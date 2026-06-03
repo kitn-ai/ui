@@ -49,7 +49,7 @@ For plain HTML pages:
 
 ## Usage Pattern
 
-All rich props (arrays, objects) must be set as **JavaScript properties**, not HTML attributes. Events are standard DOM `CustomEvent`s that bubble and cross the shadow boundary (`composed: true`), so you can listen on the host element.
+All rich props (arrays, objects) must be set as **JavaScript properties**, not HTML attributes. Events are standard DOM `CustomEvent`s dispatched on the host element. They do **not** bubble and are **not** composed — listen directly on the element (`el.addEventListener(...)`).
 
 ```html
 <script type="module">
@@ -85,7 +85,8 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `value` | `string` | `undefined` | Controlled input value; omit for uncontrolled |
 | `placeholder` | `string` | `'Send a message...'` | Textarea placeholder text |
 | `loading` | `boolean` | `false` | Shows loading state in the prompt input |
-| `proseSize` | `ProseSize` | `'sm'` | Tailwind Typography prose size (`'sm'`, `'base'`, `'lg'`, `'xl'`, `'2xl'`) |
+| `suggestions` | `string[]` | `undefined` | Suggestion chips shown above the input; clicking one fills the input and fires `suggestionclick` |
+| `proseSize` | `ProseSize` | `'sm'` | Tailwind Typography prose size (`'xs'`, `'sm'`, `'base'`, `'lg'`) |
 | `codeTheme` | `string` | `'github-dark-dimmed'` | Shiki syntax-highlight theme name |
 
 ### Events
@@ -94,6 +95,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 |-------|---------------|-------------|
 | `submit` | `{ value: string }` | Fired when the user submits a message |
 | `valuechange` | `{ value: string }` | Fired on every input change |
+| `suggestionclick` | `{ value: string }` | Fired when a suggestion chip is clicked (the input is also filled with the value) |
 | `messageaction` | `{ messageId: string, action: ChatMessageAction }` | Fired when an action button on a message is clicked |
 
 ### `ChatMessage` schema
@@ -292,6 +294,7 @@ A standalone prompt input with a send button. Use this when you want just the in
 | `placeholder` | `string` | `'Send a message...'` | Textarea placeholder text |
 | `disabled` | `boolean` | `false` | Disables the textarea and send button |
 | `loading` | `boolean` | `false` | Shows loading state (send button disabled) |
+| `suggestions` | `string[]` | `undefined` | Suggestion chips shown above the input; clicking one fills the input and fires `suggestionclick` |
 
 ### Events
 
@@ -299,6 +302,7 @@ A standalone prompt input with a send button. Use this when you want just the in
 |-------|---------------|-------------|
 | `submit` | `{ value: string }` | Fired when the user submits (button click or Enter) |
 | `valuechange` | `{ value: string }` | Fired on every input change |
+| `suggestionclick` | `{ value: string }` | Fired when a suggestion chip is clicked (the input is also filled with the value) |
 
 ### Example
 
