@@ -13,7 +13,9 @@
     "test:watch": "vitest",
     "dev": "storybook dev -p 6006",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "build:css": "tailwindcss -i src/elements/styles.css -o src/elements/compiled.css --minify",
+    "build:css:watch": "tailwindcss -i src/elements/styles.css -o src/elements/compiled.css --watch"
   },
   "dependencies": {
     "@kobalte/core": "^0.13.0",

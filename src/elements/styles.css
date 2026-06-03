@@ -1,0 +1,12 @@
+/* Element-bundle stylesheet. Compiled to compiled.css and injected into each
+   custom element's shadow root. Mirrors .storybook/styles.css but scans src/. */
+@import "tailwindcss";
+@import "../../theme.css";
+@plugin "@tailwindcss/typography";
+
+@source "../";
+
+@layer base {
+  :host { display: block; }
+  * { border-color: var(--color-border); }
+}
