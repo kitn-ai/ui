@@ -28,3 +28,49 @@ test('emits valuechange on input and submit on Enter', async () => {
 
   el.remove();
 });
+
+test('renders suggestions and emits suggestionclick when a chip is clicked', async () => {
+  const el = document.createElement('kitn-prompt-input') as HTMLElement & {
+    suggestions?: string[];
+  };
+  el.suggestions = ['Hi', 'Bye'];
+  document.body.appendChild(el);
+  await Promise.resolve();
+
+  expect(el.shadowRoot!.textContent).toContain('Hi');
+  expect(el.shadowRoot!.textContent).toContain('Bye');
+
+  let clicked: string | null = null;
+  el.addEventListener('suggestionclick', (e) => (clicked = (e as CustomEvent).detail.value));
+
+  const chips = Array.from(
+    el.shadowRoot!.querySelectorAll<HTMLButtonElement>('button:not([data-testid="send"])'),
+  );
+  const hiChip = chips.find((b) => b.textContent?.trim() === 'Hi')!;
+  // A real .click() produces a composed event, so it reaches Solid's delegated
+  // listeners across the shadow boundary in jsdom.
+  hiChip.click();
+  expect(clicked).toBe('Hi');
+
+  el.remove();
+});
+
+test('send button is disabled when loading even with non-empty value', async () => {
+  const el = document.createElement('kitn-prompt-input') as HTMLElement & {
+    loading?: boolean;
+  };
+  document.body.appendChild(el);
+  await Promise.resolve();
+
+  const textarea = el.shadowRoot!.querySelector('textarea')!;
+  textarea.value = 'something';
+  textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+
+  el.loading = true;
+  await Promise.resolve();
+
+  const send = el.shadowRoot!.querySelector<HTMLButtonElement>('[data-testid="send"]')!;
+  expect(send.disabled).toBe(true);
+
+  el.remove();
+});

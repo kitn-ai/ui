@@ -6,7 +6,7 @@ import { Message, MessageContent, MessageActions } from '../components/message';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '../components/reasoning';
 import { Tool } from '../components/tool';
 import { Button } from '../ui/button';
-import { PromptInput, PromptInputTextarea, PromptInputActions } from '../components/prompt-input';
+import { DefaultPromptInput } from './default-input';
 import type { ChatMessage, ChatMessageAction } from './chat-types';
 import type { ProseSize } from '../primitives/chat-config';
 
@@ -15,6 +15,7 @@ interface Props extends Record<string, unknown> {
   value?: string;
   placeholder?: string;
   loading?: boolean;
+  suggestions?: string[];
   proseSize?: ProseSize;
   codeTheme?: string;
 }
@@ -28,6 +29,7 @@ defineKitnElement<Props>('kitn-chat', {
   value: undefined,
   placeholder: 'Send a message...',
   loading: false,
+  suggestions: undefined,
   proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',
 }, (props, { dispatch }) => {
@@ -39,6 +41,7 @@ defineKitnElement<Props>('kitn-chat', {
   const current = () => props.value ?? internal();
   const handleChange = (v: string) => { setInternal(v); dispatch('valuechange', { value: v }); };
   const handleSubmit = () => dispatch('submit', { value: current() });
+  const handleSuggestionClick = (v: string) => { handleChange(v); dispatch('suggestionclick', { value: v }); };
 
   return (
     <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} portalMount={outer.portalMount()}>
@@ -89,16 +92,15 @@ defineKitnElement<Props>('kitn-chat', {
         </ChatContainer>
         <div class="shrink-0 px-4 pb-4">
           <div class="mx-auto max-w-3xl">
-            <PromptInput value={current()} onValueChange={handleChange} onSubmit={handleSubmit} isLoading={props.loading}>
-              <PromptInputTextarea placeholder={props.placeholder} class="min-h-[44px] pt-3 pl-4" />
-              <PromptInputActions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
-                <Button size="icon-sm" class="rounded-full" disabled={!current().trim()} onClick={handleSubmit}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
-                  </svg>
-                </Button>
-              </PromptInputActions>
-            </PromptInput>
+            <DefaultPromptInput
+              value={current()}
+              placeholder={props.placeholder}
+              loading={props.loading}
+              suggestions={props.suggestions}
+              onValueChange={handleChange}
+              onSubmit={handleSubmit}
+              onSuggestionClick={handleSuggestionClick}
+            />
           </div>
         </div>
       </div>
