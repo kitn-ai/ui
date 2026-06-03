@@ -30,8 +30,8 @@ export function defineKitnElement<P extends Record<string, unknown>>(
 ): void {
   if (typeof customElements !== 'undefined' && customElements.get(tag)) return;
 
-  customElement(tag, propDefaults, (props: P, options: { element: HTMLElement }) => {
-    const element = options.element;
+  customElement(tag, propDefaults, (props: P, options: { element: object }) => {
+    const element = options.element as HTMLElement;
     let portalNode!: HTMLDivElement;
 
     const dispatch = (type: string, detail?: unknown) =>
