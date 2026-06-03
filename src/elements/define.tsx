@@ -6,7 +6,8 @@ import type { JSX } from 'solid-js';
 export interface KitnElementContext {
   /** The custom-element host node. */
   element: HTMLElement;
-  /** Fire a composed CustomEvent off the host so it crosses the shadow boundary. */
+  /** Fire a non-bubbling, non-composed CustomEvent off the host. Consumers
+   *  listen directly on the element (`el.addEventListener(...)`). */
   dispatch: (type: string, detail?: unknown) => void;
 }
 
@@ -19,8 +20,9 @@ type FacadeComponent<P> = (props: P, ctx: KitnElementContext) => JSX.Element;
  *   compiled kit CSS injected via a `<style>` so Tailwind classes apply inside.
  * - Creates a portal mount node inside the shadow root and provides it through
  *   `ChatConfig` so Kobalte overlays stay inside the shadow root.
- * - Gives the facade a `dispatch(type, detail)` helper that fires composed
- *   CustomEvents off the host element.
+ * - Gives the facade a `dispatch(type, detail)` helper that fires non-bubbling,
+ *   non-composed CustomEvents off the host element (consumers listen directly on
+ *   the element, so bubbling/composed would only cause consumer collisions).
  * - Idempotent: redefining an already-registered tag is a no-op.
  */
 export function defineKitnElement<P extends Record<string, unknown>>(
@@ -36,7 +38,7 @@ export function defineKitnElement<P extends Record<string, unknown>>(
 
     const dispatch = (type: string, detail?: unknown) =>
       element.dispatchEvent(
-        new CustomEvent(type, { detail, bubbles: true, composed: true }),
+        new CustomEvent(type, { detail, bubbles: false, composed: false }),
       );
 
     return (
