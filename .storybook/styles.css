@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "../theme.css";
+@plugin "@tailwindcss/typography";
+
+@source "../src/";
+
+/* Storybook-only base reset (NOT shipped in theme.css). */
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: system-ui, -apple-system, sans-serif;
+    margin: 0;
+  }
+}

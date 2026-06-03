@@ -1,0 +1,100 @@
+import { splitProps, For, Show, createSignal, createMemo } from 'solid-js';
+import { cn } from '../utils/cn';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../ui/collapsible';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
+import { ScrollArea } from '../ui/scroll-area';
+import { ConversationItem } from './conversation-item';
+import type { ConversationSummary, ConversationGroup } from '../types';
+
+export interface ConversationListProps {
+  groups: ConversationGroup[];
+  conversations: ConversationSummary[];
+  activeId?: string;
+  onSelect: (id: string) => void;
+  onNewChat: () => void;
+  onToggleSidebar?: () => void;
+  class?: string;
+}
+
+export function ConversationList(props: ConversationListProps) {
+  const [local] = splitProps(props, ['groups', 'conversations', 'activeId', 'onSelect', 'onNewChat', 'onToggleSidebar', 'class']);
+  const [searchQuery, setSearchQuery] = createSignal('');
+
+  const filteredConversations = createMemo(() => {
+    const q = searchQuery().toLowerCase();
+    if (!q) return local.conversations;
+    return local.conversations.filter((c) => c.title.toLowerCase().includes(q));
+  });
+
+  const groupedConversations = createMemo(() => {
+    const grouped = new Map<string | undefined, ConversationSummary[]>();
+    for (const conv of filteredConversations()) {
+      const key = conv.groupId;
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key)!.push(conv);
+    }
+    return grouped;
+  });
+
+  const ungrouped = createMemo(() => groupedConversations().get(undefined) ?? []);
+
+  return (
+    <div class={cn('flex flex-col h-full bg-sidebar', local.class)}>
+      <div class="flex items-center justify-between p-3 pb-2">
+        <div class="flex items-center gap-2">
+          <Button variant="ghost" size="icon-sm" onClick={local.onToggleSidebar}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </Button>
+          <span class="text-sm font-semibold text-foreground">Chats</span>
+        </div>
+        <Button variant="ghost" size="icon-sm" onClick={local.onNewChat}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </Button>
+      </div>
+      <div class="px-3 pb-2">
+        <div class="flex items-center gap-2 rounded-md bg-muted/40 px-2.5 py-1.5">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted-foreground/60"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" value={searchQuery()} onInput={(e) => setSearchQuery(e.currentTarget.value)} placeholder="Search chats..."
+            class="bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none w-full" />
+        </div>
+      </div>
+      <ScrollArea class="flex-1 px-2">
+        <For each={local.groups}>
+          {(group) => {
+            const convs = createMemo(() => groupedConversations().get(group.id) ?? []);
+            return (
+              <Show when={convs().length > 0}>
+                <GroupSection name={group.name} count={convs().length} conversations={convs()} activeId={local.activeId} onSelect={local.onSelect} />
+              </Show>
+            );
+          }}
+        </For>
+        <Show when={ungrouped().length > 0}>
+          <GroupSection name="Ungrouped" count={ungrouped().length} conversations={ungrouped()} activeId={local.activeId} onSelect={local.onSelect} />
+        </Show>
+      </ScrollArea>
+    </div>
+  );
+}
+
+function GroupSection(props: { name: string; count: number; conversations: ConversationSummary[]; activeId?: string; onSelect: (id: string) => void }) {
+  const [open, setOpen] = createSignal(true);
+  return (
+    <Collapsible open={open()} onOpenChange={setOpen}>
+      <CollapsibleTrigger class="flex items-center gap-1.5 w-full px-1.5 py-1 rounded-md bg-muted/30 text-[13px] text-muted-foreground font-medium hover:bg-muted/50 transition-colors cursor-pointer mt-1.5">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          class={cn('transition-transform', !open() && '-rotate-90')}><polyline points="6 9 12 15 18 9"/></svg>
+        <span>{props.name}</span>
+        <Badge variant="count" class="ml-auto text-[11px]">{props.count}</Badge>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div class="pl-2 mt-0.5 space-y-0.5">
+          <For each={props.conversations}>
+            {(conv) => <ConversationItem conversation={conv} isActive={conv.id === props.activeId} onSelect={props.onSelect} />}
+          </For>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
