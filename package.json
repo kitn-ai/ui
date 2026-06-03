@@ -6,9 +6,12 @@
   "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./elements": "./dist/kitn-chat.es.js",
     "./theme.css": "./theme.css"
   },
   "scripts": {
+    "prebuild": "npm run build:css",
+    "build": "vite build --config vite.config.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "dev": "storybook dev -p 6006",
