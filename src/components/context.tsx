@@ -2,6 +2,7 @@ import { type JSX, Show, createContext, createMemo, splitProps, useContext } fro
 import { HoverCard as KHoverCard } from '@kobalte/core/hover-card';
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
+import { useChatConfig } from '../primitives/chat-config';
 
 const ICON_RADIUS = 10;
 const ICON_VIEWBOX = 24;
@@ -144,8 +145,9 @@ export interface ContextContentProps {
 }
 
 export function ContextContent(props: ContextContentProps) {
+  const config = useChatConfig();
   return (
-    <KHoverCard.Portal>
+    <KHoverCard.Portal mount={config.portalMount()}>
       <KHoverCard.Content
         class={cn(
           'z-50 min-w-60 divide-y divide-border overflow-hidden rounded-lg bg-card shadow-lg animate-in fade-in-0 zoom-in-95',

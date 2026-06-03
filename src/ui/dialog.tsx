@@ -1,13 +1,15 @@
 import { Dialog as KDialog } from '@kobalte/core/dialog';
 import { type JSX } from 'solid-js';
 import { cn } from '../utils/cn';
+import { useChatConfig } from '../primitives/chat-config';
 
 export const Dialog = KDialog;
 export const DialogTrigger = KDialog.Trigger;
 
 export function DialogContent(props: { children: JSX.Element; class?: string; title: string }) {
+  const config = useChatConfig();
   return (
-    <KDialog.Portal>
+    <KDialog.Portal mount={config.portalMount()}>
       <KDialog.Overlay class="fixed inset-0 z-50 bg-black/50 animate-in fade-in-0" />
       <KDialog.Content class={cn('fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-card p-6 shadow-xl animate-in fade-in-0 zoom-in-95 w-full max-w-md', props.class)}>
         <KDialog.Title class="text-lg font-semibold">{props.title}</KDialog.Title>

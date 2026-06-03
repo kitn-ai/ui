@@ -1,15 +1,17 @@
 import { HoverCard as KHoverCard } from '@kobalte/core/hover-card';
 import { type JSX, splitProps } from 'solid-js';
 import { cn } from '../utils/cn';
+import { useChatConfig } from '../primitives/chat-config';
 
 export interface HoverCardProps { trigger: JSX.Element; children: JSX.Element; class?: string; openDelay?: number; closeDelay?: number; }
 
 export function HoverCard(props: HoverCardProps) {
   const [local] = splitProps(props, ['trigger', 'children', 'class', 'openDelay', 'closeDelay']);
+  const config = useChatConfig();
   return (
     <KHoverCard openDelay={local.openDelay} closeDelay={local.closeDelay}>
       <KHoverCard.Trigger as="span">{local.trigger}</KHoverCard.Trigger>
-      <KHoverCard.Portal>
+      <KHoverCard.Portal mount={config.portalMount()}>
         <KHoverCard.Content class={cn('z-50 w-64 rounded-lg bg-card p-4 shadow-lg animate-in fade-in-0 zoom-in-95', local.class)}>
           <KHoverCard.Arrow />
           {local.children}
@@ -35,8 +37,9 @@ export function HoverCardTrigger(props: HoverCardTriggerProps) {
 export interface HoverCardContentProps { children: JSX.Element; class?: string; }
 
 export function HoverCardContent(props: HoverCardContentProps) {
+  const config = useChatConfig();
   return (
-    <KHoverCard.Portal>
+    <KHoverCard.Portal mount={config.portalMount()}>
       <KHoverCard.Content class={cn('z-50 rounded-lg bg-card shadow-lg animate-in fade-in-0 zoom-in-95', props.class)}>
         {props.children}
       </KHoverCard.Content>
