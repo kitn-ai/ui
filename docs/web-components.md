@@ -26,8 +26,9 @@ Internally this runs `build:css` (compiles Tailwind to `src/elements/compiled.cs
 
 | File | Format | Notes |
 |------|--------|-------|
-| `dist/kitn-chat.es.js` | ES module | Recommended entry |
-| `dist/kitn-chat.umd.js` | UMD | Large — inlines all Shiki syntax-highlighting languages |
+| `dist/kitn-chat.es.js` | ES module | The entry. ~280 KB; loads on-demand chunks (code highlighting, etc.) lazily |
+
+The build is **ES-module only** by design. A UMD/IIFE build cannot code-split, so it would have to inline every lazy chunk (all the Shiki syntax-highlighting languages) into one multi-MB file. The ES build keeps those chunks lazy and is loadable directly via `<script type="module">` in every modern browser.
 
 ### Register the elements
 
@@ -88,6 +89,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `suggestions` | `string[]` | `undefined` | Suggestion chips shown above the input; clicking one fills the input and fires `suggestionclick` |
 | `proseSize` | `ProseSize` | `'sm'` | Tailwind Typography prose size (`'xs'`, `'sm'`, `'base'`, `'lg'`) |
 | `codeTheme` | `string` | `'github-dark-dimmed'` | Shiki syntax-highlight theme name |
+| `codeHighlight` | `boolean` | `true` | Set `false` to render code blocks as plain text — no Shiki is loaded at all |
 
 ### Events
 
@@ -356,3 +358,44 @@ Override any `--color-*` token on `:root` (or a parent element) to rebrand the c
 ```
 
 No other host-side CSS configuration is required or supported — all layout and typography are encapsulated inside the shadow root.
+
+---
+
+## Code highlighting (on-demand, optional)
+
+Syntax highlighting is powered by [Shiki](https://shiki.style), wired to be **as lightweight as possible**:
+
+- **Nothing loads until a code block actually renders.** A chat with no code never fetches Shiki — zero bytes.
+- **On-demand, per-language.** When a code block appears, only the Shiki core, the JavaScript regex engine (no WASM), the one theme, and the one language grammar it needs are fetched as small lazy chunks.
+- **No WASM.** Uses Shiki's JavaScript engine, avoiding the ~620 KB Oniguruma WASM blob.
+
+### Built-in languages
+
+A curated default set loads on demand: `javascript`/`js`, `jsx`, `typescript`/`ts`, `tsx`, `json`, `html`, `css`, `python`/`py`, `bash`/`sh`, `shellscript`/`shell`, `markdown`/`md`, `yaml`/`yml`, `sql`, `diff`, `go`, `rust`/`rs`. Languages outside this set render as plain text unless you register them.
+
+### Configure or disable
+
+`configureCodeHighlighting()` is exported from both `@kitn-ai/chat` and `@kitn-ai/chat/elements`. Call it once before rendering.
+
+```js
+import { configureCodeHighlighting } from '@kitn-ai/chat/elements';
+
+// Add languages (each becomes its own lazy chunk, loaded on demand)
+configureCodeHighlighting({
+  languages: {
+    ruby: () => import('@shikijs/langs/ruby'),
+    swift: () => import('@shikijs/langs/swift'),
+  },
+  aliases: { rb: 'ruby' },
+});
+
+// Add a theme
+configureCodeHighlighting({
+  themes: { dracula: () => import('@shikijs/themes/dracula') },
+});
+
+// Or turn highlighting off entirely (no Shiki ever loads) — code renders as plain text
+configureCodeHighlighting({ enabled: false });
+```
+
+Per-element, set `codeHighlight={false}` (e.g. on `<kitn-chat>`) to disable highlighting for just that element.

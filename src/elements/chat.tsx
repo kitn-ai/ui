@@ -18,6 +18,7 @@ interface Props extends Record<string, unknown> {
   suggestions?: string[];
   proseSize?: ProseSize;
   codeTheme?: string;
+  codeHighlight?: boolean;
 }
 
 const ACTION_LABEL: Record<ChatMessageAction, string> = {
@@ -32,6 +33,7 @@ defineKitnElement<Props>('kitn-chat', {
   suggestions: undefined,
   proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',
+  codeHighlight: true,
 }, (props, { dispatch }) => {
   // Preserve the shadow-root portal mount from the wrapper's outer ChatConfig
   // when we nest a second ChatConfig to set proseSize/codeTheme.
@@ -44,7 +46,7 @@ defineKitnElement<Props>('kitn-chat', {
   const handleSuggestionClick = (v: string) => { handleChange(v); dispatch('suggestionclick', { value: v }); };
 
   return (
-    <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} portalMount={outer.portalMount()}>
+    <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={props.codeHighlight} portalMount={outer.portalMount()}>
       <div class="flex h-full flex-col bg-background">
         <ChatContainer class="flex-1 px-4 py-3">
           <ChatContainerContent class="mx-auto w-full max-w-3xl space-y-4">

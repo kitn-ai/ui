@@ -13,6 +13,8 @@ export { useVoiceRecorder } from './primitives/use-voice-recorder';
 export type { UseVoiceRecorderOptions } from './primitives/use-voice-recorder';
 export { ChatConfig, useChatConfig, proseClass, textClass } from './primitives/chat-config';
 export type { ChatConfigValue, ProseSize, ChatConfigProps } from './primitives/chat-config';
+export { configureCodeHighlighting, isCodeHighlightingEnabled } from './primitives/highlighter';
+export type { CodeHighlightingOptions } from './primitives/highlighter';
 
 // Layer 2: UI Primitives
 export { Button, buttonVariants } from './ui/button';

@@ -1,6 +1,7 @@
-import { type JSX, splitProps, createResource, createSignal, Show } from 'solid-js';
+import { type JSX, splitProps, createResource, Show } from 'solid-js';
 import { cn } from '../utils/cn';
 import { useChatConfig } from '../primitives/chat-config';
+import { highlight, isCodeHighlightingEnabled } from '../primitives/highlighter';
 
 // --- CodeBlock (Root) ---
 
@@ -38,21 +39,13 @@ function CodeBlockCode(props: CodeBlockCodeProps) {
 
   const lang = () => local.language ?? 'tsx';
   const theme = () => local.theme ?? config.codeTheme();
+  const highlightingOn = () => isCodeHighlightingEnabled() && config.codeHighlight();
 
+  // When highlighting is off, the source is null so the fetcher never runs and
+  // no Shiki code is ever imported — the plain `<pre>` fallback renders instead.
   const [highlighted] = createResource(
-    () => ({ code: local.code, lang: lang(), theme: theme() }),
-    async ({ code, lang, theme }) => {
-      if (!code) return '<pre><code></code></pre>';
-      try {
-        // Use Shiki's curated "web" bundle (~78 languages) instead of the full
-        // bundle (~250) to keep the shipped/inlined size down. Tier 2 replaces
-        // this with a fine-grained, on-demand highlighter (see specs).
-        const { codeToHtml } = await import('shiki/bundle/web');
-        return await codeToHtml(code, { lang, theme });
-      } catch {
-        return `<pre><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
-      }
-    }
+    () => (highlightingOn() ? { code: local.code, lang: lang(), theme: theme() } : null),
+    (src) => highlight(src.code, src.lang, src.theme)
   );
 
   const codeTextSize = () => {

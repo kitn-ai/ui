@@ -9,12 +9,15 @@ export interface ChatConfigValue {
   codeTheme: Accessor<string>;
   /** Node Kobalte overlays portal into; undefined → document.body */
   portalMount: Accessor<HTMLElement | undefined>;
+  /** Whether code blocks are syntax-highlighted; false → plain text, no Shiki loaded */
+  codeHighlight: Accessor<boolean>;
 }
 
 const defaultConfig: ChatConfigValue = {
   proseSize: () => 'sm' as ProseSize,
   codeTheme: () => 'github-dark-dimmed',
   portalMount: () => undefined,
+  codeHighlight: () => true,
 };
 
 const ChatConfigContext = createContext<ChatConfigValue>(defaultConfig);
@@ -23,6 +26,7 @@ export interface ChatConfigProps {
   proseSize?: ProseSize;
   codeTheme?: string;
   portalMount?: HTMLElement;
+  codeHighlight?: boolean;
   children: JSX.Element;
 }
 
@@ -36,6 +40,7 @@ export function ChatConfig(props: ChatConfigProps) {
     proseSize: () => props.proseSize ?? 'sm',
     codeTheme: () => props.codeTheme ?? 'github-dark-dimmed',
     portalMount: () => props.portalMount,
+    codeHighlight: () => props.codeHighlight ?? true,
   };
 
   return (

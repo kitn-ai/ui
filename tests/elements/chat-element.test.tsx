@@ -48,3 +48,20 @@ test('emits messageaction when an action button is clicked', async () => {
 
   el.remove();
 });
+
+test('codeHighlight={false} renders fenced code as plain text (no Shiki)', async () => {
+  const el = document.createElement('kitn-chat') as HTMLElement & {
+    messages: ChatMessage[]; codeHighlight: boolean;
+  };
+  el.codeHighlight = false;
+  el.messages = [{ id: 'm1', role: 'assistant', content: '```tsx\nconst answer = 42\n```' }];
+  document.body.appendChild(el);
+  await Promise.resolve();
+
+  expect(el.shadowRoot!.querySelector('pre')).toBeTruthy();
+  expect(el.shadowRoot!.textContent).toContain('const answer = 42');
+  // Shiki adds inline token color styles; the disabled path must not.
+  expect(el.shadowRoot!.innerHTML).not.toMatch(/style="[^"]*color/);
+
+  el.remove();
+});
