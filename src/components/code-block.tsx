@@ -44,7 +44,10 @@ function CodeBlockCode(props: CodeBlockCodeProps) {
     async ({ code, lang, theme }) => {
       if (!code) return '<pre><code></code></pre>';
       try {
-        const { codeToHtml } = await import('shiki');
+        // Use Shiki's curated "web" bundle (~78 languages) instead of the full
+        // bundle (~250) to keep the shipped/inlined size down. Tier 2 replaces
+        // this with a fine-grained, on-demand highlighter (see specs).
+        const { codeToHtml } = await import('shiki/bundle/web');
         return await codeToHtml(code, { lang, theme });
       } catch {
         return `<pre><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
