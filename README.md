@@ -92,6 +92,154 @@ function App() {
 
 The SolidJS entry (`.`) is the kit's raw source (`src/index.ts`) — your bundler compiles it, so it tree-shakes to just what you import.
 
+## Integrations
+
+The components are deliberately **transport-agnostic**: `<kitn-chat>` just renders the `messages` array you give it and emits a `submit` event when the user sends. You own the request, the streaming, and any extras like text-to-speech. The patterns below use the web component, but the same wiring applies to the SolidJS API.
+
+### Streaming responses from OpenRouter
+
+[OpenRouter](https://openrouter.ai) exposes an OpenAI-compatible streaming API (Server-Sent Events). On `submit`, append the user message + an empty assistant message, then grow the assistant message as tokens arrive.
+
+> **Security:** never ship your API key to the browser. In production, point `fetch` at your own backend endpoint that proxies to OpenRouter and injects the key. The parsing below is identical either way.
+
+```html
+<kitn-chat id="chat" style="display:block; height:100vh;"></kitn-chat>
+
+<script type="module">
+  import '@kitn-ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+  chat.messages = [];
+
+  chat.addEventListener('submit', async (e) => {
+    const text = e.detail.value.trim();
+    if (!text) return;
+
+    // 1. Show the user message immediately
+    const history = [...chat.messages, { id: crypto.randomUUID(), role: 'user', content: text }];
+    chat.messages = history;
+    chat.value = '';        // clear the input
+    chat.loading = true;
+
+    // 2. Add an empty assistant message we'll stream into
+    const assistantId = crypto.randomUUID();
+    chat.messages = [...history, { id: assistantId, role: 'assistant', content: '' }];
+
+    try {
+      // In production, replace this URL with your own proxy endpoint.
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`, // server-side in production!
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'anthropic/claude-sonnet-4',
+          stream: true,
+          messages: history.map((m) => ({ role: m.role, content: m.content })),
+        }),
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let answer = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // SSE frames are separated by newlines; each data line is JSON
+        const lines = buffer.split('\n');
+        buffer = lines.pop();               // keep the partial last line
+        for (const line of lines) {
+          const s = line.trim();
+          if (!s.startsWith('data:')) continue;  // skip ": keep-alive" comments
+          const payload = s.slice(5).trim();
+          if (payload === '[DONE]') continue;
+          try {
+            const delta = JSON.parse(payload).choices?.[0]?.delta?.content;
+            if (!delta) continue;
+            answer += delta;
+            // Replace the assistant message with a NEW object so the row re-renders
+            chat.messages = chat.messages.map((m) =>
+              m.id === assistantId ? { ...m, content: answer } : m
+            );
+          } catch { /* ignore non-JSON keep-alive lines */ }
+        }
+      }
+    } catch (err) {
+      chat.messages = chat.messages.map((m) =>
+        m.id === assistantId ? { ...m, content: '⚠️ ' + err.message } : m
+      );
+    } finally {
+      chat.loading = false;
+    }
+  });
+</script>
+```
+
+Key point: reassign `chat.messages` with a **new array containing a new object** for the streaming message on each chunk — that's what triggers the re-render. Mutating the existing object in place won't update the view.
+
+### Text-to-speech (TTS)
+
+#### Option 1 — Browser-native (zero dependencies)
+
+The Web Speech API speaks text with no network call. Speak each assistant reply once it finishes streaming — call `speak(answer)` right before `chat.loading = false` in the example above:
+
+```js
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-US';
+  utter.rate = 1;
+  speechSynthesis.cancel();   // stop anything already playing
+  speechSynthesis.speak(utter);
+}
+```
+
+To speak *as it streams*, flush complete sentences instead of waiting for the end:
+
+```js
+let spokenUpTo = 0;
+function speakIncremental(fullText) {
+  const lastBreak = fullText.lastIndexOf('. ', fullText.length);
+  if (lastBreak > spokenUpTo) {
+    speak(fullText.slice(spokenUpTo, lastBreak + 1));
+    spokenUpTo = lastBreak + 1;
+  }
+}
+// call speakIncremental(answer) inside the streaming loop
+```
+
+#### Option 2 — Cloud TTS (OpenAI, ElevenLabs, …)
+
+For higher-quality voices, have your backend call a TTS API and return audio, then play it. Keep the provider key on the server.
+
+```js
+async function speakCloud(text) {
+  const res = await fetch('/api/tts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text, voice: 'alloy' }),
+  });
+  const audio = new Audio(URL.createObjectURL(await res.blob()));
+  audio.play();
+}
+```
+
+```js
+// Example backend (Node) — /api/tts proxying OpenAI's speech endpoint
+// const r = await openai.audio.speech.create({ model: 'gpt-4o-mini-tts', voice, input: text });
+// res.setHeader('Content-Type', 'audio/mpeg');
+// Readable.fromWeb(r.body).pipe(res);
+```
+
+You can trigger either option from the streaming completion (auto-read replies) or from a button you render alongside each message.
+
+> **Speech-to-text** (the other direction) is already built in — the kit ships a `VoiceInput` component for capturing microphone input. See Storybook (`npm run dev`).
+
 ## Code highlighting (optional, on-demand)
 
 Syntax highlighting uses [Shiki](https://shiki.style) and is wired to be as light as possible:
