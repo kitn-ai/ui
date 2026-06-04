@@ -371,7 +371,7 @@ Syntax highlighting is powered by [Shiki](https://shiki.style), wired to be **as
 
 ### Built-in languages
 
-A curated default set loads on demand: `javascript`/`js`, `jsx`, `typescript`/`ts`, `tsx`, `json`, `html`, `css`, `python`/`py`, `bash`/`sh`, `shellscript`/`shell`, `markdown`/`md`, `yaml`/`yml`, `sql`, `diff`, `go`, `rust`/`rs`. Languages outside this set render as plain text unless you register them.
+A minimal default set loads on demand: `javascript`/`js`, `typescript`/`ts`, `tsx`, `json`, `bash`/`sh`. Languages outside this set render as plain text unless you register them with `configureCodeHighlighting({ languages })` (see below).
 
 ### Configure or disable
 

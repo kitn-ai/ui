@@ -12,24 +12,16 @@ import type { HighlighterCore } from 'shiki/core';
 
 type Loader = () => Promise<unknown>;
 
-/** Curated default languages — each a separate lazy chunk, loaded only on use. */
+/**
+ * Minimal default language set — each a separate lazy chunk, loaded only on use.
+ * Kept deliberately small; hosts add more via `configureCodeHighlighting({ languages })`.
+ */
 const DEFAULT_LANGUAGES: Record<string, Loader> = {
   javascript: () => import('@shikijs/langs/javascript'),
-  jsx: () => import('@shikijs/langs/jsx'),
   typescript: () => import('@shikijs/langs/typescript'),
   tsx: () => import('@shikijs/langs/tsx'),
   json: () => import('@shikijs/langs/json'),
-  html: () => import('@shikijs/langs/html'),
-  css: () => import('@shikijs/langs/css'),
-  python: () => import('@shikijs/langs/python'),
   bash: () => import('@shikijs/langs/bash'),
-  shellscript: () => import('@shikijs/langs/shellscript'),
-  markdown: () => import('@shikijs/langs/markdown'),
-  yaml: () => import('@shikijs/langs/yaml'),
-  sql: () => import('@shikijs/langs/sql'),
-  diff: () => import('@shikijs/langs/diff'),
-  go: () => import('@shikijs/langs/go'),
-  rust: () => import('@shikijs/langs/rust'),
 };
 
 const DEFAULT_THEMES: Record<string, Loader> = {
@@ -41,11 +33,6 @@ const DEFAULT_ALIASES: Record<string, string> = {
   js: 'javascript',
   ts: 'typescript',
   sh: 'bash',
-  shell: 'shellscript',
-  yml: 'yaml',
-  py: 'python',
-  rs: 'rust',
-  md: 'markdown',
 };
 
 const FALLBACK_THEME = 'github-dark-dimmed';
