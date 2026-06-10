@@ -1,4 +1,4 @@
-# @kitn-ai/chat
+# @kitn-ai/ai-elements
 
 A SolidJS component kit for building AI chat interfaces — message threads, prompt inputs, streaming responses, markdown + code rendering, reasoning/tool panels, attachments, and a conversation sidebar.
 
@@ -17,7 +17,7 @@ It can be consumed two ways:
 ## Install
 
 ```bash
-npm install @kitn-ai/chat
+npm install @kitn-ai/ai-elements
 ```
 
 SolidJS consumers also need `solid-js` (a peer dependency):
@@ -41,7 +41,7 @@ npm run build   # emits dist/kitn-chat.es.js
   <kitn-chat style="display:block; height:100%;"></kitn-chat>
 
   <script type="module">
-    import '@kitn-ai/chat/elements';
+    import '@kitn-ai/ai-elements/elements';
 
     const chat = document.querySelector('kitn-chat');
 
@@ -67,8 +67,8 @@ import {
   ChatConfig, ChatContainer, ChatContainerContent,
   Message, MessageContent,
   PromptInput, PromptInputTextarea, PromptInputActions,
-} from '@kitn-ai/chat';
-import '@kitn-ai/chat/theme.css';
+} from '@kitn-ai/ai-elements';
+import '@kitn-ai/ai-elements/theme.css';
 
 function App() {
   const [input, setInput] = createSignal('');
@@ -106,7 +106,7 @@ The components are deliberately **transport-agnostic**: `<kitn-chat>` just rende
 <kitn-chat id="chat" style="display:block; height:100vh;"></kitn-chat>
 
 <script type="module">
-  import '@kitn-ai/chat/elements';
+  import '@kitn-ai/ai-elements/elements';
 
   const chat = document.getElementById('chat');
   chat.messages = [];
@@ -249,7 +249,7 @@ Syntax highlighting uses [Shiki](https://shiki.style) and is wired to be as ligh
 - Default languages: `javascript`/`js`, `typescript`/`ts`, `tsx`, `json`, `bash`/`sh`. Add more or turn it off:
 
 ```js
-import { configureCodeHighlighting } from '@kitn-ai/chat/elements'; // or '@kitn-ai/chat'
+import { configureCodeHighlighting } from '@kitn-ai/ai-elements/elements'; // or '@kitn-ai/ai-elements'
 
 configureCodeHighlighting({
   languages: { python: () => import('@shikijs/langs/python') },
@@ -273,7 +273,7 @@ Visual appearance is driven by `--color-*` CSS custom properties in `theme.css`.
 }
 ```
 
-For SolidJS usage, import `@kitn-ai/chat/theme.css` once. For web components the kit's CSS is injected into each shadow root automatically; only `theme.css` (design tokens) is optional to include.
+For SolidJS usage, import `@kitn-ai/ai-elements/theme.css` once. For web components the kit's CSS is injected into each shadow root automatically; only `theme.css` (design tokens) is optional to include.
 
 ## Development
 

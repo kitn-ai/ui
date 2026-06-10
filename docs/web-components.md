@@ -2,7 +2,7 @@
 
 ## Overview
 
-`@kitn-ai/chat` ships three framework-agnostic custom elements built on the SolidJS kit:
+`@kitn-ai/ai-elements` ships three framework-agnostic custom elements built on the SolidJS kit:
 
 | Tag | Purpose |
 |-----|---------|
@@ -35,7 +35,7 @@ The build is **ES-module only** by design. A UMD/IIFE build cannot code-split, s
 Import the ES module as a side-effect. It registers all three custom elements via `customElements.define`:
 
 ```js
-import '@kitn-ai/chat/elements';
+import '@kitn-ai/ai-elements/elements';
 ```
 
 The `./elements` export in `package.json` resolves to `dist/kitn-chat.es.js`.
@@ -54,7 +54,7 @@ All rich props (arrays, objects) must be set as **JavaScript properties**, not H
 
 ```html
 <script type="module">
-  import '@kitn-ai/chat/elements';
+  import '@kitn-ai/ai-elements/elements';
 
   const chat = document.querySelector('kitn-chat');
 
@@ -146,7 +146,7 @@ interface AttachmentData {
   <kitn-chat style="display: block; height: 100%;"></kitn-chat>
 
   <script type="module">
-    import '@kitn-ai/chat/elements';
+    import '@kitn-ai/ai-elements/elements';
 
     const chat = document.querySelector('kitn-chat');
 
@@ -245,7 +245,7 @@ interface ConversationScope {
 <kitn-conversation-list style="width: 260px; height: 100vh; display: block;"></kitn-conversation-list>
 
 <script type="module">
-  import '@kitn-ai/chat/elements';
+  import '@kitn-ai/ai-elements/elements';
 
   const list = document.querySelector('kitn-conversation-list');
 
@@ -312,7 +312,7 @@ A standalone prompt input with a send button. Use this when you want just the in
 <kitn-prompt-input placeholder="Ask anything..."></kitn-prompt-input>
 
 <script type="module">
-  import '@kitn-ai/chat/elements';
+  import '@kitn-ai/ai-elements/elements';
 
   const input = document.querySelector('kitn-prompt-input');
 
@@ -344,7 +344,7 @@ Each element renders into its own Shadow DOM. This provides **full CSS isolation
 The kit's visual appearance is controlled by CSS custom properties defined in `theme.css`. Import it in your page to apply the default colour palette:
 
 ```html
-<link rel="stylesheet" href="node_modules/@kitn-ai/chat/theme.css" />
+<link rel="stylesheet" href="node_modules/@kitn-ai/ai-elements/theme.css" />
 ```
 
 Override any `--color-*` token on `:root` (or a parent element) to rebrand the components. Because Shadow DOM inherits inherited CSS properties, custom properties pierce the shadow boundary automatically:
@@ -375,10 +375,10 @@ A minimal default set loads on demand: `javascript`/`js`, `typescript`/`ts`, `ts
 
 ### Configure or disable
 
-`configureCodeHighlighting()` is exported from both `@kitn-ai/chat` and `@kitn-ai/chat/elements`. Call it once before rendering.
+`configureCodeHighlighting()` is exported from both `@kitn-ai/ai-elements` and `@kitn-ai/ai-elements/elements`. Call it once before rendering.
 
 ```js
-import { configureCodeHighlighting } from '@kitn-ai/chat/elements';
+import { configureCodeHighlighting } from '@kitn-ai/ai-elements/elements';
 
 // Add languages (each becomes its own lazy chunk, loaded on demand)
 configureCodeHighlighting({

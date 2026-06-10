@@ -1,7 +1,16 @@
 {
-  "name": "@kitn-ai/chat",
+  "name": "@kitn-ai/ai-elements",
   "version": "0.1.0",
   "type": "module",
+  "description": "SolidJS + Shadow-DOM web component kit for building AI chat interfaces.",
+  "homepage": "https://github.com/kitn-ai/ai-elements#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kitn-ai/ai-elements.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kitn-ai/ai-elements/issues"
+  },
   "main": "src/index.ts",
   "types": "src/index.ts",
   "exports": {
