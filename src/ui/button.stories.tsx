@@ -66,11 +66,20 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Attach a clean, copy-paste-ready source snippet to a story. SolidJS stories
- * can't auto-serialize an args-spread render (it shows `{}`), so we provide
- * real usage code that the docs "Show code" / "Copy code" buttons surface.
+ * Attach a clean, copy-paste-ready SolidJS snippet to a story. SolidJS stories
+ * can't auto-serialize an args-spread render (it shows `{}`), so we provide real
+ * usage code (with the import line, so it's truly paste-ready) that the docs
+ * "Show code" / "Copy code" buttons surface. `language: 'tsx'` labels it as SolidJS.
+ *
+ * Note: `Button` is a SolidJS *component* (a scoped import), not a global custom
+ * element, so the unprefixed name can't conflict with anything — alias on import
+ * if a host already has a `Button`. Only the web components (`<kitn-chat>`, …)
+ * are prefixed, because those claim global custom-element tag names.
  */
-const src = (code: string) => ({ parameters: { docs: { source: { code } } } });
+const IMPORT = `import { Button } from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
 
 /** Interactive playground — tweak the controls to explore every combination. */
 export const Playground: Story = {

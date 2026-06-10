@@ -23,9 +23,9 @@
     "build": "vite build --config vite.config.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "dev": "storybook dev -p 6006",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "dev": "npm run build:css && storybook dev -p 6006",
+    "storybook": "npm run build:css && storybook dev -p 6006",
+    "build-storybook": "npm run build:css && storybook build",
     "build:css": "tailwindcss -i src/elements/styles.css -o src/elements/compiled.css --minify",
     "build:css:watch": "tailwindcss -i src/elements/styles.css -o src/elements/compiled.css --watch"
   },
