@@ -217,7 +217,7 @@ export const Default: Story = {
     const [activeId, setActiveId] = createSignal("1");
     const [modelId, setModelId] = createSignal("claude-4");
     const [inputValue, setInputValue] = createSignal("");
-    const [proseSize, setProseSize] = createSignal<ProseSize>("sm");
+    const [proseSize, setProseSize] = createSignal<ProseSize>("base");
     const [attachedFiles, setAttachedFiles] = createSignal<AttachmentData[]>([
       {
         id: 'att-1',

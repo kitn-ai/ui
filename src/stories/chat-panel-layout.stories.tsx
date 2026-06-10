@@ -44,7 +44,7 @@ export const ChatGPTStyle: Story = {
   render: () => {
     const [input, setInput] = createSignal('');
     return (
-      <ChatConfig proseSize="sm">
+      <ChatConfig proseSize="base">
         <div
           style={{ width: '420px', height: '700px' }}
           class="flex flex-col overflow-hidden rounded-lg bg-card"
