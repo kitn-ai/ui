@@ -13,3 +13,16 @@
     margin: 0;
   }
 }
+
+/* Larger, more readable body text on the Storybook MDX docs pages.
+   SB10 renders MDX prose as plain tags inside `.sbdocs-content` (default ~14px),
+   not our chat components. !important to win over Storybook's injected styles. */
+.sbdocs-content p,
+.sbdocs-content li {
+  font-size: 16px !important;
+  line-height: 1.7 !important;
+}
+.sbdocs-content p code,
+.sbdocs-content li code {
+  font-size: 0.9em !important;
+}
