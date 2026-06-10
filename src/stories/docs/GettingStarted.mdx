@@ -1,0 +1,76 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as FullChat from '../full-chat.stories';
+
+<Meta title="Getting Started" />
+
+# Getting Started
+
+`<kitn-chat>` is **transport-agnostic**: you give it a `messages` array, it renders the conversation, and it emits a `submit` event when the user sends. You own the request and the streaming; the component owns the UI.
+
+## A web component in ~10 lines
+
+Set rich data as JS **properties** and listen for **events** on the element:
+
+```html
+<kitn-chat id="chat" style="display:block; height:100vh;"></kitn-chat>
+
+<script type="module">
+  import '@kitn-ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+  chat.messages = [
+    { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+  ];
+
+  chat.addEventListener('submit', (e) => {
+    const text = e.detail.value;
+    chat.messages = [
+      ...chat.messages,
+      { id: crypto.randomUUID(), role: 'user', content: text },
+    ];
+    // ...call your model, then append an assistant message
+  });
+</script>
+```
+
+> Reactivity tip: assign a **new array** (and a new object for any message you change) when updating `chat.messages` — that's what triggers a re-render.
+
+## The same thing in SolidJS
+
+```tsx
+import {
+  ChatConfig, ChatContainer, ChatContainerContent,
+  Message, MessageContent,
+  PromptInput, PromptInputTextarea, PromptInputActions,
+} from '@kitn-ai/chat';
+import { createSignal } from 'solid-js';
+
+function Chat() {
+  const [input, setInput] = createSignal('');
+  return (
+    <ChatConfig proseSize="sm">
+      <ChatContainer class="h-full">
+        <ChatContainerContent class="space-y-4 p-4">
+          <Message>
+            <MessageContent markdown>{`Ask me anything.`}</MessageContent>
+          </Message>
+        </ChatContainerContent>
+      </ChatContainer>
+      <PromptInput value={input()} onValueChange={setInput} onSubmit={() => setInput('')}>
+        <PromptInputTextarea placeholder="Ask anything..." />
+        <PromptInputActions>{/* your buttons */}</PromptInputActions>
+      </PromptInput>
+    </ChatConfig>
+  );
+}
+```
+
+## A complete example
+
+Everything assembled into a real app — a conversation sidebar, a message thread with markdown, reasoning blocks and a tool call, a model switcher, context-usage meter, and a rich prompt input with attachments:
+
+<Canvas of={FullChat.Default} />
+
+Open it full-screen under **Examples → Full Chat App**, then explore each building block on its own page in the sidebar.
+
+Ready to make it yours? See **[Theming](?path=/docs/theming--docs)**. Wiring a real model? See **[Integrations](?path=/docs/integrations--docs)**.

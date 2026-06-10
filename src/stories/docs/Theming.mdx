@@ -1,0 +1,54 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Theming" />
+
+# Theming
+
+The kit's appearance is driven entirely by **CSS custom properties** (`--color-*` design tokens) defined in `theme.css`. Override them to rebrand everything — buttons, bubbles, borders, the sidebar, code blocks — without touching component code.
+
+## Overriding tokens
+
+Because inherited CSS pierces the Shadow DOM boundary, setting tokens on `:root` re-themes both the SolidJS components and the web components:
+
+```css
+:root {
+  --color-background: #0f0f0f;
+  --color-foreground: #f5f5f5;
+  --color-primary: #7c3aed;
+  --color-primary-foreground: #ffffff;
+  --color-muted: #1e1e1e;
+  --color-border: #2a2a2a;
+}
+```
+
+Scope the same variables to a parent element instead of `:root` to theme just one subtree.
+
+## Dark mode
+
+The kit ships light and dark token sets. Toggle dark mode by adding the `dark` class to a root element (this Storybook's toolbar does exactly that):
+
+```js
+document.documentElement.classList.toggle('dark');
+```
+
+## Appearance settings
+
+`ChatConfig` (SolidJS) and matching properties on `<kitn-chat>` control non-color appearance:
+
+| Setting | Values | Purpose |
+| --- | --- | --- |
+| `proseSize` | `xs` · `sm` · `base` · `lg` | Text/markdown sizing |
+| `codeTheme` | any Shiki theme name | Syntax-highlight theme for code blocks |
+| `codeHighlight` | `true` / `false` | Turn code highlighting off entirely (renders plain text, loads no Shiki) |
+
+```tsx
+<ChatConfig proseSize="base" codeTheme="github-dark-dimmed">
+  {/* ... */}
+</ChatConfig>
+```
+
+```html
+<kitn-chat prose-size="base" code-theme="github-dark-dimmed"></kitn-chat>
+```
+
+That's the whole theming surface — tokens for color, `ChatConfig` for sizing and code. Everything else is encapsulated.

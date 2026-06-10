@@ -1,0 +1,29 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as ChatPanel from '../chat-panel-layout.stories';
+
+<Meta title="Introduction" />
+
+# @kitn-ai/chat
+
+**A SolidJS + Shadow-DOM web component kit for building AI chat interfaces.**
+
+Message threads, prompt inputs, streaming responses, markdown + code rendering, reasoning & tool-call panels, attachments, and a conversation sidebar — composable building blocks you can drop into any app.
+
+<Canvas of={ChatPanel.ChatGPTStyle} />
+
+## Why @kitn-ai/chat
+
+- **Two ways to use it** — import the SolidJS components for full compositional control, or drop in framework-agnostic **web components** (`<kitn-chat>`) that work in React, Vue, Svelte, or plain HTML.
+- **Zero style conflicts** — the web components render in **Shadow DOM**, so the host page's CSS can't leak in and the kit's Tailwind can't leak out.
+- **Lightweight** — a markdown-only `<kitn-chat>` is **~61 KB gzip**, a single file. Syntax highlighting loads **on demand, per language, with no WASM** — and never loads at all if you don't render code.
+- **~50 composable components** across three layers: headless primitives → UI primitives (built on [Kobalte](https://kobalte.dev)) → AI feature components.
+- **Themeable** — restyle everything by overriding a handful of `--color-*` design tokens.
+
+## Where to next
+
+- **[Installation](?path=/docs/installation--docs)** — add it to your project
+- **[Getting Started](?path=/docs/getting-started--docs)** — your first chat in a few lines, plus a full example
+- **[Theming](?path=/docs/theming--docs)** — make it match your brand
+- **[Integrations](?path=/docs/integrations--docs)** — stream responses from OpenRouter and add text-to-speech
+
+Or browse every component in isolation from the sidebar.

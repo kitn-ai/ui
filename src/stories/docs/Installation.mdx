@@ -1,0 +1,48 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Installation" />
+
+# Installation
+
+```bash
+npm install @kitn-ai/chat
+```
+
+The package ships two entry points: the SolidJS components (`@kitn-ai/chat`) and the framework-agnostic web components (`@kitn-ai/chat/elements`). Pick whichever fits your stack — you can mix them.
+
+## SolidJS projects
+
+SolidJS is a peer dependency:
+
+```bash
+npm install solid-js
+```
+
+Import the components and the design tokens once:
+
+```tsx
+import { ChatContainer, Message, MessageContent, PromptInput } from '@kitn-ai/chat';
+import '@kitn-ai/chat/theme.css';
+```
+
+The `@kitn-ai/chat` entry is shipped as source, so your bundler tree-shakes it down to exactly what you import.
+
+## Web components (React, Vue, plain HTML, …)
+
+Build the element bundle, then import it as a **side effect** — that registers `<kitn-chat>`, `<kitn-conversation-list>`, and `<kitn-prompt-input>`:
+
+```bash
+npm run build   # emits dist/kitn-chat.es.js
+```
+
+```html
+<script type="module">
+  import '@kitn-ai/chat/elements';
+</script>
+```
+
+- The bundle is **ESM-only** and loads via `<script type="module">` in every modern browser.
+- **SolidJS is bundled in** — the host page needs nothing else.
+- The kit's CSS is injected into each element's Shadow DOM automatically; importing `theme.css` is optional and only needed if you want to override design tokens.
+
+Head to **[Getting Started](?path=/docs/getting-started--docs)** to render your first chat.

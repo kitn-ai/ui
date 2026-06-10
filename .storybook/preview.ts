@@ -4,6 +4,20 @@ import './styles.css';
 const preview: Preview = {
   parameters: {
     layout: 'fullscreen',
+    options: {
+      storySort: {
+        order: [
+          'Introduction',
+          'Installation',
+          'Getting Started',
+          'Theming',
+          'Integrations',
+          'Examples',
+          'Patterns',
+          '*',
+        ],
+      },
+    },
   },
   globalTypes: {
     theme: {

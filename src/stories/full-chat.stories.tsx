@@ -64,6 +64,10 @@ import {
 
 const meta: Meta = {
   title: "Examples/Full Chat App",
+  parameters: {
+    // Render in a bounded iframe when embedded in docs (the story is h-screen).
+    docs: { story: { inline: false, height: "640px" } },
+  },
 };
 
 export default meta;

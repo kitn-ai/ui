@@ -1,0 +1,110 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Integrations" />
+
+# Integrations
+
+The components don't talk to any model for you — they render `messages` and emit `submit`. That keeps you free to wire up any provider, streaming protocol, or extra like text-to-speech.
+
+## Streaming from OpenRouter
+
+[OpenRouter](https://openrouter.ai) exposes an OpenAI-compatible streaming API (Server-Sent Events). On `submit`, append the user message plus an empty assistant message, then grow the assistant message as tokens arrive.
+
+> **Security:** never ship an API key to the browser. In production, point `fetch` at your own backend that proxies to OpenRouter and injects the key. The parsing is identical either way.
+
+```js
+chat.addEventListener('submit', async (e) => {
+  const text = e.detail.value.trim();
+  if (!text) return;
+
+  // 1. Show the user message; clear the input
+  const history = [...chat.messages, { id: crypto.randomUUID(), role: 'user', content: text }];
+  chat.messages = history;
+  chat.value = '';
+  chat.loading = true;
+
+  // 2. Add an empty assistant message to stream into
+  const assistantId = crypto.randomUUID();
+  chat.messages = [...history, { id: assistantId, role: 'assistant', content: '' }];
+
+  // In production, replace this URL with your own proxy endpoint.
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`, // server-side in production!
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'anthropic/claude-sonnet-4',
+      stream: true,
+      messages: history.map((m) => ({ role: m.role, content: m.content })),
+    }),
+  });
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let answer = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const lines = buffer.split('\n');
+    buffer = lines.pop();                       // keep the partial last line
+    for (const line of lines) {
+      const s = line.trim();
+      if (!s.startsWith('data:')) continue;     // skip keep-alive comments
+      const payload = s.slice(5).trim();
+      if (payload === '[DONE]') continue;
+      try {
+        const delta = JSON.parse(payload).choices?.[0]?.delta?.content;
+        if (!delta) continue;
+        answer += delta;
+        // New object for the streaming message so the row re-renders
+        chat.messages = chat.messages.map((m) =>
+          m.id === assistantId ? { ...m, content: answer } : m
+        );
+      } catch { /* ignore non-JSON keep-alive lines */ }
+    }
+  }
+  chat.loading = false;
+});
+```
+
+## Text-to-speech (TTS)
+
+### Browser-native (zero dependencies)
+
+Speak each reply once it finishes streaming — call `speak(answer)` right before `chat.loading = false`:
+
+```js
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-US';
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
+```
+
+### Cloud TTS (OpenAI, ElevenLabs, …)
+
+For higher-quality voices, have your backend call a TTS API and return audio, then play it (keep the provider key server-side):
+
+```js
+async function speakCloud(text) {
+  const res = await fetch('/api/tts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text, voice: 'alloy' }),
+  });
+  const audio = new Audio(URL.createObjectURL(await res.blob()));
+  audio.play();
+}
+```
+
+## Speech-to-text
+
+The reverse direction is built in — the kit ships a `VoiceInput` component for capturing microphone input. Find it in the sidebar under the component stories.
