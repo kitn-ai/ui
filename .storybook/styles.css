@@ -103,3 +103,30 @@
   background: #3a3a3a !important;
   color: #ffffff !important;
 }
+
+/* Dark mode: theme Storybook's docs CHROME — the Canvas/preview blocks that
+   hold live examples, their toolbars, and loading/error states — so they're
+   not white blocks on a dark page. (Code blocks above are dark in every mode;
+   these preview surfaces follow the dark/light toggle.) */
+.dark .sbdocs-preview,
+.dark .sbdocs-preview .docs-story,
+.dark .sb-story,
+.dark .sb-bar,
+.dark .sb-preparing-story,
+.dark .sb-preparing-docs,
+.dark .sb-previewBlock,
+.dark .sb-nopreview_main,
+.dark .sb-errordisplay_main {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-border) !important;
+}
+.dark .sb-bar,
+.dark .sb-bar button {
+  color: var(--color-muted-foreground) !important;
+}
+.dark .sb-bar button:hover {
+  color: var(--color-foreground) !important;
+}
+.dark .sbdocs-content table :is(td, th) {
+  background-color: var(--color-background) !important;
+}
