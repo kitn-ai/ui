@@ -54,9 +54,13 @@
 .dark .sbdocs-content :is(hr, td, th, table) {
   border-color: var(--color-border) !important;
 }
-.dark .sbdocs-content :not(pre) > code {
-  background-color: color-mix(in oklab, var(--color-muted-foreground) 16%, transparent);
-  color: var(--color-foreground);
+/* Inline `code` in docs prose — blue accent chip, borderless, matching the
+   kit's .chat-markdown inline code (driven by --color-code-foreground, which
+   switches blue shade per light/dark mode). */
+.sbdocs-content :not(pre) > code {
+  background: color-mix(in oklab, var(--color-code-foreground) 15%, transparent) !important;
+  color: var(--color-code-foreground) !important;
+  border: none !important;
 }
 
 /* Docs code blocks — dark "terminal" style in EVERY mode. Storybook renders

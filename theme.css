@@ -42,6 +42,9 @@
   --color-sidebar-border: hsl(220 13% 91%);
   --color-sidebar-ring: hsl(217.2 91.2% 59.8%);
 
+  /* Inline `code` accent. Blue text on a translucent blue chip. */
+  --color-code-foreground: hsl(224.3 76.3% 48%);
+
   --radius: 0.6rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -97,6 +100,7 @@
   --color-sidebar-accent-foreground: hsl(240 4.8% 95.9%);
   --color-sidebar-border: hsl(240 3.7% 15.9%);
   --color-sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --color-code-foreground: hsl(213 94% 78%);
 }
 
 /* Self-contained markdown styling — replaces the typography plugin's `prose`.
@@ -123,7 +127,8 @@
 }
 .chat-markdown hr { margin: 1em 0; border: 0; border-top: 1px solid var(--color-border); }
 .chat-markdown code:not(pre code) {
-  background: color-mix(in oklab, var(--color-muted-foreground) 14%, transparent);
+  background: color-mix(in oklab, var(--color-code-foreground) 15%, transparent);
+  color: var(--color-code-foreground);
   border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.875em;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
 }
