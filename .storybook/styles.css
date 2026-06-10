@@ -148,3 +148,76 @@
 .dark .sbdocs-content table :is(td, th) {
   background-color: var(--color-background) !important;
 }
+
+/* Dark mode: args-table form controls (select, textarea, input, buttons) in the
+   "Control" column of the autodocs args table. Storybook injects emotion-hashed
+   class names (css-xxxx) that are NOT stable, so we target structural selectors
+   scoped under .dark + .docblock-argstable. All rules use !important to win
+   over Storybook's inline/emotion styles. */
+
+/* Select dropdowns */
+.dark .docblock-argstable select {
+  background-color: var(--color-input) !important;
+  color: var(--color-foreground) !important;
+  border-color: var(--color-border) !important;
+  color-scheme: dark !important;
+}
+
+/* Textarea (e.g. children / string controls) */
+.dark .docblock-argstable textarea {
+  background-color: var(--color-input) !important;
+  color: var(--color-foreground) !important;
+  border-color: var(--color-border) !important;
+}
+.dark .docblock-argstable textarea::placeholder {
+  color: var(--color-muted-foreground) !important;
+}
+
+/* Text / number inputs */
+.dark .docblock-argstable input:not([type="checkbox"]) {
+  background-color: var(--color-input) !important;
+  color: var(--color-foreground) !important;
+  border-color: var(--color-border) !important;
+}
+.dark .docblock-argstable input:not([type="checkbox"])::placeholder {
+  color: var(--color-muted-foreground) !important;
+}
+
+/* "Set object" button and similar control action buttons */
+.dark .docblock-argstable button:not(.css-d474as) {
+  background-color: var(--color-muted) !important;
+  color: var(--color-foreground) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: none !important;
+}
+.dark .docblock-argstable button:not(.css-d474as):hover {
+  background-color: var(--color-input) !important;
+  color: var(--color-foreground) !important;
+}
+
+/* Boolean toggle (False/True) — the outer label wrapper */
+.dark .docblock-argstable label[role="switch"],
+.dark .docblock-argstable label[aria-label] {
+  background-color: var(--color-muted) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* The "active" segment span inside the boolean toggle (the white pill) */
+.dark .docblock-argstable label[role="switch"] span,
+.dark .docblock-argstable label[aria-label] span {
+  background-color: transparent !important;
+  color: var(--color-muted-foreground) !important;
+}
+
+/* The checked/active span — Storybook renders it as first span when False is
+   active; use :has on the checkbox state to flip styling */
+.dark .docblock-argstable label[role="switch"]:has(input:not(:checked)) span:first-of-type,
+.dark .docblock-argstable label[aria-label]:has(input:not(:checked)) span:first-of-type {
+  background-color: var(--color-background) !important;
+  color: var(--color-foreground) !important;
+}
+.dark .docblock-argstable label[role="switch"]:has(input:checked) span:last-of-type,
+.dark .docblock-argstable label[aria-label]:has(input:checked) span:last-of-type {
+  background-color: var(--color-background) !important;
+  color: var(--color-foreground) !important;
+}
