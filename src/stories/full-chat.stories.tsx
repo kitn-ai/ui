@@ -65,8 +65,9 @@ import {
 const meta: Meta = {
   title: "Examples/Full Chat App",
   parameters: {
-    // Render in a bounded iframe when embedded in docs (the story is h-screen).
-    docs: { story: { inline: false, height: "640px" } },
+    // Render inline in docs so the embedded example inherits the dark-mode
+    // class (a non-inline iframe would stay light). Bounded to a sensible height.
+    docs: { story: { inline: true, height: "640px" } },
   },
 };
 

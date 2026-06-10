@@ -1,8 +1,13 @@
 @import "tailwindcss";
 @import "../theme.css";
-@plugin "@tailwindcss/typography";
 
 @source "../src/";
+
+/* NOTE: the @tailwindcss/typography plugin is intentionally NOT loaded. The kit
+   replaces `prose` with its own self-contained `.chat-markdown` styles (in
+   theme.css). Loading typography here made `prose` classes in the stories
+   override the kit's markdown colors and break contrast in dark mode — and it
+   didn't match production, which never ships the plugin. */
 
 /* Storybook-only base reset (NOT shipped in theme.css). */
 @layer base {
