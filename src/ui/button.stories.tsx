@@ -65,18 +65,42 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * Attach a clean, copy-paste-ready source snippet to a story. SolidJS stories
+ * can't auto-serialize an args-spread render (it shows `{}`), so we provide
+ * real usage code that the docs "Show code" / "Copy code" buttons surface.
+ */
+const src = (code: string) => ({ parameters: { docs: { source: { code } } } });
+
 /** Interactive playground — tweak the controls to explore every combination. */
-export const Playground: Story = {};
+export const Playground: Story = {
+  ...src(`<Button variant="default" size="md" onClick={() => {}}>Click me</Button>`),
+};
 
-export const Ghost: Story = { args: { variant: 'ghost', children: 'Ghost' } };
+export const Ghost: Story = {
+  args: { variant: 'ghost', children: 'Ghost' },
+  ...src(`<Button variant="ghost">Ghost</Button>`),
+};
 
-export const Outline: Story = { args: { variant: 'outline', children: 'Outline' } };
+export const Outline: Story = {
+  args: { variant: 'outline', children: 'Outline' },
+  ...src(`<Button variant="outline">Outline</Button>`),
+};
 
-export const Small: Story = { args: { size: 'sm', children: 'Small' } };
+export const Small: Story = {
+  args: { size: 'sm', children: 'Small' },
+  ...src(`<Button size="sm">Small</Button>`),
+};
 
-export const Large: Story = { args: { size: 'lg', children: 'Large' } };
+export const Large: Story = {
+  args: { size: 'lg', children: 'Large' },
+  ...src(`<Button size="lg">Large</Button>`),
+};
 
-export const Disabled: Story = { args: { disabled: true, children: 'Disabled' } };
+export const Disabled: Story = {
+  args: { disabled: true, children: 'Disabled' },
+  ...src(`<Button disabled>Disabled</Button>`),
+};
 
 const PlusIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -87,6 +111,7 @@ const PlusIcon = () => (
 
 export const Icon: Story = {
   args: { size: 'icon', children: <PlusIcon />, 'aria-label': 'Add' } as never,
+  ...src(`<Button size="icon" aria-label="Add">\n  <PlusIcon />\n</Button>`),
 };
 
 /** All variants and sizes side by side (showcase — not driven by controls). */
@@ -101,4 +126,12 @@ export const AllVariants: Story = {
       <Button variant="default" size="icon" aria-label="Add"><PlusIcon /></Button>
     </div>
   ),
+  ...src(`<div class="flex flex-wrap items-center gap-3">
+  <Button variant="default">Default</Button>
+  <Button variant="ghost">Ghost</Button>
+  <Button variant="outline">Outline</Button>
+  <Button size="sm">Small</Button>
+  <Button size="lg">Large</Button>
+  <Button size="icon" aria-label="Add"><PlusIcon /></Button>
+</div>`),
 };

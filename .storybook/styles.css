@@ -136,6 +136,15 @@
 .dark .sb-bar button:hover {
   color: var(--color-foreground) !important;
 }
+/* The Canvas/autodocs preview toolbar (zoom-controls bar) — first child of the
+   preview block — stays white otherwise. Theme it dark with light icons. */
+.dark .sbdocs-preview > div:first-child {
+  background-color: var(--color-background) !important;
+  border-bottom-color: var(--color-border) !important;
+}
+.dark .sbdocs-preview > div:first-child svg {
+  color: var(--color-muted-foreground) !important;
+}
 .dark .sbdocs-content table :is(td, th) {
   background-color: var(--color-background) !important;
 }
