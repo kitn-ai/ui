@@ -53,3 +53,42 @@
   background-color: color-mix(in oklab, var(--color-muted-foreground) 16%, transparent);
   color: var(--color-foreground);
 }
+
+/* Docs code blocks — dark "terminal" style in EVERY mode. Storybook renders
+   fenced code on a white card by default, which clashes with a dark UI and
+   isn't the look developers expect. Skin the Source block + any plain <pre>
+   dark, with a VS Code-style token palette for readability. */
+.docblock-source,
+.sbdocs-content pre {
+  background: #1e1e1e !important;
+  border-color: #2a2a2a !important;
+}
+.docblock-source pre,
+.docblock-source code,
+.sbdocs-content pre,
+.sbdocs-content pre code {
+  background: transparent !important;
+  color: #e6e6e6 !important;
+}
+:is(.docblock-source, .sbdocs-content pre) .token.comment {
+  color: #6a9955 !important;
+  font-style: italic;
+}
+:is(.docblock-source, .sbdocs-content pre) :is(.token.string, .token.attr-value, .token.char) {
+  color: #ce9178 !important;
+}
+:is(.docblock-source, .sbdocs-content pre) :is(.token.keyword, .token.tag, .token.boolean, .token.selector) {
+  color: #569cd6 !important;
+}
+:is(.docblock-source, .sbdocs-content pre) .token.function {
+  color: #dcdcaa !important;
+}
+:is(.docblock-source, .sbdocs-content pre) :is(.token.number, .token.constant) {
+  color: #b5cea8 !important;
+}
+:is(.docblock-source, .sbdocs-content pre) :is(.token.operator, .token.punctuation) {
+  color: #d4d4d4 !important;
+}
+:is(.docblock-source, .sbdocs-content pre) :is(.token.property, .token.attr-name) {
+  color: #9cdcfe !important;
+}
