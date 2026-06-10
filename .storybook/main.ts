@@ -4,6 +4,7 @@ const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(ts|tsx)'],
   framework: 'storybook-solidjs-vite',
   addons: [
+    'storybook-dark-mode',
     '@storybook/addon-themes',
     '@storybook/addon-vitest',
     '@storybook/addon-docs'

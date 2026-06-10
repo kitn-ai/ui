@@ -26,3 +26,30 @@
 .sbdocs-content li code {
   font-size: 0.9em !important;
 }
+
+/* Dark mode for the Storybook DOCS surface. storybook-dark-mode themes the
+   manager + preview but leaves the docs content white; the addon puts `.dark`
+   on the docs iframe's <html>, so we re-skin the docs surface with the kit's
+   own design tokens (defined in theme.css) to match. */
+.dark .sbdocs-wrapper {
+  background-color: var(--color-background) !important;
+}
+.dark .sbdocs-content {
+  color: var(--color-foreground);
+}
+.dark .sbdocs-content :is(p, li, td, blockquote) {
+  color: var(--color-muted-foreground);
+}
+.dark .sbdocs-content :is(h1, h2, h3, h4, h5, strong) {
+  color: var(--color-foreground) !important;
+}
+.dark .sbdocs-content a {
+  color: var(--color-primary);
+}
+.dark .sbdocs-content :is(hr, td, th, table) {
+  border-color: var(--color-border) !important;
+}
+.dark .sbdocs-content :not(pre) > code {
+  background-color: color-mix(in oklab, var(--color-muted-foreground) 16%, transparent);
+  color: var(--color-foreground);
+}

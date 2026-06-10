@@ -1,4 +1,5 @@
 import type { Preview } from 'storybook-solidjs-vite';
+import { themes } from 'storybook/theming';
 import './styles.css';
 
 const preview: Preview = {
@@ -18,36 +19,20 @@ const preview: Preview = {
         ],
       },
     },
-  },
-  globalTypes: {
-    theme: {
-      description: 'Toggle light/dark theme',
-      toolbar: {
-        title: 'Theme',
-        icon: 'sun',
-        items: [
-          { value: 'light', icon: 'sun', title: 'Light' },
-          { value: 'dark', icon: 'moon', title: 'Dark' },
-        ],
-        dynamicTitle: true,
-      },
+    // storybook-dark-mode: one toggle themes the whole Storybook — manager
+    // chrome, docs pages, and the preview. `darkClass: 'dark'` on the preview
+    // <html> drives the kit's own `.dark` design tokens, so the components
+    // switch in lockstep with the surrounding UI.
+    darkMode: {
+      current: 'light',
+      stylePreview: true,
+      classTarget: 'html',
+      darkClass: 'dark',
+      lightClass: 'light',
+      dark: { ...themes.dark, appPreviewBg: 'hsl(50 2% 9%)' },
+      light: { ...themes.light },
     },
   },
-  initialGlobals: {
-    theme: 'light',
-  },
-  decorators: [
-    (Story, context) => {
-      const theme = context.globals.theme ?? 'light';
-      const root = document.documentElement;
-      if (theme === 'dark') {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
-      return Story();
-    },
-  ],
 };
 
 export default preview;
