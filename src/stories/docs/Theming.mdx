@@ -1,4 +1,5 @@
-import { Meta } from '@storybook/addon-docs/blocks';
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+import * as Playground from '../theming-playground.stories';
 
 <Meta title="Theming" />
 
@@ -21,7 +22,19 @@ Because inherited CSS pierces the Shadow DOM boundary, setting tokens on `:root`
 }
 ```
 
-Scope the same variables to a parent element instead of `:root` to theme just one subtree.
+Scope the same variables to a parent element instead of `:root` to theme just one subtree. The tokens follow the **shadcn/ui convention**: they're *semantic* (`--color-primary`, not `--color-blue`) and come in **`X` / `X-foreground` pairs** — a surface color and the text color that sits on it.
+
+## Live editor
+
+Click any swatch to override that token and watch the components re-skin. Press **Reset** to restore the defaults.
+
+<Canvas of={Playground.LiveEditor} />
+
+## Every token
+
+A complete, auto-generated reference of what you can override (generated live from the loaded CSS, so it never drifts from `theme.css`):
+
+<Canvas of={Playground.TokenReference} />
 
 ## Dark mode
 
