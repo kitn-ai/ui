@@ -1,18 +1,39 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './resizable';
 
-const meta: Meta = {
+const meta = {
   title: 'UI/Resizable',
-  parameters: { layout: 'padded' },
-};
-
-export default meta;
-type Story = StoryObj;
-
-export const Horizontal: Story = {
-  render: () => (
+  component: ResizablePanelGroup,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      controls: { exclude: ['use:eventListener'] },
+      description: {
+        component: [
+          'A **resizable split layout**: `ResizablePanelGroup` lays out `ResizablePanel` children along an axis, divided by a draggable `ResizableHandle`.',
+          '**When to use:** to let users adjust the relative size of two or more regions — e.g. a collapsible sidebar next to the main chat, or a chat pane next to an inspector.',
+          '**How to use:** wrap panels in `ResizablePanelGroup` and set `orientation` (`horizontal` row / `vertical` column). Give panels a `defaultSize` (percent) and optional `minSize`/`maxSize`; min/max are read from `data-min-size`/`data-max-size` attributes at drag time. Place a `ResizableHandle` (add `withHandle` for a visible grip) between panels. The group needs a sized container (height/width).',
+          '**Placement:** app shells — sidebar + conversation, conversation + context/inspector panels, or stacked editor/preview regions.',
+        ].join('\n\n'),
+      },
+    },
+  },
+  argTypes: {
+    orientation: {
+      control: 'select',
+      options: ['horizontal', 'vertical'],
+      description: 'Axis the panels are laid out along.',
+      table: { defaultValue: { summary: 'horizontal' } },
+    },
+  },
+  args: {
+    orientation: 'horizontal',
+  },
+  render: (args) => (
     <div class="h-48 w-full max-w-2xl rounded-lg border border-border overflow-hidden">
-      <ResizablePanelGroup orientation="horizontal">
+      <ResizablePanelGroup {...args}>
         <ResizablePanel defaultSize={30} data-min-size="100" data-max-size="400">
           <div class="flex h-full items-center justify-center bg-muted/30 p-4">
             <span class="text-sm text-muted-foreground">Sidebar</span>
@@ -27,8 +48,39 @@ export const Horizontal: Story = {
       </ResizablePanelGroup>
     </div>
   ),
+} satisfies Meta<typeof ResizablePanelGroup>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground — flip the orientation, then drag the handle. */
+export const Playground: Story = {
+  ...src(`<ResizablePanelGroup orientation="horizontal">
+  <ResizablePanel defaultSize={30} data-min-size="100" data-max-size="400">
+    Sidebar
+  </ResizablePanel>
+  <ResizableHandle withHandle />
+  <ResizablePanel>Content</ResizablePanel>
+</ResizablePanelGroup>`),
 };
 
+export const Horizontal: Story = {
+  args: { orientation: 'horizontal' },
+  ...src(`<ResizablePanelGroup orientation="horizontal">
+  <ResizablePanel defaultSize={30} data-min-size="100" data-max-size="400">
+    Sidebar
+  </ResizablePanel>
+  <ResizableHandle withHandle />
+  <ResizablePanel>Content</ResizablePanel>
+</ResizablePanelGroup>`),
+};
+
+/** Stacked top/bottom split (showcase). */
 export const Vertical: Story = {
   render: () => (
     <div class="h-96 w-full max-w-md rounded-lg border border-border overflow-hidden">
@@ -47,8 +99,16 @@ export const Vertical: Story = {
       </ResizablePanelGroup>
     </div>
   ),
+  ...src(`<ResizablePanelGroup orientation="vertical">
+  <ResizablePanel defaultSize={40} data-min-size="60" data-max-size="300">
+    Top
+  </ResizablePanel>
+  <ResizableHandle withHandle />
+  <ResizablePanel>Bottom</ResizablePanel>
+</ResizablePanelGroup>`),
 };
 
+/** Three panels with two handles (showcase). */
 export const ThreePanels: Story = {
   name: 'Three Panels',
   render: () => (
@@ -74,8 +134,16 @@ export const ThreePanels: Story = {
       </ResizablePanelGroup>
     </div>
   ),
+  ...src(`<ResizablePanelGroup orientation="horizontal">
+  <ResizablePanel defaultSize={25} data-min-size="80" data-max-size="300">Left</ResizablePanel>
+  <ResizableHandle />
+  <ResizablePanel>Center</ResizablePanel>
+  <ResizableHandle />
+  <ResizablePanel defaultSize={25} data-min-size="80" data-max-size="300">Right</ResizablePanel>
+</ResizablePanelGroup>`),
 };
 
+/** Handle without a visible grip; reports drag deltas via `onPanelResize` (showcase). */
 export const NoHandle: Story = {
   name: 'Without Handle',
   render: () => (
@@ -86,7 +154,7 @@ export const NoHandle: Story = {
             <span class="text-sm text-muted-foreground">Panel A</span>
           </div>
         </ResizablePanel>
-        <ResizableHandle />
+        <ResizableHandle onPanelResize={fn()} />
         <ResizablePanel>
           <div class="flex h-full items-center justify-center p-4">
             <span class="text-sm text-muted-foreground">Panel B</span>
@@ -95,4 +163,9 @@ export const NoHandle: Story = {
       </ResizablePanelGroup>
     </div>
   ),
+  ...src(`<ResizablePanelGroup orientation="horizontal">
+  <ResizablePanel defaultSize={40}>Panel A</ResizablePanel>
+  <ResizableHandle onPanelResize={(delta) => console.log(delta)} />
+  <ResizablePanel>Panel B</ResizablePanel>
+</ResizablePanelGroup>`),
 };

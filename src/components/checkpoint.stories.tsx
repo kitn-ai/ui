@@ -1,25 +1,64 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { Checkpoint, CheckpointIcon, CheckpointTrigger } from './checkpoint';
 
-const meta: Meta = {
+const meta = {
   title: 'Components/Checkpoint',
-  parameters: { layout: 'padded' },
-};
-
-export default meta;
-type Story = StoryObj;
-
-export const Default: Story = {
-  render: () => (
+  component: Checkpoint,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component: [
+          'An inline marker that lets a user restore the conversation to a saved point. Composed of `Checkpoint` (row + separator) wrapping a `CheckpointIcon` and a `CheckpointTrigger` button.',
+          '**When to use:** to mark a restorable state in a transcript — e.g. before an edit or a branching action — so the user can revert to it.',
+          '**How to use:** place a `CheckpointIcon` and a `CheckpointTrigger` inside `Checkpoint`. Give the trigger an `onClick` handler and an optional `tooltip`; pass custom SVG children to `CheckpointIcon` to override the default flag.',
+          '**Placement:** between messages in a chat transcript, as a thin separator-style row.',
+        ].join('\n\n'),
+      },
+      controls: { exclude: ['use:eventListener'] },
+    },
+  },
+  argTypes: {
+    children: {
+      control: false,
+      description: 'The `CheckpointIcon` and `CheckpointTrigger` contents.',
+    },
+    class: {
+      control: 'text',
+      description: 'Extra classes for the checkpoint row.',
+    },
+  },
+  args: {},
+  render: (args) => (
     <div class="max-w-md">
-      <Checkpoint>
+      <Checkpoint {...args}>
         <CheckpointIcon />
-        <CheckpointTrigger tooltip="Restore to this point">
+        <CheckpointTrigger tooltip="Restore to this point" onClick={fn()}>
           Restore
         </CheckpointTrigger>
       </Checkpoint>
     </div>
   ),
+} satisfies Meta<typeof Checkpoint>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import { Checkpoint, CheckpointIcon, CheckpointTrigger } from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground — the default flag icon with a restore trigger. */
+export const Playground: Story = {
+  ...src(`<Checkpoint>
+  <CheckpointIcon />
+  <CheckpointTrigger tooltip="Restore to this point" onClick={handleRestore}>
+    Restore
+  </CheckpointTrigger>
+</Checkpoint>`),
 };
 
 export const WithCustomIcon: Story = {
@@ -32,12 +71,20 @@ export const WithCustomIcon: Story = {
             <path d="M12 6v6l4 2" />
           </svg>
         </CheckpointIcon>
-        <CheckpointTrigger tooltip="Go back to this checkpoint">
+        <CheckpointTrigger tooltip="Go back to this checkpoint" onClick={fn()}>
           Revert to checkpoint
         </CheckpointTrigger>
       </Checkpoint>
     </div>
   ),
+  ...src(`<Checkpoint>
+  <CheckpointIcon>
+    <ClockIcon class="size-4" />
+  </CheckpointIcon>
+  <CheckpointTrigger tooltip="Go back to this checkpoint" onClick={handleRevert}>
+    Revert to checkpoint
+  </CheckpointTrigger>
+</Checkpoint>`),
 };
 
 export const NoTooltip: Story = {
@@ -45,8 +92,12 @@ export const NoTooltip: Story = {
     <div class="max-w-md">
       <Checkpoint>
         <CheckpointIcon />
-        <CheckpointTrigger>Restore</CheckpointTrigger>
+        <CheckpointTrigger onClick={fn()}>Restore</CheckpointTrigger>
       </Checkpoint>
     </div>
   ),
+  ...src(`<Checkpoint>
+  <CheckpointIcon />
+  <CheckpointTrigger onClick={handleRestore}>Restore</CheckpointTrigger>
+</Checkpoint>`),
 };

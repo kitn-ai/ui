@@ -2,14 +2,6 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { CodeBlock, CodeBlockCode, CodeBlockGroup } from './code-block';
 import { Button } from '../ui/button';
 
-const meta: Meta = {
-  title: 'Components/CodeBlock',
-  parameters: { layout: 'padded' },
-};
-
-export default meta;
-type Story = StoryObj;
-
 const tsCode = `interface User {
   id: string;
   name: string;
@@ -43,36 +35,95 @@ const cssCode = `:root {
   padding: 0.5rem 1rem;
 }`;
 
-export const TypeScript: Story = {
-  render: () => (
+/**
+ * Story for the compound `CodeBlock` family. The root `CodeBlock` is a bordered
+ * card container; `CodeBlockCode` does the (on-demand, Shiki) syntax
+ * highlighting; `CodeBlockGroup` is a flex header/footer row. The controllable
+ * props live on `CodeBlockCode`, so `Playground` drives that piece directly.
+ */
+const meta = {
+  title: 'Components/CodeBlock',
+  component: CodeBlockCode,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component: [
+          'A bordered code card with optional syntax highlighting. `CodeBlock` is the container, `CodeBlockCode` renders the (Shiki-)highlighted source, and `CodeBlockGroup` is a flex row for a header/footer (filename + copy button).',
+          '**When to use:** to display code snippets in chat messages, documentation, or anywhere fenced code appears — typically emitted by the Markdown renderer for ``` blocks.',
+          '**How to use:** wrap one or more children in `<CodeBlock>`. Pass the source string and a `language` to `<CodeBlockCode>`; optionally override the `theme`. Add a `<CodeBlockGroup>` for a filename row and copy action.',
+          '**Placement:** inside assistant message content, README/docs panes, and tool-output views.',
+        ].join('\n\n'),
+      },
+      controls: { exclude: ['use:eventListener'] },
+    },
+  },
+  argTypes: {
+    code: {
+      control: 'text',
+      description: 'The source code string to render.',
+    },
+    language: {
+      control: 'text',
+      description: 'Language id for syntax highlighting (e.g. `typescript`, `python`, `css`).',
+      table: { defaultValue: { summary: 'tsx' } },
+    },
+    theme: {
+      control: 'text',
+      description: 'Shiki theme id. Falls back to the active ChatConfig `codeTheme`.',
+    },
+  },
+  args: {
+    code: tsCode,
+    language: 'typescript',
+  },
+  render: (args) => (
     <div class="max-w-lg">
       <CodeBlock>
-        <CodeBlockCode code={tsCode} language="typescript" />
+        <CodeBlockCode {...args} />
       </CodeBlock>
     </div>
   ),
+} satisfies Meta<typeof CodeBlockCode>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import { CodeBlock, CodeBlockCode, CodeBlockGroup } from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground — edit the code, language, or theme via controls. */
+export const Playground: Story = {
+  ...src(`<CodeBlock>
+  <CodeBlockCode code={tsCode} language="typescript" />
+</CodeBlock>`),
+};
+
+export const TypeScript: Story = {
+  args: { code: tsCode, language: 'typescript' },
+  ...src(`<CodeBlock>
+  <CodeBlockCode code={tsCode} language="typescript" />
+</CodeBlock>`),
 };
 
 export const Python: Story = {
-  render: () => (
-    <div class="max-w-lg">
-      <CodeBlock>
-        <CodeBlockCode code={pythonCode} language="python" />
-      </CodeBlock>
-    </div>
-  ),
+  args: { code: pythonCode, language: 'python' },
+  ...src(`<CodeBlock>
+  <CodeBlockCode code={pythonCode} language="python" />
+</CodeBlock>`),
 };
 
 export const CSS: Story = {
-  render: () => (
-    <div class="max-w-lg">
-      <CodeBlock>
-        <CodeBlockCode code={cssCode} language="css" />
-      </CodeBlock>
-    </div>
-  ),
+  args: { code: cssCode, language: 'css' },
+  ...src(`<CodeBlock>
+  <CodeBlockCode code={cssCode} language="css" />
+</CodeBlock>`),
 };
 
+/** A header row (`CodeBlockGroup`) with a filename and a copy button — showcase. */
 export const WithHeader: Story = {
   render: () => (
     <div class="max-w-lg">
@@ -90,4 +141,11 @@ export const WithHeader: Story = {
       </CodeBlock>
     </div>
   ),
+  ...src(`<CodeBlock>
+  <CodeBlockGroup class="border-b border-border px-4 py-2">
+    <span class="text-xs text-muted-foreground font-mono">user.ts</span>
+    <Button variant="ghost" size="icon-sm">{/* copy icon */}</Button>
+  </CodeBlockGroup>
+  <CodeBlockCode code={tsCode} language="typescript" />
+</CodeBlock>`),
 };

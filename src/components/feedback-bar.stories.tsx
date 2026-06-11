@@ -1,34 +1,101 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { FeedbackBar } from './feedback-bar';
 
-const meta: Meta = {
+const meta = {
   title: 'Components/FeedbackBar',
-  parameters: { layout: 'padded' },
-};
+  component: FeedbackBar,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      controls: { exclude: ['use:eventListener'] },
+      description: {
+        component: [
+          'An inline bar that prompts the user to rate a response, with thumbs-up / thumbs-down actions and a dismiss button.',
+          '**When to use:** after an assistant message, to collect quick helpful / not-helpful feedback on the answer.',
+          '**How to use:** set a `title`, optionally pass an `icon`, and wire `onHelpful`, `onNotHelpful`, and `onClose` to capture the rating or hide the bar.',
+          '**Placement:** directly beneath a completed assistant message, or in a message action row.',
+        ].join('\n\n'),
+      },
+    },
+  },
+  argTypes: {
+    title: {
+      control: 'text',
+      description: 'Prompt text shown next to the rating buttons.',
+    },
+    icon: {
+      control: false,
+      description: 'Optional leading icon element shown before the title.',
+    },
+    class: {
+      control: 'text',
+      description: 'Additional CSS classes for the root element.',
+    },
+    onHelpful: {
+      action: 'helpful',
+      description: 'Fired when the thumbs-up (Helpful) button is clicked.',
+      table: { category: 'Events' },
+    },
+    onNotHelpful: {
+      action: 'notHelpful',
+      description: 'Fired when the thumbs-down (Not helpful) button is clicked.',
+      table: { category: 'Events' },
+    },
+    onClose: {
+      action: 'close',
+      description: 'Fired when the close (X) button is clicked.',
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    title: 'Was this response helpful?',
+    onHelpful: fn(),
+    onNotHelpful: fn(),
+    onClose: fn(),
+  },
+  render: (args) => <FeedbackBar {...args} />,
+} satisfies Meta<typeof FeedbackBar>;
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  render: () => <FeedbackBar title="Was this response helpful?" />,
+const IMPORT = `import { FeedbackBar } from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground — tweak the controls to explore the feedback bar. */
+export const Playground: Story = {
+  ...src(`<FeedbackBar
+  title="Was this response helpful?"
+  onHelpful={() => {}}
+  onNotHelpful={() => {}}
+  onClose={() => {}}
+/>`),
 };
 
 export const CustomTitle: Story = {
-  render: () => <FeedbackBar title="Rate this answer" />,
+  args: { title: 'Rate this answer' },
+  ...src(`<FeedbackBar title="Rate this answer" onHelpful={() => {}} onNotHelpful={() => {}} />`),
 };
 
+const SmileyIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted-foreground">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+    <line x1="9" y1="9" x2="9.01" y2="9" />
+    <line x1="15" y1="9" x2="15.01" y2="9" />
+  </svg>
+);
+
 export const WithIcon: Story = {
-  render: () => (
-    <FeedbackBar
-      title="How did I do?"
-      icon={
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted-foreground">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-          <line x1="9" y1="9" x2="9.01" y2="9" />
-          <line x1="15" y1="9" x2="15.01" y2="9" />
-        </svg>
-      }
-    />
-  ),
+  args: { title: 'How did I do?', icon: <SmileyIcon /> },
+  ...src(`<FeedbackBar
+  title="How did I do?"
+  icon={<SmileyIcon />}
+  onHelpful={() => {}}
+  onNotHelpful={() => {}}
+/>`),
 };

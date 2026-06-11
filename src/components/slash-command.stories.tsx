@@ -1,22 +1,9 @@
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
-import { createSignal, For, Show } from "solid-js";
+import { fn } from "storybook/test";
+import { createSignal } from "solid-js";
 import { SlashCommand, type SlashCommandItem } from "./slash-command";
-import {
-  PromptInput,
-  PromptInputTextarea,
-  PromptInputActions,
-} from "./prompt-input";
-import { Button } from "../ui/button";
+import { PromptInput, PromptInputTextarea } from "./prompt-input";
 import { ChatConfig } from "../primitives/chat-config";
-import { ArrowUp } from "lucide-solid";
-
-const meta: Meta = {
-  title: "Components/SlashCommand",
-  parameters: { layout: "centered" },
-};
-
-export default meta;
-type Story = StoryObj;
 
 const skillCommands: SlashCommandItem[] = [
   { id: "caveman", label: "Caveman", description: "Ultra-compressed terse responses", category: "Skills" },
@@ -26,114 +13,6 @@ const skillCommands: SlashCommandItem[] = [
   { id: "concise", label: "Concise", description: "Short, direct answers", category: "Skills" },
 ];
 
-/**
- * Default (compact) — title and description on one line.
- * Type `/` to see the popup.
- */
-export const Compact: Story = {
-  render: () => {
-    const [value, setValue] = createSignal("");
-    const [selected, setSelected] = createSignal<string[]>([]);
-
-    function handleSelect(cmd: SlashCommandItem) {
-      setSelected((prev) =>
-        prev.includes(cmd.id)
-          ? prev.filter((id) => id !== cmd.id)
-          : [...prev, cmd.id],
-      );
-    }
-
-    return (
-      <ChatConfig proseSize="sm">
-        <div style={{ width: "420px" }} class="bg-card rounded-lg p-4">
-          <Show when={selected().length > 0}>
-            <div class="flex gap-1 flex-wrap mb-3">
-              <For each={selected()}>
-                {(id) => {
-                  const cmd = skillCommands.find((c) => c.id === id);
-                  return (
-                    <button
-                      onClick={() => handleSelect(cmd!)}
-                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-violet-400/10 text-violet-400 hover:bg-violet-400/20 cursor-pointer transition-colors"
-                    >
-                      {cmd?.label}
-                      <span class="text-[10px]">✕</span>
-                    </button>
-                  );
-                }}
-              </For>
-            </div>
-          </Show>
-
-          <div class="relative">
-            <PromptInput
-              value={value()}
-              onValueChange={setValue}
-              onSubmit={() => setValue("")}
-            >
-              <PromptInputTextarea
-                placeholder="Type / for commands..."
-                class="min-h-[36px] pt-2 pl-3"
-              />
-              <PromptInputActions class="mt-0.5 flex w-full items-center justify-between gap-2 px-2 pb-1.5">
-                <span class="text-xs text-muted-foreground/40">
-                  Type / for skills
-                </span>
-                <Button
-                  size="icon-sm"
-                  class="rounded-full"
-                  disabled={!value().trim() || value().startsWith("/")}
-                >
-                  <ArrowUp class="size-4" />
-                </Button>
-              </PromptInputActions>
-              <SlashCommand commands={skillCommands} activeIds={selected()} onSelect={handleSelect} />
-            </PromptInput>
-          </div>
-
-          <p class="text-xs text-muted-foreground/40 mt-2 text-center">
-            Type <code class="bg-muted px-1 rounded">/</code> to see commands.
-            Arrow keys + Tab/Enter to select.
-          </p>
-        </div>
-      </ChatConfig>
-    );
-  },
-};
-
-/**
- * Expanded mode — title and description on separate lines.
- */
-export const Expanded: Story = {
-  render: () => {
-    const [value, setValue] = createSignal("/");
-
-    return (
-      <ChatConfig proseSize="sm">
-        <div style={{ width: "420px" }} class="bg-card rounded-lg p-4">
-          <div class="relative">
-            <PromptInput
-              value={value()}
-              onValueChange={setValue}
-              onSubmit={() => setValue("")}
-            >
-              <PromptInputTextarea
-                placeholder="Type / for commands..."
-                class="min-h-[36px] pt-2 pl-3"
-              />
-              <SlashCommand
-                commands={skillCommands}
-                compact={false}
-                onSelect={(cmd) => setValue("")}
-              />
-            </PromptInput>
-          </div>
-        </div>
-      </ChatConfig>
-    );
-  },
-};
-
 const mixedCommands: SlashCommandItem[] = [
   ...skillCommands,
   { id: "clear", label: "Clear", description: "Clear conversation history", category: "Actions" },
@@ -141,36 +20,145 @@ const mixedCommands: SlashCommandItem[] = [
 ];
 
 /**
- * Commands grouped by category (Skills + Actions).
+ * `SlashCommand` reads the input value from the enclosing `PromptInput`
+ * context, so every story mounts it inside a `PromptInput`. The popup opens
+ * when the input starts with `/`.
  */
-export const WithCategories: Story = {
-  render: () => {
-    const [value, setValue] = createSignal("/");
-
-    return (
-      <ChatConfig proseSize="sm">
-        <div style={{ width: "420px" }} class="bg-card rounded-lg p-4">
-          <div class="relative">
-            <PromptInput
-              value={value()}
-              onValueChange={setValue}
-              onSubmit={() => setValue("")}
-            >
-              <PromptInputTextarea
-                placeholder="Type / for commands..."
-                class="min-h-[36px] pt-2 pl-3"
-              />
-              <SlashCommand
-                commands={mixedCommands}
-                onSelect={(cmd) => {
-                  setValue("");
-                  alert(`Selected: ${cmd.label}`);
-                }}
-              />
-            </PromptInput>
-          </div>
+function SlashDemo(props: { commands: SlashCommandItem[]; activeIds?: string[]; compact?: boolean; onSelect: (cmd: SlashCommandItem) => void }) {
+  const [value, setValue] = createSignal("/");
+  return (
+    <ChatConfig proseSize="sm">
+      <div style={{ width: "420px" }} class="bg-card rounded-lg p-4">
+        <div class="relative">
+          <PromptInput value={value()} onValueChange={setValue} onSubmit={() => setValue("")}>
+            <PromptInputTextarea placeholder="Type / for commands..." class="min-h-[36px] pt-2 pl-3" />
+            <SlashCommand
+              commands={props.commands}
+              activeIds={props.activeIds}
+              compact={props.compact}
+              onSelect={(cmd) => {
+                props.onSelect(cmd);
+                setValue("");
+              }}
+            />
+          </PromptInput>
         </div>
-      </ChatConfig>
+        <p class="text-xs text-muted-foreground/40 mt-2 text-center">
+          Type <code class="bg-muted px-1 rounded">/</code> to see commands. Arrow keys + Tab/Enter to select.
+        </p>
+      </div>
+    </ChatConfig>
+  );
+}
+
+const meta = {
+  title: "Components/SlashCommand",
+  component: SlashCommand,
+  tags: ["autodocs"],
+  parameters: {
+    layout: "centered",
+    docs: {
+      description: {
+        component: [
+          "A keyboard-navigable command palette that pops above a `PromptInput` when the user types `/`. Filters and groups commands by category, with arrow-key navigation and Tab/Enter to select.",
+          "**When to use:** to offer slash commands or toggleable skills/modes directly from the prompt input as the user types `/name`.",
+          "**How to use:** render it as a child of `PromptInput` (it consumes that context). Pass `commands`, handle `onSelect`, and optionally pass `activeIds` to mark active toggles. Set `compact={false}` for two-line rows.",
+          "**Placement:** inside the relative-positioned `PromptInput`, absolutely anchored to the top of the textarea.",
+        ].join("\n\n"),
+      },
+      controls: { exclude: ["use:eventListener"] },
+    },
+  },
+  argTypes: {
+    commands: {
+      control: "object",
+      description: "List of selectable commands ({ id, label, description?, category? }).",
+    },
+    activeIds: {
+      control: "object",
+      description: "IDs currently marked active — selecting an active command toggles it off.",
+    },
+    compact: {
+      control: "boolean",
+      description: "Single-line rows (label + description side by side). When false, two-line rows.",
+      table: { defaultValue: { summary: "true" } },
+    },
+    onSelect: {
+      action: "select",
+      description: "Fired with the chosen command when an item is selected.",
+      table: { category: "Events" },
+    },
+    class: { control: "text", description: "Additional classes on the popup container." },
+  },
+  args: {
+    commands: skillCommands,
+    compact: true,
+    activeIds: [],
+    onSelect: fn(),
+  },
+  render: (args) => (
+    <SlashDemo commands={args.commands} activeIds={args.activeIds} compact={args.compact} onSelect={args.onSelect} />
+  ),
+} satisfies Meta<typeof SlashCommand>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import { SlashCommand, PromptInput, PromptInputTextarea } from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground — type `/` in the input; tweak `commands`/`compact`/`activeIds`. */
+export const Playground: Story = {
+  ...src(`<PromptInput value={value()} onValueChange={setValue} onSubmit={() => setValue('')}>
+  <PromptInputTextarea placeholder="Type / for commands..." />
+  <SlashCommand commands={commands} onSelect={(cmd) => { /* apply */ }} />
+</PromptInput>`),
+};
+
+/** Compact single-line rows (default). */
+export const Compact: Story = {
+  args: { compact: true },
+  ...src(`<SlashCommand commands={commands} onSelect={handleSelect} />`),
+};
+
+/** Two-line rows with label above description. */
+export const Expanded: Story = {
+  args: { compact: false },
+  ...src(`<SlashCommand commands={commands} compact={false} onSelect={handleSelect} />`),
+};
+
+/** Commands grouped by category (Skills + Actions). */
+export const WithCategories: Story = {
+  args: { commands: mixedCommands },
+  ...src(`const commands = [
+  { id: 'eli5', label: 'ELI5', description: 'Explain simply', category: 'Skills' },
+  { id: 'clear', label: 'Clear', description: 'Clear conversation', category: 'Actions' },
+];
+
+<SlashCommand commands={commands} onSelect={handleSelect} />`),
+};
+
+/** Toggleable skills — active IDs are marked and toggle off when reselected (showcase). */
+export const ActiveToggles: Story = {
+  render: () => {
+    const [selected, setSelected] = createSignal<string[]>(["eli5"]);
+    return (
+      <SlashDemo
+        commands={skillCommands}
+        activeIds={selected()}
+        onSelect={(cmd) =>
+          setSelected((prev) =>
+            prev.includes(cmd.id) ? prev.filter((id) => id !== cmd.id) : [...prev, cmd.id],
+          )
+        }
+      />
     );
   },
+  ...src(`<SlashCommand
+  commands={skillCommands}
+  activeIds={selected()}
+  onSelect={(cmd) => toggle(cmd.id)}
+/>`),
 };

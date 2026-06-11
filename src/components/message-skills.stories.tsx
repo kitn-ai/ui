@@ -1,57 +1,95 @@
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { MessageSkills } from "./message-skills";
-import { Message, MessageAvatar, MessageContent, MessageActions } from "./message";
+import { Message, MessageContent, MessageActions } from "./message";
 import { ChatConfig } from "../primitives/chat-config";
 import { Copy, ThumbsUp, ThumbsDown } from "lucide-solid";
 
-const meta: Meta = {
+const meta = {
   title: "Components/MessageSkills",
-  parameters: { layout: "padded" },
-};
+  component: MessageSkills,
+  tags: ["autodocs"],
+  parameters: {
+    layout: "padded",
+    docs: {
+      controls: { exclude: ["use:eventListener"] },
+      description: {
+        component: [
+          "A row of small badges that label which **skills** were active when a message was generated.",
+          "**When to use:** above an assistant message whose response was shaped by one or more skills (e.g. `Concise`, `ELI5`). Renders nothing when the `skills` array is empty.",
+          "**How to use:** pass a `skills` array of `{ id, name }`; each `name` is shown as a badge. Add `class` (e.g. `mb-1`) to space it from the message body.",
+          "**Placement:** directly above `MessageContent` inside an assistant `Message`.",
+        ].join("\n\n"),
+      },
+    },
+  },
+  argTypes: {
+    skills: {
+      control: "object",
+      description: "Active skills to display as badges. Each is `{ id, name }`.",
+    },
+    class: {
+      control: "text",
+      description: "Extra classes for the badge row container.",
+    },
+  },
+  args: {
+    skills: [
+      { id: "1", name: "Concise" },
+      { id: "2", name: "ELI5" },
+    ],
+  },
+  render: (args) => <MessageSkills {...args} />,
+} satisfies Meta<typeof MessageSkills>;
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof meta>;
 
+const IMPORT = `import { MessageSkills } from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: "tsx" } } },
+});
+
+/** Interactive playground — edit the `skills` array to see the badges update. */
+export const Playground: Story = {
+  ...src(`<MessageSkills skills={[{ id: '1', name: 'Concise' }, { id: '2', name: 'ELI5' }]} />`),
+};
+
+/** A single active skill. */
 export const SingleSkill: Story = {
-  render: () => (
-    <div class="max-w-2xl">
-      <MessageSkills skills={[{ id: "1", name: "Caveman" }]} />
-    </div>
-  ),
+  args: { skills: [{ id: "1", name: "Caveman" }] },
+  ...src(`<MessageSkills skills={[{ id: '1', name: 'Caveman' }]} />`),
 };
 
+/** Several active skills wrap onto multiple lines if needed. */
 export const MultipleSkills: Story = {
-  render: () => (
-    <div class="max-w-2xl">
-      <MessageSkills
-        skills={[
-          { id: "1", name: "Concise" },
-          { id: "2", name: "ELI5" },
-        ]}
-      />
-    </div>
-  ),
+  args: {
+    skills: [
+      { id: "1", name: "Concise" },
+      { id: "2", name: "ELI5" },
+    ],
+  },
+  ...src(`<MessageSkills
+  skills={[
+    { id: '1', name: 'Concise' },
+    { id: '2', name: 'ELI5' },
+  ]}
+/>`),
 };
 
+/** Empty array — the component renders nothing. */
 export const NoSkills: Story = {
-  render: () => (
-    <div class="max-w-2xl">
-      <MessageSkills skills={[]} />
-    </div>
-  ),
+  args: { skills: [] },
+  ...src(`<MessageSkills skills={[]} />`),
 };
 
+/** Composed above an assistant message body (showcase — not driven by controls). */
 export const InAssistantMessage: Story = {
   name: "In Assistant Message",
   render: () => (
     <ChatConfig proseSize="sm">
       <div class="max-w-md space-y-4">
-        {/* Assistant message with skills */}
         <Message class="flex-col !gap-0">
-          <MessageSkills
-            skills={[{ id: "1", name: "Caveman" }]}
-            class="mb-1"
-          />
+          <MessageSkills skills={[{ id: "1", name: "Caveman" }]} class="mb-1" />
           <MessageContent markdown class="bg-transparent p-0 pt-1.5">
             {"Bug in auth middleware. Token expiry check use `<` not `<=`. Fix: update comparison operator in `validateToken()`."}
           </MessageContent>
@@ -68,7 +106,6 @@ export const InAssistantMessage: Story = {
           </MessageActions>
         </Message>
 
-        {/* Assistant message without skills */}
         <Message class="flex-col !gap-0">
           <MessageContent markdown class="bg-transparent p-0 pt-1.5">
             The authentication middleware validates JWT tokens by checking the
@@ -90,21 +127,26 @@ export const InAssistantMessage: Story = {
       </div>
     </ChatConfig>
   ),
+  ...src(`<Message class="flex-col !gap-0">
+  <MessageSkills skills={[{ id: '1', name: 'Caveman' }]} class="mb-1" />
+  <MessageContent markdown class="bg-transparent p-0 pt-1.5">
+    {assistantText}
+  </MessageContent>
+</Message>`),
 };
 
+/** Skills across a multi-turn flow (showcase). */
 export const InConversation: Story = {
   name: "In Conversation Flow",
   render: () => (
     <ChatConfig proseSize="sm">
       <div class="max-w-md space-y-4">
-        {/* User message */}
         <Message class="group flex-col items-end !gap-0">
           <MessageContent class="bg-muted text-primary max-w-[85%] rounded-xl px-4 py-2 mr-1">
             What is the main topic of this video?
           </MessageContent>
         </Message>
 
-        {/* Assistant — no skills */}
         <Message class="flex-col !gap-0">
           <MessageContent markdown class="bg-transparent p-0 pt-1.5">
             The video covers advanced React patterns including compound
@@ -115,19 +157,14 @@ export const InConversation: Story = {
           </MessageActions>
         </Message>
 
-        {/* User message */}
         <Message class="group flex-col items-end !gap-0">
           <MessageContent class="bg-muted text-primary max-w-[85%] rounded-xl px-4 py-2 mr-1">
             Can you explain that more simply?
           </MessageContent>
         </Message>
 
-        {/* Assistant — with ELI5 skill */}
         <Message class="flex-col !gap-0">
-          <MessageSkills
-            skills={[{ id: "1", name: "ELI5" }]}
-            class="mb-1"
-          />
+          <MessageSkills skills={[{ id: "1", name: "ELI5" }]} class="mb-1" />
           <MessageContent markdown class="bg-transparent p-0 pt-1.5">
             Think of React patterns like different ways to build with LEGO.
             Some ways make it easier to change pieces later, some ways make
@@ -138,14 +175,12 @@ export const InConversation: Story = {
           </MessageActions>
         </Message>
 
-        {/* User message */}
         <Message class="group flex-col items-end !gap-0">
           <MessageContent class="bg-muted text-primary max-w-[85%] rounded-xl px-4 py-2 mr-1">
             Now give me the technical details
           </MessageContent>
         </Message>
 
-        {/* Assistant — with Detailed + Concise */}
         <Message class="flex-col !gap-0">
           <MessageSkills
             skills={[
@@ -168,4 +203,10 @@ export const InConversation: Story = {
       </div>
     </ChatConfig>
   ),
+  ...src(`<Message class="flex-col !gap-0">
+  <MessageSkills skills={[{ id: '1', name: 'Detailed' }, { id: '2', name: 'Concise' }]} class="mb-1" />
+  <MessageContent markdown class="bg-transparent p-0 pt-1.5">
+    {assistantText}
+  </MessageContent>
+</Message>`),
 };

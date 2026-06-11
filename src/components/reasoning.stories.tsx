@@ -1,37 +1,94 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from './reasoning';
 
-const meta: Meta = {
+const meta = {
   title: 'Components/Reasoning',
-  parameters: { layout: 'padded' },
-};
-
-export default meta;
-type Story = StoryObj;
-
-export const Default: Story = {
-  render: () => (
-    <Reasoning>
+  component: Reasoning,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component: [
+          'A collapsible disclosure for a model\'s thinking/reasoning. Compose `Reasoning` (root) with `ReasoningTrigger` (the toggle) and `ReasoningContent` (the body, with optional markdown).',
+          '**When to use:** to surface an assistant\'s chain-of-thought or scratch reasoning that should be available but collapsed by default. It can auto-open while streaming and auto-close when streaming ends.',
+          '**How to use:** wrap a trigger and content in `Reasoning`. Leave it uncontrolled, or drive it with `open` + `onOpenChange`. Set `isStreaming` to auto-open during generation. Pass `markdown` on `ReasoningContent` to render a markdown string.',
+          '**Placement:** inside or above an assistant message, before the final answer.',
+        ].join('\n\n'),
+      },
+      controls: { exclude: ['use:eventListener'] },
+    },
+  },
+  argTypes: {
+    open: {
+      control: 'boolean',
+      description: 'Controlled open state. Omit for uncontrolled behavior.',
+    },
+    isStreaming: {
+      control: 'boolean',
+      description: 'When true, auto-opens the disclosure; auto-closes when it returns to false.',
+      table: { defaultValue: { summary: 'false' } },
+    },
+    onOpenChange: {
+      action: 'openChange',
+      description: 'Fired with the next open state when the trigger is toggled.',
+      table: { category: 'Events' },
+    },
+    children: { control: false, description: 'Trigger and content composition.' },
+  },
+  args: {
+    isStreaming: false,
+    onOpenChange: fn(),
+  },
+  render: (args) => (
+    <Reasoning {...args}>
       <ReasoningTrigger>View reasoning</ReasoningTrigger>
       <ReasoningContent>
         <p>The user is asking about reactive programming. Let me break down the key concepts of signals, effects, and memos in SolidJS.</p>
       </ReasoningContent>
     </Reasoning>
   ),
+} satisfies Meta<typeof Reasoning>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import { Reasoning, ReasoningTrigger, ReasoningContent } from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground — toggle `open` / `isStreaming` via the controls. */
+export const Playground: Story = {
+  ...src(`<Reasoning>
+  <ReasoningTrigger>View reasoning</ReasoningTrigger>
+  <ReasoningContent>
+    <p>Let me break down signals, effects, and memos in SolidJS.</p>
+  </ReasoningContent>
+</Reasoning>`),
 };
 
+/** Content rendered from a markdown string. */
 export const WithMarkdown: Story = {
-  render: () => (
-    <Reasoning>
+  render: (args: Parameters<NonNullable<Story['render']>>[0]) => (
+    <Reasoning {...args}>
       <ReasoningTrigger>View reasoning</ReasoningTrigger>
       <ReasoningContent markdown>
-        {"The user wants to understand **reactive primitives**.\n\n- `createSignal` for state\n- `createEffect` for side effects\n- `createMemo` for derived values"}
+        {'The user wants to understand **reactive primitives**.\n\n- `createSignal` for state\n- `createEffect` for side effects\n- `createMemo` for derived values'}
       </ReasoningContent>
     </Reasoning>
   ),
+  ...src(`<Reasoning>
+  <ReasoningTrigger>View reasoning</ReasoningTrigger>
+  <ReasoningContent markdown>
+    {'The user wants **reactive primitives**.\\n\\n- \`createSignal\`\\n- \`createEffect\`\\n- \`createMemo\`'}
+  </ReasoningContent>
+</Reasoning>`),
 };
 
+/** Controlled via `open` + `onOpenChange`, starting open (showcase). */
 export const Controlled: Story = {
   render: () => {
     const [open, setOpen] = createSignal(true);
@@ -44,8 +101,17 @@ export const Controlled: Story = {
       </Reasoning>
     );
   },
+  ...src(`const [open, setOpen] = createSignal(true);
+
+<Reasoning open={open()} onOpenChange={setOpen}>
+  <ReasoningTrigger>Thinking process</ReasoningTrigger>
+  <ReasoningContent>
+    <p>This is a controlled reasoning component that starts open.</p>
+  </ReasoningContent>
+</Reasoning>`),
 };
 
+/** Auto-opens while streaming, auto-closes when it ends (showcase). */
 export const Streaming: Story = {
   render: () => {
     const [streaming, setStreaming] = createSignal(true);
@@ -66,4 +132,10 @@ export const Streaming: Story = {
       </div>
     );
   },
+  ...src(`<Reasoning isStreaming={streaming()}>
+  <ReasoningTrigger>Thinking...</ReasoningTrigger>
+  <ReasoningContent>
+    <p>Auto-opens during streaming and auto-closes when streaming ends.</p>
+  </ReasoningContent>
+</Reasoning>`),
 };

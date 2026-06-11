@@ -13,14 +13,6 @@ import {
 } from './attachments';
 import type { AttachmentData } from './attachments';
 
-const meta: Meta = {
-  title: 'Components/Attachments',
-  parameters: { layout: 'padded' },
-};
-
-export default meta;
-type Story = StoryObj;
-
 const sampleAttachments: AttachmentData[] = [
   {
     id: '1',
@@ -63,14 +55,91 @@ const sampleAttachments: AttachmentData[] = [
   },
 ];
 
+const meta = {
+  title: 'Components/Attachments',
+  component: Attachments,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component: [
+          'A composable container for displaying file and source-document attachments as thumbnails, inline chips, or a vertical list. Built from `Attachments` + per-item `Attachment` with `AttachmentPreview`, `AttachmentInfo`, and `AttachmentRemove` parts.',
+          '**When to use:** to show files a user attached to a prompt, or documents/sources referenced by a message. Choose `grid` for thumbnails, `inline` for compact chips, `list` for a detailed rows view.',
+          '**How to use:** set `variant` on `Attachments`, then map your data to `Attachment` (passing each item via `data` and an `onRemove` handler) and compose the preview/info/remove parts inside.',
+          '**Placement:** prompt input area (pending uploads), message bodies (attached or cited files), and document panels.',
+        ].join('\n\n'),
+      },
+      controls: { exclude: ['use:eventListener'] },
+    },
+  },
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['grid', 'inline', 'list'],
+      description: 'Layout of the attachment items.',
+      table: { defaultValue: { summary: 'grid' } },
+    },
+    children: {
+      control: false,
+      description: 'The `Attachment` items to render inside the container.',
+    },
+    class: {
+      control: 'text',
+      description: 'Extra classes for the container element.',
+    },
+  },
+  args: {
+    variant: 'grid',
+  },
+  render: (args) => {
+    const [items, setItems] = createSignal([...sampleAttachments]);
+    const remove = (id: string) => setItems((prev) => prev.filter((a) => a.id !== id));
+    return (
+      <Attachments {...args}>
+        <For each={items()}>
+          {(item) => (
+            <Attachment data={item} onRemove={() => remove(item.id)}>
+              <AttachmentPreview />
+              <AttachmentInfo />
+              <AttachmentRemove />
+            </Attachment>
+          )}
+        </For>
+      </Attachments>
+    );
+  },
+} satisfies Meta<typeof Attachments>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import {
+  Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove,
+} from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground — switch `variant` to compare grid / inline / list. */
+export const Playground: Story = {
+  ...src(`<Attachments variant="grid">
+  <For each={items()}>
+    {(item) => (
+      <Attachment data={item} onRemove={() => remove(item.id)}>
+        <AttachmentPreview />
+        <AttachmentInfo />
+        <AttachmentRemove />
+      </Attachment>
+    )}
+  </For>
+</Attachments>`),
+};
+
 export const Grid: Story = {
   render: () => {
     const [items, setItems] = createSignal([...sampleAttachments]);
-
-    const remove = (id: string) => {
-      setItems((prev) => prev.filter((a) => a.id !== id));
-    };
-
+    const remove = (id: string) => setItems((prev) => prev.filter((a) => a.id !== id));
     return (
       <div class="space-y-4">
         <Attachments variant="grid">
@@ -92,16 +161,22 @@ export const Grid: Story = {
       </div>
     );
   },
+  ...src(`<Attachments variant="grid">
+  <For each={items()}>
+    {(item) => (
+      <Attachment data={item} onRemove={() => remove(item.id)}>
+        <AttachmentPreview />
+        <AttachmentRemove />
+      </Attachment>
+    )}
+  </For>
+</Attachments>`),
 };
 
 export const Inline: Story = {
   render: () => {
     const [items, setItems] = createSignal([...sampleAttachments]);
-
-    const remove = (id: string) => {
-      setItems((prev) => prev.filter((a) => a.id !== id));
-    };
-
+    const remove = (id: string) => setItems((prev) => prev.filter((a) => a.id !== id));
     return (
       <div class="space-y-4">
         <Attachments variant="inline">
@@ -124,16 +199,23 @@ export const Inline: Story = {
       </div>
     );
   },
+  ...src(`<Attachments variant="inline">
+  <For each={items()}>
+    {(item) => (
+      <Attachment data={item} onRemove={() => remove(item.id)}>
+        <AttachmentPreview />
+        <AttachmentInfo />
+        <AttachmentRemove />
+      </Attachment>
+    )}
+  </For>
+</Attachments>`),
 };
 
 export const List: Story = {
   render: () => {
     const [items, setItems] = createSignal([...sampleAttachments]);
-
-    const remove = (id: string) => {
-      setItems((prev) => prev.filter((a) => a.id !== id));
-    };
-
+    const remove = (id: string) => setItems((prev) => prev.filter((a) => a.id !== id));
     return (
       <div class="w-96 space-y-4">
         <Attachments variant="list">
@@ -156,6 +238,17 @@ export const List: Story = {
       </div>
     );
   },
+  ...src(`<Attachments variant="list">
+  <For each={items()}>
+    {(item) => (
+      <Attachment data={item} onRemove={() => remove(item.id)}>
+        <AttachmentPreview />
+        <AttachmentInfo showMediaType />
+        <AttachmentRemove />
+      </Attachment>
+    )}
+  </For>
+</Attachments>`),
 };
 
 export const WithHoverCard: Story = {
@@ -185,6 +278,18 @@ export const WithHoverCard: Story = {
       </AttachmentHoverCard>
     </Attachments>
   ),
+  ...src(`<Attachments variant="grid">
+  <AttachmentHoverCard>
+    <AttachmentHoverCardTrigger>
+      <Attachment data={item}>
+        <AttachmentPreview />
+      </Attachment>
+    </AttachmentHoverCardTrigger>
+    <AttachmentHoverCardContent>
+      <img src={item.url} alt={item.filename} class="max-w-xs rounded" />
+    </AttachmentHoverCardContent>
+  </AttachmentHoverCard>
+</Attachments>`),
 };
 
 export const Empty: Story = {
@@ -193,4 +298,7 @@ export const Empty: Story = {
       <AttachmentEmpty />
     </Attachments>
   ),
+  ...src(`<Attachments variant="grid">
+  <AttachmentEmpty />
+</Attachments>`),
 };

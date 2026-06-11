@@ -1,122 +1,84 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { For } from 'solid-js';
-import { Button } from '../ui/button';
+import { fn } from 'storybook/test';
+import { VoiceInput } from './voice-input';
 
-const meta: Meta = {
-  title: 'Components/VoiceInput',
-  parameters: { layout: 'padded' },
+/** Sample transcription handler — resolves the recorded audio to text. */
+const transcribe = async (_audio: Blob): Promise<string> => {
+  await new Promise((r) => setTimeout(r, 1200));
+  return 'Hello from the microphone';
 };
+
+const meta = {
+  title: 'Components/VoiceInput',
+  component: VoiceInput,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      controls: { exclude: ['use:eventListener'] },
+      description: {
+        component: [
+          'A microphone button that records audio, shows recording (pulse rings) and processing (spinner) states, then hands the audio off for transcription.',
+          '**When to use:** to let users dictate input by voice instead of typing — speech-to-text for the prompt field.',
+          '**How to use:** provide `onTranscribe(audio)` returning a `Promise<string>` (your STT call) and `onTranscription(text)` to receive the result. Click toggles recording; transcription runs automatically on stop. Set `disabled` to block input.',
+          '**Placement:** inside the prompt input action bar, next to send and other input actions.',
+        ].join('\n\n'),
+      },
+    },
+  },
+  argTypes: {
+    disabled: {
+      control: 'boolean',
+      description: 'Disables the button (also disabled while transcribing).',
+      table: { defaultValue: { summary: 'false' } },
+    },
+    class: {
+      control: 'text',
+      description: 'Additional CSS classes for the container.',
+    },
+    onTranscribe: {
+      action: 'transcribe',
+      description: 'Receives the recorded audio `Blob` and must resolve to the transcribed text.',
+      table: { category: 'Events' },
+    },
+    onTranscription: {
+      action: 'transcription',
+      description: 'Called with the final transcribed text (trimmed, non-empty).',
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    disabled: false,
+    onTranscribe: transcribe,
+    onTranscription: fn(),
+  },
+  render: (args) => <VoiceInput {...args} />,
+} satisfies Meta<typeof VoiceInput>;
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  render: () => (
-    <div class="relative inline-flex items-center justify-center">
-      <Button variant="ghost" size="icon-sm" class="relative z-10 rounded-full">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
-          <path d="M19 10v2a7 7 0 01-14 0v-2" />
-          <line x1="12" y1="19" x2="12" y2="23" />
-          <line x1="8" y1="23" x2="16" y2="23" />
-        </svg>
-      </Button>
-    </div>
-  ),
+const IMPORT = `import { VoiceInput } from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground — click the mic to record (requires mic permission). */
+export const Playground: Story = {
+  ...src(`<VoiceInput
+  onTranscribe={async (audio) => {
+    const res = await transcribeAudio(audio); // your STT call
+    return res.text;
+  }}
+  onTranscription={(text) => setInput((v) => v + text)}
+/>`),
 };
 
-export const RecordingState: Story = {
-  render: () => (
-    <div class="relative inline-flex items-center justify-center">
-      <For each={[0, 1, 2]}>
-        {(index) => (
-          <div
-            class="absolute inset-0 animate-ping rounded-full border-2 border-red-400/30"
-            style={{
-              "animation-delay": `${index * 0.3}s`,
-              "animation-duration": "2s",
-            }}
-          />
-        )}
-      </For>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        class="relative z-10 rounded-full bg-destructive text-white hover:bg-destructive/80 transition-all duration-300"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <rect x="4" y="4" width="16" height="16" rx="2" />
-        </svg>
-      </Button>
-    </div>
-  ),
-};
-
-export const ProcessingState: Story = {
-  render: () => (
-    <div class="relative inline-flex items-center justify-center">
-      <Button variant="ghost" size="icon-sm" class="relative z-10 rounded-full" disabled>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-spin">
-          <path d="M21 12a9 9 0 11-6.219-8.56" />
-        </svg>
-      </Button>
-    </div>
-  ),
-};
-
-export const AllStates: Story = {
-  render: () => (
-    <div class="flex items-center gap-8">
-      <div class="flex flex-col items-center gap-2">
-        <div class="relative inline-flex items-center justify-center">
-          <Button variant="ghost" size="icon-sm" class="relative z-10 rounded-full">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
-              <path d="M19 10v2a7 7 0 01-14 0v-2" />
-              <line x1="12" y1="19" x2="12" y2="23" />
-              <line x1="8" y1="23" x2="16" y2="23" />
-            </svg>
-          </Button>
-        </div>
-        <span class="text-xs text-muted-foreground">Idle</span>
-      </div>
-
-      <div class="flex flex-col items-center gap-2">
-        <div class="relative inline-flex items-center justify-center">
-          <For each={[0, 1, 2]}>
-            {(index) => (
-              <div
-                class="absolute inset-0 animate-ping rounded-full border-2 border-red-400/30"
-                style={{
-                  "animation-delay": `${index * 0.3}s`,
-                  "animation-duration": "2s",
-                }}
-              />
-            )}
-          </For>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            class="relative z-10 rounded-full bg-destructive text-white hover:bg-destructive/80"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <rect x="4" y="4" width="16" height="16" rx="2" />
-            </svg>
-          </Button>
-        </div>
-        <span class="text-xs text-muted-foreground">Recording</span>
-      </div>
-
-      <div class="flex flex-col items-center gap-2">
-        <div class="relative inline-flex items-center justify-center">
-          <Button variant="ghost" size="icon-sm" class="relative z-10 rounded-full" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-spin">
-              <path d="M21 12a9 9 0 11-6.219-8.56" />
-            </svg>
-          </Button>
-        </div>
-        <span class="text-xs text-muted-foreground">Processing</span>
-      </div>
-    </div>
-  ),
+export const Disabled: Story = {
+  args: { disabled: true },
+  ...src(`<VoiceInput
+  disabled
+  onTranscribe={transcribe}
+  onTranscription={(text) => setInput(text)}
+/>`),
 };

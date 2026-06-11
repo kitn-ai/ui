@@ -1,15 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { For } from 'solid-js';
 import { ChatContainerRoot, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
 import { Message, MessageAvatar, MessageContent } from './message';
-import { For } from 'solid-js';
-
-const meta: Meta = {
-  title: 'Components/ChatContainer',
-  parameters: { layout: 'padded' },
-};
-
-export default meta;
-type Story = StoryObj;
 
 const sampleMessages = [
   { role: 'user', content: 'What is SolidJS?' },
@@ -41,22 +33,46 @@ function Counter() {
 Notice that \`count\` is called as a function -- this is how SolidJS tracks which parts of the UI depend on which signals.` },
 ];
 
-export const FullChat: Story = {
-  render: () => (
+const meta = {
+  title: 'Components/ChatContainer',
+  component: ChatContainerRoot,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component: [
+          'A scrollable message viewport that automatically sticks to the bottom as new content streams in. Composed of `ChatContainerRoot` (the scroll region), `ChatContainerContent` (the message stack), and `ChatContainerScrollAnchor` (the stick-to-bottom target).',
+          '**When to use:** as the conversation transcript region of a chat UI, where messages append over time and the view should follow the latest output unless the user scrolls up.',
+          '**How to use:** wrap your message list in `ChatContainerRoot`, place messages inside `ChatContainerContent`, and end with `ChatContainerScrollAnchor`. Give the root a fixed height so it can scroll.',
+          '**Placement:** the central pane of a chat layout, between the header and the prompt input.',
+        ].join('\n\n'),
+      },
+      controls: { exclude: ['use:eventListener'] },
+    },
+  },
+  argTypes: {
+    children: {
+      control: false,
+      description: 'The container content — typically `ChatContainerContent` with messages.',
+    },
+    class: {
+      control: 'text',
+      description: 'Extra classes for the scroll region (set a height so it can scroll).',
+    },
+  },
+  args: {
+    class: 'h-full flex-col p-4',
+  },
+  render: (args) => (
     <div class="h-[500px] w-full max-w-2xl border border-border rounded-lg overflow-hidden">
-      <ChatContainerRoot class="h-full flex-col p-4">
+      <ChatContainerRoot {...args}>
         <ChatContainerContent class="space-y-4">
           <For each={sampleMessages}>
             {(msg) => (
               <Message>
-                <MessageAvatar
-                  src=""
-                  fallback={msg.role === 'user' ? 'U' : 'AI'}
-                  alt={msg.role}
-                />
-                <MessageContent markdown={msg.role === 'assistant'}>
-                  {msg.content}
-                </MessageContent>
+                <MessageAvatar src="" fallback={msg.role === 'user' ? 'U' : 'AI'} alt={msg.role} />
+                <MessageContent markdown={msg.role === 'assistant'}>{msg.content}</MessageContent>
               </Message>
             )}
           </For>
@@ -65,6 +81,69 @@ export const FullChat: Story = {
       </ChatContainerRoot>
     </div>
   ),
+} satisfies Meta<typeof ChatContainerRoot>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import {
+  ChatContainerRoot, ChatContainerContent, ChatContainerScrollAnchor,
+  Message, MessageAvatar, MessageContent,
+} from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground — a full transcript inside the stick-to-bottom container. */
+export const Playground: Story = {
+  ...src(`<div class="h-[500px]">
+  <ChatContainerRoot class="h-full flex-col p-4">
+    <ChatContainerContent class="space-y-4">
+      <For each={messages}>
+        {(msg) => (
+          <Message>
+            <MessageAvatar src="" fallback={msg.role === 'user' ? 'U' : 'AI'} alt={msg.role} />
+            <MessageContent markdown={msg.role === 'assistant'}>{msg.content}</MessageContent>
+          </Message>
+        )}
+      </For>
+      <ChatContainerScrollAnchor />
+    </ChatContainerContent>
+  </ChatContainerRoot>
+</div>`),
+};
+
+export const FullChat: Story = {
+  render: () => (
+    <div class="h-[500px] w-full max-w-2xl border border-border rounded-lg overflow-hidden">
+      <ChatContainerRoot class="h-full flex-col p-4">
+        <ChatContainerContent class="space-y-4">
+          <For each={sampleMessages}>
+            {(msg) => (
+              <Message>
+                <MessageAvatar src="" fallback={msg.role === 'user' ? 'U' : 'AI'} alt={msg.role} />
+                <MessageContent markdown={msg.role === 'assistant'}>{msg.content}</MessageContent>
+              </Message>
+            )}
+          </For>
+          <ChatContainerScrollAnchor />
+        </ChatContainerContent>
+      </ChatContainerRoot>
+    </div>
+  ),
+  ...src(`<ChatContainerRoot class="h-full flex-col p-4">
+  <ChatContainerContent class="space-y-4">
+    <For each={messages}>
+      {(msg) => (
+        <Message>
+          <MessageAvatar src="" fallback={msg.role === 'user' ? 'U' : 'AI'} alt={msg.role} />
+          <MessageContent markdown={msg.role === 'assistant'}>{msg.content}</MessageContent>
+        </Message>
+      )}
+    </For>
+    <ChatContainerScrollAnchor />
+  </ChatContainerContent>
+</ChatContainerRoot>`),
 };
 
 export const LongConversation: Story = {
@@ -82,11 +161,7 @@ export const LongConversation: Story = {
             <For each={manyMessages}>
               {(msg) => (
                 <Message>
-                  <MessageAvatar
-                    src=""
-                    fallback={msg.role === 'user' ? 'U' : 'AI'}
-                    alt={msg.role}
-                  />
+                  <MessageAvatar src="" fallback={msg.role === 'user' ? 'U' : 'AI'} alt={msg.role} />
                   <MessageContent>{msg.content}</MessageContent>
                 </Message>
               )}
@@ -97,4 +172,17 @@ export const LongConversation: Story = {
       </div>
     );
   },
+  ...src(`<ChatContainerRoot class="h-full flex-col p-4">
+  <ChatContainerContent class="space-y-4">
+    <For each={manyMessages}>
+      {(msg) => (
+        <Message>
+          <MessageAvatar src="" fallback={msg.role === 'user' ? 'U' : 'AI'} alt={msg.role} />
+          <MessageContent>{msg.content}</MessageContent>
+        </Message>
+      )}
+    </For>
+    <ChatContainerScrollAnchor />
+  </ChatContainerContent>
+</ChatContainerRoot>`),
 };

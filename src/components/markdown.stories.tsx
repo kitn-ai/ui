@@ -1,37 +1,87 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Markdown } from './markdown';
 
-const meta: Meta = {
+const meta = {
   title: 'Components/Markdown',
-  parameters: { layout: 'padded' },
-};
+  component: Markdown,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      controls: { exclude: ['use:eventListener'] },
+      description: {
+        component: [
+          'Renders a Markdown string to styled HTML (GFM enabled — tables, lists, blockquotes), splitting fenced code into highlighted `CodeBlock`s.',
+          '**When to use:** to display assistant message content, documentation, or any rich text authored in Markdown.',
+          '**How to use:** pass the Markdown string as `content`; optionally set `codeTheme` for code fences and `class` for the prose container. Prose sizing follows the surrounding `ChatConfig`.',
+          '**Placement:** inside `MessageContent`, response panels, or anywhere formatted text is shown.',
+        ].join('\n\n'),
+      },
+    },
+  },
+  argTypes: {
+    content: {
+      control: 'text',
+      description: 'The Markdown source string to render.',
+    },
+    id: {
+      control: 'text',
+      description: 'Optional stable id used for block keys (auto-generated if omitted).',
+    },
+    codeTheme: {
+      control: 'text',
+      description: 'Shiki theme name applied to fenced code blocks (falls back to the chat config theme).',
+    },
+    class: {
+      control: 'text',
+      description: 'Additional CSS classes for the prose container.',
+    },
+  },
+  args: {
+    content: 'This is a simple paragraph of text rendered through the **Markdown** component.',
+  },
+  render: (args) => <Markdown {...args} />,
+} satisfies Meta<typeof Markdown>;
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import { Markdown } from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground — edit the `content` control to render any Markdown. */
+export const Playground: Story = {
+  ...src(`<Markdown content="This is a simple paragraph of **Markdown** text." />`),
+};
 
 export const PlainText: Story = {
-  render: () => (
-    <Markdown content="This is a simple paragraph of text rendered through the Markdown component." />
-  ),
+  args: {
+    content: 'This is a simple paragraph of text rendered through the Markdown component.',
+  },
+  ...src(`<Markdown content="This is a simple paragraph of text rendered through the Markdown component." />`),
 };
 
 export const Headings: Story = {
-  render: () => (
-    <Markdown
-      content={`# Heading 1
+  args: {
+    content: `# Heading 1
 ## Heading 2
 ### Heading 3
 #### Heading 4
 
-Some text below the headings.`}
-    />
-  ),
+Some text below the headings.`,
+  },
+  ...src(`<Markdown content={\`# Heading 1
+## Heading 2
+### Heading 3
+
+Some text below the headings.\`} />`),
 };
 
 export const CodeBlocks: Story = {
-  render: () => (
-    <Markdown
-      content={`Here is some inline \`code\` in a paragraph.
+  args: {
+    content: `Here is some inline \`code\` in a paragraph.
 
 \`\`\`typescript
 const x: number = 42;
@@ -42,15 +92,19 @@ And another block:
 
 \`\`\`python
 print("hello world")
-\`\`\``}
-    />
-  ),
+\`\`\``,
+  },
+  ...src(`<Markdown content={\`Here is some inline \\\`code\\\` in a paragraph.
+
+\\\`\\\`\\\`typescript
+const x: number = 42;
+console.log(x);
+\\\`\\\`\\\`\`} />`),
 };
 
 export const Lists: Story = {
-  render: () => (
-    <Markdown
-      content={`### Unordered List
+  args: {
+    content: `### Unordered List
 - First item
 - Second item
   - Nested item
@@ -60,31 +114,39 @@ export const Lists: Story = {
 ### Ordered List
 1. Step one
 2. Step two
-3. Step three`}
-    />
-  ),
+3. Step three`,
+  },
+  ...src(`<Markdown content={\`### Unordered List
+- First item
+- Second item
+  - Nested item
+
+### Ordered List
+1. Step one
+2. Step two\`} />`),
 };
 
 export const GFMTable: Story = {
-  render: () => (
-    <Markdown
-      content={`### Comparison Table
+  args: {
+    content: `### Comparison Table
 
 | Feature | SolidJS | React | Svelte |
 |---------|---------|-------|--------|
 | Reactivity | Fine-grained | Virtual DOM | Compiler |
 | Bundle Size | ~7KB | ~40KB | ~2KB |
 | Performance | Excellent | Good | Excellent |
-| Learning Curve | Moderate | Moderate | Easy |`}
-    />
-  ),
+| Learning Curve | Moderate | Moderate | Easy |`,
+  },
+  ...src(`<Markdown content={\`| Feature | SolidJS | React |
+|---------|---------|-------|
+| Reactivity | Fine-grained | Virtual DOM |
+| Bundle Size | ~7KB | ~40KB |\`} />`),
 };
 
 export const RichContent: Story = {
-  render: () => (
-    <Markdown
-      class="max-w-2xl"
-      content={`# Project Overview
+  args: {
+    class: 'max-w-2xl',
+    content: `# Project Overview
 
 This is a **comprehensive** guide to building modern web applications.
 
@@ -113,7 +175,7 @@ pnpm dev
 | State | Signals | Reactivity |
 | Styling | Tailwind | Design |
 
-For more info, visit [solidjs.com](https://solidjs.com).`}
-    />
-  ),
+For more info, visit [solidjs.com](https://solidjs.com).`,
+  },
+  ...src(`<Markdown class="max-w-2xl" content={richMarkdown} />`),
 };

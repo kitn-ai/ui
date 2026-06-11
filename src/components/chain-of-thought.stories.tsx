@@ -7,13 +7,85 @@ import {
   ChainOfThoughtItem,
 } from './chain-of-thought';
 
-const meta: Meta = {
+const meta = {
   title: 'Components/ChainOfThought',
-  parameters: { layout: 'padded' },
-};
+  component: ChainOfThought,
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component: [
+          'A vertical, collapsible timeline that reveals an agent\'s reasoning as a series of connected steps. Composed of `ChainOfThought` (root) wrapping `ChainOfThoughtStep` items, each with a `ChainOfThoughtTrigger`, `ChainOfThoughtContent`, and one or more `ChainOfThoughtItem`s.',
+          '**When to use:** to surface multi-step reasoning, tool calls, or research progress behind an assistant response, letting users expand each step on demand.',
+          '**How to use:** map each reasoning step to a `ChainOfThoughtStep` (mark the final one with `isLast`); put the summary in `ChainOfThoughtTrigger` and the detail inside `ChainOfThoughtContent` / `ChainOfThoughtItem`.',
+          '**Placement:** above or within an assistant message, typically before the final answer.',
+        ].join('\n\n'),
+      },
+      controls: { exclude: ['use:eventListener'] },
+    },
+  },
+  argTypes: {
+    children: {
+      control: false,
+      description: 'The `ChainOfThoughtStep` items that make up the timeline.',
+    },
+    class: {
+      control: 'text',
+      description: 'Extra classes for the root wrapper.',
+    },
+  },
+  args: {},
+  render: (args) => (
+    <ChainOfThought {...args}>
+      <ChainOfThoughtStep>
+        <ChainOfThoughtTrigger>Understanding the question</ChainOfThoughtTrigger>
+        <ChainOfThoughtContent>
+          <ChainOfThoughtItem>
+            The user is asking about reactive programming concepts in SolidJS.
+          </ChainOfThoughtItem>
+        </ChainOfThoughtContent>
+      </ChainOfThoughtStep>
+      <ChainOfThoughtStep isLast>
+        <ChainOfThoughtTrigger>Formulating response</ChainOfThoughtTrigger>
+        <ChainOfThoughtContent>
+          <ChainOfThoughtItem>
+            Combining insights from documentation and examples into a clear answer.
+          </ChainOfThoughtItem>
+        </ChainOfThoughtContent>
+      </ChainOfThoughtStep>
+    </ChainOfThought>
+  ),
+} satisfies Meta<typeof ChainOfThought>;
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof meta>;
+
+const IMPORT = `import {
+  ChainOfThought, ChainOfThoughtStep, ChainOfThoughtTrigger,
+  ChainOfThoughtContent, ChainOfThoughtItem,
+} from '@kitn-ai/chat';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
+/** Interactive playground — expand the steps to reveal each reasoning item. */
+export const Playground: Story = {
+  ...src(`<ChainOfThought>
+  <ChainOfThoughtStep>
+    <ChainOfThoughtTrigger>Understanding the question</ChainOfThoughtTrigger>
+    <ChainOfThoughtContent>
+      <ChainOfThoughtItem>The user is asking about SolidJS reactivity.</ChainOfThoughtItem>
+    </ChainOfThoughtContent>
+  </ChainOfThoughtStep>
+  <ChainOfThoughtStep isLast>
+    <ChainOfThoughtTrigger>Formulating response</ChainOfThoughtTrigger>
+    <ChainOfThoughtContent>
+      <ChainOfThoughtItem>Combining insights into a clear answer.</ChainOfThoughtItem>
+    </ChainOfThoughtContent>
+  </ChainOfThoughtStep>
+</ChainOfThought>`),
+};
 
 export const SingleStep: Story = {
   render: () => (
@@ -28,6 +100,14 @@ export const SingleStep: Story = {
       </ChainOfThoughtStep>
     </ChainOfThought>
   ),
+  ...src(`<ChainOfThought>
+  <ChainOfThoughtStep isLast>
+    <ChainOfThoughtTrigger>Analyzing the question</ChainOfThoughtTrigger>
+    <ChainOfThoughtContent>
+      <ChainOfThoughtItem>Breaking down the query into key concepts.</ChainOfThoughtItem>
+    </ChainOfThoughtContent>
+  </ChainOfThoughtStep>
+</ChainOfThought>`),
 };
 
 export const MultipleSteps: Story = {
@@ -59,6 +139,26 @@ export const MultipleSteps: Story = {
       </ChainOfThoughtStep>
     </ChainOfThought>
   ),
+  ...src(`<ChainOfThought>
+  <ChainOfThoughtStep>
+    <ChainOfThoughtTrigger>Understanding the question</ChainOfThoughtTrigger>
+    <ChainOfThoughtContent>
+      <ChainOfThoughtItem>The user is asking about SolidJS reactivity.</ChainOfThoughtItem>
+    </ChainOfThoughtContent>
+  </ChainOfThoughtStep>
+  <ChainOfThoughtStep>
+    <ChainOfThoughtTrigger>Searching knowledge base</ChainOfThoughtTrigger>
+    <ChainOfThoughtContent>
+      <ChainOfThoughtItem>Found 3 relevant documents.</ChainOfThoughtItem>
+    </ChainOfThoughtContent>
+  </ChainOfThoughtStep>
+  <ChainOfThoughtStep isLast>
+    <ChainOfThoughtTrigger>Formulating response</ChainOfThoughtTrigger>
+    <ChainOfThoughtContent>
+      <ChainOfThoughtItem>Combining insights into a clear answer.</ChainOfThoughtItem>
+    </ChainOfThoughtContent>
+  </ChainOfThoughtStep>
+</ChainOfThought>`),
 };
 
 export const WithCustomIcons: Story = {
@@ -95,4 +195,18 @@ export const WithCustomIcons: Story = {
       </ChainOfThoughtStep>
     </ChainOfThought>
   ),
+  ...src(`<ChainOfThought>
+  <ChainOfThoughtStep>
+    <ChainOfThoughtTrigger leftIcon={<SearchIcon />}>Searching documents</ChainOfThoughtTrigger>
+    <ChainOfThoughtContent>
+      <ChainOfThoughtItem>Found 5 relevant results.</ChainOfThoughtItem>
+    </ChainOfThoughtContent>
+  </ChainOfThoughtStep>
+  <ChainOfThoughtStep isLast>
+    <ChainOfThoughtTrigger leftIcon={<CheckIcon />}>Analysis complete</ChainOfThoughtTrigger>
+    <ChainOfThoughtContent>
+      <ChainOfThoughtItem>All sources analyzed and synthesized.</ChainOfThoughtItem>
+    </ChainOfThoughtContent>
+  </ChainOfThoughtStep>
+</ChainOfThought>`),
 };
