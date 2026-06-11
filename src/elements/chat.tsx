@@ -5,6 +5,7 @@ import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from '
 import { Message, MessageContent, MessageActions } from '../components/message';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '../components/reasoning';
 import { Tool } from '../components/tool';
+import { Attachments, Attachment, AttachmentPreview, AttachmentInfo } from '../components/attachments';
 import { Button } from '../ui/button';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
 import type { Component } from 'solid-js';
@@ -68,6 +69,18 @@ defineKitnElement<Props>('kitn-chat', {
                   <For each={m.tools ?? []}>
                     {(tp) => <Tool toolPart={tp} class="mb-2 w-full" />}
                   </For>
+                  <Show when={m.attachments?.length}>
+                    <Attachments variant="inline" class={m.role === 'user' ? 'mb-2 justify-end' : 'mb-2'}>
+                      <For each={m.attachments!}>
+                        {(att) => (
+                          <Attachment data={att}>
+                            <AttachmentPreview />
+                            <AttachmentInfo />
+                          </Attachment>
+                        )}
+                      </For>
+                    </Attachments>
+                  </Show>
                   <MessageContent
                     markdown={m.role === 'assistant'}
                     class={m.role === 'user'
