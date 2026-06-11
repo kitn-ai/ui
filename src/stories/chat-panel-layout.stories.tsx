@@ -10,7 +10,7 @@ import { Copy, ArrowUp } from 'lucide-solid';
 
 const meta: Meta = {
   title: 'Patterns/Chat Panel Layout',
-  parameters: { layout: 'centered', options: { showPanel: false } },
+  parameters: { layout: 'centered' },
 };
 
 export default meta;

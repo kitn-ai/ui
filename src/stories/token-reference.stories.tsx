@@ -5,7 +5,7 @@ import { TokenTable } from './docs/theme-tokens';
 // into the Theming docs page via <Canvas of={...}>.
 const meta = {
   title: 'Theming/Token Reference',
-  parameters: { layout: 'padded', options: { showPanel: false } },
+  parameters: { layout: 'padded' },
 } satisfies Meta;
 
 export default meta;
