@@ -4,3 +4,6 @@ storybook-static/
 src/elements/compiled.css
 *.log
 .DS_Store
+
+# Brainstorming visual companion
+.superpowers/
