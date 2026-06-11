@@ -64,7 +64,7 @@ type Story = StoryObj<typeof meta>;
 const IMPORT = `import {
   ChainOfThought, ChainOfThoughtStep, ChainOfThoughtTrigger,
   ChainOfThoughtContent, ChainOfThoughtItem,
-} from '@kitn-ai/chat';`;
+} from '@kitnai/chat';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

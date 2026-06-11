@@ -5,10 +5,10 @@ import { Meta } from '@storybook/addon-docs/blocks';
 # Installation
 
 ```bash
-npm install @kitn-ai/chat
+npm install @kitnai/chat
 ```
 
-The package ships two entry points: the SolidJS components (`@kitn-ai/chat`) and the framework-agnostic web components (`@kitn-ai/chat/elements`). Pick whichever fits your stack — you can mix them.
+The package ships two entry points: the SolidJS components (`@kitnai/chat`) and the framework-agnostic web components (`@kitnai/chat/elements`). Pick whichever fits your stack — you can mix them.
 
 ## SolidJS projects
 
@@ -21,11 +21,11 @@ npm install solid-js
 Import the components and the design tokens once:
 
 ```tsx
-import { ChatContainer, Message, MessageContent, PromptInput } from '@kitn-ai/chat';
-import '@kitn-ai/chat/theme.css';
+import { ChatContainer, Message, MessageContent, PromptInput } from '@kitnai/chat';
+import '@kitnai/chat/theme.css';
 ```
 
-The `@kitn-ai/chat` entry is shipped as source, so your bundler tree-shakes it down to exactly what you import.
+The `@kitnai/chat` entry is shipped as source, so your bundler tree-shakes it down to exactly what you import.
 
 ## Web components (React, Vue, plain HTML, …)
 
@@ -37,7 +37,7 @@ npm run build   # emits dist/kitn-chat.es.js
 
 ```html
 <script type="module">
-  import '@kitn-ai/chat/elements';
+  import '@kitnai/chat/elements';
 </script>
 ```
 

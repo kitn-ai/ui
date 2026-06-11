@@ -37,7 +37,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kitn-chat id="chat" style="display:block; height:100vh;"></kitn-chat>
 
 <script type="module">
-  import '@kitn-ai/chat/elements';   // registers the custom elements
+  import '@kitnai/chat/elements';   // registers the custom elements
 
   const chat = document.getElementById('chat');
   chat.messages = [
@@ -49,9 +49,9 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   chat.addEventListener('submit', (e) => console.log('user sent:', e.detail.value));
 </script>`;
 
-const SOLID_SNIPPET = `import '@kitn-ai/chat/elements'; // registers the custom elements
+const SOLID_SNIPPET = `import '@kitnai/chat/elements'; // registers the custom elements
 import { onMount } from 'solid-js';
-import type { ChatMessage } from '@kitn-ai/chat/elements';
+import type { ChatMessage } from '@kitnai/chat/elements';
 
 function Chat() {
   let el: HTMLElement & { messages?: ChatMessage[] };
@@ -79,7 +79,7 @@ const meta = {
         component: [
           '`<kitn-chat>` is the framework-agnostic **web component** version of the chat UI — a complete message thread plus prompt input, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** dropping a full chat into a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the primitives (`ChatContainer`, `Message`, `PromptInput`) instead.',
-          '**How to use:** register once with `import \'@kitn-ai/chat/elements\'`, set rich data as JS **properties** (`el.messages = [...]`), and listen for **CustomEvents** (`submit`, `messageaction`, `valuechange`) directly on the element.',
+          '**How to use:** register once with `import \'@kitnai/chat/elements\'`, set rich data as JS **properties** (`el.messages = [...]`), and listen for **CustomEvents** (`submit`, `messageaction`, `valuechange`) directly on the element.',
           '**Placement:** as a top-level panel or full-page surface. Give it an explicit height (e.g. `height: 100vh`).',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ].join('\n\n'),

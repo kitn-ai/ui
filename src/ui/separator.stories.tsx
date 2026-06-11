@@ -42,7 +42,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { Separator } from '@kitn-ai/chat';`;
+const IMPORT = `import { Separator } from '@kitnai/chat';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

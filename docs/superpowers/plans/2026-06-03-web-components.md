@@ -955,7 +955,7 @@ git commit -m "feat(elements): add registration entry, Vite library build, ./ele
 
 - [ ] **Step 1: Write `docs/web-components.md`**
 
-Document: install, `import '@kitn-ai/chat/elements'`, the three tags, every property and event with its `detail` shape (from Tasks 5–7), the `ChatMessage` schema, and a note that styling is fully isolated via Shadow DOM. Include one runnable HTML snippet per element mirroring the Task 8 smoke test.
+Document: install, `import '@kitnai/chat/elements'`, the three tags, every property and event with its `detail` shape (from Tasks 5–7), the `ChatMessage` schema, and a note that styling is fully isolated via Shadow DOM. Include one runnable HTML snippet per element mirroring the Task 8 smoke test.
 
 - [ ] **Step 2: Commit**
 

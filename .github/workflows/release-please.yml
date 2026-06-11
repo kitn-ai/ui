@@ -1,0 +1,41 @@
+name: Release
+
+# release-please watches Conventional Commits on main and maintains a "release
+# PR" that bumps the version and updates CHANGELOG.md. Merging that PR creates
+# the git tag + GitHub Release, and (in the same run) publishes to npm.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write # npm provenance
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Everything below only runs on the commit that merged the release PR.
+      - uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.release_created }}
+
+      - uses: actions/setup-node@v4
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+        if: ${{ steps.release.outputs.release_created }}
+
+      # prepublishOnly runs `npm run build`, so dist/ is built fresh before publish.
+      - run: npm publish --access public --provenance
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

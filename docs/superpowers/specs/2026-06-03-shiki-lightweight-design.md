@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-03
 **Status:** Approved (owner-delegated); implement + verify
-**Package:** `@kitn-ai/chat`
+**Package:** `@kitnai/chat`
 
 ## Goal
 

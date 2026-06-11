@@ -90,7 +90,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { CodeBlock, CodeBlockCode, CodeBlockGroup } from '@kitn-ai/chat';`;
+const IMPORT = `import { CodeBlock, CodeBlockCode, CodeBlockGroup } from '@kitnai/chat';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
