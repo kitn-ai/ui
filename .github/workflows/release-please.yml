@@ -10,7 +10,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write # npm provenance
+  id-token: write # npm trusted publishing (OIDC) + provenance
 
 jobs:
   release:
@@ -28,14 +28,17 @@ jobs:
       - uses: actions/setup-node@v4
         if: ${{ steps.release.outputs.release_created }}
         with:
-          node-version: 20
+          node-version: 22 # trusted publishing needs Node >= 22.14
           registry-url: https://registry.npmjs.org
+
+      # Node 22 ships an older npm; trusted publishing needs npm >= 11.5.1.
+      - if: ${{ steps.release.outputs.release_created }}
+        run: npm install -g npm@latest
 
       - run: npm ci
         if: ${{ steps.release.outputs.release_created }}
 
+      # Trusted publishing (OIDC): no NODE_AUTH_TOKEN, provenance is automatic.
       # prepublishOnly runs `npm run build`, so dist/ is built fresh before publish.
-      - run: npm publish --access public --provenance
+      - run: npm publish --access public
         if: ${{ steps.release.outputs.release_created }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
