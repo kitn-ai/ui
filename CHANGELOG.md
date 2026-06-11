@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.0](https://github.com/kitn-ai/chat/compare/chat-v0.2.0...chat-v0.3.0) (2026-06-11)
+
+
+### Features
+
+* attachment support in the web-component input ([59d2c55](https://github.com/kitn-ai/chat/commit/59d2c55cbe3598fa0f8bb277212cfb7b10733aa8))
+* **elements:** attachment support in the web-component input ([6cedda3](https://github.com/kitn-ai/chat/commit/6cedda328f783b33ff68a32cbe2717b50c1bec3b))
+* **elements:** bring &lt;kitn-chat&gt; web component to full-chat parity ([dbd1c24](https://github.com/kitn-ai/chat/commit/dbd1c240cebf707a3ce10242a451936b2713c0e0))
+* **examples:** add React + Vite example using kitn-chat web components ([5b836bb](https://github.com/kitn-ai/chat/commit/5b836bb3e43c138b549bb276df0a43238de2ddb6))
+* **examples:** add SolidJS primitives example (Vite + Tailwind v4) ([6dea25f](https://github.com/kitn-ai/chat/commit/6dea25f979fc2cf00e0b147e838fd3f3030039a9))
+* full story parity for &lt;kitn-chat&gt; (header, model switcher, context, scroll button, toolbar) ([aae1541](https://github.com/kitn-ai/chat/commit/aae15414bc82a35bb53ce3372947bb7087b926c0))
+
+
+### Bug Fixes
+
+* **build:** minify ES lib chunks via generateBundle esbuild pass ([ff49688](https://github.com/kitn-ai/chat/commit/ff49688475f1cde620314e2d49a5195f33b1b0f9))
+* **build:** minify the library bundle (Vite skips minify for ESM lib builds) ([13cb3f5](https://github.com/kitn-ai/chat/commit/13cb3f5514f7a56967503bece53d0ed9d5f93f6a))
+* **conversation-list:** smaller conversation labels; docs(web-components): full API reference ([ceff6fa](https://github.com/kitn-ai/chat/commit/ceff6fa52598ba952d6b53b0bc5d4226e2071940))
+* **conversation-list:** smaller labels + docs(web-components): full API reference ([e29698e](https://github.com/kitn-ai/chat/commit/e29698e4975e9b3a59a9a8fa2a112f432b6e5e91))
+
 ## [0.2.0](https://github.com/kitn-ai/chat/compare/chat-v0.1.0...chat-v0.2.0) (2026-06-11)
 
 
