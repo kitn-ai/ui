@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "@kitnai/chat/theme.css";
+@source "../node_modules/@kitnai/chat";
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
