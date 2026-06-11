@@ -28,19 +28,7 @@
   --color-border: hsl(240 5.9% 90%);
   --color-input: hsl(240 5.9% 90%);
   --color-ring: hsl(240 10% 3.9%);
-  --color-chart-1: hsl(12 76% 61%);
-  --color-chart-2: hsl(173 58% 39%);
-  --color-chart-3: hsl(197 37% 24%);
-  --color-chart-4: hsl(43 74% 66%);
-  --color-chart-5: hsl(27 87% 67%);
   --color-sidebar: hsl(0 0% 100%);
-  --color-sidebar-foreground: hsl(240 5.3% 26.1%);
-  --color-sidebar-primary: hsl(240 5.9% 10%);
-  --color-sidebar-primary-foreground: hsl(0 0% 98%);
-  --color-sidebar-accent: hsl(240 4.8% 95.9%);
-  --color-sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --color-sidebar-border: hsl(220 13% 91%);
-  --color-sidebar-ring: hsl(217.2 91.2% 59.8%);
 
   /* Inline `code` accent. Blue text on a translucent blue chip. */
   --color-code-foreground: hsl(224.3 76.3% 48%);
@@ -87,19 +75,7 @@
   --color-border: hsl(240 3.7% 15.9%);
   --color-input: hsl(240 3.7% 15.9%);
   --color-ring: hsl(240 4.9% 83.9%);
-  --color-chart-1: hsl(220 70% 50%);
-  --color-chart-2: hsl(160 60% 45%);
-  --color-chart-3: hsl(30 80% 55%);
-  --color-chart-4: hsl(280 65% 60%);
-  --color-chart-5: hsl(340 75% 55%);
   --color-sidebar: hsl(50 2% 7%);
-  --color-sidebar-foreground: hsl(240 4.8% 95.9%);
-  --color-sidebar-primary: hsl(224.3 76.3% 48%);
-  --color-sidebar-primary-foreground: hsl(0 0% 100%);
-  --color-sidebar-accent: hsl(240 3.7% 15.9%);
-  --color-sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --color-sidebar-border: hsl(240 3.7% 15.9%);
-  --color-sidebar-ring: hsl(217.2 91.2% 59.8%);
   --color-code-foreground: hsl(213 94% 78%);
 }
 

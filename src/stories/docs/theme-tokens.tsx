@@ -31,18 +31,6 @@ const PURPOSE: Record<string, string> = {
   '--color-input': 'Input field background',
   '--color-ring': 'Focus ring',
   '--color-sidebar': 'Sidebar background',
-  '--color-sidebar-foreground': 'Sidebar text',
-  '--color-sidebar-primary': 'Sidebar active item',
-  '--color-sidebar-primary-foreground': 'Text on sidebar active item',
-  '--color-sidebar-accent': 'Sidebar hover surface',
-  '--color-sidebar-accent-foreground': 'Text on sidebar hover',
-  '--color-sidebar-border': 'Sidebar borders',
-  '--color-sidebar-ring': 'Sidebar focus ring',
-  '--color-chart-1': 'Chart series color 1',
-  '--color-chart-2': 'Chart series color 2',
-  '--color-chart-3': 'Chart series color 3',
-  '--color-chart-4': 'Chart series color 4',
-  '--color-chart-5': 'Chart series color 5',
   '--color-code-foreground': 'Inline code text / accent',
 };
 
@@ -179,10 +167,10 @@ function Preview() {
 
       {/* sidebar + chat card: sidebar*, card*, muted, primary bubble, code */}
       <div class="flex gap-3">
-        <div class="bg-sidebar text-sidebar-foreground border border-sidebar-border rounded-lg p-2 w-28 shrink-0 space-y-1 text-xs">
+        <div class="bg-sidebar text-foreground border border-border rounded-lg p-2 w-28 shrink-0 space-y-1 text-xs">
           <div class="font-medium px-2 py-1">Chats</div>
-          <div class="bg-sidebar-primary text-sidebar-primary-foreground rounded px-2 py-1">Active</div>
-          <div class="bg-sidebar-accent text-sidebar-accent-foreground rounded px-2 py-1">Hovered</div>
+          <div class="bg-muted rounded px-2 py-1">Active</div>
+          <div class="px-2 py-1 text-muted-foreground">Another</div>
         </div>
         <div class="flex-1 bg-card text-card-foreground border border-border rounded-lg p-3 space-y-2">
           <div class="bg-muted text-foreground rounded-2xl px-3 py-2 w-fit text-xs">Muted bubble</div>
@@ -201,15 +189,9 @@ function Preview() {
         <span class="bg-popover text-popover-foreground border border-border shadow rounded-md px-2 py-1 text-xs">Popover</span>
       </div>
 
-      {/* destructive alert + chart colors */}
-      <div class="border rounded-md px-3 py-2 text-xs" style={{ 'border-color': 'color-mix(in oklab, var(--color-destructive) 45%, transparent)', color: 'var(--color-destructive)' }}>
+      {/* destructive alert */}
+      <div class="mt-auto border rounded-md px-3 py-2 text-xs" style={{ 'border-color': 'color-mix(in oklab, var(--color-destructive) 45%, transparent)', color: 'var(--color-destructive)' }}>
         Destructive / danger message
-      </div>
-      <div class="flex items-end gap-1.5 h-12 mt-auto">
-        <For each={[40, 72, 55, 90, 65]}>
-          {(h, i) => <div class="w-6 rounded-t" style={{ height: h + '%', background: `var(--color-chart-${i() + 1})` }} />}
-        </For>
-        <span class="text-muted-foreground text-xs ml-2 self-center">chart 1–5</span>
       </div>
     </div>
   );
