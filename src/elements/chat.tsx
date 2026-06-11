@@ -5,7 +5,10 @@ import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from '
 import { Message, MessageContent, MessageActions } from '../components/message';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '../components/reasoning';
 import { Tool } from '../components/tool';
+import { Attachments, Attachment, AttachmentPreview, AttachmentInfo } from '../components/attachments';
 import { Button } from '../ui/button';
+import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
+import type { Component } from 'solid-js';
 import { DefaultPromptInput } from './default-input';
 import type { ChatMessage, ChatMessageAction } from './chat-types';
 import type { ProseSize } from '../primitives/chat-config';
@@ -23,6 +26,10 @@ interface Props extends Record<string, unknown> {
 
 const ACTION_LABEL: Record<ChatMessageAction, string> = {
   copy: 'Copy', like: 'Like', dislike: 'Dislike', regenerate: 'Regenerate', edit: 'Edit',
+};
+
+const ACTION_ICON: Record<ChatMessageAction, Component<{ class?: string }>> = {
+  copy: Copy, like: ThumbsUp, dislike: ThumbsDown, regenerate: RefreshCw, edit: Pencil,
 };
 
 defineKitnElement<Props>('kitn-chat', {
@@ -62,6 +69,18 @@ defineKitnElement<Props>('kitn-chat', {
                   <For each={m.tools ?? []}>
                     {(tp) => <Tool toolPart={tp} class="mb-2 w-full" />}
                   </For>
+                  <Show when={m.attachments?.length}>
+                    <Attachments variant="inline" class={m.role === 'user' ? 'mb-2 justify-end' : 'mb-2'}>
+                      <For each={m.attachments!}>
+                        {(att) => (
+                          <Attachment data={att}>
+                            <AttachmentPreview />
+                            <AttachmentInfo />
+                          </Attachment>
+                        )}
+                      </For>
+                    </Attachments>
+                  </Show>
                   <MessageContent
                     markdown={m.role === 'assistant'}
                     class={m.role === 'user'
@@ -80,7 +99,10 @@ defineKitnElement<Props>('kitn-chat', {
                             aria-label={ACTION_LABEL[a]}
                             onClick={() => dispatch('messageaction', { messageId: m.id, action: a })}
                           >
-                            <span class="text-xs">{ACTION_LABEL[a][0]}</span>
+                            {(() => {
+                              const Icon = ACTION_ICON[a];
+                              return <Icon class="size-3.5" />;
+                            })()}
                           </Button>
                         )}
                       </For>

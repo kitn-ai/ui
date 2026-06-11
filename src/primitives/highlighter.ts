@@ -14,14 +14,15 @@ type Loader = () => Promise<unknown>;
 
 /**
  * Minimal default language set — each a separate lazy chunk, loaded only on use.
- * Kept deliberately small; hosts add more via `configureCodeHighlighting({ languages })`.
+ * Kept deliberately small to keep the bundle lean; hosts add more at runtime via
+ * `configureCodeHighlighting({ languages })` (no rebuild needed — see that fn).
  */
 const DEFAULT_LANGUAGES: Record<string, Loader> = {
-  javascript: () => import('@shikijs/langs/javascript'),
-  typescript: () => import('@shikijs/langs/typescript'),
-  tsx: () => import('@shikijs/langs/tsx'),
-  json: () => import('@shikijs/langs/json'),
   bash: () => import('@shikijs/langs/bash'),
+  javascript: () => import('@shikijs/langs/javascript'),
+  html: () => import('@shikijs/langs/html'),
+  css: () => import('@shikijs/langs/css'),
+  json: () => import('@shikijs/langs/json'),
 };
 
 const DEFAULT_THEMES: Record<string, Loader> = {
@@ -31,8 +32,8 @@ const DEFAULT_THEMES: Record<string, Loader> = {
 
 const DEFAULT_ALIASES: Record<string, string> = {
   js: 'javascript',
-  ts: 'typescript',
   sh: 'bash',
+  shell: 'bash',
 };
 
 const FALLBACK_THEME = 'github-dark-dimmed';

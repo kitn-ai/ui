@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>kitn-chat — full chat via CDN</title>
+    <style>
+      /* The web components style themselves inside Shadow DOM, so the host page
+         only needs layout. No CSS framework, no build step. */
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        font-family: system-ui, sans-serif;
+        background: #fff;
+      }
+      /* Host-page chrome (body bg + the divider) follows the same mode as the
+         components — set by the toggle / system preference below. */
+      body.dark {
+        background: #0a0a0b;
+      }
+      /* Slim app-bar so the theme toggle lives at the top-right without ever
+         overlapping the chat content. */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 48px;
+        padding: 0 14px;
+        box-sizing: border-box;
+        border-bottom: 1px solid #e5e5e5;
+      }
+      body.dark .topbar {
+        border-bottom-color: #27272a;
+      }
+      .brand {
+        font-weight: 700;
+        font-size: 14px;
+        color: #18181b;
+      }
+      body.dark .brand {
+        color: #fafafa;
+      }
+      .app {
+        display: flex;
+        height: calc(100vh - 49px);
+      }
+      kitn-conversation-list {
+        width: 300px;
+        flex: none;
+        border-right: 1px solid #e5e5e5;
+      }
+      body.dark kitn-conversation-list {
+        border-right-color: #27272a;
+      }
+      kitn-chat {
+        flex: 1;
+        min-width: 0;
+      }
+      .icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        border: 1px solid #d4d4d8;
+        background: #fff;
+        color: #18181b;
+        cursor: pointer;
+      }
+      .icon-btn:hover {
+        background: #f4f4f5;
+      }
+      body.dark .icon-btn {
+        background: #18181b;
+        color: #fafafa;
+        border-color: #3f3f46;
+      }
+      body.dark .icon-btn:hover {
+        background: #27272a;
+      }
+      .icon-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <span class="brand">kitn-chat</span>
+      <button id="theme-btn" class="icon-btn" type="button" aria-label="Toggle light/dark"></button>
+    </header>
+    <div class="app">
+      <kitn-conversation-list id="list"></kitn-conversation-list>
+      <kitn-chat id="chat"></kitn-chat>
+    </div>
+
+    <!-- One line, straight from the CDN: registers <kitn-chat>,
+         <kitn-conversation-list>, and <kitn-prompt-input>. SolidJS + styles are
+         bundled in; Shiki language grammars lazy-load on demand. Pin a version
+         (…/@kitnai/chat@1.2.3) for reproducibility; jsDelivr also works:
+         https://cdn.jsdelivr.net/npm/@kitnai/chat -->
+    <script type="module" src="https://unpkg.com/@kitnai/chat"></script>
+
+    <script type="module">
+      import { configureCodeHighlighting } from 'https://unpkg.com/@kitnai/chat';
+
+      // Built-in languages: bash, javascript, html, css, json. This demo also shows
+      // a Python block, so we register that one at runtime — NO rebuild — by pointing
+      // the loader at a CDN ESM URL. This is exactly how a host adds ANY Shiki
+      // language to <kitn-chat> (typescript, markdown, go, …); the grammar is
+      // fetched lazily on first use.
+      configureCodeHighlighting({
+        languages: {
+          python: () => import('https://esm.sh/@shikijs/langs@4/python'),
+        },
+        aliases: { py: 'python' },
+      });
+
+      const list = document.getElementById('list');
+      const chat = document.getElementById('chat');
+
+      // --- Sidebar data (set as JS properties, not attributes) ---
+      list.groups = [
+        { id: 'g-work', name: 'Work', sortOrder: 0, createdAt: '2026-06-01T09:00:00.000Z' },
+        { id: 'g-personal', name: 'Personal', sortOrder: 1, createdAt: '2026-06-02T09:00:00.000Z' },
+      ];
+      list.conversations = [
+        { id: 'c-1', title: 'SolidJS vs React benchmark', groupId: 'g-work', scope: { type: 'collection' }, messageCount: 2, lastMessageAt: '2026-06-10T15:30:00.000Z', updatedAt: '2026-06-10T15:30:00.000Z' },
+        { id: 'c-2', title: 'Centering a div', groupId: 'g-work', scope: { type: 'collection' }, messageCount: 2, lastMessageAt: '2026-06-09T14:20:00.000Z', updatedAt: '2026-06-09T14:20:00.000Z' },
+        { id: 'c-3', title: 'Read a CSV in Python', groupId: 'g-personal', scope: { type: 'collection' }, messageCount: 2, lastMessageAt: '2026-06-08T11:05:00.000Z', updatedAt: '2026-06-08T11:05:00.000Z' },
+      ];
+
+      // --- Canned conversations showing the web component's full message model:
+      //     attachments, reasoning, tool calls, multi-language code, actions. ---
+      const conversationMessages = {
+        'c-1': [
+          {
+            id: 'm1',
+            role: 'user',
+            content: 'Can you benchmark SolidJS vs React for rendering 10,000 list items?',
+            attachments: [
+              { id: 'a1', type: 'file', filename: 'requirements.pdf', mediaType: 'application/pdf' },
+              { id: 'a2', type: 'source-document', filename: 'SolidJS Docs', title: 'SolidJS Reactivity', url: 'https://solidjs.com/docs' },
+            ],
+          },
+          {
+            id: 'm2',
+            role: 'assistant',
+            actions: ['copy', 'like', 'dislike', 'regenerate'],
+            reasoning: {
+              label: 'Thought for 4 seconds',
+              text: 'I should render the same 10,000-item list in both frameworks and measure initial render plus single-item updates with `performance.now()`. SolidJS should win on updates thanks to fine-grained reactivity.',
+            },
+            tools: [
+              {
+                type: 'run_benchmark',
+                state: 'output-available',
+                input: { framework: ['solid', 'react'], itemCount: 10000, iterations: 5 },
+                output: { solid: { avgRenderMs: 12.4, avgUpdateMs: 0.8 }, react: { avgRenderMs: 89.2, avgUpdateMs: 34.1 } },
+                toolCallId: 'call_abc123',
+              },
+            ],
+            content:
+              'Here are the results for 10,000 list items:\n\n| Metric | SolidJS | React | Difference |\n|--------|---------|-------|-----------|\n| Initial render | 12.4ms | 89.2ms | **7.2× faster** |\n| Single item update | 0.8ms | 34.1ms | **42.6× faster** |\n\nSolidJS updates only the changed DOM node; React diffs the whole list.',
+          },
+        ],
+        'c-2': [
+          { id: 'm1', role: 'user', content: 'How do I center a div?' },
+          {
+            id: 'm2',
+            role: 'assistant',
+            actions: ['copy', 'like', 'dislike'],
+            content:
+              'The modern way is a grid:\n\n```css\n.box {\n  display: grid;\n  place-items: center;\n}\n```\n\nThat centers the child on both axes — no magic numbers.',
+          },
+        ],
+        'c-3': [
+          { id: 'm1', role: 'user', content: 'Read a CSV and print the first row in Python.' },
+          {
+            id: 'm2',
+            role: 'assistant',
+            actions: ['copy', 'like', 'dislike'],
+            content:
+              "Use the built-in `csv` module:\n\n```python\nimport csv\n\nwith open(\"data.csv\", newline=\"\") as f:\n    reader = csv.DictReader(f)\n    print(next(reader))\n```\n\n`DictReader` maps each row to a dict keyed by the header.",
+          },
+        ],
+      };
+
+      // Prompt-suggestion chips above the input (a web-component prop).
+      chat.suggestions = [
+        'How does SolidJS handle context?',
+        'Show me a store example',
+        'SolidJS vs Svelte',
+      ];
+
+      let activeId = 'c-1';
+      function open(id) {
+        activeId = id;
+        list.activeId = id;
+        chat.messages = conversationMessages[id] ?? [];
+      }
+      open(activeId);
+
+      // --- Events (CustomEvents on the elements) ---
+      list.addEventListener('select', (e) => open(e.detail.id));
+
+      list.addEventListener('newchat', () => {
+        const id = 'c-' + Date.now();
+        list.conversations = [
+          { id, title: 'New chat', groupId: 'g-work', scope: { type: 'collection' }, messageCount: 0, lastMessageAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+          ...list.conversations,
+        ];
+        conversationMessages[id] = [];
+        open(id);
+      });
+
+      // Append the user's message + a canned reply when they send.
+      chat.addEventListener('submit', (e) => {
+        const value = e.detail.value?.trim();
+        if (!value) return;
+        const next = [
+          ...(conversationMessages[activeId] ?? []),
+          { id: 'u' + Date.now(), role: 'user', content: value },
+          { id: 'a' + Date.now(), role: 'assistant', actions: ['copy', 'like', 'dislike'], content: 'This demo runs entirely from the CDN — wire `submit` to your backend to stream a real reply.' },
+        ];
+        conversationMessages[activeId] = next;
+        chat.messages = next;
+      });
+
+      // --- Theme: starts on the OS preference (the components default to
+      //     theme="auto" = prefers-color-scheme); the sun/moon button then toggles
+      //     between explicit light and dark. ---
+      const themeBtn = document.getElementById('theme-btn');
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+      const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+      const MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+      let theme = 'auto'; // 'auto' | 'light' | 'dark'
+
+      const isDark = () => theme === 'dark' || (theme === 'auto' && systemDark.matches);
+      function applyTheme() {
+        chat.theme = theme;
+        list.theme = theme;
+        const dark = isDark();
+        document.body.classList.toggle('dark', dark);
+        themeBtn.innerHTML = dark ? MOON : SUN; // show the active mode
+      }
+      themeBtn.addEventListener('click', () => {
+        theme = isDark() ? 'light' : 'dark'; // first click pins an explicit mode
+        applyTheme();
+      });
+      // While still on "auto", keep following the OS preference live.
+      systemDark.addEventListener('change', () => { if (theme === 'auto') applyTheme(); });
+      applyTheme();
+    </script>
+  </body>
+</html>
