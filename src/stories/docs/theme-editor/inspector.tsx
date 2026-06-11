@@ -23,17 +23,18 @@ export function Inspector(props: {
       <div class="flex flex-col gap-2">
         <For each={props.tokens}>
           {(name) => {
-            let initial = '#888888';
-            try {
-              initial = toHex(props.values[name]);
-            } catch {
-              /* keep default */
-            }
+            const hex = () => {
+              try {
+                return toHex(props.values[name]);
+              } catch {
+                return '#888888';
+              }
+            };
             return (
               <label class="flex items-center gap-2 text-xs">
                 <input
                   type="color"
-                  value={initial}
+                  value={hex()}
                   onInput={(e) => props.onColorChange(name, e.currentTarget.value)}
                   style={swatch}
                 />
