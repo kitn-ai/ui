@@ -1,6 +1,6 @@
 {
   "name": "@kitnai/chat",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "SolidJS + Shadow-DOM web component kit for building AI chat interfaces.",
   "license": "MIT",

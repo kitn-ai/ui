@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/kitn-ai/chat/compare/chat-v0.3.0...chat-v0.3.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* **elements:** inherited text color follows light/dark (attachment labels, etc.) ([e39dc1a](https://github.com/kitn-ai/chat/commit/e39dc1a305586ef613ce470a83068bb1588f9a89))
+* **elements:** inherited text color follows the element's light/dark mode ([dae7f0a](https://github.com/kitn-ai/chat/commit/dae7f0a27d6b9548e2fb4ab5ec5cb6cc4ab5aaca))
+
 ## [0.3.0](https://github.com/kitn-ai/chat/compare/chat-v0.2.0...chat-v0.3.0) (2026-06-11)
 
 
