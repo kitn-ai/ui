@@ -2,7 +2,7 @@ import { For, Show } from 'solid-js';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from '../components/prompt-input';
 import { PromptSuggestion } from '../components/prompt-suggestion';
 import { Button } from '../ui/button';
-import { Paperclip } from 'lucide-solid';
+import { Paperclip, Globe, Mic } from 'lucide-solid';
 import {
   Attachments,
   Attachment,
@@ -21,10 +21,16 @@ export interface DefaultPromptInputProps {
   /** Attachments staged in the input. Provide `onAttachmentsChange` to enable
    *  the attach button + removable previews. */
   attachments?: AttachmentData[];
+  /** Show a Search (Globe) button in the left toolbar; calls `onSearch`. */
+  search?: boolean;
+  /** Show a Voice (Mic) button in the left toolbar; calls `onVoice`. */
+  voice?: boolean;
   onValueChange: (v: string) => void;
   onSubmit: () => void;
   onSuggestionClick: (v: string) => void;
   onAttachmentsChange?: (attachments: AttachmentData[]) => void;
+  onSearch?: () => void;
+  onVoice?: () => void;
 }
 
 function fileToAttachment(file: File): AttachmentData {
@@ -113,6 +119,33 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 onClick={() => fileInput?.click()}
               >
                 <Paperclip class="size-4" />
+              </Button>
+            </Show>
+            <Show when={props.search}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                class="rounded-full gap-1"
+                aria-label="Search the web"
+                disabled={props.disabled}
+                onClick={() => props.onSearch?.()}
+              >
+                <Globe class="size-4" />
+                Search
+              </Button>
+            </Show>
+            <Show when={props.voice}>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                class="rounded-full"
+                aria-label="Voice input"
+                disabled={props.disabled}
+                onClick={() => props.onVoice?.()}
+              >
+                <Mic class="size-4" />
               </Button>
             </Show>
           </div>
