@@ -69,8 +69,11 @@ export function defineKitnElement<P extends Record<string, unknown>>(
     return (
       <>
         <style>{KITN_CSS}</style>
-        {/* display:contents — no layout box; just carries the .dark token scope. */}
-        <div classList={{ dark: isDark() }} style={{ display: 'contents' }}>
+        {/* display:contents — no layout box; carries the .dark token scope and
+            re-roots the inherited `color` to the active mode's foreground, so text
+            without an explicit color class (e.g. attachment filename labels) follows
+            light/dark instead of inheriting the host page's color. */}
+        <div classList={{ dark: isDark() }} style={{ display: 'contents', color: 'var(--color-foreground)' }}>
           <div ref={portalNode} />
           <ChatConfig portalMount={portalNode}>
             {Facade(props as unknown as P, { element, dispatch })}
