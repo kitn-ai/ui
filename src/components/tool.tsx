@@ -46,27 +46,42 @@ function ToolStateIcon(props: { state: ToolPart['state'] }) {
   );
 }
 
+// Status chips: a saturated hue as text over a 15% translucent fill of the same
+// hue. This reads on both light and dark surfaces (mirroring the inline-code chip),
+// so it needs no `dark:` variant — which wouldn't follow a token-scoped theme anyway.
+const STATE_HUE: Record<ToolPart['state'], string> = {
+  'input-streaming': 'hsl(217 91% 60%)', // blue
+  'input-available': 'hsl(38 92% 50%)', // amber
+  'output-available': 'hsl(142 71% 45%)', // green
+  'output-error': 'hsl(0 84% 60%)', // red
+};
+
+function stateChip(state: ToolPart['state']): JSX.CSSProperties {
+  const hue = STATE_HUE[state];
+  return { color: hue, background: `color-mix(in oklab, ${hue} 15%, transparent)` };
+}
+
 function ToolStateBadge(props: { state: ToolPart['state'] }) {
   const baseClasses = 'px-2 py-1 rounded-full text-xs font-medium';
   return (
     <>
       <Show when={props.state === 'input-streaming'}>
-        <span class={cn(baseClasses, 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400')}>
+        <span class={baseClasses} style={stateChip('input-streaming')}>
           Processing
         </span>
       </Show>
       <Show when={props.state === 'input-available'}>
-        <span class={cn(baseClasses, 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400')}>
+        <span class={baseClasses} style={stateChip('input-available')}>
           Ready
         </span>
       </Show>
       <Show when={props.state === 'output-available'}>
-        <span class={cn(baseClasses, 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400')}>
+        <span class={baseClasses} style={stateChip('output-available')}>
           Completed
         </span>
       </Show>
       <Show when={props.state === 'output-error'}>
-        <span class={cn(baseClasses, 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400')}>
+        <span class={baseClasses} style={stateChip('output-error')}>
           Error
         </span>
       </Show>

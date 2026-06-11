@@ -139,7 +139,10 @@ function ReasoningContent(props: ReasoningContentProps) {
       <div
         ref={innerRef}
         class={cn(
-          'text-muted-foreground prose prose-sm dark:prose-invert',
+          // Markdown content is styled by the token-based `.chat-markdown` (see
+          // Markdown component), which themes via design tokens — so no Tailwind
+          // `prose`/`dark:prose-invert` is needed (those wouldn't follow a scoped theme).
+          'text-muted-foreground',
           local.contentClass
         )}
       >

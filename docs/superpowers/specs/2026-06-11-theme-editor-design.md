@@ -105,6 +105,26 @@ Under `src/stories/docs/theme-editor/`:
 - `theme-tokens.tsx` — retains `TokenTable`, `discover()`, `toHex()`, `PURPOSE`;
   `ThemeEditor` and `Preview` removed.
 
+## How the preview applies the theme (and a component guideline)
+
+The live preview is **scoped to the canvas**: the editor writes the active mode's
+palette (plus `color` and `color-scheme`) directly onto a `CANVAS_CLASS` wrapper.
+This makes the canvas reflect the editor's Light/Dark **independently of any
+ancestor `.dark`** (e.g. Storybook's own dark theme), and means only the canvas
+reskins — not the editor chrome. Copy CSS still exports the full `:root` + `.dark`
+theme separately.
+
+**Constraint this implies:** a same-document subtree cannot escape an ancestor
+`.dark`, so any component that expresses dark mode via Tailwind `dark:` utilities
+(rather than design tokens) will follow Storybook's mode, not the editor's. The
+kit therefore themes dark mode purely through tokens; `tool.tsx` (status badges)
+and `reasoning.tsx` (`dark:prose-invert`) were migrated to token-based styling so
+the editor preview follows the canvas mode everywhere.
+
+**Guideline for new kit components:** drive dark mode through the `--color-*`
+tokens (or `.chat-markdown`), not `dark:` utilities, so they theme correctly in
+the editor preview, in shadow DOM, and anywhere a scoped theme is applied.
+
 ## YAGNI — explicitly out of scope
 
 Randomize, import-existing-CSS, shareable-URL theme links, and font/typography
