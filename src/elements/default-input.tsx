@@ -2,6 +2,15 @@ import { For, Show } from 'solid-js';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from '../components/prompt-input';
 import { PromptSuggestion } from '../components/prompt-suggestion';
 import { Button } from '../ui/button';
+import { Paperclip } from 'lucide-solid';
+import {
+  Attachments,
+  Attachment,
+  AttachmentPreview,
+  AttachmentInfo,
+  AttachmentRemove,
+  type AttachmentData,
+} from '../components/attachments';
 
 export interface DefaultPromptInputProps {
   value: string;
@@ -9,12 +18,44 @@ export interface DefaultPromptInputProps {
   disabled?: boolean;
   loading?: boolean;
   suggestions?: string[];
+  /** Attachments staged in the input. Provide `onAttachmentsChange` to enable
+   *  the attach button + removable previews. */
+  attachments?: AttachmentData[];
   onValueChange: (v: string) => void;
   onSubmit: () => void;
   onSuggestionClick: (v: string) => void;
+  onAttachmentsChange?: (attachments: AttachmentData[]) => void;
+}
+
+function fileToAttachment(file: File): AttachmentData {
+  const id =
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${file.name}-${file.size}-${file.lastModified}`;
+  return {
+    id,
+    type: 'file',
+    filename: file.name,
+    mediaType: file.type || undefined,
+    url: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
+  };
 }
 
 export function DefaultPromptInput(props: DefaultPromptInputProps) {
+  let fileInput: HTMLInputElement | undefined;
+  const attachments = () => props.attachments ?? [];
+  const canAttach = () => !!props.onAttachmentsChange;
+
+  const addFiles = (files: FileList | null) => {
+    if (!files?.length || !props.onAttachmentsChange) return;
+    props.onAttachmentsChange([...attachments(), ...Array.from(files).map(fileToAttachment)]);
+  };
+  const removeAttachment = (id: string) =>
+    props.onAttachmentsChange?.(attachments().filter((a) => a.id !== id));
+
+  const sendDisabled = () =>
+    props.disabled || props.loading || (!props.value.trim() && attachments().length === 0);
+
   return (
     <>
       <Show when={props.suggestions?.length}>
@@ -33,13 +74,53 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         isLoading={props.loading}
         disabled={props.disabled}
       >
+        <Show when={canAttach() && attachments().length}>
+          <div class="px-3 pt-3">
+            <Attachments variant="inline">
+              <For each={attachments()}>
+                {(att) => (
+                  <Attachment data={att} onRemove={() => removeAttachment(att.id)}>
+                    <AttachmentPreview />
+                    <AttachmentInfo />
+                    <AttachmentRemove />
+                  </Attachment>
+                )}
+              </For>
+            </Attachments>
+          </div>
+        </Show>
         <PromptInputTextarea placeholder={props.placeholder} class="min-h-[44px] pt-3 pl-4" />
-        <PromptInputActions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
+        <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
+          <div class="flex items-center gap-2">
+            <Show when={canAttach()}>
+              <input
+                ref={fileInput}
+                type="file"
+                multiple
+                class="hidden"
+                onChange={(e) => {
+                  addFiles(e.currentTarget.files);
+                  e.currentTarget.value = ''; // allow re-picking the same file
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                class="rounded-full"
+                aria-label="Attach files"
+                disabled={props.disabled}
+                onClick={() => fileInput?.click()}
+              >
+                <Paperclip class="size-4" />
+              </Button>
+            </Show>
+          </div>
           <Button
             size="icon-sm"
             class="rounded-full"
             data-testid="send"
-            disabled={props.disabled || props.loading || !props.value.trim()}
+            disabled={sendDisabled()}
             onClick={props.onSubmit}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

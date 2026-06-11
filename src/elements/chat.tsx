@@ -5,7 +5,7 @@ import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from '
 import { Message, MessageContent, MessageActions } from '../components/message';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '../components/reasoning';
 import { Tool } from '../components/tool';
-import { Attachments, Attachment, AttachmentPreview, AttachmentInfo } from '../components/attachments';
+import { Attachments, Attachment, AttachmentPreview, AttachmentInfo, type AttachmentData } from '../components/attachments';
 import { Button } from '../ui/button';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
 import type { Component } from 'solid-js';
@@ -47,9 +47,13 @@ defineKitnElement<Props>('kitn-chat', {
   const outer = useChatConfig();
 
   const [internal, setInternal] = createSignal(props.value ?? '');
+  const [attachments, setAttachments] = createSignal<AttachmentData[]>([]);
   const current = () => props.value ?? internal();
   const handleChange = (v: string) => { setInternal(v); dispatch('valuechange', { value: v }); };
-  const handleSubmit = () => dispatch('submit', { value: current() });
+  const handleSubmit = () => {
+    dispatch('submit', { value: current(), attachments: attachments() });
+    setAttachments([]);
+  };
   const handleSuggestionClick = (v: string) => { handleChange(v); dispatch('suggestionclick', { value: v }); };
 
   return (
@@ -121,9 +125,11 @@ defineKitnElement<Props>('kitn-chat', {
               placeholder={props.placeholder}
               loading={props.loading}
               suggestions={props.suggestions}
+              attachments={attachments()}
               onValueChange={handleChange}
               onSubmit={handleSubmit}
               onSuggestionClick={handleSuggestionClick}
+              onAttachmentsChange={setAttachments}
             />
           </div>
         </div>
