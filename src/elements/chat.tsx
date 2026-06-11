@@ -6,6 +6,8 @@ import { Message, MessageContent, MessageActions } from '../components/message';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '../components/reasoning';
 import { Tool } from '../components/tool';
 import { Button } from '../ui/button';
+import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
+import type { Component } from 'solid-js';
 import { DefaultPromptInput } from './default-input';
 import type { ChatMessage, ChatMessageAction } from './chat-types';
 import type { ProseSize } from '../primitives/chat-config';
@@ -23,6 +25,10 @@ interface Props extends Record<string, unknown> {
 
 const ACTION_LABEL: Record<ChatMessageAction, string> = {
   copy: 'Copy', like: 'Like', dislike: 'Dislike', regenerate: 'Regenerate', edit: 'Edit',
+};
+
+const ACTION_ICON: Record<ChatMessageAction, Component<{ class?: string }>> = {
+  copy: Copy, like: ThumbsUp, dislike: ThumbsDown, regenerate: RefreshCw, edit: Pencil,
 };
 
 defineKitnElement<Props>('kitn-chat', {
@@ -80,7 +86,10 @@ defineKitnElement<Props>('kitn-chat', {
                             aria-label={ACTION_LABEL[a]}
                             onClick={() => dispatch('messageaction', { messageId: m.id, action: a })}
                           >
-                            <span class="text-xs">{ACTION_LABEL[a][0]}</span>
+                            {(() => {
+                              const Icon = ACTION_ICON[a];
+                              return <Icon class="size-3.5" />;
+                            })()}
                           </Button>
                         )}
                       </For>
