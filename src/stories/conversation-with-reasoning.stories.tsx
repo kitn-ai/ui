@@ -10,7 +10,7 @@ import { Copy, ThumbsUp, ThumbsDown, ArrowUp, Lightbulb, Search, Calculator } fr
 
 const meta: Meta = {
   title: 'Examples/Conversation with Reasoning',
-  parameters: { layout: 'padded' },
+  parameters: { layout: 'padded', options: { showPanel: false } },
 };
 
 export default meta;

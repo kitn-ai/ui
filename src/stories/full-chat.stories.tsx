@@ -4,6 +4,7 @@ import { ChatScene } from "./chat-scene";
 const meta: Meta = {
   title: "Examples/Full Chat App",
   parameters: {
+    options: { showPanel: false },
     // Render inline in docs so the embedded example inherits the dark-mode
     // class (a non-inline iframe would stay light). Bounded to a sensible height.
     docs: { story: { inline: true, height: "640px" } },

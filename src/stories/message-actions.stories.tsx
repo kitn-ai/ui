@@ -8,7 +8,7 @@ import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Share, Bookmark, Check } from 'l
 
 const meta: Meta = {
   title: 'Examples/Message Actions',
-  parameters: { layout: 'padded' },
+  parameters: { layout: 'padded', options: { showPanel: false } },
 };
 
 export default meta;

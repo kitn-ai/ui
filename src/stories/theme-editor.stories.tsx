@@ -4,7 +4,7 @@ import { ThemeEditor } from './docs/theme-editor/theme-editor';
 
 const meta = {
   title: 'Theming/Editor',
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', options: { showPanel: false } },
 } satisfies Meta;
 
 export default meta;
