@@ -12,6 +12,12 @@
         margin: 0;
         height: 100%;
         font-family: system-ui, sans-serif;
+        background: #fff;
+      }
+      /* Host-page chrome (body bg + the divider) follows the same mode as the
+         components — set by the toggle / system preference below. */
+      body.dark {
+        background: #0a0a0b;
       }
       .app {
         display: flex;
@@ -20,15 +26,37 @@
       kitn-conversation-list {
         width: 300px;
         flex: none;
-        border-right: 1px solid var(--color-border, #e5e5e5);
+        border-right: 1px solid #e5e5e5;
+      }
+      body.dark kitn-conversation-list {
+        border-right-color: #27272a;
       }
       kitn-chat {
         flex: 1;
         min-width: 0;
       }
+      #theme-btn {
+        position: fixed;
+        top: 10px;
+        right: 14px;
+        z-index: 10;
+        font: 600 12px system-ui, sans-serif;
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: 1px solid #d4d4d8;
+        background: #fff;
+        color: #18181b;
+        cursor: pointer;
+      }
+      body.dark #theme-btn {
+        background: #18181b;
+        color: #fafafa;
+        border-color: #3f3f46;
+      }
     </style>
   </head>
   <body>
+    <button id="theme-btn" type="button">💻 System</button>
     <div class="app">
       <kitn-conversation-list id="list"></kitn-conversation-list>
       <kitn-chat id="chat"></kitn-chat>
@@ -44,8 +72,8 @@
     <script type="module">
       import { configureCodeHighlighting } from 'https://unpkg.com/@kitnai/chat';
 
-      // Built-in languages: bash, javascript, html, css. This demo also shows a
-      // Python block, so we register that one at runtime — NO rebuild — by pointing
+      // Built-in languages: bash, javascript, html, css, json. This demo also shows
+      // a Python block, so we register that one at runtime — NO rebuild — by pointing
       // the loader at a CDN ESM URL. This is exactly how a host adds ANY Shiki
       // language to <kitn-chat> (typescript, markdown, go, …); the grammar is
       // fetched lazily on first use.
@@ -74,7 +102,15 @@
       //     attachments, reasoning, tool calls, multi-language code, actions. ---
       const conversationMessages = {
         'c-1': [
-          { id: 'm1', role: 'user', content: 'Can you benchmark SolidJS vs React for rendering 10,000 list items?' },
+          {
+            id: 'm1',
+            role: 'user',
+            content: 'Can you benchmark SolidJS vs React for rendering 10,000 list items?',
+            attachments: [
+              { id: 'a1', type: 'file', filename: 'requirements.pdf', mediaType: 'application/pdf' },
+              { id: 'a2', type: 'source-document', filename: 'SolidJS Docs', title: 'SolidJS Reactivity', url: 'https://solidjs.com/docs' },
+            ],
+          },
           {
             id: 'm2',
             role: 'assistant',
@@ -158,6 +194,31 @@
         conversationMessages[activeId] = next;
         chat.messages = next;
       });
+
+      // --- Light / dark / system theme ---
+      // The components accept a `theme` property: 'auto' (default — follows the OS
+      // `prefers-color-scheme`), 'light', or 'dark'. We cycle through the three and
+      // mirror the resolved mode onto the host page chrome (body bg + divider).
+      const themeBtn = document.getElementById('theme-btn');
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+      const LABELS = { auto: '💻 System', light: '☀️ Light', dark: '🌙 Dark' };
+      const NEXT = { auto: 'light', light: 'dark', dark: 'auto' };
+      let theme = 'auto';
+
+      function applyTheme() {
+        chat.theme = theme;
+        list.theme = theme;
+        themeBtn.textContent = LABELS[theme];
+        const dark = theme === 'dark' || (theme === 'auto' && systemDark.matches);
+        document.body.classList.toggle('dark', dark);
+      }
+      themeBtn.addEventListener('click', () => {
+        theme = NEXT[theme];
+        applyTheme();
+      });
+      // Keep "System" live if the OS preference changes while open.
+      systemDark.addEventListener('change', () => { if (theme === 'auto') applyTheme(); });
+      applyTheme();
     </script>
   </body>
 </html>
