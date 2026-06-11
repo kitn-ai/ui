@@ -1,7 +1,5 @@
 import { createSignal, For, onMount, type JSX } from 'solid-js';
-import { Button } from '../../ui/button';
-import { Badge } from '../../ui/badge';
-import { Loader } from '../../components/loader';
+import type { Palette } from './theme-editor/theme-css';
 
 // Docs-only helpers (not part of the kit's public API). They auto-discover the
 // kit's design tokens straight from the loaded CSS, so the reference + editor
@@ -10,7 +8,7 @@ import { Loader } from '../../components/loader';
 type ColorToken = { name: string; light: string; dark: string };
 type RadiusToken = { name: string; value: string };
 
-const PURPOSE: Record<string, string> = {
+export const PURPOSE: Record<string, string> = {
   '--color-background': 'App / page background',
   '--color-foreground': 'Default text',
   '--color-card': 'Card surface',
@@ -34,45 +32,77 @@ const PURPOSE: Record<string, string> = {
   '--color-code-foreground': 'Inline code text / accent',
 };
 
-/** Walk the loaded stylesheets and collect the kit's tokens. A color token is
- *  one that has a `.dark` override (this excludes Tailwind's default palette). */
-function discover(): { colors: ColorToken[]; radii: RadiusToken[] } {
-  const lightRoot: Record<string, string> = {};
-  const darkRoot: Record<string, string> = {};
-  for (const sheet of Array.from(document.styleSheets)) {
-    let rules: CSSRuleList;
-    try {
-      rules = sheet.cssRules;
-    } catch {
-      continue; // cross-origin sheet
-    }
+/** Raw walk of loaded stylesheets → light/dark custom-property maps (colors + radius).
+ *  Recurses into grouping rules (@layer, @media, @supports) because Tailwind v4
+ *  emits the `:root` theme tokens inside an `@layer`, which a flat walk would miss. */
+function collectTokens(): { light: Record<string, string>; dark: Record<string, string> } {
+  const light: Record<string, string> = {};
+  const dark: Record<string, string> = {};
+  const visit = (rules: CSSRuleList) => {
     for (const rule of Array.from(rules)) {
       const r = rule as CSSStyleRule;
-      if (!r.style || !r.selectorText) continue;
-      const isRoot = /(^|,)\s*:root\b/.test(r.selectorText);
-      const isDark = /(^|,)\s*\.dark\b/.test(r.selectorText);
-      if (!isRoot && !isDark) continue;
-      for (const prop of Array.from(r.style)) {
-        if (!prop.startsWith('--color-') && !prop.startsWith('--radius')) continue;
-        const val = r.style.getPropertyValue(prop).trim();
-        if (isRoot) lightRoot[prop] = val;
-        if (isDark) darkRoot[prop] = val;
+      if (r.selectorText && r.style) {
+        const isRoot = /(^|,)\s*:root\b/.test(r.selectorText);
+        const isDark = /(^|,)\s*\.dark\b/.test(r.selectorText);
+        if (isRoot || isDark) {
+          for (const prop of Array.from(r.style)) {
+            if (!prop.startsWith('--color-') && !prop.startsWith('--radius')) continue;
+            const val = r.style.getPropertyValue(prop).trim();
+            if (isRoot) light[prop] = val;
+            if (isDark) dark[prop] = val;
+          }
+        }
       }
+      // Grouping rules (@layer/@media/@supports) carry nested rules — recurse.
+      const nested = (rule as CSSGroupingRule).cssRules;
+      if (nested) visit(nested);
+    }
+  };
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      visit(sheet.cssRules);
+    } catch {
+      // cross-origin sheet
     }
   }
-  const colors = Object.keys(darkRoot)
+  return { light, dark };
+}
+
+/** Reference data for the token table: a color token is one with a `.dark` override. */
+function discover(): { colors: ColorToken[]; radii: RadiusToken[] } {
+  const { light, dark } = collectTokens();
+  const colors = Object.keys(dark)
     .filter((n) => n.startsWith('--color-'))
     .sort()
-    .map((name) => ({ name, light: lightRoot[name] || darkRoot[name], dark: darkRoot[name] }));
-  const radii = Object.keys(lightRoot)
+    .map((name) => ({ name, light: light[name] || dark[name], dark: dark[name] }));
+  const radii = Object.keys(light)
     .filter((n) => n.startsWith('--radius'))
     .sort()
-    .map((name) => ({ name, value: lightRoot[name] }));
+    .map((name) => ({ name, value: light[name] }));
   return { colors, radii };
 }
 
+/** Light/dark palettes for the theme editor: light = colors + --radius, dark = colors.
+ *  The token set is keyed off the `.dark` overrides — that's what defines a kit token
+ *  and excludes Tailwind's default palette (which has no `.dark` entry). Light values
+ *  come from `:root`, falling back to the dark value if a token only exists in dark. */
+export function discoverPalettes(): { light: Palette; dark: Palette } {
+  const { light, dark } = collectTokens();
+  const names = Object.keys(dark).filter((n) => n.startsWith('--color-')).sort();
+  const lightPalette: Palette = { '--radius': light['--radius'] ?? '0.6rem' };
+  const darkPalette: Palette = {};
+  for (const name of names) {
+    lightPalette[name] = light[name] || dark[name];
+    darkPalette[name] = dark[name];
+  }
+  return {
+    light: lightPalette,
+    dark: darkPalette,
+  };
+}
+
 /** Resolve any CSS color string (e.g. hsl(...)) to #rrggbb for a color input. */
-function toHex(css: string): string {
+export function toHex(css: string): string {
   const el = document.createElement('div');
   el.style.color = css;
   el.style.display = 'none';
@@ -139,126 +169,6 @@ export function TokenTable() {
       <p style={{ 'margin-top': '.75rem', color: 'var(--color-muted-foreground)', 'font-size': '12px' }}>
         This table is generated live from the loaded CSS — it always reflects the current tokens in <code>theme.css</code>.
       </p>
-    </div>
-  );
-}
-
-const inlineCode: JSX.CSSProperties = {
-  color: 'var(--color-code-foreground)',
-  background: 'color-mix(in oklab, var(--color-code-foreground) 15%, transparent)',
-  padding: '.1em .35em', 'border-radius': '4px', 'font-family': 'ui-monospace, monospace',
-};
-
-/** A "kitchen sink" preview that exercises every token so any change is visible. */
-function Preview() {
-  return (
-    <div class="h-full overflow-auto rounded-xl border border-border bg-background p-4 text-foreground text-sm flex flex-col gap-3">
-      <div class="text-sm font-semibold">Live preview</div>
-
-      {/* buttons + badge: primary / secondary / accent / destructive / muted */}
-      <div class="flex flex-wrap items-center gap-2">
-        <Button>Primary</Button>
-        <Button variant="ghost">Ghost</Button>
-        <Button variant="outline">Outline</Button>
-        <button class="bg-secondary text-secondary-foreground rounded-md px-3 h-8 text-xs font-medium">Secondary</button>
-        <button class="bg-destructive text-destructive-foreground rounded-md px-3 h-8 text-xs font-medium">Delete</button>
-        <Badge>Badge</Badge>
-      </div>
-
-      {/* sidebar + chat card: sidebar*, card*, muted, primary bubble, code */}
-      <div class="flex gap-3">
-        <div class="bg-sidebar text-foreground border border-border rounded-lg p-2 w-28 shrink-0 space-y-1 text-xs">
-          <div class="font-medium px-2 py-1">Chats</div>
-          <div class="bg-muted rounded px-2 py-1">Active</div>
-          <div class="px-2 py-1 text-muted-foreground">Another</div>
-        </div>
-        <div class="flex-1 bg-card text-card-foreground border border-border rounded-lg p-3 space-y-2">
-          <div class="bg-muted text-foreground rounded-2xl px-3 py-2 w-fit text-xs">Muted bubble</div>
-          <div class="bg-primary text-primary-foreground rounded-2xl px-3 py-2 w-fit ml-auto text-xs">Primary bubble</div>
-          <div class="text-muted-foreground text-xs flex items-center gap-2">
-            <Loader variant="dots" size="sm" /> muted caption · inline <span style={inlineCode}>code</span>
-          </div>
-        </div>
-      </div>
-
-      {/* input / ring / accent / popover */}
-      <div class="flex flex-wrap items-center gap-2">
-        <input class="bg-input border border-border rounded-md px-2 h-8 text-xs" placeholder="Input" />
-        <input class="bg-input border border-border rounded-md px-2 h-8 text-xs ring-2 ring-ring" placeholder="Focused (ring)" />
-        <span class="bg-accent text-accent-foreground rounded-md px-2 py-1 text-xs">Accent</span>
-        <span class="bg-popover text-popover-foreground border border-border shadow rounded-md px-2 py-1 text-xs">Popover</span>
-      </div>
-
-      {/* destructive alert */}
-      <div class="mt-auto border rounded-md px-3 py-2 text-xs" style={{ 'border-color': 'color-mix(in oklab, var(--color-destructive) 45%, transparent)', color: 'var(--color-destructive)' }}>
-        Destructive / danger message
-      </div>
-    </div>
-  );
-}
-
-/** Live theme editor — change any token and watch the preview re-skin. */
-export function ThemeEditor() {
-  const [colors, setColors] = createSignal<ColorToken[]>([]);
-  const [overrides, setOverrides] = createSignal<Record<string, string>>({});
-  const [copied, setCopied] = createSignal(false);
-  onMount(() => setColors(discover().colors));
-
-  const setToken = (name: string, hex: string) => {
-    document.documentElement.style.setProperty(name, hex);
-    setOverrides((o) => ({ ...o, [name]: hex }));
-  };
-  const reset = () => {
-    for (const name of Object.keys(overrides())) document.documentElement.style.removeProperty(name);
-    setOverrides({});
-  };
-  const copyCss = async () => {
-    const ov = overrides();
-    const keys = Object.keys(ov).sort();
-    const css = keys.length
-      ? `:root {\n${keys.map((k) => `  ${k}: ${ov[k]};`).join('\n')}\n}`
-      : '/* Edit a swatch first — your changes will appear here as overrides. */';
-    try {
-      await navigator.clipboard.writeText(css);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch { /* clipboard blocked */ }
-  };
-  const changedCount = () => Object.keys(overrides()).length;
-
-  return (
-    <div style={{ display: 'grid', 'grid-template-columns': 'minmax(0,1fr) minmax(0,1fr)', gap: '1.5rem', height: '480px' }}>
-      <div style={{ display: 'flex', 'flex-direction': 'column', 'min-height': '0' }}>
-        <div style={{ display: 'flex', 'justify-content': 'space-between', 'align-items': 'center', gap: '.5rem', 'margin-bottom': '.5rem' }}>
-          <strong style={{ 'font-size': '13px' }}>Tokens — click a swatch to edit</strong>
-          <div style={{ display: 'flex', gap: '.4rem' }}>
-            <Button size="sm" variant="outline" onClick={copyCss}>
-              {copied() ? 'Copied!' : `Copy CSS${changedCount() ? ` (${changedCount()})` : ''}`}
-            </Button>
-            <Button size="sm" variant="outline" onClick={reset}>Reset</Button>
-          </div>
-        </div>
-        <div style={{ display: 'grid', 'grid-template-columns': '1fr 1fr', gap: '.35rem .9rem', flex: '1', 'min-height': '0', overflow: 'auto', 'padding-right': '.25rem' }}>
-          <For each={colors()}>
-            {(t) => {
-              let initial = '#888888';
-              try { initial = toHex(t.light); } catch { /* keep default */ }
-              return (
-                <label style={{ display: 'flex', 'align-items': 'center', gap: '.4rem', 'font-size': '12px', color: 'var(--color-foreground)' }}>
-                  <input
-                    type="color"
-                    value={overrides()[t.name] ?? initial}
-                    onInput={(e) => setToken(t.name, e.currentTarget.value)}
-                    style={{ width: '1.5rem', height: '1.5rem', padding: '0', border: '1px solid var(--color-border)', 'border-radius': '4px', background: 'none', cursor: 'pointer' }}
-                  />
-                  <code style={{ 'font-size': '11px' }}>{t.name.replace('--color-', '')}</code>
-                </label>
-              );
-            }}
-          </For>
-        </div>
-      </div>
-      <Preview />
     </div>
   );
 }
