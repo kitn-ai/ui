@@ -1,11 +1,16 @@
 import { ChatScene } from '../../chat-scene';
 
+/** Class the editor targets to write the active mode's token values directly onto
+ *  this wrapper — so the preview reflects the editor's mode independently of any
+ *  ancestor `.dark` (e.g. Storybook's own dark theme), and only the canvas reskins. */
+export const CANVAS_CLASS = 'kitn-editor-canvas';
+
 /** Live preview: the real chat app scene + a small rail for tokens the chat
- *  doesn't naturally surface. `mode` toggles the .dark wrapper so descendants
- *  resolve dark token values. */
+ *  doesn't naturally surface. The editor sets the active palette on CANVAS_CLASS;
+ *  the `.dark` class is also applied for any `dark:`-keyed component styling. */
 export function Canvas(props: { mode: 'light' | 'dark' }) {
   return (
-    <div classList={{ dark: props.mode === 'dark' }} class="h-full">
+    <div classList={{ [CANVAS_CLASS]: true, dark: props.mode === 'dark' }} class="h-full">
       <div class="h-full flex flex-col rounded-xl border border-border overflow-hidden bg-background">
         {/* The real product UI — same component the Full Chat App example uses */}
         <div class="flex-1 min-h-0">

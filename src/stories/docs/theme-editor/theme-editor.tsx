@@ -5,7 +5,7 @@ import { discoverPalettes } from '../theme-tokens';
 import { buildThemeCss, type Palette } from './theme-css';
 import { buildPresets, type Preset } from './presets';
 import { Inspector } from './inspector';
-import { Canvas } from './canvas';
+import { Canvas, CANVAS_CLASS } from './canvas';
 
 const STYLE_ID = 'kitn-theme-editor-overrides';
 
@@ -26,10 +26,17 @@ export function ThemeEditor() {
     setDark({ ...def.dark });
   });
 
+  // Apply the ACTIVE mode's palette directly onto the canvas wrapper. Scoping to
+  // CANVAS_CLASS (rather than :root/.dark) means the preview reflects the editor's
+  // mode independently of any ancestor `.dark` (e.g. Storybook's dark theme), and
+  // only the canvas reskins — not the editor chrome. Export (Copy CSS) still emits
+  // the full :root + .dark theme separately.
   let styleEl: HTMLStyleElement | undefined;
   createEffect(() => {
     if (!Object.keys(light()).length) return; // not seeded yet
-    const css = buildThemeCss(light(), dark());
+    const palette: Palette = { ...(mode() === 'light' ? light() : dark()), '--radius': light()['--radius'] ?? '0.6rem' };
+    const body = Object.keys(palette).sort().map((k) => `  ${k}: ${palette[k]};`).join('\n');
+    const css = `.${CANVAS_CLASS} {\n${body}\n}`;
     if (!styleEl) {
       styleEl = document.createElement('style');
       styleEl.id = STYLE_ID;
