@@ -32,29 +32,37 @@ export const PURPOSE: Record<string, string> = {
   '--color-code-foreground': 'Inline code text / accent',
 };
 
-/** Raw walk of loaded stylesheets → light/dark custom-property maps (colors + radius). */
+/** Raw walk of loaded stylesheets → light/dark custom-property maps (colors + radius).
+ *  Recurses into grouping rules (@layer, @media, @supports) because Tailwind v4
+ *  emits the `:root` theme tokens inside an `@layer`, which a flat walk would miss. */
 function collectTokens(): { light: Record<string, string>; dark: Record<string, string> } {
   const light: Record<string, string> = {};
   const dark: Record<string, string> = {};
-  for (const sheet of Array.from(document.styleSheets)) {
-    let rules: CSSRuleList;
-    try {
-      rules = sheet.cssRules;
-    } catch {
-      continue; // cross-origin sheet
-    }
+  const visit = (rules: CSSRuleList) => {
     for (const rule of Array.from(rules)) {
       const r = rule as CSSStyleRule;
-      if (!r.style || !r.selectorText) continue;
-      const isRoot = /(^|,)\s*:root\b/.test(r.selectorText);
-      const isDark = /(^|,)\s*\.dark\b/.test(r.selectorText);
-      if (!isRoot && !isDark) continue;
-      for (const prop of Array.from(r.style)) {
-        if (!prop.startsWith('--color-') && !prop.startsWith('--radius')) continue;
-        const val = r.style.getPropertyValue(prop).trim();
-        if (isRoot) light[prop] = val;
-        if (isDark) dark[prop] = val;
+      if (r.selectorText && r.style) {
+        const isRoot = /(^|,)\s*:root\b/.test(r.selectorText);
+        const isDark = /(^|,)\s*\.dark\b/.test(r.selectorText);
+        if (isRoot || isDark) {
+          for (const prop of Array.from(r.style)) {
+            if (!prop.startsWith('--color-') && !prop.startsWith('--radius')) continue;
+            const val = r.style.getPropertyValue(prop).trim();
+            if (isRoot) light[prop] = val;
+            if (isDark) dark[prop] = val;
+          }
+        }
       }
+      // Grouping rules (@layer/@media/@supports) carry nested rules — recurse.
+      const nested = (rule as CSSGroupingRule).cssRules;
+      if (nested) visit(nested);
+    }
+  };
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      visit(sheet.cssRules);
+    } catch {
+      // cross-origin sheet
     }
   }
   return { light, dark };
@@ -74,19 +82,22 @@ function discover(): { colors: ColorToken[]; radii: RadiusToken[] } {
   return { colors, radii };
 }
 
-/** Light/dark palettes for the theme editor: light = colors + --radius, dark = colors. */
+/** Light/dark palettes for the theme editor: light = colors + --radius, dark = colors.
+ *  The token set is keyed off the `.dark` overrides — that's what defines a kit token
+ *  and excludes Tailwind's default palette (which has no `.dark` entry). Light values
+ *  come from `:root`, falling back to the dark value if a token only exists in dark. */
 export function discoverPalettes(): { light: Palette; dark: Palette } {
   const { light, dark } = collectTokens();
-  const pickColors = (m: Record<string, string>) =>
-    Object.fromEntries(
-      Object.keys(m)
-        .filter((n) => n.startsWith('--color-'))
-        .sort()
-        .map((n) => [n, m[n]]),
-    ) as Palette;
+  const names = Object.keys(dark).filter((n) => n.startsWith('--color-')).sort();
+  const lightPalette: Palette = { '--radius': light['--radius'] ?? '0.6rem' };
+  const darkPalette: Palette = {};
+  for (const name of names) {
+    lightPalette[name] = light[name] || dark[name];
+    darkPalette[name] = dark[name];
+  }
   return {
-    light: { ...pickColors(light), '--radius': light['--radius'] ?? '0.6rem' },
-    dark: pickColors(dark),
+    light: lightPalette,
+    dark: darkPalette,
   };
 }
 
