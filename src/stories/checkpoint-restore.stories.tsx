@@ -11,6 +11,7 @@ import { Copy, ThumbsUp, ThumbsDown, ArrowUp, RotateCcw } from 'lucide-solid';
 
 const meta: Meta = {
   title: 'Examples/Checkpoint & Restore',
+  parameters: { options: { showPanel: false } },
 };
 
 export default meta;

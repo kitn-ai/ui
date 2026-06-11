@@ -4,8 +4,8 @@ import { TokenTable } from './docs/theme-tokens';
 // Renders in the Solid preview (unlike MDX, which is React) and is embedded
 // into the Theming docs page via <Canvas of={...}>.
 const meta = {
-  title: 'Theming/Playground',
-  parameters: { layout: 'padded' },
+  title: 'Theming/Token Reference',
+  parameters: { layout: 'padded', options: { showPanel: false } },
 } satisfies Meta;
 
 export default meta;

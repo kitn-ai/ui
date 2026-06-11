@@ -10,6 +10,7 @@ import { Square, ArrowUp } from 'lucide-solid';
 
 const meta: Meta = {
   title: 'Examples/Streaming Response',
+  parameters: { options: { showPanel: false } },
 };
 
 export default meta;
