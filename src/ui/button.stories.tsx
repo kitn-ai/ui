@@ -76,7 +76,7 @@ type Story = StoryObj<typeof meta>;
  * if a host already has a `Button`. Only the web components (`<kitn-chat>`, …)
  * are prefixed, because those claim global custom-element tag names.
  */
-const IMPORT = `import { Button } from '@kitn-ai/chat';`;
+const IMPORT = `import { Button } from '@kitnai/chat';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

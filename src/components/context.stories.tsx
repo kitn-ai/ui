@@ -101,7 +101,7 @@ const IMPORT = `import {
   Context, ContextTrigger, ContextContent, ContextContentHeader,
   ContextContentBody, ContextContentFooter,
   ContextInputUsage, ContextOutputUsage, ContextReasoningUsage, ContextCacheUsage,
-} from '@kitn-ai/chat';`;
+} from '@kitnai/chat';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

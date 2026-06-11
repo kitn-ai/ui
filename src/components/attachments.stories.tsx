@@ -116,7 +116,7 @@ type Story = StoryObj<typeof meta>;
 
 const IMPORT = `import {
   Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove,
-} from '@kitn-ai/chat';`;
+} from '@kitnai/chat';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

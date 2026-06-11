@@ -84,7 +84,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn-ai/chat';`;
+const IMPORT = `import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitnai/chat';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

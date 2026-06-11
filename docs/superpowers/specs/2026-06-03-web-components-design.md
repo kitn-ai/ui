@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-03
 **Status:** Approved (architecture); pending spec review
-**Package:** `@kitn-ai/chat`
+**Package:** `@kitnai/chat`
 
 ## Goal
 
