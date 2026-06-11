@@ -36,7 +36,10 @@ export function ThemeEditor() {
     if (!Object.keys(light()).length) return; // not seeded yet
     const palette: Palette = { ...(mode() === 'light' ? light() : dark()), '--radius': light()['--radius'] ?? '0.6rem' };
     const body = Object.keys(palette).sort().map((k) => `  ${k}: ${palette[k]};`).join('\n');
-    const css = `.${CANVAS_CLASS} {\n${body}\n}`;
+    // Re-establish the inherited `color` and native `color-scheme` on the wrapper:
+    // tokens alone don't fix text whose color is inherited from outside the canvas
+    // (e.g. elements with no explicit text-color class), nor native form controls.
+    const css = `.${CANVAS_CLASS} {\n${body}\n  color: var(--color-foreground);\n  color-scheme: ${mode()};\n}`;
     if (!styleEl) {
       styleEl = document.createElement('style');
       styleEl.id = STYLE_ID;
