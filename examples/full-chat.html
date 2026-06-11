@@ -19,9 +19,31 @@
       body.dark {
         background: #0a0a0b;
       }
+      /* Slim app-bar so the theme toggle lives at the top-right without ever
+         overlapping the chat content. */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 48px;
+        padding: 0 14px;
+        box-sizing: border-box;
+        border-bottom: 1px solid #e5e5e5;
+      }
+      body.dark .topbar {
+        border-bottom-color: #27272a;
+      }
+      .brand {
+        font-weight: 700;
+        font-size: 14px;
+        color: #18181b;
+      }
+      body.dark .brand {
+        color: #fafafa;
+      }
       .app {
         display: flex;
-        height: 100vh;
+        height: calc(100vh - 49px);
       }
       kitn-conversation-list {
         width: 300px;
@@ -35,28 +57,40 @@
         flex: 1;
         min-width: 0;
       }
-      #theme-btn {
-        position: fixed;
-        top: 10px;
-        right: 14px;
-        z-index: 10;
-        font: 600 12px system-ui, sans-serif;
-        padding: 6px 10px;
-        border-radius: 8px;
+      .icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
         border: 1px solid #d4d4d8;
         background: #fff;
         color: #18181b;
         cursor: pointer;
       }
-      body.dark #theme-btn {
+      .icon-btn:hover {
+        background: #f4f4f5;
+      }
+      body.dark .icon-btn {
         background: #18181b;
         color: #fafafa;
         border-color: #3f3f46;
       }
+      body.dark .icon-btn:hover {
+        background: #27272a;
+      }
+      .icon-btn svg {
+        width: 18px;
+        height: 18px;
+      }
     </style>
   </head>
   <body>
-    <button id="theme-btn" type="button">💻 System</button>
+    <header class="topbar">
+      <span class="brand">kitn-chat</span>
+      <button id="theme-btn" class="icon-btn" type="button" aria-label="Toggle light/dark"></button>
+    </header>
     <div class="app">
       <kitn-conversation-list id="list"></kitn-conversation-list>
       <kitn-chat id="chat"></kitn-chat>
@@ -195,28 +229,28 @@
         chat.messages = next;
       });
 
-      // --- Light / dark / system theme ---
-      // The components accept a `theme` property: 'auto' (default — follows the OS
-      // `prefers-color-scheme`), 'light', or 'dark'. We cycle through the three and
-      // mirror the resolved mode onto the host page chrome (body bg + divider).
+      // --- Theme: starts on the OS preference (the components default to
+      //     theme="auto" = prefers-color-scheme); the sun/moon button then toggles
+      //     between explicit light and dark. ---
       const themeBtn = document.getElementById('theme-btn');
       const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
-      const LABELS = { auto: '💻 System', light: '☀️ Light', dark: '🌙 Dark' };
-      const NEXT = { auto: 'light', light: 'dark', dark: 'auto' };
-      let theme = 'auto';
+      const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+      const MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+      let theme = 'auto'; // 'auto' | 'light' | 'dark'
 
+      const isDark = () => theme === 'dark' || (theme === 'auto' && systemDark.matches);
       function applyTheme() {
         chat.theme = theme;
         list.theme = theme;
-        themeBtn.textContent = LABELS[theme];
-        const dark = theme === 'dark' || (theme === 'auto' && systemDark.matches);
+        const dark = isDark();
         document.body.classList.toggle('dark', dark);
+        themeBtn.innerHTML = dark ? MOON : SUN; // show the active mode
       }
       themeBtn.addEventListener('click', () => {
-        theme = NEXT[theme];
+        theme = isDark() ? 'light' : 'dark'; // first click pins an explicit mode
         applyTheme();
       });
-      // Keep "System" live if the OS preference changes while open.
+      // While still on "auto", keep following the OS preference live.
       systemDark.addEventListener('change', () => { if (theme === 'auto') applyTheme(); });
       applyTheme();
     </script>
