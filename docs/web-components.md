@@ -14,6 +14,20 @@ Each element renders into its own **Shadow DOM** so the host page's CSS cannot l
 
 ---
 
+## How the elements work (read this first)
+
+- **Controlled, not stateful.** The host owns the data. You push it in via JS **properties** (`el.messages = …`, `el.conversations = …`), the element pushes interactions out via **events**, and you update the properties in response. The element keeps no message store of its own — to stream a reply you keep reassigning `el.messages`.
+- **Data in = properties, config = attributes, data out = events.** Object/array data (messages, models, context) must be set as properties; simple config (`theme`, `prose-size`, `search`) also works as attributes.
+- **Opt-in by data/flags.** Features appear when you give them data: pass `models` → a model switcher; pass `context` → a token meter; set `search`/`voice` → those buttons. Omit them → they don't render. Re-theme with `--color-*` tokens.
+
+### What `<kitn-chat>` includes vs. the primitive layer
+
+`<kitn-chat>` is the **drop-in** layer. Per message it renders: Markdown + code highlighting, **reasoning** blocks, **tool-call** panels, **attachments**, and **action buttons** (copy/like/dislike/regenerate). It also offers the header (title + model switcher + context meter), a scroll-to-bottom button, suggestions, and the input toolbar.
+
+Some kit features are **primitive-only** — not surfaced by the web component: **ChainOfThought**, **FeedbackBar**, **ThinkingBar / TextShimmer** (animated "thinking"), **VoiceInput**, **FileUpload**, **SlashCommand**. If you need those, custom layout/placement, or anything the props don't cover, **compose the SolidJS primitives directly** (`import { … } from '@kitnai/chat'` — everything is exported; see the Solid example). No forking required: tune via props/tokens, or drop to the primitive layer.
+
+---
+
 ## Install / Build
 
 ### Build the bundle
@@ -80,25 +94,42 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 
 ### Properties
 
-| Property | Type | Default | Notes |
-|----------|------|---------|-------|
-| `messages` | `ChatMessage[]` | `[]` | The full list of messages to display |
-| `value` | `string` | `undefined` | Controlled input value; omit for uncontrolled |
-| `placeholder` | `string` | `'Send a message...'` | Textarea placeholder text |
-| `loading` | `boolean` | `false` | Shows loading state in the prompt input |
-| `suggestions` | `string[]` | `undefined` | Suggestion chips shown above the input; clicking one fills the input and fires `suggestionclick` |
-| `proseSize` | `ProseSize` | `'sm'` | Tailwind Typography prose size (`'xs'`, `'sm'`, `'base'`, `'lg'`) |
-| `codeTheme` | `string` | `'github-dark-dimmed'` | Shiki syntax-highlight theme name |
-| `codeHighlight` | `boolean` | `true` | Set `false` to render code blocks as plain text — no Shiki is loaded at all |
+All are set as JS **properties** (objects/arrays can't go through HTML attributes). Several are presence-based: provide the data and the feature appears; omit it and it doesn't.
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `messages` | — | `ChatMessage[]` | `[]` | The full list of messages to display |
+| `value` | `value` | `string` | `undefined` | Controlled input value; omit for uncontrolled |
+| `placeholder` | `placeholder` | `string` | `'Send a message...'` | Textarea placeholder text |
+| `loading` | `loading` | `boolean` | `false` | Disables/locks the prompt input. **Does not render a thinking animation** — convey progress by streaming `messages` |
+| `suggestions` | — | `string[]` | `undefined` | Suggestion chips above the input; clicking one fills the input + fires `suggestionclick` |
+| `theme` | `theme` | `'light' \| 'dark' \| 'auto'` | `'auto'` | `auto` follows the OS `prefers-color-scheme` |
+| `proseSize` | `prose-size` | `ProseSize` | `'base'` | Markdown/text sizing (`'xs'`, `'sm'`, `'base'`, `'lg'`) |
+| `codeTheme` | `code-theme` | `string` | `'github-dark-dimmed'` | Shiki syntax-highlight theme name |
+| `codeHighlight` | `code-highlight` | `boolean` | `true` | `false` → plain code blocks, no Shiki loaded |
+| `chatTitle` | `chat-title` | `string` | `undefined` | Header title. The header appears when `chatTitle`, `models`, or `context` is set |
+| `models` | — | `ModelOption[]` | `undefined` | Shows a **ModelSwitcher** in the header; fires `modelchange` |
+| `currentModel` | `current-model` | `string` | `undefined` | Selected model id |
+| `context` | — | `{ usedTokens; maxTokens; inputTokens; outputTokens; estimatedCost }` | `undefined` | Shows the **Context** token-usage meter in the header |
+| `scrollButton` | `scroll-button` | `boolean` | `true` | Built-in scroll-to-bottom button |
+| `search` | `search` | `boolean` | `false` | Show a Search button in the input toolbar; fires `search` |
+| `voice` | `voice` | `boolean` | `false` | Show a Mic button in the input toolbar; fires `voice` |
+
+The input always has a **📎 attach** button: picked files are staged as removable previews (images show a thumbnail, other files an icon) and arrive on the `submit` event as `attachments`.
 
 ### Events
 
+Events are non-bubbling `CustomEvent`s — listen directly on the element.
+
 | Event | `detail` shape | Description |
 |-------|---------------|-------------|
-| `submit` | `{ value: string }` | Fired when the user submits a message |
+| `submit` | `{ value: string, attachments: AttachmentData[] }` | User submitted a message (with any staged attachments) |
 | `valuechange` | `{ value: string }` | Fired on every input change |
-| `suggestionclick` | `{ value: string }` | Fired when a suggestion chip is clicked (the input is also filled with the value) |
-| `messageaction` | `{ messageId: string, action: ChatMessageAction }` | Fired when an action button on a message is clicked |
+| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked (the input is also filled) |
+| `messageaction` | `{ messageId: string, action: ChatMessageAction }` | An action button on a message was clicked |
+| `modelchange` | `{ modelId: string }` | The header model switcher changed (only when `models` is set) |
+| `search` | _(none)_ | The Search button was clicked (only when `search` is set) — you implement the behavior |
+| `voice` | _(none)_ | The Mic button was clicked (only when `voice` is set) — you implement the behavior |
 
 ### `ChatMessage` schema
 
@@ -371,22 +402,32 @@ Syntax highlighting is powered by [Shiki](https://shiki.style), wired to be **as
 
 ### Built-in languages
 
-A minimal default set loads on demand: `javascript`/`js`, `typescript`/`ts`, `tsx`, `json`, `bash`/`sh`. Languages outside this set render as plain text unless you register them with `configureCodeHighlighting({ languages })` (see below).
+A deliberately small default set loads on demand: `bash`/`sh`, `javascript`/`js`, `html`, `css`, `json`. Anything else renders as plain text until you register it with `configureCodeHighlighting({ languages })` (below).
 
 ### Configure or disable
 
-`configureCodeHighlighting()` is exported from both `@kitnai/chat` and `@kitnai/chat/elements`. Call it once before rendering.
+`configureCodeHighlighting()` is exported from both `@kitnai/chat` and `@kitnai/chat/elements`. Call it once before a code block of that language renders — the loader is consulted lazily, so it applies to the running app with **no rebuild**.
 
 ```js
 import { configureCodeHighlighting } from '@kitnai/chat/elements';
 
-// Add languages (each becomes its own lazy chunk, loaded on demand)
+// Bundler / npm consumers — your bundler resolves the import:
 configureCodeHighlighting({
   languages: {
     ruby: () => import('@shikijs/langs/ruby'),
     swift: () => import('@shikijs/langs/swift'),
   },
   aliases: { rb: 'ruby' },
+});
+```
+
+```js
+// No-build / CDN consumers — point the loader at a CDN ESM URL so the grammar
+// is fetched at runtime (no bundler needed):
+import { configureCodeHighlighting } from 'https://unpkg.com/@kitnai/chat';
+configureCodeHighlighting({
+  languages: { python: () => import('https://esm.sh/@shikijs/langs@4/python') },
+  aliases: { py: 'python' },
 });
 
 // Add a theme
