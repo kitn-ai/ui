@@ -6,12 +6,33 @@ import { Message, MessageContent, MessageActions } from '../components/message';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '../components/reasoning';
 import { Tool } from '../components/tool';
 import { Attachments, Attachment, AttachmentPreview, AttachmentInfo, type AttachmentData } from '../components/attachments';
+import { ModelSwitcher } from '../components/model-switcher';
+import { ScrollButton } from '../components/scroll-button';
+import {
+  Context,
+  ContextTrigger,
+  ContextContent,
+  ContextContentHeader,
+  ContextContentBody,
+  ContextContentFooter,
+  ContextInputUsage,
+  ContextOutputUsage,
+} from '../components/context';
 import { Button } from '../ui/button';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
 import type { Component } from 'solid-js';
 import { DefaultPromptInput } from './default-input';
 import type { ChatMessage, ChatMessageAction } from './chat-types';
 import type { ProseSize } from '../primitives/chat-config';
+import type { ModelOption } from '../types';
+
+interface ContextUsage {
+  usedTokens: number;
+  maxTokens: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  estimatedCost?: number;
+}
 
 interface Props extends Record<string, unknown> {
   messages: ChatMessage[];
@@ -22,6 +43,22 @@ interface Props extends Record<string, unknown> {
   proseSize?: ProseSize;
   codeTheme?: string;
   codeHighlight?: boolean;
+  /** Optional header title shown on the left of the header. */
+  chatTitle?: string;
+  /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the
+   *  header and a `modelchange` event fires on selection. */
+  models?: ModelOption[];
+  /** The currently selected model id (pairs with `models`). */
+  currentModel?: string;
+  /** Optional context-window token usage. When set, a Context token meter is
+   *  shown in the header. */
+  context?: ContextUsage;
+  /** Show the scroll-to-bottom button inside the scroll area. Default true. */
+  scrollButton?: boolean;
+  /** Show a Search (Globe) button in the input toolbar; fires a `search` event. */
+  search?: boolean;
+  /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
+  voice?: boolean;
 }
 
 const ACTION_LABEL: Record<ChatMessageAction, string> = {
@@ -41,6 +78,13 @@ defineKitnElement<Props>('kitn-chat', {
   proseSize: 'base',
   codeTheme: 'github-dark-dimmed',
   codeHighlight: true,
+  chatTitle: undefined,
+  models: undefined,
+  currentModel: undefined,
+  context: undefined,
+  scrollButton: true,
+  search: false,
+  voice: false,
 }, (props, { dispatch }) => {
   // Preserve the shadow-root portal mount from the wrapper's outer ChatConfig
   // when we nest a second ChatConfig to set proseSize/codeTheme.
@@ -56,10 +100,51 @@ defineKitnElement<Props>('kitn-chat', {
   };
   const handleSuggestionClick = (v: string) => { handleChange(v); dispatch('suggestionclick', { value: v }); };
 
+  const showHeader = () => !!(props.chatTitle || props.models || props.context);
+  const showScrollButton = () => props.scrollButton !== false;
+
   return (
     <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={props.codeHighlight} portalMount={outer.portalMount()}>
       <div class="flex h-full flex-col bg-background">
-        <ChatContainer class="flex-1 px-4 py-3">
+        <Show when={showHeader()}>
+          <header class="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
+            <div class="text-sm font-semibold text-foreground">
+              {props.chatTitle}
+            </div>
+            <div class="flex items-center gap-2">
+              <Show when={props.models}>
+                <ModelSwitcher
+                  models={props.models!}
+                  currentModelId={props.currentModel ?? props.models![0]?.id ?? ''}
+                  onModelChange={(modelId) => dispatch('modelchange', { modelId })}
+                />
+              </Show>
+              <Show when={props.context}>
+                <Context
+                  usedTokens={props.context!.usedTokens}
+                  maxTokens={props.context!.maxTokens}
+                  inputTokens={props.context!.inputTokens}
+                  outputTokens={props.context!.outputTokens}
+                  estimatedCost={props.context!.estimatedCost}
+                >
+                  <ContextTrigger />
+                  <ContextContent>
+                    <ContextContentHeader />
+                    <ContextContentBody>
+                      <div class="space-y-1.5">
+                        <ContextInputUsage />
+                        <ContextOutputUsage />
+                      </div>
+                    </ContextContentBody>
+                    <ContextContentFooter />
+                  </ContextContent>
+                </Context>
+              </Show>
+            </div>
+          </header>
+        </Show>
+        <div class="relative flex-1 overflow-hidden">
+        <ChatContainer class="h-full px-4 py-3">
           <ChatContainerContent class="mx-auto w-full max-w-3xl space-y-4">
             <For each={props.messages}>
               {(m) => (
@@ -117,7 +202,13 @@ defineKitnElement<Props>('kitn-chat', {
             </For>
             <ChatContainerScrollAnchor />
           </ChatContainerContent>
+          <Show when={showScrollButton()}>
+            <div class="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
+              <ScrollButton class="shadow-sm" />
+            </div>
+          </Show>
         </ChatContainer>
+        </div>
         <div class="shrink-0 px-4 pb-4">
           <div class="mx-auto max-w-3xl">
             <DefaultPromptInput
@@ -126,10 +217,14 @@ defineKitnElement<Props>('kitn-chat', {
               loading={props.loading}
               suggestions={props.suggestions}
               attachments={attachments()}
+              search={props.search}
+              voice={props.voice}
               onValueChange={handleChange}
               onSubmit={handleSubmit}
               onSuggestionClick={handleSuggestionClick}
               onAttachmentsChange={setAttachments}
+              onSearch={() => dispatch('search', {})}
+              onVoice={() => dispatch('voice', {})}
             />
           </div>
         </div>

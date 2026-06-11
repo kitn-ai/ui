@@ -23,7 +23,11 @@
       .brand img { width: 20px; height: 20px; }
 
       .app { display: flex; height: calc(100vh - 49px); }
-      kitn-conversation-list { width: 300px; flex: none; border-right: 1px solid #e5e5e5; }
+      /* CSS `resize` makes the sidebar drag-resizable horizontally — no JS. */
+      kitn-conversation-list {
+        width: 300px; flex: none; border-right: 1px solid #e5e5e5;
+        resize: horizontal; overflow: auto; min-width: 200px; max-width: 460px;
+      }
       body.dark kitn-conversation-list { border-right-color: #27272a; }
       kitn-chat { flex: 1; min-width: 0; }
 
@@ -124,12 +128,26 @@
 
       chat.suggestions = ['How does SolidJS handle context?', 'Show me a store example', 'SolidJS vs Svelte'];
 
+      // ---- Opt-in full-parity features: header (title + model switcher +
+      //      context meter) and the input toolbar's search/voice buttons. ----
+      chat.models = [
+        { id: 'claude-4', name: 'Claude 4 Opus', provider: 'Anthropic' },
+        { id: 'claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic' },
+        { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI' },
+      ];
+      chat.currentModel = 'claude-4';
+      chat.context = { usedTokens: 12400, maxTokens: 200000, inputTokens: 8200, outputTokens: 4200, estimatedCost: 0.042 };
+      chat.search = true;
+      chat.voice = true;
+
       // ------------------------------------------------------------- helpers
       let activeId = 'c-1';
       function open(id) {
         activeId = id;
         list.activeId = id;
         chat.messages = conversationMessages[id] ?? [];
+        const conv = conversations.find((c) => c.id === id);
+        chat.chatTitle = conv ? conv.title : 'New chat'; // header title
         document.body.classList.remove('sidebar-open'); // close drawer on mobile
       }
 
@@ -189,6 +207,11 @@
         chat.loading = true;
         setTimeout(() => streamReply(convId, reply(value || 'your attachment')), 450);
       });
+
+      // Header model switcher + input toolbar buttons.
+      chat.addEventListener('modelchange', (e) => { chat.currentModel = e.detail.modelId; toast('Model: ' + e.detail.modelId); });
+      chat.addEventListener('search', () => toast('Web search toggled'));
+      chat.addEventListener('voice', () => toast('Voice input (demo)'));
 
       // Working message actions.
       chat.addEventListener('messageaction', async (e) => {
