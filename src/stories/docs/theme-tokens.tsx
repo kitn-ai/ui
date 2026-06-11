@@ -155,23 +155,61 @@ export function TokenTable() {
   );
 }
 
+const inlineCode: JSX.CSSProperties = {
+  color: 'var(--color-code-foreground)',
+  background: 'color-mix(in oklab, var(--color-code-foreground) 15%, transparent)',
+  padding: '.1em .35em', 'border-radius': '4px', 'font-family': 'ui-monospace, monospace',
+};
+
+/** A "kitchen sink" preview that exercises every token so any change is visible. */
 function Preview() {
   return (
-    <div class="rounded-xl border border-border bg-card p-4 space-y-3 text-card-foreground">
+    <div class="h-full overflow-auto rounded-xl border border-border bg-background p-4 text-foreground text-sm flex flex-col gap-3">
       <div class="text-sm font-semibold">Live preview</div>
+
+      {/* buttons + badge: primary / secondary / accent / destructive / muted */}
       <div class="flex flex-wrap items-center gap-2">
         <Button>Primary</Button>
         <Button variant="ghost">Ghost</Button>
         <Button variant="outline">Outline</Button>
+        <button class="bg-secondary text-secondary-foreground rounded-md px-3 h-8 text-xs font-medium">Secondary</button>
+        <button class="bg-destructive text-destructive-foreground rounded-md px-3 h-8 text-xs font-medium">Delete</button>
         <Badge>Badge</Badge>
       </div>
-      <div class="bg-muted text-foreground rounded-2xl px-4 py-2 text-sm w-fit">A muted message bubble</div>
-      <div class="bg-primary text-primary-foreground rounded-2xl px-4 py-2 text-sm w-fit ml-auto">A primary message bubble</div>
-      <div class="flex items-center gap-2 text-muted-foreground text-sm">
-        <Loader variant="dots" size="sm" /> thinking…
+
+      {/* sidebar + chat card: sidebar*, card*, muted, primary bubble, code */}
+      <div class="flex gap-3">
+        <div class="bg-sidebar text-sidebar-foreground border border-sidebar-border rounded-lg p-2 w-28 shrink-0 space-y-1 text-xs">
+          <div class="font-medium px-2 py-1">Chats</div>
+          <div class="bg-sidebar-primary text-sidebar-primary-foreground rounded px-2 py-1">Active</div>
+          <div class="bg-sidebar-accent text-sidebar-accent-foreground rounded px-2 py-1">Hovered</div>
+        </div>
+        <div class="flex-1 bg-card text-card-foreground border border-border rounded-lg p-3 space-y-2">
+          <div class="bg-muted text-foreground rounded-2xl px-3 py-2 w-fit text-xs">Muted bubble</div>
+          <div class="bg-primary text-primary-foreground rounded-2xl px-3 py-2 w-fit ml-auto text-xs">Primary bubble</div>
+          <div class="text-muted-foreground text-xs flex items-center gap-2">
+            <Loader variant="dots" size="sm" /> muted caption · inline <span style={inlineCode}>code</span>
+          </div>
+        </div>
       </div>
-      <div class="text-sm">
-        inline <span style={{ color: 'var(--color-code-foreground)', background: 'color-mix(in oklab, var(--color-code-foreground) 15%, transparent)', padding: '.1em .35em', 'border-radius': '4px', 'font-family': 'ui-monospace, monospace' }}>code</span> accent
+
+      {/* input / ring / accent / popover */}
+      <div class="flex flex-wrap items-center gap-2">
+        <input class="bg-input border border-border rounded-md px-2 h-8 text-xs" placeholder="Input" />
+        <input class="bg-input border border-border rounded-md px-2 h-8 text-xs ring-2 ring-ring" placeholder="Focused (ring)" />
+        <span class="bg-accent text-accent-foreground rounded-md px-2 py-1 text-xs">Accent</span>
+        <span class="bg-popover text-popover-foreground border border-border shadow rounded-md px-2 py-1 text-xs">Popover</span>
+      </div>
+
+      {/* destructive alert + chart colors */}
+      <div class="border rounded-md px-3 py-2 text-xs" style={{ 'border-color': 'color-mix(in oklab, var(--color-destructive) 45%, transparent)', color: 'var(--color-destructive)' }}>
+        Destructive / danger message
+      </div>
+      <div class="flex items-end gap-1.5 h-12 mt-auto">
+        <For each={[40, 72, 55, 90, 65]}>
+          {(h, i) => <div class="w-6 rounded-t" style={{ height: h + '%', background: `var(--color-chart-${i() + 1})` }} />}
+        </For>
+        <span class="text-muted-foreground text-xs ml-2 self-center">chart 1–5</span>
       </div>
     </div>
   );
@@ -181,6 +219,7 @@ function Preview() {
 export function ThemeEditor() {
   const [colors, setColors] = createSignal<ColorToken[]>([]);
   const [overrides, setOverrides] = createSignal<Record<string, string>>({});
+  const [copied, setCopied] = createSignal(false);
   onMount(() => setColors(discover().colors));
 
   const setToken = (name: string, hex: string) => {
@@ -191,15 +230,33 @@ export function ThemeEditor() {
     for (const name of Object.keys(overrides())) document.documentElement.style.removeProperty(name);
     setOverrides({});
   };
+  const copyCss = async () => {
+    const ov = overrides();
+    const keys = Object.keys(ov).sort();
+    const css = keys.length
+      ? `:root {\n${keys.map((k) => `  ${k}: ${ov[k]};`).join('\n')}\n}`
+      : '/* Edit a swatch first — your changes will appear here as overrides. */';
+    try {
+      await navigator.clipboard.writeText(css);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* clipboard blocked */ }
+  };
+  const changedCount = () => Object.keys(overrides()).length;
 
   return (
-    <div style={{ display: 'grid', 'grid-template-columns': 'minmax(0,1fr) minmax(0,1fr)', gap: '1.5rem', 'align-items': 'start' }}>
-      <div>
-        <div style={{ display: 'flex', 'justify-content': 'space-between', 'align-items': 'center', 'margin-bottom': '.5rem' }}>
+    <div style={{ display: 'grid', 'grid-template-columns': 'minmax(0,1fr) minmax(0,1fr)', gap: '1.5rem', height: '480px' }}>
+      <div style={{ display: 'flex', 'flex-direction': 'column', 'min-height': '0' }}>
+        <div style={{ display: 'flex', 'justify-content': 'space-between', 'align-items': 'center', gap: '.5rem', 'margin-bottom': '.5rem' }}>
           <strong style={{ 'font-size': '13px' }}>Tokens — click a swatch to edit</strong>
-          <Button size="sm" variant="outline" onClick={reset}>Reset</Button>
+          <div style={{ display: 'flex', gap: '.4rem' }}>
+            <Button size="sm" variant="outline" onClick={copyCss}>
+              {copied() ? 'Copied!' : `Copy CSS${changedCount() ? ` (${changedCount()})` : ''}`}
+            </Button>
+            <Button size="sm" variant="outline" onClick={reset}>Reset</Button>
+          </div>
         </div>
-        <div style={{ display: 'grid', 'grid-template-columns': '1fr 1fr', gap: '.35rem .9rem', 'max-height': '440px', 'overflow': 'auto', 'padding-right': '.25rem' }}>
+        <div style={{ display: 'grid', 'grid-template-columns': '1fr 1fr', gap: '.35rem .9rem', flex: '1', 'min-height': '0', overflow: 'auto', 'padding-right': '.25rem' }}>
           <For each={colors()}>
             {(t) => {
               let initial = '#888888';
