@@ -34,12 +34,28 @@ export function ThemeEditor() {
   let styleEl: HTMLStyleElement | undefined;
   createEffect(() => {
     if (!Object.keys(light()).length) return; // not seeded yet
-    const palette: Palette = { ...(mode() === 'light' ? light() : dark()), '--radius': light()['--radius'] ?? '0.6rem' };
-    const body = Object.keys(palette).sort().map((k) => `  ${k}: ${palette[k]};`).join('\n');
+    const colors: Palette = mode() === 'light' ? light() : dark();
+    const radius = light()['--radius'] ?? '0.6rem';
+    const colorBody = Object.keys(colors)
+      .filter((k) => k.startsWith('--color-'))
+      .sort()
+      .map((k) => `  ${k}: ${colors[k]};`)
+      .join('\n');
+    // Re-express the radius scale on the wrapper. The kit's --radius-sm/md/lg/xl are
+    // calc(var(--radius) …) declared at :root, so their var(--radius) resolves once
+    // at :root and inherits as a fixed length — overriding --radius lower in the tree
+    // doesn't move them. Re-declaring them here (against the wrapper's --radius) does.
+    const radiusBody = [
+      `  --radius: ${radius};`,
+      `  --radius-sm: calc(var(--radius) - 4px);`,
+      `  --radius-md: calc(var(--radius) - 2px);`,
+      `  --radius-lg: var(--radius);`,
+      `  --radius-xl: calc(var(--radius) + 4px);`,
+    ].join('\n');
     // Re-establish the inherited `color` and native `color-scheme` on the wrapper:
     // tokens alone don't fix text whose color is inherited from outside the canvas
     // (e.g. elements with no explicit text-color class), nor native form controls.
-    const css = `.${CANVAS_CLASS} {\n${body}\n  color: var(--color-foreground);\n  color-scheme: ${mode()};\n}`;
+    const css = `.${CANVAS_CLASS} {\n${colorBody}\n${radiusBody}\n  color: var(--color-foreground);\n  color-scheme: ${mode()};\n}`;
     if (!styleEl) {
       styleEl = document.createElement('style');
       styleEl.id = STYLE_ID;

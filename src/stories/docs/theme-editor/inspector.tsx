@@ -14,13 +14,13 @@ export function Inspector(props: {
 }) {
   const radiusRem = () => parseFloat(props.radius) || 0;
   const swatch: JSX.CSSProperties = {
-    width: '1.5rem', height: '1.5rem', padding: '0', border: '1px solid var(--color-border)',
-    'border-radius': '4px', background: 'none', cursor: 'pointer',
+    width: '1.75rem', height: '1.75rem', padding: '0', border: '1px solid var(--color-border)',
+    'border-radius': '6px', background: 'none', cursor: 'pointer', 'flex-shrink': '0',
   };
   return (
     <div class="p-3 text-foreground">
-      <div class="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wide">Tokens</div>
-      <div class="flex flex-col gap-2">
+      <div class="text-xs font-semibold mb-2.5 text-muted-foreground uppercase tracking-wide">Tokens</div>
+      <div class="flex flex-col gap-2.5">
         <For each={props.tokens}>
           {(name) => {
             const hex = () => {
@@ -31,16 +31,16 @@ export function Inspector(props: {
               }
             };
             return (
-              <label class="flex items-center gap-2 text-xs">
+              <label class="flex items-center gap-2.5">
                 <input
                   type="color"
                   value={hex()}
                   onInput={(e) => props.onColorChange(name, e.currentTarget.value)}
                   style={swatch}
                 />
-                <span class="flex flex-col">
-                  <code class="text-[11px]">{name.replace('--color-', '')}</code>
-                  <span class="text-[10px] text-muted-foreground">{PURPOSE[name] ?? ''}</span>
+                <span class="flex min-w-0 flex-col leading-tight">
+                  <span class="text-sm font-medium truncate">{name.replace('--color-', '')}</span>
+                  <span class="text-xs text-muted-foreground truncate">{PURPOSE[name] ?? ''}</span>
                 </span>
               </label>
             );
@@ -48,8 +48,8 @@ export function Inspector(props: {
         </For>
       </div>
 
-      <div class="text-xs font-semibold mt-4 mb-2 text-muted-foreground uppercase tracking-wide">Radius</div>
-      <label class="flex items-center gap-2 text-xs">
+      <div class="text-xs font-semibold mt-5 mb-2.5 text-muted-foreground uppercase tracking-wide">Radius</div>
+      <label class="flex items-center gap-2.5 text-sm">
         <input
           type="range"
           min="0"
@@ -59,7 +59,7 @@ export function Inspector(props: {
           onInput={(e) => props.onRadiusChange(`${e.currentTarget.value}rem`)}
           class="flex-1"
         />
-        <code class="text-[11px] w-14 text-right">{props.radius}</code>
+        <span class="text-sm tabular-nums w-16 text-right">{props.radius}</span>
       </label>
     </div>
   );
