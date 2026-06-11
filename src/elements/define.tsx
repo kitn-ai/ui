@@ -1,7 +1,24 @@
 import { customElement } from 'solid-element';
 import { ChatConfig } from '../primitives/chat-config';
 import { KITN_CSS } from './css';
-import type { JSX } from 'solid-js';
+import { createSignal, onCleanup, type JSX } from 'solid-js';
+
+/** Resolve whether the element should render dark, given its `theme` and the
+ *  system preference. `auto` (the default) follows `prefers-color-scheme`. */
+function createDarkMode(getTheme: () => string | undefined) {
+  const [systemDark, setSystemDark] = createSignal(false);
+  if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    setSystemDark(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener('change', onChange);
+    onCleanup(() => mq.removeEventListener('change', onChange));
+  }
+  return () => {
+    const theme = getTheme() ?? 'auto';
+    return theme === 'dark' || (theme === 'auto' && systemDark());
+  };
+}
 
 export interface KitnElementContext {
   /** The custom-element host node. */
@@ -32,7 +49,13 @@ export function defineKitnElement<P extends Record<string, unknown>>(
 ): void {
   if (typeof customElements !== 'undefined' && customElements.get(tag)) return;
 
-  customElement(tag, propDefaults, (props: P, options: { element: object }) => {
+  // Every element gets a `theme` property/attribute: 'light' | 'dark' | 'auto'
+  // (default 'auto' = follow the OS `prefers-color-scheme`). It drives a `.dark`
+  // class on an inner wrapper, which the injected kit CSS already styles — so dark
+  // mode works in standalone Shadow-DOM usage with no token duplication.
+  const defaults = { theme: 'auto', ...propDefaults };
+
+  customElement(tag, defaults, (props: typeof defaults, options: { element: object }) => {
     const element = options.element as HTMLElement;
     let portalNode!: HTMLDivElement;
 
@@ -41,13 +64,18 @@ export function defineKitnElement<P extends Record<string, unknown>>(
         new CustomEvent(type, { detail, bubbles: false, composed: false }),
       );
 
+    const isDark = createDarkMode(() => props.theme as string | undefined);
+
     return (
       <>
         <style>{KITN_CSS}</style>
-        <div ref={portalNode} />
-        <ChatConfig portalMount={portalNode}>
-          {Facade(props, { element, dispatch })}
-        </ChatConfig>
+        {/* display:contents — no layout box; just carries the .dark token scope. */}
+        <div classList={{ dark: isDark() }} style={{ display: 'contents' }}>
+          <div ref={portalNode} />
+          <ChatConfig portalMount={portalNode}>
+            {Facade(props as unknown as P, { element, dispatch })}
+          </ChatConfig>
+        </div>
       </>
     );
   });
