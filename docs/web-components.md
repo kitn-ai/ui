@@ -378,7 +378,11 @@ Each element renders into its own Shadow DOM. This provides **full CSS isolation
 
 To **rebrand**, override any `--color-*` token on `:root` (or a parent element). Because inherited custom properties pierce the Shadow DOM boundary automatically, your overrides reach the components:
 
-> **Note:** `@kitnai/chat/theme.css` is a **Tailwind v4 source file** (it uses `@theme`/`@custom-variant`), intended for `@import` inside a Tailwind build — *not* for loading directly via `<link>` (the browser ignores `@theme {}`, so no tokens would apply). For a plain HTML / CDN page you don't need it: the elements carry their own tokens; just set your `--color-*` overrides on `:root` directly. (A browser-ready compiled token stylesheet for `<link>` consumers is a planned addition.)
+> **Two stylesheets — pick by how you consume the kit:**
+> - **Tailwind builds** (composing the SolidJS primitives): `@import "@kitnai/chat/theme.css"` in your CSS — this is the Tailwind *source* (`@theme`/`@custom-variant`), and registers the kit's colours as Tailwind utilities (`bg-background`, …).
+> - **Plain HTML / CDN** (web components): `<link rel="stylesheet" href="…/@kitnai/chat/theme.tokens.css">` — a browser-ready stylesheet that sets the `--color-*` tokens on `:root` (plus a `.dark` block and the component keyframes). You only need it to theme your **own** host-page markup or to rebrand; the elements already carry their own tokens.
+>
+> Do **not** load the Tailwind-source `theme.css` via `<link>` — the browser ignores `@theme {}`, so no tokens would apply.
 
 ```css
 :root {

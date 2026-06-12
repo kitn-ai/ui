@@ -1,0 +1,69 @@
+// Generates `dist/theme.tokens.css` — a browser-ready token stylesheet for
+// `<link>` / CDN consumers — from the Tailwind SOURCE `theme.css`.
+//
+// Why: `theme.css` is a Tailwind v4 source (`@theme`, `@custom-variant`,
+// `@import "tw-animate-css"`). Loaded directly via `<link>` it 404s on the
+// import AND applies no tokens (browsers ignore `@theme {}`). This emits the
+// same tokens as plain CSS so a host page can `<link>` it: the `@theme` block
+// becomes `:root {}`, its `@keyframes` are hoisted to top level, and the already-
+// plain `.dark` / `.chat-markdown` / `.scrollbar-thin` rules are kept verbatim.
+//
+// theme.css stays the single source of truth; run on every build.
+
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const src = readFileSync(resolve(root, 'theme.css'), 'utf8');
+
+/** Return the body and end-index of the brace block that opens at `openIdx`. */
+function matchBraces(text, openIdx) {
+  let depth = 0;
+  for (let i = openIdx; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    else if (text[i] === '}' && --depth === 0) return { body: text.slice(openIdx + 1, i), end: i };
+  }
+  throw new Error('unbalanced braces');
+}
+
+// --- locate the @theme block ---
+const themeAt = src.indexOf('@theme');
+if (themeAt === -1) throw new Error('no @theme block in theme.css');
+const themeOpen = src.indexOf('{', themeAt);
+const { body: themeBody, end: themeEnd } = matchBraces(src, themeOpen);
+const afterTheme = src.slice(themeEnd + 1); // .dark / .chat-markdown / .scrollbar-thin — already plain CSS
+
+// --- split @theme body into token declarations vs hoisted @keyframes ---
+const keyframes = [];
+let decls = '';
+let i = 0;
+while (i < themeBody.length) {
+  const kf = themeBody.indexOf('@keyframes', i);
+  if (kf === -1) { decls += themeBody.slice(i); break; }
+  decls += themeBody.slice(i, kf);
+  const { body, end } = matchBraces(themeBody, themeBody.indexOf('{', kf));
+  keyframes.push(`@keyframes ${themeBody.slice(kf + '@keyframes'.length, themeBody.indexOf('{', kf)).trim()} {${body}}`);
+  i = end + 1;
+}
+
+const tokens = decls
+  .split('\n')
+  .map((l) => l.replace(/\s+$/, ''))
+  .filter((l) => l.trim().length)
+  .join('\n');
+
+const out = `/* AUTO-GENERATED from theme.css by scripts/build-theme-tokens.mjs — do not edit.
+   Browser-ready token stylesheet for <link>/CDN consumers (the kit's ELEMENTS
+   are self-themed and don't need this; it themes host-page chrome / rebrands). */
+
+:root {
+${tokens}
+}
+
+${keyframes.join('\n')}
+${afterTheme.replace(/^\n+/, '')}`;
+
+mkdirSync(resolve(root, 'dist'), { recursive: true });
+writeFileSync(resolve(root, 'dist/theme.tokens.css'), out);
+console.log('✓ wrote dist/theme.tokens.css');

@@ -19,7 +19,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./elements": "./dist/kitn-chat.es.js",
-    "./theme.css": "./theme.css"
+    "./theme.css": "./theme.css",
+    "./theme.tokens.css": "./dist/theme.tokens.css"
   },
   "files": [
     "dist",
@@ -30,6 +31,8 @@
     "prepublishOnly": "npm run build",
     "prebuild": "npm run build:css",
     "build": "vite build --config vite.config.ts",
+    "postbuild": "npm run build:theme",
+    "build:theme": "node scripts/build-theme-tokens.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "dev": "npm run build:css && storybook dev -p 6006",
