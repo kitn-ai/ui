@@ -255,8 +255,10 @@ function AttachmentInfo(props: AttachmentInfoProps) {
     <Show when={ctx.variant !== 'grid'}>
       <div class={cn('min-w-0 flex-1', local.class)} {...rest}>
         <span class="block truncate">{label()}</span>
-        <Show when={local.showMediaType && ctx.data.mediaType}>
-          <span class="block truncate text-muted-foreground text-xs">
+        {/* The media-type subtitle is a two-line affordance — only the `list`
+            variant has room for it; `inline` chips are a fixed single-line height. */}
+        <Show when={local.showMediaType && ctx.variant === 'list' && ctx.data.mediaType}>
+          <span class="text-muted-foreground text-caption block truncate">
             {ctx.data.mediaType}
           </span>
         </Show>

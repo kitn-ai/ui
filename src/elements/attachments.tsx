@@ -77,14 +77,20 @@ defineKitnElement<Props, Events>('kitn-attachments', {
               onRemove={removable() ? () => dispatch('remove', { id: item.id }) : undefined}
             >
               <Show
-                when={hoverCard()}
+                when={hoverCard() && variant() !== 'grid'}
                 fallback={
                   <>
                     <AttachmentPreview />
-                    <AttachmentInfo showMediaType={showMediaType()} />
+                    {/* Info only for non-grid; grid is a self-contained visual tile. */}
+                    <Show when={variant() !== 'grid'}>
+                      <AttachmentInfo showMediaType={showMediaType()} />
+                    </Show>
                   </>
                 }
               >
+                {/* Hover preview is for compact inline/list chips; grid tiles are
+                    already the visual, so they skip it (wrapping them would also
+                    collapse non-image tiles to the icon's height). */}
                 <AttachmentHoverCard>
                   <AttachmentHoverCardTrigger>
                     <div class="flex items-center gap-1.5">
@@ -93,9 +99,9 @@ defineKitnElement<Props, Events>('kitn-attachments', {
                     </div>
                   </AttachmentHoverCardTrigger>
                   <AttachmentHoverCardContent>
-                    <div class="text-sm font-medium">{getAttachmentLabel(item)}</div>
+                    <div class="text-body font-medium">{getAttachmentLabel(item)}</div>
                     <Show when={item.mediaType}>
-                      <div class="text-muted-foreground text-xs">{item.mediaType}</div>
+                      <div class="text-muted-foreground text-caption">{item.mediaType}</div>
                     </Show>
                   </AttachmentHoverCardContent>
                 </AttachmentHoverCard>

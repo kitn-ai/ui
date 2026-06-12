@@ -18,7 +18,7 @@
       /* warm-paper light theme (default); follow OS unless explicitly overridden */
       --bg:      #f4f2ec;
       --surface: #fbfaf6;
-      --stage:   #efece3;
+      --stage:   #ffffff;
       --ink:     #1b1a17;
       --ink-2:   #423f38;
       --muted:   #837e72;
@@ -38,7 +38,7 @@
       :root:not(.light) {
         --bg:      #121110;
         --surface: #1a1917;
-        --stage:   #100f0e;
+        --stage:   #171716;
         --ink:     #f1efe9;
         --ink-2:   #cbc7bd;
         --muted:   #908b80;
@@ -52,14 +52,14 @@
       }
     }
     :root.dark {
-      --bg:#121110; --surface:#1a1917; --stage:#100f0e; --ink:#f1efe9; --ink-2:#cbc7bd;
+      --bg:#121110; --surface:#1a1917; --stage:#171716; --ink:#f1efe9; --ink-2:#cbc7bd;
       --muted:#908b80; --line:#2a2824; --line-2:#38352f; --accent:#a78bfa; --accent-2:#c4b5fd;
       --accent-ghost: rgba(167,139,250,.12);
       --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
       color-scheme: dark;
     }
     :root.light {
-      --bg:#f4f2ec; --surface:#fbfaf6; --stage:#efece3; --ink:#1b1a17; --ink-2:#423f38;
+      --bg:#f4f2ec; --surface:#fbfaf6; --stage:#ffffff; --ink:#1b1a17; --ink-2:#423f38;
       --muted:#837e72; --line:#e2ddd0; --line-2:#d3cdbd; --accent:#6d28d9; --accent-2:#8b5cf6;
       --accent-ghost: rgba(109,40,217,.08);
       --shadow: 0 1px 2px rgba(40,34,20,.04), 0 8px 24px -12px rgba(40,34,20,.12);
@@ -159,8 +159,10 @@
       box-shadow: var(--shadow); min-width: 0;
     }
     .spec > header { display: flex; flex-direction: column; gap: .3rem; }
-    .tag { display: inline-flex; align-items: center; gap: .5rem; font: 500 12.5px/1 var(--font-mono); color: var(--ink); width: fit-content; }
-    .tag::before { content: ''; width: 6px; height: 6px; border-radius: 2px; background: var(--accent); flex: none; }
+    .tag { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .55rem; font: 600 15px/1.25 var(--font-mono); letter-spacing: -.01em; color: var(--ink); }
+    .tag::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--accent); flex: none; }
+    .tag .nm { white-space: nowrap; } /* keep the component name on one line */
+    .tag b { font-size: .8em; } /* attribute hints, smaller than the title */
     .tag b { color: var(--muted); font-weight: 500; } /* attribute hints */
     .desc { font-size: .86rem; color: var(--muted); line-height: 1.45; }
     .stage {
@@ -170,7 +172,7 @@
     .stage.block { display: block; }
     .stage.center { justify-content: center; }
     .stage.frame { padding: 0; overflow: hidden; }
-    .stage.tall { height: 440px; padding: 0; }
+    .stage.tall { height: 440px; padding: 0; overflow: hidden; } /* clip the element to the rounded corners */
 
     /* docked event console */
     .console {
@@ -198,7 +200,7 @@
     .console-body .line .ev { color: var(--accent); }
     .console-body .empty { color: var(--muted); opacity: .6; }
 
-    .pill-btn { font: 500 11px/1 var(--font-mono); padding: .45rem .7rem; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+    .pill-btn { font: 500 12px/1 var(--font-mono); padding: .5rem .8rem; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); cursor: pointer; }
     .pill-btn:hover { border-color: var(--accent); color: var(--accent); }
 
     @media (max-width: 880px) {
@@ -258,15 +260,15 @@
         </div>
         <div class="grid">
           <div class="spec">
-            <header><span class="tag">kitn-conversation-list</span><span class="desc">Sidebar of conversations with grouping &amp; selection.</span></header>
+            <header><span class="tag"><span class="nm">kitn-conversation-list</span></span><span class="desc">Sidebar of conversations with grouping &amp; selection.</span></header>
             <div class="stage tall"><kitn-conversation-list id="list" style="display:block;height:100%"></kitn-conversation-list></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-chat</span><span class="desc">The full chat UI — set <b>.messages</b>, listen for <b>submit</b>. Try sending a message.</span></header>
+            <header><span class="tag"><span class="nm">kitn-chat</span></span><span class="desc">The full chat UI — set <b>.messages</b>, listen for <b>submit</b>. Try sending a message.</span></header>
             <div class="stage tall"><kitn-chat id="chat" style="display:block;height:100%" chat-title="Assistant" search voice></kitn-chat></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag">kitn-prompt-input <b>slash-commands</b></span><span class="desc">Standalone composer with attachments &amp; a slash-command palette — type <b>/</b>.</span></header>
+            <header><span class="tag"><span class="nm">kitn-prompt-input</span> <b>slash-commands</b></span><span class="desc">Standalone composer with attachments &amp; a slash-command palette — type <b>/</b>.</span></header>
             <div class="stage block"><kitn-prompt-input id="pi" placeholder="Ask anything…  (try typing /)"></kitn-prompt-input></div>
           </div>
         </div>
@@ -280,31 +282,31 @@
         </div>
         <div class="grid">
           <div class="spec col-full">
-            <header><span class="tag">kitn-message <b>role="assistant"</b></span><span class="desc">One assistant turn: reasoning, a tool call, an attachment, and action buttons — from a single <b>message</b> object.</span></header>
+            <header><span class="tag"><span class="nm">kitn-message</span> <b>role="assistant"</b></span><span class="desc">One assistant turn: reasoning, a tool call, an attachment, and action buttons — from a single <b>message</b> object.</span></header>
             <div class="stage block"><kitn-message id="msg-a"></kitn-message></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-message <b>role="user"</b></span><span class="desc">A user turn.</span></header>
+            <header><span class="tag"><span class="nm">kitn-message</span> <b>role="user"</b></span><span class="desc">A user turn.</span></header>
             <div class="stage block"><kitn-message id="msg-u" role="user"></kitn-message></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-markdown</span><span class="desc">Token-themed markdown with fenced code.</span></header>
+            <header><span class="tag"><span class="nm">kitn-markdown</span></span><span class="desc">Token-themed markdown with fenced code.</span></header>
             <div class="stage block"><kitn-markdown id="md"></kitn-markdown></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-reasoning <b>streaming</b></span><span class="desc">Collapsible thinking; auto-opens while streaming.</span></header>
+            <header><span class="tag"><span class="nm">kitn-reasoning</span> <b>streaming</b></span><span class="desc">Collapsible thinking; auto-opens while streaming.</span></header>
             <div class="stage block"><kitn-reasoning id="reason" label="Reasoning" streaming></kitn-reasoning></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-chain-of-thought</span><span class="desc">Step-by-step reasoning with connectors.</span></header>
+            <header><span class="tag"><span class="nm">kitn-chain-of-thought</span></span><span class="desc">Step-by-step reasoning with connectors.</span></header>
             <div class="stage block"><kitn-chain-of-thought id="cot"></kitn-chain-of-thought></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag">kitn-code-block <b>language="ts"</b></span><span class="desc">A single highlighted code block with copy.</span></header>
+            <header><span class="tag"><span class="nm">kitn-code-block</span> <b>language="ts"</b></span><span class="desc">A single highlighted code block with copy.</span></header>
             <div class="stage block"><kitn-code-block id="code" language="ts"></kitn-code-block></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag">kitn-tool <b>open</b></span><span class="desc">A tool-call panel — input, output, and a state badge.</span></header>
+            <header><span class="tag"><span class="nm">kitn-tool</span> <b>open</b></span><span class="desc">A tool-call panel — input, output, and a state badge.</span></header>
             <div class="stage block"><kitn-tool id="tool" open></kitn-tool></div>
           </div>
         </div>
@@ -318,23 +320,23 @@
         </div>
         <div class="grid">
           <div class="spec">
-            <header><span class="tag">kitn-attachments <b>variant="inline"</b></span><span class="desc">Icon + label chips.</span></header>
-            <div class="stage block"><kitn-attachments id="att-inline" variant="inline" show-media-type></kitn-attachments></div>
+            <header><span class="tag"><span class="nm">kitn-attachments</span> <b>variant="inline" hover-card</b></span><span class="desc">Compact icon + label chips with a hover preview.</span></header>
+            <div class="stage block"><kitn-attachments id="att-inline" variant="inline" hover-card></kitn-attachments></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-attachments <b>variant="grid" hover-card removable</b></span><span class="desc">Visual tiles, hover preview, removable.</span></header>
-            <div class="stage block"><kitn-attachments id="att-grid" variant="grid" hover-card removable></kitn-attachments></div>
+            <header><span class="tag"><span class="nm">kitn-attachments</span> <b>variant="grid" removable</b></span><span class="desc">Visual tiles, removable on hover.</span></header>
+            <div class="stage block"><kitn-attachments id="att-grid" variant="grid" removable></kitn-attachments></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-image</span><span class="desc">base64 / byte-array image with skeleton.</span></header>
+            <header><span class="tag"><span class="nm">kitn-image</span></span><span class="desc">base64 / byte-array image with skeleton.</span></header>
             <div class="stage center"><kitn-image id="img" alt="demo" style="width:96px"></kitn-image></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-source <b>show-favicon</b></span><span class="desc">A citation link with a hover preview.</span></header>
+            <header><span class="tag"><span class="nm">kitn-source</span> <b>show-favicon</b></span><span class="desc">A citation link with a hover preview.</span></header>
             <div class="stage"><kitn-source id="src" href="https://kitn.dev" headline="kitn — the kit" description="Composable SolidJS + web-component chat UI." show-favicon></kitn-source></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag">kitn-source-list</span><span class="desc">A wrapped row of citations.</span></header>
+            <header><span class="tag"><span class="nm">kitn-source-list</span></span><span class="desc">A wrapped row of citations.</span></header>
             <div class="stage block"><kitn-source-list id="srcs"></kitn-source-list></div>
           </div>
         </div>
@@ -348,15 +350,15 @@
         </div>
         <div class="grid">
           <div class="spec col-full">
-            <header><span class="tag">kitn-prompt-suggestions</span><span class="desc">Suggestion chips; clicking one fills the input above and fires <b>select</b>.</span></header>
+            <header><span class="tag"><span class="nm">kitn-prompt-suggestions</span></span><span class="desc">Suggestion chips; clicking one fills the input above and fires <b>select</b>.</span></header>
             <div class="stage block"><kitn-prompt-suggestions id="suggs"></kitn-prompt-suggestions></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-file-upload</span><span class="desc">Click / drag-drop dropzone; <b>slot</b>-overridable label.</span></header>
+            <header><span class="tag"><span class="nm">kitn-file-upload</span></span><span class="desc">Click / drag-drop dropzone; <b>slot</b>-overridable label.</span></header>
             <div class="stage block"><kitn-file-upload id="fu"></kitn-file-upload></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-voice-input · kitn-thinking-bar</span><span class="desc">Mic capture (function property) + a shimmering “thinking” bar.</span></header>
+            <header><span class="tag"><span class="nm">kitn-voice-input</span> · kitn-thinking-bar</span><span class="desc">Mic capture (function property) + a shimmering “thinking” bar.</span></header>
             <div class="stage"><kitn-voice-input id="voice"></kitn-voice-input><kitn-thinking-bar id="think" text="Thinking…" stoppable style="flex:1"></kitn-thinking-bar></div>
           </div>
         </div>
@@ -370,23 +372,23 @@
         </div>
         <div class="grid">
           <div class="spec">
-            <header><span class="tag">kitn-model-switcher</span><span class="desc">Model dropdown; emits <b>modelchange</b>.</span></header>
+            <header><span class="tag"><span class="nm">kitn-model-switcher</span></span><span class="desc">Model dropdown; emits <b>modelchange</b>.</span></header>
             <div class="stage"><kitn-model-switcher id="models"></kitn-model-switcher></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-context-meter</span><span class="desc">Token-usage meter with a breakdown.</span></header>
+            <header><span class="tag"><span class="nm">kitn-context-meter</span></span><span class="desc">Token-usage meter with a breakdown.</span></header>
             <div class="stage"><kitn-context-meter id="ctx"></kitn-context-meter></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-chat-scope-picker</span><span class="desc">Scope a chat by author or tag.</span></header>
+            <header><span class="tag"><span class="nm">kitn-chat-scope-picker</span></span><span class="desc">Scope a chat by author or tag.</span></header>
             <div class="stage"><kitn-chat-scope-picker id="scope"></kitn-chat-scope-picker></div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-checkpoint · kitn-message-skills</span><span class="desc">Bookmark button + active-skill badges.</span></header>
+            <header><span class="tag"><span class="nm">kitn-checkpoint</span> · kitn-message-skills</span><span class="desc">Bookmark button + active-skill badges.</span></header>
             <div class="stage"><kitn-checkpoint id="cp" label="Checkpoint" tooltip="Restore"></kitn-checkpoint><kitn-message-skills id="skills"></kitn-message-skills></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag">kitn-feedback-bar</span><span class="desc">Inline thumbs up/down banner.</span></header>
+            <header><span class="tag"><span class="nm">kitn-feedback-bar</span></span><span class="desc">Inline thumbs up/down banner.</span></header>
             <div class="stage"><kitn-feedback-bar id="fb" bar-title="Was this helpful?"></kitn-feedback-bar></div>
           </div>
         </div>
@@ -400,7 +402,7 @@
         </div>
         <div class="grid">
           <div class="spec">
-            <header><span class="tag">kitn-loader <b>variant=…</b></span><span class="desc">Twelve loader styles.</span></header>
+            <header><span class="tag"><span class="nm">kitn-loader</span> <b>variant=…</b></span><span class="desc">Twelve loader styles.</span></header>
             <div class="stage center" style="gap:1.6rem">
               <kitn-loader variant="circular"></kitn-loader>
               <kitn-loader variant="dots"></kitn-loader>
@@ -410,16 +412,16 @@
             </div>
           </div>
           <div class="spec">
-            <header><span class="tag">kitn-text-shimmer</span><span class="desc">Animated shimmering text.</span></header>
+            <header><span class="tag"><span class="nm">kitn-text-shimmer</span></span><span class="desc">Animated shimmering text.</span></header>
             <div class="stage center"><kitn-text-shimmer text="Generating response…"></kitn-text-shimmer></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag">kitn-response-stream <b>mode="typewriter"</b></span><span class="desc">Reveals text character-by-character; emits <b>complete</b>.</span></header>
+            <header><span class="tag"><span class="nm">kitn-response-stream</span> <b>mode="typewriter"</b></span><span class="desc">Reveals text character-by-character; emits <b>complete</b>.</span></header>
             <div class="stage block"><kitn-response-stream id="stream" speed="30"></kitn-response-stream>
               <button class="pill-btn" id="replay" style="margin-top:.8rem">↻ replay</button></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag">kitn-empty</span><span class="desc">Empty-state layout — <b>media</b> &amp; default slots.</span></header>
+            <header><span class="tag"><span class="nm">kitn-empty</span></span><span class="desc">Empty-state layout — <b>media</b> &amp; default slots.</span></header>
             <div class="stage block">
               <kitn-empty empty-title="No conversations yet" description="Start chatting to see them here.">
                 <span slot="media">✦</span>

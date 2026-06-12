@@ -34,6 +34,7 @@ defineKitnElement<Props, Events>('kitn-response-stream', {
     mode={props.mode}
     speed={props.speed}
     as={props.as}
+    class="text-body"
     onComplete={() => dispatch('complete')}
   />
 ));

@@ -22,7 +22,7 @@ defineKitnElement<Props>('kitn-text-shimmer', {
   duration: 4,
   spread: 20,
 }, (props) => (
-  <TextShimmer as={props.as} duration={props.duration} spread={props.spread}>
+  <TextShimmer as={props.as} duration={props.duration} spread={props.spread} class="text-body">
     {props.text}
   </TextShimmer>
 ));
