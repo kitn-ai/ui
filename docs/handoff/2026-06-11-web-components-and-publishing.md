@@ -57,14 +57,24 @@ R&D into shipping the *individual* primitives as web components so consumers can
 
 **Findings / gaps surfaced:**
 - **Bare boolean attributes parse to `undefined`** in `component-register` (`<el removable>` → `undefined`, not `true`). The new `flag()` fixes it. **This also affects the EXISTING `<kitn-chat>`** — its `loading`/`search`/`voice` attributes only *seem* to work because their default is `false`; `<kitn-chat loading>` would NOT lock the input. **TODO: apply `flag()` to `<kitn-chat>` + fix `docs/web-components.md`.**
-- **`theme.css:7` ships `@import "tw-animate-css";`** — resolves only inside a Tailwind build. Loaded directly via `<link>` (as the docs recommend), the browser 404s on it. Tokens still work; shadow-DOM animations use the built `compiled.css`. Cosmetic console error on the happy path — pre-existing, worth fixing (strip/inline it in the distributed `theme.css`, or drop it since direct consumers only need the tokens).
+- **`theme.css` is a Tailwind v4 *source* file, not a browser stylesheet** (uses `@theme`/`@custom-variant`/`@import "tw-animate-css"`). Loaded directly via `<link>` (as the docs recommended) it (a) **404s on `tw-animate-css`** and (b) **applies NO tokens** — the browser ignores `@theme {}`, so `--color-background` resolves empty (verified). The web components are unaffected: each ships the compiled token set inside its Shadow DOM (`:root, :host` in `compiled.css`), so they're self-themed and need no host stylesheet. **Proper fix (deferred — it's a publishing-surface change):** ship a separately-**compiled**, browser-ready token stylesheet (real `:root { --color-* }` + keyframes) as a NEW export (e.g. `./theme.css` → compiled, source moves to `./theme.source.css`), update docs to point `<link>`/CDN consumers at it, and keep the Tailwind-source for `@import` build consumers (examples/solid relies on the `@theme` registration for `bg-background`-style utilities — do NOT just repoint the existing export). Docs (`docs/web-components.md`) already updated to stop recommending `<link theme.css>` and explain self-theming. **Needs a publishing decision before implementing.**
 - **Cosmetic:** non-image attachments in `variant="grid"` render as thin icon pills (pre-existing primitive behavior, not the wrapper) — polish pass if grid ships.
 
-**Next steps (in order):**
-1. Expand the element roster a bit more to stress the conventions before going wide.
-2. Apply `flag()` to `<kitn-chat>` booleans; correct the docs.
-3. **Custom-elements-manifest** (`@custom-elements-manifest/analyzer`) → auto-generate React/Vue wrappers + typed `HTMLElementTagNameMap` + API docs. The user is keen on the framework-wrapper DX; this gets it without a Stencil rewrite.
-4. Fix the `theme.css` `@import` 404.
+**Build progress (branch `spike/composable-web-components`, all phases committed, NOT merged):**
+- ✅ Phase 0 — `defineKitnElement<P,E>` infra (shared stylesheet, `flag()`, typed `dispatch`) + 3 spike elements.
+- ✅ Phase 1 — message core: `<kitn-message>`, `<kitn-markdown>`, `<kitn-code-block>`, `<kitn-reasoning>`, `<kitn-tool>`.
+- ✅ Phase 2 — header/meta: `<kitn-context-meter>`, `<kitn-feedback-bar>`, `<kitn-chat-scope-picker>`.
+- ✅ Phase 3 — input: `<kitn-prompt-suggestions>`, `<kitn-file-upload>` (Route 2 slot), `<kitn-voice-input>` (function-property). `<kitn-slash-command>` deliberately deferred (context-bound to PromptInput — folds into `<kitn-prompt-input>` later).
+- ✅ Phase 4 — leaves: `<kitn-loader>`, `<kitn-text-shimmer>`, `<kitn-image>`, `<kitn-checkpoint>`, `<kitn-message-skills>`, `<kitn-source>`/`<kitn-source-list>`, `<kitn-response-stream>`, `<kitn-empty>` (Route 2 slots), `<kitn-chain-of-thought>` (`steps[]` data model).
+- ✅ Cross-cutting — `flag()` applied to existing `<kitn-chat>` (`loading`/`search`/`voice`/`code-highlight`) + `<kitn-prompt-input>` (`disabled`/`loading`) booleans; docs updated. `define.tsx` now throws a clear error if a prop name collides with a global reflected attribute (`title`/`id`/`slot`/`lang`) — the CE-constructor footgun that `<kitn-source>.title` hit.
+- **~28 elements total; bundle ~101 KB gzip** (was ~89), in the projected 100–120 KB range. Each phase: build + typecheck + headless Playwright smoke (render/events/shared-sheet) + element unit tests, all green. Validated against `npm pack` consumer install.
+
+**Remaining / next:**
+1. **Custom-elements-manifest** (`@custom-elements-manifest/analyzer` or a small script over the per-element `Props`/`Events` decls) → auto-generate React/Vue wrappers + typed `HTMLElementTagNameMap` + API docs. (User keen on this; no Stencil rewrite needed.)
+2. **theme.css compiled-token file** — the publishing-surface fix described above (needs a decision).
+3. Fold `<kitn-slash-command>` into `<kitn-prompt-input>` as a `slash-commands` property.
+4. Add Storybook stories + docs pages for the new elements; refresh `examples/composable/index.html` to showcase the full roster.
+5. Update `docs/web-components.md` with the full element reference (currently covers the original 3).
 
 ## Working norms / gotchas
 - **Review before commit/merge** (memory `review-before-commit`) — though the user has been actively authorizing merges + releases this session.

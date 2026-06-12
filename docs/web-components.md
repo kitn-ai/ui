@@ -66,6 +66,8 @@ For plain HTML pages:
 
 All rich props (arrays, objects) must be set as **JavaScript properties**, not HTML attributes. Events are standard DOM `CustomEvent`s dispatched on the host element. They do **not** bubble and are **not** composed — listen directly on the element (`el.addEventListener(...)`).
 
+**Boolean attributes** behave like normal HTML: a bare attribute turns the flag on, and `="false"` (or omitting it) turns it off. All of these are equivalent — `<kitn-chat loading>`, `<kitn-chat loading="true">`, and `el.loading = true`; `<kitn-chat loading="false">`, omitting it, and `el.loading = false` all leave it off.
+
 ```html
 <script type="module">
   import '@kitnai/chat/elements';
@@ -372,13 +374,11 @@ Each element renders into its own Shadow DOM. This provides **full CSS isolation
 
 ### Design tokens
 
-The kit's visual appearance is controlled by CSS custom properties defined in `theme.css`. Import it in your page to apply the default colour palette:
+**The elements are self-themed.** Each element's Shadow DOM already contains the full compiled token set, so the components render correctly with **no host-side stylesheet required** — including light/dark via the `theme` attribute.
 
-```html
-<link rel="stylesheet" href="node_modules/@kitnai/chat/theme.css" />
-```
+To **rebrand**, override any `--color-*` token on `:root` (or a parent element). Because inherited custom properties pierce the Shadow DOM boundary automatically, your overrides reach the components:
 
-Override any `--color-*` token on `:root` (or a parent element) to rebrand the components. Because Shadow DOM inherits inherited CSS properties, custom properties pierce the shadow boundary automatically:
+> **Note:** `@kitnai/chat/theme.css` is a **Tailwind v4 source file** (it uses `@theme`/`@custom-variant`), intended for `@import` inside a Tailwind build — *not* for loading directly via `<link>` (the browser ignores `@theme {}`, so no tokens would apply). For a plain HTML / CDN page you don't need it: the elements carry their own tokens; just set your `--color-*` overrides on `:root` directly. (A browser-ready compiled token stylesheet for `<link>` consumers is a planned addition.)
 
 ```css
 :root {

@@ -17,7 +17,7 @@ defineKitnElement<Props>('kitn-prompt-input', {
   disabled: false,
   loading: false,
   suggestions: undefined,
-}, (props, { dispatch }) => {
+}, (props, { dispatch, flag }) => {
   const [internal, setInternal] = createSignal(props.value ?? '');
   const [attachments, setAttachments] = createSignal<AttachmentData[]>([]);
   const current = () => props.value ?? internal();
@@ -33,8 +33,8 @@ defineKitnElement<Props>('kitn-prompt-input', {
     <DefaultPromptInput
       value={current()}
       placeholder={props.placeholder}
-      disabled={props.disabled}
-      loading={props.loading}
+      disabled={flag('disabled')}
+      loading={flag('loading')}
       suggestions={props.suggestions}
       attachments={attachments()}
       onValueChange={handleChange}

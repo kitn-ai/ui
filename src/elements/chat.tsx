@@ -85,7 +85,7 @@ defineKitnElement<Props>('kitn-chat', {
   scrollButton: true,
   search: false,
   voice: false,
-}, (props, { dispatch }) => {
+}, (props, { dispatch, flag }) => {
   // Preserve the shadow-root portal mount from the wrapper's outer ChatConfig
   // when we nest a second ChatConfig to set proseSize/codeTheme.
   const outer = useChatConfig();
@@ -104,7 +104,7 @@ defineKitnElement<Props>('kitn-chat', {
   const showScrollButton = () => props.scrollButton !== false;
 
   return (
-    <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={props.codeHighlight} portalMount={outer.portalMount()}>
+    <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={flag('codeHighlight')} portalMount={outer.portalMount()}>
       <div class="flex h-full flex-col bg-background">
         <Show when={showHeader()}>
           <header class="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
@@ -214,11 +214,11 @@ defineKitnElement<Props>('kitn-chat', {
             <DefaultPromptInput
               value={current()}
               placeholder={props.placeholder}
-              loading={props.loading}
+              loading={flag('loading')}
               suggestions={props.suggestions}
               attachments={attachments()}
-              search={props.search}
-              voice={props.voice}
+              search={flag('search')}
+              voice={flag('voice')}
               onValueChange={handleChange}
               onSubmit={handleSubmit}
               onSuggestionClick={handleSuggestionClick}
