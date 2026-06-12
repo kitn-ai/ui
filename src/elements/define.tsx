@@ -4,36 +4,6 @@ import { KITN_CSS } from './css';
 import { createSignal, onCleanup, onMount, Show, type JSX } from 'solid-js';
 
 /**
- * Tailwind v4 emits the `@theme` tokens (`--color-*`, `--text-*`, `--radius-*`,
- * …) to `:root,:host`. The `:host` part pins every token *on the element*, and a
- * value specified on the element always beats one inherited from the document —
- * so a consumer's `:root` override could never reach the components.
- *
- * To make tokens overridable from `:root` (as the docs promise), we (1) strip
- * `:host` from that rule in the shadow stylesheet so the tokens are NOT pinned,
- * and (2) inject the same defaults onto the document `:root` in a low-priority
- * `@layer`, so the elements still self-theme (no host stylesheet needed) while an
- * un-layered consumer `:root { --color-…/--text-… }` override wins and inherits
- * into every shadow root. Dark mode is unaffected — it's a `.dark` class *inside*
- * the shadow, not a `:host` default.
- */
-const SHADOW_CSS = KITN_CSS.replace(':root,:host{', ':root{');
-
-let documentTokensInjected = false;
-function ensureDocumentTokens(): void {
-  if (documentTokensInjected || typeof document === 'undefined') return;
-  documentTokensInjected = true;
-  if (document.getElementById('kitn-tokens')) return;
-  const tokens = KITN_CSS.match(/:root,:host\{([^}]*)\}/);
-  if (!tokens) return;
-  const style = document.createElement('style');
-  style.id = 'kitn-tokens';
-  // @layer → an un-layered consumer `:root {…}` override always beats these defaults.
-  style.textContent = `@layer kitn-tokens{:root{${tokens[1]}}}`;
-  (document.head ?? document.documentElement).appendChild(style);
-}
-
-/**
  * Shared constructable stylesheet, built once and adopted by every element's
  * shadow root. This avoids duplicating the full compiled kit CSS (~77 KB) as an
  * inline `<style>` in each instance — important now that composing many small
@@ -47,7 +17,7 @@ function getSharedSheet(): CSSStyleSheet | null {
   try {
     if (typeof CSSStyleSheet === 'undefined') throw new Error('no CSSStyleSheet');
     const sheet = new CSSStyleSheet();
-    sheet.replaceSync(SHADOW_CSS);
+    sheet.replaceSync(KITN_CSS);
     sharedSheet = sheet;
   } catch {
     sharedSheet = null;
@@ -131,10 +101,6 @@ export function defineKitnElement<P extends Record<string, unknown>, E = Record<
 ): void {
   if (typeof customElements !== 'undefined' && customElements.get(tag)) return;
 
-  // Put the kit's default tokens on the document :root so the elements self-theme
-  // AND a consumer's :root override can reach them (see SHADOW_CSS above).
-  ensureDocumentTokens();
-
   // Guard against prop names that collide with global reflected HTMLElement IDL
   // attributes. component-register sets `this[prop] = undefined` in the element
   // constructor; for these, the native setter coerces undefined → "undefined"
@@ -187,7 +153,7 @@ export function defineKitnElement<P extends Record<string, unknown>, E = Record<
     return (
       <>
         <Show when={!sheet}>
-          <style>{SHADOW_CSS}</style>
+          <style>{KITN_CSS}</style>
         </Show>
         {/* display:contents — no layout box; carries the .dark token scope and
             re-roots the inherited `color` to the active mode's foreground, so text

@@ -18,7 +18,7 @@ Each element renders into its own **Shadow DOM** so the host page's CSS cannot l
 
 - **Controlled, not stateful.** The host owns the data. You push it in via JS **properties** (`el.messages = …`, `el.conversations = …`), the element pushes interactions out via **events**, and you update the properties in response. The element keeps no message store of its own — to stream a reply you keep reassigning `el.messages`.
 - **Data in = properties, config = attributes, data out = events.** Object/array data (messages, models, context) must be set as properties; simple config (`theme`, `prose-size`, `search`) also works as attributes.
-- **Opt-in by data/flags.** Features appear when you give them data: pass `models` → a model switcher; pass `context` → a token meter; set `search`/`voice` → those buttons. Omit them → they don't render. Re-theme with `--color-*` tokens.
+- **Opt-in by data/flags.** Features appear when you give them data: pass `models` → a model switcher; pass `context` → a token meter; set `search`/`voice` → those buttons. Omit them → they don't render. Re-theme with `--kitn-color-*` tokens.
 
 ### What `<kitn-chat>` includes vs. the primitive layer
 
@@ -405,7 +405,7 @@ Each element renders into its own Shadow DOM. This provides **full CSS isolation
 
 **The elements are self-themed.** Each element's Shadow DOM already contains the full compiled token set, so the components render correctly with **no host-side stylesheet required** — including light/dark via the `theme` attribute.
 
-To **rebrand**, override any `--color-*` token on `:root` (or a parent element). Because inherited custom properties pierce the Shadow DOM boundary automatically, your overrides reach the components:
+To **rebrand**, override the kit's **namespaced** tokens — `--kitn-color-*` (and `--kitn-text-*`, `--kitn-radius`) — on `:root` or a parent. The components read these via a `var(--kitn-…, default)` fallback that pierces the Shadow DOM, so your overrides reach them. The namespacing is deliberate: it keeps a host's own generic tokens (e.g. a shadcn page's `--color-primary` / `--radius`) from accidentally restyling the kit — only the explicit `--kitn-*` surface does. A single `--kitn-*` value applies in both light and dark; scope it to `:root.dark` / a media query if you want different values per mode.
 
 > **Two stylesheets — pick by how you consume the kit:**
 > - **Tailwind builds** (composing the SolidJS primitives): `@import "@kitnai/chat/theme.css"` in your CSS — this is the Tailwind *source* (`@theme`/`@custom-variant`), and registers the kit's colours as Tailwind utilities (`bg-background`, …).
@@ -415,9 +415,10 @@ To **rebrand**, override any `--color-*` token on `:root` (or a parent element).
 
 ```css
 :root {
-  --color-background: #0f0f0f;
-  --color-primary: #7c3aed;
-  --color-muted: #1e1e1e;
+  --kitn-color-background: #0f0f0f;
+  --kitn-color-primary: #7c3aed;
+  --kitn-color-muted: #1e1e1e;
+  --kitn-text-body: 0.9375rem;   /* optional: bump the reading size */
 }
 ```
 

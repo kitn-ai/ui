@@ -34,9 +34,10 @@ function TypographyScale() {
       <h2 class="mb-1 text-lg font-semibold">Typography scale</h2>
       <p class="text-muted-foreground mb-6 text-sm">
         Defined once in <code class="text-code-foreground">theme.css</code>. Each token generates a Tailwind utility
-        (<code class="text-code-foreground">text-meta</code>, …) and is a plain CSS custom property — override
-        <code class="text-code-foreground"> --text-*</code> on <code class="text-code-foreground">:root</code> to restyle the kit's
-        typography globally. It pierces the Shadow&nbsp;DOM exactly like the <code class="text-code-foreground">--color-*</code> tokens.
+        (<code class="text-code-foreground">text-meta</code>, …). To restyle the kit's typography globally, override the
+        namespaced <code class="text-code-foreground">--kitn-text-*</code> token on <code class="text-code-foreground">:root</code> —
+        it pierces the Shadow&nbsp;DOM exactly like the <code class="text-code-foreground">--kitn-color-*</code> tokens. (The bare
+        <code class="text-code-foreground"> --text-*</code> names stay internal, so a host's own tokens can't collide.)
       </p>
 
       <div class="border-border divide-border divide-y rounded-xl border">
@@ -59,8 +60,8 @@ function TypographyScale() {
 
       <h3 class="mt-8 mb-2 text-sm font-semibold">Override example</h3>
       <pre class="bg-muted text-foreground overflow-auto rounded-lg p-3 font-mono text-xs">{`:root {
-  --text-body: 0.9375rem;   /* bump the reading size to 15px */
-  --text-meta: 0.8125rem;   /* and the control size to 13px */
+  --kitn-text-body: 0.9375rem;   /* bump the reading size to 15px */
+  --kitn-text-meta: 0.8125rem;   /* and the control size to 13px */
 }`}</pre>
       <p class="text-muted-foreground mt-2 text-xs">
         Reading text in messages / input / markdown additionally scales with the
