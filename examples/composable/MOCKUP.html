@@ -18,8 +18,9 @@
           kitn-* element as a side effect. The host never needs SolidJS. -->
   <script type="module" src="https://unpkg.com/@kitnai/chat/elements"></script>
 
-  <!-- 2) Tokens. Same theme.css as today; re-brand via --color-* on :root. -->
-  <link rel="stylesheet" href="https://unpkg.com/@kitnai/chat/theme.css" />
+  <!-- 2) Tokens for host-page chrome: theme.tokens.css. Re-brand the elements by
+          overriding the namespaced --kitn-color-* / --kitn-text-* on :root. -->
+  <link rel="stylesheet" href="https://unpkg.com/@kitnai/chat/theme.tokens.css" />
 
   <style>
     /* Layout/spacing BETWEEN composed elements is the HOST's job, because each
