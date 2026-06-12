@@ -34,7 +34,6 @@ export { Separator } from './ui/separator';
 export { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './ui/resizable';
 export type { ResizablePanelGroupProps, ResizablePanelProps, ResizableHandleProps } from './ui/resizable';
 export { Skeleton } from './ui/skeleton';
-export { Dialog, DialogTrigger, DialogContent } from './ui/dialog';
 
 // Layer 3: AI/Feature Components
 export {
