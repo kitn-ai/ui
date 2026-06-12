@@ -1,0 +1,64 @@
+import { For, Show } from 'solid-js';
+import { defineKitnElement } from './define';
+import { Source, SourceTrigger, SourceContent, SourceList } from '../components/source';
+
+// --- <kitn-source> — a single citation link with hover preview ---
+
+interface SourceProps extends Record<string, unknown> {
+  href?: string;
+  /** Trigger label (defaults to the domain). */
+  label?: string;
+  /** Hover-card headline. Attribute: `headline` (`title` is avoided — it's a
+   *  global HTML attribute that reflects in a CE constructor and breaks it). */
+  headline?: string;
+  description?: string;
+  showFavicon?: boolean;
+}
+
+defineKitnElement<SourceProps>('kitn-source', {
+  href: '',
+  label: undefined,
+  headline: '',
+  description: '',
+  showFavicon: false,
+}, (props, { flag }) => (
+  <Show when={props.href}>
+    <Source href={props.href!}>
+      <SourceTrigger label={props.label} showFavicon={flag('showFavicon')} />
+      <SourceContent title={props.headline ?? ''} description={props.description ?? ''} />
+    </Source>
+  </Show>
+));
+
+// --- <kitn-source-list> — a wrapped list of citation links ---
+
+interface SourceItem {
+  href: string;
+  title?: string;
+  description?: string;
+  label?: string;
+  showFavicon?: boolean;
+}
+
+interface SourceListProps extends Record<string, unknown> {
+  /** The sources to render. Set as a JS property. */
+  sources: SourceItem[];
+  /** Show favicons on all items (per-item `showFavicon` overrides). */
+  showFavicon?: boolean;
+}
+
+defineKitnElement<SourceListProps>('kitn-source-list', {
+  sources: [],
+  showFavicon: false,
+}, (props, { flag }) => (
+  <SourceList>
+    <For each={props.sources}>
+      {(s) => (
+        <Source href={s.href}>
+          <SourceTrigger label={s.label} showFavicon={s.showFavicon ?? flag('showFavicon')} />
+          <SourceContent title={s.title ?? ''} description={s.description ?? ''} />
+        </Source>
+      )}
+    </For>
+  </SourceList>
+));

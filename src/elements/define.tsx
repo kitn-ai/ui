@@ -101,6 +101,23 @@ export function defineKitnElement<P extends Record<string, unknown>, E = Record<
 ): void {
   if (typeof customElements !== 'undefined' && customElements.get(tag)) return;
 
+  // Guard against prop names that collide with global reflected HTMLElement IDL
+  // attributes. component-register sets `this[prop] = undefined` in the element
+  // constructor; for these, the native setter coerces undefined → "undefined"
+  // and reflects it to an attribute — which is illegal in a CE constructor and
+  // throws a cryptic "result must not have attributes". Fail loud and early with
+  // a name + fix instead. (Use a prefixed attribute, e.g. `bar-title`/`headline`.)
+  const RESERVED = ['title', 'id', 'slot', 'lang'];
+  for (const key of Object.keys(propDefaults)) {
+    if (RESERVED.includes(key)) {
+      throw new Error(
+        `defineKitnElement(${tag}): prop "${key}" collides with a global HTMLElement ` +
+        `attribute and will break the element constructor. Rename it (e.g. ` +
+        `"bar-title" → barTitle, a source title → headline).`,
+      );
+    }
+  }
+
   // Every element gets a `theme` property/attribute: 'light' | 'dark' | 'auto'
   // (default 'auto' = follow the OS `prefers-color-scheme`). It drives a `.dark`
   // class on an inner wrapper, which the injected kit CSS already styles — so dark
