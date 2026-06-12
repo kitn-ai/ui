@@ -195,8 +195,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   for (const mod of ['./gen-element-types.mjs', './gen-element-react.mjs']) {
     try {
       const m = await import(mod);
-      if (m.writeTypes) m.writeTypes(root, elements, toAttr);
-      if (m.writeReact) m.writeReact(root, elements);
+      if (m.writeTypes) m.writeTypes(root, elements, toAttr, IMPORTS);
+      if (m.writeReact) m.writeReact(root, elements, IMPORTS);
     } catch (e) {
       if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e;
     }
