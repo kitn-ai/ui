@@ -159,10 +159,10 @@
       <h2>Input ecosystem</h2>
       <div class="grid">
         <div class="demo span2">
-          <div class="tag">&lt;<b>kitn-prompt-input</b>&gt; + &lt;<b>kitn-prompt-suggestions</b>&gt;</div>
+          <div class="tag">&lt;<b>kitn-prompt-input</b>&gt; + &lt;<b>kitn-prompt-suggestions</b>&gt; — type <code>/</code> for slash commands</div>
           <div class="body" style="display:block">
             <kitn-prompt-suggestions id="suggs" style="margin-bottom:.6rem;display:block"></kitn-prompt-suggestions>
-            <kitn-prompt-input id="pi" placeholder="Ask anything…"></kitn-prompt-input>
+            <kitn-prompt-input id="pi" placeholder="Ask anything…  (try typing /)"></kitn-prompt-input>
           </div>
         </div>
         <div class="demo">
@@ -340,6 +340,12 @@
     suggs.suggestions = ['Explain the architecture', 'Show me a code example', 'What\'s deferred?'];
     suggs.addEventListener('select', (e) => { document.getElementById('pi').value = e.detail.value; log('suggestion', e.detail.value); });
     const pi = document.getElementById('pi');
+    pi.slashCommands = [
+      { id: 'summarize', label: '/summarize', description: 'Summarize the conversation', category: 'Actions' },
+      { id: 'translate', label: '/translate', description: 'Translate the last message', category: 'Actions' },
+      { id: 'image', label: '/image', description: 'Generate an image', category: 'Tools' },
+    ];
+    pi.addEventListener('slashselect', (e) => log('slashselect', e.detail.command.id));
     pi.addEventListener('submit', (e) => { log('pi.submit', e.detail.value); pi.value = ''; });
     document.getElementById('fu').addEventListener('filesadded', (e) => log('filesadded', e.detail.files.map((f) => f.name).join(', ')));
     const voice = document.getElementById('voice');

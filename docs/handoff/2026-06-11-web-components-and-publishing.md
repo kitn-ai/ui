@@ -69,12 +69,13 @@ R&D into shipping the *individual* primitives as web components so consumers can
 - ✅ Cross-cutting — `flag()` applied to existing `<kitn-chat>` (`loading`/`search`/`voice`/`code-highlight`) + `<kitn-prompt-input>` (`disabled`/`loading`) booleans; docs updated. `define.tsx` now throws a clear error if a prop name collides with a global reflected attribute (`title`/`id`/`slot`/`lang`) — the CE-constructor footgun that `<kitn-source>.title` hit.
 - **~28 elements total; bundle ~101 KB gzip** (was ~89), in the projected 100–120 KB range. Each phase: build + typecheck + headless Playwright smoke (render/events/shared-sheet) + element unit tests, all green. Validated against `npm pack` consumer install.
 
+- ✅ **Slash commands folded in** — `SlashCommand` is context-bound to the prompt input, so it's wired into the shared `DefaultPromptInput` and exposed on both `<kitn-prompt-input>` and `<kitn-chat>` via a `slashCommands` property (+ `slashActiveIds`/`slash-compact`); typing `/` opens the palette, emits `slashselect`. Verified headless.
+- ✅ **Full-roster showcase** — `examples/composable/index.html` rebuilt as a themed showcase of all ~26 elements (light/dark toggle + live event log). `_harness.html` is the test-only blank page.
+
 **Remaining / next:**
 1. **Custom-elements-manifest** (`@custom-elements-manifest/analyzer` or a small script over the per-element `Props`/`Events` decls) → auto-generate React/Vue wrappers + typed `HTMLElementTagNameMap` + API docs. (User keen on this; no Stencil rewrite needed.)
 2. **theme.css compiled-token file** — the publishing-surface fix described above (needs a decision).
-3. Fold `<kitn-slash-command>` into `<kitn-prompt-input>` as a `slash-commands` property.
-4. Add Storybook stories + docs pages for the new elements; refresh `examples/composable/index.html` to showcase the full roster.
-5. Update `docs/web-components.md` with the full element reference (currently covers the original 3).
+3. Add Storybook stories for the new elements; update `docs/web-components.md` with the full element reference (currently covers the original 3).
 
 ## Working norms / gotchas
 - **Review before commit/merge** (memory `review-before-commit`) — though the user has been actively authorizing merges + releases this session.
