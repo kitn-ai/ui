@@ -12,15 +12,31 @@
     /* The host page owns its own chrome tokens. The kit's ELEMENTS are
        self-themed (compiled tokens live inside each Shadow DOM) and follow the
        `theme` attribute — so the host stylesheet only styles the host chrome. */
+    /* Light by default; follow the OS unless the user explicitly overrides via
+       the toggle (.light / .dark on <html>). The kit's ELEMENTS already follow
+       the OS via their default theme="auto" — this keeps the host chrome in sync
+       so first paint matches on a dark-mode system (no toggle needed). */
     :root {
       --bg: #ffffff; --panel: #fafafa; --fg: #18181b; --muted: #71717a;
       --border: #e4e4e7; --accent: #7c3aed;
       color-scheme: light;
     }
+    @media (prefers-color-scheme: dark) {
+      :root:not(.light) {
+        --bg: #171716; --panel: #1f1f1e; --fg: #f4f4f5; --muted: #a1a1aa;
+        --border: #2a2a28; --accent: #a78bfa;
+        color-scheme: dark;
+      }
+    }
     :root.dark {
       --bg: #171716; --panel: #1f1f1e; --fg: #f4f4f5; --muted: #a1a1aa;
       --border: #2a2a28; --accent: #a78bfa;
       color-scheme: dark;
+    }
+    :root.light {
+      --bg: #ffffff; --panel: #fafafa; --fg: #18181b; --muted: #71717a;
+      --border: #e4e4e7; --accent: #7c3aed;
+      color-scheme: light;
     }
     * { box-sizing: border-box; }
     body {
@@ -401,11 +417,18 @@ npm run examples     <span style="opacity:.6"># serves the repo root on :8000</s
     document.getElementById('replay').addEventListener('click', () => { stream.text = ''; requestAnimationFrame(runStream); });
 
     // ---- theme toggle ----
-    let dark = false;
+    // On load nothing is forced: the host chrome follows the OS (CSS media
+    // query) and the elements follow it too (default theme="auto"), so first
+    // paint is already consistent. The toggle starts from the OS value and
+    // applies an explicit override (.light/.dark on <html> + theme attr on every
+    // element), which beats both the media query and auto.
+    let dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.getElementById('theme').addEventListener('click', () => {
       dark = !dark;
-      document.documentElement.classList.toggle('dark', dark);
-      for (const el of document.querySelectorAll('[id], kitn-loader, kitn-image')) {
+      const root = document.documentElement;
+      root.classList.toggle('dark', dark);
+      root.classList.toggle('light', !dark);
+      for (const el of document.querySelectorAll('*')) {
         if (el.tagName.startsWith('KITN-')) el.setAttribute('theme', dark ? 'dark' : 'light');
       }
       log('theme', dark ? 'dark' : 'light');
