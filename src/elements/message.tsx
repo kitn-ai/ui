@@ -47,7 +47,7 @@ defineKitnElement<Props, Events>('kitn-message', {
   role: 'assistant',
   content: undefined,
   markdown: undefined,
-  proseSize: 'base',
+  proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',
   codeHighlight: true,
 }, (props, { dispatch, flag, element }) => {

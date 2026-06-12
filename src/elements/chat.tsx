@@ -83,7 +83,7 @@ defineKitnElement<Props>('kitn-chat', {
   placeholder: 'Send a message...',
   loading: false,
   suggestions: undefined,
-  proseSize: 'base',
+  proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',
   codeHighlight: true,
   chatTitle: undefined,

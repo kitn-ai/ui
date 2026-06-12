@@ -39,6 +39,17 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
+  /* Typography scale — semantic sizes shared by all components. Each generates a
+     Tailwind utility (text-caption / text-meta / text-body / text-title) AND is a
+     plain CSS custom property, so a consumer can restyle the kit's typography by
+     overriding --text-* on :root — it pierces the Shadow DOM exactly like the
+     --color-* tokens. (Message/markdown/input reading size also scales with the
+     `proseSize` prop; these tokens cover the fixed chrome & controls.) */
+  --text-caption: 0.6875rem;  --text-caption--line-height: 1rem;      /* 11px — micro labels, badges, sub-counts */
+  --text-meta:    0.75rem;     --text-meta--line-height: 1.1rem;       /* 12px — controls, toggles, switchers, captions */
+  --text-body:    0.875rem;    --text-body--line-height: 1.45rem;      /* 14px — primary reading text */
+  --text-title:   1rem;        --text-title--line-height: 1.5rem;      /* 16px — emphasis / headers */
+
   @keyframes typing { 0%,100% { transform: translateY(0); opacity: .5 } 50% { transform: translateY(-2px); opacity: 1 } }
   @keyframes loading-dots { 0%,100% { opacity: 0 } 50% { opacity: 1 } }
   @keyframes wave { 0%,100% { transform: scaleY(1) } 50% { transform: scaleY(.6) } }

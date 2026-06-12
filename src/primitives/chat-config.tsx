@@ -14,7 +14,7 @@ export interface ChatConfigValue {
 }
 
 const defaultConfig: ChatConfigValue = {
-  proseSize: () => 'base' as ProseSize,
+  proseSize: () => 'sm' as ProseSize,
   codeTheme: () => 'github-dark-dimmed',
   portalMount: () => undefined,
   codeHighlight: () => true,
@@ -37,7 +37,7 @@ export interface ChatConfigProps {
  */
 export function ChatConfig(props: ChatConfigProps) {
   const value: ChatConfigValue = {
-    proseSize: () => props.proseSize ?? 'base',
+    proseSize: () => props.proseSize ?? 'sm',
     codeTheme: () => props.codeTheme ?? 'github-dark-dimmed',
     portalMount: () => props.portalMount,
     codeHighlight: () => props.codeHighlight ?? true,

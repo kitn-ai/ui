@@ -24,7 +24,7 @@ defineKitnElement<Props>('kitn-code-block', {
   language: undefined,
   codeTheme: 'github-dark-dimmed',
   codeHighlight: true,
-  proseSize: 'base',
+  proseSize: 'sm',
 }, (props, { flag }) => {
   const outer = useChatConfig();
   return (

@@ -20,7 +20,7 @@ interface Props extends Record<string, unknown> {
  */
 defineKitnElement<Props>('kitn-markdown', {
   content: '',
-  proseSize: 'base',
+  proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',
   codeHighlight: true,
 }, (props, { flag }) => {

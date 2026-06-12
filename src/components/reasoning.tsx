@@ -74,7 +74,7 @@ function ReasoningTrigger(props: ReasoningTriggerProps) {
 
   return (
     <button
-      class={cn('flex cursor-pointer items-center gap-2', local.class)}
+      class={cn('flex cursor-pointer items-center gap-2 text-meta', local.class)}
       onClick={() => onOpenChange(!isOpen())}
       {...rest}
     >
@@ -142,7 +142,7 @@ function ReasoningContent(props: ReasoningContentProps) {
           // Markdown content is styled by the token-based `.chat-markdown` (see
           // Markdown component), which themes via design tokens — so no Tailwind
           // `prose`/`dark:prose-invert` is needed (those wouldn't follow a scoped theme).
-          'text-muted-foreground',
+          'text-muted-foreground text-body',
           local.contentClass
         )}
       >

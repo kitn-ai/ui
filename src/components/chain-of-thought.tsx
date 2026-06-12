@@ -33,7 +33,7 @@ function ChainOfThoughtTrigger(props: ChainOfThoughtTriggerProps) {
   return (
     <CollapsibleTrigger
       class={cn(
-        'group text-muted-foreground hover:text-foreground flex cursor-pointer items-center justify-start gap-1 text-left text-sm transition-colors',
+        'group text-muted-foreground hover:text-foreground flex cursor-pointer items-center justify-start gap-1 text-left text-meta transition-colors',
         props.class
       )}
     >
