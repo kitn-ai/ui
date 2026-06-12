@@ -7,6 +7,12 @@ import './chat';
 import './thinking-bar';
 import './model-switcher';
 import './attachments';
+// Phase 1 — message-rendering core
+import './message';
+import './markdown';
+import './code-block';
+import './reasoning';
+import './tool';
 
 export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';
