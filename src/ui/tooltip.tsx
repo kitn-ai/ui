@@ -22,10 +22,6 @@ export function Tooltip(props: TooltipProps) {
   };
   const hide = () => { clearTimeout(timer); setOpen(false); };
 
-  // Use open() directly for Show so the tooltip unmounts synchronously when
-  // dismissed (Escape / blur / leave). createPresence would defer unmounting
-  // via queueMicrotask which breaks synchronous test assertions.
-  // We still track animation state for CSS transitions on the content element.
   const presence = createPresence(open);
   const position = usePosition(() => triggerEl, () => contentEl, { placement: 'top', gutter: 6 });
   useDismiss({ enabled: open, onDismiss: hide, refs: () => [triggerEl, contentEl] });
@@ -43,7 +39,7 @@ export function Tooltip(props: TooltipProps) {
       >
         {local.children}
       </As>
-      <Show when={open()}>
+      <Show when={presence.present()}>
         <Portal mount={config.portalMount()}>
           <div
             ref={(el) => { contentEl = el; presence.setRef(el); }}
