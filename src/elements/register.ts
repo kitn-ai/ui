@@ -13,6 +13,10 @@ import './markdown';
 import './code-block';
 import './reasoning';
 import './tool';
+// Phase 2 — header / meta
+import './context-meter';
+import './feedback-bar';
+import './chat-scope-picker';
 
 export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';
