@@ -3,133 +3,381 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>kitn — composable web components (SPIKE)</title>
+  <title>kitn — composable web components showcase</title>
 
-  <!-- Local build of the SAME single ESM bundle. One import registers every
-       element (including the three new composable leaf elements). -->
+  <!-- One import of the local build registers every kitn-* element. -->
   <script type="module" src="../../dist/kitn-chat.es.js"></script>
-  <link rel="stylesheet" href="../../theme.css" />
 
   <style>
-    :root { color-scheme: light dark; }
-    body {
-      margin: 0; min-height: 100vh; padding: 2rem;
-      font-family: system-ui, sans-serif;
-      background: var(--color-background); color: var(--color-foreground);
-      display: grid; gap: 2rem; max-width: 880px; margin-inline: auto;
+    /* The host page owns its own chrome tokens. The kit's ELEMENTS are
+       self-themed (compiled tokens live inside each Shadow DOM) and follow the
+       `theme` attribute — so the host stylesheet only styles the host chrome. */
+    :root {
+      --bg: #ffffff; --panel: #fafafa; --fg: #18181b; --muted: #71717a;
+      --border: #e4e4e7; --accent: #7c3aed;
+      color-scheme: light;
     }
-    h1 { font-size: 1.25rem; margin: 0; }
-    h2 { font-size: .95rem; margin: 0 0 .75rem; color: var(--color-muted-foreground); }
-    section { border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; }
-    .row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-    .bar { display: flex; align-items: center; justify-content: space-between; }
-    button.host { font: inherit; padding: .4rem .7rem; border-radius: 8px;
-      border: 1px solid var(--color-border); background: var(--color-muted);
-      color: var(--color-foreground); cursor: pointer; }
-    #log { font: 12px ui-monospace, monospace; white-space: pre-wrap;
-      background: var(--color-muted); border-radius: 8px; padding: .75rem;
-      max-height: 160px; overflow: auto; margin: 0; }
+    :root.dark {
+      --bg: #171716; --panel: #1f1f1e; --fg: #f4f4f5; --muted: #a1a1aa;
+      --border: #2a2a28; --accent: #a78bfa;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--fg);
+      transition: background .2s, color .2s;
+    }
+    header {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; padding: .85rem 1.5rem;
+      background: color-mix(in srgb, var(--bg) 85%, transparent);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 { font-size: 1rem; margin: 0; font-weight: 650; letter-spacing: -.01em; }
+    header .sq { display: inline-block; width: 14px; height: 14px; border-radius: 4px;
+      background: var(--accent); margin-right: .5rem; vertical-align: -2px; }
+    .toolbtn {
+      font: inherit; font-size: .85rem; padding: .4rem .75rem; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--panel); color: var(--fg);
+      cursor: pointer;
+    }
+    .toolbtn:hover { border-color: var(--accent); }
+    main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
+    section { margin-top: 3rem; }
+    section > h2 {
+      font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); margin: 0 0 1rem; font-weight: 600;
+    }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .demo {
+      border: 1px solid var(--border); border-radius: 14px; background: var(--panel);
+      padding: 1rem; display: flex; flex-direction: column; gap: .75rem; min-width: 0;
+    }
+    .demo.span2 { grid-column: span 2; }
+    .demo > .tag {
+      font: 12px ui-monospace, SFMono-Regular, monospace; color: var(--muted);
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .demo > .tag b { color: var(--accent); font-weight: 600; }
+    .demo > .body { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; min-width: 0; }
+    .frame { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; height: 460px; }
+    /* event log */
+    #log {
+      position: fixed; bottom: 1rem; right: 1rem; width: 320px; max-height: 200px; overflow: auto;
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+      padding: .6rem .8rem; font: 11px ui-monospace, monospace; color: var(--fg);
+      box-shadow: 0 8px 30px rgba(0,0,0,.12); z-index: 20;
+    }
+    #log h3 { margin: 0 0 .4rem; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+    #log .line { white-space: pre-wrap; opacity: .9; }
+    #log .line .ev { color: var(--accent); }
   </style>
 </head>
 
 <body>
-  <div class="bar">
-    <h1>Composable web components — spike</h1>
-    <button class="host" id="theme">Toggle theme</button>
-  </div>
-
-  <!-- ── Case 1: icon + label (variant="inline") ───────────────────────── -->
-  <section>
-    <h2>&lt;kitn-attachments variant="inline"&gt; — icon + label</h2>
-    <kitn-attachments id="inline" variant="inline" show-media-type></kitn-attachments>
-  </section>
-
-  <!-- ── Case 2: visual + hover card + removable (variant="grid") ──────── -->
-  <section>
-    <h2>&lt;kitn-attachments variant="grid" hover-card removable&gt; — visual + hover + remove</h2>
-    <kitn-attachments id="grid" variant="grid" hover-card removable></kitn-attachments>
-  </section>
-
-  <!-- ── Event-emitting leaf ───────────────────────────────────────────── -->
-  <section>
-    <h2>&lt;kitn-model-switcher&gt; — emits <code>modelchange</code></h2>
-    <div class="row">
-      <kitn-model-switcher id="models"></kitn-model-switcher>
+  <header>
+    <h1><span class="sq"></span>kitn — composable web components</h1>
+    <div style="display:flex;gap:.5rem;align-items:center">
+      <kitn-model-switcher id="hdr-models"></kitn-model-switcher>
+      <kitn-context-meter id="hdr-ctx"></kitn-context-meter>
+      <kitn-chat-scope-picker id="hdr-scope"></kitn-chat-scope-picker>
+      <button class="toolbtn" id="theme">☾ / ☼ theme</button>
     </div>
-  </section>
+  </header>
 
-  <!-- ── Pure leaf (animated thinking) ─────────────────────────────────── -->
-  <section>
-    <h2>&lt;kitn-thinking-bar stoppable&gt; — emits <code>stop</code></h2>
-    <kitn-thinking-bar id="think" text="Thinking…" stoppable stop-label="Answer now"></kitn-thinking-bar>
-  </section>
+  <main>
+    <!-- ════════════════ Batteries-included ════════════════ -->
+    <section>
+      <h2>Batteries-included (the drop-in layer)</h2>
+      <div class="grid" style="grid-template-columns: 260px 1fr;">
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-conversation-list</b>&gt;</div>
+          <div class="frame" style="height:460px"><kitn-conversation-list id="list" style="display:block;height:100%"></kitn-conversation-list></div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-chat</b>&gt; — full UI, set <code>.messages</code>, listen for <code>submit</code></div>
+          <div class="frame"><kitn-chat id="chat" style="display:block;height:100%" chat-title="Assistant" search voice></kitn-chat></div>
+        </div>
+      </div>
+    </section>
 
-  <section>
-    <h2>Event log</h2>
-    <pre id="log">(interactions appear here)</pre>
-  </section>
+    <!-- ════════════════ Message rendering core ════════════════ -->
+    <section>
+      <h2>Message rendering — compose your own list</h2>
+      <div class="grid">
+        <div class="demo span2">
+          <div class="tag">&lt;<b>kitn-message</b>&gt; — assistant (reasoning + tool + attachment + actions)</div>
+          <div class="body" style="display:block"><kitn-message id="msg-a"></kitn-message></div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-message</b> role="user"&gt;</div>
+          <div class="body" style="display:block"><kitn-message id="msg-u" role="user"></kitn-message></div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-markdown</b>&gt;</div>
+          <div class="body" style="display:block"><kitn-markdown id="md"></kitn-markdown></div>
+        </div>
+        <div class="demo span2">
+          <div class="tag">&lt;<b>kitn-code-block</b> language="ts"&gt;</div>
+          <div class="body" style="display:block"><kitn-code-block id="code" language="ts"></kitn-code-block></div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-reasoning</b> streaming&gt;</div>
+          <div class="body" style="display:block"><kitn-reasoning id="reason" label="Reasoning" streaming></kitn-reasoning></div>
+        </div>
+        <div class="demo span2">
+          <div class="tag">&lt;<b>kitn-tool</b> open&gt;</div>
+          <div class="body" style="display:block"><kitn-tool id="tool" open></kitn-tool></div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-chain-of-thought</b>&gt;</div>
+          <div class="body" style="display:block"><kitn-chain-of-thought id="cot"></kitn-chain-of-thought></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ Attachments ════════════════ -->
+    <section>
+      <h2>Attachments — one element, presentation via attributes</h2>
+      <div class="grid">
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-attachments</b> variant="inline" show-media-type&gt;</div>
+          <div class="body" style="display:block"><kitn-attachments id="att-inline" variant="inline" show-media-type></kitn-attachments></div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-attachments</b> variant="grid" hover-card removable&gt;</div>
+          <div class="body" style="display:block"><kitn-attachments id="att-grid" variant="grid" hover-card removable></kitn-attachments></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ Input ════════════════ -->
+    <section>
+      <h2>Input ecosystem</h2>
+      <div class="grid">
+        <div class="demo span2">
+          <div class="tag">&lt;<b>kitn-prompt-input</b>&gt; + &lt;<b>kitn-prompt-suggestions</b>&gt;</div>
+          <div class="body" style="display:block">
+            <kitn-prompt-suggestions id="suggs" style="margin-bottom:.6rem;display:block"></kitn-prompt-suggestions>
+            <kitn-prompt-input id="pi" placeholder="Ask anything…"></kitn-prompt-input>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-file-upload</b>&gt; (default <code>&lt;slot&gt;</code>)</div>
+          <div class="body" style="display:block"><kitn-file-upload id="fu"></kitn-file-upload></div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-voice-input</b>&gt; + &lt;<b>kitn-thinking-bar</b>&gt;</div>
+          <div class="body"><kitn-voice-input id="voice"></kitn-voice-input>
+            <kitn-thinking-bar id="think" text="Thinking…" stoppable style="flex:1"></kitn-thinking-bar></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ Meta & feedback ════════════════ -->
+    <section>
+      <h2>Meta & feedback</h2>
+      <div class="grid">
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-feedback-bar</b>&gt;</div>
+          <div class="body"><kitn-feedback-bar id="fb" bar-title="Was this helpful?"></kitn-feedback-bar></div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-message-skills</b>&gt; · &lt;<b>kitn-checkpoint</b>&gt;</div>
+          <div class="body"><kitn-message-skills id="skills"></kitn-message-skills>
+            <kitn-checkpoint id="cp" label="Checkpoint" tooltip="Restore"></kitn-checkpoint></div>
+        </div>
+        <div class="demo span2">
+          <div class="tag">&lt;<b>kitn-source-list</b>&gt;</div>
+          <div class="body" style="display:block"><kitn-source-list id="srcs"></kitn-source-list></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ Indicators & leaves ════════════════ -->
+    <section>
+      <h2>Indicators, streaming & leaves</h2>
+      <div class="grid">
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-loader</b>&gt; — variants</div>
+          <div class="body">
+            <kitn-loader variant="circular"></kitn-loader>
+            <kitn-loader variant="dots"></kitn-loader>
+            <kitn-loader variant="wave"></kitn-loader>
+            <kitn-loader variant="bars"></kitn-loader>
+            <kitn-loader variant="pulse-dot"></kitn-loader>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-text-shimmer</b>&gt;</div>
+          <div class="body"><kitn-text-shimmer text="Generating response…"></kitn-text-shimmer></div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-image</b>&gt;</div>
+          <div class="body"><kitn-image id="img" alt="demo" style="width:80px"></kitn-image></div>
+        </div>
+        <div class="demo span2">
+          <div class="tag">&lt;<b>kitn-response-stream</b>&gt; — typewriter (replay)</div>
+          <div class="body" style="display:block"><kitn-response-stream id="stream" speed="30"></kitn-response-stream>
+            <button class="toolbtn" id="replay" style="margin-top:.6rem">↻ replay</button></div>
+        </div>
+        <div class="demo">
+          <div class="tag">&lt;<b>kitn-empty</b>&gt; (slots)</div>
+          <div class="body" style="display:block">
+            <kitn-empty empty-title="No conversations yet" description="Start chatting to see them here.">
+              <span slot="media">💬</span>
+              <button class="toolbtn">New chat</button>
+            </kitn-empty>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="log"><h3>Event log</h3><div id="log-body"></div></div>
 
   <script type="module">
-    const log = (msg) => {
-      const el = document.getElementById('log');
-      el.textContent = `${new Date().toLocaleTimeString()}  ${msg}\n` + el.textContent;
+    const log = (ev, detail) => {
+      const el = document.getElementById('log-body');
+      const line = document.createElement('div');
+      line.className = 'line';
+      line.innerHTML = `<span class="ev">${ev}</span> ${detail ?? ''}`;
+      el.prepend(line);
+      while (el.children.length > 12) el.lastChild.remove();
     };
 
-    // A tiny inline SVG so the grid thumbnail renders offline.
-    const img =
-      'data:image/svg+xml;utf8,' + encodeURIComponent(
-        '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">' +
-        '<rect width="96" height="96" fill="%237c3aed"/>' +
-        '<text x="48" y="56" font-size="40" text-anchor="middle" fill="white">★</text></svg>');
-
-    const items = () => ([
-      { id: '1', type: 'file', filename: 'diagram.png', mediaType: 'image/png', url: img },
-      { id: '2', type: 'file', filename: 'notes.pdf',   mediaType: 'application/pdf' },
-      { id: '3', type: 'source-document', title: 'kitn.dev', filename: 'kitn.dev' },
-    ]);
-
-    // Case 1 + Case 2 — same data, different presentation via attributes only.
-    document.getElementById('inline').items = items();
-
-    const grid = document.getElementById('grid');
-    grid.items = items();
-    grid.addEventListener('remove', (e) => {
-      log(`attachments: remove ${e.detail.id}`);
-      grid.items = grid.items.filter((x) => x.id !== e.detail.id);
-    });
-
-    // Model switcher (renders only with >1 model).
-    const models = document.getElementById('models');
-    models.models = [
-      { id: 'opus',  name: 'Claude Opus',  provider: 'Anthropic' },
+    // ---- shared sample data ----
+    const models = [
+      { id: 'opus', name: 'Claude Opus', provider: 'Anthropic' },
+      { id: 'sonnet', name: 'Claude Sonnet', provider: 'Anthropic' },
       { id: 'haiku', name: 'Claude Haiku', provider: 'Anthropic' },
     ];
-    models.currentModel = 'opus';
-    models.addEventListener('modelchange', (e) => {
-      models.currentModel = e.detail.modelId;
-      log(`model: ${e.detail.modelId}`);
+    const ctx = { usedTokens: 48200, maxTokens: 200000, inputTokens: 31000, outputTokens: 17200, estimatedCost: 0.42 };
+    const attachments = [
+      { id: '1', type: 'file', filename: 'architecture.png', mediaType: 'image/png', url: imgData('#7c3aed', '◆') },
+      { id: '2', type: 'file', filename: 'spec.pdf', mediaType: 'application/pdf' },
+      { id: '3', type: 'source-document', title: 'kitn.dev/docs', filename: 'kitn.dev' },
+    ];
+    function imgData(fill, glyph) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="12" fill="${fill}"/><text x="48" y="60" font-size="42" text-anchor="middle" fill="white">${glyph}</text></svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    // ---- header ----
+    const hm = document.getElementById('hdr-models');
+    hm.models = models; hm.currentModel = 'opus';
+    hm.addEventListener('modelchange', (e) => { hm.currentModel = e.detail.modelId; log('modelchange', e.detail.modelId); });
+    document.getElementById('hdr-ctx').context = ctx;
+    const scope = document.getElementById('hdr-scope');
+    scope.availableAuthors = ['Rob', 'Alex']; scope.availableTags = ['design', 'api'];
+    scope.addEventListener('scopechange', (e) => log('scopechange', JSON.stringify(e.detail.filters ?? 'all')));
+
+    // ---- <kitn-chat> ----
+    const chat = document.getElementById('chat');
+    chat.models = models; chat.currentModel = 'opus'; chat.context = ctx;
+    chat.suggestions = ['Summarize this thread', 'What changed in v0.3?'];
+    chat.messages = [
+      { id: '1', role: 'assistant', content: 'Hi! I\'m the **drop-in** `<kitn-chat>`. Ask me anything.', actions: ['copy', 'like', 'dislike'] },
+    ];
+    chat.addEventListener('submit', (e) => {
+      log('submit', e.detail.value);
+      chat.messages = [...chat.messages, { id: Date.now() + '', role: 'user', content: e.detail.value }];
+      chat.loading = true;
+      setTimeout(() => {
+        chat.messages = [...chat.messages, { id: Date.now() + 'a', role: 'assistant', content: 'Echo: ' + e.detail.value, actions: ['copy'] }];
+        chat.loading = false;
+      }, 600);
     });
+    chat.addEventListener('modelchange', (e) => { chat.currentModel = e.detail.modelId; log('chat.modelchange', e.detail.modelId); });
+    chat.addEventListener('messageaction', (e) => log('messageaction', `${e.detail.action} on ${e.detail.messageId}`));
+    chat.addEventListener('search', () => log('search', '(clicked)'));
+    chat.addEventListener('voice', () => log('voice', '(clicked)'));
 
-    // Thinking bar.
-    document.getElementById('think').addEventListener('stop', () => log('thinking: stop'));
+    // ---- conversation list ----
+    const list = document.getElementById('list');
+    list.conversations = [
+      { id: 'c1', title: 'Web component architecture', scope: { type: 'document' }, messageCount: 12, lastMessageAt: '2026-06-11T10:00:00Z', updatedAt: '2026-06-11T10:00:00Z' },
+      { id: 'c2', title: 'Theming & tokens', scope: { type: 'document' }, messageCount: 5, lastMessageAt: '2026-06-10T09:00:00Z', updatedAt: '2026-06-10T09:00:00Z' },
+      { id: 'c3', title: 'Publishing pipeline', scope: { type: 'document' }, messageCount: 8, lastMessageAt: '2026-06-09T09:00:00Z', updatedAt: '2026-06-09T09:00:00Z' },
+    ];
+    list.activeId = 'c1';
+    list.addEventListener('select', (e) => { list.activeId = e.detail.id; log('select', e.detail.id); });
+    list.addEventListener('newchat', () => log('newchat'));
 
-    // Theme toggle — proves dark mode still pierces the SHARED stylesheet.
+    // ---- message core ----
+    document.getElementById('msg-a').message = {
+      id: 'm-a', role: 'assistant',
+      content: 'Here\'s the plan, with a quick code sample:\n```js\nconst kit = useKitn();\n```',
+      reasoning: { text: 'The user wants X, so I should do Y then Z.', label: 'Reasoning' },
+      tools: [{ type: 'search', state: 'output-available', input: { query: 'kitn docs' }, output: { hits: 3 } }],
+      attachments: [attachments[0]],
+      actions: ['copy', 'like', 'dislike', 'regenerate'],
+    };
+    document.getElementById('msg-a').addEventListener('messageaction', (e) => log('msg.action', e.detail.action));
+    document.getElementById('msg-u').message = { id: 'm-u', role: 'user', content: 'How do I compose these myself?' };
+
+    document.getElementById('md').content = '### Markdown\nRenders **bold**, _italic_, `code`, and lists:\n- one\n- two\n\n> and blockquotes.';
+    document.getElementById('code').code = 'export function add(a: number, b: number): number {\n  return a + b;\n}';
+    document.getElementById('reason').text = 'First I parse the request, then I plan the steps, then I execute and verify.';
+    document.getElementById('tool').tool = { type: 'database_query', state: 'output-available', input: { table: 'users', limit: 10 }, output: { rows: 10, ms: 42 } };
+    document.getElementById('cot').steps = [
+      { label: 'Understand the request', content: 'The user wants a composable set.' },
+      { label: 'Design the API', content: 'Route 1: variant + flags + events.' },
+      { label: 'Build & verify' },
+    ];
+
+    // ---- attachments ----
+    document.getElementById('att-inline').items = attachments;
+    const attGrid = document.getElementById('att-grid');
+    attGrid.items = attachments;
+    attGrid.addEventListener('remove', (e) => { attGrid.items = attGrid.items.filter((x) => x.id !== e.detail.id); log('remove', e.detail.id); });
+
+    // ---- input ----
+    const suggs = document.getElementById('suggs');
+    suggs.suggestions = ['Explain the architecture', 'Show me a code example', 'What\'s deferred?'];
+    suggs.addEventListener('select', (e) => { document.getElementById('pi').value = e.detail.value; log('suggestion', e.detail.value); });
+    const pi = document.getElementById('pi');
+    pi.addEventListener('submit', (e) => { log('pi.submit', e.detail.value); pi.value = ''; });
+    document.getElementById('fu').addEventListener('filesadded', (e) => log('filesadded', e.detail.files.map((f) => f.name).join(', ')));
+    const voice = document.getElementById('voice');
+    voice.transcribe = async () => { await new Promise((r) => setTimeout(r, 400)); return 'transcribed text'; };
+    voice.addEventListener('transcription', (e) => log('transcription', e.detail.text));
+    document.getElementById('think').addEventListener('stop', () => log('thinking.stop'));
+
+    // ---- meta ----
+    document.getElementById('fb').addEventListener('helpful', () => log('feedback', 'helpful'));
+    document.getElementById('fb').addEventListener('nothelpful', () => log('feedback', 'not helpful'));
+    document.getElementById('fb').addEventListener('close', () => log('feedback', 'closed'));
+    document.getElementById('skills').skills = [{ id: 's1', name: 'web-search' }, { id: 's2', name: 'code' }];
+    document.getElementById('cp').addEventListener('select', () => log('checkpoint', 'restore'));
+    document.getElementById('srcs').sources = [
+      { href: 'https://kitn.dev', title: 'kitn — the kit', description: 'Composable SolidJS + web-component chat UI.', showFavicon: true },
+      { href: 'https://solidjs.com', title: 'SolidJS', description: 'A reactive UI library.', showFavicon: true },
+    ];
+
+    // ---- leaves ----
+    document.getElementById('img').base64 = btoa(unescape(encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" rx="14" fill="#7c3aed"/><text x="40" y="52" font-size="36" text-anchor="middle" fill="white">★</text></svg>')));
+    document.getElementById('img').setAttribute('media-type', 'image/svg+xml');
+    const stream = document.getElementById('stream');
+    const streamText = 'This text reveals with a typewriter animation, streamed character by character — exactly how you\'d render a live assistant reply.';
+    const runStream = () => { stream.text = streamText; };
+    runStream();
+    stream.addEventListener('complete', () => log('stream', 'complete'));
+    document.getElementById('replay').addEventListener('click', () => { stream.text = ''; requestAnimationFrame(runStream); });
+
+    // ---- theme toggle ----
     let dark = false;
     document.getElementById('theme').addEventListener('click', () => {
       dark = !dark;
-      for (const el of document.querySelectorAll('kitn-attachments, kitn-model-switcher, kitn-thinking-bar')) {
-        el.setAttribute('theme', dark ? 'dark' : 'light');
+      document.documentElement.classList.toggle('dark', dark);
+      for (const el of document.querySelectorAll('[id], kitn-loader, kitn-image')) {
+        if (el.tagName.startsWith('KITN-')) el.setAttribute('theme', dark ? 'dark' : 'light');
       }
-      document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
-      log(`theme: ${dark ? 'dark' : 'light'}`);
-    });
-
-    // Sanity: how many shadow roots share the single constructable stylesheet?
-    requestAnimationFrame(() => {
-      const roots = [...document.querySelectorAll('kitn-attachments, kitn-model-switcher, kitn-thinking-bar')]
-        .map((el) => el.shadowRoot).filter(Boolean);
-      const adopted = roots.filter((r) => r.adoptedStyleSheets?.length).length;
-      log(`shared stylesheet adopted by ${adopted}/${roots.length} shadow roots`);
+      log('theme', dark ? 'dark' : 'light');
     });
   </script>
 </body>
