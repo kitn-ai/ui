@@ -11,10 +11,11 @@ interface HoverCardCtx {
   open: Accessor<boolean>;
   enter: () => void;
   leave: () => void;
+  close: () => void;
   setTrigger: (el: HTMLElement) => void;
   setContent: (el: HTMLElement) => void;
-  trigger: () => HTMLElement | undefined;
-  content: () => HTMLElement | undefined;
+  trigger: Accessor<HTMLElement | undefined>;
+  content: Accessor<HTMLElement | undefined>;
 }
 const Ctx = createContext<HoverCardCtx>();
 const useHoverCard = () => {
@@ -27,8 +28,8 @@ export interface HoverCardRootProps { children: JSX.Element; openDelay?: number;
 
 export function HoverCardRoot(props: HoverCardRootProps) {
   const [open, setOpen] = createSignal(false);
-  let trigger: HTMLElement | undefined;
-  let content: HTMLElement | undefined;
+  const [trigger, setTrigger] = createSignal<HTMLElement>();
+  const [content, setContent] = createSignal<HTMLElement>();
   let timer: number | undefined;
 
   // ONE shared timer drives both trigger and content. Entering either cancels
@@ -45,15 +46,14 @@ export function HoverCardRoot(props: HoverCardRootProps) {
     clearTimeout(timer);
     timer = window.setTimeout(() => setOpen(false), props.closeDelay ?? 0);
   };
+  const close = () => { clearTimeout(timer); setOpen(false); };
   onCleanup(() => clearTimeout(timer));
 
   return (
     <Ctx.Provider value={{
-      open, enter, leave,
-      setTrigger: (el) => (trigger = el),
-      setContent: (el) => (content = el),
-      trigger: () => trigger,
-      content: () => content,
+      open, enter, leave, close,
+      setTrigger, setContent,
+      trigger, content,
     }}>
       {props.children}
     </Ctx.Provider>
@@ -85,7 +85,7 @@ export function HoverCardContent(props: HoverCardContentProps) {
   const config = useChatConfig();
   const presence = createPresence(ctx.open);
   const position = usePosition(ctx.trigger, ctx.content, { placement: 'bottom', gutter: 8 });
-  useDismiss({ enabled: ctx.open, onDismiss: ctx.leave, refs: () => [ctx.trigger(), ctx.content()] });
+  useDismiss({ enabled: ctx.open, onDismiss: (reason) => (reason === 'escape' ? ctx.close() : ctx.leave()), refs: () => [ctx.trigger(), ctx.content()] });
 
   return (
     <Show when={presence.present()}>
@@ -97,6 +97,8 @@ export function HoverCardContent(props: HoverCardContentProps) {
           data-closed={presence.state() === 'closed' ? '' : undefined}
           onPointerEnter={ctx.enter}
           onPointerLeave={ctx.leave}
+          onFocusIn={ctx.enter}
+          onFocusOut={ctx.leave}
           style={{ position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px` }}
           class={cn(
             'z-50 rounded-lg bg-card shadow-lg',

@@ -52,4 +52,35 @@ describe('HoverCard determinism (HC-1)', () => {
     vi.advanceTimersByTime(100);
     expect(screen.queryByTestId('content')).toBeTruthy();
   });
+
+  it('opens on focus (keyboard)', () => {
+    setup();
+    const trg = screen.getByTestId('trg').parentElement!;
+    fireEvent.focusIn(trg);
+    vi.advanceTimersByTime(100);
+    expect(screen.queryByTestId('content')).toBeTruthy();
+  });
+
+  it('focus transit trigger -> content keeps it open', async () => {
+    setup();
+    const trg = screen.getByTestId('trg').parentElement!;
+    fireEvent.focusIn(trg);
+    vi.advanceTimersByTime(100);
+    const content = screen.getByTestId('content').closest('[data-hovercard-content]')!;
+    fireEvent.focusOut(trg, { relatedTarget: content });
+    fireEvent.focusIn(content);
+    vi.advanceTimersByTime(100);
+    expect(screen.queryByTestId('content')).toBeTruthy();
+  });
+
+  it('Escape closes immediately (no closeDelay wait)', async () => {
+    setup();
+    const trg = screen.getByTestId('trg').parentElement!;
+    fireEvent.pointerEnter(trg);
+    vi.advanceTimersByTime(100);
+    expect(screen.queryByTestId('content')).toBeTruthy();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await Promise.resolve(); // microtask unmount
+    expect(screen.queryByTestId('content')).toBeNull();
+  });
 });

@@ -11,8 +11,8 @@ export function Tooltip(props: TooltipProps) {
   const config = useChatConfig();
   const id = createUniqueId();
   const [open, setOpen] = createSignal(false);
-  let triggerEl: HTMLElement | undefined;
-  let contentEl: HTMLElement | undefined;
+  const [triggerEl, setTriggerEl] = createSignal<HTMLElement>();
+  const [contentEl, setContentEl] = createSignal<HTMLElement>();
   let timer: number | undefined;
 
   const [pointerInside, setPointerInside] = createSignal(false);
@@ -28,26 +28,26 @@ export function Tooltip(props: TooltipProps) {
   onCleanup(() => clearTimeout(timer));
 
   const presence = createPresence(open);
-  const position = usePosition(() => triggerEl, () => contentEl, { placement: 'top', gutter: 6 });
-  useDismiss({ enabled: open, onDismiss: hide, refs: () => [triggerEl, contentEl] });
+  const position = usePosition(triggerEl, contentEl, { placement: 'top', gutter: 6 });
+  useDismiss({ enabled: open, onDismiss: hide, refs: () => [triggerEl(), contentEl()] });
 
   return (
     <>
       <As
         as="span"
-        ref={(el: HTMLElement) => (triggerEl = el)}
+        ref={setTriggerEl}
         aria-describedby={open() ? id : undefined}
         onPointerEnter={() => { setPointerInside(true); show(local.openDelay ?? 600); }}
         onPointerLeave={() => { setPointerInside(false); maybeHide(); }}
         onFocusIn={() => { setFocusInside(true); show(); }}
-        onFocusOut={(e: FocusEvent) => { if (triggerEl && triggerEl.contains(e.relatedTarget as Node)) return; setFocusInside(false); maybeHide(); }}
+        onFocusOut={(e: FocusEvent) => { const t = triggerEl(); if (t && t.contains(e.relatedTarget as Node)) return; setFocusInside(false); maybeHide(); }}
       >
         {local.children}
       </As>
       <Show when={presence.present()}>
         <Portal mount={config.portalMount()}>
           <div
-            ref={(el) => { contentEl = el; presence.setRef(el); }}
+            ref={(el) => { setContentEl(el); presence.setRef(el); }}
             id={id}
             role="tooltip"
             data-expanded={presence.state() === 'open' ? '' : undefined}
