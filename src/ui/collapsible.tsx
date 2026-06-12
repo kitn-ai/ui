@@ -9,6 +9,15 @@ import {
 } from 'solid-js';
 import { cn } from '../utils/cn';
 
+// Extend SolidJS JSX to allow `bool:inert` (forces setAttribute so jsdom reflects it as an attribute).
+declare module 'solid-js' {
+  namespace JSX {
+    interface ExplicitBoolAttributes {
+      inert: boolean;
+    }
+  }
+}
+
 interface CollapsibleCtx {
   open: Accessor<boolean>;
   toggle: () => void;
@@ -42,7 +51,13 @@ export function Collapsible(props: {
   const contentId = createUniqueId();
   return (
     <Ctx.Provider value={{ open, toggle, contentId }}>
-      <div class={local.class} data-expanded={open() ? '' : undefined} data-state={open() ? 'open' : 'closed'} {...rest}>
+      <div
+        class={local.class}
+        {...rest}
+        data-expanded={open() ? '' : undefined}
+        data-closed={open() ? undefined : ''}
+        data-state={open() ? 'open' : 'closed'}
+      >
         {local.children}
       </div>
     </Ctx.Provider>
@@ -52,19 +67,26 @@ export function Collapsible(props: {
 export function CollapsibleTrigger(props: {
   children?: JSX.Element;
   class?: string;
-  as?: (triggerProps: JSX.HTMLAttributes<HTMLButtonElement> & { 'aria-expanded': boolean; 'aria-controls': string }) => JSX.Element;
+  as?: (props: Record<string, any>) => JSX.Element;
+  onClick?: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent>;
   [k: string]: any;
 }) {
   const ctx = useCollapsible();
-  const [local, rest] = splitProps(props, ['children', 'class', 'as']);
+  const [local, rest] = splitProps(props, ['children', 'class', 'as', 'onClick']);
 
   const triggerProps = () => ({
     type: 'button' as const,
     'aria-expanded': ctx.open(),
     'aria-controls': ctx.contentId,
     'data-expanded': ctx.open() ? '' : undefined,
+    'data-closed': ctx.open() ? undefined : '',
     'data-state': ctx.open() ? 'open' : 'closed',
-    onClick: () => ctx.toggle(),
+    onClick: (e: MouseEvent) => {
+      if (typeof local.onClick === 'function') {
+        (local.onClick as (e: MouseEvent) => void)(e);
+      }
+      ctx.toggle();
+    },
     class: local.class,
     ...rest,
   });
@@ -87,6 +109,7 @@ export function CollapsibleContent(props: { children?: JSX.Element; class?: stri
   const [local, rest] = splitProps(props, ['children', 'class']);
   return (
     <div
+      {...rest}
       id={ctx.contentId}
       data-expanded={ctx.open() ? '' : undefined}
       data-closed={ctx.open() ? undefined : ''}
@@ -94,8 +117,7 @@ export function CollapsibleContent(props: { children?: JSX.Element; class?: stri
         'grid transition-[grid-template-rows] duration-200 ease-out',
         ctx.open() ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
       )}
-      inert={ctx.open() ? undefined : (true as any)}
-      {...rest}
+      bool:inert={!ctx.open()}
     >
       <div class={cn('overflow-hidden', local.class)}>{local.children}</div>
     </div>
