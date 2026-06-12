@@ -22,6 +22,7 @@ import { Button } from '../ui/button';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
 import type { Component } from 'solid-js';
 import { DefaultPromptInput } from './default-input';
+import type { SlashCommandItem } from '../components/slash-command';
 import type { ChatMessage, ChatMessageAction } from './chat-types';
 import type { ProseSize } from '../primitives/chat-config';
 import type { ModelOption } from '../types';
@@ -59,6 +60,13 @@ interface Props extends Record<string, unknown> {
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
   voice?: boolean;
+  /** Slash commands — when set, typing `/` in the input opens the command
+   *  palette and fires `slashselect`. Set as a JS property. */
+  slashCommands?: SlashCommandItem[];
+  /** Command ids to highlight as active in the palette. */
+  slashActiveIds?: string[];
+  /** Single-line palette rows. */
+  slashCompact?: boolean;
 }
 
 const ACTION_LABEL: Record<ChatMessageAction, string> = {
@@ -85,6 +93,9 @@ defineKitnElement<Props>('kitn-chat', {
   scrollButton: true,
   search: false,
   voice: false,
+  slashCommands: undefined,
+  slashActiveIds: undefined,
+  slashCompact: false,
 }, (props, { dispatch, flag }) => {
   // Preserve the shadow-root portal mount from the wrapper's outer ChatConfig
   // when we nest a second ChatConfig to set proseSize/codeTheme.
@@ -219,12 +230,16 @@ defineKitnElement<Props>('kitn-chat', {
               attachments={attachments()}
               search={flag('search')}
               voice={flag('voice')}
+              slashCommands={props.slashCommands}
+              slashActiveIds={props.slashActiveIds}
+              slashCompact={flag('slashCompact')}
               onValueChange={handleChange}
               onSubmit={handleSubmit}
               onSuggestionClick={handleSuggestionClick}
               onAttachmentsChange={setAttachments}
               onSearch={() => dispatch('search', {})}
               onVoice={() => dispatch('voice', {})}
+              onSlashSelect={(command) => dispatch('slashselect', { command })}
             />
           </div>
         </div>

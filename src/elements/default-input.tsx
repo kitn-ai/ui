@@ -1,6 +1,7 @@
 import { For, Show } from 'solid-js';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from '../components/prompt-input';
 import { PromptSuggestion } from '../components/prompt-suggestion';
+import { SlashCommand, type SlashCommandItem } from '../components/slash-command';
 import { Button } from '../ui/button';
 import { Paperclip, Globe, Mic } from 'lucide-solid';
 import {
@@ -25,12 +26,19 @@ export interface DefaultPromptInputProps {
   search?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; calls `onVoice`. */
   voice?: boolean;
+  /** Slash commands — when set, typing `/` opens the command palette. */
+  slashCommands?: SlashCommandItem[];
+  /** Currently-active command ids (highlighted in the palette). */
+  slashActiveIds?: string[];
+  /** Single-line palette rows. */
+  slashCompact?: boolean;
   onValueChange: (v: string) => void;
   onSubmit: () => void;
   onSuggestionClick: (v: string) => void;
   onAttachmentsChange?: (attachments: AttachmentData[]) => void;
   onSearch?: () => void;
   onVoice?: () => void;
+  onSlashSelect?: (command: SlashCommandItem) => void;
 }
 
 function fileToAttachment(file: File): AttachmentData {
@@ -79,7 +87,19 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         onSubmit={props.onSubmit}
         isLoading={props.loading}
         disabled={props.disabled}
+        class="relative"
       >
+        <Show when={props.slashCommands?.length}>
+          {/* Rendered inside PromptInput so SlashCommand's usePromptInput()
+              context (input value + textarea ref) resolves; the `relative` root
+              anchors its `absolute bottom-full` palette above the input. */}
+          <SlashCommand
+            commands={props.slashCommands!}
+            activeIds={props.slashActiveIds}
+            compact={props.slashCompact}
+            onSelect={(command) => props.onSlashSelect?.(command)}
+          />
+        </Show>
         <Show when={canAttach() && attachments().length}>
           <div class="px-3 pt-3">
             <Attachments variant="inline">
