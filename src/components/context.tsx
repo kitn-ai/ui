@@ -1,8 +1,7 @@
-import { type JSX, Show, createContext, createMemo, splitProps, useContext } from 'solid-js';
-import { HoverCard as KHoverCard } from '@kobalte/core/hover-card';
+import { type JSX, Show, createContext, createMemo, useContext } from 'solid-js';
+import { HoverCardRoot, HoverCardTrigger, HoverCardContent } from '../ui/hover-card';
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
-import { useChatConfig } from '../primitives/chat-config';
 
 const ICON_RADIUS = 10;
 const ICON_VIEWBOX = 24;
@@ -60,9 +59,9 @@ export function Context(props: ContextProps) {
 
   return (
     <ContextCtx.Provider value={value()}>
-      <KHoverCard openDelay={0} closeDelay={0}>
+      <HoverCardRoot openDelay={0} closeDelay={0}>
         {props.children}
-      </KHoverCard>
+      </HoverCardRoot>
     </ContextCtx.Provider>
   );
 }
@@ -123,7 +122,7 @@ export function ContextTrigger(props: ContextTriggerProps) {
   const renderedPercent = createMemo(() => fmtPercent.format(usedPercent()));
 
   return (
-    <KHoverCard.Trigger as="span">
+    <HoverCardTrigger>
       <Show
         when={!props.children}
         fallback={props.children}
@@ -133,7 +132,7 @@ export function ContextTrigger(props: ContextTriggerProps) {
           <ContextIcon />
         </Button>
       </Show>
-    </KHoverCard.Trigger>
+    </HoverCardTrigger>
   );
 }
 
@@ -145,18 +144,15 @@ export interface ContextContentProps {
 }
 
 export function ContextContent(props: ContextContentProps) {
-  const config = useChatConfig();
   return (
-    <KHoverCard.Portal mount={config.portalMount()}>
-      <KHoverCard.Content
-        class={cn(
-          'z-50 min-w-60 divide-y divide-border overflow-hidden rounded-lg bg-card shadow-lg animate-in fade-in-0 zoom-in-95',
-          props.class
-        )}
-      >
-        {props.children}
-      </KHoverCard.Content>
-    </KHoverCard.Portal>
+    <HoverCardContent
+      class={cn(
+        'min-w-60 divide-y divide-border overflow-hidden',
+        props.class
+      )}
+    >
+      {props.children}
+    </HoverCardContent>
   );
 }
 
