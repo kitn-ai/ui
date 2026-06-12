@@ -1,4 +1,4 @@
-import { createSignal, createUniqueId, Show, type JSX, splitProps } from 'solid-js';
+import { createSignal, createUniqueId, onCleanup, Show, type JSX, splitProps } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { cn } from '../utils/cn';
 import { useChatConfig } from '../primitives/chat-config';
@@ -15,12 +15,17 @@ export function Tooltip(props: TooltipProps) {
   let contentEl: HTMLElement | undefined;
   let timer: number | undefined;
 
+  const [pointerInside, setPointerInside] = createSignal(false);
+  const [focusInside, setFocusInside] = createSignal(false);
+
   const show = (delay = 0) => {
     clearTimeout(timer);
     if (delay) timer = window.setTimeout(() => setOpen(true), delay);
     else setOpen(true);
   };
   const hide = () => { clearTimeout(timer); setOpen(false); };
+  const maybeHide = () => { if (!pointerInside() && !focusInside()) hide(); };
+  onCleanup(() => clearTimeout(timer));
 
   const presence = createPresence(open);
   const position = usePosition(() => triggerEl, () => contentEl, { placement: 'top', gutter: 6 });
@@ -32,10 +37,10 @@ export function Tooltip(props: TooltipProps) {
         as="span"
         ref={(el: HTMLElement) => (triggerEl = el)}
         aria-describedby={open() ? id : undefined}
-        onPointerEnter={() => show(local.openDelay ?? 600)}
-        onPointerLeave={hide}
-        onFocusIn={() => show()}
-        onFocusOut={hide}
+        onPointerEnter={() => { setPointerInside(true); show(local.openDelay ?? 600); }}
+        onPointerLeave={() => { setPointerInside(false); maybeHide(); }}
+        onFocusIn={() => { setFocusInside(true); show(); }}
+        onFocusOut={(e: FocusEvent) => { if (triggerEl && triggerEl.contains(e.relatedTarget as Node)) return; setFocusInside(false); maybeHide(); }}
       >
         {local.children}
       </As>

@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component: [
-          'A small floating label that appears on hover/focus of its trigger element, built on Kobalte `Tooltip` with an arrow.',
+          'A small floating label that appears on hover/focus of its trigger element, built with a DIY overlay-core implementation (no third-party dependency, no arrow).',
           '**When to use:** to clarify the purpose of icon-only buttons or terse controls — short, supplementary hints that are not essential to complete the action.',
           '**How to use:** wrap a single interactive `children` element and set `content` to the hint text. The child becomes the trigger.',
           '**Placement:** toolbars, message action rows, and any compact icon control where a label would not otherwise fit.',
