@@ -73,9 +73,10 @@ R&D into shipping the *individual* primitives as web components so consumers can
 - ✅ **Full-roster showcase** — `examples/composable/index.html` rebuilt as a themed showcase of all ~26 elements (light/dark toggle + live event log). `_harness.html` is the test-only blank page.
 
 - ✅ **theme.css compiled-token file** — `dist/theme.tokens.css` + `./theme.tokens.css` export (see the theming finding above). Non-breaking.
+- ✅ **Element API codegen** — `scripts/gen-element-api.mjs` (TS compiler API) extracts every element's props/events/attributes from the facades and emits, on every build (`postbuild`): `dist/custom-elements.json` (CEM, `customElements` field), `src/elements/element-types.d.ts` (typed `HTMLElementTagNameMap` → typed `querySelector`/`createElement`, wired as the `./elements` types entry), and `frameworks/react/index.tsx` (typed React wrappers, `./react` export, react optional peer dep). Types are fully self-contained (kit types expanded inline) so they don't drag Solid `.tsx` into a React/consumer compile. `npm run typecheck` covers both JSX contexts. **NB:** wrappers live in `frameworks/react/` — a top-level `react/` dir + `baseUrl:"."` shadows the `react` package.
 
 **Remaining / next:**
-1. **Custom-elements-manifest** (`@custom-elements-manifest/analyzer` or a small script over the per-element `Props`/`Events` decls) → auto-generate React/Vue wrappers + typed `HTMLElementTagNameMap` + API docs. (User keen on this; no Stencil rewrite needed.)
+1. **Vue wrappers** (optional) — same generator pattern as React (`scripts/gen-element-vue.mjs` + `frameworks/vue/`, `./vue` export). Not built yet.
 2. Add Storybook stories for the new elements; update `docs/web-components.md` with the full element reference (currently covers the original 3).
 
 ## Working norms / gotchas

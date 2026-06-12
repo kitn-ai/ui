@@ -88,6 +88,35 @@ All rich props (arrays, objects) must be set as **JavaScript properties**, not H
 <kitn-chat></kitn-chat>
 ```
 
+### TypeScript
+
+Importing the elements entry augments `HTMLElementTagNameMap`, so DOM lookups are typed (props autocompleted, wrong assignments rejected):
+
+```ts
+import '@kitnai/chat/elements';
+const chat = document.querySelector('kitn-chat'); // : KitnChatElement | null
+chat!.messages = [/* … */];                        // typed
+```
+
+A [Custom Elements Manifest](https://github.com/webcomponents/custom-elements-manifest) (`customElements` in `package.json`) ships too, for editor autocomplete in HTML.
+
+### React
+
+Typed wrappers are generated for every element under `@kitnai/chat/react` (React is an optional peer dependency). They set rich data as DOM **properties** (so arrays/objects pass through correctly) and expose CustomEvents as `on<Event>` props:
+
+```tsx
+import { KitnChat, KitnMessage } from '@kitnai/chat/react';
+
+<KitnChat
+  messages={messages}
+  models={models}
+  onSubmit={(e) => send(e.detail.value)}
+  onMessageaction={(e) => handle(e.detail)}
+/>;
+```
+
+Component names are the PascalCase of the tag (`kitn-chat` → `KitnChat`); event props are `on` + the event name (`messageaction` → `onMessageaction`).
+
 ---
 
 ## `<kitn-chat>`
