@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { createPresence, As, useDismiss } from '../../src/ui/overlay';
+import { createPresence, As, useDismiss, usePosition } from '../../src/ui/overlay';
 
 // jsdom (v24) does not implement the PointerEvent constructor. useDismiss
 // listens for `pointerdown`, so the outside-dismiss test dispatches one. Real
@@ -39,6 +39,51 @@ describe('createPresence', () => {
     setShow(false);
     await Promise.resolve();
     expect(present()).toBe(false);
+  });
+
+  it('exposes state open/closed reflecting show', async () => {
+    const [show, setShow] = createSignal(true);
+    let state!: () => 'open' | 'closed';
+    render(() => {
+      const p = createPresence(show);
+      state = p.state;
+      return <div ref={p.setRef} />;
+    });
+    expect(state()).toBe('open');
+    setShow(false);
+    await Promise.resolve();
+    expect(state()).toBe('closed');
+  });
+
+  it('does not unmount when re-opened before the microtask drains (reduced-motion safety)', async () => {
+    const [show, setShow] = createSignal(true);
+    let present!: () => boolean;
+    render(() => {
+      const p = createPresence(show);
+      present = p.present;
+      return <div ref={p.setRef} />;
+    });
+    setShow(false);
+    setShow(true); // re-open synchronously before microtask
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(present()).toBe(true);
+  });
+});
+
+describe('usePosition', () => {
+  it('returns pos/arrowPos signals and tolerates undefined refs', () => {
+    let result!: ReturnType<typeof usePosition>;
+    render(() => {
+      const [ref] = createSignal<HTMLElement | undefined>(undefined);
+      const [float] = createSignal<HTMLElement | undefined>(undefined);
+      result = usePosition(ref, float, { placement: 'top', gutter: 6 });
+      return null;
+    });
+    expect(typeof result.pos).toBe('function');
+    expect(result.pos()).toHaveProperty('x');
+    expect(result.pos()).toHaveProperty('y');
+    expect(typeof result.arrowPos).toBe('function');
   });
 });
 

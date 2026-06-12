@@ -16,12 +16,14 @@ import {
 export function createPresence(show: Accessor<boolean>) {
   const [present, setPresent] = createSignal(show());
   const [state, setState] = createSignal<'open' | 'closed'>(show() ? 'open' : 'closed');
-  let node: HTMLElement | undefined;
-  const setRef = (el: HTMLElement) => { node = el; };
+  let node: Element | undefined;
+  let generation = 0;
+  const setRef = (el: Element) => { node = el; };
 
   createEffect((prev: boolean | undefined) => {
     const visible = show();
     if (visible) {
+      generation++;
       setPresent(true);
       setState('open');
     } else if (prev) {
@@ -32,16 +34,18 @@ export function createPresence(show: Accessor<boolean>) {
         return cs.animationName !== 'none' && parseFloat(cs.animationDuration || '0') > 0;
       })();
       if (!el || !hasAnim) {
-        queueMicrotask(() => setPresent(false));
+        const gen = ++generation;
+        queueMicrotask(() => { if (gen === generation) setPresent(false); });
         return visible;
       }
+      const animEl = el as HTMLElement;
       const onEnd = (e: AnimationEvent) => {
-        if (e.target !== el) return;
-        el.removeEventListener('animationend', onEnd);
+        if (e.target !== animEl) return;
+        animEl.removeEventListener('animationend', onEnd);
         setPresent(false);
       };
-      el.addEventListener('animationend', onEnd);
-      onCleanup(() => el.removeEventListener('animationend', onEnd));
+      animEl.addEventListener('animationend', onEnd);
+      onCleanup(() => animEl.removeEventListener('animationend', onEnd));
     }
     return visible;
   });
@@ -74,6 +78,9 @@ export interface UsePositionOptions {
  * Position `floating` relative to `reference` using fixed strategy + autoUpdate,
  * so the element tracks the trigger on scroll/resize (fix DD-2). Writes
  * position into the returned `pos` signal; caller applies it as inline style.
+ *
+ * `options` (placement/gutter) are read at setup time — pass static values;
+ * reactive option changes won't reposition until the next autoUpdate tick.
  */
 export function usePosition(
   reference: Accessor<HTMLElement | undefined>,
@@ -118,7 +125,13 @@ export interface UseDismissOptions {
   refs: () => (HTMLElement | undefined)[];
 }
 
-/** Escape key + outside-pointerdown dismissal. Does NOT lock page scroll (fix DD-1). */
+/**
+ * Escape key + outside-pointerdown dismissal. Does NOT lock page scroll (fix DD-1).
+ *
+ * `onDismiss` and `refs` are captured at call time (component setup), which is
+ * fine in SolidJS since components don't re-run — ensure they close over mutable
+ * variables, not stale values.
+ */
 export function useDismiss(opts: UseDismissOptions) {
   createEffect(() => {
     if (!opts.enabled()) return;
