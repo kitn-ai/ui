@@ -239,6 +239,31 @@
 
   <div id="log"><h3>Event log</h3><div id="log-body"></div></div>
 
+  <!-- Shown only if the component bundle fails to load (e.g. opened as a file://
+       page, or served from the wrong directory). -->
+  <div id="boot-error" style="display:none;position:fixed;inset:0;z-index:100;background:var(--bg);color:var(--fg);padding:3rem;font:15px/1.6 system-ui,sans-serif">
+    <div style="max-width:640px;margin:0 auto">
+      <h2 style="margin:0 0 1rem">⚠️ The component bundle didn't load</h2>
+      <p>These are ES-module web components, so this page must be <strong>served over HTTP</strong> (not opened as a <code>file://</code> page) and served from the <strong>repo root</strong> (it loads the local build at <code>../../dist/</code>).</p>
+      <p>From the repository root:</p>
+      <pre style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow:auto">npm run build        <span style="opacity:.6"># once, to produce dist/</span>
+npm run examples     <span style="opacity:.6"># serves the repo root on :8000</span></pre>
+      <p>then open <a id="boot-link" href="#" style="color:var(--accent)">http://localhost:8000/examples/composable/index.html</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Boot guard: if the bundle didn't register the elements shortly after load,
+    // show clear instructions instead of empty boxes.
+    setTimeout(() => {
+      if (!customElements.get('kitn-chat')) {
+        const link = document.getElementById('boot-link');
+        if (location.protocol.startsWith('http')) link.href = location.origin + '/examples/composable/index.html';
+        document.getElementById('boot-error').style.display = 'block';
+      }
+    }, 1200);
+  </script>
+
   <script type="module">
     const log = (ev, detail) => {
       const el = document.getElementById('log-body');

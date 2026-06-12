@@ -43,6 +43,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.react.json",
+    "examples": "echo 'Serving repo root on http://localhost:8000 — open http://localhost:8000/examples/composable/index.html' && python3 -m http.server 8000",
     "dev": "npm run build:css && storybook dev -p 6006",
     "storybook": "npm run build:css && storybook dev -p 6006",
     "build-storybook": "npm run build:css && storybook build",
