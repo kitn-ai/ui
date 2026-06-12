@@ -16,6 +16,7 @@
   "types": "src/index.ts",
   "unpkg": "./dist/kitn-chat.es.js",
   "jsdelivr": "./dist/kitn-chat.es.js",
+  "customElements": "dist/custom-elements.json",
   "exports": {
     ".": "./src/index.ts",
     "./elements": "./dist/kitn-chat.es.js",
@@ -31,8 +32,9 @@
     "prepublishOnly": "npm run build",
     "prebuild": "npm run build:css",
     "build": "vite build --config vite.config.ts",
-    "postbuild": "npm run build:theme",
+    "postbuild": "npm run build:theme && npm run build:api",
     "build:theme": "node scripts/build-theme-tokens.mjs",
+    "build:api": "node scripts/gen-element-api.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "dev": "npm run build:css && storybook dev -p 6006",
