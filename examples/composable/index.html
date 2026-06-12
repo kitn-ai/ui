@@ -12,205 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
-  <style>
-    /* ─────────────────────────── design tokens ─────────────────────────── */
-    :root {
-      /* warm-paper light theme (default); follow OS unless explicitly overridden */
-      --bg:      #f4f2ec;
-      --surface: #fbfaf6;
-      --stage:   #ffffff;
-      --ink:     #1b1a17;
-      --ink-2:   #423f38;
-      --muted:   #837e72;
-      --line:    #e2ddd0;
-      --line-2:  #d3cdbd;
-      --accent:  #6d28d9;
-      --accent-2:#8b5cf6;
-      --accent-ghost: rgba(109,40,217,.08);
-      --shadow:  0 1px 2px rgba(40,34,20,.04), 0 8px 24px -12px rgba(40,34,20,.12);
-      --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
-      --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-      --console-h: 39px;   /* collapsed bar height; the layout reserves this space */
-      color-scheme: light;
-    }
-    :root.console-open { --console-h: 252px; }
-    @media (prefers-color-scheme: dark) {
-      :root:not(.light) {
-        --bg:      #121110;
-        --surface: #1a1917;
-        --stage:   #171716;
-        --ink:     #f1efe9;
-        --ink-2:   #cbc7bd;
-        --muted:   #908b80;
-        --line:    #2a2824;
-        --line-2:  #38352f;
-        --accent:  #a78bfa;
-        --accent-2:#c4b5fd;
-        --accent-ghost: rgba(167,139,250,.12);
-        --shadow:  0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
-        color-scheme: dark;
-      }
-    }
-    :root.dark {
-      --bg:#121110; --surface:#1a1917; --stage:#171716; --ink:#f1efe9; --ink-2:#cbc7bd;
-      --muted:#908b80; --line:#2a2824; --line-2:#38352f; --accent:#a78bfa; --accent-2:#c4b5fd;
-      --accent-ghost: rgba(167,139,250,.12);
-      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
-      color-scheme: dark;
-    }
-    :root.light {
-      --bg:#f4f2ec; --surface:#fbfaf6; --stage:#ffffff; --ink:#1b1a17; --ink-2:#423f38;
-      --muted:#837e72; --line:#e2ddd0; --line-2:#d3cdbd; --accent:#6d28d9; --accent-2:#8b5cf6;
-      --accent-ghost: rgba(109,40,217,.08);
-      --shadow: 0 1px 2px rgba(40,34,20,.04), 0 8px 24px -12px rgba(40,34,20,.12);
-      color-scheme: light;
-    }
-
-    /* ─────────────────────────── base ─────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: var(--font-display);
-      font-weight: 380;
-      background: var(--bg);
-      color: var(--ink);
-      -webkit-font-smoothing: antialiased;
-      padding-bottom: var(--console-h); /* content shares space with the docked console */
-      transition: background .25s ease, color .25s ease, padding-bottom .22s ease;
-    }
-    /* faint dot-grid atmosphere */
-    body::before {
-      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background-image: radial-gradient(var(--line-2) 1px, transparent 1px);
-      background-size: 26px 26px;
-      opacity: .35; mask-image: radial-gradient(ellipse 100% 80% at 50% 0%, #000, transparent 75%);
-    }
-    a { color: var(--accent); text-decoration: none; }
-
-    /* ─────────────────────────── shell ─────────────────────────── */
-    .shell { position: relative; z-index: 1; display: grid; grid-template-columns: 264px minmax(0, 1fr); max-width: 1320px; margin: 0 auto; }
-
-    /* ── sidebar index ── */
-    .index {
-      position: sticky; top: 0; align-self: start; height: calc(100vh - var(--console-h));
-      padding: 2.2rem 1.6rem 2rem; border-right: 1px solid var(--line);
-      display: flex; flex-direction: column; gap: 1.6rem; overflow-y: auto;
-      transition: height .22s ease;
-    }
-    .brand { display: flex; align-items: center; gap: .65rem; }
-    .mark { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 22px; height: 22px; }
-    .mark i { background: var(--accent); border-radius: 3px; }
-    .mark i:nth-child(2), .mark i:nth-child(3) { opacity: .55; }
-    .brand b { font-weight: 700; font-size: 1.05rem; letter-spacing: -.02em; }
-    .brand small { font: 500 11px/1 var(--font-mono); color: var(--muted); letter-spacing: .04em; }
-
-    .toc { list-style: none; margin: 0; padding: 0; counter-reset: toc; display: flex; flex-direction: column; gap: .1rem; }
-    .toc a {
-      counter-increment: toc; display: flex; align-items: baseline; gap: .7rem;
-      padding: .5rem .55rem; border-radius: 9px; color: var(--muted);
-      font-size: .92rem; transition: color .15s, background .15s; position: relative;
-    }
-    .toc a::before { content: counter(toc, decimal-leading-zero); font: 500 11px/1 var(--font-mono); color: var(--line-2); width: 1.4em; }
-    .toc a:hover { color: var(--ink-2); background: var(--accent-ghost); }
-    .toc a.active { color: var(--ink); }
-    .toc a.active::before { color: var(--accent); }
-    .toc a.active::after { content: ''; position: absolute; left: -1.6rem; top: 50%; width: 3px; height: 18px; transform: translateY(-50%); background: var(--accent); border-radius: 0 3px 3px 0; }
-    .toc small { margin-left: auto; font: 500 10px/1 var(--font-mono); color: var(--line-2); }
-
-    .index-foot { margin-top: auto; font: 400 11.5px/1.6 var(--font-mono); color: var(--muted); }
-    .index-foot code { color: var(--ink-2); }
-
-    /* ── main ── */
-    main { padding: 0 clamp(1.5rem, 4vw, 4rem) 8rem; min-width: 0; }
-
-    /* hero */
-    .hero { padding: 4.5rem 0 3rem; display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; border-bottom: 1px solid var(--line); }
-    .hero h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 600; line-height: .98; letter-spacing: -.035em; margin: 0; }
-    .hero h1 em { font-style: normal; color: var(--accent); }
-    .hero p { margin: 1rem 0 0; max-width: 42ch; color: var(--ink-2); font-size: 1.05rem; line-height: 1.5; }
-    .hero .kpi { display: flex; gap: 1.6rem; margin-top: 1.5rem; }
-    .hero .kpi div { display: flex; flex-direction: column; }
-    .hero .kpi b { font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em; }
-    .hero .kpi span { font: 500 11px/1 var(--font-mono); color: var(--muted); letter-spacing: .05em; text-transform: uppercase; margin-top: .25rem; }
-    .theme-btn {
-      flex-shrink: 0; display: inline-flex; align-items: center; gap: .5rem;
-      font: 500 12px/1 var(--font-mono); color: var(--ink-2); cursor: pointer;
-      background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
-      padding: .6rem .9rem; transition: border-color .15s, color .15s;
-    }
-    .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* sections */
-    section { padding: 4.5rem 0 0; scroll-margin-top: 1.5rem; }
-    .sec-head { display: flex; align-items: baseline; gap: 1.1rem; margin-bottom: 2rem; }
-    .sec-head .num { font: 600 13px/1 var(--font-mono); color: var(--accent); padding-top: .4rem; }
-    .sec-head h2 { margin: 0; font-size: 1.7rem; font-weight: 600; letter-spacing: -.025em; }
-    .sec-head p { margin: .35rem 0 0; color: var(--muted); font-size: .98rem; }
-
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; }
-    .col-full { grid-column: 1 / -1; }
-    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
-
-    /* specimen card */
-    .spec {
-      background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
-      padding: 1.1rem 1.1rem 1.2rem; display: flex; flex-direction: column; gap: 1rem;
-      box-shadow: var(--shadow); min-width: 0;
-    }
-    .spec > header { display: flex; flex-direction: column; gap: .3rem; }
-    .tag { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .55rem; font: 600 15px/1.25 var(--font-mono); letter-spacing: -.01em; color: var(--ink); }
-    .tag::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--accent); flex: none; }
-    .tag .nm { white-space: nowrap; } /* keep the component name on one line */
-    .tag b { font-size: .8em; } /* attribute hints, smaller than the title */
-    .tag b { color: var(--muted); font-weight: 500; } /* attribute hints */
-    .desc { font-size: .86rem; color: var(--muted); line-height: 1.45; }
-    .stage {
-      background: var(--stage); border: 1px solid var(--line); border-radius: 11px;
-      padding: 1.1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; min-width: 0;
-    }
-    .stage.block { display: block; }
-    .stage.center { justify-content: center; }
-    .stage.frame { padding: 0; overflow: hidden; }
-    .stage.tall { height: 440px; padding: 0; overflow: hidden; } /* clip the element to the rounded corners */
-
-    /* docked event console */
-    .console {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; height: var(--console-h);
-      background: var(--surface); border-top: 1px solid var(--line);
-      display: flex; flex-direction: column; overflow: hidden;
-      transition: height .22s ease; box-shadow: 0 -8px 24px -16px rgba(0,0,0,.25);
-    }
-    .console-head { flex: none; height: 39px; display: flex; align-items: center; justify-content: space-between; padding: 0 1rem 0 1.3rem; }
-    .console-toggle {
-      display: inline-flex; align-items: center; gap: .6rem; background: none; border: 0; cursor: pointer;
-      font: 500 11px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: .6rem 0;
-    }
-    .console-toggle:hover { color: var(--ink-2); }
-    .console-toggle .chev { color: var(--accent); transition: transform .2s ease; display: inline-block; }
-    :root.console-open .console-toggle .chev { transform: rotate(90deg); }
-    .console-count { font: 500 10px/1 var(--font-mono); color: var(--ink); background: var(--accent-ghost); border: 1px solid var(--line-2); border-radius: 999px; padding: .25rem .45rem; min-width: 1.5em; text-align: center; }
-    .console-count[data-n="0"] { opacity: .45; }
-    .console-tools { display: flex; gap: .4rem; opacity: 0; pointer-events: none; transition: opacity .15s; }
-    :root.console-open .console-tools { opacity: 1; pointer-events: auto; }
-    .console-tools button { font: 500 10.5px/1 var(--font-mono); color: var(--muted); background: none; border: 1px solid var(--line-2); border-radius: 7px; padding: .35rem .6rem; cursor: pointer; }
-    .console-tools button:hover { color: var(--accent); border-color: var(--accent); }
-    .console-body { flex: 1; overflow-y: auto; padding: .2rem 1.3rem 1rem; font: 400 11.5px/1.7 var(--font-mono); }
-    .console-body .line { color: var(--ink-2); white-space: pre-wrap; }
-    .console-body .line .ev { color: var(--accent); }
-    .console-body .empty { color: var(--muted); opacity: .6; }
-
-    .pill-btn { font: 500 12px/1 var(--font-mono); padding: .5rem .8rem; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); cursor: pointer; }
-    .pill-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    @media (max-width: 880px) {
-      .shell { grid-template-columns: 1fr; }
-      .index { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); flex-direction: row; flex-wrap: wrap; align-items: center; }
-      .index-foot, .toc small { display: none; }
-      .toc { flex-direction: row; flex-wrap: wrap; }
-      .toc a::after { display: none; }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
@@ -249,7 +51,7 @@
             <div><b>0</b><span>framework deps</span></div>
           </div>
         </div>
-        <button class="theme-btn" id="theme">◐&nbsp; theme</button>
+        <button class="theme-btn" id="theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> Theme</button>
       </header>
 
       <!-- 01 ───────────────────────── batteries-included ── -->
@@ -418,14 +220,14 @@
           <div class="spec col-full">
             <header><span class="tag"><span class="nm">kitn-response-stream</span> <b>mode="typewriter"</b></span><span class="desc">Reveals text character-by-character; emits <b>complete</b>.</span></header>
             <div class="stage block"><kitn-response-stream id="stream" speed="30"></kitn-response-stream>
-              <button class="pill-btn" id="replay" style="margin-top:.8rem">↻ replay</button></div>
+              <button class="pill-btn" id="replay" style="margin-top:.8rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Replay</button></div>
           </div>
           <div class="spec col-full">
             <header><span class="tag"><span class="nm">kitn-empty</span></span><span class="desc">Empty-state layout — <b>media</b> &amp; default slots.</span></header>
             <div class="stage block">
               <kitn-empty empty-title="No conversations yet" description="Start chatting to see them here.">
                 <span slot="media">✦</span>
-                <button class="pill-btn">New chat</button>
+                <button class="pill-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg> New chat</button>
               </kitn-empty>
             </div>
           </div>
@@ -448,7 +250,7 @@
     <div class="console-body" id="log-body"><span class="empty">Interactions appear here — click a model, send a message, remove an attachment…</span></div>
   </aside>
 
-  <!-- Shown only if the component bundle fails to load. -->
+  <!-- Shown only if the component bundle fails to load (see main.js boot guard). -->
   <div id="boot-error" style="display:none;position:fixed;inset:0;z-index:100;background:var(--bg);color:var(--ink);padding:3rem;font-family:var(--font-display)">
     <div style="max-width:640px;margin:0 auto">
       <h2 style="margin:0 0 1rem">The component bundle didn't load</h2>
@@ -458,191 +260,7 @@ npm run examples     <span style="opacity:.6"># serves the repo root on :8000</s
       <p>then open <a id="boot-link" href="#">http://localhost:8000/examples/composable/index.html</a></p>
     </div>
   </div>
-  <script>
-    setTimeout(() => {
-      if (!customElements.get('kitn-chat')) {
-        const link = document.getElementById('boot-link');
-        if (location.protocol.startsWith('http')) link.href = location.origin + '/examples/composable/index.html';
-        document.getElementById('boot-error').style.display = 'block';
-      }
-    }, 1200);
-  </script>
 
-  <script type="module">
-    // ── docked event console: collapsible, clearable, shares vertical space ──
-    const logBody = document.getElementById('log-body');
-    const countEl = document.getElementById('console-count');
-    let logCount = 0;
-    const log = (ev, detail) => {
-      logBody.querySelector('.empty')?.remove();
-      const line = document.createElement('div');
-      line.className = 'line';
-      line.innerHTML = `<span class="ev">${ev}</span> ${detail ?? ''}`;
-      logBody.prepend(line);
-      while (logBody.children.length > 40) logBody.lastChild.remove();
-      countEl.textContent = ++logCount;
-      countEl.dataset.n = logCount;
-    };
-    const setConsole = (open) => {
-      document.documentElement.classList.toggle('console-open', open);
-      document.getElementById('console-toggle').setAttribute('aria-expanded', open);
-    };
-    document.getElementById('console-toggle').addEventListener('click', () =>
-      setConsole(!document.documentElement.classList.contains('console-open')));
-    document.getElementById('console-hide').addEventListener('click', (e) => { e.stopPropagation(); setConsole(false); });
-    document.getElementById('console-clear').addEventListener('click', (e) => {
-      e.stopPropagation();
-      logBody.innerHTML = '<span class="empty">Cleared.</span>';
-      logCount = 0; countEl.textContent = '0'; countEl.dataset.n = '0';
-    });
-
-    // ── shared sample data ──
-    const models = [
-      { id: 'opus', name: 'Claude Opus', provider: 'Anthropic' },
-      { id: 'sonnet', name: 'Claude Sonnet', provider: 'Anthropic' },
-      { id: 'haiku', name: 'Claude Haiku', provider: 'Anthropic' },
-    ];
-    const ctx = { usedTokens: 48200, maxTokens: 200000, inputTokens: 31000, outputTokens: 17200, estimatedCost: 0.42 };
-    function imgData(fill, glyph) {
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="12" fill="${fill}"/><text x="48" y="60" font-size="42" text-anchor="middle" fill="white">${glyph}</text></svg>`;
-      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
-    }
-    const attachments = [
-      { id: '1', type: 'file', filename: 'architecture.png', mediaType: 'image/png', url: imgData('#7c3aed', '◆') },
-      { id: '2', type: 'file', filename: 'spec.pdf', mediaType: 'application/pdf' },
-      { id: '3', type: 'source-document', title: 'kitn.dev/docs', filename: 'kitn.dev' },
-    ];
-
-    // ── batteries-included ──
-    const chat = document.getElementById('chat');
-    chat.models = models; chat.currentModel = 'opus'; chat.context = ctx;
-    chat.suggestions = ['Summarize this thread', 'What changed in v0.3?'];
-    chat.messages = [{ id: '1', role: 'assistant', content: 'Hi! I\'m the **drop-in** `<kitn-chat>`. Ask me anything.', actions: ['copy', 'like', 'dislike'] }];
-    chat.addEventListener('submit', (e) => {
-      log('submit', e.detail.value);
-      chat.messages = [...chat.messages, { id: Date.now() + '', role: 'user', content: e.detail.value }];
-      chat.loading = true;
-      setTimeout(() => {
-        chat.messages = [...chat.messages, { id: Date.now() + 'a', role: 'assistant', content: 'Echo: ' + e.detail.value, actions: ['copy'] }];
-        chat.loading = false;
-      }, 600);
-    });
-    chat.addEventListener('modelchange', (e) => { chat.currentModel = e.detail.modelId; log('modelchange', e.detail.modelId); });
-    chat.addEventListener('messageaction', (e) => log('messageaction', `${e.detail.action} · ${e.detail.messageId}`));
-    chat.addEventListener('search', () => log('search', '(clicked)'));
-    chat.addEventListener('voice', () => log('voice', '(clicked)'));
-
-    const list = document.getElementById('list');
-    list.conversations = [
-      { id: 'c1', title: 'Web component architecture', scope: { type: 'document' }, messageCount: 12, lastMessageAt: '2026-06-11T10:00:00Z', updatedAt: '2026-06-11T10:00:00Z' },
-      { id: 'c2', title: 'Theming & tokens', scope: { type: 'document' }, messageCount: 5, lastMessageAt: '2026-06-10T09:00:00Z', updatedAt: '2026-06-10T09:00:00Z' },
-      { id: 'c3', title: 'Publishing pipeline', scope: { type: 'document' }, messageCount: 8, lastMessageAt: '2026-06-09T09:00:00Z', updatedAt: '2026-06-09T09:00:00Z' },
-    ];
-    list.activeId = 'c1';
-    list.addEventListener('select', (e) => { list.activeId = e.detail.id; log('select', e.detail.id); });
-    list.addEventListener('newchat', () => log('newchat'));
-
-    const pi = document.getElementById('pi');
-    pi.slashCommands = [
-      { id: 'summarize', label: '/summarize', description: 'Summarize the conversation', category: 'Actions' },
-      { id: 'translate', label: '/translate', description: 'Translate the last message', category: 'Actions' },
-      { id: 'image', label: '/image', description: 'Generate an image', category: 'Tools' },
-    ];
-    pi.addEventListener('slashselect', (e) => log('slashselect', e.detail.command.id));
-    pi.addEventListener('submit', (e) => { log('submit', e.detail.value); pi.value = ''; });
-
-    // ── messages ──
-    document.getElementById('msg-a').message = {
-      id: 'm-a', role: 'assistant',
-      content: 'Here\'s the plan, with a quick code sample:\n```js\nconst kit = useKitn();\n```',
-      reasoning: { text: 'The user wants X, so I should do Y then Z.', label: 'Reasoning' },
-      tools: [{ type: 'search', state: 'output-available', input: { query: 'kitn docs' }, output: { hits: 3 } }],
-      attachments: [attachments[0]],
-      actions: ['copy', 'like', 'dislike', 'regenerate'],
-    };
-    document.getElementById('msg-a').addEventListener('messageaction', (e) => log('messageaction', e.detail.action));
-    document.getElementById('msg-u').message = { id: 'm-u', role: 'user', content: 'How do I compose these myself?' };
-    document.getElementById('md').content = '### Markdown\nRenders **bold**, _italic_, `code`, and lists:\n- one\n- two\n\n> and blockquotes.';
-    document.getElementById('code').code = 'export function add(a: number, b: number): number {\n  return a + b;\n}';
-    document.getElementById('reason').text = 'First I parse the request, then I plan the steps, then I execute and verify.';
-    document.getElementById('tool').tool = { type: 'database_query', state: 'output-available', input: { table: 'users', limit: 10 }, output: { rows: 10, ms: 42 } };
-    document.getElementById('cot').steps = [
-      { label: 'Understand the request', content: 'The user wants a composable set.' },
-      { label: 'Design the API', content: 'Route 1: variant + flags + events.' },
-      { label: 'Build & verify' },
-    ];
-
-    // ── attachments & media ──
-    document.getElementById('att-inline').items = attachments;
-    const attGrid = document.getElementById('att-grid');
-    attGrid.items = attachments;
-    attGrid.addEventListener('remove', (e) => { attGrid.items = attGrid.items.filter((x) => x.id !== e.detail.id); log('remove', e.detail.id); });
-    document.getElementById('img').base64 = btoa(unescape(encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="16" fill="#7c3aed"/><text x="48" y="62" font-size="44" text-anchor="middle" fill="white">★</text></svg>')));
-    document.getElementById('img').setAttribute('media-type', 'image/svg+xml');
-    document.getElementById('srcs').sources = [
-      { href: 'https://kitn.dev', title: 'kitn — the kit', description: 'Composable SolidJS + web-component chat UI.', showFavicon: true },
-      { href: 'https://solidjs.com', title: 'SolidJS', description: 'A reactive UI library.', showFavicon: true },
-    ];
-
-    // ── composer ──
-    const suggs = document.getElementById('suggs');
-    suggs.suggestions = ['Explain the architecture', 'Show me a code example', 'What\'s deferred?'];
-    suggs.addEventListener('select', (e) => { pi.value = e.detail.value; log('select', e.detail.value); });
-    document.getElementById('fu').addEventListener('filesadded', (e) => log('filesadded', e.detail.files.map((f) => f.name).join(', ')));
-    const voice = document.getElementById('voice');
-    voice.transcribe = async () => { await new Promise((r) => setTimeout(r, 400)); return 'transcribed text'; };
-    voice.addEventListener('transcription', (e) => log('transcription', e.detail.text));
-    document.getElementById('think').addEventListener('stop', () => log('stop', 'thinking'));
-
-    // ── header & meta ──
-    const ms = document.getElementById('models');
-    ms.models = models; ms.currentModel = 'opus';
-    ms.addEventListener('modelchange', (e) => { ms.currentModel = e.detail.modelId; log('modelchange', e.detail.modelId); });
-    document.getElementById('ctx').context = ctx;
-    const scope = document.getElementById('scope');
-    scope.availableAuthors = ['Rob', 'Alex']; scope.availableTags = ['design', 'api'];
-    scope.addEventListener('scopechange', (e) => log('scopechange', JSON.stringify(e.detail.filters ?? 'all')));
-    document.getElementById('cp').addEventListener('select', () => log('select', 'checkpoint'));
-    document.getElementById('skills').skills = [{ id: 's1', name: 'web-search' }, { id: 's2', name: 'code' }];
-    const fb = document.getElementById('fb');
-    fb.addEventListener('helpful', () => log('feedback', 'helpful'));
-    fb.addEventListener('nothelpful', () => log('feedback', 'not helpful'));
-    fb.addEventListener('close', () => log('feedback', 'closed'));
-
-    // ── status & motion ──
-    const stream = document.getElementById('stream');
-    const streamText = 'This text reveals with a typewriter animation, streamed character by character — exactly how you\'d render a live assistant reply.';
-    const runStream = () => { stream.text = streamText; };
-    runStream();
-    stream.addEventListener('complete', () => log('complete', 'stream'));
-    document.getElementById('replay').addEventListener('click', () => { stream.text = ''; requestAnimationFrame(runStream); });
-
-    // ── theme toggle (OS-aware on first paint; explicit override on click) ──
-    let dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.getElementById('theme').addEventListener('click', () => {
-      dark = !dark;
-      const root = document.documentElement;
-      root.classList.toggle('dark', dark);
-      root.classList.toggle('light', !dark);
-      for (const el of document.querySelectorAll('*')) {
-        if (el.tagName.startsWith('KITN-')) el.setAttribute('theme', dark ? 'dark' : 'light');
-      }
-      log('theme', dark ? 'dark' : 'light');
-    });
-
-    // ── scroll-spy for the sidebar index ──
-    const links = [...document.querySelectorAll('.toc a')];
-    const byId = Object.fromEntries(links.map((a) => [a.getAttribute('href').slice(1), a]));
-    const spy = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting) {
-          links.forEach((l) => l.classList.remove('active'));
-          byId[e.target.id]?.classList.add('active');
-        }
-      }
-    }, { rootMargin: '-20% 0px -70% 0px' });
-    document.querySelectorAll('main section').forEach((s) => spy.observe(s));
-  </script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
