@@ -42,7 +42,7 @@ export function Collapsible(props: {
   const contentId = createUniqueId();
   return (
     <Ctx.Provider value={{ open, toggle, contentId }}>
-      <div class={local.class} data-expanded={open() ? '' : undefined} {...rest}>
+      <div class={local.class} data-expanded={open() ? '' : undefined} data-state={open() ? 'open' : 'closed'} {...rest}>
         {local.children}
       </div>
     </Ctx.Provider>
@@ -63,6 +63,7 @@ export function CollapsibleTrigger(props: {
     'aria-expanded': ctx.open(),
     'aria-controls': ctx.contentId,
     'data-expanded': ctx.open() ? '' : undefined,
+    'data-state': ctx.open() ? 'open' : 'closed',
     onClick: () => ctx.toggle(),
     class: local.class,
     ...rest,
@@ -73,15 +74,7 @@ export function CollapsibleTrigger(props: {
       {local.as
         ? local.as(triggerProps() as any)
         : (
-          <button
-            type="button"
-            aria-expanded={ctx.open()}
-            aria-controls={ctx.contentId}
-            data-expanded={ctx.open() ? '' : undefined}
-            onClick={() => ctx.toggle()}
-            class={local.class}
-            {...rest}
-          >
+          <button {...triggerProps()}>
             {local.children}
           </button>
         )}

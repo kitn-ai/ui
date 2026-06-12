@@ -44,4 +44,18 @@ describe('Collapsible', () => {
     fireEvent.click(trg);
     expect(trg.getAttribute('aria-expanded')).toBe('true');
   });
+
+  it('trigger exposes data-state reflecting open', () => {
+    const [open, setOpen] = createSignal(false);
+    render(() => (
+      <Collapsible open={open()} onOpenChange={setOpen}>
+        <CollapsibleTrigger data-testid="trg">Toggle</CollapsibleTrigger>
+        <CollapsibleContent>Body</CollapsibleContent>
+      </Collapsible>
+    ));
+    const trg = screen.getByTestId('trg');
+    expect(trg.getAttribute('data-state')).toBe('closed');
+    fireEvent.click(trg);
+    expect(trg.getAttribute('data-state')).toBe('open');
+  });
 });
