@@ -3,274 +3,430 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>kitn — composable web components showcase</title>
+  <title>kitn · composable web components</title>
 
   <!-- One import of the local build registers every kitn-* element. -->
   <script type="module" src="../../dist/kitn-chat.es.js"></script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
   <style>
-    /* The host page owns its own chrome tokens. The kit's ELEMENTS are
-       self-themed (compiled tokens live inside each Shadow DOM) and follow the
-       `theme` attribute — so the host stylesheet only styles the host chrome. */
-    /* Light by default; follow the OS unless the user explicitly overrides via
-       the toggle (.light / .dark on <html>). The kit's ELEMENTS already follow
-       the OS via their default theme="auto" — this keeps the host chrome in sync
-       so first paint matches on a dark-mode system (no toggle needed). */
+    /* ─────────────────────────── design tokens ─────────────────────────── */
     :root {
-      --bg: #ffffff; --panel: #fafafa; --fg: #18181b; --muted: #71717a;
-      --border: #e4e4e7; --accent: #7c3aed;
+      /* warm-paper light theme (default); follow OS unless explicitly overridden */
+      --bg:      #f4f2ec;
+      --surface: #fbfaf6;
+      --stage:   #efece3;
+      --ink:     #1b1a17;
+      --ink-2:   #423f38;
+      --muted:   #837e72;
+      --line:    #e2ddd0;
+      --line-2:  #d3cdbd;
+      --accent:  #6d28d9;
+      --accent-2:#8b5cf6;
+      --accent-ghost: rgba(109,40,217,.08);
+      --shadow:  0 1px 2px rgba(40,34,20,.04), 0 8px 24px -12px rgba(40,34,20,.12);
+      --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
       color-scheme: light;
     }
     @media (prefers-color-scheme: dark) {
       :root:not(.light) {
-        --bg: #171716; --panel: #1f1f1e; --fg: #f4f4f5; --muted: #a1a1aa;
-        --border: #2a2a28; --accent: #a78bfa;
+        --bg:      #121110;
+        --surface: #1a1917;
+        --stage:   #100f0e;
+        --ink:     #f1efe9;
+        --ink-2:   #cbc7bd;
+        --muted:   #908b80;
+        --line:    #2a2824;
+        --line-2:  #38352f;
+        --accent:  #a78bfa;
+        --accent-2:#c4b5fd;
+        --accent-ghost: rgba(167,139,250,.12);
+        --shadow:  0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
         color-scheme: dark;
       }
     }
     :root.dark {
-      --bg: #171716; --panel: #1f1f1e; --fg: #f4f4f5; --muted: #a1a1aa;
-      --border: #2a2a28; --accent: #a78bfa;
+      --bg:#121110; --surface:#1a1917; --stage:#100f0e; --ink:#f1efe9; --ink-2:#cbc7bd;
+      --muted:#908b80; --line:#2a2824; --line-2:#38352f; --accent:#a78bfa; --accent-2:#c4b5fd;
+      --accent-ghost: rgba(167,139,250,.12);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
       color-scheme: dark;
     }
     :root.light {
-      --bg: #ffffff; --panel: #fafafa; --fg: #18181b; --muted: #71717a;
-      --border: #e4e4e7; --accent: #7c3aed;
+      --bg:#f4f2ec; --surface:#fbfaf6; --stage:#efece3; --ink:#1b1a17; --ink-2:#423f38;
+      --muted:#837e72; --line:#e2ddd0; --line-2:#d3cdbd; --accent:#6d28d9; --accent-2:#8b5cf6;
+      --accent-ghost: rgba(109,40,217,.08);
+      --shadow: 0 1px 2px rgba(40,34,20,.04), 0 8px 24px -12px rgba(40,34,20,.12);
       color-scheme: light;
     }
-    * { box-sizing: border-box; }
+
+    /* ─────────────────────────── base ─────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      margin: 0; font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg); color: var(--fg);
-      transition: background .2s, color .2s;
+      margin: 0;
+      font-family: var(--font-display);
+      font-weight: 380;
+      background: var(--bg);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      transition: background .25s ease, color .25s ease;
     }
-    header {
-      position: sticky; top: 0; z-index: 10;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 1rem; padding: .85rem 1.5rem;
-      background: color-mix(in srgb, var(--bg) 85%, transparent);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
+    /* faint dot-grid atmosphere */
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: radial-gradient(var(--line-2) 1px, transparent 1px);
+      background-size: 26px 26px;
+      opacity: .35; mask-image: radial-gradient(ellipse 100% 80% at 50% 0%, #000, transparent 75%);
     }
-    header h1 { font-size: 1rem; margin: 0; font-weight: 650; letter-spacing: -.01em; }
-    header .sq { display: inline-block; width: 14px; height: 14px; border-radius: 4px;
-      background: var(--accent); margin-right: .5rem; vertical-align: -2px; }
-    .toolbtn {
-      font: inherit; font-size: .85rem; padding: .4rem .75rem; border-radius: 8px;
-      border: 1px solid var(--border); background: var(--panel); color: var(--fg);
-      cursor: pointer;
+    a { color: var(--accent); text-decoration: none; }
+
+    /* ─────────────────────────── shell ─────────────────────────── */
+    .shell { position: relative; z-index: 1; display: grid; grid-template-columns: 264px minmax(0, 1fr); max-width: 1320px; margin: 0 auto; }
+
+    /* ── sidebar index ── */
+    .index {
+      position: sticky; top: 0; align-self: start; height: 100vh;
+      padding: 2.2rem 1.6rem 2rem; border-right: 1px solid var(--line);
+      display: flex; flex-direction: column; gap: 1.6rem; overflow-y: auto;
     }
-    .toolbtn:hover { border-color: var(--accent); }
-    main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
-    section { margin-top: 3rem; }
-    section > h2 {
-      font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
-      color: var(--muted); margin: 0 0 1rem; font-weight: 600;
+    .brand { display: flex; align-items: center; gap: .65rem; }
+    .mark { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 22px; height: 22px; }
+    .mark i { background: var(--accent); border-radius: 3px; }
+    .mark i:nth-child(2), .mark i:nth-child(3) { opacity: .55; }
+    .brand b { font-weight: 700; font-size: 1.05rem; letter-spacing: -.02em; }
+    .brand small { font: 500 11px/1 var(--font-mono); color: var(--muted); letter-spacing: .04em; }
+
+    .toc { list-style: none; margin: 0; padding: 0; counter-reset: toc; display: flex; flex-direction: column; gap: .1rem; }
+    .toc a {
+      counter-increment: toc; display: flex; align-items: baseline; gap: .7rem;
+      padding: .5rem .55rem; border-radius: 9px; color: var(--muted);
+      font-size: .92rem; transition: color .15s, background .15s; position: relative;
     }
-    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-    .demo {
-      border: 1px solid var(--border); border-radius: 14px; background: var(--panel);
-      padding: 1rem; display: flex; flex-direction: column; gap: .75rem; min-width: 0;
+    .toc a::before { content: counter(toc, decimal-leading-zero); font: 500 11px/1 var(--font-mono); color: var(--line-2); width: 1.4em; }
+    .toc a:hover { color: var(--ink-2); background: var(--accent-ghost); }
+    .toc a.active { color: var(--ink); }
+    .toc a.active::before { color: var(--accent); }
+    .toc a.active::after { content: ''; position: absolute; left: -1.6rem; top: 50%; width: 3px; height: 18px; transform: translateY(-50%); background: var(--accent); border-radius: 0 3px 3px 0; }
+    .toc small { margin-left: auto; font: 500 10px/1 var(--font-mono); color: var(--line-2); }
+
+    .index-foot { margin-top: auto; font: 400 11.5px/1.6 var(--font-mono); color: var(--muted); }
+    .index-foot code { color: var(--ink-2); }
+
+    /* ── main ── */
+    main { padding: 0 clamp(1.5rem, 4vw, 4rem) 8rem; min-width: 0; }
+
+    /* hero */
+    .hero { padding: 4.5rem 0 3rem; display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; border-bottom: 1px solid var(--line); }
+    .hero h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 600; line-height: .98; letter-spacing: -.035em; margin: 0; }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero p { margin: 1rem 0 0; max-width: 42ch; color: var(--ink-2); font-size: 1.05rem; line-height: 1.5; }
+    .hero .kpi { display: flex; gap: 1.6rem; margin-top: 1.5rem; }
+    .hero .kpi div { display: flex; flex-direction: column; }
+    .hero .kpi b { font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em; }
+    .hero .kpi span { font: 500 11px/1 var(--font-mono); color: var(--muted); letter-spacing: .05em; text-transform: uppercase; margin-top: .25rem; }
+    .theme-btn {
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: .5rem;
+      font: 500 12px/1 var(--font-mono); color: var(--ink-2); cursor: pointer;
+      background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+      padding: .6rem .9rem; transition: border-color .15s, color .15s;
     }
-    .demo.span2 { grid-column: span 2; }
-    .demo > .tag {
-      font: 12px ui-monospace, SFMono-Regular, monospace; color: var(--muted);
-      display: flex; align-items: center; gap: .5rem;
+    .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* sections */
+    section { padding: 4.5rem 0 0; scroll-margin-top: 1.5rem; }
+    .sec-head { display: flex; align-items: baseline; gap: 1.1rem; margin-bottom: 2rem; }
+    .sec-head .num { font: 600 13px/1 var(--font-mono); color: var(--accent); padding-top: .4rem; }
+    .sec-head h2 { margin: 0; font-size: 1.7rem; font-weight: 600; letter-spacing: -.025em; }
+    .sec-head p { margin: .35rem 0 0; color: var(--muted); font-size: .98rem; }
+
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; }
+    .col-full { grid-column: 1 / -1; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+    /* specimen card */
+    .spec {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+      padding: 1.1rem 1.1rem 1.2rem; display: flex; flex-direction: column; gap: 1rem;
+      box-shadow: var(--shadow); min-width: 0;
     }
-    .demo > .tag b { color: var(--accent); font-weight: 600; }
-    .demo > .body { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; min-width: 0; }
-    .frame { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; height: 460px; }
+    .spec > header { display: flex; flex-direction: column; gap: .3rem; }
+    .tag { display: inline-flex; align-items: center; gap: .5rem; font: 500 12.5px/1 var(--font-mono); color: var(--ink); width: fit-content; }
+    .tag::before { content: ''; width: 6px; height: 6px; border-radius: 2px; background: var(--accent); flex: none; }
+    .tag b { color: var(--muted); font-weight: 500; } /* attribute hints */
+    .desc { font-size: .86rem; color: var(--muted); line-height: 1.45; }
+    .stage {
+      background: var(--stage); border: 1px solid var(--line); border-radius: 11px;
+      padding: 1.1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; min-width: 0;
+    }
+    .stage.block { display: block; }
+    .stage.center { justify-content: center; }
+    .stage.frame { padding: 0; overflow: hidden; }
+    .stage.tall { height: 440px; padding: 0; }
+
     /* event log */
-    #log {
-      position: fixed; bottom: 1rem; right: 1rem; width: 320px; max-height: 200px; overflow: auto;
-      background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
-      padding: .6rem .8rem; font: 11px ui-monospace, monospace; color: var(--fg);
-      box-shadow: 0 8px 30px rgba(0,0,0,.12); z-index: 20;
+    .log {
+      position: fixed; right: 1.1rem; bottom: 1.1rem; z-index: 40; width: 300px; max-height: 210px;
+      overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 13px;
+      padding: .7rem .85rem; box-shadow: var(--shadow); font: 400 11px/1.55 var(--font-mono);
     }
-    #log h3 { margin: 0 0 .4rem; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-    #log .line { white-space: pre-wrap; opacity: .9; }
-    #log .line .ev { color: var(--accent); }
+    .log h3 { margin: 0 0 .45rem; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
+    .log h3::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    .log .line { color: var(--ink-2); white-space: pre-wrap; }
+    .log .line .ev { color: var(--accent); }
+    @media (max-width: 600px) { .log { display: none; } }
+
+    .pill-btn { font: 500 11px/1 var(--font-mono); padding: .45rem .7rem; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+    .pill-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    @media (max-width: 880px) {
+      .shell { grid-template-columns: 1fr; }
+      .index { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); flex-direction: row; flex-wrap: wrap; align-items: center; }
+      .index-foot, .toc small { display: none; }
+      .toc { flex-direction: row; flex-wrap: wrap; }
+      .toc a::after { display: none; }
+    }
   </style>
 </head>
 
 <body>
-  <header>
-    <h1><span class="sq"></span>kitn — composable web components</h1>
-    <div style="display:flex;gap:.5rem;align-items:center">
-      <kitn-model-switcher id="hdr-models"></kitn-model-switcher>
-      <kitn-context-meter id="hdr-ctx"></kitn-context-meter>
-      <kitn-chat-scope-picker id="hdr-scope"></kitn-chat-scope-picker>
-      <button class="toolbtn" id="theme">☾ / ☼ theme</button>
-    </div>
-  </header>
-
-  <main>
-    <!-- ════════════════ Batteries-included ════════════════ -->
-    <section>
-      <h2>Batteries-included (the drop-in layer)</h2>
-      <div class="grid" style="grid-template-columns: 260px 1fr;">
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-conversation-list</b>&gt;</div>
-          <div class="frame" style="height:460px"><kitn-conversation-list id="list" style="display:block;height:100%"></kitn-conversation-list></div>
-        </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-chat</b>&gt; — full UI, set <code>.messages</code>, listen for <code>submit</code></div>
-          <div class="frame"><kitn-chat id="chat" style="display:block;height:100%" chat-title="Assistant" search voice></kitn-chat></div>
-        </div>
+  <div class="shell">
+    <!-- ───────────────────────── sidebar index ───────────────────────── -->
+    <aside class="index">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span><b>kitn</b><br><small>web components</small></span>
       </div>
-    </section>
-
-    <!-- ════════════════ Message rendering core ════════════════ -->
-    <section>
-      <h2>Message rendering — compose your own list</h2>
-      <div class="grid">
-        <div class="demo span2">
-          <div class="tag">&lt;<b>kitn-message</b>&gt; — assistant (reasoning + tool + attachment + actions)</div>
-          <div class="body" style="display:block"><kitn-message id="msg-a"></kitn-message></div>
-        </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-message</b> role="user"&gt;</div>
-          <div class="body" style="display:block"><kitn-message id="msg-u" role="user"></kitn-message></div>
-        </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-markdown</b>&gt;</div>
-          <div class="body" style="display:block"><kitn-markdown id="md"></kitn-markdown></div>
-        </div>
-        <div class="demo span2">
-          <div class="tag">&lt;<b>kitn-code-block</b> language="ts"&gt;</div>
-          <div class="body" style="display:block"><kitn-code-block id="code" language="ts"></kitn-code-block></div>
-        </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-reasoning</b> streaming&gt;</div>
-          <div class="body" style="display:block"><kitn-reasoning id="reason" label="Reasoning" streaming></kitn-reasoning></div>
-        </div>
-        <div class="demo span2">
-          <div class="tag">&lt;<b>kitn-tool</b> open&gt;</div>
-          <div class="body" style="display:block"><kitn-tool id="tool" open></kitn-tool></div>
-        </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-chain-of-thought</b>&gt;</div>
-          <div class="body" style="display:block"><kitn-chain-of-thought id="cot"></kitn-chain-of-thought></div>
-        </div>
+      <nav>
+        <ol class="toc">
+          <li><a href="#sec-dropin">Batteries-included <small>3</small></a></li>
+          <li><a href="#sec-messages">Messages <small>6</small></a></li>
+          <li><a href="#sec-media">Attachments &amp; media <small>5</small></a></li>
+          <li><a href="#sec-composer">Composer <small>3</small></a></li>
+          <li><a href="#sec-meta">Header &amp; meta <small>6</small></a></li>
+          <li><a href="#sec-status">Status &amp; motion <small>5</small></a></li>
+        </ol>
+      </nav>
+      <div class="index-foot">
+        compose in plain HTML,<br>React or Vue.<br><br>
+        <code>npm run examples</code>
       </div>
-    </section>
+    </aside>
 
-    <!-- ════════════════ Attachments ════════════════ -->
-    <section>
-      <h2>Attachments — one element, presentation via attributes</h2>
-      <div class="grid">
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-attachments</b> variant="inline" show-media-type&gt;</div>
-          <div class="body" style="display:block"><kitn-attachments id="att-inline" variant="inline" show-media-type></kitn-attachments></div>
-        </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-attachments</b> variant="grid" hover-card removable&gt;</div>
-          <div class="body" style="display:block"><kitn-attachments id="att-grid" variant="grid" hover-card removable></kitn-attachments></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ════════════════ Input ════════════════ -->
-    <section>
-      <h2>Input ecosystem</h2>
-      <div class="grid">
-        <div class="demo span2">
-          <div class="tag">&lt;<b>kitn-prompt-input</b>&gt; + &lt;<b>kitn-prompt-suggestions</b>&gt; — type <code>/</code> for slash commands</div>
-          <div class="body" style="display:block">
-            <kitn-prompt-suggestions id="suggs" style="margin-bottom:.6rem;display:block"></kitn-prompt-suggestions>
-            <kitn-prompt-input id="pi" placeholder="Ask anything…  (try typing /)"></kitn-prompt-input>
+    <!-- ───────────────────────── main ───────────────────────── -->
+    <main>
+      <header class="hero">
+        <div>
+          <h1>Composable<br><em>web components</em></h1>
+          <p>Every primitive in the kit, shipped as a framework-agnostic custom element. Drop them into any page — data in via properties, interactions out via events.</p>
+          <div class="kpi">
+            <div><b>28</b><span>elements</span></div>
+            <div><b>~101kb</b><span>gzip, shared</span></div>
+            <div><b>0</b><span>framework deps</span></div>
           </div>
         </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-file-upload</b>&gt; (default <code>&lt;slot&gt;</code>)</div>
-          <div class="body" style="display:block"><kitn-file-upload id="fu"></kitn-file-upload></div>
-        </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-voice-input</b>&gt; + &lt;<b>kitn-thinking-bar</b>&gt;</div>
-          <div class="body"><kitn-voice-input id="voice"></kitn-voice-input>
-            <kitn-thinking-bar id="think" text="Thinking…" stoppable style="flex:1"></kitn-thinking-bar></div>
-        </div>
-      </div>
-    </section>
+        <button class="theme-btn" id="theme">◐&nbsp; theme</button>
+      </header>
 
-    <!-- ════════════════ Meta & feedback ════════════════ -->
-    <section>
-      <h2>Meta & feedback</h2>
-      <div class="grid">
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-feedback-bar</b>&gt;</div>
-          <div class="body"><kitn-feedback-bar id="fb" bar-title="Was this helpful?"></kitn-feedback-bar></div>
+      <!-- 01 ───────────────────────── batteries-included ── -->
+      <section id="sec-dropin">
+        <div class="sec-head">
+          <span class="num">01</span>
+          <div><h2>Batteries-included</h2><p>The drop-in layer — whole surfaces in a single tag.</p></div>
         </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-message-skills</b>&gt; · &lt;<b>kitn-checkpoint</b>&gt;</div>
-          <div class="body"><kitn-message-skills id="skills"></kitn-message-skills>
-            <kitn-checkpoint id="cp" label="Checkpoint" tooltip="Restore"></kitn-checkpoint></div>
-        </div>
-        <div class="demo span2">
-          <div class="tag">&lt;<b>kitn-source-list</b>&gt;</div>
-          <div class="body" style="display:block"><kitn-source-list id="srcs"></kitn-source-list></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ════════════════ Indicators & leaves ════════════════ -->
-    <section>
-      <h2>Indicators, streaming & leaves</h2>
-      <div class="grid">
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-loader</b>&gt; — variants</div>
-          <div class="body">
-            <kitn-loader variant="circular"></kitn-loader>
-            <kitn-loader variant="dots"></kitn-loader>
-            <kitn-loader variant="wave"></kitn-loader>
-            <kitn-loader variant="bars"></kitn-loader>
-            <kitn-loader variant="pulse-dot"></kitn-loader>
+        <div class="grid">
+          <div class="spec">
+            <header><span class="tag">kitn-conversation-list</span><span class="desc">Sidebar of conversations with grouping &amp; selection.</span></header>
+            <div class="stage tall"><kitn-conversation-list id="list" style="display:block;height:100%"></kitn-conversation-list></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-chat</span><span class="desc">The full chat UI — set <b>.messages</b>, listen for <b>submit</b>. Try sending a message.</span></header>
+            <div class="stage tall"><kitn-chat id="chat" style="display:block;height:100%" chat-title="Assistant" search voice></kitn-chat></div>
+          </div>
+          <div class="spec col-full">
+            <header><span class="tag">kitn-prompt-input <b>slash-commands</b></span><span class="desc">Standalone composer with attachments &amp; a slash-command palette — type <b>/</b>.</span></header>
+            <div class="stage block"><kitn-prompt-input id="pi" placeholder="Ask anything…  (try typing /)"></kitn-prompt-input></div>
           </div>
         </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-text-shimmer</b>&gt;</div>
-          <div class="body"><kitn-text-shimmer text="Generating response…"></kitn-text-shimmer></div>
+      </section>
+
+      <!-- 02 ───────────────────────── messages ── -->
+      <section id="sec-messages">
+        <div class="sec-head">
+          <span class="num">02</span>
+          <div><h2>Messages</h2><p>Compose your own message list from the parts a turn is made of.</p></div>
         </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-image</b>&gt;</div>
-          <div class="body"><kitn-image id="img" alt="demo" style="width:80px"></kitn-image></div>
-        </div>
-        <div class="demo span2">
-          <div class="tag">&lt;<b>kitn-response-stream</b>&gt; — typewriter (replay)</div>
-          <div class="body" style="display:block"><kitn-response-stream id="stream" speed="30"></kitn-response-stream>
-            <button class="toolbtn" id="replay" style="margin-top:.6rem">↻ replay</button></div>
-        </div>
-        <div class="demo">
-          <div class="tag">&lt;<b>kitn-empty</b>&gt; (slots)</div>
-          <div class="body" style="display:block">
-            <kitn-empty empty-title="No conversations yet" description="Start chatting to see them here.">
-              <span slot="media">💬</span>
-              <button class="toolbtn">New chat</button>
-            </kitn-empty>
+        <div class="grid">
+          <div class="spec col-full">
+            <header><span class="tag">kitn-message <b>role="assistant"</b></span><span class="desc">One assistant turn: reasoning, a tool call, an attachment, and action buttons — from a single <b>message</b> object.</span></header>
+            <div class="stage block"><kitn-message id="msg-a"></kitn-message></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-message <b>role="user"</b></span><span class="desc">A user turn.</span></header>
+            <div class="stage block"><kitn-message id="msg-u" role="user"></kitn-message></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-markdown</span><span class="desc">Token-themed markdown with fenced code.</span></header>
+            <div class="stage block"><kitn-markdown id="md"></kitn-markdown></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-reasoning <b>streaming</b></span><span class="desc">Collapsible thinking; auto-opens while streaming.</span></header>
+            <div class="stage block"><kitn-reasoning id="reason" label="Reasoning" streaming></kitn-reasoning></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-chain-of-thought</span><span class="desc">Step-by-step reasoning with connectors.</span></header>
+            <div class="stage block"><kitn-chain-of-thought id="cot"></kitn-chain-of-thought></div>
+          </div>
+          <div class="spec col-full">
+            <header><span class="tag">kitn-code-block <b>language="ts"</b></span><span class="desc">A single highlighted code block with copy.</span></header>
+            <div class="stage block"><kitn-code-block id="code" language="ts"></kitn-code-block></div>
+          </div>
+          <div class="spec col-full">
+            <header><span class="tag">kitn-tool <b>open</b></span><span class="desc">A tool-call panel — input, output, and a state badge.</span></header>
+            <div class="stage block"><kitn-tool id="tool" open></kitn-tool></div>
           </div>
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <div id="log"><h3>Event log</h3><div id="log-body"></div></div>
+      <!-- 03 ───────────────────────── attachments & media ── -->
+      <section id="sec-media">
+        <div class="sec-head">
+          <span class="num">03</span>
+          <div><h2>Attachments &amp; media</h2><p>One element, presentation chosen by attribute.</p></div>
+        </div>
+        <div class="grid">
+          <div class="spec">
+            <header><span class="tag">kitn-attachments <b>variant="inline"</b></span><span class="desc">Icon + label chips.</span></header>
+            <div class="stage block"><kitn-attachments id="att-inline" variant="inline" show-media-type></kitn-attachments></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-attachments <b>variant="grid" hover-card removable</b></span><span class="desc">Visual tiles, hover preview, removable.</span></header>
+            <div class="stage block"><kitn-attachments id="att-grid" variant="grid" hover-card removable></kitn-attachments></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-image</span><span class="desc">base64 / byte-array image with skeleton.</span></header>
+            <div class="stage center"><kitn-image id="img" alt="demo" style="width:96px"></kitn-image></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-source <b>show-favicon</b></span><span class="desc">A citation link with a hover preview.</span></header>
+            <div class="stage"><kitn-source id="src" href="https://kitn.dev" headline="kitn — the kit" description="Composable SolidJS + web-component chat UI." show-favicon></kitn-source></div>
+          </div>
+          <div class="spec col-full">
+            <header><span class="tag">kitn-source-list</span><span class="desc">A wrapped row of citations.</span></header>
+            <div class="stage block"><kitn-source-list id="srcs"></kitn-source-list></div>
+          </div>
+        </div>
+      </section>
 
-  <!-- Shown only if the component bundle fails to load (e.g. opened as a file://
-       page, or served from the wrong directory). -->
-  <div id="boot-error" style="display:none;position:fixed;inset:0;z-index:100;background:var(--bg);color:var(--fg);padding:3rem;font:15px/1.6 system-ui,sans-serif">
-    <div style="max-width:640px;margin:0 auto">
-      <h2 style="margin:0 0 1rem">⚠️ The component bundle didn't load</h2>
-      <p>These are ES-module web components, so this page must be <strong>served over HTTP</strong> (not opened as a <code>file://</code> page) and served from the <strong>repo root</strong> (it loads the local build at <code>../../dist/</code>).</p>
-      <p>From the repository root:</p>
-      <pre style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow:auto">npm run build        <span style="opacity:.6"># once, to produce dist/</span>
-npm run examples     <span style="opacity:.6"># serves the repo root on :8000</span></pre>
-      <p>then open <a id="boot-link" href="#" style="color:var(--accent)">http://localhost:8000/examples/composable/index.html</a></p>
-    </div>
+      <!-- 04 ───────────────────────── composer ── -->
+      <section id="sec-composer">
+        <div class="sec-head">
+          <span class="num">04</span>
+          <div><h2>Composer</h2><p>Input affordances you can place anywhere.</p></div>
+        </div>
+        <div class="grid">
+          <div class="spec col-full">
+            <header><span class="tag">kitn-prompt-suggestions</span><span class="desc">Suggestion chips; clicking one fills the input above and fires <b>select</b>.</span></header>
+            <div class="stage block"><kitn-prompt-suggestions id="suggs"></kitn-prompt-suggestions></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-file-upload</span><span class="desc">Click / drag-drop dropzone; <b>slot</b>-overridable label.</span></header>
+            <div class="stage block"><kitn-file-upload id="fu"></kitn-file-upload></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-voice-input · kitn-thinking-bar</span><span class="desc">Mic capture (function property) + a shimmering “thinking” bar.</span></header>
+            <div class="stage"><kitn-voice-input id="voice"></kitn-voice-input><kitn-thinking-bar id="think" text="Thinking…" stoppable style="flex:1"></kitn-thinking-bar></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 ───────────────────────── header & meta ── -->
+      <section id="sec-meta">
+        <div class="sec-head">
+          <span class="num">05</span>
+          <div><h2>Header &amp; meta</h2><p>The small pieces around a conversation.</p></div>
+        </div>
+        <div class="grid">
+          <div class="spec">
+            <header><span class="tag">kitn-model-switcher</span><span class="desc">Model dropdown; emits <b>modelchange</b>.</span></header>
+            <div class="stage"><kitn-model-switcher id="models"></kitn-model-switcher></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-context-meter</span><span class="desc">Token-usage meter with a breakdown.</span></header>
+            <div class="stage"><kitn-context-meter id="ctx"></kitn-context-meter></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-chat-scope-picker</span><span class="desc">Scope a chat by author or tag.</span></header>
+            <div class="stage"><kitn-chat-scope-picker id="scope"></kitn-chat-scope-picker></div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-checkpoint · kitn-message-skills</span><span class="desc">Bookmark button + active-skill badges.</span></header>
+            <div class="stage"><kitn-checkpoint id="cp" label="Checkpoint" tooltip="Restore"></kitn-checkpoint><kitn-message-skills id="skills"></kitn-message-skills></div>
+          </div>
+          <div class="spec col-full">
+            <header><span class="tag">kitn-feedback-bar</span><span class="desc">Inline thumbs up/down banner.</span></header>
+            <div class="stage"><kitn-feedback-bar id="fb" bar-title="Was this helpful?"></kitn-feedback-bar></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 ───────────────────────── status & motion ── -->
+      <section id="sec-status">
+        <div class="sec-head">
+          <span class="num">06</span>
+          <div><h2>Status &amp; motion</h2><p>Loaders, streaming text, and empty states.</p></div>
+        </div>
+        <div class="grid">
+          <div class="spec">
+            <header><span class="tag">kitn-loader <b>variant=…</b></span><span class="desc">Twelve loader styles.</span></header>
+            <div class="stage center" style="gap:1.6rem">
+              <kitn-loader variant="circular"></kitn-loader>
+              <kitn-loader variant="dots"></kitn-loader>
+              <kitn-loader variant="wave"></kitn-loader>
+              <kitn-loader variant="bars"></kitn-loader>
+              <kitn-loader variant="pulse-dot"></kitn-loader>
+            </div>
+          </div>
+          <div class="spec">
+            <header><span class="tag">kitn-text-shimmer</span><span class="desc">Animated shimmering text.</span></header>
+            <div class="stage center"><kitn-text-shimmer text="Generating response…"></kitn-text-shimmer></div>
+          </div>
+          <div class="spec col-full">
+            <header><span class="tag">kitn-response-stream <b>mode="typewriter"</b></span><span class="desc">Reveals text character-by-character; emits <b>complete</b>.</span></header>
+            <div class="stage block"><kitn-response-stream id="stream" speed="30"></kitn-response-stream>
+              <button class="pill-btn" id="replay" style="margin-top:.8rem">↻ replay</button></div>
+          </div>
+          <div class="spec col-full">
+            <header><span class="tag">kitn-empty</span><span class="desc">Empty-state layout — <b>media</b> &amp; default slots.</span></header>
+            <div class="stage block">
+              <kitn-empty empty-title="No conversations yet" description="Start chatting to see them here.">
+                <span slot="media">✦</span>
+                <button class="pill-btn">New chat</button>
+              </kitn-empty>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
+  <div class="log"><h3>event log</h3><div id="log-body"></div></div>
+
+  <!-- Shown only if the component bundle fails to load. -->
+  <div id="boot-error" style="display:none;position:fixed;inset:0;z-index:100;background:var(--bg);color:var(--ink);padding:3rem;font-family:var(--font-display)">
+    <div style="max-width:640px;margin:0 auto">
+      <h2 style="margin:0 0 1rem">The component bundle didn't load</h2>
+      <p style="color:var(--ink-2);line-height:1.6">These are ES-module web components, so this page must be <strong>served over HTTP</strong> (not opened as a <code>file://</code> page) from the <strong>repo root</strong> (it loads the local build at <code>../../dist/</code>).</p>
+      <pre style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1rem;overflow:auto;font-family:var(--font-mono)">npm run build        <span style="opacity:.6"># once, to produce dist/</span>
+npm run examples     <span style="opacity:.6"># serves the repo root on :8000</span></pre>
+      <p>then open <a id="boot-link" href="#">http://localhost:8000/examples/composable/index.html</a></p>
+    </div>
+  </div>
   <script>
-    // Boot guard: if the bundle didn't register the elements shortly after load,
-    // show clear instructions instead of empty boxes.
     setTimeout(() => {
       if (!customElements.get('kitn-chat')) {
         const link = document.getElementById('boot-link');
@@ -290,39 +446,28 @@ npm run examples     <span style="opacity:.6"># serves the repo root on :8000</s
       while (el.children.length > 12) el.lastChild.remove();
     };
 
-    // ---- shared sample data ----
+    // ── shared sample data ──
     const models = [
       { id: 'opus', name: 'Claude Opus', provider: 'Anthropic' },
       { id: 'sonnet', name: 'Claude Sonnet', provider: 'Anthropic' },
       { id: 'haiku', name: 'Claude Haiku', provider: 'Anthropic' },
     ];
     const ctx = { usedTokens: 48200, maxTokens: 200000, inputTokens: 31000, outputTokens: 17200, estimatedCost: 0.42 };
+    function imgData(fill, glyph) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="12" fill="${fill}"/><text x="48" y="60" font-size="42" text-anchor="middle" fill="white">${glyph}</text></svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
     const attachments = [
       { id: '1', type: 'file', filename: 'architecture.png', mediaType: 'image/png', url: imgData('#7c3aed', '◆') },
       { id: '2', type: 'file', filename: 'spec.pdf', mediaType: 'application/pdf' },
       { id: '3', type: 'source-document', title: 'kitn.dev/docs', filename: 'kitn.dev' },
     ];
-    function imgData(fill, glyph) {
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="12" fill="${fill}"/><text x="48" y="60" font-size="42" text-anchor="middle" fill="white">${glyph}</text></svg>`;
-      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
-    }
 
-    // ---- header ----
-    const hm = document.getElementById('hdr-models');
-    hm.models = models; hm.currentModel = 'opus';
-    hm.addEventListener('modelchange', (e) => { hm.currentModel = e.detail.modelId; log('modelchange', e.detail.modelId); });
-    document.getElementById('hdr-ctx').context = ctx;
-    const scope = document.getElementById('hdr-scope');
-    scope.availableAuthors = ['Rob', 'Alex']; scope.availableTags = ['design', 'api'];
-    scope.addEventListener('scopechange', (e) => log('scopechange', JSON.stringify(e.detail.filters ?? 'all')));
-
-    // ---- <kitn-chat> ----
+    // ── batteries-included ──
     const chat = document.getElementById('chat');
     chat.models = models; chat.currentModel = 'opus'; chat.context = ctx;
     chat.suggestions = ['Summarize this thread', 'What changed in v0.3?'];
-    chat.messages = [
-      { id: '1', role: 'assistant', content: 'Hi! I\'m the **drop-in** `<kitn-chat>`. Ask me anything.', actions: ['copy', 'like', 'dislike'] },
-    ];
+    chat.messages = [{ id: '1', role: 'assistant', content: 'Hi! I\'m the **drop-in** `<kitn-chat>`. Ask me anything.', actions: ['copy', 'like', 'dislike'] }];
     chat.addEventListener('submit', (e) => {
       log('submit', e.detail.value);
       chat.messages = [...chat.messages, { id: Date.now() + '', role: 'user', content: e.detail.value }];
@@ -332,12 +477,11 @@ npm run examples     <span style="opacity:.6"># serves the repo root on :8000</s
         chat.loading = false;
       }, 600);
     });
-    chat.addEventListener('modelchange', (e) => { chat.currentModel = e.detail.modelId; log('chat.modelchange', e.detail.modelId); });
-    chat.addEventListener('messageaction', (e) => log('messageaction', `${e.detail.action} on ${e.detail.messageId}`));
+    chat.addEventListener('modelchange', (e) => { chat.currentModel = e.detail.modelId; log('modelchange', e.detail.modelId); });
+    chat.addEventListener('messageaction', (e) => log('messageaction', `${e.detail.action} · ${e.detail.messageId}`));
     chat.addEventListener('search', () => log('search', '(clicked)'));
     chat.addEventListener('voice', () => log('voice', '(clicked)'));
 
-    // ---- conversation list ----
     const list = document.getElementById('list');
     list.conversations = [
       { id: 'c1', title: 'Web component architecture', scope: { type: 'document' }, messageCount: 12, lastMessageAt: '2026-06-11T10:00:00Z', updatedAt: '2026-06-11T10:00:00Z' },
@@ -348,7 +492,16 @@ npm run examples     <span style="opacity:.6"># serves the repo root on :8000</s
     list.addEventListener('select', (e) => { list.activeId = e.detail.id; log('select', e.detail.id); });
     list.addEventListener('newchat', () => log('newchat'));
 
-    // ---- message core ----
+    const pi = document.getElementById('pi');
+    pi.slashCommands = [
+      { id: 'summarize', label: '/summarize', description: 'Summarize the conversation', category: 'Actions' },
+      { id: 'translate', label: '/translate', description: 'Translate the last message', category: 'Actions' },
+      { id: 'image', label: '/image', description: 'Generate an image', category: 'Tools' },
+    ];
+    pi.addEventListener('slashselect', (e) => log('slashselect', e.detail.command.id));
+    pi.addEventListener('submit', (e) => { log('submit', e.detail.value); pi.value = ''; });
+
+    // ── messages ──
     document.getElementById('msg-a').message = {
       id: 'm-a', role: 'assistant',
       content: 'Here\'s the plan, with a quick code sample:\n```js\nconst kit = useKitn();\n```',
@@ -357,9 +510,8 @@ npm run examples     <span style="opacity:.6"># serves the repo root on :8000</s
       attachments: [attachments[0]],
       actions: ['copy', 'like', 'dislike', 'regenerate'],
     };
-    document.getElementById('msg-a').addEventListener('messageaction', (e) => log('msg.action', e.detail.action));
+    document.getElementById('msg-a').addEventListener('messageaction', (e) => log('messageaction', e.detail.action));
     document.getElementById('msg-u').message = { id: 'm-u', role: 'user', content: 'How do I compose these myself?' };
-
     document.getElementById('md').content = '### Markdown\nRenders **bold**, _italic_, `code`, and lists:\n- one\n- two\n\n> and blockquotes.';
     document.getElementById('code').code = 'export function add(a: number, b: number): number {\n  return a + b;\n}';
     document.getElementById('reason').text = 'First I parse the request, then I plan the steps, then I execute and verify.';
@@ -370,58 +522,53 @@ npm run examples     <span style="opacity:.6"># serves the repo root on :8000</s
       { label: 'Build & verify' },
     ];
 
-    // ---- attachments ----
+    // ── attachments & media ──
     document.getElementById('att-inline').items = attachments;
     const attGrid = document.getElementById('att-grid');
     attGrid.items = attachments;
     attGrid.addEventListener('remove', (e) => { attGrid.items = attGrid.items.filter((x) => x.id !== e.detail.id); log('remove', e.detail.id); });
-
-    // ---- input ----
-    const suggs = document.getElementById('suggs');
-    suggs.suggestions = ['Explain the architecture', 'Show me a code example', 'What\'s deferred?'];
-    suggs.addEventListener('select', (e) => { document.getElementById('pi').value = e.detail.value; log('suggestion', e.detail.value); });
-    const pi = document.getElementById('pi');
-    pi.slashCommands = [
-      { id: 'summarize', label: '/summarize', description: 'Summarize the conversation', category: 'Actions' },
-      { id: 'translate', label: '/translate', description: 'Translate the last message', category: 'Actions' },
-      { id: 'image', label: '/image', description: 'Generate an image', category: 'Tools' },
-    ];
-    pi.addEventListener('slashselect', (e) => log('slashselect', e.detail.command.id));
-    pi.addEventListener('submit', (e) => { log('pi.submit', e.detail.value); pi.value = ''; });
-    document.getElementById('fu').addEventListener('filesadded', (e) => log('filesadded', e.detail.files.map((f) => f.name).join(', ')));
-    const voice = document.getElementById('voice');
-    voice.transcribe = async () => { await new Promise((r) => setTimeout(r, 400)); return 'transcribed text'; };
-    voice.addEventListener('transcription', (e) => log('transcription', e.detail.text));
-    document.getElementById('think').addEventListener('stop', () => log('thinking.stop'));
-
-    // ---- meta ----
-    document.getElementById('fb').addEventListener('helpful', () => log('feedback', 'helpful'));
-    document.getElementById('fb').addEventListener('nothelpful', () => log('feedback', 'not helpful'));
-    document.getElementById('fb').addEventListener('close', () => log('feedback', 'closed'));
-    document.getElementById('skills').skills = [{ id: 's1', name: 'web-search' }, { id: 's2', name: 'code' }];
-    document.getElementById('cp').addEventListener('select', () => log('checkpoint', 'restore'));
+    document.getElementById('img').base64 = btoa(unescape(encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="16" fill="#7c3aed"/><text x="48" y="62" font-size="44" text-anchor="middle" fill="white">★</text></svg>')));
+    document.getElementById('img').setAttribute('media-type', 'image/svg+xml');
     document.getElementById('srcs').sources = [
       { href: 'https://kitn.dev', title: 'kitn — the kit', description: 'Composable SolidJS + web-component chat UI.', showFavicon: true },
       { href: 'https://solidjs.com', title: 'SolidJS', description: 'A reactive UI library.', showFavicon: true },
     ];
 
-    // ---- leaves ----
-    document.getElementById('img').base64 = btoa(unescape(encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" rx="14" fill="#7c3aed"/><text x="40" y="52" font-size="36" text-anchor="middle" fill="white">★</text></svg>')));
-    document.getElementById('img').setAttribute('media-type', 'image/svg+xml');
+    // ── composer ──
+    const suggs = document.getElementById('suggs');
+    suggs.suggestions = ['Explain the architecture', 'Show me a code example', 'What\'s deferred?'];
+    suggs.addEventListener('select', (e) => { pi.value = e.detail.value; log('select', e.detail.value); });
+    document.getElementById('fu').addEventListener('filesadded', (e) => log('filesadded', e.detail.files.map((f) => f.name).join(', ')));
+    const voice = document.getElementById('voice');
+    voice.transcribe = async () => { await new Promise((r) => setTimeout(r, 400)); return 'transcribed text'; };
+    voice.addEventListener('transcription', (e) => log('transcription', e.detail.text));
+    document.getElementById('think').addEventListener('stop', () => log('stop', 'thinking'));
+
+    // ── header & meta ──
+    const ms = document.getElementById('models');
+    ms.models = models; ms.currentModel = 'opus';
+    ms.addEventListener('modelchange', (e) => { ms.currentModel = e.detail.modelId; log('modelchange', e.detail.modelId); });
+    document.getElementById('ctx').context = ctx;
+    const scope = document.getElementById('scope');
+    scope.availableAuthors = ['Rob', 'Alex']; scope.availableTags = ['design', 'api'];
+    scope.addEventListener('scopechange', (e) => log('scopechange', JSON.stringify(e.detail.filters ?? 'all')));
+    document.getElementById('cp').addEventListener('select', () => log('select', 'checkpoint'));
+    document.getElementById('skills').skills = [{ id: 's1', name: 'web-search' }, { id: 's2', name: 'code' }];
+    const fb = document.getElementById('fb');
+    fb.addEventListener('helpful', () => log('feedback', 'helpful'));
+    fb.addEventListener('nothelpful', () => log('feedback', 'not helpful'));
+    fb.addEventListener('close', () => log('feedback', 'closed'));
+
+    // ── status & motion ──
     const stream = document.getElementById('stream');
     const streamText = 'This text reveals with a typewriter animation, streamed character by character — exactly how you\'d render a live assistant reply.';
     const runStream = () => { stream.text = streamText; };
     runStream();
-    stream.addEventListener('complete', () => log('stream', 'complete'));
+    stream.addEventListener('complete', () => log('complete', 'stream'));
     document.getElementById('replay').addEventListener('click', () => { stream.text = ''; requestAnimationFrame(runStream); });
 
-    // ---- theme toggle ----
-    // On load nothing is forced: the host chrome follows the OS (CSS media
-    // query) and the elements follow it too (default theme="auto"), so first
-    // paint is already consistent. The toggle starts from the OS value and
-    // applies an explicit override (.light/.dark on <html> + theme attr on every
-    // element), which beats both the media query and auto.
+    // ── theme toggle (OS-aware on first paint; explicit override on click) ──
     let dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.getElementById('theme').addEventListener('click', () => {
       dark = !dark;
@@ -433,6 +580,19 @@ npm run examples     <span style="opacity:.6"># serves the repo root on :8000</s
       }
       log('theme', dark ? 'dark' : 'light');
     });
+
+    // ── scroll-spy for the sidebar index ──
+    const links = [...document.querySelectorAll('.toc a')];
+    const byId = Object.fromEntries(links.map((a) => [a.getAttribute('href').slice(1), a]));
+    const spy = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          links.forEach((l) => l.classList.remove('active'));
+          byId[e.target.id]?.classList.add('active');
+        }
+      }
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    document.querySelectorAll('main section').forEach((s) => spy.observe(s));
   </script>
 </body>
 </html>
