@@ -24,11 +24,13 @@
       "default": "./dist/kitn-chat.es.js"
     },
     "./theme.css": "./theme.css",
-    "./theme.tokens.css": "./dist/theme.tokens.css"
+    "./theme.tokens.css": "./dist/theme.tokens.css",
+    "./react": "./frameworks/react/index.tsx"
   },
   "files": [
     "dist",
     "src",
+    "frameworks",
     "theme.css"
   ],
   "scripts": {
@@ -40,6 +42,7 @@
     "build:api": "node scripts/gen-element-api.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.react.json",
     "dev": "npm run build:css && storybook dev -p 6006",
     "storybook": "npm run build:css && storybook dev -p 6006",
     "build-storybook": "npm run build:css && storybook build",
@@ -83,6 +86,12 @@
     "vitest": "^4.1.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.9.0"
+    "solid-js": "^1.9.0",
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   }
 }

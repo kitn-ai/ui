@@ -1,0 +1,15 @@
+{
+  "comment": "Typechecks the generated React wrappers (react/) in a React-JSX context, separate from the Solid-JSX src/ build.",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["frameworks/**/*.tsx"]
+}

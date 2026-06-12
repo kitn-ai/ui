@@ -37,20 +37,12 @@ const isScalar = (t) => {
 const toAttr = (name) => name.replace(/([A-Z])/g, '-$1').toLowerCase();
 const jsdocOf = (sym) => ts.displayPartsToString(sym.getDocumentationComment(checker)).replace(/\s+/g, ' ').trim();
 
-// The kit's exported object types — kept by name (consumers import them). Other
-// named object types (local interfaces like Step/Skill) get expanded inline;
-// string-literal-union aliases (ProseSize, Mode…) also expand; lib types
-// (Uint8Array, Blob, Promise, AsyncIterable) stay opaque.
-const IMPORTS = {
-  ModelOption: '../types',
-  ConversationSummary: '../types',
-  ConversationGroup: '../types',
-  AttachmentData: '../components/attachments',
-  ToolPart: '../components/tool',
-  SlashCommandItem: '../components/slash-command',
-  ChatMessage: './chat-types',
-  ChatMessageAction: './chat-types',
-};
+// Generated types are FULLY SELF-CONTAINED: every named type is expanded inline
+// (no imports), so the type files don't drag the kit's Solid `.tsx` sources into
+// a consumer's (or React-JSX) compilation. Only lib types (Uint8Array, Blob,
+// Promise, AsyncIterable) stay opaque. Keep this empty unless you have a
+// JSX-free type module to import from.
+const IMPORTS = {};
 const IMPORTABLE = new Set(Object.keys(IMPORTS));
 
 const isLibSym = (sym) => {
