@@ -3,6 +3,10 @@
 import './conversation-list';
 import './prompt-input';
 import './chat';
+// Composable leaf elements (spike — see docs/handoff + examples/composable)
+import './thinking-bar';
+import './model-switcher';
+import './attachments';
 
 export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';

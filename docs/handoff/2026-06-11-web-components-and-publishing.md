@@ -38,6 +38,34 @@ Real action icons (was "C/L/D"); web-component dark mode via `theme` attr (was b
 - Optionally **surface more primitives** in the web component (ChainOfThought, FeedbackBar, thinking/shimmer while `loading`).
 - Polish the React/Solid examples; consider a Vue example.
 
+## Composable web components — spike (branch `spike/composable-web-components`, uncommitted)
+
+R&D into shipping the *individual* primitives as web components so consumers can compose in plain HTML/React/Vue, not only use the batteries-included `<kitn-chat>`. **Verdict so far: the approach holds; staying on Solid + `solid-element` (no Stencil rewrite).**
+
+**Decision — Solid, not Stencil.** The web-component layer is a thin facade; the library's actual value is the ~50 SolidJS primitives + **Kobalte** (accessible Dropdown/HoverCard/Dialog/Collapsible/etc.). A Stencil rewrite would mean rebuilding that whole layer and replacing Kobalte for benefits that are mostly DX polish — which we can get incrementally on Solid. Revisit only if the product becomes web-component-first (SSR/hydration + auto framework wrappers as core, Solid layer not strategic).
+
+**Composition model (settled).** Each element is its own complete Solid tree; composition happens at the **data layer** (properties in, CustomEvents out), NOT by splitting compound components across shadow roots. Three routes considered:
+- **Route 1 (default):** one configurable element per feature. Presentation that the Solid layer expresses by composing sub-parts becomes **`variant` attribute + boolean flags**. (e.g. `<kitn-attachments variant="inline">` = icon+label; `variant="grid" hover-card removable` = visual+hover+remove.)
+- **Route 2 (opt-in, designed-but-deferred):** a `<template slot="…">` for genuinely-custom content (e.g. a bespoke hover-card body). Not built yet.
+- **Route 3 (rejected):** nested per-sub-part elements (`<kitn-attachment-preview>` reading parent state) — Solid Context does NOT cross shadow-root boundaries, so this means re-plumbing context over the DOM. Too much work, fragile.
+- The **SolidJS primitive layer** remains the escape hatch below all of this. Not every export becomes an element — hooks (`useTextStream`…) and generic UI primitives (`Button`, `Dialog`…) stay Solid-only. Roster is ~15–20 feature elements.
+
+**Built in the spike:**
+- `define.tsx` — (1) **shared constructable `CSSStyleSheet`** adopted into every shadow root via `adoptedStyleSheets` (was: full ~77 KB compiled CSS inline-`<style>` per instance; inline is now only a fallback). Verified: 4 elements → 1 shared sheet. (2) `defineKitnElement<P, E>` now bakes in **typed `dispatch`** (event map `E`) and a **`flag(name)`** helper on the facade context.
+- New elements: `<kitn-thinking-bar>` (leaf; `stop`), `<kitn-model-switcher>` (`modelchange`), `<kitn-attachments>` (the Route 1 exemplar: `variant` + `hover-card`/`removable`/`show-media-type` flags; `remove`). Registered in `register.ts`.
+- `examples/composable/` — `MOCKUP.html` (approved API sketch) + functional `index.html` test page. Verified headless via Playwright (render, events, shared sheet, dark mode). **Bundle: ~90.4 KB gzip (was ~89) — +~1.4 KB for 3 elements + the shared-sheet refactor.** Confirms per-element marginal cost is tiny; full roster projected ~100–120 KB gzip.
+
+**Findings / gaps surfaced:**
+- **Bare boolean attributes parse to `undefined`** in `component-register` (`<el removable>` → `undefined`, not `true`). The new `flag()` fixes it. **This also affects the EXISTING `<kitn-chat>`** — its `loading`/`search`/`voice` attributes only *seem* to work because their default is `false`; `<kitn-chat loading>` would NOT lock the input. **TODO: apply `flag()` to `<kitn-chat>` + fix `docs/web-components.md`.**
+- **`theme.css:7` ships `@import "tw-animate-css";`** — resolves only inside a Tailwind build. Loaded directly via `<link>` (as the docs recommend), the browser 404s on it. Tokens still work; shadow-DOM animations use the built `compiled.css`. Cosmetic console error on the happy path — pre-existing, worth fixing (strip/inline it in the distributed `theme.css`, or drop it since direct consumers only need the tokens).
+- **Cosmetic:** non-image attachments in `variant="grid"` render as thin icon pills (pre-existing primitive behavior, not the wrapper) — polish pass if grid ships.
+
+**Next steps (in order):**
+1. Expand the element roster a bit more to stress the conventions before going wide.
+2. Apply `flag()` to `<kitn-chat>` booleans; correct the docs.
+3. **Custom-elements-manifest** (`@custom-elements-manifest/analyzer`) → auto-generate React/Vue wrappers + typed `HTMLElementTagNameMap` + API docs. The user is keen on the framework-wrapper DX; this gets it without a Stencil rewrite.
+4. Fix the `theme.css` `@import` 404.
+
 ## Working norms / gotchas
 - **Review before commit/merge** (memory `review-before-commit`) — though the user has been actively authorizing merges + releases this session.
 - `gh pr edit`/`gh pr merge` trip on a **Projects-classic GraphQL deprecation** in this repo. Use REST: `gh api --method PUT repos/kitn-ai/chat/pulls/N/merge -f merge_method=merge` and `gh api --method PATCH repos/kitn-ai/chat/pulls/N -F body=@file`.

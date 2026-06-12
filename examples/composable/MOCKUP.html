@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kitn — composable web components (MOCKUP, non-functional)</title>
+
+  <!--
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │  THIS IS A VISUAL MOCKUP — IT DOES NOT RUN YET.                       │
+    │  Its only job is to show the *shape* of the composable API so we can  │
+    │  agree on it before building the spike. Tag names / props / events    │
+    │  here are proposals, not final.                                       │
+    └─────────────────────────────────────────────────────────────────────┘
+  -->
+
+  <!-- 1) ONE import. Same single ESM bundle as today. Registers every
+          kitn-* element as a side effect. The host never needs SolidJS. -->
+  <script type="module" src="https://unpkg.com/@kitnai/chat/elements"></script>
+
+  <!-- 2) Tokens. Same theme.css as today; re-brand via --color-* on :root. -->
+  <link rel="stylesheet" href="https://unpkg.com/@kitnai/chat/theme.css" />
+
+  <style>
+    /* Layout/spacing BETWEEN composed elements is the HOST's job, because each
+       element is its own shadow root and can't style its siblings. This is the
+       main ergonomic difference vs. the all-in-one <kitn-chat>. */
+    body { margin: 0; height: 100vh; font-family: system-ui, sans-serif; }
+    .app   { display: grid; grid-template-columns: 260px 1fr; height: 100%; }
+    .main  { display: flex; flex-direction: column; min-width: 0; }
+    .stream{ flex: 1; overflow-y: auto; padding: 1rem; display: flex;
+             flex-direction: column; gap: 1rem; }
+    .composer { border-top: 1px solid var(--color-border); padding: 1rem; }
+    .header   { display: flex; align-items: center; justify-content: space-between;
+                padding: 0 1.25rem; height: 56px;
+                border-bottom: 1px solid var(--color-border); }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- ───────────────────────── SIDEBAR ─────────────────────────
+         A self-contained element. Data in via property, actions out via events.
+         (This one already exists today as <kitn-conversation-list>.) -->
+    <kitn-conversation-list id="sidebar"></kitn-conversation-list>
+
+    <div class="main">
+
+      <!-- ───────────────────────── HEADER (composed by hand) ─────────────
+           Instead of the batteries-included header, the developer arranges
+           their OWN leaf elements. Each is independent; the host lays them out. -->
+      <div class="header">
+        <span style="font-weight:600">My Custom Chat</span>
+        <div style="display:flex; gap:.5rem; align-items:center">
+          <!-- leaf element: emits `modelchange` -->
+          <kitn-model-switcher id="models"></kitn-model-switcher>
+          <!-- leaf element: token meter, data via property -->
+          <kitn-context-meter id="ctx"></kitn-context-meter>
+        </div>
+      </div>
+
+      <!-- ───────────────────────── MESSAGE STREAM ─────────────────
+           Developer owns the loop. Each message is its own element.
+           You could v-for / .map these from your framework, or build them
+           by hand as below. -->
+      <div class="stream" id="stream">
+
+        <!-- An assistant turn, composed from several leaf elements that the
+             developer stacks themselves. Each is independent; no shared Solid
+             context across them — they just take data + emit events. -->
+        <kitn-message role="assistant">
+          <!-- optional "thinking" indicator while a reply streams (one of the
+               primitives NOT in today's <kitn-chat>) -->
+          <kitn-thinking-bar label="Thinking…"></kitn-thinking-bar>
+
+          <!-- collapsible reasoning block; `text` set as a property in JS -->
+          <kitn-reasoning id="r1" label="Reasoning"></kitn-reasoning>
+
+          <!-- a tool-call panel; `tool` (object) set as a property -->
+          <kitn-tool id="t1"></kitn-tool>
+
+          <!-- the actual answer; markdown rendered inside the element -->
+          <kitn-message-content markdown id="a1"></kitn-message-content>
+
+          <!-- feedback row; emits `feedback` -->
+          <kitn-feedback-bar></kitn-feedback-bar>
+        </kitn-message>
+
+        <kitn-message role="user">
+          <kitn-message-content id="u1"></kitn-message-content>
+        </kitn-message>
+
+      </div>
+
+      <!-- ───────────────────────── COMPOSER ─────────────────────────
+           Standalone input (already exists today as <kitn-prompt-input>),
+           shown here with a slot to inject your OWN toolbar buttons —
+           the "bring-your-own input-actions" idea (Strategy A: slots). -->
+      <div class="composer">
+        <kitn-prompt-input id="composer" placeholder="Ask anything…">
+          <!-- light-DOM content projected into the element's named slot.
+               YOU own and wire these buttons; the element just gives them a home. -->
+          <button slot="actions" onclick="alert('your custom action')">📎</button>
+          <button slot="actions" onclick="alert('your custom action')">🎤</button>
+        </kitn-prompt-input>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ─────────────────────────────────────────────────────────────────────
+       DATA + EVENTS. Rich data (arrays/objects) is set as JS *properties*,
+       exactly like today. Interactions come back as CustomEvents you listen
+       to directly on each element. This <script> is the "compose it yourself"
+       glue — in React/Vue/Solid this is just refs + props instead.
+  ────────────────────────────────────────────────────────────────────────── -->
+  <script type="module">
+    // NOTE: illustrative only — these elements don't exist yet.
+
+    // --- feed each leaf element its data via properties ---
+    sidebar.conversations = [
+      { id: 'c1', title: 'First chat', scope: { type: 'document' },
+        messageCount: 4, lastMessageAt: '2026-06-01T12:00:00Z',
+        updatedAt: '2026-06-01T12:00:00Z' },
+    ];
+    sidebar.activeId = 'c1';
+
+    models.models = [
+      { id: 'opus',  label: 'Claude Opus' },
+      { id: 'haiku', label: 'Claude Haiku' },
+    ];
+    models.currentModel = 'opus';
+
+    ctx.context = { usedTokens: 12000, maxTokens: 200000,
+                    inputTokens: 8000, outputTokens: 4000 };
+
+    r1.text   = 'Let me work through this step by step…';
+    t1.tool   = { type: 'search', state: 'output-available',
+                  input: { query: 'kitn' }, output: { hits: 3 } };
+    a1.content = 'Here is the **answer** with a code block:\n```js\nconst x = 1;\n```';
+    u1.content = 'Thanks!';
+
+    // --- listen for interactions; the host owns all state updates ---
+    sidebar.addEventListener('select',      (e) => console.log('open', e.detail.id));
+    sidebar.addEventListener('newchat',     ()  => console.log('new chat'));
+    models.addEventListener('modelchange',  (e) => console.log('model', e.detail.modelId));
+    composer.addEventListener('submit',     (e) => {
+      console.log('send', e.detail.value);
+      // you'd append a <kitn-message> to #stream here and stream the reply
+    });
+    document.querySelector('kitn-feedback-bar')
+      .addEventListener('feedback', (e) => console.log('feedback', e.detail));
+  </script>
+
+
+  <!-- ─────────────────────────────────────────────────────────────────────
+       FOR CONTRAST: the batteries-included element still exists unchanged.
+       Same bundle, same import. You pick the altitude per use-case:
+
+         <kitn-chat></kitn-chat>          ← drop-in, one element, set .messages
+         …compose the leaf elements…      ← full control, you arrange the layout
+
+       Strategy A (slots) also lets you keep <kitn-chat> but swap one region:
+
+         <kitn-chat>
+           <div slot="header"> …your own header… </div>
+         </kitn-chat>
+  ────────────────────────────────────────────────────────────────────────── -->
+</body>
+</html>
