@@ -105,7 +105,16 @@ export function DropdownContent(props: { children: JSX.Element; class?: string }
     const idx = ((i % list.length) + list.length) % list.length;
     list[idx].focus();
   };
-  const currentIndex = () => items().findIndex((el) => el === document.activeElement);
+  // Resolve the focused item via the menu's own root node. Inside a Shadow DOM
+  // (every kitn-* element), `document.activeElement` returns the host element,
+  // not the focused menu item, which would break ArrowUp/Down roving focus.
+  // `getRootNode().activeElement` correctly returns the active node within the
+  // same tree (ShadowRoot or Document).
+  const activeItem = () => {
+    const root = ctx.menu()?.getRootNode() as Document | ShadowRoot | undefined;
+    return (root?.activeElement ?? document.activeElement) as Element | null;
+  };
+  const currentIndex = () => items().findIndex((el) => el === activeItem());
 
   const onKeyDown = (e: KeyboardEvent) => {
     const list = items();
