@@ -8,12 +8,16 @@ import { Meta } from '@storybook/addon-docs/blocks';
 [llmstxt.org](https://llmstxt.org) convention, so coding agents (Claude Code,
 Copilot, Cursor, Codex, …) can wire up the components correctly without guessing.
 
+**View them now:** <a href="/llms.txt" target="_blank" rel="noreferrer">llms.txt</a> ·
+<a href="/llms-full.txt" target="_blank" rel="noreferrer">llms-full.txt</a>
+(open in a new tab)
+
 ## The files
 
 | File | Audience | Where to find it |
 |---|---|---|
-| `llms.txt` | Agents + humans | Repo root, the npm package root (`node_modules/@kitnai/chat/llms.txt`), and https://kitn.dev/llms.txt |
-| `llms-full.txt` | Agents | Same locations; the per-element API reference for **every** `kitn-*` element |
+| <a href="/llms.txt" target="_blank" rel="noreferrer"><code>llms.txt</code></a> | Agents + humans | Repo root, the npm package root (`node_modules/@kitnai/chat/llms.txt`), and `https://kitn.dev/llms.txt` |
+| <a href="/llms-full.txt" target="_blank" rel="noreferrer"><code>llms-full.txt</code></a> | Agents | Same locations; the per-element API reference for **every** `kitn-*` element |
 
 Both files are **auto-generated** from `dist/custom-elements.json` by
 `scripts/gen-llms.mjs` during `npm run build`, so they never drift from the
@@ -84,6 +88,6 @@ chat.addEventListener('submit', async (e) => {
 
 ## Links
 
-- `llms.txt` — orientation: https://kitn.dev/llms.txt
-- `llms-full.txt` — full element reference: https://kitn.dev/llms-full.txt
-- Custom Elements Manifest: https://unpkg.com/@kitnai/chat/dist/custom-elements.json
+- <a href="/llms.txt" target="_blank" rel="noreferrer"><code>llms.txt</code></a> — orientation (also published at `https://kitn.dev/llms.txt`)
+- <a href="/llms-full.txt" target="_blank" rel="noreferrer"><code>llms-full.txt</code></a> — full per-element reference (also `https://kitn.dev/llms-full.txt`)
+- Custom Elements Manifest — `dist/custom-elements.json` (published at `https://unpkg.com/@kitnai/chat/dist/custom-elements.json`)
