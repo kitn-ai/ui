@@ -1,15 +1,15 @@
 # @kitnai/chat
 
-A SolidJS component kit for building AI chat interfaces — message threads, prompt inputs, streaming responses, markdown + code rendering, reasoning/tool panels, attachments, and a conversation sidebar.
+Framework-agnostic web components for building AI chat interfaces — message threads, prompt inputs, streaming responses, markdown + code rendering, reasoning/tool panels, attachments, and a conversation sidebar. Drop them into any app: React, Vue, Angular, Svelte, or plain HTML.
 
 It can be consumed two ways:
 
-1. **As SolidJS components** — import the components directly into a SolidJS app for full compositional control.
-2. **As framework-agnostic web components** — drop `<kitn-chat>`, `<kitn-conversation-list>`, and `<kitn-prompt-input>` into any project (React, Vue, plain HTML). Each is fully style-isolated via Shadow DOM; SolidJS is bundled in, so the host needs nothing.
+1. **As framework-agnostic web components** *(primary)* — drop `<kitn-chat>`, `<kitn-conversation-list>`, and `<kitn-prompt-input>` into any project (React, Vue, Angular, Svelte, plain HTML). Each is fully style-isolated via Shadow DOM, and the rendering runtime is bundled in, so the host needs nothing.
+2. **As native SolidJS components** — the kit is authored in SolidJS, so SolidJS apps can import the components directly for full compositional control. (This is a convenience for SolidJS users, not a requirement — the web components work everywhere.)
 
 ## Highlights
 
-- **~50 composable components** across three layers: headless primitives → UI primitives (built on [Kobalte](https://kobalte.dev)) → AI feature components.
+- **~50 composable components** across three layers: headless primitives → accessible UI primitives (built in-house, WCAG 2.1 AA — no third-party UI dependency) → AI feature components.
 - **Shadow-DOM web components** — zero CSS conflicts in any host. The host's styles can't leak in; the kit's Tailwind can't leak out.
 - **Lightweight by design** — a markdown-only `<kitn-chat>` is **~61 KB gzip** (one file). Syntax highlighting (Shiki) is loaded **on demand, per-language, with no WASM** — and never loads at all if you don't render code.
 - **Tailwind v4** design tokens — rebrand by overriding `--color-*` custom properties.
@@ -59,6 +59,25 @@ npm run build   # emits dist/kitn-chat.es.js
 ```
 
 The element bundle is **ES-module only** and loads via `<script type="module">` in every modern browser. See **[docs/web-components.md](docs/web-components.md)** for the full element API (every property, event, and the `ChatMessage` schema).
+
+#### Or load from a CDN (no build, no npm)
+
+The element bundle is a self-contained ES module — load it directly from [jsDelivr](https://www.jsdelivr.com/package/npm/@kitnai/chat) or [unpkg](https://unpkg.com/browse/@kitnai/chat/), no install or bundler required:
+
+```html
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/@kitnai/chat/dist/kitn-chat.es.js';
+  // …or unpkg: import 'https://unpkg.com/@kitnai/chat/dist/kitn-chat.es.js';
+</script>
+
+<kitn-chat></kitn-chat>
+```
+
+The URLs above track the **latest** release — handy for trying things out. **For production, pin an exact version** (e.g. `@kitnai/chat@0.4.0/dist/kitn-chat.es.js`): pinned URLs are immutable and cached far more aggressively, and — since this package is pre-1.0 — pinning shields you from breaking changes in a future minor release. SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To override design tokens, also include `theme.css`:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitnai/chat/theme.css">
+```
 
 ### Option B — SolidJS components
 
@@ -303,7 +322,7 @@ Storybook is the primary way to explore and develop components in isolation.
 ```
 src/
   primitives/    Headless logic hooks + ChatConfig + on-demand highlighter
-  ui/            UI primitives (Button, Dialog, Tooltip, … built on Kobalte)
+  ui/            Accessible UI primitives (Button, Dropdown, Tooltip, HoverCard, … built in-house, no third-party UI deps)
   components/    AI feature components (Message, PromptInput, Markdown, Tool, …)
   elements/      Web-component facades + defineKitnElement wrapper + Vite lib entry
   stories/       Composed example stories (full chat app, layouts)

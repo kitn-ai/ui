@@ -3,7 +3,7 @@
 
 # @kitnai/chat
 
-> SolidJS + Shadow-DOM web component kit for building AI chat interfaces. 27 `kitn-*` custom elements: streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; SolidJS is bundled in.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 27 `kitn-*` custom elements: streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 

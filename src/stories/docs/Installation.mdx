@@ -45,4 +45,31 @@ npm run build   # emits dist/kitn-chat.es.js
 - **SolidJS is bundled in** — the host page needs nothing else.
 - The kit's CSS is injected into each element's Shadow DOM automatically; importing `theme.css` is optional and only needed if you want to override design tokens.
 
+### Via CDN (no build step, no npm)
+
+The element bundle is a self-contained ES module, so you can load it straight from a CDN — no install, no bundler, no import map. It's published on both <a href="https://www.jsdelivr.com/package/npm/@kitnai/chat" target="_blank" rel="noreferrer">jsDelivr</a> and <a href="https://unpkg.com/browse/@kitnai/chat/" target="_blank" rel="noreferrer">unpkg</a>:
+
+```html
+<!-- jsDelivr -->
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/@kitnai/chat/dist/kitn-chat.es.js';
+</script>
+
+<!-- …or unpkg -->
+<script type="module">
+  import 'https://unpkg.com/@kitnai/chat/dist/kitn-chat.es.js';
+</script>
+
+<kitn-chat></kitn-chat>
+```
+
+- The URLs above track the **latest** release (no version) — they never go stale, so they're ideal for demos and quick starts.
+- **For production, pin an exact version** — e.g. `.../npm/@kitnai/chat@0.4.0/dist/kitn-chat.es.js`. Pinned URLs are immutable and cached far more aggressively (floating "latest" tags get revalidated every few hours), and — since this package is **pre-1.0** — pinning shields you from breaking changes in a future minor release. A version *range* (`@0` / `@0.4`) won't: pre-1.0 it can still resolve to a breaking minor.
+- SolidJS and the kit's CSS are bundled in, and the lazy syntax-highlighting chunks load from the **same CDN** automatically (they're relative to the bundle) — so nothing else is needed.
+- To override design tokens, also pull in `theme.css`:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitnai/chat/theme.css">
+```
+
 Head to **[Getting Started](?path=/docs/docs-getting-started--docs)** to render your first chat.

@@ -5,7 +5,7 @@ import * as ChatPanel from '../chat-panel-layout.stories';
 
 # @kitnai/chat
 
-**A SolidJS + Shadow-DOM web component kit for building AI chat interfaces.**
+**Framework-agnostic, Shadow-DOM web components for building AI chat interfaces.**
 
 Message threads, prompt inputs, streaming responses, markdown + code rendering, reasoning & tool-call panels, attachments, and a conversation sidebar — composable building blocks you can drop into any app.
 
@@ -13,11 +13,20 @@ Message threads, prompt inputs, streaming responses, markdown + code rendering, 
 
 ## Why @kitnai/chat
 
-- **Two ways to use it** — import the SolidJS components for full compositional control, or drop in framework-agnostic **web components** (`<kitn-chat>`) that work in React, Vue, Svelte, or plain HTML.
+- **Works in any framework** — drop in the framework-agnostic **web components** (`<kitn-chat>`) and they just work in React, Vue, Angular, Svelte, or plain HTML. Authored in SolidJS, so SolidJS apps can also import the components natively for full compositional control.
 - **Zero style conflicts** — the web components render in **Shadow DOM**, so the host page's CSS can't leak in and the kit's Tailwind can't leak out.
 - **Lightweight** — a markdown-only `<kitn-chat>` is **~61 KB gzip**, a single file. Syntax highlighting loads **on demand, per language, with no WASM** — and never loads at all if you don't render code.
-- **~50 composable components** across three layers: headless primitives → UI primitives (built on [Kobalte](https://kobalte.dev)) → AI feature components.
+- **~50 composable components** across three layers: headless primitives → accessible UI primitives (built in-house, WCAG 2.1 AA — no third-party UI dependency) → AI feature components.
 - **Themeable** — restyle everything by overriding a handful of `--color-*` design tokens.
+
+## Browsing the sidebar — which group do I copy from?
+
+The kit ships at two layers, and the sidebar reflects that. **Use the right one for your stack:**
+
+- **Web Components** — the framework-agnostic `<kitn-*>` custom elements. **This is what to copy into a React, Vue, Angular, Svelte, or plain-HTML app.** Data goes on JS properties, interactions come back as events.
+- **Components · SolidJS** and **UI · SolidJS** — the **native SolidJS** components (feature components) and primitives (Button, Dropdown, HoverCard, …) that the web components are *built from*. Their snippets are SolidJS JSX, so **only copy these into a SolidJS app**.
+
+In other words: the `<kitn-chat>` web component is a thin facade over the SolidJS `ChatContainer`/`Message`/… components — same UI, different consumption model. When in doubt, reach for **Web Components**.
 
 ## Where to next
 

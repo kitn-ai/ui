@@ -7,7 +7,7 @@ export interface ChatConfigValue {
   proseSize: Accessor<ProseSize>;
   /** Shiki theme for code blocks */
   codeTheme: Accessor<string>;
-  /** Node Kobalte overlays portal into; undefined → document.body */
+  /** Node the kit's overlays portal into; undefined → document.body */
   portalMount: Accessor<HTMLElement | undefined>;
   /** Whether code blocks are syntax-highlighted; false → plain text, no Shiki loaded */
   codeHighlight: Accessor<boolean>;
