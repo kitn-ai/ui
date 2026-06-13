@@ -146,3 +146,42 @@ test('send button is disabled when loading even with non-empty value', async () 
 
   el.remove();
 });
+
+test('send button and textarea have accessible names (a11y A1)', async () => {
+  const el = document.createElement('kitn-prompt-input') as HTMLElement & {
+    placeholder?: string;
+  };
+  el.placeholder = 'Ask anything...';
+  document.body.appendChild(el);
+  await Promise.resolve();
+
+  const send = el.shadowRoot!.querySelector<HTMLButtonElement>('[data-testid="send"]')!;
+  expect(send.getAttribute('aria-label')).toBe('Send message');
+
+  const textarea = el.shadowRoot!.querySelector('textarea')!;
+  expect(textarea.getAttribute('aria-label')).toBe('Ask anything...');
+
+  el.remove();
+});
+
+test('textarea always has a non-empty accessible name', async () => {
+  // With no explicit placeholder the element supplies its default placeholder,
+  // which becomes the accessible name. When the placeholder is empty the label
+  // falls back to "Message" so the control is never unnamed.
+  const withDefault = document.createElement('kitn-prompt-input');
+  document.body.appendChild(withDefault);
+  await Promise.resolve();
+  const defaultTextarea = withDefault.shadowRoot!.querySelector('textarea')!;
+  expect(defaultTextarea.getAttribute('aria-label')).toBeTruthy();
+  withDefault.remove();
+
+  const emptyPlaceholder = document.createElement('kitn-prompt-input') as HTMLElement & {
+    placeholder?: string;
+  };
+  emptyPlaceholder.placeholder = '';
+  document.body.appendChild(emptyPlaceholder);
+  await Promise.resolve();
+  const emptyTextarea = emptyPlaceholder.shadowRoot!.querySelector('textarea')!;
+  expect(emptyTextarea.getAttribute('aria-label')).toBe('Message');
+  emptyPlaceholder.remove();
+});

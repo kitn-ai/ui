@@ -115,7 +115,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             </Attachments>
           </div>
         </Show>
-        <PromptInputTextarea placeholder={props.placeholder} class="min-h-[44px] pt-3 pl-4" />
+        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" />
         <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
           <div class="flex items-center gap-2">
             <Show when={canAttach()}>
@@ -173,6 +173,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             size="icon-sm"
             class="rounded-full"
             data-testid="send"
+            aria-label="Send message"
             disabled={sendDisabled()}
             onClick={props.onSubmit}
           >

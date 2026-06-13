@@ -26,3 +26,26 @@ test('renders conversations and emits select', async () => {
 
   el.remove();
 });
+
+test('icon-only controls have accessible names (a11y A1)', async () => {
+  const el = document.createElement('kitn-conversation-list') as HTMLElement & {
+    groups: ConversationGroup[]; conversations: ConversationSummary[];
+  };
+  el.groups = groups;
+  el.conversations = conversations;
+  document.body.appendChild(el);
+  await Promise.resolve();
+
+  const root = el.shadowRoot!;
+  const toggle = root.querySelector<HTMLButtonElement>('button[aria-label="Toggle sidebar"]');
+  const newChat = root.querySelector<HTMLButtonElement>('button[aria-label="New chat"]');
+  const search = root.querySelector<HTMLInputElement>('input[type="text"]');
+
+  expect(toggle).not.toBeNull();
+  expect(toggle!.getAttribute('aria-label')).toBe('Toggle sidebar');
+  expect(newChat).not.toBeNull();
+  expect(newChat!.getAttribute('aria-label')).toBe('New chat');
+  expect(search!.getAttribute('aria-label')).toBe('Search chats');
+
+  el.remove();
+});

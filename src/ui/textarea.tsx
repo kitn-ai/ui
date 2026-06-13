@@ -13,7 +13,7 @@ export function Textarea(props: TextareaProps) {
   return (
     <textarea
       ref={local.autoResize !== false ? ref : undefined}
-      class={cn('w-full resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none', local.class)}
+      class={cn('w-full resize-none rounded-md bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring', local.class)}
       rows={1}
       {...rest}
     />
