@@ -8,7 +8,7 @@ Comprehensive resume doc for the `spike/composable-web-components` branch. Super
 
 We turned the kit's SolidJS primitives into a full set of **composable, framework-agnostic web components** (compose in plain HTML / React / Vue, not just the batteries-included `<kitn-chat>`). 28 element tags total, all on the branch, **nothing merged** — the publish firewall holds (npm publishes only when this branch merges to `main` → a release-please PR is merged). 27 commits. Bundle ~**80 KB gzip** (main chunk, after Kobalte→DIY — see UPDATE below).
 
-The build-out is done. Remaining work is: **Vue wrappers** (optional), a **508/WCAG accessibility pass** (real violations found — see below), **Storybook stories + full docs** for the new elements, and polishing. The last few sessions also did a deep **theming overhaul** (namespaced `--kitn-*` override surface, typography tokens, dark-palette harmonization) and a **showcase redesign**.
+The build-out is done. Remaining work is now just **Vue wrappers** (optional) and the **merge decision** — the accessibility pass, Storybook stories/docs, React wrappers, and an AI-agent `llms.txt` are all DONE (see the second UPDATE section below). The last few sessions also did a deep **theming overhaul** (namespaced `--kitn-*` override surface, typography tokens, dark-palette harmonization) and a **showcase redesign**.
 
 ---
 
@@ -30,6 +30,20 @@ The "Kobalte keep-vs-DIY decision" below is now **resolved: replaced.** All four
 
 ### Verification
 Full gate green vs the 3-failure Shiki baseline. New unit tests: `tests/ui/{overlay,collapsible,tooltip,hover-card,dropdown}.test.tsx` + prompt-input behavior tests. A real-browser **Playwright pass = 21/21** (keyboard nav incl. ArrowUp/Down/Home/End/typeahead/Enter/Escape/Tab, DD-1, DD-2, HC-1, tooltip+collapsible, positioning in light+dark). Still on `spike/composable-web-components`, **not merged** — publish firewall holds.
+
+---
+
+## UPDATE (2026-06-12, later still) — Accessibility (WCAG 2.1 AA) + Storybook/docs + React wrappers + llms.txt
+
+All shipped via subagents with independent spec+code-quality review; spec at `docs/superpowers/specs/2026-06-12-a11y-stories-react-design.md`.
+
+- **Accessibility / 508 (WCAG 2.1 AA): kit + showcase now report 0 axe violations in light AND dark.** Reusable audit: `scripts/audit-a11y.mjs` (axe-core in a real browser, shadow-root aware, light + proper dark via `theme="dark"`, + keyboard tab trace). Fixed: accessible names on all icon-only buttons (conversation-list ☰/＋, send, scroll-to-bottom, voice-input, message copy) + textareas; visible focus (search input `focus:outline-none`→ring, `Button` ring-1→ring-2); muted/subtle text contrast (`--color-muted-foreground` light bump, new mode-aware `--color-tool-*` tokens, removed low-opacity on readable text, violet badges); keyboard-accessible event log. Everything is tabbable with a visible focus ring and an accessible name; dropdowns open/navigate via keyboard.
+- **Storybook: element stories for all 28 tags** (was 3) under `src/elements/*.stories.tsx`; prop JSDoc enriched so `custom-elements.json`/autodocs/`llms-full.txt` have no empty descriptions. New docs: `src/stories/docs/{Frameworks & Integrations, Accessibility, For AI Agents}.mdx`. `docs/web-components.md` extended to all 27 elements. `build-storybook` green.
+- **React wrappers (`@kitnai/chat/react`) behave natively:** `runtime.tsx` hardened (rich props as live DOM properties, `on<Event>` listeners stable/no-leak, slots). `examples/react` rewritten to use `<KitnChat messages={[…]} onSubmit={…} />` declaratively (builds against local via vite aliases). Isolated React tests in `vitest.react.config.ts` (`npm run test:react`, 5/5) prove array/object props reach the element and events fire. Fixed a generated-types bug (array-of-union types now parenthesized).
+- **AI-agent integration:** `scripts/gen-llms.mjs` generates `llms.txt` + `llms-full.txt` from the manifest in `postbuild` (repo root + `dist/llms/`, shipped in npm `files`). Decision: static files, **no MCP server** (research in `docs/superpowers/research/`). 
+- **Bundle:** main chunk ~80 KB gzip (kitn-chat.es.js 80.02 KB). Validation: full `npm test` green vs the 3 Shiki baseline; `npm run test:react` 5/5; `scripts/audit-a11y.mjs` 0 violations; `examples/react` + `build-storybook` build; `npm pack` includes llms.txt/react/dist. **59 commits ahead of main, not merged** — ready for a PR (regular merge, per user).
+
+Open polish noted: tooltip/hover-card arrows still dropped (overlay core retains `arrowEl`/`arrowPos`); slash-command in-prompt highlight deferred (needs contenteditable/overlay); the npm tarball also ships some `src/stories/docs/theme-editor/*` files (pre-existing `files` glob breadth — harmless, tidy later); a full tarball consumer-install smoke not yet run (dry-run contents verified).
 
 ---
 
