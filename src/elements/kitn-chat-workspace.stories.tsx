@@ -1,0 +1,195 @@
+import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { onMount } from 'solid-js';
+import './register'; // side effect: registers all kitn custom elements including <kitn-chat-workspace>
+import type { ConversationGroup, ConversationSummary, ModelOption } from '../types';
+import type { ChatMessage } from './chat-types';
+
+// The web components are custom DOM elements, so declare the tags for JSX.
+declare module 'solid-js' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      'kitn-chat-workspace': JSX.HTMLAttributes<HTMLElement>;
+    }
+  }
+}
+
+const sampleGroups: ConversationGroup[] = [
+  { id: 'today', name: 'Today', sortOrder: 0, createdAt: '2026-06-13T00:00:00.000Z' },
+];
+
+const sampleConversations: ConversationSummary[] = [
+  {
+    id: '1',
+    title: 'Web component architecture',
+    groupId: 'today',
+    scope: { type: 'document' },
+    messageCount: 12,
+    lastMessageAt: '2026-06-13T15:30:00.000Z',
+    updatedAt: '2026-06-13T15:30:00.000Z',
+  },
+  {
+    id: '2',
+    title: 'Theming & tokens',
+    groupId: 'today',
+    scope: { type: 'document' },
+    messageCount: 5,
+    lastMessageAt: '2026-06-13T11:20:00.000Z',
+    updatedAt: '2026-06-13T11:20:00.000Z',
+  },
+];
+
+const sampleModels: ModelOption[] = [
+  { id: 'claude-4', name: 'Claude 4 Opus', provider: 'Anthropic' },
+  { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI' },
+];
+
+const sampleMessages: ChatMessage[] = [
+  { id: 'm1', role: 'user', content: 'How do I drop the whole chat app in with one tag?' },
+  {
+    id: 'm2',
+    role: 'assistant',
+    content:
+      'Use `<kitn-chat-workspace>` — set `conversations`, `messages`, and `models` as properties and listen for `conversationselect` + `submit`.',
+    actions: ['copy', 'like'],
+  },
+];
+
+/** Live demo of the actual `<kitn-chat-workspace>` custom element (Shadow DOM and all). */
+function WorkspaceElement() {
+  let el:
+    | (HTMLElement & {
+        groups?: ConversationGroup[];
+        conversations?: ConversationSummary[];
+        activeId?: string;
+        messages?: ChatMessage[];
+        models?: ModelOption[];
+        currentModel?: string;
+        chatTitle?: string;
+      })
+    | undefined;
+  onMount(() => {
+    if (el) {
+      el.groups = sampleGroups;
+      el.conversations = sampleConversations;
+      el.activeId = '1';
+      el.messages = sampleMessages;
+      el.models = sampleModels;
+      el.currentModel = 'claude-4';
+      el.chatTitle = 'Web component architecture';
+      el.addEventListener('conversationselect', (e) => console.log('select', (e as CustomEvent).detail));
+      el.addEventListener('submit', (e) => console.log('submit', (e as unknown as CustomEvent).detail));
+      el.addEventListener('sidebartoggle', (e) => console.log('sidebartoggle', (e as CustomEvent).detail));
+    }
+  });
+  return (
+    <div style={{ height: '720px', width: '100%' }}>
+      <kitn-chat-workspace
+        ref={(e) => (el = e as HTMLElement)}
+        style={{ display: 'block', height: '100%' }}
+      />
+    </div>
+  );
+}
+
+const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
+<kitn-chat-workspace id="workspace" style="display:block; height:100vh;"></kitn-chat-workspace>
+
+<script type="module">
+  import '@kitnai/chat/elements';   // registers the custom elements
+
+  const workspace = document.getElementById('workspace');
+  workspace.conversations = [
+    {
+      id: '1', title: 'Web component architecture',
+      scope: { type: 'document' }, messageCount: 12,
+      lastMessageAt: '2026-06-13T15:30:00Z', updatedAt: '2026-06-13T15:30:00Z',
+    },
+  ];
+  workspace.messages = [
+    { id: 'm1', role: 'user', content: 'How do I drop the whole chat app in with one tag?' },
+    { id: 'm2', role: 'assistant', content: 'Use <kitn-chat-workspace> — set conversations, messages, and models as properties.' },
+  ];
+  workspace.models = [
+    { id: 'claude-4', name: 'Claude 4 Opus', provider: 'Anthropic' },
+  ];
+
+  // events are CustomEvents on the element (they do not bubble)
+  workspace.addEventListener('conversationselect', (e) => console.log('selected conversation:', e.detail.id));
+  workspace.addEventListener('submit', (e) => console.log('user sent:', e.detail.value));
+  workspace.addEventListener('sidebartoggle', (e) => console.log('sidebar collapsed:', e.detail.collapsed));
+</script>`;
+
+const SOLID_SNIPPET = `import '@kitnai/chat/elements'; // registers the custom elements
+import { onMount } from 'solid-js';
+import type { ConversationSummary, ModelOption } from '@kitnai/chat';
+import type { ChatMessage } from '@kitnai/chat/elements';
+
+function Workspace() {
+  let el: HTMLElement & {
+    conversations?: ConversationSummary[];
+    messages?: ChatMessage[];
+    models?: ModelOption[];
+    activeId?: string;
+  };
+  const conversations: ConversationSummary[] = [
+    {
+      id: '1', title: 'Web component architecture',
+      scope: { type: 'document' }, messageCount: 12,
+      lastMessageAt: '2026-06-13T15:30:00Z', updatedAt: '2026-06-13T15:30:00Z',
+    },
+  ];
+  const messages: ChatMessage[] = [
+    { id: 'm1', role: 'user', content: 'How do I drop the whole chat app in with one tag?' },
+    { id: 'm2', role: 'assistant', content: 'Use <kitn-chat-workspace> — set conversations, messages, and models as properties.' },
+  ];
+  onMount(() => {
+    el.conversations = conversations;
+    el.messages = messages;
+    el.activeId = '1';
+    el.addEventListener('conversationselect', (e) => console.log('selected:', e.detail.id));
+    el.addEventListener('submit', (e) => console.log('user sent:', e.detail.value));
+    el.addEventListener('sidebartoggle', (e) => console.log('sidebar collapsed:', e.detail.collapsed));
+  });
+  return (
+    <kitn-chat-workspace
+      ref={el}
+      style={{ display: 'block', height: '100vh' }}
+    />
+  );
+}`;
+
+const meta = {
+  title: 'Web Components/kitn-chat-workspace',
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        component: [
+          '`<kitn-chat-workspace>` is the full chat shell as a single **web component** — a resizable split layout with a collapsible conversation list on the left and a full message thread on the right, all isolated in **Shadow DOM**. SolidJS is bundled in, so the host needs nothing.',
+          '**When to use:** dropping an entire chat application shell into a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts and a ready-made list+chat layout. If you *are* in SolidJS and want fine-grained control, compose the `ConversationList` and `ChatThread` primitives directly.',
+          '**How to use:** register once with `import \'@kitnai/chat/elements\'`, set rich data as JS **properties** (`el.conversations = [...]`, `el.messages = [...]`, `el.models = [...]`), and listen for **CustomEvents** (`conversationselect`, `submit`, `sidebartoggle`, `newchat`) directly on the element.',
+          '**Placement:** as a full-page surface or large panel. Give it an explicit height (e.g. `height: 100vh`). The sidebar is drag-resizable and can be collapsed via the toggle button in its header.',
+          'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
+        ].join('\n\n'),
+      },
+    },
+  },
+} satisfies Meta;
+
+export default meta;
+type Story = StoryObj;
+
+/** The element used the plain-HTML / any-framework way. */
+export const Default: Story = {
+  render: () => <WorkspaceElement />,
+  parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
+};
+
+/** The same element used inside a SolidJS component (properties via `ref` + `onMount`, events via `addEventListener`). */
+export const InSolidJS: Story = {
+  name: 'In SolidJS',
+  render: () => <WorkspaceElement />,
+  parameters: { docs: { source: { code: SOLID_SNIPPET, language: 'tsx' } } },
+};
