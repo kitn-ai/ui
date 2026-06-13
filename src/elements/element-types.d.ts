@@ -259,6 +259,28 @@ export interface KcReasoningElement extends HTMLElement {
   markdown?: boolean;
 }
 
+export interface KcResizableElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
+  orientation?: "horizontal" | "vertical";
+}
+
+export interface KcResizableItemElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Initial main-axis size: `"280px"` (fixed) or `"25%"`/`25` (percent). Omitted → flexible. */
+  size?: string;
+  /** Minimum size during resize (px or %). */
+  min?: string;
+  /** Maximum size during resize (px or %). */
+  max?: string;
+  /** Fix this panel's size; adjacent dividers become non-draggable. */
+  locked?: boolean;
+  /** Hide this panel; its divider is dropped and the rest reflow. */
+  hidden?: boolean;
+}
+
 export interface KcResponseStreamElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -429,6 +451,8 @@ declare global {
     'kc-model-switcher': KcModelSwitcherElement;
     'kc-prompt-input': KcPromptInputElement;
     'kc-reasoning': KcReasoningElement;
+    'kc-resizable': KcResizableElement;
+    'kc-resizable-item': KcResizableItemElement;
     'kc-response-stream': KcResponseStreamElement;
     'kc-scope-picker': KcScopePickerElement;
     'kc-skills': KcSkillsElement;

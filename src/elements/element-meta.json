@@ -1353,6 +1353,101 @@
     "tokens": []
   },
   {
+    "tag": "kc-resizable",
+    "className": "KcResizableElement",
+    "props": [
+      {
+        "name": "orientation",
+        "type": "undefined | \"horizontal\" | \"vertical\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Layout axis: `horizontal` (row, default) or `vertical` (column).",
+        "default": "'horizontal'",
+        "displayType": "undefined | \"horizontal\" | \"vertical\""
+      }
+    ],
+    "events": [
+      {
+        "name": "change",
+        "detail": "{ sizes: number[] }",
+        "description": "Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent.",
+        "displayDetail": "{ sizes: number[] }"
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "ResizableHandle",
+        "group": "UI",
+        "storyId": "ui-resizablehandle--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kc-resizable-item",
+    "className": "KcResizableItemElement",
+    "props": [
+      {
+        "name": "size",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial main-axis size: `\"280px\"` (fixed) or `\"25%\"`/`25` (percent). Omitted → flexible.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "min",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Minimum size during resize (px or %).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "max",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Maximum size during resize (px or %).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "locked",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Fix this panel's size; adjacent dividers become non-draggable.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "hidden",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Hide this panel; its divider is dropped and the rest reflow.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "change",
+        "detail": "unknown",
+        "description": "",
+        "displayDetail": "unknown"
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "ResizableHandle",
+        "group": "UI",
+        "storyId": "ui-resizablehandle--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kc-response-stream",
     "className": "KcResponseStreamElement",
     "props": [
