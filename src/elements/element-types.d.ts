@@ -40,6 +40,8 @@ export interface KitnChatElement extends HTMLElement {
   placeholder?: string;
   loading?: boolean;
   suggestions?: string[];
+  /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
+  suggestionMode?: "submit" | "fill";
   proseSize?: "xs" | "sm" | "base" | "lg";
   codeTheme?: string;
   codeHighlight?: boolean;
@@ -220,6 +222,8 @@ export interface KitnPromptInputElement extends HTMLElement {
   disabled?: boolean;
   loading?: boolean;
   suggestions?: string[];
+  /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
+  suggestionMode?: "submit" | "fill";
   /** Slash commands — when set, typing `/` opens the command palette. Set as a JS property. */
   slashCommands?: { id: string; label: string; description?: string; category?: string }[];
   /** Command ids to highlight as active. */

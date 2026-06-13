@@ -45,6 +45,8 @@ export interface KitnChatProps extends KitnBaseProps {
   placeholder?: string;
   loading?: boolean;
   suggestions?: string[];
+  /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
+  suggestionMode?: "submit" | "fill";
   proseSize?: "xs" | "sm" | "base" | "lg";
   codeTheme?: string;
   codeHighlight?: boolean;
@@ -80,7 +82,7 @@ export interface KitnChatProps extends KitnBaseProps {
 
 export const KitnChat = createKitnComponent<KitnChatProps>(
   'kitn-chat',
-  ["theme","messages","value","placeholder","loading","suggestions","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact"],
+  ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact"],
   { onMessageaction: 'messageaction', onModelchange: 'modelchange', onSearch: 'search', onSlashselect: 'slashselect', onSubmit: 'submit', onSuggestionclick: 'suggestionclick', onValuechange: 'valuechange', onVoice: 'voice' },
 );
 
@@ -309,6 +311,8 @@ export interface KitnPromptInputProps extends KitnBaseProps {
   disabled?: boolean;
   loading?: boolean;
   suggestions?: string[];
+  /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
+  suggestionMode?: "submit" | "fill";
   /** Slash commands — when set, typing `/` opens the command palette. Set as a JS property. */
   slashCommands?: { id: string; label: string; description?: string; category?: string }[];
   /** Command ids to highlight as active. */
@@ -324,7 +328,7 @@ export interface KitnPromptInputProps extends KitnBaseProps {
 
 export const KitnPromptInput = createKitnComponent<KitnPromptInputProps>(
   'kitn-prompt-input',
-  ["theme","value","placeholder","disabled","loading","suggestions","slashCommands","slashActiveIds","slashCompact"],
+  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","slashCommands","slashActiveIds","slashCompact"],
   { onSlashselect: 'slashselect', onSubmit: 'submit', onSuggestionclick: 'suggestionclick', onValuechange: 'valuechange' },
 );
 

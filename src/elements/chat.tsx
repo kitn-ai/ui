@@ -41,6 +41,9 @@ interface Props extends Record<string, unknown> {
   placeholder?: string;
   loading?: boolean;
   suggestions?: string[];
+  /** What clicking a suggestion does: `'submit'` (default) sends it immediately
+   *  as if typed and submitted; `'fill'` just places it in the input. */
+  suggestionMode?: 'submit' | 'fill';
   proseSize?: ProseSize;
   codeTheme?: string;
   codeHighlight?: boolean;
@@ -83,6 +86,7 @@ defineKitnElement<Props>('kitn-chat', {
   placeholder: 'Send a message...',
   loading: false,
   suggestions: undefined,
+  suggestionMode: 'submit',
   proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',
   codeHighlight: true,
@@ -109,7 +113,16 @@ defineKitnElement<Props>('kitn-chat', {
     dispatch('submit', { value: current(), attachments: attachments() });
     setAttachments([]);
   };
-  const handleSuggestionClick = (v: string) => { handleChange(v); dispatch('suggestionclick', { value: v }); };
+  const handleSuggestionClick = (v: string) => {
+    if ((props.suggestionMode ?? 'submit') === 'fill') {
+      handleChange(v);
+      dispatch('suggestionclick', { value: v });
+    } else {
+      // Default: behave as if the user typed the suggestion and pressed submit.
+      dispatch('submit', { value: v, attachments: attachments() });
+      setAttachments([]);
+    }
+  };
 
   const showHeader = () => !!(props.chatTitle || props.models || props.context);
   const showScrollButton = () => props.scrollButton !== false;

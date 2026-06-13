@@ -99,11 +99,20 @@ function SlashCommand(props: SlashCommandProps) {
   });
 
   function selectItem(item: SlashCommandItem) {
-    ctx.setValue("");
+    // Insert the chosen command into the prompt (e.g. "/summarize ") so it
+    // appears in the input ready to send or edit. The trailing space ends the
+    // slash token, which closes the palette. Still fire onSelect so consumers
+    // can react to the selection.
+    ctx.setValue(item.label + " ");
     setOpen(false);
     props.onSelect(item);
-    // Refocus textarea
-    setTimeout(() => ctx.textareaRef?.focus(), 0);
+    // Refocus the textarea and place the caret at the end.
+    setTimeout(() => {
+      const ta = ctx.textareaRef;
+      if (!ta) return;
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+    }, 0);
   }
 
   function handleKeyDown(e: KeyboardEvent) {

@@ -10,6 +10,9 @@ interface Props extends Record<string, unknown> {
   disabled?: boolean;
   loading?: boolean;
   suggestions?: string[];
+  /** What clicking a suggestion does: `'submit'` (default) sends it immediately
+   *  as if typed and submitted; `'fill'` just places it in the input. */
+  suggestionMode?: 'submit' | 'fill';
   /** Slash commands — when set, typing `/` opens the command palette. Set as a
    *  JS property. */
   slashCommands?: SlashCommandItem[];
@@ -34,6 +37,7 @@ defineKitnElement<Props, Events>('kitn-prompt-input', {
   disabled: false,
   loading: false,
   suggestions: undefined,
+  suggestionMode: 'submit',
   slashCommands: undefined,
   slashActiveIds: undefined,
   slashCompact: false,
@@ -47,7 +51,16 @@ defineKitnElement<Props, Events>('kitn-prompt-input', {
     dispatch('submit', { value: current(), attachments: attachments() });
     setAttachments([]);
   };
-  const handleSuggestionClick = (v: string) => { handleChange(v); dispatch('suggestionclick', { value: v }); };
+  const handleSuggestionClick = (v: string) => {
+    if ((props.suggestionMode ?? 'submit') === 'fill') {
+      handleChange(v);
+      dispatch('suggestionclick', { value: v });
+    } else {
+      // Default: behave as if the user typed the suggestion and pressed submit.
+      dispatch('submit', { value: v, attachments: attachments() });
+      setAttachments([]);
+    }
+  };
 
   return (
     <DefaultPromptInput
