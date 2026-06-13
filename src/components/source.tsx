@@ -35,7 +35,7 @@ function Source(props: SourceProps) {
 
   return (
     <SourceContext.Provider value={{ get href() { return props.href; }, get domain() { return domain(); } }}>
-      <HoverCardRoot openDelay={150} closeDelay={0}>
+      <HoverCardRoot openDelay={150}>
         {props.children}
       </HoverCardRoot>
     </SourceContext.Provider>

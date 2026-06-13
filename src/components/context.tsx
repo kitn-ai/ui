@@ -59,7 +59,7 @@ export function Context(props: ContextProps) {
 
   return (
     <ContextCtx.Provider value={value()}>
-      <HoverCardRoot openDelay={0} closeDelay={0}>
+      <HoverCardRoot openDelay={0}>
         {props.children}
       </HoverCardRoot>
     </ContextCtx.Provider>

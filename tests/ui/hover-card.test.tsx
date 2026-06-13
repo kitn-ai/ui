@@ -84,3 +84,60 @@ describe('HoverCard determinism (HC-1)', () => {
     expect(screen.queryByTestId('content')).toBeNull();
   });
 });
+
+describe('HoverCard safe-area (transparent-gap bridge + closeDelay default)', () => {
+  // No explicit delays -> openDelay defaults to 0, closeDelay defaults to 300.
+  function setupDefaults() {
+    return render(() => (
+      <HoverCardRoot>
+        <HoverCardTrigger><button data-testid="trg">trigger</button></HoverCardTrigger>
+        <HoverCardContent class="w-80"><div data-testid="content">card</div></HoverCardContent>
+      </HoverCardRoot>
+    ));
+  }
+
+  it('renders an outer shell (data-hovercard-content) wrapping an inner visual card', () => {
+    setupDefaults();
+    const trg = screen.getByTestId('trg').parentElement!;
+    fireEvent.pointerEnter(trg);
+    vi.advanceTimersByTime(0); // openDelay default 0
+    const shell = document.querySelector('[data-hovercard-content]') as HTMLElement;
+    expect(shell).toBeTruthy();
+    // Outer shell holds the positioning + transparent background, NOT the card classes.
+    expect(shell.style.position).toBe('fixed');
+    expect(shell.className).toContain('z-50');
+    expect(shell.className).not.toContain('bg-card');
+    // The safe-area padding bridges the gap (default placement 'bottom' -> padding-top).
+    expect(shell.style.paddingTop).toBe('8px');
+    // Inner card carries the visual classes, the consumer class, and presence state.
+    const inner = shell.firstElementChild as HTMLElement;
+    expect(inner.className).toContain('bg-card');
+    expect(inner.className).toContain('rounded-lg');
+    expect(inner.className).toContain('w-80'); // consumer-controlled sizing
+    expect(inner.hasAttribute('data-expanded')).toBe(true);
+    expect(inner.contains(screen.getByTestId('content'))).toBe(true);
+  });
+
+  it('stays open across a short advance because closeDelay defaults to 300ms', () => {
+    setupDefaults();
+    const trg = screen.getByTestId('trg').parentElement!;
+    fireEvent.pointerEnter(trg);
+    vi.advanceTimersByTime(0);
+    expect(screen.queryByTestId('content')).toBeTruthy();
+    // Leave the trigger, then advance LESS than the 300ms default close window.
+    fireEvent.pointerLeave(trg);
+    vi.advanceTimersByTime(100);
+    expect(screen.queryByTestId('content')).toBeTruthy(); // still open at 100ms
+  });
+
+  it('closes after the 300ms default closeDelay elapses', async () => {
+    setupDefaults();
+    const trg = screen.getByTestId('trg').parentElement!;
+    fireEvent.pointerEnter(trg);
+    vi.advanceTimersByTime(0);
+    fireEvent.pointerLeave(trg);
+    vi.advanceTimersByTime(300);
+    await Promise.resolve();
+    expect(screen.queryByTestId('content')).toBeNull();
+  });
+});

@@ -44,7 +44,9 @@ export function HoverCardRoot(props: HoverCardRootProps) {
   };
   const leave = () => {
     clearTimeout(timer);
-    timer = window.setTimeout(() => setOpen(false), props.closeDelay ?? 0);
+    // closeDelay default is 300ms (Radix-style) as a belt-and-suspenders fallback
+    // for diagonal pointer escapes that miss the transparent safe bridge.
+    timer = window.setTimeout(() => setOpen(false), props.closeDelay ?? 300);
   };
   const close = () => { clearTimeout(timer); setOpen(false); };
   onCleanup(() => clearTimeout(timer));
@@ -80,33 +82,74 @@ export function HoverCardTrigger(props: HoverCardTriggerProps) {
 
 export interface HoverCardContentProps { children: JSX.Element; class?: string; }
 
+// Visual gap between trigger and the visible card. Also the depth of the
+// transparent safe bridge so the pointer never crosses "empty" space.
+const GUTTER = 8;
+
+/**
+ * Returns the CSS padding property that, set to `gutter`px on the OUTER floating
+ * shell, recreates the visual gap as a transparent safe area on the
+ * trigger-facing side. The outer shell is placed flush (gutter: 0) so the
+ * padding bridges the gap while keeping the inner card the same distance away.
+ *
+ * Placement strings from @floating-ui/dom (post flip/shift) may carry a
+ * '-start'/'-end' alignment suffix; we split on '-' and key on the side.
+ *   bottom* -> padding-top, top* -> padding-bottom,
+ *   left*   -> padding-right, right* -> padding-left
+ */
+function gapPaddingStyle(placement: string, gutter: number): JSX.CSSProperties {
+  const side = placement.split('-')[0];
+  const prop: Record<string, keyof JSX.CSSProperties> = {
+    bottom: 'padding-top',
+    top: 'padding-bottom',
+    left: 'padding-right',
+    right: 'padding-left',
+  };
+  return { [prop[side] ?? 'padding-top']: `${gutter}px` };
+}
+
 export function HoverCardContent(props: HoverCardContentProps) {
   const ctx = useHoverCard();
   const config = useChatConfig();
   const presence = createPresence(ctx.open);
-  const position = usePosition(ctx.trigger, ctx.content, { placement: 'bottom', gutter: 8 });
+  // gutter: 0 places the outer shell flush with the trigger; the visual gap is
+  // recreated by transparent padding (gapPaddingStyle) so the hit area bridges
+  // it and a straight trigger->content transit never leaves a hot zone.
+  const position = usePosition(ctx.trigger, ctx.content, { placement: 'bottom', gutter: 0 });
   useDismiss({ enabled: ctx.open, onDismiss: (reason) => (reason === 'escape' ? ctx.close() : ctx.leave()), refs: () => [ctx.trigger(), ctx.content()] });
 
   return (
     <Show when={presence.present()}>
       <Portal mount={config.portalMount()}>
+        {/* Outer shell: positioning + the transparent safe bridge + hot zone. */}
         <div
           ref={(el) => { ctx.setContent(el); presence.setRef(el); }}
           data-hovercard-content
-          data-expanded={presence.state() === 'open' ? '' : undefined}
-          data-closed={presence.state() === 'closed' ? '' : undefined}
           onPointerEnter={ctx.enter}
           onPointerLeave={ctx.leave}
           onFocusIn={ctx.enter}
           onFocusOut={ctx.leave}
-          style={{ position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px` }}
-          class={cn(
-            'z-50 rounded-lg bg-card shadow-lg',
-            'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
-            props.class,
-          )}
+          style={{
+            position: 'fixed',
+            left: `${position.pos().x}px`,
+            top: `${position.pos().y}px`,
+            background: 'transparent',
+            ...gapPaddingStyle(position.pos().placement, GUTTER),
+          }}
+          class="z-50"
         >
-          {props.children}
+          {/* Inner card: all visual + animation classes and the presence state. */}
+          <div
+            data-expanded={presence.state() === 'open' ? '' : undefined}
+            data-closed={presence.state() === 'closed' ? '' : undefined}
+            class={cn(
+              'rounded-lg bg-card shadow-lg',
+              'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
+              props.class,
+            )}
+          >
+            {props.children}
+          </div>
         </div>
       </Portal>
     </Show>
