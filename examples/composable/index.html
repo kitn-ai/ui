@@ -47,7 +47,7 @@
           <p>Every primitive in the kit, shipped as a framework-agnostic custom element. Drop them into any page — data in via properties, interactions out via events.</p>
           <div class="kpi">
             <div><b>28</b><span>elements</span></div>
-            <div><b>~101kb</b><span>gzip, shared</span></div>
+            <div><b>~80kb</b><span>gzip, shared</span></div>
             <div><b>0</b><span>framework deps</span></div>
           </div>
         </div>
@@ -247,7 +247,7 @@
         <button id="console-hide">hide ▾</button>
       </div>
     </div>
-    <div class="console-body" id="log-body"><span class="empty">Interactions appear here — click a model, send a message, remove an attachment…</span></div>
+    <div class="console-body" id="log-body" tabindex="0" role="log" aria-label="Event log" aria-live="polite"><span class="empty">Interactions appear here — click a model, send a message, remove an attachment…</span></div>
   </aside>
 
   <!-- Shown only if the component bundle fails to load (see main.js boot guard). -->
