@@ -75,6 +75,10 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
+      // Render in its own iframe in the docs page so the docs wrapper's
+      // transform+overflow doesn't trap/clip the header overlays (model-switcher,
+      // context dropdown) that portal into shadow DOM.
+      story: { inline: false, height: '360px' },
       description: {
         component: [
           '`<kitn-chat>` is the framework-agnostic **web component** version of the chat UI — a complete message thread plus prompt input, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',

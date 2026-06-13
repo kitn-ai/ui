@@ -43,6 +43,9 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
+      // Render in its own iframe in the docs page so the docs wrapper's
+      // transform+overflow doesn't trap/clip this element's shadow-DOM tooltip.
+      story: { inline: false, height: '200px' },
       description: {
         component: [
           '`<kitn-checkpoint>` is the framework-agnostic **web component** for a bookmark/checkpoint button (with an optional tooltip and label), isolated in **Shadow DOM**.',
