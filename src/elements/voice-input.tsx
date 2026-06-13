@@ -8,6 +8,7 @@ interface Props extends Record<string, unknown> {
    * a value-returning callback can't be modelled as a fire-and-forget event.
    */
   transcribe?: (audio: Blob) => Promise<string>;
+  /** Disable the mic button (non-interactive). */
   disabled?: boolean;
 }
 

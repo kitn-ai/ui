@@ -36,16 +36,32 @@ interface ContextUsage {
 }
 
 interface Props extends Record<string, unknown> {
+  /** The full message thread to render, newest last. Each entry carries its role,
+   *  content, and optional reasoning/tools/attachments/actions. Set as a JS
+   *  property (`el.messages = [...]`). */
   messages: ChatMessage[];
+  /** Controlled value of the input. When set, the host owns the input text and
+   *  must update it on `valuechange`; leave unset for uncontrolled behavior. */
   value?: string;
+  /** Placeholder text shown in the empty input. */
   placeholder?: string;
+  /** When true, shows the loading/streaming state and disables submit (use while
+   *  awaiting the assistant's reply). */
   loading?: boolean;
+  /** Starter prompts shown above the input when the thread is empty. Clicking one
+   *  follows `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately
    *  as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: 'submit' | 'fill';
+  /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`).
+   *  Defaults to `'sm'`. */
   proseSize?: ProseSize;
+  /** Shiki theme name for syntax-highlighted code blocks (e.g.
+   *  `'github-dark-dimmed'`). */
   codeTheme?: string;
+  /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain
+   *  `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;

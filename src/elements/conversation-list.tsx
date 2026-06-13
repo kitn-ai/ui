@@ -3,8 +3,14 @@ import { ConversationList } from '../components/conversation-list';
 import type { ConversationGroup, ConversationSummary } from '../types';
 
 interface Props extends Record<string, unknown> {
+  /** Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its
+   *  own conversations. Use this when you want to control the grouping/headers
+   *  yourself; otherwise pass a flat `conversations` array. Set as a JS property. */
   groups: ConversationGroup[];
+  /** A flat list of conversation summaries; the component buckets them by recency
+   *  for you. Ignored when `groups` is provided. Set as a JS property. */
   conversations: ConversationSummary[];
+  /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
 }
 

@@ -2,7 +2,11 @@ import { defineKitnElement } from './define';
 import { Loader, type LoaderVariant, type LoaderSize } from '../components/loader';
 
 interface Props extends Record<string, unknown> {
+  /** The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' |
+   *  'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' |
+   *  'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`. */
   variant?: LoaderVariant;
+  /** Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. */
   size?: LoaderSize;
   /** Label for the text-based variants. */
   text?: string;

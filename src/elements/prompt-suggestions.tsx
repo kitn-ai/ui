@@ -8,6 +8,7 @@ interface Props extends Record<string, unknown> {
   /** The suggestions. Strings, or `{ label, value }` when the displayed text
    *  and the emitted value differ. Set as a JS property. */
   suggestions: Item[];
+  /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
   variant?: 'outline' | 'ghost' | 'default';
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;

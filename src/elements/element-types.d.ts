@@ -35,15 +35,23 @@ export interface KitnChainOfThoughtElement extends HTMLElement {
 export interface KitnChatElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
+  /** The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). */
   messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | "copy" | "like" | "dislike" | "regenerate" | "edit"[] }[];
+  /** Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior. */
   value?: string;
+  /** Placeholder text shown in the empty input. */
   placeholder?: string;
+  /** When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). */
   loading?: boolean;
+  /** Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: "submit" | "fill";
+  /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
+  /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
   codeTheme?: string;
+  /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;
@@ -116,8 +124,11 @@ export interface KitnContextMeterElement extends HTMLElement {
 export interface KitnConversationListElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
+  /** Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. */
   groups: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[];
+  /** A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. */
   conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
+  /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
 }
 
@@ -144,6 +155,7 @@ export interface KitnFileUploadElement extends HTMLElement {
   multiple?: boolean;
   /** `accept` attribute for the file picker (e.g. `image/*`). */
   accept?: string;
+  /** Disable the dropzone — no clicking, no drag-and-drop. */
   disabled?: boolean;
   /** Default dropzone label (overridable via the default slot). */
   label?: string;
@@ -165,7 +177,9 @@ export interface KitnImageElement extends HTMLElement {
 export interface KitnLoaderElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
+  /** The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`. */
   variant?: "circular" | "classic" | "pulse" | "pulse-dot" | "dots" | "typing" | "wave" | "bars" | "terminal" | "text-blink" | "text-shimmer" | "loading-dots";
+  /** Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. */
   size?: "sm" | "lg" | "md";
   /** Label for the text-based variants. */
   text?: string;
@@ -222,10 +236,15 @@ export interface KitnModelSwitcherElement extends HTMLElement {
 export interface KitnPromptInputElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
+  /** Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior. */
   value?: string;
+  /** Placeholder text shown in the empty input. */
   placeholder?: string;
+  /** Disable the input and submit button entirely (non-interactive). */
   disabled?: boolean;
+  /** Show the loading/streaming state and block submit (use while awaiting a reply). */
   loading?: boolean;
+  /** Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: "submit" | "fill";
@@ -242,6 +261,7 @@ export interface KitnPromptSuggestionsElement extends HTMLElement {
   theme?: 'light' | 'dark' | 'auto';
   /** The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. */
   suggestions: string | { label: string; value?: undefined | string }[];
+  /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
   variant?: "ghost" | "default" | "outline";
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
@@ -339,6 +359,7 @@ export interface KitnVoiceInputElement extends HTMLElement {
   theme?: 'light' | 'dark' | 'auto';
   /** Transcriber the host supplies — records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event. */
   transcribe?: (audio: Blob) => Promise<string>;
+  /** Disable the mic button (non-interactive). */
   disabled?: boolean;
 }
 

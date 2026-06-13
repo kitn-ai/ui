@@ -5,10 +5,18 @@ import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
 
 interface Props extends Record<string, unknown> {
+  /** Controlled value of the input. When set, the host owns the text and must
+   *  update it on `valuechange`; leave unset for uncontrolled behavior. */
   value?: string;
+  /** Placeholder text shown in the empty input. */
   placeholder?: string;
+  /** Disable the input and submit button entirely (non-interactive). */
   disabled?: boolean;
+  /** Show the loading/streaming state and block submit (use while awaiting a
+   *  reply). */
   loading?: boolean;
+  /** Starter prompts shown above the input. Clicking one follows
+   *  `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately
    *  as if typed and submitted; `'fill'` just places it in the input. */
@@ -24,8 +32,11 @@ interface Props extends Record<string, unknown> {
 
 /** Events fired by `<kitn-prompt-input>`. */
 interface Events {
+  /** The user submitted the prompt (Enter or send button) with its attachments. */
   submit: { value: string; attachments: AttachmentData[] };
+  /** The input text changed (fires on every keystroke). */
   valuechange: { value: string };
+  /** A suggestion was clicked while `suggestion-mode="fill"`. */
   suggestionclick: { value: string };
   /** A slash command was chosen from the palette. */
   slashselect: { command: SlashCommandItem };

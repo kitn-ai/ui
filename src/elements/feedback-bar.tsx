@@ -9,8 +9,11 @@ interface Props extends Record<string, unknown> {
 
 /** Events fired by `<kitn-feedback-bar>`. */
 interface Events {
+  /** The user clicked thumbs-up. */
   helpful: void;
+  /** The user clicked thumbs-down. */
   nothelpful: void;
+  /** The user dismissed the banner. */
   close: void;
 }
 
