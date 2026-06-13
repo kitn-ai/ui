@@ -179,42 +179,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 A complete chat interface: a scrolling message list (with Markdown rendering, reasoning blocks, tool call panels, and message action buttons) plus a prompt input area with a send button.
 
-| Property | Attribute | Type | Default | Notes |
-|----------|-----------|------|---------|-------|
-| `messages` | — | `ChatMessage[]` | `[]` | The full message thread to render, newest last |
-| `value` | `value` | `string` | — | Controlled input value; omit for uncontrolled |
-| `placeholder` | `placeholder` | `string` | `'Send a message...'` | Textarea placeholder text |
-| `loading` | `loading` | `boolean` | `false` | Disables/locks the prompt input while awaiting a reply |
-| `suggestions` | — | `string[]` | — | Starter prompts shown above the input when the thread is empty; clicking one follows `suggestionMode` |
-| `suggestionMode` | `suggestion-mode` | `'submit' \| 'fill'` | `'submit'` | `'submit'` sends immediately; `'fill'` places the text in the input |
-| `theme` | `theme` | `'light' \| 'dark' \| 'auto'` | `'auto'` | `auto` follows `prefers-color-scheme` |
-| `proseSize` | `prose-size` | `'xs' \| 'sm' \| 'base' \| 'lg'` | `'sm'` | Markdown/text sizing |
-| `codeTheme` | `code-theme` | `string` | `'github-dark-dimmed'` | Shiki syntax-highlight theme name |
-| `codeHighlight` | `code-highlight` | `boolean` | `true` | `false` → plain code blocks, no Shiki loaded |
-| `chatTitle` | `chat-title` | `string` | — | Header title (header renders when `chatTitle`, `models`, or `context` is set) |
-| `models` | — | `ModelOption[]` | — | Shows a ModelSwitcher in the header; fires `modelchange` |
-| `currentModel` | `current-model` | `string` | — | Selected model id (pairs with `models`) |
-| `context` | — | `ContextData` | — | Shows the Context token-usage meter in the header |
-| `scrollButton` | `scroll-button` | `boolean` | `true` | Built-in scroll-to-bottom button |
-| `search` | `search` | `boolean` | `false` | Show a Search button in the input toolbar; fires `search` |
-| `voice` | `voice` | `boolean` | `false` | Show a Mic button in the input toolbar; fires `voice` |
-| `slashCommands` | — | `SlashCommand[]` | — | When set, typing `/` opens the command palette; fires `slashselect` |
-| `slashActiveIds` | — | `string[]` | — | Command ids to highlight as active in the palette |
-| `slashCompact` | `slash-compact` | `boolean` | `false` | Single-line palette rows |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `submit` | `{ value: string, attachments: AttachmentData[] }` | User submitted a message |
-| `valuechange` | `{ value: string }` | Fired on every input change |
-| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked — fires **only** when `suggestion-mode="fill"`; in the default `submit` mode the chip dispatches `submit` instead |
-| `messageaction` | `{ messageId: string, action: ChatMessageAction }` | An action button on a message was clicked |
-| `modelchange` | `{ modelId: string }` | Header model switcher changed |
-| `slashselect` | `{ command: SlashCommand }` | A slash command was chosen from the palette |
-| `search` | — | Search button clicked |
-| `voice` | — | Mic button clicked |
-
 ---
 
 ### `<kitn-chat-workspace>` / `KitnChatWorkspace`
@@ -277,52 +241,6 @@ Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kitn-chat-workspace -->
 
 The full app shell in one tag — a collapsible conversation-list sidebar (left), a drag-to-resize handle, and the complete chat thread (right) — all wired together. Drop in a single element and own the data; the workspace handles layout, resize, and collapse state internally.
-
-| Property | Attribute | Type | Default | Notes |
-|----------|-----------|------|---------|-------|
-| `groups` | — | `ConversationGroup[]` | `[]` | Pre-bucketed conversation groups for the sidebar; controls grouping/headers |
-| `conversations` | — | `ConversationSummary[]` | `[]` | Flat conversation list; auto-bucketed by recency when `groups` is empty |
-| `activeId` | `active-id` | `string` | — | ID of the open conversation; highlighted in the sidebar |
-| `messages` | — | `ChatMessage[]` | `[]` | The active conversation's message thread, newest last |
-| `value` | `value` | `string` | — | Controlled input value; omit for uncontrolled |
-| `placeholder` | `placeholder` | `string` | `'Send a message...'` | Textarea placeholder text |
-| `loading` | `loading` | `boolean` | `false` | Disables/locks the prompt input while awaiting a reply |
-| `suggestions` | — | `string[]` | — | Starter prompts shown above the input when the thread is empty |
-| `suggestionMode` | `suggestion-mode` | `'submit' \| 'fill'` | `'submit'` | `'submit'` sends immediately; `'fill'` places the text in the input |
-| `theme` | `theme` | `'light' \| 'dark' \| 'auto'` | `'auto'` | `auto` follows `prefers-color-scheme` |
-| `proseSize` | `prose-size` | `'xs' \| 'sm' \| 'base' \| 'lg'` | `'sm'` | Markdown/text sizing |
-| `codeTheme` | `code-theme` | `string` | `'github-dark-dimmed'` | Shiki syntax-highlight theme name |
-| `codeHighlight` | `code-highlight` | `boolean` | `true` | `false` → plain code blocks, no Shiki loaded |
-| `chatTitle` | `chat-title` | `string` | — | Chat header title (header renders when `chatTitle`, `models`, or `context` is set) |
-| `models` | — | `ModelOption[]` | — | Shows a ModelSwitcher in the chat header; fires `modelchange` |
-| `currentModel` | `current-model` | `string` | — | Selected model id (pairs with `models`) |
-| `context` | — | `ContextData` | — | Shows the Context token-usage meter in the chat header |
-| `scrollButton` | `scroll-button` | `boolean` | `true` | Built-in scroll-to-bottom button in the chat thread |
-| `search` | `search` | `boolean` | `false` | Show a Search button in the input toolbar; fires `search` |
-| `voice` | `voice` | `boolean` | `false` | Show a Mic button in the input toolbar; fires `voice` |
-| `slashCommands` | — | `SlashCommand[]` | — | When set, typing `/` opens the command palette; fires `slashselect` |
-| `slashActiveIds` | — | `string[]` | — | Command ids to highlight as active in the palette |
-| `slashCompact` | `slash-compact` | `boolean` | `false` | Single-line palette rows |
-| `sidebarWidth` | `sidebar-width` | `number` | `22` | Sidebar default width as a percent of the workspace |
-| `sidebarMinWidth` | `sidebar-min-width` | `number` | `200` | Sidebar minimum width in px |
-| `sidebarMaxWidth` | `sidebar-max-width` | `number` | `420` | Sidebar maximum width in px |
-| `sidebarCollapsed` | `sidebar-collapsed` | `boolean` | `false` | Initial collapsed state of the sidebar |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `conversationselect` | `{ id: string }` | User clicked a conversation in the sidebar |
-| `newchat` | — | User clicked "New chat" |
-| `sidebartoggle` | `{ collapsed: boolean }` | Sidebar collapse state changed |
-| `submit` | `{ value: string, attachments: AttachmentData[] }` | User submitted a message |
-| `valuechange` | `{ value: string }` | Fired on every input change |
-| `modelchange` | `{ modelId: string }` | Header model switcher changed |
-| `messageaction` | `{ messageId: string, action: ChatMessageAction }` | An action button on a message was clicked |
-| `search` | — | Search button clicked |
-| `voice` | — | Mic button clicked |
-| `slashselect` | `{ command: SlashCommand }` | A slash command was chosen from the palette |
-| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked — fires **only** when `suggestion-mode="fill"`; in the default `submit` mode the chip dispatches `submit` instead |
 
 **Example:**
 
@@ -394,20 +312,6 @@ Themed by the global design tokens (override any `--color-*`). Element-specific 
 
 Sidebar panel listing conversations, optionally grouped. Emits events for navigation; does not manage its own state.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `conversations` | — | `ConversationSummary[]` | Flat list; the component buckets by recency. Ignored when `groups` is provided |
-| `groups` | — | `ConversationGroup[]` | Pre-bucketed groups with their own conversations; controls the grouping/headers |
-| `activeId` | `active-id` | `string` | ID of the currently selected conversation |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `select` | `{ id: string }` | User clicked a conversation |
-| `newchat` | — | User clicked "New chat" |
-| `togglesidebar` | — | User clicked the sidebar toggle |
-
 ---
 
 ### `<kitn-prompt-input>` / `KitnPromptInput`
@@ -448,27 +352,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 Standalone prompt input with a send button. Use when you want just the input area without the message list.
 
-| Property | Attribute | Type | Default | Notes |
-|----------|-----------|------|---------|-------|
-| `value` | `value` | `string` | — | Controlled input value; omit for uncontrolled |
-| `placeholder` | `placeholder` | `string` | `'Send a message...'` | Textarea placeholder |
-| `disabled` | `disabled` | `boolean` | `false` | Disables the textarea and send button |
-| `loading` | `loading` | `boolean` | `false` | Shows loading state (submit disabled) |
-| `suggestions` | — | `string[]` | — | Suggestion chips shown above the input |
-| `suggestionMode` | `suggestion-mode` | `'submit' \| 'fill'` | `'submit'` | What clicking a suggestion does |
-| `slashCommands` | — | `SlashCommand[]` | — | When set, typing `/` opens the command palette |
-| `slashActiveIds` | — | `string[]` | — | Command ids to highlight as active |
-| `slashCompact` | `slash-compact` | `boolean` | `false` | Single-line palette rows |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `submit` | `{ value: string, attachments: AttachmentData[] }` | User submitted |
-| `valuechange` | `{ value: string }` | Fired on every input change |
-| `suggestionclick` | `{ value: string }` | Suggestion chip clicked (with `suggestion-mode="fill"`) |
-| `slashselect` | `{ command: SlashCommand }` | A slash command was chosen |
-
 ---
 
 ### `<kitn-message>` / `KitnMessage`
@@ -503,22 +386,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 A single message row: renders markdown/plain content, reasoning, tool calls, attachments, and action buttons from one message object.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `message` | — | `ChatMessage` | The full message object (preferred) |
-| `role` | `role` | `'user' \| 'assistant'` | Convenience when not passing a `message` object |
-| `content` | `content` | `string` | Convenience content (used when `message` is not set) |
-| `markdown` | `markdown` | `boolean` | Force markdown on/off (default on for assistant, off for user) |
-| `proseSize` | `prose-size` | `'xs' \| 'sm' \| 'base' \| 'lg'` | Text sizing |
-| `codeTheme` | `code-theme` | `string` | Shiki theme for code blocks |
-| `codeHighlight` | `code-highlight` | `boolean` | Disable syntax highlighting |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `messageaction` | `{ messageId: string, action: ChatMessageAction }` | An action button was clicked |
-
 ---
 
 ### `<kitn-markdown>` / `KitnMarkdown`
@@ -543,13 +410,6 @@ Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kitn-markdown -->
 
 Renders a markdown string with code highlighting.
-
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `content` | `content` | `string` | The markdown source |
-| `proseSize` | `prose-size` | `'xs' \| 'sm' \| 'base' \| 'lg'` | Text sizing |
-| `codeTheme` | `code-theme` | `string` | Shiki theme for fenced code blocks |
-| `codeHighlight` | `code-highlight` | `boolean` | Disable syntax highlighting |
 
 No events.
 
@@ -578,14 +438,6 @@ Themed by the global design tokens (override any `--color-*`). Element-specific 
 <!-- /spec:kitn-code-block -->
 
 A single syntax-highlighted code block with a copy button.
-
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `code` | `code` | `string` | The source code to render |
-| `language` | `language` | `string` | Language grammar (e.g. `js`, `python`). Defaults to `tsx` |
-| `codeTheme` | `code-theme` | `string` | Shiki theme name |
-| `codeHighlight` | `code-highlight` | `boolean` | Disable syntax highlighting |
-| `proseSize` | `prose-size` | `'xs' \| 'sm' \| 'base' \| 'lg'` | Code text sizing |
 
 No events.
 
@@ -621,20 +473,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 Collapsible reasoning/thinking block with optional streaming auto-expand.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `text` | `text` | `string` | The reasoning text |
-| `label` | `label` | `string` | Trigger label |
-| `open` | `open` | `boolean` | Controlled open state |
-| `streaming` | `streaming` | `boolean` | While true, auto-expands; re-collapses when it flips false |
-| `markdown` | `markdown` | `boolean` | Render `text` as markdown |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `openchange` | `{ open: boolean }` | Open state changed |
-
 ---
 
 ### `<kitn-tool>` / `KitnTool`
@@ -657,11 +495,6 @@ Themed by the global design tokens (override any `--color-*`). Element-specific 
 <!-- /spec:kitn-tool -->
 
 Tool-call panel showing a function call's type, state, input, and output.
-
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `tool` | — | `ToolPart` | The tool-call to display |
-| `open` | `open` | `boolean` | Start expanded |
 
 No events.
 
@@ -698,21 +531,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 Renders a list of file/document attachments in grid, inline, or list layouts.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `items` | — | `AttachmentData[]` | The attachments to render |
-| `variant` | `variant` | `'grid' \| 'inline' \| 'list'` | Layout style |
-| `hoverCard` | `hover-card` | `boolean` | Wrap each item in a hover card |
-| `removable` | `removable` | `boolean` | Show a remove button per item |
-| `showMediaType` | `show-media-type` | `boolean` | Show media type beneath the filename |
-| `emptyText` | `empty-text` | `string` | Text shown when `items` is empty |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `remove` | `{ id: string }` | A remove button was clicked |
-
 ---
 
 ### `<kitn-model-switcher>` / `KitnModelSwitcher`
@@ -742,17 +560,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 A dropdown that lets the user switch between available models.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `models` | — | `ModelOption[]` | The selectable models |
-| `currentModel` | `current-model` | `string` | Currently-selected model id (defaults to first model) |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `modelchange` | `{ modelId: string }` | A model was selected |
-
 ---
 
 ### `<kitn-context-meter>` / `KitnContextMeter`
@@ -774,10 +581,6 @@ Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kitn-context-meter -->
 
 Token-usage meter showing used/max tokens and estimated cost.
-
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `context` | — | `ContextData` | Token-usage data |
 
 No events.
 
@@ -802,10 +605,6 @@ Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kitn-chain-of-thought -->
 
 Displays a list of reasoning steps as a collapsible chain-of-thought.
-
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `steps` | — | `{ label: string; content?: string }[]` | The reasoning steps |
 
 No events.
 
@@ -841,19 +640,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 Suggestion chips or full-width rows. Can render plain strings or `{ label, value }` pairs.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `suggestions` | — | `string[] \| { label: string; value?: string }[]` | The suggestions |
-| `variant` | `variant` | `'outline' \| 'ghost' \| 'default'` | Chip style |
-| `block` | `block` | `boolean` | Full-width left-aligned rows |
-| `highlight` | `highlight` | `string` | Substring to highlight within each suggestion |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `select` | `{ value: string }` | A suggestion was clicked |
-
 ---
 
 ### `<kitn-source>` / `KitnSource`
@@ -880,14 +666,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 An inline citation link that opens a hover card with source details.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `href` | `href` | `string` | The URL this citation links to |
-| `label` | `label` | `string` | Trigger label (defaults to the domain) |
-| `headline` | `headline` | `string` | Hover-card headline |
-| `description` | `description` | `string` | Hover-card body text |
-| `showFavicon` | `show-favicon` | `boolean` | Show the source's favicon |
-
 No events.
 
 ---
@@ -912,11 +690,6 @@ Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kitn-source-list -->
 
 Renders a list of sources using `<kitn-source>` internally.
-
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `sources` | — | `SourceItem[]` | The sources to render |
-| `showFavicon` | `show-favicon` | `boolean` | Show favicons on all items |
 
 No events.
 
@@ -950,18 +723,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 A thumbs-up / thumbs-down banner (e.g. "Was this helpful?").
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `barTitle` | `bar-title` | `string` | The banner label |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `helpful` | — | User clicked thumbs-up |
-| `nothelpful` | — | User clicked thumbs-down |
-| `close` | — | User dismissed the banner |
-
 ---
 
 ### `<kitn-file-upload>` / `KitnFileUpload`
@@ -993,19 +754,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 A drag-and-drop / click-to-pick file upload dropzone.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `multiple` | `multiple` | `boolean` | Allow multiple files (default true) |
-| `accept` | `accept` | `string` | `accept` attribute for the file picker (e.g. `image/*`) |
-| `disabled` | `disabled` | `boolean` | Disable the dropzone |
-| `label` | `label` | `string` | Default dropzone label |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `filesadded` | `{ files: File[] }` | Files were picked or dropped |
-
 ---
 
 ### `<kitn-voice-input>` / `KitnVoiceInput`
@@ -1036,18 +784,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 A mic button that records audio and optionally transcribes it via a host-supplied function.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `transcribe` | — | `(audio: Blob) => Promise<string>` | Function-valued property: the host supplies a transcriber |
-| `disabled` | `disabled` | `boolean` | Disable the mic button |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `audiocaptured` | `{ blob: Blob }` | Raw audio captured (before transcription) |
-| `transcription` | `{ text: string }` | Transcription completed |
-
 ---
 
 ### `<kitn-loader>` / `KitnLoader`
@@ -1071,12 +807,6 @@ Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kitn-loader -->
 
 An animated loading indicator with 12 style variants.
-
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `variant` | `variant` | `'circular' \| 'classic' \| 'pulse' \| 'pulse-dot' \| 'dots' \| 'typing' \| 'wave' \| 'bars' \| 'terminal' \| 'text-blink' \| 'text-shimmer' \| 'loading-dots'` | Animation style |
-| `size` | `size` | `'sm' \| 'md' \| 'lg'` | Loader size |
-| `text` | `text` | `string` | Label for text-based variants |
 
 No events.
 
@@ -1110,18 +840,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 An animated "thinking" shimmer bar with an optional stop affordance.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `text` | `text` | `string` | The shimmering label (e.g. "Thinking…") |
-| `stoppable` | `stoppable` | `boolean` | Show a stop affordance |
-| `stopLabel` | `stop-label` | `string` | Label for the stop affordance |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `stop` | — | The stop affordance was clicked |
-
 ---
 
 ### `<kitn-text-shimmer>` / `KitnTextShimmer`
@@ -1146,13 +864,6 @@ Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kitn-text-shimmer -->
 
 Text with a shimmer animation — useful for "thinking" indicators.
-
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `text` | `text` | `string` | The text to shimmer |
-| `as` | `as` | `string` | Element tag to render as (default `span`) |
-| `duration` | `duration` | `number` | Animation duration in seconds |
-| `spread` | `spread` | `number` | Gradient spread (5–45) |
 
 No events.
 
@@ -1187,19 +898,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 Renders a string or an `AsyncIterable<string>` with a reveal animation.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `text` | — | `string \| AsyncIterable<string>` | Text to stream (async iterables must be set as a JS property) |
-| `mode` | `mode` | `'typewriter' \| 'fade'` | Reveal animation |
-| `speed` | `speed` | `number` | Characters/segments per tick |
-| `as` | `as` | `string` | Element tag to render as |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `complete` | — | Streaming finished |
-
 ---
 
 ### `<kitn-image>` / `KitnImage`
@@ -1224,13 +922,6 @@ Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kitn-image -->
 
 Renders a base64-encoded or raw-bytes image.
-
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `base64` | `base64` | `string` | Base64-encoded image data (pair with `media-type`) |
-| `bytes` | — | `Uint8Array` | Raw image bytes (must be set as a JS property) |
-| `alt` | `alt` | `string` | Alt text |
-| `mediaType` | `media-type` | `string` | MIME type (default `image/png`) |
 
 No events.
 
@@ -1265,19 +956,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 A small button used to mark or navigate to a conversation checkpoint.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `label` | `label` | `string` | Optional text beside the icon |
-| `tooltip` | `tooltip` | `string` | Tooltip on hover |
-| `variant` | `variant` | `'default' \| 'outline' \| 'ghost'` | Visual button style |
-| `size` | `size` | `'sm' \| 'md' \| 'lg' \| 'icon' \| 'icon-sm'` | Button size |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `select` | — | The checkpoint was clicked |
-
 ---
 
 ### `<kitn-chat-scope-picker>` / `KitnChatScopePicker`
@@ -1308,18 +986,6 @@ Themed by the global design tokens (override any `--color-*`).
 
 A dropdown for filtering the chat to specific authors, tags, content type, or date range.
 
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `availableAuthors` | — | `string[]` | Authors to offer as scope filters |
-| `availableTags` | — | `string[]` | Tags to offer as scope filters |
-| `currentLabel` | `current-label` | `string` | Label shown on the trigger for the active scope |
-
-**Events:**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `scopechange` | `{ filters: SearchFilters \| undefined }` | A scope was chosen (`undefined` filters = "All Content") |
-
 ---
 
 ### `<kitn-message-skills>` / `KitnMessageSkills`
@@ -1341,10 +1007,6 @@ Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kitn-message-skills -->
 
 Displays active skills as badges on a message.
-
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `skills` | — | `{ id: string; name: string }[]` | The active skills to badge |
 
 No events.
 
@@ -1370,11 +1032,6 @@ Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kitn-empty -->
 
 Empty-state placeholder with a title and description.
-
-| Property | Attribute | Type | Notes |
-|----------|-----------|------|-------|
-| `emptyTitle` | `empty-title` | `string` | Title text (attribute is `empty-title` to avoid collision with the global `title` attribute) |
-| `description` | `description` | `string` | Description text |
 
 No events.
 
