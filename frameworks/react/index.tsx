@@ -346,6 +346,14 @@ export interface KitnPromptInputProps extends KitnBaseProps {
   slashActiveIds?: string[];
   /** Single-line palette rows. */
   slashCompact?: boolean;
+  /** Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. */
+  search?: boolean;
+  /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. */
+  voice?: boolean;
+  /** Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). */
+  attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
+  /** The Search (Globe) toolbar button was clicked. */
+  onSearch?: (event: CustomEvent<undefined>) => void;
   /** A slash command was chosen from the palette. */
   onSlashselect?: (event: CustomEvent<{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }>) => void;
   /** The user submitted the prompt (Enter or send button) with its attachments. */
@@ -354,12 +362,14 @@ export interface KitnPromptInputProps extends KitnBaseProps {
   onSuggestionclick?: (event: CustomEvent<{ value: string }>) => void;
   /** The input text changed (fires on every keystroke). */
   onValuechange?: (event: CustomEvent<{ value: string }>) => void;
+  /** The Voice (Mic) toolbar button was clicked. */
+  onVoice?: (event: CustomEvent<undefined>) => void;
 }
 
 export const KitnPromptInput = createKitnComponent<KitnPromptInputProps>(
   'kitn-prompt-input',
-  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","slashCommands","slashActiveIds","slashCompact"],
-  { onSlashselect: 'slashselect', onSubmit: 'submit', onSuggestionclick: 'suggestionclick', onValuechange: 'valuechange' },
+  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","slashCommands","slashActiveIds","slashCompact","search","voice","attachments"],
+  { onSearch: 'search', onSlashselect: 'slashselect', onSubmit: 'submit', onSuggestionclick: 'suggestionclick', onValuechange: 'valuechange', onVoice: 'voice' },
 );
 
 export interface KitnPromptSuggestionsProps extends KitnBaseProps {
@@ -367,6 +377,8 @@ export interface KitnPromptSuggestionsProps extends KitnBaseProps {
   suggestions: (string | { label: string; value?: undefined | string })[];
   /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
   variant?: "ghost" | "default" | "outline";
+  /** Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). */
+  size?: "sm" | "lg" | "md" | "icon" | "icon-sm";
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
   /** Substring to highlight within each suggestion. */
@@ -377,7 +389,7 @@ export interface KitnPromptSuggestionsProps extends KitnBaseProps {
 
 export const KitnPromptSuggestions = createKitnComponent<KitnPromptSuggestionsProps>(
   'kitn-prompt-suggestions',
-  ["theme","suggestions","variant","block","highlight"],
+  ["theme","suggestions","variant","size","block","highlight"],
   { onSelect: 'select' },
 );
 

@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js';
+import { createEffect, createSignal } from 'solid-js';
 import { defineKitnElement } from './define';
 import { DefaultPromptInput } from './default-input';
 import type { AttachmentData } from '../components/attachments';
@@ -28,6 +28,16 @@ interface Props extends Record<string, unknown> {
   slashActiveIds?: string[];
   /** Single-line palette rows. */
   slashCompact?: boolean;
+  /** Show a Search (Globe) button in the left toolbar; clicking it fires a
+   *  `search` event. */
+  search?: boolean;
+  /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice`
+   *  event. */
+  voice?: boolean;
+  /** Attachments to seed the input with (so a consumer can pre-populate staged
+   *  files without an upload). Set as a JS property; the element then manages its
+   *  own attachment state from there (add via the paperclip, remove per chip). */
+  attachments?: AttachmentData[];
 }
 
 /** Events fired by `<kitn-prompt-input>`. */
@@ -40,6 +50,10 @@ interface Events {
   suggestionclick: { value: string };
   /** A slash command was chosen from the palette. */
   slashselect: { command: SlashCommandItem };
+  /** The Search (Globe) toolbar button was clicked. */
+  search: undefined;
+  /** The Voice (Mic) toolbar button was clicked. */
+  voice: undefined;
 }
 
 defineKitnElement<Props, Events>('kitn-prompt-input', {
@@ -52,9 +66,19 @@ defineKitnElement<Props, Events>('kitn-prompt-input', {
   slashCommands: undefined,
   slashActiveIds: undefined,
   slashCompact: false,
+  search: false,
+  voice: false,
+  attachments: undefined,
 }, (props, { dispatch, flag }) => {
   const [internal, setInternal] = createSignal(props.value ?? '');
-  const [attachments, setAttachments] = createSignal<AttachmentData[]>([]);
+  // Seed staged attachments from the `attachments` property; the element manages
+  // its own state from there (paperclip adds, per-chip remove deletes).
+  const [attachments, setAttachments] = createSignal<AttachmentData[]>(props.attachments ?? []);
+  // Re-seed when the `attachments` property is (re)assigned by the consumer
+  // (e.g. set via a `ref` after mount). Subsequent in-element edits stay local.
+  createEffect(() => {
+    if (props.attachments) setAttachments(props.attachments);
+  });
   const current = () => props.value ?? internal();
 
   const handleChange = (v: string) => { setInternal(v); dispatch('valuechange', { value: v }); };
@@ -84,10 +108,14 @@ defineKitnElement<Props, Events>('kitn-prompt-input', {
       slashCommands={props.slashCommands}
       slashActiveIds={props.slashActiveIds}
       slashCompact={flag('slashCompact')}
+      search={flag('search')}
+      voice={flag('voice')}
       onValueChange={handleChange}
       onSubmit={handleSubmit}
       onSuggestionClick={handleSuggestionClick}
       onAttachmentsChange={setAttachments}
+      onSearch={() => dispatch('search')}
+      onVoice={() => dispatch('voice')}
       onSlashSelect={(command) => dispatch('slashselect', { command })}
     />
   );

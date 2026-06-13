@@ -10,6 +10,9 @@ interface Props extends Record<string, unknown> {
   suggestions: Item[];
   /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
   variant?: 'outline' | 'ghost' | 'default';
+  /** Size preset for each chip. Defaults to the pill default (`'lg'`); pass
+   *  `'sm'` for smaller pills (or `'md'`). */
+  size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
   /** Substring to highlight within each suggestion. */
@@ -33,6 +36,7 @@ const valueOf = (s: Item) => (typeof s === 'string' ? s : s.value ?? s.label);
 defineKitnElement<Props, Events>('kitn-prompt-suggestions', {
   suggestions: [],
   variant: 'outline',
+  size: undefined,
   block: false,
   highlight: undefined,
 }, (props, { dispatch, flag }) => (
@@ -41,6 +45,7 @@ defineKitnElement<Props, Events>('kitn-prompt-suggestions', {
       {(s) => (
         <PromptSuggestion
           variant={props.variant}
+          size={props.size}
           block={flag('block')}
           highlight={props.highlight}
           onClick={() => dispatch('select', { value: valueOf(s) })}

@@ -496,15 +496,20 @@ _No events._
 | `slashCommands` | — | `undefined \| { id: string; label: string; description?: undefined \| string; category?: undefined \| string }[]` | Slash commands — when set, typing `/` opens the command palette. Set as a JS property. |
 | `slashActiveIds` | — | `undefined \| string[]` | Command ids to highlight as active. |
 | `slashCompact` | `slash-compact` | `undefined \| false \| true` | Single-line palette rows. |
+| `search` | `search` | `undefined \| false \| true` | Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. |
+| `voice` | `voice` | `undefined \| false \| true` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
+| `attachments` | — | `undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]` | Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
+| `search` | `CustomEvent<undefined>` | The Search (Globe) toolbar button was clicked. |
 | `slashselect` | `CustomEvent<{ command: { id: string; label: string; description?: undefined \| string; category?: undefined \| string } }>` | A slash command was chosen from the palette. |
 | `submit` | `CustomEvent<{ value: string; attachments: { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[] }>` | The user submitted the prompt (Enter or send button) with its attachments. |
 | `suggestionclick` | `CustomEvent<{ value: string }>` | A suggestion was clicked while `suggestion-mode="fill"`. |
 | `valuechange` | `CustomEvent<{ value: string }>` | The input text changed (fires on every keystroke). |
+| `voice` | `CustomEvent<undefined>` | The Voice (Mic) toolbar button was clicked. |
 
 ---
 
@@ -516,6 +521,7 @@ _No events._
 |---|---|---|---|
 | `suggestions` | — | `(string \| { label: string; value?: undefined \| string })[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
 | `variant` | `variant` | `undefined \| "ghost" \| "default" \| "outline"` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
+| `size` | `size` | `undefined \| "sm" \| "lg" \| "md" \| "icon" \| "icon-sm"` | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
 | `block` | `block` | `undefined \| false \| true` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined \| string` | Substring to highlight within each suggestion. |
 

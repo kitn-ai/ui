@@ -11,6 +11,7 @@ import {
   AttachmentHoverCardContent,
   AttachmentEmpty,
   getAttachmentLabel,
+  getMediaCategory,
   type AttachmentData,
   type AttachmentVariant,
 } from '../components/attachments';
@@ -99,9 +100,24 @@ defineKitnElement<Props, Events>('kitn-attachments', {
                     </div>
                   </AttachmentHoverCardTrigger>
                   <AttachmentHoverCardContent>
-                    <div class="text-body font-medium">{getAttachmentLabel(item)}</div>
-                    <Show when={item.mediaType}>
-                      <div class="text-muted-foreground text-caption">{item.mediaType}</div>
+                    {/* For image attachments, preview the actual thumbnail;
+                        otherwise fall back to the label + media-type details. */}
+                    <Show
+                      when={getMediaCategory(item) === 'image' && item.type === 'file' && item.url}
+                      fallback={
+                        <>
+                          <div class="text-body font-medium">{getAttachmentLabel(item)}</div>
+                          <Show when={item.mediaType}>
+                            <div class="text-muted-foreground text-caption">{item.mediaType}</div>
+                          </Show>
+                        </>
+                      }
+                    >
+                      <img
+                        src={item.url}
+                        alt={getAttachmentLabel(item)}
+                        class="block max-h-64 max-w-xs rounded object-contain"
+                      />
                     </Show>
                   </AttachmentHoverCardContent>
                 </AttachmentHoverCard>

@@ -22,7 +22,21 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
        stroke="currentColor" stroke-width="2">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
-  <button>New chat</button>
+
+  <!-- Slotted actions are light DOM, so style them with your own page CSS
+       (a ghost button with a + icon, here styled inline for portability). -->
+  <button
+    style="display:inline-flex; align-items:center; gap:.45rem;
+           font:500 13.5px/1 system-ui,sans-serif; padding:.5rem .85rem;
+           border-radius:9px; border:1px solid var(--color-border, #e5e5e5);
+           background:transparent; color:inherit; cursor:pointer;"
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12h14" /><path d="M12 5v14" />
+    </svg>
+    New chat
+  </button>
 </kitn-empty>
 
 <script type="module">
@@ -63,7 +77,28 @@ function EmptyElement() {
       <svg slot="media" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
-      <button>New chat</button>
+      {/* Slotted actions are light DOM — style them with the host page's own
+          CSS. Here a ghost "+ New chat" button, styled inline so it renders
+          correctly in any context (mirrors the composable example's pill-btn). */}
+      <button
+        style={{
+          display: 'inline-flex',
+          'align-items': 'center',
+          gap: '0.45rem',
+          font: '500 13.5px/1 system-ui, sans-serif',
+          padding: '0.5rem 0.85rem',
+          'border-radius': '9px',
+          border: '1px solid var(--color-border, #e5e5e5)',
+          background: 'transparent',
+          color: 'inherit',
+          cursor: 'pointer',
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14" /><path d="M12 5v14" />
+        </svg>
+        New chat
+      </button>
     </kitn-empty>
   );
 }
