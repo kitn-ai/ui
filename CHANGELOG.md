@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.7.0](https://github.com/kitn-ai/chat/compare/chat-v0.6.0...chat-v0.7.0) (2026-06-13)
+
+
+### Features
+
+* **docs:** generate web-components.md tables from element-meta (between markers) ([bf0935f](https://github.com/kitn-ai/chat/commit/bf0935fdadf065b4cc62d5aeeca5033eeba6efdc))
+* **elements:** declare typed Events maps on flagship facades (typed dispatch + generated detail shapes) ([a1ace5c](https://github.com/kitn-ai/chat/commit/a1ace5c317739af19c0e176893c298ef189983ac))
+* **elements:** typed Events maps on remaining dispatching facades ([fd292ec](https://github.com/kitn-ai/chat/commit/fd292ec3022ca7fb252b1317525d8017487380f4))
+* **gen:** add composedFrom links + component tokens to element spec ([04886b8](https://github.com/kitn-ai/chat/commit/04886b87a67b72f8390d391a4413497c2e0fc98b))
+* **gen:** extract prop defaults + always emit element-meta.json ([1463793](https://github.com/kitn-ai/chat/commit/14637936022b9db8ae9954ddd672edc881c02c3d))
+* **storybook:** API spec page + live Controls on flagship element stories ([96c1d8a](https://github.com/kitn-ai/chat/commit/96c1d8a8dcefe066e5ebb3d42afc968b6c638f79))
+* **storybook:** API spec page on attachments/chain-of-thought/chat-scope-picker/checkpoint/code-block/context-meter element stories ([7dbfc0f](https://github.com/kitn-ai/chat/commit/7dbfc0ff97e2a09e5c649faef8300e372b916fd2))
+* **storybook:** API spec page on empty/feedback-bar/file-upload/image/loader/markdown element stories ([9b4dd9f](https://github.com/kitn-ai/chat/commit/9b4dd9f74b272ba4094253e96c03f249ca2af754))
+* **storybook:** API spec page on message-skills/message/model-switcher/prompt-suggestions/reasoning/response-stream element stories ([fd06dcc](https://github.com/kitn-ai/chat/commit/fd06dcc280a9f3c2430428f77ebab66e16d4dcd8))
+* **storybook:** API spec page on source-list/source/text-shimmer/thinking-bar/tool/voice-input element stories ([6f2d3bd](https://github.com/kitn-ai/chat/commit/6f2d3bd8d0351db0966d4ba74ef8f253b11d1b52))
+* **storybook:** ElementSpec doc-component + argTypesFor controls helper ([bb1ea25](https://github.com/kitn-ai/chat/commit/bb1ea25d8433825f4e437cb1b3fdfd25b35ae4f8))
+
+
+### Bug Fixes
+
+* **docs:** render payloadless event detail as — (not Record&lt;string, never&gt;) ([c32c436](https://github.com/kitn-ai/chat/commit/c32c436968556b9a2546c1afc1de478ba1a00a2a))
+
 ## [0.6.0](https://github.com/kitn-ai/chat/compare/chat-v0.5.0...chat-v0.6.0) (2026-06-13)
 
 
