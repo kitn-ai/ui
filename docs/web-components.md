@@ -170,6 +170,96 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 
 ---
 
+### `<kitn-chat-workspace>` / `KitnChatWorkspace`
+
+The full app shell in one tag — a collapsible conversation-list sidebar (left), a drag-to-resize handle, and the complete chat thread (right) — all wired together. Drop in a single element and own the data; the workspace handles layout, resize, and collapse state internally.
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `groups` | — | `ConversationGroup[]` | `[]` | Pre-bucketed conversation groups for the sidebar; controls grouping/headers |
+| `conversations` | — | `ConversationSummary[]` | `[]` | Flat conversation list; auto-bucketed by recency when `groups` is empty |
+| `activeId` | `active-id` | `string` | — | ID of the open conversation; highlighted in the sidebar |
+| `messages` | — | `ChatMessage[]` | `[]` | The active conversation's message thread, newest last |
+| `value` | `value` | `string` | — | Controlled input value; omit for uncontrolled |
+| `placeholder` | `placeholder` | `string` | `'Send a message...'` | Textarea placeholder text |
+| `loading` | `loading` | `boolean` | `false` | Disables/locks the prompt input while awaiting a reply |
+| `suggestions` | — | `string[]` | — | Starter prompts shown above the input when the thread is empty |
+| `suggestionMode` | `suggestion-mode` | `'submit' \| 'fill'` | `'submit'` | `'submit'` sends immediately; `'fill'` places the text in the input |
+| `theme` | `theme` | `'light' \| 'dark' \| 'auto'` | `'auto'` | `auto` follows `prefers-color-scheme` |
+| `proseSize` | `prose-size` | `'xs' \| 'sm' \| 'base' \| 'lg'` | `'sm'` | Markdown/text sizing |
+| `codeTheme` | `code-theme` | `string` | `'github-dark-dimmed'` | Shiki syntax-highlight theme name |
+| `codeHighlight` | `code-highlight` | `boolean` | `true` | `false` → plain code blocks, no Shiki loaded |
+| `chatTitle` | `chat-title` | `string` | — | Chat header title (header renders when `chatTitle`, `models`, or `context` is set) |
+| `models` | — | `ModelOption[]` | — | Shows a ModelSwitcher in the chat header; fires `modelchange` |
+| `currentModel` | `current-model` | `string` | — | Selected model id (pairs with `models`) |
+| `context` | — | `ContextData` | — | Shows the Context token-usage meter in the chat header |
+| `scrollButton` | `scroll-button` | `boolean` | `true` | Built-in scroll-to-bottom button in the chat thread |
+| `search` | `search` | `boolean` | `false` | Show a Search button in the input toolbar; fires `search` |
+| `voice` | `voice` | `boolean` | `false` | Show a Mic button in the input toolbar; fires `voice` |
+| `slashCommands` | — | `SlashCommand[]` | — | When set, typing `/` opens the command palette; fires `slashselect` |
+| `slashActiveIds` | — | `string[]` | — | Command ids to highlight as active in the palette |
+| `slashCompact` | `slash-compact` | `boolean` | `false` | Single-line palette rows |
+| `sidebarWidth` | `sidebar-width` | `number` | `22` | Sidebar default width as a percent of the workspace |
+| `sidebarMinWidth` | `sidebar-min-width` | `number` | `200` | Sidebar minimum width in px |
+| `sidebarMaxWidth` | `sidebar-max-width` | `number` | `420` | Sidebar maximum width in px |
+| `sidebarCollapsed` | `sidebar-collapsed` | `boolean` | `false` | Initial collapsed state of the sidebar |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `conversationselect` | `{ id: string }` | User clicked a conversation in the sidebar |
+| `newchat` | — | User clicked "New chat" |
+| `sidebartoggle` | `{ collapsed: boolean }` | Sidebar collapse state changed |
+| `submit` | `{ value: string, attachments: AttachmentData[] }` | User submitted a message |
+| `valuechange` | `{ value: string }` | Fired on every input change |
+| `modelchange` | `{ modelId: string }` | Header model switcher changed |
+| `messageaction` | `{ messageId: string, action: ChatMessageAction }` | An action button on a message was clicked |
+| `search` | — | Search button clicked |
+| `voice` | — | Mic button clicked |
+| `slashselect` | `{ command: SlashCommand }` | A slash command was chosen from the palette |
+| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked |
+
+**Example:**
+
+```html
+<script type="module">
+  import '@kitnai/chat/elements';
+
+  const workspace = document.getElementById('workspace');
+
+  // Arrays and objects → JS properties
+  workspace.conversations = [
+    { id: 'c1', title: 'First chat', scope: { type: 'document' },
+      messageCount: 5, lastMessageAt: '2026-06-13T10:00:00Z', updatedAt: '2026-06-13T10:00:00Z' },
+  ];
+  workspace.messages = [
+    { id: 'm1', role: 'assistant', content: 'Hello! How can I help?', actions: ['copy', 'like'] },
+  ];
+  workspace.models = [
+    { id: 'claude-4', name: 'Claude 4 Opus', provider: 'Anthropic' },
+  ];
+
+  workspace.addEventListener('conversationselect', (e) => {
+    // load messages for e.detail.id, then reassign workspace.messages
+    console.log('selected', e.detail.id);
+  });
+
+  workspace.addEventListener('submit', async (e) => {
+    const text = e.detail.value;
+    const history = [...workspace.messages, { id: crypto.randomUUID(), role: 'user', content: text }];
+    workspace.messages = history;
+    workspace.loading = true;
+    // …stream reply, reassign workspace.messages each chunk
+    workspace.loading = false;
+  });
+</script>
+
+<kitn-chat-workspace id="workspace" style="display: block; height: 100vh;"></kitn-chat-workspace>
+```
+
+---
+
 ### `<kitn-conversation-list>` / `KitnConversationList`
 
 Sidebar panel listing conversations, optionally grouped. Emits events for navigation; does not manage its own state.

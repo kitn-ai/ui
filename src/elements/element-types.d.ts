@@ -86,6 +86,45 @@ export interface KitnChatScopePickerElement extends HTMLElement {
   currentLabel?: string;
 }
 
+export interface KitnChatWorkspaceElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Pre-bucketed conversation groups for the sidebar. Set as a JS property. */
+  groups: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[];
+  /** Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. */
+  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
+  /** Id of the open conversation, highlighted in the sidebar. */
+  activeId?: string;
+  /** The active conversation's message thread, newest last. Set as a JS property. */
+  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit")[] }[];
+  value?: string;
+  placeholder?: string;
+  loading?: boolean;
+  suggestions?: string[];
+  suggestionMode?: "submit" | "fill";
+  proseSize?: "xs" | "sm" | "base" | "lg";
+  codeTheme?: string;
+  codeHighlight?: boolean;
+  chatTitle?: string;
+  models?: { id: string; name: string; provider?: string }[];
+  currentModel?: string;
+  context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; estimatedCost?: number };
+  scrollButton?: boolean;
+  search?: boolean;
+  voice?: boolean;
+  slashCommands?: { id: string; label: string; description?: string; category?: string }[];
+  slashActiveIds?: string[];
+  slashCompact?: boolean;
+  /** Sidebar default width as a percent of the workspace (default 22). */
+  sidebarWidth?: number;
+  /** Sidebar min width in px (default 200). */
+  sidebarMinWidth?: number;
+  /** Sidebar max width in px (default 420). */
+  sidebarMaxWidth?: number;
+  /** Initial collapsed state of the sidebar (default false). */
+  sidebarCollapsed?: boolean;
+}
+
 export interface KitnCheckpointElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -377,6 +416,7 @@ declare global {
     'kitn-chain-of-thought': KitnChainOfThoughtElement;
     'kitn-chat': KitnChatElement;
     'kitn-chat-scope-picker': KitnChatScopePickerElement;
+    'kitn-chat-workspace': KitnChatWorkspaceElement;
     'kitn-checkpoint': KitnCheckpointElement;
     'kitn-code-block': KitnCodeBlockElement;
     'kitn-context-meter': KitnContextMeterElement;
