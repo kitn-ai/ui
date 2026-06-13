@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { HoverCard } from './hover-card';
 import { Button } from './button';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'UI/HoverCard',
@@ -9,13 +10,11 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A floating card that opens when its trigger is hovered or focused, built on the kit\'s DIY overlay core (positioning + dismiss + presence — no third-party dependency). Portals into the active shadow root so it never clips, and a transparent "safe bridge" keeps it open while the pointer travels from trigger to card.',
-          '**When to use:** to reveal supplementary, non-essential context on hover — a user/profile preview, a link or citation preview, an attachment summary. For an actionable menu use `Dropdown`; for a one-line label use `Tooltip`.',
-          '**How to use:** pass the trigger element as `trigger` and the card body as `children`. Tune `openDelay` / `closeDelay` (ms) to taste.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A floating card that opens when its trigger is hovered or focused, built on the kit\'s DIY overlay core (positioning + dismiss + presence — no third-party dependency). Portals into the active shadow root so it never clips, and a transparent "safe bridge" keeps it open while the pointer travels from trigger to card.',
+        '**When to use:** to reveal supplementary, non-essential context on hover — a user/profile preview, a link or citation preview, an attachment summary. For an actionable menu use `Dropdown`; for a one-line label use `Tooltip`.',
+        '**How to use:** pass the trigger element as `trigger` and the card body as `children`. Tune `openDelay` / `closeDelay` (ms) to taste.',
+      ]),
     },
   },
   argTypes: {

@@ -10,6 +10,7 @@ import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-i
 import {
   FolderPlus, MessageCircleQuestion, Inbox, Search, Sparkles, FileText, ArrowUp, Plus, Upload,
 } from 'lucide-solid';
+import { componentDescription } from '../stories/docs/element-controls';
 
 /**
  * Story for the compound `Empty` family. `Empty` is the root container; the
@@ -24,14 +25,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A composable empty-state block (modeled on shadcn/ui `Empty`): a centered media tile, title, description, and a content slot for actions or suggestions. Token-driven styling; no border by default.',
-          '**When to use:** when a region has nothing to show yet — an empty list/inbox, no search results, a blank chat, or a drop zone — and you want to guide the user toward a next action.',
-          '**How to use:** compose `Empty > EmptyHeader (EmptyMedia + EmptyTitle + EmptyDescription)` and an optional `EmptyContent` for buttons or prompt suggestions. Set `EmptyMedia` `variant` to `icon` for a muted tile or `default` for a bare slot (avatar/illustration). Add `border border-dashed` via `class` for a card.',
-          '**Placement:** empty lists/sidebars, search-result panes, blank chat launch states, and file drop zones.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A composable empty-state block (modeled on shadcn/ui `Empty`): a centered media tile, title, description, and a content slot for actions or suggestions. Token-driven styling; no border by default.',
+        '**When to use:** when a region has nothing to show yet — an empty list/inbox, no search results, a blank chat, or a drop zone — and you want to guide the user toward a next action.',
+        '**How to use:** compose `Empty > EmptyHeader (EmptyMedia + EmptyTitle + EmptyDescription)` and an optional `EmptyContent` for buttons or prompt suggestions. Set `EmptyMedia` `variant` to `icon` for a muted tile or `default` for a bare slot (avatar/illustration). Add `border border-dashed` via `class` for a card.',
+        '**Placement:** empty lists/sidebars, search-result panes, blank chat launch states, and file drop zones.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

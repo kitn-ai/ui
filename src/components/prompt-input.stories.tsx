@@ -3,6 +3,7 @@ import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
 import { Button } from '../ui/button';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/PromptInput',
@@ -12,14 +13,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'A composer shell that hosts an auto-resizing `PromptInputTextarea` and a `PromptInputActions` toolbar, with controlled or uncontrolled value, loading, and disabled states.',
-          '**When to use:** as the message input at the bottom of any chat surface, wherever the user types and submits a prompt.',
-          '**How to use:** control text via `value` + `onValueChange` (or leave uncontrolled), wire `onSubmit` (also fired on Enter without Shift), and place your send/stop controls inside `PromptInputActions`. Toggle `isLoading` / `disabled` for in-flight and read-only states.',
-          '**Placement:** pinned at the bottom of the chat column, below the message transcript.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A composer shell that hosts an auto-resizing `PromptInputTextarea` and a `PromptInputActions` toolbar, with controlled or uncontrolled value, loading, and disabled states.',
+        '**When to use:** as the message input at the bottom of any chat surface, wherever the user types and submits a prompt.',
+        '**How to use:** control text via `value` + `onValueChange` (or leave uncontrolled), wire `onSubmit` (also fired on Enter without Shift), and place your send/stop controls inside `PromptInputActions`. Toggle `isLoading` / `disabled` for in-flight and read-only states.',
+        '**Placement:** pinned at the bottom of the chat column, below the message transcript.',
+      ]),
     },
   },
   argTypes: {

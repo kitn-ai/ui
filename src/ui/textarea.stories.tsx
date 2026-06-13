@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import type { JSX } from 'solid-js';
 import { Textarea } from './textarea';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'UI/Textarea',
@@ -9,13 +10,11 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A single-line-by-default textarea that auto-grows with its content up to an optional `maxHeight`, after which it scrolls. It is **transparent and borderless by design** — it is meant to drop into a composed input frame that owns the visual boundary and focus ring (the demos below wrap it exactly the way `PromptInput` / `<kitn-prompt-input>` does, with `focus-within` on the frame). This is the editable surface behind `PromptInput`.',
-          '**When to use:** free-text entry that may span multiple lines — a chat composer, a comment box, an editable note.',
-          '**How to use:** drop it inside a framed container and use it like a native `<textarea>` (`value`, `placeholder`, `onInput`, …). Auto-resize is on by default; set `maxHeight` (px) to cap growth, or `autoResize={false}` for a fixed-height field.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A single-line-by-default textarea that auto-grows with its content up to an optional `maxHeight`, after which it scrolls. It is **transparent and borderless by design** — it is meant to drop into a composed input frame that owns the visual boundary and focus ring (the demos below wrap it exactly the way `PromptInput` / `<kitn-prompt-input>` does, with `focus-within` on the frame). This is the editable surface behind `PromptInput`.',
+        '**When to use:** free-text entry that may span multiple lines — a chat composer, a comment box, an editable note.',
+        '**How to use:** drop it inside a framed container and use it like a native `<textarea>` (`value`, `placeholder`, `onInput`, …). Auto-resize is on by default; set `maxHeight` (px) to cap growth, or `autoResize={false}` for a fixed-height field.',
+      ]),
     },
   },
   argTypes: {

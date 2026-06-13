@@ -4,6 +4,7 @@ import { createSignal } from "solid-js";
 import { SlashCommand, type SlashCommandItem } from "./slash-command";
 import { PromptInput, PromptInputTextarea } from "./prompt-input";
 import { ChatConfig } from "../primitives/chat-config";
+import { componentDescription } from '../stories/docs/element-controls';
 
 const skillCommands: SlashCommandItem[] = [
   { id: "caveman", label: "Caveman", description: "Ultra-compressed terse responses", category: "Skills" },
@@ -58,14 +59,12 @@ const meta = {
   parameters: {
     layout: "centered",
     docs: {
-      description: {
-        component: [
-          "A keyboard-navigable command palette that pops above a `PromptInput` when the user types `/`. Filters and groups commands by category, with arrow-key navigation and Tab/Enter to select.",
-          "**When to use:** to offer slash commands or toggleable skills/modes directly from the prompt input as the user types `/name`.",
-          "**How to use:** render it as a child of `PromptInput` (it consumes that context). Pass `commands`, handle `onSelect`, and optionally pass `activeIds` to mark active toggles. Set `compact={false}` for two-line rows.",
-          "**Placement:** inside the relative-positioned `PromptInput`, absolutely anchored to the top of the textarea.",
-        ].join("\n\n"),
-      },
+      description: componentDescription([
+        "A keyboard-navigable command palette that pops above a `PromptInput` when the user types `/`. Filters and groups commands by category, with arrow-key navigation and Tab/Enter to select.",
+        "**When to use:** to offer slash commands or toggleable skills/modes directly from the prompt input as the user types `/name`.",
+        "**How to use:** render it as a child of `PromptInput` (it consumes that context). Pass `commands`, handle `onSelect`, and optionally pass `activeIds` to mark active toggles. Set `compact={false}` for two-line rows.",
+        "**Placement:** inside the relative-positioned `PromptInput`, absolutely anchored to the top of the textarea.",
+      ]),
       controls: { exclude: ["use:eventListener"] },
     },
   },

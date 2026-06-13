@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Source, SourceTrigger, SourceContent, SourceList } from './source';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Source',
@@ -8,14 +9,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'An inline citation chip with a hover-card preview. Compose `Source` (root, holds the `href`) with `SourceTrigger` (the clickable pill) and `SourceContent` (the hover preview). `SourceList` lays out several side by side.',
-          '**When to use:** to cite a referenced web source inline in an assistant message — show a compact domain/number pill that previews the title and description on hover.',
-          '**How to use:** wrap `SourceTrigger` and `SourceContent` in `Source` with the target `href`. Use `label` for custom text or a citation number, `showFavicon` for the site icon, and pass `title`/`description` to `SourceContent`.',
-          '**Placement:** within message body text as citations, or grouped under a message in a `SourceList`.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'An inline citation chip with a hover-card preview. Compose `Source` (root, holds the `href`) with `SourceTrigger` (the clickable pill) and `SourceContent` (the hover preview). `SourceList` lays out several side by side.',
+        '**When to use:** to cite a referenced web source inline in an assistant message — show a compact domain/number pill that previews the title and description on hover.',
+        '**How to use:** wrap `SourceTrigger` and `SourceContent` in `Source` with the target `href`. Use `label` for custom text or a citation number, `showFavicon` for the site icon, and pass `title`/`description` to `SourceContent`.',
+        '**Placement:** within message body text as citations, or grouped under a message in a `SourceList`.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

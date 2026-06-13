@@ -3,6 +3,7 @@ import { Message, MessageAvatar, MessageContent } from './message';
 import { ChatContainer } from './chat-container';
 import { ChatConfig } from '../primitives/chat-config';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resizable';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Message/Narrow Panel',
@@ -12,14 +13,12 @@ const meta = {
     layout: 'centered',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'Layout stress-tests for `Message` inside narrow chat panels (300–380px) and resizable side panels, verifying text wraps and the 32px avatar stays fixed.',
-          '**When to use:** as a reference when embedding the chat in a constrained column — a browser-extension side panel, a docked drawer, or a resizable split view.',
-          '**How to use:** wrap messages in a fixed/min-width container (and usually `ChatConfig proseSize="sm"`), keeping `min-w-0` on flex children so long text wraps instead of overflowing.',
-          '**Placement:** these are full-composition showcases, not control-driven; use them to copy the surrounding panel structure.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'Layout stress-tests for `Message` inside narrow chat panels (300–380px) and resizable side panels, verifying text wraps and the 32px avatar stays fixed.',
+        '**When to use:** as a reference when embedding the chat in a constrained column — a browser-extension side panel, a docked drawer, or a resizable split view.',
+        '**How to use:** wrap messages in a fixed/min-width container (and usually `ChatConfig proseSize="sm"`), keeping `min-w-0` on flex children so long text wraps instead of overflowing.',
+        '**Placement:** these are full-composition showcases, not control-driven; use them to copy the surrounding panel structure.',
+      ]),
     },
   },
   argTypes: {

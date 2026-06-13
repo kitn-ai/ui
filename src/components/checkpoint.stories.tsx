@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { Checkpoint, CheckpointIcon, CheckpointTrigger } from './checkpoint';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Checkpoint',
@@ -9,14 +10,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'An inline marker that lets a user restore the conversation to a saved point. Composed of `Checkpoint` (row + separator) wrapping a `CheckpointIcon` and a `CheckpointTrigger` button.',
-          '**When to use:** to mark a restorable state in a transcript — e.g. before an edit or a branching action — so the user can revert to it.',
-          '**How to use:** place a `CheckpointIcon` and a `CheckpointTrigger` inside `Checkpoint`. Give the trigger an `onClick` handler and an optional `tooltip`; pass custom SVG children to `CheckpointIcon` to override the default flag.',
-          '**Placement:** between messages in a chat transcript, as a thin separator-style row.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'An inline marker that lets a user restore the conversation to a saved point. Composed of `Checkpoint` (row + separator) wrapping a `CheckpointIcon` and a `CheckpointTrigger` button.',
+        '**When to use:** to mark a restorable state in a transcript — e.g. before an edit or a branching action — so the user can revert to it.',
+        '**How to use:** place a `CheckpointIcon` and a `CheckpointTrigger` inside `Checkpoint`. Give the trigger an `onClick` handler and an optional `tooltip`; pass custom SVG children to `CheckpointIcon` to override the default flag.',
+        '**Placement:** between messages in a chat transcript, as a thin separator-style row.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

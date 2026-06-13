@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Image } from './image';
+import { componentDescription } from '../stories/docs/element-controls';
 
 // Compact SVG chat typing icon as base64
 const chatIconBase64 =
@@ -13,14 +14,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'Renders an image from a `base64` string or a `uint8Array`, building a data URL or object URL automatically; shows a pulsing placeholder until a source is available.',
-          '**When to use:** to display model-generated or attached images supplied as raw bytes / base64 (the `GeneratedImageLike` shape) rather than a remote URL.',
-          '**How to use:** pass `base64` + `mediaType` (or `uint8Array` + `mediaType`) and an `alt` description; size and style via `class`.',
-          '**Placement:** inside assistant messages, attachment previews, or anywhere a generated image needs to be shown.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'Renders an image from a `base64` string or a `uint8Array`, building a data URL or object URL automatically; shows a pulsing placeholder until a source is available.',
+        '**When to use:** to display model-generated or attached images supplied as raw bytes / base64 (the `GeneratedImageLike` shape) rather than a remote URL.',
+        '**How to use:** pass `base64` + `mediaType` (or `uint8Array` + `mediaType`) and an `alt` description; size and style via `class`.',
+        '**Placement:** inside assistant messages, attachment previews, or anywhere a generated image needs to be shown.',
+      ]),
     },
   },
   argTypes: {

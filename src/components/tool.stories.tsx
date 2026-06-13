@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Tool } from './tool';
 import type { ToolPart } from './tool';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const streamingPart: ToolPart = {
   type: 'search_documents',
@@ -40,14 +41,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'A collapsible panel that visualizes a single tool call — its name, state (processing / ready / completed / error), input, output, error, and call ID.',
-          '**When to use:** to surface assistant tool/function calls in the conversation, so users can inspect what was run and what came back.',
-          '**How to use:** pass a `toolPart` describing the call (`type`, `state`, optional `input`, `output`, `errorText`, `toolCallId`). State drives the icon and badge automatically. Set `defaultOpen` to start expanded.',
-          '**Placement:** inline within an assistant message, typically between text segments where the tool was invoked.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A collapsible panel that visualizes a single tool call — its name, state (processing / ready / completed / error), input, output, error, and call ID.',
+        '**When to use:** to surface assistant tool/function calls in the conversation, so users can inspect what was run and what came back.',
+        '**How to use:** pass a `toolPart` describing the call (`type`, `state`, optional `input`, `output`, `errorText`, `toolCallId`). State drives the icon and badge automatically. Set `defaultOpen` to start expanded.',
+        '**Placement:** inline within an assistant message, typically between text segments where the tool was invoked.',
+      ]),
     },
   },
   argTypes: {

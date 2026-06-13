@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { PromptSuggestion } from './prompt-suggestion';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/PromptSuggestion',
@@ -9,14 +10,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A clickable suggestion chip built on `Button` — renders as a rounded pill, a full-width list row (`block`), or a search-style row that highlights a matching substring (`highlight`).',
-          '**When to use:** offer the user ready-made prompts to send — empty-state starter questions, follow-up suggestions, or a filtered list of matching prompts as they type.',
-          '**How to use:** pass the prompt text as children and wire `onClick` to submit it. Use `block` for stacked, left-aligned list rows; pass `highlight` to emphasize a matched substring (forces list-row layout). Override `variant`/`size` to restyle.',
-          '**Placement:** chat empty states, below the prompt input as follow-ups, or in a suggestion dropdown.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A clickable suggestion chip built on `Button` — renders as a rounded pill, a full-width list row (`block`), or a search-style row that highlights a matching substring (`highlight`).',
+        '**When to use:** offer the user ready-made prompts to send — empty-state starter questions, follow-up suggestions, or a filtered list of matching prompts as they type.',
+        '**How to use:** pass the prompt text as children and wire `onClick` to submit it. Use `block` for stacked, left-aligned list rows; pass `highlight` to emphasize a matched substring (forces list-row layout). Override `variant`/`size` to restyle.',
+        '**Placement:** chat empty states, below the prompt input as follow-ups, or in a suggestion dropdown.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

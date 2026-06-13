@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { VoiceInput } from './voice-input';
+import { componentDescription } from '../stories/docs/element-controls';
 
 /** Sample transcription handler — resolves the recorded audio to text. */
 const transcribe = async (_audio: Blob): Promise<string> => {
@@ -16,14 +17,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'A microphone button that records audio, shows recording (pulse rings) and processing (spinner) states, then hands the audio off for transcription.',
-          '**When to use:** to let users dictate input by voice instead of typing — speech-to-text for the prompt field.',
-          '**How to use:** provide `onTranscribe(audio)` returning a `Promise<string>` (your STT call) and `onTranscription(text)` to receive the result. Click toggles recording; transcription runs automatically on stop. Set `disabled` to block input.',
-          '**Placement:** inside the prompt input action bar, next to send and other input actions.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A microphone button that records audio, shows recording (pulse rings) and processing (spinner) states, then hands the audio off for transcription.',
+        '**When to use:** to let users dictate input by voice instead of typing — speech-to-text for the prompt field.',
+        '**How to use:** provide `onTranscribe(audio)` returning a `Promise<string>` (your STT call) and `onTranscription(text)` to receive the result. Click toggles recording; transcription runs automatically on stop. Set `disabled` to block input.',
+        '**Placement:** inside the prompt input action bar, next to send and other input actions.',
+      ]),
     },
   },
   argTypes: {

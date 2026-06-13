@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Message, MessageAvatar, MessageContent, MessageActions } from './message';
 import { Button } from '../ui/button';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Message',
@@ -11,14 +12,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'A horizontal message row that composes an optional `MessageAvatar`, a `MessageContent` body (plain or markdown), and an optional `MessageActions` toolbar.',
-          '**When to use:** rendering any chat turn — user or assistant. Use a bubble + right alignment for user turns, and an avatar + transparent content for assistant turns.',
-          '**How to use:** wrap the parts in `<Message>`. Add `MessageAvatar` for the speaker, `MessageContent` for the text (set `markdown` to render markdown), and `MessageActions` for hover actions. Layout (alignment, bubble) is controlled via `class`.',
-          '**Placement:** inside a `ChatContainer`/scroll region, stacked vertically as the conversation transcript.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A horizontal message row that composes an optional `MessageAvatar`, a `MessageContent` body (plain or markdown), and an optional `MessageActions` toolbar.',
+        '**When to use:** rendering any chat turn — user or assistant. Use a bubble + right alignment for user turns, and an avatar + transparent content for assistant turns.',
+        '**How to use:** wrap the parts in `<Message>`. Add `MessageAvatar` for the speaker, `MessageContent` for the text (set `markdown` to render markdown), and `MessageActions` for hover actions. Layout (alignment, bubble) is controlled via `class`.',
+        '**Placement:** inside a `ChatContainer`/scroll region, stacked vertically as the conversation transcript.',
+      ]),
     },
   },
   argTypes: {

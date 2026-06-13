@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Badge } from './badge';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'UI/Badge',
@@ -9,14 +10,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'A compact pill **badge** for short status text, counts, or citation markers, rendered as an inline `<span>`.',
-          '**When to use:** to annotate a count (unread, results), tag a status/label, or mark an inline source citation in assistant output.',
-          '**How to use:** choose a `variant` (`default` label, `count` numeric pill, `citation` clickable source marker) and pass the text or number as children.',
-          '**Placement:** inline with message text (citations), next to titles or list items (labels), and on toolbar/icon buttons (counts).',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A compact pill **badge** for short status text, counts, or citation markers, rendered as an inline `<span>`.',
+        '**When to use:** to annotate a count (unread, results), tag a status/label, or mark an inline source citation in assistant output.',
+        '**How to use:** choose a `variant` (`default` label, `count` numeric pill, `citation` clickable source marker) and pass the text or number as children.',
+        '**Placement:** inline with message text (citations), next to titles or list items (labels), and on toolbar/icon buttons (counts).',
+      ]),
     },
   },
   argTypes: {

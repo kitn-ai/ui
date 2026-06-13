@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { TextShimmer } from './text-shimmer';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/TextShimmer',
@@ -9,14 +10,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'An animated text effect that sweeps a light gradient across its content, rendered into any element tag via `as`.',
-          '**When to use:** to signal an in-progress / loading state with a label — e.g. "Thinking", "Generating", "Searching" — or to draw subtle attention to a transient status line.',
-          '**How to use:** wrap text in `<TextShimmer>`; tune `duration` (seconds per sweep) and `spread` (gradient width, clamped 5–45). Use `as` to change the wrapping tag (e.g. `"h2"`) and pass any standard HTML attributes.',
-          '**Placement:** loading indicators, streaming status lines, thinking bars, and placeholder labels.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'An animated text effect that sweeps a light gradient across its content, rendered into any element tag via `as`.',
+        '**When to use:** to signal an in-progress / loading state with a label — e.g. "Thinking", "Generating", "Searching" — or to draw subtle attention to a transient status line.',
+        '**How to use:** wrap text in `<TextShimmer>`; tune `duration` (seconds per sweep) and `spread` (gradient width, clamped 5–45). Use `as` to change the wrapping tag (e.g. `"h2"`) and pass any standard HTML attributes.',
+        '**Placement:** loading indicators, streaming status lines, thinking bars, and placeholder labels.',
+      ]),
     },
   },
   argTypes: {

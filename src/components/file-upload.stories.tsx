@@ -3,6 +3,7 @@ import { fn } from 'storybook/test';
 import { createSignal, For } from 'solid-js';
 import { FileUpload, FileUploadTrigger, FileUploadContent } from './file-upload';
 import { Upload } from 'lucide-solid';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/FileUpload',
@@ -12,14 +13,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'A headless file-upload root that handles window-wide drag-and-drop plus a hidden file input, composed with `FileUploadTrigger` (opens the picker) and `FileUploadContent` (full-screen drop overlay).',
-          '**When to use:** to let users attach files to a chat — via a button click or by dragging files anywhere onto the page.',
-          '**How to use:** wrap a `FileUploadTrigger` and optional `FileUploadContent` in `FileUpload`, and read selected files from `onFilesAdded`. Set `multiple`, `accept`, or `disabled` as needed.',
-          '**Placement:** in the prompt input area or composer toolbar where attachments are added.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A headless file-upload root that handles window-wide drag-and-drop plus a hidden file input, composed with `FileUploadTrigger` (opens the picker) and `FileUploadContent` (full-screen drop overlay).',
+        '**When to use:** to let users attach files to a chat — via a button click or by dragging files anywhere onto the page.',
+        '**How to use:** wrap a `FileUploadTrigger` and optional `FileUploadContent` in `FileUpload`, and read selected files from `onFilesAdded`. Set `multiple`, `accept`, or `disabled` as needed.',
+        '**Placement:** in the prompt input area or composer toolbar where attachments are added.',
+      ]),
     },
   },
   argTypes: {

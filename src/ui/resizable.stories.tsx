@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './resizable';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'UI/Resizable',
@@ -10,14 +11,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'A **resizable split layout**: `ResizablePanelGroup` lays out `ResizablePanel` children along an axis, divided by a draggable `ResizableHandle`.',
-          '**When to use:** to let users adjust the relative size of two or more regions — e.g. a collapsible sidebar next to the main chat, or a chat pane next to an inspector.',
-          '**How to use:** wrap panels in `ResizablePanelGroup` and set `orientation` (`horizontal` row / `vertical` column). Give panels a `defaultSize` (percent) and optional `minSize`/`maxSize`; min/max are read from `data-min-size`/`data-max-size` attributes at drag time. Place a `ResizableHandle` (add `withHandle` for a visible grip) between panels. The group needs a sized container (height/width).',
-          '**Placement:** app shells — sidebar + conversation, conversation + context/inspector panels, or stacked editor/preview regions.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A **resizable split layout**: `ResizablePanelGroup` lays out `ResizablePanel` children along an axis, divided by a draggable `ResizableHandle`.',
+        '**When to use:** to let users adjust the relative size of two or more regions — e.g. a collapsible sidebar next to the main chat, or a chat pane next to an inspector.',
+        '**How to use:** wrap panels in `ResizablePanelGroup` and set `orientation` (`horizontal` row / `vertical` column). Give panels a `defaultSize` (percent) and optional `minSize`/`maxSize`; min/max are read from `data-min-size`/`data-max-size` attributes at drag time. Place a `ResizableHandle` (add `withHandle` for a visible grip) between panels. The group needs a sized container (height/width).',
+        '**Placement:** app shells — sidebar + conversation, conversation + context/inspector panels, or stacked editor/preview regions.',
+      ]),
     },
   },
   argTypes: {

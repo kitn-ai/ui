@@ -12,6 +12,7 @@ import {
   AttachmentEmpty,
 } from './attachments';
 import type { AttachmentData } from './attachments';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const sampleAttachments: AttachmentData[] = [
   {
@@ -62,14 +63,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A composable container for displaying file and source-document attachments as thumbnails, inline chips, or a vertical list. Built from `Attachments` + per-item `Attachment` with `AttachmentPreview`, `AttachmentInfo`, and `AttachmentRemove` parts.',
-          '**When to use:** to show files a user attached to a prompt, or documents/sources referenced by a message. Choose `grid` for thumbnails, `inline` for compact chips, `list` for a detailed rows view.',
-          '**How to use:** set `variant` on `Attachments`, then map your data to `Attachment` (passing each item via `data` and an `onRemove` handler) and compose the preview/info/remove parts inside.',
-          '**Placement:** prompt input area (pending uploads), message bodies (attached or cited files), and document panels.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A composable container for displaying file and source-document attachments as thumbnails, inline chips, or a vertical list. Built from `Attachments` + per-item `Attachment` with `AttachmentPreview`, `AttachmentInfo`, and `AttachmentRemove` parts.',
+        '**When to use:** to show files a user attached to a prompt, or documents/sources referenced by a message. Choose `grid` for thumbnails, `inline` for compact chips, `list` for a detailed rows view.',
+        '**How to use:** set `variant` on `Attachments`, then map your data to `Attachment` (passing each item via `data` and an `onRemove` handler) and compose the preview/info/remove parts inside.',
+        '**Placement:** prompt input area (pending uploads), message bodies (attached or cited files), and document panels.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

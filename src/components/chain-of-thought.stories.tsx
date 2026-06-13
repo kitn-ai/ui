@@ -6,6 +6,7 @@ import {
   ChainOfThoughtContent,
   ChainOfThoughtItem,
 } from './chain-of-thought';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/ChainOfThought',
@@ -14,14 +15,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A vertical, collapsible timeline that reveals an agent\'s reasoning as a series of connected steps. Composed of `ChainOfThought` (root) wrapping `ChainOfThoughtStep` items, each with a `ChainOfThoughtTrigger`, `ChainOfThoughtContent`, and one or more `ChainOfThoughtItem`s.',
-          '**When to use:** to surface multi-step reasoning, tool calls, or research progress behind an assistant response, letting users expand each step on demand.',
-          '**How to use:** map each reasoning step to a `ChainOfThoughtStep` (mark the final one with `isLast`); put the summary in `ChainOfThoughtTrigger` and the detail inside `ChainOfThoughtContent` / `ChainOfThoughtItem`.',
-          '**Placement:** above or within an assistant message, typically before the final answer.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A vertical, collapsible timeline that reveals an agent\'s reasoning as a series of connected steps. Composed of `ChainOfThought` (root) wrapping `ChainOfThoughtStep` items, each with a `ChainOfThoughtTrigger`, `ChainOfThoughtContent`, and one or more `ChainOfThoughtItem`s.',
+        '**When to use:** to surface multi-step reasoning, tool calls, or research progress behind an assistant response, letting users expand each step on demand.',
+        '**How to use:** map each reasoning step to a `ChainOfThoughtStep` (mark the final one with `isLast`); put the summary in `ChainOfThoughtTrigger` and the detail inside `ChainOfThoughtContent` / `ChainOfThoughtItem`.',
+        '**Placement:** above or within an assistant message, typically before the final answer.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },
