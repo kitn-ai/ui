@@ -333,6 +333,51 @@ docs/
 
 The web-component layer wraps a few coarse facades over the SolidJS components; the SolidJS API stays the source of truth and is unchanged by it.
 
+## Examples
+
+A set of runnable examples and a hosted component playground are included in the repo. See [`examples/README.md`](examples/README.md) for full details.
+
+### Composable showcase
+
+The composable showcase demonstrates every individual element in one page. Build the package first, then serve from the repo root:
+
+```bash
+npm run build     # produces dist/kitn-chat.es.js
+npm run examples  # static server at http://localhost:8000
+```
+
+Then open: **http://localhost:8000/examples/composable/index.html**
+
+### Storybook
+
+Storybook is the primary component playground for development:
+
+```bash
+npm run dev    # dev server at http://localhost:6006
+```
+
+The published docs are deployed to GitHub Pages:
+**https://kitn-ai.github.io/chat/**
+
+### Framework example apps
+
+The `examples/react` and `examples/solid` directories are full Vite apps — install their dependencies and run the local dev server:
+
+```bash
+cd examples/react && npm install && npm run dev
+# or
+cd examples/solid && npm install && npm run dev
+```
+
+These use the React wrappers from `@kitnai/chat/react` (`examples/react`) and the raw SolidJS component API (`examples/solid`).
+
+> More framework examples (Vue, Angular) are coming separately.
+
+### Docs and reference
+
+- **[docs/web-components.md](docs/web-components.md)** — full element API: every property, event, and the `ChatMessage` schema.
+- **[llms.txt](llms.txt)** / **[llms-full.txt](llms-full.txt)** — dense machine-readable references for AI coding agents.
+
 ## Bundle size
 
 | Scenario | Loaded |
