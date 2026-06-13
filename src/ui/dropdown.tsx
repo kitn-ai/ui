@@ -34,12 +34,13 @@ export function Dropdown(props: { children: JSX.Element }) {
     setViaKb(!!opts?.viaKeyboard);
     setOpenSig(v);
     if (v) {
-      // Opening: Solid renders the menu synchronously within this flush, so the
-      // items already exist. On keyboard-open, focus the first item now (the
-      // roving-focus contract) without waiting for a microtask.
+      // Focus the first item on keyboard-open. The menu mounts via <Show>; we
+      // attempt focus now and re-assert in the menu ref's microtask so it lands
+      // once the node exists. Skip disabled items (roving-focus contract).
       if (opts?.viaKeyboard) {
-        queueMicrotask(() => menu()?.querySelector<HTMLElement>('[role="menuitem"]')?.focus());
-        menu()?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+        const sel = '[role="menuitem"]:not([aria-disabled="true"])';
+        queueMicrotask(() => menu()?.querySelector<HTMLElement>(sel)?.focus());
+        menu()?.querySelector<HTMLElement>(sel)?.focus();
       }
     } else if (opts?.returnFocus !== false) {
       // Closing via keyboard/select: return focus to the trigger. The menu
@@ -97,7 +98,7 @@ export function DropdownContent(props: { children: JSX.Element; class?: string }
     refs: () => [ctx.trigger(), ctx.menu()],
   });
 
-  const items = () => Array.from(ctx.menu()?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+  const items = () => Array.from(ctx.menu()?.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])') ?? []);
   const focusIndex = (i: number) => {
     const list = items();
     if (!list.length) return;
@@ -113,7 +114,7 @@ export function DropdownContent(props: { children: JSX.Element; class?: string }
       case 'ArrowUp': e.preventDefault(); focusIndex(currentIndex() - 1); break;
       case 'Home': e.preventDefault(); focusIndex(0); break;
       case 'End': e.preventDefault(); focusIndex(list.length - 1); break;
-      case 'Tab': ctx.setOpen(false); break;
+      case 'Tab': ctx.setOpen(false, { returnFocus: false }); break;
       default:
         if (e.key.length === 1 && /\S/.test(e.key)) {
           const start = currentIndex() + 1;
@@ -132,10 +133,10 @@ export function DropdownContent(props: { children: JSX.Element; class?: string }
           ref={(el) => {
             ctx.setMenu(el); presence.setRef(el);
             // Keyboard-open focuses the first item. setOpen() also attempts this
-            // synchronously; this ref-time fallback covers any case where the
-            // menu node/items mount after setOpen has run.
+            // synchronously; this ref-time microtask re-asserts focus once the
+            // menu node exists. Skip disabled items.
             if (ctx.openedViaKeyboard()) {
-              queueMicrotask(() => el.querySelector<HTMLElement>('[role="menuitem"]')?.focus());
+              queueMicrotask(() => el.querySelector<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')?.focus());
             }
           }}
           id={ctx.menuId}

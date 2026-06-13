@@ -81,4 +81,15 @@ describe('Dropdown', () => {
     fireEvent.keyDown(items[0], { key: 'g' });
     expect(document.activeElement).toBe(items[2]); // Gamma
   });
+
+  it('Tab closes the menu without forcing focus back to the trigger', async () => {
+    const { trg } = setup();
+    fireEvent.keyDown(trg, { key: 'ArrowDown' });
+    const items = screen.getAllByRole('menuitem');
+    expect(document.activeElement).toBe(items[0]);
+    fireEvent.keyDown(items[0], { key: 'Tab' });
+    await Promise.resolve(); // async unmount
+    expect(screen.queryByRole('menu')).toBeNull();
+    expect(document.activeElement).not.toBe(trg); // focus NOT yanked back to trigger
+  });
 });
