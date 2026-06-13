@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -52,26 +51,18 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-reasoning', [
           '`<kitn-reasoning>` is the framework-agnostic **web component** for a collapsible reasoning/thinking block that auto-expands while a thought is `streaming`, isolated in **Shadow DOM**.',
           '**When to use:** surfacing model chain-of-thought in a non-Solid app. In SolidJS, compose the `Reasoning` primitives directly.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the body via the `text` **property**, set the `streaming` flag while it streams in, optionally drive the controlled `open` property, and listen for the `openchange` **CustomEvent**.",
           'See the **Code** tab for HTML usage.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj;
-
-/** Full generated API reference — properties, events, tokens, and composed-from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-reasoning" />,
-  parameters: { layout: 'padded' },
-};
 
 /** A collapsed reasoning block (the trigger toggles it). */
 export const Default: Story = {

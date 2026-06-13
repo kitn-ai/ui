@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -52,26 +51,18 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-empty', [
           '`<kitn-empty>` is the framework-agnostic **web component** for an empty-state block — an icon, a title, a description, and actions — isolated in **Shadow DOM**.',
           '**When to use:** placeholder UI for an empty list/thread in a non-Solid app. In SolidJS, compose the `Empty*` primitives.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set `empty-title` (note `empty-title`, not `title`) and `description` via attributes, and use the **slots** (\"Route 2\") to project your own icon (`slot=\"media\"`) and actions (the default slot).",
           'See the **Code** tab for HTML usage.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj;
-
-/** Full generated API reference — properties, events, tokens, and composed-from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-empty" />,
-  parameters: { layout: 'padded' },
-};
 
 /** Render the actual `<kitn-empty>` custom element with slotted children. */
 function EmptyElement() {

@@ -9,7 +9,8 @@
         "optional": false,
         "scalar": false,
         "description": "The attachments to render. Set as a JS property (array).",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "AttachmentData[]"
       },
       {
         "name": "variant",
@@ -17,7 +18,8 @@
         "optional": true,
         "scalar": true,
         "description": "Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows.",
-        "default": "'grid'"
+        "default": "'grid'",
+        "displayType": "undefined | \"grid\" | \"inline\" | \"list\""
       },
       {
         "name": "hoverCard",
@@ -25,7 +27,8 @@
         "optional": true,
         "scalar": true,
         "description": "Wrap each item in a hover card that previews its details.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "removable",
@@ -33,7 +36,8 @@
         "optional": true,
         "scalar": true,
         "description": "Show a remove button per item; clicking it fires a `remove` event.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "showMediaType",
@@ -41,21 +45,24 @@
         "optional": true,
         "scalar": true,
         "description": "Also show the media type beneath the filename (non-grid variants).",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "emptyText",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Text shown when `items` is empty."
+        "description": "Text shown when `items` is empty.",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
       {
         "name": "remove",
         "detail": "{ id: string }",
-        "description": "A remove button was clicked."
+        "description": "A remove button was clicked.",
+        "displayDetail": "{ id: string }"
       }
     ],
     "composedFrom": [
@@ -117,7 +124,8 @@
         "optional": false,
         "scalar": false,
         "description": "The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1).",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "{ label: string; content?: undefined | string }[]"
       }
     ],
     "events": [],
@@ -160,14 +168,16 @@
         "optional": false,
         "scalar": false,
         "description": "The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`).",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "ChatMessage[]"
       },
       {
         "name": "value",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior."
+        "description": "Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior.",
+        "displayType": "undefined | string"
       },
       {
         "name": "placeholder",
@@ -175,7 +185,8 @@
         "optional": true,
         "scalar": true,
         "description": "Placeholder text shown in the empty input.",
-        "default": "'Send a message...'"
+        "default": "'Send a message...'",
+        "displayType": "undefined | string"
       },
       {
         "name": "loading",
@@ -183,14 +194,16 @@
         "optional": true,
         "scalar": true,
         "description": "When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply).",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "suggestions",
         "type": "undefined | string[]",
         "optional": true,
         "scalar": false,
-        "description": "Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property."
+        "description": "Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property.",
+        "displayType": "undefined | string[]"
       },
       {
         "name": "suggestionMode",
@@ -198,7 +211,8 @@
         "optional": true,
         "scalar": true,
         "description": "What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input.",
-        "default": "'submit'"
+        "default": "'submit'",
+        "displayType": "undefined | \"submit\" | \"fill\""
       },
       {
         "name": "proseSize",
@@ -206,7 +220,8 @@
         "optional": true,
         "scalar": true,
         "description": "Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`.",
-        "default": "'sm'"
+        "default": "'sm'",
+        "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
       },
       {
         "name": "codeTheme",
@@ -214,7 +229,8 @@
         "optional": true,
         "scalar": true,
         "description": "Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`).",
-        "default": "'github-dark-dimmed'"
+        "default": "'github-dark-dimmed'",
+        "displayType": "undefined | string"
       },
       {
         "name": "codeHighlight",
@@ -222,35 +238,40 @@
         "optional": true,
         "scalar": true,
         "description": "Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true.",
-        "default": "true"
+        "default": "true",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "chatTitle",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Optional header title shown on the left of the header."
+        "description": "Optional header title shown on the left of the header.",
+        "displayType": "undefined | string"
       },
       {
         "name": "models",
         "type": "undefined | { id: string; name: string; provider?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": "Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `modelchange` event fires on selection."
+        "description": "Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `modelchange` event fires on selection.",
+        "displayType": "ModelOption[] | undefined"
       },
       {
         "name": "currentModel",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "The currently selected model id (pairs with `models`)."
+        "description": "The currently selected model id (pairs with `models`).",
+        "displayType": "undefined | string"
       },
       {
         "name": "context",
         "type": "undefined | { usedTokens: number; maxTokens: number; inputTokens?: undefined | number; outputTokens?: undefined | number; estimatedCost?: undefined | number }",
         "optional": true,
         "scalar": false,
-        "description": "Optional context-window token usage. When set, a Context token meter is shown in the header."
+        "description": "Optional context-window token usage. When set, a Context token meter is shown in the header.",
+        "displayType": "ContextData | undefined"
       },
       {
         "name": "scrollButton",
@@ -258,7 +279,8 @@
         "optional": true,
         "scalar": true,
         "description": "Show the scroll-to-bottom button inside the scroll area. Default true.",
-        "default": "true"
+        "default": "true",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "search",
@@ -266,7 +288,8 @@
         "optional": true,
         "scalar": true,
         "description": "Show a Search (Globe) button in the input toolbar; fires a `search` event.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "voice",
@@ -274,21 +297,24 @@
         "optional": true,
         "scalar": true,
         "description": "Show a Voice (Mic) button in the input toolbar; fires a `voice` event.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "slashCommands",
         "type": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": "Slash commands — when set, typing `/` in the input opens the command palette and fires `slashselect`. Set as a JS property."
+        "description": "Slash commands — when set, typing `/` in the input opens the command palette and fires `slashselect`. Set as a JS property.",
+        "displayType": "SlashCommandItem[] | undefined"
       },
       {
         "name": "slashActiveIds",
         "type": "undefined | string[]",
         "optional": true,
         "scalar": false,
-        "description": "Command ids to highlight as active in the palette."
+        "description": "Command ids to highlight as active in the palette.",
+        "displayType": "undefined | string[]"
       },
       {
         "name": "slashCompact",
@@ -296,49 +322,58 @@
         "optional": true,
         "scalar": true,
         "description": "Single-line palette rows.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
       {
         "name": "messageaction",
         "detail": "{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }",
-        "description": "An action button on a message was clicked."
+        "description": "An action button on a message was clicked.",
+        "displayDetail": "{ messageId: string; action: ChatMessageAction }"
       },
       {
         "name": "modelchange",
         "detail": "{ modelId: string }",
-        "description": "The header model switcher changed."
+        "description": "The header model switcher changed.",
+        "displayDetail": "{ modelId: string }"
       },
       {
         "name": "search",
         "detail": "Record<string, never>",
-        "description": "The Search button was clicked."
+        "description": "The Search button was clicked.",
+        "displayDetail": "Record<string, never>"
       },
       {
         "name": "slashselect",
         "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
-        "description": "A slash command was chosen from the palette."
+        "description": "A slash command was chosen from the palette.",
+        "displayDetail": "{ command: SlashCommandItem }"
       },
       {
         "name": "submit",
         "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
-        "description": "User submitted a message."
+        "description": "User submitted a message.",
+        "displayDetail": "{ value: string; attachments: AttachmentData[] }"
       },
       {
         "name": "suggestionclick",
         "detail": "{ value: string }",
-        "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`)."
+        "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`).",
+        "displayDetail": "{ value: string }"
       },
       {
         "name": "valuechange",
         "detail": "{ value: string }",
-        "description": "Fired on every input change."
+        "description": "Fired on every input change.",
+        "displayDetail": "{ value: string }"
       },
       {
         "name": "voice",
         "detail": "Record<string, never>",
-        "description": "The Mic / voice button was clicked."
+        "description": "The Mic / voice button was clicked.",
+        "displayDetail": "Record<string, never>"
       }
     ],
     "composedFrom": [
@@ -360,7 +395,8 @@
         "optional": false,
         "scalar": false,
         "description": "Authors to offer as scope filters. Set as a JS property.",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "string[]"
       },
       {
         "name": "availableTags",
@@ -368,7 +404,8 @@
         "optional": false,
         "scalar": false,
         "description": "Tags to offer as scope filters. Set as a JS property.",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "string[]"
       },
       {
         "name": "currentLabel",
@@ -376,14 +413,16 @@
         "optional": true,
         "scalar": true,
         "description": "The label shown on the trigger for the active scope.",
-        "default": "'All Content'"
+        "default": "'All Content'",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
       {
         "name": "scopechange",
         "detail": "{ filters: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }",
-        "description": "A scope was chosen (`undefined` filters = \"All Content\")."
+        "description": "A scope was chosen (`undefined` filters = \"All Content\").",
+        "displayDetail": "{ filters: SearchFilters | undefined }"
       }
     ],
     "composedFrom": [
@@ -405,7 +444,8 @@
         "optional": false,
         "scalar": false,
         "description": "Pre-bucketed conversation groups for the sidebar. Set as a JS property.",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "ConversationGroup[]"
       },
       {
         "name": "conversations",
@@ -413,14 +453,16 @@
         "optional": false,
         "scalar": false,
         "description": "Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property.",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "ConversationSummary[]"
       },
       {
         "name": "activeId",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Id of the open conversation, highlighted in the sidebar."
+        "description": "Id of the open conversation, highlighted in the sidebar.",
+        "displayType": "undefined | string"
       },
       {
         "name": "messages",
@@ -428,14 +470,16 @@
         "optional": false,
         "scalar": false,
         "description": "The active conversation's message thread, newest last. Set as a JS property.",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "ChatMessage[]"
       },
       {
         "name": "value",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": ""
+        "description": "",
+        "displayType": "undefined | string"
       },
       {
         "name": "placeholder",
@@ -443,7 +487,8 @@
         "optional": true,
         "scalar": true,
         "description": "",
-        "default": "'Send a message...'"
+        "default": "'Send a message...'",
+        "displayType": "undefined | string"
       },
       {
         "name": "loading",
@@ -451,14 +496,16 @@
         "optional": true,
         "scalar": true,
         "description": "",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "suggestions",
         "type": "undefined | string[]",
         "optional": true,
         "scalar": false,
-        "description": ""
+        "description": "",
+        "displayType": "undefined | string[]"
       },
       {
         "name": "suggestionMode",
@@ -466,7 +513,8 @@
         "optional": true,
         "scalar": true,
         "description": "",
-        "default": "'submit'"
+        "default": "'submit'",
+        "displayType": "undefined | \"submit\" | \"fill\""
       },
       {
         "name": "proseSize",
@@ -474,7 +522,8 @@
         "optional": true,
         "scalar": true,
         "description": "",
-        "default": "'sm'"
+        "default": "'sm'",
+        "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
       },
       {
         "name": "codeTheme",
@@ -482,7 +531,8 @@
         "optional": true,
         "scalar": true,
         "description": "",
-        "default": "'github-dark-dimmed'"
+        "default": "'github-dark-dimmed'",
+        "displayType": "undefined | string"
       },
       {
         "name": "codeHighlight",
@@ -490,35 +540,40 @@
         "optional": true,
         "scalar": true,
         "description": "",
-        "default": "true"
+        "default": "true",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "chatTitle",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": ""
+        "description": "",
+        "displayType": "undefined | string"
       },
       {
         "name": "models",
         "type": "undefined | { id: string; name: string; provider?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": ""
+        "description": "",
+        "displayType": "ModelOption[] | undefined"
       },
       {
         "name": "currentModel",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": ""
+        "description": "",
+        "displayType": "undefined | string"
       },
       {
         "name": "context",
         "type": "undefined | { usedTokens: number; maxTokens: number; inputTokens?: undefined | number; outputTokens?: undefined | number; estimatedCost?: undefined | number }",
         "optional": true,
         "scalar": false,
-        "description": ""
+        "description": "",
+        "displayType": "ContextData | undefined"
       },
       {
         "name": "scrollButton",
@@ -526,7 +581,8 @@
         "optional": true,
         "scalar": true,
         "description": "",
-        "default": "true"
+        "default": "true",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "search",
@@ -534,7 +590,8 @@
         "optional": true,
         "scalar": true,
         "description": "",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "voice",
@@ -542,21 +599,24 @@
         "optional": true,
         "scalar": true,
         "description": "",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "slashCommands",
         "type": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": ""
+        "description": "",
+        "displayType": "SlashCommandItem[] | undefined"
       },
       {
         "name": "slashActiveIds",
         "type": "undefined | string[]",
         "optional": true,
         "scalar": false,
-        "description": ""
+        "description": "",
+        "displayType": "undefined | string[]"
       },
       {
         "name": "slashCompact",
@@ -564,7 +624,8 @@
         "optional": true,
         "scalar": true,
         "description": "",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "sidebarWidth",
@@ -572,7 +633,8 @@
         "optional": true,
         "scalar": true,
         "description": "Sidebar default width as a percent of the workspace (default 22).",
-        "default": "22"
+        "default": "22",
+        "displayType": "undefined | number"
       },
       {
         "name": "sidebarMinWidth",
@@ -580,7 +642,8 @@
         "optional": true,
         "scalar": true,
         "description": "Sidebar min width in px (default 200).",
-        "default": "200"
+        "default": "200",
+        "displayType": "undefined | number"
       },
       {
         "name": "sidebarMaxWidth",
@@ -588,7 +651,8 @@
         "optional": true,
         "scalar": true,
         "description": "Sidebar max width in px (default 420).",
-        "default": "420"
+        "default": "420",
+        "displayType": "undefined | number"
       },
       {
         "name": "sidebarCollapsed",
@@ -596,64 +660,76 @@
         "optional": true,
         "scalar": true,
         "description": "Initial collapsed state of the sidebar (default false).",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
       {
         "name": "conversationselect",
         "detail": "{ id: string }",
-        "description": "A conversation was selected in the sidebar."
+        "description": "A conversation was selected in the sidebar.",
+        "displayDetail": "{ id: string }"
       },
       {
         "name": "messageaction",
         "detail": "{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }",
-        "description": "An action button on a message was clicked."
+        "description": "An action button on a message was clicked.",
+        "displayDetail": "{ messageId: string; action: ChatMessageAction }"
       },
       {
         "name": "modelchange",
         "detail": "{ modelId: string }",
-        "description": "The header model switcher changed."
+        "description": "The header model switcher changed.",
+        "displayDetail": "{ modelId: string }"
       },
       {
         "name": "newchat",
         "detail": "Record<string, never>",
-        "description": "The \"New chat\" button was clicked."
+        "description": "The \"New chat\" button was clicked.",
+        "displayDetail": "Record<string, never>"
       },
       {
         "name": "search",
         "detail": "Record<string, never>",
-        "description": "The Search button was clicked."
+        "description": "The Search button was clicked.",
+        "displayDetail": "Record<string, never>"
       },
       {
         "name": "sidebartoggle",
         "detail": "{ collapsed: false | true }",
-        "description": "The sidebar was collapsed or expanded."
+        "description": "The sidebar was collapsed or expanded.",
+        "displayDetail": "{ collapsed: false | true }"
       },
       {
         "name": "slashselect",
         "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
-        "description": "A slash command was chosen from the palette."
+        "description": "A slash command was chosen from the palette.",
+        "displayDetail": "{ command: SlashCommandItem }"
       },
       {
         "name": "submit",
         "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
-        "description": "User submitted a message."
+        "description": "User submitted a message.",
+        "displayDetail": "{ value: string; attachments: AttachmentData[] }"
       },
       {
         "name": "suggestionclick",
         "detail": "{ value: string }",
-        "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`)."
+        "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`).",
+        "displayDetail": "{ value: string }"
       },
       {
         "name": "valuechange",
         "detail": "{ value: string }",
-        "description": "Fired on every input change."
+        "description": "Fired on every input change.",
+        "displayDetail": "{ value: string }"
       },
       {
         "name": "voice",
         "detail": "Record<string, never>",
-        "description": "The Mic / voice button was clicked."
+        "description": "The Mic / voice button was clicked.",
+        "displayDetail": "Record<string, never>"
       }
     ],
     "composedFrom": [
@@ -699,14 +775,16 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Optional text beside the icon."
+        "description": "Optional text beside the icon.",
+        "displayType": "undefined | string"
       },
       {
         "name": "tooltip",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Tooltip on hover."
+        "description": "Tooltip on hover.",
+        "displayType": "undefined | string"
       },
       {
         "name": "variant",
@@ -714,7 +792,8 @@
         "optional": true,
         "scalar": true,
         "description": "Visual button style.",
-        "default": "'ghost'"
+        "default": "'ghost'",
+        "displayType": "undefined | \"ghost\" | \"default\" | \"outline\""
       },
       {
         "name": "size",
@@ -722,14 +801,16 @@
         "optional": true,
         "scalar": true,
         "description": "Button size (use an `icon*` size for an icon-only checkpoint).",
-        "default": "'sm'"
+        "default": "'sm'",
+        "displayType": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\""
       }
     ],
     "events": [
       {
         "name": "select",
         "detail": null,
-        "description": "The checkpoint was clicked."
+        "description": "The checkpoint was clicked.",
+        "displayDetail": null
       }
     ],
     "composedFrom": [
@@ -761,14 +842,16 @@
         "optional": false,
         "scalar": true,
         "description": "The source code to render.",
-        "default": "''"
+        "default": "''",
+        "displayType": "string"
       },
       {
         "name": "language",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Language grammar (e.g. `js`, `python`). Defaults to `tsx`."
+        "description": "Language grammar (e.g. `js`, `python`). Defaults to `tsx`.",
+        "displayType": "undefined | string"
       },
       {
         "name": "codeTheme",
@@ -776,7 +859,8 @@
         "optional": true,
         "scalar": true,
         "description": "Shiki theme name.",
-        "default": "'github-dark-dimmed'"
+        "default": "'github-dark-dimmed'",
+        "displayType": "undefined | string"
       },
       {
         "name": "codeHighlight",
@@ -784,7 +868,8 @@
         "optional": true,
         "scalar": true,
         "description": "Disable syntax highlighting (renders plain text, no Shiki).",
-        "default": "true"
+        "default": "true",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "proseSize",
@@ -792,7 +877,8 @@
         "optional": true,
         "scalar": true,
         "description": "Code text sizing.",
-        "default": "'sm'"
+        "default": "'sm'",
+        "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
       }
     ],
     "events": [],
@@ -821,7 +907,8 @@
         "type": "undefined | { usedTokens: number; maxTokens: number; inputTokens?: undefined | number; outputTokens?: undefined | number; reasoningTokens?: undefined | number; cacheTokens?: undefined | number; estimatedCost?: undefined | number }",
         "optional": true,
         "scalar": false,
-        "description": "Token-usage data. Set as a JS property."
+        "description": "Token-usage data. Set as a JS property.",
+        "displayType": "ContextData | undefined"
       }
     ],
     "events": [],
@@ -889,7 +976,8 @@
         "optional": false,
         "scalar": false,
         "description": "Pre-bucketed conversation groups (e.g. \"Today\", \"Yesterday\"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property.",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "ConversationGroup[]"
       },
       {
         "name": "conversations",
@@ -897,31 +985,36 @@
         "optional": false,
         "scalar": false,
         "description": "A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property.",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "ConversationSummary[]"
       },
       {
         "name": "activeId",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "The id of the currently-open conversation, highlighted in the list."
+        "description": "The id of the currently-open conversation, highlighted in the list.",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
       {
         "name": "newchat",
         "detail": "Record<string, never>",
-        "description": "The \"New chat\" button was clicked."
+        "description": "The \"New chat\" button was clicked.",
+        "displayDetail": "Record<string, never>"
       },
       {
         "name": "select",
         "detail": "{ id: string }",
-        "description": "A conversation was selected."
+        "description": "A conversation was selected.",
+        "displayDetail": "{ id: string }"
       },
       {
         "name": "togglesidebar",
         "detail": "Record<string, never>",
-        "description": "The sidebar toggle was clicked."
+        "description": "The sidebar toggle was clicked.",
+        "displayDetail": "Record<string, never>"
       }
     ],
     "composedFrom": [
@@ -946,7 +1039,8 @@
         "optional": true,
         "scalar": true,
         "description": "Title text. Attribute: `empty-title` (`title` is a global HTML attribute).",
-        "default": "''"
+        "default": "''",
+        "displayType": "undefined | string"
       },
       {
         "name": "description",
@@ -954,7 +1048,8 @@
         "optional": true,
         "scalar": true,
         "description": "Description text.",
-        "default": "''"
+        "default": "''",
+        "displayType": "undefined | string"
       }
     ],
     "events": [],
@@ -1002,24 +1097,28 @@
         "optional": true,
         "scalar": true,
         "description": "The banner label (e.g. \"Was this helpful?\"). Attribute: `bar-title` (`title` is avoided — it's a global HTML attribute).",
-        "default": "'Was this helpful?'"
+        "default": "'Was this helpful?'",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
       {
         "name": "close",
         "detail": null,
-        "description": "The user dismissed the banner."
+        "description": "The user dismissed the banner.",
+        "displayDetail": null
       },
       {
         "name": "helpful",
         "detail": null,
-        "description": "The user clicked thumbs-up."
+        "description": "The user clicked thumbs-up.",
+        "displayDetail": null
       },
       {
         "name": "nothelpful",
         "detail": null,
-        "description": "The user clicked thumbs-down."
+        "description": "The user clicked thumbs-down.",
+        "displayDetail": null
       }
     ],
     "composedFrom": [
@@ -1041,14 +1140,16 @@
         "optional": true,
         "scalar": true,
         "description": "Allow selecting multiple files (default true).",
-        "default": "true"
+        "default": "true",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "accept",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "`accept` attribute for the file picker (e.g. `image/*`)."
+        "description": "`accept` attribute for the file picker (e.g. `image/*`).",
+        "displayType": "undefined | string"
       },
       {
         "name": "disabled",
@@ -1056,7 +1157,8 @@
         "optional": true,
         "scalar": true,
         "description": "Disable the dropzone — no clicking, no drag-and-drop.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "label",
@@ -1064,14 +1166,16 @@
         "optional": true,
         "scalar": true,
         "description": "Default dropzone label (overridable via the default slot).",
-        "default": "'Click or drop files to upload'"
+        "default": "'Click or drop files to upload'",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
       {
         "name": "filesadded",
         "detail": "{ files: File[] }",
-        "description": "Files were picked or dropped."
+        "description": "Files were picked or dropped.",
+        "displayDetail": "{ files: File[] }"
       }
     ],
     "composedFrom": [
@@ -1097,14 +1201,16 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Base64-encoded image data (pair with `media-type`)."
+        "description": "Base64-encoded image data (pair with `media-type`).",
+        "displayType": "undefined | string"
       },
       {
         "name": "bytes",
         "type": "undefined | Uint8Array<ArrayBufferLike>",
         "optional": true,
         "scalar": false,
-        "description": "Raw image bytes (set as a JS property)."
+        "description": "Raw image bytes (set as a JS property).",
+        "displayType": "undefined | Uint8Array<ArrayBufferLike>"
       },
       {
         "name": "alt",
@@ -1112,14 +1218,16 @@
         "optional": true,
         "scalar": true,
         "description": "Alt text.",
-        "default": "''"
+        "default": "''",
+        "displayType": "undefined | string"
       },
       {
         "name": "mediaType",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "MIME type (default `image/png`)."
+        "description": "MIME type (default `image/png`).",
+        "displayType": "undefined | string"
       }
     ],
     "events": [],
@@ -1142,7 +1250,8 @@
         "optional": true,
         "scalar": true,
         "description": "The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`.",
-        "default": "'circular'"
+        "default": "'circular'",
+        "displayType": "LoaderVariant | undefined"
       },
       {
         "name": "size",
@@ -1150,14 +1259,16 @@
         "optional": true,
         "scalar": true,
         "description": "Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`.",
-        "default": "'md'"
+        "default": "'md'",
+        "displayType": "undefined | \"sm\" | \"lg\" | \"md\""
       },
       {
         "name": "text",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Label for the text-based variants."
+        "description": "Label for the text-based variants.",
+        "displayType": "undefined | string"
       }
     ],
     "events": [],
@@ -1180,7 +1291,8 @@
         "optional": false,
         "scalar": true,
         "description": "The markdown source to render.",
-        "default": "''"
+        "default": "''",
+        "displayType": "string"
       },
       {
         "name": "proseSize",
@@ -1188,7 +1300,8 @@
         "optional": true,
         "scalar": true,
         "description": "Text/markdown sizing.",
-        "default": "'sm'"
+        "default": "'sm'",
+        "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
       },
       {
         "name": "codeTheme",
@@ -1196,7 +1309,8 @@
         "optional": true,
         "scalar": true,
         "description": "Shiki theme for fenced code blocks.",
-        "default": "'github-dark-dimmed'"
+        "default": "'github-dark-dimmed'",
+        "displayType": "undefined | string"
       },
       {
         "name": "codeHighlight",
@@ -1204,7 +1318,8 @@
         "optional": true,
         "scalar": true,
         "description": "Disable syntax highlighting (no Shiki loads).",
-        "default": "true"
+        "default": "true",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [],
@@ -1226,7 +1341,8 @@
         "type": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\")[] }",
         "optional": true,
         "scalar": false,
-        "description": "The full message object. Set as a JS property."
+        "description": "The full message object. Set as a JS property.",
+        "displayType": "ChatMessage | undefined"
       },
       {
         "name": "role",
@@ -1234,21 +1350,24 @@
         "optional": true,
         "scalar": true,
         "description": "Convenience for simple cases when not passing a `message` object.",
-        "default": "'assistant'"
+        "default": "'assistant'",
+        "displayType": "undefined | \"user\" | \"assistant\""
       },
       {
         "name": "content",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Convenience content (used when `message` is not set)."
+        "description": "Convenience content (used when `message` is not set).",
+        "displayType": "undefined | string"
       },
       {
         "name": "markdown",
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Force markdown on/off. Defaults to on for assistant, off for user."
+        "description": "Force markdown on/off. Defaults to on for assistant, off for user.",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "proseSize",
@@ -1256,7 +1375,8 @@
         "optional": true,
         "scalar": true,
         "description": "Text/markdown sizing for the message body.",
-        "default": "'sm'"
+        "default": "'sm'",
+        "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
       },
       {
         "name": "codeTheme",
@@ -1264,7 +1384,8 @@
         "optional": true,
         "scalar": true,
         "description": "Shiki theme name used for fenced code blocks in the content.",
-        "default": "'github-dark-dimmed'"
+        "default": "'github-dark-dimmed'",
+        "displayType": "undefined | string"
       },
       {
         "name": "codeHighlight",
@@ -1272,14 +1393,16 @@
         "optional": true,
         "scalar": true,
         "description": "Disable syntax highlighting for code blocks (no Shiki loads).",
-        "default": "true"
+        "default": "true",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
       {
         "name": "messageaction",
         "detail": "{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }",
-        "description": "An action button was clicked."
+        "description": "An action button was clicked.",
+        "displayDetail": "{ messageId: string; action: ChatMessageAction }"
       }
     ],
     "composedFrom": [
@@ -1356,7 +1479,8 @@
         "optional": false,
         "scalar": false,
         "description": "The active skills to badge. Set as a JS property.",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "{ id: string; name: string }[]"
       }
     ],
     "events": [],
@@ -1379,21 +1503,24 @@
         "optional": false,
         "scalar": false,
         "description": "The selectable models. Set as a JS property (array).",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "{ id: string; name: string; provider?: undefined | string }[]"
       },
       {
         "name": "currentModel",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "The currently-selected model id. Defaults to the first model."
+        "description": "The currently-selected model id. Defaults to the first model.",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
       {
         "name": "modelchange",
         "detail": "{ modelId: string }",
-        "description": "A model was selected."
+        "description": "A model was selected.",
+        "displayDetail": "{ modelId: string }"
       }
     ],
     "composedFrom": [
@@ -1414,7 +1541,8 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior."
+        "description": "Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior.",
+        "displayType": "undefined | string"
       },
       {
         "name": "placeholder",
@@ -1422,7 +1550,8 @@
         "optional": true,
         "scalar": true,
         "description": "Placeholder text shown in the empty input.",
-        "default": "'Send a message...'"
+        "default": "'Send a message...'",
+        "displayType": "undefined | string"
       },
       {
         "name": "disabled",
@@ -1430,7 +1559,8 @@
         "optional": true,
         "scalar": true,
         "description": "Disable the input and submit button entirely (non-interactive).",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "loading",
@@ -1438,14 +1568,16 @@
         "optional": true,
         "scalar": true,
         "description": "Show the loading/streaming state and block submit (use while awaiting a reply).",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "suggestions",
         "type": "undefined | string[]",
         "optional": true,
         "scalar": false,
-        "description": "Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property."
+        "description": "Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property.",
+        "displayType": "undefined | string[]"
       },
       {
         "name": "suggestionMode",
@@ -1453,21 +1585,24 @@
         "optional": true,
         "scalar": true,
         "description": "What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input.",
-        "default": "'submit'"
+        "default": "'submit'",
+        "displayType": "undefined | \"submit\" | \"fill\""
       },
       {
         "name": "slashCommands",
         "type": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": "Slash commands — when set, typing `/` opens the command palette. Set as a JS property."
+        "description": "Slash commands — when set, typing `/` opens the command palette. Set as a JS property.",
+        "displayType": "SlashCommandItem[] | undefined"
       },
       {
         "name": "slashActiveIds",
         "type": "undefined | string[]",
         "optional": true,
         "scalar": false,
-        "description": "Command ids to highlight as active."
+        "description": "Command ids to highlight as active.",
+        "displayType": "undefined | string[]"
       },
       {
         "name": "slashCompact",
@@ -1475,7 +1610,8 @@
         "optional": true,
         "scalar": true,
         "description": "Single-line palette rows.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "search",
@@ -1483,7 +1619,8 @@
         "optional": true,
         "scalar": true,
         "description": "Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "voice",
@@ -1491,46 +1628,54 @@
         "optional": true,
         "scalar": true,
         "description": "Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "attachments",
         "type": "undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": "Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip)."
+        "description": "Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip).",
+        "displayType": "AttachmentData[] | undefined"
       }
     ],
     "events": [
       {
         "name": "search",
         "detail": "Record<string, never>",
-        "description": "The Search (Globe) toolbar button was clicked."
+        "description": "The Search (Globe) toolbar button was clicked.",
+        "displayDetail": "Record<string, never>"
       },
       {
         "name": "slashselect",
         "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
-        "description": "A slash command was chosen from the palette."
+        "description": "A slash command was chosen from the palette.",
+        "displayDetail": "{ command: SlashCommandItem }"
       },
       {
         "name": "submit",
         "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
-        "description": "The user submitted the prompt (Enter or send button) with its attachments."
+        "description": "The user submitted the prompt (Enter or send button) with its attachments.",
+        "displayDetail": "{ value: string; attachments: AttachmentData[] }"
       },
       {
         "name": "suggestionclick",
         "detail": "{ value: string }",
-        "description": "A suggestion was clicked while `suggestion-mode=\"fill\"`."
+        "description": "A suggestion was clicked while `suggestion-mode=\"fill\"`.",
+        "displayDetail": "{ value: string }"
       },
       {
         "name": "valuechange",
         "detail": "{ value: string }",
-        "description": "The input text changed (fires on every keystroke)."
+        "description": "The input text changed (fires on every keystroke).",
+        "displayDetail": "{ value: string }"
       },
       {
         "name": "voice",
         "detail": "Record<string, never>",
-        "description": "The Voice (Mic) toolbar button was clicked."
+        "description": "The Voice (Mic) toolbar button was clicked.",
+        "displayDetail": "Record<string, never>"
       }
     ],
     "composedFrom": [],
@@ -1546,7 +1691,8 @@
         "optional": false,
         "scalar": false,
         "description": "The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property.",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "(string | { label: string; value?: undefined | string })[]"
       },
       {
         "name": "variant",
@@ -1554,14 +1700,16 @@
         "optional": true,
         "scalar": true,
         "description": "Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled).",
-        "default": "'outline'"
+        "default": "'outline'",
+        "displayType": "undefined | \"ghost\" | \"default\" | \"outline\""
       },
       {
         "name": "size",
         "type": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\"",
         "optional": true,
         "scalar": true,
-        "description": "Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`)."
+        "description": "Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`).",
+        "displayType": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\""
       },
       {
         "name": "block",
@@ -1569,21 +1717,24 @@
         "optional": true,
         "scalar": true,
         "description": "Full-width left-aligned rows instead of pills.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "highlight",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Substring to highlight within each suggestion."
+        "description": "Substring to highlight within each suggestion.",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
       {
         "name": "select",
         "detail": "{ value: string }",
-        "description": "A suggestion was clicked."
+        "description": "A suggestion was clicked.",
+        "displayDetail": "{ value: string }"
       }
     ],
     "composedFrom": [
@@ -1605,7 +1756,8 @@
         "optional": false,
         "scalar": true,
         "description": "The reasoning text to display.",
-        "default": "''"
+        "default": "''",
+        "displayType": "string"
       },
       {
         "name": "label",
@@ -1613,14 +1765,16 @@
         "optional": true,
         "scalar": true,
         "description": "Trigger label.",
-        "default": "'Reasoning'"
+        "default": "'Reasoning'",
+        "displayType": "undefined | string"
       },
       {
         "name": "open",
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it)."
+        "description": "Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it).",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "streaming",
@@ -1628,7 +1782,8 @@
         "optional": true,
         "scalar": true,
         "description": "While true, auto-expands (and re-collapses when it flips false).",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "markdown",
@@ -1636,14 +1791,16 @@
         "optional": true,
         "scalar": true,
         "description": "Render `text` as markdown.",
-        "default": "true"
+        "default": "true",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
       {
         "name": "openchange",
         "detail": "{ open: false | true }",
-        "description": "Open state changed (via the trigger or streaming auto-open)."
+        "description": "Open state changed (via the trigger or streaming auto-open).",
+        "displayDetail": "{ open: false | true }"
       }
     ],
     "composedFrom": [
@@ -1675,7 +1832,8 @@
         "optional": true,
         "scalar": false,
         "description": "Text to stream. A string, or an `AsyncIterable<string>` (set as a JS property — async iterables can't be HTML attributes).",
-        "default": "''"
+        "default": "''",
+        "displayType": "undefined | string | AsyncIterable<string>"
       },
       {
         "name": "mode",
@@ -1683,7 +1841,8 @@
         "optional": true,
         "scalar": true,
         "description": "Reveal animation.",
-        "default": "'typewriter'"
+        "default": "'typewriter'",
+        "displayType": "undefined | \"typewriter\" | \"fade\""
       },
       {
         "name": "speed",
@@ -1691,21 +1850,24 @@
         "optional": true,
         "scalar": true,
         "description": "Characters/segments per tick.",
-        "default": "20"
+        "default": "20",
+        "displayType": "undefined | number"
       },
       {
         "name": "as",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Element tag to render as."
+        "description": "Element tag to render as.",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
       {
         "name": "complete",
         "detail": null,
-        "description": "Streaming finished."
+        "description": "Streaming finished.",
+        "displayDetail": null
       }
     ],
     "composedFrom": [
@@ -1727,14 +1889,16 @@
         "optional": true,
         "scalar": true,
         "description": "The URL this citation links to (the domain also seeds the default label/favicon).",
-        "default": "''"
+        "default": "''",
+        "displayType": "undefined | string"
       },
       {
         "name": "label",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Trigger label (defaults to the domain)."
+        "description": "Trigger label (defaults to the domain).",
+        "displayType": "undefined | string"
       },
       {
         "name": "headline",
@@ -1742,7 +1906,8 @@
         "optional": true,
         "scalar": true,
         "description": "Hover-card headline. Attribute: `headline` (`title` is avoided — it's a global HTML attribute that reflects in a CE constructor and breaks it).",
-        "default": "''"
+        "default": "''",
+        "displayType": "undefined | string"
       },
       {
         "name": "description",
@@ -1750,7 +1915,8 @@
         "optional": true,
         "scalar": true,
         "description": "Hover-card body text describing the source.",
-        "default": "''"
+        "default": "''",
+        "displayType": "undefined | string"
       },
       {
         "name": "showFavicon",
@@ -1758,7 +1924,8 @@
         "optional": true,
         "scalar": true,
         "description": "Show the source's favicon next to the trigger label.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [],
@@ -1796,7 +1963,8 @@
         "optional": false,
         "scalar": false,
         "description": "The sources to render. Set as a JS property.",
-        "default": "[]"
+        "default": "[]",
+        "displayType": "SourceItem[]"
       },
       {
         "name": "showFavicon",
@@ -1804,7 +1972,8 @@
         "optional": true,
         "scalar": true,
         "description": "Show favicons on all items (per-item `showFavicon` overrides).",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [],
@@ -1842,7 +2011,8 @@
         "optional": true,
         "scalar": true,
         "description": "The text to shimmer.",
-        "default": "''"
+        "default": "''",
+        "displayType": "undefined | string"
       },
       {
         "name": "as",
@@ -1850,7 +2020,8 @@
         "optional": true,
         "scalar": true,
         "description": "Element tag to render as (default `span`).",
-        "default": "'span'"
+        "default": "'span'",
+        "displayType": "undefined | string"
       },
       {
         "name": "duration",
@@ -1858,7 +2029,8 @@
         "optional": true,
         "scalar": true,
         "description": "Animation duration in seconds.",
-        "default": "4"
+        "default": "4",
+        "displayType": "undefined | number"
       },
       {
         "name": "spread",
@@ -1866,7 +2038,8 @@
         "optional": true,
         "scalar": true,
         "description": "Gradient spread (5–45).",
-        "default": "20"
+        "default": "20",
+        "displayType": "undefined | number"
       }
     ],
     "events": [],
@@ -1889,7 +2062,8 @@
         "optional": true,
         "scalar": true,
         "description": "The shimmering label, e.g. \"Thinking…\".",
-        "default": "'Thinking'"
+        "default": "'Thinking'",
+        "displayType": "undefined | string"
       },
       {
         "name": "stoppable",
@@ -1897,7 +2071,8 @@
         "optional": true,
         "scalar": true,
         "description": "When true, show a \"stop\" affordance that fires a `stop` event.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       },
       {
         "name": "stopLabel",
@@ -1905,14 +2080,16 @@
         "optional": true,
         "scalar": true,
         "description": "Label for the stop affordance.",
-        "default": "'Answer now'"
+        "default": "'Answer now'",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
       {
         "name": "stop",
         "detail": null,
-        "description": "The \"stop / answer now\" affordance was clicked."
+        "description": "The \"stop / answer now\" affordance was clicked.",
+        "displayDetail": null
       }
     ],
     "composedFrom": [
@@ -1933,7 +2110,8 @@
         "type": "undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }",
         "optional": true,
         "scalar": false,
-        "description": "The tool-call to display. Set as a JS property."
+        "description": "The tool-call to display. Set as a JS property.",
+        "displayType": "ToolPart | undefined"
       },
       {
         "name": "open",
@@ -1941,7 +2119,8 @@
         "optional": true,
         "scalar": true,
         "description": "Start expanded.",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [],
@@ -1968,7 +2147,8 @@
         "type": "undefined | (audio: Blob) => Promise<string>",
         "optional": true,
         "scalar": false,
-        "description": "Transcriber the host supplies — records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event."
+        "description": "Transcriber the host supplies — records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event.",
+        "displayType": "undefined | (audio: Blob) => Promise<string>"
       },
       {
         "name": "disabled",
@@ -1976,19 +2156,22 @@
         "optional": true,
         "scalar": true,
         "description": "Disable the mic button (non-interactive).",
-        "default": "false"
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
       {
         "name": "audiocaptured",
         "detail": "{ blob: Blob }",
-        "description": "Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property."
+        "description": "Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property.",
+        "displayDetail": "{ blob: Blob }"
       },
       {
         "name": "transcription",
         "detail": "{ text: string }",
-        "description": "Transcription completed (the `transcribe` property resolved)."
+        "description": "Transcription completed (the `transcribe` property resolved).",
+        "displayDetail": "{ text: string }"
       }
     ],
     "composedFrom": [

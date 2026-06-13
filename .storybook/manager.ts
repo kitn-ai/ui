@@ -1,4 +1,5 @@
 import { addons } from 'storybook/manager-api';
+import './api-tab'; // registers the "API" tab for Web Components
 
 // Storybook 10 controls addon-panel visibility here (the old per-story
 // `parameters.options.showPanel` is no longer honored). The Examples, Patterns,

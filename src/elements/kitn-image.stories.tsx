@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -51,26 +50,18 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-image', [
           '`<kitn-image>` is the framework-agnostic **web component** that renders a base64 or byte-array image, showing a skeleton fallback while it resolves, isolated in **Shadow DOM**.',
           '**When to use:** displaying model-generated or in-memory images (without a hosted URL) in a non-Solid app. In SolidJS, use the `Image` primitive directly.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set `base64` (paired with the `media-type` attribute) or set raw `bytes` as a **property**, and add `alt` text.",
           'See the **Code** tab for HTML usage.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj;
-
-/** Full generated API reference — properties, events, tokens, and composed-from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-image" />,
-  parameters: { layout: 'padded' },
-};
 
 /** A base64-encoded SVG with a media type and alt text. */
 export const Default: Story = {

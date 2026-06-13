@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 interface Step {
   label: string;
@@ -56,26 +55,18 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
-          '`<kitn-chain-of-thought>` is the framework-agnostic **web component** for step-by-step reasoning — a connected list of steps, each with optional collapsible detail — isolated in **Shadow DOM**. The compound primitive collapses to a single `steps` data model (Route 1).',
-          '**When to use:** surfacing an agent\'s plan or reasoning trace in a non-Solid app. In SolidJS, compose the `ChainOfThought` primitives for finer control.',
-          "**How to use:** register once with `import '@kitnai/chat/elements'`, then set the `steps` **property** — an array of `{ label, content? }`. Steps with `content` become expandable.",
-          'See the **Code** tab for HTML usage.',
-        ].join('\n\n'),
-      },
+      description: specDescription('kitn-chain-of-thought', [
+        '`<kitn-chain-of-thought>` is the framework-agnostic **web component** for step-by-step reasoning — a connected list of steps, each with optional collapsible detail — isolated in **Shadow DOM**. The compound primitive collapses to a single `steps` data model (Route 1).',
+        '**When to use:** surfacing an agent\'s plan or reasoning trace in a non-Solid app. In SolidJS, compose the `ChainOfThought` primitives for finer control.',
+        "**How to use:** register once with `import '@kitnai/chat/elements'`, then set the `steps` **property** — an array of `{ label, content? }`. Steps with `content` become expandable.",
+        'See the **Code** tab for HTML usage.',
+      ]),
     },
   },
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj;
-
-/** Full generated API reference — properties, events, tokens, and composed-from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-chain-of-thought" />,
-  parameters: { layout: 'padded' },
-};
 
 /** A three-step reasoning trace; the last step has no detail. */
 export const Default: Story = {

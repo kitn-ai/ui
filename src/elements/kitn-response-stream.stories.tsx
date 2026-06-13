@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -55,26 +54,18 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-response-stream', [
           '`<kitn-response-stream>` is the framework-agnostic **web component** that reveals text with a typewriter or fade animation — the building block for streamed assistant replies, isolated in **Shadow DOM**.',
           '**When to use:** animating a response as it arrives. Pass a finished string to replay an animation, or an `AsyncIterable<string>` to drive it from a live stream. In SolidJS, use the `ResponseStream` primitive.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `text` **property** (string or async iterable), tune `mode` (`typewriter` / `fade`) and `speed`, and listen for the `complete` **CustomEvent**.",
           'See the **Code** tab for HTML usage.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj;
-
-/** Full generated API reference — properties, events, tokens, and composed-from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-response-stream" />,
-  parameters: { layout: 'padded' },
-};
 
 /** Typewriter reveal (the default). */
 export const Typewriter: Story = {

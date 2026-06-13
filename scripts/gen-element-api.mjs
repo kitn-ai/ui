@@ -258,6 +258,13 @@ export { elements, toAttr, tagToClass, IMPORTS };
 
 // run the sibling generators if present (types + react)
 if (import.meta.url === `file://${process.argv[1]}`) {
+  // Add readable (alias-shortened) display types for the Storybook API tab, which
+  // renders from this JSON and can't run the markdown shortening at display time.
+  const { shorten } = await import('./gen-web-components-md.mjs');
+  for (const el of elements) {
+    for (const p of el.props) p.displayType = shorten(p.type);
+    for (const ev of el.events) ev.displayDetail = ev.detail ? shorten(ev.detail) : null;
+  }
   writeFileSync(resolve(root, 'src/elements/element-meta.json'), JSON.stringify(elements, null, 2) + '\n');
   console.log(`✓ src/elements/element-meta.json — ${elements.length} elements`);
   for (const mod of ['./gen-element-types.mjs', './gen-element-react.mjs']) {

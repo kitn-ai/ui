@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -53,26 +52,18 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-chat-scope-picker', [
           '`<kitn-chat-scope-picker>` is the framework-agnostic **web component** for scoping a chat by author or tag — a dropdown that emits the chosen filters — isolated in **Shadow DOM**.',
           '**When to use:** letting users narrow a conversation/search to a subset of content. In SolidJS, use the `ChatScopePicker` primitive.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `availableAuthors` / `availableTags` **properties** (and optionally `current-label`), and listen for the `scopechange` **CustomEvent** (`undefined` filters = \"All Content\").",
           'See the **Code** tab for HTML usage.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj;
-
-/** Full generated API reference — properties, events, tokens, and composed-from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-chat-scope-picker" />,
-  parameters: { layout: 'padded' },
-};
 
 /** Authors and tags available as scope filters. */
 export const Default: Story = {

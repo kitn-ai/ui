@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -54,26 +53,18 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-source', [
           '`<kitn-source>` is the framework-agnostic **web component** for a single citation link with a hover-card preview, isolated in **Shadow DOM**.',
           '**When to use:** inlining a single source citation in a non-Solid app. For multiple sources, use `<kitn-source-list>`; in SolidJS, compose the `Source` primitives.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, then set `href` (the link, also the default label/favicon source), `label`, `headline` (the hover headline — note `headline`, not `title`), `description`, and the `show-favicon` flag via attributes.",
           'See the **Code** tab for HTML usage.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj;
-
-/** Full generated API reference — properties, events, tokens, and composed-from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-source" />,
-  parameters: { layout: 'padded' },
-};
 
 /** A citation with a custom label, hover headline/description, and favicon. */
 export const Default: Story = {
