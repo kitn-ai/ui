@@ -31,7 +31,9 @@
     "dist",
     "src",
     "frameworks",
-    "theme.css"
+    "theme.css",
+    "llms.txt",
+    "llms-full.txt"
   ],
   "scripts": {
     "prepublishOnly": "npm run build",

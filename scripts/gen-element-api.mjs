@@ -193,4 +193,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e;
     }
   }
+  // Generate llms.txt / llms-full.txt from the same in-memory model (one parse).
+  const { generate } = await import('./gen-llms.mjs');
+  generate(elements);
 }
