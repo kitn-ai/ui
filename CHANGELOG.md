@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.0](https://github.com/kitn-ai/chat/compare/chat-v0.5.0...chat-v0.6.0) (2026-06-13)
+
+
+### Features
+
+* **examples:** add runnable Angular example app ([dab40bd](https://github.com/kitn-ai/chat/commit/dab40bdd8972819a99b54df1fae7909f6710224d))
+* **examples:** add runnable Vue example app ([97e9495](https://github.com/kitn-ai/chat/commit/97e94955be09470d2b1dffc3e209a8796d0e6245))
+* **theme:** custom cross-platform scrollbars (thin, rounded, subtle, themed) ([ae9b83b](https://github.com/kitn-ai/chat/commit/ae9b83b55da50149fd863ea694417a7e9e51e328))
+
 ## [0.5.0](https://github.com/kitn-ai/chat/compare/chat-v0.4.0...chat-v0.5.0) (2026-06-13)
 
 
