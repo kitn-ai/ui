@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import './register'; // side effect: registers the custom elements
+import { ElementSpec } from '../stories/docs/element-spec';
+import { argTypesFor } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -29,6 +31,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 const meta = {
   title: 'Web Components/kitn-thinking-bar',
   tags: ['autodocs'],
+  argTypes: argTypesFor('kitn-thinking-bar'),
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -46,6 +49,12 @@ const meta = {
 
 export default meta;
 type Story = StoryObj;
+
+/** Full generated API reference — properties, events, tokens, and composed-from. */
+export const API: Story = {
+  render: () => <ElementSpec tag="kitn-thinking-bar" />,
+  parameters: { layout: 'padded' },
+};
 
 /** A plain thinking indicator. */
 export const Default: Story = {
