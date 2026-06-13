@@ -108,7 +108,8 @@ function tablesFor(el) {
   if (el.events.length) {
     const evRows = el.events
       .map((e) => {
-        const detail = e.detail ? `\`${shorten(e.detail)}\`` : '—';
+        // Payloadless events (no detail, or an empty `Record<string, never>`) render as a dash.
+        const detail = e.detail && e.detail !== 'Record<string, never>' ? `\`${shorten(e.detail)}\`` : '—';
         const desc = e.description || '';
         return `| \`${e.name}\` | ${detail} | ${desc} |`;
       })

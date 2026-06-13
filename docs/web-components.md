@@ -161,12 +161,12 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 |-------|-----------|-------------|
 | `messageaction` | `{ messageId: string; action: ChatMessageAction }` | An action button on a message was clicked. |
 | `modelchange` | `{ modelId: string }` | The header model switcher changed. |
-| `search` | `Record<string, never>` | The Search button was clicked. |
+| `search` | — | The Search button was clicked. |
 | `slashselect` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
 | `submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
 | `suggestionclick` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
 | `valuechange` | `{ value: string }` | Fired on every input change. |
-| `voice` | `Record<string, never>` | The Mic / voice button was clicked. |
+| `voice` | — | The Mic / voice button was clicked. |
 
 #### Composed from
 
@@ -222,14 +222,14 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `conversationselect` | `{ id: string }` | A conversation was selected in the sidebar. |
 | `messageaction` | `{ messageId: string; action: ChatMessageAction }` | An action button on a message was clicked. |
 | `modelchange` | `{ modelId: string }` | The header model switcher changed. |
-| `newchat` | `Record<string, never>` | The "New chat" button was clicked. |
-| `search` | `Record<string, never>` | The Search button was clicked. |
+| `newchat` | — | The "New chat" button was clicked. |
+| `search` | — | The Search button was clicked. |
 | `sidebartoggle` | `{ collapsed: false | true }` | The sidebar was collapsed or expanded. |
 | `slashselect` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
 | `submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
 | `suggestionclick` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
 | `valuechange` | `{ value: string }` | Fired on every input change. |
-| `voice` | `Record<string, never>` | The Mic / voice button was clicked. |
+| `voice` | — | The Mic / voice button was clicked. |
 
 #### Composed from
 
@@ -297,9 +297,9 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `newchat` | `Record<string, never>` | The "New chat" button was clicked. |
+| `newchat` | — | The "New chat" button was clicked. |
 | `select` | `{ id: string }` | A conversation was selected. |
-| `togglesidebar` | `Record<string, never>` | The sidebar toggle was clicked. |
+| `togglesidebar` | — | The sidebar toggle was clicked. |
 
 #### Composed from
 
@@ -338,12 +338,12 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `search` | `Record<string, never>` | The Search (Globe) toolbar button was clicked. |
+| `search` | — | The Search (Globe) toolbar button was clicked. |
 | `slashselect` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
 | `submit` | `{ value: string; attachments: AttachmentData[] }` | The user submitted the prompt (Enter or send button) with its attachments. |
 | `suggestionclick` | `{ value: string }` | A suggestion was clicked while `suggestion-mode="fill"`. |
 | `valuechange` | `{ value: string }` | The input text changed (fires on every keystroke). |
-| `voice` | `Record<string, never>` | The Voice (Mic) toolbar button was clicked. |
+| `voice` | — | The Voice (Mic) toolbar button was clicked. |
 
 #### Theming
 

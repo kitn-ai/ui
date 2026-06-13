@@ -45,7 +45,7 @@ export function ElementSpec(props: { tag: string }) {
                   <For each={e().events}>{(ev) => (
                     <tr>
                       <td class={td}><span class={code}>{ev.name}</span></td>
-                      <td class={td}><span class={code}>{ev.detail ?? '—'}</span></td>
+                      <td class={td}><span class={code}>{detailText(ev.detail)}</span></td>
                       <td class={td}>{ev.description}</td>
                     </tr>
                   )}</For>
@@ -82,3 +82,5 @@ export function ElementSpec(props: { tag: string }) {
 }
 
 function kebab(name: string) { return name.replace(/([A-Z])/g, '-$1').toLowerCase(); }
+// Payloadless events (no detail, or an empty `Record<string, never>`) render as a dash.
+function detailText(detail: string | null) { return !detail || detail === 'Record<string, never>' ? '—' : detail; }
