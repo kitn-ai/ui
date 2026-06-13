@@ -2,8 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers <kitn-chat>, <kitn-conversation-list>, <kitn-prompt-input>
 import type { ChatMessage } from './chat-types';
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -110,15 +109,13 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-chat', [
           '`<kitn-chat>` is the framework-agnostic **web component** version of the chat UI — a complete message thread plus prompt input, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** dropping a full chat into a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the primitives (`ChatContainer`, `Message`, `PromptInput`) instead.',
           '**How to use:** register once with `import \'@kitnai/chat/elements\'`, set rich data as JS **properties** (`el.messages = [...]`), and listen for **CustomEvents** (`submit`, `messageaction`, `valuechange`) directly on the element.',
           '**Placement:** as a top-level panel or full-page surface. Give it an explicit height (e.g. `height: 100vh`).',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
@@ -151,8 +148,3 @@ export const InSolidJS: Story = {
   parameters: { docs: { source: { code: SOLID_SNIPPET, language: 'tsx' } } },
 };
 
-/** Full generated API reference — properties, events, tokens, and the SolidJS components this element is composed from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-chat" />,
-  parameters: { layout: 'padded' },
-};

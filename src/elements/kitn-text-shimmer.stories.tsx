@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import './register'; // side effect: registers the custom elements
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -31,26 +30,18 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-text-shimmer', [
           '`<kitn-text-shimmer>` is the framework-agnostic **web component** for animated shimmering text — a gradient sweep across a label, isolated in **Shadow DOM**.',
           '**When to use:** signalling a quiet, in-progress state ("Thinking…", "Generating…") inline. In SolidJS, use the `TextShimmer` primitive.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `text` attribute, and tune `duration` (seconds) and `spread` (gradient width, 5–45).",
           'See the **Code** tab for HTML usage.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj;
-
-/** Full generated API reference — properties, events, tokens, and composed-from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-text-shimmer" />,
-  parameters: { layout: 'padded' },
-};
 
 /** Default shimmer. */
 export const Default: Story = {

@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import './register'; // side effect: registers the custom elements
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -31,26 +30,18 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-loader', [
           '`<kitn-loader>` is the framework-agnostic **web component** for an animated busy indicator — a dozen styles (circular, dots, wave, bars, text-shimmer, …) selected via the `variant` attribute, isolated in **Shadow DOM**.',
           '**When to use:** showing a small "working" indicator anywhere outside the chat thread (toolbars, buttons, panels). In SolidJS, use the `Loader` primitive directly.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, then set `variant`, `size`, and (for text variants) `text` as plain HTML attributes.",
           'See the **Code** tab for HTML usage.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj;
-
-/** Full generated API reference — properties, events, tokens, and composed-from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-loader" />,
-  parameters: { layout: 'padded' },
-};
 
 const VARIANTS = [
   'circular', 'classic', 'pulse', 'pulse-dot', 'dots', 'typing',

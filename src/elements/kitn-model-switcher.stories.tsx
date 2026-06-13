@@ -2,8 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
 import type { ModelOption } from '../types';
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -61,26 +60,18 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-model-switcher', [
           '`<kitn-model-switcher>` is the framework-agnostic **web component** for picking the active model — a dropdown showing each model\'s name and provider — isolated in **Shadow DOM**. It mirrors the switcher inside `<kitn-chat>` as a standalone, composable piece.',
           '**When to use:** building your own chat header and want the model picker on its own. In SolidJS, use the `ModelSwitcher` primitive.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `models` **property** (and optionally `currentModel`), and listen for the `modelchange` **CustomEvent**. Note: like the underlying primitive, it only renders when more than one model is provided.",
           'See the **Code** tab for HTML usage.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj;
-
-/** Full generated API reference — properties, events, tokens, and composed-from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-model-switcher" />,
-  parameters: { layout: 'padded' },
-};
 
 /** A three-model picker; selecting updates the trigger label. */
 export const Default: Story = {

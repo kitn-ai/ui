@@ -87,8 +87,8 @@ const ALIAS = new Map([
   ],
 ]);
 
-/** Shorten a fully-expanded type string to a readable alias for markdown display. */
-function shorten(type) {
+/** Shorten a fully-expanded type string to a readable alias for display. */
+export function shorten(type) {
   return ALIAS.get(type) ?? type;
 }
 

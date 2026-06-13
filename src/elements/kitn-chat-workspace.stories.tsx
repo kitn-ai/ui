@@ -3,8 +3,7 @@ import { onMount } from 'solid-js';
 import './register'; // side effect: registers all kitn custom elements including <kitn-chat-workspace>
 import type { ConversationGroup, ConversationSummary, ModelOption } from '../types';
 import type { ChatMessage } from './chat-types';
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -196,15 +195,13 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-chat-workspace', [
           '`<kitn-chat-workspace>` is the full chat shell as a single **web component** — a resizable split layout with a collapsible conversation list on the left and a full message thread on the right, all isolated in **Shadow DOM**. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** dropping an entire chat application shell into a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts and a ready-made list+chat layout. If you *are* in SolidJS and want fine-grained control, compose the `ConversationList` and `ChatThread` primitives directly.',
           '**How to use:** register once with `import \'@kitnai/chat/elements\'`, set rich data as JS **properties** (`el.conversations = [...]`, `el.messages = [...]`, `el.models = [...]`), and listen for **CustomEvents** (`conversationselect`, `submit`, `sidebartoggle`, `newchat`) directly on the element.',
           '**Placement:** as a full-page surface or large panel. Give it an explicit height (e.g. `height: 100vh`). The sidebar is drag-resizable and can be collapsed via the toggle button in its header.',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
@@ -238,8 +235,3 @@ export const InSolidJS: Story = {
   parameters: { docs: { source: { code: SOLID_SNIPPET, language: 'tsx' } } },
 };
 
-/** Full generated API reference — properties, events, tokens, and the SolidJS components this element is composed from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-chat-workspace" />,
-  parameters: { layout: 'padded' },
-};

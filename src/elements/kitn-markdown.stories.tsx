@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
-import { ElementSpec } from '../stories/docs/element-spec';
-import { argTypesFor } from '../stories/docs/element-controls';
+import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -56,26 +55,18 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: {
-        component: [
+      description: specDescription('kitn-markdown', [
           '`<kitn-markdown>` is the framework-agnostic **web component** that renders a markdown string (with fenced-code syntax highlighting via Shiki) as a standalone element, isolated in **Shadow DOM**.',
           '**When to use:** showing model output or any markdown in a non-Solid app without pulling in a markdown stack. In SolidJS, use the `Markdown` primitive directly.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the source via the `content` **property** (`el.content = '...'`), and tune rendering with the `prose-size`, `code-theme`, and `code-highlight` attributes.",
           'See the **Code** tab for HTML usage.',
-        ].join('\n\n'),
-      },
+        ]),
     },
   },
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj;
-
-/** Full generated API reference — properties, events, tokens, and composed-from. */
-export const API: Story = {
-  render: () => <ElementSpec tag="kitn-markdown" />,
-  parameters: { layout: 'padded' },
-};
 
 /** Headings, emphasis, lists, a blockquote, and a highlighted code fence. */
 export const Default: Story = {
