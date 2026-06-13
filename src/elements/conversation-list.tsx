@@ -14,7 +14,16 @@ interface Props extends Record<string, unknown> {
   activeId?: string;
 }
 
-defineKitnElement<Props>('kitn-conversation-list', {
+interface Events {
+  /** A conversation was selected. */
+  select: { id: string };
+  /** The "New chat" button was clicked. */
+  newchat: Record<string, never>;
+  /** The sidebar toggle was clicked. */
+  togglesidebar: Record<string, never>;
+}
+
+defineKitnElement<Props, Events>('kitn-conversation-list', {
   groups: [],
   conversations: [],
   activeId: undefined,

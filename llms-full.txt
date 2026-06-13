@@ -240,14 +240,14 @@ _No events._
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `messageaction` | `CustomEvent<unknown>` |  |
-| `modelchange` | `CustomEvent<unknown>` |  |
-| `search` | `CustomEvent<unknown>` |  |
-| `slashselect` | `CustomEvent<unknown>` |  |
-| `submit` | `CustomEvent<unknown>` |  |
-| `suggestionclick` | `CustomEvent<unknown>` |  |
-| `valuechange` | `CustomEvent<unknown>` |  |
-| `voice` | `CustomEvent<unknown>` |  |
+| `messageaction` | `CustomEvent<{ messageId: string; action: "copy" \| "like" \| "dislike" \| "regenerate" \| "edit" }>` | An action button on a message was clicked. |
+| `modelchange` | `CustomEvent<{ modelId: string }>` | The header model switcher changed. |
+| `search` | `CustomEvent<Record<string, never>>` | The Search button was clicked. |
+| `slashselect` | `CustomEvent<{ command: { id: string; label: string; description?: undefined \| string; category?: undefined \| string } }>` | A slash command was chosen from the palette. |
+| `submit` | `CustomEvent<{ value: string; attachments: { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[] }>` | User submitted a message. |
+| `suggestionclick` | `CustomEvent<{ value: string }>` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
+| `valuechange` | `CustomEvent<{ value: string }>` | Fired on every input change. |
+| `voice` | `CustomEvent<Record<string, never>>` | The Mic / voice button was clicked. |
 
 ---
 
@@ -306,17 +306,17 @@ _No events._
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `conversationselect` | `CustomEvent<unknown>` |  |
-| `messageaction` | `CustomEvent<unknown>` |  |
-| `modelchange` | `CustomEvent<unknown>` |  |
-| `newchat` | `CustomEvent<unknown>` |  |
-| `search` | `CustomEvent<unknown>` |  |
-| `sidebartoggle` | `CustomEvent<unknown>` |  |
-| `slashselect` | `CustomEvent<unknown>` |  |
-| `submit` | `CustomEvent<unknown>` |  |
-| `suggestionclick` | `CustomEvent<unknown>` |  |
-| `valuechange` | `CustomEvent<unknown>` |  |
-| `voice` | `CustomEvent<unknown>` |  |
+| `conversationselect` | `CustomEvent<{ id: string }>` | A conversation was selected in the sidebar. |
+| `messageaction` | `CustomEvent<{ messageId: string; action: "copy" \| "like" \| "dislike" \| "regenerate" \| "edit" }>` | An action button on a message was clicked. |
+| `modelchange` | `CustomEvent<{ modelId: string }>` | The header model switcher changed. |
+| `newchat` | `CustomEvent<Record<string, never>>` | The "New chat" button was clicked. |
+| `search` | `CustomEvent<Record<string, never>>` | The Search button was clicked. |
+| `sidebartoggle` | `CustomEvent<{ collapsed: false \| true }>` | The sidebar was collapsed or expanded. |
+| `slashselect` | `CustomEvent<{ command: { id: string; label: string; description?: undefined \| string; category?: undefined \| string } }>` | A slash command was chosen from the palette. |
+| `submit` | `CustomEvent<{ value: string; attachments: { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[] }>` | User submitted a message. |
+| `suggestionclick` | `CustomEvent<{ value: string }>` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
+| `valuechange` | `CustomEvent<{ value: string }>` | Fired on every input change. |
+| `voice` | `CustomEvent<Record<string, never>>` | The Mic / voice button was clicked. |
 
 ---
 
@@ -381,9 +381,9 @@ _No events._
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `newchat` | `CustomEvent<unknown>` |  |
-| `select` | `CustomEvent<unknown>` |  |
-| `togglesidebar` | `CustomEvent<unknown>` |  |
+| `newchat` | `CustomEvent<Record<string, never>>` | The "New chat" button was clicked. |
+| `select` | `CustomEvent<{ id: string }>` | A conversation was selected. |
+| `togglesidebar` | `CustomEvent<Record<string, never>>` | The sidebar toggle was clicked. |
 
 ---
 
@@ -555,12 +555,12 @@ _No events._
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `search` | `CustomEvent<undefined>` | The Search (Globe) toolbar button was clicked. |
+| `search` | `CustomEvent<Record<string, never>>` | The Search (Globe) toolbar button was clicked. |
 | `slashselect` | `CustomEvent<{ command: { id: string; label: string; description?: undefined \| string; category?: undefined \| string } }>` | A slash command was chosen from the palette. |
 | `submit` | `CustomEvent<{ value: string; attachments: { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[] }>` | The user submitted the prompt (Enter or send button) with its attachments. |
 | `suggestionclick` | `CustomEvent<{ value: string }>` | A suggestion was clicked while `suggestion-mode="fill"`. |
 | `valuechange` | `CustomEvent<{ value: string }>` | The input text changed (fires on every keystroke). |
-| `voice` | `CustomEvent<undefined>` | The Voice (Mic) toolbar button was clicked. |
+| `voice` | `CustomEvent<Record<string, never>>` | The Voice (Mic) toolbar button was clicked. |
 
 ---
 

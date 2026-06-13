@@ -302,43 +302,43 @@
     "events": [
       {
         "name": "messageaction",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }",
+        "description": "An action button on a message was clicked."
       },
       {
         "name": "modelchange",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ modelId: string }",
+        "description": "The header model switcher changed."
       },
       {
         "name": "search",
-        "detail": "unknown",
-        "description": ""
+        "detail": "Record<string, never>",
+        "description": "The Search button was clicked."
       },
       {
         "name": "slashselect",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
+        "description": "A slash command was chosen from the palette."
       },
       {
         "name": "submit",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
+        "description": "User submitted a message."
       },
       {
         "name": "suggestionclick",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ value: string }",
+        "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`)."
       },
       {
         "name": "valuechange",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ value: string }",
+        "description": "Fired on every input change."
       },
       {
         "name": "voice",
-        "detail": "unknown",
-        "description": ""
+        "detail": "Record<string, never>",
+        "description": "The Mic / voice button was clicked."
       }
     ],
     "composedFrom": [
@@ -602,58 +602,58 @@
     "events": [
       {
         "name": "conversationselect",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ id: string }",
+        "description": "A conversation was selected in the sidebar."
       },
       {
         "name": "messageaction",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }",
+        "description": "An action button on a message was clicked."
       },
       {
         "name": "modelchange",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ modelId: string }",
+        "description": "The header model switcher changed."
       },
       {
         "name": "newchat",
-        "detail": "unknown",
-        "description": ""
+        "detail": "Record<string, never>",
+        "description": "The \"New chat\" button was clicked."
       },
       {
         "name": "search",
-        "detail": "unknown",
-        "description": ""
+        "detail": "Record<string, never>",
+        "description": "The Search button was clicked."
       },
       {
         "name": "sidebartoggle",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ collapsed: false | true }",
+        "description": "The sidebar was collapsed or expanded."
       },
       {
         "name": "slashselect",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
+        "description": "A slash command was chosen from the palette."
       },
       {
         "name": "submit",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
+        "description": "User submitted a message."
       },
       {
         "name": "suggestionclick",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ value: string }",
+        "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`)."
       },
       {
         "name": "valuechange",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ value: string }",
+        "description": "Fired on every input change."
       },
       {
         "name": "voice",
-        "detail": "unknown",
-        "description": ""
+        "detail": "Record<string, never>",
+        "description": "The Mic / voice button was clicked."
       }
     ],
     "composedFrom": [
@@ -910,18 +910,18 @@
     "events": [
       {
         "name": "newchat",
-        "detail": "unknown",
-        "description": ""
+        "detail": "Record<string, never>",
+        "description": "The \"New chat\" button was clicked."
       },
       {
         "name": "select",
-        "detail": "unknown",
-        "description": ""
+        "detail": "{ id: string }",
+        "description": "A conversation was selected."
       },
       {
         "name": "togglesidebar",
-        "detail": "unknown",
-        "description": ""
+        "detail": "Record<string, never>",
+        "description": "The sidebar toggle was clicked."
       }
     ],
     "composedFrom": [
@@ -1504,7 +1504,7 @@
     "events": [
       {
         "name": "search",
-        "detail": "undefined",
+        "detail": "Record<string, never>",
         "description": "The Search (Globe) toolbar button was clicked."
       },
       {
@@ -1529,7 +1529,7 @@
       },
       {
         "name": "voice",
-        "detail": "undefined",
+        "detail": "Record<string, never>",
         "description": "The Voice (Mic) toolbar button was clicked."
       }
     ],
