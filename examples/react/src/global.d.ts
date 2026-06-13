@@ -13,3 +13,6 @@
  * as an opaque module so the build doesn't pull in the Solid sources.
  */
 declare module '@kitnai/chat/elements';
+
+/** Allow plain `.css` side-effect imports (e.g. `import './App.css'`). */
+declare module '*.css';
