@@ -57,7 +57,7 @@ export type AsTag = string | ((props: Record<string, any>) => JSX.Element);
 
 /**
  * Polymorphic element. `as` may be a tag name (default 'span') or a render
- * function that receives the forwarded props (Kobalte-compatible `as={fn}`).
+ * function that receives the forwarded props (render-prop style `as={fn}`).
  * Uses splitProps (NOT destructuring) so reactive forwarded props such as
  * aria-expanded stay reactive. All extra props (incl. `ref`, event handlers,
  * aria-*) are forwarded. `children` is left in `rest` so it forwards naturally.

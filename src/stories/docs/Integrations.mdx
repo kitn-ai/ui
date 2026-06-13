@@ -30,6 +30,8 @@ Scalar values (strings, numbers, booleans) work as attributes: `placeholder`, `l
 
 Import the element bundle once as a side-effect (it registers all `kitn-*` custom elements), then set properties and listen for events in a `<script type="module">` block.
 
+> **Want the whole shell in one tag?** `<kitn-chat-workspace>` bundles the conversation-list sidebar, the drag-to-resize handle, and the full chat thread together. Set `conversations`, `messages`, and optionally `models` as properties; listen for `conversationselect` and `submit`. See the <a href="?path=/docs/web-components-kitn-chat-workspace--docs">kitn-chat-workspace story</a> and the <a href="https://github.com/kitn-ai/kitn-chat/blob/main/docs/web-components.md#kitn-chat-workspace--kitnchatworkspace">web-components.md reference</a> for the full API.
+
 ```html
 <!DOCTYPE html>
 <html>

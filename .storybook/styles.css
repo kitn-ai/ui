@@ -11,11 +11,18 @@
 
 /* Storybook-only base reset (NOT shipped in theme.css). */
 @layer base {
-  * { @apply border-border outline-ring/50; }
+  * { @apply border-border; }
   body {
     @apply bg-background text-foreground;
     font-family: system-ui, -apple-system, sans-serif;
     margin: 0;
+  }
+  /* Mirror the shipped focus ring (src/elements/styles.css) so dev/docs match
+     production: one blue, token-driven :focus-visible outline on every
+     focusable element. Keeps Storybook honest about what real apps render. */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
   }
 }
 

@@ -3,6 +3,7 @@
 import './conversation-list';
 import './prompt-input';
 import './chat';
+import './chat-workspace';
 // Composable leaf elements (spike — see docs/handoff + examples/composable)
 import './thinking-bar';
 import './model-switcher';

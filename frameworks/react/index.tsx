@@ -111,6 +111,60 @@ export const KitnChatScopePicker = createKitnComponent<KitnChatScopePickerProps>
   { onScopechange: 'scopechange' },
 );
 
+export interface KitnChatWorkspaceProps extends KitnBaseProps {
+  /** Pre-bucketed conversation groups for the sidebar. Set as a JS property. */
+  groups: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[];
+  /** Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. */
+  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
+  /** Id of the open conversation, highlighted in the sidebar. */
+  activeId?: string;
+  /** The active conversation's message thread, newest last. Set as a JS property. */
+  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit")[] }[];
+  value?: string;
+  placeholder?: string;
+  loading?: boolean;
+  suggestions?: string[];
+  suggestionMode?: "submit" | "fill";
+  proseSize?: "xs" | "sm" | "base" | "lg";
+  codeTheme?: string;
+  codeHighlight?: boolean;
+  chatTitle?: string;
+  models?: { id: string; name: string; provider?: string }[];
+  currentModel?: string;
+  context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; estimatedCost?: number };
+  scrollButton?: boolean;
+  search?: boolean;
+  voice?: boolean;
+  slashCommands?: { id: string; label: string; description?: string; category?: string }[];
+  slashActiveIds?: string[];
+  slashCompact?: boolean;
+  /** Sidebar default width as a percent of the workspace (default 22). */
+  sidebarWidth?: number;
+  /** Sidebar min width in px (default 200). */
+  sidebarMinWidth?: number;
+  /** Sidebar max width in px (default 420). */
+  sidebarMaxWidth?: number;
+  /** Initial collapsed state of the sidebar (default false). */
+  sidebarCollapsed?: boolean;
+  onConversationselect?: (event: CustomEvent<unknown>) => void;
+  onMessageaction?: (event: CustomEvent<unknown>) => void;
+  onModelchange?: (event: CustomEvent<unknown>) => void;
+  onNewchat?: (event: CustomEvent<unknown>) => void;
+  onSearch?: (event: CustomEvent<unknown>) => void;
+  onSidebartoggle?: (event: CustomEvent<unknown>) => void;
+  onSlashselect?: (event: CustomEvent<unknown>) => void;
+  onSubmit?: (event: CustomEvent<unknown>) => void;
+  onSuggestionclick?: (event: CustomEvent<unknown>) => void;
+  onValuechange?: (event: CustomEvent<unknown>) => void;
+  onVoice?: (event: CustomEvent<unknown>) => void;
+}
+
+export const KitnChatWorkspace = createKitnComponent<KitnChatWorkspaceProps>(
+  'kitn-chat-workspace',
+  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed"],
+  { onConversationselect: 'conversationselect', onMessageaction: 'messageaction', onModelchange: 'modelchange', onNewchat: 'newchat', onSearch: 'search', onSidebartoggle: 'sidebartoggle', onSlashselect: 'slashselect', onSubmit: 'submit', onSuggestionclick: 'suggestionclick', onValuechange: 'valuechange', onVoice: 'voice' },
+);
+
 export interface KitnCheckpointProps extends KitnBaseProps {
   /** Optional text beside the icon. */
   label?: string;

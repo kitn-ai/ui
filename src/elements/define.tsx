@@ -88,7 +88,7 @@ type FacadeComponent<P, E> = (props: P, ctx: KitnElementContext<E>) => JSX.Eleme
  * - Renders into the element's shadow root (solid-element's default), with the
  *   compiled kit CSS injected via a `<style>` so Tailwind classes apply inside.
  * - Creates a portal mount node inside the shadow root and provides it through
- *   `ChatConfig` so Kobalte overlays stay inside the shadow root.
+ *   `ChatConfig` so the kit's overlays stay inside the shadow root.
  * - Gives the facade a `dispatch(type, detail)` helper that fires non-bubbling,
  *   non-composed CustomEvents off the host element (consumers listen directly on
  *   the element, so bubbling/composed would only cause consumer collisions).
