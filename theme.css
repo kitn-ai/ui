@@ -20,7 +20,7 @@
   --color-secondary: var(--kitn-color-secondary, hsl(240 4.8% 95.9%));
   --color-secondary-foreground: var(--kitn-color-secondary-foreground, hsl(240 5.9% 10%));
   --color-muted: var(--kitn-color-muted, hsl(240 4.8% 95.9%));
-  --color-muted-foreground: var(--kitn-color-muted-foreground, hsl(240 3.8% 46.1%));
+  --color-muted-foreground: var(--kitn-color-muted-foreground, hsl(240 3.8% 43%));
   --color-accent: var(--kitn-color-accent, hsl(240 4.8% 95.9%));
   --color-accent-foreground: var(--kitn-color-accent-foreground, hsl(240 5.9% 10%));
   --color-destructive: var(--kitn-color-destructive, hsl(0 84.2% 60.2%));
@@ -32,6 +32,16 @@
 
   /* Inline `code` accent. Blue text on a translucent blue chip. */
   --color-code-foreground: var(--kitn-color-code-foreground, hsl(224.3 76.3% 48%));
+
+  /* Tool/status chip hues. Each chip is hue text over a 15% translucent fill of
+     the SAME hue (set in tool.tsx). The bare hue is too light to reach WCAG AA
+     (4.5:1) on the faint fill in LIGHT mode, so the light values are darkened;
+     dark mode keeps brighter hues for AA on the dark fill. Override via
+     --kitn-color-tool-* to retheme. */
+  --color-tool-blue: var(--kitn-color-tool-blue, hsl(217 91% 38%));
+  --color-tool-amber: var(--kitn-color-tool-amber, hsl(38 92% 28%));
+  --color-tool-green: var(--kitn-color-tool-green, hsl(142 71% 26%));
+  --color-tool-red: var(--kitn-color-tool-red, hsl(0 72% 42%));
 
   --radius: var(--kitn-radius, 0.6rem);
   --radius-sm: calc(var(--radius) - 4px);
@@ -90,6 +100,12 @@
   --color-ring: var(--kitn-color-ring, hsl(45 5% 72%));
   --color-sidebar: var(--kitn-color-sidebar, hsl(50 2% 7%));
   --color-code-foreground: var(--kitn-color-code-foreground, hsl(213 94% 78%));
+
+  /* Tool/status chip hues — dark mode. Brighter hues reach AA on the dark fill. */
+  --color-tool-blue: var(--kitn-color-tool-blue, hsl(217 91% 70%));
+  --color-tool-amber: var(--kitn-color-tool-amber, hsl(38 92% 50%));
+  --color-tool-green: var(--kitn-color-tool-green, hsl(142 71% 45%));
+  --color-tool-red: var(--kitn-color-tool-red, hsl(0 84% 70%));
 }
 
 /* Self-contained markdown styling — replaces the typography plugin's `prose`.

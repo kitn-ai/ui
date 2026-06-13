@@ -54,10 +54,10 @@ export function ConversationList(props: ConversationListProps) {
       </div>
       <div class="px-3 pb-2">
         <div class="flex items-center gap-2 rounded-md bg-muted/40 px-2.5 py-1.5">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted-foreground/60"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted-foreground"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" value={searchQuery()} onInput={(e) => setSearchQuery(e.currentTarget.value)} placeholder="Search chats..."
             aria-label="Search chats"
-            class="bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground/60 rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-full" />
+            class="bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-full" />
         </div>
       </div>
       <ScrollArea class="flex-1 px-2">
