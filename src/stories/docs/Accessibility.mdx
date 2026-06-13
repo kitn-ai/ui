@@ -1,0 +1,119 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Accessibility" />
+
+# Accessibility
+
+`@kitnai/chat` targets **WCAG 2.1 Level AA**. The kit is audited with [axe-core](https://github.com/dequelabs/axe-core) (via `scripts/audit-a11y.mjs`) and ships with **0 axe violations** in both light and dark modes. Keyboard navigation is verified with a Playwright browser test suite.
+
+This page describes the accessibility posture, the keyboard model, known limitations, and what you need to do as an integrator.
+
+---
+
+## Color contrast
+
+All text and UI chrome meet WCAG 2.1 AA contrast requirements (4.5:1 for body text, 3:1 for large text and UI components) in the default light and dark palettes.
+
+The `theme` attribute on every element (`light | dark | auto`) controls which token set loads. `auto` (the default) follows the OS `prefers-color-scheme` media query, so users who configure dark mode at the OS level get it automatically. Override either set with `--kitn-color-*` tokens — if you do, verify contrast yourself; the kit cannot audit tokens it does not control.
+
+---
+
+## Keyboard operability
+
+Every interactive control is reachable and operable without a mouse.
+
+### Focus order
+
+Tab moves through all focusable controls in DOM order. The prompt textarea, send button, attachment button, toolbar controls (search, mic), header controls (model switcher, context meter), message action buttons, suggestion chips, and conversation list items are all included. Focus rings are always visible — they are not hidden on `:focus`, only on `:focus-visible`.
+
+### Dropdowns and select menus (ModelSwitcher, ChatScopePicker, …)
+
+| Key | Action |
+|---|---|
+| Enter / Space / ↓ | Open the menu |
+| ↑ / ↓ | Move between items |
+| Home / End | Jump to first / last item |
+| Typeahead (letter keys) | Jump to the first item starting with that letter |
+| Enter / Space | Select the focused item |
+| Esc | Close without selecting; focus returns to the trigger |
+| Tab | Close and move focus past the trigger |
+
+Focus always returns to the trigger element after the menu closes, whether closed by Esc, selection, or a click outside.
+
+### Collapsible panels (Reasoning, Tool calls, …)
+
+| Key | Action |
+|---|---|
+| Enter / Space | Toggle expanded / collapsed |
+| Tab | Move into the expanded content |
+| Esc | Collapse (if focused inside) |
+
+### Slash command palette
+
+Typing `/` in the prompt input opens the command palette.
+
+| Key | Action |
+|---|---|
+| ↑ / ↓ | Navigate items |
+| Home / End | Jump to first / last item |
+| Enter / Tab | Select the focused command (inserts `/label ` into the input with caret at end) |
+| Esc | Close the palette; focus stays in the input |
+
+### Conversation list
+
+| Key | Action |
+|---|---|
+| ↑ / ↓ | Move between conversations |
+| Enter | Select the focused conversation |
+| Tab | Move through action buttons (if any) |
+
+---
+
+## Accessible names on icon buttons
+
+Every icon-only button (attach, send, mic, search, copy, like, dislike, regenerate, close) carries an accessible name via `aria-label`. Screen readers announce the button's purpose rather than "button" or nothing. Labels use plain language: "Send message", "Attach file", "Copy message", "Thumbs up", and so on.
+
+---
+
+## Tooltips and hover cards
+
+Tooltips and hover cards (on sources, context meter, etc.) are dismissable and persistent per WCAG 2.1 SC 1.4.13 (Content on Hover or Focus):
+
+- They appear on both hover and keyboard focus.
+- Moving the pointer over the tooltip/card content keeps it visible (it does not vanish when the pointer leaves the trigger).
+- They can be dismissed with **Esc** without moving focus.
+
+---
+
+## ARIA landmarks and live regions
+
+- The message list is marked as a log region (`role="log"`, `aria-live="polite"`) so streaming tokens are announced to screen readers without being intrusive.
+- The prompt area is labelled; the textarea carries its placeholder as an accessible name fallback.
+- The conversation sidebar is a navigation landmark (`<nav>`).
+
+---
+
+## Shadow DOM and screen readers
+
+All elements render inside Shadow DOM. Modern screen readers (NVDA + Chrome, JAWS + Chrome, VoiceOver + Safari/Chrome) pierce Shadow DOM correctly. Accessible names, roles, and live regions work as expected.
+
+---
+
+## Audit tooling
+
+Accessibility is verified with:
+
+- **axe-core** (`scripts/audit-a11y.mjs`) — automated rule checks in both light and dark themes. Zero violations at the time of build.
+- **Playwright keyboard tests** — 21-scenario browser test suite covering focus order, dropdown/collapsible/palette keyboard nav, ArrowUp/Down/Home/End/typeahead/Enter/Escape/Tab, and focus-return after close.
+
+The kit does not carry a "WCAG AA certified" certification — no automated tool can certify that. What it does carry is a targeted AA design, an axe-core clean bill, and a passing Playwright keyboard suite.
+
+---
+
+## What integrators need to do
+
+1. **Do not hide focus rings.** The kit renders visible focus rings via `:focus-visible`. Do not add `outline: none` or `outline: 0` in your host-page CSS targeting `*` or the element host.
+2. **Verify contrast if you override tokens.** Use a contrast checker after overriding any `--kitn-color-*` token.
+3. **Provide meaningful conversation titles.** The conversation list announces the `title` field to screen readers. "Chat 1" is less useful than "React integration help".
+4. **Set a meaningful `placeholder`.** The textarea placeholder doubles as an accessible name when no label is associated.
+5. **Check your theme choice.** Using `theme="light"` in a page the user has set to dark mode (or vice versa) can create contrast mismatches between kit components and host-page content. `theme="auto"` (the default) avoids this.

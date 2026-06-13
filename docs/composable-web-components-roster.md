@@ -222,4 +222,4 @@ For hosts building a fully custom stream who still want the scroll-to-bottom beh
 - **Phase 4 — indicators/leaves:** `<kitn-loader>`, `<kitn-text-shimmer>`, `<kitn-image>`, `<kitn-checkpoint>`, `<kitn-message-skills>`, `<kitn-source(-list)>`, `<kitn-response-stream>`, `<kitn-empty>`, `<kitn-chain-of-thought>` (+ `<kitn-thinking-bar>` 🔬, `<kitn-attachments>` 🔬).
 - **Cross-cutting (do alongside):** apply `flag()` to existing `<kitn-chat>` booleans; fix `theme.css` `@import` 404; emit a custom-elements-manifest → React/Vue wrappers + `HTMLElementTagNameMap` types.
 
-Each phase ships independently; the bundle grows ~1–3 KB gzip per element (Solid/Kobalte already shared). Full roster projected ~100–120 KB gzip.
+Each phase ships independently; the bundle grows ~1–3 KB gzip per element. Full roster projected ~100–120 KB gzip (projection from planning). **Actual shipped main chunk: ~80 KB gzip** after the Kobalte→DIY replacement removed ~23 KB (102.61 KB → 79.61 KB; see the 2026-06-12 handoff UPDATE for details).

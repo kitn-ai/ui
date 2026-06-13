@@ -6,7 +6,7 @@ Comprehensive resume doc for the `spike/composable-web-components` branch. Super
 
 ## TL;DR
 
-We turned the kit's SolidJS primitives into a full set of **composable, framework-agnostic web components** (compose in plain HTML / React / Vue, not just the batteries-included `<kitn-chat>`). 28 element tags total, all on the branch, **nothing merged** — the publish firewall holds (npm publishes only when this branch merges to `main` → a release-please PR is merged). 27 commits. Bundle ~**100 KB gzip** (main chunk).
+We turned the kit's SolidJS primitives into a full set of **composable, framework-agnostic web components** (compose in plain HTML / React / Vue, not just the batteries-included `<kitn-chat>`). 28 element tags total, all on the branch, **nothing merged** — the publish firewall holds (npm publishes only when this branch merges to `main` → a release-please PR is merged). 27 commits. Bundle ~**80 KB gzip** (main chunk, after Kobalte→DIY — see UPDATE below).
 
 The build-out is done. Remaining work is: **Vue wrappers** (optional), a **508/WCAG accessibility pass** (real violations found — see below), **Storybook stories + full docs** for the new elements, and polishing. The last few sessions also did a deep **theming overhaul** (namespaced `--kitn-*` override surface, typography tokens, dark-palette harmonization) and a **showcase redesign**.
 

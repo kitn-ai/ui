@@ -2,15 +2,18 @@
 
 ## Overview
 
-`@kitnai/chat` ships three framework-agnostic custom elements built on the SolidJS kit:
+`@kitnai/chat` ships 27 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
 | `<kitn-chat>` | Full chat UI — message list plus prompt input |
 | `<kitn-conversation-list>` | Sidebar conversation browser with group support |
 | `<kitn-prompt-input>` | Standalone text-input area with send button |
+| + 24 composable primitives | See the full roster below |
 
 Each element renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the element bundle — the host does not need SolidJS.
+
+The authoritative machine-readable API is the **Custom Elements Manifest** at `dist/custom-elements.json` (`customElements` field in `package.json`). The human- and agent-readable summary files are `llms.txt` (orientation) and `llms-full.txt` (full per-element reference, generated from the manifest — do not edit by hand).
 
 ---
 
@@ -18,13 +21,13 @@ Each element renders into its own **Shadow DOM** so the host page's CSS cannot l
 
 - **Controlled, not stateful.** The host owns the data. You push it in via JS **properties** (`el.messages = …`, `el.conversations = …`), the element pushes interactions out via **events**, and you update the properties in response. The element keeps no message store of its own — to stream a reply you keep reassigning `el.messages`.
 - **Data in = properties, config = attributes, data out = events.** Object/array data (messages, models, context) must be set as properties; simple config (`theme`, `prose-size`, `search`) also works as attributes.
-- **Opt-in by data/flags.** Features appear when you give them data: pass `models` → a model switcher; pass `context` → a token meter; set `search`/`voice` → those buttons. Omit them → they don't render. Re-theme with `--kitn-color-*` tokens.
+- **Opt-in by data/flags.** Features appear when you give them data: pass `models` → a model switcher; pass `context` → a token meter; set `search`/`voice` → those buttons. Omit them → they don't render. Re-theme with `--kitn-*` tokens.
 
 ### What `<kitn-chat>` includes vs. the primitive layer
 
 `<kitn-chat>` is the **drop-in** layer. Per message it renders: Markdown + code highlighting, **reasoning** blocks, **tool-call** panels, **attachments**, and **action buttons** (copy/like/dislike/regenerate). It also offers the header (title + model switcher + context meter), a scroll-to-bottom button, suggestions, and the input toolbar.
 
-Some kit features are **primitive-only** — not surfaced by the web component: **ChainOfThought**, **FeedbackBar**, **ThinkingBar / TextShimmer** (animated "thinking"), **VoiceInput**, **FileUpload**, **SlashCommand**. If you need those, custom layout/placement, or anything the props don't cover, **compose the SolidJS primitives directly** (`import { … } from '@kitnai/chat'` — everything is exported; see the Solid example). No forking required: tune via props/tokens, or drop to the primitive layer.
+Some kit features are **primitive-only** — not surfaced by the web component: **ChainOfThought**, **FeedbackBar**, **ThinkingBar / TextShimmer** (animated "thinking"), **VoiceInput**, **FileUpload**, **SlashCommand**. If you need those, custom layout/placement, or anything the props don't cover, **compose the SolidJS primitives directly** (`import { … } from '@kitnai/chat'` — everything is exported). No forking required: tune via props/tokens, or drop to the primitive layer.
 
 ---
 
@@ -40,13 +43,13 @@ Internally this runs `build:css` (compiles Tailwind to `src/elements/compiled.cs
 
 | File | Format | Notes |
 |------|--------|-------|
-| `dist/kitn-chat.es.js` | ES module | The entry. ~280 KB; loads on-demand chunks (code highlighting, etc.) lazily |
+| `dist/kitn-chat.es.js` | ES module | Main entry. ~80 KB gzip; lazy chunks for code highlighting load on demand |
 
 The build is **ES-module only** by design. A UMD/IIFE build cannot code-split, so it would have to inline every lazy chunk (all the Shiki syntax-highlighting languages) into one multi-MB file. The ES build keeps those chunks lazy and is loadable directly via `<script type="module">` in every modern browser.
 
 ### Register the elements
 
-Import the ES module as a side-effect. It registers all three custom elements via `customElements.define`:
+Import the ES module as a side-effect. It registers all 27 custom elements via `customElements.define`:
 
 ```js
 import '@kitnai/chat/elements';
@@ -105,7 +108,7 @@ A [Custom Elements Manifest](https://github.com/webcomponents/custom-elements-ma
 Typed wrappers are generated for every element under `@kitnai/chat/react` (React is an optional peer dependency). They set rich data as DOM **properties** (so arrays/objects pass through correctly) and expose CustomEvents as `on<Event>` props:
 
 ```tsx
-import { KitnChat, KitnMessage } from '@kitnai/chat/react';
+import { KitnChat } from '@kitnai/chat/react';
 
 <KitnChat
   messages={messages}
@@ -119,50 +122,496 @@ Component names are the PascalCase of the tag (`kitn-chat` → `KitnChat`); even
 
 ---
 
-## `<kitn-chat>`
+## Full Element Reference (27 elements)
+
+Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, default `'auto'`). Array/object properties are marked with a `—` in the Attribute column — they **must** be set as JS properties.
+
+---
+
+### `<kitn-chat>` / `KitnChat`
 
 A complete chat interface: a scrolling message list (with Markdown rendering, reasoning blocks, tool call panels, and message action buttons) plus a prompt input area with a send button.
 
-### Properties
-
-All are set as JS **properties** (objects/arrays can't go through HTML attributes). Several are presence-based: provide the data and the feature appears; omit it and it doesn't.
-
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `messages` | — | `ChatMessage[]` | `[]` | The full list of messages to display |
-| `value` | `value` | `string` | `undefined` | Controlled input value; omit for uncontrolled |
+| `messages` | — | `ChatMessage[]` | `[]` | The full message thread to render, newest last |
+| `value` | `value` | `string` | — | Controlled input value; omit for uncontrolled |
 | `placeholder` | `placeholder` | `string` | `'Send a message...'` | Textarea placeholder text |
-| `loading` | `loading` | `boolean` | `false` | Disables/locks the prompt input. **Does not render a thinking animation** — convey progress by streaming `messages` |
-| `suggestions` | — | `string[]` | `undefined` | Suggestion chips above the input; clicking one fills the input + fires `suggestionclick` |
-| `theme` | `theme` | `'light' \| 'dark' \| 'auto'` | `'auto'` | `auto` follows the OS `prefers-color-scheme` |
-| `proseSize` | `prose-size` | `ProseSize` | `'base'` | Markdown/text sizing (`'xs'`, `'sm'`, `'base'`, `'lg'`) |
+| `loading` | `loading` | `boolean` | `false` | Disables/locks the prompt input while awaiting a reply |
+| `suggestions` | — | `string[]` | — | Starter prompts shown above the input when the thread is empty; clicking one follows `suggestionMode` |
+| `suggestionMode` | `suggestion-mode` | `'submit' \| 'fill'` | `'submit'` | `'submit'` sends immediately; `'fill'` places the text in the input |
+| `theme` | `theme` | `'light' \| 'dark' \| 'auto'` | `'auto'` | `auto` follows `prefers-color-scheme` |
+| `proseSize` | `prose-size` | `'xs' \| 'sm' \| 'base' \| 'lg'` | `'sm'` | Markdown/text sizing |
 | `codeTheme` | `code-theme` | `string` | `'github-dark-dimmed'` | Shiki syntax-highlight theme name |
 | `codeHighlight` | `code-highlight` | `boolean` | `true` | `false` → plain code blocks, no Shiki loaded |
-| `chatTitle` | `chat-title` | `string` | `undefined` | Header title. The header appears when `chatTitle`, `models`, or `context` is set |
-| `models` | — | `ModelOption[]` | `undefined` | Shows a **ModelSwitcher** in the header; fires `modelchange` |
-| `currentModel` | `current-model` | `string` | `undefined` | Selected model id |
-| `context` | — | `{ usedTokens; maxTokens; inputTokens; outputTokens; estimatedCost }` | `undefined` | Shows the **Context** token-usage meter in the header |
+| `chatTitle` | `chat-title` | `string` | — | Header title (header renders when `chatTitle`, `models`, or `context` is set) |
+| `models` | — | `ModelOption[]` | — | Shows a ModelSwitcher in the header; fires `modelchange` |
+| `currentModel` | `current-model` | `string` | — | Selected model id (pairs with `models`) |
+| `context` | — | `ContextData` | — | Shows the Context token-usage meter in the header |
 | `scrollButton` | `scroll-button` | `boolean` | `true` | Built-in scroll-to-bottom button |
 | `search` | `search` | `boolean` | `false` | Show a Search button in the input toolbar; fires `search` |
 | `voice` | `voice` | `boolean` | `false` | Show a Mic button in the input toolbar; fires `voice` |
+| `slashCommands` | — | `SlashCommand[]` | — | When set, typing `/` opens the command palette; fires `slashselect` |
+| `slashActiveIds` | — | `string[]` | — | Command ids to highlight as active in the palette |
+| `slashCompact` | `slash-compact` | `boolean` | `false` | Single-line palette rows |
 
-The input always has a **📎 attach** button: picked files are staged as removable previews (images show a thumbnail, other files an icon) and arrive on the `submit` event as `attachments`.
+**Events:**
 
-### Events
-
-Events are non-bubbling `CustomEvent`s — listen directly on the element.
-
-| Event | `detail` shape | Description |
-|-------|---------------|-------------|
-| `submit` | `{ value: string, attachments: AttachmentData[] }` | User submitted a message (with any staged attachments) |
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `submit` | `{ value: string, attachments: AttachmentData[] }` | User submitted a message |
 | `valuechange` | `{ value: string }` | Fired on every input change |
-| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked (the input is also filled) |
+| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked |
 | `messageaction` | `{ messageId: string, action: ChatMessageAction }` | An action button on a message was clicked |
-| `modelchange` | `{ modelId: string }` | The header model switcher changed (only when `models` is set) |
-| `search` | _(none)_ | The Search button was clicked (only when `search` is set) — you implement the behavior |
-| `voice` | _(none)_ | The Mic button was clicked (only when `voice` is set) — you implement the behavior |
+| `modelchange` | `{ modelId: string }` | Header model switcher changed |
+| `slashselect` | `{ command: SlashCommand }` | A slash command was chosen from the palette |
+| `search` | — | Search button clicked |
+| `voice` | — | Mic button clicked |
 
-### `ChatMessage` schema
+---
+
+### `<kitn-conversation-list>` / `KitnConversationList`
+
+Sidebar panel listing conversations, optionally grouped. Emits events for navigation; does not manage its own state.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `conversations` | — | `ConversationSummary[]` | Flat list; the component buckets by recency. Ignored when `groups` is provided |
+| `groups` | — | `ConversationGroup[]` | Pre-bucketed groups with their own conversations; controls the grouping/headers |
+| `activeId` | `active-id` | `string` | ID of the currently selected conversation |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `select` | `{ id: string }` | User clicked a conversation |
+| `newchat` | — | User clicked "New chat" |
+| `togglesidebar` | — | User clicked the sidebar toggle |
+
+---
+
+### `<kitn-prompt-input>` / `KitnPromptInput`
+
+Standalone prompt input with a send button. Use when you want just the input area without the message list.
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `value` | `value` | `string` | — | Controlled input value; omit for uncontrolled |
+| `placeholder` | `placeholder` | `string` | `'Send a message...'` | Textarea placeholder |
+| `disabled` | `disabled` | `boolean` | `false` | Disables the textarea and send button |
+| `loading` | `loading` | `boolean` | `false` | Shows loading state (submit disabled) |
+| `suggestions` | — | `string[]` | — | Suggestion chips shown above the input |
+| `suggestionMode` | `suggestion-mode` | `'submit' \| 'fill'` | `'submit'` | What clicking a suggestion does |
+| `slashCommands` | — | `SlashCommand[]` | — | When set, typing `/` opens the command palette |
+| `slashActiveIds` | — | `string[]` | — | Command ids to highlight as active |
+| `slashCompact` | `slash-compact` | `boolean` | `false` | Single-line palette rows |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `submit` | `{ value: string, attachments: AttachmentData[] }` | User submitted |
+| `valuechange` | `{ value: string }` | Fired on every input change |
+| `suggestionclick` | `{ value: string }` | Suggestion chip clicked (with `suggestion-mode="fill"`) |
+| `slashselect` | `{ command: SlashCommand }` | A slash command was chosen |
+
+---
+
+### `<kitn-message>` / `KitnMessage`
+
+A single message row: renders markdown/plain content, reasoning, tool calls, attachments, and action buttons from one message object.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `message` | — | `ChatMessage` | The full message object (preferred) |
+| `role` | `role` | `'user' \| 'assistant'` | Convenience when not passing a `message` object |
+| `content` | `content` | `string` | Convenience content (used when `message` is not set) |
+| `markdown` | `markdown` | `boolean` | Force markdown on/off (default on for assistant, off for user) |
+| `proseSize` | `prose-size` | `'xs' \| 'sm' \| 'base' \| 'lg'` | Text sizing |
+| `codeTheme` | `code-theme` | `string` | Shiki theme for code blocks |
+| `codeHighlight` | `code-highlight` | `boolean` | Disable syntax highlighting |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `messageaction` | `{ messageId: string, action: ChatMessageAction }` | An action button was clicked |
+
+---
+
+### `<kitn-markdown>` / `KitnMarkdown`
+
+Renders a markdown string with code highlighting.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `content` | `content` | `string` | The markdown source |
+| `proseSize` | `prose-size` | `'xs' \| 'sm' \| 'base' \| 'lg'` | Text sizing |
+| `codeTheme` | `code-theme` | `string` | Shiki theme for fenced code blocks |
+| `codeHighlight` | `code-highlight` | `boolean` | Disable syntax highlighting |
+
+No events.
+
+---
+
+### `<kitn-code-block>` / `KitnCodeBlock`
+
+A single syntax-highlighted code block with a copy button.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `code` | `code` | `string` | The source code to render |
+| `language` | `language` | `string` | Language grammar (e.g. `js`, `python`). Defaults to `tsx` |
+| `codeTheme` | `code-theme` | `string` | Shiki theme name |
+| `codeHighlight` | `code-highlight` | `boolean` | Disable syntax highlighting |
+| `proseSize` | `prose-size` | `'xs' \| 'sm' \| 'base' \| 'lg'` | Code text sizing |
+
+No events.
+
+---
+
+### `<kitn-reasoning>` / `KitnReasoning`
+
+Collapsible reasoning/thinking block with optional streaming auto-expand.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `text` | `text` | `string` | The reasoning text |
+| `label` | `label` | `string` | Trigger label |
+| `open` | `open` | `boolean` | Controlled open state |
+| `streaming` | `streaming` | `boolean` | While true, auto-expands; re-collapses when it flips false |
+| `markdown` | `markdown` | `boolean` | Render `text` as markdown |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `openchange` | `{ open: boolean }` | Open state changed |
+
+---
+
+### `<kitn-tool>` / `KitnTool`
+
+Tool-call panel showing a function call's type, state, input, and output.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `tool` | — | `ToolPart` | The tool-call to display |
+| `open` | `open` | `boolean` | Start expanded |
+
+No events.
+
+---
+
+### `<kitn-attachments>` / `KitnAttachments`
+
+Renders a list of file/document attachments in grid, inline, or list layouts.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `items` | — | `AttachmentData[]` | The attachments to render |
+| `variant` | `variant` | `'grid' \| 'inline' \| 'list'` | Layout style |
+| `hoverCard` | `hover-card` | `boolean` | Wrap each item in a hover card |
+| `removable` | `removable` | `boolean` | Show a remove button per item |
+| `showMediaType` | `show-media-type` | `boolean` | Show media type beneath the filename |
+| `emptyText` | `empty-text` | `string` | Text shown when `items` is empty |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `remove` | `{ id: string }` | A remove button was clicked |
+
+---
+
+### `<kitn-model-switcher>` / `KitnModelSwitcher`
+
+A dropdown that lets the user switch between available models.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `models` | — | `ModelOption[]` | The selectable models |
+| `currentModel` | `current-model` | `string` | Currently-selected model id (defaults to first model) |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `modelchange` | `{ modelId: string }` | A model was selected |
+
+---
+
+### `<kitn-context-meter>` / `KitnContextMeter`
+
+Token-usage meter showing used/max tokens and estimated cost.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `context` | — | `ContextData` | Token-usage data |
+
+No events.
+
+---
+
+### `<kitn-chain-of-thought>` / `KitnChainOfThought`
+
+Displays a list of reasoning steps as a collapsible chain-of-thought.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `steps` | — | `{ label: string; content?: string }[]` | The reasoning steps |
+
+No events.
+
+---
+
+### `<kitn-prompt-suggestions>` / `KitnPromptSuggestions`
+
+Suggestion chips or full-width rows. Can render plain strings or `{ label, value }` pairs.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `suggestions` | — | `string[] \| { label: string; value?: string }[]` | The suggestions |
+| `variant` | `variant` | `'outline' \| 'ghost' \| 'default'` | Chip style |
+| `block` | `block` | `boolean` | Full-width left-aligned rows |
+| `highlight` | `highlight` | `string` | Substring to highlight within each suggestion |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `select` | `{ value: string }` | A suggestion was clicked |
+
+---
+
+### `<kitn-source>` / `KitnSource`
+
+An inline citation link that opens a hover card with source details.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `href` | `href` | `string` | The URL this citation links to |
+| `label` | `label` | `string` | Trigger label (defaults to the domain) |
+| `headline` | `headline` | `string` | Hover-card headline |
+| `description` | `description` | `string` | Hover-card body text |
+| `showFavicon` | `show-favicon` | `boolean` | Show the source's favicon |
+
+No events.
+
+---
+
+### `<kitn-source-list>` / `KitnSourceList`
+
+Renders a list of sources using `<kitn-source>` internally.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `sources` | — | `SourceItem[]` | The sources to render |
+| `showFavicon` | `show-favicon` | `boolean` | Show favicons on all items |
+
+No events.
+
+---
+
+### `<kitn-feedback-bar>` / `KitnFeedbackBar`
+
+A thumbs-up / thumbs-down banner (e.g. "Was this helpful?").
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `barTitle` | `bar-title` | `string` | The banner label |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `helpful` | — | User clicked thumbs-up |
+| `nothelpful` | — | User clicked thumbs-down |
+| `close` | — | User dismissed the banner |
+
+---
+
+### `<kitn-file-upload>` / `KitnFileUpload`
+
+A drag-and-drop / click-to-pick file upload dropzone.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `multiple` | `multiple` | `boolean` | Allow multiple files (default true) |
+| `accept` | `accept` | `string` | `accept` attribute for the file picker (e.g. `image/*`) |
+| `disabled` | `disabled` | `boolean` | Disable the dropzone |
+| `label` | `label` | `string` | Default dropzone label |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `filesadded` | `{ files: File[] }` | Files were picked or dropped |
+
+---
+
+### `<kitn-voice-input>` / `KitnVoiceInput`
+
+A mic button that records audio and optionally transcribes it via a host-supplied function.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `transcribe` | — | `(audio: Blob) => Promise<string>` | Function-valued property: the host supplies a transcriber |
+| `disabled` | `disabled` | `boolean` | Disable the mic button |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `audiocaptured` | `{ blob: Blob }` | Raw audio captured (before transcription) |
+| `transcription` | `{ text: string }` | Transcription completed |
+
+---
+
+### `<kitn-loader>` / `KitnLoader`
+
+An animated loading indicator with 12 style variants.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `variant` | `variant` | `'circular' \| 'classic' \| 'pulse' \| 'pulse-dot' \| 'dots' \| 'typing' \| 'wave' \| 'bars' \| 'terminal' \| 'text-blink' \| 'text-shimmer' \| 'loading-dots'` | Animation style |
+| `size` | `size` | `'sm' \| 'md' \| 'lg'` | Loader size |
+| `text` | `text` | `string` | Label for text-based variants |
+
+No events.
+
+---
+
+### `<kitn-thinking-bar>` / `KitnThinkingBar`
+
+An animated "thinking" shimmer bar with an optional stop affordance.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `text` | `text` | `string` | The shimmering label (e.g. "Thinking…") |
+| `stoppable` | `stoppable` | `boolean` | Show a stop affordance |
+| `stopLabel` | `stop-label` | `string` | Label for the stop affordance |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `stop` | — | The stop affordance was clicked |
+
+---
+
+### `<kitn-text-shimmer>` / `KitnTextShimmer`
+
+Text with a shimmer animation — useful for "thinking" indicators.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `text` | `text` | `string` | The text to shimmer |
+| `as` | `as` | `string` | Element tag to render as (default `span`) |
+| `duration` | `duration` | `number` | Animation duration in seconds |
+| `spread` | `spread` | `number` | Gradient spread (5–45) |
+
+No events.
+
+---
+
+### `<kitn-response-stream>` / `KitnResponseStream`
+
+Renders a string or an `AsyncIterable<string>` with a reveal animation.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `text` | — | `string \| AsyncIterable<string>` | Text to stream (async iterables must be set as a JS property) |
+| `mode` | `mode` | `'typewriter' \| 'fade'` | Reveal animation |
+| `speed` | `speed` | `number` | Characters/segments per tick |
+| `as` | `as` | `string` | Element tag to render as |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `complete` | — | Streaming finished |
+
+---
+
+### `<kitn-image>` / `KitnImage`
+
+Renders a base64-encoded or raw-bytes image.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `base64` | `base64` | `string` | Base64-encoded image data (pair with `media-type`) |
+| `bytes` | — | `Uint8Array` | Raw image bytes (must be set as a JS property) |
+| `alt` | `alt` | `string` | Alt text |
+| `mediaType` | `media-type` | `string` | MIME type (default `image/png`) |
+
+No events.
+
+---
+
+### `<kitn-checkpoint>` / `KitnCheckpoint`
+
+A small button used to mark or navigate to a conversation checkpoint.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `label` | `label` | `string` | Optional text beside the icon |
+| `tooltip` | `tooltip` | `string` | Tooltip on hover |
+| `variant` | `variant` | `'default' \| 'outline' \| 'ghost'` | Visual button style |
+| `size` | `size` | `'sm' \| 'md' \| 'lg' \| 'icon' \| 'icon-sm'` | Button size |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `select` | — | The checkpoint was clicked |
+
+---
+
+### `<kitn-chat-scope-picker>` / `KitnChatScopePicker`
+
+A dropdown for filtering the chat to specific authors, tags, content type, or date range.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `availableAuthors` | — | `string[]` | Authors to offer as scope filters |
+| `availableTags` | — | `string[]` | Tags to offer as scope filters |
+| `currentLabel` | `current-label` | `string` | Label shown on the trigger for the active scope |
+
+**Events:**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `scopechange` | `{ filters: SearchFilters \| undefined }` | A scope was chosen (`undefined` filters = "All Content") |
+
+---
+
+### `<kitn-message-skills>` / `KitnMessageSkills`
+
+Displays active skills as badges on a message.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `skills` | — | `{ id: string; name: string }[]` | The active skills to badge |
+
+No events.
+
+---
+
+### `<kitn-empty>` / `KitnEmpty`
+
+Empty-state placeholder with a title and description.
+
+| Property | Attribute | Type | Notes |
+|----------|-----------|------|-------|
+| `emptyTitle` | `empty-title` | `string` | Title text (attribute is `empty-title` to avoid collision with the global `title` attribute) |
+| `description` | `description` | `string` | Description text |
+
+No events.
+
+---
+
+## ChatMessage schema
 
 ```ts
 interface ChatMessage {
@@ -172,10 +621,8 @@ interface ChatMessage {
   reasoning?: { text: string; label?: string };
   tools?: ToolPart[];
   attachments?: AttachmentData[];
-  actions?: ChatMessageAction[];
+  actions?: ('copy' | 'like' | 'dislike' | 'regenerate' | 'edit')[];
 }
-
-type ChatMessageAction = 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit';
 
 interface ToolPart {
   type: string;
@@ -194,202 +641,29 @@ interface AttachmentData {
   url?: string;
   title?: string;
 }
-```
 
-### Example
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <link rel="stylesheet" href="./theme.css" />
-</head>
-<body style="height: 100vh; margin: 0;">
-  <kitn-chat style="display: block; height: 100%;"></kitn-chat>
-
-  <script type="module">
-    import '@kitnai/chat/elements';
-
-    const chat = document.querySelector('kitn-chat');
-
-    chat.messages = [
-      {
-        id: '1',
-        role: 'assistant',
-        content: 'Hello! How can I help you today?',
-        actions: ['copy', 'like', 'dislike']
-      }
-    ];
-
-    chat.addEventListener('submit', async (e) => {
-      const userText = e.detail.value;
-
-      // Append user message
-      chat.messages = [
-        ...chat.messages,
-        { id: Date.now().toString(), role: 'user', content: userText }
-      ];
-      chat.loading = true;
-
-      // ... fetch assistant reply, then:
-      // chat.messages = [...chat.messages, { id: ..., role: 'assistant', content: reply }];
-      // chat.loading = false;
-    });
-
-    chat.addEventListener('messageaction', (e) => {
-      console.log('action:', e.detail.action, 'on message:', e.detail.messageId);
-    });
-  </script>
-</body>
-</html>
-```
-
----
-
-## `<kitn-conversation-list>`
-
-A sidebar panel that lists conversations, optionally grouped. Emits events for navigation and UI actions but does not manage its own state — the host is responsible for filtering and updating the lists.
-
-### Properties
-
-| Property | Type | Default | Notes |
-|----------|------|---------|-------|
-| `groups` | `ConversationGroup[]` | `[]` | Named groups for organising conversations |
-| `conversations` | `ConversationSummary[]` | `[]` | Flat list of all conversations |
-| `activeId` | `string` | `undefined` | ID of the currently selected conversation |
-
-### Events
-
-| Event | `detail` shape | Description |
-|-------|---------------|-------------|
-| `select` | `{ id: string }` | Fired when the user clicks a conversation |
-| `newchat` | _(none)_ | Fired when the user clicks the "New chat" button |
-| `togglesidebar` | _(none)_ | Fired when the user clicks the sidebar toggle button |
-
-### `ConversationGroup` and `ConversationSummary` schemas
-
-```ts
-interface ConversationGroup {
+interface ModelOption {
   id: string;
-  userId?: string;
-  teamId?: string;
   name: string;
-  sortOrder: number;
-  createdAt: string;  // ISO 8601
+  provider?: string;
 }
 
-interface ConversationSummary {
+interface ContextData {
+  usedTokens: number;
+  maxTokens: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  reasoningTokens?: number;
+  cacheTokens?: number;
+  estimatedCost?: number;
+}
+
+interface SlashCommand {
   id: string;
-  title: string;
-  groupId?: string;         // links to ConversationGroup.id
-  scope: ConversationScope;
-  messageCount: number;
-  lastMessageAt: string;    // ISO 8601
-  updatedAt: string;        // ISO 8601
+  label: string;
+  description?: string;
+  category?: string;
 }
-
-// ConversationScope (referenced by ConversationSummary)
-interface ConversationScope {
-  type: 'document' | 'collection';
-  documentId?: string;
-  filters?: {
-    tags?: string[];
-    authors?: string[];
-    contentType?: 'transcript' | 'markdown';
-    dateRange?: { from: string; to: string };
-  };
-}
-```
-
-### Example
-
-```html
-<kitn-conversation-list style="width: 260px; height: 100vh; display: block;"></kitn-conversation-list>
-
-<script type="module">
-  import '@kitnai/chat/elements';
-
-  const list = document.querySelector('kitn-conversation-list');
-
-  list.groups = [
-    { id: 'g1', name: 'Projects', sortOrder: 0, createdAt: '2024-01-01T00:00:00Z' }
-  ];
-
-  list.conversations = [
-    {
-      id: 'c1',
-      title: 'My first chat',
-      groupId: 'g1',
-      scope: { type: 'document' },
-      messageCount: 4,
-      lastMessageAt: '2024-06-01T12:00:00Z',
-      updatedAt: '2024-06-01T12:00:00Z',
-    }
-  ];
-
-  list.activeId = 'c1';
-
-  list.addEventListener('select', (e) => {
-    list.activeId = e.detail.id;
-    console.log('navigate to conversation:', e.detail.id);
-  });
-
-  list.addEventListener('newchat', () => {
-    console.log('user wants a new conversation');
-  });
-
-  list.addEventListener('togglesidebar', () => {
-    console.log('user toggled sidebar');
-  });
-</script>
-```
-
----
-
-## `<kitn-prompt-input>`
-
-A standalone prompt input with a send button. Use this when you want just the input area without the message list.
-
-### Properties
-
-| Property | Type | Default | Notes |
-|----------|------|---------|-------|
-| `value` | `string` | `undefined` | Controlled input value; omit for uncontrolled |
-| `placeholder` | `string` | `'Send a message...'` | Textarea placeholder text |
-| `disabled` | `boolean` | `false` | Disables the textarea and send button |
-| `loading` | `boolean` | `false` | Shows loading state (send button disabled) |
-| `suggestions` | `string[]` | `undefined` | Suggestion chips shown above the input; clicking one fills the input and fires `suggestionclick` |
-
-### Events
-
-| Event | `detail` shape | Description |
-|-------|---------------|-------------|
-| `submit` | `{ value: string }` | Fired when the user submits (button click or Enter) |
-| `valuechange` | `{ value: string }` | Fired on every input change |
-| `suggestionclick` | `{ value: string }` | Fired when a suggestion chip is clicked (the input is also filled with the value) |
-
-### Example
-
-```html
-<kitn-prompt-input placeholder="Ask anything..."></kitn-prompt-input>
-
-<script type="module">
-  import '@kitnai/chat/elements';
-
-  const input = document.querySelector('kitn-prompt-input');
-
-  input.addEventListener('submit', (e) => {
-    console.log('submitted:', e.detail.value);
-    input.loading = true;
-    // ... do async work, then:
-    // input.loading = false;
-    // input.value = '';  // clear after send
-  });
-
-  input.addEventListener('valuechange', (e) => {
-    console.log('current value:', e.detail.value);
-  });
-</script>
 ```
 
 ---
@@ -405,72 +679,69 @@ Each element renders into its own Shadow DOM. This provides **full CSS isolation
 
 **The elements are self-themed.** Each element's Shadow DOM already contains the full compiled token set, so the components render correctly with **no host-side stylesheet required** — including light/dark via the `theme` attribute.
 
-To **rebrand**, override the kit's **namespaced** tokens — `--kitn-color-*` (and `--kitn-text-*`, `--kitn-radius`) — on `:root` or a parent. The components read these via a `var(--kitn-…, default)` fallback that pierces the Shadow DOM, so your overrides reach them. The namespacing is deliberate: it keeps a host's own generic tokens (e.g. a shadcn page's `--color-primary` / `--radius`) from accidentally restyling the kit — only the explicit `--kitn-*` surface does. A single `--kitn-*` value applies in both light and dark; scope it to `:root.dark` / a media query if you want different values per mode.
-
-> **Two stylesheets — pick by how you consume the kit:**
-> - **Tailwind builds** (composing the SolidJS primitives): `@import "@kitnai/chat/theme.css"` in your CSS — this is the Tailwind *source* (`@theme`/`@custom-variant`), and registers the kit's colours as Tailwind utilities (`bg-background`, …).
-> - **Plain HTML / CDN** (web components): `<link rel="stylesheet" href="…/@kitnai/chat/theme.tokens.css">` — a browser-ready stylesheet that sets the `--color-*` tokens on `:root` (plus a `.dark` block and the component keyframes). You only need it to theme your **own** host-page markup or to rebrand; the elements already carry their own tokens.
->
-> Do **not** load the Tailwind-source `theme.css` via `<link>` — the browser ignores `@theme {}`, so no tokens would apply.
+To **rebrand**, override the kit's **namespaced** tokens — `--kitn-color-*` (and `--kitn-text-*`, `--kitn-radius`) — on `:root` or a parent. The components read these via a `var(--kitn-…, default)` fallback that pierces the Shadow DOM, so your overrides reach them.
 
 ```css
 :root {
   --kitn-color-background: #0f0f0f;
   --kitn-color-primary: #7c3aed;
   --kitn-color-muted: #1e1e1e;
-  --kitn-text-body: 0.9375rem;   /* optional: bump the reading size */
+  --kitn-text-body: 0.9375rem;
 }
 ```
 
-No other host-side CSS configuration is required or supported — all layout and typography are encapsulated inside the shadow root.
+> **Two stylesheets — pick by how you consume the kit:**
+> - **Tailwind builds** (composing the SolidJS primitives): `@import "@kitnai/chat/theme.css"` in your CSS.
+> - **Plain HTML / CDN** (web components): `<link rel="stylesheet" href="…/@kitnai/chat/theme.tokens.css">` — only needed to theme your own host-page markup; the elements carry their own tokens.
+
+### Theme attribute
+
+Every element accepts `theme="light"`, `theme="dark"`, or `theme="auto"` (default). `auto` follows the OS `prefers-color-scheme` media query.
+
+```html
+<kitn-chat theme="dark"></kitn-chat>
+```
 
 ---
 
 ## Code highlighting (on-demand, optional)
 
-Syntax highlighting is powered by [Shiki](https://shiki.style), wired to be **as lightweight as possible**:
+Syntax highlighting is powered by [Shiki](https://shiki.style), wired to be as lightweight as possible:
 
-- **Nothing loads until a code block actually renders.** A chat with no code never fetches Shiki — zero bytes.
-- **On-demand, per-language.** When a code block appears, only the Shiki core, the JavaScript regex engine (no WASM), the one theme, and the one language grammar it needs are fetched as small lazy chunks.
-- **No WASM.** Uses Shiki's JavaScript engine, avoiding the ~620 KB Oniguruma WASM blob.
+- **Nothing loads until a code block actually renders.** A chat with no code never fetches Shiki.
+- **On-demand, per-language.** Only the Shiki core, the JS regex engine, the one theme, and the one language grammar are fetched as small lazy chunks.
+- **No WASM.** Uses Shiki's JavaScript engine.
 
 ### Built-in languages
 
-A deliberately small default set loads on demand: `bash`/`sh`, `javascript`/`js`, `html`, `css`, `json`. Anything else renders as plain text until you register it with `configureCodeHighlighting({ languages })` (below).
+A small default set loads on demand: `bash`/`sh`, `javascript`/`js`, `html`, `css`, `json`. Anything else renders as plain text until registered.
 
 ### Configure or disable
-
-`configureCodeHighlighting()` is exported from both `@kitnai/chat` and `@kitnai/chat/elements`. Call it once before a code block of that language renders — the loader is consulted lazily, so it applies to the running app with **no rebuild**.
 
 ```js
 import { configureCodeHighlighting } from '@kitnai/chat/elements';
 
-// Bundler / npm consumers — your bundler resolves the import:
 configureCodeHighlighting({
   languages: {
     ruby: () => import('@shikijs/langs/ruby'),
-    swift: () => import('@shikijs/langs/swift'),
+    python: () => import('@shikijs/langs/python'),
   },
-  aliases: { rb: 'ruby' },
-});
-```
-
-```js
-// No-build / CDN consumers — point the loader at a CDN ESM URL so the grammar
-// is fetched at runtime (no bundler needed):
-import { configureCodeHighlighting } from 'https://unpkg.com/@kitnai/chat';
-configureCodeHighlighting({
-  languages: { python: () => import('https://esm.sh/@shikijs/langs@4/python') },
-  aliases: { py: 'python' },
+  aliases: { rb: 'ruby', py: 'python' },
 });
 
-// Add a theme
-configureCodeHighlighting({
-  themes: { dracula: () => import('@shikijs/themes/dracula') },
-});
-
-// Or turn highlighting off entirely (no Shiki ever loads) — code renders as plain text
+// Or turn off entirely (no Shiki ever loads):
 configureCodeHighlighting({ enabled: false });
 ```
 
-Per-element, set `codeHighlight={false}` (e.g. on `<kitn-chat>`) to disable highlighting for just that element.
+---
+
+## Machine-readable API
+
+The authoritative source for all element APIs is `dist/custom-elements.json` (generated by `@custom-elements-manifest/analyzer` as part of `npm run build`). Do not edit it by hand.
+
+Two human/agent-readable files are generated from the manifest by `scripts/gen-llms.mjs`:
+
+- **`llms.txt`** (~4 KB) — orientation: install, the property-vs-attribute rule, architecture, theming, and framework wiring.
+- **`llms-full.txt`** (~32 KB) — everything in `llms.txt` plus a generated props/events table for each element, a streaming recipe, and a build-a-chat-app runbook.
+
+Both files are at the repo root, the npm package root (`node_modules/@kitnai/chat/llms.txt`), and https://kitn.dev/llms.txt.
