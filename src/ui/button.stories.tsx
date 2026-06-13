@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { Button } from './button';
+import { componentDescription } from '../stories/docs/element-controls';
 
 /**
  * Convention exemplar — every component story should follow this shape:
@@ -15,14 +16,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A clickable button with style **variants** and **sizes**, built on a native `<button>` (all standard button attributes pass through).',
-          '**When to use:** any user-triggered action — submitting input, toolbar/icon actions, confirming or dismissing. Use `default` for the primary action, `ghost`/`outline` for secondary or low-emphasis actions.',
-          '**How to use:** set `variant` and `size`, pass label or an icon as children, and wire `onClick`. For icon-only buttons use `size="icon"` / `"icon-sm"` and include an `aria-label`.',
-          '**Placement:** prompt action bars, message action rows, dialogs, toolbars, and empty-state CTAs.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A clickable button with style **variants** and **sizes**, built on a native `<button>` (all standard button attributes pass through).',
+        '**When to use:** any user-triggered action — submitting input, toolbar/icon actions, confirming or dismissing. Use `default` for the primary action, `ghost`/`outline` for secondary or low-emphasis actions.',
+        '**How to use:** set `variant` and `size`, pass label or an icon as children, and wire `onClick`. For icon-only buttons use `size="icon"` / `"icon-sm"` and include an `aria-label`.',
+        '**Placement:** prompt action bars, message action rows, dialogs, toolbars, and empty-state CTAs.',
+      ]),
     },
   },
   argTypes: {

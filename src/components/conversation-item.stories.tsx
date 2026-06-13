@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { ConversationItem } from './conversation-item';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const baseConversation = {
   id: '1',
@@ -22,14 +23,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A single conversation row — shows the title and message count, truncating long titles, with a highlighted active state.',
-          '**When to use:** as the leaf item inside a chat history sidebar. Usually rendered for you by `ConversationList`; use it directly to build a custom list.',
-          '**How to use:** pass a `conversation` summary, an `isActive` flag, and an `onSelect(id)` handler fired when the row is clicked.',
-          '**Placement:** inside a conversation/chat history sidebar list.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A single conversation row — shows the title and message count, truncating long titles, with a highlighted active state.',
+        '**When to use:** as the leaf item inside a chat history sidebar. Usually rendered for you by `ConversationList`; use it directly to build a custom list.',
+        '**How to use:** pass a `conversation` summary, an `isActive` flag, and an `onSelect(id)` handler fired when the row is clicked.',
+        '**Placement:** inside a conversation/chat history sidebar list.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

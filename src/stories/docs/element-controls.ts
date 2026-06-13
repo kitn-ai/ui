@@ -21,6 +21,21 @@ export function specDescription(_tag: string, paragraphs: string[]): { component
   return { component: [API_POINTER, ...paragraphs].join('\n\n') };
 }
 
+// The Components/UI sibling of API_POINTER — same idea, component vocabulary
+// (props/callbacks/slots rather than properties/events/attributes).
+const COMPONENT_POINTER =
+  '> **Full API reference** — every prop, callback, slot and token is on the **API** tab above.';
+
+/**
+ * Build a Storybook `docs.description` for a SolidJS/UI component story, with the
+ * API-tab pointer prepended. The generated spec (props/callbacks/slots/tokens)
+ * lives on the **API** tab (see `.storybook/api-tab.tsx`), from
+ * `src/components/component-meta.json`.
+ */
+export function componentDescription(paragraphs: string[]): { component: string } {
+  return { component: [COMPONENT_POINTER, ...paragraphs].join('\n\n') };
+}
+
 const enumValues = (type: string): string[] | null => {
   // string-literal unions like "'light' | 'dark' | 'auto'"
   const parts = type.split('|').map((s) => s.trim());

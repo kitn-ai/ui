@@ -11,6 +11,7 @@ import {
   ContextReasoningUsage,
   ContextCacheUsage,
 } from './context';
+import { componentDescription } from '../stories/docs/element-controls';
 
 /**
  * Story for the compound `Context` family. `Context` is the root provider that
@@ -25,14 +26,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A model context-window usage indicator: a hover-card trigger showing the used-percent ring, with a popover breaking down token usage (input / output / reasoning / cache) and estimated cost.',
-          '**When to use:** to surface how much of a model\'s context window a conversation has consumed and roughly what it costs — near the prompt input or in a chat header.',
-          '**How to use:** wrap the composition in `<Context>` and pass `usedTokens` / `maxTokens` (plus optional `inputTokens`, `outputTokens`, `reasoningTokens`, `cacheTokens`, `estimatedCost`). Compose `ContextTrigger`, `ContextContent` (with `Header`/`Body`/`Footer`), and the usage rows.',
-          '**Placement:** chat toolbars, prompt-input action bars, and conversation headers.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A model context-window usage indicator: a hover-card trigger showing the used-percent ring, with a popover breaking down token usage (input / output / reasoning / cache) and estimated cost.',
+        '**When to use:** to surface how much of a model\'s context window a conversation has consumed and roughly what it costs — near the prompt input or in a chat header.',
+        '**How to use:** wrap the composition in `<Context>` and pass `usedTokens` / `maxTokens` (plus optional `inputTokens`, `outputTokens`, `reasoningTokens`, `cacheTokens`, `estimatedCost`). Compose `ContextTrigger`, `ContextContent` (with `Header`/`Body`/`Footer`), and the usage rows.',
+        '**Placement:** chat toolbars, prompt-input action bars, and conversation headers.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

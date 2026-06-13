@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { For } from 'solid-js';
 import { Loader, type LoaderVariant, type LoaderSize } from './loader';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Loader',
@@ -10,14 +11,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'A loading indicator with twelve animated **variants** (spinners, dots, bars, terminal, and text-based) in three **sizes**.',
-          '**When to use:** while waiting on an async operation — a streaming response, a tool call, or any pending state.',
-          '**How to use:** pick a `variant` and `size`. Text variants (`text-blink`, `text-shimmer`, `loading-dots`) display the `text` prop (defaults to "Thinking").',
-          '**Placement:** inside assistant message bubbles, send-button states, empty states, or anywhere an in-progress signal is needed.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A loading indicator with twelve animated **variants** (spinners, dots, bars, terminal, and text-based) in three **sizes**.',
+        '**When to use:** while waiting on an async operation — a streaming response, a tool call, or any pending state.',
+        '**How to use:** pick a `variant` and `size`. Text variants (`text-blink`, `text-shimmer`, `loading-dots`) display the `text` prop (defaults to "Thinking").',
+        '**Placement:** inside assistant message bubbles, send-button states, empty states, or anywhere an in-progress signal is needed.',
+      ]),
     },
   },
   argTypes: {

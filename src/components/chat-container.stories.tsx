@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { For } from 'solid-js';
 import { ChatContainerRoot, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
 import { Message, MessageAvatar, MessageContent } from './message';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const sampleMessages = [
   { role: 'user', content: 'What is SolidJS?' },
@@ -40,14 +41,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A scrollable message viewport that automatically sticks to the bottom as new content streams in. Composed of `ChatContainerRoot` (the scroll region), `ChatContainerContent` (the message stack), and `ChatContainerScrollAnchor` (the stick-to-bottom target).',
-          '**When to use:** as the conversation transcript region of a chat UI, where messages append over time and the view should follow the latest output unless the user scrolls up.',
-          '**How to use:** wrap your message list in `ChatContainerRoot`, place messages inside `ChatContainerContent`, and end with `ChatContainerScrollAnchor`. Give the root a fixed height so it can scroll.',
-          '**Placement:** the central pane of a chat layout, between the header and the prompt input.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A scrollable message viewport that automatically sticks to the bottom as new content streams in. Composed of `ChatContainerRoot` (the scroll region), `ChatContainerContent` (the message stack), and `ChatContainerScrollAnchor` (the stick-to-bottom target).',
+        '**When to use:** as the conversation transcript region of a chat UI, where messages append over time and the view should follow the latest output unless the user scrolls up.',
+        '**How to use:** wrap your message list in `ChatContainerRoot`, place messages inside `ChatContainerContent`, and end with `ChatContainerScrollAnchor`. Give the root a fixed height so it can scroll.',
+        '**Placement:** the central pane of a chat layout, between the header and the prompt input.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

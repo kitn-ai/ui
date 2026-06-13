@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { FeedbackBar } from './feedback-bar';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/FeedbackBar',
@@ -10,14 +11,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'An inline bar that prompts the user to rate a response, with thumbs-up / thumbs-down actions and a dismiss button.',
-          '**When to use:** after an assistant message, to collect quick helpful / not-helpful feedback on the answer.',
-          '**How to use:** set a `title`, optionally pass an `icon`, and wire `onHelpful`, `onNotHelpful`, and `onClose` to capture the rating or hide the bar.',
-          '**Placement:** directly beneath a completed assistant message, or in a message action row.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'An inline bar that prompts the user to rate a response, with thumbs-up / thumbs-down actions and a dismiss button.',
+        '**When to use:** after an assistant message, to collect quick helpful / not-helpful feedback on the answer.',
+        '**How to use:** set a `title`, optionally pass an `icon`, and wire `onHelpful`, `onNotHelpful`, and `onClose` to capture the rating or hide the bar.',
+        '**Placement:** directly beneath a completed assistant message, or in a message action row.',
+      ]),
     },
   },
   argTypes: {

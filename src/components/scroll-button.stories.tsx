@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { For } from 'solid-js';
 import { ScrollButton } from './scroll-button';
 import { ChatContainerRoot, ChatContainerContent } from './chat-container';
+import { componentDescription } from '../stories/docs/element-controls';
 
 /**
  * `ScrollButton` reads scroll state from the surrounding `ChatContainerRoot`
@@ -37,14 +38,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A floating "scroll to bottom" button wired to the enclosing `ChatContainerRoot`. It calls `scrollToBottom()` on click and animates in/out based on `isAtBottom`.',
-          '**When to use:** in a scrollable message log, to let the user jump back to the latest message after scrolling up. It hides itself automatically while pinned to the bottom.',
-          '**How to use:** render it inside a `ChatContainerRoot` (it consumes that context). Position it with absolute layout and optionally restyle via `variant`, `size`, and `class`.',
-          '**Placement:** overlaid near the bottom-center of the chat message area.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A floating "scroll to bottom" button wired to the enclosing `ChatContainerRoot`. It calls `scrollToBottom()` on click and animates in/out based on `isAtBottom`.',
+        '**When to use:** in a scrollable message log, to let the user jump back to the latest message after scrolling up. It hides itself automatically while pinned to the bottom.',
+        '**How to use:** render it inside a `ChatContainerRoot` (it consumes that context). Position it with absolute layout and optionally restyle via `variant`, `size`, and `class`.',
+        '**Placement:** overlaid near the bottom-center of the chat message area.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

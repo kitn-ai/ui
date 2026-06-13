@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { ConversationList, type ConversationListProps } from './conversation-list';
 import type { ConversationSummary, ConversationGroup } from '../types';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const scope = { type: 'document' as const };
 
@@ -31,14 +32,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A full chat-history sidebar: header (sidebar toggle + new chat), a built-in search box that filters by title, and conversations bucketed into collapsible, count-badged groups.',
-          '**When to use:** as the left-hand navigation for a chat app — browsing, searching, and switching between past conversations.',
-          '**How to use:** pass `groups` and `conversations` arrays, the `activeId`, and handlers `onSelect(id)` / `onNewChat()` (plus optional `onToggleSidebar()`). Give it a sized, overflow-hidden container.',
-          '**Placement:** the persistent left sidebar of a chat layout.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A full chat-history sidebar: header (sidebar toggle + new chat), a built-in search box that filters by title, and conversations bucketed into collapsible, count-badged groups.',
+        '**When to use:** as the left-hand navigation for a chat app — browsing, searching, and switching between past conversations.',
+        '**How to use:** pass `groups` and `conversations` arrays, the `activeId`, and handlers `onSelect(id)` / `onNewChat()` (plus optional `onToggleSidebar()`). Give it a sized, overflow-hidden container.',
+        '**Placement:** the persistent left sidebar of a chat layout.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

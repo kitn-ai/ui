@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Separator } from './separator';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'UI/Separator',
@@ -9,14 +10,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'A thin **divider** line (a `role="separator"` element) that visually splits content either horizontally or vertically.',
-          '**When to use:** to separate stacked sections, group items in a menu/list, or divide inline controls in a toolbar.',
-          '**How to use:** set `orientation` to `horizontal` (full-width line) or `vertical` (full-height line). For a vertical separator, give the parent a height so the line has something to fill.',
-          '**Placement:** between message groups, in dropdown/menu sections, header toolbars, and between sidebar regions.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A thin **divider** line (a `role="separator"` element) that visually splits content either horizontally or vertically.',
+        '**When to use:** to separate stacked sections, group items in a menu/list, or divide inline controls in a toolbar.',
+        '**How to use:** set `orientation` to `horizontal` (full-width line) or `vertical` (full-height line). For a vertical separator, give the parent a height so the line has something to fill.',
+        '**Placement:** between message groups, in dropdown/menu sections, header toolbars, and between sidebar regions.',
+      ]),
     },
   },
   argTypes: {

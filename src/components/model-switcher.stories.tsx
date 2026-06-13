@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { ModelSwitcher } from './model-switcher';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const multipleModels = [
   { id: 'claude-sonnet', name: 'Claude Sonnet', provider: 'Anthropic' },
@@ -17,14 +18,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'A compact dropdown that shows the active model and lets the user switch between the available **models** (grouped by optional `provider` label).',
-          '**When to use:** when a chat surface offers more than one model. It renders nothing when fewer than two models are provided, so it is safe to mount unconditionally.',
-          '**How to use:** pass the `models` list and the `currentModelId`, then handle `onModelChange` to update your selected-model state.',
-          '**Placement:** the prompt input action bar, a chat header, or a settings/toolbar row near the composer.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A compact dropdown that shows the active model and lets the user switch between the available **models** (grouped by optional `provider` label).',
+        '**When to use:** when a chat surface offers more than one model. It renders nothing when fewer than two models are provided, so it is safe to mount unconditionally.',
+        '**How to use:** pass the `models` list and the `currentModelId`, then handle `onModelChange` to update your selected-model state.',
+        '**Placement:** the prompt input action bar, a chat header, or a settings/toolbar row near the composer.',
+      ]),
     },
   },
   argTypes: {

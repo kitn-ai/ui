@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Markdown } from './markdown';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Markdown',
@@ -9,14 +10,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'Renders a Markdown string to styled HTML (GFM enabled — tables, lists, blockquotes), splitting fenced code into highlighted `CodeBlock`s.',
-          '**When to use:** to display assistant message content, documentation, or any rich text authored in Markdown.',
-          '**How to use:** pass the Markdown string as `content`; optionally set `codeTheme` for code fences and `class` for the prose container. Prose sizing follows the surrounding `ChatConfig`.',
-          '**Placement:** inside `MessageContent`, response panels, or anywhere formatted text is shown.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'Renders a Markdown string to styled HTML (GFM enabled — tables, lists, blockquotes), splitting fenced code into highlighted `CodeBlock`s.',
+        '**When to use:** to display assistant message content, documentation, or any rich text authored in Markdown.',
+        '**How to use:** pass the Markdown string as `content`; optionally set `codeTheme` for code fences and `class` for the prose container. Prose sizing follows the surrounding `ChatConfig`.',
+        '**Placement:** inside `MessageContent`, response panels, or anywhere formatted text is shown.',
+      ]),
     },
   },
   argTypes: {

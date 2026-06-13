@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { CodeBlock, CodeBlockCode, CodeBlockGroup } from './code-block';
 import { Button } from '../ui/button';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const tsCode = `interface User {
   id: string;
@@ -48,14 +49,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A bordered code card with optional syntax highlighting. `CodeBlock` is the container, `CodeBlockCode` renders the (Shiki-)highlighted source, and `CodeBlockGroup` is a flex row for a header/footer (filename + copy button).',
-          '**When to use:** to display code snippets in chat messages, documentation, or anywhere fenced code appears — typically emitted by the Markdown renderer for ``` blocks.',
-          '**How to use:** wrap one or more children in `<CodeBlock>`. Pass the source string and a `language` to `<CodeBlockCode>`; optionally override the `theme`. Add a `<CodeBlockGroup>` for a filename row and copy action.',
-          '**Placement:** inside assistant message content, README/docs panes, and tool-output views.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A bordered code card with optional syntax highlighting. `CodeBlock` is the container, `CodeBlockCode` renders the (Shiki-)highlighted source, and `CodeBlockGroup` is a flex row for a header/footer (filename + copy button).',
+        '**When to use:** to display code snippets in chat messages, documentation, or anywhere fenced code appears — typically emitted by the Markdown renderer for ``` blocks.',
+        '**How to use:** wrap one or more children in `<CodeBlock>`. Pass the source string and a `language` to `<CodeBlockCode>`; optionally override the `theme`. Add a `<CodeBlockGroup>` for a filename row and copy action.',
+        '**Placement:** inside assistant message content, README/docs panes, and tool-output views.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

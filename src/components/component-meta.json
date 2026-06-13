@@ -1,0 +1,2909 @@
+[
+  {
+    "name": "Attachment",
+    "group": "Components",
+    "sourceFile": "src/components/attachments.tsx",
+    "props": [
+      {
+        "name": "data",
+        "type": "{ id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }",
+        "displayType": "{ id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }",
+        "optional": false,
+        "scalar": false,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onRemove",
+        "type": "undefined | () => void",
+        "displayType": "undefined | () => void",
+        "description": ""
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "AttachmentEmpty",
+    "group": "Components",
+    "sourceFile": "src/components/attachments.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "AttachmentHoverCard",
+    "group": "Components",
+    "sourceFile": "src/components/attachments.tsx",
+    "props": [
+      {
+        "name": "openDelay",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "0"
+      },
+      {
+        "name": "closeDelay",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "0"
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "AttachmentHoverCardContent",
+    "group": "Components",
+    "sourceFile": "src/components/attachments.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "AttachmentHoverCardTrigger",
+    "group": "Components",
+    "sourceFile": "src/components/attachments.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "AttachmentInfo",
+    "group": "Components",
+    "sourceFile": "src/components/attachments.tsx",
+    "props": [
+      {
+        "name": "showMediaType",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "AttachmentPreview",
+    "group": "Components",
+    "sourceFile": "src/components/attachments.tsx",
+    "props": [],
+    "callbacks": [
+      {
+        "name": "fallbackIcon",
+        "type": "undefined | null | number | false | true | Node | { length: number; toString: () => string; toLocaleString: { (): string; (locales: string | string[], options?: Intl.NumberFormatOptions & Intl.DateTimeFormatOptions): string; }; pop: () => JSX.Element; push: (...items: JSX.Element[]) => number; concat: { (...items: ConcatArray<JSX.Element>[]): JSX.Element[]; (...items: (JSX.Element | ConcatArray<JSX.Element>)[]): JSX.Element[]; }; join: (separator?: string) => string; reverse: () => JSX.Element[]; shift: () => JSX.Element; slice: (start?: number, end?: number) => JSX.Element[]; sort: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.ArrayElement; splice: { (start: number, deleteCount?: number): JSX.Element[]; (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; }; unshift: (...items: JSX.Element[]) => number; indexOf: (searchElement: JSX.Element, fromIndex?: number) => number; lastIndexOf: (searchElement: JSX.Element, fromIndex?: number) => number; every: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): this is S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): boolean; }; some: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => boolean; forEach: (callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => void, thisArg?: any) => void; map: <U>(callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => U, thisArg?: any) => U[]; filter: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element[]; }; reduce: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; reduceRight: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; find: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findIndex: (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any) => number; fill: (value: JSX.Element, start?: number, end?: number) => JSX.ArrayElement; copyWithin: (target: number, start: number, end?: number) => JSX.ArrayElement; entries: () => ArrayIterator<[number, JSX.Element]>; keys: () => ArrayIterator<number>; values: () => ArrayIterator<JSX.Element>; includes: (searchElement: JSX.Element, fromIndex?: number) => boolean; flatMap: <U, This = undefined>(callback: (this: This, value: JSX.Element, index: number, array: JSX.Element[]) => U | readonly U[], thisArg?: This | undefined) => U[]; flat: <A, D extends number = 1>(this: A, depth?: D | undefined) => FlatArray<A, D>[]; at: (index: number) => JSX.Element; findLast: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findLastIndex: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => number; toReversed: () => JSX.Element[]; toSorted: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.Element[]; toSpliced: { (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; (start: number, deleteCount?: number): JSX.Element[]; }; with: (index: number, value: JSX.Element) => JSX.Element[]; __@iterator@906: () => ArrayIterator<JSX.Element>; __@unscopables@908: { [x: number]: boolean | undefined; length?: boolean | undefined; toString?: boolean | undefined; toLocaleString?: boolean | undefined; pop?: boolean | undefined; push?: boolean | undefined; concat?: boolean | undefined; join?: boolean | undefined; reverse?: boolean | undefined; shift?: boolean | undefined; slice?: boolean | undefined; sort?: boolean | undefined; splice?: boolean | undefined; unshift?: boolean | undefined; indexOf?: boolean | undefined; lastIndexOf?: boolean | undefined; every?: boolean | undefined; some?: boolean | undefined; forEach?: boolean | undefined; map?: boolean | undefined; filter?: boolean | undefined; reduce?: boolean | undefined; reduceRight?: boolean | undefined; find?: boolean | undefined; findIndex?: boolean | undefined; fill?: boolean | undefined; copyWithin?: boolean | undefined; entries?: boolean | undefined; keys?: boolean | undefined; values?: boolean | undefined; includes?: boolean | undefined; flatMap?: boolean | undefined; flat?: boolean | undefined; at?: boolean | undefined; findLast?: boolean | undefined; findLastIndex?: boolean | undefined; toReversed?: boolean | undefined; toSorted?: boolean | undefined; toSpliced?: boolean | undefined; with?: boolean | undefined; [Symbol.iterator]?: boolean | undefined; readonly [Symbol.unscopables]?: boolean | undefined; } } | string & {}",
+        "displayType": "undefined | null | number | false | true | Node | { length: number; toString: () => string; toLocaleString: { (): string; (locales: string | string[], options?: Intl.NumberFormatOptions & Intl.DateTimeFormatOptions): string; }; pop: () => JSX.Element; push: (...items: JSX.Element[]) => number; concat: { (...items: ConcatArray<JSX.Element>[]): JSX.Element[]; (...items: (JSX.Element | ConcatArray<JSX.Element>)[]): JSX.Element[]; }; join: (separator?: string) => string; reverse: () => JSX.Element[]; shift: () => JSX.Element; slice: (start?: number, end?: number) => JSX.Element[]; sort: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.ArrayElement; splice: { (start: number, deleteCount?: number): JSX.Element[]; (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; }; unshift: (...items: JSX.Element[]) => number; indexOf: (searchElement: JSX.Element, fromIndex?: number) => number; lastIndexOf: (searchElement: JSX.Element, fromIndex?: number) => number; every: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): this is S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): boolean; }; some: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => boolean; forEach: (callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => void, thisArg?: any) => void; map: <U>(callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => U, thisArg?: any) => U[]; filter: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element[]; }; reduce: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; reduceRight: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; find: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findIndex: (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any) => number; fill: (value: JSX.Element, start?: number, end?: number) => JSX.ArrayElement; copyWithin: (target: number, start: number, end?: number) => JSX.ArrayElement; entries: () => ArrayIterator<[number, JSX.Element]>; keys: () => ArrayIterator<number>; values: () => ArrayIterator<JSX.Element>; includes: (searchElement: JSX.Element, fromIndex?: number) => boolean; flatMap: <U, This = undefined>(callback: (this: This, value: JSX.Element, index: number, array: JSX.Element[]) => U | readonly U[], thisArg?: This | undefined) => U[]; flat: <A, D extends number = 1>(this: A, depth?: D | undefined) => FlatArray<A, D>[]; at: (index: number) => JSX.Element; findLast: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findLastIndex: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => number; toReversed: () => JSX.Element[]; toSorted: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.Element[]; toSpliced: { (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; (start: number, deleteCount?: number): JSX.Element[]; }; with: (index: number, value: JSX.Element) => JSX.Element[]; __@iterator@906: () => ArrayIterator<JSX.Element>; __@unscopables@908: { [x: number]: boolean | undefined; length?: boolean | undefined; toString?: boolean | undefined; toLocaleString?: boolean | undefined; pop?: boolean | undefined; push?: boolean | undefined; concat?: boolean | undefined; join?: boolean | undefined; reverse?: boolean | undefined; shift?: boolean | undefined; slice?: boolean | undefined; sort?: boolean | undefined; splice?: boolean | undefined; unshift?: boolean | undefined; indexOf?: boolean | undefined; lastIndexOf?: boolean | undefined; every?: boolean | undefined; some?: boolean | undefined; forEach?: boolean | undefined; map?: boolean | undefined; filter?: boolean | undefined; reduce?: boolean | undefined; reduceRight?: boolean | undefined; find?: boolean | undefined; findIndex?: boolean | undefined; fill?: boolean | undefined; copyWithin?: boolean | undefined; entries?: boolean | undefined; keys?: boolean | undefined; values?: boolean | undefined; includes?: boolean | undefined; flatMap?: boolean | undefined; flat?: boolean | undefined; at?: boolean | undefined; findLast?: boolean | undefined; findLastIndex?: boolean | undefined; toReversed?: boolean | undefined; toSorted?: boolean | undefined; toSpliced?: boolean | undefined; with?: boolean | undefined; [Symbol.iterator]?: boolean | undefined; readonly [Symbol.unscopables]?: boolean | undefined; } } | string & {}",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "AttachmentRemove",
+    "group": "Components",
+    "sourceFile": "src/components/attachments.tsx",
+    "props": [
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'Remove'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "Attachments",
+    "group": "Components",
+    "sourceFile": "src/components/attachments.tsx",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | \"grid\" | \"inline\" | \"list\"",
+        "displayType": "undefined | \"grid\" | \"inline\" | \"list\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'grid'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "BarsLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ChainOfThought",
+    "group": "Components",
+    "sourceFile": "src/components/chain-of-thought.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ChainOfThoughtContent",
+    "group": "Components",
+    "sourceFile": "src/components/chain-of-thought.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ChainOfThoughtItem",
+    "group": "Components",
+    "sourceFile": "src/components/chain-of-thought.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "ChainOfThoughtStep",
+    "group": "Components",
+    "sourceFile": "src/components/chain-of-thought.tsx",
+    "props": [
+      {
+        "name": "isLast",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "false"
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ChainOfThoughtTrigger",
+    "group": "Components",
+    "sourceFile": "src/components/chain-of-thought.tsx",
+    "props": [
+      {
+        "name": "swapIconOnHover",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "true"
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "leftIcon",
+        "type": "undefined | null | number | false | true | Node | { length: number; toString: () => string; toLocaleString: { (): string; (locales: string | string[], options?: Intl.NumberFormatOptions & Intl.DateTimeFormatOptions): string; }; pop: () => JSX.Element; push: (...items: JSX.Element[]) => number; concat: { (...items: ConcatArray<JSX.Element>[]): JSX.Element[]; (...items: (JSX.Element | ConcatArray<JSX.Element>)[]): JSX.Element[]; }; join: (separator?: string) => string; reverse: () => JSX.Element[]; shift: () => JSX.Element; slice: (start?: number, end?: number) => JSX.Element[]; sort: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.ArrayElement; splice: { (start: number, deleteCount?: number): JSX.Element[]; (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; }; unshift: (...items: JSX.Element[]) => number; indexOf: (searchElement: JSX.Element, fromIndex?: number) => number; lastIndexOf: (searchElement: JSX.Element, fromIndex?: number) => number; every: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): this is S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): boolean; }; some: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => boolean; forEach: (callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => void, thisArg?: any) => void; map: <U>(callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => U, thisArg?: any) => U[]; filter: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element[]; }; reduce: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; reduceRight: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; find: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findIndex: (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any) => number; fill: (value: JSX.Element, start?: number, end?: number) => JSX.ArrayElement; copyWithin: (target: number, start: number, end?: number) => JSX.ArrayElement; entries: () => ArrayIterator<[number, JSX.Element]>; keys: () => ArrayIterator<number>; values: () => ArrayIterator<JSX.Element>; includes: (searchElement: JSX.Element, fromIndex?: number) => boolean; flatMap: <U, This = undefined>(callback: (this: This, value: JSX.Element, index: number, array: JSX.Element[]) => U | readonly U[], thisArg?: This | undefined) => U[]; flat: <A, D extends number = 1>(this: A, depth?: D | undefined) => FlatArray<A, D>[]; at: (index: number) => JSX.Element; findLast: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findLastIndex: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => number; toReversed: () => JSX.Element[]; toSorted: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.Element[]; toSpliced: { (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; (start: number, deleteCount?: number): JSX.Element[]; }; with: (index: number, value: JSX.Element) => JSX.Element[]; __@iterator@906: () => ArrayIterator<JSX.Element>; __@unscopables@908: { [x: number]: boolean | undefined; length?: boolean | undefined; toString?: boolean | undefined; toLocaleString?: boolean | undefined; pop?: boolean | undefined; push?: boolean | undefined; concat?: boolean | undefined; join?: boolean | undefined; reverse?: boolean | undefined; shift?: boolean | undefined; slice?: boolean | undefined; sort?: boolean | undefined; splice?: boolean | undefined; unshift?: boolean | undefined; indexOf?: boolean | undefined; lastIndexOf?: boolean | undefined; every?: boolean | undefined; some?: boolean | undefined; forEach?: boolean | undefined; map?: boolean | undefined; filter?: boolean | undefined; reduce?: boolean | undefined; reduceRight?: boolean | undefined; find?: boolean | undefined; findIndex?: boolean | undefined; fill?: boolean | undefined; copyWithin?: boolean | undefined; entries?: boolean | undefined; keys?: boolean | undefined; values?: boolean | undefined; includes?: boolean | undefined; flatMap?: boolean | undefined; flat?: boolean | undefined; at?: boolean | undefined; findLast?: boolean | undefined; findLastIndex?: boolean | undefined; toReversed?: boolean | undefined; toSorted?: boolean | undefined; toSpliced?: boolean | undefined; with?: boolean | undefined; [Symbol.iterator]?: boolean | undefined; readonly [Symbol.unscopables]?: boolean | undefined; } } | string & {}",
+        "displayType": "undefined | null | number | false | true | Node | { length: number; toString: () => string; toLocaleString: { (): string; (locales: string | string[], options?: Intl.NumberFormatOptions & Intl.DateTimeFormatOptions): string; }; pop: () => JSX.Element; push: (...items: JSX.Element[]) => number; concat: { (...items: ConcatArray<JSX.Element>[]): JSX.Element[]; (...items: (JSX.Element | ConcatArray<JSX.Element>)[]): JSX.Element[]; }; join: (separator?: string) => string; reverse: () => JSX.Element[]; shift: () => JSX.Element; slice: (start?: number, end?: number) => JSX.Element[]; sort: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.ArrayElement; splice: { (start: number, deleteCount?: number): JSX.Element[]; (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; }; unshift: (...items: JSX.Element[]) => number; indexOf: (searchElement: JSX.Element, fromIndex?: number) => number; lastIndexOf: (searchElement: JSX.Element, fromIndex?: number) => number; every: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): this is S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): boolean; }; some: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => boolean; forEach: (callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => void, thisArg?: any) => void; map: <U>(callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => U, thisArg?: any) => U[]; filter: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element[]; }; reduce: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; reduceRight: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; find: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findIndex: (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any) => number; fill: (value: JSX.Element, start?: number, end?: number) => JSX.ArrayElement; copyWithin: (target: number, start: number, end?: number) => JSX.ArrayElement; entries: () => ArrayIterator<[number, JSX.Element]>; keys: () => ArrayIterator<number>; values: () => ArrayIterator<JSX.Element>; includes: (searchElement: JSX.Element, fromIndex?: number) => boolean; flatMap: <U, This = undefined>(callback: (this: This, value: JSX.Element, index: number, array: JSX.Element[]) => U | readonly U[], thisArg?: This | undefined) => U[]; flat: <A, D extends number = 1>(this: A, depth?: D | undefined) => FlatArray<A, D>[]; at: (index: number) => JSX.Element; findLast: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findLastIndex: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => number; toReversed: () => JSX.Element[]; toSorted: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.Element[]; toSpliced: { (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; (start: number, deleteCount?: number): JSX.Element[]; }; with: (index: number, value: JSX.Element) => JSX.Element[]; __@iterator@906: () => ArrayIterator<JSX.Element>; __@unscopables@908: { [x: number]: boolean | undefined; length?: boolean | undefined; toString?: boolean | undefined; toLocaleString?: boolean | undefined; pop?: boolean | undefined; push?: boolean | undefined; concat?: boolean | undefined; join?: boolean | undefined; reverse?: boolean | undefined; shift?: boolean | undefined; slice?: boolean | undefined; sort?: boolean | undefined; splice?: boolean | undefined; unshift?: boolean | undefined; indexOf?: boolean | undefined; lastIndexOf?: boolean | undefined; every?: boolean | undefined; some?: boolean | undefined; forEach?: boolean | undefined; map?: boolean | undefined; filter?: boolean | undefined; reduce?: boolean | undefined; reduceRight?: boolean | undefined; find?: boolean | undefined; findIndex?: boolean | undefined; fill?: boolean | undefined; copyWithin?: boolean | undefined; entries?: boolean | undefined; keys?: boolean | undefined; values?: boolean | undefined; includes?: boolean | undefined; flatMap?: boolean | undefined; flat?: boolean | undefined; at?: boolean | undefined; findLast?: boolean | undefined; findLastIndex?: boolean | undefined; toReversed?: boolean | undefined; toSorted?: boolean | undefined; toSpliced?: boolean | undefined; with?: boolean | undefined; [Symbol.iterator]?: boolean | undefined; readonly [Symbol.unscopables]?: boolean | undefined; } } | string & {}",
+        "description": ""
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ChatContainer",
+    "group": "Components",
+    "sourceFile": "src/components/chat-container.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "ChatContainerContent",
+    "group": "Components",
+    "sourceFile": "src/components/chat-container.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "ChatContainerRoot",
+    "group": "Components",
+    "sourceFile": "src/components/chat-container.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "ChatContainerScrollAnchor",
+    "group": "Components",
+    "sourceFile": "src/components/chat-container.tsx",
+    "props": [],
+    "callbacks": [
+      {
+        "name": "ref",
+        "type": "undefined | HTMLDivElement | (el: HTMLDivElement) => void",
+        "displayType": "undefined | HTMLDivElement | (el: HTMLDivElement) => void",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "ChatScopePicker",
+    "group": "Components",
+    "sourceFile": "src/components/chat-scope-picker.tsx",
+    "props": [
+      {
+        "name": "currentLabel",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "availableAuthors",
+        "type": "undefined | string[]",
+        "displayType": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "availableTags",
+        "type": "undefined | string[]",
+        "displayType": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onScopeChange",
+        "type": "(filters: SearchFilters | undefined) => void",
+        "displayType": "(filters: SearchFilters | undefined) => void",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "Checkpoint",
+    "group": "Components",
+    "sourceFile": "src/components/checkpoint.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "CheckpointIcon",
+    "group": "Components",
+    "sourceFile": "src/components/checkpoint.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "CheckpointTrigger",
+    "group": "Components",
+    "sourceFile": "src/components/checkpoint.tsx",
+    "props": [
+      {
+        "name": "tooltip",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "variant",
+        "type": "undefined | \"default\" | \"ghost\" | \"outline\"",
+        "displayType": "undefined | \"default\" | \"ghost\" | \"outline\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'ghost'"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'sm'"
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onClick",
+        "type": "undefined | () => void",
+        "displayType": "undefined | () => void",
+        "description": ""
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "CircularLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ClassicLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "CodeBlock",
+    "group": "Components",
+    "sourceFile": "src/components/code-block.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [
+      "--color-code-foreground"
+    ],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "CodeBlockCode",
+    "group": "Components",
+    "sourceFile": "src/components/code-block.tsx",
+    "props": [
+      {
+        "name": "code",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "language",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'tsx'"
+      },
+      {
+        "name": "theme",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [
+      "--color-code-foreground"
+    ],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "CodeBlockGroup",
+    "group": "Components",
+    "sourceFile": "src/components/code-block.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "Context",
+    "group": "Components",
+    "sourceFile": "src/components/context.tsx",
+    "props": [
+      {
+        "name": "usedTokens",
+        "type": "number",
+        "displayType": "number",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "maxTokens",
+        "type": "number",
+        "displayType": "number",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "inputTokens",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "outputTokens",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "reasoningTokens",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "cacheTokens",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "estimatedCost",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ContextCacheUsage",
+    "group": "Components",
+    "sourceFile": "src/components/context.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ContextContent",
+    "group": "Components",
+    "sourceFile": "src/components/context.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ContextContentBody",
+    "group": "Components",
+    "sourceFile": "src/components/context.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ContextContentFooter",
+    "group": "Components",
+    "sourceFile": "src/components/context.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ContextContentHeader",
+    "group": "Components",
+    "sourceFile": "src/components/context.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ContextInputUsage",
+    "group": "Components",
+    "sourceFile": "src/components/context.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ContextOutputUsage",
+    "group": "Components",
+    "sourceFile": "src/components/context.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ContextReasoningUsage",
+    "group": "Components",
+    "sourceFile": "src/components/context.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ContextTrigger",
+    "group": "Components",
+    "sourceFile": "src/components/context.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ConversationItem",
+    "group": "Components",
+    "sourceFile": "src/components/conversation-item.tsx",
+    "props": [
+      {
+        "name": "conversation",
+        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }",
+        "displayType": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }",
+        "optional": false,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "isActive",
+        "type": "false | true",
+        "displayType": "false | true",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onSelect",
+        "type": "(id: string) => void",
+        "displayType": "(id: string) => void",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [
+      "--color-sidebar"
+    ],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ConversationList",
+    "group": "Components",
+    "sourceFile": "src/components/conversation-list.tsx",
+    "props": [
+      {
+        "name": "groups",
+        "type": "{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]",
+        "displayType": "ConversationGroup[]",
+        "optional": false,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "conversations",
+        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
+        "displayType": "ConversationSummary[]",
+        "optional": false,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "activeId",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onSelect",
+        "type": "(id: string) => void",
+        "displayType": "(id: string) => void",
+        "description": ""
+      },
+      {
+        "name": "onNewChat",
+        "type": "() => void",
+        "displayType": "() => void",
+        "description": ""
+      },
+      {
+        "name": "onToggleSidebar",
+        "type": "undefined | () => void",
+        "displayType": "undefined | () => void",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [
+      "--color-sidebar",
+      "--color-scrollbar-thumb",
+      "--color-scrollbar-thumb-hover"
+    ],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "DotsLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "Empty",
+    "group": "Components",
+    "sourceFile": "src/components/empty.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "EmptyContent",
+    "group": "Components",
+    "sourceFile": "src/components/empty.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "EmptyDescription",
+    "group": "Components",
+    "sourceFile": "src/components/empty.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "EmptyHeader",
+    "group": "Components",
+    "sourceFile": "src/components/empty.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "EmptyMedia",
+    "group": "Components",
+    "sourceFile": "src/components/empty.tsx",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | null | \"default\" | \"icon\"",
+        "displayType": "undefined | null | \"default\" | \"icon\"",
+        "optional": true,
+        "scalar": false,
+        "description": "",
+        "default": "'default'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "EmptyTitle",
+    "group": "Components",
+    "sourceFile": "src/components/empty.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "FeedbackBar",
+    "group": "Components",
+    "sourceFile": "src/components/feedback-bar.tsx",
+    "props": [
+      {
+        "name": "title",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "icon",
+        "type": "undefined | null | number | false | true | Node | { length: number; toString: () => string; toLocaleString: { (): string; (locales: string | string[], options?: Intl.NumberFormatOptions & Intl.DateTimeFormatOptions): string; }; pop: () => JSX.Element; push: (...items: JSX.Element[]) => number; concat: { (...items: ConcatArray<JSX.Element>[]): JSX.Element[]; (...items: (JSX.Element | ConcatArray<JSX.Element>)[]): JSX.Element[]; }; join: (separator?: string) => string; reverse: () => JSX.Element[]; shift: () => JSX.Element; slice: (start?: number, end?: number) => JSX.Element[]; sort: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.ArrayElement; splice: { (start: number, deleteCount?: number): JSX.Element[]; (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; }; unshift: (...items: JSX.Element[]) => number; indexOf: (searchElement: JSX.Element, fromIndex?: number) => number; lastIndexOf: (searchElement: JSX.Element, fromIndex?: number) => number; every: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): this is S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): boolean; }; some: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => boolean; forEach: (callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => void, thisArg?: any) => void; map: <U>(callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => U, thisArg?: any) => U[]; filter: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element[]; }; reduce: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; reduceRight: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; find: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findIndex: (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any) => number; fill: (value: JSX.Element, start?: number, end?: number) => JSX.ArrayElement; copyWithin: (target: number, start: number, end?: number) => JSX.ArrayElement; entries: () => ArrayIterator<[number, JSX.Element]>; keys: () => ArrayIterator<number>; values: () => ArrayIterator<JSX.Element>; includes: (searchElement: JSX.Element, fromIndex?: number) => boolean; flatMap: <U, This = undefined>(callback: (this: This, value: JSX.Element, index: number, array: JSX.Element[]) => U | readonly U[], thisArg?: This | undefined) => U[]; flat: <A, D extends number = 1>(this: A, depth?: D | undefined) => FlatArray<A, D>[]; at: (index: number) => JSX.Element; findLast: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findLastIndex: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => number; toReversed: () => JSX.Element[]; toSorted: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.Element[]; toSpliced: { (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; (start: number, deleteCount?: number): JSX.Element[]; }; with: (index: number, value: JSX.Element) => JSX.Element[]; __@iterator@906: () => ArrayIterator<JSX.Element>; __@unscopables@908: { [x: number]: boolean | undefined; length?: boolean | undefined; toString?: boolean | undefined; toLocaleString?: boolean | undefined; pop?: boolean | undefined; push?: boolean | undefined; concat?: boolean | undefined; join?: boolean | undefined; reverse?: boolean | undefined; shift?: boolean | undefined; slice?: boolean | undefined; sort?: boolean | undefined; splice?: boolean | undefined; unshift?: boolean | undefined; indexOf?: boolean | undefined; lastIndexOf?: boolean | undefined; every?: boolean | undefined; some?: boolean | undefined; forEach?: boolean | undefined; map?: boolean | undefined; filter?: boolean | undefined; reduce?: boolean | undefined; reduceRight?: boolean | undefined; find?: boolean | undefined; findIndex?: boolean | undefined; fill?: boolean | undefined; copyWithin?: boolean | undefined; entries?: boolean | undefined; keys?: boolean | undefined; values?: boolean | undefined; includes?: boolean | undefined; flatMap?: boolean | undefined; flat?: boolean | undefined; at?: boolean | undefined; findLast?: boolean | undefined; findLastIndex?: boolean | undefined; toReversed?: boolean | undefined; toSorted?: boolean | undefined; toSpliced?: boolean | undefined; with?: boolean | undefined; [Symbol.iterator]?: boolean | undefined; readonly [Symbol.unscopables]?: boolean | undefined; } } | string & {}",
+        "displayType": "undefined | null | number | false | true | Node | { length: number; toString: () => string; toLocaleString: { (): string; (locales: string | string[], options?: Intl.NumberFormatOptions & Intl.DateTimeFormatOptions): string; }; pop: () => JSX.Element; push: (...items: JSX.Element[]) => number; concat: { (...items: ConcatArray<JSX.Element>[]): JSX.Element[]; (...items: (JSX.Element | ConcatArray<JSX.Element>)[]): JSX.Element[]; }; join: (separator?: string) => string; reverse: () => JSX.Element[]; shift: () => JSX.Element; slice: (start?: number, end?: number) => JSX.Element[]; sort: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.ArrayElement; splice: { (start: number, deleteCount?: number): JSX.Element[]; (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; }; unshift: (...items: JSX.Element[]) => number; indexOf: (searchElement: JSX.Element, fromIndex?: number) => number; lastIndexOf: (searchElement: JSX.Element, fromIndex?: number) => number; every: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): this is S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): boolean; }; some: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => boolean; forEach: (callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => void, thisArg?: any) => void; map: <U>(callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => U, thisArg?: any) => U[]; filter: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element[]; }; reduce: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; reduceRight: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; find: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findIndex: (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any) => number; fill: (value: JSX.Element, start?: number, end?: number) => JSX.ArrayElement; copyWithin: (target: number, start: number, end?: number) => JSX.ArrayElement; entries: () => ArrayIterator<[number, JSX.Element]>; keys: () => ArrayIterator<number>; values: () => ArrayIterator<JSX.Element>; includes: (searchElement: JSX.Element, fromIndex?: number) => boolean; flatMap: <U, This = undefined>(callback: (this: This, value: JSX.Element, index: number, array: JSX.Element[]) => U | readonly U[], thisArg?: This | undefined) => U[]; flat: <A, D extends number = 1>(this: A, depth?: D | undefined) => FlatArray<A, D>[]; at: (index: number) => JSX.Element; findLast: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findLastIndex: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => number; toReversed: () => JSX.Element[]; toSorted: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.Element[]; toSpliced: { (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; (start: number, deleteCount?: number): JSX.Element[]; }; with: (index: number, value: JSX.Element) => JSX.Element[]; __@iterator@906: () => ArrayIterator<JSX.Element>; __@unscopables@908: { [x: number]: boolean | undefined; length?: boolean | undefined; toString?: boolean | undefined; toLocaleString?: boolean | undefined; pop?: boolean | undefined; push?: boolean | undefined; concat?: boolean | undefined; join?: boolean | undefined; reverse?: boolean | undefined; shift?: boolean | undefined; slice?: boolean | undefined; sort?: boolean | undefined; splice?: boolean | undefined; unshift?: boolean | undefined; indexOf?: boolean | undefined; lastIndexOf?: boolean | undefined; every?: boolean | undefined; some?: boolean | undefined; forEach?: boolean | undefined; map?: boolean | undefined; filter?: boolean | undefined; reduce?: boolean | undefined; reduceRight?: boolean | undefined; find?: boolean | undefined; findIndex?: boolean | undefined; fill?: boolean | undefined; copyWithin?: boolean | undefined; entries?: boolean | undefined; keys?: boolean | undefined; values?: boolean | undefined; includes?: boolean | undefined; flatMap?: boolean | undefined; flat?: boolean | undefined; at?: boolean | undefined; findLast?: boolean | undefined; findLastIndex?: boolean | undefined; toReversed?: boolean | undefined; toSorted?: boolean | undefined; toSpliced?: boolean | undefined; with?: boolean | undefined; [Symbol.iterator]?: boolean | undefined; readonly [Symbol.unscopables]?: boolean | undefined; } } | string & {}",
+        "description": ""
+      },
+      {
+        "name": "onHelpful",
+        "type": "undefined | () => void",
+        "displayType": "undefined | () => void",
+        "description": ""
+      },
+      {
+        "name": "onNotHelpful",
+        "type": "undefined | () => void",
+        "displayType": "undefined | () => void",
+        "description": ""
+      },
+      {
+        "name": "onClose",
+        "type": "undefined | () => void",
+        "displayType": "undefined | () => void",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "FileUpload",
+    "group": "Components",
+    "sourceFile": "src/components/file-upload.tsx",
+    "props": [
+      {
+        "name": "multiple",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "true"
+      },
+      {
+        "name": "accept",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onFilesAdded",
+        "type": "(files: File[]) => void",
+        "displayType": "(files: File[]) => void",
+        "description": ""
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "FileUploadContent",
+    "group": "Components",
+    "sourceFile": "src/components/file-upload.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "FileUploadTrigger",
+    "group": "Components",
+    "sourceFile": "src/components/file-upload.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "Image",
+    "group": "Components",
+    "sourceFile": "src/components/image.tsx",
+    "props": [
+      {
+        "name": "alt",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "base64",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "uint8Array",
+        "type": "undefined | Uint8Array<ArrayBufferLike>",
+        "displayType": "undefined | Uint8Array<ArrayBufferLike>",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "mediaType",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'image/png'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "Loader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | \"circular\" | \"classic\" | \"pulse\" | \"pulse-dot\" | \"dots\" | \"typing\" | \"wave\" | \"bars\" | \"terminal\" | \"text-blink\" | \"text-shimmer\" | \"loading-dots\"",
+        "displayType": "LoaderVariant | undefined",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "text",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "Markdown",
+    "group": "Components",
+    "sourceFile": "src/components/markdown.tsx",
+    "props": [
+      {
+        "name": "content",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "id",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "codeTheme",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "Message",
+    "group": "Components",
+    "sourceFile": "src/components/message.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "MessageAction",
+    "group": "Components",
+    "sourceFile": "src/components/message.tsx",
+    "props": [
+      {
+        "name": "tooltip",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "side",
+        "type": "undefined | \"top\" | \"bottom\" | \"left\" | \"right\"",
+        "displayType": "undefined | \"top\" | \"bottom\" | \"left\" | \"right\"",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "MessageActions",
+    "group": "Components",
+    "sourceFile": "src/components/message.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "MessageAvatar",
+    "group": "Components",
+    "sourceFile": "src/components/message.tsx",
+    "props": [
+      {
+        "name": "src",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "alt",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "fallback",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "MessageContent",
+    "group": "Components",
+    "sourceFile": "src/components/message.tsx",
+    "props": [
+      {
+        "name": "markdown",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "MessageCopyButton",
+    "group": "Components",
+    "sourceFile": "src/components/message.tsx",
+    "props": [
+      {
+        "name": "content",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "size",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "14"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "MessageSkills",
+    "group": "Components",
+    "sourceFile": "src/components/message-skills.tsx",
+    "props": [
+      {
+        "name": "skills",
+        "type": "{ id: string; name: string }[]",
+        "displayType": "{ id: string; name: string }[]",
+        "optional": false,
+        "scalar": false,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": "Displays skill badges above a message to indicate which skills were active when the message was generated."
+  },
+  {
+    "name": "ModelSwitcher",
+    "group": "Components",
+    "sourceFile": "src/components/model-switcher.tsx",
+    "props": [
+      {
+        "name": "models",
+        "type": "{ id: string; name: string; provider?: undefined | string }[]",
+        "displayType": "{ id: string; name: string; provider?: undefined | string }[]",
+        "optional": false,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "currentModelId",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onModelChange",
+        "type": "(modelId: string) => void",
+        "displayType": "(modelId: string) => void",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "PromptInput",
+    "group": "Components",
+    "sourceFile": "src/components/prompt-input.tsx",
+    "props": [
+      {
+        "name": "isLoading",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "false"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "''"
+      },
+      {
+        "name": "maxHeight",
+        "type": "undefined | string | number",
+        "displayType": "undefined | string | number",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "240"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onValueChange",
+        "type": "undefined | (value: string) => void",
+        "displayType": "undefined | (value: string) => void",
+        "description": ""
+      },
+      {
+        "name": "onSubmit",
+        "type": "undefined | () => void",
+        "displayType": "undefined | () => void",
+        "description": ""
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "PromptInputAction",
+    "group": "Components",
+    "sourceFile": "src/components/prompt-input.tsx",
+    "props": [
+      {
+        "name": "tooltip",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "side",
+        "type": "undefined | \"top\" | \"bottom\" | \"left\" | \"right\"",
+        "displayType": "undefined | \"top\" | \"bottom\" | \"left\" | \"right\"",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "PromptInputActions",
+    "group": "Components",
+    "sourceFile": "src/components/prompt-input.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "PromptInputTextarea",
+    "group": "Components",
+    "sourceFile": "src/components/prompt-input.tsx",
+    "props": [
+      {
+        "name": "disableAutosize",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "PromptSuggestion",
+    "group": "Components",
+    "sourceFile": "src/components/prompt-suggestion.tsx",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | \"default\" | \"ghost\" | \"outline\"",
+        "displayType": "undefined | \"default\" | \"ghost\" | \"outline\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'outline'"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'lg'"
+      },
+      {
+        "name": "highlight",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "block",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Render as a full-width, left-aligned list row (the \"suggested questions\" idiom) instead of a rounded pill. Wraps long text. Ignored in highlight mode, which is always a list row."
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "PulseDotLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "PulseLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "Reasoning",
+    "group": "Components",
+    "sourceFile": "src/components/reasoning.tsx",
+    "props": [
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "isStreaming",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onOpenChange",
+        "type": "undefined | (open: boolean) => void",
+        "displayType": "undefined | (open: boolean) => void",
+        "description": ""
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ReasoningContent",
+    "group": "Components",
+    "sourceFile": "src/components/reasoning.tsx",
+    "props": [
+      {
+        "name": "markdown",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "contentClass",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "ReasoningTrigger",
+    "group": "Components",
+    "sourceFile": "src/components/reasoning.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "ResponseStream",
+    "group": "Components",
+    "sourceFile": "src/components/response-stream.tsx",
+    "props": [
+      {
+        "name": "textStream",
+        "type": "string | AsyncIterable<string>",
+        "displayType": "string | AsyncIterable<string>",
+        "optional": false,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "mode",
+        "type": "undefined | \"typewriter\" | \"fade\"",
+        "displayType": "undefined | \"typewriter\" | \"fade\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'typewriter'"
+      },
+      {
+        "name": "speed",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "20"
+      },
+      {
+        "name": "as",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "fadeDuration",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "segmentDelay",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "characterChunkSize",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onComplete",
+        "type": "undefined | () => void",
+        "displayType": "undefined | () => void",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ScrollButton",
+    "group": "Components",
+    "sourceFile": "src/components/scroll-button.tsx",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | \"default\" | \"ghost\" | \"outline\"",
+        "displayType": "undefined | \"default\" | \"ghost\" | \"outline\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'outline'"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'sm'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "SlashCommand",
+    "group": "Components",
+    "sourceFile": "src/components/slash-command.tsx",
+    "props": [
+      {
+        "name": "commands",
+        "type": "{ id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
+        "displayType": "{ id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
+        "optional": false,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "activeIds",
+        "type": "undefined | string[]",
+        "displayType": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "compact",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onSelect",
+        "type": "(command: SlashCommandItem) => void",
+        "displayType": "(command: SlashCommandItem) => void",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "Source",
+    "group": "Components",
+    "sourceFile": "src/components/source.tsx",
+    "props": [
+      {
+        "name": "href",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "SourceContent",
+    "group": "Components",
+    "sourceFile": "src/components/source.tsx",
+    "props": [
+      {
+        "name": "title",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "SourceList",
+    "group": "Components",
+    "sourceFile": "src/components/source.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "SourceTrigger",
+    "group": "Components",
+    "sourceFile": "src/components/source.tsx",
+    "props": [
+      {
+        "name": "label",
+        "type": "undefined | string | number",
+        "displayType": "undefined | string | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "showFavicon",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "TerminalLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "TextBlinkLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "text",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'Thinking'"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "TextDotsLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "text",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'Thinking'"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "TextShimmer",
+    "group": "Components",
+    "sourceFile": "src/components/text-shimmer.tsx",
+    "props": [
+      {
+        "name": "as",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'span'"
+      },
+      {
+        "name": "duration",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "4"
+      },
+      {
+        "name": "spread",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "20"
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "TextShimmerLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "text",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'Thinking'"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ThinkingBar",
+    "group": "Components",
+    "sourceFile": "src/components/thinking-bar.tsx",
+    "props": [
+      {
+        "name": "text",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'Thinking'"
+      },
+      {
+        "name": "stopLabel",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'Answer now'"
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onStop",
+        "type": "undefined | () => void",
+        "displayType": "undefined | () => void",
+        "description": ""
+      },
+      {
+        "name": "onClick",
+        "type": "undefined | () => void",
+        "displayType": "undefined | () => void",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "Tool",
+    "group": "Components",
+    "sourceFile": "src/components/tool.tsx",
+    "props": [
+      {
+        "name": "toolPart",
+        "type": "{ type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }",
+        "displayType": "{ type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }",
+        "optional": false,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "false"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [
+      "--color-tool-blue",
+      "--color-tool-amber",
+      "--color-tool-green",
+      "--color-tool-red"
+    ],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "TypingLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "VoiceInput",
+    "group": "Components",
+    "sourceFile": "src/components/voice-input.tsx",
+    "props": [
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onTranscribe",
+        "type": "(audio: Blob) => Promise<string>",
+        "displayType": "(audio: Blob) => Promise<string>",
+        "description": ""
+      },
+      {
+        "name": "onTranscription",
+        "type": "(text: string) => void",
+        "displayType": "(text: string) => void",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "WaveLoader",
+    "group": "Components",
+    "sourceFile": "src/components/loader.tsx",
+    "props": [
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "Avatar",
+    "group": "UI",
+    "sourceFile": "src/ui/avatar.tsx",
+    "props": [
+      {
+        "name": "src",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "alt",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "fallback",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'md'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "Badge",
+    "group": "UI",
+    "sourceFile": "src/ui/badge.tsx",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | null | \"default\" | \"count\" | \"citation\"",
+        "displayType": "undefined | null | \"default\" | \"count\" | \"citation\"",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "Button",
+    "group": "UI",
+    "sourceFile": "src/ui/button.tsx",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | null | \"default\" | \"ghost\" | \"outline\"",
+        "displayType": "undefined | null | \"default\" | \"ghost\" | \"outline\"",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "size",
+        "type": "undefined | null | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
+        "displayType": "undefined | null | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "Collapsible",
+    "group": "UI",
+    "sourceFile": "src/ui/collapsible.tsx",
+    "props": [
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "false"
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onOpenChange",
+        "type": "undefined | (open: boolean) => void",
+        "displayType": "undefined | (open: boolean) => void",
+        "description": ""
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "CollapsibleContent",
+    "group": "UI",
+    "sourceFile": "src/ui/collapsible.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "CollapsibleTrigger",
+    "group": "UI",
+    "sourceFile": "src/ui/collapsible.tsx",
+    "props": [],
+    "callbacks": [
+      {
+        "name": "as",
+        "type": "undefined | (props: Record<string, any>) => JSX.Element",
+        "displayType": "undefined | (props: Record<string, any>) => JSX.Element",
+        "description": ""
+      },
+      {
+        "name": "onClick",
+        "type": "undefined | JSX.EventHandler<HTMLButtonElement, MouseEvent> | { 0: (data: any, e: MouseEvent & { currentTarget: HTMLButtonElement; target: import(\"/Users/home/Projects/kitn-ai/kitn-chat/node_modules/solid-js/types/jsx\").DOMElement; }) => void; 1: any }",
+        "displayType": "undefined | JSX.EventHandler<HTMLButtonElement, MouseEvent> | { 0: (data: any, e: MouseEvent & { currentTarget: HTMLButtonElement; target: import(\"/Users/home/Projects/kitn-ai/kitn-chat/node_modules/solid-js/types/jsx\").DOMElement; }) => void; 1: any }",
+        "description": ""
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "Dropdown",
+    "group": "UI",
+    "sourceFile": "src/ui/dropdown.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "DropdownContent",
+    "group": "UI",
+    "sourceFile": "src/ui/dropdown.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "DropdownItem",
+    "group": "UI",
+    "sourceFile": "src/ui/dropdown.tsx",
+    "props": [],
+    "callbacks": [
+      {
+        "name": "onSelect",
+        "type": "undefined | () => void",
+        "displayType": "undefined | () => void",
+        "description": ""
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "DropdownTrigger",
+    "group": "UI",
+    "sourceFile": "src/ui/dropdown.tsx",
+    "props": [],
+    "callbacks": [
+      {
+        "name": "as",
+        "type": "undefined | string | (props: Record<string, any>) => JSX.Element",
+        "displayType": "undefined | string | (props: Record<string, any>) => JSX.Element",
+        "description": ""
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "HoverCard",
+    "group": "UI",
+    "sourceFile": "src/ui/hover-card.tsx",
+    "props": [
+      {
+        "name": "openDelay",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "closeDelay",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "trigger",
+        "type": "undefined | null | number | false | true | Node | { length: number; toString: () => string; toLocaleString: { (): string; (locales: string | string[], options?: Intl.NumberFormatOptions & Intl.DateTimeFormatOptions): string; }; pop: () => JSX.Element; push: (...items: JSX.Element[]) => number; concat: { (...items: ConcatArray<JSX.Element>[]): JSX.Element[]; (...items: (JSX.Element | ConcatArray<JSX.Element>)[]): JSX.Element[]; }; join: (separator?: string) => string; reverse: () => JSX.Element[]; shift: () => JSX.Element; slice: (start?: number, end?: number) => JSX.Element[]; sort: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.ArrayElement; splice: { (start: number, deleteCount?: number): JSX.Element[]; (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; }; unshift: (...items: JSX.Element[]) => number; indexOf: (searchElement: JSX.Element, fromIndex?: number) => number; lastIndexOf: (searchElement: JSX.Element, fromIndex?: number) => number; every: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): this is S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): boolean; }; some: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => boolean; forEach: (callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => void, thisArg?: any) => void; map: <U>(callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => U, thisArg?: any) => U[]; filter: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element[]; }; reduce: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; reduceRight: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; find: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findIndex: (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any) => number; fill: (value: JSX.Element, start?: number, end?: number) => JSX.ArrayElement; copyWithin: (target: number, start: number, end?: number) => JSX.ArrayElement; entries: () => ArrayIterator<[number, JSX.Element]>; keys: () => ArrayIterator<number>; values: () => ArrayIterator<JSX.Element>; includes: (searchElement: JSX.Element, fromIndex?: number) => boolean; flatMap: <U, This = undefined>(callback: (this: This, value: JSX.Element, index: number, array: JSX.Element[]) => U | readonly U[], thisArg?: This | undefined) => U[]; flat: <A, D extends number = 1>(this: A, depth?: D | undefined) => FlatArray<A, D>[]; at: (index: number) => JSX.Element; findLast: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findLastIndex: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => number; toReversed: () => JSX.Element[]; toSorted: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.Element[]; toSpliced: { (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; (start: number, deleteCount?: number): JSX.Element[]; }; with: (index: number, value: JSX.Element) => JSX.Element[]; __@iterator@906: () => ArrayIterator<JSX.Element>; __@unscopables@908: { [x: number]: boolean | undefined; length?: boolean | undefined; toString?: boolean | undefined; toLocaleString?: boolean | undefined; pop?: boolean | undefined; push?: boolean | undefined; concat?: boolean | undefined; join?: boolean | undefined; reverse?: boolean | undefined; shift?: boolean | undefined; slice?: boolean | undefined; sort?: boolean | undefined; splice?: boolean | undefined; unshift?: boolean | undefined; indexOf?: boolean | undefined; lastIndexOf?: boolean | undefined; every?: boolean | undefined; some?: boolean | undefined; forEach?: boolean | undefined; map?: boolean | undefined; filter?: boolean | undefined; reduce?: boolean | undefined; reduceRight?: boolean | undefined; find?: boolean | undefined; findIndex?: boolean | undefined; fill?: boolean | undefined; copyWithin?: boolean | undefined; entries?: boolean | undefined; keys?: boolean | undefined; values?: boolean | undefined; includes?: boolean | undefined; flatMap?: boolean | undefined; flat?: boolean | undefined; at?: boolean | undefined; findLast?: boolean | undefined; findLastIndex?: boolean | undefined; toReversed?: boolean | undefined; toSorted?: boolean | undefined; toSpliced?: boolean | undefined; with?: boolean | undefined; [Symbol.iterator]?: boolean | undefined; readonly [Symbol.unscopables]?: boolean | undefined; } } | string & {}",
+        "displayType": "undefined | null | number | false | true | Node | { length: number; toString: () => string; toLocaleString: { (): string; (locales: string | string[], options?: Intl.NumberFormatOptions & Intl.DateTimeFormatOptions): string; }; pop: () => JSX.Element; push: (...items: JSX.Element[]) => number; concat: { (...items: ConcatArray<JSX.Element>[]): JSX.Element[]; (...items: (JSX.Element | ConcatArray<JSX.Element>)[]): JSX.Element[]; }; join: (separator?: string) => string; reverse: () => JSX.Element[]; shift: () => JSX.Element; slice: (start?: number, end?: number) => JSX.Element[]; sort: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.ArrayElement; splice: { (start: number, deleteCount?: number): JSX.Element[]; (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; }; unshift: (...items: JSX.Element[]) => number; indexOf: (searchElement: JSX.Element, fromIndex?: number) => number; lastIndexOf: (searchElement: JSX.Element, fromIndex?: number) => number; every: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): this is S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): boolean; }; some: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => boolean; forEach: (callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => void, thisArg?: any) => void; map: <U>(callbackfn: (value: JSX.Element, index: number, array: JSX.Element[]) => U, thisArg?: any) => U[]; filter: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S[]; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element[]; }; reduce: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; reduceRight: { (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element): JSX.Element; (callbackfn: (previousValue: JSX.Element, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => JSX.Element, initialValue: JSX.Element): JSX.Element; <U>(callbackfn: (previousValue: U, currentValue: JSX.Element, currentIndex: number, array: JSX.Element[]) => U, initialValue: U): U; }; find: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findIndex: (predicate: (value: JSX.Element, index: number, obj: JSX.Element[]) => unknown, thisArg?: any) => number; fill: (value: JSX.Element, start?: number, end?: number) => JSX.ArrayElement; copyWithin: (target: number, start: number, end?: number) => JSX.ArrayElement; entries: () => ArrayIterator<[number, JSX.Element]>; keys: () => ArrayIterator<number>; values: () => ArrayIterator<JSX.Element>; includes: (searchElement: JSX.Element, fromIndex?: number) => boolean; flatMap: <U, This = undefined>(callback: (this: This, value: JSX.Element, index: number, array: JSX.Element[]) => U | readonly U[], thisArg?: This | undefined) => U[]; flat: <A, D extends number = 1>(this: A, depth?: D | undefined) => FlatArray<A, D>[]; at: (index: number) => JSX.Element; findLast: { <S extends JSX.Element>(predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => value is S, thisArg?: any): S | undefined; (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any): JSX.Element; }; findLastIndex: (predicate: (value: JSX.Element, index: number, array: JSX.Element[]) => unknown, thisArg?: any) => number; toReversed: () => JSX.Element[]; toSorted: (compareFn?: ((a: JSX.Element, b: JSX.Element) => number) | undefined) => JSX.Element[]; toSpliced: { (start: number, deleteCount: number, ...items: JSX.Element[]): JSX.Element[]; (start: number, deleteCount?: number): JSX.Element[]; }; with: (index: number, value: JSX.Element) => JSX.Element[]; __@iterator@906: () => ArrayIterator<JSX.Element>; __@unscopables@908: { [x: number]: boolean | undefined; length?: boolean | undefined; toString?: boolean | undefined; toLocaleString?: boolean | undefined; pop?: boolean | undefined; push?: boolean | undefined; concat?: boolean | undefined; join?: boolean | undefined; reverse?: boolean | undefined; shift?: boolean | undefined; slice?: boolean | undefined; sort?: boolean | undefined; splice?: boolean | undefined; unshift?: boolean | undefined; indexOf?: boolean | undefined; lastIndexOf?: boolean | undefined; every?: boolean | undefined; some?: boolean | undefined; forEach?: boolean | undefined; map?: boolean | undefined; filter?: boolean | undefined; reduce?: boolean | undefined; reduceRight?: boolean | undefined; find?: boolean | undefined; findIndex?: boolean | undefined; fill?: boolean | undefined; copyWithin?: boolean | undefined; entries?: boolean | undefined; keys?: boolean | undefined; values?: boolean | undefined; includes?: boolean | undefined; flatMap?: boolean | undefined; flat?: boolean | undefined; at?: boolean | undefined; findLast?: boolean | undefined; findLastIndex?: boolean | undefined; toReversed?: boolean | undefined; toSorted?: boolean | undefined; toSpliced?: boolean | undefined; with?: boolean | undefined; [Symbol.iterator]?: boolean | undefined; readonly [Symbol.unscopables]?: boolean | undefined; } } | string & {}",
+        "description": ""
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  },
+  {
+    "name": "ResizableHandle",
+    "group": "UI",
+    "sourceFile": "src/ui/resizable.tsx",
+    "props": [
+      {
+        "name": "withHandle",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [
+      {
+        "name": "onPanelResize",
+        "type": "undefined | (delta: number) => void",
+        "displayType": "undefined | (delta: number) => void",
+        "description": ""
+      }
+    ],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "ResizablePanel",
+    "group": "UI",
+    "sourceFile": "src/ui/resizable.tsx",
+    "props": [
+      {
+        "name": "defaultSize",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "minSize",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "maxSize",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "ResizablePanelGroup",
+    "group": "UI",
+    "sourceFile": "src/ui/resizable.tsx",
+    "props": [
+      {
+        "name": "orientation",
+        "type": "undefined | \"horizontal\" | \"vertical\"",
+        "displayType": "undefined | \"horizontal\" | \"vertical\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'horizontal'"
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "ScrollArea",
+    "group": "UI",
+    "sourceFile": "src/ui/scroll-area.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "Separator",
+    "group": "UI",
+    "sourceFile": "src/ui/separator.tsx",
+    "props": [
+      {
+        "name": "orientation",
+        "type": "undefined | \"horizontal\" | \"vertical\"",
+        "displayType": "undefined | \"horizontal\" | \"vertical\"",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "Skeleton",
+    "group": "UI",
+    "sourceFile": "src/ui/skeleton.tsx",
+    "props": [],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "Textarea",
+    "group": "UI",
+    "sourceFile": "src/ui/textarea.tsx",
+    "props": [
+      {
+        "name": "maxHeight",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "autoResize",
+        "type": "undefined | false | true",
+        "displayType": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      }
+    ],
+    "callbacks": [],
+    "slots": [],
+    "tokens": [],
+    "extendsHtmlAttributes": true,
+    "description": ""
+  },
+  {
+    "name": "Tooltip",
+    "group": "UI",
+    "sourceFile": "src/ui/tooltip.tsx",
+    "props": [
+      {
+        "name": "content",
+        "type": "string",
+        "displayType": "string",
+        "optional": false,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "openDelay",
+        "type": "undefined | number",
+        "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "600"
+      }
+    ],
+    "callbacks": [],
+    "slots": [
+      {
+        "name": "children",
+        "description": ""
+      }
+    ],
+    "tokens": [],
+    "extendsHtmlAttributes": false,
+    "description": ""
+  }
+]

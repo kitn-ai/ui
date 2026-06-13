@@ -11,6 +11,7 @@ import ts from 'typescript';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createTsHelpers } from './_ts-helpers.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const elementsDir = resolve(root, 'src/elements');
@@ -29,13 +30,7 @@ const tsconfig = ts.parseJsonConfigFileContent(
 const program = ts.createProgram(facadeFiles, { ...tsconfig.options, noEmit: true });
 const checker = program.getTypeChecker();
 
-const isScalar = (t) => {
-  if (t.isUnion?.()) return t.types.every(isScalar);
-  const F = ts.TypeFlags;
-  return !!(t.flags & (F.String | F.Number | F.Boolean | F.StringLiteral | F.NumberLiteral | F.BooleanLiteral | F.Undefined | F.Any));
-};
 const toAttr = (name) => name.replace(/([A-Z])/g, '-$1').toLowerCase();
-const jsdocOf = (sym) => ts.displayPartsToString(sym.getDocumentationComment(checker)).replace(/\s+/g, ' ').trim();
 
 // Generated types are FULLY SELF-CONTAINED: every named type is expanded inline
 // (no imports), so the type files don't drag the kit's Solid `.tsx` sources into
@@ -45,53 +40,9 @@ const jsdocOf = (sym) => ts.displayPartsToString(sym.getDocumentationComment(che
 const IMPORTS = {};
 const IMPORTABLE = new Set(Object.keys(IMPORTS));
 
-const isLibSym = (sym) => {
-  const d = sym?.declarations?.[0];
-  return !!d && program.isSourceFileDefaultLibrary(d.getSourceFile());
-};
-
-function renderType(type, decl) {
-  if (type.isUnion()) return [...new Set(type.types.map((t) => renderType(t, decl)))].join(' | ');
-  if (checker.isArrayType(type)) {
-    const elem = checker.getTypeArguments(type)[0];
-    const rendered = renderType(elem, decl);
-    // Parenthesize unions so `(A | B)[]` doesn't mis-parse as `A | (B[])`.
-    return elem.isUnion() ? `(${rendered})[]` : `${rendered}[]`;
-  }
-  const sym = type.aliasSymbol || type.getSymbol();
-  const name = sym?.getName();
-  if (name && IMPORTABLE.has(name)) return name;
-  if (
-    type.flags & ts.TypeFlags.Object &&
-    type.getCallSignatures().length === 0 &&
-    !isLibSym(sym) &&
-    type.getProperties().length
-  ) {
-    const props = type.getProperties().map((s) => {
-      const t = checker.getTypeOfSymbolAtLocation(s, s.valueDeclaration ?? decl);
-      const opt = s.flags & ts.SymbolFlags.Optional ? '?' : '';
-      return `${s.name}${opt}: ${renderType(t, decl)}`;
-    });
-    return `{ ${props.join('; ')} }`;
-  }
-  return checker.typeToString(type, decl, ts.TypeFormatFlags.NoTruncation);
-}
-
-const membersOf = (typeNode) => {
-  if (!typeNode) return [];
-  const type = checker.getTypeFromTypeNode(typeNode);
-  return type.getProperties().map((sym) => {
-    const decl = sym.valueDeclaration ?? sym.declarations?.[0] ?? typeNode;
-    const t = checker.getTypeOfSymbolAtLocation(sym, decl);
-    return {
-      name: sym.name,
-      type: renderType(t, decl),
-      optional: !!(sym.flags & ts.SymbolFlags.Optional),
-      scalar: isScalar(t),
-      description: jsdocOf(sym),
-    };
-  });
-};
+// renderType/membersOf/isScalar/jsdocOf live in _ts-helpers.mjs (shared with
+// gen-component-api.mjs); membersOf here reads a Props/Events *type node*.
+const { membersOfNode: membersOf } = createTsHelpers(program, checker, { importable: IMPORTABLE });
 
 // Render a propDefaults object-literal property value to a short display string.
 function defaultText(initializer) {
@@ -282,4 +233,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Regenerate docs/web-components.md tables between <!-- spec:TAG --> markers.
   const { writeWebComponentsMd } = await import('./gen-web-components-md.mjs');
   writeWebComponentsMd(root, elements);
+  // Phase 2: regenerate the SolidJS/UI component spec in the same build pass.
+  const { generate: generateComponents } = await import('./gen-component-api.mjs');
+  generateComponents();
 }

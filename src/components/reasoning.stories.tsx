@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from './reasoning';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'Components/Reasoning',
@@ -10,14 +11,12 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
-      description: {
-        component: [
-          'A collapsible disclosure for a model\'s thinking/reasoning. Compose `Reasoning` (root) with `ReasoningTrigger` (the toggle) and `ReasoningContent` (the body, with optional markdown).',
-          '**When to use:** to surface an assistant\'s chain-of-thought or scratch reasoning that should be available but collapsed by default. It can auto-open while streaming and auto-close when streaming ends.',
-          '**How to use:** wrap a trigger and content in `Reasoning`. Leave it uncontrolled, or drive it with `open` + `onOpenChange`. Set `isStreaming` to auto-open during generation. Pass `markdown` on `ReasoningContent` to render a markdown string.',
-          '**Placement:** inside or above an assistant message, before the final answer.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A collapsible disclosure for a model\'s thinking/reasoning. Compose `Reasoning` (root) with `ReasoningTrigger` (the toggle) and `ReasoningContent` (the body, with optional markdown).',
+        '**When to use:** to surface an assistant\'s chain-of-thought or scratch reasoning that should be available but collapsed by default. It can auto-open while streaming and auto-close when streaming ends.',
+        '**How to use:** wrap a trigger and content in `Reasoning`. Leave it uncontrolled, or drive it with `open` + `onOpenChange`. Set `isStreaming` to auto-open during generation. Pass `markdown` on `ReasoningContent` to render a markdown string.',
+        '**Placement:** inside or above an assistant message, before the final answer.',
+      ]),
       controls: { exclude: ['use:eventListener'] },
     },
   },

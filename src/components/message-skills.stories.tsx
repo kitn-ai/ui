@@ -3,6 +3,7 @@ import { MessageSkills } from "./message-skills";
 import { Message, MessageContent, MessageActions } from "./message";
 import { ChatConfig } from "../primitives/chat-config";
 import { Copy, ThumbsUp, ThumbsDown } from "lucide-solid";
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: "Components/MessageSkills",
@@ -12,14 +13,12 @@ const meta = {
     layout: "padded",
     docs: {
       controls: { exclude: ["use:eventListener"] },
-      description: {
-        component: [
-          "A row of small badges that label which **skills** were active when a message was generated.",
-          "**When to use:** above an assistant message whose response was shaped by one or more skills (e.g. `Concise`, `ELI5`). Renders nothing when the `skills` array is empty.",
-          "**How to use:** pass a `skills` array of `{ id, name }`; each `name` is shown as a badge. Add `class` (e.g. `mb-1`) to space it from the message body.",
-          "**Placement:** directly above `MessageContent` inside an assistant `Message`.",
-        ].join("\n\n"),
-      },
+      description: componentDescription([
+        "A row of small badges that label which **skills** were active when a message was generated.",
+        "**When to use:** above an assistant message whose response was shaped by one or more skills (e.g. `Concise`, `ELI5`). Renders nothing when the `skills` array is empty.",
+        "**How to use:** pass a `skills` array of `{ id, name }`; each `name` is shown as a badge. Add `class` (e.g. `mb-1`) to space it from the message body.",
+        "**Placement:** directly above `MessageContent` inside an assistant `Message`.",
+      ]),
     },
   },
   argTypes: {

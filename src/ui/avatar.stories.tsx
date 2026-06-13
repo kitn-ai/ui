@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { Avatar } from './avatar';
+import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
   title: 'UI/Avatar',
@@ -9,14 +10,12 @@ const meta = {
     layout: 'padded',
     docs: {
       controls: { exclude: ['use:eventListener'] },
-      description: {
-        component: [
-          'A small, rounded **avatar** that renders an image when `src` is provided and falls back to short initials otherwise.',
-          '**When to use:** to identify the author of a message, a conversation participant, or the current user in a header or list.',
-          '**How to use:** always pass a `fallback` (1–2 initials) and a `size`. Provide `src`/`alt` when you have an image; if the image is missing or fails, the `fallback` text shows instead.',
-          '**Placement:** message rows (next to assistant/user content), conversation list items, account menus, and headers.',
-        ].join('\n\n'),
-      },
+      description: componentDescription([
+        'A small, rounded **avatar** that renders an image when `src` is provided and falls back to short initials otherwise.',
+        '**When to use:** to identify the author of a message, a conversation participant, or the current user in a header or list.',
+        '**How to use:** always pass a `fallback` (1–2 initials) and a `size`. Provide `src`/`alt` when you have an image; if the image is missing or fails, the `fallback` text shows instead.',
+        '**Placement:** message rows (next to assistant/user content), conversation list items, account menus, and headers.',
+      ]),
     },
   },
   argTypes: {
