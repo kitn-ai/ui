@@ -58,9 +58,6 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      // Render in its own iframe in the docs page so the docs wrapper's
-      // transform+overflow doesn't trap/clip this element's shadow-DOM overlay.
-      story: { inline: false, height: '360px' },
       description: {
         component: [
           '`<kitn-model-switcher>` is the framework-agnostic **web component** for picking the active model — a dropdown showing each model\'s name and provider — isolated in **Shadow DOM**. It mirrors the switcher inside `<kitn-chat>` as a standalone, composable piece.',

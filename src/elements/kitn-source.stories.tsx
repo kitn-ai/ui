@@ -51,9 +51,6 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      // Render in its own iframe in the docs page so the docs wrapper's
-      // transform+overflow doesn't trap/clip this element's shadow-DOM overlay.
-      story: { inline: false, height: '360px' },
       description: {
         component: [
           '`<kitn-source>` is the framework-agnostic **web component** for a single citation link with a hover-card preview, isolated in **Shadow DOM**.',

@@ -63,9 +63,6 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      // Render in its own iframe in the docs page so the docs wrapper's
-      // transform+overflow doesn't trap/clip this element's shadow-DOM overlay.
-      story: { inline: false, height: '360px' },
       description: {
         component: [
           '`<kitn-context-meter>` is the framework-agnostic **web component** for a token/context-window usage meter — a compact gauge with a hover-card breakdown (input / output / reasoning / cache + estimated cost) — isolated in **Shadow DOM**.',

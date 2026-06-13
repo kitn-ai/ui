@@ -50,9 +50,6 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      // Render in its own iframe in the docs page so the docs wrapper's
-      // transform+overflow doesn't trap/clip this element's shadow-DOM overlay.
-      story: { inline: false, height: '360px' },
       description: {
         component: [
           '`<kitn-chat-scope-picker>` is the framework-agnostic **web component** for scoping a chat by author or tag — a dropdown that emits the chosen filters — isolated in **Shadow DOM**.',

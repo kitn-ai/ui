@@ -60,9 +60,6 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     docs: {
-      // Render in its own iframe in the docs page so the docs wrapper's
-      // transform+overflow doesn't trap/clip this element's shadow-DOM tooltip.
-      story: { inline: false, height: '200px' },
       description: {
         component: [
           '`<kitn-voice-input>` is the framework-agnostic **web component** for a mic button that records and transcribes audio — isolated in **Shadow DOM**. It is the canonical **function-property** element.',
