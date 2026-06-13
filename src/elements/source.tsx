@@ -5,13 +5,16 @@ import { Source, SourceTrigger, SourceContent, SourceList } from '../components/
 // --- <kitn-source> — a single citation link with hover preview ---
 
 interface SourceProps extends Record<string, unknown> {
+  /** The URL this citation links to (the domain also seeds the default label/favicon). */
   href?: string;
   /** Trigger label (defaults to the domain). */
   label?: string;
   /** Hover-card headline. Attribute: `headline` (`title` is avoided — it's a
    *  global HTML attribute that reflects in a CE constructor and breaks it). */
   headline?: string;
+  /** Hover-card body text describing the source. */
   description?: string;
+  /** Show the source's favicon next to the trigger label. */
   showFavicon?: boolean;
 }
 

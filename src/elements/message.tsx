@@ -18,8 +18,11 @@ interface Props extends Record<string, unknown> {
   content?: string;
   /** Force markdown on/off. Defaults to on for assistant, off for user. */
   markdown?: boolean;
+  /** Text/markdown sizing for the message body. */
   proseSize?: ProseSize;
+  /** Shiki theme name used for fenced code blocks in the content. */
   codeTheme?: string;
+  /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
 }
 

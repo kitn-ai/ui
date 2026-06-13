@@ -7,7 +7,9 @@ interface Props extends Record<string, unknown> {
   label?: string;
   /** Tooltip on hover. */
   tooltip?: string;
+  /** Visual button style. */
   variant?: 'ghost' | 'default' | 'outline';
+  /** Button size (use an `icon*` size for an icon-only checkpoint). */
   size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
 }
 

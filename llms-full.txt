@@ -277,8 +277,8 @@ _No events._
 |---|---|---|---|
 | `label` | `label` | `undefined \| string` | Optional text beside the icon. |
 | `tooltip` | `tooltip` | `undefined \| string` | Tooltip on hover. |
-| `variant` | `variant` | `undefined \| "ghost" \| "default" \| "outline"` |  |
-| `size` | `size` | `undefined \| "sm" \| "lg" \| "md" \| "icon" \| "icon-sm"` |  |
+| `variant` | `variant` | `undefined \| "ghost" \| "default" \| "outline"` | Visual button style. |
+| `size` | `size` | `undefined \| "sm" \| "lg" \| "md" \| "icon" \| "icon-sm"` | Button size (use an `icon*` size for an icon-only checkpoint). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -440,9 +440,9 @@ _No events._
 | `role` | `role` | `undefined \| "user" \| "assistant"` | Convenience for simple cases when not passing a `message` object. |
 | `content` | `content` | `undefined \| string` | Convenience content (used when `message` is not set). |
 | `markdown` | `markdown` | `undefined \| false \| true` | Force markdown on/off. Defaults to on for assistant, off for user. |
-| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` |  |
-| `codeTheme` | `code-theme` | `undefined \| string` |  |
-| `codeHighlight` | `code-highlight` | `undefined \| false \| true` |  |
+| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Text/markdown sizing for the message body. |
+| `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name used for fenced code blocks in the content. |
+| `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting for code blocks (no Shiki loads). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -572,11 +572,11 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `href` | `href` | `undefined \| string` |  |
+| `href` | `href` | `undefined \| string` | The URL this citation links to (the domain also seeds the default label/favicon). |
 | `label` | `label` | `undefined \| string` | Trigger label (defaults to the domain). |
 | `headline` | `headline` | `undefined \| string` | Hover-card headline. Attribute: `headline` (`title` is avoided — it's a global HTML attribute that reflects in a CE constructor and breaks it). |
-| `description` | `description` | `undefined \| string` |  |
-| `showFavicon` | `show-favicon` | `undefined \| false \| true` |  |
+| `description` | `description` | `undefined \| string` | Hover-card body text describing the source. |
+| `showFavicon` | `show-favicon` | `undefined \| false \| true` | Show the source's favicon next to the trigger label. |
 
 _No events._
 

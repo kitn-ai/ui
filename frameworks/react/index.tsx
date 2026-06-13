@@ -108,7 +108,9 @@ export interface KitnCheckpointProps extends KitnBaseProps {
   label?: string;
   /** Tooltip on hover. */
   tooltip?: string;
+  /** Visual button style. */
   variant?: "ghost" | "default" | "outline";
+  /** Button size (use an `icon*` size for an icon-only checkpoint). */
   size?: "sm" | "lg" | "md" | "icon" | "icon-sm";
   /** The checkpoint was clicked. */
   onSelect?: (event: CustomEvent) => void;
@@ -266,8 +268,11 @@ export interface KitnMessageProps extends KitnBaseProps {
   content?: string;
   /** Force markdown on/off. Defaults to on for assistant, off for user. */
   markdown?: boolean;
+  /** Text/markdown sizing for the message body. */
   proseSize?: "xs" | "sm" | "base" | "lg";
+  /** Shiki theme name used for fenced code blocks in the content. */
   codeTheme?: string;
+  /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
   /** An action button was clicked. */
   onMessageaction?: (event: CustomEvent<{ messageId: string; action: "copy" | "like" | "dislike" | "regenerate" | "edit" }>) => void;
@@ -391,12 +396,15 @@ export const KitnResponseStream = createKitnComponent<KitnResponseStreamProps>(
 );
 
 export interface KitnSourceProps extends KitnBaseProps {
+  /** The URL this citation links to (the domain also seeds the default label/favicon). */
   href?: string;
   /** Trigger label (defaults to the domain). */
   label?: string;
   /** Hover-card headline. Attribute: `headline` (`title` is avoided — it's a global HTML attribute that reflects in a CE constructor and breaks it). */
   headline?: string;
+  /** Hover-card body text describing the source. */
   description?: string;
+  /** Show the source's favicon next to the trigger label. */
   showFavicon?: boolean;
 }
 
