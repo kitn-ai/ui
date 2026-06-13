@@ -93,6 +93,31 @@ const membersOf = (typeNode) => {
   });
 };
 
+// Render a propDefaults object-literal property value to a short display string.
+function defaultText(initializer) {
+  if (!initializer) return undefined;
+  if (ts.isStringLiteralLike(initializer)) return `'${initializer.text}'`;
+  if (initializer.kind === ts.SyntaxKind.TrueKeyword) return 'true';
+  if (initializer.kind === ts.SyntaxKind.FalseKeyword) return 'false';
+  if (ts.isNumericLiteral(initializer)) return initializer.text;
+  if (initializer.kind === ts.SyntaxKind.UndefinedKeyword || initializer.getText() === 'undefined') return undefined;
+  if (ts.isArrayLiteralExpression(initializer)) return initializer.elements.length ? '[…]' : '[]';
+  if (ts.isObjectLiteralExpression(initializer)) return '{…}';
+  return initializer.getText();
+}
+// Map prop name -> default display string from the propDefaults object literal (arg 1).
+function defaultsFrom(objLiteralNode) {
+  const out = {};
+  if (objLiteralNode && ts.isObjectLiteralExpression(objLiteralNode)) {
+    for (const p of objLiteralNode.properties) {
+      if (ts.isPropertyAssignment(p) && (ts.isIdentifier(p.name) || ts.isStringLiteral(p.name))) {
+        out[p.name.text] = defaultText(p.initializer);
+      }
+    }
+  }
+  return out;
+}
+
 // collect dispatch('name') literals per source file
 const dispatchNames = (sourceFile) => {
   const names = new Set();
@@ -122,6 +147,8 @@ for (const file of facadeFiles) {
       if (!tagArg || !ts.isStringLiteralLike(tagArg)) return;
       const tag = tagArg.text;
       const props = membersOf(node.typeArguments?.[0]);
+      const defaults = defaultsFrom(node.arguments[1]);
+      for (const p of props) p.default = defaults[p.name];
       const typedEvents = membersOf(node.typeArguments?.[1]);
       const detailByName = new Map(typedEvents.map((e) => [e.name, e]));
       // union of typed events and dispatch() literals seen in the file
@@ -185,10 +212,8 @@ export { elements, toAttr, tagToClass, IMPORTS };
 
 // run the sibling generators if present (types + react)
 if (import.meta.url === `file://${process.argv[1]}`) {
-  if (process.env.DUMP) {
-    writeFileSync(resolve(root, '.element-meta.json'), JSON.stringify(elements, null, 2));
-    console.log('✓ dumped .element-meta.json');
-  }
+  writeFileSync(resolve(root, 'src/elements/element-meta.json'), JSON.stringify(elements, null, 2) + '\n');
+  console.log(`✓ src/elements/element-meta.json — ${elements.length} elements`);
   for (const mod of ['./gen-element-types.mjs', './gen-element-react.mjs']) {
     try {
       const m = await import(mod);
