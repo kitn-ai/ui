@@ -121,8 +121,21 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
   ));
 
   function handleInput(e: InputEvent & { currentTarget: HTMLTextAreaElement }) {
-    adjustHeight(e.currentTarget);
-    ctx.setValue(e.currentTarget.value);
+    const el = e.currentTarget;
+    let value = el.value;
+    // Disallow leading whitespace — a prompt can't start with a space or blank
+    // line. Strip it (covers typing a space at the start AND pasting) and keep
+    // the caret in the right place.
+    if (/^\s/.test(value)) {
+      const stripped = value.replace(/^\s+/, '');
+      const removed = value.length - stripped.length;
+      const caret = Math.max(0, (el.selectionStart ?? 0) - removed);
+      el.value = stripped;
+      el.setSelectionRange(caret, caret);
+      value = stripped;
+    }
+    adjustHeight(el);
+    ctx.setValue(value);
   }
 
   function handleKeyDown(e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) {

@@ -77,6 +77,29 @@ test('suggestionMode "fill": clicking a suggestion fills the input and emits sug
   el.remove();
 });
 
+test('disallows leading whitespace at the start of the prompt', async () => {
+  const el = document.createElement('kitn-prompt-input') as HTMLElement & { value?: string };
+  document.body.appendChild(el);
+  await Promise.resolve();
+
+  const textarea = el.shadowRoot!.querySelector('textarea')!;
+  let changed: string | null = null;
+  el.addEventListener('valuechange', (e) => (changed = (e as CustomEvent).detail.value));
+
+  // Leading spaces are stripped on input.
+  textarea.value = '   hello';
+  textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+  expect(textarea.value).toBe('hello');
+  expect(changed).toBe('hello');
+
+  // A lone leading space collapses to empty (hitting space at the start does nothing).
+  textarea.value = ' ';
+  textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+  expect(textarea.value).toBe('');
+
+  el.remove();
+});
+
 test('slash command: selecting (Enter) inserts the command into the input', async () => {
   const el = document.createElement('kitn-prompt-input') as HTMLElement & {
     slashCommands?: { id: string; label: string; description?: string }[];
