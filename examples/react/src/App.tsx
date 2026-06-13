@@ -1,40 +1,43 @@
 /**
- * kitn-chat React example
+ * kitn-chat React example — using the generated wrappers.
  *
- * The kit is built with SolidJS, but ships framework-agnostic custom elements
- * (web components). Importing '@kitnai/chat/elements' registers
- * <kitn-chat>, <kitn-conversation-list>, and <kitn-prompt-input> as side effects.
+ * The kit is built with SolidJS but ships framework-agnostic custom elements.
+ * `@kitnai/chat/react` provides typed React wrappers (KitnChat, KitnPromptInput,
+ * KitnConversationList, …) that make the elements feel native:
+ *   - array/object props (messages, models, conversations, suggestions, context,
+ *     slashCommands) are passed as React props and assigned as live DOM
+ *     *properties* (NOT stringified to attributes);
+ *   - boolean props (loading) reflect correctly;
+ *   - events are `on<Event>` handlers (onSubmit, onModelchange, onSelect, …)
+ *     wired to the elements' CustomEvents under the hood;
+ *   - refs are forwarded; `theme`/`style`/`className`/`id` pass through.
  *
- * React (even v19) doesn't set DOM *properties* on custom elements — it only
- * sets *attributes*, which stringify objects to "[object Object]". The fix:
- *   1. Give each element a ref.
- *   2. In a useEffect, set the JS properties directly on the DOM node.
- *   3. In the same effect, attach native addEventListener listeners for custom events.
- *   4. Return a cleanup function that removes the listeners.
+ * We must still register the elements once as a side effect.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
-// Side-effect import: registers the three custom elements globally.
+// Side-effect import: registers the custom elements globally.
 import '@kitnai/chat/elements';
+// Typed React wrappers — the whole point of this example.
+import { KitnChat, KitnConversationList, KitnPromptInput } from '@kitnai/chat/react';
 
 // --- types ------------------------------------------------------------------
+
+type MessageAction = 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit';
 
 type ChatMessage = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  reasoning?: { label: string; text: string };
-  tools?: unknown[];
-  attachments?: { id: string; type: string; filename: string; mediaType?: string; url?: string; title?: string }[];
-  actions?: string[];
+  actions?: MessageAction[];
 };
 
 type Conversation = {
   id: string;
   title: string;
   groupId: string;
-  scope: { type: string };
+  scope: { type: 'document' | 'collection' };
   messageCount: number;
   lastMessageAt: string;
   updatedAt: string;
@@ -47,6 +50,7 @@ type Group = {
   createdAt: string;
 };
 
+type Model = { id: string; name: string; provider?: string };
 type Theme = 'light' | 'dark' | 'auto';
 
 // --- seed data ---------------------------------------------------------------
@@ -64,13 +68,11 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
 
 const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
   'c-1': [
-    {
-      id: 'm1', role: 'user',
-      content: 'How do I use kitn-chat web components inside a React app?',
-    },
+    { id: 'm1', role: 'user', content: 'How do I use kitn-chat web components inside a React app?' },
     {
       id: 'm2', role: 'assistant', actions: ['copy', 'like', 'dislike'],
-      content: "Import `'@kitnai/chat/elements'` as a side effect to register the custom elements, then use `ref` + `useEffect` to set JS *properties* (not attributes) and wire up `addEventListener` for custom events.\n\n```tsx\nconst chatRef = useRef<HTMLElement>(null);\n\nuseEffect(() => {\n  const el = chatRef.current;\n  if (!el) return;\n  el.messages = messages;\n  const handler = (e) => console.log(e.detail);\n  el.addEventListener('submit', handler);\n  return () => el.removeEventListener('submit', handler);\n}, [messages]);\n```\n\nThis example shows the full pattern in action.",
+      content:
+        "Just use the wrappers from `@kitnai/chat/react`:\n\n```tsx\nimport { KitnChat } from '@kitnai/chat/react';\n\n<KitnChat\n  messages={messages}\n  models={models}\n  onSubmit={(e) => console.log(e.detail)}\n  theme=\"auto\"\n/>\n```\n\nArrays/objects are passed as props and become live DOM properties; events arrive as `on<Event>` callbacks. No refs or `useEffect` needed.",
     },
   ],
   'c-2': [
@@ -89,10 +91,24 @@ const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
   ],
 };
 
+const MODELS: Model[] = [
+  { id: 'sonnet', name: 'Claude Sonnet', provider: 'Anthropic' },
+  { id: 'opus', name: 'Claude Opus', provider: 'Anthropic' },
+  { id: 'haiku', name: 'Claude Haiku', provider: 'Anthropic' },
+];
+
+const CONTEXT = { usedTokens: 8200, maxTokens: 200_000, inputTokens: 6400, outputTokens: 1800 };
+
 const SUGGESTIONS = [
   'How do custom events work in React?',
   'Show me a streaming example',
   'What is SolidJS?',
+];
+
+const SLASH_COMMANDS = [
+  { id: 'summarize', label: '/summarize', description: 'Summarize the conversation', category: 'Actions' },
+  { id: 'explain', label: '/explain', description: 'Explain the last message', category: 'Actions' },
+  { id: 'translate', label: '/translate', description: 'Translate to another language', category: 'Actions' },
 ];
 
 // --- helpers -----------------------------------------------------------------
@@ -102,14 +118,11 @@ function generateId() {
 }
 
 function buildReply(text: string): string {
-  return `Thanks for your message!\n\n> ${text}\n\nThis is a canned demo reply. In a real app, wire the \`submit\` event to your backend and stream the model's response into the \`messages\` prop.`;
+  return `Thanks for your message!\n\n> ${text}\n\nThis canned reply was appended to the \`messages\` prop in React state — proving array round-tripping through the wrapper.`;
 }
 
 /** "Streams" a reply word-by-word, updating state on each tick. */
-function streamReply(
-  fullText: string,
-  onChunk: (partial: string, done: boolean) => void,
-): () => void {
+function streamReply(fullText: string, onChunk: (partial: string, done: boolean) => void): () => void {
   const words = fullText.split(' ');
   let i = 0;
   const timer = setInterval(() => {
@@ -122,8 +135,6 @@ function streamReply(
   return () => clearInterval(timer);
 }
 
-// --- Sun / Moon SVG icons ----------------------------------------------------
-
 const SUN_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
 const MOON_SVG =
@@ -132,185 +143,141 @@ const MOON_SVG =
 // --- component ---------------------------------------------------------------
 
 export default function App() {
-  // ---- state
   const [theme, setTheme] = useState<Theme>('auto');
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
   const [activeId, setActiveId] = useState('c-1');
   const [allMessages, setAllMessages] = useState<Record<string, ChatMessage[]>>(INITIAL_MESSAGES);
+  const [currentModel, setCurrentModel] = useState('sonnet');
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [draftSubmissions, setDraftSubmissions] = useState<string[]>([]);
 
-  // Convenience: messages for the active conversation.
+  // Messages for the active conversation (a real array prop, not stringified).
   const messages = allMessages[activeId] ?? [];
 
-  // ---- refs to the custom elements
-  const chatRef = useRef<HTMLElement>(null);
-  const listRef = useRef<HTMLElement>(null);
-
-  // ---- dark-mode derivation
   const systemDark =
     typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
   const isDark = theme === 'dark' || (theme === 'auto' && systemDark);
 
-  // ---- toast helper
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 1600);
   }
 
-  // ---- Wire <kitn-chat> properties + events ---------------------------------
-  useEffect(() => {
-    const el = chatRef.current;
-    if (!el) return;
+  // ---- KitnChat handlers ----------------------------------------------------
+  function handleSubmit(e: CustomEvent) {
+    const { value, attachments } = (e.detail ?? {}) as { value?: string; attachments?: unknown[] };
+    const text = (value ?? '').trim();
+    if (!text && !(attachments ?? []).length) return;
 
-    // Set JS properties (React would stringify these as attributes otherwise)
-    (el as unknown as Record<string, unknown>)['messages'] = messages;
-    (el as unknown as Record<string, unknown>)['suggestions'] = SUGGESTIONS;
-    (el as unknown as Record<string, unknown>)['loading'] = loading;
-    (el as unknown as Record<string, unknown>)['theme'] = theme;
-  }, [messages, loading, theme]);
+    const userMsg: ChatMessage = { id: 'u' + generateId(), role: 'user', content: text };
+    const replyId = 'a' + generateId();
 
-  useEffect(() => {
-    const el = chatRef.current;
-    if (!el) return;
+    // Append to the messages array in React state → re-renders KitnChat with a
+    // NEW array prop, which the wrapper re-assigns as the element's `messages`.
+    setAllMessages((prev) => ({
+      ...prev,
+      [activeId]: [...(prev[activeId] ?? []), userMsg, { id: replyId, role: 'assistant', content: '' }],
+    }));
+    setLoading(true);
 
-    // `submit` — user sends a message
-    function onSubmit(e: Event) {
-      const { value, attachments } = (e as CustomEvent<{ value: string; attachments: unknown[] }>).detail;
-      const text = (value ?? '').trim();
-      if (!text && !(attachments ?? []).length) return;
-
-      const userMsg: ChatMessage = {
-        id: 'u' + generateId(),
-        role: 'user',
-        content: text,
-      };
-      const replyId = 'a' + generateId();
-
+    streamReply(buildReply(text || 'your attachment'), (partial, done) => {
       setAllMessages((prev) => ({
         ...prev,
-        [activeId]: [...(prev[activeId] ?? []), userMsg, { id: replyId, role: 'assistant', content: '' }],
+        [activeId]: (prev[activeId] ?? []).map((m) =>
+          m.id === replyId
+            ? { ...m, content: partial, actions: done ? (['copy', 'like', 'dislike', 'regenerate'] as MessageAction[]) : undefined }
+            : m,
+        ),
+      }));
+      if (done) setLoading(false);
+    });
+  }
+
+  async function handleMessageAction(e: CustomEvent) {
+    const { messageId, action } = (e.detail ?? {}) as { messageId: string; action: string };
+    const msgs = allMessages[activeId] ?? [];
+    const msg = msgs.find((m) => m.id === messageId);
+    if (!msg) return;
+
+    if (action === 'copy') {
+      try { await navigator.clipboard.writeText(msg.content); showToast('Copied to clipboard'); }
+      catch { showToast('Copy failed'); }
+    } else if (action === 'like') {
+      showToast('Glad it helped!');
+    } else if (action === 'dislike') {
+      showToast('Thanks — noted.');
+    } else if (action === 'regenerate') {
+      const idx = msgs.findIndex((m) => m.id === messageId);
+      const replyId = 'a' + generateId();
+      setAllMessages((prev) => ({
+        ...prev,
+        [activeId]: [
+          ...(prev[activeId] ?? []).slice(0, idx),
+          { id: replyId, role: 'assistant' as const, content: '' },
+        ],
       }));
       setLoading(true);
-
-      streamReply(buildReply(text || 'your attachment'), (partial, done) => {
+      streamReply(buildReply('regenerated answer'), (partial, done) => {
         setAllMessages((prev) => ({
           ...prev,
           [activeId]: (prev[activeId] ?? []).map((m) =>
             m.id === replyId
-              ? { ...m, content: partial, actions: done ? ['copy', 'like', 'dislike', 'regenerate'] : undefined }
+              ? { ...m, content: partial, actions: done ? (['copy', 'like', 'dislike', 'regenerate'] as MessageAction[]) : undefined }
               : m,
           ),
         }));
         if (done) setLoading(false);
       });
     }
+  }
 
-    // `messageaction` — copy / like / dislike / regenerate
-    async function onMessageAction(e: Event) {
-      const { messageId, action } = (e as CustomEvent<{ messageId: string; action: string }>).detail;
-      const msgs = allMessages[activeId] ?? [];
-      const msg = msgs.find((m) => m.id === messageId);
-      if (!msg) return;
+  function handleModelChange(e: CustomEvent) {
+    const { modelId } = (e.detail ?? {}) as { modelId: string };
+    setCurrentModel(modelId);
+    showToast(`Model → ${MODELS.find((m) => m.id === modelId)?.name ?? modelId}`);
+  }
 
-      if (action === 'copy') {
-        try { await navigator.clipboard.writeText(msg.content); showToast('Copied to clipboard'); }
-        catch { showToast('Copy failed'); }
-      } else if (action === 'like') {
-        showToast('Glad it helped!');
-      } else if (action === 'dislike') {
-        showToast('Thanks — noted.');
-      } else if (action === 'regenerate') {
-        const idx = msgs.findIndex((m) => m.id === messageId);
-        const replyId = 'a' + generateId();
-        setAllMessages((prev) => ({
-          ...prev,
-          [activeId]: [
-            ...(prev[activeId] ?? []).slice(0, idx),
-            { id: replyId, role: 'assistant' as const, content: '' },
-          ],
-        }));
-        setLoading(true);
-        streamReply(buildReply('regenerated answer'), (partial, done) => {
-          setAllMessages((prev) => ({
-            ...prev,
-            [activeId]: (prev[activeId] ?? []).map((m) =>
-              m.id === replyId
-                ? { ...m, content: partial, actions: done ? ['copy', 'like', 'dislike', 'regenerate'] : undefined }
-                : m,
-            ),
-          }));
-          if (done) setLoading(false);
-        });
-      }
-    }
+  // ---- KitnConversationList handlers ----------------------------------------
+  function handleSelect(e: CustomEvent) {
+    const { id } = (e.detail ?? {}) as { id: string };
+    setActiveId(id);
+    document.body.classList.remove('sidebar-open');
+  }
 
-    el.addEventListener('submit', onSubmit);
-    el.addEventListener('messageaction', onMessageAction);
-    return () => {
-      el.removeEventListener('submit', onSubmit);
-      el.removeEventListener('messageaction', onMessageAction);
+  function handleNewChat() {
+    const id = 'c-' + generateId();
+    const newConv: Conversation = {
+      id,
+      title: 'New chat',
+      groupId: 'g-work',
+      scope: { type: 'collection' },
+      messageCount: 0,
+      lastMessageAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeId, allMessages]);
+    setConversations((prev) => [newConv, ...prev]);
+    setAllMessages((prev) => ({ ...prev, [id]: [] }));
+    setActiveId(id);
+    document.body.classList.remove('sidebar-open');
+  }
 
-  // ---- Wire <kitn-conversation-list> properties + events --------------------
-  useEffect(() => {
-    const el = listRef.current;
-    if (!el) return;
-    (el as unknown as Record<string, unknown>)['groups'] = GROUPS;
-    (el as unknown as Record<string, unknown>)['conversations'] = conversations;
-    (el as unknown as Record<string, unknown>)['activeId'] = activeId;
-    (el as unknown as Record<string, unknown>)['theme'] = theme;
-  }, [conversations, activeId, theme]);
+  function handleToggleSidebar() {
+    document.body.classList.toggle('sidebar-open');
+  }
 
-  useEffect(() => {
-    const el = listRef.current;
-    if (!el) return;
+  // ---- standalone KitnPromptInput handler -----------------------------------
+  function handleStandaloneSubmit(e: CustomEvent) {
+    const { value } = (e.detail ?? {}) as { value?: string };
+    const text = (value ?? '').trim();
+    if (!text) return;
+    setDraftSubmissions((prev) => [text, ...prev].slice(0, 5));
+  }
 
-    function onSelect(e: Event) {
-      const { id } = (e as CustomEvent<{ id: string }>).detail;
-      setActiveId(id);
-      document.body.classList.remove('sidebar-open');
-    }
-
-    function onNewChat() {
-      const id = 'c-' + generateId();
-      const newConv: Conversation = {
-        id,
-        title: 'New chat',
-        groupId: 'g-work',
-        scope: { type: 'collection' },
-        messageCount: 0,
-        lastMessageAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setConversations((prev) => [newConv, ...prev]);
-      setAllMessages((prev) => ({ ...prev, [id]: [] }));
-      setActiveId(id);
-      document.body.classList.remove('sidebar-open');
-    }
-
-    function onToggleSidebar() {
-      document.body.classList.toggle('sidebar-open');
-    }
-
-    el.addEventListener('select', onSelect);
-    el.addEventListener('newchat', onNewChat);
-    el.addEventListener('togglesidebar', onToggleSidebar);
-    return () => {
-      el.removeEventListener('select', onSelect);
-      el.removeEventListener('newchat', onNewChat);
-      el.removeEventListener('togglesidebar', onToggleSidebar);
-    };
-  }, []);
-
-  // ---- theme toggle ---------------------------------------------------------
   function toggleTheme() {
     setTheme((prev) => (prev === 'light' || (prev === 'auto' && !isDark) ? 'dark' : 'light'));
   }
 
-  // ---- render ---------------------------------------------------------------
   return (
     <div
       style={{
@@ -336,7 +303,7 @@ export default function App() {
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 14 }}>
           <img src="../shared/logo.svg" alt="" width={20} height={20} />
-          kitn-chat · React example
+          kitn-chat · React example (generated wrappers)
         </span>
 
         <button
@@ -354,7 +321,6 @@ export default function App() {
             color: isDark ? '#fafafa' : '#18181b',
             cursor: 'pointer',
           }}
-          // Inline SVG via dangerouslySetInnerHTML so we don't need an icon lib
           dangerouslySetInnerHTML={{ __html: isDark ? MOON_SVG : SUN_SVG }}
         />
       </header>
@@ -362,12 +328,17 @@ export default function App() {
       {/* Main area: sidebar + chat */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         {/*
-          <kitn-conversation-list> is a custom element.
-          We render it as a plain JSX tag (typed in global.d.ts) and pass a ref.
-          All data and event listeners are wired in the useEffect hooks above.
+          Native-feeling React: array/object props + on<Event> handlers + theme.
+          No ref / useEffect / addEventListener in sight.
         */}
-        <kitn-conversation-list
-          ref={listRef}
+        <KitnConversationList
+          groups={GROUPS}
+          conversations={conversations}
+          activeId={activeId}
+          theme={theme}
+          onSelect={handleSelect}
+          onNewchat={handleNewChat}
+          onTogglesidebar={handleToggleSidebar}
           style={{
             width: 300,
             flexShrink: 0,
@@ -375,14 +346,46 @@ export default function App() {
           }}
         />
 
-        {/*
-          <kitn-chat> is a custom element.
-          Same pattern: ref + useEffect for properties and events.
-        */}
-        <kitn-chat
-          ref={chatRef}
+        <KitnChat
+          messages={messages}
+          models={MODELS}
+          currentModel={currentModel}
+          context={CONTEXT}
+          suggestions={SUGGESTIONS}
+          slashCommands={SLASH_COMMANDS}
+          loading={loading}
+          theme={theme}
+          onSubmit={handleSubmit}
+          onModelchange={handleModelChange}
+          onMessageaction={handleMessageAction}
           style={{ flex: 1, minWidth: 0 }}
         />
+      </div>
+
+      {/* Standalone KitnPromptInput — proves a leaf wrapper works on its own. */}
+      <div
+        style={{
+          borderTop: `1px solid ${isDark ? '#27272a' : '#e5e5e5'}`,
+          padding: '10px 14px',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6 }}>
+          Standalone &lt;KitnPromptInput&gt; (try typing <code>/</code> for slash commands):
+        </div>
+        <KitnPromptInput
+          placeholder="Standalone prompt input…"
+          slashCommands={SLASH_COMMANDS}
+          theme={theme}
+          onSubmit={handleStandaloneSubmit}
+        />
+        {draftSubmissions.length > 0 && (
+          <ul style={{ fontSize: 12, opacity: 0.7, margin: '8px 0 0', paddingLeft: 18 }}>
+            {draftSubmissions.map((d, i) => (
+              <li key={i}>submitted: {d}</li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Toast notification */}

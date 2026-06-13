@@ -1,0 +1,21 @@
+{
+  "comment": "Typechecks the React wrapper tests (tests/react/) in a React-JSX context. Separate from tsconfig.react.json (which typechecks the published wrappers) and from the Solid src/ build.",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@kitnai/chat/react": ["./frameworks/react/index.tsx"],
+      "@kitnai/chat/elements": ["./tests/react/elements-stub.d.ts"]
+    }
+  },
+  "include": ["tests/react/**/*.ts", "tests/react/**/*.tsx"]
+}

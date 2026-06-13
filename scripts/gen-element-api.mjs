@@ -52,7 +52,12 @@ const isLibSym = (sym) => {
 
 function renderType(type, decl) {
   if (type.isUnion()) return [...new Set(type.types.map((t) => renderType(t, decl)))].join(' | ');
-  if (checker.isArrayType(type)) return `${renderType(checker.getTypeArguments(type)[0], decl)}[]`;
+  if (checker.isArrayType(type)) {
+    const elem = checker.getTypeArguments(type)[0];
+    const rendered = renderType(elem, decl);
+    // Parenthesize unions so `(A | B)[]` doesn't mis-parse as `A | (B[])`.
+    return elem.isUnion() ? `(${rendered})[]` : `${rendered}[]`;
+  }
   const sym = type.aliasSymbol || type.getSymbol();
   const name = sym?.getName();
   if (name && IMPORTABLE.has(name)) return name;
