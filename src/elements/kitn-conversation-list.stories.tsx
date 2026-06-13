@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers <kitn-chat>, <kitn-conversation-list>, <kitn-prompt-input>
 import type { ConversationGroup, ConversationSummary } from '../types';
+import { ElementSpec } from '../stories/docs/element-spec';
+import { argTypesFor } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -56,25 +58,34 @@ const sampleConversations: ConversationSummary[] = [
   },
 ];
 
+type ConversationListEl = HTMLElement & {
+  groups?: ConversationGroup[];
+  conversations?: ConversationSummary[];
+  activeId?: string;
+};
+
 /** Live demo of the actual `<kitn-conversation-list>` custom element (Shadow DOM and all). */
-function ConversationListElement() {
-  let el:
-    | (HTMLElement & {
-        groups?: ConversationGroup[];
-        conversations?: ConversationSummary[];
-        activeId?: string;
-      })
-    | undefined;
+function ConversationListElement(props: { args?: Record<string, unknown> }) {
+  let el: ConversationListEl | undefined;
   onMount(() => {
     if (el) {
+      // Fixed array data
       el.groups = sampleGroups;
       el.conversations = sampleConversations;
       el.activeId = 'c-1';
+      // Scalar args from Controls
+      const args = props.args;
+      if (args) {
+        const scalarNames = ['activeId'];
+        for (const name of scalarNames) {
+          if (name in args) (el as unknown as Record<string, unknown>)[name] = args[name];
+        }
+      }
     }
   });
   return (
     <kitn-conversation-list
-      ref={(e) => (el = e as HTMLElement)}
+      ref={(e) => (el = e as ConversationListEl)}
       style={{ display: 'block', width: '300px', height: '560px' }}
     />
   );
@@ -144,6 +155,7 @@ function Sidebar() {
 const meta = {
   title: 'Web Components/kitn-conversation-list',
   tags: ['autodocs'],
+  argTypes: argTypesFor('kitn-conversation-list'),
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -165,7 +177,10 @@ type Story = StoryObj;
 
 /** The element used the plain-HTML / any-framework way. */
 export const Default: Story = {
-  render: () => <ConversationListElement />,
+  args: {
+    activeId: 'c-1',
+  },
+  render: (args: Record<string, unknown>) => <ConversationListElement args={args} />,
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
 };
 
@@ -174,4 +189,10 @@ export const InSolidJS: Story = {
   name: 'In SolidJS',
   render: () => <ConversationListElement />,
   parameters: { docs: { source: { code: SOLID_SNIPPET, language: 'tsx' } } },
+};
+
+/** Full generated API reference — properties, events, tokens, and the SolidJS components this element is composed from. */
+export const API: Story = {
+  render: () => <ElementSpec tag="kitn-conversation-list" />,
+  parameters: { layout: 'padded' },
 };
