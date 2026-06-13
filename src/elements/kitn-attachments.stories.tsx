@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
 import type { AttachmentData } from '../components/attachments';
+import { ElementSpec } from '../stories/docs/element-spec';
+import { argTypesFor } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -125,6 +127,7 @@ const HOVER_SNIPPET = `<!-- inline/list chips with a hover-card image preview --
 const meta = {
   title: 'Web Components/kitn-attachments',
   tags: ['autodocs'],
+  argTypes: argTypesFor('kitn-attachments'),
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -142,6 +145,12 @@ const meta = {
 
 export default meta;
 type Story = StoryObj;
+
+/** Full generated API reference — properties, events, tokens, and composed-from. */
+export const API: Story = {
+  render: () => <ElementSpec tag="kitn-attachments" />,
+  parameters: { layout: 'padded' },
+};
 
 /** Visual tiles (the default `grid` variant) — image attachments render as real
  *  `<img>` thumbnails; non-image files fall back to a media-type icon. */

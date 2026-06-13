@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
+import { ElementSpec } from '../stories/docs/element-spec';
+import { argTypesFor } from '../stories/docs/element-controls';
 
 interface Step {
   label: string;
@@ -50,6 +52,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 const meta = {
   title: 'Web Components/kitn-chain-of-thought',
   tags: ['autodocs'],
+  argTypes: argTypesFor('kitn-chain-of-thought'),
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -67,6 +70,12 @@ const meta = {
 
 export default meta;
 type Story = StoryObj;
+
+/** Full generated API reference — properties, events, tokens, and composed-from. */
+export const API: Story = {
+  render: () => <ElementSpec tag="kitn-chain-of-thought" />,
+  parameters: { layout: 'padded' },
+};
 
 /** A three-step reasoning trace; the last step has no detail. */
 export const Default: Story = {
