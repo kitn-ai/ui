@@ -57,13 +57,15 @@ defineKitnElement<Props>('kitn-chat-workspace', {
   sidebarWidth: 22, sidebarMinWidth: 200, sidebarMaxWidth: 420, sidebarCollapsed: false,
 }, (props, { dispatch, flag }) => {
   // Collapse is internal UI state; `sidebarCollapsed` only sets the initial value
-  // (not a controlled binding). Toggling re-renders the <Show> below, which
-  // remounts <ChatThread> — fine because the input value is controlled via
-  // `props.value` when the host owns it.
+  // (not a controlled binding).
   const [collapsed, setCollapsed] = createSignal(props.sidebarCollapsed === true);
   const toggle = () => { const next = !collapsed(); setCollapsed(next); dispatch('sidebartoggle', { collapsed: next }); };
 
-  const thread = () => (
+  // Create the thread ONCE and reference the same node in both <Show> branches.
+  // It's owned by this component root (not by a Show branch), so toggling the
+  // sidebar moves the node between branches without disposing it — the thread's
+  // own state (e.g. an uncontrolled draft) survives the collapse/expand.
+  const threadEl = (
     <ChatThread
       messages={props.messages} value={props.value as string | undefined} placeholder={props.placeholder as string}
       loading={flag('loading')} suggestions={props.suggestions as string[] | undefined}
@@ -98,7 +100,7 @@ defineKitnElement<Props>('kitn-chat-workspace', {
             >
               <PanelLeftOpen class="size-4" />
             </Button>
-            {thread()}
+            {threadEl}
           </div>
         }
       >
@@ -112,7 +114,7 @@ defineKitnElement<Props>('kitn-chat-workspace', {
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel>{thread()}</ResizablePanel>
+          <ResizablePanel>{threadEl}</ResizablePanel>
         </ResizablePanelGroup>
       </Show>
     </div>
