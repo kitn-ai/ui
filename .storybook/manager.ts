@@ -7,7 +7,20 @@ import { addons } from 'storybook/manager-api';
 // groups; Components/* stories (which use controls) keep their panel.
 const NO_PANEL_PREFIXES = ['Examples/', 'Patterns/', 'Theming/'];
 
+// The `Components` and `UI` groups are the SolidJS-native components/primitives
+// (their stories show Solid JSX). The `Web Components` group is the
+// framework-agnostic `<kitn-*>` API. Tag the two Solid groups in the sidebar so
+// a reader copying code never mistakes a Solid component for a custom element.
+// Done via renderLabel (display only) so no story IDs change.
+const SOLID_GROUPS = new Set(['Components', 'UI']);
+
 addons.setConfig({
+  sidebar: {
+    renderLabel: (item) =>
+      item.type === 'root' && SOLID_GROUPS.has(item.name)
+        ? `${item.name} · SolidJS`
+        : item.name,
+  },
   layoutCustomisations: {
     showPanel(state, defaultValue) {
       const title = state.index?.[state.storyId]?.title ?? '';
