@@ -52,7 +52,6 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
-    "@kobalte/core": "^0.13.0",
     "@shikijs/langs": "^4.2.0",
     "@shikijs/themes": "^4.2.0",
     "class-variance-authority": "^0.7.0",

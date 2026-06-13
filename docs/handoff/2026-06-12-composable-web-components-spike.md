@@ -8,7 +8,28 @@ Comprehensive resume doc for the `spike/composable-web-components` branch. Super
 
 We turned the kit's SolidJS primitives into a full set of **composable, framework-agnostic web components** (compose in plain HTML / React / Vue, not just the batteries-included `<kitn-chat>`). 28 element tags total, all on the branch, **nothing merged** — the publish firewall holds (npm publishes only when this branch merges to `main` → a release-please PR is merged). 27 commits. Bundle ~**100 KB gzip** (main chunk).
 
-The build-out is done. Remaining work is: **Vue wrappers** (optional), a **508/WCAG accessibility pass** (real violations found — see below), a **Kobalte keep-vs-DIY decision** (data gathered), **Storybook stories + full docs** for the new elements, and polishing. The last few sessions also did a deep **theming overhaul** (namespaced `--kitn-*` override surface, typography tokens, dark-palette harmonization) and a **showcase redesign**.
+The build-out is done. Remaining work is: **Vue wrappers** (optional), a **508/WCAG accessibility pass** (real violations found — see below), **Storybook stories + full docs** for the new elements, and polishing. The last few sessions also did a deep **theming overhaul** (namespaced `--kitn-*` override surface, typography tokens, dark-palette harmonization) and a **showcase redesign**.
+
+---
+
+## UPDATE (2026-06-12, later) — Kobalte REPLACED with DIY primitives; `@kobalte/core` removed
+
+The "Kobalte keep-vs-DIY decision" below is now **resolved: replaced.** All four Kobalte primitives the kit used (`collapsible`, `tooltip`, `hover-card`, `dropdown`) were reimplemented as our own SolidJS components on a new shared internal **`src/ui/overlay.tsx`** core (portal + `@floating-ui/dom` positioning with `autoUpdate` + a `createPresence` enter/exit-animation helper + `useDismiss` + a polymorphic `As`). Public APIs of `src/ui/{collapsible,tooltip,hover-card,dropdown}.tsx` are unchanged, so the ~9 consumers didn't change except `context.tsx` (migrated off its raw Kobalte hover-card import). `@kobalte/core` is **uninstalled**; `@floating-ui/dom` is now a direct dep.
+
+- **Bundle delta (measured, main `kitn-chat.es.js` chunk, gzip):** **102.61 KB → 79.61 KB = ~23 KB saved (~22%)**. Raw 363.76 KB → 290.08 KB. The Solid/Shiki `core` chunk is unchanged (36.54 KB gzip). Net beat the 14–20 KB estimate because floating-ui was already in the bundle transitively via Kobalte.
+- **Bugs fixed (we own these now):** **DD-1** dropdown no longer locks page scroll; **DD-2** dropdown menu follows the trigger on scroll (autoUpdate); **HC-1** hover card is deterministic across repeated hovers (one shared-timer state machine, shared by trigger+content). Also fixed during review: a **critical (0,0) positioning bug** (overlays passed plain-var refs to `usePosition`, so its effect never re-ran when portaled content mounted — fixed by using reactive signals; jsdom couldn't catch it, the Playwright pass did) and a **dropdown roving-focus-in-Shadow-DOM bug** (used `document.activeElement` which returns the host, not the menu item — fixed via `getRootNode().activeElement`).
+- **Transitions:** full enter/exit animation parity via `tw-animate-css` + `createPresence` (content gated on `presence.present()`, `data-expanded`/`data-closed` drive `animate-in`/`animate-out`).
+- **Arrows dropped** from tooltip & hover-card (Kobalte rendered an auto-colored SVG arrow; replicating it across flip placements was deemed not worth it). The overlay core RETAINS `arrowEl`/`arrowPos` plumbing, so arrows can be re-added later cheaply.
+- **`collapsible` hand-roll** (was listed as an optional separate step) is included in this work.
+
+### Prompt-input behavior changes (same session, unrelated to Kobalte)
+- **Slash palette:** selecting a command (Enter/Tab/click) now **inserts** its label into the prompt (e.g. `/summarize `, caret at end) instead of clearing the input; still fires `slashselect`.
+- **Suggestions:** new **`suggestion-mode`** attr (`"submit"` | `"fill"`, default **`"submit"`**) on `<kitn-chat>` and `<kitn-prompt-input>` — clicking a suggestion now sends it by default; `"fill"` keeps the old place-in-input behavior.
+- **Leading whitespace blocked** in the prompt input (can't start with a space/blank line).
+- **DEFERRED:** highlighting the in-prompt slash-command token a distinct color — needs either a backdrop-overlay hack or a `contenteditable` rewrite; left as a future enhancement by request.
+
+### Verification
+Full gate green vs the 3-failure Shiki baseline. New unit tests: `tests/ui/{overlay,collapsible,tooltip,hover-card,dropdown}.test.tsx` + prompt-input behavior tests. A real-browser **Playwright pass = 21/21** (keyboard nav incl. ArrowUp/Down/Home/End/typeahead/Enter/Escape/Tab, DD-1, DD-2, HC-1, tooltip+collapsible, positioning in light+dark). Still on `spike/composable-web-components`, **not merged** — publish firewall holds.
 
 ---
 
@@ -94,7 +115,7 @@ The kit ships **self-themed** elements (compiled tokens inside each Shadow DOM; 
 2. **Vue wrappers** — optional; same generator pattern as React (`scripts/gen-element-vue.mjs` + `frameworks/vue/` + `./vue` export). Not built.
 3. **Storybook stories for the new elements** — only the original components + the new `Theming/Typography` story exist. ~23 new elements have no stories.
 4. **`docs/web-components.md` full element reference** — still documents only the original 3 elements (plus the React/TS/theming sections we added). Could auto-generate the per-element reference from `custom-elements.json`.
-5. **Kobalte keep-vs-DIY** — decision pending (data below).
+5. **Kobalte keep-vs-DIY** — ✅ **RESOLVED: replaced** (see the UPDATE section at the top). `@kobalte/core` removed; ~23 KB gzip saved on the main chunk; DD-1/DD-2/HC-1 fixed. The data/analysis below is retained for history.
 6. **Misc element polish:** `<kitn-attachments>` hover-card is scoped to inline/list only (grid tiles can't host the hover trigger without collapsing — see commit `7efd3e1`); a grid+hover combo would need real work. `<kitn-chat>` `loading` only locks the input (no thinking animation by design — convey progress by streaming messages).
 
 ---
@@ -105,7 +126,7 @@ The kit ships **self-themed** elements (compiled tokens inside each Shadow DOM; 
 - **Used:** `dropdown-menu` (model-switcher, chat-scope-picker), `hover-card` (attachments, context, source), `tooltip` (checkpoint, voice-input), `collapsible` (tool, conversation-list, chain-of-thought). **Dialog removed** (was dead). floating-ui is a transitive dep (Kobalte's positioning).
 - **Bundle spike (measured, gzip):** Kobalte runtime = **25.9 KB** (~26% of the main bundle, the max you could save); floating-ui = 6.6 KB (you'd KEEP this in a DIY approach); together 32.5 KB. Realistic DIY net saving ≈ **14–20 KB** after re-adding floating-ui + writing your own implementations.
 - **The catch:** floating-ui only solves *positioning* (easy ~20%); a11y/keyboard/focus is the hard 80% Kobalte does well — especially `dropdown-menu` (roving focus, typeahead) and any future dialog.
-- **Recommendation:** **Keep Kobalte for now.** Don't take on reimplementing accessible primitives while the kit still has a11y debt (you'd be *owning* widget a11y exactly when you most need Kobalte's correctness). Sequence: (1) ✅ Dialog removed; (2) **do the 508/WCAG pass first** (needed regardless); (3) optionally hand-roll `collapsible` now (no positioning, trivial a11y — low-risk trim of part of the 26 KB); (4) revisit Kobalte replacement AFTER the a11y baseline is solid — at which point keeping the 26 KB for *guaranteed* widget a11y may well be right.
+- **Recommendation (SUPERSEDED — see UPDATE at top; we replaced Kobalte):** ~~**Keep Kobalte for now.**~~ Don't take on reimplementing accessible primitives while the kit still has a11y debt (you'd be *owning* widget a11y exactly when you most need Kobalte's correctness). Sequence: (1) ✅ Dialog removed; (2) **do the 508/WCAG pass first** (needed regardless); (3) optionally hand-roll `collapsible` now (no positioning, trivial a11y — low-risk trim of part of the 26 KB); (4) revisit Kobalte replacement AFTER the a11y baseline is solid — at which point keeping the 26 KB for *guaranteed* widget a11y may well be right.
 
 ### Framework wrappers
 - React wrappers done. Vue is the same generator pattern. The custom-elements-manifest also enables generating Vue/Angular wrappers + `vscode.html-custom-data.json` if wanted.
