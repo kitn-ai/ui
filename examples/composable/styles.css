@@ -10,7 +10,7 @@
   --stage:   #ffffff;
   --ink:     #1b1a17;
   --ink-2:   #423f38;
-  --muted:   #837e72;
+  --muted:   #5f5a4f;
   --line:    #e2ddd0;
   --line-2:  #d3cdbd;
   --accent:  #6d28d9;
@@ -49,7 +49,7 @@
 }
 :root.light {
   --bg:#f4f2ec; --surface:#fbfaf6; --stage:#ffffff; --ink:#1b1a17; --ink-2:#423f38;
-  --muted:#837e72; --line:#e2ddd0; --line-2:#d3cdbd; --accent:#6d28d9; --accent-2:#8b5cf6;
+  --muted:#5f5a4f; --line:#e2ddd0; --line-2:#d3cdbd; --accent:#6d28d9; --accent-2:#8b5cf6;
   --accent-ghost: rgba(109,40,217,.08);
   --shadow: 0 1px 2px rgba(40,34,20,.04), 0 8px 24px -12px rgba(40,34,20,.12);
   color-scheme: light;
@@ -105,7 +105,7 @@ a { color: var(--accent); text-decoration: none; }
 .toc a.active { color: var(--ink); }
 .toc a.active::before { color: var(--accent); }
 .toc a.active::after { content: ''; position: absolute; left: -1.6rem; top: 50%; width: 3px; height: 18px; transform: translateY(-50%); background: var(--accent); border-radius: 0 3px 3px 0; }
-.toc small { margin-left: auto; font: 500 10px/1 var(--font-mono); color: var(--line-2); }
+.toc small { margin-left: auto; font: 500 10px/1 var(--font-mono); color: var(--muted); }
 
 .index-foot { margin-top: auto; font: 400 11.5px/1.6 var(--font-mono); color: var(--muted); }
 .index-foot code { color: var(--ink-2); }
