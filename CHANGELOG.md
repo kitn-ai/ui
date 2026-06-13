@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.0](https://github.com/kitn-ai/chat/compare/chat-v0.4.0...chat-v0.5.0) (2026-06-13)
+
+
+### Features
+
+* **elements:** add &lt;kitn-chat-workspace&gt; (list + chat + resize) ([4d6f799](https://github.com/kitn-ai/chat/commit/4d6f79980b893537f8aafc85f170dc1f574ba58a))
+* **storybook:** sidebar IA — Web Components first, Examples by importance ([da44605](https://github.com/kitn-ai/chat/commit/da446059487a2a910a1f03bbcf37d211edcc7905))
+* **theme:** controlled blue focus ring across all components ([603e3c4](https://github.com/kitn-ai/chat/commit/603e3c41f929cf4104763d47c019c2923c615b2d))
+
+
+### Bug Fixes
+
+* **elements:** preserve chat draft across kitn-chat-workspace sidebar toggle ([339aa9e](https://github.com/kitn-ai/chat/commit/339aa9e59bb88c44e2ab6b780d21a22ee67eec51))
+
 ## [0.4.0](https://github.com/kitn-ai/chat/compare/chat-v0.3.1...chat-v0.4.0) (2026-06-13)
 
 
