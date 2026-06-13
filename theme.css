@@ -27,7 +27,11 @@
   --color-destructive-foreground: var(--kitn-color-destructive-foreground, hsl(0 0% 98%));
   --color-border: var(--kitn-color-border, hsl(240 5.9% 90%));
   --color-input: var(--kitn-color-input, hsl(240 5.9% 90%));
-  --color-ring: var(--kitn-color-ring, hsl(240 10% 3.9%));
+  /* Focus ring — a deliberate blue (not a neutral) so keyboard focus is always
+     obvious and on-brand in both modes. Light uses a strong blue; dark uses a
+     brighter one for contrast on dark surfaces. Both clear WCAG 2.1 non-text
+     contrast (≥3:1) against the kit's backgrounds. Override via --kitn-color-ring. */
+  --color-ring: var(--kitn-color-ring, hsl(217 91% 53%));
   --color-sidebar: var(--kitn-color-sidebar, hsl(0 0% 100%));
 
   /* Inline `code` accent. Blue text on a translucent blue chip. */
@@ -97,7 +101,7 @@
   --color-destructive-foreground: var(--kitn-color-destructive-foreground, hsl(0 0% 98%));
   --color-border: var(--kitn-color-border, hsl(45 4% 17%));
   --color-input: var(--kitn-color-input, hsl(45 4% 17%));
-  --color-ring: var(--kitn-color-ring, hsl(45 5% 72%));
+  --color-ring: var(--kitn-color-ring, hsl(217 91% 68%));
   --color-sidebar: var(--kitn-color-sidebar, hsl(50 2% 7%));
   --color-code-foreground: var(--kitn-color-code-foreground, hsl(213 94% 78%));
 

@@ -9,4 +9,18 @@
 @layer base {
   :host { display: block; }
   * { border-color: var(--color-border); }
+
+  /* One token-driven focus ring for EVERY focusable element in the shadow root.
+     Blue by default (via --color-ring), consistent in light + dark, and
+     overridable through --kitn-color-ring. Uses `outline` (not a box-shadow
+     ring) so it never clips on overflow and follows the element's radius;
+     `:focus-visible` so it only appears for keyboard navigation, never on a
+     mouse click. Components that render their own ring set
+     `focus-visible:outline-none` (a utility in a later cascade layer) and win
+     over this — so there's no double ring, just a guaranteed blue fallback for
+     the many controls that have no explicit focus style. */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
 }
