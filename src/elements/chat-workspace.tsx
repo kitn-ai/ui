@@ -1,0 +1,120 @@
+import { createSignal, Show } from 'solid-js';
+import { defineKitnElement } from './define';
+import { ChatThread, type ChatThreadContextUsage } from '../components/chat-thread';
+import { ConversationList } from '../components/conversation-list';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resizable';
+import { Button } from '../ui/button';
+import { PanelLeftOpen } from 'lucide-solid';
+import type { SlashCommandItem } from '../components/slash-command';
+import type { ChatMessage } from './chat-types';
+import type { ProseSize } from '../primitives/chat-config';
+import type { ModelOption, ConversationGroup, ConversationSummary } from '../types';
+
+interface Props extends Record<string, unknown> {
+  /** Pre-bucketed conversation groups for the sidebar. Set as a JS property. */
+  groups: ConversationGroup[];
+  /** Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. */
+  conversations: ConversationSummary[];
+  /** Id of the open conversation, highlighted in the sidebar. */
+  activeId?: string;
+  /** The active conversation's message thread, newest last. Set as a JS property. */
+  messages: ChatMessage[];
+  value?: string;
+  placeholder?: string;
+  loading?: boolean;
+  suggestions?: string[];
+  suggestionMode?: 'submit' | 'fill';
+  proseSize?: ProseSize;
+  codeTheme?: string;
+  codeHighlight?: boolean;
+  chatTitle?: string;
+  models?: ModelOption[];
+  currentModel?: string;
+  context?: ChatThreadContextUsage;
+  scrollButton?: boolean;
+  search?: boolean;
+  voice?: boolean;
+  slashCommands?: SlashCommandItem[];
+  slashActiveIds?: string[];
+  slashCompact?: boolean;
+  /** Sidebar default width as a percent of the workspace (default 22). */
+  sidebarWidth?: number;
+  /** Sidebar min width in px (default 200). */
+  sidebarMinWidth?: number;
+  /** Sidebar max width in px (default 420). */
+  sidebarMaxWidth?: number;
+  /** Initial collapsed state of the sidebar (default false). */
+  sidebarCollapsed?: boolean;
+}
+
+defineKitnElement<Props>('kitn-chat-workspace', {
+  groups: [], conversations: [], activeId: undefined, messages: [],
+  value: undefined, placeholder: 'Send a message...', loading: false,
+  suggestions: undefined, suggestionMode: 'submit', proseSize: 'sm',
+  codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
+  models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
+  search: false, voice: false, slashCommands: undefined, slashActiveIds: undefined, slashCompact: false,
+  sidebarWidth: 22, sidebarMinWidth: 200, sidebarMaxWidth: 420, sidebarCollapsed: false,
+}, (props, { dispatch, flag }) => {
+  // Collapse is internal UI state; `sidebarCollapsed` only sets the initial value
+  // (not a controlled binding). Toggling re-renders the <Show> below, which
+  // remounts <ChatThread> — fine because the input value is controlled via
+  // `props.value` when the host owns it.
+  const [collapsed, setCollapsed] = createSignal(props.sidebarCollapsed === true);
+  const toggle = () => { const next = !collapsed(); setCollapsed(next); dispatch('sidebartoggle', { collapsed: next }); };
+
+  const thread = () => (
+    <ChatThread
+      messages={props.messages} value={props.value as string | undefined} placeholder={props.placeholder as string}
+      loading={flag('loading')} suggestions={props.suggestions as string[] | undefined}
+      suggestionMode={props.suggestionMode as 'submit' | 'fill'} proseSize={props.proseSize as ProseSize}
+      codeTheme={props.codeTheme as string} codeHighlight={flag('codeHighlight')}
+      chatTitle={props.chatTitle as string | undefined} models={props.models as ModelOption[] | undefined}
+      currentModel={props.currentModel as string | undefined} context={props.context as ChatThreadContextUsage | undefined}
+      scrollButton={props.scrollButton !== false} search={flag('search')} voice={flag('voice')}
+      slashCommands={props.slashCommands as SlashCommandItem[] | undefined}
+      slashActiveIds={props.slashActiveIds as string[] | undefined} slashCompact={flag('slashCompact')}
+      onValueChange={(value) => dispatch('valuechange', { value })}
+      onSubmit={(detail) => dispatch('submit', detail)}
+      onSuggestionClick={(value) => dispatch('suggestionclick', { value })}
+      onModelChange={(modelId) => dispatch('modelchange', { modelId })}
+      onMessageAction={(detail) => dispatch('messageaction', detail)}
+      onSearch={() => dispatch('search', {})}
+      onVoice={() => dispatch('voice', {})}
+      onSlashSelect={(command) => dispatch('slashselect', { command })}
+    />
+  );
+
+  return (
+    <div class="h-full w-full overflow-hidden bg-background">
+      <Show
+        when={!collapsed()}
+        fallback={
+          <div class="relative h-full">
+            <Button
+              variant="ghost" size="icon-sm" aria-label="Open sidebar"
+              class="absolute left-2 top-2 z-10 rounded-full bg-card/80 shadow-sm backdrop-blur"
+              onClick={toggle}
+            >
+              <PanelLeftOpen class="size-4" />
+            </Button>
+            {thread()}
+          </div>
+        }
+      >
+        <ResizablePanelGroup orientation="horizontal">
+          <ResizablePanel defaultSize={props.sidebarWidth as number} data-min-size={String(props.sidebarMinWidth)} data-max-size={String(props.sidebarMaxWidth)}>
+            <ConversationList
+              groups={props.groups} conversations={props.conversations} activeId={props.activeId as string | undefined}
+              onSelect={(id) => dispatch('conversationselect', { id })}
+              onNewChat={() => dispatch('newchat', {})}
+              onToggleSidebar={toggle}
+            />
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel>{thread()}</ResizablePanel>
+        </ResizablePanelGroup>
+      </Show>
+    </div>
+  );
+});
