@@ -231,7 +231,7 @@ export function Chat() {
 
 In Vue, use the element directly in your template. Pass arrays and objects via the `.prop` modifier (or `:propName.prop` for dynamic bindings) so Vue sets them as DOM properties rather than HTML attributes. Events use the standard `@event` syntax.
 
-```vue
+```html
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import '@kitnai/chat/elements';
@@ -275,7 +275,7 @@ Add `@kitnai/chat/elements` to your `vite.config.ts` / `env.d.ts` once so Vue's 
 
 Cross-element coordination goes through the host component — the `<kitn-conversation-list>` fires `select`, you update a reactive ref, and pass it into `<kitn-chat>`:
 
-```vue
+```html
 <script setup lang="ts">
 import '@kitnai/chat/elements';
 import { ref } from 'vue';
@@ -315,7 +315,7 @@ const onSelect = (e: CustomEvent<{ id: string }>) => {
 
 Svelte's template compiler sets DOM **properties** when you bind with `bind:` or use the `|propname` directive. For custom events, use `on:eventname`:
 
-```svelte
+```html
 <script>
   import '@kitnai/chat/elements';
 
