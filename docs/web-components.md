@@ -161,7 +161,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 |-------|----------|-------------|
 | `submit` | `{ value: string, attachments: AttachmentData[] }` | User submitted a message |
 | `valuechange` | `{ value: string }` | Fired on every input change |
-| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked |
+| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked — fires **only** when `suggestion-mode="fill"`; in the default `submit` mode the chip dispatches `submit` instead |
 | `messageaction` | `{ messageId: string, action: ChatMessageAction }` | An action button on a message was clicked |
 | `modelchange` | `{ modelId: string }` | Header model switcher changed |
 | `slashselect` | `{ command: SlashCommand }` | A slash command was chosen from the palette |
@@ -218,7 +218,7 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 | `search` | — | Search button clicked |
 | `voice` | — | Mic button clicked |
 | `slashselect` | `{ command: SlashCommand }` | A slash command was chosen from the palette |
-| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked |
+| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked — fires **only** when `suggestion-mode="fill"`; in the default `submit` mode the chip dispatches `submit` instead |
 
 **Example:**
 
