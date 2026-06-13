@@ -1,5 +1,63 @@
 # Changelog
 
+## [0.4.0](https://github.com/kitn-ai/chat/compare/chat-v0.3.1...chat-v0.4.0) (2026-06-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ui:** remove @kobalte/core dependency (replaced by DIY overlay primitives)
+
+### Features
+
+* composable web-component layer — DIY accessible primitives, React wrappers, Storybook/docs, llms.txt ([501e7db](https://github.com/kitn-ai/chat/commit/501e7db4aa6b1861fd6981f4d167f03836b929ed))
+* **docs:** generate llms.txt + llms-full.txt for AI-agent integration ([bd40c90](https://github.com/kitn-ai/chat/commit/bd40c90cc77f237f007d38f4a8cf816acdb19394))
+* **elements:** composable web-component foundation + first three elements ([bb79a2a](https://github.com/kitn-ai/chat/commit/bb79a2af28c9b5892f5c491116e4a11e21f159b0))
+* **elements:** fold SlashCommand into prompt-input + chat ([46709c8](https://github.com/kitn-ai/chat/commit/46709c8f79a3214548ec27dfd66804498710eb49))
+* **elements:** generate Custom Elements Manifest from the facades ([bd9f18b](https://github.com/kitn-ai/chat/commit/bd9f18b30113405f6c8fed9efdd8df1f7f9cfecc))
+* **elements:** generate typed HTMLElementTagNameMap d.ts ([9545780](https://github.com/kitn-ai/chat/commit/9545780ce5a4904da8de6df2944b5e0c211fd6f2))
+* **elements:** phase 1 — message-rendering core elements ([ca26d95](https://github.com/kitn-ai/chat/commit/ca26d955ec7427c04202c3fa0ce68824a3380016))
+* **elements:** phase 2 — header / meta elements ([2ea6595](https://github.com/kitn-ai/chat/commit/2ea659550eedb32e784546dbf61cdac8cb80b4b4))
+* **elements:** phase 3 — input ecosystem elements ([1e09086](https://github.com/kitn-ai/chat/commit/1e09086ea9ffe82c1a540603f4b7e647d939b508))
+* **elements:** phase 4 — indicators & leaf elements ([3a3b68e](https://github.com/kitn-ai/chat/commit/3a3b68ea16b4a4d066e529b83cc66118ebc4efe0))
+* **examples:** docked, collapsible event console in the showcase ([25923ec](https://github.com/kitn-ai/chat/commit/25923ec2b79b587f774175f5c5d6a519541f5526))
+* **prompt-input:** disallow leading whitespace in the prompt ([0ce580b](https://github.com/kitn-ai/chat/commit/0ce580b5783602b2999f38aab3eac6e8678330a4))
+* **prompt-input:** insert slash command on select; configurable suggestion submit ([4229d6b](https://github.com/kitn-ai/chat/commit/4229d6bbf4b8bf3e8cb68173c86099332f774ec4))
+* **react:** generated typed React wrappers (@kitnai/chat/react) ([faa4da4](https://github.com/kitn-ai/chat/commit/faa4da432b28f6bfce116e08376012a2648c8ab6))
+* **react:** wrapper verification, native-style examples/react demo, React wrapper tests ([b142cb6](https://github.com/kitn-ai/chat/commit/b142cb6a1e10a59abaa3ea38d4f076cc653864e2))
+* **theme:** ship browser-ready theme.tokens.css for &lt;link&gt;/CDN consumers ([2ec93c4](https://github.com/kitn-ai/chat/commit/2ec93c459a325a0414ba345019bacdc57d99794f))
+* **theme:** tokenized typography scale + consistent component sizing ([4dc46e2](https://github.com/kitn-ai/chat/commit/4dc46e2fd271803d73de42beec6ce0da22f8411a))
+* **ui:** add @floating-ui/dom dep + createPresence overlay primitive ([a327a7c](https://github.com/kitn-ai/chat/commit/a327a7cd9fd1d90ed2fcdb13582f2a463d3846fa))
+* **ui:** add usePosition (autoUpdate) + useDismiss + As to overlay core ([a459ec5](https://github.com/kitn-ai/chat/commit/a459ec5e872d5982734cc9fe272a524864bffa1c))
+* **ui:** emit data-state on Collapsible root/trigger so consumer chevron-rotation classes work ([f4be7ad](https://github.com/kitn-ai/chat/commit/f4be7ad41550c17a92dc8dbb14ebc0be7ac03d8b))
+* **ui:** reimplement Collapsible without Kobalte (grid-rows anim, inert on close) ([c9ae2a7](https://github.com/kitn-ai/chat/commit/c9ae2a71041998ab496c065eef3fce2e5910ea5c))
+* **ui:** reimplement Dropdown menu on overlay core (roving focus, typeahead, no scroll-lock, follows scroll) ([3575b7c](https://github.com/kitn-ai/chat/commit/3575b7c35b699526f31f598339f98dbca34e47ee))
+* **ui:** reimplement HoverCard with deterministic shared-timer machine (HC-1); migrate context.tsx ([968a1b4](https://github.com/kitn-ai/chat/commit/968a1b4af2bdf6e894d736de187d71a38dbc1cf7))
+* **ui:** reimplement Tooltip on overlay core (role=tooltip, aria-describedby) ([b06c4f5](https://github.com/kitn-ai/chat/commit/b06c4f56a16913e2b98f12ece4da71fab5f106b7))
+* **ui:** remove @kobalte/core dependency (replaced by DIY overlay primitives) ([a1b9e1f](https://github.com/kitn-ai/chat/commit/a1b9e1ff826eea380c50581b46fcd035594ed2cb))
+
+
+### Bug Fixes
+
+* **a11y,examples:** darken showcase --muted token to meet AA (0 axe violations, light+dark) ([18577be](https://github.com/kitn-ai/chat/commit/18577bee0859c91da1c026a72444cd237b08a337))
+* **a11y,examples:** keyboard-accessible event log (scrollable-region) + update bundle figure to ~80kb ([503e821](https://github.com/kitn-ai/chat/commit/503e8218a12a906d7acea95b62651449e1d151e1))
+* **a11y:** accessible names on icon buttons + visible focus (WCAG 2.1 AA, A1/A3) ([812348a](https://github.com/kitn-ai/chat/commit/812348a28f65b518c8c33d8acf7d22d0881fcb9c))
+* **a11y:** raise muted/subtle text contrast to WCAG 2.1 AA (A2, light+dark) ([0668785](https://github.com/kitn-ai/chat/commit/06687852c8c8bf675e8c6f7a7564d8671874c40a))
+* **checkpoint:** use a button factory so tooltip variant doesn't share a DOM node ([e5971c2](https://github.com/kitn-ai/chat/commit/e5971c2793b2838690171ccdcd188639c6db08e3))
+* **components,examples:** font sizes, attachment layout, showcase polish ([7efd3e1](https://github.com/kitn-ai/chat/commit/7efd3e143cf4dc12fec88aecae64bfe6eacdc443))
+* **elements:** apply flag() to existing element booleans + docs ([9cdc85b](https://github.com/kitn-ai/chat/commit/9cdc85bc0c37c2b1c7405fae5a6178c0a3898d00))
+* **elements:** make --color-*/--text-* overridable from :root in shadow DOM ([b6b998e](https://github.com/kitn-ai/chat/commit/b6b998e8b19eda6c9c944deeb6768ab2e3869689))
+* **examples:** composable showcase follows OS dark mode on first paint ([518bd56](https://github.com/kitn-ai/chat/commit/518bd56930fcba8844821ca302c8643c38a56bbe))
+* **theme:** harmonize dark surface tokens with the warm background ([6022492](https://github.com/kitn-ai/chat/commit/60224927beebdc1586afaf1e867476524e96aec0))
+* **ui:** dropdown roving focus works inside Shadow DOM ([58c4096](https://github.com/kitn-ai/chat/commit/58c4096a750f8427663bc7e66b554fe158023d26))
+* **ui:** dropdown Tab closes without stealing focus; skip disabled items; clarify focus timing ([46df213](https://github.com/kitn-ai/chat/commit/46df213d2b39726fecf551cc41099dc87280d284))
+* **ui:** gate Tooltip content on presence so exit animation plays; await async unmount in test ([1a12a6e](https://github.com/kitn-ai/chat/commit/1a12a6e1b5713381d5c0698f1f40ade8e53d05de))
+* **ui:** guard createPresence microtask close; broaden setRef type; add docs + tests ([11b0d65](https://github.com/kitn-ai/chat/commit/11b0d652d2599f708a196bc5d4ac366d73e870e3))
+* **ui:** harden Collapsible prop forwarding (id/onClick), data-closed parity, tests ([d8afc02](https://github.com/kitn-ai/chat/commit/d8afc02a191ca65e31b7b40b8950cd830802eee1))
+* **ui:** hover-card safe-area (transparent-gap bridge + 300ms closeDelay) so pointer can cross to content ([726519f](https://github.com/kitn-ai/chat/commit/726519f14e8deafeed5abd65a96c87d6bf7a06de))
+* **ui:** make tooltip/hover-card refs reactive so floating position computes (C-1); hover-card focus persistence + instant Escape ([8ab1f70](https://github.com/kitn-ai/chat/commit/8ab1f704b2ef3d4ff8060f0274de6fc75a3fe4a0))
+* **ui:** register custom text-* size utilities with tailwind-merge; explicit thinking-bar size ([09e4e7e](https://github.com/kitn-ai/chat/commit/09e4e7e4a61a7417d4ca4e4cbdd0c9b56e7a31d2))
+* **ui:** tooltip stays open while focused or hovered; clean up hover timer ([0264710](https://github.com/kitn-ai/chat/commit/0264710673a646bd98eb5e74980fe3052307f40a))
+
 ## [0.3.1](https://github.com/kitn-ai/chat/compare/chat-v0.3.0...chat-v0.3.1) (2026-06-11)
 
 
