@@ -58,10 +58,14 @@ test('codeHighlight={false} renders fenced code as plain text (no Shiki)', async
   document.body.appendChild(el);
   await Promise.resolve();
 
-  expect(el.shadowRoot!.querySelector('pre')).toBeTruthy();
+  const pre = el.shadowRoot!.querySelector('pre');
+  expect(pre).toBeTruthy();
   expect(el.shadowRoot!.textContent).toContain('const answer = 42');
-  // Shiki adds inline token color styles; the disabled path must not.
-  expect(el.shadowRoot!.innerHTML).not.toMatch(/style="[^"]*color/);
+  // Shiki adds inline token color styles; the disabled path must not. Scope the
+  // check to the code block — the element wrapper carries its own
+  // `style="…color:var(--color-foreground)"` (theme inheritance) that is
+  // unrelated to syntax highlighting.
+  expect(pre!.innerHTML).not.toMatch(/style="[^"]*color/);
 
   el.remove();
 });

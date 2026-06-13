@@ -16,6 +16,9 @@ export function VoiceInput(props: VoiceInputProps) {
   const { isRecording, start, stop } = useVoiceRecorder();
   const [isProcessing, setIsProcessing] = createSignal(false);
 
+  const label = () =>
+    isProcessing() ? 'Transcribing...' : isRecording() ? 'Stop recording' : 'Voice input';
+
   async function handleClick() {
     if (isRecording()) {
       stop();
@@ -76,10 +79,11 @@ export function VoiceInput(props: VoiceInputProps) {
         </For>
       </Show>
 
-      <Tooltip content={isProcessing() ? 'Transcribing...' : isRecording() ? 'Stop recording' : 'Voice input'}>
+      <Tooltip content={label()}>
         <Button
           variant="ghost"
           size="icon-sm"
+          aria-label={label()}
           onClick={handleClick}
           disabled={local.disabled || isProcessing()}
           class={cn(

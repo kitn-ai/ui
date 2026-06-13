@@ -9,35 +9,58 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(240 10% 3.9%);
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(240 10% 3.9%);
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(240 10% 3.9%);
-  --color-primary: hsl(240 5.9% 10%);
-  --color-primary-foreground: hsl(0 0% 98%);
-  --color-secondary: hsl(240 4.8% 95.9%);
-  --color-secondary-foreground: hsl(240 5.9% 10%);
-  --color-muted: hsl(240 4.8% 95.9%);
-  --color-muted-foreground: hsl(240 3.8% 46.1%);
-  --color-accent: hsl(240 4.8% 95.9%);
-  --color-accent-foreground: hsl(240 5.9% 10%);
-  --color-destructive: hsl(0 84.2% 60.2%);
-  --color-destructive-foreground: hsl(0 0% 98%);
-  --color-border: hsl(240 5.9% 90%);
-  --color-input: hsl(240 5.9% 90%);
-  --color-ring: hsl(240 10% 3.9%);
-  --color-sidebar: hsl(0 0% 100%);
+  --color-background: var(--kitn-color-background, hsl(0 0% 100%));
+  --color-foreground: var(--kitn-color-foreground, hsl(240 10% 3.9%));
+  --color-card: var(--kitn-color-card, hsl(0 0% 100%));
+  --color-card-foreground: var(--kitn-color-card-foreground, hsl(240 10% 3.9%));
+  --color-popover: var(--kitn-color-popover, hsl(0 0% 100%));
+  --color-popover-foreground: var(--kitn-color-popover-foreground, hsl(240 10% 3.9%));
+  --color-primary: var(--kitn-color-primary, hsl(240 5.9% 10%));
+  --color-primary-foreground: var(--kitn-color-primary-foreground, hsl(0 0% 98%));
+  --color-secondary: var(--kitn-color-secondary, hsl(240 4.8% 95.9%));
+  --color-secondary-foreground: var(--kitn-color-secondary-foreground, hsl(240 5.9% 10%));
+  --color-muted: var(--kitn-color-muted, hsl(240 4.8% 95.9%));
+  --color-muted-foreground: var(--kitn-color-muted-foreground, hsl(240 3.8% 43%));
+  --color-accent: var(--kitn-color-accent, hsl(240 4.8% 95.9%));
+  --color-accent-foreground: var(--kitn-color-accent-foreground, hsl(240 5.9% 10%));
+  --color-destructive: var(--kitn-color-destructive, hsl(0 84.2% 60.2%));
+  --color-destructive-foreground: var(--kitn-color-destructive-foreground, hsl(0 0% 98%));
+  --color-border: var(--kitn-color-border, hsl(240 5.9% 90%));
+  --color-input: var(--kitn-color-input, hsl(240 5.9% 90%));
+  --color-ring: var(--kitn-color-ring, hsl(240 10% 3.9%));
+  --color-sidebar: var(--kitn-color-sidebar, hsl(0 0% 100%));
 
   /* Inline `code` accent. Blue text on a translucent blue chip. */
-  --color-code-foreground: hsl(224.3 76.3% 48%);
+  --color-code-foreground: var(--kitn-color-code-foreground, hsl(224.3 76.3% 48%));
 
-  --radius: 0.6rem;
+  /* Tool/status chip hues. Each chip is hue text over a 15% translucent fill of
+     the SAME hue (set in tool.tsx). The bare hue is too light to reach WCAG AA
+     (4.5:1) on the faint fill in LIGHT mode, so the light values are darkened;
+     dark mode keeps brighter hues for AA on the dark fill. Override via
+     --kitn-color-tool-* to retheme. */
+  --color-tool-blue: var(--kitn-color-tool-blue, hsl(217 91% 38%));
+  --color-tool-amber: var(--kitn-color-tool-amber, hsl(38 92% 28%));
+  --color-tool-green: var(--kitn-color-tool-green, hsl(142 71% 26%));
+  --color-tool-red: var(--kitn-color-tool-red, hsl(0 72% 42%));
+
+  --radius: var(--kitn-radius, 0.6rem);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Typography scale — semantic sizes shared by all components. Each generates a
+     Tailwind utility (text-caption / text-meta / text-body / text-title). To
+     restyle the kit's typography, override the namespaced --kitn-text-* token on
+     :root (e.g. `--kitn-text-body: 0.9375rem`) — it pierces the Shadow DOM via the
+     var() fallback, exactly like the --kitn-color-* tokens. The bare --text-*
+     names stay internal so a host's own --text-* can't collide. (Message/markdown/
+     input reading size also scales with the `proseSize` prop; these tokens cover
+     the fixed chrome & controls.) */
+  --text-caption: var(--kitn-text-caption, 0.6875rem);  --text-caption--line-height: 1rem;      /* 11px — micro labels, badges, sub-counts */
+  --text-meta: var(--kitn-text-meta, 0.75rem);     --text-meta--line-height: 1.1rem;       /* 12px — controls, toggles, switchers, captions */
+  --text-body: var(--kitn-text-body, 0.875rem);    --text-body--line-height: 1.45rem;      /* 14px — primary reading text */
+  --text-title: var(--kitn-text-title, 1rem);        --text-title--line-height: 1.5rem;      /* 16px — emphasis / headers */
 
   @keyframes typing { 0%,100% { transform: translateY(0); opacity: .5 } 50% { transform: translateY(-2px); opacity: 1 } }
   @keyframes loading-dots { 0%,100% { opacity: 0 } 50% { opacity: 1 } }
@@ -56,27 +79,33 @@
 }
 
 .dark {
-  --color-background: hsl(50 2% 9%);
-  --color-foreground: hsl(0 0% 98%);
-  --color-card: hsl(240 10% 3.9%);
-  --color-card-foreground: hsl(0 0% 98%);
-  --color-popover: hsl(240 10% 3.9%);
-  --color-popover-foreground: hsl(0 0% 98%);
-  --color-primary: hsl(0 0% 98%);
-  --color-primary-foreground: hsl(240 5.9% 10%);
-  --color-secondary: hsl(240 3.7% 15.9%);
-  --color-secondary-foreground: hsl(0 0% 98%);
-  --color-muted: hsl(240 3.7% 15.9%);
-  --color-muted-foreground: hsl(240 5% 64.9%);
-  --color-accent: hsl(240 3.7% 15.9%);
-  --color-accent-foreground: hsl(0 0% 98%);
-  --color-destructive: hsl(0 62.8% 30.6%);
-  --color-destructive-foreground: hsl(0 0% 98%);
-  --color-border: hsl(240 3.7% 15.9%);
-  --color-input: hsl(240 3.7% 15.9%);
-  --color-ring: hsl(240 4.9% 83.9%);
-  --color-sidebar: hsl(50 2% 7%);
-  --color-code-foreground: hsl(213 94% 78%);
+  --color-background: var(--kitn-color-background, hsl(50 2% 9%));
+  --color-foreground: var(--kitn-color-foreground, hsl(0 0% 98%));
+  --color-card: var(--kitn-color-card, hsl(45 4% 12%));
+  --color-card-foreground: var(--kitn-color-card-foreground, hsl(0 0% 98%));
+  --color-popover: var(--kitn-color-popover, hsl(45 4% 12%));
+  --color-popover-foreground: var(--kitn-color-popover-foreground, hsl(0 0% 98%));
+  --color-primary: var(--kitn-color-primary, hsl(0 0% 98%));
+  --color-primary-foreground: var(--kitn-color-primary-foreground, hsl(45 4% 11%));
+  --color-secondary: var(--kitn-color-secondary, hsl(45 4% 17%));
+  --color-secondary-foreground: var(--kitn-color-secondary-foreground, hsl(0 0% 98%));
+  --color-muted: var(--kitn-color-muted, hsl(45 4% 17%));
+  --color-muted-foreground: var(--kitn-color-muted-foreground, hsl(45 4% 64%));
+  --color-accent: var(--kitn-color-accent, hsl(45 4% 17%));
+  --color-accent-foreground: var(--kitn-color-accent-foreground, hsl(0 0% 98%));
+  --color-destructive: var(--kitn-color-destructive, hsl(0 62.8% 30.6%));
+  --color-destructive-foreground: var(--kitn-color-destructive-foreground, hsl(0 0% 98%));
+  --color-border: var(--kitn-color-border, hsl(45 4% 17%));
+  --color-input: var(--kitn-color-input, hsl(45 4% 17%));
+  --color-ring: var(--kitn-color-ring, hsl(45 5% 72%));
+  --color-sidebar: var(--kitn-color-sidebar, hsl(50 2% 7%));
+  --color-code-foreground: var(--kitn-color-code-foreground, hsl(213 94% 78%));
+
+  /* Tool/status chip hues — dark mode. Brighter hues reach AA on the dark fill. */
+  --color-tool-blue: var(--kitn-color-tool-blue, hsl(217 91% 70%));
+  --color-tool-amber: var(--kitn-color-tool-amber, hsl(38 92% 50%));
+  --color-tool-green: var(--kitn-color-tool-green, hsl(142 71% 45%));
+  --color-tool-red: var(--kitn-color-tool-red, hsl(0 84% 70%));
 }
 
 /* Self-contained markdown styling — replaces the typography plugin's `prose`.

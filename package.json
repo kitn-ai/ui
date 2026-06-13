@@ -16,22 +16,37 @@
   "types": "src/index.ts",
   "unpkg": "./dist/kitn-chat.es.js",
   "jsdelivr": "./dist/kitn-chat.es.js",
+  "customElements": "dist/custom-elements.json",
   "exports": {
     ".": "./src/index.ts",
-    "./elements": "./dist/kitn-chat.es.js",
-    "./theme.css": "./theme.css"
+    "./elements": {
+      "types": "./src/elements/element-types.d.ts",
+      "default": "./dist/kitn-chat.es.js"
+    },
+    "./theme.css": "./theme.css",
+    "./theme.tokens.css": "./dist/theme.tokens.css",
+    "./react": "./frameworks/react/index.tsx"
   },
   "files": [
     "dist",
     "src",
-    "theme.css"
+    "frameworks",
+    "theme.css",
+    "llms.txt",
+    "llms-full.txt"
   ],
   "scripts": {
     "prepublishOnly": "npm run build",
     "prebuild": "npm run build:css",
     "build": "vite build --config vite.config.ts",
+    "postbuild": "npm run build:theme && npm run build:api",
+    "build:theme": "node scripts/build-theme-tokens.mjs",
+    "build:api": "node scripts/gen-element-api.mjs",
     "test": "vitest run",
+    "test:react": "vitest run --config vitest.react.config.ts",
     "test:watch": "vitest",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.react.json && tsc --noEmit -p tsconfig.react.test.json",
+    "examples": "echo 'Serving repo root on http://localhost:8000 — open http://localhost:8000/examples/composable/index.html' && python3 -m http.server 8000",
     "dev": "npm run build:css && storybook dev -p 6006",
     "storybook": "npm run build:css && storybook dev -p 6006",
     "build-storybook": "npm run build:css && storybook build",
@@ -39,7 +54,7 @@
     "build:css:watch": "tailwindcss -i src/elements/styles.css -o src/elements/compiled.css --watch"
   },
   "dependencies": {
-    "@kobalte/core": "^0.13.0",
+    "@floating-ui/dom": "^1.7.6",
     "@shikijs/langs": "^4.2.0",
     "@shikijs/themes": "^4.2.0",
     "class-variance-authority": "^0.7.0",
@@ -60,10 +75,18 @@
     "@tailwindcss/postcss": "^4.2.2",
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
     "@vitest/browser-playwright": "4.1.2",
     "@vitest/coverage-v8": "4.1.2",
+    "axe-core": "^4.12.1",
     "jsdom": "^24.0.0",
     "playwright": "^1.59.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "remark-gfm": "^4.0.1",
     "storybook": "^10.3.5",
     "storybook-dark-mode": "^5.0.0",
     "storybook-solidjs-vite": "^10.0.12",
@@ -75,6 +98,12 @@
     "vitest": "^4.1.0"
   },
   "peerDependencies": {
+    "react": ">=18",
     "solid-js": "^1.9.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   }
 }

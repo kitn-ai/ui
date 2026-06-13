@@ -1,48 +1,169 @@
-import { HoverCard as KHoverCard } from '@kobalte/core/hover-card';
-import { type JSX, splitProps } from 'solid-js';
+import {
+  createContext, useContext, createSignal, Show, splitProps, onCleanup,
+  type JSX, type Accessor,
+} from 'solid-js';
+import { Portal } from 'solid-js/web';
 import { cn } from '../utils/cn';
 import { useChatConfig } from '../primitives/chat-config';
+import { createPresence, usePosition, useDismiss, As } from './overlay';
 
-export interface HoverCardProps { trigger: JSX.Element; children: JSX.Element; class?: string; openDelay?: number; closeDelay?: number; }
-
-export function HoverCard(props: HoverCardProps) {
-  const [local] = splitProps(props, ['trigger', 'children', 'class', 'openDelay', 'closeDelay']);
-  const config = useChatConfig();
-  return (
-    <KHoverCard openDelay={local.openDelay} closeDelay={local.closeDelay}>
-      <KHoverCard.Trigger as="span">{local.trigger}</KHoverCard.Trigger>
-      <KHoverCard.Portal mount={config.portalMount()}>
-        <KHoverCard.Content class={cn('z-50 w-64 rounded-lg bg-card p-4 shadow-lg animate-in fade-in-0 zoom-in-95', local.class)}>
-          <KHoverCard.Arrow />
-          {local.children}
-        </KHoverCard.Content>
-      </KHoverCard.Portal>
-    </KHoverCard>
-  );
+interface HoverCardCtx {
+  open: Accessor<boolean>;
+  enter: () => void;
+  leave: () => void;
+  close: () => void;
+  setTrigger: (el: HTMLElement) => void;
+  setContent: (el: HTMLElement) => void;
+  trigger: Accessor<HTMLElement | undefined>;
+  content: Accessor<HTMLElement | undefined>;
 }
+const Ctx = createContext<HoverCardCtx>();
+const useHoverCard = () => {
+  const c = useContext(Ctx);
+  if (!c) throw new Error('HoverCard parts must be used within <HoverCardRoot>');
+  return c;
+};
 
-// Compound primitives for custom layouts (e.g. Source component)
 export interface HoverCardRootProps { children: JSX.Element; openDelay?: number; closeDelay?: number; }
 
 export function HoverCardRoot(props: HoverCardRootProps) {
-  return <KHoverCard openDelay={props.openDelay} closeDelay={props.closeDelay}>{props.children}</KHoverCard>;
+  const [open, setOpen] = createSignal(false);
+  const [trigger, setTrigger] = createSignal<HTMLElement>();
+  const [content, setContent] = createSignal<HTMLElement>();
+  let timer: number | undefined;
+
+  // ONE shared timer drives both trigger and content. Entering either cancels
+  // any pending close and schedules an open; leaving either cancels any pending
+  // open and schedules a close. Because the pointer transit trigger -> content
+  // fires leave() then enter() against the SAME timer, the close is cancelled
+  // before it can run, so the card never flickers and there are no stale-timer
+  // sporadics (the HC-1 fix).
+  const enter = () => {
+    clearTimeout(timer);
+    timer = window.setTimeout(() => setOpen(true), props.openDelay ?? 0);
+  };
+  const leave = () => {
+    clearTimeout(timer);
+    // closeDelay default is 300ms (Radix-style) as a belt-and-suspenders fallback
+    // for diagonal pointer escapes that miss the transparent safe bridge.
+    timer = window.setTimeout(() => setOpen(false), props.closeDelay ?? 300);
+  };
+  const close = () => { clearTimeout(timer); setOpen(false); };
+  onCleanup(() => clearTimeout(timer));
+
+  return (
+    <Ctx.Provider value={{
+      open, enter, leave, close,
+      setTrigger, setContent,
+      trigger, content,
+    }}>
+      {props.children}
+    </Ctx.Provider>
+  );
 }
 
 export interface HoverCardTriggerProps { children: JSX.Element; }
 
 export function HoverCardTrigger(props: HoverCardTriggerProps) {
-  return <KHoverCard.Trigger as="span">{props.children}</KHoverCard.Trigger>;
+  const ctx = useHoverCard();
+  return (
+    <As
+      as="span"
+      ref={ctx.setTrigger}
+      onPointerEnter={ctx.enter}
+      onPointerLeave={ctx.leave}
+      onFocusIn={ctx.enter}
+      onFocusOut={ctx.leave}
+    >
+      {props.children}
+    </As>
+  );
 }
 
 export interface HoverCardContentProps { children: JSX.Element; class?: string; }
 
+// Visual gap between trigger and the visible card. Also the depth of the
+// transparent safe bridge so the pointer never crosses "empty" space.
+const GUTTER = 8;
+
+/**
+ * Returns the CSS padding property that, set to `gutter`px on the OUTER floating
+ * shell, recreates the visual gap as a transparent safe area on the
+ * trigger-facing side. The outer shell is placed flush (gutter: 0) so the
+ * padding bridges the gap while keeping the inner card the same distance away.
+ *
+ * Placement strings from @floating-ui/dom (post flip/shift) may carry a
+ * '-start'/'-end' alignment suffix; we split on '-' and key on the side.
+ *   bottom* -> padding-top, top* -> padding-bottom,
+ *   left*   -> padding-right, right* -> padding-left
+ */
+function gapPaddingStyle(placement: string, gutter: number): JSX.CSSProperties {
+  const side = placement.split('-')[0];
+  const prop: Record<string, keyof JSX.CSSProperties> = {
+    bottom: 'padding-top',
+    top: 'padding-bottom',
+    left: 'padding-right',
+    right: 'padding-left',
+  };
+  return { [prop[side] ?? 'padding-top']: `${gutter}px` };
+}
+
 export function HoverCardContent(props: HoverCardContentProps) {
+  const ctx = useHoverCard();
   const config = useChatConfig();
+  const presence = createPresence(ctx.open);
+  // gutter: 0 places the outer shell flush with the trigger; the visual gap is
+  // recreated by transparent padding (gapPaddingStyle) so the hit area bridges
+  // it and a straight trigger->content transit never leaves a hot zone.
+  const position = usePosition(ctx.trigger, ctx.content, { placement: 'bottom', gutter: 0 });
+  useDismiss({ enabled: ctx.open, onDismiss: (reason) => (reason === 'escape' ? ctx.close() : ctx.leave()), refs: () => [ctx.trigger(), ctx.content()] });
+
   return (
-    <KHoverCard.Portal mount={config.portalMount()}>
-      <KHoverCard.Content class={cn('z-50 rounded-lg bg-card shadow-lg animate-in fade-in-0 zoom-in-95', props.class)}>
-        {props.children}
-      </KHoverCard.Content>
-    </KHoverCard.Portal>
+    <Show when={presence.present()}>
+      <Portal mount={config.portalMount()}>
+        {/* Outer shell: positioning + the transparent safe bridge + hot zone. */}
+        <div
+          ref={(el) => { ctx.setContent(el); presence.setRef(el); }}
+          data-hovercard-content
+          onPointerEnter={ctx.enter}
+          onPointerLeave={ctx.leave}
+          onFocusIn={ctx.enter}
+          onFocusOut={ctx.leave}
+          style={{
+            position: 'fixed',
+            left: `${position.pos().x}px`,
+            top: `${position.pos().y}px`,
+            background: 'transparent',
+            ...gapPaddingStyle(position.pos().placement, GUTTER),
+          }}
+          class="z-50"
+        >
+          {/* Inner card: all visual + animation classes and the presence state. */}
+          <div
+            data-expanded={presence.state() === 'open' ? '' : undefined}
+            data-closed={presence.state() === 'closed' ? '' : undefined}
+            class={cn(
+              'rounded-lg bg-card shadow-lg',
+              'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
+              props.class,
+            )}
+          >
+            {props.children}
+          </div>
+        </div>
+      </Portal>
+    </Show>
+  );
+}
+
+export interface HoverCardProps { trigger: JSX.Element; children: JSX.Element; class?: string; openDelay?: number; closeDelay?: number; }
+
+export function HoverCard(props: HoverCardProps) {
+  const [local] = splitProps(props, ['trigger', 'children', 'class', 'openDelay', 'closeDelay']);
+  return (
+    <HoverCardRoot openDelay={local.openDelay} closeDelay={local.closeDelay}>
+      <HoverCardTrigger>{local.trigger}</HoverCardTrigger>
+      <HoverCardContent class={cn('w-64 p-4', local.class)}>{local.children}</HoverCardContent>
+    </HoverCardRoot>
   );
 }

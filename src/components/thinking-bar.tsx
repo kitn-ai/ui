@@ -22,7 +22,7 @@ function ThinkingBar(props: ThinkingBarProps) {
       <Show
         when={local.onClick}
         fallback={
-          <TextShimmer class="cursor-default font-medium">{text()}</TextShimmer>
+          <TextShimmer class="cursor-default text-sm font-medium">{text()}</TextShimmer>
         }
       >
         <button
@@ -30,7 +30,7 @@ function ThinkingBar(props: ThinkingBarProps) {
           onClick={local.onClick}
           class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80"
         >
-          <TextShimmer class="font-medium">{text()}</TextShimmer>
+          <TextShimmer class="text-sm font-medium">{text()}</TextShimmer>
           <ChevronRight class="text-muted-foreground size-4" />
         </button>
       </Show>

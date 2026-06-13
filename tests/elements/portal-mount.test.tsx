@@ -1,4 +1,4 @@
-import { render } from '@solidjs/testing-library';
+import { render, fireEvent, screen } from '@solidjs/testing-library';
 import { ChatConfig } from '../../src/primitives/chat-config';
 import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../../src/ui/dropdown';
 
@@ -9,14 +9,16 @@ test('dropdown content portals into the configured mount node when open', () => 
 
   render(() => (
     <ChatConfig portalMount={mount}>
-      <Dropdown open>
-        <DropdownTrigger>open</DropdownTrigger>
+      <Dropdown>
+        <DropdownTrigger as={(p: any) => <button {...p} data-testid="trg">open</button>} />
         <DropdownContent>
           <DropdownItem>Item A</DropdownItem>
         </DropdownContent>
       </Dropdown>
     </ChatConfig>
   ));
+
+  fireEvent.click(screen.getByTestId('trg'));
 
   expect(mount.textContent).toContain('Item A');
   mount.remove();

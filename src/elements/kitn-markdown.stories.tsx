@@ -1,0 +1,75 @@
+import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { onMount } from 'solid-js';
+import './register'; // side effect: registers the custom elements
+
+// The web components are custom DOM elements, so declare the tags for JSX.
+declare module 'solid-js' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      'kitn-markdown': JSX.HTMLAttributes<HTMLElement>;
+    }
+  }
+}
+
+const sampleMarkdown = `### Markdown
+Renders **bold**, _italic_, \`code\`, and lists:
+- one
+- two
+
+> and blockquotes.
+
+\`\`\`ts
+export function add(a: number, b: number): number {
+  return a + b;
+}
+\`\`\``;
+
+/** Render the actual `<kitn-markdown>` custom element with a `content` property. */
+function MarkdownElement(props: { content: string }) {
+  let el: (HTMLElement & { content?: string }) | undefined;
+  onMount(() => {
+    if (el) el.content = props.content;
+  });
+  return (
+    <kitn-markdown ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
+  );
+}
+
+const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
+<kitn-markdown id="md" code-theme="github-dark-dimmed"></kitn-markdown>
+
+<script type="module">
+  import '@kitnai/chat/elements';   // registers the custom elements
+
+  const md = document.getElementById('md');
+  md.content = '### Hello\\nRenders **bold**, _italic_, and \\\`code\\\`.';
+  // md.setAttribute('code-highlight', 'false'); // skip Shiki entirely
+</script>`;
+
+const meta = {
+  title: 'Web Components/kitn-markdown',
+  tags: ['autodocs'],
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        component: [
+          '`<kitn-markdown>` is the framework-agnostic **web component** that renders a markdown string (with fenced-code syntax highlighting via Shiki) as a standalone element, isolated in **Shadow DOM**.',
+          '**When to use:** showing model output or any markdown in a non-Solid app without pulling in a markdown stack. In SolidJS, use the `Markdown` primitive directly.',
+          "**How to use:** register once with `import '@kitnai/chat/elements'`, set the source via the `content` **property** (`el.content = '...'`), and tune rendering with the `prose-size`, `code-theme`, and `code-highlight` attributes.",
+          'See the **Code** tab for HTML usage.',
+        ].join('\n\n'),
+      },
+    },
+  },
+} satisfies Meta;
+
+export default meta;
+type Story = StoryObj;
+
+/** Headings, emphasis, lists, a blockquote, and a highlighted code fence. */
+export const Default: Story = {
+  render: () => <MarkdownElement content={sampleMarkdown} />,
+  parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
+};

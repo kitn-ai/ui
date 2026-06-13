@@ -1,32 +1,15 @@
 /**
- * JSX intrinsic-element declarations for kitn-chat web components.
+ * Ambient module declaration for the side-effect-only registration import:
  *
- * React resolves JSX tag types from React.JSX.IntrinsicElements. Custom
- * elements are not in that map by default, so TypeScript would complain:
- *   "Property 'kitn-chat' does not exist on type JSX.IntrinsicElements"
+ *   import '@kitnai/chat/elements';
  *
- * We extend the interface here to accept any attribute (string) or a ref
- * (React.Ref<HTMLElement>). All component *properties* (messages, groups, …)
- * are set imperatively via ref + useEffect, not as JSX attributes, so we
- * only need to allow the standard HTML attributes plus style/ref/className.
+ * This example uses the typed React wrappers from `@kitnai/chat/react`, so it
+ * renders <KitnChat /> etc. (real React components) rather than raw custom-
+ * element JSX tags — no JSX.IntrinsicElements augmentation is needed.
+ *
+ * The `/elements` entry's real type module re-exports from the kit's SolidJS
+ * source, which a React-JSX `tsc` build can't type-check. Since we only import
+ * it for its side effect (registering the custom elements), we declare it here
+ * as an opaque module so the build doesn't pull in the Solid sources.
  */
-
-import type React from 'react';
-
-type CustomElementProps = React.HTMLAttributes<HTMLElement> & {
-  ref?: React.Ref<HTMLElement>;
-  style?: React.CSSProperties;
-  // Allow any extra string attributes that web components may expose.
-  [key: string]: unknown;
-};
-
-declare module 'react' {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    interface IntrinsicElements {
-      'kitn-chat': CustomElementProps;
-      'kitn-conversation-list': CustomElementProps;
-      'kitn-prompt-input': CustomElementProps;
-    }
-  }
-}
+declare module '@kitnai/chat/elements';

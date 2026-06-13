@@ -133,6 +133,7 @@ function MessageCopyButton(props: MessageCopyButtonProps) {
   return (
     <button
       class={props.class}
+      aria-label={copied() ? 'Copied' : 'Copy message'}
       onClick={() => {
         navigator.clipboard.writeText(props.content);
         setCopied(true);

@@ -22,6 +22,7 @@ import { Button } from '../ui/button';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
 import type { Component } from 'solid-js';
 import { DefaultPromptInput } from './default-input';
+import type { SlashCommandItem } from '../components/slash-command';
 import type { ChatMessage, ChatMessageAction } from './chat-types';
 import type { ProseSize } from '../primitives/chat-config';
 import type { ModelOption } from '../types';
@@ -35,13 +36,32 @@ interface ContextUsage {
 }
 
 interface Props extends Record<string, unknown> {
+  /** The full message thread to render, newest last. Each entry carries its role,
+   *  content, and optional reasoning/tools/attachments/actions. Set as a JS
+   *  property (`el.messages = [...]`). */
   messages: ChatMessage[];
+  /** Controlled value of the input. When set, the host owns the input text and
+   *  must update it on `valuechange`; leave unset for uncontrolled behavior. */
   value?: string;
+  /** Placeholder text shown in the empty input. */
   placeholder?: string;
+  /** When true, shows the loading/streaming state and disables submit (use while
+   *  awaiting the assistant's reply). */
   loading?: boolean;
+  /** Starter prompts shown above the input when the thread is empty. Clicking one
+   *  follows `suggestionMode`. Set as a JS property. */
   suggestions?: string[];
+  /** What clicking a suggestion does: `'submit'` (default) sends it immediately
+   *  as if typed and submitted; `'fill'` just places it in the input. */
+  suggestionMode?: 'submit' | 'fill';
+  /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`).
+   *  Defaults to `'sm'`. */
   proseSize?: ProseSize;
+  /** Shiki theme name for syntax-highlighted code blocks (e.g.
+   *  `'github-dark-dimmed'`). */
   codeTheme?: string;
+  /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain
+   *  `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;
@@ -59,6 +79,13 @@ interface Props extends Record<string, unknown> {
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
   voice?: boolean;
+  /** Slash commands — when set, typing `/` in the input opens the command
+   *  palette and fires `slashselect`. Set as a JS property. */
+  slashCommands?: SlashCommandItem[];
+  /** Command ids to highlight as active in the palette. */
+  slashActiveIds?: string[];
+  /** Single-line palette rows. */
+  slashCompact?: boolean;
 }
 
 const ACTION_LABEL: Record<ChatMessageAction, string> = {
@@ -75,7 +102,8 @@ defineKitnElement<Props>('kitn-chat', {
   placeholder: 'Send a message...',
   loading: false,
   suggestions: undefined,
-  proseSize: 'base',
+  suggestionMode: 'submit',
+  proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',
   codeHighlight: true,
   chatTitle: undefined,
@@ -85,7 +113,10 @@ defineKitnElement<Props>('kitn-chat', {
   scrollButton: true,
   search: false,
   voice: false,
-}, (props, { dispatch }) => {
+  slashCommands: undefined,
+  slashActiveIds: undefined,
+  slashCompact: false,
+}, (props, { dispatch, flag }) => {
   // Preserve the shadow-root portal mount from the wrapper's outer ChatConfig
   // when we nest a second ChatConfig to set proseSize/codeTheme.
   const outer = useChatConfig();
@@ -98,13 +129,22 @@ defineKitnElement<Props>('kitn-chat', {
     dispatch('submit', { value: current(), attachments: attachments() });
     setAttachments([]);
   };
-  const handleSuggestionClick = (v: string) => { handleChange(v); dispatch('suggestionclick', { value: v }); };
+  const handleSuggestionClick = (v: string) => {
+    if ((props.suggestionMode ?? 'submit') === 'fill') {
+      handleChange(v);
+      dispatch('suggestionclick', { value: v });
+    } else {
+      // Default: behave as if the user typed the suggestion and pressed submit.
+      dispatch('submit', { value: v, attachments: attachments() });
+      setAttachments([]);
+    }
+  };
 
   const showHeader = () => !!(props.chatTitle || props.models || props.context);
   const showScrollButton = () => props.scrollButton !== false;
 
   return (
-    <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={props.codeHighlight} portalMount={outer.portalMount()}>
+    <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={flag('codeHighlight')} portalMount={outer.portalMount()}>
       <div class="flex h-full flex-col bg-background">
         <Show when={showHeader()}>
           <header class="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
@@ -214,17 +254,21 @@ defineKitnElement<Props>('kitn-chat', {
             <DefaultPromptInput
               value={current()}
               placeholder={props.placeholder}
-              loading={props.loading}
+              loading={flag('loading')}
               suggestions={props.suggestions}
               attachments={attachments()}
-              search={props.search}
-              voice={props.voice}
+              search={flag('search')}
+              voice={flag('voice')}
+              slashCommands={props.slashCommands}
+              slashActiveIds={props.slashActiveIds}
+              slashCompact={flag('slashCompact')}
               onValueChange={handleChange}
               onSubmit={handleSubmit}
               onSuggestionClick={handleSuggestionClick}
               onAttachmentsChange={setAttachments}
               onSearch={() => dispatch('search', {})}
               onVoice={() => dispatch('voice', {})}
+              onSlashSelect={(command) => dispatch('slashselect', { command })}
             />
           </div>
         </div>

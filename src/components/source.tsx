@@ -35,7 +35,7 @@ function Source(props: SourceProps) {
 
   return (
     <SourceContext.Provider value={{ get href() { return props.href; }, get domain() { return domain(); } }}>
-      <HoverCardRoot openDelay={150} closeDelay={0}>
+      <HoverCardRoot openDelay={150}>
         {props.children}
       </HoverCardRoot>
     </SourceContext.Provider>
@@ -61,7 +61,7 @@ function SourceTrigger(props: SourceTriggerProps) {
         target="_blank"
         rel="noopener noreferrer"
         class={cn(
-          'bg-muted text-muted-foreground hover:bg-muted-foreground/30 hover:text-primary inline-flex h-5 max-w-32 items-center gap-1 overflow-hidden rounded-full py-0 text-xs no-underline transition-colors duration-150',
+          'bg-muted text-muted-foreground hover:bg-muted-foreground/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background inline-flex h-5 max-w-32 items-center gap-1 overflow-hidden rounded-full py-0 text-xs no-underline transition-colors duration-150',
           props.showFavicon ? 'pr-2 pl-1' : 'px-2',
           props.class
         )}

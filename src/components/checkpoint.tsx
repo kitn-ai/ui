@@ -61,7 +61,11 @@ export function CheckpointTrigger(props: CheckpointTriggerProps) {
   const variant = () => props.variant ?? 'ghost';
   const size = () => props.size ?? 'sm';
 
-  const button = (
+  // A factory (not a single shared node): the Show fallback and the Tooltip
+  // child each need their OWN element instance, otherwise Solid reuses one DOM
+  // node across both branches and throws HierarchyRequestError when the tooltip
+  // branch mounts it.
+  const renderButton = () => (
     <Button
       variant={variant()}
       size={size()}
@@ -74,8 +78,8 @@ export function CheckpointTrigger(props: CheckpointTriggerProps) {
   );
 
   return (
-    <Show when={props.tooltip} fallback={button}>
-      <Tooltip content={props.tooltip!}>{button}</Tooltip>
+    <Show when={props.tooltip} fallback={renderButton()}>
+      <Tooltip content={props.tooltip!}>{renderButton()}</Tooltip>
     </Show>
   );
 }

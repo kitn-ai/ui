@@ -39,7 +39,12 @@ export default defineConfig({
       extends: true,
       test: {
         environment: 'jsdom',
-        globals: true
+        globals: true,
+        // React wrapper tests run under @vitejs/plugin-react via the separate
+        // vitest.react.config.ts (`npm run test:react`). They MUST be excluded
+        // here, or the global Solid JSX transform would mis-compile their React
+        // JSX ("Comp is not a function").
+        exclude: ['**/node_modules/**', 'tests/react/**']
       }
     }, {
       extends: true,

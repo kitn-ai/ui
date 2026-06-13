@@ -275,6 +275,17 @@ Visual appearance is driven by `--color-*` CSS custom properties in `theme.css`.
 
 For SolidJS usage, import `@kitnai/chat/theme.css` once. For web components the kit's CSS is injected into each shadow root automatically; only `theme.css` (design tokens) is optional to include.
 
+## For AI agents / LLMs
+
+The package ships [llmstxt.org](https://llmstxt.org)-style files so coding agents (Claude Code, Copilot, Cursor, Codex) can wire up the components correctly:
+
+- **[`llms.txt`](./llms.txt)** — dense orientation: install, the property-vs-attribute rule, the two-layer architecture, theming, and framework wiring.
+- **[`llms-full.txt`](./llms-full.txt)** — the above plus a generated props/events reference for every `kitn-*` element, a streaming recipe, and a build runbook.
+
+Both are auto-generated from `dist/custom-elements.json` during `npm run build` (so they never drift) and are published in the npm package — find them at `node_modules/@kitnai/chat/llms.txt` after install.
+
+> **#1 thing agents get wrong:** array/object data (`messages`, `models`, `context`, …) must be set as **JS properties**, not HTML attributes. Only scalars (`placeholder`, `loading`, `theme`) work as attributes.
+
 ## Development
 
 ```bash

@@ -46,10 +46,19 @@ function ToolStateIcon(props: { state: ToolPart['state'] }) {
   );
 }
 
-// Status chips: a saturated hue as text over a 15% translucent fill of the same
-// hue. This reads on both light and dark surfaces (mirroring the inline-code chip),
-// so it needs no `dark:` variant — which wouldn't follow a token-scoped theme anyway.
-const STATE_HUE: Record<ToolPart['state'], string> = {
+// Status chips: a hue as text over a 15% translucent fill of the same hue
+// (mirroring the inline-code chip). The TEXT color comes from a theme token
+// (--color-tool-*) whose light value is darkened so it reaches WCAG AA (4.5:1)
+// on the faint fill, while dark mode keeps a brighter hue for AA on the dark
+// surface — both modes resolve via the token's `.dark` override. The FILL keeps
+// a fixed bright hue so the chip's colored tint looks the same in both modes.
+const STATE_TOKEN: Record<ToolPart['state'], string> = {
+  'input-streaming': 'var(--color-tool-blue)',
+  'input-available': 'var(--color-tool-amber)',
+  'output-available': 'var(--color-tool-green)',
+  'output-error': 'var(--color-tool-red)',
+};
+const STATE_FILL: Record<ToolPart['state'], string> = {
   'input-streaming': 'hsl(217 91% 60%)', // blue
   'input-available': 'hsl(38 92% 50%)', // amber
   'output-available': 'hsl(142 71% 45%)', // green
@@ -57,8 +66,10 @@ const STATE_HUE: Record<ToolPart['state'], string> = {
 };
 
 function stateChip(state: ToolPart['state']): JSX.CSSProperties {
-  const hue = STATE_HUE[state];
-  return { color: hue, background: `color-mix(in oklab, ${hue} 15%, transparent)` };
+  return {
+    color: STATE_TOKEN[state],
+    background: `color-mix(in oklab, ${STATE_FILL[state]} 15%, transparent)`,
+  };
 }
 
 function ToolStateBadge(props: { state: ToolPart['state'] }) {

@@ -16,6 +16,7 @@ function ScrollButton(props: ScrollButtonProps) {
     <Button
       variant={props.variant ?? 'outline'}
       size={props.size ?? 'sm'}
+      aria-label="Scroll to bottom"
       class={cn(
         'h-10 w-10 rounded-full transition-all duration-150 ease-out',
         !isAtBottom()

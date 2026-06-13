@@ -1,0 +1,93 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/For AI Agents" />
+
+# For AI Agents / LLMs
+
+`@kitnai/chat` ships machine-readable orientation files that follow the
+[llmstxt.org](https://llmstxt.org) convention, so coding agents (Claude Code,
+Copilot, Cursor, Codex, …) can wire up the components correctly without guessing.
+
+**View them now:** <a href="/llms.txt" target="_blank" rel="noreferrer">llms.txt</a> ·
+<a href="/llms-full.txt" target="_blank" rel="noreferrer">llms-full.txt</a>
+(open in a new tab)
+
+## The files
+
+| File | Audience | Where to find it |
+|---|---|---|
+| <a href="/llms.txt" target="_blank" rel="noreferrer"><code>llms.txt</code></a> | Agents + humans | Repo root, the npm package root (`node_modules/@kitnai/chat/llms.txt`), and `https://kitn.dev/llms.txt` |
+| <a href="/llms-full.txt" target="_blank" rel="noreferrer"><code>llms-full.txt</code></a> | Agents | Same locations; the per-element API reference for **every** `kitn-*` element |
+
+Both files are **auto-generated** from `dist/custom-elements.json` by
+`scripts/gen-llms.mjs` during `npm run build`, so they never drift from the
+shipped API. Do not edit them by hand.
+
+- **`llms.txt`** (~4 KB) — a dense orientation: install, the property-vs-attribute
+  rule, the two-layer architecture, theming, and framework wiring. Fast to read.
+- **`llms-full.txt`** (~32 KB) — everything in `llms.txt` plus a generated props/events
+  table for each element, a streaming recipe, and a "build a chat app" runbook.
+
+## The #1 rule agents get wrong
+
+**Array and object data must be set as JavaScript properties, not HTML attributes.**
+An HTML attribute is always a string, so passing `messages`, `models`, `context`,
+`suggestions`, or `slashCommands` as an attribute silently fails.
+
+```js
+const chat = document.querySelector('kitn-chat');
+chat.messages = [{ id: '1', role: 'assistant', content: 'Hi!' }]; // ✅ property
+```
+
+```html
+<kitn-chat messages="[...]"></kitn-chat>  <!-- ❌ never works -->
+```
+
+Only scalar props (string / number / boolean) work as attributes — for example
+`placeholder`, `loading`, and `theme`.
+
+## How agents consume these files
+
+| Tool | How it finds them |
+|---|---|
+| Claude Code | Reference `@llms.txt` in `CLAUDE.md`, or read `node_modules/@kitnai/chat/llms-full.txt` |
+| GitHub Copilot | Workspace indexing picks up the file in `node_modules`; reference it from `.github/copilot-instructions.md` |
+| Cursor | Point `.cursorrules` at the installed `llms.txt` |
+| Codex / ChatGPT | Fetch https://kitn.dev/llms.txt directly |
+| Any agent | `npm install @kitnai/chat` → file is at `node_modules/@kitnai/chat/llms.txt` |
+
+## Build a chat app (the runbook agents follow)
+
+```js
+import '@kitnai/chat/elements';
+const chat = document.querySelector('kitn-chat');
+chat.messages = [];
+
+chat.addEventListener('submit', async (e) => {
+  const userText = e.detail.value;
+
+  // Append the user message (new array)
+  const history = [...chat.messages, { id: crypto.randomUUID(), role: 'user', content: userText }];
+  chat.messages = history;
+  chat.loading = true;
+
+  // Empty assistant placeholder to stream into
+  const aid = crypto.randomUUID();
+  chat.messages = [...history, { id: aid, role: 'assistant', content: '' }];
+
+  // Stream — reassign a NEW array with a NEW message object each chunk.
+  // Mutating in place will NOT re-render.
+  let answer = '';
+  for await (const token of streamFromYourAPI(history)) {
+    answer += token;
+    chat.messages = chat.messages.map((m) => (m.id === aid ? { ...m, content: answer } : m));
+  }
+  chat.loading = false;
+});
+```
+
+## Links
+
+- <a href="/llms.txt" target="_blank" rel="noreferrer"><code>llms.txt</code></a> — orientation (also published at `https://kitn.dev/llms.txt`)
+- <a href="/llms-full.txt" target="_blank" rel="noreferrer"><code>llms-full.txt</code></a> — full per-element reference (also `https://kitn.dev/llms-full.txt`)
+- Custom Elements Manifest — `dist/custom-elements.json` (published at `https://unpkg.com/@kitnai/chat/dist/custom-elements.json`)

@@ -13,7 +13,7 @@ export function ModelSwitcher(props: ModelSwitcherProps) {
     <Show when={local.models.length > 1}>
       <Dropdown>
         <DropdownTrigger as={(triggerProps: any) => (
-          <Button variant="ghost" size="sm" class={cn('gap-1 text-xs text-muted-foreground', local.class)} {...triggerProps}>
+          <Button variant="ghost" size="sm" class={cn('gap-1 text-meta text-muted-foreground', local.class)} {...triggerProps}>
             {currentModel()?.name ?? local.currentModelId}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </Button>
@@ -23,8 +23,8 @@ export function ModelSwitcher(props: ModelSwitcherProps) {
             {(model) => (
               <DropdownItem onSelect={() => local.onModelChange(model.id)}>
                 <div class="flex flex-col">
-                  <span class={cn('text-sm', model.id === local.currentModelId && 'font-medium text-foreground')}>{model.name}</span>
-                  <Show when={model.provider}><span class="text-xs text-muted-foreground">{model.provider}</span></Show>
+                  <span class={cn('text-body', model.id === local.currentModelId && 'font-medium text-foreground')}>{model.name}</span>
+                  <Show when={model.provider}><span class="text-caption text-muted-foreground">{model.provider}</span></Show>
                 </div>
               </DropdownItem>
             )}

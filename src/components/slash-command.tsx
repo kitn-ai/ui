@@ -99,11 +99,20 @@ function SlashCommand(props: SlashCommandProps) {
   });
 
   function selectItem(item: SlashCommandItem) {
-    ctx.setValue("");
+    // Insert the chosen command into the prompt (e.g. "/summarize ") so it
+    // appears in the input ready to send or edit. The trailing space ends the
+    // slash token, which closes the palette. Still fire onSelect so consumers
+    // can react to the selection.
+    ctx.setValue(item.label + " ");
     setOpen(false);
     props.onSelect(item);
-    // Refocus textarea
-    setTimeout(() => ctx.textareaRef?.focus(), 0);
+    // Refocus the textarea and place the caret at the end.
+    setTimeout(() => {
+      const ta = ctx.textareaRef;
+      if (!ta) return;
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+    }, 0);
   }
 
   function handleKeyDown(e: KeyboardEvent) {
@@ -163,7 +172,7 @@ function SlashCommand(props: SlashCommandProps) {
             {([category, items]) => (
               <>
                 <Show when={category}>
-                  <div class="px-3 pt-2 pb-1 text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide">
+                  <div class="px-3 pt-2 pb-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
                     {category}
                   </div>
                 </Show>
@@ -189,11 +198,11 @@ function SlashCommand(props: SlashCommandProps) {
                             <div class="text-xs flex items-center gap-1.5">
                               {item.label}
                               <Show when={isActive()}>
-                                <span class="text-[10px] text-violet-400">active</span>
+                                <span class="text-[10px] text-violet-600 dark:text-violet-400">active</span>
                               </Show>
                             </div>
                             <Show when={item.description}>
-                              <div class="text-xs text-muted-foreground/50 truncate">
+                              <div class="text-xs text-muted-foreground truncate">
                                 {item.description}
                               </div>
                             </Show>
@@ -202,9 +211,9 @@ function SlashCommand(props: SlashCommandProps) {
                           <Show when={isActive()}>
                             <span class="w-1 h-1 rounded-full bg-violet-400 flex-shrink-0" />
                           </Show>
-                          <span class={cn("text-xs flex-shrink-0", isActive() && "text-violet-400")}>{item.label}</span>
+                          <span class={cn("text-xs flex-shrink-0", isActive() && "text-violet-600 dark:text-violet-400")}>{item.label}</span>
                           <Show when={item.description}>
-                            <span class="text-xs text-muted-foreground/40 truncate">{item.description}</span>
+                            <span class="text-xs text-muted-foreground truncate">{item.description}</span>
                           </Show>
                         </Show>
                       </button>

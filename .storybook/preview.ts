@@ -7,14 +7,25 @@ const preview: Preview = {
     layout: 'fullscreen',
     options: {
       storySort: {
+        // All documentation lives under a single "Docs" group, pinned to the
+        // top of the sidebar (in reading order), then examples/patterns, then
+        // the component libraries.
         order: [
-          'Introduction',
-          'Installation',
-          'Getting Started',
-          'Theming',
-          'Integrations',
+          'Docs',
+          [
+            'Introduction',
+            'Installation',
+            'Getting Started',
+            'Theming',
+            'Frameworks & Integrations',
+            'Accessibility',
+            'For AI Agents',
+          ],
           'Examples',
           'Patterns',
+          'Components',
+          'UI',
+          'Web Components',
           '*',
         ],
       },
