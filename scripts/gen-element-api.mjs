@@ -272,4 +272,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Generate llms.txt / llms-full.txt from the same in-memory model (one parse).
   const { generate } = await import('./gen-llms.mjs');
   generate(elements);
+  // Regenerate docs/web-components.md tables between <!-- spec:TAG --> markers.
+  const { writeWebComponentsMd } = await import('./gen-web-components-md.mjs');
+  writeWebComponentsMd(root, elements);
 }
