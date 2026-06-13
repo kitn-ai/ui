@@ -23,4 +23,25 @@
     outline: 2px solid var(--color-ring);
     outline-offset: 2px;
   }
+
+  /* Consistent cross-platform scrollbars for EVERY scroll region inside the
+     shadow root (message list, conversation list, menus, hover cards, code
+     blocks, the prompt textarea …). Thin + rounded + subtle, themed via tokens
+     for light/dark, thumb stronger on hover. Track stays transparent and
+     overflow is untouched, so no scrollbar is forced where none is needed.
+     Scoped to the shadow root, so it never restyles the host page. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scrollbar-thumb) transparent;
+  }
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--color-scrollbar-thumb);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-thumb:hover { background-color: var(--color-scrollbar-thumb-hover); }
+  *::-webkit-scrollbar-corner { background: transparent; }
 }

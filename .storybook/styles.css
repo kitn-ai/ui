@@ -24,6 +24,22 @@
     outline: 2px solid var(--color-ring);
     outline-offset: 2px;
   }
+  /* Mirror the shipped cross-platform scrollbar styling (src/elements/styles.css)
+     so Storybook matches what real apps render. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scrollbar-thumb) transparent;
+  }
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--color-scrollbar-thumb);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-thumb:hover { background-color: var(--color-scrollbar-thumb-hover); }
+  *::-webkit-scrollbar-corner { background: transparent; }
 }
 
 /* Larger, more readable body text on the Storybook MDX docs pages.
