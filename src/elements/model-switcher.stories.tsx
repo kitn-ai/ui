@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-model-switcher': JSX.HTMLAttributes<HTMLElement>;
+      'kc-model-switcher': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -20,7 +20,7 @@ const models: ModelOption[] = [
   { id: 'haiku', name: 'Claude Haiku', provider: 'Anthropic' },
 ];
 
-/** Render `<kitn-model-switcher>` with `models` set as a property; tracks selection. */
+/** Render `<kc-model-switcher>` with `models` set as a property; tracks selection. */
 function SwitcherElement(props: { models: ModelOption[]; current?: string }) {
   let el: (HTMLElement & { models?: ModelOption[]; currentModel?: string }) | undefined;
   onMount(() => {
@@ -34,12 +34,12 @@ function SwitcherElement(props: { models: ModelOption[]; current?: string }) {
     });
   });
   return (
-    <kitn-model-switcher ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '40px' }} />
+    <kc-model-switcher ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '40px' }} />
   );
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-model-switcher id="ms"></kitn-model-switcher>
+<kc-model-switcher id="ms"></kc-model-switcher>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -54,14 +54,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-model-switcher',
+  title: 'Web Components/kc-model-switcher',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-model-switcher'),
+  argTypes: argTypesFor('kc-model-switcher'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-model-switcher', [
-          '`<kitn-model-switcher>` is the framework-agnostic **web component** for picking the active model — a dropdown showing each model\'s name and provider — isolated in **Shadow DOM**. It mirrors the switcher inside `<kitn-chat>` as a standalone, composable piece.',
+      description: specDescription('kc-model-switcher', [
+          '`<kc-model-switcher>` is the framework-agnostic **web component** for picking the active model — a dropdown showing each model\'s name and provider — isolated in **Shadow DOM**. It mirrors the switcher inside `<kc-chat>` as a standalone, composable piece.',
           '**When to use:** building your own chat header and want the model picker on its own. In SolidJS, use the `ModelSwitcher` primitive.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `models` **property** (and optionally `currentModel`), and listen for the `modelchange` **CustomEvent**. Note: like the underlying primitive, it only renders when more than one model is provided.",
           'See the **Code** tab for HTML usage.',

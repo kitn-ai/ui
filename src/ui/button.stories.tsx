@@ -72,7 +72,7 @@ type Story = StoryObj<typeof meta>;
  *
  * Note: `Button` is a SolidJS *component* (a scoped import), not a global custom
  * element, so the unprefixed name can't conflict with anything — alias on import
- * if a host already has a `Button`. Only the web components (`<kitn-chat>`, …)
+ * if a host already has a `Button`. Only the web components (`<kc-chat>`, …)
  * are prefixed, because those claim global custom-element tag names.
  */
 const IMPORT = `import { Button } from '@kitnai/chat';`;

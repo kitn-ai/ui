@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
-import './register'; // side effect: registers all kitn custom elements including <kitn-chat-workspace>
+import './register'; // side effect: registers all kitn custom elements including <kc-workspace>
 import type { ConversationGroup, ConversationSummary, ModelOption } from '../types';
 import type { ChatMessage } from './chat-types';
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
@@ -10,7 +10,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-chat-workspace': JSX.HTMLAttributes<HTMLElement>;
+      'kc-workspace': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -51,7 +51,7 @@ const sampleMessages: ChatMessage[] = [
     id: 'm2',
     role: 'assistant',
     content:
-      'Use `<kitn-chat-workspace>` — set `conversations`, `messages`, and `models` as properties and listen for `conversationselect` + `submit`.',
+      'Use `<kc-workspace>` — set `conversations`, `messages`, and `models` as properties and listen for `conversationselect` + `submit`.',
     actions: ['copy', 'like'],
   },
 ];
@@ -81,7 +81,7 @@ type WorkspaceEl = HTMLElement & {
   value?: string;
 };
 
-/** Live demo of the actual `<kitn-chat-workspace>` custom element (Shadow DOM and all). */
+/** Live demo of the actual `<kc-workspace>` custom element (Shadow DOM and all). */
 function WorkspaceElement(props: { args?: Record<string, unknown> }) {
   let el: WorkspaceEl | undefined;
   onMount(() => {
@@ -113,7 +113,7 @@ function WorkspaceElement(props: { args?: Record<string, unknown> }) {
   });
   return (
     <div style={{ height: '720px', width: '100%' }}>
-      <kitn-chat-workspace
+      <kc-workspace
         ref={(e) => (el = e as WorkspaceEl)}
         style={{ display: 'block', height: '100%' }}
       />
@@ -122,7 +122,7 @@ function WorkspaceElement(props: { args?: Record<string, unknown> }) {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-chat-workspace id="workspace" style="display:block; height:100vh;"></kitn-chat-workspace>
+<kc-workspace id="workspace" style="display:block; height:100vh;"></kc-workspace>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -137,7 +137,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   ];
   workspace.messages = [
     { id: 'm1', role: 'user', content: 'How do I drop the whole chat app in with one tag?' },
-    { id: 'm2', role: 'assistant', content: 'Use <kitn-chat-workspace> — set conversations, messages, and models as properties.' },
+    { id: 'm2', role: 'assistant', content: 'Use <kc-workspace> — set conversations, messages, and models as properties.' },
   ];
   workspace.models = [
     { id: 'claude-4', name: 'Claude 4 Opus', provider: 'Anthropic' },
@@ -170,7 +170,7 @@ function Workspace() {
   ];
   const messages: ChatMessage[] = [
     { id: 'm1', role: 'user', content: 'How do I drop the whole chat app in with one tag?' },
-    { id: 'm2', role: 'assistant', content: 'Use <kitn-chat-workspace> — set conversations, messages, and models as properties.' },
+    { id: 'm2', role: 'assistant', content: 'Use <kc-workspace> — set conversations, messages, and models as properties.' },
   ];
   onMount(() => {
     el.conversations = conversations;
@@ -181,7 +181,7 @@ function Workspace() {
     el.addEventListener('sidebartoggle', (e) => console.log('sidebar collapsed:', e.detail.collapsed));
   });
   return (
-    <kitn-chat-workspace
+    <kc-workspace
       ref={el}
       style={{ display: 'block', height: '100vh' }}
     />
@@ -189,14 +189,14 @@ function Workspace() {
 }`;
 
 const meta = {
-  title: 'Web Components/kitn-chat-workspace',
+  title: 'Web Components/kc-workspace',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-chat-workspace'),
+  argTypes: argTypesFor('kc-workspace'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-chat-workspace', [
-          '`<kitn-chat-workspace>` is the full chat shell as a single **web component** — a resizable split layout with a collapsible conversation list on the left and a full message thread on the right, all isolated in **Shadow DOM**. SolidJS is bundled in, so the host needs nothing.',
+      description: specDescription('kc-workspace', [
+          '`<kc-workspace>` is the full chat shell as a single **web component** — a resizable split layout with a collapsible conversation list on the left and a full message thread on the right, all isolated in **Shadow DOM**. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** dropping an entire chat application shell into a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts and a ready-made list+chat layout. If you *are* in SolidJS and want fine-grained control, compose the `ConversationList` and `ChatThread` primitives directly.',
           '**How to use:** register once with `import \'@kitnai/chat/elements\'`, set rich data as JS **properties** (`el.conversations = [...]`, `el.messages = [...]`, `el.models = [...]`), and listen for **CustomEvents** (`conversationselect`, `submit`, `sidebartoggle`, `newchat`) directly on the element.',
           '**Placement:** as a full-page surface or large panel. Give it an explicit height (e.g. `height: 100vh`). The sidebar is drag-resizable and can be collapsed via the toggle button in its header.',

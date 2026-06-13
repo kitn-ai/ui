@@ -18,7 +18,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-context-meter': JSX.HTMLAttributes<HTMLElement>;
+      'kc-context': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -33,19 +33,19 @@ const usage: ContextUsage = {
   estimatedCost: 0.42,
 };
 
-/** Render `<kitn-context-meter>` with the `context` set as a JS property. */
+/** Render `<kc-context>` with the `context` set as a JS property. */
 function MeterElement(props: { context: ContextUsage }) {
   let el: (HTMLElement & { context?: ContextUsage }) | undefined;
   onMount(() => {
     if (el) el.context = props.context;
   });
   return (
-    <kitn-context-meter ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '40px' }} />
+    <kc-context ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '40px' }} />
   );
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-context-meter id="ctx"></kitn-context-meter>
+<kc-context id="ctx"></kc-context>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -59,14 +59,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-context-meter',
+  title: 'Web Components/kc-context',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-context-meter'),
+  argTypes: argTypesFor('kc-context'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-context-meter', [
-          '`<kitn-context-meter>` is the framework-agnostic **web component** for a token/context-window usage meter — a compact gauge with a hover-card breakdown (input / output / reasoning / cache + estimated cost) — isolated in **Shadow DOM**.',
+      description: specDescription('kc-context', [
+          '`<kc-context>` is the framework-agnostic **web component** for a token/context-window usage meter — a compact gauge with a hover-card breakdown (input / output / reasoning / cache + estimated cost) — isolated in **Shadow DOM**.',
           '**When to use:** showing how much of the context window a conversation is using, typically in a chat header. In SolidJS, compose the `Context` primitives.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, then set the `context` **property** with the usage object. Hover the meter to reveal the breakdown.",
           'See the **Code** tab for HTML usage.',

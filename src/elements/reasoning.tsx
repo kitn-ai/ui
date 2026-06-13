@@ -16,18 +16,18 @@ interface Props extends Record<string, unknown> {
   markdown?: boolean;
 }
 
-/** Events fired by `<kitn-reasoning>`. */
+/** Events fired by `<kc-reasoning>`. */
 interface Events {
   /** Open state changed (via the trigger or streaming auto-open). */
   openchange: { open: boolean };
 }
 
 /**
- * `<kitn-reasoning>` — a collapsible reasoning/thinking block that auto-expands
+ * `<kc-reasoning>` — a collapsible reasoning/thinking block that auto-expands
  * while `streaming`. Text via the `text` property; `markdown`/`streaming` flags;
  * `open` is a controlled property; emits `openchange`.
  */
-defineKitnElement<Props, Events>('kitn-reasoning', {
+defineKitnElement<Props, Events>('kc-reasoning', {
   text: '',
   label: 'Reasoning',
   open: undefined,

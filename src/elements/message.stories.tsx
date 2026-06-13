@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-message': JSX.HTMLAttributes<HTMLElement>;
+      'kc-message': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -43,19 +43,19 @@ const userMessage: ChatMessage = {
   content: 'How do I compose these myself?',
 };
 
-/** Render the actual `<kitn-message>` custom element with a `message` property. */
+/** Render the actual `<kc-message>` custom element with a `message` property. */
 function MessageElement(props: { message: ChatMessage }) {
   let el: (HTMLElement & { message?: ChatMessage }) | undefined;
   onMount(() => {
     if (el) el.message = props.message;
   });
   return (
-    <kitn-message ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
+    <kc-message ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
   );
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-message id="msg" style="display:block;"></kitn-message>
+<kc-message id="msg" style="display:block;"></kc-message>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -74,14 +74,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-message',
+  title: 'Web Components/kc-message',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-message'),
+  argTypes: argTypesFor('kc-message'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-message', [
-          '`<kitn-message>` is the framework-agnostic **web component** for a single message row — markdown/plain content, an optional reasoning block, tool calls, attachments, and action buttons — all rendered from one `message` object (the same shape `<kitn-chat>` uses per message). It is the keystone of the "compose your own message list" pattern, isolated in **Shadow DOM**.',
+      description: specDescription('kc-message', [
+          '`<kc-message>` is the framework-agnostic **web component** for a single message row — markdown/plain content, an optional reasoning block, tool calls, attachments, and action buttons — all rendered from one `message` object (the same shape `<kc-chat>` uses per message). It is the keystone of the "compose your own message list" pattern, isolated in **Shadow DOM**.',
           "**When to use:** building a custom message thread in a non-Solid app, or anywhere you want to lay out the list yourself but keep the kit's rich message rendering. In SolidJS, compose the `Message` primitives for finer control.",
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the whole row via the `message` **property** (`el.message = {...}`), and listen for the `messageaction` **CustomEvent** for action-button clicks. For simple cases, set `role` + `content` attributes instead of a full object.",
           'See the **Code** tab for HTML usage.',

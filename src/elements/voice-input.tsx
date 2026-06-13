@@ -12,7 +12,7 @@ interface Props extends Record<string, unknown> {
   disabled?: boolean;
 }
 
-/** Events fired by `<kitn-voice-input>`. */
+/** Events fired by `<kc-voice-input>`. */
 interface Events {
   /** Raw audio captured (before transcription) — for hosts that prefer to
    *  handle transcription themselves instead of via the `transcribe` property. */
@@ -22,11 +22,11 @@ interface Events {
 }
 
 /**
- * `<kitn-voice-input>` — a mic button that records and transcribes. The
+ * `<kc-voice-input>` — a mic button that records and transcribes. The
  * canonical **function-property** element: set `el.transcribe` to your async
  * transcriber. Also emits `audiocaptured` (raw blob) and `transcription` (text).
  */
-defineKitnElement<Props, Events>('kitn-voice-input', {
+defineKitnElement<Props, Events>('kc-voice-input', {
   transcribe: undefined,
   disabled: false,
 }, (props, { dispatch, flag }) => (

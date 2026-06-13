@@ -15,7 +15,7 @@ const messages: ChatMessage[] = [
 ];
 
 test('renders messages and emits submit', async () => {
-  const el = document.createElement('kitn-chat') as HTMLElement & { messages: ChatMessage[] };
+  const el = document.createElement('kc-chat') as HTMLElement & { messages: ChatMessage[] };
   el.messages = messages;
   document.body.appendChild(el);
   await Promise.resolve();
@@ -35,7 +35,7 @@ test('renders messages and emits submit', async () => {
 });
 
 test('emits messageaction when an action button is clicked', async () => {
-  const el = document.createElement('kitn-chat') as HTMLElement & { messages: ChatMessage[] };
+  const el = document.createElement('kc-chat') as HTMLElement & { messages: ChatMessage[] };
   el.messages = messages;
   document.body.appendChild(el);
   await Promise.resolve();
@@ -50,7 +50,7 @@ test('emits messageaction when an action button is clicked', async () => {
 });
 
 test('codeHighlight={false} renders fenced code as plain text (no Shiki)', async () => {
-  const el = document.createElement('kitn-chat') as HTMLElement & {
+  const el = document.createElement('kc-chat') as HTMLElement & {
     messages: ChatMessage[]; codeHighlight: boolean;
   };
   el.codeHighlight = false;

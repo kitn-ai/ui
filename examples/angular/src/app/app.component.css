@@ -90,7 +90,7 @@
 /* ── Responsive sidebar overlay ──────────────────────────────────────────── */
 
 @media (max-width: 720px) {
-  .main-area kitn-chat-workspace {
+  .main-area kc-workspace {
     /* The workspace handles its own sidebar toggle internally */
   }
 }

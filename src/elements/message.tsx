@@ -26,7 +26,7 @@ interface Props extends Record<string, unknown> {
   codeHighlight?: boolean;
 }
 
-/** Events fired by `<kitn-message>`. */
+/** Events fired by `<kc-message>`. */
 interface Events {
   /** An action button was clicked. */
   messageaction: { messageId: string; action: ChatMessageAction };
@@ -40,12 +40,12 @@ const ACTION_ICON: Record<ChatMessageAction, Component<{ class?: string }>> = {
 };
 
 /**
- * `<kitn-message>` — a single message row: markdown/plain content, reasoning,
+ * `<kc-message>` — a single message row: markdown/plain content, reasoning,
  * tool calls, attachments, and action buttons, rendered from one `message`
- * object (the same shape `<kitn-chat>` uses per message). The keystone of the
+ * object (the same shape `<kc-chat>` uses per message). The keystone of the
  * "compose your own message list" pattern. Emits `messageaction`.
  */
-defineKitnElement<Props, Events>('kitn-message', {
+defineKitnElement<Props, Events>('kc-message', {
   message: undefined,
   role: 'assistant',
   content: undefined,

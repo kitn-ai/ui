@@ -1,5 +1,5 @@
 /**
- * kitn-chat Angular example — using web components natively.
+ * kc-chat Angular example — using web components natively.
  *
  * Angular can bind to custom-element DOM properties with [prop]="value" and
  * listen to CustomEvents with (eventname)="handler($event)".  No wrappers or
@@ -144,7 +144,7 @@ export class AppComponent {
     this.theme.set(wasDark ? 'light' : 'dark');
   }
 
-  // ── kitn-chat-workspace event handlers ────────────────────────────────────
+  // ── kc-workspace event handlers ────────────────────────────────────
 
   /**
    * `(submit)` — fired when the user sends a message.
@@ -290,7 +290,7 @@ export class AppComponent {
     document.body.classList.toggle('sidebar-open');
   }
 
-  // ── Standalone kitn-prompt-input handler ──────────────────────────────────
+  // ── Standalone kc-prompt-input handler ──────────────────────────────────
 
   onStandaloneSubmit(event: Event): void {
     const { value } = ((event as CustomEvent).detail ?? {}) as { value?: string };

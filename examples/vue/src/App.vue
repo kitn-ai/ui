@@ -1,5 +1,5 @@
 <!--
-  kitn-chat Vue 3 example — using web components natively.
+  kc-chat Vue 3 example — using web components natively.
 
   Vue can bind to custom-element DOM properties with the `.prop` modifier:
     :prop.prop="value"  — sets the DOM *property* (not a stringified attribute);
@@ -134,7 +134,7 @@ function toggleTheme(): void {
   theme.value = wasDark ? 'light' : 'dark';
 }
 
-// ── kitn-chat-workspace event handlers ─────────────────────────────────────────
+// ── kc-workspace event handlers ─────────────────────────────────────────
 
 /**
  * @submit — fired when the user sends a message.
@@ -276,7 +276,7 @@ function onSidebarToggle(): void {
   document.body.classList.toggle('sidebar-open');
 }
 
-// ── Standalone kitn-prompt-input handler ───────────────────────────────────────
+// ── Standalone kc-prompt-input handler ───────────────────────────────────────
 
 function onStandaloneSubmit(event: Event): void {
   const { value } = ((event as CustomEvent).detail ?? {}) as { value?: string };
@@ -288,7 +288,7 @@ function onStandaloneSubmit(event: Event): void {
 
 <template>
   <!--
-    kitn-chat Vue 3 example template.
+    kc-chat Vue 3 example template.
 
     Key Vue web-component patterns:
       :prop.prop="value"   — the `.prop` modifier sets the DOM *property*
@@ -305,7 +305,7 @@ function onStandaloneSubmit(event: Event): void {
     <header class="topbar" :style="{ borderBottom: '1px solid ' + borderColor }">
       <span class="topbar-brand">
         <img src="../../shared/logo.svg" alt="" width="20" height="20" />
-        kitn-chat &middot; Vue example (web components)
+        kc-chat &middot; Vue example (web components)
       </span>
 
       <button
@@ -321,13 +321,13 @@ function onStandaloneSubmit(event: Event): void {
       ></button>
     </header>
 
-    <!-- Main area: the flagship <kitn-chat-workspace> element.
+    <!-- Main area: the flagship <kc-workspace> element.
          :prop.prop sets DOM properties; @event listens for CustomEvents.
          The `.prop` modifier is critical — without it Vue would stringify
          arrays/objects as attributes and the elements would receive "[object Object]". -->
     <div class="main-area">
       <!--
-        <kitn-chat-workspace> is the batteries-included shell: sidebar +
+        <kc-workspace> is the batteries-included shell: sidebar +
         conversation list + chat panel + resize handle, all in one element.
 
         Property bindings (:prop.prop):
@@ -351,7 +351,7 @@ function onStandaloneSubmit(event: Event): void {
           - @newchat              — "New chat" button clicked
           - @sidebartoggle        — hamburger / sidebar toggle
       -->
-      <kitn-chat-workspace
+      <kc-workspace
         :groups.prop="groups"
         :conversations.prop="conversations"
         :activeId.prop="activeId"
@@ -370,20 +370,20 @@ function onStandaloneSubmit(event: Event): void {
         @newchat="onNewChat"
         @sidebartoggle="onSidebarToggle"
         style="flex: 1; min-height: 0;"
-      ></kitn-chat-workspace>
+      ></kc-workspace>
     </div>
 
-    <!-- Standalone <kitn-prompt-input> — proves a leaf element works on its own. -->
+    <!-- Standalone <kc-prompt-input> — proves a leaf element works on its own. -->
     <div class="standalone-section" :style="{ borderTop: '1px solid ' + borderColor }">
       <div class="standalone-label">
-        Standalone &lt;kitn-prompt-input&gt; (try typing <code>/</code> for slash commands):
+        Standalone &lt;kc-prompt-input&gt; (try typing <code>/</code> for slash commands):
       </div>
-      <kitn-prompt-input
+      <kc-prompt-input
         placeholder="Standalone prompt input…"
         :slashCommands.prop="slashCommands"
         :theme.prop="theme"
         @submit="onStandaloneSubmit"
-      ></kitn-prompt-input>
+      ></kc-prompt-input>
       <ul v-if="draftSubmissions.length > 0" class="draft-list">
         <li v-for="d in draftSubmissions" :key="d">submitted: {{ d }}</li>
       </ul>

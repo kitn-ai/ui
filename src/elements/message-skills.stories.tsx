@@ -8,7 +8,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-message-skills': JSX.HTMLAttributes<HTMLElement>;
+      'kc-skills': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -23,19 +23,19 @@ const sampleSkills: Skill[] = [
   { id: 's2', name: 'code' },
 ];
 
-/** Render the actual `<kitn-message-skills>` custom element with a `skills` property. */
+/** Render the actual `<kc-skills>` custom element with a `skills` property. */
 function MessageSkillsElement(props: { skills: Skill[] }) {
   let el: (HTMLElement & { skills?: Skill[] }) | undefined;
   onMount(() => {
     if (el) el.skills = props.skills;
   });
   return (
-    <kitn-message-skills ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px' }} />
+    <kc-skills ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px' }} />
   );
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-message-skills id="skills"></kitn-message-skills>
+<kc-skills id="skills"></kc-skills>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -48,14 +48,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-message-skills',
+  title: 'Web Components/kc-skills',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-message-skills'),
+  argTypes: argTypesFor('kc-skills'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-message-skills', [
-          '`<kitn-message-skills>` is the framework-agnostic **web component** that badges which skills were active for a message, isolated in **Shadow DOM**.',
+      description: specDescription('kc-skills', [
+          '`<kc-skills>` is the framework-agnostic **web component** that badges which skills were active for a message, isolated in **Shadow DOM**.',
           '**When to use:** annotating a message row with the skills/tools it used, in a non-Solid app. In SolidJS, use the `MessageSkills` primitive directly.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, then set the `skills` **property** to an array of `{ id, name }`.",
           'See the **Code** tab for HTML usage.',

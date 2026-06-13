@@ -18,11 +18,11 @@ npm install solid-js
 This is the single most common mistake. Arrays and objects (`messages`, `models`, `context`, `suggestions`, `slashCommands`, …) MUST be assigned as JavaScript properties on the element. They CANNOT be passed as HTML attributes — an HTML attribute is always a string and will be ignored or mis-parsed.
 
 ```js
-const chat = document.querySelector('kitn-chat');
+const chat = document.querySelector('kc-chat');
 chat.messages = [{ id: '1', role: 'assistant', content: 'Hi!' }]; // ✅ property
 ```
 ```html
-<kitn-chat messages="[...]"></kitn-chat>  <!-- ❌ never works -->
+<kc-chat messages="[...]"></kc-chat>  <!-- ❌ never works -->
 ```
 
 Only scalar values (string/number/boolean) work as attributes (e.g. `placeholder`, `loading`, `theme`).
@@ -32,12 +32,12 @@ Only scalar values (string/number/boolean) work as attributes (e.g. `placeholder
 **Layer 1 — batteries-included web components** (`import '@kitnai/chat/elements'`):
 Drop an element into any framework (React, Vue, plain HTML). Data in via JS properties; interactions out via non-bubbling CustomEvents.
 
-- `<kitn-chat>` — full chat UI (message list + prompt input). The primary starting point.
-- `<kitn-conversation-list>` — sidebar conversation browser with group support.
-- `<kitn-prompt-input>` — standalone composer with send button.
+- `<kc-chat>` — full chat UI (message list + prompt input). The primary starting point.
+- `<kc-conversations>` — sidebar conversation browser with group support.
+- `<kc-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitnai/chat'`):
-All 28 elements are also exported individually. Use them for custom layouts or features `<kitn-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 28 elements are also exported individually. Use them for custom layouts or features `<kc-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -47,7 +47,7 @@ All 28 elements are also exported individually. Use them for custom layouts or f
 3. **`theme` attribute** (`'light' | 'dark' | 'auto'`) works on every element. Default `auto` follows `prefers-color-scheme`.
 4. **Theming via CSS custom properties** — override `--kitn-color-*` tokens on `:root`; they pierce Shadow DOM.
 
-## ChatMessage schema (required for `<kitn-chat>`)
+## ChatMessage schema (required for `<kc-chat>`)
 
 ```ts
 interface ChatMessage {
@@ -66,9 +66,9 @@ interface ChatMessage {
 **Plain HTML / CDN**
 ```html
 <script type="module" src="https://unpkg.com/@kitnai/chat/elements"></script>
-<kitn-chat style="display:block;height:100vh"></kitn-chat>
+<kc-chat style="display:block;height:100vh"></kc-chat>
 <script type="module">
-  const chat = document.querySelector('kitn-chat');
+  const chat = document.querySelector('kc-chat');
   chat.messages = [];
 </script>
 ```
@@ -81,7 +81,7 @@ import { KitnChat } from '@kitnai/chat/react';
 
 **Vue** — use the element directly; pass arrays via `.prop`:
 ```vue
-<kitn-chat :messages.prop="messages" @submit="send" />
+<kc-chat :messages.prop="messages" @submit="send" />
 ```
 
 ## Theming
@@ -115,13 +115,13 @@ npm install @kitnai/chat
 ```
 
 ### 2 — Pick your layer
-Drop-in: use `<kitn-chat>` for a full chat UI in one tag (`import '@kitnai/chat/elements'`).
-Composable: combine `<kitn-message>`, `<kitn-prompt-input>`, `<kitn-reasoning>`, … in your own markup.
+Drop-in: use `<kc-chat>` for a full chat UI in one tag (`import '@kitnai/chat/elements'`).
+Composable: combine `<kc-message>`, `<kc-prompt-input>`, `<kc-reasoning>`, … in your own markup.
 
 ### 3 — Handle `submit` and stream
 ```js
 import '@kitnai/chat/elements';
-const chat = document.querySelector('kitn-chat');
+const chat = document.querySelector('kc-chat');
 chat.messages = [];
 
 chat.addEventListener('submit', async (e) => {
@@ -150,7 +150,7 @@ chat.addEventListener('submit', async (e) => {
 - Tool calls: add `tools: [{ type: 'search', state: 'output-available', input: {…}, output: {…} }]`.
 - Model switcher: `chat.models = [{ id: 'gpt-4o', name: 'GPT-4o' }]; chat.currentModel = 'gpt-4o';` — listen for `modelchange`.
 - Token meter: `chat.context = { usedTokens: 1200, maxTokens: 128000 };`.
-- History sidebar: add `<kitn-conversation-list>`; listen for `select` and `newchat`.
+- History sidebar: add `<kc-conversations>`; listen for `select` and `newchat`.
 
 ### 5 — Theme
 Override `--kitn-color-*` tokens on `:root` (they pierce Shadow DOM).
@@ -177,7 +177,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
-### `kitn-attachments` / `KitnAttachments`
+### `kc-attachments` / `KcAttachments`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 
@@ -198,7 +198,7 @@ Every element also accepts the `theme` attribute. Array/object properties are ma
 
 ---
 
-### `kitn-chain-of-thought` / `KitnChainOfThought`
+### `kc-chain-of-thought` / `KcChainOfThought`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 
@@ -210,7 +210,7 @@ _No events._
 
 ---
 
-### `kitn-chat` / `KitnChat`
+### `kc-chat` / `KcChat`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 
@@ -251,7 +251,278 @@ _No events._
 
 ---
 
-### `kitn-chat-scope-picker` / `KitnChatScopePicker`
+### `kc-checkpoint` / `KcCheckpoint`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `label` | `label` | `undefined \| string` | Optional text beside the icon. |
+| `tooltip` | `tooltip` | `undefined \| string` | Tooltip on hover. |
+| `variant` | `variant` | `undefined \| "ghost" \| "default" \| "outline"` | Visual button style. |
+| `size` | `size` | `undefined \| "sm" \| "lg" \| "md" \| "icon" \| "icon-sm"` | Button size (use an `icon*` size for an icon-only checkpoint). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `select` | `CustomEvent` | The checkpoint was clicked. |
+
+---
+
+### `kc-code-block` / `KcCodeBlock`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `code` | `code` | `string` | The source code to render. |
+| `language` | `language` | `undefined \| string` | Language grammar (e.g. `js`, `python`). Defaults to `tsx`. |
+| `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name. |
+| `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting (renders plain text, no Shiki). |
+| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Code text sizing. |
+
+_No events._
+
+---
+
+### `kc-context` / `KcContext`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `context` | — | `undefined \| { usedTokens: number; maxTokens: number; inputTokens?: undefined \| number; outputTokens?: undefined \| number; reasoningTokens?: undefined \| number; cacheTokens?: undefined \| number; estimatedCost?: undefined \| number }` | Token-usage data. Set as a JS property. |
+
+_No events._
+
+---
+
+### `kc-conversations` / `KcConversations`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `groups` | — | `{ id: string; userId?: undefined \| string; teamId?: undefined \| string; name: string; sortOrder: number; createdAt: string }[]` | Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. |
+| `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]` | A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. |
+| `activeId` | `active-id` | `undefined \| string` | The id of the currently-open conversation, highlighted in the list. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `newchat` | `CustomEvent<Record<string, never>>` | The "New chat" button was clicked. |
+| `select` | `CustomEvent<{ id: string }>` | A conversation was selected. |
+| `togglesidebar` | `CustomEvent<Record<string, never>>` | The sidebar toggle was clicked. |
+
+---
+
+### `kc-empty` / `KcEmpty`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `emptyTitle` | `empty-title` | `undefined \| string` | Title text. Attribute: `empty-title` (`title` is a global HTML attribute). |
+| `description` | `description` | `undefined \| string` | Description text. |
+
+_No events._
+
+---
+
+### `kc-feedback-bar` / `KcFeedbackBar`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `barTitle` | `bar-title` | `undefined \| string` | The banner label (e.g. "Was this helpful?"). Attribute: `bar-title` (`title` is avoided — it's a global HTML attribute). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `close` | `CustomEvent` | The user dismissed the banner. |
+| `helpful` | `CustomEvent` | The user clicked thumbs-up. |
+| `nothelpful` | `CustomEvent` | The user clicked thumbs-down. |
+
+---
+
+### `kc-file-upload` / `KcFileUpload`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `multiple` | `multiple` | `undefined \| false \| true` | Allow selecting multiple files (default true). |
+| `accept` | `accept` | `undefined \| string` | `accept` attribute for the file picker (e.g. `image/*`). |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable the dropzone — no clicking, no drag-and-drop. |
+| `label` | `label` | `undefined \| string` | Default dropzone label (overridable via the default slot). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `filesadded` | `CustomEvent<{ files: File[] }>` | Files were picked or dropped. |
+
+---
+
+### `kc-image` / `KcImage`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `base64` | `base64` | `undefined \| string` | Base64-encoded image data (pair with `media-type`). |
+| `bytes` | — | `undefined \| Uint8Array<ArrayBufferLike>` | Raw image bytes (set as a JS property). |
+| `alt` | `alt` | `undefined \| string` | Alt text. |
+| `mediaType` | `media-type` | `undefined \| string` | MIME type (default `image/png`). |
+
+_No events._
+
+---
+
+### `kc-loader` / `KcLoader`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `variant` | `variant` | `undefined \| "circular" \| "classic" \| "pulse" \| "pulse-dot" \| "dots" \| "typing" \| "wave" \| "bars" \| "terminal" \| "text-blink" \| "text-shimmer" \| "loading-dots"` | The animation style: `'circular' \| 'classic' \| 'pulse' \| 'pulse-dot' \| 'dots' \| 'typing' \| 'wave' \| 'bars' \| 'terminal' \| 'text-blink' \| 'text-shimmer' \| 'loading-dots'`. Defaults to `'circular'`. |
+| `size` | `size` | `undefined \| "sm" \| "lg" \| "md"` | Loader size: `'sm' \| 'md' \| 'lg'`. Defaults to `'md'`. |
+| `text` | `text` | `undefined \| string` | Label for the text-based variants. |
+
+_No events._
+
+---
+
+### `kc-markdown` / `KcMarkdown`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `content` | `content` | `string` | The markdown source to render. |
+| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Text/markdown sizing. |
+| `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme for fenced code blocks. |
+| `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting (no Shiki loads). |
+
+_No events._
+
+---
+
+### `kc-message` / `KcMessage`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `message` | — | `undefined \| { id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit")[] }` | The full message object. Set as a JS property. |
+| `role` | `role` | `undefined \| "user" \| "assistant"` | Convenience for simple cases when not passing a `message` object. |
+| `content` | `content` | `undefined \| string` | Convenience content (used when `message` is not set). |
+| `markdown` | `markdown` | `undefined \| false \| true` | Force markdown on/off. Defaults to on for assistant, off for user. |
+| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Text/markdown sizing for the message body. |
+| `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name used for fenced code blocks in the content. |
+| `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting for code blocks (no Shiki loads). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `messageaction` | `CustomEvent<{ messageId: string; action: "copy" \| "like" \| "dislike" \| "regenerate" \| "edit" }>` | An action button was clicked. |
+
+---
+
+### `kc-model-switcher` / `KcModelSwitcher`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `models` | — | `{ id: string; name: string; provider?: undefined \| string }[]` | The selectable models. Set as a JS property (array). |
+| `currentModel` | `current-model` | `undefined \| string` | The currently-selected model id. Defaults to the first model. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `modelchange` | `CustomEvent<{ modelId: string }>` | A model was selected. |
+
+---
+
+### `kc-prompt-input` / `KcPromptInput`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `value` | `value` | `undefined \| string` | Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior. |
+| `placeholder` | `placeholder` | `undefined \| string` | Placeholder text shown in the empty input. |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable the input and submit button entirely (non-interactive). |
+| `loading` | `loading` | `undefined \| false \| true` | Show the loading/streaming state and block submit (use while awaiting a reply). |
+| `suggestions` | — | `undefined \| string[]` | Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. |
+| `suggestionMode` | `suggestion-mode` | `undefined \| "submit" \| "fill"` | What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. |
+| `slashCommands` | — | `undefined \| { id: string; label: string; description?: undefined \| string; category?: undefined \| string }[]` | Slash commands — when set, typing `/` opens the command palette. Set as a JS property. |
+| `slashActiveIds` | — | `undefined \| string[]` | Command ids to highlight as active. |
+| `slashCompact` | `slash-compact` | `undefined \| false \| true` | Single-line palette rows. |
+| `search` | `search` | `undefined \| false \| true` | Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. |
+| `voice` | `voice` | `undefined \| false \| true` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
+| `attachments` | — | `undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]` | Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `search` | `CustomEvent<Record<string, never>>` | The Search (Globe) toolbar button was clicked. |
+| `slashselect` | `CustomEvent<{ command: { id: string; label: string; description?: undefined \| string; category?: undefined \| string } }>` | A slash command was chosen from the palette. |
+| `submit` | `CustomEvent<{ value: string; attachments: { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[] }>` | The user submitted the prompt (Enter or send button) with its attachments. |
+| `suggestionclick` | `CustomEvent<{ value: string }>` | A suggestion was clicked while `suggestion-mode="fill"`. |
+| `valuechange` | `CustomEvent<{ value: string }>` | The input text changed (fires on every keystroke). |
+| `voice` | `CustomEvent<Record<string, never>>` | The Voice (Mic) toolbar button was clicked. |
+
+---
+
+### `kc-reasoning` / `KcReasoning`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `text` | `text` | `string` | The reasoning text to display. |
+| `label` | `label` | `undefined \| string` | Trigger label. |
+| `open` | `open` | `undefined \| false \| true` | Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it). |
+| `streaming` | `streaming` | `undefined \| false \| true` | While true, auto-expands (and re-collapses when it flips false). |
+| `markdown` | `markdown` | `undefined \| false \| true` | Render `text` as markdown. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `openchange` | `CustomEvent<{ open: false \| true }>` | Open state changed (via the trigger or streaming auto-open). |
+
+---
+
+### `kc-response-stream` / `KcResponseStream`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `text` | — | `undefined \| string \| AsyncIterable<string>` | Text to stream. A string, or an `AsyncIterable<string>` (set as a JS property — async iterables can't be HTML attributes). |
+| `mode` | `mode` | `undefined \| "typewriter" \| "fade"` | Reveal animation. |
+| `speed` | `speed` | `undefined \| number` | Characters/segments per tick. |
+| `as` | `as` | `undefined \| string` | Element tag to render as. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `complete` | `CustomEvent` | Streaming finished. |
+
+---
+
+### `kc-scope-picker` / `KcScopePicker`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 
@@ -269,7 +540,132 @@ _No events._
 
 ---
 
-### `kitn-chat-workspace` / `KitnChatWorkspace`
+### `kc-skills` / `KcSkills`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `skills` | — | `{ id: string; name: string }[]` | The active skills to badge. Set as a JS property. |
+
+_No events._
+
+---
+
+### `kc-source` / `KcSource`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `href` | `href` | `undefined \| string` | The URL this citation links to (the domain also seeds the default label/favicon). |
+| `label` | `label` | `undefined \| string` | Trigger label (defaults to the domain). |
+| `headline` | `headline` | `undefined \| string` | Hover-card headline. Attribute: `headline` (`title` is avoided — it's a global HTML attribute that reflects in a CE constructor and breaks it). |
+| `description` | `description` | `undefined \| string` | Hover-card body text describing the source. |
+| `showFavicon` | `show-favicon` | `undefined \| false \| true` | Show the source's favicon next to the trigger label. |
+
+_No events._
+
+---
+
+### `kc-sources` / `KcSources`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `sources` | — | `{ href: string; title?: undefined \| string; description?: undefined \| string; label?: undefined \| string; showFavicon?: undefined \| false \| true }[]` | The sources to render. Set as a JS property. |
+| `showFavicon` | `show-favicon` | `undefined \| false \| true` | Show favicons on all items (per-item `showFavicon` overrides). |
+
+_No events._
+
+---
+
+### `kc-suggestions` / `KcSuggestions`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `suggestions` | — | `(string \| { label: string; value?: undefined \| string })[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
+| `variant` | `variant` | `undefined \| "ghost" \| "default" \| "outline"` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
+| `size` | `size` | `undefined \| "sm" \| "lg" \| "md" \| "icon" \| "icon-sm"` | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
+| `block` | `block` | `undefined \| false \| true` | Full-width left-aligned rows instead of pills. |
+| `highlight` | `highlight` | `undefined \| string` | Substring to highlight within each suggestion. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `select` | `CustomEvent<{ value: string }>` | A suggestion was clicked. |
+
+---
+
+### `kc-text-shimmer` / `KcTextShimmer`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `text` | `text` | `undefined \| string` | The text to shimmer. |
+| `as` | `as` | `undefined \| string` | Element tag to render as (default `span`). |
+| `duration` | `duration` | `undefined \| number` | Animation duration in seconds. |
+| `spread` | `spread` | `undefined \| number` | Gradient spread (5–45). |
+
+_No events._
+
+---
+
+### `kc-thinking-bar` / `KcThinkingBar`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `text` | `text` | `undefined \| string` | The shimmering label, e.g. "Thinking…". |
+| `stoppable` | `stoppable` | `undefined \| false \| true` | When true, show a "stop" affordance that fires a `stop` event. |
+| `stopLabel` | `stop-label` | `undefined \| string` | Label for the stop affordance. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `stop` | `CustomEvent` | The "stop / answer now" affordance was clicked. |
+
+---
+
+### `kc-tool` / `KcTool`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `tool` | — | `undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }` | The tool-call to display. Set as a JS property. |
+| `open` | `open` | `undefined \| false \| true` | Start expanded. |
+
+_No events._
+
+---
+
+### `kc-voice-input` / `KcVoiceInput`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `transcribe` | — | `undefined \| (audio: Blob) => Promise<string>` | Transcriber the host supplies — records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event. |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable the mic button (non-interactive). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `audiocaptured` | `CustomEvent<{ blob: Blob }>` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. |
+| `transcription` | `CustomEvent<{ text: string }>` | Transcription completed (the `transcribe` property resolved). |
+
+---
+
+### `kc-workspace` / `KcWorkspace`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 
@@ -317,402 +713,6 @@ _No events._
 | `suggestionclick` | `CustomEvent<{ value: string }>` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
 | `valuechange` | `CustomEvent<{ value: string }>` | Fired on every input change. |
 | `voice` | `CustomEvent<Record<string, never>>` | The Mic / voice button was clicked. |
-
----
-
-### `kitn-checkpoint` / `KitnCheckpoint`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `label` | `label` | `undefined \| string` | Optional text beside the icon. |
-| `tooltip` | `tooltip` | `undefined \| string` | Tooltip on hover. |
-| `variant` | `variant` | `undefined \| "ghost" \| "default" \| "outline"` | Visual button style. |
-| `size` | `size` | `undefined \| "sm" \| "lg" \| "md" \| "icon" \| "icon-sm"` | Button size (use an `icon*` size for an icon-only checkpoint). |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `select` | `CustomEvent` | The checkpoint was clicked. |
-
----
-
-### `kitn-code-block` / `KitnCodeBlock`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `code` | `code` | `string` | The source code to render. |
-| `language` | `language` | `undefined \| string` | Language grammar (e.g. `js`, `python`). Defaults to `tsx`. |
-| `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name. |
-| `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting (renders plain text, no Shiki). |
-| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Code text sizing. |
-
-_No events._
-
----
-
-### `kitn-context-meter` / `KitnContextMeter`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `context` | — | `undefined \| { usedTokens: number; maxTokens: number; inputTokens?: undefined \| number; outputTokens?: undefined \| number; reasoningTokens?: undefined \| number; cacheTokens?: undefined \| number; estimatedCost?: undefined \| number }` | Token-usage data. Set as a JS property. |
-
-_No events._
-
----
-
-### `kitn-conversation-list` / `KitnConversationList`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `groups` | — | `{ id: string; userId?: undefined \| string; teamId?: undefined \| string; name: string; sortOrder: number; createdAt: string }[]` | Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. |
-| `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]` | A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. |
-| `activeId` | `active-id` | `undefined \| string` | The id of the currently-open conversation, highlighted in the list. |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `newchat` | `CustomEvent<Record<string, never>>` | The "New chat" button was clicked. |
-| `select` | `CustomEvent<{ id: string }>` | A conversation was selected. |
-| `togglesidebar` | `CustomEvent<Record<string, never>>` | The sidebar toggle was clicked. |
-
----
-
-### `kitn-empty` / `KitnEmpty`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `emptyTitle` | `empty-title` | `undefined \| string` | Title text. Attribute: `empty-title` (`title` is a global HTML attribute). |
-| `description` | `description` | `undefined \| string` | Description text. |
-
-_No events._
-
----
-
-### `kitn-feedback-bar` / `KitnFeedbackBar`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `barTitle` | `bar-title` | `undefined \| string` | The banner label (e.g. "Was this helpful?"). Attribute: `bar-title` (`title` is avoided — it's a global HTML attribute). |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `close` | `CustomEvent` | The user dismissed the banner. |
-| `helpful` | `CustomEvent` | The user clicked thumbs-up. |
-| `nothelpful` | `CustomEvent` | The user clicked thumbs-down. |
-
----
-
-### `kitn-file-upload` / `KitnFileUpload`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `multiple` | `multiple` | `undefined \| false \| true` | Allow selecting multiple files (default true). |
-| `accept` | `accept` | `undefined \| string` | `accept` attribute for the file picker (e.g. `image/*`). |
-| `disabled` | `disabled` | `undefined \| false \| true` | Disable the dropzone — no clicking, no drag-and-drop. |
-| `label` | `label` | `undefined \| string` | Default dropzone label (overridable via the default slot). |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `filesadded` | `CustomEvent<{ files: File[] }>` | Files were picked or dropped. |
-
----
-
-### `kitn-image` / `KitnImage`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `base64` | `base64` | `undefined \| string` | Base64-encoded image data (pair with `media-type`). |
-| `bytes` | — | `undefined \| Uint8Array<ArrayBufferLike>` | Raw image bytes (set as a JS property). |
-| `alt` | `alt` | `undefined \| string` | Alt text. |
-| `mediaType` | `media-type` | `undefined \| string` | MIME type (default `image/png`). |
-
-_No events._
-
----
-
-### `kitn-loader` / `KitnLoader`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `variant` | `variant` | `undefined \| "circular" \| "classic" \| "pulse" \| "pulse-dot" \| "dots" \| "typing" \| "wave" \| "bars" \| "terminal" \| "text-blink" \| "text-shimmer" \| "loading-dots"` | The animation style: `'circular' \| 'classic' \| 'pulse' \| 'pulse-dot' \| 'dots' \| 'typing' \| 'wave' \| 'bars' \| 'terminal' \| 'text-blink' \| 'text-shimmer' \| 'loading-dots'`. Defaults to `'circular'`. |
-| `size` | `size` | `undefined \| "sm" \| "lg" \| "md"` | Loader size: `'sm' \| 'md' \| 'lg'`. Defaults to `'md'`. |
-| `text` | `text` | `undefined \| string` | Label for the text-based variants. |
-
-_No events._
-
----
-
-### `kitn-markdown` / `KitnMarkdown`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `content` | `content` | `string` | The markdown source to render. |
-| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Text/markdown sizing. |
-| `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme for fenced code blocks. |
-| `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting (no Shiki loads). |
-
-_No events._
-
----
-
-### `kitn-message` / `KitnMessage`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `message` | — | `undefined \| { id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit")[] }` | The full message object. Set as a JS property. |
-| `role` | `role` | `undefined \| "user" \| "assistant"` | Convenience for simple cases when not passing a `message` object. |
-| `content` | `content` | `undefined \| string` | Convenience content (used when `message` is not set). |
-| `markdown` | `markdown` | `undefined \| false \| true` | Force markdown on/off. Defaults to on for assistant, off for user. |
-| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Text/markdown sizing for the message body. |
-| `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name used for fenced code blocks in the content. |
-| `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting for code blocks (no Shiki loads). |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `messageaction` | `CustomEvent<{ messageId: string; action: "copy" \| "like" \| "dislike" \| "regenerate" \| "edit" }>` | An action button was clicked. |
-
----
-
-### `kitn-message-skills` / `KitnMessageSkills`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `skills` | — | `{ id: string; name: string }[]` | The active skills to badge. Set as a JS property. |
-
-_No events._
-
----
-
-### `kitn-model-switcher` / `KitnModelSwitcher`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `models` | — | `{ id: string; name: string; provider?: undefined \| string }[]` | The selectable models. Set as a JS property (array). |
-| `currentModel` | `current-model` | `undefined \| string` | The currently-selected model id. Defaults to the first model. |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `modelchange` | `CustomEvent<{ modelId: string }>` | A model was selected. |
-
----
-
-### `kitn-prompt-input` / `KitnPromptInput`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `value` | `value` | `undefined \| string` | Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior. |
-| `placeholder` | `placeholder` | `undefined \| string` | Placeholder text shown in the empty input. |
-| `disabled` | `disabled` | `undefined \| false \| true` | Disable the input and submit button entirely (non-interactive). |
-| `loading` | `loading` | `undefined \| false \| true` | Show the loading/streaming state and block submit (use while awaiting a reply). |
-| `suggestions` | — | `undefined \| string[]` | Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. |
-| `suggestionMode` | `suggestion-mode` | `undefined \| "submit" \| "fill"` | What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. |
-| `slashCommands` | — | `undefined \| { id: string; label: string; description?: undefined \| string; category?: undefined \| string }[]` | Slash commands — when set, typing `/` opens the command palette. Set as a JS property. |
-| `slashActiveIds` | — | `undefined \| string[]` | Command ids to highlight as active. |
-| `slashCompact` | `slash-compact` | `undefined \| false \| true` | Single-line palette rows. |
-| `search` | `search` | `undefined \| false \| true` | Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. |
-| `voice` | `voice` | `undefined \| false \| true` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
-| `attachments` | — | `undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]` | Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `search` | `CustomEvent<Record<string, never>>` | The Search (Globe) toolbar button was clicked. |
-| `slashselect` | `CustomEvent<{ command: { id: string; label: string; description?: undefined \| string; category?: undefined \| string } }>` | A slash command was chosen from the palette. |
-| `submit` | `CustomEvent<{ value: string; attachments: { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[] }>` | The user submitted the prompt (Enter or send button) with its attachments. |
-| `suggestionclick` | `CustomEvent<{ value: string }>` | A suggestion was clicked while `suggestion-mode="fill"`. |
-| `valuechange` | `CustomEvent<{ value: string }>` | The input text changed (fires on every keystroke). |
-| `voice` | `CustomEvent<Record<string, never>>` | The Voice (Mic) toolbar button was clicked. |
-
----
-
-### `kitn-prompt-suggestions` / `KitnPromptSuggestions`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `suggestions` | — | `(string \| { label: string; value?: undefined \| string })[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
-| `variant` | `variant` | `undefined \| "ghost" \| "default" \| "outline"` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
-| `size` | `size` | `undefined \| "sm" \| "lg" \| "md" \| "icon" \| "icon-sm"` | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
-| `block` | `block` | `undefined \| false \| true` | Full-width left-aligned rows instead of pills. |
-| `highlight` | `highlight` | `undefined \| string` | Substring to highlight within each suggestion. |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `select` | `CustomEvent<{ value: string }>` | A suggestion was clicked. |
-
----
-
-### `kitn-reasoning` / `KitnReasoning`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `text` | `text` | `string` | The reasoning text to display. |
-| `label` | `label` | `undefined \| string` | Trigger label. |
-| `open` | `open` | `undefined \| false \| true` | Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it). |
-| `streaming` | `streaming` | `undefined \| false \| true` | While true, auto-expands (and re-collapses when it flips false). |
-| `markdown` | `markdown` | `undefined \| false \| true` | Render `text` as markdown. |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `openchange` | `CustomEvent<{ open: false \| true }>` | Open state changed (via the trigger or streaming auto-open). |
-
----
-
-### `kitn-response-stream` / `KitnResponseStream`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `text` | — | `undefined \| string \| AsyncIterable<string>` | Text to stream. A string, or an `AsyncIterable<string>` (set as a JS property — async iterables can't be HTML attributes). |
-| `mode` | `mode` | `undefined \| "typewriter" \| "fade"` | Reveal animation. |
-| `speed` | `speed` | `undefined \| number` | Characters/segments per tick. |
-| `as` | `as` | `undefined \| string` | Element tag to render as. |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `complete` | `CustomEvent` | Streaming finished. |
-
----
-
-### `kitn-source` / `KitnSource`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `href` | `href` | `undefined \| string` | The URL this citation links to (the domain also seeds the default label/favicon). |
-| `label` | `label` | `undefined \| string` | Trigger label (defaults to the domain). |
-| `headline` | `headline` | `undefined \| string` | Hover-card headline. Attribute: `headline` (`title` is avoided — it's a global HTML attribute that reflects in a CE constructor and breaks it). |
-| `description` | `description` | `undefined \| string` | Hover-card body text describing the source. |
-| `showFavicon` | `show-favicon` | `undefined \| false \| true` | Show the source's favicon next to the trigger label. |
-
-_No events._
-
----
-
-### `kitn-source-list` / `KitnSourceList`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `sources` | — | `{ href: string; title?: undefined \| string; description?: undefined \| string; label?: undefined \| string; showFavicon?: undefined \| false \| true }[]` | The sources to render. Set as a JS property. |
-| `showFavicon` | `show-favicon` | `undefined \| false \| true` | Show favicons on all items (per-item `showFavicon` overrides). |
-
-_No events._
-
----
-
-### `kitn-text-shimmer` / `KitnTextShimmer`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `text` | `text` | `undefined \| string` | The text to shimmer. |
-| `as` | `as` | `undefined \| string` | Element tag to render as (default `span`). |
-| `duration` | `duration` | `undefined \| number` | Animation duration in seconds. |
-| `spread` | `spread` | `undefined \| number` | Gradient spread (5–45). |
-
-_No events._
-
----
-
-### `kitn-thinking-bar` / `KitnThinkingBar`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `text` | `text` | `undefined \| string` | The shimmering label, e.g. "Thinking…". |
-| `stoppable` | `stoppable` | `undefined \| false \| true` | When true, show a "stop" affordance that fires a `stop` event. |
-| `stopLabel` | `stop-label` | `undefined \| string` | Label for the stop affordance. |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `stop` | `CustomEvent` | The "stop / answer now" affordance was clicked. |
-
----
-
-### `kitn-tool` / `KitnTool`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `tool` | — | `undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }` | The tool-call to display. Set as a JS property. |
-| `open` | `open` | `undefined \| false \| true` | Start expanded. |
-
-_No events._
-
----
-
-### `kitn-voice-input` / `KitnVoiceInput`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `transcribe` | — | `undefined \| (audio: Blob) => Promise<string>` | Transcriber the host supplies — records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event. |
-| `disabled` | `disabled` | `undefined \| false \| true` | Disable the mic button (non-interactive). |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `audiocaptured` | `CustomEvent<{ blob: Blob }>` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. |
-| `transcription` | `CustomEvent<{ text: string }>` | Transcription completed (the `transcribe` property resolved). |
 
 ---
 

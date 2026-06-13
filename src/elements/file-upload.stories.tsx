@@ -7,7 +7,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-file-upload': JSX.HTMLAttributes<HTMLElement> & {
+      'kc-file-upload': JSX.HTMLAttributes<HTMLElement> & {
         multiple?: boolean | string;
         accept?: string;
         disabled?: boolean | string;
@@ -19,25 +19,25 @@ declare module 'solid-js' {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-file-upload accept="image/*" label="Drop images here"></kitn-file-upload>
+<kc-file-upload accept="image/*" label="Drop images here"></kc-file-upload>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
 
-  document.querySelector('kitn-file-upload')
+  document.querySelector('kc-file-upload')
     .addEventListener('filesadded', (e) =>
       console.log(e.detail.files.map((f) => f.name)));
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-file-upload',
+  title: 'Web Components/kc-file-upload',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-file-upload'),
+  argTypes: argTypesFor('kc-file-upload'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-file-upload', [
-          '`<kitn-file-upload>` is the framework-agnostic **web component** for a click / drag-and-drop file dropzone — isolated in **Shadow DOM**.',
+      description: specDescription('kc-file-upload', [
+          '`<kc-file-upload>` is the framework-agnostic **web component** for a click / drag-and-drop file dropzone — isolated in **Shadow DOM**.',
           '**When to use:** accepting file or image uploads in a non-Solid app. In SolidJS, compose the `FileUpload` primitives.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `accept` / `multiple` / `label` attributes, and listen for the `filesadded` **CustomEvent** (`e.detail.files` is a `File[]`). The default dropzone label can be replaced with your own markup via the default `<slot>`.",
           'See the **Code** tab for HTML usage.',
@@ -53,7 +53,7 @@ type Story = StoryObj;
 export const Default: Story = {
   render: () => (
     <div style={{ padding: '24px', 'max-width': '480px' }}>
-      <kitn-file-upload
+      <kc-file-upload
         on:filesadded={(e: CustomEvent<{ files: File[] }>) =>
           console.log(e.detail.files.map((f) => f.name))}
       />
@@ -66,7 +66,7 @@ export const Default: Story = {
 export const ImagesOnly: Story = {
   render: () => (
     <div style={{ padding: '24px', 'max-width': '480px' }}>
-      <kitn-file-upload accept="image/*" multiple={false} label="Click or drop an image" />
+      <kc-file-upload accept="image/*" multiple={false} label="Click or drop an image" />
     </div>
   ),
 };
@@ -75,7 +75,7 @@ export const ImagesOnly: Story = {
 export const Disabled: Story = {
   render: () => (
     <div style={{ padding: '24px', 'max-width': '480px' }}>
-      <kitn-file-upload disabled label="Uploads are disabled" />
+      <kc-file-upload disabled label="Uploads are disabled" />
     </div>
   ),
 };

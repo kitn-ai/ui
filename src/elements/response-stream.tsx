@@ -13,17 +13,17 @@ interface Props extends Record<string, unknown> {
   as?: string;
 }
 
-/** Events fired by `<kitn-response-stream>`. */
+/** Events fired by `<kc-response-stream>`. */
 interface Events {
   /** Streaming finished. */
   complete: void;
 }
 
 /**
- * `<kitn-response-stream>` — reveals text with a typewriter or fade animation.
+ * `<kc-response-stream>` — reveals text with a typewriter or fade animation.
  * Text via the `text` property; `mode`/`speed` attributes; emits `complete`.
  */
-defineKitnElement<Props, Events>('kitn-response-stream', {
+defineKitnElement<Props, Events>('kc-response-stream', {
   text: '',
   mode: 'typewriter',
   speed: 20,

@@ -10,7 +10,7 @@ const kebab = (n) => n.replace(/([A-Z])/g, '-$1').toLowerCase();
 // .d.ts must keep the full expansions so consumers get complete type info).
 //
 // To update: run `node -e "const m=require('./src/elements/element-meta.json');
-// console.log(m.find(e=>e.tag==='kitn-chat').props.find(p=>p.name==='messages').type)"`
+// console.log(m.find(e=>e.tag==='kc-chat').props.find(p=>p.name==='messages').type)"`
 // and add the resulting string → alias pair.
 // ---------------------------------------------------------------------------
 const ALIAS = new Map([
@@ -147,7 +147,7 @@ export function writeWebComponentsMd(root, elements) {
       md = md.replace(re, replacement);
     } else {
       // First run: insert markers right after the element's heading line.
-      // Headings look like:  ### `<kitn-chat>` / `KitnChat`
+      // Headings look like:  ### `<kc-chat>` / `KcChat`
       // The / KitnClass suffix is optional (some elements may not have it).
       const headingRe = new RegExp(
         `(### \`<${el.tag}>\`[^\\n]*\\n)`,

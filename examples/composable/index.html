@@ -62,16 +62,16 @@
         </div>
         <div class="grid">
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-conversation-list</span></span><span class="desc">Sidebar of conversations with grouping &amp; selection.</span></header>
-            <div class="stage tall"><kitn-conversation-list id="list" style="display:block;height:100%"></kitn-conversation-list></div>
+            <header><span class="tag"><span class="nm">kc-conversations</span></span><span class="desc">Sidebar of conversations with grouping &amp; selection.</span></header>
+            <div class="stage tall"><kc-conversations id="list" style="display:block;height:100%"></kc-conversations></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-chat</span></span><span class="desc">The full chat UI — set <b>.messages</b>, listen for <b>submit</b>. Try sending a message.</span></header>
-            <div class="stage tall"><kitn-chat id="chat" style="display:block;height:100%" chat-title="Assistant" search voice></kitn-chat></div>
+            <header><span class="tag"><span class="nm">kc-chat</span></span><span class="desc">The full chat UI — set <b>.messages</b>, listen for <b>submit</b>. Try sending a message.</span></header>
+            <div class="stage tall"><kc-chat id="chat" style="display:block;height:100%" chat-title="Assistant" search voice></kc-chat></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag"><span class="nm">kitn-prompt-input</span> <b>slash-commands</b></span><span class="desc">Standalone composer with attachments &amp; a slash-command palette — type <b>/</b>.</span></header>
-            <div class="stage block"><kitn-prompt-input id="pi" placeholder="Ask anything…  (try typing /)"></kitn-prompt-input></div>
+            <header><span class="tag"><span class="nm">kc-prompt-input</span> <b>slash-commands</b></span><span class="desc">Standalone composer with attachments &amp; a slash-command palette — type <b>/</b>.</span></header>
+            <div class="stage block"><kc-prompt-input id="pi" placeholder="Ask anything…  (try typing /)"></kc-prompt-input></div>
           </div>
         </div>
       </section>
@@ -84,32 +84,32 @@
         </div>
         <div class="grid">
           <div class="spec col-full">
-            <header><span class="tag"><span class="nm">kitn-message</span> <b>role="assistant"</b></span><span class="desc">One assistant turn: reasoning, a tool call, an attachment, and action buttons — from a single <b>message</b> object.</span></header>
-            <div class="stage block"><kitn-message id="msg-a"></kitn-message></div>
+            <header><span class="tag"><span class="nm">kc-message</span> <b>role="assistant"</b></span><span class="desc">One assistant turn: reasoning, a tool call, an attachment, and action buttons — from a single <b>message</b> object.</span></header>
+            <div class="stage block"><kc-message id="msg-a"></kc-message></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-message</span> <b>role="user"</b></span><span class="desc">A user turn.</span></header>
-            <div class="stage block"><kitn-message id="msg-u" role="user"></kitn-message></div>
+            <header><span class="tag"><span class="nm">kc-message</span> <b>role="user"</b></span><span class="desc">A user turn.</span></header>
+            <div class="stage block"><kc-message id="msg-u" role="user"></kc-message></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-markdown</span></span><span class="desc">Token-themed markdown with fenced code.</span></header>
-            <div class="stage block"><kitn-markdown id="md"></kitn-markdown></div>
+            <header><span class="tag"><span class="nm">kc-markdown</span></span><span class="desc">Token-themed markdown with fenced code.</span></header>
+            <div class="stage block"><kc-markdown id="md"></kc-markdown></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-reasoning</span> <b>streaming</b></span><span class="desc">Collapsible thinking; auto-opens while streaming.</span></header>
-            <div class="stage block"><kitn-reasoning id="reason" label="Reasoning" streaming></kitn-reasoning></div>
+            <header><span class="tag"><span class="nm">kc-reasoning</span> <b>streaming</b></span><span class="desc">Collapsible thinking; auto-opens while streaming.</span></header>
+            <div class="stage block"><kc-reasoning id="reason" label="Reasoning" streaming></kc-reasoning></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-chain-of-thought</span></span><span class="desc">Step-by-step reasoning with connectors.</span></header>
-            <div class="stage block"><kitn-chain-of-thought id="cot"></kitn-chain-of-thought></div>
+            <header><span class="tag"><span class="nm">kc-chain-of-thought</span></span><span class="desc">Step-by-step reasoning with connectors.</span></header>
+            <div class="stage block"><kc-chain-of-thought id="cot"></kc-chain-of-thought></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag"><span class="nm">kitn-code-block</span> <b>language="ts"</b></span><span class="desc">A single highlighted code block with copy.</span></header>
-            <div class="stage block"><kitn-code-block id="code" language="ts"></kitn-code-block></div>
+            <header><span class="tag"><span class="nm">kc-code-block</span> <b>language="ts"</b></span><span class="desc">A single highlighted code block with copy.</span></header>
+            <div class="stage block"><kc-code-block id="code" language="ts"></kc-code-block></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag"><span class="nm">kitn-tool</span> <b>open</b></span><span class="desc">A tool-call panel — input, output, and a state badge.</span></header>
-            <div class="stage block"><kitn-tool id="tool" open></kitn-tool></div>
+            <header><span class="tag"><span class="nm">kc-tool</span> <b>open</b></span><span class="desc">A tool-call panel — input, output, and a state badge.</span></header>
+            <div class="stage block"><kc-tool id="tool" open></kc-tool></div>
           </div>
         </div>
       </section>
@@ -122,24 +122,24 @@
         </div>
         <div class="grid">
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-attachments</span> <b>variant="inline" hover-card</b></span><span class="desc">Compact icon + label chips with a hover preview.</span></header>
-            <div class="stage block"><kitn-attachments id="att-inline" variant="inline" hover-card></kitn-attachments></div>
+            <header><span class="tag"><span class="nm">kc-attachments</span> <b>variant="inline" hover-card</b></span><span class="desc">Compact icon + label chips with a hover preview.</span></header>
+            <div class="stage block"><kc-attachments id="att-inline" variant="inline" hover-card></kc-attachments></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-attachments</span> <b>variant="grid" removable</b></span><span class="desc">Visual tiles, removable on hover.</span></header>
-            <div class="stage block"><kitn-attachments id="att-grid" variant="grid" removable></kitn-attachments></div>
+            <header><span class="tag"><span class="nm">kc-attachments</span> <b>variant="grid" removable</b></span><span class="desc">Visual tiles, removable on hover.</span></header>
+            <div class="stage block"><kc-attachments id="att-grid" variant="grid" removable></kc-attachments></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-image</span></span><span class="desc">base64 / byte-array image with skeleton.</span></header>
-            <div class="stage center"><kitn-image id="img" alt="demo" style="width:96px"></kitn-image></div>
+            <header><span class="tag"><span class="nm">kc-image</span></span><span class="desc">base64 / byte-array image with skeleton.</span></header>
+            <div class="stage center"><kc-image id="img" alt="demo" style="width:96px"></kc-image></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-source</span> <b>show-favicon</b></span><span class="desc">A citation link with a hover preview.</span></header>
-            <div class="stage"><kitn-source id="src" href="https://kitn.dev" headline="kitn — the kit" description="Composable SolidJS + web-component chat UI." show-favicon></kitn-source></div>
+            <header><span class="tag"><span class="nm">kc-source</span> <b>show-favicon</b></span><span class="desc">A citation link with a hover preview.</span></header>
+            <div class="stage"><kc-source id="src" href="https://kitn.dev" headline="kitn — the kit" description="Composable SolidJS + web-component chat UI." show-favicon></kc-source></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag"><span class="nm">kitn-source-list</span></span><span class="desc">A wrapped row of citations.</span></header>
-            <div class="stage block"><kitn-source-list id="srcs"></kitn-source-list></div>
+            <header><span class="tag"><span class="nm">kc-sources</span></span><span class="desc">A wrapped row of citations.</span></header>
+            <div class="stage block"><kc-sources id="srcs"></kc-sources></div>
           </div>
         </div>
       </section>
@@ -152,16 +152,16 @@
         </div>
         <div class="grid">
           <div class="spec col-full">
-            <header><span class="tag"><span class="nm">kitn-prompt-suggestions</span></span><span class="desc">Suggestion chips; clicking one fills the input above and fires <b>select</b>.</span></header>
-            <div class="stage block"><kitn-prompt-suggestions id="suggs"></kitn-prompt-suggestions></div>
+            <header><span class="tag"><span class="nm">kc-suggestions</span></span><span class="desc">Suggestion chips; clicking one fills the input above and fires <b>select</b>.</span></header>
+            <div class="stage block"><kc-suggestions id="suggs"></kc-suggestions></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-file-upload</span></span><span class="desc">Click / drag-drop dropzone; <b>slot</b>-overridable label.</span></header>
-            <div class="stage block"><kitn-file-upload id="fu"></kitn-file-upload></div>
+            <header><span class="tag"><span class="nm">kc-file-upload</span></span><span class="desc">Click / drag-drop dropzone; <b>slot</b>-overridable label.</span></header>
+            <div class="stage block"><kc-file-upload id="fu"></kc-file-upload></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-voice-input</span> · kitn-thinking-bar</span><span class="desc">Mic capture (function property) + a shimmering “thinking” bar.</span></header>
-            <div class="stage"><kitn-voice-input id="voice"></kitn-voice-input><kitn-thinking-bar id="think" text="Thinking…" stoppable style="flex:1"></kitn-thinking-bar></div>
+            <header><span class="tag"><span class="nm">kc-voice-input</span> · kc-thinking-bar</span><span class="desc">Mic capture (function property) + a shimmering “thinking” bar.</span></header>
+            <div class="stage"><kc-voice-input id="voice"></kc-voice-input><kc-thinking-bar id="think" text="Thinking…" stoppable style="flex:1"></kc-thinking-bar></div>
           </div>
         </div>
       </section>
@@ -174,24 +174,24 @@
         </div>
         <div class="grid">
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-model-switcher</span></span><span class="desc">Model dropdown; emits <b>modelchange</b>.</span></header>
-            <div class="stage"><kitn-model-switcher id="models"></kitn-model-switcher></div>
+            <header><span class="tag"><span class="nm">kc-model-switcher</span></span><span class="desc">Model dropdown; emits <b>modelchange</b>.</span></header>
+            <div class="stage"><kc-model-switcher id="models"></kc-model-switcher></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-context-meter</span></span><span class="desc">Token-usage meter with a breakdown.</span></header>
-            <div class="stage"><kitn-context-meter id="ctx"></kitn-context-meter></div>
+            <header><span class="tag"><span class="nm">kc-context</span></span><span class="desc">Token-usage meter with a breakdown.</span></header>
+            <div class="stage"><kc-context id="ctx"></kc-context></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-chat-scope-picker</span></span><span class="desc">Scope a chat by author or tag.</span></header>
-            <div class="stage"><kitn-chat-scope-picker id="scope"></kitn-chat-scope-picker></div>
+            <header><span class="tag"><span class="nm">kc-scope-picker</span></span><span class="desc">Scope a chat by author or tag.</span></header>
+            <div class="stage"><kc-scope-picker id="scope"></kc-scope-picker></div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-checkpoint</span> · kitn-message-skills</span><span class="desc">Bookmark button + active-skill badges.</span></header>
-            <div class="stage"><kitn-checkpoint id="cp" label="Checkpoint" tooltip="Restore"></kitn-checkpoint><kitn-message-skills id="skills"></kitn-message-skills></div>
+            <header><span class="tag"><span class="nm">kc-checkpoint</span> · kc-skills</span><span class="desc">Bookmark button + active-skill badges.</span></header>
+            <div class="stage"><kc-checkpoint id="cp" label="Checkpoint" tooltip="Restore"></kc-checkpoint><kc-skills id="skills"></kc-skills></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag"><span class="nm">kitn-feedback-bar</span></span><span class="desc">Inline thumbs up/down banner.</span></header>
-            <div class="stage"><kitn-feedback-bar id="fb" bar-title="Was this helpful?"></kitn-feedback-bar></div>
+            <header><span class="tag"><span class="nm">kc-feedback-bar</span></span><span class="desc">Inline thumbs up/down banner.</span></header>
+            <div class="stage"><kc-feedback-bar id="fb" bar-title="Was this helpful?"></kc-feedback-bar></div>
           </div>
         </div>
       </section>
@@ -204,31 +204,31 @@
         </div>
         <div class="grid">
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-loader</span> <b>variant=…</b></span><span class="desc">Twelve loader styles.</span></header>
+            <header><span class="tag"><span class="nm">kc-loader</span> <b>variant=…</b></span><span class="desc">Twelve loader styles.</span></header>
             <div class="stage center" style="gap:1.6rem">
-              <kitn-loader variant="circular"></kitn-loader>
-              <kitn-loader variant="dots"></kitn-loader>
-              <kitn-loader variant="wave"></kitn-loader>
-              <kitn-loader variant="bars"></kitn-loader>
-              <kitn-loader variant="pulse-dot"></kitn-loader>
+              <kc-loader variant="circular"></kc-loader>
+              <kc-loader variant="dots"></kc-loader>
+              <kc-loader variant="wave"></kc-loader>
+              <kc-loader variant="bars"></kc-loader>
+              <kc-loader variant="pulse-dot"></kc-loader>
             </div>
           </div>
           <div class="spec">
-            <header><span class="tag"><span class="nm">kitn-text-shimmer</span></span><span class="desc">Animated shimmering text.</span></header>
-            <div class="stage center"><kitn-text-shimmer text="Generating response…"></kitn-text-shimmer></div>
+            <header><span class="tag"><span class="nm">kc-text-shimmer</span></span><span class="desc">Animated shimmering text.</span></header>
+            <div class="stage center"><kc-text-shimmer text="Generating response…"></kc-text-shimmer></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag"><span class="nm">kitn-response-stream</span> <b>mode="typewriter"</b></span><span class="desc">Reveals text character-by-character; emits <b>complete</b>.</span></header>
-            <div class="stage block"><kitn-response-stream id="stream" speed="30"></kitn-response-stream>
+            <header><span class="tag"><span class="nm">kc-response-stream</span> <b>mode="typewriter"</b></span><span class="desc">Reveals text character-by-character; emits <b>complete</b>.</span></header>
+            <div class="stage block"><kc-response-stream id="stream" speed="30"></kc-response-stream>
               <button class="pill-btn" id="replay" style="margin-top:.8rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Replay</button></div>
           </div>
           <div class="spec col-full">
-            <header><span class="tag"><span class="nm">kitn-empty</span></span><span class="desc">Empty-state layout — <b>media</b> &amp; default slots.</span></header>
+            <header><span class="tag"><span class="nm">kc-empty</span></span><span class="desc">Empty-state layout — <b>media</b> &amp; default slots.</span></header>
             <div class="stage block">
-              <kitn-empty empty-title="No conversations yet" description="Start chatting to see them here.">
+              <kc-empty empty-title="No conversations yet" description="Start chatting to see them here.">
                 <span slot="media">✦</span>
                 <button class="pill-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg> New chat</button>
-              </kitn-empty>
+              </kc-empty>
             </div>
           </div>
         </div>

@@ -1,9 +1,9 @@
 /**
- * kitn-chat React example — using the generated wrappers.
+ * kc-chat React example — using the generated wrappers.
  *
  * The kit is built with SolidJS but ships framework-agnostic custom elements.
- * `@kitnai/chat/react` provides typed React wrappers (KitnChat, KitnPromptInput,
- * KitnConversationList, …) that make the elements feel native:
+ * `@kitnai/chat/react` provides typed React wrappers (KcChat, KcPromptInput,
+ * KcConversations, …) that make the elements feel native:
  *   - array/object props (messages, models, conversations, suggestions, context,
  *     slashCommands) are passed as React props and assigned as live DOM
  *     *properties* (NOT stringified to attributes);
@@ -20,7 +20,7 @@ import { useState } from 'react';
 // Side-effect import: registers the custom elements globally.
 import '@kitnai/chat/elements';
 // Typed React wrappers — the whole point of this example.
-import { KitnChat, KitnConversationList, KitnPromptInput } from '@kitnai/chat/react';
+import { KcChat, KcConversations, KcPromptInput } from '@kitnai/chat/react';
 
 // Shared sample data and types (also used by other framework examples).
 import {
@@ -97,7 +97,7 @@ export default function App() {
     setTimeout(() => setToast(null), 1600);
   }
 
-  // ── KitnChat handlers ──────────────────────────────────────────────────────
+  // ── KcChat handlers ──────────────────────────────────────────────────────
 
   function handleSubmit(e: CustomEvent) {
     const { value, attachments } = (e.detail ?? {}) as { value?: string; attachments?: unknown[] };
@@ -107,7 +107,7 @@ export default function App() {
     const userMsg: ChatMessage = { id: 'u' + generateId(), role: 'user', content: text };
     const replyId = 'a' + generateId();
 
-    // Append to the messages array in React state → re-renders KitnChat with a
+    // Append to the messages array in React state → re-renders KcChat with a
     // NEW array prop, which the wrapper re-assigns as the element's `messages`.
     setAllMessages((prev) => ({
       ...prev,
@@ -188,7 +188,7 @@ export default function App() {
     showToast(`Model → ${SAMPLE_MODELS.find((m) => m.id === modelId)?.name ?? modelId}`);
   }
 
-  // ── KitnConversationList handlers ──────────────────────────────────────────
+  // ── KcConversations handlers ──────────────────────────────────────────
 
   function handleSelect(e: CustomEvent) {
     const { id } = (e.detail ?? {}) as { id: string };
@@ -219,7 +219,7 @@ export default function App() {
     document.body.classList.toggle('sidebar-open');
   }
 
-  // ── Standalone KitnPromptInput handler ────────────────────────────────────
+  // ── Standalone KcPromptInput handler ────────────────────────────────────
 
   function handleStandaloneSubmit(e: CustomEvent) {
     const { value } = (e.detail ?? {}) as { value?: string };
@@ -251,7 +251,7 @@ export default function App() {
       >
         <span className="topbar-brand">
           <img src="../shared/logo.svg" alt="" width={20} height={20} />
-          kitn-chat · React example (generated wrappers)
+          kc-chat · React example (generated wrappers)
         </span>
 
         <button
@@ -273,7 +273,7 @@ export default function App() {
           Native-feeling React: array/object props + on<Event> handlers + theme.
           No ref / useEffect / addEventListener in sight.
         */}
-        <KitnConversationList
+        <KcConversations
           groups={SAMPLE_GROUPS}
           conversations={conversations}
           activeId={activeId}
@@ -288,7 +288,7 @@ export default function App() {
           }}
         />
 
-        <KitnChat
+        <KcChat
           messages={messages}
           models={SAMPLE_MODELS}
           currentModel={currentModel}
@@ -304,15 +304,15 @@ export default function App() {
         />
       </div>
 
-      {/* Standalone KitnPromptInput — proves a leaf wrapper works on its own. */}
+      {/* Standalone KcPromptInput — proves a leaf wrapper works on its own. */}
       <div
         className="standalone-section"
         style={{ borderTop: `1px solid ${borderColor}` }}
       >
         <div className="standalone-label">
-          Standalone &lt;KitnPromptInput&gt; (try typing <code>/</code> for slash commands):
+          Standalone &lt;KcPromptInput&gt; (try typing <code>/</code> for slash commands):
         </div>
-        <KitnPromptInput
+        <KcPromptInput
           placeholder="Standalone prompt input…"
           slashCommands={SAMPLE_SLASH_COMMANDS}
           theme={theme}

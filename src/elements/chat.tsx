@@ -29,7 +29,7 @@ interface Events {
   voice: Record<string, never>;
 }
 
-defineKitnElement<Props, Events>('kitn-chat', {
+defineKitnElement<Props, Events>('kc-chat', {
   messages: [], value: undefined, placeholder: 'Send a message...', loading: false,
   suggestions: undefined, suggestionMode: 'submit', proseSize: 'sm',
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,

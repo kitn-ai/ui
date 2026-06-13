@@ -8,12 +8,12 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-checkpoint': JSX.HTMLAttributes<HTMLElement>;
+      'kc-checkpoint': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
 
-/** Render the actual `<kitn-checkpoint>` custom element configured by attributes. */
+/** Render the actual `<kc-checkpoint>` custom element configured by attributes. */
 function CheckpointElement(props: { label?: string; tooltip?: string; variant?: string; size?: string }) {
   let el: HTMLElement | undefined;
   onMount(() => {
@@ -24,29 +24,29 @@ function CheckpointElement(props: { label?: string; tooltip?: string; variant?: 
     if (props.size) el.setAttribute('size', props.size);
     el.addEventListener('select', () => console.log('checkpoint selected'));
   });
-  return <kitn-checkpoint ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '16px' }} />;
+  return <kc-checkpoint ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '16px' }} />;
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-checkpoint label="Restore" tooltip="Restore this checkpoint" variant="outline" size="sm"></kitn-checkpoint>
+<kc-checkpoint label="Restore" tooltip="Restore this checkpoint" variant="outline" size="sm"></kc-checkpoint>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
 
-  const cp = document.querySelector('kitn-checkpoint');
+  const cp = document.querySelector('kc-checkpoint');
   // events are CustomEvents on the element (they do not bubble)
   cp.addEventListener('select', () => console.log('restore checkpoint'));
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-checkpoint',
+  title: 'Web Components/kc-checkpoint',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-checkpoint'),
+  argTypes: argTypesFor('kc-checkpoint'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-checkpoint', [
-          '`<kitn-checkpoint>` is the framework-agnostic **web component** for a bookmark/checkpoint button (with an optional tooltip and label), isolated in **Shadow DOM**.',
+      description: specDescription('kc-checkpoint', [
+          '`<kc-checkpoint>` is the framework-agnostic **web component** for a bookmark/checkpoint button (with an optional tooltip and label), isolated in **Shadow DOM**.',
           '**When to use:** marking a restore point in a conversation in a non-Solid app. In SolidJS, compose the `Checkpoint` primitives.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set `label`, `tooltip`, `variant` (`ghost` | `default` | `outline`), and `size` via attributes, and listen for the `select` **CustomEvent** on click.",
           'See the **Code** tab for HTML usage.',

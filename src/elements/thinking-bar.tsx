@@ -10,18 +10,18 @@ interface Props extends Record<string, unknown> {
   stopLabel?: string;
 }
 
-/** Events fired by `<kitn-thinking-bar>`. */
+/** Events fired by `<kc-thinking-bar>`. */
 interface Events {
   /** The "stop / answer now" affordance was clicked. */
   stop: void;
 }
 
 /**
- * `<kitn-thinking-bar>` — a pure leaf element: an animated "thinking" indicator
- * (one of the primitives the batteries-included `<kitn-chat>` does NOT surface).
+ * `<kc-thinking-bar>` — a pure leaf element: an animated "thinking" indicator
+ * (one of the primitives the batteries-included `<kc-chat>` does NOT surface).
  * Config via attributes, the only interaction (`stop`) comes back as an event.
  */
-defineKitnElement<Props, Events>('kitn-thinking-bar', {
+defineKitnElement<Props, Events>('kc-thinking-bar', {
   text: 'Thinking',
   stoppable: false,
   stopLabel: 'Answer now',

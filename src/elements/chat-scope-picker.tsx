@@ -11,18 +11,18 @@ interface Props extends Record<string, unknown> {
   currentLabel?: string;
 }
 
-/** Events fired by `<kitn-chat-scope-picker>`. */
+/** Events fired by `<kc-scope-picker>`. */
 interface Events {
   /** A scope was chosen (`undefined` filters = "All Content"). */
   scopechange: { filters: SearchFilters | undefined };
 }
 
 /**
- * `<kitn-chat-scope-picker>` — a dropdown to scope a chat by author or tag.
+ * `<kc-scope-picker>` — a dropdown to scope a chat by author or tag.
  * Options via `available-authors`/`available-tags` properties; emits
  * `scopechange`.
  */
-defineKitnElement<Props, Events>('kitn-chat-scope-picker', {
+defineKitnElement<Props, Events>('kc-scope-picker', {
   availableAuthors: [],
   availableTags: [],
   currentLabel: 'All Content',

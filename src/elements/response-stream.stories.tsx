@@ -8,7 +8,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-response-stream': JSX.HTMLAttributes<HTMLElement> & {
+      'kc-response-stream': JSX.HTMLAttributes<HTMLElement> & {
         mode?: string;
         speed?: number;
       };
@@ -19,14 +19,14 @@ declare module 'solid-js' {
 const STREAM_TEXT =
   "This text reveals with a typewriter animation, streamed character by character — exactly how you'd render a live assistant reply.";
 
-/** Render `<kitn-response-stream>` with the `text` set as a JS property. */
+/** Render `<kc-response-stream>` with the `text` set as a JS property. */
 function StreamElement(props: { text: string; mode?: string; speed?: number }) {
   let el: (HTMLElement & { text?: string }) | undefined;
   onMount(() => {
     if (el) el.text = props.text;
   });
   return (
-    <kitn-response-stream
+    <kc-response-stream
       ref={(e) => (el = e as HTMLElement)}
       mode={props.mode}
       speed={props.speed}
@@ -36,7 +36,7 @@ function StreamElement(props: { text: string; mode?: string; speed?: number }) {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-response-stream id="stream" mode="typewriter" speed="20"></kitn-response-stream>
+<kc-response-stream id="stream" mode="typewriter" speed="20"></kc-response-stream>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -48,14 +48,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-response-stream',
+  title: 'Web Components/kc-response-stream',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-response-stream'),
+  argTypes: argTypesFor('kc-response-stream'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-response-stream', [
-          '`<kitn-response-stream>` is the framework-agnostic **web component** that reveals text with a typewriter or fade animation — the building block for streamed assistant replies, isolated in **Shadow DOM**.',
+      description: specDescription('kc-response-stream', [
+          '`<kc-response-stream>` is the framework-agnostic **web component** that reveals text with a typewriter or fade animation — the building block for streamed assistant replies, isolated in **Shadow DOM**.',
           '**When to use:** animating a response as it arrives. Pass a finished string to replay an animation, or an `AsyncIterable<string>` to drive it from a live stream. In SolidJS, use the `ResponseStream` primitive.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `text` **property** (string or async iterable), tune `mode` (`typewriter` / `fade`) and `speed`, and listen for the `complete` **CustomEvent**.",
           'See the **Code** tab for HTML usage.',

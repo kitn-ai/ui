@@ -13,10 +13,10 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kitn-loader>` — an animated loader. `variant` selects the style (circular,
+ * `<kc-loader>` — an animated loader. `variant` selects the style (circular,
  * dots, wave, text-shimmer, …); `size` and `text` are attributes.
  */
-defineKitnElement<Props>('kitn-loader', {
+defineKitnElement<Props>('kc-loader', {
   variant: 'circular',
   size: 'md',
   text: undefined,

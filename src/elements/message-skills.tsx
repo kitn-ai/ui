@@ -14,9 +14,9 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kitn-message-skills>` — badges showing which skills were active for a
+ * `<kc-skills>` — badges showing which skills were active for a
  * message. Data via the `skills` property.
  */
-defineKitnElement<Props>('kitn-message-skills', {
+defineKitnElement<Props>('kc-skills', {
   skills: [],
 }, (props) => <MessageSkills skills={props.skills} />);

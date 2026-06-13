@@ -3,7 +3,7 @@
 
 // ── boot guard: if the bundle didn't register the elements, show how to run it ──
 setTimeout(() => {
-  if (!customElements.get('kitn-chat')) {
+  if (!customElements.get('kc-chat')) {
     const link = document.getElementById('boot-link');
     if (location.protocol.startsWith('http')) link.href = location.origin + '/examples/composable/index.html';
     document.getElementById('boot-error').style.display = 'block';
@@ -58,7 +58,7 @@ const attachments = [
 const chat = document.getElementById('chat');
 chat.models = models; chat.currentModel = 'opus'; chat.context = ctx;
 chat.suggestions = ['Summarize this thread', 'What changed in v0.3?'];
-chat.messages = [{ id: '1', role: 'assistant', content: 'Hi! I\'m the **drop-in** `<kitn-chat>`. Ask me anything.', actions: ['copy', 'like', 'dislike'] }];
+chat.messages = [{ id: '1', role: 'assistant', content: 'Hi! I\'m the **drop-in** `<kc-chat>`. Ask me anything.', actions: ['copy', 'like', 'dislike'] }];
 chat.addEventListener('submit', (e) => {
   log('submit', e.detail.value);
   chat.messages = [...chat.messages, { id: Date.now() + '', role: 'user', content: e.detail.value }];
@@ -167,7 +167,7 @@ document.getElementById('theme').addEventListener('click', () => {
   root.classList.toggle('dark', dark);
   root.classList.toggle('light', !dark);
   for (const el of document.querySelectorAll('*')) {
-    if (el.tagName.startsWith('KITN-')) el.setAttribute('theme', dark ? 'dark' : 'light');
+    if (el.tagName.startsWith('KC-')) el.setAttribute('theme', dark ? 'dark' : 'light');
   }
   log('theme', dark ? 'dark' : 'light');
 });

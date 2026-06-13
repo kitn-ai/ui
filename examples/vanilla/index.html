@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>kitn-chat — full chat (vanilla / CDN)</title>
+    <title>kc-chat — full chat (vanilla / CDN)</title>
     <link rel="icon" type="image/svg+xml" href="../shared/logo.svg" />
     <style>
       /* No build step: the web components style themselves inside Shadow DOM,
@@ -24,12 +24,12 @@
 
       .app { display: flex; height: calc(100vh - 49px); }
       /* CSS `resize` makes the sidebar drag-resizable horizontally — no JS. */
-      kitn-conversation-list {
+      kc-conversations {
         width: 300px; flex: none; border-right: 1px solid #e5e5e5;
         resize: horizontal; overflow: auto; min-width: 200px; max-width: 460px;
       }
-      body.dark kitn-conversation-list { border-right-color: #27272a; }
-      kitn-chat { flex: 1; min-width: 0; }
+      body.dark kc-conversations { border-right-color: #27272a; }
+      kc-chat { flex: 1; min-width: 0; }
 
       .icon-btn {
         display: inline-flex; align-items: center; justify-content: center;
@@ -52,27 +52,27 @@
 
       /* Responsive: the sidebar slides in over the chat on small screens. */
       @media (max-width: 720px) {
-        kitn-conversation-list {
+        kc-conversations {
           position: fixed; inset: 49px auto 0 0; height: calc(100vh - 49px); width: 280px;
           z-index: 10; transform: translateX(-100%); transition: transform .2s ease;
         }
-        body.sidebar-open kitn-conversation-list { transform: translateX(0); box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35); }
+        body.sidebar-open kc-conversations { transform: translateX(0); box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35); }
       }
     </style>
   </head>
   <body>
     <header class="topbar">
-      <span class="brand"><img src="../shared/logo.svg" alt="" />kitn-chat</span>
+      <span class="brand"><img src="../shared/logo.svg" alt="" />kc-chat</span>
       <button id="theme-btn" class="icon-btn" type="button" aria-label="Toggle light/dark"></button>
     </header>
     <div class="app">
-      <kitn-conversation-list id="list"></kitn-conversation-list>
-      <kitn-chat id="chat"></kitn-chat>
+      <kc-conversations id="list"></kc-conversations>
+      <kc-chat id="chat"></kc-chat>
     </div>
     <div id="toast" class="toast"></div>
 
-    <!-- One line from the CDN registers <kitn-chat>, <kitn-conversation-list>,
-         <kitn-prompt-input>. SolidJS + styles are bundled in. Pin a version
+    <!-- One line from the CDN registers <kc-chat>, <kc-conversations>,
+         <kc-prompt-input>. SolidJS + styles are bundled in. Pin a version
          (…/@kitnai/chat@1.2.3) for reproducibility; jsDelivr also works. -->
     <script type="module" src="https://unpkg.com/@kitnai/chat"></script>
 

@@ -1,5 +1,5 @@
 <!--
-  kitn-chat Angular example template.
+  kc-chat Angular example template.
 
   Key Angular web-component patterns:
     [prop]="value"    — sets the DOM *property* (not an attribute string); this is
@@ -18,7 +18,7 @@
   <header class="topbar" [style.borderBottom]="'1px solid ' + borderColor">
     <span class="topbar-brand">
       <img src="../shared/logo.svg" alt="" width="20" height="20" />
-      kitn-chat · Angular example (web components)
+      kc-chat · Angular example (web components)
     </span>
 
     <button
@@ -32,11 +32,11 @@
     ></button>
   </header>
 
-  <!-- Main area: the flagship <kitn-chat-workspace> element.
+  <!-- Main area: the flagship <kc-workspace> element.
        [prop] sets DOM properties; (event) listens for CustomEvents. -->
   <div class="main-area">
     <!--
-      <kitn-chat-workspace> is the batteries-included shell: sidebar +
+      <kc-workspace> is the batteries-included shell: sidebar +
       conversation list + chat panel + resize handle, all in one element.
 
       Property bindings ([prop]):
@@ -60,7 +60,7 @@
         - (newchat)             — "New chat" button clicked
         - (sidebartoggle)       — hamburger / sidebar toggle
     -->
-    <kitn-chat-workspace
+    <kc-workspace
       [groups]="groups"
       [conversations]="conversations()"
       [activeId]="activeId()"
@@ -79,20 +79,20 @@
       (newchat)="onNewChat()"
       (sidebartoggle)="onSidebarToggle()"
       style="flex: 1; min-height: 0;"
-    ></kitn-chat-workspace>
+    ></kc-workspace>
   </div>
 
-  <!-- Standalone <kitn-prompt-input> — proves a leaf element works on its own. -->
+  <!-- Standalone <kc-prompt-input> — proves a leaf element works on its own. -->
   <div class="standalone-section" [style.borderTop]="'1px solid ' + borderColor">
     <div class="standalone-label">
-      Standalone &lt;kitn-prompt-input&gt; (try typing <code>/</code> for slash commands):
+      Standalone &lt;kc-prompt-input&gt; (try typing <code>/</code> for slash commands):
     </div>
-    <kitn-prompt-input
+    <kc-prompt-input
       placeholder="Standalone prompt input…"
       [slashCommands]="slashCommands"
       [theme]="theme()"
       (submit)="onStandaloneSubmit($event)"
-    ></kitn-prompt-input>
+    ></kc-prompt-input>
     @if (draftSubmissions().length > 0) {
       <ul class="draft-list">
         @for (d of draftSubmissions(); track d) {

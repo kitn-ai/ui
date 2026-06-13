@@ -13,13 +13,13 @@ import { Meta } from '@storybook/addon-docs/blocks';
 Arrays and objects **must** be set as JavaScript **properties** on the DOM element — never as HTML attributes. An HTML attribute is always a string, so passing `messages`, `models`, `context`, `suggestions`, or `slashCommands` as an attribute silently fails or is ignored.
 
 ```js
-const chat = document.querySelector('kitn-chat');
+const chat = document.querySelector('kc-chat');
 
 // ✅ correct — set as a JS property
 chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
 
 // ❌ wrong — HTML attribute, always a string, never works
-// <kitn-chat messages="[...]"></kitn-chat>
+// <kc-chat messages="[...]"></kc-chat>
 ```
 
 Scalar values (strings, numbers, booleans) work as attributes: `placeholder`, `loading`, `theme`, `prose-size`, and so on.
@@ -30,7 +30,7 @@ Scalar values (strings, numbers, booleans) work as attributes: `placeholder`, `l
 
 Import the element bundle once as a side-effect (it registers all `kitn-*` custom elements), then set properties and listen for events in a `<script type="module">` block.
 
-> **Want the whole shell in one tag?** `<kitn-chat-workspace>` bundles the conversation-list sidebar, the drag-to-resize handle, and the full chat thread together. Set `conversations`, `messages`, and optionally `models` as properties; listen for `conversationselect` and `submit`. See the <a href="?path=/docs/web-components-kitn-chat-workspace--docs">kitn-chat-workspace story</a> and the <a href="https://github.com/kitn-ai/kitn-chat/blob/main/docs/web-components.md#kitn-chat-workspace--kitnchatworkspace">web-components.md reference</a> for the full API.
+> **Want the whole shell in one tag?** `<kc-workspace>` bundles the conversation-list sidebar, the drag-to-resize handle, and the full chat thread together. Set `conversations`, `messages`, and optionally `models` as properties; listen for `conversationselect` and `submit`. See the <a href="?path=/docs/web-components-kc-workspace--docs">kc-workspace story</a> and the <a href="https://github.com/kitn-ai/chat/blob/main/docs/web-components.md#kc-workspace--kcworkspace">web-components.md reference</a> for the full API.
 
 ```html
 <!DOCTYPE html>
@@ -40,7 +40,7 @@ Import the element bundle once as a side-effect (it registers all `kitn-*` custo
   <link rel="stylesheet" href="./node_modules/@kitnai/chat/dist/theme.tokens.css" />
 </head>
 <body style="height: 100vh; margin: 0;">
-  <kitn-chat id="chat" style="display: block; height: 100%;"></kitn-chat>
+  <kc-chat id="chat" style="display: block; height: 100%;"></kc-chat>
 
   <script type="module">
     import '@kitnai/chat/elements';
@@ -89,10 +89,10 @@ Scalars can go directly in the HTML as attributes:
 
 ```html
 <!-- theme, placeholder, and loading are scalar → safe as attributes -->
-<kitn-chat
+<kc-chat
   theme="dark"
   placeholder="Ask anything…"
-></kitn-chat>
+></kc-chat>
 ```
 
 ---
@@ -102,7 +102,7 @@ Scalars can go directly in the HTML as attributes:
 The kit ships auto-generated, typed React wrappers under `@kitnai/chat/react`. They handle the ref plumbing internally — rich props are set as DOM **properties** and CustomEvents are exposed as `on<Event>` handlers, so you write idiomatic JSX without touching refs yourself.
 
 ```tsx
-import { KitnChat, KitnConversationList } from '@kitnai/chat/react';
+import { KcChat, KcConversations } from '@kitnai/chat/react';
 import { useState } from 'react';
 
 type Message = {
@@ -137,7 +137,7 @@ export function App() {
   };
 
   return (
-    <KitnChat
+    <KcChat
       messages={messages}
       suggestions={['Summarize the chat', 'Start fresh']}
       onSubmit={handleSubmit}
@@ -169,18 +169,18 @@ Component names are the PascalCase of the tag name:
 
 ```tsx
 import {
-  KitnChat,
-  KitnConversationList,
-  KitnPromptInput,
-  KitnMessage,
-  KitnMarkdown,
-  KitnCodeBlock,
-  KitnReasoning,
-  KitnTool,
-  KitnContextMeter,
-  KitnModelSwitcher,
-  KitnAttachments,
-  KitnLoader,
+  KcChat,
+  KcConversations,
+  KcPromptInput,
+  KcMessage,
+  KcMarkdown,
+  KcCodeBlock,
+  KcReasoning,
+  KcTool,
+  KcContext,
+  KcModelSwitcher,
+  KcAttachments,
+  KcLoader,
   // …all 27 elements
 } from '@kitnai/chat/react';
 ```
@@ -223,7 +223,7 @@ export function Chat() {
     return () => el.removeEventListener('submit', onSubmit);
   }, []);
 
-  return <kitn-chat ref={chatRef} style={{ display: 'block', height: '100vh' }} />;
+  return <kc-chat ref={chatRef} style={{ display: 'block', height: '100vh' }} />;
 }
 ```
 
@@ -254,7 +254,7 @@ const handleSubmit = (e: CustomEvent<{ value: string }>) => {
 
 <template>
   <!-- Arrays/objects → .prop modifier; scalars → plain attributes -->
-  <kitn-chat
+  <kc-chat
     :messages.prop="messages"
     placeholder="Ask anything…"
     theme="auto"
@@ -275,7 +275,7 @@ Add `@kitnai/chat/elements` to your `vite.config.ts` / `env.d.ts` once so Vue's 
 
 ### Sidebar + chat together (Vue)
 
-Cross-element coordination goes through the host component — the `<kitn-conversation-list>` fires `select`, you update a reactive ref, and pass it into `<kitn-chat>`:
+Cross-element coordination goes through the host component — the `<kc-conversations>` fires `select`, you update a reactive ref, and pass it into `<kc-chat>`:
 
 ```html
 <script setup lang="ts">
@@ -297,13 +297,13 @@ const onSelect = (e: CustomEvent<{ id: string }>) => {
 
 <template>
   <div style="display: flex; height: 100vh;">
-    <kitn-conversation-list
+    <kc-conversations
       :conversations.prop="conversations"
       :active-id="activeId"
       style="width: 260px"
       @select="onSelect"
     />
-    <kitn-chat
+    <kc-chat
       :messages.prop="messages"
       style="flex: 1"
     />
@@ -333,7 +333,7 @@ Svelte's template compiler sets DOM **properties** when you bind with `bind:` or
 </script>
 
 <!-- use:action pattern to set properties -->
-<kitn-chat
+<kc-chat
   use:setProps={{ messages }}
   style="display: block; height: 100vh"
   on:submit={handleSubmit}
@@ -393,7 +393,7 @@ export class AppComponent {
 
 ```html
 <!-- app.component.html -->
-<kitn-chat
+<kc-chat
   [messages]="messages"
   [models]="models"
   [loading]="loading"
@@ -401,7 +401,7 @@ export class AppComponent {
   style="display: block; height: 100vh"
   (submit)="onSubmit($event)"
   (modelchange)="onModelChange($event)"
-></kitn-chat>
+></kc-chat>
 ```
 
 > **Why `[messages]` works:** Angular's `[prop]` binding writes to the element's DOM property (not an attribute), so the property-vs-attribute rule is satisfied automatically. Scalars like `theme` can be plain attributes. `CUSTOM_ELEMENTS_SCHEMA` is required so Angular doesn't error on the unknown `kitn-*` tags.
@@ -509,4 +509,4 @@ async function speakCloud(text) {
 
 ## Speech-to-text
 
-The reverse direction is built in — the kit ships `<kitn-voice-input>` (and a `VoiceInput` SolidJS component). Find it in the sidebar under the component stories.
+The reverse direction is built in — the kit ships `<kc-voice-input>` (and a `VoiceInput` SolidJS component). Find it in the sidebar under the component stories.

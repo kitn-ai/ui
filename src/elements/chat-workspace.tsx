@@ -73,7 +73,7 @@ interface Events {
   suggestionclick: { value: string };
 }
 
-defineKitnElement<Props, Events>('kitn-chat-workspace', {
+defineKitnElement<Props, Events>('kc-workspace', {
   groups: [], conversations: [], activeId: undefined, messages: [],
   value: undefined, placeholder: 'Send a message...', loading: false,
   suggestions: undefined, suggestionMode: 'submit', proseSize: 'sm',

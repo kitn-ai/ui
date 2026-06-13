@@ -1,4 +1,4 @@
-# kitn-chat — React example
+# kc-chat — React example
 
 This example shows how to use the `@kitnai/chat` web components inside a
 **React + Vite + TypeScript** application.
@@ -6,8 +6,8 @@ This example shows how to use the `@kitnai/chat` web components inside a
 ## What it demonstrates
 
 - **Registering custom elements** — a single side-effect import
-  (`import '@kitnai/chat/elements'`) registers `<kitn-chat>`,
-  `<kitn-conversation-list>`, and `<kitn-prompt-input>` globally.
+  (`import '@kitnai/chat/elements'`) registers `<kc-chat>`,
+  `<kc-conversations>`, and `<kc-prompt-input>` globally.
 
 - **Setting properties via `ref` + `useEffect`** — React only sets *attributes*
   on custom elements. Objects like `messages` and `conversations` must be
@@ -24,7 +24,7 @@ This example shows how to use the `@kitnai/chat` web components inside a
   }, [messages, loading]);
 
   // In JSX:
-  <kitn-chat ref={chatRef} />
+  <kc-chat ref={chatRef} />
   ```
 
 - **Listening for custom events** — `submit`, `messageaction`, `select`,

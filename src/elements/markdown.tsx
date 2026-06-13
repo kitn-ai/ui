@@ -14,11 +14,11 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kitn-markdown>` — renders markdown (with fenced-code syntax highlighting) as
+ * `<kc-markdown>` — renders markdown (with fenced-code syntax highlighting) as
  * a standalone element. Content via the `content` property; sizing/highlighting
  * via attributes.
  */
-defineKitnElement<Props>('kitn-markdown', {
+defineKitnElement<Props>('kc-markdown', {
   content: '',
   proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',

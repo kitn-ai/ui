@@ -8,14 +8,14 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-voice-input': JSX.HTMLAttributes<HTMLElement> & {
+      'kc-voice-input': JSX.HTMLAttributes<HTMLElement> & {
         disabled?: boolean | string;
       };
     }
   }
 }
 
-/** Render `<kitn-voice-input>` with a stub `transcribe` function-property. */
+/** Render `<kc-voice-input>` with a stub `transcribe` function-property. */
 function VoiceElement(props: { disabled?: boolean }) {
   let el: (HTMLElement & { transcribe?: (audio: Blob) => Promise<string> }) | undefined;
   onMount(() => {
@@ -32,7 +32,7 @@ function VoiceElement(props: { disabled?: boolean }) {
     });
   });
   return (
-    <kitn-voice-input
+    <kc-voice-input
       ref={(e) => (el = e as HTMLElement)}
       disabled={props.disabled ? true : undefined}
       style={{ display: 'inline-block', padding: '40px' }}
@@ -41,7 +41,7 @@ function VoiceElement(props: { disabled?: boolean }) {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-voice-input id="voice"></kitn-voice-input>
+<kc-voice-input id="voice"></kc-voice-input>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -56,14 +56,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-voice-input',
+  title: 'Web Components/kc-voice-input',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-voice-input'),
+  argTypes: argTypesFor('kc-voice-input'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-voice-input', [
-          '`<kitn-voice-input>` is the framework-agnostic **web component** for a mic button that records and transcribes audio — isolated in **Shadow DOM**. It is the canonical **function-property** element.',
+      description: specDescription('kc-voice-input', [
+          '`<kc-voice-input>` is the framework-agnostic **web component** for a mic button that records and transcribes audio — isolated in **Shadow DOM**. It is the canonical **function-property** element.',
           '**When to use:** adding voice dictation to an input in a non-Solid app. In SolidJS, use the `VoiceInput` primitive.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, then set the `transcribe` **function property** (`el.transcribe = async blob => '...'`) — a value-returning callback can't be modelled as an event. It also emits `audiocaptured` (raw blob) and `transcription` (text) **CustomEvents**.",
           'See the **Code** tab for HTML usage.',

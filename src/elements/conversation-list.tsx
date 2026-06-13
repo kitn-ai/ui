@@ -23,7 +23,7 @@ interface Events {
   togglesidebar: Record<string, never>;
 }
 
-defineKitnElement<Props, Events>('kitn-conversation-list', {
+defineKitnElement<Props, Events>('kc-conversations', {
   groups: [],
   conversations: [],
   activeId: undefined,

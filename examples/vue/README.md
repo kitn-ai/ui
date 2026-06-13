@@ -1,4 +1,4 @@
-# kitn-chat — Vue 3 example
+# kc-chat — Vue 3 example
 
 A minimal, runnable **Vue 3 + Vite** app that uses the kit's web components directly (no wrappers).
 
@@ -8,7 +8,7 @@ A minimal, runnable **Vue 3 + Vite** app that uses the kit's web components dire
 - The **`.prop` modifier** (`:groups.prop`, `:conversations.prop`, `:messages.prop`, etc.) so Vue sets DOM *properties* rather than stringified attributes — required when passing arrays/objects to Shadow-DOM custom elements.
 - `@event` listeners that read `(e as CustomEvent).detail` for `@conversationselect`, `@submit`, `@modelchange`, `@sidebartoggle`, `@newchat`, and `@messageaction`.
 - `vite.config.ts` with `isCustomElement: (tag) => tag.startsWith('kitn-')` so Vue treats `kitn-*` tags as native custom elements, not Vue components.
-- The flagship `<kitn-chat-workspace>` (sidebar + chat + resize shell) plus a standalone `<kitn-prompt-input>`.
+- The flagship `<kc-workspace>` (sidebar + chat + resize shell) plus a standalone `<kc-prompt-input>`.
 
 ## Prerequisites
 
@@ -54,7 +54,7 @@ If the elements import is late (e.g. inside a component's `onMounted`), Vue sets
 ### Property bindings (`.prop` modifier)
 
 ```vue
-<kitn-chat-workspace
+<kc-workspace
   :conversations.prop="conversations"
   :messages.prop="messages"
   :groups.prop="groups"
@@ -65,7 +65,7 @@ If the elements import is late (e.g. inside a component's `onMounted`), Vue sets
   :theme.prop="theme"
   @submit="onSubmit"
   @conversationselect="onConversationSelect"
-></kitn-chat-workspace>
+></kc-workspace>
 ```
 
 ### Event handling

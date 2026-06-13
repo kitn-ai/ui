@@ -1,7 +1,7 @@
 import '../../src/elements/prompt-input';
 
 test('emits valuechange on input and submit on Enter', async () => {
-  const el = document.createElement('kitn-prompt-input') as HTMLElement & {
+  const el = document.createElement('kc-prompt-input') as HTMLElement & {
     value?: string; placeholder?: string;
   };
   el.placeholder = 'Ask...';
@@ -34,7 +34,7 @@ const suggestionChip = (el: HTMLElement, label: string) =>
     .find((b) => b.textContent?.trim() === label)!;
 
 test('default suggestionMode "submit": clicking a suggestion emits submit (sends it)', async () => {
-  const el = document.createElement('kitn-prompt-input') as HTMLElement & { suggestions?: string[] };
+  const el = document.createElement('kc-prompt-input') as HTMLElement & { suggestions?: string[] };
   el.suggestions = ['Hi', 'Bye'];
   document.body.appendChild(el);
   await Promise.resolve();
@@ -56,7 +56,7 @@ test('default suggestionMode "submit": clicking a suggestion emits submit (sends
 });
 
 test('suggestionMode "fill": clicking a suggestion fills the input and emits suggestionclick', async () => {
-  const el = document.createElement('kitn-prompt-input') as HTMLElement & {
+  const el = document.createElement('kc-prompt-input') as HTMLElement & {
     suggestions?: string[]; suggestionMode?: 'submit' | 'fill';
   };
   el.suggestions = ['Hi', 'Bye'];
@@ -78,7 +78,7 @@ test('suggestionMode "fill": clicking a suggestion fills the input and emits sug
 });
 
 test('disallows leading whitespace at the start of the prompt', async () => {
-  const el = document.createElement('kitn-prompt-input') as HTMLElement & { value?: string };
+  const el = document.createElement('kc-prompt-input') as HTMLElement & { value?: string };
   document.body.appendChild(el);
   await Promise.resolve();
 
@@ -101,7 +101,7 @@ test('disallows leading whitespace at the start of the prompt', async () => {
 });
 
 test('slash command: selecting (Enter) inserts the command into the input', async () => {
-  const el = document.createElement('kitn-prompt-input') as HTMLElement & {
+  const el = document.createElement('kc-prompt-input') as HTMLElement & {
     slashCommands?: { id: string; label: string; description?: string }[];
   };
   el.slashCommands = [{ id: 'summarize', label: '/summarize', description: 'Summarize' }];
@@ -128,7 +128,7 @@ test('slash command: selecting (Enter) inserts the command into the input', asyn
 });
 
 test('send button is disabled when loading even with non-empty value', async () => {
-  const el = document.createElement('kitn-prompt-input') as HTMLElement & {
+  const el = document.createElement('kc-prompt-input') as HTMLElement & {
     loading?: boolean;
   };
   document.body.appendChild(el);
@@ -148,7 +148,7 @@ test('send button is disabled when loading even with non-empty value', async () 
 });
 
 test('send button and textarea have accessible names (a11y A1)', async () => {
-  const el = document.createElement('kitn-prompt-input') as HTMLElement & {
+  const el = document.createElement('kc-prompt-input') as HTMLElement & {
     placeholder?: string;
   };
   el.placeholder = 'Ask anything...';
@@ -168,14 +168,14 @@ test('textarea always has a non-empty accessible name', async () => {
   // With no explicit placeholder the element supplies its default placeholder,
   // which becomes the accessible name. When the placeholder is empty the label
   // falls back to "Message" so the control is never unnamed.
-  const withDefault = document.createElement('kitn-prompt-input');
+  const withDefault = document.createElement('kc-prompt-input');
   document.body.appendChild(withDefault);
   await Promise.resolve();
   const defaultTextarea = withDefault.shadowRoot!.querySelector('textarea')!;
   expect(defaultTextarea.getAttribute('aria-label')).toBeTruthy();
   withDefault.remove();
 
-  const emptyPlaceholder = document.createElement('kitn-prompt-input') as HTMLElement & {
+  const emptyPlaceholder = document.createElement('kc-prompt-input') as HTMLElement & {
     placeholder?: string;
   };
   emptyPlaceholder.placeholder = '';
