@@ -514,11 +514,11 @@ git commit -m "feat(docs): generate web-components.md tables from element-meta (
 
 This is the same mechanical pattern as Task 3, parallelizable. For EACH facade:
 
-- [ ] **Step 1:** `grep -n "dispatch(" src/elements/<file>` to list the events it fires, and read its `### ` section in `docs/web-components.md` for the curated `detail` shapes + descriptions.
-- [ ] **Step 2:** Add an `interface Events { … }` (one JSDoc'd field per event; `Record<string, never>` for payloadless events), importing any referenced detail types, and change to `defineKitnElement<Props, Events>(…)`.
-- [ ] **Step 3:** `npm run typecheck` → fix any real `dispatch` payload mismatches surfaced.
-- [ ] **Step 4:** After all are done: `npm run build`, then verify none still show `unknown`: `node -e "const m=require('./src/elements/element-meta.json'); for (const e of m) for (const ev of e.events) if (ev.detail==='unknown') console.log('STILL UNKNOWN:', e.tag, ev.name)"` → prints nothing.
-- [ ] **Step 5:** Commit: `git add src/elements/*.tsx src/elements/element-meta.json dist/custom-elements.json docs/web-components.md && git commit -m "feat(elements): typed Events maps on remaining dispatching facades"`
+- [x] **Step 1:** `grep -n "dispatch(" src/elements/<file>` to list the events it fires, and read its `### ` section in `docs/web-components.md` for the curated `detail` shapes + descriptions.
+- [x] **Step 2:** Add an `interface Events { … }` (one JSDoc'd field per event; `Record<string, never>` for payloadless events), importing any referenced detail types, and change to `defineKitnElement<Props, Events>(…)`.
+- [x] **Step 3:** `npm run typecheck` → fix any real `dispatch` payload mismatches surfaced.
+- [x] **Step 4:** After all are done: `npm run build`, then verify none still show `unknown`: `node -e "const m=require('./src/elements/element-meta.json'); for (const e of m) for (const ev of e.events) if (ev.detail==='unknown') console.log('STILL UNKNOWN:', e.tag, ev.name)"` → prints nothing.
+- [x] **Step 5:** Commit: `git add src/elements/*.tsx src/elements/element-meta.json dist/custom-elements.json docs/web-components.md && git commit -m "feat(elements): typed Events maps on remaining dispatching facades"`
 
 ---
 
