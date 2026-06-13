@@ -27,9 +27,15 @@ Then open:
 
 ## Framework examples (their own dev servers)
 
-- **`react/`** and **`solid/`** are Vite apps. `cd` in, `npm install`, `npm run dev`.
-  They depend on the published `@kitnai/chat`; to test unpublished local changes,
-  `npm run build` at the root then `npm pack` and install the tarball into the example.
+- **`react/`**, **`solid/`**, and **`angular/`** are Vite apps. `cd` in, `npm install`, `npm run dev`.
+  They alias `@kitnai/chat/elements` to the local `dist/kitn-chat.es.js`, so run
+  `npm run build` at the repo root first, then start any example's dev server.
+
+  | Directory | Framework | Kit API used |
+  |---|---|---|
+  | `react/` | React 19 | Generated wrappers from `@kitnai/chat/react` |
+  | `solid/` | SolidJS | Raw SolidJS component API |
+  | `angular/` | Angular 19 | Web components via `[prop]`/`(event)` + `CUSTOM_ELEMENTS_SCHEMA` |
 
 ## Why a server?
 

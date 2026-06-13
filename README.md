@@ -361,17 +361,21 @@ The published docs are deployed to GitHub Pages:
 
 ### Framework example apps
 
-The `examples/react` and `examples/solid` directories are full Vite apps — install their dependencies and run the local dev server:
+The `examples/react`, `examples/solid`, and `examples/angular` directories are full Vite apps — install their dependencies and run the local dev server:
 
 ```bash
 cd examples/react && npm install && npm run dev
 # or
 cd examples/solid && npm install && npm run dev
+# or
+cd examples/angular && npm install && npm run dev
 ```
 
-These use the React wrappers from `@kitnai/chat/react` (`examples/react`) and the raw SolidJS component API (`examples/solid`).
+- `examples/react` — uses the generated React wrappers from `@kitnai/chat/react`
+- `examples/solid` — uses the raw SolidJS component API
+- `examples/angular` — uses the web components natively via Angular's `[prop]` / `(event)` bindings with `CUSTOM_ELEMENTS_SCHEMA` (no wrappers needed)
 
-> More framework examples (Vue, Angular) are coming separately.
+> A Vue example is coming separately.
 
 ### Docs and reference
 
