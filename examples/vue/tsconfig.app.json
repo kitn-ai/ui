@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": [],
+    "skipLibCheck": true,
+    "paths": {
+      "@kitnai/chat/elements": ["./src/stubs/kitn-chat-elements.d.ts"],
+      "@kitnai/chat/theme.css": ["./src/stubs/kitn-chat-theme.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "env.d.ts"],
+  "exclude": []
+}
