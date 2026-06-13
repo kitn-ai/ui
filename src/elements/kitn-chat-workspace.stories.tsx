@@ -3,6 +3,8 @@ import { onMount } from 'solid-js';
 import './register'; // side effect: registers all kitn custom elements including <kitn-chat-workspace>
 import type { ConversationGroup, ConversationSummary, ModelOption } from '../types';
 import type { ChatMessage } from './chat-types';
+import { ElementSpec } from '../stories/docs/element-spec';
+import { argTypesFor } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -55,21 +57,37 @@ const sampleMessages: ChatMessage[] = [
   },
 ];
 
+type WorkspaceEl = HTMLElement & {
+  groups?: ConversationGroup[];
+  conversations?: ConversationSummary[];
+  activeId?: string;
+  messages?: ChatMessage[];
+  models?: ModelOption[];
+  currentModel?: string;
+  chatTitle?: string;
+  placeholder?: string;
+  loading?: boolean;
+  suggestionMode?: string;
+  proseSize?: string;
+  codeTheme?: string;
+  codeHighlight?: boolean;
+  scrollButton?: boolean;
+  search?: boolean;
+  voice?: boolean;
+  slashCompact?: boolean;
+  sidebarWidth?: number;
+  sidebarMinWidth?: number;
+  sidebarMaxWidth?: number;
+  sidebarCollapsed?: boolean;
+  value?: string;
+};
+
 /** Live demo of the actual `<kitn-chat-workspace>` custom element (Shadow DOM and all). */
-function WorkspaceElement() {
-  let el:
-    | (HTMLElement & {
-        groups?: ConversationGroup[];
-        conversations?: ConversationSummary[];
-        activeId?: string;
-        messages?: ChatMessage[];
-        models?: ModelOption[];
-        currentModel?: string;
-        chatTitle?: string;
-      })
-    | undefined;
+function WorkspaceElement(props: { args?: Record<string, unknown> }) {
+  let el: WorkspaceEl | undefined;
   onMount(() => {
     if (el) {
+      // Fixed array/object data
       el.groups = sampleGroups;
       el.conversations = sampleConversations;
       el.activeId = '1';
@@ -77,6 +95,18 @@ function WorkspaceElement() {
       el.models = sampleModels;
       el.currentModel = 'claude-4';
       el.chatTitle = 'Web component architecture';
+      // Scalar args from Controls (override defaults above for scalar props)
+      const args = props.args;
+      if (args) {
+        const scalarNames = [
+          'placeholder', 'loading', 'suggestionMode', 'proseSize', 'codeTheme',
+          'codeHighlight', 'scrollButton', 'search', 'voice', 'slashCompact',
+          'sidebarWidth', 'sidebarMinWidth', 'sidebarMaxWidth', 'sidebarCollapsed', 'value',
+        ];
+        for (const name of scalarNames) {
+          if (name in args) (el as unknown as Record<string, unknown>)[name] = args[name];
+        }
+      }
       el.addEventListener('conversationselect', (e) => console.log('select', (e as CustomEvent).detail));
       el.addEventListener('submit', (e) => console.log('submit', (e as unknown as CustomEvent).detail));
       el.addEventListener('sidebartoggle', (e) => console.log('sidebartoggle', (e as CustomEvent).detail));
@@ -85,7 +115,7 @@ function WorkspaceElement() {
   return (
     <div style={{ height: '720px', width: '100%' }}>
       <kitn-chat-workspace
-        ref={(e) => (el = e as HTMLElement)}
+        ref={(e) => (el = e as WorkspaceEl)}
         style={{ display: 'block', height: '100%' }}
       />
     </div>
@@ -162,6 +192,7 @@ function Workspace() {
 const meta = {
   title: 'Web Components/kitn-chat-workspace',
   tags: ['autodocs'],
+  argTypes: argTypesFor('kitn-chat-workspace'),
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -183,7 +214,20 @@ type Story = StoryObj;
 
 /** The element used the plain-HTML / any-framework way. */
 export const Default: Story = {
-  render: () => <WorkspaceElement />,
+  args: {
+    placeholder: 'Send a message...',
+    loading: false,
+    suggestionMode: 'submit',
+    proseSize: 'sm',
+    codeTheme: 'github-dark-dimmed',
+    codeHighlight: true,
+    scrollButton: true,
+    search: false,
+    voice: false,
+    slashCompact: false,
+    sidebarCollapsed: false,
+  },
+  render: (args: Record<string, unknown>) => <WorkspaceElement args={args} />,
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
 };
 
@@ -192,4 +236,10 @@ export const InSolidJS: Story = {
   name: 'In SolidJS',
   render: () => <WorkspaceElement />,
   parameters: { docs: { source: { code: SOLID_SNIPPET, language: 'tsx' } } },
+};
+
+/** Full generated API reference — properties, events, tokens, and the SolidJS components this element is composed from. */
+export const API: Story = {
+  render: () => <ElementSpec tag="kitn-chat-workspace" />,
+  parameters: { layout: 'padded' },
 };

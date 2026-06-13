@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
+import { ElementSpec } from '../stories/docs/element-spec';
+import { argTypesFor } from '../stories/docs/element-controls';
 
 interface ContextUsage {
   usedTokens: number;
@@ -60,6 +62,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 const meta = {
   title: 'Web Components/kitn-context-meter',
   tags: ['autodocs'],
+  argTypes: argTypesFor('kitn-context-meter'),
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -77,6 +80,12 @@ const meta = {
 
 export default meta;
 type Story = StoryObj;
+
+/** Full generated API reference — properties, events, tokens, and composed-from. */
+export const API: Story = {
+  render: () => <ElementSpec tag="kitn-context-meter" />,
+  parameters: { layout: 'padded' },
+};
 
 /** A meter at ~24% usage; hover to reveal the full breakdown. */
 export const Default: Story = {

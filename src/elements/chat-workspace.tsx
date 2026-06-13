@@ -5,8 +5,9 @@ import { ConversationList } from '../components/conversation-list';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resizable';
 import { Button } from '../ui/button';
 import { PanelLeftOpen } from 'lucide-solid';
+import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
-import type { ChatMessage } from './chat-types';
+import type { ChatMessage, ChatMessageAction } from './chat-types';
 import type { ProseSize } from '../primitives/chat-config';
 import type { ModelOption, ConversationGroup, ConversationSummary } from '../types';
 
@@ -47,7 +48,32 @@ interface Props extends Record<string, unknown> {
   sidebarCollapsed?: boolean;
 }
 
-defineKitnElement<Props>('kitn-chat-workspace', {
+interface Events {
+  /** A conversation was selected in the sidebar. */
+  conversationselect: { id: string };
+  /** The "New chat" button was clicked. */
+  newchat: Record<string, never>;
+  /** The sidebar was collapsed or expanded. */
+  sidebartoggle: { collapsed: boolean };
+  /** User submitted a message. */
+  submit: { value: string; attachments: AttachmentData[] };
+  /** Fired on every input change. */
+  valuechange: { value: string };
+  /** The header model switcher changed. */
+  modelchange: { modelId: string };
+  /** An action button on a message was clicked. */
+  messageaction: { messageId: string; action: ChatMessageAction };
+  /** The Search button was clicked. */
+  search: Record<string, never>;
+  /** The Mic / voice button was clicked. */
+  voice: Record<string, never>;
+  /** A slash command was chosen from the palette. */
+  slashselect: { command: SlashCommandItem };
+  /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
+  suggestionclick: { value: string };
+}
+
+defineKitnElement<Props, Events>('kitn-chat-workspace', {
   groups: [], conversations: [], activeId: undefined, messages: [],
   value: undefined, placeholder: 'Send a message...', loading: false,
   suggestions: undefined, suggestionMode: 'submit', proseSize: 'sm',

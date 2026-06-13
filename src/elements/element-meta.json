@@ -1,0 +1,2003 @@
+[
+  {
+    "tag": "kitn-attachments",
+    "className": "KitnAttachmentsElement",
+    "props": [
+      {
+        "name": "items",
+        "type": "{ id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "The attachments to render. Set as a JS property (array).",
+        "default": "[]"
+      },
+      {
+        "name": "variant",
+        "type": "undefined | \"grid\" | \"inline\" | \"list\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows.",
+        "default": "'grid'"
+      },
+      {
+        "name": "hoverCard",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Wrap each item in a hover card that previews its details.",
+        "default": "false"
+      },
+      {
+        "name": "removable",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a remove button per item; clicking it fires a `remove` event.",
+        "default": "false"
+      },
+      {
+        "name": "showMediaType",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Also show the media type beneath the filename (non-grid variants).",
+        "default": "false"
+      },
+      {
+        "name": "emptyText",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Text shown when `items` is empty."
+      }
+    ],
+    "events": [
+      {
+        "name": "remove",
+        "detail": "{ id: string }",
+        "description": "A remove button was clicked."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Attachments",
+        "group": "Components",
+        "storyId": "components-attachments--docs"
+      },
+      {
+        "name": "Attachment",
+        "group": "Components",
+        "storyId": "components-attachment--docs"
+      },
+      {
+        "name": "AttachmentPreview",
+        "group": "Components",
+        "storyId": "components-attachmentpreview--docs"
+      },
+      {
+        "name": "AttachmentInfo",
+        "group": "Components",
+        "storyId": "components-attachmentinfo--docs"
+      },
+      {
+        "name": "AttachmentRemove",
+        "group": "Components",
+        "storyId": "components-attachmentremove--docs"
+      },
+      {
+        "name": "AttachmentHoverCard",
+        "group": "Components",
+        "storyId": "components-attachmenthovercard--docs"
+      },
+      {
+        "name": "AttachmentHoverCardTrigger",
+        "group": "Components",
+        "storyId": "components-attachmenthovercardtrigger--docs"
+      },
+      {
+        "name": "AttachmentHoverCardContent",
+        "group": "Components",
+        "storyId": "components-attachmenthovercardcontent--docs"
+      },
+      {
+        "name": "AttachmentEmpty",
+        "group": "Components",
+        "storyId": "components-attachmentempty--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-chain-of-thought",
+    "className": "KitnChainOfThoughtElement",
+    "props": [
+      {
+        "name": "steps",
+        "type": "{ label: string; content?: undefined | string }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1).",
+        "default": "[]"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "ChainOfThought",
+        "group": "Components",
+        "storyId": "components-chainofthought--docs"
+      },
+      {
+        "name": "ChainOfThoughtStep",
+        "group": "Components",
+        "storyId": "components-chainofthoughtstep--docs"
+      },
+      {
+        "name": "ChainOfThoughtTrigger",
+        "group": "Components",
+        "storyId": "components-chainofthoughttrigger--docs"
+      },
+      {
+        "name": "ChainOfThoughtContent",
+        "group": "Components",
+        "storyId": "components-chainofthoughtcontent--docs"
+      },
+      {
+        "name": "ChainOfThoughtItem",
+        "group": "Components",
+        "storyId": "components-chainofthoughtitem--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-chat",
+    "className": "KitnChatElement",
+    "props": [
+      {
+        "name": "messages",
+        "type": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\")[] }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`).",
+        "default": "[]"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior."
+      },
+      {
+        "name": "placeholder",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Placeholder text shown in the empty input.",
+        "default": "'Send a message...'"
+      },
+      {
+        "name": "loading",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply).",
+        "default": "false"
+      },
+      {
+        "name": "suggestions",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property."
+      },
+      {
+        "name": "suggestionMode",
+        "type": "undefined | \"submit\" | \"fill\"",
+        "optional": true,
+        "scalar": true,
+        "description": "What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input.",
+        "default": "'submit'"
+      },
+      {
+        "name": "proseSize",
+        "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`.",
+        "default": "'sm'"
+      },
+      {
+        "name": "codeTheme",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`).",
+        "default": "'github-dark-dimmed'"
+      },
+      {
+        "name": "codeHighlight",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true.",
+        "default": "true"
+      },
+      {
+        "name": "chatTitle",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Optional header title shown on the left of the header."
+      },
+      {
+        "name": "models",
+        "type": "undefined | { id: string; name: string; provider?: undefined | string }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `modelchange` event fires on selection."
+      },
+      {
+        "name": "currentModel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The currently selected model id (pairs with `models`)."
+      },
+      {
+        "name": "context",
+        "type": "undefined | { usedTokens: number; maxTokens: number; inputTokens?: undefined | number; outputTokens?: undefined | number; estimatedCost?: undefined | number }",
+        "optional": true,
+        "scalar": false,
+        "description": "Optional context-window token usage. When set, a Context token meter is shown in the header."
+      },
+      {
+        "name": "scrollButton",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show the scroll-to-bottom button inside the scroll area. Default true.",
+        "default": "true"
+      },
+      {
+        "name": "search",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a Search (Globe) button in the input toolbar; fires a `search` event.",
+        "default": "false"
+      },
+      {
+        "name": "voice",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a Voice (Mic) button in the input toolbar; fires a `voice` event.",
+        "default": "false"
+      },
+      {
+        "name": "slashCommands",
+        "type": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Slash commands — when set, typing `/` in the input opens the command palette and fires `slashselect`. Set as a JS property."
+      },
+      {
+        "name": "slashActiveIds",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Command ids to highlight as active in the palette."
+      },
+      {
+        "name": "slashCompact",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Single-line palette rows.",
+        "default": "false"
+      }
+    ],
+    "events": [
+      {
+        "name": "messageaction",
+        "detail": "{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }",
+        "description": "An action button on a message was clicked."
+      },
+      {
+        "name": "modelchange",
+        "detail": "{ modelId: string }",
+        "description": "The header model switcher changed."
+      },
+      {
+        "name": "search",
+        "detail": "Record<string, never>",
+        "description": "The Search button was clicked."
+      },
+      {
+        "name": "slashselect",
+        "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
+        "description": "A slash command was chosen from the palette."
+      },
+      {
+        "name": "submit",
+        "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
+        "description": "User submitted a message."
+      },
+      {
+        "name": "suggestionclick",
+        "detail": "{ value: string }",
+        "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`)."
+      },
+      {
+        "name": "valuechange",
+        "detail": "{ value: string }",
+        "description": "Fired on every input change."
+      },
+      {
+        "name": "voice",
+        "detail": "Record<string, never>",
+        "description": "The Mic / voice button was clicked."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "ChatThread",
+        "group": "Components",
+        "storyId": "components-chatthread--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-chat-scope-picker",
+    "className": "KitnChatScopePickerElement",
+    "props": [
+      {
+        "name": "availableAuthors",
+        "type": "string[]",
+        "optional": false,
+        "scalar": false,
+        "description": "Authors to offer as scope filters. Set as a JS property.",
+        "default": "[]"
+      },
+      {
+        "name": "availableTags",
+        "type": "string[]",
+        "optional": false,
+        "scalar": false,
+        "description": "Tags to offer as scope filters. Set as a JS property.",
+        "default": "[]"
+      },
+      {
+        "name": "currentLabel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The label shown on the trigger for the active scope.",
+        "default": "'All Content'"
+      }
+    ],
+    "events": [
+      {
+        "name": "scopechange",
+        "detail": "{ filters: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }",
+        "description": "A scope was chosen (`undefined` filters = \"All Content\")."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "ChatScopePicker",
+        "group": "Components",
+        "storyId": "components-chatscopepicker--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-chat-workspace",
+    "className": "KitnChatWorkspaceElement",
+    "props": [
+      {
+        "name": "groups",
+        "type": "{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "Pre-bucketed conversation groups for the sidebar. Set as a JS property.",
+        "default": "[]"
+      },
+      {
+        "name": "conversations",
+        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property.",
+        "default": "[]"
+      },
+      {
+        "name": "activeId",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Id of the open conversation, highlighted in the sidebar."
+      },
+      {
+        "name": "messages",
+        "type": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\")[] }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "The active conversation's message thread, newest last. Set as a JS property.",
+        "default": "[]"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "placeholder",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'Send a message...'"
+      },
+      {
+        "name": "loading",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "false"
+      },
+      {
+        "name": "suggestions",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "suggestionMode",
+        "type": "undefined | \"submit\" | \"fill\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'submit'"
+      },
+      {
+        "name": "proseSize",
+        "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'sm'"
+      },
+      {
+        "name": "codeTheme",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "'github-dark-dimmed'"
+      },
+      {
+        "name": "codeHighlight",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "true"
+      },
+      {
+        "name": "chatTitle",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "models",
+        "type": "undefined | { id: string; name: string; provider?: undefined | string }[]",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "currentModel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "context",
+        "type": "undefined | { usedTokens: number; maxTokens: number; inputTokens?: undefined | number; outputTokens?: undefined | number; estimatedCost?: undefined | number }",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "scrollButton",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "true"
+      },
+      {
+        "name": "search",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "false"
+      },
+      {
+        "name": "voice",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "false"
+      },
+      {
+        "name": "slashCommands",
+        "type": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "slashActiveIds",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": ""
+      },
+      {
+        "name": "slashCompact",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "",
+        "default": "false"
+      },
+      {
+        "name": "sidebarWidth",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Sidebar default width as a percent of the workspace (default 22).",
+        "default": "22"
+      },
+      {
+        "name": "sidebarMinWidth",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Sidebar min width in px (default 200).",
+        "default": "200"
+      },
+      {
+        "name": "sidebarMaxWidth",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Sidebar max width in px (default 420).",
+        "default": "420"
+      },
+      {
+        "name": "sidebarCollapsed",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial collapsed state of the sidebar (default false).",
+        "default": "false"
+      }
+    ],
+    "events": [
+      {
+        "name": "conversationselect",
+        "detail": "{ id: string }",
+        "description": "A conversation was selected in the sidebar."
+      },
+      {
+        "name": "messageaction",
+        "detail": "{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }",
+        "description": "An action button on a message was clicked."
+      },
+      {
+        "name": "modelchange",
+        "detail": "{ modelId: string }",
+        "description": "The header model switcher changed."
+      },
+      {
+        "name": "newchat",
+        "detail": "Record<string, never>",
+        "description": "The \"New chat\" button was clicked."
+      },
+      {
+        "name": "search",
+        "detail": "Record<string, never>",
+        "description": "The Search button was clicked."
+      },
+      {
+        "name": "sidebartoggle",
+        "detail": "{ collapsed: false | true }",
+        "description": "The sidebar was collapsed or expanded."
+      },
+      {
+        "name": "slashselect",
+        "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
+        "description": "A slash command was chosen from the palette."
+      },
+      {
+        "name": "submit",
+        "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
+        "description": "User submitted a message."
+      },
+      {
+        "name": "suggestionclick",
+        "detail": "{ value: string }",
+        "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`)."
+      },
+      {
+        "name": "valuechange",
+        "detail": "{ value: string }",
+        "description": "Fired on every input change."
+      },
+      {
+        "name": "voice",
+        "detail": "Record<string, never>",
+        "description": "The Mic / voice button was clicked."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "ChatThread",
+        "group": "Components",
+        "storyId": "components-chatthread--docs"
+      },
+      {
+        "name": "ConversationList",
+        "group": "Components",
+        "storyId": "components-conversationlist--docs"
+      },
+      {
+        "name": "ResizablePanelGroup",
+        "group": "UI",
+        "storyId": "ui-resizablepanelgroup--docs"
+      },
+      {
+        "name": "ResizablePanel",
+        "group": "UI",
+        "storyId": "ui-resizablepanel--docs"
+      },
+      {
+        "name": "ResizableHandle",
+        "group": "UI",
+        "storyId": "ui-resizablehandle--docs"
+      },
+      {
+        "name": "Button",
+        "group": "UI",
+        "storyId": "ui-button--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-checkpoint",
+    "className": "KitnCheckpointElement",
+    "props": [
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Optional text beside the icon."
+      },
+      {
+        "name": "tooltip",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Tooltip on hover."
+      },
+      {
+        "name": "variant",
+        "type": "undefined | \"ghost\" | \"default\" | \"outline\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Visual button style.",
+        "default": "'ghost'"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Button size (use an `icon*` size for an icon-only checkpoint).",
+        "default": "'sm'"
+      }
+    ],
+    "events": [
+      {
+        "name": "select",
+        "detail": null,
+        "description": "The checkpoint was clicked."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Checkpoint",
+        "group": "Components",
+        "storyId": "components-checkpoint--docs"
+      },
+      {
+        "name": "CheckpointIcon",
+        "group": "Components",
+        "storyId": "components-checkpointicon--docs"
+      },
+      {
+        "name": "CheckpointTrigger",
+        "group": "Components",
+        "storyId": "components-checkpointtrigger--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-code-block",
+    "className": "KitnCodeBlockElement",
+    "props": [
+      {
+        "name": "code",
+        "type": "string",
+        "optional": false,
+        "scalar": true,
+        "description": "The source code to render.",
+        "default": "''"
+      },
+      {
+        "name": "language",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Language grammar (e.g. `js`, `python`). Defaults to `tsx`."
+      },
+      {
+        "name": "codeTheme",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Shiki theme name.",
+        "default": "'github-dark-dimmed'"
+      },
+      {
+        "name": "codeHighlight",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable syntax highlighting (renders plain text, no Shiki).",
+        "default": "true"
+      },
+      {
+        "name": "proseSize",
+        "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Code text sizing.",
+        "default": "'sm'"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "CodeBlock",
+        "group": "Components",
+        "storyId": "components-codeblock--docs"
+      },
+      {
+        "name": "CodeBlockCode",
+        "group": "Components",
+        "storyId": "components-codeblockcode--docs"
+      }
+    ],
+    "tokens": [
+      "--color-code-foreground"
+    ]
+  },
+  {
+    "tag": "kitn-context-meter",
+    "className": "KitnContextMeterElement",
+    "props": [
+      {
+        "name": "context",
+        "type": "undefined | { usedTokens: number; maxTokens: number; inputTokens?: undefined | number; outputTokens?: undefined | number; reasoningTokens?: undefined | number; cacheTokens?: undefined | number; estimatedCost?: undefined | number }",
+        "optional": true,
+        "scalar": false,
+        "description": "Token-usage data. Set as a JS property."
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Context",
+        "group": "Components",
+        "storyId": "components-context--docs"
+      },
+      {
+        "name": "ContextTrigger",
+        "group": "Components",
+        "storyId": "components-contexttrigger--docs"
+      },
+      {
+        "name": "ContextContent",
+        "group": "Components",
+        "storyId": "components-contextcontent--docs"
+      },
+      {
+        "name": "ContextContentHeader",
+        "group": "Components",
+        "storyId": "components-contextcontentheader--docs"
+      },
+      {
+        "name": "ContextContentBody",
+        "group": "Components",
+        "storyId": "components-contextcontentbody--docs"
+      },
+      {
+        "name": "ContextContentFooter",
+        "group": "Components",
+        "storyId": "components-contextcontentfooter--docs"
+      },
+      {
+        "name": "ContextInputUsage",
+        "group": "Components",
+        "storyId": "components-contextinputusage--docs"
+      },
+      {
+        "name": "ContextOutputUsage",
+        "group": "Components",
+        "storyId": "components-contextoutputusage--docs"
+      },
+      {
+        "name": "ContextReasoningUsage",
+        "group": "Components",
+        "storyId": "components-contextreasoningusage--docs"
+      },
+      {
+        "name": "ContextCacheUsage",
+        "group": "Components",
+        "storyId": "components-contextcacheusage--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-conversation-list",
+    "className": "KitnConversationListElement",
+    "props": [
+      {
+        "name": "groups",
+        "type": "{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "Pre-bucketed conversation groups (e.g. \"Today\", \"Yesterday\"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property.",
+        "default": "[]"
+      },
+      {
+        "name": "conversations",
+        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property.",
+        "default": "[]"
+      },
+      {
+        "name": "activeId",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The id of the currently-open conversation, highlighted in the list."
+      }
+    ],
+    "events": [
+      {
+        "name": "newchat",
+        "detail": "Record<string, never>",
+        "description": "The \"New chat\" button was clicked."
+      },
+      {
+        "name": "select",
+        "detail": "{ id: string }",
+        "description": "A conversation was selected."
+      },
+      {
+        "name": "togglesidebar",
+        "detail": "Record<string, never>",
+        "description": "The sidebar toggle was clicked."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "ConversationList",
+        "group": "Components",
+        "storyId": "components-conversationlist--docs"
+      }
+    ],
+    "tokens": [
+      "--color-sidebar",
+      "--color-scrollbar-thumb"
+    ]
+  },
+  {
+    "tag": "kitn-empty",
+    "className": "KitnEmptyElement",
+    "props": [
+      {
+        "name": "emptyTitle",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Title text. Attribute: `empty-title` (`title` is a global HTML attribute).",
+        "default": "''"
+      },
+      {
+        "name": "description",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Description text.",
+        "default": "''"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Empty",
+        "group": "Components",
+        "storyId": "components-empty--docs"
+      },
+      {
+        "name": "EmptyHeader",
+        "group": "Components",
+        "storyId": "components-emptyheader--docs"
+      },
+      {
+        "name": "EmptyMedia",
+        "group": "Components",
+        "storyId": "components-emptymedia--docs"
+      },
+      {
+        "name": "EmptyTitle",
+        "group": "Components",
+        "storyId": "components-emptytitle--docs"
+      },
+      {
+        "name": "EmptyDescription",
+        "group": "Components",
+        "storyId": "components-emptydescription--docs"
+      },
+      {
+        "name": "EmptyContent",
+        "group": "Components",
+        "storyId": "components-emptycontent--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-feedback-bar",
+    "className": "KitnFeedbackBarElement",
+    "props": [
+      {
+        "name": "barTitle",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The banner label (e.g. \"Was this helpful?\"). Attribute: `bar-title` (`title` is avoided — it's a global HTML attribute).",
+        "default": "'Was this helpful?'"
+      }
+    ],
+    "events": [
+      {
+        "name": "close",
+        "detail": null,
+        "description": "The user dismissed the banner."
+      },
+      {
+        "name": "helpful",
+        "detail": null,
+        "description": "The user clicked thumbs-up."
+      },
+      {
+        "name": "nothelpful",
+        "detail": null,
+        "description": "The user clicked thumbs-down."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "FeedbackBar",
+        "group": "Components",
+        "storyId": "components-feedbackbar--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-file-upload",
+    "className": "KitnFileUploadElement",
+    "props": [
+      {
+        "name": "multiple",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Allow selecting multiple files (default true).",
+        "default": "true"
+      },
+      {
+        "name": "accept",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "`accept` attribute for the file picker (e.g. `image/*`)."
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the dropzone — no clicking, no drag-and-drop.",
+        "default": "false"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Default dropzone label (overridable via the default slot).",
+        "default": "'Click or drop files to upload'"
+      }
+    ],
+    "events": [
+      {
+        "name": "filesadded",
+        "detail": "{ files: File[] }",
+        "description": "Files were picked or dropped."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "FileUpload",
+        "group": "Components",
+        "storyId": "components-fileupload--docs"
+      },
+      {
+        "name": "FileUploadTrigger",
+        "group": "Components",
+        "storyId": "components-fileuploadtrigger--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-image",
+    "className": "KitnImageElement",
+    "props": [
+      {
+        "name": "base64",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Base64-encoded image data (pair with `media-type`)."
+      },
+      {
+        "name": "bytes",
+        "type": "undefined | Uint8Array<ArrayBufferLike>",
+        "optional": true,
+        "scalar": false,
+        "description": "Raw image bytes (set as a JS property)."
+      },
+      {
+        "name": "alt",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Alt text.",
+        "default": "''"
+      },
+      {
+        "name": "mediaType",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "MIME type (default `image/png`)."
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Image",
+        "group": "Components",
+        "storyId": "components-image--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-loader",
+    "className": "KitnLoaderElement",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | \"circular\" | \"classic\" | \"pulse\" | \"pulse-dot\" | \"dots\" | \"typing\" | \"wave\" | \"bars\" | \"terminal\" | \"text-blink\" | \"text-shimmer\" | \"loading-dots\"",
+        "optional": true,
+        "scalar": true,
+        "description": "The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`.",
+        "default": "'circular'"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"lg\" | \"md\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`.",
+        "default": "'md'"
+      },
+      {
+        "name": "text",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Label for the text-based variants."
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Loader",
+        "group": "Components",
+        "storyId": "components-loader--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-markdown",
+    "className": "KitnMarkdownElement",
+    "props": [
+      {
+        "name": "content",
+        "type": "string",
+        "optional": false,
+        "scalar": true,
+        "description": "The markdown source to render.",
+        "default": "''"
+      },
+      {
+        "name": "proseSize",
+        "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Text/markdown sizing.",
+        "default": "'sm'"
+      },
+      {
+        "name": "codeTheme",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Shiki theme for fenced code blocks.",
+        "default": "'github-dark-dimmed'"
+      },
+      {
+        "name": "codeHighlight",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable syntax highlighting (no Shiki loads).",
+        "default": "true"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Markdown",
+        "group": "Components",
+        "storyId": "components-markdown--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-message",
+    "className": "KitnMessageElement",
+    "props": [
+      {
+        "name": "message",
+        "type": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\")[] }",
+        "optional": true,
+        "scalar": false,
+        "description": "The full message object. Set as a JS property."
+      },
+      {
+        "name": "role",
+        "type": "undefined | \"user\" | \"assistant\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Convenience for simple cases when not passing a `message` object.",
+        "default": "'assistant'"
+      },
+      {
+        "name": "content",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Convenience content (used when `message` is not set)."
+      },
+      {
+        "name": "markdown",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Force markdown on/off. Defaults to on for assistant, off for user."
+      },
+      {
+        "name": "proseSize",
+        "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Text/markdown sizing for the message body.",
+        "default": "'sm'"
+      },
+      {
+        "name": "codeTheme",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Shiki theme name used for fenced code blocks in the content.",
+        "default": "'github-dark-dimmed'"
+      },
+      {
+        "name": "codeHighlight",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable syntax highlighting for code blocks (no Shiki loads).",
+        "default": "true"
+      }
+    ],
+    "events": [
+      {
+        "name": "messageaction",
+        "detail": "{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }",
+        "description": "An action button was clicked."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Message",
+        "group": "Components",
+        "storyId": "components-message--docs"
+      },
+      {
+        "name": "MessageContent",
+        "group": "Components",
+        "storyId": "components-messagecontent--docs"
+      },
+      {
+        "name": "MessageActions",
+        "group": "Components",
+        "storyId": "components-messageactions--docs"
+      },
+      {
+        "name": "Reasoning",
+        "group": "Components",
+        "storyId": "components-reasoning--docs"
+      },
+      {
+        "name": "ReasoningTrigger",
+        "group": "Components",
+        "storyId": "components-reasoningtrigger--docs"
+      },
+      {
+        "name": "ReasoningContent",
+        "group": "Components",
+        "storyId": "components-reasoningcontent--docs"
+      },
+      {
+        "name": "Tool",
+        "group": "Components",
+        "storyId": "components-tool--docs"
+      },
+      {
+        "name": "Attachments",
+        "group": "Components",
+        "storyId": "components-attachments--docs"
+      },
+      {
+        "name": "Attachment",
+        "group": "Components",
+        "storyId": "components-attachment--docs"
+      },
+      {
+        "name": "AttachmentPreview",
+        "group": "Components",
+        "storyId": "components-attachmentpreview--docs"
+      },
+      {
+        "name": "AttachmentInfo",
+        "group": "Components",
+        "storyId": "components-attachmentinfo--docs"
+      },
+      {
+        "name": "Button",
+        "group": "UI",
+        "storyId": "ui-button--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-message-skills",
+    "className": "KitnMessageSkillsElement",
+    "props": [
+      {
+        "name": "skills",
+        "type": "{ id: string; name: string }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "The active skills to badge. Set as a JS property.",
+        "default": "[]"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "MessageSkills",
+        "group": "Components",
+        "storyId": "components-messageskills--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-model-switcher",
+    "className": "KitnModelSwitcherElement",
+    "props": [
+      {
+        "name": "models",
+        "type": "{ id: string; name: string; provider?: undefined | string }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "The selectable models. Set as a JS property (array).",
+        "default": "[]"
+      },
+      {
+        "name": "currentModel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The currently-selected model id. Defaults to the first model."
+      }
+    ],
+    "events": [
+      {
+        "name": "modelchange",
+        "detail": "{ modelId: string }",
+        "description": "A model was selected."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "ModelSwitcher",
+        "group": "Components",
+        "storyId": "components-modelswitcher--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-prompt-input",
+    "className": "KitnPromptInputElement",
+    "props": [
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior."
+      },
+      {
+        "name": "placeholder",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Placeholder text shown in the empty input.",
+        "default": "'Send a message...'"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the input and submit button entirely (non-interactive).",
+        "default": "false"
+      },
+      {
+        "name": "loading",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show the loading/streaming state and block submit (use while awaiting a reply).",
+        "default": "false"
+      },
+      {
+        "name": "suggestions",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property."
+      },
+      {
+        "name": "suggestionMode",
+        "type": "undefined | \"submit\" | \"fill\"",
+        "optional": true,
+        "scalar": true,
+        "description": "What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input.",
+        "default": "'submit'"
+      },
+      {
+        "name": "slashCommands",
+        "type": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Slash commands — when set, typing `/` opens the command palette. Set as a JS property."
+      },
+      {
+        "name": "slashActiveIds",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Command ids to highlight as active."
+      },
+      {
+        "name": "slashCompact",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Single-line palette rows.",
+        "default": "false"
+      },
+      {
+        "name": "search",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event.",
+        "default": "false"
+      },
+      {
+        "name": "voice",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event.",
+        "default": "false"
+      },
+      {
+        "name": "attachments",
+        "type": "undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip)."
+      }
+    ],
+    "events": [
+      {
+        "name": "search",
+        "detail": "Record<string, never>",
+        "description": "The Search (Globe) toolbar button was clicked."
+      },
+      {
+        "name": "slashselect",
+        "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
+        "description": "A slash command was chosen from the palette."
+      },
+      {
+        "name": "submit",
+        "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
+        "description": "The user submitted the prompt (Enter or send button) with its attachments."
+      },
+      {
+        "name": "suggestionclick",
+        "detail": "{ value: string }",
+        "description": "A suggestion was clicked while `suggestion-mode=\"fill\"`."
+      },
+      {
+        "name": "valuechange",
+        "detail": "{ value: string }",
+        "description": "The input text changed (fires on every keystroke)."
+      },
+      {
+        "name": "voice",
+        "detail": "Record<string, never>",
+        "description": "The Voice (Mic) toolbar button was clicked."
+      }
+    ],
+    "composedFrom": [],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-prompt-suggestions",
+    "className": "KitnPromptSuggestionsElement",
+    "props": [
+      {
+        "name": "suggestions",
+        "type": "(string | { label: string; value?: undefined | string })[]",
+        "optional": false,
+        "scalar": false,
+        "description": "The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property.",
+        "default": "[]"
+      },
+      {
+        "name": "variant",
+        "type": "undefined | \"ghost\" | \"default\" | \"outline\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled).",
+        "default": "'outline'"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`)."
+      },
+      {
+        "name": "block",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Full-width left-aligned rows instead of pills.",
+        "default": "false"
+      },
+      {
+        "name": "highlight",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Substring to highlight within each suggestion."
+      }
+    ],
+    "events": [
+      {
+        "name": "select",
+        "detail": "{ value: string }",
+        "description": "A suggestion was clicked."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "PromptSuggestion",
+        "group": "Components",
+        "storyId": "components-promptsuggestion--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-reasoning",
+    "className": "KitnReasoningElement",
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "optional": false,
+        "scalar": true,
+        "description": "The reasoning text to display.",
+        "default": "''"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Trigger label.",
+        "default": "'Reasoning'"
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it)."
+      },
+      {
+        "name": "streaming",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "While true, auto-expands (and re-collapses when it flips false).",
+        "default": "false"
+      },
+      {
+        "name": "markdown",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Render `text` as markdown.",
+        "default": "true"
+      }
+    ],
+    "events": [
+      {
+        "name": "openchange",
+        "detail": "{ open: false | true }",
+        "description": "Open state changed (via the trigger or streaming auto-open)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Reasoning",
+        "group": "Components",
+        "storyId": "components-reasoning--docs"
+      },
+      {
+        "name": "ReasoningTrigger",
+        "group": "Components",
+        "storyId": "components-reasoningtrigger--docs"
+      },
+      {
+        "name": "ReasoningContent",
+        "group": "Components",
+        "storyId": "components-reasoningcontent--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-response-stream",
+    "className": "KitnResponseStreamElement",
+    "props": [
+      {
+        "name": "text",
+        "type": "undefined | string | AsyncIterable<string>",
+        "optional": true,
+        "scalar": false,
+        "description": "Text to stream. A string, or an `AsyncIterable<string>` (set as a JS property — async iterables can't be HTML attributes).",
+        "default": "''"
+      },
+      {
+        "name": "mode",
+        "type": "undefined | \"typewriter\" | \"fade\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Reveal animation.",
+        "default": "'typewriter'"
+      },
+      {
+        "name": "speed",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Characters/segments per tick.",
+        "default": "20"
+      },
+      {
+        "name": "as",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Element tag to render as."
+      }
+    ],
+    "events": [
+      {
+        "name": "complete",
+        "detail": null,
+        "description": "Streaming finished."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "ResponseStream",
+        "group": "Components",
+        "storyId": "components-responsestream--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-source",
+    "className": "KitnSourceElement",
+    "props": [
+      {
+        "name": "href",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The URL this citation links to (the domain also seeds the default label/favicon).",
+        "default": "''"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Trigger label (defaults to the domain)."
+      },
+      {
+        "name": "headline",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Hover-card headline. Attribute: `headline` (`title` is avoided — it's a global HTML attribute that reflects in a CE constructor and breaks it).",
+        "default": "''"
+      },
+      {
+        "name": "description",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Hover-card body text describing the source.",
+        "default": "''"
+      },
+      {
+        "name": "showFavicon",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show the source's favicon next to the trigger label.",
+        "default": "false"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Source",
+        "group": "Components",
+        "storyId": "components-source--docs"
+      },
+      {
+        "name": "SourceTrigger",
+        "group": "Components",
+        "storyId": "components-sourcetrigger--docs"
+      },
+      {
+        "name": "SourceContent",
+        "group": "Components",
+        "storyId": "components-sourcecontent--docs"
+      },
+      {
+        "name": "SourceList",
+        "group": "Components",
+        "storyId": "components-sourcelist--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-source-list",
+    "className": "KitnSourceListElement",
+    "props": [
+      {
+        "name": "sources",
+        "type": "{ href: string; title?: undefined | string; description?: undefined | string; label?: undefined | string; showFavicon?: undefined | false | true }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "The sources to render. Set as a JS property.",
+        "default": "[]"
+      },
+      {
+        "name": "showFavicon",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show favicons on all items (per-item `showFavicon` overrides).",
+        "default": "false"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Source",
+        "group": "Components",
+        "storyId": "components-source--docs"
+      },
+      {
+        "name": "SourceTrigger",
+        "group": "Components",
+        "storyId": "components-sourcetrigger--docs"
+      },
+      {
+        "name": "SourceContent",
+        "group": "Components",
+        "storyId": "components-sourcecontent--docs"
+      },
+      {
+        "name": "SourceList",
+        "group": "Components",
+        "storyId": "components-sourcelist--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-text-shimmer",
+    "className": "KitnTextShimmerElement",
+    "props": [
+      {
+        "name": "text",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The text to shimmer.",
+        "default": "''"
+      },
+      {
+        "name": "as",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Element tag to render as (default `span`).",
+        "default": "'span'"
+      },
+      {
+        "name": "duration",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Animation duration in seconds.",
+        "default": "4"
+      },
+      {
+        "name": "spread",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Gradient spread (5–45).",
+        "default": "20"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "TextShimmer",
+        "group": "Components",
+        "storyId": "components-textshimmer--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-thinking-bar",
+    "className": "KitnThinkingBarElement",
+    "props": [
+      {
+        "name": "text",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The shimmering label, e.g. \"Thinking…\".",
+        "default": "'Thinking'"
+      },
+      {
+        "name": "stoppable",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "When true, show a \"stop\" affordance that fires a `stop` event.",
+        "default": "false"
+      },
+      {
+        "name": "stopLabel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Label for the stop affordance.",
+        "default": "'Answer now'"
+      }
+    ],
+    "events": [
+      {
+        "name": "stop",
+        "detail": null,
+        "description": "The \"stop / answer now\" affordance was clicked."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "ThinkingBar",
+        "group": "Components",
+        "storyId": "components-thinkingbar--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kitn-tool",
+    "className": "KitnToolElement",
+    "props": [
+      {
+        "name": "tool",
+        "type": "undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }",
+        "optional": true,
+        "scalar": false,
+        "description": "The tool-call to display. Set as a JS property."
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Start expanded.",
+        "default": "false"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Tool",
+        "group": "Components",
+        "storyId": "components-tool--docs"
+      }
+    ],
+    "tokens": [
+      "--color-tool-blue",
+      "--color-tool-amber",
+      "--color-tool-green",
+      "--color-tool-red"
+    ]
+  },
+  {
+    "tag": "kitn-voice-input",
+    "className": "KitnVoiceInputElement",
+    "props": [
+      {
+        "name": "transcribe",
+        "type": "undefined | (audio: Blob) => Promise<string>",
+        "optional": true,
+        "scalar": false,
+        "description": "Transcriber the host supplies — records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event."
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the mic button (non-interactive).",
+        "default": "false"
+      }
+    ],
+    "events": [
+      {
+        "name": "audiocaptured",
+        "detail": "{ blob: Blob }",
+        "description": "Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property."
+      },
+      {
+        "name": "transcription",
+        "detail": "{ text: string }",
+        "description": "Transcription completed (the `transcribe` property resolved)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "VoiceInput",
+        "group": "Components",
+        "storyId": "components-voiceinput--docs"
+      }
+    ],
+    "tokens": []
+  }
+]

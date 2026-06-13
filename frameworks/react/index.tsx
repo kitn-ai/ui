@@ -78,14 +78,22 @@ export interface KitnChatProps extends KitnBaseProps {
   slashActiveIds?: string[];
   /** Single-line palette rows. */
   slashCompact?: boolean;
-  onMessageaction?: (event: CustomEvent<unknown>) => void;
-  onModelchange?: (event: CustomEvent<unknown>) => void;
-  onSearch?: (event: CustomEvent<unknown>) => void;
-  onSlashselect?: (event: CustomEvent<unknown>) => void;
-  onSubmit?: (event: CustomEvent<unknown>) => void;
-  onSuggestionclick?: (event: CustomEvent<unknown>) => void;
-  onValuechange?: (event: CustomEvent<unknown>) => void;
-  onVoice?: (event: CustomEvent<unknown>) => void;
+  /** An action button on a message was clicked. */
+  onMessageaction?: (event: CustomEvent<{ messageId: string; action: "copy" | "like" | "dislike" | "regenerate" | "edit" }>) => void;
+  /** The header model switcher changed. */
+  onModelchange?: (event: CustomEvent<{ modelId: string }>) => void;
+  /** The Search button was clicked. */
+  onSearch?: (event: CustomEvent<Record<string, never>>) => void;
+  /** A slash command was chosen from the palette. */
+  onSlashselect?: (event: CustomEvent<{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }>) => void;
+  /** User submitted a message. */
+  onSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
+  onSuggestionclick?: (event: CustomEvent<{ value: string }>) => void;
+  /** Fired on every input change. */
+  onValuechange?: (event: CustomEvent<{ value: string }>) => void;
+  /** The Mic / voice button was clicked. */
+  onVoice?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
 export const KitnChat = createKitnComponent<KitnChatProps>(
@@ -146,17 +154,28 @@ export interface KitnChatWorkspaceProps extends KitnBaseProps {
   sidebarMaxWidth?: number;
   /** Initial collapsed state of the sidebar (default false). */
   sidebarCollapsed?: boolean;
-  onConversationselect?: (event: CustomEvent<unknown>) => void;
-  onMessageaction?: (event: CustomEvent<unknown>) => void;
-  onModelchange?: (event: CustomEvent<unknown>) => void;
-  onNewchat?: (event: CustomEvent<unknown>) => void;
-  onSearch?: (event: CustomEvent<unknown>) => void;
-  onSidebartoggle?: (event: CustomEvent<unknown>) => void;
-  onSlashselect?: (event: CustomEvent<unknown>) => void;
-  onSubmit?: (event: CustomEvent<unknown>) => void;
-  onSuggestionclick?: (event: CustomEvent<unknown>) => void;
-  onValuechange?: (event: CustomEvent<unknown>) => void;
-  onVoice?: (event: CustomEvent<unknown>) => void;
+  /** A conversation was selected in the sidebar. */
+  onConversationselect?: (event: CustomEvent<{ id: string }>) => void;
+  /** An action button on a message was clicked. */
+  onMessageaction?: (event: CustomEvent<{ messageId: string; action: "copy" | "like" | "dislike" | "regenerate" | "edit" }>) => void;
+  /** The header model switcher changed. */
+  onModelchange?: (event: CustomEvent<{ modelId: string }>) => void;
+  /** The "New chat" button was clicked. */
+  onNewchat?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The Search button was clicked. */
+  onSearch?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The sidebar was collapsed or expanded. */
+  onSidebartoggle?: (event: CustomEvent<{ collapsed: boolean }>) => void;
+  /** A slash command was chosen from the palette. */
+  onSlashselect?: (event: CustomEvent<{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }>) => void;
+  /** User submitted a message. */
+  onSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
+  onSuggestionclick?: (event: CustomEvent<{ value: string }>) => void;
+  /** Fired on every input change. */
+  onValuechange?: (event: CustomEvent<{ value: string }>) => void;
+  /** The Mic / voice button was clicked. */
+  onVoice?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
 export const KitnChatWorkspace = createKitnComponent<KitnChatWorkspaceProps>(
@@ -221,9 +240,12 @@ export interface KitnConversationListProps extends KitnBaseProps {
   conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
-  onNewchat?: (event: CustomEvent<unknown>) => void;
-  onSelect?: (event: CustomEvent<unknown>) => void;
-  onTogglesidebar?: (event: CustomEvent<unknown>) => void;
+  /** The "New chat" button was clicked. */
+  onNewchat?: (event: CustomEvent<Record<string, never>>) => void;
+  /** A conversation was selected. */
+  onSelect?: (event: CustomEvent<{ id: string }>) => void;
+  /** The sidebar toggle was clicked. */
+  onTogglesidebar?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
 export const KitnConversationList = createKitnComponent<KitnConversationListProps>(
@@ -407,7 +429,7 @@ export interface KitnPromptInputProps extends KitnBaseProps {
   /** Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). */
   attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
   /** The Search (Globe) toolbar button was clicked. */
-  onSearch?: (event: CustomEvent<undefined>) => void;
+  onSearch?: (event: CustomEvent<Record<string, never>>) => void;
   /** A slash command was chosen from the palette. */
   onSlashselect?: (event: CustomEvent<{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }>) => void;
   /** The user submitted the prompt (Enter or send button) with its attachments. */
@@ -417,7 +439,7 @@ export interface KitnPromptInputProps extends KitnBaseProps {
   /** The input text changed (fires on every keystroke). */
   onValuechange?: (event: CustomEvent<{ value: string }>) => void;
   /** The Voice (Mic) toolbar button was clicked. */
-  onVoice?: (event: CustomEvent<undefined>) => void;
+  onVoice?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
 export const KitnPromptInput = createKitnComponent<KitnPromptInputProps>(

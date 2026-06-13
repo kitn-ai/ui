@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
+import { ElementSpec } from '../stories/docs/element-spec';
+import { argTypesFor } from '../stories/docs/element-controls';
 
 type Item = string | { label: string; value?: string };
 
@@ -62,6 +64,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 const meta = {
   title: 'Web Components/kitn-prompt-suggestions',
   tags: ['autodocs'],
+  argTypes: argTypesFor('kitn-prompt-suggestions'),
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -79,6 +82,12 @@ const meta = {
 
 export default meta;
 type Story = StoryObj;
+
+/** Full generated API reference — properties, events, tokens, and composed-from. */
+export const API: Story = {
+  render: () => <ElementSpec tag="kitn-prompt-suggestions" />,
+  parameters: { layout: 'padded' },
+};
 
 /** Default outline pills, wrapping in a row. */
 export const Default: Story = {

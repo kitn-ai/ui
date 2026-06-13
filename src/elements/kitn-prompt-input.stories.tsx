@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers <kitn-chat>, <kitn-conversation-list>, <kitn-prompt-input>
 import type { AttachmentData } from '../components/attachments';
+import { ElementSpec } from '../stories/docs/element-spec';
+import { argTypesFor } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -41,15 +43,27 @@ interface PromptInputEl extends HTMLElement {
 }
 
 /** Live demo of the actual `<kitn-prompt-input>` custom element (Shadow DOM and all). */
-function PromptInputElement(props?: { search?: boolean; voice?: boolean; attachments?: AttachmentData[] }) {
+function PromptInputElement(props: { search?: boolean; voice?: boolean; attachments?: AttachmentData[]; args?: Record<string, unknown> }) {
   let el: PromptInputEl | undefined;
   onMount(() => {
     if (!el) return;
+    // Default fixed data
     el.placeholder = 'Ask anything...';
     el.suggestions = sampleSuggestions;
-    if (props?.search) el.setAttribute('search', '');
-    if (props?.voice) el.setAttribute('voice', '');
-    if (props?.attachments) el.attachments = props.attachments;
+    if (props.search) el.setAttribute('search', '');
+    if (props.voice) el.setAttribute('voice', '');
+    if (props.attachments) el.attachments = props.attachments;
+    // Scalar args from Controls
+    const args = props.args;
+    if (args) {
+      const scalarNames = [
+        'value', 'placeholder', 'disabled', 'loading', 'suggestionMode',
+        'slashCompact', 'search', 'voice',
+      ];
+      for (const name of scalarNames) {
+        if (name in args) (el as unknown as Record<string, unknown>)[name] = args[name];
+      }
+    }
     el.addEventListener('search', () => console.log('search clicked'));
     el.addEventListener('voice', () => console.log('voice clicked'));
   });
@@ -108,6 +122,7 @@ function Composer() {
 const meta = {
   title: 'Web Components/kitn-prompt-input',
   tags: ['autodocs'],
+  argTypes: argTypesFor('kitn-prompt-input'),
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -129,7 +144,16 @@ type Story = StoryObj;
 
 /** The element used the plain-HTML / any-framework way. */
 export const Default: Story = {
-  render: () => <PromptInputElement />,
+  args: {
+    placeholder: 'Send a message...',
+    disabled: false,
+    loading: false,
+    suggestionMode: 'submit',
+    slashCompact: false,
+    search: false,
+    voice: false,
+  },
+  render: (args: Record<string, unknown>) => <PromptInputElement args={args} />,
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
 };
 
@@ -178,4 +202,10 @@ export const WithAttachments: Story = {
   name: 'With Attachments',
   render: () => <PromptInputElement voice attachments={sampleAttachments} />,
   parameters: { docs: { source: { code: ATTACHMENTS_SNIPPET, language: 'html' } } },
+};
+
+/** Full generated API reference — properties, events, tokens, and the SolidJS components this element is composed from. */
+export const API: Story = {
+  render: () => <ElementSpec tag="kitn-prompt-input" />,
+  parameters: { layout: 'padded' },
 };

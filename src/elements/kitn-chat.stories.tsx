@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers <kitn-chat>, <kitn-conversation-list>, <kitn-prompt-input>
 import type { ChatMessage } from './chat-types';
+import { ElementSpec } from '../stories/docs/element-spec';
+import { argTypesFor } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -24,13 +26,45 @@ const sampleMessages: ChatMessage[] = [
   },
 ];
 
+type ChatEl = HTMLElement & {
+  messages?: ChatMessage[];
+  value?: string;
+  placeholder?: string;
+  loading?: boolean;
+  suggestionMode?: string;
+  proseSize?: string;
+  codeTheme?: string;
+  codeHighlight?: boolean;
+  chatTitle?: string;
+  currentModel?: string;
+  scrollButton?: boolean;
+  search?: boolean;
+  voice?: boolean;
+  slashCompact?: boolean;
+};
+
 /** Live demo of the actual `<kitn-chat>` custom element (Shadow DOM and all). */
-function ChatElement() {
-  let el: (HTMLElement & { messages?: ChatMessage[] }) | undefined;
+function ChatElement(props: { args?: Record<string, unknown> }) {
+  let el: ChatEl | undefined;
   onMount(() => {
-    if (el) el.messages = sampleMessages;
+    if (el) {
+      // Fixed array data
+      el.messages = sampleMessages;
+      // Scalar args from Controls
+      const args = props.args;
+      if (args) {
+        const scalarNames = [
+          'value', 'placeholder', 'loading', 'suggestionMode', 'proseSize',
+          'codeTheme', 'codeHighlight', 'chatTitle', 'currentModel',
+          'scrollButton', 'search', 'voice', 'slashCompact',
+        ];
+        for (const name of scalarNames) {
+          if (name in args) (el as unknown as Record<string, unknown>)[name] = args[name];
+        }
+      }
+    }
   });
-  return <kitn-chat ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', height: '560px' }} />;
+  return <kitn-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }} />;
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
@@ -72,6 +106,7 @@ function Chat() {
 const meta = {
   title: 'Web Components/kitn-chat',
   tags: ['autodocs'],
+  argTypes: argTypesFor('kitn-chat'),
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -93,7 +128,19 @@ type Story = StoryObj;
 
 /** The element used the plain-HTML / any-framework way. */
 export const Default: Story = {
-  render: () => <ChatElement />,
+  args: {
+    placeholder: 'Send a message...',
+    loading: false,
+    suggestionMode: 'submit',
+    proseSize: 'sm',
+    codeTheme: 'github-dark-dimmed',
+    codeHighlight: true,
+    scrollButton: true,
+    search: false,
+    voice: false,
+    slashCompact: false,
+  },
+  render: (args: Record<string, unknown>) => <ChatElement args={args} />,
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
 };
 
@@ -102,4 +149,10 @@ export const InSolidJS: Story = {
   name: 'In SolidJS',
   render: () => <ChatElement />,
   parameters: { docs: { source: { code: SOLID_SNIPPET, language: 'tsx' } } },
+};
+
+/** Full generated API reference — properties, events, tokens, and the SolidJS components this element is composed from. */
+export const API: Story = {
+  render: () => <ElementSpec tag="kitn-chat" />,
+  parameters: { layout: 'padded' },
 };

@@ -51,9 +51,9 @@ interface Events {
   /** A slash command was chosen from the palette. */
   slashselect: { command: SlashCommandItem };
   /** The Search (Globe) toolbar button was clicked. */
-  search: undefined;
+  search: Record<string, never>;
   /** The Voice (Mic) toolbar button was clicked. */
-  voice: undefined;
+  voice: Record<string, never>;
 }
 
 defineKitnElement<Props, Events>('kitn-prompt-input', {

@@ -1,14 +1,35 @@
 import { defineKitnElement } from './define';
 import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage } from '../components/chat-thread';
+import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
 import type { ProseSize } from '../primitives/chat-config';
+import type { ChatMessageAction } from './chat-types';
 import type { ModelOption } from '../types';
 
 type Props = Omit<ChatThreadProps,
   'class' | 'onValueChange' | 'onSubmit' | 'onSuggestionClick' | 'onModelChange'
   | 'onMessageAction' | 'onSearch' | 'onVoice' | 'onSlashSelect'> & Record<string, unknown>;
 
-defineKitnElement<Props>('kitn-chat', {
+interface Events {
+  /** User submitted a message. */
+  submit: { value: string; attachments: AttachmentData[] };
+  /** Fired on every input change. */
+  valuechange: { value: string };
+  /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
+  suggestionclick: { value: string };
+  /** An action button on a message was clicked. */
+  messageaction: { messageId: string; action: ChatMessageAction };
+  /** The header model switcher changed. */
+  modelchange: { modelId: string };
+  /** A slash command was chosen from the palette. */
+  slashselect: { command: SlashCommandItem };
+  /** The Search button was clicked. */
+  search: Record<string, never>;
+  /** The Mic / voice button was clicked. */
+  voice: Record<string, never>;
+}
+
+defineKitnElement<Props, Events>('kitn-chat', {
   messages: [], value: undefined, placeholder: 'Send a message...', loading: false,
   suggestions: undefined, suggestionMode: 'submit', proseSize: 'sm',
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,

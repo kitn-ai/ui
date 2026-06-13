@@ -93,6 +93,66 @@ const membersOf = (typeNode) => {
   });
 };
 
+// Render a propDefaults object-literal property value to a short display string.
+function defaultText(initializer) {
+  if (!initializer) return undefined;
+  if (ts.isStringLiteralLike(initializer)) return `'${initializer.text}'`;
+  if (initializer.kind === ts.SyntaxKind.TrueKeyword) return 'true';
+  if (initializer.kind === ts.SyntaxKind.FalseKeyword) return 'false';
+  if (ts.isNumericLiteral(initializer)) return initializer.text;
+  if (initializer.kind === ts.SyntaxKind.UndefinedKeyword || initializer.getText() === 'undefined') return undefined;
+  if (ts.isArrayLiteralExpression(initializer)) return initializer.elements.length ? '[…]' : '[]';
+  if (ts.isObjectLiteralExpression(initializer)) return '{…}';
+  return initializer.getText();
+}
+// Map prop name -> default display string from the propDefaults object literal (arg 1).
+function defaultsFrom(objLiteralNode) {
+  const out = {};
+  if (objLiteralNode && ts.isObjectLiteralExpression(objLiteralNode)) {
+    for (const p of objLiteralNode.properties) {
+      if (ts.isPropertyAssignment(p) && (ts.isIdentifier(p.name) || ts.isStringLiteral(p.name))) {
+        out[p.name.text] = defaultText(p.initializer);
+      }
+    }
+  }
+  return out;
+}
+
+// Storybook toId: lowercase, non-alphanumerics → nothing (matches our story titles).
+const kebabId = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+// Collect { name, group } for imports from ../components/ or ../ui/ in a facade file.
+// Skips `import type` declarations and inline `type` specifiers (type-only imports).
+const composedImports = (sourceFile) => {
+  const out = [];
+  for (const st of sourceFile.statements) {
+    if (!ts.isImportDeclaration(st) || !st.importClause?.namedBindings) continue;
+    // Skip `import type { ... }` (the whole declaration is type-only)
+    if (st.importClause.isTypeOnly) continue;
+    const spec = st.moduleSpecifier.text;
+    const group = spec.startsWith('../components/') ? 'Components'
+                : spec.startsWith('../ui/') ? 'UI' : null;
+    if (!group) continue;
+    const named = st.importClause.namedBindings;
+    if (ts.isNamedImports(named)) {
+      for (const el of named.elements) {
+        // Skip inline `type` specifiers e.g. `{ Foo, type Bar }`
+        if (el.isTypeOnly) continue;
+        const name = el.name.text;
+        if (/^[A-Z]/.test(name)) out.push({ name, group }); // components, not lowercase utils
+      }
+    }
+  }
+  return out;
+};
+
+// The few elements with element-specific tokens; everything else is themed by
+// the global token set (see the Theming → Token Reference story).
+const COMPONENT_TOKENS = {
+  'kitn-tool': ['--color-tool-blue', '--color-tool-amber', '--color-tool-green', '--color-tool-red'],
+  'kitn-code-block': ['--color-code-foreground'],
+  'kitn-conversation-list': ['--color-sidebar', '--color-scrollbar-thumb'],
+};
+
 // collect dispatch('name') literals per source file
 const dispatchNames = (sourceFile) => {
   const names = new Set();
@@ -122,6 +182,8 @@ for (const file of facadeFiles) {
       if (!tagArg || !ts.isStringLiteralLike(tagArg)) return;
       const tag = tagArg.text;
       const props = membersOf(node.typeArguments?.[0]);
+      const defaults = defaultsFrom(node.arguments[1]);
+      for (const p of props) p.default = defaults[p.name];
       const typedEvents = membersOf(node.typeArguments?.[1]);
       const detailByName = new Map(typedEvents.map((e) => [e.name, e]));
       // union of typed events and dispatch() literals seen in the file
@@ -131,13 +193,23 @@ for (const file of facadeFiles) {
         const detail = ev ? ev.type : 'unknown';
         return { name, detail: detail === 'void' ? null : detail, description: ev?.description ?? '' };
       });
-      elements.push({ tag, className: tagToClass(tag), props, events });
+      const composed = composedImports(sf);
+      const tokens = COMPONENT_TOKENS[tag] ?? [];
+      elements.push({ tag, className: tagToClass(tag), props, events, composedFrom: composed, tokens });
     }
     ts.forEachChild(node, visit);
   };
   visit(sf);
 }
 elements.sort((a, b) => a.tag.localeCompare(b.tag));
+
+// Resolve story ids for composedFrom entries (after the loop so all elements are collected).
+for (const el of elements) {
+  el.composedFrom = el.composedFrom.map(({ name, group }) => ({
+    name, group,
+    storyId: `${group.toLowerCase()}-${kebabId(name)}--docs`,
+  }));
+}
 
 function tagToClass(tag) {
   return tag.split('-').map((s) => s[0].toUpperCase() + s.slice(1)).join('') + 'Element';
@@ -174,6 +246,7 @@ const cem = {
         type: { text: e.detail ? `CustomEvent<${e.detail}>` : 'CustomEvent' },
         description: e.description,
       })),
+      cssProperties: el.tokens.map((name) => ({ name })),
     })),
   }],
 };
@@ -185,10 +258,8 @@ export { elements, toAttr, tagToClass, IMPORTS };
 
 // run the sibling generators if present (types + react)
 if (import.meta.url === `file://${process.argv[1]}`) {
-  if (process.env.DUMP) {
-    writeFileSync(resolve(root, '.element-meta.json'), JSON.stringify(elements, null, 2));
-    console.log('✓ dumped .element-meta.json');
-  }
+  writeFileSync(resolve(root, 'src/elements/element-meta.json'), JSON.stringify(elements, null, 2) + '\n');
+  console.log(`✓ src/elements/element-meta.json — ${elements.length} elements`);
   for (const mod of ['./gen-element-types.mjs', './gen-element-react.mjs']) {
     try {
       const m = await import(mod);
@@ -201,4 +272,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Generate llms.txt / llms-full.txt from the same in-memory model (one parse).
   const { generate } = await import('./gen-llms.mjs');
   generate(elements);
+  // Regenerate docs/web-components.md tables between <!-- spec:TAG --> markers.
+  const { writeWebComponentsMd } = await import('./gen-web-components-md.mjs');
+  writeWebComponentsMd(root, elements);
 }

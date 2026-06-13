@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers the custom elements
+import { ElementSpec } from '../stories/docs/element-spec';
+import { argTypesFor } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -46,6 +48,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 const meta = {
   title: 'Web Components/kitn-empty',
   tags: ['autodocs'],
+  argTypes: argTypesFor('kitn-empty'),
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -63,6 +66,12 @@ const meta = {
 
 export default meta;
 type Story = StoryObj;
+
+/** Full generated API reference — properties, events, tokens, and composed-from. */
+export const API: Story = {
+  render: () => <ElementSpec tag="kitn-empty" />,
+  parameters: { layout: 'padded' },
+};
 
 /** Render the actual `<kitn-empty>` custom element with slotted children. */
 function EmptyElement() {
