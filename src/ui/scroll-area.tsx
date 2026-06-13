@@ -6,7 +6,7 @@ export interface ScrollAreaProps extends JSX.HTMLAttributes<HTMLDivElement> { ch
 export function ScrollArea(props: ScrollAreaProps) {
   const [local, rest] = splitProps(props, ['children', 'class']);
   return (
-    <div class={cn('overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent', local.class)} {...rest}>
+    <div class={cn('overflow-y-auto scrollbar-thin', local.class)} {...rest}>
       {local.children}
     </div>
   );

@@ -32,6 +32,12 @@
      brighter one for contrast on dark surfaces. Both clear WCAG 2.1 non-text
      contrast (≥3:1) against the kit's backgrounds. Override via --kitn-color-ring. */
   --color-ring: var(--kitn-color-ring, hsl(217 91% 53%));
+  /* Custom scrollbars — thin, rounded, subtle; thumb strengthens on hover. A
+     consistent cross-platform look (the kit styles its OWN scroll regions inside
+     the shadow root; the track stays transparent so nothing is forced where no
+     scrollbar is needed). Override via --kitn-color-scrollbar-thumb(-hover). */
+  --color-scrollbar-thumb: var(--kitn-color-scrollbar-thumb, hsl(240 5% 80%));
+  --color-scrollbar-thumb-hover: var(--kitn-color-scrollbar-thumb-hover, hsl(240 4% 64%));
   --color-sidebar: var(--kitn-color-sidebar, hsl(0 0% 100%));
 
   /* Inline `code` accent. Blue text on a translucent blue chip. */
@@ -102,6 +108,8 @@
   --color-border: var(--kitn-color-border, hsl(45 4% 17%));
   --color-input: var(--kitn-color-input, hsl(45 4% 17%));
   --color-ring: var(--kitn-color-ring, hsl(217 91% 68%));
+  --color-scrollbar-thumb: var(--kitn-color-scrollbar-thumb, hsl(45 3% 30%));
+  --color-scrollbar-thumb-hover: var(--kitn-color-scrollbar-thumb-hover, hsl(45 3% 42%));
   --color-sidebar: var(--kitn-color-sidebar, hsl(50 2% 7%));
   --color-code-foreground: var(--kitn-color-code-foreground, hsl(213 94% 78%));
 
@@ -145,4 +153,20 @@
 .chat-markdown th, .chat-markdown td { border: 1px solid var(--color-border); padding: 0.4em 0.6em; text-align: left; }
 .chat-markdown th { font-weight: 600; background: color-mix(in oklab, var(--color-muted-foreground) 8%, transparent); }
 
-.scrollbar-thin { scrollbar-width: thin; scrollbar-color: var(--color-muted) transparent; }
+/* Cross-platform thin scrollbar utility (Firefox + WebKit). Used by ScrollArea
+   and any scroll region in the SolidJS-component build (web components also get
+   this globally inside their shadow root — see src/elements/styles.css). */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-scrollbar-thumb) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--color-scrollbar-thumb);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background-color: var(--color-scrollbar-thumb-hover); }
+.scrollbar-thin::-webkit-scrollbar-corner { background: transparent; }
