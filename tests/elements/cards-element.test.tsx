@@ -48,6 +48,22 @@ test('sets data + card-id + heading on a child', async () => {
   expect(child.heading).toBe('Deploy?');
 });
 
+test('.policy set AFTER the element is in the DOM still receives events', async () => {
+  // The standard host pattern is to set `el.policy` as a property after append.
+  // The router must read policy at event time, not capture it at mount.
+  const actions: string[] = [];
+  const el = document.createElement('kc-cards') as CardsEl;
+  el.cards = [CONFIRM];
+  document.body.appendChild(el);
+  await flush(); await flush(); await flush();
+  el.policy = { onAction: (_id, action) => actions.push(action) };
+  const btn = el.shadowRoot!.querySelector('kc-confirm')!.shadowRoot!
+    .querySelector<HTMLButtonElement>('[data-action-id="go"]')!;
+  btn.click();
+  await flush();
+  expect(actions).toEqual(['go']);
+});
+
 test('.policy receives a child action', async () => {
   const actions: string[] = [];
   const el = await mount([CONFIRM], (e) => { e.policy = { onAction: (_id, action) => actions.push(action) }; });

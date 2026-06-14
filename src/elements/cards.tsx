@@ -8,8 +8,8 @@ import { For, Show, createEffect, onCleanup, onMount, type JSX } from 'solid-js'
 import { Dynamic } from 'solid-js/web';
 import { defineWebComponent } from './define';
 import type { CardEnvelope, CardEvent, CardPolicy } from '../primitives/card-contract';
-import { emitCardEvent, listenForCardEvents } from '../primitives/card-routing';
-import { mergeCardTags, type CardTagMap } from '../primitives/card-registry';
+import { CARD_EVENT_NAME, emitCardEvent, routeCardEvent } from '../primitives/card-routing';
+import { mergeCardTags } from '../primitives/card-registry';
 import { CardFallback } from '../components/card-fallback';
 // Register the built-in child card elements so that importing <kc-cards> is self-contained.
 import './form';
@@ -21,8 +21,10 @@ import './embed';
 interface Props extends Record<string, unknown> {
   /** The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. */
   cards?: CardEnvelope[];
-  /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. */
-  types?: CardTagMap;
+  /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`.
+   *  Typed as a plain string map (not the `CardTagMap` alias) so the generated React
+   *  wrapper inlines it instead of emitting an unresolved named type. */
+  types?: Record<string, string>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
   policy?: CardPolicy;
 }
@@ -61,9 +63,13 @@ defineWebComponent<Props>(
   (props, { element }) => {
     // Route children's bubbling kc-card events through the policy. Attached to the host
     // element so composed events from each child's shadow root are caught as they bubble.
+    // The handler reads `props.policy` at EVENT time (not mount time) so setting
+    // `el.policy` after the element is in the DOM — the standard host pattern — works.
     onMount(() => {
-      const off = listenForCardEvents(element, props.policy ?? {});
-      onCleanup(off);
+      const handler = (e: Event) =>
+        routeCardEvent(props.policy ?? {}, (e as CustomEvent<CardEvent>).detail);
+      element.addEventListener(CARD_EVENT_NAME, handler as EventListener);
+      onCleanup(() => element.removeEventListener(CARD_EVENT_NAME, handler as EventListener));
     });
     const theme = () => (element.getAttribute('theme') ?? 'auto');
     const tags = () => mergeCardTags(props.types);

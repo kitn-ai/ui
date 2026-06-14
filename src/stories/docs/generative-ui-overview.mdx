@@ -50,8 +50,10 @@ before sending); `id` correlates every event back to this card.
 
 ## Streaming & follow-ups
 
-Update a card's `data` for the **same `id`** and it re-renders in place — so an agent can
-stream into a card as work progresses. Swap the `cards` array to replace a card with a
-follow-up (e.g. a result card after a `confirm`).
+Swap the `cards` array to add, replace, or remove cards — e.g. replace a `confirm` with a
+result card once the user acts. For **live streaming into a single card**, the SolidJS
+`<CardRenderer>` re-renders reactively as its envelope's `data` changes, so an agent can
+stream into it as work progresses. (Keyed-by-`id` in-place updates within a `<kc-cards>`
+list are a planned refinement.)
 
 See **Cards** for each card type, and **SDK** for the dispatcher in action.

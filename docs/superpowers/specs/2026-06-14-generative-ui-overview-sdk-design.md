@@ -156,9 +156,11 @@ sidebar reads **Overview → Cards → SDK**. Covers: the loop diagram above; th
 `CardEnvelope` shape (`type/id/data/title`) and that `data` follows each type's JSON
 Schema; **where the data comes from** (the agent emits envelopes; the schemas in
 `dist/schemas` let the agent/server validate before sending); the **turnkey path** (drop
-`<kc-cards>`, set `.cards` + `.policy`); and the **streaming pattern** — updating a card's
-`data` for the same `id` re-renders in place (the dispatcher keys by id; `CardRenderer` is
-reactive). Links to the Cards stories and the SDK story.
+`<kc-cards>`, set `.cards` + `.policy`); and the **streaming pattern** — the SolidJS
+`<CardRenderer>` re-renders reactively as its envelope's `data` changes (live streaming
+into a single card); swapping the `<kc-cards>` array adds/replaces/removes cards.
+(Keyed-by-`id` in-place updates within a `<kc-cards>` list are a planned refinement.)
+Links to the Cards stories and the SDK story.
 
 ## Future — card types & patterns NOT covered (backlog, out of scope)
 
