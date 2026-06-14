@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kitn.ai/schemas/card/form.schema.json",
+  "title": "kc-form data (a form definition)",
+  "description": "The CardEnvelope.data for a card of type 'form': a JSON Schema (type:'object') describing the fields kc-form renders, plus optional x-kitn-* UI hints. The same schema validates the submission.",
+  "type": "object",
+  "required": ["type", "properties"],
+  "properties": {
+    "type": { "const": "object" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "required": { "type": "array", "items": { "type": "string" } },
+    "properties": {
+      "type": "object"
+    },
+    "x-kitn-order": { "type": "array", "items": { "type": "string" } },
+    "x-kitn-inlineMax": { "type": "integer", "minimum": 1 },
+    "x-kitn-submitLabel": { "type": "string" },
+    "x-kitn-dismissible": { "type": "boolean" },
+    "x-kitn-actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "variant": { "enum": ["default", "ghost", "outline"] }
+        }
+      }
+    }
+  }
+}
