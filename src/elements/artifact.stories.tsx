@@ -209,7 +209,7 @@ export const ImagePreview: Story = {
   },
 };
 
-/** Multi-format: the browser's native PDF viewer renders a .pdf fixture. */
+/** Multi-format: PDFs render inline via pdf.js (loaded on demand from a CDN). */
 export const PdfPreview: Story = {
   name: 'PDF (multi-format)',
   render: () => {
@@ -227,6 +227,20 @@ export const PdfPreview: Story = {
       </Frame>
     );
   },
+};
+
+/** When inline rendering can't work (CORS / 404 / blocked CDN) the viewer shows
+ *  an "Open in new tab / Download" card. Here the src 404s to force that path. */
+export const PdfFallback: Story = {
+  name: 'PDF (fallback card)',
+  render: () => (
+    <Frame>
+      <kc-artifact
+        src={`${BASE}/assets/does-not-exist.pdf`}
+        iframe-title="Missing PDF"
+      />
+    </Frame>
+  ),
 };
 
 /** Logs the emitted events so you can see the controlled nav model in action. */

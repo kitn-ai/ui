@@ -116,3 +116,23 @@ export const Controlled: Story = {
   ...src(`<Artifact src={src} files={files}
   onNavigate={(url) => …} onTabChange={(t) => …} onFileSelect={(p) => …} />`),
 };
+
+/** PDFs render inline via pdf.js (loaded on demand from a CDN). */
+export const PdfPreview: Story = {
+  name: 'PDF (inline)',
+  render: () => (
+    <div class="h-[520px] w-full max-w-[900px]">
+      <Artifact src={`${BASE}/assets/report.pdf`} files={FILES} />
+    </div>
+  ),
+};
+
+/** Fallback card when inline rendering can't work (here the src 404s). */
+export const PdfFallback: Story = {
+  name: 'PDF (fallback card)',
+  render: () => (
+    <div class="h-[520px] w-full max-w-[900px]">
+      <Artifact src={`${BASE}/assets/does-not-exist.pdf`} />
+    </div>
+  ),
+};
