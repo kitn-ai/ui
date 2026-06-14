@@ -1936,8 +1936,8 @@
       },
       {
         "name": "side",
-        "type": "undefined | \"top\" | \"bottom\" | \"left\" | \"right\"",
-        "displayType": "undefined | \"top\" | \"bottom\" | \"left\" | \"right\"",
+        "type": "undefined | \"top\" | \"right\" | \"bottom\" | \"left\"",
+        "displayType": "undefined | \"top\" | \"right\" | \"bottom\" | \"left\"",
         "optional": true,
         "scalar": true,
         "description": ""
@@ -2195,8 +2195,8 @@
       },
       {
         "name": "side",
-        "type": "undefined | \"top\" | \"bottom\" | \"left\" | \"right\"",
-        "displayType": "undefined | \"top\" | \"bottom\" | \"left\" | \"right\"",
+        "type": "undefined | \"top\" | \"right\" | \"bottom\" | \"left\"",
+        "displayType": "undefined | \"top\" | \"right\" | \"bottom\" | \"left\"",
         "optional": true,
         "scalar": true,
         "description": ""
@@ -3328,6 +3328,14 @@
         "name": "closeDelay",
         "type": "undefined | number",
         "displayType": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": ""
+      },
+      {
+        "name": "placement",
+        "type": "undefined | \"top\" | \"right\" | \"bottom\" | \"left\" | \"top-start\" | \"top-end\" | \"right-start\" | \"right-end\" | \"bottom-start\" | \"bottom-end\" | \"left-start\" | \"left-end\"",
+        "displayType": "undefined | \"top\" | \"right\" | \"bottom\" | \"left\" | \"top-start\" | \"top-end\" | \"right-start\" | \"right-end\" | \"bottom-start\" | \"bottom-end\" | \"left-start\" | \"left-end\"",
         "optional": true,
         "scalar": true,
         "description": ""

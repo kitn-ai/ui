@@ -501,12 +501,13 @@ function ListRow(props: RowProps): JSX.Element {
         <HoverCard
           openDelay={150}
           class="p-1 w-auto"
+          placement="right-start"
           trigger={<Thumb media={props.opt.media!} class="h-9 w-9" />}
         >
           <img
             src={props.opt.media!.image}
             alt={props.opt.media!.imageAlt ?? ''}
-            class="max-h-64 max-w-64 rounded-md object-contain"
+            class="max-h-80 max-w-80 rounded-md object-contain"
           />
         </HoverCard>
       </Show>
