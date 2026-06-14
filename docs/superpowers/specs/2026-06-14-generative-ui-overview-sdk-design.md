@@ -44,8 +44,10 @@ Three small additions to `@kitnai/chat`, all thin layers over the existing found
 import type { Component } from 'solid-js';
 import type { CardEnvelope } from './card-contract';
 
-/** Solid: type → a renderer that maps an envelope onto that card's props. */
-export type CardComponent = Component<{ envelope: CardEnvelope }>;
+/** Solid: type → a renderer that maps an envelope onto that card's props.
+ *  Receives the resolved `host` so each wrapper can bridge the card's emit
+ *  convention: form/confirm/task-list take `host`; link/embed take `onEmit`. */
+export type CardComponent = Component<{ envelope: CardEnvelope; host?: CardHost }>;
 export type CardComponentMap = Record<string, CardComponent>;
 
 /** Web component: type → kc-* tag name. All card elements take `data` + `cardId`;
