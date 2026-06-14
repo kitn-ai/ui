@@ -236,3 +236,20 @@ test('nested group stops the intent (outer group never maximizes)', async () => 
   expect(inner.hasAttribute('data-maximized')).toBe(true);
   expect(outer.hasAttribute('data-maximized')).toBe(false);
 });
+
+// --- Task 5: change-storm guard (one change per maximize/restore) ---
+
+test('maximize and restore each emit exactly one change (no storm)', async () => {
+  const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void; restore(): void };
+  await flush();
+  let count = 0;
+  group.addEventListener('change', () => count++);
+  group.maximize(1);
+  await flush();
+  const afterMax = count;
+  group.restore();
+  await flush();
+  const afterRestore = count - afterMax;
+  expect(afterMax).toBe(1);     // one relayout for the maximize
+  expect(afterRestore).toBe(1); // one relayout for the restore
+});

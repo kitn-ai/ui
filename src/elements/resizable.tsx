@@ -208,9 +208,11 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     setMaximized({ index, saved });
     element.setAttribute('data-maximized', '');
     item.setAttribute('data-maximized-panel', '');
-    applyingMaximize = false;
     readItems();
     emitChange();
+    // Keep applyingMaximize = true until AFTER the MutationObserver microtask fires
+    // so its queueMicrotask(emitChange) sees the guard and skips (storm guard).
+    queueMicrotask(() => { applyingMaximize = false; });
     // Tell the maximized subtree (and only it) it is now maximized.
     item.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: true }, bubbles: false, composed: true }));
     dispatch('maximizechange', { maximized: true, index });
@@ -233,9 +235,11 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     const prevItem = list[stash.index]?.el;
     setMaximized(null);
     element.removeAttribute('data-maximized');
-    applyingMaximize = false;
     readItems();
     emitChange();
+    // Keep applyingMaximize = true until AFTER the MutationObserver microtask fires
+    // so its queueMicrotask(emitChange) sees the guard and skips (storm guard).
+    queueMicrotask(() => { applyingMaximize = false; });
     // Broadcast restore on the host AND directly on the formerly-maximized item.
     element.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: false }, bubbles: false, composed: true }));
     prevItem?.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: false }, bubbles: false, composed: true }));
