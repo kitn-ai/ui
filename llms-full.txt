@@ -3,7 +3,7 @@
 
 # @kitnai/chat
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 36 `kitn-*` custom elements: streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 38 `kitn-*` custom elements: streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kc-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitnai/chat'`):
-All 36 elements are also exported individually. Use them for custom layouts or features `<kc-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 38 elements are also exported individually. Use them for custom layouts or features `<kc-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitnai/chat/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 36 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 38 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitnai/chat/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/chat/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (36 elements, generated from custom-elements.json)
+## Element reference (38 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -319,6 +319,21 @@ _No events._
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name. |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting (renders plain text, no Shiki). |
 | `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Code text sizing. |
+
+_No events._
+
+---
+
+### `kc-confirm` / `KcConfirm`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `data` | — | `undefined \| Record<string, unknown>` | The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from `@kitnai/chat` for the full shape. |
+| `cardId` | `card-id` | `undefined \| string` | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
+| `heading` | `heading` | `undefined \| string` | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
+| `autofocus` | `autofocus` | `undefined \| false \| true` | Focus the default action on mount (off by default — no focus-stealing). Attribute: `autofocus`. |
 
 _No events._
 
@@ -730,6 +745,20 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `select` | `CustomEvent<{ value: string }>` | A suggestion was clicked. |
+
+---
+
+### `kc-task-list` / `KcTaskList`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `data` | — | `undefined \| Record<string, unknown>` | The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TaskListCardData` from `@kitnai/chat` for the full shape. |
+| `cardId` | `card-id` | `undefined \| string` | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
+| `heading` | `heading` | `undefined \| string` | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
+
+_No events._
 
 ---
 

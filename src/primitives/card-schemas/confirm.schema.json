@@ -19,7 +19,7 @@
       "enum": ["default", "warning", "danger"],
       "default": "default",
       "description": "Overall card tone; 'danger' adds a warning icon + accent for destructive approvals.",
-      "x-kitn-control": "tone"
+      "x-kc-control": "tone"
     },
     "actions": {
       "type": "array",
@@ -34,7 +34,7 @@
             "type": "string",
             "minLength": 1,
             "description": "Emitted as CardEvent.action. Must be unique within `actions`.",
-            "x-kitn-unique": true
+            "x-kc-unique": true
           },
           "label": { "type": "string", "minLength": 1, "description": "Visible button label." },
           "style": {
@@ -42,7 +42,7 @@
             "enum": ["primary", "default", "destructive"],
             "default": "default",
             "description": "Button emphasis. 'destructive' = red/danger; 'primary' = filled accent.",
-            "x-kitn-control": "button-style"
+            "x-kc-control": "button-style"
           },
           "payload": {
             "description": "Optional opaque payload echoed back in CardEvent.payload (any JSON)."
@@ -51,7 +51,7 @@
             "type": "boolean",
             "default": false,
             "description": "If true, this action is the keyboard default (Enter) and gets initial focus. At most one should be true; the card uses the first if several are.",
-            "x-kitn-default-action": true
+            "x-kc-default-action": true
           }
         }
       }

@@ -184,6 +184,23 @@ export const KcCodeBlock = createWebComponent<KcCodeBlockProps>(
   {  },
 );
 
+export interface KcConfirmProps extends WebComponentProps {
+  /** The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from `@kitnai/chat` for the full shape. */
+  data?: Record<string, unknown>;
+  /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
+  cardId?: string;
+  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
+  heading?: string;
+  /** Focus the default action on mount (off by default — no focus-stealing). Attribute: `autofocus`. */
+  autofocus?: boolean;
+}
+
+export const KcConfirm = createWebComponent<KcConfirmProps>(
+  'kc-confirm',
+  ["theme","data","cardId","heading","autofocus"],
+  {  },
+);
+
 export interface KcContextProps extends WebComponentProps {
   /** Token-usage data. Set as a JS property. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; reasoningTokens?: number; cacheTokens?: number; estimatedCost?: number };
@@ -609,6 +626,21 @@ export const KcSuggestions = createWebComponent<KcSuggestionsProps>(
   'kc-suggestions',
   ["theme","suggestions","variant","size","block","highlight"],
   { onSelect: 'select' },
+);
+
+export interface KcTaskListProps extends WebComponentProps {
+  /** The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TaskListCardData` from `@kitnai/chat` for the full shape. */
+  data?: Record<string, unknown>;
+  /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
+  cardId?: string;
+  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
+  heading?: string;
+}
+
+export const KcTaskList = createWebComponent<KcTaskListProps>(
+  'kc-task-list',
+  ["theme","data","cardId","heading"],
+  {  },
 );
 
 export interface KcTextShimmerProps extends WebComponentProps {

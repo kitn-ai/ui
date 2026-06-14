@@ -651,6 +651,54 @@
     ]
   },
   {
+    "tag": "kc-confirm",
+    "className": "KcConfirmElement",
+    "props": [
+      {
+        "name": "data",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from `@kitnai/chat` for the full shape.",
+        "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "cardId",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Stable card id correlating every emitted CardEvent. Attribute: `card-id`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "heading",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "autofocus",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Focus the default action on mount (off by default — no focus-stealing). Attribute: `autofocus`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "ConfirmCard",
+        "group": "Components",
+        "storyId": "components-confirmcard--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kc-context",
     "className": "KcContextElement",
     "props": [
@@ -2041,6 +2089,45 @@
         "name": "PromptSuggestion",
         "group": "Components",
         "storyId": "components-promptsuggestion--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kc-task-list",
+    "className": "KcTaskListElement",
+    "props": [
+      {
+        "name": "data",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TaskListCardData` from `@kitnai/chat` for the full shape.",
+        "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "cardId",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Stable card id correlating every emitted CardEvent. Attribute: `card-id`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "heading",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "TaskListCard",
+        "group": "Components",
+        "storyId": "components-tasklistcard--docs"
       }
     ],
     "tokens": []
