@@ -9,8 +9,8 @@ export function ConversationItem(props: ConversationItemProps) {
   return (
     <button data-conversation-id={local.conversation.id} onClick={() => local.onSelect(local.conversation.id)}
       class={cn('w-full text-left rounded-lg px-2.5 py-2 transition-colors', local.isActive ? 'bg-muted' : 'hover:bg-muted/50', local.class)}>
-      <div class={cn('truncate text-sm', local.isActive ? 'text-foreground font-medium' : 'text-muted-foreground')}>{local.conversation.title}</div>
-      <div class="text-muted-foreground truncate mt-0.5 text-xs">{local.conversation.messageCount} messages</div>
+      <div class={cn('truncate text-sm', local.isActive ? 'text-foreground font-medium' : 'text-foreground/80')}>{local.conversation.title}</div>
+      <div class={cn('truncate mt-0.5 text-xs', local.isActive ? 'text-foreground/70' : 'text-muted-foreground')}>{local.conversation.messageCount} messages</div>
     </button>
   );
 }

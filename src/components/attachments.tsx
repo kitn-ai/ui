@@ -157,12 +157,12 @@ function Attachment(props: AttachmentProps) {
           variant === 'grid' && 'size-24 overflow-hidden rounded-lg',
           variant === 'inline' && [
             'flex h-8 cursor-pointer select-none items-center gap-1.5',
-            'rounded-md bg-muted/50 px-1.5',
+            'rounded-md bg-muted/50 px-1.5 text-foreground',
             'font-medium text-sm transition-all',
             'hover:bg-muted',
           ],
           variant === 'list' && [
-            'flex w-full items-center gap-3 rounded-lg bg-muted/30 p-3',
+            'flex w-full items-center gap-3 rounded-lg bg-muted/30 p-3 text-foreground',
             'hover:bg-muted/50',
           ],
           local.class,

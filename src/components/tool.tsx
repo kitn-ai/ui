@@ -150,7 +150,7 @@ function Tool(props: ToolProps) {
             <Show when={output()}>
               <div>
                 <h4 class="text-muted-foreground mb-2 text-sm font-medium">Output</h4>
-                <div class="max-h-60 overflow-auto rounded bg-muted/50 p-2 font-mono text-sm">
+                <div tabindex={0} class="max-h-60 overflow-auto rounded bg-muted/50 p-2 font-mono text-sm">
                   <pre class="whitespace-pre-wrap">{formatValue(output())}</pre>
                 </div>
               </div>
@@ -158,7 +158,7 @@ function Tool(props: ToolProps) {
 
             <Show when={state() === 'output-error' && local.toolPart.errorText}>
               <div>
-                <h4 class="mb-2 text-sm font-medium text-red-500">Error</h4>
+                <h4 class="mb-2 text-sm font-medium text-red-600 dark:text-red-400">Error</h4>
                 <div class="rounded bg-red-500/10 p-2 text-sm">
                   {local.toolPart.errorText}
                 </div>
