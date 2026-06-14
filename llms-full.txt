@@ -404,8 +404,8 @@ _No events._
 
 | Event | `detail` type | Description |
 |---|---|---|
+| `conversationselect` | `CustomEvent<{ id: string }>` | A conversation was selected. |
 | `newchat` | `CustomEvent<Record<string, never>>` | The "New chat" button was clicked. |
-| `select` | `CustomEvent<{ id: string }>` | A conversation was selected. |
 | `togglesidebar` | `CustomEvent<Record<string, never>>` | The sidebar toggle was clicked. |
 
 ---
@@ -449,8 +449,7 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `close` | `CustomEvent` | The user dismissed the banner. |
-| `helpful` | `CustomEvent` | The user clicked thumbs-up. |
-| `nothelpful` | `CustomEvent` | The user clicked thumbs-down. |
+| `feedback` | `CustomEvent<{ value: "helpful" \| "not-helpful" }>` | The user rated the response. `value` is `'helpful'` or `'not-helpful'`. |
 
 ---
 

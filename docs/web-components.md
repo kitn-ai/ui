@@ -297,8 +297,8 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `conversationselect` | `{ id: string }` | A conversation was selected. |
 | `newchat` | — | The "New chat" button was clicked. |
-| `select` | `{ id: string }` | A conversation was selected. |
 | `togglesidebar` | — | The sidebar toggle was clicked. |
 
 #### Composed from
@@ -709,8 +709,7 @@ No events.
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `close` | — | The user dismissed the banner. |
-| `helpful` | — | The user clicked thumbs-up. |
-| `nothelpful` | — | The user clicked thumbs-down. |
+| `feedback` | `{ value: "helpful" | "not-helpful" }` | The user rated the response. `value` is `'helpful'` or `'not-helpful'`. |
 
 #### Composed from
 

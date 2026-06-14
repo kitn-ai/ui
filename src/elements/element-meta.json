@@ -973,16 +973,16 @@
     ],
     "events": [
       {
+        "name": "conversationselect",
+        "detail": "{ id: string }",
+        "description": "A conversation was selected.",
+        "displayDetail": "{ id: string }"
+      },
+      {
         "name": "newchat",
         "detail": "Record<string, never>",
         "description": "The \"New chat\" button was clicked.",
         "displayDetail": "Record<string, never>"
-      },
-      {
-        "name": "select",
-        "detail": "{ id: string }",
-        "description": "A conversation was selected.",
-        "displayDetail": "{ id: string }"
       },
       {
         "name": "togglesidebar",
@@ -1114,16 +1114,10 @@
         "displayDetail": null
       },
       {
-        "name": "helpful",
-        "detail": null,
-        "description": "The user clicked thumbs-up.",
-        "displayDetail": null
-      },
-      {
-        "name": "nothelpful",
-        "detail": null,
-        "description": "The user clicked thumbs-down.",
-        "displayDetail": null
+        "name": "feedback",
+        "detail": "{ value: \"helpful\" | \"not-helpful\" }",
+        "description": "The user rated the response. `value` is `'helpful'` or `'not-helpful'`.",
+        "displayDetail": "{ value: \"helpful\" | \"not-helpful\" }"
       }
     ],
     "composedFrom": [

@@ -271,10 +271,10 @@ export interface KcConversationsProps extends WebComponentProps {
   conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
+  /** A conversation was selected. */
+  onConversationselect?: (event: CustomEvent<{ id: string }>) => void;
   /** The "New chat" button was clicked. */
   onNewchat?: (event: CustomEvent<Record<string, never>>) => void;
-  /** A conversation was selected. */
-  onSelect?: (event: CustomEvent<{ id: string }>) => void;
   /** The sidebar toggle was clicked. */
   onTogglesidebar?: (event: CustomEvent<Record<string, never>>) => void;
 }
@@ -282,7 +282,7 @@ export interface KcConversationsProps extends WebComponentProps {
 export const KcConversations = createWebComponent<KcConversationsProps>(
   'kc-conversations',
   ["theme","groups","conversations","activeId"],
-  { onNewchat: 'newchat', onSelect: 'select', onTogglesidebar: 'togglesidebar' },
+  { onConversationselect: 'conversationselect', onNewchat: 'newchat', onTogglesidebar: 'togglesidebar' },
 );
 
 export interface KcEmbedProps extends WebComponentProps {
@@ -316,16 +316,14 @@ export interface KcFeedbackBarProps extends WebComponentProps {
   barTitle?: string;
   /** The user dismissed the banner. */
   onClose?: (event: CustomEvent) => void;
-  /** The user clicked thumbs-up. */
-  onHelpful?: (event: CustomEvent) => void;
-  /** The user clicked thumbs-down. */
-  onNothelpful?: (event: CustomEvent) => void;
+  /** The user rated the response. `value` is `'helpful'` or `'not-helpful'`. */
+  onFeedback?: (event: CustomEvent<{ value: "helpful" | "not-helpful" }>) => void;
 }
 
 export const KcFeedbackBar = createWebComponent<KcFeedbackBarProps>(
   'kc-feedback-bar',
   ["theme","barTitle"],
-  { onClose: 'close', onHelpful: 'helpful', onNothelpful: 'nothelpful' },
+  { onClose: 'close', onFeedback: 'feedback' },
 );
 
 export interface KcFileTreeProps extends WebComponentProps {
