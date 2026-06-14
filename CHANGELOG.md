@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.1](https://github.com/kitn-ai/chat/compare/chat-v0.8.0...chat-v0.8.1) (2026-06-14)
+
+
+### Bug Fixes
+
+* **a11y:** gate Storybook a11y to error (code-block + checkpoint fixes + scoped Shiki exception) ([2f367d9](https://github.com/kitn-ai/chat/commit/2f367d9a544773514e5dbb01ea53a14867baad9c))
+* **a11y:** keyboard-focusable code scroll region + named icon-only checkpoint ([7d1d7cd](https://github.com/kitn-ai/chat/commit/7d1d7cdeaeb41753f0a3fc2544ee621818376a3a))
+
 ## [0.8.0](https://github.com/kitn-ai/chat/compare/chat-v0.7.0...chat-v0.8.0) (2026-06-14)
 
 
