@@ -33,7 +33,7 @@ test('ConfirmCard calls host.emit (action) — no CustomEvent', () => {
   expect(action.action).toBe('ok');
 });
 
-test('TaskListCard calls host.emit (submit-data) — no CustomEvent', () => {
+test('TaskListCard calls host.emit (submit) — no CustomEvent', () => {
   const { host, events } = makeHost();
   const { getByText } = render(() => (
     <TaskListCard
@@ -44,9 +44,9 @@ test('TaskListCard calls host.emit (submit-data) — no CustomEvent', () => {
   ));
   expect(events.some((e) => e.kind === 'ready' && e.cardId === 't1')).toBe(true);
   fireEvent.click(getByText('Go'));
-  const submit = events.find((e) => e.kind === 'submit-data') as Extract<
+  const submit = events.find((e) => e.kind === 'submit') as Extract<
     CardEvent,
-    { kind: 'submit-data' }
+    { kind: 'submit' }
   >;
   expect(submit.data).toEqual({ selected: ['a'] });
 });

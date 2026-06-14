@@ -15,8 +15,8 @@ interface Props extends Record<string, unknown> {
 /**
  * `<kc-task-list>` — a **selectable** task/plan list (set via the `data` property):
  * checkbox rows + an optional select-all + a confirm button. Toggling rows is local
- * UI state; only the final confirm emits the Card contract's **`submit-data`** verb
- * up a bubbling **`kc-card`** CustomEvent (`{ kind:'submit-data', cardId,
+ * UI state; only the final confirm emits the Card contract's **`submit`** verb
+ * up a bubbling **`kc-card`** CustomEvent (`{ kind:'submit', cardId,
  * data:{ selected } }`) with the checked ids in input order. Also emits `ready` on
  * mount and `error` for a malformed definition (inline error). v1 = select/approve
  * mode only. Routes through a `CardProvider` when present, else the bubbling

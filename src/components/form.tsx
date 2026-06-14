@@ -343,7 +343,7 @@ const DEFAULT_FORM: FormDefinition = { type: 'object', properties: {} };
 /**
  * `Form` — renders a JSON-Schema form definition into themed, accessible widgets
  * inside `Card` chrome, validates input against that schema, and emits the
- * collected, coerced, validated object up the Card contract as `submit-data`.
+ * collected, coerced, validated object up the Card contract as `submit`.
  * Reads context/emits via a `CardProvider` when present, else the bubbling
  * `kc-card` CustomEvent.
  */
@@ -442,7 +442,7 @@ export function Form(props: FormProps): JSX.Element {
       return;
     }
     const out = buildResult(def(), snapshot as Record<string, unknown>);
-    emit({ kind: 'submit-data', cardId: local.cardId, data: out });
+    emit({ kind: 'submit', cardId: local.cardId, data: out });
     setSubmitted(true);
   };
 

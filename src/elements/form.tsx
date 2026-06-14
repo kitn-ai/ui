@@ -17,7 +17,7 @@ interface Props extends Record<string, unknown> {
  * `<kc-form>` — renders a JSON-Schema **form definition** (set via the `data`
  * property) into themed, accessible widgets inside `<kc-card>` chrome, validates
  * input client-side, and emits the collected, coerced, validated object up the
- * Card contract as a bubbling **`kc-card`** CustomEvent of `{ kind:'submit-data' }`.
+ * Card contract as a bubbling **`kc-card`** CustomEvent of `{ kind:'submit' }`.
  * It also emits `ready` on mount, `action`/`dismiss` for secondary affordances, and
  * `error` for a malformed definition. Routes through a `CardProvider` when present,
  * else the bubbling `kc-card` event (so a bare `<kc-form>` works without a host).

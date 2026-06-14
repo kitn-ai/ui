@@ -34,7 +34,7 @@ function Demo() {
     (el as unknown as { cards: CardEnvelope[] }).cards = CARDS;
     (el as unknown as { policy: unknown }).policy = {
       onAction: (id: string, action: string) => setLog((l) => [`action: ${id} → ${action}`, ...l]),
-      onSubmitData: (id: string, data: unknown) => setLog((l) => [`submit-data: ${id} → ${JSON.stringify(data)}`, ...l]),
+      onSubmit: (id: string, data: unknown) => setLog((l) => [`submit: ${id} → ${JSON.stringify(data)}`, ...l]),
       onOpen: (url: string) => setLog((l) => [`open: ${url}`, ...l]),
       onError: (id: string, msg: string) => setLog((l) => [`error: ${id} → ${msg}`, ...l]),
     };

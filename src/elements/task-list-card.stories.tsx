@@ -122,8 +122,8 @@ const HTML_SNIPPET = (def: TaskListCardData, cardId: string) => {
 
   // Toggling rows is local; only CONFIRM emits — a single bubbling \`kc-card\` event.
   el.addEventListener('kc-card', (e) => {
-    const ev = e.detail; // { kind:'submit-data', cardId, data:{ selected } } | ...
-    if (ev.kind === 'submit-data') console.log('selected', ev.data.selected);
+    const ev = e.detail; // { kind:'submit', cardId, data:{ selected } } | ...
+    if (ev.kind === 'submit') console.log('selected', ev.data.selected);
   });
 </script>`;
 };
@@ -136,9 +136,9 @@ const meta = {
     layout: 'padded',
     docs: {
       description: specDescription('kc-task-list', [
-        "`<kc-task-list>` is a **selectable** task/plan list (set via the `data` **property**): checkbox rows + an optional select-all + a confirm button. The user picks a subset, confirms, and the card emits the Card contract's **`submit-data`** verb up a bubbling **`kc-card`** CustomEvent of `{ kind: 'submit-data', cardId, data: { selected } }` — the checked ids in **input order**. Toggling rows is local UI state; **only the final confirm emits** (the wire stays quiet, the result atomic).",
+        "`<kc-task-list>` is a **selectable** task/plan list (set via the `data` **property**): checkbox rows + an optional select-all + a confirm button. The user picks a subset, confirms, and the card emits the Card contract's **`submit`** verb up a bubbling **`kc-card`** CustomEvent of `{ kind: 'submit', cardId, data: { selected } }` — the checked ids in **input order**. Toggling rows is local UI state; **only the final confirm emits** (the wire stays quiet, the result atomic).",
         '**Gating:** confirm is enabled when `selectedCount >= (min ?? (allowEmpty ? 0 : 1))` and `<= (max ?? ∞)`. Select-all checks every toggleable (non-`disabled`) row and shows an **indeterminate** (`aria-checked="mixed"`) state when only some are checked. When `max` is reached, unchecked rows become non-toggleable. v1 is **select/approve only** (a future `mode:\'progress\'` is reserved in the schema).',
-        '**Events** (all frozen Card-contract verbs): `ready` on mount, `submit-data` on confirm, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**. The same shapes flow over the remote iframe transport unchanged.',
+        '**Events** (all frozen Card-contract verbs): `ready` on mount, `submit` on confirm, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**. The same shapes flow over the remote iframe transport unchanged.',
       ]),
     },
   },

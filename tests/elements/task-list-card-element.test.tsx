@@ -1,6 +1,6 @@
 // tests/elements/task-list-card-element.test.tsx
 // Contract integration for <kc-task-list>: row toggles are quiet; only confirm emits
-// `submit-data` with ids in input order; select-all + min/max/allowEmpty gating.
+// `submit` with ids in input order; select-all + min/max/allowEmpty gating.
 import '../../src/elements/task-list-card';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import type { CardEvent } from '../../src/primitives/card-contract';
@@ -69,11 +69,11 @@ test('toggling rows emits NO event; only confirm does', async () => {
   const root = el.shadowRoot!;
   setChecked(rowCheckbox(root, 'build'), true);
   await flush();
-  expect(events.some((e) => e.kind === 'submit-data')).toBe(false);
+  expect(events.some((e) => e.kind === 'submit')).toBe(false);
   off();
 });
 
-test('confirm emits submit-data with selected ids in INPUT order', async () => {
+test('confirm emits submit with selected ids in INPUT order', async () => {
   const { events, off } = listen();
   const el = await mount(PLAN); // lint + test pre-checked
   const root = el.shadowRoot!;
@@ -82,8 +82,8 @@ test('confirm emits submit-data with selected ids in INPUT order', async () => {
   await flush();
   confirmBtn(root).click();
   await flush();
-  const submit = events.find((e) => e.kind === 'submit-data') as
-    | Extract<CardEvent, { kind: 'submit-data' }>
+  const submit = events.find((e) => e.kind === 'submit') as
+    | Extract<CardEvent, { kind: 'submit' }>
     | undefined;
   expect(submit?.cardId).toBe('card-plan-42');
   expect(submit?.data).toEqual({ selected: ['lint', 'test', 'deploy'] });
@@ -138,8 +138,8 @@ test('allowEmpty:true confirms with zero → { selected: [] }', async () => {
   expect(confirmBtn(root).disabled).toBe(false);
   confirmBtn(root).click();
   await flush();
-  const submit = events.find((e) => e.kind === 'submit-data') as
-    | Extract<CardEvent, { kind: 'submit-data' }>
+  const submit = events.find((e) => e.kind === 'submit') as
+    | Extract<CardEvent, { kind: 'submit' }>
     | undefined;
   expect(submit?.data).toEqual({ selected: [] });
   off();

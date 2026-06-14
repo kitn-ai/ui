@@ -19,14 +19,14 @@ test('CardEnvelope accepts an action resolution', () => {
   expect(r.action).toBe('approve');
 });
 
-test('CardEnvelope accepts a submit-data resolution', () => {
+test('CardEnvelope accepts a submit resolution', () => {
   const env: CardEnvelope = {
     type: 'form',
     id: 'f1',
     data: {},
-    resolution: { kind: 'submit-data', data: { email: 'a@b.c' } },
+    resolution: { kind: 'submit', data: { email: 'a@b.c' } },
   };
-  const r = env.resolution as Extract<CardResolution, { kind: 'submit-data' }>;
+  const r = env.resolution as Extract<CardResolution, { kind: 'submit' }>;
   expect((r.data as { email: string }).email).toBe('a@b.c');
 });
 

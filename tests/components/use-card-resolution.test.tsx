@@ -27,7 +27,7 @@ test('setLocal resolves optimistically when no prop is present', () => {
     return <div />;
   });
   expect(ctl.isResolved()).toBe(false);
-  ctl.setLocal({ kind: 'submit-data', data: { x: 1 } });
+  ctl.setLocal({ kind: 'submit', data: { x: 1 } });
   expect(ctl.isResolved()).toBe(true);
   expect(ctl.isOptimistic()).toBe(true);
 });

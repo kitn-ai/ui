@@ -138,8 +138,8 @@ const HTML_SNIPPET = (def: FormDefinition) => `<kc-form></kc-form>
 
   // Cards bubble ONE \`kc-card\` CustomEvent carrying a typed CardEvent.
   form.addEventListener('kc-card', (e) => {
-    const ev = e.detail; // { kind:'submit-data', cardId, data } | { kind:'action', ... } | ...
-    if (ev.kind === 'submit-data') console.log('submission', ev.data);
+    const ev = e.detail; // { kind:'submit', cardId, data } | { kind:'action', ... } | ...
+    if (ev.kind === 'submit') console.log('submission', ev.data);
   });
 </script>`;
 
@@ -151,9 +151,9 @@ const meta = {
     layout: 'padded',
     docs: {
       description: specDescription('kc-form', [
-        '`<kc-form>` turns an agent\'s **JSON Schema** "shape" (set via the `data` **property**) into a themed, accessible, validated form inside `<kc-card>` chrome. A valid submission is emitted **up the Card contract** as a bubbling **`kc-card`** CustomEvent of `{ kind: \'submit-data\', cardId, data }`.',
+        '`<kc-form>` turns an agent\'s **JSON Schema** "shape" (set via the `data` **property**) into a themed, accessible, validated form inside `<kc-card>` chrome. A valid submission is emitted **up the Card contract** as a bubbling **`kc-card`** CustomEvent of `{ kind: \'submit\', cardId, data }`.',
         '**The mapping is deterministic:** `string`→text, `string`+`enum`→radio/select, `string`+`format`→typed inputs, `number`/`integer`→number (or `slider`/`rating` via `x-kc-widget`), `boolean`→switch, `array`→checkbox-group / multi-select / repeater / tag-list, nested `object`→fieldset. `x-kc-*` hints (`x-kc-widget`, `x-kc-order`, `x-kc-submitLabel`, `x-kc-actions`, `x-kc-dismissible`, …) refine the UI and live **inside** the schema, so one source of truth drives both the form and validation.',
-        "**Events** (all frozen Card-contract verbs): `ready` on mount, `submit-data` on a valid submit, `action` for secondary buttons (`x-kc-actions`), `dismiss` when dismissible, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**.",
+        "**Events** (all frozen Card-contract verbs): `ready` on mount, `submit` on a valid submit, `action` for secondary buttons (`x-kc-actions`), `dismiss` when dismissible, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**.",
         '**The same `CardEnvelope`/`CardEvent` shapes flow over the remote iframe transport unchanged** — this is the *native* card. See the **Code** tab for the full envelope JSON + the HTML wiring.',
       ]),
     },

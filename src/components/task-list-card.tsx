@@ -165,8 +165,8 @@ const DEFAULT_DATA: TaskListCardData = { tasks: [] };
 /**
  * `TaskListCard` — a selectable task/plan list (checkbox rows + optional select-all
  * + a confirm button) inside `Card` chrome. Row toggling and select-all are local
- * UI state; only the final confirm emits the Card contract's `submit-data` verb
- * (`{ kind:'submit-data', cardId, data:{ selected } }`) with the checked ids in
+ * UI state; only the final confirm emits the Card contract's `submit` verb
+ * (`{ kind:'submit', cardId, data:{ selected } }`) with the checked ids in
  * input order. Emits `ready` on mount and `error` for an unusable definition.
  */
 export function TaskListCard(props: TaskListCardProps): JSX.Element {
@@ -243,7 +243,7 @@ export function TaskListCard(props: TaskListCardProps): JSX.Element {
   const onConfirm = (): void => {
     if (!confirmEnabled()) return;
     const result: TaskListCardResult = { selected: selectedInOrder(tasks(), selected()) };
-    emit({ kind: 'submit-data', cardId: local.cardId, data: result });
+    emit({ kind: 'submit', cardId: local.cardId, data: result });
     setSubmitted(true);
   };
 

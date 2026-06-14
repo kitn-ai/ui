@@ -53,7 +53,7 @@ test('mount emits a bubbling `ready` kc-card event reaching the document', async
   off();
 });
 
-test('valid submit emits submit-data with the coerced object', async () => {
+test('valid submit emits submit with the coerced object', async () => {
   const { events, off } = listen();
   const el = await mount(FEEDBACK);
   const root = el.shadowRoot!;
@@ -89,8 +89,8 @@ test('valid submit emits submit-data with the coerced object', async () => {
   form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
   await flush();
 
-  const submit = events.find((e) => e.kind === 'submit-data') as
-    | Extract<CardEvent, { kind: 'submit-data' }>
+  const submit = events.find((e) => e.kind === 'submit') as
+    | Extract<CardEvent, { kind: 'submit' }>
     | undefined;
   expect(submit).toBeTruthy();
   expect(submit!.cardId).toBe('card-feedback-7f3');
@@ -130,7 +130,7 @@ test('dismissible form emits `dismiss`', async () => {
   off();
 });
 
-test('required missing blocks submit (no submit-data) and marks the field', async () => {
+test('required missing blocks submit (no submit) and marks the field', async () => {
   const { events, off } = listen();
   const el = await mount(FEEDBACK);
   const form = el.shadowRoot!.querySelector('form')!;
@@ -138,7 +138,7 @@ test('required missing blocks submit (no submit-data) and marks the field', asyn
     ? form.requestSubmit()
     : form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
   await flush();
-  expect(events.some((e) => e.kind === 'submit-data')).toBe(false);
+  expect(events.some((e) => e.kind === 'submit')).toBe(false);
   // an inline error appears
   expect(el.shadowRoot!.querySelector('[role="alert"]')).toBeTruthy();
   off();
