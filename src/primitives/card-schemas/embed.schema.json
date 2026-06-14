@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kitn.ai/schemas/card/embed.schema.json",
+  "title": "EmbedCardData",
+  "description": "Lazy media-embed payload (YouTube / Vimeo / generic player URL).",
+  "type": "object",
+  "x-kitn-card-type": "embed",
+  "x-kitn-contract-version": "1",
+  "required": ["provider"],
+  "additionalProperties": false,
+  "properties": {
+    "provider": {
+      "type": "string",
+      "enum": ["youtube", "vimeo", "generic"],
+      "description": "Media provider. 'generic' frames `url` directly (must be an https embeddable player URL whose origin is app-allowlisted).",
+      "x-kitn-control": "select"
+    },
+    "id": {
+      "type": "string",
+      "description": "Provider video id (required for youtube/vimeo when `url` is absent). e.g. 'dQw4w9WgXcQ'.",
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Full media/watch URL. For youtube/vimeo it is parsed to an id; for 'generic' it is the embeddable player src (https only).",
+      "x-kitn-format": "url"
+    },
+    "title": {
+      "type": "string",
+      "description": "Accessible title for the player iframe + the poster label. Strongly recommended for a11y.",
+      "maxLength": 300
+    },
+    "poster": {
+      "type": "string",
+      "format": "uri",
+      "description": "Thumbnail shown before play. When omitted, youtube/vimeo derive a default thumbnail; 'generic' shows a neutral play placeholder.",
+      "x-kitn-format": "url"
+    },
+    "start": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Optional start offset in seconds.",
+      "x-kitn-unit": "seconds"
+    },
+    "aspectRatio": {
+      "type": "string",
+      "enum": ["16:9", "4:3", "1:1", "9:16"],
+      "default": "16:9",
+      "description": "Player box aspect ratio (CSS aspect-ratio).",
+      "x-kitn-control": "select"
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "provider": { "const": "generic" } } },
+      "then": { "required": ["url"] }
+    },
+    {
+      "if": { "properties": { "provider": { "enum": ["youtube", "vimeo"] } } },
+      "then": { "anyOf": [{ "required": ["id"] }, { "required": ["url"] }] }
+    }
+  ]
+}

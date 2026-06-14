@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kitn.ai/schemas/card/link.schema.json",
+  "title": "LinkCardData",
+  "description": "Rich link / Open-Graph preview payload. The card renders from this; it never fetches.",
+  "type": "object",
+  "x-kitn-card-type": "link",
+  "x-kitn-contract-version": "1",
+  "required": ["url"],
+  "additionalProperties": false,
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Canonical destination. Opened via the contract `open` verb (target 'tab').",
+      "x-kitn-format": "url"
+    },
+    "title": {
+      "type": "string",
+      "description": "OG title (og:title). Falls back to the domain when absent.",
+      "maxLength": 300
+    },
+    "description": {
+      "type": "string",
+      "description": "OG description (og:description). Clamped to 3 lines in the UI.",
+      "maxLength": 1000
+    },
+    "image": {
+      "type": "string",
+      "format": "uri",
+      "description": "Preview image (og:image). Optional; the card degrades gracefully when missing or it fails to load.",
+      "x-kitn-format": "url"
+    },
+    "imageAlt": {
+      "type": "string",
+      "description": "Alt text for the preview image. Defaults to the title (or empty = decorative) when omitted.",
+      "maxLength": 300
+    },
+    "favicon": {
+      "type": "string",
+      "format": "uri",
+      "description": "Site favicon shown next to the domain.",
+      "x-kitn-format": "url"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Display domain (e.g. 'example.com'). Derived from `url` when omitted.",
+      "maxLength": 253
+    },
+    "siteName": {
+      "type": "string",
+      "description": "OG site name (og:site_name). Shown in place of the domain when present.",
+      "maxLength": 200
+    }
+  }
+}
