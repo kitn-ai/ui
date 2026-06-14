@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kitn.ai/schemas/card/task-list.schema.json",
-  "title": "TaskListCardData",
-  "description": "Data payload for a `task-list` card (CardEnvelope.data when type='task-list').",
+  "$id": "https://kitn.ai/schemas/card/tasks.schema.json",
+  "title": "TasksCardData",
+  "description": "Data payload for a `tasks` card (CardEnvelope.data when type='tasks').",
   "type": "object",
   "required": ["tasks"],
   "properties": {

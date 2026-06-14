@@ -44,7 +44,7 @@ import './form';
 import './link-card';
 import './embed';
 import './confirm-card';
-import './task-list-card';
+import './tasks';
 import './choice';
 import './cards';
 

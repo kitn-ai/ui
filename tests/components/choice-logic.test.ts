@@ -1,6 +1,6 @@
 // tests/components/choice-logic.test.ts
 // Pure-helper unit tests for the choice card (normalizeOptions + resolveOtherConfig),
-// mirroring the confirm/task-list helper tests.
+// mirroring the confirm/tasks helper tests.
 import { expect, test, vi } from 'vitest';
 import {
   normalizeOptions,

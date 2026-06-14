@@ -14,7 +14,7 @@ import { CardFallback } from '../components/card-fallback';
 // Register the built-in child card elements so that importing <kc-cards> is self-contained.
 import './form';
 import './confirm-card';
-import './task-list-card';
+import './tasks';
 import './link-card';
 import './embed';
 

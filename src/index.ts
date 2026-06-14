@@ -52,7 +52,7 @@ export type {
   WidgetKind,
 } from './components/form';
 
-// Card: kc-confirm (approval) + kc-task-list (selectable plan)
+// Card: kc-confirm (approval) + kc-tasks (selectable plan)
 export {
   ConfirmCard,
   CONFIRM_CARD_TYPE,
@@ -69,8 +69,8 @@ export type {
   ConfirmCardEnvelope,
 } from './components/confirm-card';
 export {
-  TaskListCard,
-  TASK_LIST_CARD_TYPE,
+  TasksCard,
+  TASKS_CARD_TYPE,
   normalizeTasks,
   initialSelected,
   selectedInOrder,
@@ -80,15 +80,15 @@ export {
   canConfirm,
   isMaxReached,
   confirmReason,
-} from './components/task-list-card';
+} from './components/tasks-card';
 export type {
-  TaskListCardProps,
-  TaskListTask,
-  TaskListCardData,
-  TaskListCardResult,
-  TaskListCardEnvelope,
+  TasksCardProps,
+  TasksTask,
+  TasksCardData,
+  TasksCardResult,
+  TasksCardEnvelope,
   SelectAllState,
-} from './components/task-list-card';
+} from './components/tasks-card';
 
 // Card: kc-choice (single-select option card)
 export {

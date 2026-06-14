@@ -1,6 +1,6 @@
 // tests/primitives/choice-schema.test.ts
 // Schema-artifact tests for the choice card (good + bad examples), modeled on
-// confirm-task-list-schemas.test.ts.
+// confirm-tasks-schemas.test.ts.
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
 import { validateAgainstSchema, type JsonSchema } from '../../src/primitives/card-validate';

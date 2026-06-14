@@ -1,10 +1,10 @@
 import { defineWebComponent } from './define';
-import { TaskListCard, type TaskListCardData } from '../components/task-list-card';
+import { TasksCard, type TasksCardData } from '../components/tasks-card';
 
 interface Props extends Record<string, unknown> {
-  /** The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY:
+  /** The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY:
    *  `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import
-   *  `TaskListCardData` from `@kitn.ai/chat` for the full shape. */
+   *  `TasksCardData` from `@kitn.ai/chat` for the full shape. */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -13,7 +13,7 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-task-list>` — a **selectable** task/plan list (set via the `data` property):
+ * `<kc-tasks>` — a **selectable** task/plan list (set via the `data` property):
  * checkbox rows + an optional select-all + a confirm button. Toggling rows is local
  * UI state; only the final confirm emits the Card contract's **`submit`** verb
  * up a bubbling **`kc-card`** CustomEvent (`{ kind:'submit', cardId,
@@ -23,16 +23,16 @@ interface Props extends Record<string, unknown> {
  * `kc-card` event. Isolated in Shadow DOM; theme-aware via the shared kit tokens.
  */
 defineWebComponent<Props>(
-  'kc-task-list',
+  'kc-tasks',
   {
     data: undefined,
     cardId: undefined,
     heading: undefined,
   },
   (props, { element }) => (
-    <TaskListCard
-      data={props.data as TaskListCardData | undefined}
-      cardId={props.cardId ?? (element.id || 'kc-task-list')}
+    <TasksCard
+      data={props.data as TasksCardData | undefined}
+      cardId={props.cardId ?? (element.id || 'kc-tasks')}
       heading={props.heading}
       hostElement={element}
     />

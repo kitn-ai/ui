@@ -96,11 +96,11 @@ export const KcCard = createWebComponent<KcCardProps>(
 
 export interface KcCardsProps extends WebComponentProps {
   /** The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. */
-  cards?: { type: string; id: string; data: unknown; title?: string }[];
+  cards?: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } }[];
   /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
   types?: Record<string, string>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
-  policy?: { onSubmitData?: (cardId: string, data: unknown) => void; onAction?: (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: (text: string, opts: { mode: "compose" | "send"; context?: unknown; }) => void; onOpen?: (url: string, target: "tab" | "artifact") => void; onState?: (cardId: string, patch: unknown) => void; onDismiss?: (cardId: string) => void; onError?: (cardId: string, message: string) => void; maxSendPromptMode?: "compose" | "send" };
+  policy?: { onSubmit?: (cardId: string, data: unknown) => void; onAction?: (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: (text: string, opts: { mode: "compose" | "send"; context?: unknown; }) => void; onOpen?: (url: string, target: "tab" | "artifact") => void; onState?: (cardId: string, patch: unknown) => void; onDismiss?: (cardId: string) => void; onError?: (cardId: string, message: string) => void; maxSendPromptMode?: "compose" | "send" };
 }
 
 export const KcCards = createWebComponent<KcCardsProps>(
@@ -683,8 +683,8 @@ export const KcSuggestions = createWebComponent<KcSuggestionsProps>(
   { onSelect: 'select' },
 );
 
-export interface KcTaskListProps extends WebComponentProps {
-  /** The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TaskListCardData` from `@kitn.ai/chat` for the full shape. */
+export interface KcTasksProps extends WebComponentProps {
+  /** The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/chat` for the full shape. */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -692,8 +692,8 @@ export interface KcTaskListProps extends WebComponentProps {
   heading?: string;
 }
 
-export const KcTaskList = createWebComponent<KcTaskListProps>(
-  'kc-task-list',
+export const KcTasks = createWebComponent<KcTasksProps>(
+  'kc-tasks',
   ["theme","data","cardId","heading"],
   {  },
 );

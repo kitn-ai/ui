@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, onMount, type JSX } from 'solid-js';
-import './task-list-card';
+import './tasks';
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
-import type { TaskListCardData } from '../components/task-list-card';
+import type { TasksCardData } from '../components/tasks-card';
 import type { CardEvent } from '../primitives/card-contract';
 
 declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-task-list': JSX.HTMLAttributes<HTMLElement> & {
+      'kc-tasks': JSX.HTMLAttributes<HTMLElement> & {
         heading?: string;
         'card-id'?: string;
         ref?: (el: HTMLElement) => void;
@@ -18,16 +18,16 @@ declare module 'solid-js' {
   }
 }
 
-type TaskListEl = HTMLElement & { data?: TaskListCardData };
+type TasksEl = HTMLElement & { data?: TasksCardData };
 
 function Frame(props: { children: JSX.Element }) {
   return <div style={{ 'max-width': '460px' }}>{props.children}</div>;
 }
 
-/** Mounts a <kc-task-list>, sets `.data`, logs the emitted CardEvent under the render. */
-function TaskListDemo(props: { def: TaskListCardData; cardId: string; heading?: string }) {
+/** Mounts a <kc-tasks>, sets `.data`, logs the emitted CardEvent under the render. */
+function TasksDemo(props: { def: TasksCardData; cardId: string; heading?: string }) {
   const [log, setLog] = createSignal<CardEvent[]>([]);
-  let el: TaskListEl | undefined;
+  let el: TasksEl | undefined;
   onMount(() => {
     if (!el) return;
     el.data = props.def;
@@ -39,7 +39,7 @@ function TaskListDemo(props: { def: TaskListCardData; cardId: string; heading?: 
   return (
     <Frame>
       <div style={{ display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
-        <kc-task-list ref={(e) => (el = e as TaskListEl)} card-id={props.cardId} heading={props.heading} />
+        <kc-tasks ref={(e) => (el = e as TasksEl)} card-id={props.cardId} heading={props.heading} />
         <pre
           style={{
             margin: 0,
@@ -58,7 +58,7 @@ function TaskListDemo(props: { def: TaskListCardData; cardId: string; heading?: 
   );
 }
 
-const PLAN: TaskListCardData = {
+const PLAN: TasksCardData = {
   mode: 'select',
   selectAll: true,
   confirmLabel: 'Run selected',
@@ -70,7 +70,7 @@ const PLAN: TaskListCardData = {
   ],
 };
 
-const REQUIRE_ONE: TaskListCardData = {
+const REQUIRE_ONE: TasksCardData = {
   confirmLabel: 'Apply',
   allowEmpty: false,
   tasks: [
@@ -80,7 +80,7 @@ const REQUIRE_ONE: TaskListCardData = {
   ],
 };
 
-const BOUNDED: TaskListCardData = {
+const BOUNDED: TasksCardData = {
   heading: 'Pick up to 2 reviewers',
   confirmLabel: 'Request review',
   min: 1,
@@ -93,7 +93,7 @@ const BOUNDED: TaskListCardData = {
   ],
 };
 
-const WITH_DESCRIPTIONS: TaskListCardData = {
+const WITH_DESCRIPTIONS: TasksCardData = {
   selectAll: true,
   confirmLabel: 'Run cleanup',
   tasks: [
@@ -110,13 +110,13 @@ const HEADING_MAP: Record<string, string | undefined> = {
   'card-desc': 'Storage cleanup',
 };
 
-const HTML_SNIPPET = (def: TaskListCardData, cardId: string) => {
+const HTML_SNIPPET = (def: TasksCardData, cardId: string) => {
   const heading = HEADING_MAP[cardId];
-  return `<kc-task-list${heading ? ` heading="${heading}"` : ''}></kc-task-list>
+  return `<kc-tasks${heading ? ` heading="${heading}"` : ''}></kc-tasks>
 <script type="module">
   import '@kitn.ai/chat/elements'; // registers the custom elements
 
-  const el = document.querySelector('kc-task-list');
+  const el = document.querySelector('kc-tasks');
   // \`data\` is the CardEnvelope.data (set as a property).
   el.data = ${JSON.stringify(def, null, 2)};
 
@@ -129,14 +129,14 @@ const HTML_SNIPPET = (def: TaskListCardData, cardId: string) => {
 };
 
 const meta = {
-  title: 'Generative UI/Cards/kc-task-list',
+  title: 'Generative UI/Cards/kc-tasks',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-task-list'),
+  argTypes: argTypesFor('kc-tasks'),
   parameters: {
     layout: 'padded',
     docs: {
-      description: specDescription('kc-task-list', [
-        "`<kc-task-list>` is a **selectable** task/plan list (set via the `data` **property**): checkbox rows + an optional select-all + a confirm button. The user picks a subset, confirms, and the card emits the Card contract's **`submit`** verb up a bubbling **`kc-card`** CustomEvent of `{ kind: 'submit', cardId, data: { selected } }` — the checked ids in **input order**. Toggling rows is local UI state; **only the final confirm emits** (the wire stays quiet, the result atomic).",
+      description: specDescription('kc-tasks', [
+        "`<kc-tasks>` is a **selectable** task/plan list (set via the `data` **property**): checkbox rows + an optional select-all + a confirm button. The user picks a subset, confirms, and the card emits the Card contract's **`submit`** verb up a bubbling **`kc-card`** CustomEvent of `{ kind: 'submit', cardId, data: { selected } }` — the checked ids in **input order**. Toggling rows is local UI state; **only the final confirm emits** (the wire stays quiet, the result atomic).",
         '**Gating:** confirm is enabled when `selectedCount >= (min ?? (allowEmpty ? 0 : 1))` and `<= (max ?? ∞)`. Select-all checks every toggleable (non-`disabled`) row and shows an **indeterminate** (`aria-checked="mixed"`) state when only some are checked. When `max` is reached, unchecked rows become non-toggleable. v1 is **select/approve only** (a future `mode:\'progress\'` is reserved in the schema).',
         '**Events** (all frozen Card-contract verbs): `ready` on mount, `submit` on confirm, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**. The same shapes flow over the remote iframe transport unchanged.',
       ]),
@@ -149,42 +149,42 @@ type Story = StoryObj;
 
 /** Select a plan (select-all on, a few pre-checked). */
 export const SelectAPlan: Story = {
-  render: () => <TaskListDemo def={PLAN} cardId="card-plan" heading="Approve the plan steps" />,
+  render: () => <TasksDemo def={PLAN} cardId="card-plan" heading="Approve the plan steps" />,
   parameters: { docs: { source: { code: HTML_SNIPPET(PLAN, 'card-plan'), language: 'html' } } },
 };
 
 /** Require at least one (`allowEmpty:false`, the default) — confirm stays disabled until a row is checked. */
 export const RequireAtLeastOne: Story = {
-  render: () => <TaskListDemo def={REQUIRE_ONE} cardId="card-require" heading="Choose maintenance steps" />,
+  render: () => <TasksDemo def={REQUIRE_ONE} cardId="card-require" heading="Choose maintenance steps" />,
   parameters: { docs: { source: { code: HTML_SNIPPET(REQUIRE_ONE, 'card-require'), language: 'html' } } },
 };
 
 /** Bounded (`min`/`max`) — confirm gating + max-reached row disabling. */
 export const Bounded: Story = {
-  render: () => <TaskListDemo def={BOUNDED} cardId="card-bounded" />,
+  render: () => <TasksDemo def={BOUNDED} cardId="card-bounded" />,
   parameters: { docs: { source: { code: HTML_SNIPPET(BOUNDED, 'card-bounded'), language: 'html' } } },
 };
 
 /** Rows with secondary descriptions (linked via aria-describedby). */
 export const WithDescriptions: Story = {
-  render: () => <TaskListDemo def={WITH_DESCRIPTIONS} cardId="card-desc" heading="Storage cleanup" />,
+  render: () => <TasksDemo def={WITH_DESCRIPTIONS} cardId="card-desc" heading="Storage cleanup" />,
   parameters: { docs: { source: { code: HTML_SNIPPET(WITH_DESCRIPTIONS, 'card-desc'), language: 'html' } } },
 };
 
 /** A malformed `data` (empty `tasks`) → the inline error state + an `error` event. */
 export const ErrorState: Story = {
-  render: () => <TaskListDemo def={{ tasks: [] } as unknown as TaskListCardData} cardId="card-bad" />,
+  render: () => <TasksDemo def={{ tasks: [] } as unknown as TasksCardData} cardId="card-bad" />,
   parameters: {
     docs: {
       source: {
-        code: `<kc-task-list></kc-task-list>
+        code: `<kc-tasks></kc-tasks>
 <script type="module">
   import '@kitn.ai/chat/elements';
-  const el = document.querySelector('kc-task-list');
+  const el = document.querySelector('kc-tasks');
   // No tasks → inline error state + an \`error\` event.
   el.data = { tasks: [] };
   el.addEventListener('kc-card', (e) => {
-    if (e.detail.kind === 'error') console.warn('task-list error:', e.detail.message);
+    if (e.detail.kind === 'error') console.warn('tasks error:', e.detail.message);
   });
 </script>`,
         language: 'html',

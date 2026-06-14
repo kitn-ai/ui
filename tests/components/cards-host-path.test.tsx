@@ -2,7 +2,7 @@
 // Native Solid host path: a `host` prop's emit is called (not the CustomEvent).
 import { render, fireEvent } from '@solidjs/testing-library';
 import { ConfirmCard } from '../../src/components/confirm-card';
-import { TaskListCard } from '../../src/components/task-list-card';
+import { TasksCard } from '../../src/components/tasks-card';
 import type { CardEvent, CardHost, CardContext } from '../../src/primitives/card-contract';
 
 afterEach(() => {
@@ -33,10 +33,10 @@ test('ConfirmCard calls host.emit (action) — no CustomEvent', () => {
   expect(action.action).toBe('ok');
 });
 
-test('TaskListCard calls host.emit (submit) — no CustomEvent', () => {
+test('TasksCard calls host.emit (submit) — no CustomEvent', () => {
   const { host, events } = makeHost();
   const { getByText } = render(() => (
-    <TaskListCard
+    <TasksCard
       host={host}
       cardId="t1"
       data={{ tasks: [{ id: 'a', label: 'A', checked: true }], confirmLabel: 'Go' }}

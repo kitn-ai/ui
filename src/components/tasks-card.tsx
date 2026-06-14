@@ -19,10 +19,10 @@ import { emitCardEvent } from '../primitives/card-routing';
 import { useCardHost } from '../primitives/card-host';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Types (task-list.schema.json) — see src/primitives/card-schemas/task-list.schema.json
+// Types (tasks.schema.json) — see src/primitives/card-schemas/tasks.schema.json
 // ─────────────────────────────────────────────────────────────────────────────
 
-export interface TaskListTask {
+export interface TasksTask {
   id: string;
   label: string;
   description?: string;
@@ -30,10 +30,10 @@ export interface TaskListTask {
   disabled?: boolean;
 }
 
-export interface TaskListCardData {
+export interface TasksCardData {
   mode?: 'select'; // future: 'select' | 'progress'
   heading?: string;
-  tasks: TaskListTask[]; // >=1
+  tasks: TasksTask[]; // >=1
   selectAll?: boolean;
   confirmLabel?: string;
   allowEmpty?: boolean;
@@ -41,33 +41,33 @@ export interface TaskListCardData {
   max?: number;
 }
 
-export interface TaskListCardResult {
+export interface TasksCardResult {
   selected: string[];
 }
 
-export type TaskListCardEnvelope = CardEnvelope<'task-list', TaskListCardData>;
+export type TasksCardEnvelope = CardEnvelope<'tasks', TasksCardData>;
 
-export const TASK_LIST_CARD_TYPE = 'task-list' as const;
+export const TASKS_CARD_TYPE = 'tasks' as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Pure helpers (unit-tested in isolation).
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** De-dupe tasks by id (first wins). Returns the usable list + an optional error. */
-export function normalizeTasks(tasks: unknown): { tasks: TaskListTask[]; error?: string } {
+export function normalizeTasks(tasks: unknown): { tasks: TasksTask[]; error?: string } {
   if (!Array.isArray(tasks) || tasks.length === 0) {
     return { tasks: [], error: "This card couldn't be displayed." };
   }
   const seen = new Set<string>();
-  const out: TaskListTask[] = [];
+  const out: TasksTask[] = [];
   for (const t of tasks) {
     if (!t || typeof t !== 'object') continue;
-    const task = t as Partial<TaskListTask>;
+    const task = t as Partial<TasksTask>;
     if (typeof task.id !== 'string' || task.id.length === 0) continue;
     if (typeof task.label !== 'string' || task.label.length === 0) continue;
     if (seen.has(task.id)) {
       // eslint-disable-next-line no-console
-      console.warn(`[kc-task-list] duplicate task id "${task.id}" ignored`);
+      console.warn(`[kc-tasks] duplicate task id "${task.id}" ignored`);
       continue;
     }
     seen.add(task.id);
@@ -84,24 +84,24 @@ export function normalizeTasks(tasks: unknown): { tasks: TaskListTask[]; error?:
 }
 
 /** The ids of the initially-checked tasks (in input order). */
-export function initialSelected(tasks: TaskListTask[]): string[] {
+export function initialSelected(tasks: TasksTask[]): string[] {
   return tasks.filter((t) => t.checked).map((t) => t.id);
 }
 
 /** The selected ids in input order (selection set ∩ tasks, preserving task order). */
-export function selectedInOrder(tasks: TaskListTask[], selected: Set<string>): string[] {
+export function selectedInOrder(tasks: TasksTask[], selected: Set<string>): string[] {
   return tasks.filter((t) => selected.has(t.id)).map((t) => t.id);
 }
 
 /** The toggleable (non-disabled) task ids. */
-export function toggleableIds(tasks: TaskListTask[]): string[] {
+export function toggleableIds(tasks: TasksTask[]): string[] {
   return tasks.filter((t) => !t.disabled).map((t) => t.id);
 }
 
 export type SelectAllState = 'checked' | 'unchecked' | 'indeterminate';
 
 /** Select-all tri-state over the toggleable rows. */
-export function selectAllState(tasks: TaskListTask[], selected: Set<string>): SelectAllState {
+export function selectAllState(tasks: TasksTask[], selected: Set<string>): SelectAllState {
   const ids = toggleableIds(tasks);
   if (ids.length === 0) return 'unchecked';
   const n = ids.filter((id) => selected.has(id)).length;
@@ -112,7 +112,7 @@ export function selectAllState(tasks: TaskListTask[], selected: Set<string>): Se
 
 /** Whether select-all should be shown: requested AND not blocked by `max` (since
  *  "all" would violate max). */
-export function showSelectAll(data: TaskListCardData, tasks: TaskListTask[]): boolean {
+export function showSelectAll(data: TasksCardData, tasks: TasksTask[]): boolean {
   if (data.selectAll !== true) return false;
   const count = toggleableIds(tasks).length;
   if (data.max !== undefined && count > data.max) return false;
@@ -120,7 +120,7 @@ export function showSelectAll(data: TaskListCardData, tasks: TaskListTask[]): bo
 }
 
 /** Whether confirm is enabled for the current selection count. */
-export function canConfirm(data: TaskListCardData, count: number): boolean {
+export function canConfirm(data: TasksCardData, count: number): boolean {
   const min = data.min ?? (data.allowEmpty ? 0 : 1);
   if (count < min) return false;
   if (data.max !== undefined && count > data.max) return false;
@@ -128,12 +128,12 @@ export function canConfirm(data: TaskListCardData, count: number): boolean {
 }
 
 /** Whether an unchecked row is blocked because `max` is reached. */
-export function isMaxReached(data: TaskListCardData, count: number): boolean {
+export function isMaxReached(data: TasksCardData, count: number): boolean {
   return data.max !== undefined && count >= data.max;
 }
 
 /** The disabled-reason text for confirm (for aria-describedby), or undefined. */
-export function confirmReason(data: TaskListCardData, count: number): string | undefined {
+export function confirmReason(data: TasksCardData, count: number): string | undefined {
   if (canConfirm(data, count)) return undefined;
   const min = data.min ?? (data.allowEmpty ? 0 : 1);
   if (count < min) return `Select at least ${min}.`;
@@ -142,12 +142,12 @@ export function confirmReason(data: TaskListCardData, count: number): string | u
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// The <TaskListCard> component.
+// The <TasksCard> component.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export interface TaskListCardProps {
-  /** The task-list definition (CardEnvelope.data). */
-  data?: TaskListCardData;
+export interface TasksCardProps {
+  /** The tasks definition (CardEnvelope.data). */
+  data?: TasksCardData;
   /** The card id used to correlate every emitted CardEvent. */
   cardId?: string;
   /** The envelope title rendered in the card chrome. */
@@ -160,17 +160,17 @@ export interface TaskListCardProps {
   class?: string;
 }
 
-const DEFAULT_DATA: TaskListCardData = { tasks: [] };
+const DEFAULT_DATA: TasksCardData = { tasks: [] };
 
 /**
- * `TaskListCard` — a selectable task/plan list (checkbox rows + optional select-all
+ * `TasksCard` — a selectable task/plan list (checkbox rows + optional select-all
  * + a confirm button) inside `Card` chrome. Row toggling and select-all are local
  * UI state; only the final confirm emits the Card contract's `submit` verb
  * (`{ kind:'submit', cardId, data:{ selected } }`) with the checked ids in
  * input order. Emits `ready` on mount and `error` for an unusable definition.
  */
-export function TaskListCard(props: TaskListCardProps): JSX.Element {
-  const merged = mergeProps({ cardId: 'kc-task-list' }, props);
+export function TasksCard(props: TasksCardProps): JSX.Element {
+  const merged = mergeProps({ cardId: 'kc-tasks' }, props);
   const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class']);
 
   const ctxHost = useCardHost();
@@ -186,7 +186,7 @@ export function TaskListCard(props: TaskListCardProps): JSX.Element {
   const valid = createMemo(() => normalized().error === undefined);
   const errorMessage = createMemo(() => normalized().error ?? '');
   const tasks = createMemo(() => normalized().tasks);
-  const data = createMemo<TaskListCardData>(() => local.data ?? DEFAULT_DATA);
+  const data = createMemo<TasksCardData>(() => local.data ?? DEFAULT_DATA);
 
   const [selected, setSelected] = createSignal<Set<string>>(new Set());
   const [submitted, setSubmitted] = createSignal(false);
@@ -242,7 +242,7 @@ export function TaskListCard(props: TaskListCardProps): JSX.Element {
 
   const onConfirm = (): void => {
     if (!confirmEnabled()) return;
-    const result: TaskListCardResult = { selected: selectedInOrder(tasks(), selected()) };
+    const result: TasksCardResult = { selected: selectedInOrder(tasks(), selected()) };
     emit({ kind: 'submit', cardId: local.cardId, data: result });
     setSubmitted(true);
   };

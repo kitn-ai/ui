@@ -79,11 +79,11 @@ export interface KcCardsElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. */
-  cards?: { type: string; id: string; data: unknown; title?: string }[];
+  cards?: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } }[];
   /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
   types?: Record<string, string>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
-  policy?: { onSubmitData?: (cardId: string, data: unknown) => void; onAction?: (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: (text: string, opts: { mode: "compose" | "send"; context?: unknown; }) => void; onOpen?: (url: string, target: "tab" | "artifact") => void; onState?: (cardId: string, patch: unknown) => void; onDismiss?: (cardId: string) => void; onError?: (cardId: string, message: string) => void; maxSendPromptMode?: "compose" | "send" };
+  policy?: { onSubmit?: (cardId: string, data: unknown) => void; onAction?: (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: (text: string, opts: { mode: "compose" | "send"; context?: unknown; }) => void; onOpen?: (url: string, target: "tab" | "artifact") => void; onState?: (cardId: string, patch: unknown) => void; onDismiss?: (cardId: string) => void; onError?: (cardId: string, message: string) => void; maxSendPromptMode?: "compose" | "send" };
 }
 
 export interface KcChainOfThoughtElement extends HTMLElement {
@@ -478,10 +478,10 @@ export interface KcSuggestionsElement extends HTMLElement {
   highlight?: string;
 }
 
-export interface KcTaskListElement extends HTMLElement {
+export interface KcTasksElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TaskListCardData` from `@kitn.ai/chat` for the full shape. */
+  /** The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/chat` for the full shape. */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -606,7 +606,7 @@ declare global {
     'kc-source': KcSourceElement;
     'kc-sources': KcSourcesElement;
     'kc-suggestions': KcSuggestionsElement;
-    'kc-task-list': KcTaskListElement;
+    'kc-tasks': KcTasksElement;
     'kc-text-shimmer': KcTextShimmerElement;
     'kc-thinking-bar': KcThinkingBarElement;
     'kc-tool': KcToolElement;

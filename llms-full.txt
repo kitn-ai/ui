@@ -253,9 +253,9 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `cards` | — | `undefined \| { type: string; id: string; data: unknown; title?: undefined \| string }[]` | The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. |
+| `cards` | — | `undefined \| { type: string; id: string; data: unknown; title?: undefined \| string; resolution?: undefined \| { kind: "action"; action: string; payload?: unknown; at?: undefined \| string } \| { kind: "submit"; data: unknown; at?: undefined \| string } }[]` | The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. |
 | `types` | — | `undefined \| Record<string, string>` | Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. |
-| `policy` | — | `undefined \| { onSubmitData?: undefined \| (cardId: string, data: unknown) => void; onAction?: undefined \| (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined \| (text: string, opts: { mode: "compose" \| "send"; context?: unknown; }) => void; onOpen?: undefined \| (url: string, target: "tab" \| "artifact") => void; onState?: undefined \| (cardId: string, patch: unknown) => void; onDismiss?: undefined \| (cardId: string) => void; onError?: undefined \| (cardId: string, message: string) => void; maxSendPromptMode?: undefined \| "compose" \| "send" }` | Optional CardPolicy handling child events. Property: `el.policy`. |
+| `policy` | — | `undefined \| { onSubmit?: undefined \| (cardId: string, data: unknown) => void; onAction?: undefined \| (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined \| (text: string, opts: { mode: "compose" \| "send"; context?: unknown; }) => void; onOpen?: undefined \| (url: string, target: "tab" \| "artifact") => void; onState?: undefined \| (cardId: string, patch: unknown) => void; onDismiss?: undefined \| (cardId: string) => void; onError?: undefined \| (cardId: string, message: string) => void; maxSendPromptMode?: undefined \| "compose" \| "send" }` | Optional CardPolicy handling child events. Property: `el.policy`. |
 
 _No events._
 
@@ -789,13 +789,13 @@ _No events._
 
 ---
 
-### `kc-task-list` / `KcTaskList`
+### `kc-tasks` / `KcTasks`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `data` | — | `undefined \| Record<string, unknown>` | The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TaskListCardData` from `@kitn.ai/chat` for the full shape. |
+| `data` | — | `undefined \| Record<string, unknown>` | The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/chat` for the full shape. |
 | `cardId` | `card-id` | `undefined \| string` | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined \| string` | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
 

@@ -27,7 +27,7 @@ Everything an agent sends is a `CardEnvelope`:
 interface CardEnvelope { type: string; id: string; data: unknown; title?: string }
 ```
 
-`type` selects the card (`form`, `confirm`, `task-list`, `link`, `embed`); `data` follows
+`type` selects the card (`form`, `confirm`, `tasks`, `link`, `embed`); `data` follows
 that type's **JSON Schema** (shipped in `dist/schemas`, so an agent/server can validate
 before sending); `id` correlates every event back to this card.
 

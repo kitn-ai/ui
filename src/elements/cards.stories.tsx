@@ -15,7 +15,7 @@ const CARDS: CardEnvelope[] = [
   { type: 'confirm', id: 'deploy', title: 'Deploy to production?',
     data: { body: 'Apply 3 migrations and deploy?', tone: 'warning',
       actions: [{ id: 'go', label: 'Deploy', style: 'primary', default: true }, { id: 'no', label: 'Cancel' }] } },
-  { type: 'task-list', id: 'plan', title: 'Pick the steps',
+  { type: 'tasks', id: 'plan', title: 'Pick the steps',
     data: { tasks: [{ id: 'a', label: 'Run tests', checked: true }, { id: 'b', label: 'Tag release' }], confirmLabel: 'Run selected' } },
   { type: 'choice', id: 'plan-pick', title: 'Choose a plan',
     data: { prompt: 'Which plan fits your team?', options: [

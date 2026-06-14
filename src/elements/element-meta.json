@@ -349,11 +349,11 @@
     "props": [
       {
         "name": "cards",
-        "type": "undefined | { type: string; id: string; data: unknown; title?: undefined | string }[]",
+        "type": "undefined | { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } }[]",
         "optional": true,
         "scalar": false,
         "description": "The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`.",
-        "displayType": "undefined | { type: string; id: string; data: unknown; title?: undefined | string }[]"
+        "displayType": "undefined | { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } }[]"
       },
       {
         "name": "types",
@@ -365,11 +365,11 @@
       },
       {
         "name": "policy",
-        "type": "undefined | { onSubmitData?: undefined | (cardId: string, data: unknown) => void; onAction?: undefined | (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined | (text: string, opts: { mode: \"compose\" | \"send\"; context?: unknown; }) => void; onOpen?: undefined | (url: string, target: \"tab\" | \"artifact\") => void; onState?: undefined | (cardId: string, patch: unknown) => void; onDismiss?: undefined | (cardId: string) => void; onError?: undefined | (cardId: string, message: string) => void; maxSendPromptMode?: undefined | \"compose\" | \"send\" }",
+        "type": "undefined | { onSubmit?: undefined | (cardId: string, data: unknown) => void; onAction?: undefined | (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined | (text: string, opts: { mode: \"compose\" | \"send\"; context?: unknown; }) => void; onOpen?: undefined | (url: string, target: \"tab\" | \"artifact\") => void; onState?: undefined | (cardId: string, patch: unknown) => void; onDismiss?: undefined | (cardId: string) => void; onError?: undefined | (cardId: string, message: string) => void; maxSendPromptMode?: undefined | \"compose\" | \"send\" }",
         "optional": true,
         "scalar": false,
         "description": "Optional CardPolicy handling child events. Property: `el.policy`.",
-        "displayType": "undefined | { onSubmitData?: undefined | (cardId: string, data: unknown) => void; onAction?: undefined | (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined | (text: string, opts: { mode: \"compose\" | \"send\"; context?: unknown; }) => void; onOpen?: undefined | (url: string, target: \"tab\" | \"artifact\") => void; onState?: undefined | (cardId: string, patch: unknown) => void; onDismiss?: undefined | (cardId: string) => void; onError?: undefined | (cardId: string, message: string) => void; maxSendPromptMode?: undefined | \"compose\" | \"send\" }"
+        "displayType": "undefined | { onSubmit?: undefined | (cardId: string, data: unknown) => void; onAction?: undefined | (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined | (text: string, opts: { mode: \"compose\" | \"send\"; context?: unknown; }) => void; onOpen?: undefined | (url: string, target: \"tab\" | \"artifact\") => void; onState?: undefined | (cardId: string, patch: unknown) => void; onDismiss?: undefined | (cardId: string) => void; onError?: undefined | (cardId: string, message: string) => void; maxSendPromptMode?: undefined | \"compose\" | \"send\" }"
       }
     ],
     "events": [],
@@ -2283,15 +2283,15 @@
     "tokens": []
   },
   {
-    "tag": "kc-task-list",
-    "className": "KcTaskListElement",
+    "tag": "kc-tasks",
+    "className": "KcTasksElement",
     "props": [
       {
         "name": "data",
         "type": "undefined | Record<string, unknown>",
         "optional": true,
         "scalar": false,
-        "description": "The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TaskListCardData` from `@kitn.ai/chat` for the full shape.",
+        "description": "The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/chat` for the full shape.",
         "displayType": "undefined | Record<string, unknown>"
       },
       {
@@ -2314,9 +2314,9 @@
     "events": [],
     "composedFrom": [
       {
-        "name": "TaskListCard",
+        "name": "TasksCard",
         "group": "Components",
-        "storyId": "components-tasklistcard--docs"
+        "storyId": "components-taskscard--docs"
       }
     ],
     "tokens": []
