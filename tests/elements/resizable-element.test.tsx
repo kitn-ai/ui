@@ -1,5 +1,6 @@
 // tests/elements/resizable-element.test.tsx
 import '../../src/elements/resizable';
+import type { KcMaximizeIntentDetail, KcMaximizeStateDetail } from '../../src/elements/resizable';
 
 // jsdom has no layout, so we only assert DOM structure, attributes and events
 // here. Drag, keyboard and visual layout are verified via Playwright.
@@ -102,4 +103,190 @@ test('kc-resizable-item renders its slotted light content via a default slot', a
   await flush();
   expect(item.shadowRoot!.querySelector('slot')).toBeTruthy();
   item.remove();
+});
+
+test('exports the maximize protocol detail types (compile-time shape check)', () => {
+  const intent: KcMaximizeIntentDetail = { requested: true };
+  const state: KcMaximizeStateDetail = { maximized: false };
+  expect(intent.requested).toBe(true);
+  expect(state.maximized).toBe(false);
+});
+
+// --- Task 2: maximize/restore core ---
+
+function intentFrom(item: Element, requested: boolean) {
+  item.dispatchEvent(new CustomEvent('kc-maximize-intent', { detail: { requested }, bubbles: true, composed: true }));
+}
+
+test('maximize hides siblings, clears the maximized item size/locked, reflects data-maximized', async () => {
+  const group = makeGroup([{ size: '25%' }, { size: '50%', locked: '' }, { size: '25%' }]);
+  await flush();
+  intentFrom(group.children[1], true);
+  await flush();
+  const items = Array.from(group.children) as HTMLElement[];
+  expect(items[0].hasAttribute('hidden')).toBe(true);
+  expect(items[2].hasAttribute('hidden')).toBe(true);
+  expect(items[1].hasAttribute('hidden')).toBe(false);
+  expect(items[1].hasAttribute('locked')).toBe(false); // cleared so it fills
+  expect(group.hasAttribute('data-maximized')).toBe(true);
+});
+
+test('restore returns each item to its stashed size/hidden/locked', async () => {
+  const group = makeGroup([{ size: '25%' }, { size: '50%', locked: '' }, { hidden: '', size: '25%' }]);
+  await flush();
+  intentFrom(group.children[1], true);
+  await flush();
+  intentFrom(group.children[1], false);
+  await flush();
+  const items = Array.from(group.children) as HTMLElement[];
+  // item[1] regains its locked attr; item[2] was already hidden pre-maximize → stays hidden.
+  expect(items[1].hasAttribute('locked')).toBe(true);
+  expect(items[2].hasAttribute('hidden')).toBe(true);
+  expect(items[0].hasAttribute('hidden')).toBe(false);
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+});
+
+test('intent from outside any item is ignored', async () => {
+  const group = makeGroup([{}, {}]);
+  await flush();
+  group.dispatchEvent(new CustomEvent('kc-maximize-intent', { detail: { requested: true }, bubbles: true, composed: true }));
+  await flush();
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+});
+
+// --- Task 3: maximizedIndex prop + maximize/restore host methods + maximizechange ---
+
+test('maximize(i) / restore() host methods drive the layout + maximizechange', async () => {
+  const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void; restore(): void; maximizedIndex: number | null };
+  await flush();
+  const events: { maximized: boolean; index: number | null }[] = [];
+  group.addEventListener('maximizechange', (e) => events.push((e as CustomEvent).detail));
+  group.maximize(2);
+  await flush();
+  expect(group.children[0].hasAttribute('hidden')).toBe(true);
+  expect(events.at(-1)).toEqual({ maximized: true, index: 2 });
+  group.restore();
+  await flush();
+  expect(group.children[0].hasAttribute('hidden')).toBe(false);
+  expect(events.at(-1)).toEqual({ maximized: false, index: null });
+});
+
+test('setting maximizedIndex maximizes; setting it null restores', async () => {
+  const group = makeGroup([{}, {}]) as HTMLElement & { maximizedIndex: number | null };
+  await flush();
+  group.maximizedIndex = 0;
+  await flush();
+  expect(group.children[1].hasAttribute('hidden')).toBe(true);
+  group.maximizedIndex = null;
+  await flush();
+  expect(group.children[1].hasAttribute('hidden')).toBe(false);
+});
+
+test('re-target: maximizing a different item while maximized restores+re-maximizes', async () => {
+  const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void };
+  await flush();
+  group.maximize(0);
+  await flush();
+  group.maximize(2);
+  await flush();
+  expect(group.children[0].hasAttribute('hidden')).toBe(true);
+  expect(group.children[2].hasAttribute('hidden')).toBe(false);
+});
+
+// --- Task 4: Escape-to-restore, auto-restore on removal, nested stopPropagation ---
+
+test('Escape while maximized restores (and is a no-op otherwise)', async () => {
+  const group = makeGroup([{}, {}]) as HTMLElement & { maximize(i: number): void };
+  await flush();
+  group.maximize(0);
+  await flush();
+  group.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  await flush();
+  expect(group.children[1].hasAttribute('hidden')).toBe(false);
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+  // Escape again is a harmless no-op.
+  group.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  await flush();
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+});
+
+test('removing the maximized item auto-restores (no empty container)', async () => {
+  const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void };
+  await flush();
+  group.maximize(1);
+  await flush();
+  group.children[1].remove();
+  await flush();
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+  expect(group.querySelectorAll('kc-resizable-item').length).toBe(2);
+});
+
+test('nested group stops the intent (outer group never maximizes)', async () => {
+  const outer = makeGroup([{}, {}]);
+  // Put an inner group inside the first outer item.
+  const inner = document.createElement('kc-resizable');
+  const innerItem = document.createElement('kc-resizable-item');
+  inner.appendChild(innerItem);
+  const leaf = document.createElement('kc-resizable-item');
+  leaf.appendChild(inner);
+  outer.replaceChild(leaf, outer.children[0]);
+  await flush();
+  innerItem.dispatchEvent(new CustomEvent('kc-maximize-intent', { detail: { requested: true }, bubbles: true, composed: true }));
+  await flush();
+  expect(inner.hasAttribute('data-maximized')).toBe(true);
+  expect(outer.hasAttribute('data-maximized')).toBe(false);
+});
+
+// --- Fix #1 regression: element-keyed stash (index-drift when sibling removed) ---
+
+test('restore after sibling removal re-applies each item its OWN saved state (no index-drift)', async () => {
+  // 3-item group with DISTINCT sizes so a positional mis-assignment is detectable.
+  const group = makeGroup([
+    { size: '20%' },   // A — index 0
+    { size: '50%' },   // B — index 1 (will be maximized)
+    { size: '30%' },   // C — index 2
+  ]) as HTMLElement & { restore(): void };
+  await flush();
+
+  const [a, b, c] = Array.from(group.children) as HTMLElement[];
+
+  // Maximize B (index 1).
+  intentFrom(b, true);
+  await flush();
+
+  // Remove A while maximized — this shifts C from index 2 → index 1.
+  a.remove();
+  await flush();
+
+  // Restore should apply B's own stash to B and C's own stash to C.
+  intentFrom(b, false);
+  await flush();
+
+  // B is still in the group and should have its own stash (size='50%', not hidden, not locked).
+  expect(b.getAttribute('size')).toBe('50%');
+  expect(b.hasAttribute('hidden')).toBe(false);
+
+  // C must have its own size restored ('30%'), NOT B's ('50%').
+  expect(c.getAttribute('size')).toBe('30%');
+  expect(c.hasAttribute('hidden')).toBe(false);
+
+  // The group must no longer be in maximized state.
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+});
+
+// --- Task 5: change-storm guard (one change per maximize/restore) ---
+
+test('maximize and restore each emit exactly one change (no storm)', async () => {
+  const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void; restore(): void };
+  await flush();
+  let count = 0;
+  group.addEventListener('change', () => count++);
+  group.maximize(1);
+  await flush();
+  const afterMax = count;
+  group.restore();
+  await flush();
+  const afterRestore = count - afterMax;
+  expect(afterMax).toBe(1);     // one relayout for the maximize
+  expect(afterRestore).toBe(1); // one relayout for the restore
 });

@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { createSignal, type JSX } from 'solid-js';
+import { createSignal, onMount, type JSX } from 'solid-js';
 import './register'; // side effect: registers the custom elements
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
+import { Resizable, ResizablePanel } from '../ui/resizable';
+import type { ArtifactFile } from '../components/artifact';
+import { Artifact } from '../components/artifact';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
 declare module 'solid-js' {
@@ -12,9 +15,22 @@ declare module 'solid-js' {
       'kc-resizable-item': JSX.HTMLAttributes<HTMLElement> & {
         size?: string; min?: string; max?: string; locked?: boolean | string; hidden?: boolean | string;
       };
+      // `kc-artifact` JSX type is augmented (with the full attr set) in
+      // artifact.stories.tsx — declaring it again here with a different shape
+      // would trip TS2717 (module-augmentation merges must match). Reuse that one.
     }
   }
 }
+
+// Fixture base URL (served by Storybook staticDirs from examples/artifact-fixtures).
+const BASE = '/artifact-fixtures';
+
+const ARTIFACT_FILES: ArtifactFile[] = [
+  { path: 'index.html', url: `${BASE}/index.html`, type: 'html', language: 'html',
+    code: `<!DOCTYPE html><html lang="en"><head><title>Preview</title></head><body><h1>Starboard</h1></body></html>` },
+  { path: 'about.html', url: `${BASE}/about.html`, type: 'html', language: 'html',
+    code: `<!DOCTYPE html><html lang="en"><head><title>About</title></head><body><h1>About</h1></body></html>` },
+];
 
 /** A labelled placeholder pane so the layout is visible in stories. */
 function Pane(props: { label: string; tone?: 'muted' | 'plain' }) {
@@ -197,4 +213,213 @@ export const HiddenToggle: Story = {
       </div>
     );
   },
+};
+
+const EXPAND_TO_FILL_SNIPPET = `<!-- The artifact's "Expand" button (opt-in: expandable) fires a bubbling
+     kc-maximize-intent event. The nearest enclosing <kc-resizable> catches it
+     automatically and hides siblings so the preview panel fills the container.
+     No wiring needed between the two elements — the protocol is zero-config. -->
+
+<kc-resizable orientation="horizontal" style="display:block;height:480px">
+  <kc-resizable-item size="20%" min="120px"> …list… </kc-resizable-item>
+  <kc-resizable-item> …chat… </kc-resizable-item>
+  <kc-resizable-item size="35%" min="200px">
+    <!-- expandable opt-in: adds the Expand/Collapse button -->
+    <kc-artifact
+      src="…/index.html"
+      expandable
+    ></kc-artifact>
+  </kc-resizable-item>
+</kc-resizable>
+
+<script type="module">
+  import '@kitnai/chat/elements';
+
+  // Optional: observe the layout events.
+  document.querySelector('kc-resizable')
+    .addEventListener('change', (e) => console.log('change', e.detail.sizes));
+  document.querySelector('kc-resizable')
+    .addEventListener('maximizechange', (e) => console.log('maximizechange', e.detail));
+  document.querySelector('kc-artifact')
+    .addEventListener('maximizechange', (e) => console.log('artifact maximizechange', e.detail));
+</script>
+
+<!-- Cross-element protocol (hand-authored; not generated):
+  • kc-maximize-intent  — CustomEvent, bubbles:true, composed:true
+      Fired by <kc-artifact> when the Expand/Collapse button is clicked.
+      detail: { requested: boolean }  (true = maximize, false = restore)
+  • kc-maximize-state   — CustomEvent, bubbles:false, composed:true
+      Dispatched by <kc-resizable> back DOWN onto the maximized <kc-resizable-item>
+      (on maximize) or the group host + the formerly-maximized item (on restore)
+      so the artifact can reconcile its button label.
+      detail: { maximized: boolean }
+  These protocol events are NOT listed in the generated web-components.md because
+  they are cross-element — the generator only documents per-element dispatch events. -->`;
+
+/**
+ * **Expand to fill** — the headline integration: the artifact's expand button
+ * fills the preview panel to the full container width. No wiring between the
+ * two elements is needed — clicking **Expand** fires a `kc-maximize-intent` event
+ * that bubbles up to the nearest enclosing `<kc-resizable>`, which hides siblings
+ * and lets the preview panel fill. **Collapse** (or **Escape**) restores the
+ * original layout.
+ *
+ * **Cross-element protocol (hand-authored docs):**
+ * - `kc-maximize-intent` — `bubbles:true, composed:true`; fired by `<kc-artifact>`
+ *   when Expand/Collapse is toggled. `detail: { requested: boolean }`.
+ * - `kc-maximize-state` — `bubbles:false, composed:true`; dispatched by
+ *   `<kc-resizable>` back down to the affected `<kc-resizable-item>` so the
+ *   artifact can reconcile its button. `detail: { maximized: boolean }`.
+ *
+ * These protocol events are NOT in the generated `web-components.md`
+ * (the generator only documents per-element `dispatch` events — resolved decision #1).
+ */
+export const ExpandToFill: Story = {
+  name: 'Expand to fill',
+  render: () => {
+    const [log, setLog] = createSignal<string[]>([]);
+    let artifactEl: HTMLElement & { files?: ArtifactFile[] };
+    let resizableEl: HTMLElement;
+    onMount(() => {
+      if (artifactEl) artifactEl.files = ARTIFACT_FILES;
+      if (resizableEl) {
+        resizableEl.addEventListener('change', (e: Event) =>
+          setLog((l) => [`change → ${JSON.stringify((e as CustomEvent).detail.sizes)}`, ...l].slice(0, 6)),
+        );
+        resizableEl.addEventListener('maximizechange', (e: Event) =>
+          setLog((l) => [`maximizechange → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
+        );
+      }
+      if (artifactEl) {
+        artifactEl.addEventListener('maximizechange', (e: Event) =>
+          setLog((l) => [`artifact maximizechange → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
+        );
+      }
+    });
+    return (
+      <div style={{ display: 'flex', 'flex-direction': 'column', gap: '8px' }}>
+        <div
+          style={{
+            height: '480px',
+            width: '100%',
+            'max-width': '900px',
+            border: '1px solid var(--color-border, #e4e4e7)',
+            'border-radius': '8px',
+            overflow: 'hidden',
+          }}
+        >
+          <kc-resizable
+            ref={(e) => (resizableEl = e as HTMLElement)}
+            orientation="horizontal"
+          >
+            <kc-resizable-item size="20%" min="120px">
+              <Pane label="List" />
+            </kc-resizable-item>
+            <kc-resizable-item min="140px">
+              <Pane label="Chat" tone="plain" />
+            </kc-resizable-item>
+            <kc-resizable-item size="35%" min="200px">
+              <kc-artifact
+                ref={(e) => (artifactEl = e as HTMLElement & { files?: ArtifactFile[] })}
+                src={`${BASE}/index.html`}
+                iframe-title="Starboard artifact preview"
+                expandable
+              />
+            </kc-resizable-item>
+          </kc-resizable>
+        </div>
+        <pre
+          style={{
+            'font-size': '12px',
+            'max-width': '900px',
+            padding: '10px 12px',
+            'border-radius': '8px',
+            background: 'var(--color-muted, #f4f4f5)',
+            color: 'var(--color-muted-foreground, #71717a)',
+            'min-height': '72px',
+            margin: '0',
+          }}
+        >
+          {log().length ? log().join('\n') : '(click the ⤢ Expand button in the preview toolbar…)'}
+        </pre>
+      </div>
+    );
+  },
+  parameters: { docs: { source: { code: EXPAND_TO_FILL_SNIPPET, language: 'html' } } },
+};
+
+const SOLID_PARITY_SNIPPET = `// SolidJS — Artifact inside Resizable with maximizedIndex/onMaximizeChange.
+// No web components needed; works in a pure-Solid app.
+import { createSignal } from 'solid-js';
+import { Artifact } from '@kitnai/chat/components';
+import { Resizable, ResizablePanel } from '@kitnai/chat/ui';
+
+function App() {
+  const [maximizedIndex, setMaximizedIndex] = createSignal<number | null>(null);
+  return (
+    <Resizable
+      maximizedIndex={maximizedIndex()}
+      onMaximizeChange={setMaximizedIndex}
+      style="height:480px"
+    >
+      <ResizablePanel defaultSize="20%" minSize="120px">…list…</ResizablePanel>
+      <ResizablePanel minSize="140px">…chat…</ResizablePanel>
+      <ResizablePanel defaultSize="35%" minSize="200px">
+        <Artifact
+          src="…"
+          expandable
+          maximized={maximizedIndex() === 2}
+          onMaximizeChange={(m) => setMaximizedIndex(m ? 2 : null)}
+        />
+      </ResizablePanel>
+    </Resizable>
+  );
+}`;
+
+/**
+ * **SolidJS parity** — the same `list | chat | artifact` layout using the Solid
+ * `Resizable` convenience and the `Artifact` component directly (no web components).
+ * `maximizedIndex` / `onMaximizeChange` on `Resizable` mirror the web-component
+ * protocol at the Solid level. Wire `Artifact`'s `onMaximizeChange` to set the
+ * index and pass `maximized` back down to drive the button.
+ */
+export const SolidParity: Story = {
+  name: 'SolidJS parity (Resizable + Artifact)',
+  render: () => {
+    const [maximizedIndex, setMaximizedIndex] = createSignal<number | null>(null);
+    return (
+      <div
+        style={{
+          height: '480px',
+          width: '100%',
+          'max-width': '900px',
+          border: '1px solid var(--color-border, #e4e4e7)',
+          'border-radius': '8px',
+          overflow: 'hidden',
+        }}
+      >
+        <Resizable
+          maximizedIndex={maximizedIndex()}
+          onMaximizeChange={setMaximizedIndex}
+        >
+          <ResizablePanel defaultSize="20%" minSize="120px">
+            <Pane label="List" />
+          </ResizablePanel>
+          <ResizablePanel minSize="140px">
+            <Pane label="Chat" tone="plain" />
+          </ResizablePanel>
+          <ResizablePanel defaultSize="35%" minSize="200px">
+            <Artifact
+              src={`${BASE}/index.html`}
+              iframeTitle="Starboard artifact preview"
+              expandable
+              maximized={maximizedIndex() === 2}
+              onMaximizeChange={(m) => setMaximizedIndex(m ? 2 : null)}
+            />
+          </ResizablePanel>
+        </Resizable>
+      </div>
+    );
+  },
+  parameters: { docs: { source: { code: SOLID_PARITY_SNIPPET, language: 'tsx' } } },
 };

@@ -16,6 +16,16 @@ declare module 'solid-js' {
         sandbox?: string;
         'iframe-title'?: string;
         ref?: (el: HTMLElement) => void;
+        // toolbar composition flags (all boolean attrs)
+        expandable?: boolean | string;
+        'open-in-tab'?: boolean | string;
+        'no-nav'?: boolean | string;
+        'no-reload'?: boolean | string;
+        'no-home'?: boolean | string;
+        'no-path-field'?: boolean | string;
+        'no-tabs'?: boolean | string;
+        standalone?: boolean | string;
+        'readonly-path'?: boolean | string;
       };
     }
   }
@@ -288,4 +298,208 @@ export const WithEvents: Story = {
       </div>
     );
   },
+};
+
+const CONFIGURABLE_TOOLBAR_SNIPPET = `<!-- All toolbar affordances are individually opt-in/out via attributes. -->
+
+<!-- The five default-shown items each have a "no-*" flag to hide them: -->
+<kc-artifact
+  src="…"
+  no-nav
+  no-reload
+  no-home
+></kc-artifact>
+
+<!-- Two new buttons are OPT-IN (hidden by default): -->
+<kc-artifact
+  src="…"
+  expandable
+  open-in-tab
+></kc-artifact>
+
+<!-- Standalone chrome: rounded corners + border (default is square/borderless in-panel): -->
+<kc-artifact src="…" standalone></kc-artifact>
+
+<!-- Read-only path: visible, nav-tracking, non-editable: -->
+<kc-artifact src="…" readonly-path></kc-artifact>`;
+
+/**
+ * Every toolbar affordance is individually configurable.
+ *
+ * **Default-shown (`no-*` flags hide):** back/forward (`no-nav`), reload (`no-reload`),
+ * home (`no-home`), address field (`no-path-field`), Preview|Code toggle (`no-tabs`).
+ *
+ * **Opt-in (hidden by default; positive attr enables):** expand-to-fill (`expandable`),
+ * open-in-new-tab (`open-in-tab`).
+ *
+ * **Chrome:** `standalone` adds rounded corners + border (default = square/borderless
+ * for in-panel use). `readonly-path` makes the address field visible but non-editable.
+ *
+ * When ALL affordances are hidden the toolbar bar is omitted entirely (zero height).
+ */
+export const ConfigurableToolbar: Story = {
+  name: 'Configurable toolbar',
+  render: (args: {
+    expandable?: boolean;
+    openInTab?: boolean;
+    noNav?: boolean;
+    noReload?: boolean;
+    noHome?: boolean;
+    noPathField?: boolean;
+    noTabs?: boolean;
+    standalone?: boolean;
+    readonlyPath?: boolean;
+  }) => {
+    let el: HTMLElement & { files?: ArtifactFile[] };
+    onMount(() => { if (el) el.files = FILES; });
+    return (
+      <Frame>
+        <kc-artifact
+          ref={(e) => (el = e as HTMLElement & { files?: ArtifactFile[] })}
+          src={`${BASE}/index.html`}
+          iframe-title="Starboard artifact preview"
+          expandable={args.expandable || undefined}
+          open-in-tab={args.openInTab || undefined}
+          no-nav={args.noNav || undefined}
+          no-reload={args.noReload || undefined}
+          no-home={args.noHome || undefined}
+          no-path-field={args.noPathField || undefined}
+          no-tabs={args.noTabs || undefined}
+          standalone={args.standalone || undefined}
+          readonly-path={args.readonlyPath || undefined}
+        />
+      </Frame>
+    );
+  },
+  args: {
+    expandable: false,
+    openInTab: false,
+    noNav: false,
+    noReload: false,
+    noHome: false,
+    noPathField: false,
+    noTabs: false,
+    standalone: false,
+    readonlyPath: false,
+  },
+  argTypes: {
+    expandable: { control: 'boolean', description: 'Show the expand-to-fill button (opt-in).' },
+    openInTab: { control: 'boolean', name: 'open-in-tab', description: 'Show the open-in-new-tab button (opt-in).' },
+    noNav: { control: 'boolean', name: 'no-nav', description: 'Hide the back/forward buttons.' },
+    noReload: { control: 'boolean', name: 'no-reload', description: 'Hide the reload button.' },
+    noHome: { control: 'boolean', name: 'no-home', description: 'Hide the home button.' },
+    noPathField: { control: 'boolean', name: 'no-path-field', description: 'Hide the address field.' },
+    noTabs: { control: 'boolean', name: 'no-tabs', description: 'Hide the Preview|Code toggle.' },
+    standalone: { control: 'boolean', description: 'Standalone chrome (rounded + border).' },
+    readonlyPath: { control: 'boolean', name: 'readonly-path', description: 'Address field is visible but non-editable.' },
+  },
+  parameters: { docs: { source: { code: CONFIGURABLE_TOOLBAR_SNIPPET, language: 'html' } } },
+};
+
+const MINIMAL_SNIPPET = `<!-- Minimal: only the preview iframe, no toolbar at all. -->
+<kc-artifact
+  src="…"
+  no-nav
+  no-reload
+  no-home
+  no-path-field
+  no-tabs
+></kc-artifact>`;
+
+/**
+ * All five default-shown toolbar affordances suppressed — the toolbar bar
+ * disappears entirely (zero height), leaving just the preview iframe.
+ * Useful for an embedded, chrome-free artifact tile.
+ */
+export const MinimalPreview: Story = {
+  name: 'Minimal (preview-only)',
+  render: () => (
+    <Frame>
+      <kc-artifact
+        src={`${BASE}/index.html`}
+        iframe-title="Starboard artifact preview"
+        no-nav
+        no-reload
+        no-home
+        no-path-field
+        no-tabs
+      />
+    </Frame>
+  ),
+  parameters: { docs: { source: { code: MINIMAL_SNIPPET, language: 'html' } } },
+};
+
+const OPEN_IN_TAB_SNIPPET = `<!-- open-in-tab: adds a button that opens the current URL in a new tab.
+     The button is disabled while the src is blank. -->
+<kc-artifact
+  src="https://your-backend.example/artifacts/abc/index.html"
+  open-in-tab
+></kc-artifact>`;
+
+/**
+ * The **open-in-tab** button (opt-in via `open-in-tab`) opens the current
+ * preview URL in a new browser tab (`window.open`, `noopener,noreferrer`).
+ * It is disabled while the URL is empty / `about:blank` and follows the live
+ * navigation state — clicking it after the user has navigated to a sub-page
+ * opens that sub-page, not the original `src`.
+ */
+export const OpenInTab: Story = {
+  name: 'Open in new tab',
+  render: () => {
+    let el: HTMLElement & { files?: ArtifactFile[] };
+    onMount(() => { if (el) el.files = FILES; });
+    return (
+      <Frame>
+        <kc-artifact
+          ref={(e) => (el = e as HTMLElement & { files?: ArtifactFile[] })}
+          src={`${BASE}/index.html`}
+          iframe-title="Starboard artifact preview"
+          open-in-tab
+        />
+      </Frame>
+    );
+  },
+  parameters: { docs: { source: { code: OPEN_IN_TAB_SNIPPET, language: 'html' } } },
+};
+
+const STANDALONE_SNIPPET = `<!-- standalone: adds rounded corners + a border (like a card).
+     Suppresses the expand button even when expandable is set.
+     Use for an artifact rendered outside any panel layout. -->
+<kc-artifact
+  src="…"
+  standalone
+  style="display:block;height:520px"
+></kc-artifact>`;
+
+/**
+ * `standalone` adds rounded corners and a border — the "card" chrome for an
+ * artifact rendered outside any panel layout (e.g. as a modal or inline tile).
+ * In the default in-panel mode the element is square and borderless so it fits
+ * flush inside a `<kc-resizable>` panel without double-borders.
+ *
+ * `standalone` also suppresses the expand button (there is no enclosing resizable
+ * to maximize into) regardless of `expandable`.
+ *
+ * `readonly-path` keeps the address field visible and navigation-tracking but
+ * non-editable — useful when the consumer drives the URL programmatically.
+ */
+export const StandaloneChrome: Story = {
+  name: 'Standalone chrome + read-only path',
+  render: () => {
+    let el: HTMLElement & { files?: ArtifactFile[] };
+    onMount(() => { if (el) el.files = FILES; });
+    return (
+      <div style={{ padding: '16px', 'max-width': '900px' }}>
+        <kc-artifact
+          ref={(e) => (el = e as HTMLElement & { files?: ArtifactFile[] })}
+          src={`${BASE}/index.html`}
+          iframe-title="Starboard artifact preview"
+          standalone
+          readonly-path
+          style={{ display: 'block', height: '480px' }}
+        />
+      </div>
+    );
+  },
+  parameters: { docs: { source: { code: STANDALONE_SNIPPET, language: 'html' } } },
 };

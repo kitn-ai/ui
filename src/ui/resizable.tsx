@@ -1,4 +1,4 @@
-import { type JSX, splitProps, createSignal, createContext, useContext, For, Show, children as resolveChildren } from 'solid-js';
+import { type JSX, splitProps, createSignal, createEffect, createContext, useContext, For, Show, children as resolveChildren } from 'solid-js';
 import { cn } from '../utils/cn';
 
 // --- Types ---
@@ -426,6 +426,10 @@ export interface ResizableProps {
   /** Show a visible grip on each interactive handle. */
   withHandle?: boolean;
   class?: string;
+  /** Which panel index is maximized (null = none). Hides the others. */
+  maximizedIndex?: number | null;
+  /** Fired when the maximized panel changes (index, or null on restore). */
+  onMaximizeChange?: (index: number | null) => void;
   /** `ResizablePanel` children. */
   children: JSX.Element;
 }
@@ -438,7 +442,9 @@ export interface ResizableProps {
  * `ResizablePanelGroup` + explicit `ResizableHandle`s.
  */
 function Resizable(props: ResizableProps) {
-  const [local] = splitProps(props, ['orientation', 'onChange', 'withHandle', 'class', 'children']);
+  const [local] = splitProps(props, [
+    'orientation', 'onChange', 'withHandle', 'class', 'children', 'maximizedIndex', 'onMaximizeChange',
+  ]);
   const orientation = () => local.orientation ?? 'horizontal';
 
   // Resolve children to the actual panel elements so we can read their props.
@@ -454,6 +460,29 @@ function Resizable(props: ResizableProps) {
   };
 
   const visible = () => panels().filter((p) => !p.hidden);
+
+  const maxIdx = () => local.maximizedIndex ?? null;
+  // When maximized, only the maximized panel is "visible" for layout; siblings drop
+  // (mirrors the web-component facade hiding siblings). Indices are over all panels.
+  // Note: stash/restore of sizes is handled by the panels' own defaultSize/flex —
+  // since the convenience re-renders from the unchanged ResizablePanel children on
+  // restore, sizes return to their declared values. The post-drag-live-size stash
+  // fidelity is a web-component-only concern; the Solid story uses declarative sizes.
+  const renderPanels = () => {
+    const all = panels();
+    const m = maxIdx();
+    if (m == null) return all.filter((p) => !p.hidden);
+    const target = all[m];
+    return target && !target.hidden ? [target] : all.filter((p) => !p.hidden);
+  };
+
+  // Notify on change of the maximized index (defer the initial null run).
+  let prevMax: number | null | undefined;
+  createEffect(() => {
+    const m = maxIdx();
+    if (prevMax === undefined) { prevMax = m; return; }
+    if (m !== prevMax) { prevMax = m; local.onMaximizeChange?.(m); }
+  });
 
   function emitChange() {
     if (!local.onChange) return;
@@ -477,13 +506,13 @@ function Resizable(props: ResizableProps) {
         )}
         data-orientation={orientation()}
       >
-        <For each={visible()}>
+        <For each={renderPanels()}>
           {(panel, i) => (
             <>
               <Show when={i() > 0}>
                 <ResizableHandle
                   withHandle={local.withHandle}
-                  static={panel.locked || visible()[i() - 1]?.locked}
+                  static={panel.locked || renderPanels()[i() - 1]?.locked}
                   onPanelResize={() => emitChange()}
                 />
               </Show>
