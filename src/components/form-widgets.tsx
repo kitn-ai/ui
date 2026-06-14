@@ -96,7 +96,7 @@ export function TextareaWidget(props: WidgetProps): JSX.Element {
 }
 
 export function NumberWidget(props: WidgetProps): JSX.Element {
-  const step = () => props.field['x-kitn-step'] ?? (props.field.type === 'integer' ? 1 : undefined);
+  const step = () => props.field['x-kc-step'] ?? (props.field.type === 'integer' ? 1 : undefined);
   return (
     <input
       id={props.id}
@@ -119,7 +119,7 @@ export function NumberWidget(props: WidgetProps): JSX.Element {
 export function SliderWidget(props: WidgetProps): JSX.Element {
   const min = () => props.field.minimum ?? 0;
   const max = () => props.field.maximum ?? 100;
-  const step = () => props.field['x-kitn-step'] ?? (props.field.type === 'integer' ? 1 : undefined);
+  const step = () => props.field['x-kc-step'] ?? (props.field.type === 'integer' ? 1 : undefined);
   const current = () => (props.value === undefined || props.value === null ? min() : Number(props.value));
   return (
     <div class="flex items-center gap-3">

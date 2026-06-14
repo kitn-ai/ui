@@ -41,7 +41,7 @@ missing is:
    contract's `submit-data` verb.
 
 **Goal:** an agent emits a `CardEnvelope` of `type: 'form'` whose `data` is a JSON
-Schema + a few `x-kitn-*` UI hints; the host renders a fully accessible form inside
+Schema + a few `x-kc-*` UI hints; the host renders a fully accessible form inside
 `kc-card` chrome; on submit the host receives a `submit-data` event carrying an
 object that is **guaranteed to validate** against the form's *result* schema.
 
@@ -51,7 +51,7 @@ object that is **guaranteed to validate** against the form's *result* schema.
   actions footer) + a standard inline **error** rendering, theme-aware (`--kitn-*`),
   a11y-clean. Other cards compose it; it is also publishable standalone.
 - `kc-form`: a deterministic **JSON-Schema → widget** mapping (the table below),
-  `x-kitn-*` hints for ambiguous cases, full client-side validation (required,
+  `x-kc-*` hints for ambiguous cases, full client-side validation (required,
   min/max/length, pattern, enum), and a `submit-data` emission of the collected,
   coerced, validated object.
 - Both consume the **frozen contract only** — read `CardContext`, emit `CardEvent`
@@ -69,7 +69,7 @@ object that is **guaranteed to validate** against the form's *result* schema.
   defines `kc-card` (which they consume) and `kc-form`.
 - **Not** a general-purpose JSON-Schema form library competitor (RJSF / JSON Forms).
   `kc-form` supports the **subset the contract's validator covers** (type, enum,
-  required, min/max, length, pattern, array items, object properties, `x-kitn-*`),
+  required, min/max, length, pattern, array items, object properties, `x-kc-*`),
   matching the contract's "lean validator first" decision. `$ref`, `allOf`/`anyOf`,
   conditional `if/then`, and `oneOf` schema composition are **out of v1** (see Open
   questions).
@@ -262,7 +262,7 @@ contract's `CardEnvelope.title` maps to `heading`.
 ### How it consumes the Card contract
 
 - **Data down:** `kc-form`'s `data` prop is the **form definition** — a JSON Schema
-  (`type: 'object'`) describing the fields, plus `x-kitn-*` hints. This is the
+  (`type: 'object'`) describing the fields, plus `x-kc-*` hints. This is the
   `CardEnvelope.data` for `type: 'form'` (`form.schema.json`). The wrapper exposes
   it as a JS **property** (`el.data = {...}`), like `<kc-file-tree>.files`.
 - **Context down:** reads `CardContext` for `theme.mode`/`tokens` (already applied
@@ -278,9 +278,9 @@ contract's `CardEnvelope.title` maps to `heading`.
     **This is the form's whole purpose.**
   - `error` — on invalid envelope schema or render failure:
     `{ kind: 'error', cardId, message }`. The card shows `kc-card`'s inline error.
-  - `action` — for **secondary** buttons declared via `x-kitn-actions` (e.g. a
+  - `action` — for **secondary** buttons declared via `x-kc-actions` (e.g. a
     "Skip"/"Cancel") → `{ kind: 'action', cardId, action: '<id>' }`.
-  - `dismiss` — if `x-kitn-dismissible`, a close affordance emits
+  - `dismiss` — if `x-kc-dismissible`, a close affordance emits
     `{ kind: 'dismiss', cardId }`.
   - `resize` — content height for the remote/iframe auto-height (the remote runtime
     emits it; native skips — see Open question 4).
@@ -320,26 +320,26 @@ is exactly what the contract's native-transport section prescribes.
 ### The type → widget mapping (concrete, deterministic)
 
 Given a JSON Schema `type: 'object'`, each property is rendered by this table.
-Resolution order: an explicit `x-kitn-widget` always wins; otherwise the
+Resolution order: an explicit `x-kc-widget` always wins; otherwise the
 `type`/`format`/`enum`/constraint combination selects the widget.
 
 | Schema shape | Widget | Notes |
 |---|---|---|
 | `string` | **text input** | single-line |
-| `string` + `enum` (≤ `x-kitn-inlineMax`, default 4) | **radio group** | `role="radiogroup"` |
+| `string` + `enum` (≤ `x-kc-inlineMax`, default 4) | **radio group** | `role="radiogroup"` |
 | `string` + `enum` (> threshold) | **select** | native `<select>` (a11y + mobile-friendly) |
 | `string` + `format: "email"` | **email input** | `type="email"` + pattern validation |
 | `string` + `format: "uri"`/`"url"` | **url input** | `type="url"` |
 | `string` + `format: "date"` | **date input** | `type="date"`, locale-aware display |
 | `string` + `format: "date-time"` | **datetime input** | `type="datetime-local"` |
 | `string` + `format: "time"` | **time input** | `type="time"` |
-| `string` + `maxLength` > 120 **or** `x-kitn-widget: "textarea"` | **textarea** | reuses `src/ui/textarea.tsx` (auto-resize) |
-| `string` + `x-kitn-widget: "password"` | **password input** | `type="password"` |
+| `string` + `maxLength` > 120 **or** `x-kc-widget: "textarea"` | **textarea** | reuses `src/ui/textarea.tsx` (auto-resize) |
+| `string` + `x-kc-widget: "password"` | **password input** | `type="password"` |
 | `number` / `integer` | **number input** | `type="number"`, `step` = 1 for integer |
-| `number`/`integer` + `minimum` & `maximum` + `x-kitn-widget: "slider"` | **slider** | `type="range"` with live value label |
-| `integer` + `x-kitn-widget: "rating"` | **rating** | star buttons 1..`maximum` (lucide `Star`) |
+| `number`/`integer` + `minimum` & `maximum` + `x-kc-widget: "slider"` | **slider** | `type="range"` with live value label |
+| `integer` + `x-kc-widget: "rating"` | **rating** | star buttons 1..`maximum` (lucide `Star`) |
 | `boolean` | **toggle** | accessible switch (`role="switch"`) |
-| `boolean` + `x-kitn-widget: "checkbox"` | **checkbox** | single checkbox |
+| `boolean` + `x-kc-widget: "checkbox"` | **checkbox** | single checkbox |
 | `array` + `items.enum` | **multi-select / checkbox group** | checkboxes (≤ threshold) else multi-`<select>` |
 | `array` + `items.type: "object"` | **repeater** | add/remove rows; each row a nested fieldset |
 | `array` + `items.type: "string"` (no enum) | **tag/string list** | add/remove free-text chips |
@@ -350,26 +350,26 @@ Resolution order: an explicit `x-kitn-widget` always wins; otherwise the
 - `description` → help text (`aria-describedby`).
 - `default` → initial value.
 - `readOnly` → disabled control.
-- `placeholder` is **not** standard JSON Schema; use `x-kitn-placeholder`.
+- `placeholder` is **not** standard JSON Schema; use `x-kc-placeholder`.
 
-**Field order:** `x-kitn-order` (array of property keys) if present, else
+**Field order:** `x-kc-order` (array of property keys) if present, else
 `required` fields first then schema property declaration order.
 
-### The `x-kitn-*` UI hints
+### The `x-kc-*` UI hints
 
 All optional; the form renders sensibly without any of them. Defined here for
-`kc-form` (the contract names `x-kitn-*` as the hint namespace):
+`kc-form` (the contract names `x-kc-*` as the hint namespace):
 
 | Hint | Scope | Type | Effect |
 |---|---|---|---|
-| `x-kitn-widget` | property | `"textarea" \| "slider" \| "rating" \| "radio" \| "select" \| "checkbox" \| "password" \| "switch"` | Force a widget, overriding the default mapping. **Minimum required set per the brief: `"rating"`, `"slider"`, `"textarea"`.** |
-| `x-kitn-placeholder` | property | string | Input placeholder (JSON Schema has none). |
-| `x-kitn-order` | root | string[] | Explicit field order. |
-| `x-kitn-inlineMax` | root | integer (default 4) | enum-count threshold for radio-vs-select / checkboxes-vs-multiselect. |
-| `x-kitn-submitLabel` | root | string (default `"Submit"`) | Primary button label. |
-| `x-kitn-actions` | root | `{ id: string; label: string; variant?: "default"\|"ghost"\|"outline" }[]` | Secondary footer buttons → emit `action` with that `id`. |
-| `x-kitn-dismissible` | root | boolean | Show a close affordance → emit `dismiss`. |
-| `x-kitn-step` | property (number) | number | Numeric `step` (overrides the integer/float default). |
+| `x-kc-widget` | property | `"textarea" \| "slider" \| "rating" \| "radio" \| "select" \| "checkbox" \| "password" \| "switch"` | Force a widget, overriding the default mapping. **Minimum required set per the brief: `"rating"`, `"slider"`, `"textarea"`.** |
+| `x-kc-placeholder` | property | string | Input placeholder (JSON Schema has none). |
+| `x-kc-order` | root | string[] | Explicit field order. |
+| `x-kc-inlineMax` | root | integer (default 4) | enum-count threshold for radio-vs-select / checkboxes-vs-multiselect. |
+| `x-kc-submitLabel` | root | string (default `"Submit"`) | Primary button label. |
+| `x-kc-actions` | root | `{ id: string; label: string; variant?: "default"\|"ghost"\|"outline" }[]` | Secondary footer buttons → emit `action` with that `id`. |
+| `x-kc-dismissible` | root | boolean | Show a close affordance → emit `dismiss`. |
+| `x-kc-step` | property (number) | number | Numeric `step` (overrides the integer/float default). |
 
 These hints live **inside** the JSON Schema (`x-` keywords are valid and ignored by
 standard validators), so the same schema validates the submission *and* drives the
@@ -426,7 +426,7 @@ specified here is the contract (see Open question 3).
 
 The `data` is itself a JSON Schema (the form definition). `form.schema.json` is the
 **meta-schema** describing what a valid form-definition looks like — it constrains
-the JSON Schema subset `kc-form` accepts plus the `x-kitn-*` hints.
+the JSON Schema subset `kc-form` accepts plus the `x-kc-*` hints.
 
 `src/primitives/card-schemas/form.schema.json` (load-bearing parts):
 
@@ -446,11 +446,11 @@ the JSON Schema subset `kc-form` accepts plus the `x-kitn-*` hints.
       "type": "object",
       "additionalProperties": { "$ref": "#/$defs/field" }
     },
-    "x-kitn-order": { "type": "array", "items": { "type": "string" } },
-    "x-kitn-inlineMax": { "type": "integer", "minimum": 1, "default": 4 },
-    "x-kitn-submitLabel": { "type": "string", "default": "Submit" },
-    "x-kitn-dismissible": { "type": "boolean" },
-    "x-kitn-actions": {
+    "x-kc-order": { "type": "array", "items": { "type": "string" } },
+    "x-kc-inlineMax": { "type": "integer", "minimum": 1, "default": 4 },
+    "x-kc-submitLabel": { "type": "string", "default": "Submit" },
+    "x-kc-dismissible": { "type": "boolean" },
+    "x-kc-actions": {
       "type": "array",
       "items": {
         "type": "object",
@@ -483,11 +483,11 @@ the JSON Schema subset `kc-form` accepts plus the `x-kitn-*` hints.
         "items": {},
         "properties": { "type": "object" },
         "readOnly": { "type": "boolean" },
-        "x-kitn-widget": {
+        "x-kc-widget": {
           "enum": ["textarea", "slider", "rating", "radio", "select", "checkbox", "password", "switch"]
         },
-        "x-kitn-placeholder": { "type": "string" },
-        "x-kitn-step": { "type": "number" }
+        "x-kc-placeholder": { "type": "string" },
+        "x-kc-step": { "type": "number" }
       }
     }
   }
@@ -531,9 +531,9 @@ export interface FormField {
   items?: FormField | { enum: unknown[] };
   properties?: Record<string, FormField>;
   readOnly?: boolean;
-  'x-kitn-widget'?: 'textarea' | 'slider' | 'rating' | 'radio' | 'select' | 'checkbox' | 'password' | 'switch';
-  'x-kitn-placeholder'?: string;
-  'x-kitn-step'?: number;
+  'x-kc-widget'?: 'textarea' | 'slider' | 'rating' | 'radio' | 'select' | 'checkbox' | 'password' | 'switch';
+  'x-kc-placeholder'?: string;
+  'x-kc-step'?: number;
 }
 
 /** The form definition = CardEnvelope.data for type:'form'. */
@@ -543,11 +543,11 @@ export interface FormDefinition {
   description?: string;
   required?: string[];
   properties: Record<string, FormField>;
-  'x-kitn-order'?: string[];
-  'x-kitn-inlineMax'?: number;
-  'x-kitn-submitLabel'?: string;
-  'x-kitn-dismissible'?: boolean;
-  'x-kitn-actions'?: { id: string; label: string; variant?: 'default' | 'ghost' | 'outline' }[];
+  'x-kc-order'?: string[];
+  'x-kc-inlineMax'?: number;
+  'x-kc-submitLabel'?: string;
+  'x-kc-dismissible'?: boolean;
+  'x-kc-actions'?: { id: string; label: string; variant?: 'default' | 'ghost' | 'outline' }[];
 }
 
 export type FormCardEnvelope = CardEnvelope<'form', FormDefinition>;
@@ -569,18 +569,18 @@ export type FormCardEnvelope = CardEnvelope<'form', FormDefinition>;
     "title": "How did we do?",
     "description": "Two quick questions.",
     "required": ["rating", "contactOk"],
-    "x-kitn-order": ["rating", "comments", "plan", "contactOk"],
-    "x-kitn-submitLabel": "Send feedback",
-    "x-kitn-actions": [{ "id": "skip", "label": "Skip", "variant": "ghost" }],
+    "x-kc-order": ["rating", "comments", "plan", "contactOk"],
+    "x-kc-submitLabel": "Send feedback",
+    "x-kc-actions": [{ "id": "skip", "label": "Skip", "variant": "ghost" }],
     "properties": {
       "rating": {
         "type": "integer", "title": "Overall rating",
-        "minimum": 1, "maximum": 5, "x-kitn-widget": "rating"
+        "minimum": 1, "maximum": 5, "x-kc-widget": "rating"
       },
       "comments": {
         "type": "string", "title": "Comments",
-        "maxLength": 500, "x-kitn-widget": "textarea",
-        "x-kitn-placeholder": "What worked, what didn't…"
+        "maxLength": 500, "x-kc-widget": "textarea",
+        "x-kc-placeholder": "What worked, what didn't…"
       },
       "plan": {
         "type": "string", "title": "Your plan",
@@ -638,7 +638,7 @@ Clicking "Skip" instead emits `{ "kind": "action", "cardId": "card-feedback-7f3"
   → inline error + host receives `error`.")
 - **Render error** (a widget throws) → caught at the form root → same inline error +
   `error` event.
-- **Unknown `x-kitn-widget`** value not in the enum → ignored, falls back to the
+- **Unknown `x-kc-widget`** value not in the enum → ignored, falls back to the
   default mapping (forward-compatible; never breaks).
 - **Unknown field `type`** → that field renders a read-only "unsupported field"
   notice; the rest of the form still works (graceful degradation, mirroring the
@@ -695,8 +695,8 @@ empirical (Playwright/axe per the project gate). What's verified:
   slider hint→range; rating hint→stars; boolean→switch; checkbox hint→checkbox;
   array+items.enum→checkbox group; array+items.object→repeater; array+items.string
   →tag list; nested object→fieldset. One assertion per row.
-- `x-kitn-widget` overrides the default; unknown widget falls back.
-- `x-kitn-order` reorders; default falls back to required-first then declaration.
+- `x-kc-widget` overrides the default; unknown widget falls back.
+- `x-kc-order` reorders; default falls back to required-first then declaration.
 
 **`kc-form` — validation:**
 - required missing → blocks submit, marks field, focuses it, no `submit-data`.
@@ -779,7 +779,7 @@ Source snippet shape (mirrors `file-tree.stories.tsx`'s `HTML_SNIPPET`):
    valid, which is rarely what an author means (they usually want "must be checked",
    e.g. consent). Options: (a) treat required boolean as "must be `true`" (useful
    convention but a deviation from strict JSON Schema), (b) require an explicit
-   `const: true` / `enum: [true]` to force checked, (c) add `x-kitn-mustAccept`.
+   `const: true` / `enum: [true]` to force checked, (c) add `x-kc-mustAccept`.
    Strict-spec correctness vs author ergonomics — needs a call. (v1 draft assumes
    strict presence; flagged.)
 2. **Schema composition (`$ref`, `allOf`/`anyOf`/`oneOf`, `if/then`).** Out of v1 to

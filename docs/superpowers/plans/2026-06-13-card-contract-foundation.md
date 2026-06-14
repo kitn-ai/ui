@@ -197,8 +197,8 @@ test('array items + minItems + uniqueItems', () => {
   expect(ok({ type: 'array', uniqueItems: true }, ['a', 'a'])).toBe(false);
 });
 
-test('x-kitn-* keywords are ignored (not treated as constraints)', () => {
-  expect(ok({ type: 'string', 'x-kitn-widget': 'rating' } as JsonSchema, 'x')).toBe(true);
+test('x-kc-* keywords are ignored (not treated as constraints)', () => {
+  expect(ok({ type: 'string', 'x-kc-widget': 'rating' } as JsonSchema, 'x')).toBe(true);
 });
 
 test('errors are reported with paths', () => {
@@ -221,7 +221,7 @@ Expected: FAIL — cannot resolve `card-validate`.
 ```ts
 // src/primitives/card-validate.ts
 // The single shared lean JSON-Schema validator the contract mandates. Covers the
-// subset cards use; `x-*` keywords (incl. x-kitn-*) are ignored. No ajv. Used at
+// subset cards use; `x-*` keywords (incl. x-kc-*) are ignored. No ajv. Used at
 // every boundary (incoming card data, outgoing payloads) by cards + both transports.
 
 export interface JsonSchema {
@@ -237,7 +237,7 @@ export interface JsonSchema {
   pattern?: string;
   minItems?: number; maxItems?: number;
   uniqueItems?: boolean;
-  // x-* keywords (e.g. x-kitn-widget) are allowed and ignored.
+  // x-* keywords (e.g. x-kc-widget) are allowed and ignored.
   [key: `x-${string}`]: unknown;
 }
 

@@ -249,7 +249,7 @@ defined here only so its shape is stable for the live layer.
 Boundary validation uses a **single shared lean validator** (`card-validate`)
 shipped by this contract's implementation, covering the subset we use (type, enum,
 const, required, min/max, length, pattern, array items/uniqueItems, object
-properties — `x-kitn-*` hints are ignored by it, honored by cards). No heavy
+properties — `x-kc-*` hints are ignored by it, honored by cards). No heavy
 dependency (no `ajv`) in v1. **Every card and both transports consume this one
 module** — never a per-card re-implementation. (If the subset proves insufficient
 later, an `ajv` opt-in can be documented without changing call sites.)

@@ -1031,7 +1031,7 @@
         "type": "undefined | Record<string, unknown>",
         "optional": true,
         "scalar": false,
-        "description": "The form definition — a JSON Schema (`type:'object'`) + `x-kitn-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitnai/chat` for the full shape (it is self-referential, so the element types it loosely).",
+        "description": "The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitnai/chat` for the full shape (it is self-referential, so the element types it loosely).",
         "displayType": "undefined | Record<string, unknown>"
       },
       {

@@ -1,6 +1,6 @@
 // src/primitives/card-validate.ts
 // The single shared lean JSON-Schema validator the contract mandates. Covers the
-// subset cards use; `x-*` keywords (incl. x-kitn-*) are ignored. No ajv. Used at
+// subset cards use; `x-*` keywords (incl. x-kc-*) are ignored. No ajv. Used at
 // every boundary (incoming card data, outgoing payloads) by cards + both transports.
 
 export interface JsonSchema {
@@ -16,7 +16,7 @@ export interface JsonSchema {
   pattern?: string;
   minItems?: number; maxItems?: number;
   uniqueItems?: boolean;
-  // x-* keywords (e.g. x-kitn-widget) are allowed and ignored.
+  // x-* keywords (e.g. x-kc-widget) are allowed and ignored.
   [key: `x-${string}`]: unknown;
 }
 

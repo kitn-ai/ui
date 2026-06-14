@@ -2,7 +2,7 @@ import { defineWebComponent } from './define';
 import { Form, type FormDefinition } from '../components/form';
 
 interface Props extends Record<string, unknown> {
-  /** The form definition — a JSON Schema (`type:'object'`) + `x-kitn-*` UI hints
+  /** The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints
    *  (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object',
    *  properties:{…} }`. Import the `FormDefinition` type from `@kitnai/chat` for
    *  the full shape (it is self-referential, so the element types it loosely). */

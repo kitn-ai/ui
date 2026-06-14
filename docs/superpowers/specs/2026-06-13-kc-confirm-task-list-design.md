@@ -212,7 +212,7 @@ not required for a bare card to render correctly.
 
 ## JSON Schemas
 
-All under `src/primitives/card-schemas/`. Draft 2020-12. `x-kitn-*` keywords are
+All under `src/primitives/card-schemas/`. Draft 2020-12. `x-kc-*` keywords are
 UI hints (ignored by generic validators, honored by the cards). Each ships with a
 matching TS type (shown after the schema). The host validates these at the
 boundary (contract requirement); the cards assume already-valid data but still
@@ -243,7 +243,7 @@ guard structurally.
       "enum": ["default", "warning", "danger"],
       "default": "default",
       "description": "Overall card tone; 'danger' adds a warning icon + accent for destructive approvals.",
-      "x-kitn-control": "tone"
+      "x-kc-control": "tone"
     },
     "actions": {
       "type": "array",
@@ -259,7 +259,7 @@ guard structurally.
             "type": "string",
             "minLength": 1,
             "description": "Emitted as CardEvent.action. Must be unique within `actions`.",
-            "x-kitn-unique": true
+            "x-kc-unique": true
           },
           "label": { "type": "string", "minLength": 1, "description": "Visible button label." },
           "style": {
@@ -267,7 +267,7 @@ guard structurally.
             "enum": ["primary", "default", "destructive"],
             "default": "default",
             "description": "Button emphasis. 'destructive' = red/danger; 'primary' = filled accent.",
-            "x-kitn-control": "button-style"
+            "x-kc-control": "button-style"
           },
           "payload": {
             "description": "Optional opaque payload echoed back in CardEvent.payload (any JSON)."
@@ -276,7 +276,7 @@ guard structurally.
             "type": "boolean",
             "default": false,
             "description": "If true, this action is the keyboard default (Enter) and gets initial focus. At most one should be true; the card uses the first if several are.",
-            "x-kitn-default-action": true
+            "x-kc-default-action": true
           }
         }
       }
@@ -332,7 +332,7 @@ documented for hosts).
       "enum": ["select"],
       "default": "select",
       "description": "v1 supports only 'select' (toggle + confirm). 'progress' (live AG-UI status) is a future enum value; restricting it now keeps the wire forward-compatible.",
-      "x-kitn-mode": true
+      "x-kc-mode": true
     },
     "heading": {
       "type": "string",
@@ -351,7 +351,7 @@ documented for hosts).
             "type": "string",
             "minLength": 1,
             "description": "Stable id; the selected ids are returned in the result. Unique within `tasks`.",
-            "x-kitn-unique": true
+            "x-kc-unique": true
           },
           "label": { "type": "string", "minLength": 1, "description": "Row label." },
           "description": { "type": "string", "description": "Optional secondary line under the label." },
@@ -372,7 +372,7 @@ documented for hosts).
       "type": "boolean",
       "default": false,
       "description": "Render a master select-all checkbox above the list.",
-      "x-kitn-control": "select-all"
+      "x-kc-control": "select-all"
     },
     "confirmLabel": {
       "type": "string",
@@ -388,13 +388,13 @@ documented for hosts).
       "type": "integer",
       "minimum": 0,
       "description": "Optional minimum number that must be selected to confirm.",
-      "x-kitn-select-min": true
+      "x-kc-select-min": true
     },
     "max": {
       "type": "integer",
       "minimum": 1,
       "description": "Optional maximum selectable; further toggles are blocked once reached.",
-      "x-kitn-select-max": true
+      "x-kc-select-max": true
     }
   }
 }
@@ -452,17 +452,17 @@ requirement: outbound payloads are schema-validated; failures emit `error` and a
 NOT routed). `selected` is always a subset of the input `tasks[].id` set and
 preserves input order.
 
-### `x-kitn-*` hint summary
+### `x-kc-*` hint summary
 
 | hint | where | meaning |
 |---|---|---|
-| `x-kitn-control` | confirm.tone, action.style, task.selectAll | which control/styling the card renders |
-| `x-kitn-unique` | action.id, task.id | ids must be unique within their array (card de-dupes + warns) |
-| `x-kitn-default-action` | confirm action.default | Enter-key default + initial focus |
-| `x-kitn-mode` | task-list.mode | reserved mode discriminator (future `progress`) |
-| `x-kitn-select-min` / `-max` | task-list.min/max | selection-count bounds for confirm enablement |
+| `x-kc-control` | confirm.tone, action.style, task.selectAll | which control/styling the card renders |
+| `x-kc-unique` | action.id, task.id | ids must be unique within their array (card de-dupes + warns) |
+| `x-kc-default-action` | confirm action.default | Enter-key default + initial focus |
+| `x-kc-mode` | task-list.mode | reserved mode discriminator (future `progress`) |
+| `x-kc-select-min` / `-max` | task-list.min/max | selection-count bounds for confirm enablement |
 
-These follow the contract's "JSON-Schema-first with `x-kitn-*` UI hints" tenet;
+These follow the contract's "JSON-Schema-first with `x-kc-*` UI hints" tenet;
 generic JSON Schema validators ignore them, the cards honor them.
 
 ---
