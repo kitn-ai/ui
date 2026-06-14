@@ -66,19 +66,56 @@ const isBooleanParts = (parts: string[], rawType: string): boolean => {
   return sorted === 'false,true';
 };
 
-/** Storybook argTypes for an element's scalar props (theme select, booleans, text, number). */
+/**
+ * Storybook argTypes for an element's props (theme select, booleans, text,
+ * number, object/JSON for complex types, and no control for functions).
+ *
+ * Classification order:
+ *  1. enum  → select
+ *  2. boolean → boolean
+ *  3. number  → number
+ *  4. contains `=>` (function / function-bearing object) → control: false
+ *  5. not all-string after normalisation (arrays, records, generics…) → object
+ *  6. all-string → text
+ */
 export function argTypesFor(tag: string): Record<string, unknown> {
   const el = all.find((e) => e.tag === tag);
   if (!el) return {};
   const out: Record<string, unknown> = {};
   for (const p of el.props) {
-    if (!p.scalar) continue;
     const parts = normaliseParts(p.type);
-    const values = enumValues(parts);
-    if (values) out[p.name] = { control: { type: 'select' }, options: values };
-    else if (isBooleanParts(parts, p.type)) out[p.name] = { control: 'boolean' };
-    else if (/\bnumber\b/.test(p.type)) out[p.name] = { control: 'number' };
-    else out[p.name] = { control: 'text' };
+
+    // 1–3: scalar classifications (enums, booleans, numbers only appear in scalar props)
+    if (p.scalar) {
+      const values = enumValues(parts);
+      if (values) {
+        out[p.name] = { control: { type: 'select' }, options: values };
+        continue;
+      }
+      if (isBooleanParts(parts, p.type)) {
+        out[p.name] = { control: 'boolean' };
+        continue;
+      }
+      if (/\bnumber\b/.test(p.type)) {
+        out[p.name] = { control: 'number' };
+        continue;
+      }
+    }
+
+    // 4. Function / function-bearing object: contains `=>` in raw type string
+    if (p.type.includes('=>')) {
+      out[p.name] = { control: false };
+      continue;
+    }
+
+    // 5. Complex/object: parts are not all exactly the string "string"
+    if (!parts.every((part) => part === 'string')) {
+      out[p.name] = { control: 'object' };
+      continue;
+    }
+
+    // 6. Pure string
+    out[p.name] = { control: 'text' };
   }
   return out;
 }
