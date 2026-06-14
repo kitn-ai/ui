@@ -4,6 +4,26 @@ import { ResizableHandle, normalizeSize } from '../ui/resizable';
 
 type Orientation = 'horizontal' | 'vertical';
 
+/** Bubbling, composed intent: a descendant asks the nearest enclosing
+ *  <kc-resizable> to maximize the item containing it (filling, hiding siblings)
+ *  or to restore. Any panel content may emit it — the protocol is zero-config. */
+export interface KcMaximizeIntentDetail {
+  /** true = maximize the item containing me; false = restore. */
+  requested: boolean;
+}
+
+/** Composed, non-bubbling notification the group dispatches DOWN onto the
+ *  affected <kc-resizable-item> (on maximize) or the group host + the formerly
+ *  maximized item (on restore) so descendant content can sync its affordance. */
+export interface KcMaximizeStateDetail {
+  /** Whether THIS subtree's item is the maximized one. */
+  maximized: boolean;
+}
+
+/** Event type names for the cross-element maximize protocol. */
+export const KC_MAXIMIZE_INTENT = 'kc-maximize-intent' as const;
+export const KC_MAXIMIZE_STATE = 'kc-maximize-state' as const;
+
 /** Parsed view of a `<kc-resizable-item>` light child. */
 interface ItemInfo {
   el: HTMLElement;

@@ -1,5 +1,6 @@
 // tests/elements/resizable-element.test.tsx
 import '../../src/elements/resizable';
+import type { KcMaximizeIntentDetail, KcMaximizeStateDetail } from '../../src/elements/resizable';
 
 // jsdom has no layout, so we only assert DOM structure, attributes and events
 // here. Drag, keyboard and visual layout are verified via Playwright.
@@ -102,4 +103,11 @@ test('kc-resizable-item renders its slotted light content via a default slot', a
   await flush();
   expect(item.shadowRoot!.querySelector('slot')).toBeTruthy();
   item.remove();
+});
+
+test('exports the maximize protocol detail types (compile-time shape check)', () => {
+  const intent: KcMaximizeIntentDetail = { requested: true };
+  const state: KcMaximizeStateDetail = { maximized: false };
+  expect(intent.requested).toBe(true);
+  expect(state.maximized).toBe(false);
 });
