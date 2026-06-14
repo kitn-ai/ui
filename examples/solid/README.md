@@ -1,6 +1,6 @@
-# @kitnai/chat — SolidJS Primitives Example
+# @kitn.ai/chat — SolidJS Primitives Example
 
-A standalone **SolidJS + Vite** app that composes `@kitnai/chat` primitives
+A standalone **SolidJS + Vite** app that composes `@kitn.ai/chat` primitives
 into a working chat UI — the same composable layer used inside the kit's own
 Storybook stories.
 
@@ -19,7 +19,7 @@ Storybook stories.
 
 ## Tailwind v4 + theme setup (the key part)
 
-Because `@kitnai/chat` components use Tailwind v4 utility classes and
+Because `@kitn.ai/chat` components use Tailwind v4 utility classes and
 `--color-*` design tokens, a consuming app must do three things:
 
 ### 1. Vite plugin
@@ -39,8 +39,8 @@ export default defineConfig({
 ```css
 /* src/styles.css */
 @import "tailwindcss";
-@import "@kitnai/chat/theme.css";       /* design tokens: --color-background, --color-muted, … */
-@source "../node_modules/@kitnai/chat"; /* tell Tailwind to scan kit source for class names */
+@import "@kitn.ai/chat/theme.css";       /* design tokens: --color-background, --color-muted, … */
+@source "../node_modules/@kitn.ai/chat"; /* tell Tailwind to scan kit source for class names */
 ```
 
 The `@source` line is critical: without it Tailwind v4 only scans `src/`

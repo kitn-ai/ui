@@ -4,7 +4,7 @@ A minimal, runnable **Vue 3 + Vite** app that uses the kit's web components dire
 
 ## What this demonstrates
 
-- A **static** `import '@kitnai/chat/elements'` in `src/main.ts` **before** `createApp(App).mount(...)` — the elements must be registered/upgraded before Vue stamps the tags.
+- A **static** `import '@kitn.ai/chat/elements'` in `src/main.ts` **before** `createApp(App).mount(...)` — the elements must be registered/upgraded before Vue stamps the tags.
 - The **`.prop` modifier** (`:groups.prop`, `:conversations.prop`, `:messages.prop`, etc.) so Vue sets DOM *properties* rather than stringified attributes — required when passing arrays/objects to Shadow-DOM custom elements.
 - `@event` listeners that read `(e as CustomEvent).detail` for `@conversationselect`, `@submit`, `@modelchange`, `@sidebartoggle`, `@newchat`, and `@messageaction`.
 - `vite.config.ts` with `isCustomElement: (tag) => tag.startsWith('kitn-')` so Vue treats `kitn-*` tags as native custom elements, not Vue components.
@@ -42,8 +42,8 @@ npm run preview
 
 ```ts
 // src/main.ts
-import '@kitnai/chat/elements'; // MUST come before createApp
-import '@kitnai/chat/theme.css';
+import '@kitn.ai/chat/elements'; // MUST come before createApp
+import '@kitn.ai/chat/theme.css';
 import { createApp } from 'vue';
 import App from './App.vue';
 createApp(App).mount('#app');

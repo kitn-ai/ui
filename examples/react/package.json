@@ -1,5 +1,5 @@
 {
-  "name": "@kitnai/chat-example-react",
+  "name": "@kitn.ai/chat-example-react",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kitnai/chat": "^0.2.0",
+    "@kitn.ai/chat": "^0.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

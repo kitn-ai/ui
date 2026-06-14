@@ -12,9 +12,9 @@
  *   } from '../../shared/sample-data';
  */
 
-// ── Shared types (mirror @kitnai/chat exported interfaces) ────────────────────
+// ── Shared types (mirror @kitn.ai/chat exported interfaces) ────────────────────
 
-/** Mirror of `ConversationGroup` from @kitnai/chat. */
+/** Mirror of `ConversationGroup` from @kitn.ai/chat. */
 export interface SampleGroup {
   id: string;
   name: string;
@@ -22,7 +22,7 @@ export interface SampleGroup {
   createdAt: string;
 }
 
-/** Mirror of `ConversationSummary` from @kitnai/chat. */
+/** Mirror of `ConversationSummary` from @kitn.ai/chat. */
 export interface SampleConversation {
   id: string;
   title: string;
@@ -33,14 +33,14 @@ export interface SampleConversation {
   updatedAt: string;
 }
 
-/** Mirror of `ModelOption` from @kitnai/chat. */
+/** Mirror of `ModelOption` from @kitn.ai/chat. */
 export interface SampleModel {
   id: string;
   name: string;
   provider?: string;
 }
 
-/** Mirror of `SlashCommandItem` from @kitnai/chat. */
+/** Mirror of `SlashCommandItem` from @kitn.ai/chat. */
 export interface SampleSlashCommand {
   id: string;
   label: string;
@@ -51,7 +51,7 @@ export interface SampleSlashCommand {
 /** Message action verbs supported by <kc-chat>. */
 export type MessageAction = 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit';
 
-/** Minimal chat message shape (mirrors ChatMessage from @kitnai/chat/elements). */
+/** Minimal chat message shape (mirrors ChatMessage from @kitn.ai/chat/elements). */
 export interface SampleMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -112,7 +112,7 @@ export const SAMPLE_MESSAGES: Record<string, SampleMessage[]> = {
       role: 'assistant',
       actions: ['copy', 'like', 'dislike'],
       content:
-        "Just use the wrappers from `@kitnai/chat/react`:\n\n```tsx\nimport { KcChat } from '@kitnai/chat/react';\n\n<KcChat\n  messages={messages}\n  models={models}\n  onSubmit={(e) => console.log(e.detail)}\n  theme=\"auto\"\n/>\n```\n\nArrays/objects are passed as props and become live DOM properties; events arrive as `on<Event>` callbacks. No refs or `useEffect` needed.",
+        "Just use the wrappers from `@kitn.ai/chat/react`:\n\n```tsx\nimport { KcChat } from '@kitn.ai/chat/react';\n\n<KcChat\n  messages={messages}\n  models={models}\n  onSubmit={(e) => console.log(e.detail)}\n  theme=\"auto\"\n/>\n```\n\nArrays/objects are passed as props and become live DOM properties; events arrive as `on<Event>` callbacks. No refs or `useEffect` needed.",
     },
   ],
   'c-2': [
