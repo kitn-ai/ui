@@ -1,5 +1,90 @@
 [
   {
+    "tag": "kc-artifact",
+    "className": "KcArtifactElement",
+    "props": [
+      {
+        "name": "src",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "URL the preview iframe frames. Consumer-controlled.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "files",
+        "type": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "Files for the Code tab tree + each file's preview `url`. Set as a JS property (array).",
+        "default": "[]",
+        "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
+      },
+      {
+        "name": "tab",
+        "type": "undefined | \"preview\" | \"code\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Active tab: `preview` (default) or `code`.",
+        "default": "'preview'",
+        "displayType": "undefined | \"preview\" | \"code\""
+      },
+      {
+        "name": "activeFile",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Selected file path — syncs the tree highlight, Code source, and preview.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "sandbox",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`).",
+        "default": "'allow-scripts allow-forms'",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "iframeTitle",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Accessible title for the preview iframe.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "fileselect",
+        "detail": "{ path: string }",
+        "description": "Fired when a file is selected. `detail.path`.",
+        "displayDetail": "{ path: string }"
+      },
+      {
+        "name": "navigate",
+        "detail": "{ url: string }",
+        "description": "Fired when the preview navigates. `detail.url` = the new location.",
+        "displayDetail": "{ url: string }"
+      },
+      {
+        "name": "tabchange",
+        "detail": "{ tab: \"preview\" | \"code\" }",
+        "description": "Fired when the Preview|Code tab changes. `detail.tab`.",
+        "displayDetail": "{ tab: \"preview\" | \"code\" }"
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Artifact",
+        "group": "Components",
+        "storyId": "components-artifact--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kc-attachments",
     "className": "KcAttachmentsElement",
     "props": [
@@ -745,6 +830,53 @@
         "name": "FeedbackBar",
         "group": "Components",
         "storyId": "components-feedbackbar--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kc-file-tree",
+    "className": "KcFileTreeElement",
+    "props": [
+      {
+        "name": "files",
+        "type": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
+        "optional": false,
+        "scalar": false,
+        "description": "The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`).",
+        "default": "[]",
+        "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
+      },
+      {
+        "name": "activeFile",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Selected file path — highlighted in the tree.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "defaultExpanded",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Folder paths expanded initially. Omit to start with all folders open.",
+        "displayType": "undefined | string[]"
+      }
+    ],
+    "events": [
+      {
+        "name": "select",
+        "detail": "{ path: string }",
+        "description": "Fired when a file is selected. `detail.path` = the file's path.",
+        "displayDetail": "{ path: string }"
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "FileTree",
+        "group": "Components",
+        "storyId": "components-filetree--docs"
       }
     ],
     "tokens": []

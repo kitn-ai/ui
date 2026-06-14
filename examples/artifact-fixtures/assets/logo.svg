@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="320" viewBox="0 0 480 320" role="img" aria-label="Starboard logo">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6ea8fe"/>
+      <stop offset="1" stop-color="#b692f6"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="320" rx="20" fill="#0b1020"/>
+  <circle cx="240" cy="150" r="92" fill="none" stroke="url(#g)" stroke-width="10"/>
+  <path d="M240 70 L262 138 L334 138 L276 180 L298 248 L240 206 L182 248 L204 180 L146 138 L218 138 Z" fill="url(#g)"/>
+  <text x="240" y="296" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="26" fill="#9aa6c4">starboard.svg</text>
+</svg>

@@ -34,6 +34,12 @@ export { Separator } from './ui/separator';
 export { ResizablePanelGroup, ResizablePanel, ResizableHandle, Resizable, normalizeSize, resolveToPx } from './ui/resizable';
 export type { ResizablePanelGroupProps, ResizablePanelProps, ResizableHandleProps, ResizableProps, SizeValue } from './ui/resizable';
 export { Skeleton } from './ui/skeleton';
+export { FileTree, buildFileTree } from './components/file-tree';
+export type {
+  FileTreeProps, FileTreeFile, FileTreeNode, FileTreeFolderNode, FileTreeFileNode,
+} from './components/file-tree';
+export { Artifact } from './components/artifact';
+export type { ArtifactProps, ArtifactFile, ArtifactTab } from './components/artifact';
 
 // Layer 3: AI/Feature Components
 export {

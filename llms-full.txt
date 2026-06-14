@@ -3,7 +3,7 @@
 
 # @kitnai/chat
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 30 `kitn-*` custom elements: streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 32 `kitn-*` custom elements: streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kc-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitnai/chat'`):
-All 30 elements are also exported individually. Use them for custom layouts or features `<kc-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 32 elements are also exported individually. Use them for custom layouts or features `<kc-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitnai/chat/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 30 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 32 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitnai/chat/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/chat/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,9 +173,32 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (30 elements, generated from custom-elements.json)
+## Element reference (32 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
+
+### `kc-artifact` / `KcArtifact`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `src` | `src` | `undefined \| string` | URL the preview iframe frames. Consumer-controlled. |
+| `files` | — | `{ path: string; url?: undefined \| string; code?: undefined \| string; language?: undefined \| string; type?: undefined \| "html" \| "pdf" \| "image" \| "other" }[]` | Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). |
+| `tab` | `tab` | `undefined \| "preview" \| "code"` | Active tab: `preview` (default) or `code`. |
+| `activeFile` | `active-file` | `undefined \| string` | Selected file path — syncs the tree highlight, Code source, and preview. |
+| `sandbox` | `sandbox` | `undefined \| string` | iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`). |
+| `iframeTitle` | `iframe-title` | `undefined \| string` | Accessible title for the preview iframe. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `fileselect` | `CustomEvent<{ path: string }>` | Fired when a file is selected. `detail.path`. |
+| `navigate` | `CustomEvent<{ url: string }>` | Fired when the preview navigates. `detail.url` = the new location. |
+| `tabchange` | `CustomEvent<{ tab: "preview" \| "code" }>` | Fired when the Preview\|Code tab changes. `detail.tab`. |
+
+---
 
 ### `kc-attachments` / `KcAttachments`
 
@@ -346,6 +369,24 @@ _No events._
 | `close` | `CustomEvent` | The user dismissed the banner. |
 | `helpful` | `CustomEvent` | The user clicked thumbs-up. |
 | `nothelpful` | `CustomEvent` | The user clicked thumbs-down. |
+
+---
+
+### `kc-file-tree` / `KcFileTree`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `files` | — | `{ path: string; url?: undefined \| string; code?: undefined \| string; language?: undefined \| string; type?: undefined \| "html" \| "pdf" \| "image" \| "other" }[]` | The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`). |
+| `activeFile` | `active-file` | `undefined \| string` | Selected file path — highlighted in the tree. |
+| `defaultExpanded` | — | `undefined \| string[]` | Folder paths expanded initially. Omit to start with all folders open. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `select` | `CustomEvent<{ path: string }>` | Fired when a file is selected. `detail.path` = the file's path. |
 
 ---
 

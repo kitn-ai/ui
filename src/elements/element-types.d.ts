@@ -8,6 +8,23 @@ export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';
 
+export interface KcArtifactElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** URL the preview iframe frames. Consumer-controlled. */
+  src?: string;
+  /** Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). */
+  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
+  /** Active tab: `preview` (default) or `code`. */
+  tab?: "preview" | "code";
+  /** Selected file path — syncs the tree highlight, Code source, and preview. */
+  activeFile?: string;
+  /** iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`). */
+  sandbox?: string;
+  /** Accessible title for the preview iframe. */
+  iframeTitle?: string;
+}
+
 export interface KcAttachmentsElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -135,6 +152,17 @@ export interface KcFeedbackBarElement extends HTMLElement {
   theme?: 'light' | 'dark' | 'auto';
   /** The banner label (e.g. "Was this helpful?"). Attribute: `bar-title` (`title` is avoided — it's a global HTML attribute). */
   barTitle?: string;
+}
+
+export interface KcFileTreeElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`). */
+  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
+  /** Selected file path — highlighted in the tree. */
+  activeFile?: string;
+  /** Folder paths expanded initially. Omit to start with all folders open. */
+  defaultExpanded?: string[];
 }
 
 export interface KcFileUploadElement extends HTMLElement {
@@ -434,6 +462,7 @@ export interface KcWorkspaceElement extends HTMLElement {
 
 declare global {
   interface HTMLElementTagNameMap {
+    'kc-artifact': KcArtifactElement;
     'kc-attachments': KcAttachmentsElement;
     'kc-chain-of-thought': KcChainOfThoughtElement;
     'kc-chat': KcChatElement;
@@ -443,6 +472,7 @@ declare global {
     'kc-conversations': KcConversationsElement;
     'kc-empty': KcEmptyElement;
     'kc-feedback-bar': KcFeedbackBarElement;
+    'kc-file-tree': KcFileTreeElement;
     'kc-file-upload': KcFileUploadElement;
     'kc-image': KcImageElement;
     'kc-loader': KcLoaderElement;
