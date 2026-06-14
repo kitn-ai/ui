@@ -32,6 +32,10 @@ defineWebComponent<Props, Events>('kc-checkpoint', {
   <Checkpoint>
     <CheckpointTrigger
       tooltip={props.tooltip}
+      // Icon-only (no visible label) needs an accessible name: prefer the
+      // tooltip text, else a sensible default. With a visible label, the text
+      // is the name — leave aria-label unset so it isn't duplicated.
+      aria-label={props.label ? undefined : (props.tooltip ?? 'Checkpoint')}
       variant={props.variant}
       size={props.size}
       onClick={() => dispatch('select')}

@@ -632,6 +632,14 @@
         "description": ""
       },
       {
+        "name": "aria-label",
+        "type": "undefined | string",
+        "displayType": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Accessible name for the button — required when it has no visible text (icon-only)."
+      },
+      {
         "name": "variant",
         "type": "undefined | \"default\" | \"ghost\" | \"outline\"",
         "displayType": "undefined | \"default\" | \"ghost\" | \"outline\"",
