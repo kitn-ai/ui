@@ -42,6 +42,19 @@ export interface KcAttachmentsElement extends HTMLElement {
   emptyText?: string;
 }
 
+export interface KcCardElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
+  heading?: string;
+  /** Supporting text under the heading. Attribute: `description`. */
+  description?: string;
+  /** When set, the card renders its inline error state instead of the body. Attribute: `error-message`. */
+  errorMessage?: string;
+  /** Compact spacing for dense lists. Attribute: `dense`. */
+  dense?: boolean;
+}
+
 export interface KcChainOfThoughtElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -138,6 +151,15 @@ export interface KcConversationsElement extends HTMLElement {
   activeId?: string;
 }
 
+export interface KcEmbedElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Stable card id correlating every emitted event. Set as an attribute or property. */
+  cardId?: string;
+  /** The embed payload (provider + id/url + options). Set as a JS **property** (object). */
+  data?: { provider: "youtube" | "vimeo" | "generic"; id?: string; url?: string; title?: string; poster?: string; start?: number; aspectRatio?: "16:9" | "4:3" | "1:1" | "9:16" };
+}
+
 export interface KcEmptyElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -178,6 +200,17 @@ export interface KcFileUploadElement extends HTMLElement {
   label?: string;
 }
 
+export interface KcFormElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The form definition — a JSON Schema (`type:'object'`) + `x-kitn-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitnai/chat` for the full shape (it is self-referential, so the element types it loosely). */
+  data?: Record<string, unknown>;
+  /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
+  cardId?: string;
+  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
+  heading?: string;
+}
+
 export interface KcImageElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -189,6 +222,15 @@ export interface KcImageElement extends HTMLElement {
   alt?: string;
   /** MIME type (default `image/png`). */
   mediaType?: string;
+}
+
+export interface KcLinkCardElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Stable card id correlating every emitted event. Set as an attribute or property. */
+  cardId?: string;
+  /** The link payload (OG metadata). Set as a JS **property** (object). */
+  data?: { url: string; title?: string; description?: string; image?: string; imageAlt?: string; favicon?: string; domain?: string; siteName?: string };
 }
 
 export interface KcLoaderElement extends HTMLElement {
@@ -464,17 +506,21 @@ declare global {
   interface HTMLElementTagNameMap {
     'kc-artifact': KcArtifactElement;
     'kc-attachments': KcAttachmentsElement;
+    'kc-card': KcCardElement;
     'kc-chain-of-thought': KcChainOfThoughtElement;
     'kc-chat': KcChatElement;
     'kc-checkpoint': KcCheckpointElement;
     'kc-code-block': KcCodeBlockElement;
     'kc-context': KcContextElement;
     'kc-conversations': KcConversationsElement;
+    'kc-embed': KcEmbedElement;
     'kc-empty': KcEmptyElement;
     'kc-feedback-bar': KcFeedbackBarElement;
     'kc-file-tree': KcFileTreeElement;
     'kc-file-upload': KcFileUploadElement;
+    'kc-form': KcFormElement;
     'kc-image': KcImageElement;
+    'kc-link-card': KcLinkCardElement;
     'kc-loader': KcLoaderElement;
     'kc-markdown': KcMarkdownElement;
     'kc-message': KcMessageElement;

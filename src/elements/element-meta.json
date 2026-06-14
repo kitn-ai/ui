@@ -200,6 +200,54 @@
     "tokens": []
   },
   {
+    "tag": "kc-card",
+    "className": "KcCardElement",
+    "props": [
+      {
+        "name": "heading",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "description",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Supporting text under the heading. Attribute: `description`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "errorMessage",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "When set, the card renders its inline error state instead of the body. Attribute: `error-message`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "dense",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Compact spacing for dense lists. Attribute: `dense`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Card",
+        "group": "Components",
+        "storyId": "components-card--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kc-chain-of-thought",
     "className": "KcChainOfThoughtElement",
     "props": [
@@ -734,6 +782,37 @@
     ]
   },
   {
+    "tag": "kc-embed",
+    "className": "KcEmbedElement",
+    "props": [
+      {
+        "name": "cardId",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Stable card id correlating every emitted event. Set as an attribute or property.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "data",
+        "type": "undefined | { provider: \"youtube\" | \"vimeo\" | \"generic\"; id?: undefined | string; url?: undefined | string; title?: undefined | string; poster?: undefined | string; start?: undefined | number; aspectRatio?: undefined | \"16:9\" | \"4:3\" | \"1:1\" | \"9:16\" }",
+        "optional": true,
+        "scalar": false,
+        "description": "The embed payload (provider + id/url + options). Set as a JS **property** (object).",
+        "displayType": "undefined | { provider: \"youtube\" | \"vimeo\" | \"generic\"; id?: undefined | string; url?: undefined | string; title?: undefined | string; poster?: undefined | string; start?: undefined | number; aspectRatio?: undefined | \"16:9\" | \"4:3\" | \"1:1\" | \"9:16\" }"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Embed",
+        "group": "Components",
+        "storyId": "components-embed--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kc-empty",
     "className": "KcEmptyElement",
     "props": [
@@ -944,6 +1023,45 @@
     "tokens": []
   },
   {
+    "tag": "kc-form",
+    "className": "KcFormElement",
+    "props": [
+      {
+        "name": "data",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "The form definition — a JSON Schema (`type:'object'`) + `x-kitn-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitnai/chat` for the full shape (it is self-referential, so the element types it loosely).",
+        "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "cardId",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Stable card id correlating every emitted CardEvent. Attribute: `card-id`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "heading",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Form",
+        "group": "Components",
+        "storyId": "components-form--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kc-image",
     "className": "KcImageElement",
     "props": [
@@ -987,6 +1105,37 @@
         "name": "Image",
         "group": "Components",
         "storyId": "components-image--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kc-link-card",
+    "className": "KcLinkCardElement",
+    "props": [
+      {
+        "name": "cardId",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Stable card id correlating every emitted event. Set as an attribute or property.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "data",
+        "type": "undefined | { url: string; title?: undefined | string; description?: undefined | string; image?: undefined | string; imageAlt?: undefined | string; favicon?: undefined | string; domain?: undefined | string; siteName?: undefined | string }",
+        "optional": true,
+        "scalar": false,
+        "description": "The link payload (OG metadata). Set as a JS **property** (object).",
+        "displayType": "undefined | { url: string; title?: undefined | string; description?: undefined | string; image?: undefined | string; imageAlt?: undefined | string; favicon?: undefined | string; domain?: undefined | string; siteName?: undefined | string }"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "LinkCard",
+        "group": "Components",
+        "storyId": "components-linkcard--docs"
       }
     ],
     "tokens": []
