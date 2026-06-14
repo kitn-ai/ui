@@ -131,11 +131,127 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     dispatch('change', { sizes: currentSizes() });
   }
 
+  // --- Task 2: maximize/restore core ---
+
+  interface MaximizeStash {
+    index: number;
+    saved: { size: string | null; hidden: boolean; locked: boolean }[];
+  }
+  const [maximized, setMaximized] = createSignal<MaximizeStash | null>(null);
+  /** Re-entrancy guard: while we (un)apply maximize attributes, the observer must
+   *  NOT emit a mid-flight `change`. The final relayout emits the real one. */
+  let applyingMaximize = false;
+
+  /** Find the capped <kc-resizable-item> ancestor of an event target, if any. */
+  function findContainingItem(node: Node | null): HTMLElement | null {
+    let el = node instanceof Element ? node : node?.parentElement ?? null;
+    // The intent is composed; its target may be inside the artifact's shadow.
+    // Resolve to a direct light child <kc-resizable-item> of THIS group.
+    const capped = items().map((i) => i.el);
+    while (el) {
+      if (el instanceof HTMLElement && capped.includes(el)) return el;
+      el = el.parentElement ?? (el.getRootNode() as ShadowRoot).host ?? null;
+    }
+    return null;
+  }
+
+  function readAttrState(el: HTMLElement) {
+    return {
+      size: el.getAttribute('size'),
+      hidden: el.hidden || (el.hasAttribute('hidden') && el.getAttribute('hidden') !== 'false'),
+      locked: el.hasAttribute('locked') && el.getAttribute('locked') !== 'false',
+    };
+  }
+
+  function setBoolAttr(el: HTMLElement, name: string, on: boolean) {
+    if (on) el.setAttribute(name, '');
+    else el.removeAttribute(name);
+  }
+
+  function maximizeItem(item: HTMLElement) {
+    const list = items();
+    const index = list.findIndex((i) => i.el === item);
+    if (index < 0) return;
+    const current = maximized();
+    if (current) {
+      if (current.index === index) return;     // same item → no-op
+      restore();                               // different item → re-target
+    }
+    applyingMaximize = true;
+    // Capture the EFFECTIVE current % so a post-drag layout restores faithfully.
+    const live = currentSizes(); // visible-order percents (Playwright-verified)
+    let visIdx = 0;
+    const saved = list.map((info) => {
+      const prev = readAttrState(info.el);
+      if (!prev.hidden) {
+        // Write the live % back as the stashed size baseline.
+        const pct = live[visIdx++];
+        if (Number.isFinite(pct) && pct > 0) info.el.setAttribute('size', `${pct}%`);
+      }
+      return { size: info.el.getAttribute('size'), hidden: prev.hidden, locked: prev.locked };
+    });
+    // Hide every other item; free the maximized one to fill.
+    list.forEach((info, i) => {
+      if (i === index) {
+        info.el.removeAttribute('size');
+        info.el.removeAttribute('locked');
+        setBoolAttr(info.el, 'hidden', false);
+      } else {
+        setBoolAttr(info.el, 'hidden', true);
+      }
+    });
+    setMaximized({ index, saved });
+    element.setAttribute('data-maximized', '');
+    item.setAttribute('data-maximized-panel', '');
+    applyingMaximize = false;
+    readItems();
+    emitChange();
+    // Tell the maximized subtree (and only it) it is now maximized.
+    item.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: true }, bubbles: false, composed: true }));
+    dispatch('maximizechange', { maximized: true, index });
+  }
+
+  function restore() {
+    const stash = maximized();
+    if (!stash) return;
+    const list = items();
+    applyingMaximize = true;
+    list.forEach((info, i) => {
+      const s = stash.saved[i];
+      if (!s) return;
+      if (s.size === null) info.el.removeAttribute('size');
+      else info.el.setAttribute('size', s.size);
+      setBoolAttr(info.el, 'hidden', s.hidden);
+      setBoolAttr(info.el, 'locked', s.locked);
+      info.el.removeAttribute('data-maximized-panel');
+    });
+    const prevItem = list[stash.index]?.el;
+    setMaximized(null);
+    element.removeAttribute('data-maximized');
+    applyingMaximize = false;
+    readItems();
+    emitChange();
+    // Broadcast restore on the host AND directly on the formerly-maximized item.
+    element.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: false }, bubbles: false, composed: true }));
+    prevItem?.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: false }, bubbles: false, composed: true }));
+    dispatch('maximizechange', { maximized: false, index: null });
+  }
+
   onMount(() => {
     readItems();
+    const onIntent = (e: Event) => {
+      const ce = e as CustomEvent<KcMaximizeIntentDetail>;
+      e.stopPropagation();                       // nearest group wins (nesting)
+      const item = findContainingItem(ce.target as Node);
+      if (!item) return;                         // outside any item → ignore
+      if (ce.detail.requested) maximizeItem(item);
+      else restore();
+    };
+    element.addEventListener('kc-maximize-intent', onIntent);
+
     const mo = new MutationObserver(() => {
       readItems();
-      // A childList / attribute change (e.g. show/hide) re-lays out → emit.
+      if (applyingMaximize) return;              // our own writes — skip auto-emit
       queueMicrotask(emitChange);
     });
     mo.observe(element, {
@@ -147,7 +263,10 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
       attributes: true,
       attributeFilter: ['size', 'locked', 'min', 'max', 'hidden'],
     });
-    onCleanup(() => mo.disconnect());
+    onCleanup(() => {
+      mo.disconnect();
+      element.removeEventListener('kc-maximize-intent', onIntent);
+    });
   });
 
   const isHoriz = () => orientation() === 'horizontal';

@@ -111,3 +111,45 @@ test('exports the maximize protocol detail types (compile-time shape check)', ()
   expect(intent.requested).toBe(true);
   expect(state.maximized).toBe(false);
 });
+
+// --- Task 2: maximize/restore core ---
+
+function intentFrom(item: Element, requested: boolean) {
+  item.dispatchEvent(new CustomEvent('kc-maximize-intent', { detail: { requested }, bubbles: true, composed: true }));
+}
+
+test('maximize hides siblings, clears the maximized item size/locked, reflects data-maximized', async () => {
+  const group = makeGroup([{ size: '25%' }, { size: '50%', locked: '' }, { size: '25%' }]);
+  await flush();
+  intentFrom(group.children[1], true);
+  await flush();
+  const items = Array.from(group.children) as HTMLElement[];
+  expect(items[0].hasAttribute('hidden')).toBe(true);
+  expect(items[2].hasAttribute('hidden')).toBe(true);
+  expect(items[1].hasAttribute('hidden')).toBe(false);
+  expect(items[1].hasAttribute('locked')).toBe(false); // cleared so it fills
+  expect(group.hasAttribute('data-maximized')).toBe(true);
+});
+
+test('restore returns each item to its stashed size/hidden/locked', async () => {
+  const group = makeGroup([{ size: '25%' }, { size: '50%', locked: '' }, { hidden: '', size: '25%' }]);
+  await flush();
+  intentFrom(group.children[1], true);
+  await flush();
+  intentFrom(group.children[1], false);
+  await flush();
+  const items = Array.from(group.children) as HTMLElement[];
+  // item[1] regains its locked attr; item[2] was already hidden pre-maximize → stays hidden.
+  expect(items[1].hasAttribute('locked')).toBe(true);
+  expect(items[2].hasAttribute('hidden')).toBe(true);
+  expect(items[0].hasAttribute('hidden')).toBe(false);
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+});
+
+test('intent from outside any item is ignored', async () => {
+  const group = makeGroup([{}, {}]);
+  await flush();
+  group.dispatchEvent(new CustomEvent('kc-maximize-intent', { detail: { requested: true }, bubbles: true, composed: true }));
+  await flush();
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+});
