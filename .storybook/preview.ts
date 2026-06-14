@@ -44,12 +44,22 @@ const preview: Preview = {
   parameters: {
     layout: 'fullscreen',
     // Accessibility (axe) runs per-story in both the Storybook UI panel and the
-    // `vitest --project=storybook` test run. `test: 'todo'` reports violations
-    // as warnings (non-failing) so the test suite stays green while the
-    // component-source a11y audit is in flight. Flip to `'error'` (here, or
-    // per-story/per-component) to make a11y violations fail the test run/CI.
+    // `vitest --project=storybook` test run. `test: 'error'` makes a11y
+    // violations FAIL the test run/CI. The kit-wide a11y audit (PR #49) plus the
+    // code-block/checkpoint fixes cleared the real violations, so a11y is gated.
+    // Override per-story with a local `a11y.test` parameter if a fixture differs.
+    //
+    // `context.exclude` is the kit's ONE documented a11y exception: the Shiki
+    // dark theme (github-dark-dimmed) renders code comments at #768390 (~3.87:1),
+    // below WCAG AA — a deliberate, theme-defined syntax-highlighting aesthetic we
+    // don't control. axe can't scope a single rule to a subtree, so we exclude the
+    // rendered code (`<pre>`) from the run; it carries no interactive/labelable
+    // content, so in practice only the comment-color contrast check is waived.
+    // color-contrast (and every other rule) stays enforced everywhere else.
+    // NOTE: exclude MUST live under `context` — a top-level `exclude` is ignored.
     a11y: {
-      test: 'todo',
+      test: 'error',
+      context: { exclude: [['pre']] },
     },
     options: {
       storySort: {
