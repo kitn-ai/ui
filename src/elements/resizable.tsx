@@ -1,4 +1,4 @@
-import { createSignal, onMount, onCleanup, For, Show, type JSX } from 'solid-js';
+import { createSignal, createEffect, on, onMount, onCleanup, For, Show, type JSX } from 'solid-js';
 import { defineWebComponent } from './define';
 import { ResizableHandle, normalizeSize } from '../ui/resizable';
 
@@ -50,11 +50,15 @@ function boundAttrs(value: string | undefined): { pxAttr?: string; pctAttr?: str
 interface GroupProps extends Record<string, unknown> {
   /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
   orientation?: Orientation;
+  /** Which item index is maximized (null = none). Declarative source of truth. */
+  maximizedIndex?: number | null;
 }
 
 interface GroupEvents extends Record<string, unknown> {
   /** Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. */
   change: { sizes: number[] };
+  /** Observe layout maximize state. */
+  maximizechange: { maximized: boolean; index: number | null };
 }
 
 /**
@@ -67,6 +71,7 @@ interface GroupEvents extends Record<string, unknown> {
  */
 defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
   orientation: 'horizontal',
+  maximizedIndex: null,
 }, (props, { element, dispatch }) => {
   const [items, setItems] = createSignal<ItemInfo[]>([]);
   const orientation = (): Orientation => (props.orientation === 'vertical' ? 'vertical' : 'horizontal');
@@ -267,6 +272,34 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
       mo.disconnect();
       element.removeEventListener('kc-maximize-intent', onIntent);
     });
+
+    // --- Task 3: imperative host methods + declarative maximizedIndex prop ---
+
+    let applyingIndex = false;
+
+    // Imperative host API (assigned onto the element; typed by resizable.d.ts).
+    const host = element as unknown as { maximize(i: number): void; restore(): void };
+    host.maximize = (i: number) => {
+      const it = items()[i]?.el;
+      if (it) maximizeItem(it);
+    };
+    host.restore = () => restore();
+
+    // Declarative maximizedIndex → maximize/restore. Skip the initial null run.
+    createEffect(
+      on(
+        () => props.maximizedIndex,
+        (idx) => {
+          if (applyingIndex) return;
+          if (idx == null) restore();
+          else {
+            const it = items()[idx]?.el;
+            if (it) maximizeItem(it);
+          }
+        },
+        { defer: true },
+      ),
+    );
   });
 
   const isHoriz = () => orientation() === 'horizontal';

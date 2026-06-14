@@ -153,3 +153,42 @@ test('intent from outside any item is ignored', async () => {
   await flush();
   expect(group.hasAttribute('data-maximized')).toBe(false);
 });
+
+// --- Task 3: maximizedIndex prop + maximize/restore host methods + maximizechange ---
+
+test('maximize(i) / restore() host methods drive the layout + maximizechange', async () => {
+  const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void; restore(): void; maximizedIndex: number | null };
+  await flush();
+  const events: { maximized: boolean; index: number | null }[] = [];
+  group.addEventListener('maximizechange', (e) => events.push((e as CustomEvent).detail));
+  group.maximize(2);
+  await flush();
+  expect(group.children[0].hasAttribute('hidden')).toBe(true);
+  expect(events.at(-1)).toEqual({ maximized: true, index: 2 });
+  group.restore();
+  await flush();
+  expect(group.children[0].hasAttribute('hidden')).toBe(false);
+  expect(events.at(-1)).toEqual({ maximized: false, index: null });
+});
+
+test('setting maximizedIndex maximizes; setting it null restores', async () => {
+  const group = makeGroup([{}, {}]) as HTMLElement & { maximizedIndex: number | null };
+  await flush();
+  group.maximizedIndex = 0;
+  await flush();
+  expect(group.children[1].hasAttribute('hidden')).toBe(true);
+  group.maximizedIndex = null;
+  await flush();
+  expect(group.children[1].hasAttribute('hidden')).toBe(false);
+});
+
+test('re-target: maximizing a different item while maximized restores+re-maximizes', async () => {
+  const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void };
+  await flush();
+  group.maximize(0);
+  await flush();
+  group.maximize(2);
+  await flush();
+  expect(group.children[0].hasAttribute('hidden')).toBe(true);
+  expect(group.children[2].hasAttribute('hidden')).toBe(false);
+});
