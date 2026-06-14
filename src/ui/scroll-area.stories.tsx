@@ -35,7 +35,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { ScrollArea } from '@kitnai/chat';`;
+const IMPORT = `import { ScrollArea } from '@kitn.ai/chat';`;
 
 /** A bounded list that scrolls. Note macOS hides overlay scrollbars until you scroll. */
 export const Playground: Story = {

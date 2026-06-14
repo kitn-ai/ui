@@ -21,7 +21,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-feedback-bar bar-title="Was this helpful?"></kc-feedback-bar>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   const bar = document.querySelector('kc-feedback-bar');
   bar.addEventListener('helpful', () => console.log('👍'));
@@ -39,7 +39,7 @@ const meta = {
       description: specDescription('kc-feedback-bar', [
           '`<kc-feedback-bar>` is the framework-agnostic **web component** for an inline thumbs up/down feedback banner with a dismiss button — isolated in **Shadow DOM**.',
           '**When to use:** collecting a quick reaction after an answer or a completed task. In SolidJS, use the `FeedbackBar` primitive.',
-          "**How to use:** register once with `import '@kitnai/chat/elements'`, set the label via the `bar-title` attribute (`title` is avoided — it's a global HTML attribute), and listen for the `helpful` / `nothelpful` / `close` **CustomEvents**.",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the label via the `bar-title` attribute (`title` is avoided — it's a global HTML attribute), and listen for the `helpful` / `nothelpful` / `close` **CustomEvents**.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

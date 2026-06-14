@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Frameworks & Integrations
 
-`@kitnai/chat` is transport-agnostic: every element renders `messages` and emits `submit`. You bring the model; the kit owns the UI. This page covers how to wire it up in plain HTML, React, Vue, Svelte, and Angular, then shows how to stream a real response.
+`@kitn.ai/chat` is transport-agnostic: every element renders `messages` and emits `submit`. You bring the model; the kit owns the UI. This page covers how to wire it up in plain HTML, React, Vue, Svelte, and Angular, then shows how to stream a real response.
 
 ---
 
@@ -37,13 +37,13 @@ Import the element bundle once as a side-effect (it registers all `kitn-*` custo
 <html>
 <head>
   <!-- optional: only needed to rebrand host-page markup -->
-  <link rel="stylesheet" href="./node_modules/@kitnai/chat/dist/theme.tokens.css" />
+  <link rel="stylesheet" href="./node_modules/@kitn.ai/chat/dist/theme.tokens.css" />
 </head>
 <body style="height: 100vh; margin: 0;">
   <kc-chat id="chat" style="display: block; height: 100%;"></kc-chat>
 
   <script type="module">
-    import '@kitnai/chat/elements';
+    import '@kitn.ai/chat/elements';
 
     const chat = document.getElementById('chat');
 
@@ -99,10 +99,10 @@ Scalars can go directly in the HTML as attributes:
 
 ## React
 
-The kit ships auto-generated, typed React wrappers under `@kitnai/chat/react`. They handle the ref plumbing internally — rich props are set as DOM **properties** and CustomEvents are exposed as `on<Event>` handlers, so you write idiomatic JSX without touching refs yourself.
+The kit ships auto-generated, typed React wrappers under `@kitn.ai/chat/react`. They handle the ref plumbing internally — rich props are set as DOM **properties** and CustomEvents are exposed as `on<Event>` handlers, so you write idiomatic JSX without touching refs yourself.
 
 ```tsx
-import { KcChat, KcConversations } from '@kitnai/chat/react';
+import { KcChat, KcConversations } from '@kitn.ai/chat/react';
 import { useState } from 'react';
 
 type Message = {
@@ -182,7 +182,7 @@ import {
   KcAttachments,
   KcLoader,
   // …all 27 elements
-} from '@kitnai/chat/react';
+} from '@kitn.ai/chat/react';
 ```
 
 ### Without the React wrappers (raw custom element)
@@ -191,7 +191,7 @@ If you prefer to work with the raw custom element directly (e.g. with React 19's
 
 ```tsx
 import { useEffect, useRef, useState } from 'react';
-import '@kitnai/chat/elements';
+import '@kitn.ai/chat/elements';
 
 export function Chat() {
   const chatRef = useRef<HTMLElement>(null);
@@ -236,7 +236,7 @@ In Vue, use the element directly in your template. Pass arrays and objects via t
 ```html
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import '@kitnai/chat/elements';
+import '@kitn.ai/chat/elements';
 
 const messages = ref([
   { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
@@ -266,11 +266,11 @@ const handleSubmit = (e: CustomEvent<{ value: string }>) => {
 
 ### Vue + TypeScript: augmenting JSX types
 
-Add `@kitnai/chat/elements` to your `vite.config.ts` / `env.d.ts` once so Vue's template compiler knows the element's attributes:
+Add `@kitn.ai/chat/elements` to your `vite.config.ts` / `env.d.ts` once so Vue's template compiler knows the element's attributes:
 
 ```ts
 // env.d.ts (or vite-env.d.ts)
-/// <reference types="@kitnai/chat/elements" />
+/// <reference types="@kitn.ai/chat/elements" />
 ```
 
 ### Sidebar + chat together (Vue)
@@ -279,7 +279,7 @@ Cross-element coordination goes through the host component — the `<kc-conversa
 
 ```html
 <script setup lang="ts">
-import '@kitnai/chat/elements';
+import '@kitn.ai/chat/elements';
 import { ref } from 'vue';
 
 const conversations = ref([
@@ -319,7 +319,7 @@ Svelte's template compiler sets DOM **properties** when you bind with `bind:` or
 
 ```html
 <script>
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
 
   let messages = [
     { id: '1', role: 'assistant', content: 'Hello!' }
@@ -357,7 +357,7 @@ Angular needs **no wrappers** — its property binding (`[prop]="value"`) assign
 
 ```ts
 // main.ts — register the kitn-* elements once, app-wide
-import '@kitnai/chat/elements';
+import '@kitn.ai/chat/elements';
 ```
 
 ```ts

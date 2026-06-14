@@ -32,7 +32,7 @@ const PLAYGROUND_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </kc-card>
 
 <script type="module">
-  import '@kitnai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/chat/elements'; // registers the custom elements
 </script>`;
 
 const MEDIA_SNIPPET = `<kc-card heading="Quarterly report" description="Generated just now.">
@@ -53,7 +53,7 @@ const meta = {
       description: specDescription('kc-card', [
         '`<kc-card>` is the shared, presentational **card chrome** every native generative-UI card composes from: an optional **media** region (`slot="media"`), a **heading** + **description**, a **body** (default slot), an **actions** footer (`slot="actions"`), and one consistent inline **error** state (`error-message`).',
         '**It emits no events and reads no context** — it is chrome only. The cards that compose it (e.g. `<kc-form>`) own the Card-contract interaction. It ships public so you can also use it as a plain themed surface.',
-        "**How to use:** register once with `import '@kitnai/chat/elements'`, set `heading`/`description` attributes, drop body markup in the default slot, footer buttons in `slot=\"actions\"`, and media in `slot=\"media\"`. Set `error-message` to render the standard inline error (it replaces the body/actions).",
+        "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set `heading`/`description` attributes, drop body markup in the default slot, footer buttons in `slot=\"actions\"`, and media in `slot=\"media\"`. Set `error-message` to render the standard inline error (it replaces the body/actions).",
         'See the **Code** tab for HTML usage.',
       ]),
     },

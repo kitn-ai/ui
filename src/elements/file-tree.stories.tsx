@@ -48,7 +48,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-file-tree style="display:block;height:320px"></kc-file-tree>
 
 <script type="module">
-  import '@kitnai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/chat/elements'; // registers the custom elements
 
   const tree = document.querySelector('kc-file-tree');
   // \`files\` is a JS property (array). Folders are derived from \`/\` in each path.
@@ -72,7 +72,7 @@ const meta = {
       description: specDescription('kc-file-tree', [
         '`<kc-file-tree>` is the framework-agnostic **web component** for a collapsible, keyboard-navigable **file explorer** built from a flat list of `/`-delimited paths (nested folders are derived automatically). ARIA `tree`/`treeitem`. Isolated in **Shadow DOM**.',
         '**When to use:** any time you need a file/folder tree — the Code tab of `<kc-artifact>` uses it, but it ships public so you can reuse it standalone (a project explorer, an attachments browser, a doc outline).',
-        "**How to use:** register once with `import '@kitnai/chat/elements'`, then set the `files` **property** (a JS array of `{ path, url?, code?, language?, type? }`). Folders come from the `/` in each `path`; `type` picks the icon. Set `active-file` to highlight a row, `default-expanded` to control which folders open. Listen for **`select`** (`detail.path`). Arrow keys navigate; Enter/Space selects or toggles.",
+        "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set the `files` **property** (a JS array of `{ path, url?, code?, language?, type? }`). Folders come from the `/` in each `path`; `type` picks the icon. Set `active-file` to highlight a row, `default-expanded` to control which folders open. Listen for **`select`** (`detail.path`). Arrow keys navigate; Enter/Space selects or toggles.",
         '**Placement:** a sidebar/explorer column — inside `<kc-artifact>`, a `<kc-resizable>` panel, or any file-picker surface. It **fills** its container, so give the parent (or the element) a height.',
         'See the **Code** tab for HTML usage.',
       ]),

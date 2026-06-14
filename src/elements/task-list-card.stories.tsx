@@ -114,7 +114,7 @@ const HTML_SNIPPET = (def: TaskListCardData, cardId: string) => {
   const heading = HEADING_MAP[cardId];
   return `<kc-task-list${heading ? ` heading="${heading}"` : ''}></kc-task-list>
 <script type="module">
-  import '@kitnai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/chat/elements'; // registers the custom elements
 
   const el = document.querySelector('kc-task-list');
   // \`data\` is the CardEnvelope.data (set as a property).
@@ -179,7 +179,7 @@ export const ErrorState: Story = {
       source: {
         code: `<kc-task-list></kc-task-list>
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
   const el = document.querySelector('kc-task-list');
   // No tasks → inline error state + an \`error\` event.
   el.data = { tasks: [] };

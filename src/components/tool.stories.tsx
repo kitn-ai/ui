@@ -74,7 +74,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { Tool } from '@kitnai/chat';`;
+const IMPORT = `import { Tool } from '@kitn.ai/chat';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

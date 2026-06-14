@@ -107,7 +107,7 @@ const meta = {
         component: [
           '# Component catalog',
           'Every `kc-*` web component rendered with minimal sample data, grouped by category — the in-Storybook port of `examples/composable/index.html`. Use it to answer **"what exists?"**, then open each story\'s **Show code** panel to read the exact composition markup.',
-          'Data goes **in via properties** (set with `el.someProp = …` — see each snippet), interactions come **out via events** (`el.addEventListener("submit", …)`). Register everything once with `import "@kitnai/chat/elements"`.',
+          'Data goes **in via properties** (set with `el.someProp = …` — see each snippet), interactions come **out via events** (`el.addEventListener("submit", …)`). Register everything once with `import "@kitn.ai/chat/elements"`.',
           'Next: see **Examples / Composed chat shell** to watch these leaves assemble into a real chat, and **Examples / Choosing components** for the mental model of which tier to reach for.',
         ].join('\n\n'),
       },
@@ -125,7 +125,7 @@ const DROPIN_SNIPPET = `<!-- The drop-in layer: whole surfaces in a single tag -
 <kc-prompt-input placeholder="Ask anything…  (try typing /)"></kc-prompt-input>
 
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
 
   const list = document.querySelector('kc-conversations');
   list.conversations = [
@@ -181,7 +181,7 @@ const MESSAGES_SNIPPET = `<!-- Compose your own message list from the parts a tu
 <kc-tool id="tool" open></kc-tool>
 
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
 
   document.getElementById('assistant').message = {
     id: 'm-a', role: 'assistant',
@@ -258,7 +258,7 @@ const MEDIA_SNIPPET = `<!-- One element, presentation chosen by attribute -->
 <kc-sources id="srcs"></kc-sources>
 
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
   const items = [
     { id: '1', type: 'file', filename: 'architecture.png', mediaType: 'image/png', url: '…' },
     { id: '2', type: 'file', filename: 'spec.pdf', mediaType: 'application/pdf' },
@@ -326,7 +326,7 @@ const COMPOSER_SNIPPET = `<!-- Input affordances you can place anywhere -->
 <kc-thinking-bar text="Thinking…" stoppable></kc-thinking-bar>
 
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
   const suggs = document.getElementById('suggs');
   suggs.suggestions = ['Explain the architecture', 'Show me a code example'];
   suggs.addEventListener('select', (e) => console.log('select', e.detail.value));
@@ -376,7 +376,7 @@ const META_SNIPPET = `<!-- The small pieces around a conversation -->
 <kc-feedback-bar bar-title="Was this helpful?"></kc-feedback-bar>
 
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
   const ms = document.getElementById('models');
   ms.models = [{ id: 'opus', name: 'Claude Opus', provider: 'Anthropic' }];
   ms.currentModel = 'opus';
@@ -440,7 +440,7 @@ const STATUS_SNIPPET = `<!-- Loaders, streaming text, and empty states -->
 </kc-empty>
 
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
   const stream = document.getElementById('stream');
   stream.text = 'This text reveals with a typewriter animation, character by character.';
   stream.addEventListener('complete', () => console.log('done'));

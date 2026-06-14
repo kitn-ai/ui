@@ -45,7 +45,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-tool id="tool" open></kc-tool>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   const tool = document.getElementById('tool');
   tool.tool = {
@@ -66,7 +66,7 @@ const meta = {
       description: specDescription('kc-tool', [
           '`<kc-tool>` is the framework-agnostic **web component** for a single tool-call panel — a collapsible input/output inspector with a state badge — isolated in **Shadow DOM**.',
           '**When to use:** rendering an agent/tool-call trace in a non-Solid app. In SolidJS, use the `Tool` primitive directly.',
-          "**How to use:** register once with `import '@kitnai/chat/elements'`, set the call via the `tool` **property** (`el.tool = {...}`), and add the `open` flag to start it expanded.",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the call via the `tool` **property** (`el.tool = {...}`), and add the `open` flag to start it expanded.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

@@ -94,7 +94,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-conversations id="list" style="display:block; width:300px; height:100vh;"></kc-conversations>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   const list = document.getElementById('list');
   list.groups = [
@@ -115,9 +115,9 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   list.addEventListener('togglesidebar', () => console.log('toggle sidebar'));
 </script>`;
 
-const SOLID_SNIPPET = `import '@kitnai/chat/elements'; // registers the custom elements
+const SOLID_SNIPPET = `import '@kitn.ai/chat/elements'; // registers the custom elements
 import { onMount } from 'solid-js';
-import type { ConversationGroup, ConversationSummary } from '@kitnai/chat';
+import type { ConversationGroup, ConversationSummary } from '@kitn.ai/chat';
 
 function Sidebar() {
   let el: HTMLElement & {
@@ -161,7 +161,7 @@ const meta = {
       description: specDescription('kc-conversations', [
           '`<kc-conversations>` is the framework-agnostic **web component** version of the chat sidebar — a searchable, grouped list of conversations with a "new chat" button, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a conversation switcher to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `ConversationList` primitive instead.',
-          '**How to use:** register once with `import \'@kitnai/chat/elements\'`, set rich data as JS **properties** (`el.groups = [...]`, `el.conversations = [...]`, `el.activeId = \'c-1\'`), and listen for **CustomEvents** (`select`, `newchat`, `togglesidebar`) directly on the element.',
+          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, set rich data as JS **properties** (`el.groups = [...]`, `el.conversations = [...]`, `el.activeId = \'c-1\'`), and listen for **CustomEvents** (`select`, `newchat`, `togglesidebar`) directly on the element.',
           '**Placement:** as a fixed-width side panel next to the chat surface. Give it an explicit width and height (e.g. `width: 300px; height: 100vh`).',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ]),

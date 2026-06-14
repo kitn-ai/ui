@@ -4,7 +4,7 @@ import { TaskListCard, type TaskListCardData } from '../components/task-list-car
 interface Props extends Record<string, unknown> {
   /** The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY:
    *  `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import
-   *  `TaskListCardData` from `@kitnai/chat` for the full shape. */
+   *  `TaskListCardData` from `@kitn.ai/chat` for the full shape. */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;

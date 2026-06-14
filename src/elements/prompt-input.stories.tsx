@@ -78,7 +78,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-prompt-input id="input" style="display:block; width:100%;"></kc-prompt-input>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   const input = document.getElementById('input');
   input.placeholder = 'Ask anything...';
@@ -92,7 +92,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   input.addEventListener('suggestionclick', (e) => console.log('picked:', e.detail.value));
 </script>`;
 
-const SOLID_SNIPPET = `import '@kitnai/chat/elements'; // registers the custom elements
+const SOLID_SNIPPET = `import '@kitn.ai/chat/elements'; // registers the custom elements
 import { onMount } from 'solid-js';
 
 function Composer() {
@@ -128,7 +128,7 @@ const meta = {
       description: specDescription('kc-prompt-input', [
           '`<kc-prompt-input>` is the framework-agnostic **web component** version of the chat composer — an auto-resizing textarea with a send button and optional suggestion chips, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a message composer to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `PromptInput` primitives instead.',
-          '**How to use:** register once with `import \'@kitnai/chat/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`submit`, `valuechange`, `suggestionclick`, `search`, `voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files.',
+          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`submit`, `valuechange`, `suggestionclick`, `search`, `voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files.',
           '**Placement:** pinned to the bottom of a chat surface, full width. Set `loading` while a response streams to show the busy state, and `disabled` to block input entirely.',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ]),
@@ -165,7 +165,7 @@ const TOOLBAR_SNIPPET = `<!-- show the Search (Globe) + Voice (Mic) toolbar butt
 <kc-prompt-input id="input" search voice></kc-prompt-input>
 
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
   const input = document.getElementById('input');
   input.addEventListener('search', () => console.log('search clicked'));
   input.addEventListener('voice', () => console.log('voice clicked'));
@@ -183,7 +183,7 @@ const ATTACHMENTS_SNIPPET = `<!-- seed staged attachments without an upload -->
 <kc-prompt-input id="input" voice></kc-prompt-input>
 
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
   const input = document.getElementById('input');
   input.attachments = [
     { id: 'a1', type: 'file', filename: 'architecture.png',

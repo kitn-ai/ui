@@ -60,7 +60,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-embed id="em"></kc-embed>
 
 <script type="module">
-  import '@kitnai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/chat/elements'; // registers the custom elements
 
   const em = document.getElementById('em');
   em.cardId = 'card-embed-1';
@@ -140,7 +140,7 @@ export const Generic: Story = {
   parameters: {
     docs: {
       source: {
-        code: `import { configureEmbedAllowlist } from '@kitnai/chat';
+        code: `import { configureEmbedAllowlist } from '@kitn.ai/chat';
 
 // Generic embeds are blocked by default — allowlist the trusted origin first:
 configureEmbedAllowlist(['https://your-player.example.com']);

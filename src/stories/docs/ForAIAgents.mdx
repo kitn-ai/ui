@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # For AI Agents / LLMs
 
-`@kitnai/chat` ships machine-readable orientation files that follow the
+`@kitn.ai/chat` ships machine-readable orientation files that follow the
 [llmstxt.org](https://llmstxt.org) convention, so coding agents (Claude Code,
 Copilot, Cursor, Codex, …) can wire up the components correctly without guessing.
 
@@ -16,7 +16,7 @@ Copilot, Cursor, Codex, …) can wire up the components correctly without guessi
 
 | File | Audience | Where to find it |
 |---|---|---|
-| <a href="/llms.txt" target="_blank" rel="noreferrer"><code>llms.txt</code></a> | Agents + humans | Repo root, the npm package root (`node_modules/@kitnai/chat/llms.txt`), and `https://kitn.dev/llms.txt` |
+| <a href="/llms.txt" target="_blank" rel="noreferrer"><code>llms.txt</code></a> | Agents + humans | Repo root, the npm package root (`node_modules/@kitn.ai/chat/llms.txt`), and `https://kitn.dev/llms.txt` |
 | <a href="/llms-full.txt" target="_blank" rel="noreferrer"><code>llms-full.txt</code></a> | Agents | Same locations; the per-element API reference for **every** `kitn-*` element |
 
 Both files are **auto-generated** from `dist/custom-elements.json` by
@@ -50,16 +50,16 @@ Only scalar props (string / number / boolean) work as attributes — for example
 
 | Tool | How it finds them |
 |---|---|
-| Claude Code | Reference `@llms.txt` in `CLAUDE.md`, or read `node_modules/@kitnai/chat/llms-full.txt` |
+| Claude Code | Reference `@llms.txt` in `CLAUDE.md`, or read `node_modules/@kitn.ai/chat/llms-full.txt` |
 | GitHub Copilot | Workspace indexing picks up the file in `node_modules`; reference it from `.github/copilot-instructions.md` |
 | Cursor | Point `.cursorrules` at the installed `llms.txt` |
 | Codex / ChatGPT | Fetch https://kitn.dev/llms.txt directly |
-| Any agent | `npm install @kitnai/chat` → file is at `node_modules/@kitnai/chat/llms.txt` |
+| Any agent | `npm install @kitn.ai/chat` → file is at `node_modules/@kitn.ai/chat/llms.txt` |
 
 ## Build a chat app (the runbook agents follow)
 
 ```js
-import '@kitnai/chat/elements';
+import '@kitn.ai/chat/elements';
 const chat = document.querySelector('kc-chat');
 chat.messages = [];
 
@@ -90,4 +90,4 @@ chat.addEventListener('submit', async (e) => {
 
 - <a href="/llms.txt" target="_blank" rel="noreferrer"><code>llms.txt</code></a> — orientation (also published at `https://kitn.dev/llms.txt`)
 - <a href="/llms-full.txt" target="_blank" rel="noreferrer"><code>llms-full.txt</code></a> — full per-element reference (also `https://kitn.dev/llms-full.txt`)
-- Custom Elements Manifest — `dist/custom-elements.json` (published at `https://unpkg.com/@kitnai/chat/dist/custom-elements.json`)
+- Custom Elements Manifest — `dist/custom-elements.json` (published at `https://unpkg.com/@kitn.ai/chat/dist/custom-elements.json`)

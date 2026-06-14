@@ -36,7 +36,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-scope-picker id="scope"></kc-scope-picker>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   const scope = document.getElementById('scope');
   scope.availableAuthors = ['Rob', 'Alex'];
@@ -55,7 +55,7 @@ const meta = {
       description: specDescription('kc-scope-picker', [
           '`<kc-scope-picker>` is the framework-agnostic **web component** for scoping a chat by author or tag — a dropdown that emits the chosen filters — isolated in **Shadow DOM**.',
           '**When to use:** letting users narrow a conversation/search to a subset of content. In SolidJS, use the `ChatScopePicker` primitive.',
-          "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `availableAuthors` / `availableTags` **properties** (and optionally `current-label`), and listen for the `scopechange` **CustomEvent** (`undefined` filters = \"All Content\").",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `availableAuthors` / `availableTags` **properties** (and optionally `current-label`), and listen for the `scopechange` **CustomEvent** (`undefined` filters = \"All Content\").",
           'See the **Code** tab for HTML usage.',
         ]),
     },

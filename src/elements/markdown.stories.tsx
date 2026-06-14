@@ -41,7 +41,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-markdown id="md" code-theme="github-dark-dimmed"></kc-markdown>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   const md = document.getElementById('md');
   md.content = '### Hello\\nRenders **bold**, _italic_, and \\\`code\\\`.';
@@ -58,7 +58,7 @@ const meta = {
       description: specDescription('kc-markdown', [
           '`<kc-markdown>` is the framework-agnostic **web component** that renders a markdown string (with fenced-code syntax highlighting via Shiki) as a standalone element, isolated in **Shadow DOM**.',
           '**When to use:** showing model output or any markdown in a non-Solid app without pulling in a markdown stack. In SolidJS, use the `Markdown` primitive directly.',
-          "**How to use:** register once with `import '@kitnai/chat/elements'`, set the source via the `content` **property** (`el.content = '...'`), and tune rendering with the `prose-size`, `code-theme`, and `code-highlight` attributes.",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the source via the `content` **property** (`el.content = '...'`), and tune rendering with the `prose-size`, `code-theme`, and `code-highlight` attributes.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

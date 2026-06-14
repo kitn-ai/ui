@@ -7,7 +7,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 Agents don't just reply with text — they ask the chat to **render typed, interactive
 cards**: a form to fill, an action to approve, a plan to pick from, a link to preview.
-`@kitnai/chat` does this with a small, typed **Card Contract** and a turnkey dispatcher.
+`@kitn.ai/chat` does this with a small, typed **Card Contract** and a turnkey dispatcher.
 
 ## The loop
 
@@ -36,7 +36,7 @@ before sending); `id` correlates every event back to this card.
 ```html
 <kc-cards></kc-cards>
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
   const cards = document.querySelector('kc-cards');
   cards.cards = [{ type: 'confirm', id: 'deploy', title: 'Deploy?',
     data: { body: 'Ship it?', actions: [{ id: 'go', label: 'Deploy', default: true }] } }];

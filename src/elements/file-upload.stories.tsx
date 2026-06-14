@@ -22,7 +22,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-file-upload accept="image/*" label="Drop images here"></kc-file-upload>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   document.querySelector('kc-file-upload')
     .addEventListener('filesadded', (e) =>
@@ -39,7 +39,7 @@ const meta = {
       description: specDescription('kc-file-upload', [
           '`<kc-file-upload>` is the framework-agnostic **web component** for a click / drag-and-drop file dropzone — isolated in **Shadow DOM**.',
           '**When to use:** accepting file or image uploads in a non-Solid app. In SolidJS, compose the `FileUpload` primitives.',
-          "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `accept` / `multiple` / `label` attributes, and listen for the `filesadded` **CustomEvent** (`e.detail.files` is a `File[]`). The default dropzone label can be replaced with your own markup via the default `<slot>`.",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `accept` / `multiple` / `label` attributes, and listen for the `filesadded` **CustomEvent** (`e.detail.files` is a `File[]`). The default dropzone label can be replaced with your own markup via the default `<slot>`.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

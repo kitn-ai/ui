@@ -39,7 +39,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-chain-of-thought id="cot"></kc-chain-of-thought>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   document.getElementById('cot').steps = [
     { label: 'Understand the request', content: 'The user wants a composable set.' },
@@ -58,7 +58,7 @@ const meta = {
       description: specDescription('kc-chain-of-thought', [
         '`<kc-chain-of-thought>` is the framework-agnostic **web component** for step-by-step reasoning — a connected list of steps, each with optional collapsible detail — isolated in **Shadow DOM**. The compound primitive collapses to a single `steps` data model (Route 1).',
         '**When to use:** surfacing an agent\'s plan or reasoning trace in a non-Solid app. In SolidJS, compose the `ChainOfThought` primitives for finer control.',
-        "**How to use:** register once with `import '@kitnai/chat/elements'`, then set the `steps` **property** — an array of `{ label, content? }`. Steps with `content` become expandable.",
+        "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set the `steps` **property** — an array of `{ label, content? }`. Steps with `content` become expandable.",
         'See the **Code** tab for HTML usage.',
       ]),
     },
