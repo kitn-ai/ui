@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.9.0](https://github.com/kitn-ai/chat/compare/chat-v0.8.1...chat-v0.9.0) (2026-06-14)
+
+
+### Features
+
+* **artifact:** expand/maximize + open-in-tab + configurable toolbar + standalone/readonly-path ([e13bddf](https://github.com/kitn-ai/chat/commit/e13bddf4c137354e25a5a737dac51e0213bae295))
+* **artifact:** expand/open-in-tab/configurable toolbar + standalone + readonly-path (Solid) ([c49683e](https://github.com/kitn-ai/chat/commit/c49683ec9086d325b2c702f04457adde982c04c4))
+* **artifact:** facade flags + kc-maximize-intent emit + maximizechange + state reconcile ([38272aa](https://github.com/kitn-ai/chat/commit/38272aa4787b8deb107323df0e67d2056127e0f1))
+* **cards:** &lt;kc-cards&gt; web-component list dispatcher ([a7abd54](https://github.com/kitn-ai/chat/commit/a7abd5438056ba6790e825c79c40e4b2ab0379e8))
+* **cards:** card-registry — type→component/tag maps + merge helpers ([a5f945f](https://github.com/kitn-ai/chat/commit/a5f945fcd853a055d4189c1b614e04206d44d895))
+* **cards:** CardFallback for unsupported card types ([f6385ac](https://github.com/kitn-ai/chat/commit/f6385acb0b77ece53159cf9d0fdf787afd3331de))
+* **cards:** CardRenderer + renderCard (Solid single-envelope dispatcher) ([4aa2030](https://github.com/kitn-ai/chat/commit/4aa2030645a4bdb4a701e46403280bb239974416))
+* **cards:** export the dispatcher from the public barrel ([47cebaa](https://github.com/kitn-ai/chat/commit/47cebaa8129a822b6df27617ef52f26739364491))
+* **cards:** generative-UI card dispatcher (renderCard / &lt;kc-cards&gt;) + Overview ([04e1bb7](https://github.com/kitn-ai/chat/commit/04e1bb7fe25337dbe1cb1c0be25d9631a111b884))
+* **resizable-ui:** Solid Resizable maximizedIndex/onMaximizeChange parity ([17f9b62](https://github.com/kitn-ai/chat/commit/17f9b629f4cbe8d24420aca437ff54860c950dfd))
+* **resizable:** Escape-to-restore, auto-restore on item removal, nested stopPropagation ([4f2c1f1](https://github.com/kitn-ai/chat/commit/4f2c1f129ab920b3b0399a7a964ed6dc8f8a0ee6))
+* **resizable:** kc-maximize-intent listener + stash/restore core ([fe0780e](https://github.com/kitn-ai/chat/commit/fe0780edfc3a925a90df480cf6d77db39b5aa097))
+* **resizable:** maximize protocol types + ambient host API typing ([f03d2ae](https://github.com/kitn-ai/chat/commit/f03d2aee34ee6fe5b6f2f796be2cf8a6fecf9344))
+* **resizable:** maximizedIndex prop + maximize/restore methods + maximizechange ([5ba03ff](https://github.com/kitn-ai/chat/commit/5ba03ff11fdcb3142adf1a1637aed0239b9a269d))
+
+
+### Bug Fixes
+
+* **cards:** &lt;kc-cards&gt; reads policy at event-time + inline types prop; soften streaming docs ([7b384a1](https://github.com/kitn-ai/chat/commit/7b384a1958bd99bf4c57080ab91b316db6fe11f7))
+* **resizable:** element-keyed maximize stash (index-drift) + remove dead guards ([bb6a99b](https://github.com/kitn-ai/chat/commit/bb6a99b1325830d7662517f4376c9fe63ea57899))
+* **stories:** drop duplicate kc-artifact JSX decl (use artifact.stories augmentation) ([0202077](https://github.com/kitn-ai/chat/commit/02020772208654f3efcd9e3f6239eecd4e627360))
+
 ## [0.8.1](https://github.com/kitn-ai/chat/compare/chat-v0.8.0...chat-v0.8.1) (2026-06-14)
 
 
