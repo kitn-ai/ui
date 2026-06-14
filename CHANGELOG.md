@@ -1,5 +1,60 @@
 # Changelog
 
+## [0.8.0](https://github.com/kitn-ai/chat/compare/chat-v0.7.0...chat-v0.8.0) (2026-06-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* all web-component tag names and React wrapper names changed to the kc-* / Kc* scheme. Update markup and imports accordingly. A runtime prefix override (register({ prefix })) is planned so consumers can re-namespace on the fly without recompiling.
+
+### Features
+
+* adopt the kc-* custom-element prefix (Shoelace-style brand mark) ([5a4ec19](https://github.com/kitn-ai/chat/commit/5a4ec192a3e3fbebad9db83961bb4661c591774e))
+* **artifact:** &lt;kc-artifact&gt; viewer + &lt;kc-file-tree&gt; ([3edda25](https://github.com/kitn-ai/chat/commit/3edda2500ec22878783c17097bdd43cc6fe2dfb9))
+* **artifact:** &lt;kc-artifact&gt; viewer + &lt;kc-file-tree&gt; ([e0232a0](https://github.com/kitn-ai/chat/commit/e0232a0b77cf7d5e0d89aa301beb67a5b219b37a))
+* **artifact:** ArtifactPdfPreview inline pdf.js viewer ([f72083a](https://github.com/kitn-ai/chat/commit/f72083a4d38c9a128f87bc098317aa819981abaf))
+* **artifact:** branch Preview to inline PDF viewer + reload ([2d3f934](https://github.com/kitn-ai/chat/commit/2d3f934506f4456c4f4e020116c36fd358db9cd2))
+* **artifact:** inline PDF preview via on-demand pdf.js + fallback ([85b360c](https://github.com/kitn-ai/chat/commit/85b360c0d7de1ae2c52c9a4739b9ba0cabdc1b34))
+* **artifact:** isPdfUrl preview detector ([7437251](https://github.com/kitn-ai/chat/commit/743725176c41fe1a1882d68a1e27fe61586b23e7))
+* **artifact:** PDF fallback card (open / download) ([62a18fc](https://github.com/kitn-ai/chat/commit/62a18fc786042d8aa0343d49648906c10e556121))
+* **card-contract:** CardProvider + useCardHost native transport ([9909ca1](https://github.com/kitn-ai/chat/commit/9909ca18f110eed94923ea4e910bbb9d88d7238a))
+* **card-contract:** emitCardEvent + routeCardEvent + listener ([2cf1f10](https://github.com/kitn-ai/chat/commit/2cf1f10c694e130d16e8665f3cbd3198805d088c))
+* **card-contract:** export the foundation from the public barrel ([4d9fe9c](https://github.com/kitn-ai/chat/commit/4d9fe9ccfaf9d209a6f02e780284578c8f7039cd))
+* **card-contract:** frozen contract types + version ([712e3a5](https://github.com/kitn-ai/chat/commit/712e3a55318f2ee37d1b8ec4e058b3bdaf44d2ee))
+* **card-contract:** generative-UI foundation (types, validator, transport, schemas) ([8392275](https://github.com/kitn-ai/chat/commit/83922756d3c695d2e11a99e7e869353c8bdb42ae))
+* **card-contract:** shared lean JSON-Schema validator ([a93281e](https://github.com/kitn-ai/chat/commit/a93281e27add3c2dccb28f12ec74afc92cbec9f0))
+* **card-contract:** ship envelope/event schemas to dist/schemas ([99715de](https://github.com/kitn-ai/chat/commit/99715de1e5118c540f22c76a06f9523c05a96313))
+* **cards:** integrate kc-card/kc-form/kc-link-card/kc-embed (register + barrel + regen) ([cf2ad3a](https://github.com/kitn-ai/chat/commit/cf2ad3ac5320e74f5fff4e7ecf0238bda50175e8))
+* **cards:** integrate kc-confirm + kc-task-list (register + x-kc hints + regen) ([f832995](https://github.com/kitn-ai/chat/commit/f832995b012928f28dcaa5da0fc4fb73b74d109f))
+* **cards:** kc-card base shell + kc-form JSON-Schema renderer ([b759978](https://github.com/kitn-ai/chat/commit/b759978903edfdfd507042bc9db8318271bee3d3))
+* **cards:** kc-card, kc-form, kc-link-card, kc-embed (generative-UI cards) ([00e5884](https://github.com/kitn-ai/chat/commit/00e58849d88c93c86348db9f5b13708953969ec7))
+* **cards:** kc-confirm + kc-task-list (approval cards) + Button destructive variant ([fb8d255](https://github.com/kitn-ai/chat/commit/fb8d255bdc534a762abb5be2b97a1890a55464a2))
+* **cards:** kc-confirm + kc-task-list + full generative-UI card design pass ([f9acdc4](https://github.com/kitn-ai/chat/commit/f9acdc447abf35f9cf983c6444646bd099425ce9))
+* **cards:** kc-link-card + kc-embed (display cards on the Card Contract) ([8b5a5bc](https://github.com/kitn-ai/chat/commit/8b5a5bcc4c92a29eec6e00de192c2f54b4744f64))
+* **cards:** premium control design + Storybook light/dark + a11y fixes ([1855321](https://github.com/kitn-ai/chat/commit/18553213127a6c6b716a7f98cdca1b05a6c837dd))
+* **cards:** redesign card chrome + form controls ([d6df789](https://github.com/kitn-ai/chat/commit/d6df789402b918e2bdef9f98aa9ea7217ac63b67))
+* **pdf-preview:** config + enable/reset primitive scaffold ([49a0b87](https://github.com/kitn-ai/chat/commit/49a0b870f338df11df4ecef86c73a99ff404dff8))
+* **pdf-preview:** export configurePdfPreview from the barrel ([8be2e6d](https://github.com/kitn-ai/chat/commit/8be2e6d6fbd8a10711598f8875da323f676858c8))
+* **pdf-preview:** on-demand pdf.js loader + renderPdfInto ([c55b43e](https://github.com/kitn-ai/chat/commit/c55b43ea796c4ed16fd964dc024592c065943fa7))
+* **resizable:** &lt;kc-resizable&gt; panel layout + level up the primitives ([7abc84b](https://github.com/kitn-ai/chat/commit/7abc84b6b2c432bef47c10c31bad75e3e4d99986))
+* **resizable:** &lt;kc-resizable&gt; panel layout + level up the primitives ([656adeb](https://github.com/kitn-ai/chat/commit/656adebc5c19c8349b885b7e6170c83158dd342c))
+* **stories:** Examples/ composition stories (catalog, composed shell, choosing-components) ([233858e](https://github.com/kitn-ai/chat/commit/233858ec4e04c342e36e623c97c10cca965824a0))
+* **stories:** Examples/Catalog + Choosing-components overview (web components) ([10d2e81](https://github.com/kitn-ai/chat/commit/10d2e815250cd4d70091296cf1cd68af4b3ece23))
+* **stories:** Examples/Composed chat shell (compose-your-own vs drop-in) ([10abceb](https://github.com/kitn-ai/chat/commit/10abcebc2e0303e3ea5bd829aa482fe45eb5eff1))
+
+
+### Bug Fixes
+
+* **a11y:** brighten destructive red in dark across the cards ([1163995](https://github.com/kitn-ai/chat/commit/1163995295591581540cb42ac9a00a0763c6653e))
+* **a11y:** darken light-mode --color-destructive for WCAG contrast ([a245236](https://github.com/kitn-ai/chat/commit/a245236ff96a3fd4874d1bc26b5decfac43fde9a))
+* **a11y:** label icon buttons/selects + fix contrast in story fixtures ([b1b464e](https://github.com/kitn-ai/chat/commit/b1b464e535b64188d057fa9dad7ae78408dd6334))
+* **a11y:** WCAG AA fixes across component library + story fixtures ([994e738](https://github.com/kitn-ai/chat/commit/994e738c02e4377b00cbbf66b53fe86ebfb94fa8))
+* **a11y:** WCAG AA fixes in component library (axe-clean) ([7a18461](https://github.com/kitn-ai/chat/commit/7a18461d20f00120aa249228c40041279229f867))
+* **artifact:** make inline PDF scroll region keyboard-focusable ([767ce31](https://github.com/kitn-ai/chat/commit/767ce310557b907f270a2d95ace0e0c72a01a183))
+* **cards:** null out native range-track border/groove ([9bda968](https://github.com/kitn-ai/chat/commit/9bda96872f439e83024ef5b24ee6e5a466277ace))
+* **highlighter:** highlight TypeScript/TSX by default ([5686b4a](https://github.com/kitn-ai/chat/commit/5686b4a5ea4f9c8ccac3f8848126d9533ddd939f))
+* **highlighter:** highlight TypeScript/TSX by default ([896a103](https://github.com/kitn-ai/chat/commit/896a10329b2f39183a137bfb46fde62587daaaab))
+
 ## [0.7.0](https://github.com/kitn-ai/chat/compare/chat-v0.6.0...chat-v0.7.0) (2026-06-13)
 
 
