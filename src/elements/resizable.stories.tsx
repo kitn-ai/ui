@@ -15,13 +15,9 @@ declare module 'solid-js' {
       'kc-resizable-item': JSX.HTMLAttributes<HTMLElement> & {
         size?: string; min?: string; max?: string; locked?: boolean | string; hidden?: boolean | string;
       };
-      'kc-artifact': JSX.HTMLAttributes<HTMLElement> & {
-        src?: string;
-        'iframe-title'?: string;
-        expandable?: boolean | string;
-        'open-in-tab'?: boolean | string;
-        ref?: (el: HTMLElement) => void;
-      };
+      // `kc-artifact` JSX type is augmented (with the full attr set) in
+      // artifact.stories.tsx — declaring it again here with a different shape
+      // would trip TS2717 (module-augmentation merges must match). Reuse that one.
     }
   }
 }
