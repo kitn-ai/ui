@@ -120,6 +120,11 @@ renames to `onSubmit`.
   Submit is enabled when a concrete option is selected, or "Other" is selected with
   non-empty trimmed text.
 - Optional `submitLabel` data field (default `"Submit"`).
+- **Image hover preview:** when an option has `media.image`, the small list thumbnail
+  (~36px) is wrapped in the kit's `HoverCard` (`src/ui/hover-card.tsx`) so hovering/focusing
+  it shows a larger preview — small thumbnails can be unreadable. Icon badges (no image)
+  are unaffected. The hover trigger must not swallow the row's select click; the preview
+  image carries the same `imageAlt`. Stays within the axe gate (light+dark).
 - a11y: the radiogroup keeps its WAI-ARIA semantics; the Submit button has an accessible
   name; nothing focusable left behind in the resolved view.
 

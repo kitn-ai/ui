@@ -13,6 +13,7 @@ import {
 } from 'solid-js';
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
+import { HoverCard } from '../ui/hover-card';
 import { Card } from './card';
 import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
 import { useCardResolution } from './use-card-resolution';
@@ -497,7 +498,17 @@ function ListRow(props: RowProps): JSX.Element {
       )}
     >
       <Show when={props.opt.media?.image}>
-        <Thumb media={props.opt.media!} class="h-9 w-9" />
+        <HoverCard
+          openDelay={150}
+          class="p-1 w-auto"
+          trigger={<Thumb media={props.opt.media!} class="h-9 w-9" />}
+        >
+          <img
+            src={props.opt.media!.image}
+            alt={props.opt.media!.imageAlt ?? ''}
+            class="max-h-64 max-w-64 rounded-md object-contain"
+          />
+        </HoverCard>
       </Show>
       <Show when={!props.opt.media?.image && props.opt.media?.icon}>
         <IconBadge name={props.opt.media!.icon!} />
