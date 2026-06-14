@@ -23,7 +23,7 @@ declare module 'solid-js' {
 }
 
 // Fixture base URL (served by Storybook staticDirs from examples/artifact-fixtures).
-const BASE = '/artifact-fixtures';
+const BASE = new URL('artifact-fixtures', document.baseURI).href;
 
 const ARTIFACT_FILES: ArtifactFile[] = [
   { path: 'index.html', url: `${BASE}/index.html`, type: 'html', language: 'html',

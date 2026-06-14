@@ -34,7 +34,7 @@ declare module 'solid-js' {
 // Storybook serves examples/artifact-fixtures at /artifact-fixtures (see
 // .storybook/main.ts staticDirs). These are real, cross-linked pages so
 // relative-link nav, back/forward and multi-format all work in the iframe.
-const BASE = '/artifact-fixtures';
+const BASE = new URL('artifact-fixtures', document.baseURI).href;
 
 const FILES: ArtifactFile[] = [
   {
