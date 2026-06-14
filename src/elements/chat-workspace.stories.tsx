@@ -125,7 +125,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-workspace id="workspace" style="display:block; height:100vh;"></kc-workspace>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   const workspace = document.getElementById('workspace');
   workspace.conversations = [
@@ -149,10 +149,10 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   workspace.addEventListener('sidebartoggle', (e) => console.log('sidebar collapsed:', e.detail.collapsed));
 </script>`;
 
-const SOLID_SNIPPET = `import '@kitnai/chat/elements'; // registers the custom elements
+const SOLID_SNIPPET = `import '@kitn.ai/chat/elements'; // registers the custom elements
 import { onMount } from 'solid-js';
-import type { ConversationSummary, ModelOption } from '@kitnai/chat';
-import type { ChatMessage } from '@kitnai/chat/elements';
+import type { ConversationSummary, ModelOption } from '@kitn.ai/chat';
+import type { ChatMessage } from '@kitn.ai/chat/elements';
 
 function Workspace() {
   let el: HTMLElement & {
@@ -198,7 +198,7 @@ const meta = {
       description: specDescription('kc-workspace', [
           '`<kc-workspace>` is the full chat shell as a single **web component** — a resizable split layout with a collapsible conversation list on the left and a full message thread on the right, all isolated in **Shadow DOM**. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** dropping an entire chat application shell into a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts and a ready-made list+chat layout. If you *are* in SolidJS and want fine-grained control, compose the `ConversationList` and `ChatThread` primitives directly.',
-          '**How to use:** register once with `import \'@kitnai/chat/elements\'`, set rich data as JS **properties** (`el.conversations = [...]`, `el.messages = [...]`, `el.models = [...]`), and listen for **CustomEvents** (`conversationselect`, `submit`, `sidebartoggle`, `newchat`) directly on the element.',
+          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, set rich data as JS **properties** (`el.conversations = [...]`, `el.messages = [...]`, `el.models = [...]`), and listen for **CustomEvents** (`conversationselect`, `submit`, `sidebartoggle`, `newchat`) directly on the element.',
           '**Placement:** as a full-page surface or large panel. Give it an explicit height (e.g. `height: 100vh`). The sidebar is drag-resizable and can be collapsed via the toggle button in its header.',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ]),

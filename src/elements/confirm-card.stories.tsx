@@ -106,7 +106,7 @@ const HTML_SNIPPET = (def: ConfirmCardData, cardId: string) => {
   const heading = HEADING_MAP[cardId];
   return `<kc-confirm${heading ? ` heading="${heading}"` : ''}></kc-confirm>
 <script type="module">
-  import '@kitnai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/chat/elements'; // registers the custom elements
 
   const el = document.querySelector('kc-confirm');
   // \`data\` is the CardEnvelope.data (set as a property).
@@ -171,7 +171,7 @@ export const ErrorState: Story = {
       source: {
         code: `<kc-confirm></kc-confirm>
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
   const el = document.querySelector('kc-confirm');
   // No actions → inline error state + an \`error\` event.
   el.data = { actions: [] };

@@ -5,8 +5,8 @@
     "types": [],
     "skipLibCheck": true,
     "paths": {
-      "@kitnai/chat/elements": ["./src/stubs/kitn-chat-elements.d.ts"],
-      "@kitnai/chat/theme.css": ["./src/stubs/kitn-chat-theme.d.ts"]
+      "@kitn.ai/chat/elements": ["./src/stubs/kitn-chat-elements.d.ts"],
+      "@kitn.ai/chat/theme.css": ["./src/stubs/kitn-chat-theme.d.ts"]
     }
   },
   "include": ["src/**/*.ts"],

@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Choosing components
 
-`@kitnai/chat` ships ~32 `kc-*` web components across **three tiers**. This page is
+`@kitn.ai/chat` ships ~32 `kc-*` web components across **three tiers**. This page is
 the mental model for **which tier to reach for** — so you don't have to read all 32
 per-element pages to know where to start.
 
@@ -27,7 +27,7 @@ around it. These pre-wire the leaf components for you.
 ```html
 <kc-chat id="chat" chat-title="Assistant" style="display:block;height:560px"></kc-chat>
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
   const chat = document.getElementById('chat');
   chat.messages = [{ id: '1', role: 'assistant', content: 'Hi!' }];
   chat.addEventListener('submit', (e) => {/* call your model */});

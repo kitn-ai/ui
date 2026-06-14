@@ -41,7 +41,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-sources id="srcs" show-favicon></kc-sources>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   const srcs = document.getElementById('srcs');
   srcs.sources = [
@@ -60,7 +60,7 @@ const meta = {
       description: specDescription('kc-sources', [
           '`<kc-sources>` is the framework-agnostic **web component** for a wrapped row of citation links (each with its own hover-card preview), isolated in **Shadow DOM**.',
           '**When to use:** showing the sources behind an assistant answer in a non-Solid app. For a single citation, use `<kc-source>`; in SolidJS, compose `SourceList` + `Source`.',
-          "**How to use:** register once with `import '@kitnai/chat/elements'`, set the data via the `sources` **property** (each item: `href`, `title`, `description`, `label`, `showFavicon`), and set `show-favicon` to enable favicons for all items (a per-item `showFavicon` overrides it).",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the data via the `sources` **property** (each item: `href`, `title`, `description`, `label`, `showFavicon`), and set `show-favicon` to enable favicons for all items (a per-item `showFavicon` overrides it).",
           'See the **Code** tab for HTML usage.',
         ]),
     },

@@ -1,5 +1,5 @@
 /**
- * Type stub for `@kitnai/chat/elements`.
+ * Type stub for `@kitn.ai/chat/elements`.
  *
  * The kit ships its full SolidJS source in the package (including `.tsx` files)
  * which TypeScript would try to compile — but Angular's tsconfig has no `jsx`
@@ -8,9 +8,9 @@
  *
  * At runtime / in the Vite build, the real bundle is used via the alias in
  * vite.config.ts:
- *   `@kitnai/chat/elements` → `../../dist/kitn-chat.es.js`
+ *   `@kitn.ai/chat/elements` → `../../dist/kitn-chat.es.js`
  *
  * This import is side-effect only (registers custom elements globally) so the
  * opaque declaration is all TypeScript needs.
  */
-declare module '@kitnai/chat/elements' {}
+declare module '@kitn.ai/chat/elements' {}

@@ -42,7 +42,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-model-switcher id="ms"></kc-model-switcher>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   const ms = document.getElementById('ms');
   ms.models = [
@@ -63,7 +63,7 @@ const meta = {
       description: specDescription('kc-model-switcher', [
           '`<kc-model-switcher>` is the framework-agnostic **web component** for picking the active model — a dropdown showing each model\'s name and provider — isolated in **Shadow DOM**. It mirrors the switcher inside `<kc-chat>` as a standalone, composable piece.',
           '**When to use:** building your own chat header and want the model picker on its own. In SolidJS, use the `ModelSwitcher` primitive.',
-          "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `models` **property** (and optionally `currentModel`), and listen for the `modelchange` **CustomEvent**. Note: like the underlying primitive, it only renders when more than one model is provided.",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `models` **property** (and optionally `currentModel`), and listen for the `modelchange` **CustomEvent**. Note: like the underlying primitive, it only renders when more than one model is provided.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

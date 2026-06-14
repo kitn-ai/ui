@@ -42,7 +42,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { HoverCard } from '@kitnai/chat';`;
+const IMPORT = `import { HoverCard } from '@kitn.ai/chat';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

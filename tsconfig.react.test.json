@@ -13,8 +13,8 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@kitnai/chat/react": ["./frameworks/react/index.tsx"],
-      "@kitnai/chat/elements": ["./tests/react/elements-stub.d.ts"]
+      "@kitn.ai/chat/react": ["./frameworks/react/index.tsx"],
+      "@kitn.ai/chat/elements": ["./tests/react/elements-stub.d.ts"]
     }
   },
   "include": ["tests/react/**/*.ts", "tests/react/**/*.tsx"]

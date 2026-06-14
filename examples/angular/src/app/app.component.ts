@@ -12,7 +12,7 @@
  *   - (conversationselect), (submit), (modelchange), (sidebartoggle) listen to the
  *     kit's CustomEvents; `($event as CustomEvent).detail` carries the payload.
  *   - CUSTOM_ELEMENTS_SCHEMA tells Angular to allow unknown `kitn-*` element tags.
- *   - `@kitnai/chat/elements` is imported once (main.ts side-effect) to register
+ *   - `@kitn.ai/chat/elements` is imported once (main.ts side-effect) to register
  *     the custom elements globally.
  */
 

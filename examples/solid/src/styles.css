@@ -1,6 +1,6 @@
 @import "tailwindcss";
-@import "@kitnai/chat/theme.css";
-@source "../node_modules/@kitnai/chat";
+@import "@kitn.ai/chat/theme.css";
+@source "../node_modules/@kitn.ai/chat";
 
 html,
 body,

@@ -48,7 +48,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-context id="ctx"></kc-context>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   document.getElementById('ctx').context = {
     usedTokens: 48200, maxTokens: 200000,
@@ -68,7 +68,7 @@ const meta = {
       description: specDescription('kc-context', [
           '`<kc-context>` is the framework-agnostic **web component** for a token/context-window usage meter — a compact gauge with a hover-card breakdown (input / output / reasoning / cache + estimated cost) — isolated in **Shadow DOM**.',
           '**When to use:** showing how much of the context window a conversation is using, typically in a chat header. In SolidJS, compose the `Context` primitives.',
-          "**How to use:** register once with `import '@kitnai/chat/elements'`, then set the `context` **property** with the usage object. Hover the meter to reveal the breakdown.",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set the `context` **property** with the usage object. Hover the meter to reveal the breakdown.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

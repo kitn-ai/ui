@@ -5,10 +5,10 @@ import { Meta } from '@storybook/addon-docs/blocks';
 # Installation
 
 ```bash
-npm install @kitnai/chat
+npm install @kitn.ai/chat
 ```
 
-The package ships two entry points: the SolidJS components (`@kitnai/chat`) and the framework-agnostic web components (`@kitnai/chat/elements`). Pick whichever fits your stack — you can mix them.
+The package ships two entry points: the SolidJS components (`@kitn.ai/chat`) and the framework-agnostic web components (`@kitn.ai/chat/elements`). Pick whichever fits your stack — you can mix them.
 
 ## SolidJS projects
 
@@ -21,11 +21,11 @@ npm install solid-js
 Import the components and the design tokens once:
 
 ```tsx
-import { ChatContainer, Message, MessageContent, PromptInput } from '@kitnai/chat';
-import '@kitnai/chat/theme.css';
+import { ChatContainer, Message, MessageContent, PromptInput } from '@kitn.ai/chat';
+import '@kitn.ai/chat/theme.css';
 ```
 
-The `@kitnai/chat` entry is shipped as source, so your bundler tree-shakes it down to exactly what you import.
+The `@kitn.ai/chat` entry is shipped as source, so your bundler tree-shakes it down to exactly what you import.
 
 ## Web components (React, Vue, plain HTML, …)
 
@@ -37,7 +37,7 @@ npm run build   # emits dist/kitn-chat.es.js
 
 ```html
 <script type="module">
-  import '@kitnai/chat/elements';
+  import '@kitn.ai/chat/elements';
 </script>
 ```
 
@@ -47,29 +47,29 @@ npm run build   # emits dist/kitn-chat.es.js
 
 ### Via CDN (no build step, no npm)
 
-The element bundle is a self-contained ES module, so you can load it straight from a CDN — no install, no bundler, no import map. It's published on both <a href="https://www.jsdelivr.com/package/npm/@kitnai/chat" target="_blank" rel="noreferrer">jsDelivr</a> and <a href="https://unpkg.com/browse/@kitnai/chat/" target="_blank" rel="noreferrer">unpkg</a>:
+The element bundle is a self-contained ES module, so you can load it straight from a CDN — no install, no bundler, no import map. It's published on both <a href="https://www.jsdelivr.com/package/npm/@kitn.ai/chat" target="_blank" rel="noreferrer">jsDelivr</a> and <a href="https://unpkg.com/browse/@kitn.ai/chat/" target="_blank" rel="noreferrer">unpkg</a>:
 
 ```html
 <!-- jsDelivr -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitnai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
 </script>
 
 <!-- …or unpkg -->
 <script type="module">
-  import 'https://unpkg.com/@kitnai/chat/dist/kitn-chat.es.js';
+  import 'https://unpkg.com/@kitn.ai/chat/dist/kitn-chat.es.js';
 </script>
 
 <kc-chat></kc-chat>
 ```
 
 - The URLs above track the **latest** release (no version) — they never go stale, so they're ideal for demos and quick starts.
-- **For production, pin an exact version** — e.g. `.../npm/@kitnai/chat@0.4.0/dist/kitn-chat.es.js`. Pinned URLs are immutable and cached far more aggressively (floating "latest" tags get revalidated every few hours), and — since this package is **pre-1.0** — pinning shields you from breaking changes in a future minor release. A version *range* (`@0` / `@0.4`) won't: pre-1.0 it can still resolve to a breaking minor.
+- **For production, pin an exact version** — e.g. `.../npm/@kitn.ai/chat@0.4.0/dist/kitn-chat.es.js`. Pinned URLs are immutable and cached far more aggressively (floating "latest" tags get revalidated every few hours), and — since this package is **pre-1.0** — pinning shields you from breaking changes in a future minor release. A version *range* (`@0` / `@0.4`) won't: pre-1.0 it can still resolve to a breaking minor.
 - SolidJS and the kit's CSS are bundled in, and the lazy syntax-highlighting chunks load from the **same CDN** automatically (they're relative to the bundle) — so nothing else is needed.
 - To override design tokens, also pull in `theme.css`:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitnai/chat/theme.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/theme.css">
 ```
 
 Head to **[Getting Started](?path=/docs/docs-getting-started--docs)** to render your first chat.

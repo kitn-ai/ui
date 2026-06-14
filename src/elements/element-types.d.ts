@@ -3,7 +3,7 @@
 // `document.querySelector('kc-message')` is typed and gets prop autocomplete.
 
 
-// Re-exports for `import { … } from '@kitnai/chat/elements'`.
+// Re-exports for `import { … } from '@kitn.ai/chat/elements'`.
 export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';
@@ -167,7 +167,7 @@ export interface KcCodeBlockElement extends HTMLElement {
 export interface KcConfirmElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from `@kitnai/chat` for the full shape. */
+  /** The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from `@kitn.ai/chat` for the full shape. */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -247,7 +247,7 @@ export interface KcFileUploadElement extends HTMLElement {
 export interface KcFormElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitnai/chat` for the full shape (it is self-referential, so the element types it loosely). */
+  /** The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/chat` for the full shape (it is self-referential, so the element types it loosely). */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;
@@ -470,7 +470,7 @@ export interface KcSuggestionsElement extends HTMLElement {
 export interface KcTaskListElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TaskListCardData` from `@kitnai/chat` for the full shape. */
+  /** The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TaskListCardData` from `@kitn.ai/chat` for the full shape. */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;

@@ -38,7 +38,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-skills id="skills"></kc-skills>
 
 <script type="module">
-  import '@kitnai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/chat/elements';   // registers the custom elements
 
   const skills = document.getElementById('skills');
   skills.skills = [
@@ -57,7 +57,7 @@ const meta = {
       description: specDescription('kc-skills', [
           '`<kc-skills>` is the framework-agnostic **web component** that badges which skills were active for a message, isolated in **Shadow DOM**.',
           '**When to use:** annotating a message row with the skills/tools it used, in a non-Solid app. In SolidJS, use the `MessageSkills` primitive directly.',
-          "**How to use:** register once with `import '@kitnai/chat/elements'`, then set the `skills` **property** to an array of `{ id, name }`.",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set the `skills` **property** to an array of `{ id, name }`.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

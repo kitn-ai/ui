@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@kitnai/chat": "^0.2.0",
+    "@kitn.ai/chat": "^0.2.0",
     "lucide-solid": "^0.400.0",
     "solid-js": "^1.9.0"
   },

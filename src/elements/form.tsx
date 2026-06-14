@@ -4,7 +4,7 @@ import { Form, type FormDefinition } from '../components/form';
 interface Props extends Record<string, unknown> {
   /** The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints
    *  (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object',
-   *  properties:{…} }`. Import the `FormDefinition` type from `@kitnai/chat` for
+   *  properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/chat` for
    *  the full shape (it is self-referential, so the element types it loosely). */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */

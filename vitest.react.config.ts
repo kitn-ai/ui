@@ -14,7 +14,7 @@ const dirname =
 // `npm run test:react` (kept out of the default `npm test`).
 //
 // The custom elements themselves are SolidJS — we DON'T compile them here.
-// Instead `@kitnai/chat/elements` resolves to the prebuilt bundle (already-
+// Instead `@kitn.ai/chat/elements` resolves to the prebuilt bundle (already-
 // compiled JS), exactly like a real consumer. Run `npm run build` first so
 // `dist/kitn-chat.es.js` and the generated `frameworks/react/index.tsx` exist.
 export default defineConfig({
@@ -25,8 +25,8 @@ export default defineConfig({
   esbuild: { jsx: 'automatic', jsxImportSource: 'react' },
   resolve: {
     alias: {
-      '@kitnai/chat/react': path.resolve(dirname, 'frameworks/react/index.tsx'),
-      '@kitnai/chat/elements': path.resolve(dirname, 'dist/kitn-chat.es.js'),
+      '@kitn.ai/chat/react': path.resolve(dirname, 'frameworks/react/index.tsx'),
+      '@kitn.ai/chat/elements': path.resolve(dirname, 'dist/kitn-chat.es.js'),
     },
   },
   test: {

@@ -14,12 +14,12 @@
     "moduleDetection": "force",
     "noEmit": true,
 
-    /* Resolve @kitnai/chat/* against the local repo (matches vite.config alias)
+    /* Resolve @kitn.ai/chat/* against the local repo (matches vite.config alias)
        so the example typechecks/builds the wrappers we're developing without a
        published package. */
     "baseUrl": ".",
     "paths": {
-      "@kitnai/chat/react": ["../../frameworks/react/index.tsx"]
+      "@kitn.ai/chat/react": ["../../frameworks/react/index.tsx"]
     },
 
     /* React JSX */
