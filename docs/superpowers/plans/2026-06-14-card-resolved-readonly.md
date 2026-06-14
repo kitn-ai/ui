@@ -10,6 +10,27 @@
 
 **Spec:** `docs/superpowers/specs/2026-06-14-card-resolved-readonly-design.md`
 
+## Amendments (2026-06-14, mid-execution)
+
+After Tasks 1–3 landed, the maintainer added a card-API consistency pass. These override
+the literal snippets below where they conflict:
+
+1. **Verb rename `submit-data` → `submit`** (contract-wide): `CardEvent` variant,
+   `CardResolution` variant, `CardPolicy.onSubmitData` → `onSubmit`, all emitters
+   (form, tasks), tests, docs. Everywhere a snippet below says `submit-data`, read `submit`.
+2. **`task-list` → `tasks`** (full rename): tag `kc-task-list` → `kc-tasks`, type
+   `'task-list'` → `'tasks'`, component `TaskListCard` → `TasksCard`, files `git mv`
+   (`*-card`→`tasks-card`/`tasks`), React wrapper `KcTaskList` → `KcTasks`, stories/tests.
+   Everywhere a snippet says `task-list`/`TaskListCard`/`kc-task-list`, read the new names.
+3. **kc-choice redesign (Task 4 rewritten):** select → **Submit button** (no fire-on-click;
+   Submit emits `action` with the chosen id), **grid removed entirely** (list-only; drop
+   `GridTile`/`ChoiceLayout`/`layout`), images kept, `allowOther` unified under the single
+   Submit. The resolved read-only view from the original Task 4 is retained.
+4. **New Task R (run FIRST):** perform renames #1 and #2 as a foundational pass before the
+   choice redesign and the tasks/form resolved work, with the full gate green.
+
+Execution order: **R → 4(redesign) → 5(tasks) → 6(form) → 7 → 8 → 9 → 10.**
+
 **Conventions reminder:**
 - Run all tests from the **main checkout** (worktree vitest is broken).
 - SolidJS: never destructure props; use `splitProps`/`mergeProps`.
