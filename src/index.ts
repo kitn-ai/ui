@@ -42,6 +42,44 @@ export type {
   WidgetKind,
 } from './components/form';
 
+// Card: kc-confirm (approval) + kc-task-list (selectable plan)
+export {
+  ConfirmCard,
+  CONFIRM_CARD_TYPE,
+  buttonVariantForStyle,
+  normalizeActions,
+  defaultActionId,
+} from './components/confirm-card';
+export type {
+  ConfirmCardProps,
+  ConfirmAction,
+  ConfirmActionStyle,
+  ConfirmTone,
+  ConfirmCardData,
+  ConfirmCardEnvelope,
+} from './components/confirm-card';
+export {
+  TaskListCard,
+  TASK_LIST_CARD_TYPE,
+  normalizeTasks,
+  initialSelected,
+  selectedInOrder,
+  toggleableIds,
+  selectAllState,
+  showSelectAll,
+  canConfirm,
+  isMaxReached,
+  confirmReason,
+} from './components/task-list-card';
+export type {
+  TaskListCardProps,
+  TaskListTask,
+  TaskListCardData,
+  TaskListCardResult,
+  TaskListCardEnvelope,
+  SelectAllState,
+} from './components/task-list-card';
+
 // Card: kc-link-card (OG/link preview) + kc-embed (lazy media embed)
 export { LinkCard } from './components/link-card';
 export type { LinkCardProps } from './components/link-card';

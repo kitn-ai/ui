@@ -133,6 +133,19 @@ export interface KcCodeBlockElement extends HTMLElement {
   proseSize?: "xs" | "sm" | "base" | "lg";
 }
 
+export interface KcConfirmElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from `@kitnai/chat` for the full shape. */
+  data?: Record<string, unknown>;
+  /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
+  cardId?: string;
+  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
+  heading?: string;
+  /** Focus the default action on mount (off by default — no focus-stealing). Attribute: `autofocus`. */
+  autofocus?: boolean;
+}
+
 export interface KcContextElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -421,6 +434,17 @@ export interface KcSuggestionsElement extends HTMLElement {
   highlight?: string;
 }
 
+export interface KcTaskListElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The task-list definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TaskListCardData` from `@kitnai/chat` for the full shape. */
+  data?: Record<string, unknown>;
+  /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
+  cardId?: string;
+  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
+  heading?: string;
+}
+
 export interface KcTextShimmerElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -511,6 +535,7 @@ declare global {
     'kc-chat': KcChatElement;
     'kc-checkpoint': KcCheckpointElement;
     'kc-code-block': KcCodeBlockElement;
+    'kc-confirm': KcConfirmElement;
     'kc-context': KcContextElement;
     'kc-conversations': KcConversationsElement;
     'kc-embed': KcEmbedElement;
@@ -535,6 +560,7 @@ declare global {
     'kc-source': KcSourceElement;
     'kc-sources': KcSourcesElement;
     'kc-suggestions': KcSuggestionsElement;
+    'kc-task-list': KcTaskListElement;
     'kc-text-shimmer': KcTextShimmerElement;
     'kc-thinking-bar': KcThinkingBarElement;
     'kc-tool': KcToolElement;

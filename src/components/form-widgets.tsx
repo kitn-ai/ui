@@ -57,7 +57,7 @@ export function TextWidget(
       id={props.id}
       data-control
       type={inputType()}
-      class={cn(inputBase, props.invalid && 'border-destructive')}
+      class={cn(inputBase, props.invalid && 'border-destructive dark:border-red-400/70')}
       value={(props.value as string) ?? ''}
       placeholder={props.placeholder}
       disabled={props.disabled}
@@ -77,7 +77,7 @@ export function TextareaWidget(props: WidgetProps): JSX.Element {
       <Textarea
         id={props.id}
         data-control
-        class={cn(inputBase, props.invalid && 'border-destructive')}
+        class={cn(inputBase, props.invalid && 'border-destructive dark:border-red-400/70')}
         value={(props.value as string) ?? ''}
         placeholder={props.placeholder}
         disabled={props.disabled}
@@ -102,7 +102,7 @@ export function NumberWidget(props: WidgetProps): JSX.Element {
       id={props.id}
       data-control
       type="number"
-      class={cn(inputBase, props.invalid && 'border-destructive')}
+      class={cn(inputBase, props.invalid && 'border-destructive dark:border-red-400/70')}
       value={props.value === undefined || props.value === null ? '' : String(props.value)}
       placeholder={props.placeholder}
       disabled={props.disabled}
@@ -121,13 +121,19 @@ export function SliderWidget(props: WidgetProps): JSX.Element {
   const max = () => props.field.maximum ?? 100;
   const step = () => props.field['x-kc-step'] ?? (props.field.type === 'integer' ? 1 : undefined);
   const current = () => (props.value === undefined || props.value === null ? min() : Number(props.value));
+  const fill = (): string => {
+    const lo = min();
+    const hi = max();
+    return hi > lo ? `${((current() - lo) / (hi - lo)) * 100}%` : '0%';
+  };
   return (
     <div class="flex items-center gap-3">
       <input
         id={props.id}
         data-control
         type="range"
-        class="h-2 w-full cursor-pointer accent-[var(--color-primary)]"
+        class="kc-range"
+        style={{ '--kc-range-fill': fill() }}
         value={current()}
         min={min()}
         max={max()}
@@ -138,7 +144,9 @@ export function SliderWidget(props: WidgetProps): JSX.Element {
         onInput={(e) => props.onInput(Number(e.currentTarget.value))}
         onBlur={props.onBlur}
       />
-      <span class="w-10 shrink-0 text-right text-sm tabular-nums text-foreground">{current()}</span>
+      <span class="min-w-9 shrink-0 rounded-md bg-background px-2 py-1 text-center text-sm font-medium tabular-nums text-foreground shadow-sm">
+        {current()}
+      </span>
     </div>
   );
 }
@@ -225,12 +233,12 @@ export function SwitchWidget(props: WidgetProps): JSX.Element {
 
 export function CheckboxWidget(props: WidgetProps): JSX.Element {
   return (
-    <label class="inline-flex items-center gap-2 text-sm text-foreground">
+    <label class="-mx-1.5 inline-flex cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-1.5 text-sm text-foreground transition-colors hover:bg-muted/60">
       <input
         id={props.id}
         data-control
         type="checkbox"
-        class="h-4 w-4 rounded border-input accent-[var(--color-primary)]"
+        class="kc-checkbox"
         checked={props.value === true}
         disabled={props.disabled}
         {...ariaProps(props)}
@@ -251,16 +259,23 @@ export function RadioGroupWidget(props: WidgetProps): JSX.Element {
       role="radiogroup"
       aria-label={props.label}
       data-control
-      class="flex flex-col gap-1.5"
+      class="divide-y divide-border overflow-hidden rounded-lg border border-input"
       {...ariaProps(props)}
     >
       <For each={options()}>
         {(opt) => (
-          <label class="inline-flex items-center gap-2 text-sm text-foreground">
+          <label
+            class={cn(
+              'flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors',
+              props.value === opt
+                ? 'bg-accent font-medium text-accent-foreground'
+                : 'text-foreground hover:bg-muted/50',
+            )}
+          >
             <input
               type="radio"
               name={props.id}
-              class="h-4 w-4 accent-[var(--color-primary)]"
+              class="kc-radio"
               value={String(opt)}
               checked={props.value === opt}
               disabled={props.disabled}
@@ -283,7 +298,7 @@ export function SelectWidget(props: WidgetProps): JSX.Element {
     <select
       id={props.id}
       data-control
-      class={cn(inputBase, props.invalid && 'border-destructive')}
+      class={cn(inputBase, props.invalid && 'border-destructive dark:border-red-400/70')}
       disabled={props.disabled}
       {...ariaProps(props)}
       onChange={(e) => {
@@ -324,15 +339,22 @@ export function CheckboxGroupWidget(props: WidgetProps): JSX.Element {
       role="group"
       aria-label={props.label}
       data-control
-      class="flex flex-col gap-1.5"
+      class="divide-y divide-border overflow-hidden rounded-lg border border-input"
       {...ariaProps(props)}
     >
       <For each={itemEnum(props.field)}>
         {(opt) => (
-          <label class="inline-flex items-center gap-2 text-sm text-foreground">
+          <label
+            class={cn(
+              'flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors',
+              selected().includes(opt)
+                ? 'bg-accent font-medium text-accent-foreground'
+                : 'text-foreground hover:bg-muted/50',
+            )}
+          >
             <input
               type="checkbox"
-              class="h-4 w-4 rounded border-input accent-[var(--color-primary)]"
+              class="kc-checkbox"
               checked={selected().includes(opt)}
               disabled={props.disabled}
               onChange={() => toggle(opt)}
@@ -353,7 +375,7 @@ export function MultiSelectWidget(props: WidgetProps): JSX.Element {
       data-control
       multiple
       aria-label={props.label}
-      class={cn(inputBase, 'min-h-[6rem]', props.invalid && 'border-destructive')}
+      class={cn(inputBase, 'min-h-[6rem]', props.invalid && 'border-destructive dark:border-red-400/70')}
       disabled={props.disabled}
       {...ariaProps(props)}
       onChange={(e) => {

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kitn.ai/schemas/card/task-list.schema.json",
+  "title": "TaskListCardData",
+  "description": "Data payload for a `task-list` card (CardEnvelope.data when type='task-list').",
+  "type": "object",
+  "required": ["tasks"],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["select"],
+      "default": "select",
+      "description": "v1 supports only 'select' (toggle + confirm). 'progress' (live AG-UI status) is a future enum value; restricting it now keeps the wire forward-compatible.",
+      "x-kc-mode": true
+    },
+    "heading": {
+      "type": "string",
+      "description": "Optional in-body heading; distinct from CardEnvelope.title."
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The selectable rows, rendered in order.",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stable id; the selected ids are returned in the result. Unique within `tasks`.",
+            "x-kc-unique": true
+          },
+          "label": { "type": "string", "minLength": 1, "description": "Row label." },
+          "description": { "type": "string", "description": "Optional secondary line under the label." },
+          "checked": {
+            "type": "boolean",
+            "default": false,
+            "description": "Initial checked state of the row."
+          },
+          "disabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Row is shown but not toggleable (and excluded from select-all)."
+          }
+        }
+      }
+    },
+    "selectAll": {
+      "type": "boolean",
+      "default": false,
+      "description": "Render a master select-all checkbox above the list.",
+      "x-kc-control": "select-all"
+    },
+    "confirmLabel": {
+      "type": "string",
+      "default": "Confirm",
+      "description": "Label for the confirm button."
+    },
+    "allowEmpty": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, confirm is enabled with zero selected (emits { selected: [] }). If false, confirm is disabled until >=1 selected."
+    },
+    "min": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Optional minimum number that must be selected to confirm.",
+      "x-kc-select-min": true
+    },
+    "max": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Optional maximum selectable; further toggles are blocked once reached.",
+      "x-kc-select-max": true
+    }
+  }
+}

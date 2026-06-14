@@ -462,7 +462,8 @@ export function Form(props: FormProps): JSX.Element {
         }}
       >
         <Card
-          heading={local.heading}
+          heading={local.heading ?? def().title}
+          description={def().description}
           actions={
             <div class="flex w-full flex-wrap items-center justify-between gap-2">
               <Show when={dismissible()}>
@@ -495,21 +496,10 @@ export function Form(props: FormProps): JSX.Element {
         >
           <form
             id={formId()}
-            class={cn('flex flex-col gap-4', local.class)}
+            class={cn('flex flex-col gap-3', local.class)}
             novalidate
             onSubmit={onSubmit}
           >
-            <Show when={def().title || def().description}>
-              <div class="flex flex-col gap-1">
-                <Show when={def().title}>
-                  <p class="text-sm font-medium text-foreground">{def().title}</p>
-                </Show>
-                <Show when={def().description}>
-                  <p class="text-sm text-muted-foreground">{def().description}</p>
-                </Show>
-              </div>
-            </Show>
-
             <For each={keys()}>
               {(key) => (
                 <FieldRow
@@ -593,12 +583,12 @@ function FieldRow(props: FieldRowProps): JSX.Element {
     ['fieldset', 'repeater', 'checkbox-group', 'multiselect', 'radio', 'taglist'].includes(widget());
 
   return (
-    <div class="flex flex-col gap-1.5" data-field={props.fieldKey}>
+    <div class="flex flex-col gap-2 rounded-xl bg-muted/40 p-3.5" data-field={props.fieldKey}>
       <Show when={!isGrouped()}>
         <label for={id} class="text-sm font-medium text-foreground">
           {label()}
           <Show when={props.required}>
-            <span class="text-destructive" aria-hidden="true">{' *'}</span>
+            <span class="text-destructive dark:text-red-400" aria-hidden="true">{' *'}</span>
           </Show>
         </label>
       </Show>
@@ -612,7 +602,7 @@ function FieldRow(props: FieldRowProps): JSX.Element {
       <WidgetSwitch widget={widget()} common={common()} fieldKey={props.fieldKey} />
 
       <Show when={props.error()}>
-        <p id={errorId} role="alert" class="text-xs text-destructive">
+        <p id={errorId} role="alert" class="text-xs text-destructive dark:text-red-400">
           {props.error()}
         </p>
       </Show>
