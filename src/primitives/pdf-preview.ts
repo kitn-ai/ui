@@ -53,6 +53,7 @@ export function configurePdfPreview(options: PdfPreviewOptions): void {
   if (options.workerSrc !== undefined) workerSrc = options.workerSrc;
   if (options.load !== undefined) {
     loader = options.load;
+    pdfjsPromise = null;
   }
 }
 
@@ -64,4 +65,57 @@ export function __resetPdfPreviewForTests(): void {
   enabled = true;
   loader = DEFAULT_LOAD;
   workerSrc = DEFAULT_WORKER_SRC;
+  pdfjsPromise = null;
+}
+
+let pdfjsPromise: Promise<PdfjsLike> | null = null;
+
+/** Load pdf.js once (singleton); set the worker src. Re-loads if the loader changed. */
+function loadPdfjs(): Promise<PdfjsLike> {
+  if (!pdfjsPromise) {
+    const active = loader;
+    pdfjsPromise = (async () => {
+      const mod = await active();
+      const pdfjs = ((mod as unknown as { default?: PdfjsLike }).default ?? mod) as PdfjsLike;
+      pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+      return pdfjs;
+    })();
+  }
+  return pdfjsPromise;
+}
+
+/**
+ * Render EVERY page of the PDF at `url` into `container` as stacked <canvas>
+ * elements fit to `pxWidth` CSS pixels (rendered at devicePixelRatio for
+ * crispness). Clears `container` first. Resolves `{ pages }`. THROWS on
+ * load / CORS / parse failure — the caller catches and shows the fallback card.
+ */
+export async function renderPdfInto(
+  url: string,
+  container: HTMLElement,
+  pxWidth: number,
+): Promise<{ pages: number }> {
+  const pdfjs = await loadPdfjs();
+  const doc = await pdfjs.getDocument({ url }).promise;
+  container.replaceChildren();
+  const dpr =
+    typeof window !== 'undefined' && window.devicePixelRatio ? window.devicePixelRatio : 1;
+  for (let n = 1; n <= doc.numPages; n++) {
+    const page = await doc.getPage(n);
+    const base = page.getViewport({ scale: 1 });
+    const scale = base.width > 0 ? pxWidth / base.width : 1;
+    const viewport = page.getViewport({ scale: scale * dpr });
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.floor(viewport.width));
+    canvas.height = Math.max(1, Math.floor(viewport.height));
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', `Page ${n}`);
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
+    canvas.style.display = 'block';
+    const ctx = canvas.getContext('2d');
+    container.appendChild(canvas);
+    await page.render({ canvasContext: ctx, viewport }).promise;
+  }
+  return { pages: doc.numPages };
 }
