@@ -158,6 +158,8 @@ export interface KcChoiceElement extends HTMLElement {
   cardId?: string;
   /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
   heading?: string;
+  /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`. */
+  resolution?: Record<string, unknown>;
 }
 
 export interface KcCodeBlockElement extends HTMLElement {
@@ -186,6 +188,8 @@ export interface KcConfirmElement extends HTMLElement {
   heading?: string;
   /** Focus the default action on mount (off by default — no focus-stealing). Attribute: `autofocus`. */
   autofocus?: boolean;
+  /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`. */
+  resolution?: Record<string, unknown>;
 }
 
 export interface KcContextElement extends HTMLElement {
@@ -264,6 +268,8 @@ export interface KcFormElement extends HTMLElement {
   cardId?: string;
   /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
   heading?: string;
+  /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`. */
+  resolution?: Record<string, unknown>;
 }
 
 export interface KcImageElement extends HTMLElement {
@@ -487,6 +493,8 @@ export interface KcTasksElement extends HTMLElement {
   cardId?: string;
   /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
   heading?: string;
+  /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{ selected:[…] } }`. */
+  resolution?: Record<string, unknown>;
 }
 
 export interface KcTextShimmerElement extends HTMLElement {

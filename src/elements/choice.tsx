@@ -1,5 +1,6 @@
 import { defineWebComponent } from './define';
 import { ChoiceCard, type ChoiceCardData } from '../components/choice-card';
+import type { CardResolution } from '../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {
   /** The choice definition (the CardEnvelope.data). Set as a JS PROPERTY:
@@ -10,6 +11,9 @@ interface Props extends Record<string, unknown> {
   cardId?: string;
   /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
   heading?: string;
+  /** Set when the user resolved this card; renders the read-only view. Property:
+   *  `el.resolution = { kind:'action', action:'…' }`. */
+  resolution?: Record<string, unknown>;
 }
 
 /**
@@ -30,12 +34,14 @@ defineWebComponent<Props>(
     data: undefined,
     cardId: undefined,
     heading: undefined,
+    resolution: undefined,
   },
   (props, { element }) => (
     <ChoiceCard
       data={props.data as ChoiceCardData | undefined}
       cardId={props.cardId ?? (element.id || 'kc-choice')}
       heading={props.heading}
+      resolution={props.resolution as CardResolution | undefined}
       hostElement={element}
     />
   ),

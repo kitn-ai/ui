@@ -1,5 +1,6 @@
 import { defineWebComponent } from './define';
 import { TasksCard, type TasksCardData } from '../components/tasks-card';
+import type { CardResolution } from '../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {
   /** The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY:
@@ -10,6 +11,9 @@ interface Props extends Record<string, unknown> {
   cardId?: string;
   /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
   heading?: string;
+  /** Set when the user resolved this card; renders the read-only view. Property:
+   *  `el.resolution = { kind:'submit', data:{ selected:[…] } }`. */
+  resolution?: Record<string, unknown>;
 }
 
 /**
@@ -28,12 +32,14 @@ defineWebComponent<Props>(
     data: undefined,
     cardId: undefined,
     heading: undefined,
+    resolution: undefined,
   },
   (props, { element }) => (
     <TasksCard
       data={props.data as TasksCardData | undefined}
       cardId={props.cardId ?? (element.id || 'kc-tasks')}
       heading={props.heading}
+      resolution={props.resolution as CardResolution | undefined}
       hostElement={element}
     />
   ),

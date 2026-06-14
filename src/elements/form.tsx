@@ -1,5 +1,6 @@
 import { defineWebComponent } from './define';
 import { Form, type FormDefinition } from '../components/form';
+import type { CardResolution } from '../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {
   /** The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints
@@ -11,6 +12,9 @@ interface Props extends Record<string, unknown> {
   cardId?: string;
   /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
   heading?: string;
+  /** Set when the user resolved this card; renders the read-only view. Property:
+   *  `el.resolution = { kind:'submit', data:{…} }`. */
+  resolution?: Record<string, unknown>;
 }
 
 /**
@@ -27,11 +31,13 @@ defineWebComponent<Props>('kc-form', {
   data: undefined,
   cardId: undefined,
   heading: undefined,
+  resolution: undefined,
 }, (props, { element }) => (
   <Form
     data={props.data as FormDefinition | undefined}
     cardId={props.cardId ?? (element.id || 'kc-form')}
     heading={props.heading}
+    resolution={props.resolution as CardResolution | undefined}
     hostElement={element}
   />
 ));

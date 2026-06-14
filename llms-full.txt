@@ -342,6 +342,7 @@ _No events._
 | `data` | — | `undefined \| Record<string, unknown>` | The choice definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { prompt, options:[…], allowOther?, submitLabel? }`. Import `ChoiceCardData` from `@kitn.ai/chat` for the full shape. |
 | `cardId` | `card-id` | `undefined \| string` | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined \| string` | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
+| `resolution` | — | `undefined \| Record<string, unknown>` | Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`. |
 
 _No events._
 
@@ -373,6 +374,7 @@ _No events._
 | `cardId` | `card-id` | `undefined \| string` | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined \| string` | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
 | `autofocus` | `autofocus` | `undefined \| false \| true` | Focus the default action on mount (off by default — no focus-stealing). Attribute: `autofocus`. |
+| `resolution` | — | `undefined \| Record<string, unknown>` | Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`. |
 
 _No events._
 
@@ -499,6 +501,7 @@ _No events._
 | `data` | — | `undefined \| Record<string, unknown>` | The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/chat` for the full shape (it is self-referential, so the element types it loosely). |
 | `cardId` | `card-id` | `undefined \| string` | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined \| string` | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
+| `resolution` | — | `undefined \| Record<string, unknown>` | Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`. |
 
 _No events._
 
@@ -798,6 +801,7 @@ _No events._
 | `data` | — | `undefined \| Record<string, unknown>` | The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/chat` for the full shape. |
 | `cardId` | `card-id` | `undefined \| string` | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined \| string` | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
+| `resolution` | — | `undefined \| Record<string, unknown>` | Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{ selected:[…] } }`. |
 
 _No events._
 

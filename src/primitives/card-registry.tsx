@@ -33,16 +33,20 @@ export const BUILTIN_CARD_TAGS: CardTagMap = {
 
 export const BUILTIN_CARD_COMPONENTS: CardComponentMap = {
   form: (p) => (
-    <Form data={p.envelope.data as never} cardId={p.envelope.id} heading={p.envelope.title} host={p.host} />
+    <Form data={p.envelope.data as never} cardId={p.envelope.id} heading={p.envelope.title}
+      resolution={p.envelope.resolution} host={p.host} />
   ),
   confirm: (p) => (
-    <ConfirmCard data={p.envelope.data as never} cardId={p.envelope.id} heading={p.envelope.title} host={p.host} />
+    <ConfirmCard data={p.envelope.data as never} cardId={p.envelope.id} heading={p.envelope.title}
+      resolution={p.envelope.resolution} host={p.host} />
   ),
   'tasks': (p) => (
-    <TasksCard data={p.envelope.data as never} cardId={p.envelope.id} heading={p.envelope.title} host={p.host} />
+    <TasksCard data={p.envelope.data as never} cardId={p.envelope.id} heading={p.envelope.title}
+      resolution={p.envelope.resolution} host={p.host} />
   ),
   choice: (p) => (
-    <ChoiceCard data={p.envelope.data as never} cardId={p.envelope.id} heading={p.envelope.title} host={p.host} />
+    <ChoiceCard data={p.envelope.data as never} cardId={p.envelope.id} heading={p.envelope.title}
+      resolution={p.envelope.resolution} host={p.host} />
   ),
   // link/embed have no `heading` and emit via an onEmit callback (no context).
   link: (p) => (

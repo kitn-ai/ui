@@ -15,6 +15,7 @@ import { CardFallback } from '../components/card-fallback';
 import './form';
 import './confirm-card';
 import './tasks';
+import './choice';
 import './link-card';
 import './embed';
 
@@ -38,6 +39,7 @@ function CardSlot(props: { envelope: CardEnvelope; tag?: string; theme: string; 
     (ref as unknown as { data: unknown }).data = props.envelope.data;
     (ref as unknown as { cardId: string }).cardId = props.envelope.id;
     if (props.envelope.title != null) (ref as unknown as { heading: string }).heading = props.envelope.title;
+    (ref as unknown as { resolution: unknown }).resolution = props.envelope.resolution;
     ref.setAttribute('theme', props.theme);
   });
   // Hoist the unknown-type error emit to onMount to avoid side-effect-in-JSX lint issue

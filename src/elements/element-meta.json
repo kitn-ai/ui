@@ -746,6 +746,14 @@
         "scalar": true,
         "description": "Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "resolution",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`.",
+        "displayType": "undefined | Record<string, unknown>"
       }
     ],
     "events": [],
@@ -860,6 +868,14 @@
         "description": "Focus the default action on mount (off by default — no focus-stealing). Attribute: `autofocus`.",
         "default": "false",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "resolution",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`.",
+        "displayType": "undefined | Record<string, unknown>"
       }
     ],
     "events": [],
@@ -1265,6 +1281,14 @@
         "scalar": true,
         "description": "Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "resolution",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`.",
+        "displayType": "undefined | Record<string, unknown>"
       }
     ],
     "events": [],
@@ -2309,6 +2333,14 @@
         "scalar": true,
         "description": "Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "resolution",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{ selected:[…] } }`.",
+        "displayType": "undefined | Record<string, unknown>"
       }
     ],
     "events": [],

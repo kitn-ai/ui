@@ -209,11 +209,13 @@ export interface KcChoiceProps extends WebComponentProps {
   cardId?: string;
   /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
   heading?: string;
+  /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`. */
+  resolution?: Record<string, unknown>;
 }
 
 export const KcChoice = createWebComponent<KcChoiceProps>(
   'kc-choice',
-  ["theme","data","cardId","heading"],
+  ["theme","data","cardId","heading","resolution"],
   {  },
 );
 
@@ -245,11 +247,13 @@ export interface KcConfirmProps extends WebComponentProps {
   heading?: string;
   /** Focus the default action on mount (off by default — no focus-stealing). Attribute: `autofocus`. */
   autofocus?: boolean;
+  /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`. */
+  resolution?: Record<string, unknown>;
 }
 
 export const KcConfirm = createWebComponent<KcConfirmProps>(
   'kc-confirm',
-  ["theme","data","cardId","heading","autofocus"],
+  ["theme","data","cardId","heading","autofocus","resolution"],
   {  },
 );
 
@@ -369,11 +373,13 @@ export interface KcFormProps extends WebComponentProps {
   cardId?: string;
   /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
   heading?: string;
+  /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`. */
+  resolution?: Record<string, unknown>;
 }
 
 export const KcForm = createWebComponent<KcFormProps>(
   'kc-form',
-  ["theme","data","cardId","heading"],
+  ["theme","data","cardId","heading","resolution"],
   {  },
 );
 
@@ -690,11 +696,13 @@ export interface KcTasksProps extends WebComponentProps {
   cardId?: string;
   /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
   heading?: string;
+  /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{ selected:[…] } }`. */
+  resolution?: Record<string, unknown>;
 }
 
 export const KcTasks = createWebComponent<KcTasksProps>(
   'kc-tasks',
-  ["theme","data","cardId","heading"],
+  ["theme","data","cardId","heading","resolution"],
   {  },
 );
 

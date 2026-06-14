@@ -1,5 +1,6 @@
 import { defineWebComponent } from './define';
 import { ConfirmCard, type ConfirmCardData } from '../components/confirm-card';
+import type { CardResolution } from '../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {
   /** The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY:
@@ -13,6 +14,9 @@ interface Props extends Record<string, unknown> {
   /** Focus the default action on mount (off by default — no focus-stealing).
    *  Attribute: `autofocus`. */
   autofocus?: boolean;
+  /** Set when the user resolved this card; renders the read-only view. Property:
+   *  `el.resolution = { kind:'action', action:'…' }`. */
+  resolution?: Record<string, unknown>;
 }
 
 /**
@@ -32,6 +36,7 @@ defineWebComponent<Props>(
     cardId: undefined,
     heading: undefined,
     autofocus: false,
+    resolution: undefined,
   },
   (props, { element, flag }) => (
     <ConfirmCard
@@ -39,6 +44,7 @@ defineWebComponent<Props>(
       cardId={props.cardId ?? (element.id || 'kc-confirm')}
       heading={props.heading}
       autofocus={flag('autofocus')}
+      resolution={props.resolution as CardResolution | undefined}
       hostElement={element}
     />
   ),
