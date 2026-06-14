@@ -45,6 +45,7 @@ import './link-card';
 import './embed';
 import './confirm-card';
 import './task-list-card';
+import './cards';
 
 export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';
