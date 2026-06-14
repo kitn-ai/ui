@@ -32,7 +32,7 @@ const setAttrs = (el: HTMLElement, a: Record<string, string | boolean>) => {
   }
 };
 
-const BASE = '/artifact-fixtures'; // served by .storybook/main.ts staticDirs
+const BASE = new URL('artifact-fixtures', document.baseURI).href; // served by .storybook/main.ts staticDirs
 
 const ARTIFACT_FILES: ArtifactFile[] = [
   {
