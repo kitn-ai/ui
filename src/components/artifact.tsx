@@ -565,7 +565,8 @@ function ArtifactPdfPreview(props: { url: string; reloadKey: number }): JSX.Elem
         role="region"
         aria-label="PDF preview"
         aria-busy={state() === 'loading'}
-        class="absolute inset-0 flex flex-col items-center gap-3 overflow-auto bg-muted/20 p-3 scrollbar-thin"
+        tabindex="0"
+        class="absolute inset-0 flex flex-col items-center gap-3 overflow-auto bg-muted/20 p-3 scrollbar-thin focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
       />
       <Show when={isPdfPreviewEnabled() && state() === 'loading'}>
         <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
