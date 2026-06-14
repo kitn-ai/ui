@@ -60,6 +60,16 @@ function resolveFileUrl(file: ArtifactFile, src: string | undefined): string {
   }
 }
 
+/** True when `url` should render as a PDF: a matching `files` entry is typed
+ *  `'pdf'`, or the URL path (query/hash stripped) ends in `.pdf`. */
+export function isPdfUrl(url: string, files: ArtifactFile[]): boolean {
+  if (!url) return false;
+  const match = files.find((f) => f.url === url || f.path === url);
+  if (match?.type === 'pdf') return true;
+  const path = url.split(/[?#]/)[0];
+  return /\.pdf$/i.test(path);
+}
+
 /**
  * `Artifact` — a framed, switchable generated-artifact viewer. A functional nav
  * toolbar (back · forward · reload · home + editable path field + Preview|Code
