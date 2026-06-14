@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { onMount, onCleanup, type JSX } from 'solid-js';
+import { createSignal, onMount, type JSX } from 'solid-js';
 import './link-card'; // side effect: registers <kc-link-card>
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 import type { LinkCardData } from '../primitives/link-preview';
 import { configureLinkPreview } from '../primitives/link-preview';
+import type { CardEvent } from '../primitives/card-contract';
 
 // Custom DOM element — declare the tag for JSX.
 declare module 'solid-js' {
@@ -18,33 +19,47 @@ declare module 'solid-js' {
   }
 }
 
+type LinkCardEl = HTMLElement & { cardId?: string; data?: LinkCardData };
+
 /** A sized box the card sits in (cards expand to their container width). */
 function Frame(props: { children: JSX.Element }) {
   return <div style={{ width: '100%', 'max-width': '420px' }}>{props.children}</div>;
 }
 
-/** Mount a kc-link-card, set its `data` property, and route `open` to a console log. */
-function Card(props: { cardId: string; data: LinkCardData }) {
-  let el: HTMLElement & { cardId?: string; data?: LinkCardData };
-  const onCard = (e: Event) => {
-    const ev = (e as CustomEvent).detail;
-    // eslint-disable-next-line no-console
-    console.log('[kc-card]', ev);
-    if (ev.kind === 'open' && ev.target === 'tab') {
-      window.open(ev.url, '_blank', 'noopener,noreferrer');
-    }
-  };
+/** Mounts a <kc-link-card>, sets `.data`, logs emitted CardEvents under the render. */
+function LinkCardDemo(props: { cardId: string; data: LinkCardData }) {
+  const [log, setLog] = createSignal<CardEvent[]>([]);
+  let el: LinkCardEl | undefined;
   onMount(() => {
-    if (el) {
-      el.cardId = props.cardId;
-      el.data = props.data;
-    }
-    document.addEventListener('kc-card', onCard);
-    onCleanup(() => document.removeEventListener('kc-card', onCard));
+    if (!el) return;
+    el.cardId = props.cardId;
+    el.data = props.data;
+    el.addEventListener('kc-card', (e) => {
+      const detail = (e as CustomEvent<CardEvent>).detail;
+      setLog((prev) => [...prev, detail]);
+      if (detail.kind === 'open' && detail.target === 'tab') {
+        window.open(detail.url, '_blank', 'noopener,noreferrer');
+      }
+    });
   });
   return (
     <Frame>
-      <kc-link-card ref={(e) => (el = e as HTMLElement & { cardId?: string; data?: LinkCardData })} />
+      <div style={{ display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
+        <kc-link-card ref={(e) => (el = e as LinkCardEl)} card-id={props.cardId} />
+        <pre
+          style={{
+            margin: 0,
+            'max-height': '180px',
+            overflow: 'auto',
+            background: 'var(--color-muted, #f4f4f5)',
+            'border-radius': '8px',
+            padding: '8px',
+            'font-size': '12px',
+          }}
+        >
+          {log().length === 0 ? '// emitted CardEvents appear here' : JSON.stringify(log(), null, 2)}
+        </pre>
+      </div>
     </Frame>
   );
 }
@@ -77,8 +92,9 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   // \`data\` is a JS property (the CardEnvelope \`data\`):
   lc.data = ${JSON.stringify(FULL_ENVELOPE.data, null, 2).replace(/\n/g, '\n  ')};
 
-  // Route the card's \`open\` verb (it bubbles as the composed \`kc-card\` event):
-  document.addEventListener('kc-card', (e) => {
+  // Cards bubble a composed \`kc-card\` event carrying a typed CardEvent.
+  // kc-link-card emits: ready (on mount), open (on click), error (invalid/broken url).
+  lc.addEventListener('kc-card', (e) => {
     const ev = e.detail; // CardEvent
     if (ev.kind === 'open' && ev.target === 'tab') {
       window.open(ev.url, '_blank', 'noopener,noreferrer');
@@ -107,10 +123,10 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-/** Full OG metadata — image, site name, title, description. */
+/** Full OG metadata — image, site name, title, description. Click the card to see the emitted `open` event. */
 export const FullPreview: Story = {
   name: 'Full preview',
-  render: () => <Card cardId={FULL_ENVELOPE.id} data={FULL_ENVELOPE.data} />,
+  render: () => <LinkCardDemo cardId={FULL_ENVELOPE.id} data={FULL_ENVELOPE.data} />,
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
 };
 
@@ -118,7 +134,7 @@ export const FullPreview: Story = {
 export const NoImage: Story = {
   name: 'No image',
   render: () => (
-    <Card
+    <LinkCardDemo
       cardId="card-link-2"
       data={{
         url: 'https://docs.example.com/guide',
@@ -166,7 +182,7 @@ export const BareUrlWithFetcher: Story = {
         };
       },
     });
-    return <Card cardId="card-link-3" data={{ url: 'https://example.com/bare' }} />;
+    return <LinkCardDemo cardId="card-link-3" data={{ url: 'https://example.com/bare' }} />;
   },
   parameters: {
     docs: {
@@ -186,8 +202,8 @@ lc.data = { url: 'https://example.com/bare' };`,
   },
 };
 
-/** Invalid link — a non-clickable error chip; one \`error\` event is emitted. */
+/** Invalid link — a non-clickable error chip; one `error` event is emitted (visible in the log below). */
 export const InvalidLink: Story = {
   name: 'Invalid link',
-  render: () => <Card cardId="card-link-4" data={{ url: 'not-a-valid-url' }} />,
+  render: () => <LinkCardDemo cardId="card-link-4" data={{ url: 'not-a-valid-url' }} />,
 };

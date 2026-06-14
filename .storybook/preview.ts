@@ -116,7 +116,7 @@ const preview: Preview = {
           'Components',
           'UI',
           'Generative UI',
-          ['Overview', 'Cards', 'SDK'],
+          ['Overview', 'Cards', ['kc-confirm', '*'], 'SDK'],
           '*',
         ],
       },
