@@ -248,6 +248,45 @@
     "tokens": []
   },
   {
+    "tag": "kc-cards",
+    "className": "KcCardsElement",
+    "props": [
+      {
+        "name": "cards",
+        "type": "undefined | { type: string; id: string; data: unknown; title?: undefined | string }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`.",
+        "displayType": "undefined | { type: string; id: string; data: unknown; title?: undefined | string }[]"
+      },
+      {
+        "name": "types",
+        "type": "undefined | CardTagMap",
+        "optional": true,
+        "scalar": false,
+        "description": "Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`.",
+        "displayType": "undefined | CardTagMap"
+      },
+      {
+        "name": "policy",
+        "type": "undefined | { onSubmitData?: undefined | (cardId: string, data: unknown) => void; onAction?: undefined | (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined | (text: string, opts: { mode: \"compose\" | \"send\"; context?: unknown; }) => void; onOpen?: undefined | (url: string, target: \"tab\" | \"artifact\") => void; onState?: undefined | (cardId: string, patch: unknown) => void; onDismiss?: undefined | (cardId: string) => void; onError?: undefined | (cardId: string, message: string) => void; maxSendPromptMode?: undefined | \"compose\" | \"send\" }",
+        "optional": true,
+        "scalar": false,
+        "description": "Optional CardPolicy handling child events. Property: `el.policy`.",
+        "displayType": "undefined | { onSubmitData?: undefined | (cardId: string, data: unknown) => void; onAction?: undefined | (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined | (text: string, opts: { mode: \"compose\" | \"send\"; context?: unknown; }) => void; onOpen?: undefined | (url: string, target: \"tab\" | \"artifact\") => void; onState?: undefined | (cardId: string, patch: unknown) => void; onDismiss?: undefined | (cardId: string) => void; onError?: undefined | (cardId: string, message: string) => void; maxSendPromptMode?: undefined | \"compose\" | \"send\" }"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "CardFallback",
+        "group": "Components",
+        "storyId": "components-cardfallback--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kc-chain-of-thought",
     "className": "KcChainOfThoughtElement",
     "props": [

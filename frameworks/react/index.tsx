@@ -72,6 +72,21 @@ export const KcCard = createWebComponent<KcCardProps>(
   {  },
 );
 
+export interface KcCardsProps extends WebComponentProps {
+  /** The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. */
+  cards?: { type: string; id: string; data: unknown; title?: string }[];
+  /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. */
+  types?: CardTagMap;
+  /** Optional CardPolicy handling child events. Property: `el.policy`. */
+  policy?: { onSubmitData?: (cardId: string, data: unknown) => void; onAction?: (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: (text: string, opts: { mode: "compose" | "send"; context?: unknown; }) => void; onOpen?: (url: string, target: "tab" | "artifact") => void; onState?: (cardId: string, patch: unknown) => void; onDismiss?: (cardId: string) => void; onError?: (cardId: string, message: string) => void; maxSendPromptMode?: "compose" | "send" };
+}
+
+export const KcCards = createWebComponent<KcCardsProps>(
+  'kc-cards',
+  ["theme","cards","types","policy"],
+  {  },
+);
+
 export interface KcChainOfThoughtProps extends WebComponentProps {
   /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). */
   steps: { label: string; content?: undefined | string }[];
