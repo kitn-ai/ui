@@ -36,11 +36,34 @@ export function componentDescription(paragraphs: string[]): { component: string 
   return { component: [COMPONENT_POINTER, ...paragraphs].join('\n\n') };
 }
 
-const enumValues = (type: string): string[] | null => {
-  // string-literal unions like "'light' | 'dark' | 'auto'"
-  const parts = type.split('|').map((s) => s.trim());
-  if (parts.length > 1 && parts.every((p) => /^'[^']*'$/.test(p))) return parts.map((p) => p.slice(1, -1));
+/**
+ * Parse a type string from element-meta.json into meaningful parts.
+ *
+ * The meta generator writes types like:
+ *   - `"undefined | false | true"` for booleans (NOT "boolean")
+ *   - `"undefined | \"preview\" | \"code\""` for enums (double-quoted, with leading undefined)
+ *
+ * We normalise by splitting on `|`, trimming, and dropping `undefined` / `null`.
+ */
+const normaliseParts = (type: string): string[] =>
+  type
+    .split('|')
+    .map((s) => s.trim())
+    .filter((s) => s !== 'undefined' && s !== 'null');
+
+const enumValues = (parts: string[]): string[] | null => {
+  // Accept both single-quoted ('foo') and double-quoted ("foo") string literals.
+  if (parts.length > 0 && parts.every((p) => /^(['"])[^'"]*\1$/.test(p)))
+    return parts.map((p) => p.slice(1, -1));
   return null;
+};
+
+const isBooleanParts = (parts: string[], rawType: string): boolean => {
+  // Explicit boolean keyword (future-proof)
+  if (/\bboolean\b/.test(rawType)) return true;
+  // element-meta encodes booleans as "undefined | false | true"
+  const sorted = [...parts].sort().join(',');
+  return sorted === 'false,true';
 };
 
 /** Storybook argTypes for an element's scalar props (theme select, booleans, text, number). */
@@ -50,10 +73,11 @@ export function argTypesFor(tag: string): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const p of el.props) {
     if (!p.scalar) continue;
-    const values = enumValues(p.type);
-    if (values) out[p.name] = { control: 'select', options: values };
-    else if (/boolean/.test(p.type)) out[p.name] = { control: 'boolean' };
-    else if (/number/.test(p.type)) out[p.name] = { control: 'number' };
+    const parts = normaliseParts(p.type);
+    const values = enumValues(parts);
+    if (values) out[p.name] = { control: { type: 'select' }, options: values };
+    else if (isBooleanParts(parts, p.type)) out[p.name] = { control: 'boolean' };
+    else if (/\bnumber\b/.test(p.type)) out[p.name] = { control: 'number' };
     else out[p.name] = { control: 'text' };
   }
   return out;
