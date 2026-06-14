@@ -6,12 +6,16 @@ import {
   createEffect,
   createMemo,
   on,
+  onMount,
+  onCleanup,
   Show,
 } from 'solid-js';
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
 import { CodeBlock, CodeBlockCode } from './code-block';
 import { FileTree, type FileTreeFile } from './file-tree';
+import { Loader } from './loader';
+import { isPdfPreviewEnabled, renderPdfInto } from '../primitives/pdf-preview';
 import {
   ArrowLeft,
   ArrowRight,
@@ -486,6 +490,82 @@ function ArtifactPdfFallback(props: { url: string }): JSX.Element {
           Download
         </a>
       </div>
+    </div>
+  );
+}
+
+// --- ArtifactPdfPreview (internal) ----------------------------------------
+
+/**
+ * Renders a PDF inline via pdf.js (loaded on demand). Four states:
+ * disabled → fallback (no network); loading → spinner; success → stacked
+ * fit-width canvases; error (load/CORS/parse) → fallback card. Re-renders when
+ * the url or `reloadKey` changes, and (debounced) when the panel resizes.
+ */
+function ArtifactPdfPreview(props: { url: string; reloadKey: number }): JSX.Element {
+  const [state, setState] = createSignal<'loading' | 'success' | 'error'>('loading');
+  let container: HTMLDivElement | undefined;
+  let token = 0;
+  let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const renderNow = async () => {
+    if (!isPdfPreviewEnabled() || !container) {
+      setState('error');
+      return;
+    }
+    const mine = ++token;
+    setState('loading');
+    try {
+      const width = container.clientWidth || 600;
+      await renderPdfInto(props.url, container, width);
+      if (mine === token) setState('success');
+    } catch {
+      if (mine === token) setState('error');
+    }
+  };
+
+  createEffect(
+    on(
+      () => [props.url, props.reloadKey] as const,
+      () => {
+        void renderNow();
+      },
+    ),
+  );
+
+  onMount(() => {
+    if (!container || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => {
+      if (state() !== 'success') return;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => void renderNow(), 200);
+    });
+    ro.observe(container);
+    onCleanup(() => {
+      ro.disconnect();
+      clearTimeout(resizeTimer);
+      token++; // cancel any in-flight render
+    });
+  });
+
+  return (
+    <div class="absolute inset-0">
+      {/* Always present so clientWidth is the real panel width. */}
+      <div
+        ref={(el) => (container = el)}
+        role="region"
+        aria-label="PDF preview"
+        aria-busy={state() === 'loading'}
+        class="absolute inset-0 flex flex-col items-center gap-3 overflow-auto bg-muted/20 p-3 scrollbar-thin"
+      />
+      <Show when={isPdfPreviewEnabled() && state() === 'loading'}>
+        <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <Loader variant="circular" size="md" />
+        </div>
+      </Show>
+      <Show when={!isPdfPreviewEnabled() || state() === 'error'}>
+        <ArtifactPdfFallback url={props.url} />
+      </Show>
     </div>
   );
 }
