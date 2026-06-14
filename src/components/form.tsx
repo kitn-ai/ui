@@ -5,7 +5,6 @@ import {
   Index,
   splitProps,
   mergeProps,
-  createSignal,
   createMemo,
   createEffect,
   on,
@@ -19,9 +18,11 @@ import {
   validateAgainstSchema,
   type JsonSchema,
 } from '../primitives/card-validate';
-import type { CardEnvelope, CardEvent, CardHost } from '../primitives/card-contract';
+import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
 import { emitCardEvent } from '../primitives/card-routing';
 import { useCardHost } from '../primitives/card-host';
+import { useCardResolution } from './use-card-resolution';
+import { Check } from 'lucide-solid';
 import {
   TextWidget,
   TextareaWidget,
@@ -302,6 +303,36 @@ function friendlyError(field: FormField, key: string, raw?: string): string {
   return `${label} is invalid.`;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Read-only summary helpers (unit-tested in form-summary.test.ts).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface FormSummaryRow { key: string; label: string; value: string; }
+
+/** Format one field's value for the read-only summary. */
+export function formatFieldValue(field: FormField | undefined, raw: unknown): string {
+  if (field?.['x-kc-widget'] === 'password') {
+    return raw == null || raw === '' ? '—' : '••••';
+  }
+  if (typeof raw === 'boolean') return raw ? 'Yes' : 'No';
+  if (raw == null || raw === '') return '—';
+  if (Array.isArray(raw)) return raw.length ? raw.map((v) => String(v)).join(', ') : '—';
+  return String(raw);
+}
+
+/** Build the label→value rows for a submitted form, honoring x-kc-order. */
+export function summarizeForm(def: FormDefinition, data: Record<string, unknown>): FormSummaryRow[] {
+  const props = def.properties ?? {};
+  const ordered =
+    Array.isArray(def['x-kc-order']) && def['x-kc-order']!.length > 0
+      ? def['x-kc-order']!.filter((k) => k in props)
+      : Object.keys(props);
+  return ordered.map((key) => {
+    const field = props[key];
+    return { key, label: field?.title ?? key, value: formatFieldValue(field, data[key]) };
+  });
+}
+
 /** Build the result object: coerced values with empty optional fields omitted.
  *  `false` and `0` are kept (they are real values, not "empty"). */
 export function buildResult(
@@ -336,6 +367,8 @@ export interface FormProps {
   /** The custom-element host node, for the bubbling `kc-card` fallback emit. */
   hostElement?: HTMLElement;
   class?: string;
+  /** When set, render the chromed read-only view instead of the form inputs. */
+  resolution?: CardResolution;
 }
 
 const DEFAULT_FORM: FormDefinition = { type: 'object', properties: {} };
@@ -349,7 +382,7 @@ const DEFAULT_FORM: FormDefinition = { type: 'object', properties: {} };
  */
 export function Form(props: FormProps): JSX.Element {
   const merged = mergeProps({ cardId: 'kc-form' }, props);
-  const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class']);
+  const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution']);
 
   const ctxHost = useCardHost();
 
@@ -374,10 +407,11 @@ export function Form(props: FormProps): JSX.Element {
   const inlineMax = () => def()['x-kc-inlineMax'] ?? DEFAULT_INLINE_MAX;
   const keys = createMemo(() => orderedKeys(def()));
 
+  const res = useCardResolution({ prop: () => local.resolution, data: () => local.data });
+
   // The reactive values store, seeded from each field's `default`.
   const [values, setValues] = createStore<Record<string, unknown>>({});
   const [errors, setErrors] = createStore<Record<string, string>>({});
-  const [submitted, setSubmitted] = createSignal(false);
 
   const seed = (d: FormDefinition): void => {
     const next: Record<string, unknown> = {};
@@ -392,7 +426,6 @@ export function Form(props: FormProps): JSX.Element {
     setErrors(produce((s) => {
       for (const k of Object.keys(s)) delete s[k];
     }));
-    setSubmitted(false);
   };
 
   // Reseed whenever a NEW valid definition arrives.
@@ -403,6 +436,14 @@ export function Form(props: FormProps): JSX.Element {
     if (state.ok) emit({ kind: 'ready', cardId: local.cardId });
     else emit({ kind: 'error', cardId: local.cardId, message: state.message });
   }));
+
+  // Surface the resolved state for host styling.
+  createEffect(() => {
+    const el = local.hostElement;
+    if (!el) return;
+    if (res.isResolved()) el.setAttribute('data-kc-resolved', 'submitted');
+    else el.removeAttribute('data-kc-resolved');
+  });
 
   const setField = (key: string, raw: unknown): void => {
     setValues(key, raw);
@@ -421,6 +462,7 @@ export function Form(props: FormProps): JSX.Element {
 
   const onSubmit = (e: Event): void => {
     e.preventDefault();
+    if (res.isResolved()) return;
     // Capture the <form> synchronously — `e.currentTarget` is nulled out once the
     // event has finished dispatching (so it can't be read in a later microtask).
     const formEl = e.currentTarget as HTMLElement | null;
@@ -443,12 +485,18 @@ export function Form(props: FormProps): JSX.Element {
     }
     const out = buildResult(def(), snapshot as Record<string, unknown>);
     emit({ kind: 'submit', cardId: local.cardId, data: out });
-    setSubmitted(true);
+    res.setLocal({ kind: 'submit', data: out });
   };
 
   const actions = createMemo(() => def()['x-kc-actions'] ?? []);
   const submitLabel = () => def()['x-kc-submitLabel'] ?? 'Submit';
   const dismissible = () => def()['x-kc-dismissible'] === true;
+
+  const summaryRows = createMemo(() => {
+    const r = res.resolution();
+    if (!r || r.kind !== 'submit') return [];
+    return summarizeForm(def(), (r.data ?? {}) as Record<string, unknown>);
+  });
 
   return (
     <Show
@@ -465,63 +513,67 @@ export function Form(props: FormProps): JSX.Element {
           heading={local.heading ?? def().title}
           description={def().description}
           actions={
-            <div class="flex w-full flex-wrap items-center justify-between gap-2">
-              <Show when={dismissible()}>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => emit({ kind: 'dismiss', cardId: local.cardId })}
-                >
-                  Dismiss
-                </Button>
-              </Show>
-              <div class="ml-auto flex flex-wrap items-center gap-2">
-                <For each={actions()}>
-                  {(action) => (
-                    <Button
-                      type="button"
-                      variant={action.variant ?? 'ghost'}
-                      onClick={() => emit({ kind: 'action', cardId: local.cardId, action: action.id })}
-                    >
-                      {action.label}
-                    </Button>
-                  )}
-                </For>
-                <Button type="submit" form={formId()} disabled={submitted()}>
-                  {submitLabel()}
-                </Button>
+            <Show
+              when={!res.isResolved()}
+              fallback={undefined}
+            >
+              <div class="flex w-full flex-wrap items-center justify-between gap-2">
+                <Show when={dismissible()}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => emit({ kind: 'dismiss', cardId: local.cardId })}
+                  >
+                    Dismiss
+                  </Button>
+                </Show>
+                <div class="ml-auto flex flex-wrap items-center gap-2">
+                  <For each={actions()}>
+                    {(action) => (
+                      <Button
+                        type="button"
+                        variant={action.variant ?? 'ghost'}
+                        onClick={() => emit({ kind: 'action', cardId: local.cardId, action: action.id })}
+                      >
+                        {action.label}
+                      </Button>
+                    )}
+                  </For>
+                  <Button type="submit" form={formId()}>
+                    {submitLabel()}
+                  </Button>
+                </div>
               </div>
-            </div>
+            </Show>
           }
         >
-          <form
-            id={formId()}
-            class={cn('flex flex-col gap-3', local.class)}
-            novalidate
-            onSubmit={onSubmit}
+          <Show
+            when={!res.isResolved()}
+            fallback={<ResolvedForm rows={summaryRows()} optimistic={res.isOptimistic()} />}
           >
-            <For each={keys()}>
-              {(key) => (
-                <FieldRow
-                  fieldKey={key}
-                  field={def().properties[key]}
-                  required={(def().required ?? []).includes(key)}
-                  inlineMax={inlineMax()}
-                  value={() => values[key]}
-                  error={() => errors[key]}
-                  disabled={submitted()}
-                  onInput={(v) => setField(key, v)}
-                  onBlur={() => validateField(key)}
-                />
-              )}
-            </For>
-
-            <Show when={submitted()}>
-              <p role="status" class="text-sm text-muted-foreground">
-                Submitted. Thank you.
-              </p>
-            </Show>
-          </form>
+            <form
+              id={formId()}
+              class={cn('flex flex-col gap-3', local.class)}
+              novalidate
+              onSubmit={onSubmit}
+            >
+              <For each={keys()}>
+                {(key) => (
+                  <FieldRow
+                    fieldKey={key}
+                    field={def().properties[key]}
+                    required={(def().required ?? []).includes(key)}
+                    inlineMax={inlineMax()}
+                    value={() => values[key]}
+                    error={() => errors[key]}
+                    disabled={false}
+                    onInput={(v) => setField(key, v)}
+                    onBlur={() => validateField(key)}
+                  />
+                )}
+              </For>
+            </form>
+          </Show>
         </Card>
       </ErrorBoundary>
     </Show>
@@ -533,6 +585,31 @@ let formIdCounter = 0;
 const formIdValue = `kc-form-${++formIdCounter}`;
 function formId(): string {
   return formIdValue;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Read-only resolved view presenter.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ResolvedForm(props: { rows: FormSummaryRow[]; optimistic: boolean }): JSX.Element {
+  return (
+    <div class="flex flex-col gap-3" role={props.optimistic ? 'status' : undefined}>
+      <p class="flex items-center gap-2 text-sm font-medium text-foreground">
+        <Check size={16} aria-hidden="true" />
+        <span>Submitted</span>
+      </p>
+      <dl class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1.5">
+        <For each={props.rows}>
+          {(row) => (
+            <>
+              <dt class="text-xs text-muted-foreground">{row.label}</dt>
+              <dd class="m-0 text-sm font-medium text-foreground">{row.value}</dd>
+            </>
+          )}
+        </For>
+      </dl>
+    </div>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
