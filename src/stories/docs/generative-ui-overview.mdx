@@ -27,7 +27,7 @@ Everything an agent sends is a `CardEnvelope`:
 interface CardEnvelope { type: string; id: string; data: unknown; title?: string }
 ```
 
-`type` selects the card (`form`, `confirm`, `task-list`, `link`, `embed`); `data` follows
+`type` selects the card (`form`, `confirm`, `tasks`, `link`, `embed`); `data` follows
 that type's **JSON Schema** (shipped in `dist/schemas`, so an agent/server can validate
 before sending); `id` correlates every event back to this card.
 
@@ -55,5 +55,28 @@ result card once the user acts. For **live streaming into a single card**, the S
 `<CardRenderer>` re-renders reactively as its envelope's `data` changes, so an agent can
 stream into it as work progresses. (Keyed-by-`id` in-place updates within a `<kc-cards>`
 list are a planned refinement.)
+
+## Resolved cards
+
+Interactive cards (`kc-confirm`, `kc-choice`, `kc-tasks`, `kc-form`) flip to a **chromed
+read-only** view the moment the user acts — optimistically, before any server round-trip.
+
+To make that survive a **reload or history re-hydration**, the card reads an optional
+`resolution` field on its `CardEnvelope`. Persist it by feeding the card's terminal event
+back into the array with the `applyResolution` helper:
+
+```ts
+import { applyResolution } from '@kitn.ai/chat';
+
+// <kc-cards> is controlled — persist the resolution so it survives reload:
+el.addEventListener('kc-card', (e) => {
+  el.cards = applyResolution(el.cards, e.detail); // resolved cards re-hydrate read-only
+  // …then save el.cards to your store/server.
+});
+```
+
+`applyResolution` is pure and safe to call on every `kc-card` event — non-terminal events
+(`ready` / `error` / …) and unknown card ids return the same array unchanged. The terminal
+verbs are `action` (confirm / choice) and `submit` (tasks / form).
 
 See **Cards** for each card type, and **SDK** for the dispatcher in action.

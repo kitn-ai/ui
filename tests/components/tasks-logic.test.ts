@@ -1,4 +1,4 @@
-// tests/components/task-list-logic.test.ts
+// tests/components/tasks-logic.test.ts
 // The load-bearing selection logic, tested as pure functions.
 import { describe, expect, test, vi } from 'vitest';
 import {
@@ -11,11 +11,11 @@ import {
   canConfirm,
   isMaxReached,
   confirmReason,
-  type TaskListTask,
-  type TaskListCardData,
-} from '../../src/components/task-list-card';
+  type TasksTask,
+  type TasksCardData,
+} from '../../src/components/tasks-card';
 
-const T = (id: string, extra: Partial<TaskListTask> = {}): TaskListTask => ({ id, label: id, ...extra });
+const T = (id: string, extra: Partial<TasksTask> = {}): TasksTask => ({ id, label: id, ...extra });
 
 describe('normalizeTasks', () => {
   test('rejects non-array / empty', () => {
@@ -93,7 +93,7 @@ describe('canConfirm', () => {
 });
 
 describe('isMaxReached', () => {
-  const data: TaskListCardData = { tasks: [T('a')], max: 2 };
+  const data: TasksCardData = { tasks: [T('a')], max: 2 };
   test('true at/over max', () => {
     expect(isMaxReached(data, 2)).toBe(true);
     expect(isMaxReached(data, 1)).toBe(false);

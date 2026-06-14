@@ -6,7 +6,7 @@
   "type": "object",
   "required": ["kind"],
   "properties": {
-    "kind": { "enum": ["ready", "submit-data", "action", "send-prompt", "open", "resize", "state", "dismiss", "error"] },
+    "kind": { "enum": ["ready", "submit", "action", "send-prompt", "open", "resize", "state", "dismiss", "error"] },
     "cardId": { "type": "string" }
   }
 }

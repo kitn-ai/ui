@@ -65,7 +65,7 @@ test('clicking an action emits `action` with id + echoed payload; bubbling+compo
   off();
 });
 
-test('resolved state disables the other actions + sets data-kc-resolved', async () => {
+test('resolved state shows read-only chosen label, hides other actions + sets data-kc-resolved', async () => {
   const { off } = listen();
   const el = await mount(APPROVE);
   const approve = Array.from(el.shadowRoot!.querySelectorAll<HTMLButtonElement>('button')).find(
@@ -73,10 +73,13 @@ test('resolved state disables the other actions + sets data-kc-resolved', async 
   )!;
   approve.click();
   await flush();
+  // After resolution, buttons are replaced by a read-only label; the other action button is absent.
   const reject = Array.from(el.shadowRoot!.querySelectorAll<HTMLButtonElement>('button')).find(
     (b) => b.dataset.actionId === 'reject',
-  )!;
-  expect(reject.disabled).toBe(true);
+  );
+  expect(reject).toBeUndefined();
+  // The chosen label is visible in the read-only view.
+  expect(el.shadowRoot!.textContent).toContain('Run migration');
   expect(el.getAttribute('data-kc-resolved')).toBe('approve');
   off();
 });

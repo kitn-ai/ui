@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, onMount, type JSX } from 'solid-js';
-import './link-card'; // side effect: registers <kc-link-card>
+import './link-preview'; // side effect: registers <kc-link-preview>
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
-import type { LinkCardData } from '../primitives/link-preview';
+import type { LinkPreviewData } from '../primitives/link-preview';
 import { configureLinkPreview } from '../primitives/link-preview';
 import type { CardEvent } from '../primitives/card-contract';
 
@@ -11,7 +11,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-link-card': JSX.HTMLAttributes<HTMLElement> & {
+      'kc-link-preview': JSX.HTMLAttributes<HTMLElement> & {
         'card-id'?: string;
         ref?: (el: HTMLElement) => void;
       };
@@ -19,17 +19,17 @@ declare module 'solid-js' {
   }
 }
 
-type LinkCardEl = HTMLElement & { cardId?: string; data?: LinkCardData };
+type LinkPreviewEl = HTMLElement & { cardId?: string; data?: LinkPreviewData };
 
 /** A sized box the card sits in (cards expand to their container width). */
 function Frame(props: { children: JSX.Element }) {
   return <div style={{ width: '100%', 'max-width': '420px' }}>{props.children}</div>;
 }
 
-/** Mounts a <kc-link-card>, sets `.data`, logs emitted CardEvents under the render. */
-function LinkCardDemo(props: { cardId: string; data: LinkCardData }) {
+/** Mounts a <kc-link-preview>, sets `.data`, logs emitted CardEvents under the render. */
+function LinkPreviewDemo(props: { cardId: string; data: LinkPreviewData }) {
   const [log, setLog] = createSignal<CardEvent[]>([]);
-  let el: LinkCardEl | undefined;
+  let el: LinkPreviewEl | undefined;
   onMount(() => {
     if (!el) return;
     el.cardId = props.cardId;
@@ -45,7 +45,7 @@ function LinkCardDemo(props: { cardId: string; data: LinkCardData }) {
   return (
     <Frame>
       <div style={{ display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
-        <kc-link-card ref={(e) => (el = e as LinkCardEl)} card-id={props.cardId} />
+        <kc-link-preview ref={(e) => (el = e as LinkPreviewEl)} card-id={props.cardId} />
         <pre
           style={{
             margin: 0,
@@ -79,10 +79,10 @@ const FULL_ENVELOPE = {
     siteName: 'Example Blog',
     domain: 'example.com',
   },
-} satisfies { type: string; id: string; title: string; data: LinkCardData };
+} satisfies { type: string; id: string; title: string; data: LinkPreviewData };
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-link-card id="lc"></kc-link-card>
+<kc-link-preview id="lc"></kc-link-preview>
 
 <script type="module">
   import '@kitn.ai/chat/elements'; // registers the custom elements
@@ -93,7 +93,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   lc.data = ${JSON.stringify(FULL_ENVELOPE.data, null, 2).replace(/\n/g, '\n  ')};
 
   // Cards bubble a composed \`kc-card\` event carrying a typed CardEvent.
-  // kc-link-card emits: ready (on mount), open (on click), error (invalid/broken url).
+  // kc-link-preview emits: ready (on mount), open (on click), error (invalid/broken url).
   lc.addEventListener('kc-card', (e) => {
     const ev = e.detail; // CardEvent
     if (ev.kind === 'open' && ev.target === 'tab') {
@@ -103,14 +103,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Generative UI/Cards/kc-link-card',
+  title: 'Generative UI/Cards/kc-link-preview',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-link-card'),
+  argTypes: argTypesFor('kc-link-preview'),
   parameters: {
     layout: 'padded',
     docs: {
-      description: specDescription('kc-link-card', [
-        '`<kc-link-card>` is a themed, accessible **rich link / Open-Graph preview** card for the generative-UI feature. It speaks the **Card Contract**: data down (a `link` `CardEnvelope`), events up (only the `open` verb, plus lifecycle `ready` / failure `error`).',
+      description: specDescription('kc-link-preview', [
+        '`<kc-link-preview>` is a themed, accessible **rich link / Open-Graph preview** card for the generative-UI feature. It speaks the **Card Contract**: data down (a `link` `CardEnvelope`), events up (only the `open` verb, plus lifecycle `ready` / failure `error`).',
         '**Pure by default:** the card renders from the metadata you supply (`title`, `description`, `image`, `favicon`, `siteName`, `domain`) — it **never fetches**. For the bare-`{ url }` case, an app may opt in to a resolver with `configureLinkPreview({ fetchMetadata })` (CORS means OG scraping needs YOUR backend; there is no built-in network call).',
         '**Interaction:** the whole card is one link target. Activating it (click / Enter / Space) dispatches the bubbling, composed **`kc-card`** event with `{ kind: \'open\', url, target: \'tab\' }` so a host-level listener routes it through `CardPolicy` (which performs the navigation, after scheme validation).',
         '**Graceful degradation:** a missing/broken image drops the image region (not an error); an invalid url renders a non-clickable "Invalid link" chip and emits one `error`.',
@@ -126,7 +126,7 @@ type Story = StoryObj;
 /** Full OG metadata — image, site name, title, description. Click the card to see the emitted `open` event. */
 export const FullPreview: Story = {
   name: 'Full preview',
-  render: () => <LinkCardDemo cardId={FULL_ENVELOPE.id} data={FULL_ENVELOPE.data} />,
+  render: () => <LinkPreviewDemo cardId={FULL_ENVELOPE.id} data={FULL_ENVELOPE.data} />,
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
 };
 
@@ -134,7 +134,7 @@ export const FullPreview: Story = {
 export const NoImage: Story = {
   name: 'No image',
   render: () => (
-    <LinkCardDemo
+    <LinkPreviewDemo
       cardId="card-link-2"
       data={{
         url: 'https://docs.example.com/guide',
@@ -182,7 +182,7 @@ export const BareUrlWithFetcher: Story = {
         };
       },
     });
-    return <LinkCardDemo cardId="card-link-3" data={{ url: 'https://example.com/bare' }} />;
+    return <LinkPreviewDemo cardId="card-link-3" data={{ url: 'https://example.com/bare' }} />;
   },
   parameters: {
     docs: {
@@ -205,5 +205,5 @@ lc.data = { url: 'https://example.com/bare' };`,
 /** Invalid link — a non-clickable error chip; one `error` event is emitted (visible in the log below). */
 export const InvalidLink: Story = {
   name: 'Invalid link',
-  render: () => <LinkCardDemo cardId="card-link-4" data={{ url: 'not-a-valid-url' }} />,
+  render: () => <LinkPreviewDemo cardId="card-link-4" data={{ url: 'not-a-valid-url' }} />,
 };

@@ -13,6 +13,8 @@ export interface CardEnvelope<TType extends string = string, TData = unknown> {
   id: string;
   data: TData;
   title?: string;
+  /** Set when the user has resolved this card; renders the chromed read-only view. */
+  resolution?: CardResolution;
 }
 
 /** Context the host pushes to every card; updated when it changes (theme, etc.). */
@@ -29,7 +31,7 @@ export interface CardContext {
 /** Everything a card can ask the host to do. The host authorizes + routes each. */
 export type CardEvent =
   | { kind: 'ready'; cardId: string }
-  | { kind: 'submit-data'; cardId: string; data: unknown }
+  | { kind: 'submit'; cardId: string; data: unknown }
   | { kind: 'action'; cardId: string; action: string; payload?: unknown }
   | { kind: 'send-prompt'; cardId: string; text: string; mode?: 'compose' | 'send'; context?: unknown }
   | { kind: 'open'; cardId: string; url: string; target?: 'tab' | 'artifact' }
@@ -40,6 +42,15 @@ export type CardEvent =
 
 export type CardEventKind = CardEvent['kind'];
 
+/** How a card was resolved by the user — the re-hydration channel for the chromed
+ *  read-only state. Mirrors the two terminal CardEvents (minus `cardId`): the
+ *  resolution is just the event that resolved the card. `at` is optional ISO-8601
+ *  provenance (data only; never rendered). Additive — does not bump the contract
+ *  version. */
+export type CardResolution =
+  | { kind: 'action'; action: string; payload?: unknown; at?: string }
+  | { kind: 'submit'; data: unknown; at?: string };
+
 /** What every card is handed (via native context or the iframe bridge). */
 export interface CardHost {
   context(): CardContext;
@@ -48,7 +59,7 @@ export interface CardHost {
 
 /** How the host routes each verb. Consumers supply handlers; defaults applied otherwise. */
 export interface CardPolicy {
-  onSubmitData?: (cardId: string, data: unknown) => void;
+  onSubmit?: (cardId: string, data: unknown) => void;
   onAction?: (cardId: string, action: string, payload?: unknown) => void;
   onSendPrompt?: (text: string, opts: { mode: 'compose' | 'send'; context?: unknown }) => void;
   onOpen?: (url: string, target: 'tab' | 'artifact') => void;

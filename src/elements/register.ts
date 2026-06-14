@@ -41,10 +41,10 @@ import './artifact';
 // Generative-UI cards (Card Contract)
 import './card';
 import './form';
-import './link-card';
+import './link-preview';
 import './embed';
 import './confirm-card';
-import './task-list-card';
+import './tasks';
 import './choice';
 import './cards';
 

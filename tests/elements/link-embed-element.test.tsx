@@ -1,6 +1,6 @@
 // tests/elements/link-embed-element.test.tsx
 import { afterEach, describe, expect, test } from 'vitest';
-import '../../src/elements/link-card';
+import '../../src/elements/link-preview';
 import '../../src/elements/embed';
 import type { CardEvent } from '../../src/primitives/card-contract';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
@@ -9,18 +9,18 @@ import { configureEmbedAllowlist, __resetEmbedAllowlistForTests } from '../../sr
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 afterEach(() => {
-  document.querySelectorAll('kc-link-card, kc-embed').forEach((e) => e.remove());
+  document.querySelectorAll('kc-link-preview, kc-embed').forEach((e) => e.remove());
   __resetEmbedAllowlistForTests();
 });
 
-test('both kc-link-card and kc-embed register', () => {
-  expect(customElements.get('kc-link-card')).toBeTruthy();
+test('both kc-link-preview and kc-embed register', () => {
+  expect(customElements.get('kc-link-preview')).toBeTruthy();
   expect(customElements.get('kc-embed')).toBeTruthy();
 });
 
-describe('kc-link-card element', () => {
+describe('kc-link-preview element', () => {
   test('renders the preview from the data property', async () => {
-    const el = document.createElement('kc-link-card') as HTMLElement & {
+    const el = document.createElement('kc-link-preview') as HTMLElement & {
       cardId: string;
       data: unknown;
     };
@@ -35,7 +35,7 @@ describe('kc-link-card element', () => {
   });
 
   test('activating the card dispatches a bubbling, composed kc-card open event', async () => {
-    const el = document.createElement('kc-link-card') as HTMLElement & {
+    const el = document.createElement('kc-link-preview') as HTMLElement & {
       cardId: string;
       data: unknown;
     };

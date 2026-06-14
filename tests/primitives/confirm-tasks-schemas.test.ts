@@ -1,5 +1,5 @@
-// tests/primitives/confirm-task-list-schemas.test.ts
-// Schema-artifact tests for the confirm + task-list cards (good + bad examples).
+// tests/primitives/confirm-tasks-schemas.test.ts
+// Schema-artifact tests for the confirm + tasks cards (good + bad examples).
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
 import { validateAgainstSchema, type JsonSchema } from '../../src/primitives/card-validate';
@@ -43,8 +43,8 @@ test('confirm schema parses + validates a good/bad payload', () => {
   ).toBe(false);
 });
 
-test('task-list schema parses + validates a good/bad payload', () => {
-  const s = load('task-list.schema.json');
+test('tasks schema parses + validates a good/bad payload', () => {
+  const s = load('tasks.schema.json');
   expect(
     validateAgainstSchema(s, {
       mode: 'select',
@@ -66,8 +66,8 @@ test('task-list schema parses + validates a good/bad payload', () => {
   expect(validateAgainstSchema(s, { tasks: [{ id: 'a', label: 'A' }], max: 0 }).valid).toBe(false);
 });
 
-test('task-list.result schema parses + validates a good/bad result', () => {
-  const s = load('task-list.result.schema.json');
+test('tasks.result schema parses + validates a good/bad result', () => {
+  const s = load('tasks.result.schema.json');
   expect(validateAgainstSchema(s, { selected: ['lint', 'test'] }).valid).toBe(true);
   expect(validateAgainstSchema(s, { selected: [] }).valid).toBe(true);
   // missing required `selected`

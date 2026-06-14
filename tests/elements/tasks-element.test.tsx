@@ -1,10 +1,10 @@
-// tests/elements/task-list-card-element.test.tsx
-// Contract integration for <kc-task-list>: row toggles are quiet; only confirm emits
-// `submit-data` with ids in input order; select-all + min/max/allowEmpty gating.
-import '../../src/elements/task-list-card';
+// tests/elements/tasks-element-element.test.tsx
+// Contract integration for <kc-tasks>: row toggles are quiet; only confirm emits
+// `submit` with ids in input order; select-all + min/max/allowEmpty gating.
+import '../../src/elements/tasks';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
 import type { CardEvent } from '../../src/primitives/card-contract';
-import type { TaskListCardData } from '../../src/components/task-list-card';
+import type { TasksCardData } from '../../src/components/tasks-card';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
@@ -16,10 +16,10 @@ function listen(): { events: CardEvent[]; off: () => void } {
 }
 
 afterEach(() => {
-  document.querySelectorAll('kc-task-list').forEach((e) => e.remove());
+  document.querySelectorAll('kc-tasks').forEach((e) => e.remove());
 });
 
-const PLAN: TaskListCardData = {
+const PLAN: TasksCardData = {
   selectAll: true,
   confirmLabel: 'Run selected',
   tasks: [
@@ -30,8 +30,8 @@ const PLAN: TaskListCardData = {
   ],
 };
 
-async function mount(data: TaskListCardData, cardId = 'card-plan-42') {
-  const el = document.createElement('kc-task-list') as HTMLElement & { data: TaskListCardData };
+async function mount(data: TasksCardData, cardId = 'card-plan-42') {
+  const el = document.createElement('kc-tasks') as HTMLElement & { data: TasksCardData };
   el.setAttribute('card-id', cardId);
   el.data = data;
   document.body.appendChild(el);
@@ -52,8 +52,8 @@ const confirmBtn = (root: ShadowRoot): HTMLButtonElement =>
     (b) => b.textContent?.includes('Run selected') || b.textContent?.includes('Confirm'),
   )!;
 
-test('kc-task-list registers', () => {
-  expect(customElements.get('kc-task-list')).toBeTruthy();
+test('kc-tasks registers', () => {
+  expect(customElements.get('kc-tasks')).toBeTruthy();
 });
 
 test('mount emits a bubbling `ready`', async () => {
@@ -69,11 +69,11 @@ test('toggling rows emits NO event; only confirm does', async () => {
   const root = el.shadowRoot!;
   setChecked(rowCheckbox(root, 'build'), true);
   await flush();
-  expect(events.some((e) => e.kind === 'submit-data')).toBe(false);
+  expect(events.some((e) => e.kind === 'submit')).toBe(false);
   off();
 });
 
-test('confirm emits submit-data with selected ids in INPUT order', async () => {
+test('confirm emits submit with selected ids in INPUT order', async () => {
   const { events, off } = listen();
   const el = await mount(PLAN); // lint + test pre-checked
   const root = el.shadowRoot!;
@@ -82,8 +82,8 @@ test('confirm emits submit-data with selected ids in INPUT order', async () => {
   await flush();
   confirmBtn(root).click();
   await flush();
-  const submit = events.find((e) => e.kind === 'submit-data') as
-    | Extract<CardEvent, { kind: 'submit-data' }>
+  const submit = events.find((e) => e.kind === 'submit') as
+    | Extract<CardEvent, { kind: 'submit' }>
     | undefined;
   expect(submit?.cardId).toBe('card-plan-42');
   expect(submit?.data).toEqual({ selected: ['lint', 'test', 'deploy'] });
@@ -138,8 +138,8 @@ test('allowEmpty:true confirms with zero → { selected: [] }', async () => {
   expect(confirmBtn(root).disabled).toBe(false);
   confirmBtn(root).click();
   await flush();
-  const submit = events.find((e) => e.kind === 'submit-data') as
-    | Extract<CardEvent, { kind: 'submit-data' }>
+  const submit = events.find((e) => e.kind === 'submit') as
+    | Extract<CardEvent, { kind: 'submit' }>
     | undefined;
   expect(submit?.data).toEqual({ selected: [] });
   off();
@@ -174,7 +174,7 @@ test('max blocks toggling unchecked rows past the cap', async () => {
 
 test('invalid envelope → inline error + `error` event; no checkboxes', async () => {
   const { events, off } = listen();
-  const el = await mount({ tasks: [] } as unknown as TaskListCardData, 'card-bad');
+  const el = await mount({ tasks: [] } as unknown as TasksCardData, 'card-bad');
   const root = el.shadowRoot!;
   expect(root.querySelector('[role="alert"]')).toBeTruthy();
   expect(root.querySelector('input[type="checkbox"]')).toBeNull();
@@ -182,14 +182,15 @@ test('invalid envelope → inline error + `error` event; no checkboxes', async (
   off();
 });
 
-test('resolved state after submit: rows + confirm disabled, Submitted shown', async () => {
+test('resolved state after submit: read-only summary shown, no controls', async () => {
   const { off } = listen();
   const el = await mount({ tasks: [{ id: 'a', label: 'A', checked: true }] });
   const root = el.shadowRoot!;
   confirmBtn(root).click();
   await flush();
-  expect(confirmBtn(root).disabled).toBe(true);
-  expect(rowCheckbox(root, 'a').disabled).toBe(true);
-  expect(root.querySelector('[role="status"]')?.textContent).toContain('Submitted');
+  // After confirm the interactive controls are gone and the read-only summary appears.
+  expect(root.querySelector('button')).toBeNull();
+  expect(root.querySelector('input[type="checkbox"]')).toBeNull();
+  expect(root.querySelector('[role="status"]')?.textContent).toContain('Selected 1 of 1');
   off();
 });

@@ -2,7 +2,7 @@
 // Native Solid host path: a `host` prop's emit is called (not the CustomEvent).
 import { render, fireEvent } from '@solidjs/testing-library';
 import { ConfirmCard } from '../../src/components/confirm-card';
-import { TaskListCard } from '../../src/components/task-list-card';
+import { TasksCard } from '../../src/components/tasks-card';
 import type { CardEvent, CardHost, CardContext } from '../../src/primitives/card-contract';
 
 afterEach(() => {
@@ -33,10 +33,10 @@ test('ConfirmCard calls host.emit (action) — no CustomEvent', () => {
   expect(action.action).toBe('ok');
 });
 
-test('TaskListCard calls host.emit (submit-data) — no CustomEvent', () => {
+test('TasksCard calls host.emit (submit) — no CustomEvent', () => {
   const { host, events } = makeHost();
   const { getByText } = render(() => (
-    <TaskListCard
+    <TasksCard
       host={host}
       cardId="t1"
       data={{ tasks: [{ id: 'a', label: 'A', checked: true }], confirmLabel: 'Go' }}
@@ -44,9 +44,9 @@ test('TaskListCard calls host.emit (submit-data) — no CustomEvent', () => {
   ));
   expect(events.some((e) => e.kind === 'ready' && e.cardId === 't1')).toBe(true);
   fireEvent.click(getByText('Go'));
-  const submit = events.find((e) => e.kind === 'submit-data') as Extract<
+  const submit = events.find((e) => e.kind === 'submit') as Extract<
     CardEvent,
-    { kind: 'submit-data' }
+    { kind: 'submit' }
   >;
   expect(submit.data).toEqual({ selected: ['a'] });
 });

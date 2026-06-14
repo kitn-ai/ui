@@ -3,6 +3,7 @@ import {
   type JSX, type Accessor,
 } from 'solid-js';
 import { Portal } from 'solid-js/web';
+import { type Placement } from '@floating-ui/dom';
 import { cn } from '../utils/cn';
 import { useChatConfig } from '../primitives/chat-config';
 import { createPresence, usePosition, useDismiss, As } from './overlay';
@@ -80,7 +81,7 @@ export function HoverCardTrigger(props: HoverCardTriggerProps) {
   );
 }
 
-export interface HoverCardContentProps { children: JSX.Element; class?: string; }
+export interface HoverCardContentProps { children: JSX.Element; class?: string; placement?: Placement; }
 
 // Visual gap between trigger and the visible card. Also the depth of the
 // transparent safe bridge so the pointer never crosses "empty" space.
@@ -115,7 +116,7 @@ export function HoverCardContent(props: HoverCardContentProps) {
   // gutter: 0 places the outer shell flush with the trigger; the visual gap is
   // recreated by transparent padding (gapPaddingStyle) so the hit area bridges
   // it and a straight trigger->content transit never leaves a hot zone.
-  const position = usePosition(ctx.trigger, ctx.content, { placement: 'bottom', gutter: 0 });
+  const position = usePosition(ctx.trigger, ctx.content, { placement: props.placement ?? 'bottom', gutter: 0 });
   useDismiss({ enabled: ctx.open, onDismiss: (reason) => (reason === 'escape' ? ctx.close() : ctx.leave()), refs: () => [ctx.trigger(), ctx.content()] });
 
   return (
@@ -156,14 +157,14 @@ export function HoverCardContent(props: HoverCardContentProps) {
   );
 }
 
-export interface HoverCardProps { trigger: JSX.Element; children: JSX.Element; class?: string; openDelay?: number; closeDelay?: number; }
+export interface HoverCardProps { trigger: JSX.Element; children: JSX.Element; class?: string; openDelay?: number; closeDelay?: number; placement?: Placement; }
 
 export function HoverCard(props: HoverCardProps) {
-  const [local] = splitProps(props, ['trigger', 'children', 'class', 'openDelay', 'closeDelay']);
+  const [local] = splitProps(props, ['trigger', 'children', 'class', 'openDelay', 'closeDelay', 'placement']);
   return (
     <HoverCardRoot openDelay={local.openDelay} closeDelay={local.closeDelay}>
       <HoverCardTrigger>{local.trigger}</HoverCardTrigger>
-      <HoverCardContent class={cn('w-64 p-4', local.class)}>{local.children}</HoverCardContent>
+      <HoverCardContent class={cn('w-64 p-4', local.class)} placement={local.placement}>{local.children}</HoverCardContent>
     </HoverCardRoot>
   );
 }

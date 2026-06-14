@@ -13,18 +13,18 @@ import { cn } from '../utils/cn';
 import { Link as LinkIcon } from 'lucide-solid';
 import type { CardEvent } from '../primitives/card-contract';
 import {
-  type LinkCardData,
+  type LinkPreviewData,
   deriveDomain,
   isRenderableLink,
   hasLinkPreviewFetcher,
   resolveLinkMetadata,
 } from '../primitives/link-preview';
 
-export interface LinkCardProps {
+export interface LinkPreviewProps {
   /** The card id correlating every emitted event. */
   cardId: string;
   /** The link payload (data-down). */
-  data: LinkCardData;
+  data: LinkPreviewData;
   /** Emit a contract CardEvent up (host routes it). */
   onEmit?: (event: CardEvent) => void;
   /** Extra classes for the card root. */
@@ -32,25 +32,25 @@ export interface LinkCardProps {
 }
 
 /** True when the payload already carries renderable metadata (the pure path). */
-function hasMetadata(data: LinkCardData): boolean {
+function hasMetadata(data: LinkPreviewData): boolean {
   return Boolean(data.title || data.description || data.image);
 }
 
 /**
- * `LinkCard` — a pure, themed, accessible rich link / OG preview. Renders from the
+ * `LinkPreview` — a pure, themed, accessible rich link / OG preview. Renders from the
  * supplied metadata; it never fetches the network itself. When the payload is a
  * bare `{ url }` and an app has registered a `configureLinkPreview` fetcher, it
  * shows a skeleton, calls the hook, merges the result, and renders. Activating the
  * card (click / Enter / Space) emits the contract `open` verb (`target:'tab'`); the
  * host policy performs the navigation so it can veto/redirect.
  */
-export function LinkCard(props: LinkCardProps): JSX.Element {
+export function LinkPreview(props: LinkPreviewProps): JSX.Element {
   const [local] = splitProps(props, ['cardId', 'data', 'onEmit', 'class']);
 
   const emit = (event: CardEvent) => local.onEmit?.(event);
 
   // Bare-URL resolution state (only used when the payload lacks metadata + a fetcher exists).
-  const [fetched, setFetched] = createSignal<Partial<LinkCardData> | undefined>();
+  const [fetched, setFetched] = createSignal<Partial<LinkPreviewData> | undefined>();
   const [loading, setLoading] = createSignal(false);
   const [imageBroken, setImageBroken] = createSignal(false);
 
@@ -58,7 +58,7 @@ export function LinkCard(props: LinkCardProps): JSX.Element {
   const valid = createMemo(() => isRenderableLink(url()));
 
   // The effective payload = supplied data merged with any fetched metadata.
-  const effective = createMemo<LinkCardData>(() => ({ ...local.data, ...fetched() }));
+  const effective = createMemo<LinkPreviewData>(() => ({ ...local.data, ...fetched() }));
 
   // Lifecycle `ready` once on mount.
   onMount(() => emit({ kind: 'ready', cardId: local.cardId }));
@@ -191,4 +191,4 @@ export function LinkCard(props: LinkCardProps): JSX.Element {
   );
 }
 
-export type { LinkCardData } from '../primitives/link-preview';
+export type { LinkPreviewData } from '../primitives/link-preview';

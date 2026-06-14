@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
-import { TaskListCard, type TaskListCardData } from './task-list-card';
+import { TasksCard, type TasksCardData } from './tasks-card';
 import { componentDescription } from '../stories/docs/element-controls';
 import type { CardEvent, CardHost, CardContext } from '../primitives/card-contract';
 
 const ctx: CardContext = { theme: { mode: 'light' }, locale: 'en' };
 
-/** Renders the Solid <TaskListCard> with a capturing `host`, logging emitted events. */
-function Demo(props: { def: TaskListCardData; heading?: string; cardId: string }) {
+/** Renders the Solid <TasksCard> with a capturing `host`, logging emitted events. */
+function Demo(props: { def: TasksCardData; heading?: string; cardId: string }) {
   const [log, setLog] = createSignal<CardEvent[]>([]);
   const host: CardHost = { context: () => ctx, emit: (e) => setLog((p) => [...p, e]) };
   return (
     <div style={{ 'max-width': '460px', display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
-      <TaskListCard host={host} data={props.def} heading={props.heading} cardId={props.cardId} />
+      <TasksCard host={host} data={props.def} heading={props.heading} cardId={props.cardId} />
       <pre
         style={{
           margin: 0,
@@ -30,7 +30,7 @@ function Demo(props: { def: TaskListCardData; heading?: string; cardId: string }
   );
 }
 
-const PLAN: TaskListCardData = {
+const PLAN: TasksCardData = {
   selectAll: true,
   confirmLabel: 'Run selected',
   tasks: [
@@ -41,7 +41,7 @@ const PLAN: TaskListCardData = {
   ],
 };
 
-const BOUNDED: TaskListCardData = {
+const BOUNDED: TasksCardData = {
   confirmLabel: 'Request review',
   min: 1,
   max: 2,
@@ -53,21 +53,21 @@ const BOUNDED: TaskListCardData = {
 };
 
 const meta = {
-  title: 'Components/TaskListCard',
-  component: TaskListCard,
+  title: 'Components/TasksCard',
+  component: TasksCard,
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'The SolidJS layer behind `<kc-task-list>`. Pass a `host` (a `CardHost`) to receive the emitted `CardEvent`s directly (the native-host path), or wrap in a `CardProvider`. Toggling rows is local; only confirm emits `submit-data` with `{ selected }` in input order.',
+        'The SolidJS layer behind `<kc-tasks>`. Pass a `host` (a `CardHost`) to receive the emitted `CardEvent`s directly (the native-host path), or wrap in a `CardProvider`. Toggling rows is local; only confirm emits `submit` with `{ selected }` in input order.',
       ]),
     },
   },
-} satisfies Meta<typeof TaskListCard>;
+} satisfies Meta<typeof TasksCard>;
 
 export default meta;
-type Story = StoryObj<typeof TaskListCard>;
+type Story = StoryObj<typeof TasksCard>;
 
 export const SelectAPlan: Story = {
   render: () => <Demo def={PLAN} heading="Approve the plan steps" cardId="card-plan" />,

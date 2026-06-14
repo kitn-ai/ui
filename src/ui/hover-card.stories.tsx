@@ -72,6 +72,6 @@ export const LinkPreview: Story = {
     </p>
   ),
   ...src(`<HoverCard trigger={<a href="...">MDN reference</a>}>
-  <LinkCard title="Custom elements — MDN" host="developer.mozilla.org" />
+  <LinkPreview title="Custom elements — MDN" host="developer.mozilla.org" />
 </HoverCard>`),
 };

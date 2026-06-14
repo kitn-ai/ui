@@ -1,5 +1,5 @@
 // src/primitives/link-preview.ts
-// The optional, app-supplied bare-URL → metadata hook for <kc-link-card>, plus the
+// The optional, app-supplied bare-URL → metadata hook for <kc-link-preview>, plus the
 // `link` card's data type. The card stays PURE: it renders from supplied metadata
 // and never touches the network. CORS forbids reading cross-origin HTML in the
 // browser, so there is intentionally NO built-in network implementation here — an
@@ -8,7 +8,7 @@
 import type { CardEnvelope } from './card-contract';
 
 /** Rich link / Open-Graph preview payload. The card renders from this; it never fetches. */
-export interface LinkCardData {
+export interface LinkPreviewData {
   /** Canonical destination; opened via the contract `open` verb. */
   url: string;
   /** og:title — falls back to the domain. */
@@ -27,14 +27,14 @@ export interface LinkCardData {
   siteName?: string;
 }
 
-/** The full envelope an agent/server emits for a link card. */
-export type LinkCardEnvelope = CardEnvelope<'link', LinkCardData>;
+/** The full envelope an agent/server emits for a link preview card. */
+export type LinkPreviewEnvelope = CardEnvelope<'link', LinkPreviewData>;
 
-/** The `type` discriminator for link cards. */
-export const LINK_CARD_TYPE = 'link' as const;
+/** The `type` discriminator for link preview cards. */
+export const LINK_PREVIEW_TYPE = 'link' as const;
 
 /** App-supplied resolver: a bare URL → (partial) OG metadata. Usually hits YOUR backend. */
-export type LinkMetadataFetcher = (url: string) => Promise<Partial<LinkCardData>>;
+export type LinkMetadataFetcher = (url: string) => Promise<Partial<LinkPreviewData>>;
 
 let fetcher: LinkMetadataFetcher | undefined;
 
@@ -53,10 +53,10 @@ export function hasLinkPreviewFetcher(): boolean {
 }
 
 /**
- * Used by LinkCard ONLY when the envelope lacks metadata AND a fetcher is set.
+ * Used by LinkPreview ONLY when the envelope lacks metadata AND a fetcher is set.
  * Returns the merged metadata or throws (card shows its fallback/error state).
  */
-export async function resolveLinkMetadata(url: string): Promise<Partial<LinkCardData>> {
+export async function resolveLinkMetadata(url: string): Promise<Partial<LinkPreviewData>> {
   if (!fetcher) throw new Error('No link-preview fetcher configured');
   return fetcher(url);
 }

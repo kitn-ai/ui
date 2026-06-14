@@ -18,7 +18,7 @@ declare module 'solid-js' {
   }
 }
 
-type ChoiceEl = HTMLElement & { data?: ChoiceCardData };
+type ChoiceEl = HTMLElement & { data?: ChoiceCardData; resolution?: Record<string, unknown> };
 
 function Frame(props: { children: JSX.Element }) {
   return <div style={{ 'max-width': '460px' }}>{props.children}</div>;
@@ -60,7 +60,6 @@ function ChoiceDemo(props: { def: ChoiceCardData; cardId: string; heading?: stri
 
 const PLANS: ChoiceCardData = {
   prompt: 'Which plan fits your team?',
-  layout: 'list',
   options: [
     { id: 'free', label: 'Free', description: 'For trying things out', meta: '$0' },
     {
@@ -76,29 +75,29 @@ const PLANS: ChoiceCardData = {
   ],
 };
 
-const PRODUCTS: ChoiceCardData = {
+const TEMPLATES: ChoiceCardData = {
   prompt: 'Pick a workspace template.',
-  layout: 'grid',
+  submitLabel: 'Create workspace',
   options: [
     {
       id: 'blank',
       label: 'Blank',
       description: 'Start from scratch',
-      media: { image: 'https://placehold.co/240x160/png?text=Blank', imageAlt: 'A blank canvas' },
+      media: { image: 'https://placehold.co/80x80/png?text=Blank', imageAlt: 'A blank canvas' },
     },
     {
       id: 'kanban',
       label: 'Kanban',
       description: 'Board with columns',
       recommended: true,
-      media: { image: 'https://placehold.co/240x160/png?text=Kanban', imageAlt: 'A kanban board' },
+      media: { image: 'https://placehold.co/80x80/png?text=Kanban', imageAlt: 'A kanban board' },
       payload: { template: 'kanban' },
     },
     {
       id: 'docs',
       label: 'Docs',
       description: 'Wiki-style pages',
-      media: { image: 'https://placehold.co/240x160/png?text=Docs', imageAlt: 'A document page' },
+      media: { image: 'https://placehold.co/80x80/png?text=Docs', imageAlt: 'A document page' },
     },
   ],
 };
@@ -115,7 +114,7 @@ const QUICK_REPLIES: ChoiceCardData = {
 
 const HEADING_MAP: Record<string, string | undefined> = {
   'card-plans': 'Choose a plan',
-  'card-products': 'New workspace',
+  'card-templates': 'New workspace',
   'card-replies': undefined,
 };
 
@@ -145,11 +144,11 @@ const meta = {
     layout: 'padded',
     docs: {
       description: specDescription('kc-choice', [
-        "`<kc-choice>` is a **single-select** 'pick one of N rich options' card (set via the `data` **property**): an optional prompt + a radiogroup of options (`layout:'list'` rows or `layout:'grid'` tiles). Picking an option emits the Card contract's **`action`** verb up a bubbling **`kc-card`** CustomEvent of `{ kind:'action', cardId, action: option.id, payload? }`, then **resolves** the card (the chosen option marked, the rest disabled) so the same pick can't double-fire.",
+        "`<kc-choice>` is a **single-select** 'pick one of N rich options' card (set via the `data` **property**): an optional prompt + a radiogroup of list rows + a **Submit** button. Clicking a row (or Space/Enter on the focused row) **selects** it locally — nothing is emitted. Submit then emits the Card contract's **`action`** verb up a bubbling **`kc-card`** CustomEvent of `{ kind:'action', cardId, action: option.id, payload? }`, then **resolves** the card (the chosen option shown read-only) so the same pick can't double-fire. The Submit label is `submitLabel` (default 'Submit').",
         '**Rich-but-bounded options:** every field except `id`/`label` is optional — `description`, `media` (image + `imageAlt`, or a named `icon`), `meta` (trailing price/badge), `recommended` (a pill), `disabled` (inert + skipped in keyboard nav), and an opaque `payload` echoed back. A weaker model can just omit them.',
-        "**`allowOther`** (opt-in) adds a final 'Other…' option: selecting it reveals an inline text input + **Submit** (disabled while empty); submitting emits `{ kind:'action', action:'__other__', payload:{ text } }`. It's the only two-step option — every other pick emits immediately.",
-        '**Accessibility:** the options are a WAI-ARIA `radiogroup` (`role="radio"` + `aria-checked`) with **roving tabindex** — one tab stop in, Arrow keys move focus (skipping disabled), Enter/Space select. Disabled options are `aria-disabled` and not focusable; option images carry alt text; the Other input has a label. **0 axe violations** (light + dark).',
-        '**Events** (all frozen Card-contract verbs): `ready` on mount, `action` on choice, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**, and — because it carries a registry entry — `<kc-cards>` / `renderCard` dispatch it automatically.',
+        "**`allowOther`** (opt-in) appends a final 'Other…' row: selecting it reveals an inline text input. The single shared **Submit** stays disabled until the text is non-empty; submitting emits `{ kind:'action', action:'__other__', payload:{ text } }`.",
+        '**Accessibility:** the options are a WAI-ARIA `radiogroup` (`role="radio"` + `aria-checked`) with **roving tabindex** — one tab stop in, Arrow keys move focus (skipping disabled), Enter/Space select the focused row. Disabled options are `aria-disabled` and not focusable; option images carry alt text; the Other input has a label. **0 axe violations** (light + dark).',
+        '**Events** (all frozen Card-contract verbs): `ready` on mount, `action` on Submit, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**, and — because it carries a registry entry — `<kc-cards>` / `renderCard` dispatch it automatically.',
       ]),
     },
   },
@@ -158,22 +157,64 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-/** A list of plans with a `recommended` pill, `meta` prices, and a disabled legacy row. */
+/** A list of plans with a `recommended` pill, `meta` prices, and a disabled legacy row.
+ *  Select a row, then click Submit to emit the `action`. */
 export const Plans: Story = {
   render: () => <ChoiceDemo def={PLANS} cardId="card-plans" heading="Choose a plan" />,
   parameters: { docs: { source: { code: HTML_SNIPPET(PLANS, 'card-plans'), language: 'html' } } },
 };
 
-/** A responsive grid of options with images (each `media.image` carries `imageAlt`). */
-export const Grid: Story = {
-  render: () => <ChoiceDemo def={PRODUCTS} cardId="card-products" heading="New workspace" />,
-  parameters: { docs: { source: { code: HTML_SNIPPET(PRODUCTS, 'card-products'), language: 'html' } } },
+/** Rows with leading images (each `media.image` carries `imageAlt`) and a custom `submitLabel`. */
+export const WithMedia: Story = {
+  render: () => <ChoiceDemo def={TEMPLATES} cardId="card-templates" heading="New workspace" />,
+  parameters: { docs: { source: { code: HTML_SNIPPET(TEMPLATES, 'card-templates'), language: 'html' } } },
 };
 
-/** Quick replies with the `allowOther` free-text escape (two-step: input + Submit). */
+/** Quick replies with the `allowOther` free-text escape: select Other, type, then Submit. */
 export const AllowOther: Story = {
   render: () => <ChoiceDemo def={QUICK_REPLIES} cardId="card-replies" />,
   parameters: { docs: { source: { code: HTML_SNIPPET(QUICK_REPLIES, 'card-replies'), language: 'html' } } },
+};
+
+const RESOLVED_CHOICE: ChoiceCardData = {
+  prompt: 'Which plan?',
+  options: [
+    { id: 'free', label: 'Free', meta: '$0' },
+    { id: 'pro', label: 'Pro', meta: '$20/mo' },
+  ],
+};
+
+/** The card after the user chose **Pro** — only the chosen option shown, no radiogroup or Submit. */
+export const Resolved: Story = {
+  name: 'Resolved (read-only)',
+  render: () => {
+    let el: ChoiceEl | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.data = RESOLVED_CHOICE;
+      el.resolution = { kind: 'action', action: 'pro' };
+    });
+    return (
+      <Frame>
+        <kc-choice ref={(e) => (el = e as ChoiceEl)} card-id="card-resolved-choice" heading="Choose a plan" />
+      </Frame>
+    );
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `<kc-choice heading="Choose a plan"></kc-choice>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const el = document.querySelector('kc-choice');
+  el.data = ${JSON.stringify(RESOLVED_CHOICE, null, 2)};
+  // Setting .resolution renders the chromed read-only view — no radiogroup or Submit.
+  el.resolution = { kind: 'action', action: 'pro' };
+</script>`,
+        language: 'html',
+      },
+    },
+  },
 };
 
 /** A malformed `data` (empty `options`) → the inline error state + an `error` event. */

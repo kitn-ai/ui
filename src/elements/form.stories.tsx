@@ -18,7 +18,7 @@ declare module 'solid-js' {
   }
 }
 
-type FormEl = HTMLElement & { data?: FormDefinition };
+type FormEl = HTMLElement & { data?: FormDefinition; resolution?: Record<string, unknown> };
 
 /** A bordered box the form sits inside. */
 function Frame(props: { children: JSX.Element }) {
@@ -138,8 +138,8 @@ const HTML_SNIPPET = (def: FormDefinition) => `<kc-form></kc-form>
 
   // Cards bubble ONE \`kc-card\` CustomEvent carrying a typed CardEvent.
   form.addEventListener('kc-card', (e) => {
-    const ev = e.detail; // { kind:'submit-data', cardId, data } | { kind:'action', ... } | ...
-    if (ev.kind === 'submit-data') console.log('submission', ev.data);
+    const ev = e.detail; // { kind:'submit', cardId, data } | { kind:'action', ... } | ...
+    if (ev.kind === 'submit') console.log('submission', ev.data);
   });
 </script>`;
 
@@ -151,9 +151,9 @@ const meta = {
     layout: 'padded',
     docs: {
       description: specDescription('kc-form', [
-        '`<kc-form>` turns an agent\'s **JSON Schema** "shape" (set via the `data` **property**) into a themed, accessible, validated form inside `<kc-card>` chrome. A valid submission is emitted **up the Card contract** as a bubbling **`kc-card`** CustomEvent of `{ kind: \'submit-data\', cardId, data }`.',
+        '`<kc-form>` turns an agent\'s **JSON Schema** "shape" (set via the `data` **property**) into a themed, accessible, validated form inside `<kc-card>` chrome. A valid submission is emitted **up the Card contract** as a bubbling **`kc-card`** CustomEvent of `{ kind: \'submit\', cardId, data }`.',
         '**The mapping is deterministic:** `string`→text, `string`+`enum`→radio/select, `string`+`format`→typed inputs, `number`/`integer`→number (or `slider`/`rating` via `x-kc-widget`), `boolean`→switch, `array`→checkbox-group / multi-select / repeater / tag-list, nested `object`→fieldset. `x-kc-*` hints (`x-kc-widget`, `x-kc-order`, `x-kc-submitLabel`, `x-kc-actions`, `x-kc-dismissible`, …) refine the UI and live **inside** the schema, so one source of truth drives both the form and validation.',
-        "**Events** (all frozen Card-contract verbs): `ready` on mount, `submit-data` on a valid submit, `action` for secondary buttons (`x-kc-actions`), `dismiss` when dismissible, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**.",
+        "**Events** (all frozen Card-contract verbs): `ready` on mount, `submit` on a valid submit, `action` for secondary buttons (`x-kc-actions`), `dismiss` when dismissible, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**.",
         '**The same `CardEnvelope`/`CardEvent` shapes flow over the remote iframe transport unchanged** — this is the *native* card. See the **Code** tab for the full envelope JSON + the HTML wiring.',
       ]),
     },
@@ -179,6 +179,49 @@ export const AllWidgets: Story = {
 export const Validation: Story = {
   render: () => <FormDemo def={VALIDATION} cardId="card-signup" />,
   parameters: { docs: { source: { code: HTML_SNIPPET(VALIDATION), language: 'html' } } },
+};
+
+const RESOLVED_FORM: FormDefinition = {
+  type: 'object',
+  title: 'Book a demo',
+  'x-kc-order': ['name', 'optIn'],
+  properties: {
+    name: { type: 'string', title: 'Full name' },
+    optIn: { type: 'boolean', title: 'Email me' },
+  },
+};
+
+/** The form after a valid submission — read-only `<dl>` summary + "✓ Submitted", no inputs. */
+export const Resolved: Story = {
+  name: 'Resolved (read-only)',
+  render: () => {
+    let el: FormEl | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.data = RESOLVED_FORM;
+      el.resolution = { kind: 'submit', data: { name: 'Jane Cooper', optIn: true } };
+    });
+    return (
+      <Frame>
+        <kc-form ref={(e) => (el = e as FormEl)} card-id="card-resolved-form" />
+      </Frame>
+    );
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `<kc-form></kc-form>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const form = document.querySelector('kc-form');
+  form.data = ${JSON.stringify(RESOLVED_FORM, null, 2)};
+  // Setting .resolution renders the chromed read-only summary — no inputs or submit button.
+  form.resolution = { kind: 'submit', data: { name: 'Jane Cooper', optIn: true } };
+</script>`,
+        language: 'html',
+      },
+    },
+  },
 };
 
 /** A malformed `data` → the inline error state + an `error` event (no form rendered). */

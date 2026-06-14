@@ -16,8 +16,8 @@ test('contract version is the frozen value', () => {
 test('envelope + event shapes are usable as typed values', () => {
   const env: CardEnvelope<'form', { x: number }> = { type: 'form', id: 'c1', data: { x: 1 }, title: 'T' };
   expect(env.type).toBe('form');
-  const ev: CardEvent = { kind: 'submit-data', cardId: 'c1', data: { ok: true } };
-  expect(ev.kind).toBe('submit-data');
+  const ev: CardEvent = { kind: 'submit', cardId: 'c1', data: { ok: true } };
+  expect(ev.kind).toBe('submit');
   const ctx: CardContext = { theme: { mode: 'dark' }, locale: 'en', a11y: { reducedMotion: true } };
   expect(ctx.a11y?.reducedMotion).toBe(true);
   const host: CardHost = { context: () => ctx, emit: () => {} };

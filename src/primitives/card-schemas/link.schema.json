@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://kitn.ai/schemas/card/link.schema.json",
-  "title": "LinkCardData",
+  "title": "LinkPreviewData",
   "description": "Rich link / Open-Graph preview payload. The card renders from this; it never fetches.",
   "type": "object",
   "x-kc-card-type": "link",

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kitn.ai/schemas/card/task-list.result.schema.json",
-  "title": "TaskListCardResult",
-  "description": "Payload of CardEvent { kind: 'submit-data' } from a task-list card.",
+  "$id": "https://kitn.ai/schemas/card/tasks.result.schema.json",
+  "title": "TasksCardResult",
+  "description": "Payload of CardEvent { kind: 'submit' } from a tasks card.",
   "type": "object",
   "required": ["selected"],
   "properties": {

@@ -18,7 +18,7 @@ declare module 'solid-js' {
   }
 }
 
-type ConfirmEl = HTMLElement & { data?: ConfirmCardData };
+type ConfirmEl = HTMLElement & { data?: ConfirmCardData; resolution?: Record<string, unknown> };
 
 function Frame(props: { children: JSX.Element }) {
   return <div style={{ 'max-width': '460px' }}>{props.children}</div>;
@@ -161,6 +161,47 @@ export const ChoiceSet: Story = {
 export const Dismissible: Story = {
   render: () => <ConfirmDemo def={DISMISSIBLE} cardId="card-send" heading="Send email?" />,
   parameters: { docs: { source: { code: HTML_SNIPPET(DISMISSIBLE, 'card-send'), language: 'html' } } },
+};
+
+const RESOLVED_CONFIRM: ConfirmCardData = {
+  body: 'Apply 3 migrations?',
+  actions: [
+    { id: 'approve', label: 'Run migration', style: 'primary' },
+    { id: 'reject', label: 'Cancel' },
+  ],
+};
+
+/** The card after the user chose **Run migration** — chromed read-only, no buttons. */
+export const Resolved: Story = {
+  name: 'Resolved (read-only)',
+  render: () => {
+    let el: ConfirmEl | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.data = RESOLVED_CONFIRM;
+      el.resolution = { kind: 'action', action: 'approve' };
+    });
+    return (
+      <Frame>
+        <kc-confirm ref={(e) => (el = e as ConfirmEl)} card-id="card-resolved-confirm" heading="Run database migration?" />
+      </Frame>
+    );
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `<kc-confirm heading="Run database migration?"></kc-confirm>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const el = document.querySelector('kc-confirm');
+  el.data = ${JSON.stringify(RESOLVED_CONFIRM, null, 2)};
+  // Setting .resolution renders the chromed read-only view — no interactive controls.
+  el.resolution = { kind: 'action', action: 'approve' };
+</script>`,
+        language: 'html',
+      },
+    },
+  },
 };
 
 /** A malformed `data` (empty `actions`) → the inline error state + an `error` event. */

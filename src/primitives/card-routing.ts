@@ -31,8 +31,8 @@ export function routeCardEvent(policy: CardPolicy | undefined, event: CardEvent)
   switch (event.kind) {
     case 'ready':
       break; // lifecycle; host may react via its own listener
-    case 'submit-data':
-      p.onSubmitData ? p.onSubmitData(event.cardId, event.data) : warnNoHandler('submit-data');
+    case 'submit':
+      p.onSubmit ? p.onSubmit(event.cardId, event.data) : warnNoHandler('submit');
       break;
     case 'action':
       p.onAction ? p.onAction(event.cardId, event.action, event.payload) : warnNoHandler('action');

@@ -36,8 +36,8 @@ test('renders one child element per envelope, in order', async () => {
     CONFIRM,
     { type: 'link', id: 'l1', data: { url: 'https://example.com', title: 'Ex' } },
   ]);
-  const tags = Array.from(el.shadowRoot!.querySelectorAll('kc-confirm, kc-link-card')).map((n) => n.tagName.toLowerCase());
-  expect(tags).toEqual(['kc-confirm', 'kc-link-card']);
+  const tags = Array.from(el.shadowRoot!.querySelectorAll('kc-confirm, kc-link-preview')).map((n) => n.tagName.toLowerCase());
+  expect(tags).toEqual(['kc-confirm', 'kc-link-preview']);
 });
 
 test('sets data + card-id + heading on a child', async () => {

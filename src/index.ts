@@ -21,8 +21,9 @@ export type { PdfPreviewOptions } from './primitives/pdf-preview';
 // Card Contract (generative-UI foundation)
 export { CARD_CONTRACT_VERSION } from './primitives/card-contract';
 export type {
-  CardEnvelope, CardContext, CardEvent, CardEventKind, CardHost, CardPolicy,
+  CardEnvelope, CardContext, CardEvent, CardEventKind, CardResolution, CardHost, CardPolicy,
 } from './primitives/card-contract';
+export { applyResolution, resolutionFromEvent } from './primitives/card-resolution';
 export { CardProvider, useCardHost } from './primitives/card-host';
 export type { CardProviderProps } from './primitives/card-host';
 export { CARD_EVENT_NAME, emitCardEvent, routeCardEvent, listenForCardEvents } from './primitives/card-routing';
@@ -52,7 +53,7 @@ export type {
   WidgetKind,
 } from './components/form';
 
-// Card: kc-confirm (approval) + kc-task-list (selectable plan)
+// Card: kc-confirm (approval) + kc-tasks (selectable plan)
 export {
   ConfirmCard,
   CONFIRM_CARD_TYPE,
@@ -69,8 +70,8 @@ export type {
   ConfirmCardEnvelope,
 } from './components/confirm-card';
 export {
-  TaskListCard,
-  TASK_LIST_CARD_TYPE,
+  TasksCard,
+  TASKS_CARD_TYPE,
   normalizeTasks,
   initialSelected,
   selectedInOrder,
@@ -80,15 +81,15 @@ export {
   canConfirm,
   isMaxReached,
   confirmReason,
-} from './components/task-list-card';
+} from './components/tasks-card';
 export type {
-  TaskListCardProps,
-  TaskListTask,
-  TaskListCardData,
-  TaskListCardResult,
-  TaskListCardEnvelope,
+  TasksCardProps,
+  TasksTask,
+  TasksCardData,
+  TasksCardResult,
+  TasksCardEnvelope,
   SelectAllState,
-} from './components/task-list-card';
+} from './components/tasks-card';
 
 // Card: kc-choice (single-select option card)
 export {
@@ -104,24 +105,23 @@ export type {
   ChoiceCardProps,
   ChoiceOption,
   ChoiceOptionMedia,
-  ChoiceLayout,
   ChoiceAllowOther,
   ChoiceCardData,
   ChoiceCardEnvelope,
 } from './components/choice-card';
 
-// Card: kc-link-card (OG/link preview) + kc-embed (lazy media embed)
-export { LinkCard } from './components/link-card';
-export type { LinkCardProps } from './components/link-card';
+// Card: kc-link-preview (OG/link preview) + kc-embed (lazy media embed)
+export { LinkPreview } from './components/link-preview';
+export type { LinkPreviewProps } from './components/link-preview';
 export { Embed } from './components/embed';
 export type { EmbedProps } from './components/embed';
 export {
   configureLinkPreview,
   resolveLinkMetadata,
   hasLinkPreviewFetcher,
-  LINK_CARD_TYPE,
+  LINK_PREVIEW_TYPE,
 } from './primitives/link-preview';
-export type { LinkCardData, LinkCardEnvelope, LinkMetadataFetcher } from './primitives/link-preview';
+export type { LinkPreviewData, LinkPreviewEnvelope, LinkMetadataFetcher } from './primitives/link-preview';
 export {
   resolveEmbed,
   parseYouTubeId,

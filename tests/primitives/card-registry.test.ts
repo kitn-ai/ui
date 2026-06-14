@@ -7,14 +7,14 @@ import {
   mergeCardComponents,
 } from '../../src/primitives/card-registry';
 
-const TYPES = ['form', 'confirm', 'task-list', 'choice', 'link', 'embed'];
+const TYPES = ['form', 'confirm', 'tasks', 'choice', 'link', 'embed'];
 
 test('built-in tag map covers exactly the 6 card types', () => {
   expect(Object.keys(BUILTIN_CARD_TAGS).sort()).toEqual([...TYPES].sort());
   expect(BUILTIN_CARD_TAGS.form).toBe('kc-form');
-  expect(BUILTIN_CARD_TAGS['task-list']).toBe('kc-task-list');
+  expect(BUILTIN_CARD_TAGS['tasks']).toBe('kc-tasks');
   expect(BUILTIN_CARD_TAGS.choice).toBe('kc-choice');
-  expect(BUILTIN_CARD_TAGS.link).toBe('kc-link-card');
+  expect(BUILTIN_CARD_TAGS.link).toBe('kc-link-preview');
 });
 
 test('built-in component map covers exactly the 6 card types', () => {

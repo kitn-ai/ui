@@ -20,9 +20,9 @@ test('emitCardEvent dispatches a bubbling, composed kc-card event', () => {
 });
 
 test('routeCardEvent dispatches verbs to handlers', () => {
-  const policy: CardPolicy = { onSubmitData: vi.fn(), onAction: vi.fn() };
-  routeCardEvent(policy, { kind: 'submit-data', cardId: 'c1', data: { a: 1 } });
-  expect(policy.onSubmitData).toHaveBeenCalledWith('c1', { a: 1 });
+  const policy: CardPolicy = { onSubmit: vi.fn(), onAction: vi.fn() };
+  routeCardEvent(policy, { kind: 'submit', cardId: 'c1', data: { a: 1 } });
+  expect(policy.onSubmit).toHaveBeenCalledWith('c1', { a: 1 });
   routeCardEvent(policy, { kind: 'action', cardId: 'c1', action: 'approve', payload: 7 });
   expect(policy.onAction).toHaveBeenCalledWith('c1', 'approve', 7);
 });
