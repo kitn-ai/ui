@@ -6,12 +6,16 @@ import {
   createEffect,
   createMemo,
   on,
+  onMount,
+  onCleanup,
   Show,
 } from 'solid-js';
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
 import { CodeBlock, CodeBlockCode } from './code-block';
 import { FileTree, type FileTreeFile } from './file-tree';
+import { Loader } from './loader';
+import { isPdfPreviewEnabled, renderPdfInto } from '../primitives/pdf-preview';
 import {
   ArrowLeft,
   ArrowRight,
@@ -19,6 +23,9 @@ import {
   House,
   Eye,
   Code as CodeIcon,
+  FileText,
+  ExternalLink,
+  Download,
 } from 'lucide-solid';
 
 export type ArtifactTab = 'preview' | 'code';
@@ -58,6 +65,16 @@ function resolveFileUrl(file: ArtifactFile, src: string | undefined): string {
   } catch {
     return file.path;
   }
+}
+
+/** True when `url` should render as a PDF: a matching `files` entry is typed
+ *  `'pdf'`, or the URL path (query/hash stripped) ends in `.pdf`. */
+export function isPdfUrl(url: string, files: ArtifactFile[]): boolean {
+  if (!url) return false;
+  const match = files.find((f) => f.url === url || f.path === url);
+  if (match?.type === 'pdf') return true;
+  const path = url.split(/[?#]/)[0];
+  return /\.pdf$/i.test(path);
 }
 
 /**
@@ -101,6 +118,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
 
   const [tab, setTab] = createSignal<ArtifactTab>(local.tab);
   const [activeFile, setActiveFile] = createSignal<string | undefined>(local.activeFile);
+  const [reloadKey, setReloadKey] = createSignal(0);
 
   let iframeEl: HTMLIFrameElement | undefined;
 
@@ -179,6 +197,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
       iframeEl.src = 'about:blank';
       iframeEl.src = url || 'about:blank';
     }
+    setReloadKey((k) => k + 1); // re-render the inline PDF viewer too
     local.onNavigate?.(url);
   }
   const goHome = () => {
@@ -243,13 +262,20 @@ export function Artifact(props: ArtifactProps): JSX.Element {
             />
           }
         >
-          <ArtifactPreview
-            ref={(el) => (iframeEl = el)}
-            src={currentUrl}
-            sandbox={local.sandbox}
-            title={local.iframeTitle ?? 'Artifact preview'}
-            onLoad={onIframeLoad}
-          />
+          <Show
+            when={isPdfUrl(currentUrl(), local.files)}
+            fallback={
+              <ArtifactPreview
+                ref={(el) => (iframeEl = el)}
+                src={currentUrl}
+                sandbox={local.sandbox}
+                title={local.iframeTitle ?? 'Artifact preview'}
+                onLoad={onIframeLoad}
+              />
+            }
+          >
+            <ArtifactPdfPreview url={currentUrl()} reloadKey={reloadKey()} />
+          </Show>
         </Show>
       </div>
     </div>
@@ -440,6 +466,116 @@ function ArtifactCode(props: CodeProps): JSX.Element {
           </Show>
         </Show>
       </div>
+    </div>
+  );
+}
+
+// --- ArtifactPdfFallback (internal) ---------------------------------------
+
+/** Shown when inline PDF rendering is disabled or fails (CORS / load / parse). */
+function ArtifactPdfFallback(props: { url: string }): JSX.Element {
+  const name = () => {
+    const path = props.url.split(/[?#]/)[0];
+    return path.slice(path.lastIndexOf('/') + 1) || 'document.pdf';
+  };
+  const linkClass =
+    'inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+  return (
+    <div
+      role="region"
+      aria-label="PDF preview unavailable"
+      class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card p-6 text-center"
+    >
+      <FileText size={40} class="text-muted-foreground" aria-hidden="true" />
+      <div class="text-sm font-medium text-foreground">{name()}</div>
+      <div class="text-xs text-muted-foreground">Can't preview this PDF inline.</div>
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <a class={linkClass} href={props.url} target="_blank" rel="noopener noreferrer">
+          Open in new tab
+          <ExternalLink size={13} aria-hidden="true" />
+        </a>
+        <a class={linkClass} href={props.url} download="">
+          <Download size={13} aria-hidden="true" />
+          Download
+        </a>
+      </div>
+    </div>
+  );
+}
+
+// --- ArtifactPdfPreview (internal) ----------------------------------------
+
+/**
+ * Renders a PDF inline via pdf.js (loaded on demand). Four states:
+ * disabled → fallback (no network); loading → spinner; success → stacked
+ * fit-width canvases; error (load/CORS/parse) → fallback card. Re-renders when
+ * the url or `reloadKey` changes, and (debounced) when the panel resizes.
+ */
+function ArtifactPdfPreview(props: { url: string; reloadKey: number }): JSX.Element {
+  const [state, setState] = createSignal<'loading' | 'success' | 'error'>('loading');
+  let container: HTMLDivElement | undefined;
+  let token = 0;
+  let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const renderNow = async () => {
+    if (!isPdfPreviewEnabled() || !container) {
+      setState('error');
+      return;
+    }
+    const mine = ++token;
+    setState('loading');
+    try {
+      const width = container.clientWidth || 600;
+      await renderPdfInto(props.url, container, width);
+      if (mine === token) setState('success');
+    } catch {
+      if (mine === token) setState('error');
+    }
+  };
+
+  createEffect(
+    on(
+      () => [props.url, props.reloadKey] as const,
+      () => {
+        void renderNow();
+      },
+    ),
+  );
+
+  onMount(() => {
+    if (!container || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => {
+      if (state() !== 'success') return;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => void renderNow(), 200);
+    });
+    ro.observe(container);
+    onCleanup(() => {
+      ro.disconnect();
+      clearTimeout(resizeTimer);
+      token++; // cancel any in-flight render
+    });
+  });
+
+  return (
+    <div class="absolute inset-0">
+      {/* Always present so clientWidth is the real panel width. */}
+      <div
+        ref={(el) => (container = el)}
+        role="region"
+        aria-label="PDF preview"
+        aria-busy={state() === 'loading'}
+        tabindex="0"
+        class="absolute inset-0 flex flex-col items-center gap-3 overflow-auto bg-muted/20 p-3 scrollbar-thin focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      />
+      <Show when={isPdfPreviewEnabled() && state() === 'loading'}>
+        <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <Loader variant="circular" size="md" />
+        </div>
+      </Show>
+      <Show when={!isPdfPreviewEnabled() || state() === 'error'}>
+        <ArtifactPdfFallback url={props.url} />
+      </Show>
     </div>
   );
 }

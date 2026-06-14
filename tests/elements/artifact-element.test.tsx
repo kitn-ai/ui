@@ -1,6 +1,12 @@
 // tests/elements/artifact-element.test.tsx
 import '../../src/elements/file-tree';
 import '../../src/elements/artifact';
+import {
+  configurePdfPreview,
+  __resetPdfPreviewForTests,
+} from '../../src/primitives/pdf-preview';
+
+afterEach(() => __resetPdfPreviewForTests());
 
 // jsdom has no layout; assert DOM structure, attributes and events only.
 // Real iframe framing / nav / visuals are verified via Playwright.
@@ -150,4 +156,25 @@ test('kc-artifact resolves a file url from src origin + path when url omitted', 
   await flush();
   // new URL('about.html', 'https://host.test/base/index.html') → .../base/about.html
   expect(navUrl).toBe('https://host.test/base/about.html');
+});
+
+test('kc-artifact shows the fallback card for a PDF when inline preview is disabled', async () => {
+  configurePdfPreview({ enabled: false });
+  const el = document.createElement('kc-artifact') as HTMLElement & { src: string };
+  el.src = 'https://example.com/report.pdf';
+  document.body.appendChild(el);
+  await flush();
+  const root = el.shadowRoot!;
+  const links = Array.from(root.querySelectorAll('a')).map((a) => a.textContent ?? '');
+  expect(links.some((t) => /Open in new tab/i.test(t))).toBe(true);
+  expect(links.some((t) => /Download/i.test(t))).toBe(true);
+});
+
+test('kc-artifact frames non-PDF src in the iframe (no fallback card)', async () => {
+  const el = document.createElement('kc-artifact') as HTMLElement & { src: string };
+  el.src = 'https://example.com/index.html';
+  document.body.appendChild(el);
+  await flush();
+  const root = el.shadowRoot!;
+  expect(root.querySelector('iframe')).toBeTruthy();
 });
