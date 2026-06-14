@@ -280,7 +280,7 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
             tabindex={defaultId() !== undefined ? 0 : undefined}
           >
             <Show when={isDanger()}>
-              <div class="flex items-center gap-2 text-sm font-medium text-destructive">
+              <div class="flex items-center gap-2 text-sm font-medium text-destructive dark:text-red-400">
                 <AlertTriangle size={16} class="shrink-0" aria-hidden="true" />
                 <span>Heads up</span>
               </div>

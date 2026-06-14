@@ -57,7 +57,7 @@ export function TextWidget(
       id={props.id}
       data-control
       type={inputType()}
-      class={cn(inputBase, props.invalid && 'border-destructive')}
+      class={cn(inputBase, props.invalid && 'border-destructive dark:border-red-400/70')}
       value={(props.value as string) ?? ''}
       placeholder={props.placeholder}
       disabled={props.disabled}
@@ -77,7 +77,7 @@ export function TextareaWidget(props: WidgetProps): JSX.Element {
       <Textarea
         id={props.id}
         data-control
-        class={cn(inputBase, props.invalid && 'border-destructive')}
+        class={cn(inputBase, props.invalid && 'border-destructive dark:border-red-400/70')}
         value={(props.value as string) ?? ''}
         placeholder={props.placeholder}
         disabled={props.disabled}
@@ -102,7 +102,7 @@ export function NumberWidget(props: WidgetProps): JSX.Element {
       id={props.id}
       data-control
       type="number"
-      class={cn(inputBase, props.invalid && 'border-destructive')}
+      class={cn(inputBase, props.invalid && 'border-destructive dark:border-red-400/70')}
       value={props.value === undefined || props.value === null ? '' : String(props.value)}
       placeholder={props.placeholder}
       disabled={props.disabled}
@@ -298,7 +298,7 @@ export function SelectWidget(props: WidgetProps): JSX.Element {
     <select
       id={props.id}
       data-control
-      class={cn(inputBase, props.invalid && 'border-destructive')}
+      class={cn(inputBase, props.invalid && 'border-destructive dark:border-red-400/70')}
       disabled={props.disabled}
       {...ariaProps(props)}
       onChange={(e) => {
@@ -375,7 +375,7 @@ export function MultiSelectWidget(props: WidgetProps): JSX.Element {
       data-control
       multiple
       aria-label={props.label}
-      class={cn(inputBase, 'min-h-[6rem]', props.invalid && 'border-destructive')}
+      class={cn(inputBase, 'min-h-[6rem]', props.invalid && 'border-destructive dark:border-red-400/70')}
       disabled={props.disabled}
       {...ariaProps(props)}
       onChange={(e) => {
