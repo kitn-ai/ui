@@ -16,6 +16,10 @@ const config: StorybookConfig = {
     'storybook-dark-mode',
     '@storybook/addon-themes',
     '@storybook/addon-vitest',
+    // Registers the a11y preview annotations (axe) so accessibility checks run
+    // both in the Storybook UI panel and — via @storybook/addon-vitest — as part
+    // of the `vitest --project=storybook` test run (SB10 a11y-in-test).
+    '@storybook/addon-a11y',
     {
       name: '@storybook/addon-docs',
       options: {
