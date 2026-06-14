@@ -55,6 +55,23 @@ export const KcAttachments = createWebComponent<KcAttachmentsProps>(
   { onRemove: 'remove' },
 );
 
+export interface KcCardProps extends WebComponentProps {
+  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
+  heading?: string;
+  /** Supporting text under the heading. Attribute: `description`. */
+  description?: string;
+  /** When set, the card renders its inline error state instead of the body. Attribute: `error-message`. */
+  errorMessage?: string;
+  /** Compact spacing for dense lists. Attribute: `dense`. */
+  dense?: boolean;
+}
+
+export const KcCard = createWebComponent<KcCardProps>(
+  'kc-card',
+  ["theme","heading","description","errorMessage","dense"],
+  {  },
+);
+
 export interface KcChainOfThoughtProps extends WebComponentProps {
   /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). */
   steps: { label: string; content?: undefined | string }[];
@@ -199,6 +216,19 @@ export const KcConversations = createWebComponent<KcConversationsProps>(
   { onNewchat: 'newchat', onSelect: 'select', onTogglesidebar: 'togglesidebar' },
 );
 
+export interface KcEmbedProps extends WebComponentProps {
+  /** Stable card id correlating every emitted event. Set as an attribute or property. */
+  cardId?: string;
+  /** The embed payload (provider + id/url + options). Set as a JS **property** (object). */
+  data?: { provider: "youtube" | "vimeo" | "generic"; id?: string; url?: string; title?: string; poster?: string; start?: number; aspectRatio?: "16:9" | "4:3" | "1:1" | "9:16" };
+}
+
+export const KcEmbed = createWebComponent<KcEmbedProps>(
+  'kc-embed',
+  ["theme","cardId","data"],
+  {  },
+);
+
 export interface KcEmptyProps extends WebComponentProps {
   /** Title text. Attribute: `empty-title` (`title` is a global HTML attribute). */
   emptyTitle?: string;
@@ -265,6 +295,21 @@ export const KcFileUpload = createWebComponent<KcFileUploadProps>(
   { onFilesadded: 'filesadded' },
 );
 
+export interface KcFormProps extends WebComponentProps {
+  /** The form definition — a JSON Schema (`type:'object'`) + `x-kitn-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitnai/chat` for the full shape (it is self-referential, so the element types it loosely). */
+  data?: Record<string, unknown>;
+  /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
+  cardId?: string;
+  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
+  heading?: string;
+}
+
+export const KcForm = createWebComponent<KcFormProps>(
+  'kc-form',
+  ["theme","data","cardId","heading"],
+  {  },
+);
+
 export interface KcImageProps extends WebComponentProps {
   /** Base64-encoded image data (pair with `media-type`). */
   base64?: string;
@@ -279,6 +324,19 @@ export interface KcImageProps extends WebComponentProps {
 export const KcImage = createWebComponent<KcImageProps>(
   'kc-image',
   ["theme","base64","bytes","alt","mediaType"],
+  {  },
+);
+
+export interface KcLinkCardProps extends WebComponentProps {
+  /** Stable card id correlating every emitted event. Set as an attribute or property. */
+  cardId?: string;
+  /** The link payload (OG metadata). Set as a JS **property** (object). */
+  data?: { url: string; title?: string; description?: string; image?: string; imageAlt?: string; favicon?: string; domain?: string; siteName?: string };
+}
+
+export const KcLinkCard = createWebComponent<KcLinkCardProps>(
+  'kc-link-card',
+  ["theme","cardId","data"],
   {  },
 );
 

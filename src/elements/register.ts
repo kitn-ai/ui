@@ -38,6 +38,11 @@ import './chain-of-thought';
 import './resizable';
 import './file-tree';
 import './artifact';
+// Generative-UI cards (Card Contract)
+import './card';
+import './form';
+import './link-card';
+import './embed';
 
 export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';

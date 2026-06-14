@@ -29,6 +29,19 @@ export { CARD_EVENT_NAME, emitCardEvent, routeCardEvent, listenForCardEvents } f
 export { validateAgainstSchema } from './primitives/card-validate';
 export type { JsonSchema, ValidationResult } from './primitives/card-validate';
 
+// Card: kc-card (base shell) + kc-form (JSON-Schema form renderer)
+export { Card } from './components/card';
+export type { CardProps } from './components/card';
+export { Form, validateForm, buildResult, widgetFor, orderedKeys, coerceValue } from './components/form';
+export type {
+  FormProps,
+  FormField,
+  FormDefinition,
+  FormCardEnvelope,
+  FormValidation,
+  WidgetKind,
+} from './components/form';
+
 // Card: kc-link-card (OG/link preview) + kc-embed (lazy media embed)
 export { LinkCard } from './components/link-card';
 export type { LinkCardProps } from './components/link-card';
