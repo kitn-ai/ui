@@ -178,3 +178,69 @@ test('kc-artifact frames non-PDF src in the iframe (no fallback card)', async ()
   const root = el.shadowRoot!;
   expect(root.querySelector('iframe')).toBeTruthy();
 });
+
+test('expandable: expand button fires kc-maximize-intent (bubbles+composed) AND maximizechange', async () => {
+  const el = document.createElement('kc-artifact') as HTMLElement;
+  el.setAttribute('src', 'https://x.test');
+  el.setAttribute('expandable', '');
+  document.body.appendChild(el);
+  await flush();
+  let intent: { requested: boolean } | null = null;
+  let bubbles = false, composed = false;
+  document.addEventListener('kc-maximize-intent', (e) => {
+    intent = (e as CustomEvent).detail; bubbles = e.bubbles; composed = (e as CustomEvent).composed;
+  }, { once: true });
+  let mc: { maximized: boolean } | null = null;
+  el.addEventListener('maximizechange', (e) => (mc = (e as CustomEvent).detail));
+  const expand = el.shadowRoot!.querySelector<HTMLElement>('[aria-label="Expand"]')!;
+  expand.click();
+  await flush();
+  expect(intent!.requested).toBe(true);
+  expect(bubbles).toBe(true);
+  expect(composed).toBe(true);
+  expect(mc!.maximized).toBe(true);
+});
+
+test('kc-maximize-state on the host flips the artifact button label', async () => {
+  const el = document.createElement('kc-artifact') as HTMLElement;
+  el.setAttribute('src', 'https://x.test');
+  el.setAttribute('expandable', '');
+  document.body.appendChild(el);
+  await flush();
+  el.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: true }, composed: true }));
+  await flush();
+  expect(el.shadowRoot!.querySelector('[aria-label="Collapse"]')).toBeTruthy();
+  el.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: false }, composed: true }));
+  await flush();
+  expect(el.shadowRoot!.querySelector('[aria-label="Expand"]')).toBeTruthy();
+});
+
+test('no-* attributes hide affordances; standalone toggles root chrome', async () => {
+  const el = document.createElement('kc-artifact') as HTMLElement;
+  el.setAttribute('src', 'https://x.test');
+  el.setAttribute('no-nav', '');
+  el.setAttribute('no-tabs', '');
+  el.setAttribute('standalone', '');
+  document.body.appendChild(el);
+  await flush();
+  const root = el.shadowRoot!;
+  expect(root.querySelector('[aria-label="Back"]')).toBeNull();
+  expect(root.querySelector('[role="tablist"]')).toBeNull();
+  expect(root.querySelector('.rounded-xl')).toBeTruthy(); // standalone chrome
+});
+
+test('readonly-path: input readonly + submit emits no navigate', async () => {
+  const el = document.createElement('kc-artifact') as HTMLElement;
+  el.setAttribute('src', 'https://x.test/a');
+  el.setAttribute('readonly-path', '');
+  document.body.appendChild(el);
+  await flush();
+  const navs: string[] = [];
+  el.addEventListener('navigate', (e) => navs.push((e as CustomEvent).detail.url));
+  const input = el.shadowRoot!.querySelector<HTMLInputElement>('input#kc-artifact-path')!;
+  expect(input.readOnly).toBe(true);
+  input.value = 'https://x.test/b';
+  input.closest('form')!.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+  await flush();
+  expect(navs).toEqual([]);
+});
