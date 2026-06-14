@@ -8,6 +8,9 @@ const config: StorybookConfig = {
   staticDirs: [
     { from: '../llms.txt', to: '/llms.txt' },
     { from: '../llms-full.txt', to: '/llms-full.txt' },
+    // Sample artifact (cross-linked HTML pages + image + PDF) framed by
+    // <kc-artifact> stories at a stable URL — no backend needed.
+    { from: '../examples/artifact-fixtures', to: '/artifact-fixtures' },
   ],
   addons: [
     'storybook-dark-mode',

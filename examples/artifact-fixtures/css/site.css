@@ -1,0 +1,76 @@
+:root {
+  color-scheme: light;
+  --bg: #0b1020;
+  --panel: #11182e;
+  --ink: #e8edf7;
+  --muted: #9aa6c4;
+  --accent: #6ea8fe;
+  --accent-2: #b692f6;
+  --line: #243152;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: radial-gradient(1200px 600px at 70% -10%, #1a2547 0%, var(--bg) 60%);
+  color: var(--ink);
+  min-height: 100vh;
+}
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.hero {
+  padding: 40px 32px 28px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(110,168,254,.08), transparent);
+}
+.hero.alt { background: linear-gradient(180deg, rgba(182,146,246,.10), transparent); }
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+h1 { font-size: clamp(28px, 6vw, 44px); margin: 14px 0 6px; }
+.lede { color: var(--muted); font-size: 16px; margin: 0 0 18px; max-width: 56ch; }
+.nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.nav-link {
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.nav-link.active { border-color: var(--accent); color: var(--accent); }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  padding: 24px 32px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 18px 20px;
+}
+.card h2 { margin: 0 0 8px; font-size: 18px; }
+.card p { color: var(--muted); margin: 0 0 10px; line-height: 1.5; }
+.card a { color: var(--accent-2); }
+.btn {
+  appearance: none;
+  border: 1px solid var(--accent);
+  background: rgba(110,168,254,.12);
+  color: var(--accent);
+  font: inherit;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.btn:hover { background: rgba(110,168,254,.22); }
+code { color: var(--accent); background: rgba(110,168,254,.10); padding: 1px 6px; border-radius: 6px; }
+.foot { color: var(--muted); font-size: 13px; padding: 20px 32px 40px; border-top: 1px solid var(--line); }

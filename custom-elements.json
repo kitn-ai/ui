@@ -9,6 +9,142 @@
         {
           "kind": "class",
           "customElement": true,
+          "tagName": "kc-artifact",
+          "name": "KcArtifactElement",
+          "description": "",
+          "members": [
+            {
+              "kind": "field",
+              "name": "src",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "URL the preview iframe frames. Consumer-controlled.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "files",
+              "type": {
+                "text": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
+              },
+              "description": "Files for the Code tab tree + each file's preview `url`. Set as a JS property (array).",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "tab",
+              "type": {
+                "text": "undefined | \"preview\" | \"code\""
+              },
+              "description": "Active tab: `preview` (default) or `code`.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "activeFile",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Selected file path — syncs the tree highlight, Code source, and preview.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "sandbox",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`).",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "iframeTitle",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Accessible title for the preview iframe.",
+              "privacy": "public"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "theme",
+              "type": {
+                "text": "'light' | 'dark' | 'auto'"
+              },
+              "description": "Color mode (auto follows prefers-color-scheme)."
+            },
+            {
+              "name": "src",
+              "fieldName": "src",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "URL the preview iframe frames. Consumer-controlled."
+            },
+            {
+              "name": "tab",
+              "fieldName": "tab",
+              "type": {
+                "text": "undefined | \"preview\" | \"code\""
+              },
+              "description": "Active tab: `preview` (default) or `code`."
+            },
+            {
+              "name": "active-file",
+              "fieldName": "activeFile",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Selected file path — syncs the tree highlight, Code source, and preview."
+            },
+            {
+              "name": "sandbox",
+              "fieldName": "sandbox",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`)."
+            },
+            {
+              "name": "iframe-title",
+              "fieldName": "iframeTitle",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Accessible title for the preview iframe."
+            }
+          ],
+          "events": [
+            {
+              "name": "fileselect",
+              "type": {
+                "text": "CustomEvent<{ path: string }>"
+              },
+              "description": "Fired when a file is selected. `detail.path`."
+            },
+            {
+              "name": "navigate",
+              "type": {
+                "text": "CustomEvent<{ url: string }>"
+              },
+              "description": "Fired when the preview navigates. `detail.url` = the new location."
+            },
+            {
+              "name": "tabchange",
+              "type": {
+                "text": "CustomEvent<{ tab: \"preview\" | \"code\" }>"
+              },
+              "description": "Fired when the Preview|Code tab changes. `detail.tab`."
+            }
+          ],
+          "cssProperties": []
+        },
+        {
+          "kind": "class",
+          "customElement": true,
           "tagName": "kc-attachments",
           "name": "KcAttachmentsElement",
           "description": "",
@@ -936,6 +1072,69 @@
                 "text": "CustomEvent"
               },
               "description": "The user clicked thumbs-down."
+            }
+          ],
+          "cssProperties": []
+        },
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "kc-file-tree",
+          "name": "KcFileTreeElement",
+          "description": "",
+          "members": [
+            {
+              "kind": "field",
+              "name": "files",
+              "type": {
+                "text": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
+              },
+              "description": "The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`).",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "activeFile",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Selected file path — highlighted in the tree.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "defaultExpanded",
+              "type": {
+                "text": "undefined | string[]"
+              },
+              "description": "Folder paths expanded initially. Omit to start with all folders open.",
+              "privacy": "public"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "theme",
+              "type": {
+                "text": "'light' | 'dark' | 'auto'"
+              },
+              "description": "Color mode (auto follows prefers-color-scheme)."
+            },
+            {
+              "name": "active-file",
+              "fieldName": "activeFile",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Selected file path — highlighted in the tree."
+            }
+          ],
+          "events": [
+            {
+              "name": "select",
+              "type": {
+                "text": "CustomEvent<{ path: string }>"
+              },
+              "description": "Fired when a file is selected. `detail.path` = the file's path."
             }
           ],
           "cssProperties": []

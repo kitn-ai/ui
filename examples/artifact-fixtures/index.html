@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Starboard — Home</title>
+    <link rel="stylesheet" href="css/site.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <span class="badge">kc-artifact demo</span>
+      <h1>Starboard</h1>
+      <p class="lede">A tiny static artifact, framed live in a sandboxed iframe.</p>
+      <nav class="nav">
+        <a class="nav-link active" href="index.html">Home</a>
+        <a class="nav-link" href="about.html">About</a>
+        <a class="nav-link" href="assets/logo.svg">Logo (image)</a>
+      </nav>
+    </header>
+    <main class="grid">
+      <section class="card">
+        <h2>Cross-linked pages</h2>
+        <p>Click <a href="about.html">About</a> — relative-link navigation works because a real server sits behind the iframe.</p>
+      </section>
+      <section class="card">
+        <h2>Live &amp; sandboxed</h2>
+        <p id="clock" class="mono">scripts run…</p>
+        <button id="ping" class="btn" type="button">Increment counter</button>
+        <p>Count: <span id="count" class="mono">0</span></p>
+      </section>
+    </main>
+    <footer class="foot">Served as a static fixture for Storybook + examples.</footer>
+    <script>
+      const clock = document.getElementById('clock');
+      const tick = () => (clock.textContent = 'scripts run: ' + new Date().toLocaleTimeString());
+      tick();
+      setInterval(tick, 1000);
+      let n = 0;
+      document.getElementById('ping').addEventListener('click', () => {
+        document.getElementById('count').textContent = String(++n);
+      });
+    </script>
+  </body>
+</html>

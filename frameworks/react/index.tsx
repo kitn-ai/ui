@@ -5,6 +5,33 @@
 import { createKitnComponent, type KitnBaseProps } from './runtime';
 
 
+export interface KcArtifactProps extends KitnBaseProps {
+  /** URL the preview iframe frames. Consumer-controlled. */
+  src?: string;
+  /** Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). */
+  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
+  /** Active tab: `preview` (default) or `code`. */
+  tab?: "preview" | "code";
+  /** Selected file path — syncs the tree highlight, Code source, and preview. */
+  activeFile?: string;
+  /** iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`). */
+  sandbox?: string;
+  /** Accessible title for the preview iframe. */
+  iframeTitle?: string;
+  /** Fired when a file is selected. `detail.path`. */
+  onFileselect?: (event: CustomEvent<{ path: string }>) => void;
+  /** Fired when the preview navigates. `detail.url` = the new location. */
+  onNavigate?: (event: CustomEvent<{ url: string }>) => void;
+  /** Fired when the Preview|Code tab changes. `detail.tab`. */
+  onTabchange?: (event: CustomEvent<{ tab: "preview" | "code" }>) => void;
+}
+
+export const KcArtifact = createKitnComponent<KcArtifactProps>(
+  'kc-artifact',
+  ["theme","src","files","tab","activeFile","sandbox","iframeTitle"],
+  { onFileselect: 'fileselect', onNavigate: 'navigate', onTabchange: 'tabchange' },
+);
+
 export interface KcAttachmentsProps extends KitnBaseProps {
   /** The attachments to render. Set as a JS property (array). */
   items: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[];
@@ -200,6 +227,23 @@ export const KcFeedbackBar = createKitnComponent<KcFeedbackBarProps>(
   'kc-feedback-bar',
   ["theme","barTitle"],
   { onClose: 'close', onHelpful: 'helpful', onNothelpful: 'nothelpful' },
+);
+
+export interface KcFileTreeProps extends KitnBaseProps {
+  /** The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`). */
+  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
+  /** Selected file path — highlighted in the tree. */
+  activeFile?: string;
+  /** Folder paths expanded initially. Omit to start with all folders open. */
+  defaultExpanded?: string[];
+  /** Fired when a file is selected. `detail.path` = the file's path. */
+  onSelect?: (event: CustomEvent<{ path: string }>) => void;
+}
+
+export const KcFileTree = createKitnComponent<KcFileTreeProps>(
+  'kc-file-tree',
+  ["theme","files","activeFile","defaultExpanded"],
+  { onSelect: 'select' },
 );
 
 export interface KcFileUploadProps extends KitnBaseProps {
