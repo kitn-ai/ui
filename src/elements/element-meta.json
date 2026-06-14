@@ -53,6 +53,96 @@
         "scalar": true,
         "description": "Accessible title for the preview iframe.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "maximized",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Reflects the artifact's own maximized view-state (usually driven by the protocol).",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "expandable",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show the expand-to-fill button (OPT-IN).",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "openInTab",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show the open-in-new-tab button (OPT-IN).",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "noNav",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Hide back/forward.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "noReload",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Hide reload.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "noHome",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Hide home.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "noPathField",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Hide the address field.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "noTabs",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Hide the Preview|Code toggle.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "standalone",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Standalone chrome: rounded corners + border (else square, borderless in-panel).",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "readonlyPath",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show the address but make it read-only (visible, nav-tracking, non-editable).",
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
@@ -61,6 +151,12 @@
         "detail": "{ path: string }",
         "description": "Fired when a file is selected. `detail.path`.",
         "displayDetail": "{ path: string }"
+      },
+      {
+        "name": "maximizechange",
+        "detail": "{ maximized: false | true }",
+        "description": "Artifact's own maximize button toggled (consumer-observable; non-bubbling).",
+        "displayDetail": "{ maximized: false | true }"
       },
       {
         "name": "navigate",
@@ -1732,6 +1828,15 @@
         "description": "Layout axis: `horizontal` (row, default) or `vertical` (column).",
         "default": "'horizontal'",
         "displayType": "undefined | \"horizontal\" | \"vertical\""
+      },
+      {
+        "name": "maximizedIndex",
+        "type": "undefined | null | number",
+        "optional": true,
+        "scalar": false,
+        "description": "Which item index is maximized (null = none). Declarative source of truth.",
+        "default": "null",
+        "displayType": "undefined | null | number"
       }
     ],
     "events": [
@@ -1740,6 +1845,12 @@
         "detail": "{ sizes: number[] }",
         "description": "Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent.",
         "displayDetail": "{ sizes: number[] }"
+      },
+      {
+        "name": "maximizechange",
+        "detail": "{ maximized: false | true; index: null | number }",
+        "description": "Observe layout maximize state.",
+        "displayDetail": "{ maximized: false | true; index: null | number }"
       }
     ],
     "composedFrom": [
@@ -1801,6 +1912,12 @@
     "events": [
       {
         "name": "change",
+        "detail": "unknown",
+        "description": "",
+        "displayDetail": "unknown"
+      },
+      {
+        "name": "maximizechange",
         "detail": "unknown",
         "description": "",
         "displayDetail": "unknown"

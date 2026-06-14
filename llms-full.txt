@@ -189,12 +189,23 @@ Every element also accepts the `theme` attribute. Array/object properties are ma
 | `activeFile` | `active-file` | `undefined \| string` | Selected file path — syncs the tree highlight, Code source, and preview. |
 | `sandbox` | `sandbox` | `undefined \| string` | iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`). |
 | `iframeTitle` | `iframe-title` | `undefined \| string` | Accessible title for the preview iframe. |
+| `maximized` | `maximized` | `undefined \| false \| true` | Reflects the artifact's own maximized view-state (usually driven by the protocol). |
+| `expandable` | `expandable` | `undefined \| false \| true` | Show the expand-to-fill button (OPT-IN). |
+| `openInTab` | `open-in-tab` | `undefined \| false \| true` | Show the open-in-new-tab button (OPT-IN). |
+| `noNav` | `no-nav` | `undefined \| false \| true` | Hide back/forward. |
+| `noReload` | `no-reload` | `undefined \| false \| true` | Hide reload. |
+| `noHome` | `no-home` | `undefined \| false \| true` | Hide home. |
+| `noPathField` | `no-path-field` | `undefined \| false \| true` | Hide the address field. |
+| `noTabs` | `no-tabs` | `undefined \| false \| true` | Hide the Preview\|Code toggle. |
+| `standalone` | `standalone` | `undefined \| false \| true` | Standalone chrome: rounded corners + border (else square, borderless in-panel). |
+| `readonlyPath` | `readonly-path` | `undefined \| false \| true` | Show the address but make it read-only (visible, nav-tracking, non-editable). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
 | `fileselect` | `CustomEvent<{ path: string }>` | Fired when a file is selected. `detail.path`. |
+| `maximizechange` | `CustomEvent<{ maximized: false \| true }>` | Artifact's own maximize button toggled (consumer-observable; non-bubbling). |
 | `navigate` | `CustomEvent<{ url: string }>` | Fired when the preview navigates. `detail.url` = the new location. |
 | `tabchange` | `CustomEvent<{ tab: "preview" \| "code" }>` | Fired when the Preview\|Code tab changes. `detail.tab`. |
 
@@ -635,12 +646,14 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical"` | Layout axis: `horizontal` (row, default) or `vertical` (column). |
+| `maximizedIndex` | — | `undefined \| null \| number` | Which item index is maximized (null = none). Declarative source of truth. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
 | `change` | `CustomEvent<{ sizes: number[] }>` | Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. |
+| `maximizechange` | `CustomEvent<{ maximized: false \| true; index: null \| number }>` | Observe layout maximize state. |
 
 ---
 
@@ -661,6 +674,7 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `change` | `CustomEvent<unknown>` |  |
+| `maximizechange` | `CustomEvent<unknown>` |  |
 
 ---
 

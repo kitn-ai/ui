@@ -23,6 +23,26 @@ export interface KcArtifactElement extends HTMLElement {
   sandbox?: string;
   /** Accessible title for the preview iframe. */
   iframeTitle?: string;
+  /** Reflects the artifact's own maximized view-state (usually driven by the protocol). */
+  maximized?: boolean;
+  /** Show the expand-to-fill button (OPT-IN). */
+  expandable?: boolean;
+  /** Show the open-in-new-tab button (OPT-IN). */
+  openInTab?: boolean;
+  /** Hide back/forward. */
+  noNav?: boolean;
+  /** Hide reload. */
+  noReload?: boolean;
+  /** Hide home. */
+  noHome?: boolean;
+  /** Hide the address field. */
+  noPathField?: boolean;
+  /** Hide the Preview|Code toggle. */
+  noTabs?: boolean;
+  /** Standalone chrome: rounded corners + border (else square, borderless in-panel). */
+  standalone?: boolean;
+  /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
+  readonlyPath?: boolean;
 }
 
 export interface KcAttachmentsElement extends HTMLElement {
@@ -358,6 +378,8 @@ export interface KcResizableElement extends HTMLElement {
   theme?: 'light' | 'dark' | 'auto';
   /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
   orientation?: "horizontal" | "vertical";
+  /** Which item index is maximized (null = none). Declarative source of truth. */
+  maximizedIndex?: null | number;
 }
 
 export interface KcResizableItemElement extends HTMLElement {

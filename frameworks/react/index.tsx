@@ -18,8 +18,30 @@ export interface KcArtifactProps extends WebComponentProps {
   sandbox?: string;
   /** Accessible title for the preview iframe. */
   iframeTitle?: string;
+  /** Reflects the artifact's own maximized view-state (usually driven by the protocol). */
+  maximized?: boolean;
+  /** Show the expand-to-fill button (OPT-IN). */
+  expandable?: boolean;
+  /** Show the open-in-new-tab button (OPT-IN). */
+  openInTab?: boolean;
+  /** Hide back/forward. */
+  noNav?: boolean;
+  /** Hide reload. */
+  noReload?: boolean;
+  /** Hide home. */
+  noHome?: boolean;
+  /** Hide the address field. */
+  noPathField?: boolean;
+  /** Hide the Preview|Code toggle. */
+  noTabs?: boolean;
+  /** Standalone chrome: rounded corners + border (else square, borderless in-panel). */
+  standalone?: boolean;
+  /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
+  readonlyPath?: boolean;
   /** Fired when a file is selected. `detail.path`. */
   onFileselect?: (event: CustomEvent<{ path: string }>) => void;
+  /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
+  onMaximizechange?: (event: CustomEvent<{ maximized: boolean }>) => void;
   /** Fired when the preview navigates. `detail.url` = the new location. */
   onNavigate?: (event: CustomEvent<{ url: string }>) => void;
   /** Fired when the Preview|Code tab changes. `detail.tab`. */
@@ -28,8 +50,8 @@ export interface KcArtifactProps extends WebComponentProps {
 
 export const KcArtifact = createWebComponent<KcArtifactProps>(
   'kc-artifact',
-  ["theme","src","files","tab","activeFile","sandbox","iframeTitle"],
-  { onFileselect: 'fileselect', onNavigate: 'navigate', onTabchange: 'tabchange' },
+  ["theme","src","files","tab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath"],
+  { onFileselect: 'fileselect', onMaximizechange: 'maximizechange', onNavigate: 'navigate', onTabchange: 'tabchange' },
 );
 
 export interface KcAttachmentsProps extends WebComponentProps {
@@ -513,14 +535,18 @@ export const KcReasoning = createWebComponent<KcReasoningProps>(
 export interface KcResizableProps extends WebComponentProps {
   /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
   orientation?: "horizontal" | "vertical";
+  /** Which item index is maximized (null = none). Declarative source of truth. */
+  maximizedIndex?: null | number;
   /** Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. */
   onChange?: (event: CustomEvent<{ sizes: number[] }>) => void;
+  /** Observe layout maximize state. */
+  onMaximizechange?: (event: CustomEvent<{ maximized: boolean; index: null | number }>) => void;
 }
 
 export const KcResizable = createWebComponent<KcResizableProps>(
   'kc-resizable',
-  ["theme","orientation"],
-  { onChange: 'change' },
+  ["theme","orientation","maximizedIndex"],
+  { onChange: 'change', onMaximizechange: 'maximizechange' },
 );
 
 export interface KcResizableItemProps extends WebComponentProps {
@@ -535,12 +561,13 @@ export interface KcResizableItemProps extends WebComponentProps {
   /** Hide this panel; its divider is dropped and the rest reflow. */
   hidden?: boolean;
   onChange?: (event: CustomEvent<unknown>) => void;
+  onMaximizechange?: (event: CustomEvent<unknown>) => void;
 }
 
 export const KcResizableItem = createWebComponent<KcResizableItemProps>(
   'kc-resizable-item',
   ["theme","size","min","max","locked","hidden"],
-  { onChange: 'change' },
+  { onChange: 'change', onMaximizechange: 'maximizechange' },
 );
 
 export interface KcResponseStreamProps extends WebComponentProps {
