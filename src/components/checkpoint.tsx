@@ -50,6 +50,8 @@ export function CheckpointIcon(props: CheckpointIconProps) {
 
 export interface CheckpointTriggerProps {
   tooltip?: string;
+  /** Accessible name for the button — required when it has no visible text (icon-only). */
+  'aria-label'?: string;
   onClick?: () => void;
   children?: JSX.Element;
   class?: string;
@@ -70,6 +72,7 @@ export function CheckpointTrigger(props: CheckpointTriggerProps) {
       variant={variant()}
       size={size()}
       type="button"
+      aria-label={props['aria-label']}
       onClick={props.onClick}
       class={props.class}
     >

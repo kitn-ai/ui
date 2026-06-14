@@ -65,15 +65,18 @@ function CodeBlockCode(props: CodeBlockCodeProps) {
     );
 
   return (
+    // `tabindex={0}` makes the horizontally-scrollable region reachable by
+    // keyboard (axe `scrollable-region-focusable`); `{...rest}` lets a consumer
+    // override it. No `role="region"` — that would demand an accessible name.
     <Show
       when={highlighted()}
       fallback={
-        <div class={classNames()} {...rest}>
+        <div class={classNames()} tabindex={0} {...rest}>
           <pre><code>{local.code}</code></pre>
         </div>
       }
     >
-      <div class={classNames()} innerHTML={highlighted()} {...rest} />
+      <div class={classNames()} tabindex={0} innerHTML={highlighted()} {...rest} />
     </Show>
   );
 }
