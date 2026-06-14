@@ -1,0 +1,94 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Examples/Choosing components" />
+
+# Choosing components
+
+`@kitnai/chat` ships ~32 `kc-*` web components across **three tiers**. This page is
+the mental model for **which tier to reach for** — so you don't have to read all 32
+per-element pages to know where to start.
+
+> The per-element **When / How / Placement** notes live on each element's own story
+> (under **Web Components / kc-\***). This page is the missing *overview* — the
+> decision guide, not the per-element prose.
+
+## The three tiers
+
+### 1. Flagship / shells — _drop-in, the 90% path_
+
+`<kc-chat>` · `<kc-workspace>`
+
+A **whole surface in one tag**. Set `messages`, listen for `submit`, and you have a
+working chat in minutes. `<kc-workspace>` adds the conversation sidebar + header
+around it. These pre-wire the leaf components for you.
+
+**Reach for these first.** Only step down a tier when the flagship doesn't fit.
+
+```html
+<kc-chat id="chat" chat-title="Assistant" style="display:block;height:560px"></kc-chat>
+<script type="module">
+  import '@kitnai/chat/elements';
+  const chat = document.getElementById('chat');
+  chat.messages = [{ id: '1', role: 'assistant', content: 'Hi!' }];
+  chat.addEventListener('submit', (e) => {/* call your model */});
+</script>
+```
+
+### 2. Leaf features — _compose your own layout_
+
+`<kc-conversations>` · `<kc-message>` · `<kc-tool>` · `<kc-reasoning>` ·
+`<kc-chain-of-thought>` · `<kc-thinking-bar>` · `<kc-response-stream>` ·
+`<kc-source>` / `<kc-sources>` · `<kc-skills>` · `<kc-prompt-input>` ·
+`<kc-suggestions>` · `<kc-file-upload>` · `<kc-voice-input>` · `<kc-attachments>` ·
+`<kc-model-switcher>` · `<kc-context>` · `<kc-scope-picker>` · `<kc-checkpoint>` ·
+`<kc-feedback-bar>` · `<kc-artifact>` · `<kc-resizable>`
+
+The **chat-specific building blocks**. Reach for these when the flagship layout
+doesn't fit — you want a custom three-up shell, an inspector/canvas panel, a bespoke
+header, or to render messages your own way. You own the data flow and the event
+wiring; the leaves render.
+
+`<kc-resizable>` is the **layout spine** for compose-your-own shells; `<kc-artifact>`
+is the **preview/canvas** panel. See the worked example in
+**Examples / Composed chat shell**.
+
+### 3. Primitives — _reusable anywhere_
+
+`<kc-code-block>` · `<kc-markdown>` · `<kc-loader>` · `<kc-text-shimmer>` ·
+`<kc-image>` · `<kc-empty>` · `<kc-file-tree>`
+
+**Not chat-specific.** A code viewer, a markdown renderer, loaders, an image with a
+skeleton, an empty-state, a file explorer — useful in any app. They happen to be
+used inside the chat components, but ship public so you can reuse them standalone.
+
+## The decision test
+
+> **"Would a non-chat app reuse this?"**
+>
+> - **Yes** → it's a **primitive** (tier 3). A docs site wants `<kc-markdown>`; a
+>   dashboard wants `<kc-loader>`; a file browser wants `<kc-file-tree>`.
+> - **No, but it's a chat building block** → it's a **leaf feature** (tier 2).
+>   `<kc-message>`, `<kc-tool>`, `<kc-conversations>` only make sense in a chat.
+> - **I just want a working chat** → use the **flagship** (tier 1). `<kc-chat>`.
+
+## How they fit together
+
+```
+flagship            <kc-chat> / <kc-workspace>        ← pre-wires the leaves
+   ▲ composed from
+leaf features       <kc-conversations> <kc-message> <kc-prompt-input> <kc-artifact> …
+   ▲ composed from / laid out by
+primitives + layout <kc-markdown> <kc-code-block> <kc-loader> … inside <kc-resizable>
+```
+
+Start at the top. Drop a tier each time you need more control.
+
+## Where to go next
+
+- **Examples / Catalog** — every component with sample data + copy-pasteable
+  markup. Answers _"what exists?"_.
+- **Examples / Composed chat shell** — a real chat assembled from leaves inside
+  `<kc-resizable>`, shown next to the `<kc-chat>` drop-in so the contrast is
+  explicit. Answers _"how do I wire it myself, and when should I?"_.
+- **Web Components / kc-\*** — the per-element pages with full API + the When /
+  How / Placement notes.
