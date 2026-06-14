@@ -52,7 +52,7 @@ export function Card(props: CardProps): JSX.Element {
     <div
       class={cn(
         'flex flex-col rounded-xl border border-border bg-card text-card-foreground shadow-sm',
-        local.dense ? 'gap-2 p-3' : 'gap-3 p-4',
+        local.dense ? 'gap-2.5 p-3.5' : 'gap-4 p-5',
         local.class,
       )}
       {...rest}
@@ -62,14 +62,22 @@ export function Card(props: CardProps): JSX.Element {
       </Show>
 
       <Show when={hasHeader()}>
-        <div class={cn('flex flex-col', local.dense ? 'gap-0.5' : 'gap-1')}>
+        <div
+          class={cn(
+            'flex flex-col border-b border-border',
+            local.dense ? 'gap-0.5 pb-2.5' : 'gap-1 pb-4',
+          )}
+        >
           <Show when={local.heading}>
-            <h3 id={headingId()} class="text-base font-semibold leading-tight text-foreground">
+            <h3
+              id={headingId()}
+              class="text-[1.0625rem] font-semibold leading-snug tracking-tight text-foreground"
+            >
               {local.heading}
             </h3>
           </Show>
           <Show when={local.description}>
-            <p class="text-sm text-muted-foreground">{local.description}</p>
+            <p class="text-[0.8125rem] leading-relaxed text-muted-foreground">{local.description}</p>
           </Show>
         </div>
       </Show>

@@ -10,6 +10,14 @@
   :host { display: block; }
   * { border-color: var(--color-border); }
 
+  /* Native controls (date/time pickers, <select>, number spinners, the
+     checkbox/radio fallbacks, scrollbars) must follow the kit's light/dark
+     mode — NOT the OS — so e.g. the native calendar icon never renders black
+     on a dark surface. `color-scheme` drives that native rendering; we set it
+     from the resolved mode (the `.dark` scope the element factory toggles). */
+  :host { color-scheme: light; }
+  .dark { color-scheme: dark; }
+
   /* One token-driven focus ring for EVERY focusable element in the shadow root.
      Blue by default (via --color-ring), consistent in light + dark, and
      overridable through --kitn-color-ring. Uses `outline` (not a box-shadow
@@ -44,4 +52,57 @@
   }
   *::-webkit-scrollbar-thumb:hover { background-color: var(--color-scrollbar-thumb-hover); }
   *::-webkit-scrollbar-corner { background: transparent; }
+}
+
+@layer components {
+  /* Designed radio + checkbox (appearance-none) so the form controls read as
+     intentional, theme correctly in light/dark, and have comfortable targets —
+     replacing the weak native defaults. Used via `.kc-radio` / `.kc-checkbox`. */
+  .kc-radio,
+  .kc-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    margin: 0;
+    flex-shrink: 0;
+    cursor: pointer;
+    border: 1.5px solid var(--color-input);
+    background-color: var(--color-background);
+    display: inline-grid;
+    place-content: center;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+  .kc-radio { border-radius: 9999px; }
+  .kc-checkbox { border-radius: 0.3rem; }
+  .kc-radio::after {
+    content: "";
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--color-primary);
+    transform: scale(0);
+    transition: transform 0.15s ease;
+  }
+  .kc-radio:checked { border-color: var(--color-primary); }
+  .kc-radio:checked::after { transform: scale(1); }
+  .kc-checkbox:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  .kc-checkbox::after {
+    content: "";
+    inline-size: 0.8rem;
+    block-size: 0.8rem;
+    background-color: var(--color-primary-foreground);
+    transform: scale(0);
+    transition: transform 0.15s ease;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  .kc-checkbox:checked::after { transform: scale(1); }
+  .kc-radio:hover:not(:disabled),
+  .kc-checkbox:hover:not(:disabled) { border-color: var(--color-primary); }
+  .kc-radio:disabled,
+  .kc-checkbox:disabled { opacity: 0.5; cursor: not-allowed; }
 }

@@ -462,7 +462,8 @@ export function Form(props: FormProps): JSX.Element {
         }}
       >
         <Card
-          heading={local.heading}
+          heading={local.heading ?? def().title}
+          description={def().description}
           actions={
             <div class="flex w-full flex-wrap items-center justify-between gap-2">
               <Show when={dismissible()}>
@@ -495,21 +496,10 @@ export function Form(props: FormProps): JSX.Element {
         >
           <form
             id={formId()}
-            class={cn('flex flex-col gap-4', local.class)}
+            class={cn('flex flex-col gap-5', local.class)}
             novalidate
             onSubmit={onSubmit}
           >
-            <Show when={def().title || def().description}>
-              <div class="flex flex-col gap-1">
-                <Show when={def().title}>
-                  <p class="text-sm font-medium text-foreground">{def().title}</p>
-                </Show>
-                <Show when={def().description}>
-                  <p class="text-sm text-muted-foreground">{def().description}</p>
-                </Show>
-              </div>
-            </Show>
-
             <For each={keys()}>
               {(key) => (
                 <FieldRow

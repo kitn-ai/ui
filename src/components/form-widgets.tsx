@@ -225,12 +225,12 @@ export function SwitchWidget(props: WidgetProps): JSX.Element {
 
 export function CheckboxWidget(props: WidgetProps): JSX.Element {
   return (
-    <label class="inline-flex items-center gap-2 text-sm text-foreground">
+    <label class="-mx-1.5 inline-flex cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-1.5 text-sm text-foreground transition-colors hover:bg-muted/60">
       <input
         id={props.id}
         data-control
         type="checkbox"
-        class="h-4 w-4 rounded border-input accent-[var(--color-primary)]"
+        class="kc-checkbox"
         checked={props.value === true}
         disabled={props.disabled}
         {...ariaProps(props)}
@@ -251,16 +251,16 @@ export function RadioGroupWidget(props: WidgetProps): JSX.Element {
       role="radiogroup"
       aria-label={props.label}
       data-control
-      class="flex flex-col gap-1.5"
+      class="-mx-1.5 flex flex-col gap-0.5"
       {...ariaProps(props)}
     >
       <For each={options()}>
         {(opt) => (
-          <label class="inline-flex items-center gap-2 text-sm text-foreground">
+          <label class="flex cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-1.5 text-sm text-foreground transition-colors hover:bg-muted/60">
             <input
               type="radio"
               name={props.id}
-              class="h-4 w-4 accent-[var(--color-primary)]"
+              class="kc-radio"
               value={String(opt)}
               checked={props.value === opt}
               disabled={props.disabled}
@@ -324,15 +324,15 @@ export function CheckboxGroupWidget(props: WidgetProps): JSX.Element {
       role="group"
       aria-label={props.label}
       data-control
-      class="flex flex-col gap-1.5"
+      class="-mx-1.5 flex flex-col gap-0.5"
       {...ariaProps(props)}
     >
       <For each={itemEnum(props.field)}>
         {(opt) => (
-          <label class="inline-flex items-center gap-2 text-sm text-foreground">
+          <label class="flex cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-1.5 text-sm text-foreground transition-colors hover:bg-muted/60">
             <input
               type="checkbox"
-              class="h-4 w-4 rounded border-input accent-[var(--color-primary)]"
+              class="kc-checkbox"
               checked={selected().includes(opt)}
               disabled={props.disabled}
               onChange={() => toggle(opt)}
