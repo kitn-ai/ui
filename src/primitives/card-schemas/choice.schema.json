@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kitn.ai/schemas/card/choice.schema.json",
+  "title": "ChoiceCardData",
+  "description": "Data payload for a `choice` card (CardEnvelope.data when type='choice'). A single-select 'pick one of N rich options' card; activating an option emits the `action` verb.",
+  "type": "object",
+  "required": ["options"],
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "Optional question/body text rendered above the options. Distinct from CardEnvelope.title (the card chrome heading)."
+    },
+    "layout": {
+      "type": "string",
+      "enum": ["list", "grid"],
+      "default": "list",
+      "description": "Visual layout: 'list' = stacked selectable rows; 'grid' = responsive tiles. Radio semantics are identical; the grid is purely visual.",
+      "x-kc-control": "layout"
+    },
+    "options": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The selectable options, rendered in order. Exactly one can be chosen.",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Emitted as CardEvent.action. Must be unique within `options`. (The reserved id '__other__' is used by the allowOther escape.)",
+            "x-kc-unique": true
+          },
+          "label": { "type": "string", "minLength": 1, "description": "Visible option label." },
+          "description": {
+            "type": "string",
+            "description": "Optional secondary line under the label."
+          },
+          "media": {
+            "type": "object",
+            "description": "Optional leading media: an image URL or a named icon.",
+            "properties": {
+              "image": { "type": "string", "description": "Image URL rendered as a thumbnail (list) or top media (grid)." },
+              "imageAlt": { "type": "string", "description": "Accessible alt text for `image` (decorative if omitted)." },
+              "icon": { "type": "string", "description": "Named icon rendered as a leading glyph." }
+            }
+          },
+          "meta": {
+            "type": "string",
+            "description": "Trailing freeform text (e.g. a price or badge), right-aligned in list layout."
+          },
+          "recommended": {
+            "type": "boolean",
+            "default": false,
+            "description": "Renders a small 'Recommended' pill near the label."
+          },
+          "disabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Option is shown but not selectable, and skipped in keyboard nav."
+          },
+          "payload": {
+            "description": "Optional opaque payload echoed back in CardEvent.payload (any JSON)."
+          }
+        }
+      }
+    },
+    "allowOther": {
+      "description": "Optional free-text escape ('none of these / specify'). `true` renders a final 'Other…' option; an object customizes its `label`/`placeholder`. Selecting it reveals a text input + Submit; submitting emits `{ kind:'action', action:'__other__', payload:{ text } }`.",
+      "x-kc-control": "allow-other"
+    }
+  }
+}

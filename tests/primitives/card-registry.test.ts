@@ -1,5 +1,5 @@
 // tests/primitives/card-registry.test.ts
-// The registry exposes the 5 built-in card types for both layers and merges overrides.
+// The registry exposes the 6 built-in card types for both layers and merges overrides.
 import {
   BUILTIN_CARD_TAGS,
   BUILTIN_CARD_COMPONENTS,
@@ -7,16 +7,17 @@ import {
   mergeCardComponents,
 } from '../../src/primitives/card-registry';
 
-const TYPES = ['form', 'confirm', 'task-list', 'link', 'embed'];
+const TYPES = ['form', 'confirm', 'task-list', 'choice', 'link', 'embed'];
 
-test('built-in tag map covers exactly the 5 card types', () => {
+test('built-in tag map covers exactly the 6 card types', () => {
   expect(Object.keys(BUILTIN_CARD_TAGS).sort()).toEqual([...TYPES].sort());
   expect(BUILTIN_CARD_TAGS.form).toBe('kc-form');
   expect(BUILTIN_CARD_TAGS['task-list']).toBe('kc-task-list');
+  expect(BUILTIN_CARD_TAGS.choice).toBe('kc-choice');
   expect(BUILTIN_CARD_TAGS.link).toBe('kc-link-card');
 });
 
-test('built-in component map covers exactly the 5 card types', () => {
+test('built-in component map covers exactly the 6 card types', () => {
   expect(Object.keys(BUILTIN_CARD_COMPONENTS).sort()).toEqual([...TYPES].sort());
   for (const t of TYPES) expect(typeof BUILTIN_CARD_COMPONENTS[t]).toBe('function');
 });
@@ -34,5 +35,5 @@ test('mergeCardComponents merges, undefined override = built-ins only', () => {
   const merged = mergeCardComponents({ form: custom });
   expect(merged.form).toBe(custom);
   expect(typeof merged.confirm).toBe('function');
-  expect(Object.keys(mergeCardComponents(undefined))).toHaveLength(5);
+  expect(Object.keys(mergeCardComponents(undefined))).toHaveLength(6);
 });

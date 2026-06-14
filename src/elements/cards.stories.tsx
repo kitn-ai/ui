@@ -17,6 +17,11 @@ const CARDS: CardEnvelope[] = [
       actions: [{ id: 'go', label: 'Deploy', style: 'primary', default: true }, { id: 'no', label: 'Cancel' }] } },
   { type: 'task-list', id: 'plan', title: 'Pick the steps',
     data: { tasks: [{ id: 'a', label: 'Run tests', checked: true }, { id: 'b', label: 'Tag release' }], confirmLabel: 'Run selected' } },
+  { type: 'choice', id: 'plan-pick', title: 'Choose a plan',
+    data: { prompt: 'Which plan fits your team?', options: [
+      { id: 'free', label: 'Free', meta: '$0' },
+      { id: 'pro', label: 'Pro', meta: '$12/seat', recommended: true, payload: { plan: 'pro' } },
+    ] } },
   { type: 'link', id: 'doc', data: { url: 'https://kitn.dev', title: 'kitn.dev', description: 'Generative UI cards', domain: 'kitn.dev' } },
 ];
 

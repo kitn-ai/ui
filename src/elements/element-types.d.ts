@@ -149,6 +149,17 @@ export interface KcCheckpointElement extends HTMLElement {
   size?: "sm" | "lg" | "md" | "icon" | "icon-sm";
 }
 
+export interface KcChoiceElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The choice definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { prompt, options:[…], layout?, allowOther? }`. Import `ChoiceCardData` from `@kitn.ai/chat` for the full shape. */
+  data?: Record<string, unknown>;
+  /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
+  cardId?: string;
+  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
+  heading?: string;
+}
+
 export interface KcCodeBlockElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -568,6 +579,7 @@ declare global {
     'kc-chain-of-thought': KcChainOfThoughtElement;
     'kc-chat': KcChatElement;
     'kc-checkpoint': KcCheckpointElement;
+    'kc-choice': KcChoiceElement;
     'kc-code-block': KcCodeBlockElement;
     'kc-confirm': KcConfirmElement;
     'kc-context': KcContextElement;

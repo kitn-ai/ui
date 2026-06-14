@@ -90,6 +90,26 @@ export type {
   SelectAllState,
 } from './components/task-list-card';
 
+// Card: kc-choice (single-select option card)
+export {
+  ChoiceCard,
+  CHOICE_CARD_TYPE,
+  OTHER_ACTION,
+  normalizeOptions,
+  resolveOtherConfig,
+  nextEnabledIndex,
+  firstEnabledIndex,
+} from './components/choice-card';
+export type {
+  ChoiceCardProps,
+  ChoiceOption,
+  ChoiceOptionMedia,
+  ChoiceLayout,
+  ChoiceAllowOther,
+  ChoiceCardData,
+  ChoiceCardEnvelope,
+} from './components/choice-card';
+
 // Card: kc-link-card (OG/link preview) + kc-embed (lazy media embed)
 export { LinkCard } from './components/link-card';
 export type { LinkCardProps } from './components/link-card';

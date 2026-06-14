@@ -720,6 +720,45 @@
     "tokens": []
   },
   {
+    "tag": "kc-choice",
+    "className": "KcChoiceElement",
+    "props": [
+      {
+        "name": "data",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "The choice definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { prompt, options:[…], layout?, allowOther? }`. Import `ChoiceCardData` from `@kitn.ai/chat` for the full shape.",
+        "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "cardId",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Stable card id correlating every emitted CardEvent. Attribute: `card-id`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "heading",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "ChoiceCard",
+        "group": "Components",
+        "storyId": "components-choicecard--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kc-code-block",
     "className": "KcCodeBlockElement",
     "props": [
