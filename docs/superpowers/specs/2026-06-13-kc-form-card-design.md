@@ -48,7 +48,7 @@ object that is **guaranteed to validate** against the form's *result* schema.
 ### Goals (concrete)
 
 - `kc-card`: a generic, slotted/prop-driven card frame (media · title · body ·
-  actions footer) + a standard inline **error** rendering, theme-aware (`--kitn-*`),
+  actions footer) + a standard inline **error** rendering, theme-aware (`--kc-*`),
   a11y-clean. Other cards compose it; it is also publishable standalone.
 - `kc-form`: a deterministic **JSON-Schema → widget** mapping (the table below),
   `x-kc-*` hints for ambiguous cases, full client-side validation (required,

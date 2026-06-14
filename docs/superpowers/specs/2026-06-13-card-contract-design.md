@@ -23,7 +23,7 @@ A **Card** is a self-contained UI unit the agent/server asks the chat to render.
 
 Two transports implement the *same* contract:
 - **Native** — a `<kc-*>` component rendered in-process; theme-aware (inherits
-  `--kitn-*` tokens), fully accessible, no iframe. The 90% path.
+  `--kc-*` tokens), fully accessible, no iframe. The 90% path.
 - **Remote** — a provider-owned cross-origin sandboxed iframe; the *same* events
   and data flow over `postMessage`. The provider-control path. (Wire details:
   iframe-transport spec. This spec defines the shapes it carries.)

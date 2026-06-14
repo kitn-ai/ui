@@ -343,7 +343,7 @@ handling). Neither card uses `submit-data`, `action`, `send-prompt`, `resize`,
 ### Context consumed
 
 - `context().theme.mode` — already handled by the element wrapper's `theme`
-  attribute + `--kitn-*` tokens; the cards add nothing special, they just use
+  attribute + `--kc-*` tokens; the cards add nothing special, they just use
   themed classes (`bg-card`, `text-card-foreground`, `border-border`, etc.) so
   light/dark work for free.
 - `context().locale` — used only for the (optional) "Open on …" label and

@@ -20,7 +20,7 @@
 
   /* One token-driven focus ring for EVERY focusable element in the shadow root.
      Blue by default (via --color-ring), consistent in light + dark, and
-     overridable through --kitn-color-ring. Uses `outline` (not a box-shadow
+     overridable through --kc-color-ring. Uses `outline` (not a box-shadow
      ring) so it never clips on overflow and follows the element's radius;
      `:focus-visible` so it only appears for keyboard navigation, never on a
      mouse click. Components that render their own ring set

@@ -70,7 +70,7 @@ Verification tooling: `scripts/audit-a11y.mjs` (axe-core in a real browser, trav
 
 ### Work
 **B1 — Element stories:** add one interactive story file per missing element under `src/elements/*.stories.tsx` (or a grouped `Elements/*` hierarchy), each rendering the real `<kitn-*>` custom element with representative props (arrays/objects set as properties), `argTypes` controls where sensible, and an autodocs page. Cover all ~25: message, markdown, code-block, reasoning, tool, model-switcher, context-meter, chat-scope-picker, feedback-bar, prompt-suggestions, file-upload, voice-input, loader, text-shimmer, image, checkpoint, message-skills, source, source-list, response-stream, empty, chain-of-thought, thinking-bar, attachments. Follow the existing element-story pattern (`src/elements/kitn-chat.stories.tsx`).
-**B2 — Docs MDX:** update `Integrations.mdx` (or add a "Frameworks" page) with HTML / React (`@kitnai/chat/react`) / Vue usage; add an **Accessibility.mdx** documenting the 508/WCAG 2.1 AA posture, keyboard support, and `theme` attr. Update `Theming.mdx` if needed (it already reflects `--kitn-*`).
+**B2 — Docs MDX:** update `Integrations.mdx` (or add a "Frameworks" page) with HTML / React (`@kitnai/chat/react`) / Vue usage; add an **Accessibility.mdx** documenting the 508/WCAG 2.1 AA posture, keyboard support, and `theme` attr. Update `Theming.mdx` if needed (it already reflects `--kc-*`).
 **B3 — `docs/web-components.md`:** extend the full element reference to all 28 (can auto-generate the per-element table from `dist/custom-elements.json`).
 **B4 — Bundle figure:** update `examples/composable/index.html` `~101kb` → the measured value (~80 KB gzip); fix the handoff TL;DR line and the roster projection note.
 

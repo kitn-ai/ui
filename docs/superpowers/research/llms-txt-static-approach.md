@@ -53,7 +53,7 @@ npm install solid-js
 2. **Events are non-bubbling CustomEvents** — listen directly on the element.
    `chat.addEventListener('submit', (e) => console.log(e.detail.value))`
 3. **The `theme` attribute** (`'light' | 'dark' | 'auto'`) works on every element. Default is `auto` (follows `prefers-color-scheme`).
-4. **Theming via CSS custom properties**: override `--kitn-color-*` tokens on `:root`. They pierce Shadow DOM.
+4. **Theming via CSS custom properties**: override `--kc-color-*` tokens on `:root`. They pierce Shadow DOM.
 
 ## ChatMessage schema (required for `<kitn-chat>`)
 
@@ -92,9 +92,9 @@ import { KitnChat } from '@kitnai/chat/react';
 
 ```css
 :root {
-  --kitn-color-background: #0f0f0f;
-  --kitn-color-primary: #7c3aed;
-  --kitn-color-muted: #1e1e1e;
+  --kc-color-background: #0f0f0f;
+  --kc-color-primary: #7c3aed;
+  --kc-color-muted: #1e1e1e;
 }
 ```
 
@@ -462,12 +462,12 @@ chat.addEventListener('submit', async (e) => {
 
 ### Step 5 — Theme
 
-Override `--kitn-color-*` tokens on `:root`. They pierce Shadow DOM:
+Override `--kc-color-*` tokens on `:root`. They pierce Shadow DOM:
 
 ```css
 :root {
-  --kitn-color-background: #0f0f0f;
-  --kitn-color-primary: #6d28d9;
+  --kc-color-background: #0f0f0f;
+  --kc-color-primary: #6d28d9;
 }
 ```
 

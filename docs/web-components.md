@@ -21,7 +21,7 @@ The authoritative machine-readable API is the **Custom Elements Manifest** at `d
 
 - **Controlled, not stateful.** The host owns the data. You push it in via JS **properties** (`el.messages = …`, `el.conversations = …`), the element pushes interactions out via **events**, and you update the properties in response. The element keeps no message store of its own — to stream a reply you keep reassigning `el.messages`.
 - **Data in = properties, config = attributes, data out = events.** Object/array data (messages, models, context) must be set as properties; simple config (`theme`, `prose-size`, `search`) also works as attributes.
-- **Opt-in by data/flags.** Features appear when you give them data: pass `models` → a model switcher; pass `context` → a token meter; set `search`/`voice` → those buttons. Omit them → they don't render. Re-theme with `--kitn-*` tokens.
+- **Opt-in by data/flags.** Features appear when you give them data: pass `models` → a model switcher; pass `context` → a token meter; set `search`/`voice` → those buttons. Omit them → they don't render. Re-theme with `--kc-*` tokens.
 
 ### What `<kc-chat>` includes vs. the primitive layer
 
@@ -1105,14 +1105,14 @@ Each element renders into its own Shadow DOM. This provides **full CSS isolation
 
 **The elements are self-themed.** Each element's Shadow DOM already contains the full compiled token set, so the components render correctly with **no host-side stylesheet required** — including light/dark via the `theme` attribute.
 
-To **rebrand**, override the kit's **namespaced** tokens — `--kitn-color-*` (and `--kitn-text-*`, `--kitn-radius`) — on `:root` or a parent. The components read these via a `var(--kitn-…, default)` fallback that pierces the Shadow DOM, so your overrides reach them.
+To **rebrand**, override the kit's **namespaced** tokens — `--kc-color-*` (and `--kc-text-*`, `--kc-radius`) — on `:root` or a parent. The components read these via a `var(--kc-…, default)` fallback that pierces the Shadow DOM, so your overrides reach them.
 
 ```css
 :root {
-  --kitn-color-background: #0f0f0f;
-  --kitn-color-primary: #7c3aed;
-  --kitn-color-muted: #1e1e1e;
-  --kitn-text-body: 0.9375rem;
+  --kc-color-background: #0f0f0f;
+  --kc-color-primary: #7c3aed;
+  --kc-color-muted: #1e1e1e;
+  --kc-text-body: 0.9375rem;
 }
 ```
 
