@@ -60,8 +60,8 @@ export interface KcCardsElement extends HTMLElement {
   theme?: 'light' | 'dark' | 'auto';
   /** The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. */
   cards?: { type: string; id: string; data: unknown; title?: string }[];
-  /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. */
-  types?: CardTagMap;
+  /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
+  types?: Record<string, string>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
   policy?: { onSubmitData?: (cardId: string, data: unknown) => void; onAction?: (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: (text: string, opts: { mode: "compose" | "send"; context?: unknown; }) => void; onOpen?: (url: string, target: "tab" | "artifact") => void; onState?: (cardId: string, patch: unknown) => void; onDismiss?: (cardId: string) => void; onError?: (cardId: string, message: string) => void; maxSendPromptMode?: "compose" | "send" };
 }

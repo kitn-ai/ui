@@ -261,11 +261,11 @@
       },
       {
         "name": "types",
-        "type": "undefined | CardTagMap",
+        "type": "undefined | Record<string, string>",
         "optional": true,
         "scalar": false,
-        "description": "Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`.",
-        "displayType": "undefined | CardTagMap"
+        "description": "Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type.",
+        "displayType": "undefined | Record<string, string>"
       },
       {
         "name": "policy",

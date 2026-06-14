@@ -243,7 +243,7 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `cards` | — | `undefined \| { type: string; id: string; data: unknown; title?: undefined \| string }[]` | The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. |
-| `types` | — | `undefined \| CardTagMap` | Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. |
+| `types` | — | `undefined \| Record<string, string>` | Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. |
 | `policy` | — | `undefined \| { onSubmitData?: undefined \| (cardId: string, data: unknown) => void; onAction?: undefined \| (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined \| (text: string, opts: { mode: "compose" \| "send"; context?: unknown; }) => void; onOpen?: undefined \| (url: string, target: "tab" \| "artifact") => void; onState?: undefined \| (cardId: string, patch: unknown) => void; onDismiss?: undefined \| (cardId: string) => void; onError?: undefined \| (cardId: string, message: string) => void; maxSendPromptMode?: undefined \| "compose" \| "send" }` | Optional CardPolicy handling child events. Property: `el.policy`. |
 
 _No events._
