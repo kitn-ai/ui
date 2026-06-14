@@ -18,6 +18,17 @@ export type { CodeHighlightingOptions } from './primitives/highlighter';
 export { configurePdfPreview, isPdfPreviewEnabled } from './primitives/pdf-preview';
 export type { PdfPreviewOptions } from './primitives/pdf-preview';
 
+// Card Contract (generative-UI foundation)
+export { CARD_CONTRACT_VERSION } from './primitives/card-contract';
+export type {
+  CardEnvelope, CardContext, CardEvent, CardEventKind, CardHost, CardPolicy,
+} from './primitives/card-contract';
+export { CardProvider, useCardHost } from './primitives/card-host';
+export type { CardProviderProps } from './primitives/card-host';
+export { CARD_EVENT_NAME, emitCardEvent, routeCardEvent, listenForCardEvents } from './primitives/card-routing';
+export { validateAgainstSchema } from './primitives/card-validate';
+export type { JsonSchema, ValidationResult } from './primitives/card-validate';
+
 // Layer 2: UI Primitives
 export { Button, buttonVariants } from './ui/button';
 export type { ButtonProps } from './ui/button';
