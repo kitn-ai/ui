@@ -302,7 +302,11 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
       action: opt.id,
       ...(opt.payload !== undefined ? { payload: opt.payload } : {}),
     });
-    res.setLocal({ kind: 'action', action: opt.id, payload: opt.payload });
+    res.setLocal({
+      kind: 'action',
+      action: opt.id,
+      ...(opt.payload !== undefined ? { payload: opt.payload } : {}),
+    });
   };
 
   const focusRadio = (index: number): void => {
