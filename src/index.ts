@@ -15,6 +15,8 @@ export { ChatConfig, useChatConfig, proseClass, textClass } from './primitives/c
 export type { ChatConfigValue, ProseSize, ChatConfigProps } from './primitives/chat-config';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from './primitives/highlighter';
 export type { CodeHighlightingOptions } from './primitives/highlighter';
+export { configurePdfPreview, isPdfPreviewEnabled } from './primitives/pdf-preview';
+export type { PdfPreviewOptions } from './primitives/pdf-preview';
 
 // Layer 2: UI Primitives
 export { Button, buttonVariants } from './ui/button';
