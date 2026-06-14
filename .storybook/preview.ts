@@ -115,6 +115,8 @@ const preview: Preview = {
           'Web Components',
           'Components',
           'UI',
+          'Generative UI',
+          ['Overview', 'Cards', 'SDK'],
           '*',
         ],
       },
