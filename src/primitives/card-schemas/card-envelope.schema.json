@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kitn.ai/schemas/card/card-envelope.schema.json",
+  "title": "CardEnvelope",
+  "description": "A card the agent/server asks the chat to render. `data` validates against the per-type schema.",
+  "type": "object",
+  "required": ["type", "id", "data"],
+  "properties": {
+    "type": { "type": "string", "minLength": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "data": {},
+    "title": { "type": "string" }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kitn.ai/schemas/card/card-event.schema.json",
+  "title": "CardEvent",
+  "description": "An event a card emits up to the host. `kind` discriminates the payload.",
+  "type": "object",
+  "required": ["kind"],
+  "properties": {
+    "kind": { "enum": ["ready", "submit-data", "action", "send-prompt", "open", "resize", "state", "dismiss", "error"] },
+    "cardId": { "type": "string" }
+  }
+}
