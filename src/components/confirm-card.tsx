@@ -4,7 +4,6 @@ import {
   Show,
   splitProps,
   mergeProps,
-  createSignal,
   createMemo,
   createEffect,
   on,
@@ -13,7 +12,8 @@ import {
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
 import { Card } from './card';
-import type { CardEnvelope, CardEvent, CardHost } from '../primitives/card-contract';
+import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
+import { useCardResolution } from './use-card-resolution';
 import { emitCardEvent } from '../primitives/card-routing';
 import { useCardHost } from '../primitives/card-host';
 import { AlertTriangle, Check, X } from 'lucide-solid';
@@ -135,6 +135,8 @@ export interface ConfirmCardProps {
   /** Focus the default action on mount. Default OFF (no focus-stealing mid-stream). */
   autofocus?: boolean;
   class?: string;
+  /** When set, render the chromed read-only view instead of the buttons. */
+  resolution?: CardResolution;
 }
 
 /**
@@ -155,6 +157,7 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
     'hostElement',
     'autofocus',
     'class',
+    'resolution',
   ]);
 
   const ctxHost = useCardHost();
@@ -173,10 +176,14 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
   const isDanger = () => tone() === 'danger';
   const defaultId = createMemo(() => defaultActionId(actions()));
 
-  const [resolved, setResolved] = createSignal<string | undefined>(undefined);
+  const res = useCardResolution({ prop: () => local.resolution, data: () => local.data });
 
-  // Reset resolved state whenever a NEW definition arrives.
-  createEffect(on(() => local.data, () => setResolved(undefined)));
+  const resolvedAction = createMemo(() => {
+    const r = res.resolution();
+    if (!r || r.kind !== 'action') return undefined;
+    const found = actions().find((a) => a.id === r.action);
+    return { label: found?.label ?? r.action };
+  });
 
   // ready / error lifecycle emits.
   createEffect(
@@ -187,14 +194,14 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
   );
 
   const onAction = (action: ConfirmAction): void => {
-    if (resolved() !== undefined) return; // single-shot
+    if (res.isResolved()) return; // single-shot
     emit({
       kind: 'action',
       cardId: local.cardId,
       action: action.id,
       ...(action.payload !== undefined ? { payload: action.payload } : {}),
     });
-    setResolved(action.id);
+    res.setLocal({ kind: 'action', action: action.id, payload: action.payload });
   };
 
   const onDismiss = (): void => emit({ kind: 'dismiss', cardId: local.cardId });
@@ -205,8 +212,8 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
   createEffect(() => {
     const el = local.hostElement;
     if (!el) return;
-    const id = resolved();
-    if (id !== undefined) el.setAttribute('data-kc-resolved', id);
+    const r = res.resolution();
+    if (r && r.kind === 'action') el.setAttribute('data-kc-resolved', r.action);
     else el.removeAttribute('data-kc-resolved');
   });
 
@@ -221,47 +228,60 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
         <Card
           heading={local.heading}
           actions={
-            <div class="flex w-full flex-wrap items-center justify-between gap-2">
-              <Show when={local.data?.dismissible === true}>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label="Dismiss"
-                  onClick={onDismiss}
+            <Show
+              when={!res.isResolved()}
+              fallback={
+                <div
+                  class="ml-auto flex items-center gap-2 text-sm font-medium text-foreground"
+                  role={res.isOptimistic() ? 'status' : undefined}
                 >
-                  <X size={16} aria-hidden="true" />
-                </Button>
-              </Show>
-              <div class="ml-auto flex flex-wrap items-center gap-2">
-                <For each={actions()}>
-                  {(action) => {
-                    const isChosen = () => resolved() === action.id;
-                    return (
-                      <Button
-                        type="button"
-                        variant={buttonVariantForStyle(action.style)}
-                        disabled={resolved() !== undefined && !isChosen()}
-                        aria-pressed={isChosen() ? 'true' : undefined}
-                        data-action-id={action.id}
-                        data-kc-default={action.default ? 'true' : undefined}
-                        ref={(el) => {
-                          if (local.autofocus && action.id === defaultId()) {
-                            queueMicrotask(() => el.focus());
-                          }
-                        }}
-                        onClick={() => onAction(action)}
-                      >
-                        <Show when={isChosen()}>
-                          <Check size={16} aria-hidden="true" />
-                        </Show>
-                        {action.label}
-                      </Button>
-                    );
-                  }}
-                </For>
+                  <Check size={16} aria-hidden="true" />
+                  <span>{resolvedAction()?.label}</span>
+                </div>
+              }
+            >
+              <div class="flex w-full flex-wrap items-center justify-between gap-2">
+                <Show when={local.data?.dismissible === true}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Dismiss"
+                    onClick={onDismiss}
+                  >
+                    <X size={16} aria-hidden="true" />
+                  </Button>
+                </Show>
+                <div class="ml-auto flex flex-wrap items-center gap-2">
+                  <For each={actions()}>
+                    {(action) => {
+                      const isChosen = () => res.resolution()?.kind === 'action' && (res.resolution() as { kind: 'action'; action: string }).action === action.id;
+                      return (
+                        <Button
+                          type="button"
+                          variant={buttonVariantForStyle(action.style)}
+                          disabled={res.isResolved() && !isChosen()}
+                          aria-pressed={isChosen() ? 'true' : undefined}
+                          data-action-id={action.id}
+                          data-kc-default={action.default ? 'true' : undefined}
+                          ref={(el) => {
+                            if (local.autofocus && action.id === defaultId()) {
+                              queueMicrotask(() => el.focus());
+                            }
+                          }}
+                          onClick={() => onAction(action)}
+                        >
+                          <Show when={isChosen()}>
+                            <Check size={16} aria-hidden="true" />
+                          </Show>
+                          {action.label}
+                        </Button>
+                      );
+                    }}
+                  </For>
+                </div>
               </div>
-            </div>
+            </Show>
           }
         >
           <div
