@@ -201,7 +201,11 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
       action: action.id,
       ...(action.payload !== undefined ? { payload: action.payload } : {}),
     });
-    res.setLocal({ kind: 'action', action: action.id, payload: action.payload });
+    res.setLocal({
+      kind: 'action',
+      action: action.id,
+      ...(action.payload !== undefined ? { payload: action.payload } : {}),
+    });
   };
 
   const onDismiss = (): void => emit({ kind: 'dismiss', cardId: local.cardId });

@@ -43,3 +43,14 @@ test('re-hydrated render does not emit a new action event', () => {
   ));
   expect(events.some((e) => e.kind === 'action')).toBe(false);
 });
+
+test('a payload-less action resolves without a payload key (optimistic matches re-hydrated)', () => {
+  const { host, events } = makeHost();
+  const { getByText } = render(() => (
+    <ConfirmCard host={host} cardId="c1" data={{ body: 'ok?', actions: [{ id: 'go', label: 'Go' }] }} />
+  ));
+  getByText('Go').click();
+  const a = events.find((e) => e.kind === 'action') as Extract<CardEvent, { kind: 'action' }>;
+  expect(a.action).toBe('go');
+  expect('payload' in a).toBe(false);
+});
