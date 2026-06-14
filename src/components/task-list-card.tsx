@@ -259,7 +259,7 @@ export function TaskListCard(props: TaskListCardProps): JSX.Element {
         }}
       >
         <Card
-          heading={local.heading}
+          heading={local.heading ?? local.data?.heading}
           actions={
             <div class="flex w-full flex-wrap items-center justify-between gap-2">
               <span id={countId} aria-live="polite" class="text-xs text-muted-foreground">
@@ -286,7 +286,7 @@ export function TaskListCard(props: TaskListCardProps): JSX.Element {
           <div
             role="group"
             aria-label={local.heading ?? local.data?.heading ?? 'Tasks'}
-            class={cn('flex flex-col gap-1', local.class)}
+            class={cn('flex flex-col', local.class)}
             onKeyDown={(e) => {
               // Enter anywhere in the card (off a checkbox) confirms when enabled.
               if (e.key !== 'Enter') return;
@@ -295,71 +295,81 @@ export function TaskListCard(props: TaskListCardProps): JSX.Element {
               if (confirmEnabled()) onConfirm();
             }}
           >
-            <Show when={local.data?.heading}>
-              <p class="pb-1 text-sm font-semibold text-foreground">{local.data?.heading}</p>
-            </Show>
+            <div class="divide-y divide-border overflow-hidden rounded-lg border border-input">
+              <Show when={showMaster()}>
+                {(() => {
+                  const indeterminate = () => masterState() === 'indeterminate';
+                  return (
+                    <label
+                      class={cn(
+                        'flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors',
+                        masterState() === 'checked'
+                          ? 'bg-accent text-accent-foreground'
+                          : 'text-foreground hover:bg-muted/50',
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        class="kc-checkbox"
+                        checked={masterState() === 'checked'}
+                        aria-checked={indeterminate() ? 'mixed' : masterState() === 'checked'}
+                        disabled={submitted()}
+                        ref={(el) => {
+                          createEffect(() => {
+                            el.indeterminate = indeterminate();
+                          });
+                        }}
+                        onChange={(e) => toggleAll(e.currentTarget.checked)}
+                      />
+                      <span>Select all</span>
+                    </label>
+                  );
+                })()}
+              </Show>
 
-            <Show when={showMaster()}>
-              {(() => {
-                const indeterminate = () => masterState() === 'indeterminate';
-                return (
-                  <label class="flex items-center gap-2 border-b border-border pb-2 text-sm font-medium text-foreground">
-                    <input
-                      type="checkbox"
-                      class="h-4 w-4 accent-primary"
-                      checked={masterState() === 'checked'}
-                      aria-checked={indeterminate() ? 'mixed' : masterState() === 'checked'}
-                      disabled={submitted()}
-                      ref={(el) => {
-                        createEffect(() => {
-                          el.indeterminate = indeterminate();
-                        });
-                      }}
-                      onChange={(e) => toggleAll(e.currentTarget.checked)}
-                    />
-                    <span>Select all</span>
-                  </label>
-                );
-              })()}
-            </Show>
-
-            <For each={tasks()}>
-              {(task) => {
-                const checked = () => selected().has(task.id);
-                const blocked = () =>
-                  task.disabled ||
-                  submitted() ||
-                  (!checked() && isMaxReached(data(), count()));
-                const descId = `kc-tl-desc-${uid}-${task.id}`;
-                return (
-                  <label
-                    class={cn(
-                      'flex items-start gap-2 rounded-md px-1 py-1.5 text-sm',
-                      blocked() ? 'opacity-60' : 'hover:bg-muted/50',
-                    )}
-                    data-task-id={task.id}
-                  >
-                    <input
-                      type="checkbox"
-                      class="mt-0.5 h-4 w-4 accent-primary"
-                      checked={checked()}
-                      disabled={blocked()}
-                      aria-disabled={blocked() ? 'true' : undefined}
-                      aria-describedby={task.description ? descId : undefined}
-                      onChange={(e) => toggle(task.id, e.currentTarget.checked)}
-                    />
-                    <span class="flex flex-col">
-                      <span class="text-foreground">{task.label}</span>
-                      <Show when={task.description}>
-                        <span id={descId} class="text-xs text-muted-foreground">
-                          {task.description}
-                        </span>
-                      </Show>
-                    </span>
-                  </label>
-                );
-              }}
-            </For>
+              <For each={tasks()}>
+                {(task) => {
+                  const checked = () => selected().has(task.id);
+                  const blocked = () =>
+                    task.disabled ||
+                    submitted() ||
+                    (!checked() && isMaxReached(data(), count()));
+                  const descId = `kc-tl-desc-${uid}-${task.id}`;
+                  return (
+                    <label
+                      class={cn(
+                        'flex items-start gap-3 px-3 py-2.5 text-sm transition-colors',
+                        blocked()
+                          ? 'cursor-not-allowed opacity-60'
+                          : 'cursor-pointer hover:bg-muted/50',
+                        checked() && !blocked()
+                          ? 'bg-accent font-medium text-accent-foreground'
+                          : 'text-foreground',
+                      )}
+                      data-task-id={task.id}
+                    >
+                      <input
+                        type="checkbox"
+                        class="kc-checkbox mt-0.5"
+                        checked={checked()}
+                        disabled={blocked()}
+                        aria-disabled={blocked() ? 'true' : undefined}
+                        aria-describedby={task.description ? descId : undefined}
+                        onChange={(e) => toggle(task.id, e.currentTarget.checked)}
+                      />
+                      <span class="flex flex-col gap-0.5">
+                        <span>{task.label}</span>
+                        <Show when={task.description}>
+                          <span id={descId} class="text-xs font-normal text-muted-foreground">
+                            {task.description}
+                          </span>
+                        </Show>
+                      </span>
+                    </label>
+                  );
+                }}
+              </For>
+            </div>
 
             <Show when={data().max !== undefined}>
               <p class="pt-1 text-xs text-muted-foreground">Up to {data().max} selected.</p>

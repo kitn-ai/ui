@@ -99,7 +99,7 @@ export function Card(props: CardProps): JSX.Element {
       >
         <div
           role="alert"
-          class="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+          class="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive dark:bg-destructive/15 dark:text-red-400"
         >
           <AlertTriangle size={16} class="mt-0.5 shrink-0" aria-hidden="true" />
           <span>{local.errorMessage}</span>

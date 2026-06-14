@@ -121,13 +121,19 @@ export function SliderWidget(props: WidgetProps): JSX.Element {
   const max = () => props.field.maximum ?? 100;
   const step = () => props.field['x-kc-step'] ?? (props.field.type === 'integer' ? 1 : undefined);
   const current = () => (props.value === undefined || props.value === null ? min() : Number(props.value));
+  const fill = (): string => {
+    const lo = min();
+    const hi = max();
+    return hi > lo ? `${((current() - lo) / (hi - lo)) * 100}%` : '0%';
+  };
   return (
     <div class="flex items-center gap-3">
       <input
         id={props.id}
         data-control
         type="range"
-        class="h-2 w-full cursor-pointer accent-[var(--color-primary)]"
+        class="kc-range"
+        style={{ '--kc-range-fill': fill() }}
         value={current()}
         min={min()}
         max={max()}
@@ -138,7 +144,9 @@ export function SliderWidget(props: WidgetProps): JSX.Element {
         onInput={(e) => props.onInput(Number(e.currentTarget.value))}
         onBlur={props.onBlur}
       />
-      <span class="w-10 shrink-0 text-right text-sm tabular-nums text-foreground">{current()}</span>
+      <span class="min-w-9 shrink-0 rounded-md bg-background px-2 py-1 text-center text-sm font-medium tabular-nums text-foreground shadow-sm">
+        {current()}
+      </span>
     </div>
   );
 }
@@ -251,12 +259,19 @@ export function RadioGroupWidget(props: WidgetProps): JSX.Element {
       role="radiogroup"
       aria-label={props.label}
       data-control
-      class="-mx-1.5 flex flex-col gap-0.5"
+      class="divide-y divide-border overflow-hidden rounded-lg border border-input"
       {...ariaProps(props)}
     >
       <For each={options()}>
         {(opt) => (
-          <label class="flex cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-1.5 text-sm text-foreground transition-colors hover:bg-muted/60">
+          <label
+            class={cn(
+              'flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors',
+              props.value === opt
+                ? 'bg-accent font-medium text-accent-foreground'
+                : 'text-foreground hover:bg-muted/50',
+            )}
+          >
             <input
               type="radio"
               name={props.id}
@@ -324,12 +339,19 @@ export function CheckboxGroupWidget(props: WidgetProps): JSX.Element {
       role="group"
       aria-label={props.label}
       data-control
-      class="-mx-1.5 flex flex-col gap-0.5"
+      class="divide-y divide-border overflow-hidden rounded-lg border border-input"
       {...ariaProps(props)}
     >
       <For each={itemEnum(props.field)}>
         {(opt) => (
-          <label class="flex cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-1.5 text-sm text-foreground transition-colors hover:bg-muted/60">
+          <label
+            class={cn(
+              'flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors',
+              selected().includes(opt)
+                ? 'bg-accent font-medium text-accent-foreground'
+                : 'text-foreground hover:bg-muted/50',
+            )}
+          >
             <input
               type="checkbox"
               class="kc-checkbox"
