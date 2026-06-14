@@ -41,15 +41,13 @@ export interface ChoiceOption {
   payload?: unknown; // echoed back in the emitted action
 }
 
-export type ChoiceLayout = 'list' | 'grid';
-
 export type ChoiceAllowOther = boolean | { label?: string; placeholder?: string };
 
 export interface ChoiceCardData {
   prompt?: string; // optional question/body above the options
   options: ChoiceOption[]; // 1..N
-  layout?: ChoiceLayout; // default 'list'
   allowOther?: ChoiceAllowOther; // free-text escape
+  submitLabel?: string; // label for the Submit button (default 'Submit')
 }
 
 export type ChoiceCardEnvelope = CardEnvelope<'choice', ChoiceCardData>;
@@ -169,13 +167,15 @@ export interface ChoiceCardProps {
 
 /**
  * `ChoiceCard` — a single-select "pick one of N rich options" card (plans, products,
- * flights, quick replies) inside `Card` chrome. Activating an option emits the Card
- * contract's **`action`** verb (`{ kind:'action', cardId, action: option.id, payload }`)
- * and resolves the card (chosen option marked, others disabled) so the same pick can't
- * double-fire. An optional `allowOther` free-text escape renders a final "Other…" option
- * that reveals an inline input + Submit (emitting `action:'__other__'` with `{ text }`).
- * Emits `ready` on mount and `error` for an unusable definition (inline error state).
- * The options are a WAI-ARIA radiogroup with roving tabindex.
+ * flights, quick replies) inside `Card` chrome. The options are a WAI-ARIA radiogroup
+ * (list rows) with roving tabindex: clicking a row (or Space/Enter on the focused row)
+ * **selects** it locally without emitting; a **Submit** button below the list then emits
+ * the Card contract's **`action`** verb (`{ kind:'action', cardId, action: option.id,
+ * payload }`) and resolves the card (chosen option shown read-only) so the same pick can't
+ * double-fire. An optional `allowOther` free-text escape appends a selectable "Other…" row;
+ * selecting it reveals an inline text input, and the same Submit emits `action:'__other__'`
+ * with `{ text }`. Emits `ready` on mount and `error` for an unusable definition (inline
+ * error state).
  */
 export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
   const merged = mergeProps({ cardId: 'kc-choice' }, props);
@@ -194,7 +194,6 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
   const valid = createMemo(() => normalized().error === undefined);
   const errorMessage = createMemo(() => normalized().error ?? '');
   const baseOptions = createMemo(() => normalized().options);
-  const layout = (): ChoiceLayout => (local.data?.layout === 'grid' ? 'grid' : 'list');
   const otherCfg = createMemo(() => resolveOtherConfig(local.data?.allowOther));
 
   // The full radio list = base options + a synthetic "Other" option when allowOther is set.
@@ -212,18 +211,20 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
   });
 
   const [focusIndex, setFocusIndex] = createSignal(0);
-  const [otherOpen, setOtherOpen] = createSignal(false);
+  const [selectedId, setSelectedId] = createSignal<string | undefined>(undefined);
   const [otherText, setOtherText] = createSignal('');
 
   let groupRef: HTMLDivElement | undefined;
   let otherInputRef: HTMLInputElement | undefined;
+
+  const otherSelected = createMemo(() => selectedId() === OTHER_ACTION);
 
   // Reset all transient state whenever a NEW definition arrives.
   createEffect(
     on(
       () => local.data,
       () => {
-        setOtherOpen(false);
+        setSelectedId(undefined);
         setOtherText('');
         setFocusIndex(Math.max(0, firstEnabledIndex(options())));
       },
@@ -260,7 +261,41 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
 
   const isOther = (opt: ChoiceOption): boolean => opt.id === OTHER_ACTION;
 
-  const emitChoice = (opt: ChoiceOption): void => {
+  // Select (do NOT emit) the given option locally.
+  const select = (opt: ChoiceOption): void => {
+    if (res.isResolved()) return; // single-shot
+    if (opt.disabled) return;
+    setSelectedId(opt.id);
+    if (isOther(opt)) {
+      queueMicrotask(() => otherInputRef?.focus());
+    }
+  };
+
+  // Whether the current selection is submittable.
+  const canSubmit = createMemo(() => {
+    if (res.isResolved()) return false;
+    const id = selectedId();
+    if (id === undefined) return false;
+    if (id === OTHER_ACTION) return otherText().trim().length > 0;
+    return true;
+  });
+
+  const submitLabel = (): string => local.data?.submitLabel ?? 'Submit';
+
+  // Submit the current selection: emit `action` then resolve (single-shot).
+  const submit = (): void => {
+    if (res.isResolved()) return;
+    const id = selectedId();
+    if (id === undefined) return;
+    if (id === OTHER_ACTION) {
+      const text = otherText().trim();
+      if (text.length === 0) return;
+      emit({ kind: 'action', cardId: local.cardId, action: OTHER_ACTION, payload: { text } });
+      res.setLocal({ kind: 'action', action: OTHER_ACTION, payload: { text } });
+      return;
+    }
+    const opt = baseOptions().find((o) => o.id === id);
+    if (!opt) return;
     emit({
       kind: 'action',
       cardId: local.cardId,
@@ -268,27 +303,6 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
       ...(opt.payload !== undefined ? { payload: opt.payload } : {}),
     });
     res.setLocal({ kind: 'action', action: opt.id, payload: opt.payload });
-  };
-
-  const pick = (opt: ChoiceOption): void => {
-    if (res.isResolved()) return; // single-shot
-    if (opt.disabled) return;
-    if (isOther(opt)) {
-      // Two-step: reveal the free-text input + Submit; do not emit yet.
-      setOtherOpen(true);
-      queueMicrotask(() => otherInputRef?.focus());
-      return;
-    }
-    setOtherOpen(false);
-    emitChoice(opt);
-  };
-
-  const submitOther = (): void => {
-    if (res.isResolved()) return;
-    const text = otherText().trim();
-    if (text.length === 0) return;
-    emit({ kind: 'action', cardId: local.cardId, action: OTHER_ACTION, payload: { text } });
-    res.setLocal({ kind: 'action', action: OTHER_ACTION, payload: { text } });
   };
 
   const focusRadio = (index: number): void => {
@@ -318,7 +332,7 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
     } else if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       const opt = opts[i];
-      if (opt) pick(opt);
+      if (opt) select(opt);
     }
   };
 
@@ -351,34 +365,17 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
                 role="radiogroup"
                 aria-label={groupLabel()}
                 aria-describedby={local.data?.prompt ? promptId : undefined}
-                class={cn(
-                  layout() === 'grid'
-                    ? 'grid grid-cols-2 gap-2 sm:grid-cols-3'
-                    : 'divide-y divide-border overflow-hidden rounded-lg border border-input',
-                )}
+                class="divide-y divide-border overflow-hidden rounded-lg border border-input"
                 onKeyDown={onGroupKeyDown}
               >
                 <For each={options()}>
                   {(opt, index) => {
-                    const checked = () => resolvedId() === opt.id;
+                    const checked = () => selectedId() === opt.id;
                     const tabStop = () =>
                       !opt.disabled && index() === focusIndex() && !res.isResolved();
                     const descId = `kc-choice-desc-${uid}-${opt.id}`;
                     const hasDesc = () => Boolean(opt.description);
-                    return layout() === 'grid' ? (
-                      <GridTile
-                        opt={opt}
-                        checked={checked()}
-                        tabStop={tabStop()}
-                        descId={descId}
-                        hasDesc={hasDesc()}
-                        onPick={() => {
-                          setFocusIndex(index());
-                          pick(opt);
-                        }}
-                        onFocus={() => setFocusIndex(index())}
-                      />
-                    ) : (
+                    return (
                       <ListRow
                         opt={opt}
                         checked={checked()}
@@ -387,7 +384,7 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
                         hasDesc={hasDesc()}
                         onPick={() => {
                           setFocusIndex(index());
-                          pick(opt);
+                          select(opt);
                         }}
                         onFocus={() => setFocusIndex(index())}
                       />
@@ -396,37 +393,32 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
                 </For>
               </div>
 
-              <Show when={otherOpen()}>
-                <div class="flex flex-col gap-2 rounded-lg border border-input p-3">
+              <Show when={otherSelected()}>
+                <div class="flex flex-col gap-2">
                   <label for={otherInputId} class="sr-only">
                     {otherCfg()?.label ?? DEFAULT_OTHER_LABEL}
                   </label>
-                  <div class="flex items-center gap-2">
-                    <input
-                      id={otherInputId}
-                      ref={otherInputRef}
-                      type="text"
-                      class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      placeholder={otherCfg()?.placeholder}
-                      value={otherText()}
-                      onInput={(e) => setOtherText(e.currentTarget.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          submitOther();
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      disabled={otherText().trim().length === 0}
-                      onClick={submitOther}
-                    >
-                      Submit
-                    </Button>
-                  </div>
+                  <input
+                    id={otherInputId}
+                    ref={otherInputRef}
+                    type="text"
+                    class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    placeholder={otherCfg()?.placeholder}
+                    value={otherText()}
+                    onInput={(e) => setOtherText(e.currentTarget.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        submit();
+                      }
+                    }}
+                  />
                 </div>
               </Show>
+
+              <Button type="button" class="self-end" disabled={!canSubmit()} onClick={submit}>
+                {submitLabel()}
+              </Button>
             </Show>
           </div>
         </Card>
@@ -436,8 +428,8 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Internal row/tile presentations. Both are `role="radio"` with the kit's
-// selectable-list / selectable-card styling.
+// Internal list-row presentation: a `role="radio"` with the kit's
+// selectable-list styling.
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface RowProps {
@@ -555,58 +547,6 @@ function ResolvedChoice(props: {
         <Show when={!c.other && c.opt?.meta}>
           <span class="ml-auto text-xs font-normal text-muted-foreground">{!c.other ? c.opt?.meta : ''}</span>
         </Show>
-      </Show>
-    </div>
-  );
-}
-
-function GridTile(props: RowProps): JSX.Element {
-  return (
-    <div
-      role="radio"
-      aria-checked={props.checked}
-      aria-disabled={props.opt.disabled ? 'true' : undefined}
-      aria-describedby={props.hasDesc ? props.descId : undefined}
-      data-option-id={props.opt.id}
-      tabindex={props.opt.disabled ? -1 : props.tabStop ? 0 : -1}
-      onClick={() => !props.opt.disabled && props.onPick()}
-      onFocus={props.onFocus}
-      class={cn(
-        'relative flex flex-col gap-2 rounded-lg border p-3 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
-        props.opt.disabled
-          ? 'cursor-not-allowed border-input opacity-60'
-          : 'cursor-pointer border-input hover:bg-muted/50',
-        props.checked
-          ? 'border-[var(--color-primary)] bg-accent ring-2 ring-[var(--color-primary)]'
-          : '',
-      )}
-    >
-      <Show when={props.checked}>
-        <span class="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-primary)] text-[var(--color-primary-foreground,white)]">
-          <Check size={12} aria-hidden="true" />
-        </span>
-      </Show>
-      <Show when={props.opt.media?.image}>
-        <Thumb media={props.opt.media!} class="h-20 w-full" />
-      </Show>
-      <Show when={!props.opt.media?.image && props.opt.media?.icon}>
-        <IconBadge name={props.opt.media!.icon!} />
-      </Show>
-      <span class="flex items-center gap-2">
-        <span class={cn('font-medium', props.checked ? 'text-accent-foreground' : 'text-foreground')}>
-          {props.opt.label}
-        </span>
-        <Show when={props.opt.recommended}>
-          <RecommendedPill />
-        </Show>
-      </span>
-      <Show when={props.opt.description}>
-        <span id={props.descId} class="text-xs text-muted-foreground">
-          {props.opt.description}
-        </span>
-      </Show>
-      <Show when={props.opt.meta}>
-        <span class="text-xs font-medium text-foreground">{props.opt.meta}</span>
       </Show>
     </div>
   );

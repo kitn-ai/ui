@@ -1,7 +1,7 @@
 // tests/components/choice-card.test.tsx
 // Native Solid host path for ChoiceCard: a `host` prop's emit is called (not the
-// CustomEvent). Pick emits `action` (id + payload), single-shot, empty → error,
-// and the allowOther two-step emits `__other__` with the typed text.
+// CustomEvent). Select a row then Submit to emit `action` (id + payload), single-shot,
+// empty → error, and the unified allowOther flow emits `__other__` with the typed text.
 import { render, fireEvent } from '@solidjs/testing-library';
 import { ChoiceCard } from '../../src/components/choice-card';
 import type { CardEvent, CardHost, CardContext } from '../../src/primitives/card-contract';
@@ -30,7 +30,7 @@ test('ChoiceCard emits `ready` on mount', () => {
   expect(events.some((e) => e.kind === 'ready' && e.cardId === 'c1')).toBe(true);
 });
 
-test('picking an option emits `action` with id + echoed payload', () => {
+test('select a row then Submit emits `action` with id + echoed payload', () => {
   const { host, events } = makeHost();
   const { getByText } = render(() => (
     <ChoiceCard
@@ -44,15 +44,18 @@ test('picking an option emits `action` with id + echoed payload', () => {
       }}
     />
   ));
+  // Selecting a row alone does not emit.
   fireEvent.click(getByText('Pro'));
+  expect(action(events)).toBeUndefined();
+  fireEvent.click(getByText('Submit'));
   const a = action(events);
   expect(a?.action).toBe('pro');
   expect(a?.payload).toEqual({ plan: 'pro' });
 });
 
-test('single-shot: a second pick does not emit again', () => {
+test('single-shot: after Submit there is no radiogroup; cannot re-emit', () => {
   const { host, events } = makeHost();
-  const { getByText, queryByRole } = render(() => (
+  const { getByText, queryByRole, queryByText } = render(() => (
     <ChoiceCard
       host={host}
       cardId="c1"
@@ -60,15 +63,15 @@ test('single-shot: a second pick does not emit again', () => {
     />
   ));
   fireEvent.click(getByText('A'));
-  // After pick the radiogroup is replaced by the read-only resolved view.
+  fireEvent.click(getByText('Submit'));
+  // After Submit the radiogroup + Submit are replaced by the read-only resolved view.
   expect(queryByRole('radiogroup')).toBeNull();
-  // Attempt to interact with the resolved view (click the check-marked label).
-  fireEvent.click(getByText('A'));
+  expect(queryByText('Submit')).toBeNull();
   expect(events.filter((e) => e.kind === 'action').length).toBe(1);
   expect(action(events)?.action).toBe('a');
 });
 
-test('disabled option does not emit', () => {
+test('Submit stays disabled until a selectable row is selected; disabled rows cannot be selected', () => {
   const { host, events } = makeHost();
   const { getByText } = render(() => (
     <ChoiceCard
@@ -77,8 +80,15 @@ test('disabled option does not emit', () => {
       data={{ options: [{ id: 'a', label: 'A', disabled: true }, { id: 'b', label: 'B' }] }}
     />
   ));
+  const submit = getByText('Submit') as HTMLButtonElement;
+  expect(submit.disabled).toBe(true);
+  // Clicking the disabled row does not select it; Submit stays disabled.
   fireEvent.click(getByText('A'));
-  expect(action(events)).toBeUndefined();
+  expect(submit.disabled).toBe(true);
+  fireEvent.click(getByText('B'));
+  expect(submit.disabled).toBe(false);
+  fireEvent.click(submit);
+  expect(action(events)?.action).toBe('b');
 });
 
 test('empty options → inline error state + `error` event; no radios', () => {
@@ -91,25 +101,26 @@ test('empty options → inline error state + `error` event; no radios', () => {
   expect(events.some((e) => e.kind === 'error' && e.cardId === 'bad')).toBe(true);
 });
 
-test('allowOther two-step: select Other → reveals input + Submit; submit emits __other__ with text', () => {
+test('allowOther: select Other reveals input; the one Submit emits __other__ with text', () => {
   const { host, events } = makeHost();
-  const { getByText, getByLabelText, queryByText } = render(() => (
+  const { getByText, getByLabelText, queryByLabelText } = render(() => (
     <ChoiceCard
       host={host}
       cardId="c1"
       data={{ options: [{ id: 'a', label: 'A' }], allowOther: { label: 'Other…' } }}
     />
   ));
-  // No emit on selecting Other (two-step).
+  const submit = getByText('Submit') as HTMLButtonElement;
+  // Before selecting Other: no input, Submit disabled.
+  expect(queryByLabelText('Other…')).toBeNull();
+  expect(submit.disabled).toBe(true);
+
+  // Selecting Other reveals the input but does not emit; Submit still disabled (empty).
   fireEvent.click(getByText('Other…'));
   expect(action(events)).toBeUndefined();
+  expect(submit.disabled).toBe(true);
 
   const input = getByLabelText('Other…') as HTMLInputElement;
-  const submit = getByText('Submit') as HTMLButtonElement;
-  // Submit disabled while empty.
-  expect(submit.disabled).toBe(true);
-  expect(queryByText('Submit')).toBeTruthy();
-
   fireEvent.input(input, { target: { value: 'My custom answer' } });
   expect(submit.disabled).toBe(false);
   fireEvent.click(submit);

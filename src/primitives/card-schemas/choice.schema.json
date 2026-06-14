@@ -10,12 +10,9 @@
       "type": "string",
       "description": "Optional question/body text rendered above the options. Distinct from CardEnvelope.title (the card chrome heading)."
     },
-    "layout": {
+    "submitLabel": {
       "type": "string",
-      "enum": ["list", "grid"],
-      "default": "list",
-      "description": "Visual layout: 'list' = stacked selectable rows; 'grid' = responsive tiles. Radio semantics are identical; the grid is purely visual.",
-      "x-kc-control": "layout"
+      "description": "Label for the Submit button; default 'Submit'."
     },
     "options": {
       "type": "array",
@@ -40,14 +37,14 @@
             "type": "object",
             "description": "Optional leading media: an image URL or a named icon.",
             "properties": {
-              "image": { "type": "string", "description": "Image URL rendered as a thumbnail (list) or top media (grid)." },
+              "image": { "type": "string", "description": "Image URL rendered as a leading thumbnail in the row." },
               "imageAlt": { "type": "string", "description": "Accessible alt text for `image` (decorative if omitted)." },
               "icon": { "type": "string", "description": "Named icon rendered as a leading glyph." }
             }
           },
           "meta": {
             "type": "string",
-            "description": "Trailing freeform text (e.g. a price or badge), right-aligned in list layout."
+            "description": "Trailing freeform text (e.g. a price or badge), right-aligned in the row."
           },
           "recommended": {
             "type": "boolean",
@@ -66,7 +63,7 @@
       }
     },
     "allowOther": {
-      "description": "Optional free-text escape ('none of these / specify'). `true` renders a final 'Other…' option; an object customizes its `label`/`placeholder`. Selecting it reveals a text input + Submit; submitting emits `{ kind:'action', action:'__other__', payload:{ text } }`.",
+      "description": "Optional free-text escape ('none of these / specify'). `true` appends a final 'Other…' option; an object customizes its `label`/`placeholder`. Selecting it reveals a text input; the shared Submit button then emits `{ kind:'action', action:'__other__', payload:{ text } }`.",
       "x-kc-control": "allow-other"
     }
   }

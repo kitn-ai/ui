@@ -104,7 +104,6 @@ export type {
   ChoiceCardProps,
   ChoiceOption,
   ChoiceOptionMedia,
-  ChoiceLayout,
   ChoiceAllowOther,
   ChoiceCardData,
   ChoiceCardEnvelope,

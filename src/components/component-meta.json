@@ -352,8 +352,8 @@
     "props": [
       {
         "name": "variant",
-        "type": "undefined | \"list\" | \"grid\" | \"inline\"",
-        "displayType": "undefined | \"list\" | \"grid\" | \"inline\"",
+        "type": "undefined | \"grid\" | \"inline\" | \"list\"",
+        "displayType": "undefined | \"grid\" | \"inline\" | \"list\"",
         "optional": true,
         "scalar": true,
         "description": "",
@@ -826,8 +826,8 @@
     "props": [
       {
         "name": "data",
-        "type": "undefined | { prompt?: undefined | string; options: { id: string; label: string; description?: undefined | string; media?: undefined | { image?: undefined | string; imageAlt?: undefined | string; icon?: undefined | string }; meta?: undefined | string; recommended?: undefined | false | true; disabled?: undefined | false | true; payload?: unknown }[]; layout?: undefined | \"list\" | \"grid\"; allowOther?: undefined | false | true | { label?: undefined | string; placeholder?: undefined | string } }",
-        "displayType": "undefined | { prompt?: undefined | string; options: { id: string; label: string; description?: undefined | string; media?: undefined | { image?: undefined | string; imageAlt?: undefined | string; icon?: undefined | string }; meta?: undefined | string; recommended?: undefined | false | true; disabled?: undefined | false | true; payload?: unknown }[]; layout?: undefined | \"list\" | \"grid\"; allowOther?: undefined | false | true | { label?: undefined | string; placeholder?: undefined | string } }",
+        "type": "undefined | { prompt?: undefined | string; options: { id: string; label: string; description?: undefined | string; media?: undefined | { image?: undefined | string; imageAlt?: undefined | string; icon?: undefined | string }; meta?: undefined | string; recommended?: undefined | false | true; disabled?: undefined | false | true; payload?: unknown }[]; allowOther?: undefined | false | true | { label?: undefined | string; placeholder?: undefined | string }; submitLabel?: undefined | string }",
+        "displayType": "undefined | { prompt?: undefined | string; options: { id: string; label: string; description?: undefined | string; media?: undefined | { image?: undefined | string; imageAlt?: undefined | string; icon?: undefined | string }; meta?: undefined | string; recommended?: undefined | false | true; disabled?: undefined | false | true; payload?: unknown }[]; allowOther?: undefined | false | true | { label?: undefined | string; placeholder?: undefined | string }; submitLabel?: undefined | string }",
         "optional": true,
         "scalar": false,
         "description": "The choice definition (CardEnvelope.data)."
@@ -876,7 +876,7 @@
     "slots": [],
     "tokens": [],
     "extendsHtmlAttributes": false,
-    "description": "`ChoiceCard` — a single-select \"pick one of N rich options\" card (plans, products, flights, quick replies) inside `Card` chrome. Activating an option emits the Card contract's **`action`** verb (`{ kind:'action', cardId, action: option.id, payload }`) and resolves the card (chosen option marked, others disabled) so the same pick can't double-fire. An optional `allowOther` free-text escape renders a final \"Other…\" option that reveals an inline input + Submit (emitting `action:'__other__'` with `{ text }`). Emits `ready` on mount and `error` for an unusable definition (inline error state). The options are a WAI-ARIA radiogroup with roving tabindex."
+    "description": "`ChoiceCard` — a single-select \"pick one of N rich options\" card (plans, products, flights, quick replies) inside `Card` chrome. The options are a WAI-ARIA radiogroup (list rows) with roving tabindex: clicking a row (or Space/Enter on the focused row) **selects** it locally without emitting; a **Submit** button below the list then emits the Card contract's **`action`** verb (`{ kind:'action', cardId, action: option.id, payload }`) and resolves the card (chosen option shown read-only) so the same pick can't double-fire. An optional `allowOther` free-text escape appends a selectable \"Other…\" row; selecting it reveals an inline text input, and the same Submit emits `action:'__other__'` with `{ text }`. Emits `ready` on mount and `error` for an unusable definition (inline error state)."
   },
   {
     "name": "CircularLoader",
