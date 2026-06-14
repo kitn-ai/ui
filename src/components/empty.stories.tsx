@@ -345,7 +345,7 @@ export const WithInput: Story = {
             <PromptInput value={value()} onValueChange={setValue} onSubmit={() => setValue('')} class="w-full">
               <PromptInputTextarea placeholder="Ask anything..." class="min-h-[44px] px-3 pt-2.5" />
               <PromptInputActions class="justify-end px-2 pb-2">
-                <Button size="icon-sm" class="rounded-full" disabled={!value().trim()}>
+                <Button size="icon-sm" class="rounded-full" aria-label="Send message" disabled={!value().trim()}>
                   <ArrowUp class="size-4" />
                 </Button>
               </PromptInputActions>

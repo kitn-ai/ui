@@ -24,7 +24,7 @@ export const BasicInput: Story = {
         <PromptInput value={value()} onValueChange={setValue} onSubmit={() => setValue('')}>
           <PromptInputTextarea placeholder="Ask anything..." />
           <PromptInputActions class="justify-end">
-            <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()}>
+            <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()} aria-label="Send message">
               <ArrowUp class="size-4" />
             </Button>
           </PromptInputActions>
@@ -72,7 +72,7 @@ export const WithSuggestions: Story = {
         <PromptInput value={value()} onValueChange={setValue} onSubmit={() => setValue('')}>
           <PromptInputTextarea placeholder="Ask about this document..." />
           <PromptInputActions class="justify-end">
-            <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()}>
+            <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()} aria-label="Send message">
               <ArrowUp class="size-4" />
             </Button>
           </PromptInputActions>
@@ -93,12 +93,12 @@ export const WithActionButtons: Story = {
           <PromptInputTextarea placeholder="Message..." />
           <PromptInputActions class="justify-between">
             <div class="flex items-center gap-1">
-              <Button variant="ghost" size="icon-sm"><Paperclip class="size-4 text-muted-foreground" /></Button>
-              <Button variant="ghost" size="icon-sm"><Globe class="size-4 text-muted-foreground" /></Button>
-              <Button variant="ghost" size="icon-sm"><Mic class="size-4 text-muted-foreground" /></Button>
-              <Button variant="ghost" size="icon-sm"><Sparkles class="size-4 text-muted-foreground" /></Button>
+              <Button variant="ghost" size="icon-sm" aria-label="Attach file"><Paperclip class="size-4 text-muted-foreground" /></Button>
+              <Button variant="ghost" size="icon-sm" aria-label="Search the web"><Globe class="size-4 text-muted-foreground" /></Button>
+              <Button variant="ghost" size="icon-sm" aria-label="Voice input"><Mic class="size-4 text-muted-foreground" /></Button>
+              <Button variant="ghost" size="icon-sm" aria-label="AI suggestions"><Sparkles class="size-4 text-muted-foreground" /></Button>
             </div>
-            <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()}>
+            <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()} aria-label="Send message">
               <ArrowUp class="size-4" />
             </Button>
           </PromptInputActions>
@@ -119,9 +119,9 @@ export const StreamingState: Story = {
           <PromptInputActions class="justify-between">
             <div class="flex items-center gap-2">
               <Loader variant="typing" size="sm" />
-              <span class="text-xs text-muted-foreground">Generating...</span>
+              <span class="text-xs text-foreground">Generating...</span>
             </div>
-            <Button variant="outline" size="icon-sm" class="rounded-full">
+            <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Stop">
               <Square class="size-3" />
             </Button>
           </PromptInputActions>
@@ -135,9 +135,9 @@ export const StreamingState: Story = {
           <PromptInputActions class="justify-between">
             <div class="flex items-center gap-2">
               <Loader variant="dots" size="sm" />
-              <span class="text-xs text-muted-foreground">Thinking...</span>
+              <span class="text-xs text-foreground">Thinking...</span>
             </div>
-            <Button variant="outline" size="icon-sm" class="rounded-full">
+            <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Stop">
               <Square class="size-3" />
             </Button>
           </PromptInputActions>
@@ -166,8 +166,8 @@ export const WithModelSelector: Story = {
           <PromptInputActions class="justify-between">
             <ModelSwitcher models={models} currentModelId={modelId()} onModelChange={setModelId} />
             <div class="flex items-center gap-1">
-              <Button variant="ghost" size="icon-sm"><Paperclip class="size-4 text-muted-foreground" /></Button>
-              <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()}>
+              <Button variant="ghost" size="icon-sm" aria-label="Attach file"><Paperclip class="size-4 text-muted-foreground" /></Button>
+              <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()} aria-label="Send message">
                 <ArrowUp class="size-4" />
               </Button>
             </div>

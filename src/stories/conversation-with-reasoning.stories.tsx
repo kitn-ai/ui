@@ -125,9 +125,9 @@ Move to a custom sync layer if:
               </MessageContent>
 
               <MessageActions>
-                <Button variant="ghost" size="icon-sm"><Copy class="size-3.5" /></Button>
-                <Button variant="ghost" size="icon-sm"><ThumbsUp class="size-3.5" /></Button>
-                <Button variant="ghost" size="icon-sm"><ThumbsDown class="size-3.5" /></Button>
+                <Button variant="ghost" size="icon-sm" aria-label="Copy message"><Copy class="size-3.5" /></Button>
+                <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
+                <Button variant="ghost" size="icon-sm" aria-label="Bad response"><ThumbsDown class="size-3.5" /></Button>
               </MessageActions>
             </div>
           </Message>
@@ -140,7 +140,7 @@ Move to a custom sync layer if:
         <PromptInput>
           <PromptInputTextarea placeholder="Ask a follow-up..." />
           <PromptInputActions class="justify-end">
-            <Button variant="default" size="icon-sm" class="rounded-full">
+            <Button variant="default" size="icon-sm" class="rounded-full" aria-label="Send message">
               <ArrowUp class="size-4" />
             </Button>
           </PromptInputActions>

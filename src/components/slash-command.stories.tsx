@@ -44,7 +44,7 @@ function SlashDemo(props: { commands: SlashCommandItem[]; activeIds?: string[]; 
             />
           </PromptInput>
         </div>
-        <p class="text-xs text-muted-foreground/40 mt-2 text-center">
+        <p class="text-xs text-muted-foreground mt-2 text-center">
           Type <code class="bg-muted px-1 rounded">/</code> to see commands. Arrow keys + Tab/Enter to select.
         </p>
       </div>

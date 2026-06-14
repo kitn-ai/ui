@@ -30,6 +30,10 @@ function ChatContainerRoot(props: ChatContainerRootProps) {
         ref={ref}
         class={cn('flex flex-col overflow-y-auto', local.class)}
         role="log"
+        // Keyboard users must be able to scroll the conversation even when no
+        // message contains a focusable control (WCAG 2.1.1 — axe
+        // `scrollable-region-focusable`).
+        tabindex={0}
         {...rest}
       >
         {local.children}

@@ -31,7 +31,7 @@ const userMsg2 = 'And from what I understand, does that need to be another brows
 
 function CopyButton(props: { text: string }) {
   return (
-    <button onClick={() => navigator.clipboard.writeText(props.text)}>
+    <button aria-label="Copy message" onClick={() => navigator.clipboard.writeText(props.text)}>
       <Copy size={14} />
     </button>
   );
@@ -130,6 +130,7 @@ export const ChatGPTStyle: Story = {
                 <Button
                   size="icon-sm"
                   class="rounded-full"
+                  aria-label="Send message"
                   disabled={!input().trim()}
                 >
                   <ArrowUp class="size-4" />

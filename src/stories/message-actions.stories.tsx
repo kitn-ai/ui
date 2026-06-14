@@ -46,10 +46,10 @@ async fn fetch_user(id: u64) -> Result<User, AppError> {
 Use \`anyhow::Result\` for applications and \`thiserror\` for libraries to define custom error types.`}
           </MessageContent>
           <MessageActions class="opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button variant="ghost" size="icon-sm"><Copy class="size-3.5" /></Button>
-            <Button variant="ghost" size="icon-sm"><ThumbsUp class="size-3.5" /></Button>
-            <Button variant="ghost" size="icon-sm"><ThumbsDown class="size-3.5" /></Button>
-            <Button variant="ghost" size="icon-sm"><RefreshCw class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Copy message"><Copy class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Bad response"><ThumbsDown class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Regenerate response"><RefreshCw class="size-3.5" /></Button>
           </MessageActions>
         </div>
       </Message>
@@ -88,12 +88,12 @@ Import Tailwind in your main CSS file:
 \`\`\``}
           </MessageContent>
           <MessageActions>
-            <Button variant="ghost" size="icon-sm"><Copy class="size-3.5" /></Button>
-            <Button variant="ghost" size="icon-sm"><ThumbsUp class="size-3.5" /></Button>
-            <Button variant="ghost" size="icon-sm"><ThumbsDown class="size-3.5" /></Button>
-            <Button variant="ghost" size="icon-sm"><RefreshCw class="size-3.5" /></Button>
-            <Button variant="ghost" size="icon-sm"><Share class="size-3.5" /></Button>
-            <Button variant="ghost" size="icon-sm"><Bookmark class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Copy message"><Copy class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Bad response"><ThumbsDown class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Regenerate response"><RefreshCw class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Share"><Share class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Bookmark"><Bookmark class="size-3.5" /></Button>
           </MessageActions>
         </div>
       </Message>
@@ -120,11 +120,11 @@ export const WithCopyConfirmation: Story = {
               The current LTS version of Node.js is 22.x, which includes built-in support for the fetch API, test runner, and watch mode.
             </MessageContent>
             <MessageActions>
-              <Button variant="ghost" size="icon-sm" onClick={handleCopy}>
+              <Button variant="ghost" size="icon-sm" aria-label={copied() ? 'Copied' : 'Copy message'} onClick={handleCopy}>
                 {copied() ? <Check class="size-3.5 text-green-500" /> : <Copy class="size-3.5" />}
               </Button>
-              <Button variant="ghost" size="icon-sm"><ThumbsUp class="size-3.5" /></Button>
-              <Button variant="ghost" size="icon-sm"><ThumbsDown class="size-3.5" /></Button>
+              <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
+              <Button variant="ghost" size="icon-sm" aria-label="Bad response"><ThumbsDown class="size-3.5" /></Button>
             </MessageActions>
           </div>
         </Message>

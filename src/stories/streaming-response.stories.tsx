@@ -107,7 +107,7 @@ export const TypewriterStream: Story = {
               <PromptInput onSubmit={startStream}>
                 <PromptInputTextarea placeholder="Click send to start streaming..." />
                 <PromptInputActions class="justify-end">
-                  <Button variant="default" size="icon-sm" class="rounded-full" onClick={startStream}>
+                  <Button variant="default" size="icon-sm" class="rounded-full" onClick={startStream} aria-label="Send message">
                     <ArrowUp class="size-4" />
                   </Button>
                 </PromptInputActions>
@@ -167,8 +167,8 @@ export const WaitingForFirstToken: Story = {
         <PromptInput disabled isLoading>
           <PromptInputTextarea placeholder="Waiting..." />
           <PromptInputActions class="justify-between">
-            <span class="text-xs text-muted-foreground">Waiting for response...</span>
-            <Button variant="outline" size="icon-sm" class="rounded-full">
+            <span class="text-xs text-foreground">Waiting for response...</span>
+            <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Stop">
               <Square class="size-3" />
             </Button>
           </PromptInputActions>

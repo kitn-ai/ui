@@ -92,7 +92,7 @@ function renderHighlighted(text: string, highlight: string) {
   const index = textLower.indexOf(highlightLower);
 
   if (index === -1) {
-    return <span class="text-muted-foreground whitespace-pre-wrap">{text}</span>;
+    return <span class="text-foreground/70 whitespace-pre-wrap">{text}</span>;
   }
 
   const before = text.substring(0, index);
@@ -102,11 +102,11 @@ function renderHighlighted(text: string, highlight: string) {
   return (
     <>
       <Show when={before}>
-        <span class="text-muted-foreground whitespace-pre-wrap">{before}</span>
+        <span class="text-foreground/70 whitespace-pre-wrap">{before}</span>
       </Show>
       <span class="text-primary font-medium whitespace-pre-wrap">{matched}</span>
       <Show when={after}>
-        <span class="text-muted-foreground whitespace-pre-wrap">{after}</span>
+        <span class="text-foreground/70 whitespace-pre-wrap">{after}</span>
       </Show>
     </>
   );

@@ -187,8 +187,8 @@ function SlashCommand(props: SlashCommandProps) {
                           "w-full flex items-center gap-2 px-3 text-left transition-colors",
                           isCompact ? "py-1" : "py-1.5",
                           selectedIndex() === idx
-                            ? "bg-muted/50 text-foreground"
-                            : "text-foreground/80 hover:bg-muted/30",
+                            ? "bg-muted text-foreground"
+                            : "text-foreground hover:bg-muted",
                         )}
                         onMouseEnter={() => setSelectedIndex(idx)}
                         onClick={() => selectItem(item)}

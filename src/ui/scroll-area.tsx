@@ -6,7 +6,9 @@ export interface ScrollAreaProps extends JSX.HTMLAttributes<HTMLDivElement> { ch
 export function ScrollArea(props: ScrollAreaProps) {
   const [local, rest] = splitProps(props, ['children', 'class']);
   return (
-    <div class={cn('overflow-y-auto scrollbar-thin', local.class)} {...rest}>
+    // tabindex=0 keeps the scroll region reachable by keyboard when it has no
+    // focusable descendants (WCAG 2.1.1 — axe `scrollable-region-focusable`).
+    <div tabindex={0} class={cn('overflow-y-auto scrollbar-thin', local.class)} {...rest}>
       {local.children}
     </div>
   );

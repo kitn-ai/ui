@@ -256,6 +256,7 @@ export function ChatScene(props: { class?: string }) {
           </div>
           <div class="flex items-center gap-2">
             <select
+              aria-label="Reading size"
               class="bg-muted/40 text-xs text-muted-foreground rounded-lg px-2 py-1.5 outline-none hover:bg-muted/60 transition-colors cursor-pointer"
               value={proseSize()}
               onChange={(e) => setProseSize(e.currentTarget.value as ProseSize)}
@@ -305,10 +306,10 @@ export function ChatScene(props: { class?: string }) {
                     understand why.
                   </MessageContent>
                   <MessageActions class="flex gap-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Edit message">
                       <Pencil class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Copy message">
                       <Copy class="size-3.5" />
                     </Button>
                   </MessageActions>
@@ -325,16 +326,16 @@ export function ChatScene(props: { class?: string }) {
                     {assistantResponse1}
                   </MessageContent>
                   <MessageActions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Copy message">
                       <Copy class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Good response">
                       <ThumbsUp class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Bad response">
                       <ThumbsDown class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Regenerate response">
                       <RefreshCw class="size-3.5" />
                     </Button>
                   </MessageActions>
@@ -349,10 +350,10 @@ export function ChatScene(props: { class?: string }) {
                     useEffect?
                   </MessageContent>
                   <MessageActions class="flex gap-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Edit message">
                       <Pencil class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Copy message">
                       <Copy class="size-3.5" />
                     </Button>
                   </MessageActions>
@@ -369,16 +370,16 @@ export function ChatScene(props: { class?: string }) {
                     {assistantResponse2}
                   </MessageContent>
                   <MessageActions class="-ml-2.5 flex gap-0">
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Copy message">
                       <Copy class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Good response">
                       <ThumbsUp class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Bad response">
                       <ThumbsDown class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Regenerate response">
                       <RefreshCw class="size-3.5" />
                     </Button>
                   </MessageActions>
@@ -445,16 +446,16 @@ export function ChatScene(props: { class?: string }) {
 SolidJS's fine-grained reactivity really shines here — updating a single item in React triggers a full virtual DOM diff of all 10,000 items, while SolidJS surgically updates only the changed DOM node.`}
                   </MessageContent>
                   <MessageActions class="-ml-2.5 flex gap-0">
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Copy message">
                       <Copy class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Good response">
                       <ThumbsUp class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Bad response">
                       <ThumbsDown class="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon-sm" class="rounded-full">
+                    <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Regenerate response">
                       <RefreshCw class="size-3.5" />
                     </Button>
                   </MessageActions>
@@ -533,26 +534,26 @@ SolidJS's fine-grained reactivity really shines here — updating a single item 
                 />
                 <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
                   <div class="flex items-center gap-2">
-                    <Button variant="outline" size="icon-sm" class="rounded-full">
+                    <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Add">
                       <Plus class="size-4" />
                     </Button>
-                    <Button variant="outline" size="sm" class="rounded-full gap-1">
+                    <Button variant="outline" size="sm" class="rounded-full gap-1" aria-label="Search the web">
                       <Globe class="size-4" />
                       Search
                     </Button>
-                    <Button variant="outline" size="icon-sm" class="rounded-full">
+                    <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="More options">
                       <MoreHorizontal class="size-4" />
                     </Button>
                   </div>
                   <div class="flex items-center gap-2">
-                    <Button variant="outline" size="icon-sm" class="rounded-full">
+                    <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Voice input">
                       <Mic class="size-4" />
                     </Button>
                     <Button
                       size="icon-sm"
                       class="rounded-full"
                       disabled={!inputValue().trim()}
-                    >
+                     aria-label="Send message">
                       <ArrowUp class="size-4" />
                     </Button>
                   </div>

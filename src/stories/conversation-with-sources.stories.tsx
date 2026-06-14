@@ -75,9 +75,9 @@ The pattern is consistent: CPU-intensive tasks like **image processing, cryptogr
               </SourceList>
 
               <MessageActions>
-                <Button variant="ghost" size="icon-sm"><Copy class="size-3.5" /></Button>
-                <Button variant="ghost" size="icon-sm"><ThumbsUp class="size-3.5" /></Button>
-                <Button variant="ghost" size="icon-sm"><ThumbsDown class="size-3.5" /></Button>
+                <Button variant="ghost" size="icon-sm" aria-label="Copy message"><Copy class="size-3.5" /></Button>
+                <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
+                <Button variant="ghost" size="icon-sm" aria-label="Bad response"><ThumbsDown class="size-3.5" /></Button>
               </MessageActions>
             </div>
           </Message>
@@ -139,9 +139,9 @@ The consensus from the Chrome team's analysis is: **use Wasm for compute-heavy i
               </SourceList>
 
               <MessageActions>
-                <Button variant="ghost" size="icon-sm"><Copy class="size-3.5" /></Button>
-                <Button variant="ghost" size="icon-sm"><ThumbsUp class="size-3.5" /></Button>
-                <Button variant="ghost" size="icon-sm"><ThumbsDown class="size-3.5" /></Button>
+                <Button variant="ghost" size="icon-sm" aria-label="Copy message"><Copy class="size-3.5" /></Button>
+                <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
+                <Button variant="ghost" size="icon-sm" aria-label="Bad response"><ThumbsDown class="size-3.5" /></Button>
               </MessageActions>
             </div>
           </Message>
@@ -154,7 +154,7 @@ The consensus from the Chrome team's analysis is: **use Wasm for compute-heavy i
         <PromptInput>
           <PromptInputTextarea placeholder="Ask about WebAssembly..." />
           <PromptInputActions class="justify-end">
-            <Button variant="default" size="icon-sm" class="rounded-full">
+            <Button variant="default" size="icon-sm" class="rounded-full" aria-label="Send message">
               <ArrowUp class="size-4" />
             </Button>
           </PromptInputActions>
