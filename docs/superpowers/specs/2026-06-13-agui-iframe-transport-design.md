@@ -297,7 +297,7 @@ export function negotiateVersion(hostVersions: string[], mine: string[]): string
 | `teardown` | — | on dismiss / iframe reuse | runtime unmounts + stops observers |
 
 **Theme push (no FOUC):** the host sends `context` with `theme.tokens` (the
-resolved `--kitn-*` values) **before** `render`, so the runtime applies tokens to
+resolved `--kc-*` values) **before** `render`, so the runtime applies tokens to
 its `:root` before first paint. On host theme toggle, a fresh `context` re-pushes
 tokens; the runtime live-updates CSS variables (no reload).
 

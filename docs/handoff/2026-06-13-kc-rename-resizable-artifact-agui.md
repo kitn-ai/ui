@@ -27,7 +27,7 @@ Review-before-commit/merge per `[[review-before-commit]]`.
    `<kc-chat>`; features `kc-message`, `kc-tool`, `kc-conversations`, …;
    primitives `kc-loader`, `kc-code-block`, … — single tier. **Kept brand-level
    (unchanged):** `@kitnai/chat` pkg, `dist/kitn-chat.es.js` bundle + `KitnChat`
-   UMD global, `--kitn-*` design tokens, `defineKitnElement` factory. React
+   UMD global, `--kc-*` design tokens, `defineKitnElement` factory. React
    wrappers follow (`KcChat`, `KcTool`). Element story files use **bare names**
    beside facades (`tool.stories.tsx`). Decision rationale + the long
    brand-vs-product → kc- journey is in `[[kitn-chat-state]]`. Done via scripted

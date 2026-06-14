@@ -50,7 +50,7 @@ This is the crux. The question is not "could MCP add value in theory" but "does 
 
 **Offline / no subprocess required.** Agents running in CI, air-gapped environments, or constrained sandboxes can read static files. An MCP server requires a running subprocess.
 
-**`llms.txt` is a proven pattern.** A well-written `llms.txt` at the package root — a compact prose summary of the library's mental model, its two-layer architecture, the property/event/attribute contract, and the key gotchas (Shadow DOM isolation, controlled data model, `new array + new object` for streaming re-renders, `--kitn-*` CSS override surface) — costs one afternoon to write and essentially never needs updating unless the architecture changes. Combined with the machine-readable manifest, it gives agents exactly what they need.
+**`llms.txt` is a proven pattern.** A well-written `llms.txt` at the package root — a compact prose summary of the library's mental model, its two-layer architecture, the property/event/attribute contract, and the key gotchas (Shadow DOM isolation, controlled data model, `new array + new object` for streaming re-renders, `--kc-*` CSS override surface) — costs one afternoon to write and essentially never needs updating unless the architecture changes. Combined with the machine-readable manifest, it gives agents exactly what they need.
 
 ### Where MCP genuinely wins
 
@@ -119,7 +119,7 @@ The cost-to-benefit ratio is inverted for this library's current scale: one new 
 | Manifest field-quality pass | ~2 hours | Medium — the `kitn-chat` element's fields currently have empty `description` strings in the manifest; filling them in improves agent queries significantly |
 | Link manifest in `llms.txt` | Trivial | Medium — tells agents where to find the structured data |
 
-The manifest generation script (`scripts/gen-element-api.mjs`) is already the right foundation: it derives structured docs from TypeScript source automatically. The missing piece is a human-readable companion (`llms.txt`) that explains the mental model an LLM needs to use those docs correctly (the controlled-data pattern, Shadow DOM implications, the `new array + new object` streaming requirement, `--kitn-*` token surface).
+The manifest generation script (`scripts/gen-element-api.mjs`) is already the right foundation: it derives structured docs from TypeScript source automatically. The missing piece is a human-readable companion (`llms.txt`) that explains the mental model an LLM needs to use those docs correctly (the controlled-data pattern, Shadow DOM implications, the `new array + new object` streaming requirement, `--kc-*` token surface).
 
 ### Trigger to revisit
 
