@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.11.0](https://github.com/kitn-ai/chat/compare/@kitn.ai/chat-v0.10.0...@kitn.ai/chat-v0.11.0) (2026-06-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **events:** Two element-event API consolidations following the kc-message `messageaction` pattern (single event with discriminant).
+
+### Features
+
+* **cards:** kc-choice single-select option card ([aab58c9](https://github.com/kitn-ai/chat/commit/aab58c9596da7d479e223ef9cdf8cc5a046d72ff))
+* **cards:** kc-choice single-select option card ([1dd0250](https://github.com/kitn-ai/chat/commit/1dd02501f2e5a0d59ba43757aa5c49e9f9843274))
+
+
+### Bug Fixes
+
+* **stories:** artifact fixtures 404 on GitHub Pages (root-absolute base path) ([9e00e4f](https://github.com/kitn-ai/chat/commit/9e00e4f65d28ec0ad6057b547df54300d7c4d819))
+* **stories:** infer boolean/select controls from element-meta type strings ([2ad2d39](https://github.com/kitn-ai/chat/commit/2ad2d393ecc7290c71af64b9ef7a84ce4e5c7e25))
+* **stories:** infer boolean/select controls from element-meta type strings ([4d7a4ed](https://github.com/kitn-ai/chat/commit/4d7a4edcfef62e3fe6e1bc0ae7a73421fa4bf755))
+
+
+### Code Refactoring
+
+* **events:** feedback-bar onFeedback + kc-conversations conversationselect ([e801740](https://github.com/kitn-ai/chat/commit/e801740993d8914b957caf945fbfd23a6f4b612f))
+
 ## [0.10.0](https://github.com/kitn-ai/chat/compare/@kitn.ai/chat-v0.9.0...@kitn.ai/chat-v0.10.0) (2026-06-14)
 
 
