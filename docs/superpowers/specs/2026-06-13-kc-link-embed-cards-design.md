@@ -136,8 +136,8 @@ The `data` of the `CardEnvelope` is what these schemas describe.
   "title": "LinkCardData",
   "description": "Rich link / Open-Graph preview payload. The card renders from this; it never fetches.",
   "type": "object",
-  "x-kitn-card-type": "link",
-  "x-kitn-contract-version": "1",
+  "x-kc-card-type": "link",
+  "x-kc-contract-version": "1",
   "required": ["url"],
   "additionalProperties": false,
   "properties": {
@@ -145,7 +145,7 @@ The `data` of the `CardEnvelope` is what these schemas describe.
       "type": "string",
       "format": "uri",
       "description": "Canonical destination. Opened via the contract `open` verb (target 'tab').",
-      "x-kitn-format": "url"
+      "x-kc-format": "url"
     },
     "title": {
       "type": "string",
@@ -161,7 +161,7 @@ The `data` of the `CardEnvelope` is what these schemas describe.
       "type": "string",
       "format": "uri",
       "description": "Preview image (og:image). Optional; the card degrades gracefully when missing or it fails to load.",
-      "x-kitn-format": "url"
+      "x-kc-format": "url"
     },
     "imageAlt": {
       "type": "string",
@@ -172,7 +172,7 @@ The `data` of the `CardEnvelope` is what these schemas describe.
       "type": "string",
       "format": "uri",
       "description": "Site favicon shown next to the domain.",
-      "x-kitn-format": "url"
+      "x-kc-format": "url"
     },
     "domain": {
       "type": "string",
@@ -213,8 +213,8 @@ export interface LinkCardData {
 export type LinkCardEnvelope = CardEnvelope<'link', LinkCardData>;
 ```
 
-**`x-kitn-*` hints used:** `x-kitn-card-type` (the discriminator, for tooling),
-`x-kitn-contract-version` (matches `CARD_CONTRACT_VERSION`), `x-kitn-format: 'url'`
+**`x-kc-*` hints used:** `x-kc-card-type` (the discriminator, for tooling),
+`x-kc-contract-version` (matches `CARD_CONTRACT_VERSION`), `x-kc-format: 'url'`
 (marks URL-ish fields so the boundary validator / authoring tools can flag scheme
 issues — only `http`/`https` are renderable as links).
 
@@ -231,8 +231,8 @@ issues — only `http`/`https` are renderable as links).
   "title": "EmbedCardData",
   "description": "Lazy media-embed payload (YouTube / Vimeo / generic player URL).",
   "type": "object",
-  "x-kitn-card-type": "embed",
-  "x-kitn-contract-version": "1",
+  "x-kc-card-type": "embed",
+  "x-kc-contract-version": "1",
   "required": ["provider"],
   "additionalProperties": false,
   "properties": {
@@ -240,7 +240,7 @@ issues — only `http`/`https` are renderable as links).
       "type": "string",
       "enum": ["youtube", "vimeo", "generic"],
       "description": "Media provider. 'generic' frames `url` directly (must be an https embeddable player URL).",
-      "x-kitn-control": "select"
+      "x-kc-control": "select"
     },
     "id": {
       "type": "string",
@@ -252,7 +252,7 @@ issues — only `http`/`https` are renderable as links).
       "type": "string",
       "format": "uri",
       "description": "Full media/watch URL. For youtube/vimeo it is parsed to an id; for 'generic' it is the embeddable player src (https only).",
-      "x-kitn-format": "url"
+      "x-kc-format": "url"
     },
     "title": {
       "type": "string",
@@ -263,20 +263,20 @@ issues — only `http`/`https` are renderable as links).
       "type": "string",
       "format": "uri",
       "description": "Thumbnail shown before play. When omitted, youtube/vimeo derive a default thumbnail; 'generic' shows a neutral play placeholder.",
-      "x-kitn-format": "url"
+      "x-kc-format": "url"
     },
     "start": {
       "type": "integer",
       "minimum": 0,
       "description": "Optional start offset in seconds.",
-      "x-kitn-unit": "seconds"
+      "x-kc-unit": "seconds"
     },
     "aspectRatio": {
       "type": "string",
       "enum": ["16:9", "4:3", "1:1", "9:16"],
       "default": "16:9",
       "description": "Player box aspect ratio (CSS aspect-ratio).",
-      "x-kitn-control": "select"
+      "x-kc-control": "select"
     }
   },
   "allOf": [
@@ -315,9 +315,9 @@ export interface EmbedCardData {
 export type EmbedCardEnvelope = CardEnvelope<'embed', EmbedCardData>;
 ```
 
-**`x-kitn-*` hints used:** `x-kitn-card-type`, `x-kitn-contract-version`,
-`x-kitn-format: 'url'`, `x-kitn-control: 'select'` (authoring/Storybook control
-hint for enum fields), `x-kitn-unit: 'seconds'` (numeric unit hint).
+**`x-kc-*` hints used:** `x-kc-card-type`, `x-kc-contract-version`,
+`x-kc-format: 'url'`, `x-kc-control: 'select'` (authoring/Storybook control
+hint for enum fields), `x-kc-unit: 'seconds'` (numeric unit hint).
 
 ---
 

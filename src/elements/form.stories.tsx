@@ -64,17 +64,17 @@ const FEEDBACK: FormDefinition = {
   title: 'How did we do?',
   description: 'Two quick questions.',
   required: ['rating', 'contactOk'],
-  'x-kitn-order': ['rating', 'comments', 'plan', 'contactOk'],
-  'x-kitn-submitLabel': 'Send feedback',
-  'x-kitn-actions': [{ id: 'skip', label: 'Skip', variant: 'ghost' }],
+  'x-kc-order': ['rating', 'comments', 'plan', 'contactOk'],
+  'x-kc-submitLabel': 'Send feedback',
+  'x-kc-actions': [{ id: 'skip', label: 'Skip', variant: 'ghost' }],
   properties: {
-    rating: { type: 'integer', title: 'Overall rating', minimum: 1, maximum: 5, 'x-kitn-widget': 'rating' },
+    rating: { type: 'integer', title: 'Overall rating', minimum: 1, maximum: 5, 'x-kc-widget': 'rating' },
     comments: {
       type: 'string',
       title: 'Comments',
       maxLength: 500,
-      'x-kitn-widget': 'textarea',
-      'x-kitn-placeholder': "What worked, what didn't…",
+      'x-kc-widget': 'textarea',
+      'x-kc-placeholder': "What worked, what didn't…",
     },
     plan: { type: 'string', title: 'Your plan', enum: ['free', 'pro', 'team'], default: 'free' },
     contactOk: { type: 'boolean', title: 'OK to contact me about this', default: false },
@@ -84,21 +84,21 @@ const FEEDBACK: FormDefinition = {
 const ALL_WIDGETS: FormDefinition = {
   type: 'object',
   title: 'Every widget',
-  'x-kitn-submitLabel': 'Submit all',
+  'x-kc-submitLabel': 'Submit all',
   properties: {
     name: { type: 'string', title: 'Name' },
     bio: { type: 'string', title: 'Bio', maxLength: 300 },
     email: { type: 'string', title: 'Email', format: 'email' },
     website: { type: 'string', title: 'Website', format: 'uri' },
     birthday: { type: 'string', title: 'Birthday', format: 'date' },
-    secret: { type: 'string', title: 'Password', 'x-kitn-widget': 'password' },
+    secret: { type: 'string', title: 'Password', 'x-kc-widget': 'password' },
     size: { type: 'string', title: 'Size', enum: ['S', 'M', 'L'] },
     country: { type: 'string', title: 'Country', enum: ['US', 'UK', 'DE', 'FR', 'JP'] },
     age: { type: 'integer', title: 'Age', minimum: 0, maximum: 120 },
-    volume: { type: 'integer', title: 'Volume', minimum: 0, maximum: 11, 'x-kitn-widget': 'slider' },
-    stars: { type: 'integer', title: 'Stars', minimum: 1, maximum: 5, 'x-kitn-widget': 'rating' },
+    volume: { type: 'integer', title: 'Volume', minimum: 0, maximum: 11, 'x-kc-widget': 'slider' },
+    stars: { type: 'integer', title: 'Stars', minimum: 1, maximum: 5, 'x-kc-widget': 'rating' },
     notify: { type: 'boolean', title: 'Email me updates' },
-    agree: { type: 'boolean', title: 'I agree', 'x-kitn-widget': 'checkbox' },
+    agree: { type: 'boolean', title: 'I agree', 'x-kc-widget': 'checkbox' },
     tags: { type: 'array', title: 'Tags', items: { type: 'string' } },
     topics: { type: 'array', title: 'Topics', items: { enum: ['news', 'sports', 'tech'] } },
     contacts: {
@@ -133,7 +133,7 @@ const HTML_SNIPPET = (def: FormDefinition) => `<kc-form></kc-form>
   import '@kitnai/chat/elements'; // registers the custom elements
 
   const form = document.querySelector('kc-form');
-  // \`data\` is the CardEnvelope.data — a JSON Schema + x-kitn-* UI hints (set as a property).
+  // \`data\` is the CardEnvelope.data — a JSON Schema + x-kc-* UI hints (set as a property).
   form.data = ${JSON.stringify(def, null, 2)};
 
   // Cards bubble ONE \`kc-card\` CustomEvent carrying a typed CardEvent.
@@ -152,8 +152,8 @@ const meta = {
     docs: {
       description: specDescription('kc-form', [
         '`<kc-form>` turns an agent\'s **JSON Schema** "shape" (set via the `data` **property**) into a themed, accessible, validated form inside `<kc-card>` chrome. A valid submission is emitted **up the Card contract** as a bubbling **`kc-card`** CustomEvent of `{ kind: \'submit-data\', cardId, data }`.',
-        '**The mapping is deterministic:** `string`→text, `string`+`enum`→radio/select, `string`+`format`→typed inputs, `number`/`integer`→number (or `slider`/`rating` via `x-kitn-widget`), `boolean`→switch, `array`→checkbox-group / multi-select / repeater / tag-list, nested `object`→fieldset. `x-kitn-*` hints (`x-kitn-widget`, `x-kitn-order`, `x-kitn-submitLabel`, `x-kitn-actions`, `x-kitn-dismissible`, …) refine the UI and live **inside** the schema, so one source of truth drives both the form and validation.',
-        "**Events** (all frozen Card-contract verbs): `ready` on mount, `submit-data` on a valid submit, `action` for secondary buttons (`x-kitn-actions`), `dismiss` when dismissible, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**.",
+        '**The mapping is deterministic:** `string`→text, `string`+`enum`→radio/select, `string`+`format`→typed inputs, `number`/`integer`→number (or `slider`/`rating` via `x-kc-widget`), `boolean`→switch, `array`→checkbox-group / multi-select / repeater / tag-list, nested `object`→fieldset. `x-kc-*` hints (`x-kc-widget`, `x-kc-order`, `x-kc-submitLabel`, `x-kc-actions`, `x-kc-dismissible`, …) refine the UI and live **inside** the schema, so one source of truth drives both the form and validation.',
+        "**Events** (all frozen Card-contract verbs): `ready` on mount, `submit-data` on a valid submit, `action` for secondary buttons (`x-kc-actions`), `dismiss` when dismissible, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**.",
         '**The same `CardEnvelope`/`CardEvent` shapes flow over the remote iframe transport unchanged** — this is the *native* card. See the **Code** tab for the full envelope JSON + the HTML wiring.',
       ]),
     },

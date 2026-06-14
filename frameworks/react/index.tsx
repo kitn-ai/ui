@@ -296,7 +296,7 @@ export const KcFileUpload = createWebComponent<KcFileUploadProps>(
 );
 
 export interface KcFormProps extends WebComponentProps {
-  /** The form definition — a JSON Schema (`type:'object'`) + `x-kitn-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitnai/chat` for the full shape (it is self-referential, so the element types it loosely). */
+  /** The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitnai/chat` for the full shape (it is self-referential, so the element types it loosely). */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;

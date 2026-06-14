@@ -60,7 +60,7 @@ export interface FormField {
   properties?: Record<string, FormField>;
   required?: string[];
   readOnly?: boolean;
-  'x-kitn-widget'?:
+  'x-kc-widget'?:
     | 'textarea'
     | 'slider'
     | 'rating'
@@ -69,8 +69,8 @@ export interface FormField {
     | 'checkbox'
     | 'password'
     | 'switch';
-  'x-kitn-placeholder'?: string;
-  'x-kitn-step'?: number;
+  'x-kc-placeholder'?: string;
+  'x-kc-step'?: number;
 }
 
 /** The form definition = CardEnvelope.data for type:'form'. */
@@ -80,11 +80,11 @@ export interface FormDefinition {
   description?: string;
   required?: string[];
   properties: Record<string, FormField>;
-  'x-kitn-order'?: string[];
-  'x-kitn-inlineMax'?: number;
-  'x-kitn-submitLabel'?: string;
-  'x-kitn-dismissible'?: boolean;
-  'x-kitn-actions'?: { id: string; label: string; variant?: 'default' | 'ghost' | 'outline' }[];
+  'x-kc-order'?: string[];
+  'x-kc-inlineMax'?: number;
+  'x-kc-submitLabel'?: string;
+  'x-kc-dismissible'?: boolean;
+  'x-kc-actions'?: { id: string; label: string; variant?: 'default' | 'ghost' | 'outline' }[];
 }
 
 export type FormCardEnvelope = CardEnvelope<'form', FormDefinition>;
@@ -130,10 +130,10 @@ const VALID_HINTS = new Set([
 // Pure mapping / validation / coercion helpers (unit-tested in isolation).
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Resolve the widget for a field. An explicit valid `x-kitn-widget` always wins;
+/** Resolve the widget for a field. An explicit valid `x-kc-widget` always wins;
  *  otherwise the type/format/enum/constraint combination selects the widget. */
 export function widgetFor(field: FormField, inlineMax: number): WidgetKind {
-  const hint = field['x-kitn-widget'];
+  const hint = field['x-kc-widget'];
   if (hint && VALID_HINTS.has(hint)) {
     switch (hint) {
       case 'textarea':
@@ -206,11 +206,11 @@ export function humanize(key: string): string {
   return spaced.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/** Field order: `x-kitn-order` (filtered to known keys, missing appended) if
+/** Field order: `x-kc-order` (filtered to known keys, missing appended) if
  *  present, else `required` first then schema declaration order. */
 export function orderedKeys(def: FormDefinition): string[] {
   const all = Object.keys(def.properties ?? {});
-  const order = def['x-kitn-order'];
+  const order = def['x-kc-order'];
   if (Array.isArray(order)) {
     const known = order.filter((k) => all.includes(k));
     const rest = all.filter((k) => !known.includes(k));
@@ -371,7 +371,7 @@ export function Form(props: FormProps): JSX.Element {
   });
 
   const def = createMemo<FormDefinition>(() => (envelopeValid().ok ? local.data ?? DEFAULT_FORM : DEFAULT_FORM));
-  const inlineMax = () => def()['x-kitn-inlineMax'] ?? DEFAULT_INLINE_MAX;
+  const inlineMax = () => def()['x-kc-inlineMax'] ?? DEFAULT_INLINE_MAX;
   const keys = createMemo(() => orderedKeys(def()));
 
   // The reactive values store, seeded from each field's `default`.
@@ -446,9 +446,9 @@ export function Form(props: FormProps): JSX.Element {
     setSubmitted(true);
   };
 
-  const actions = createMemo(() => def()['x-kitn-actions'] ?? []);
-  const submitLabel = () => def()['x-kitn-submitLabel'] ?? 'Submit';
-  const dismissible = () => def()['x-kitn-dismissible'] === true;
+  const actions = createMemo(() => def()['x-kc-actions'] ?? []);
+  const submitLabel = () => def()['x-kc-submitLabel'] ?? 'Submit';
+  const dismissible = () => def()['x-kc-dismissible'] === true;
 
   return (
     <Show
@@ -567,7 +567,7 @@ function FieldRow(props: FieldRowProps): JSX.Element {
   const descId = `${id}-desc`;
   const label = () => props.field.title ?? humanize(props.fieldKey);
   const widget = createMemo(() => widgetFor(props.field, props.inlineMax));
-  const placeholder = () => props.field['x-kitn-placeholder'];
+  const placeholder = () => props.field['x-kc-placeholder'];
   const describedBy = () =>
     [props.field.description ? descId : '', props.error() ? errorId : '']
       .filter(Boolean)
