@@ -9,6 +9,7 @@ import type { CardEnvelope, CardHost } from './card-contract';
 import { Form } from '../components/form';
 import { ConfirmCard } from '../components/confirm-card';
 import { TaskListCard } from '../components/task-list-card';
+import { ChoiceCard } from '../components/choice-card';
 import { LinkCard } from '../components/link-card';
 import { Embed } from '../components/embed';
 
@@ -25,6 +26,7 @@ export const BUILTIN_CARD_TAGS: CardTagMap = {
   form: 'kc-form',
   confirm: 'kc-confirm',
   'task-list': 'kc-task-list',
+  choice: 'kc-choice',
   link: 'kc-link-card',
   embed: 'kc-embed',
 };
@@ -38,6 +40,9 @@ export const BUILTIN_CARD_COMPONENTS: CardComponentMap = {
   ),
   'task-list': (p) => (
     <TaskListCard data={p.envelope.data as never} cardId={p.envelope.id} heading={p.envelope.title} host={p.host} />
+  ),
+  choice: (p) => (
+    <ChoiceCard data={p.envelope.data as never} cardId={p.envelope.id} heading={p.envelope.title} host={p.host} />
   ),
   // link/embed have no `heading` and emit via an onEmit callback (no context).
   link: (p) => (
