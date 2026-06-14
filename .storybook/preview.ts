@@ -61,6 +61,17 @@ const preview: Preview = {
       test: 'error',
       context: { exclude: [['pre']] },
     },
+    // SB10 Code panel: show a "Code" tab in the CANVAS (next to Controls/
+    // Actions/etc.) carrying each story's source. It reuses the Docs Source-block
+    // config, so element stories that set their own `docs.source.code`
+    // (the per-element HTML/Solid usage snippets) surface that same snippet here
+    // — which is exactly what their "See the Code tab" descriptions point at.
+    // Provided by the already-registered `@storybook/addon-docs`; no extra
+    // registration needed. Disable for a single story with `docs.codePanel:
+    // false`.
+    docs: {
+      codePanel: true,
+    },
     options: {
       storySort: {
         // Sidebar order, top to bottom: the docs, the interactive Theming tools
