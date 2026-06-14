@@ -21,8 +21,9 @@ export type { PdfPreviewOptions } from './primitives/pdf-preview';
 // Card Contract (generative-UI foundation)
 export { CARD_CONTRACT_VERSION } from './primitives/card-contract';
 export type {
-  CardEnvelope, CardContext, CardEvent, CardEventKind, CardHost, CardPolicy,
+  CardEnvelope, CardContext, CardEvent, CardEventKind, CardResolution, CardHost, CardPolicy,
 } from './primitives/card-contract';
+export { applyResolution, resolutionFromEvent } from './primitives/card-resolution';
 export { CardProvider, useCardHost } from './primitives/card-host';
 export type { CardProviderProps } from './primitives/card-host';
 export { CARD_EVENT_NAME, emitCardEvent, routeCardEvent, listenForCardEvents } from './primitives/card-routing';
