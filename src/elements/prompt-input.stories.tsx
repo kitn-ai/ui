@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
-import './register'; // side effect: registers <kitn-chat>, <kitn-conversation-list>, <kitn-prompt-input>
+import './register'; // side effect: registers <kc-chat>, <kc-conversations>, <kc-prompt-input>
 import type { AttachmentData } from '../components/attachments';
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-prompt-input': JSX.HTMLAttributes<HTMLElement>;
+      'kc-prompt-input': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -41,7 +41,7 @@ interface PromptInputEl extends HTMLElement {
   attachments?: AttachmentData[];
 }
 
-/** Live demo of the actual `<kitn-prompt-input>` custom element (Shadow DOM and all). */
+/** Live demo of the actual `<kc-prompt-input>` custom element (Shadow DOM and all). */
 function PromptInputElement(props: { search?: boolean; voice?: boolean; attachments?: AttachmentData[]; args?: Record<string, unknown> }) {
   let el: PromptInputEl | undefined;
   onMount(() => {
@@ -67,7 +67,7 @@ function PromptInputElement(props: { search?: boolean; voice?: boolean; attachme
     el.addEventListener('voice', () => console.log('voice clicked'));
   });
   return (
-    <kitn-prompt-input
+    <kc-prompt-input
       ref={(e) => (el = e as PromptInputEl)}
       style={{ display: 'block', width: '100%', padding: '16px' }}
     />
@@ -75,7 +75,7 @@ function PromptInputElement(props: { search?: boolean; voice?: boolean; attachme
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-prompt-input id="input" style="display:block; width:100%;"></kitn-prompt-input>
+<kc-prompt-input id="input" style="display:block; width:100%;"></kc-prompt-input>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -108,7 +108,7 @@ function Composer() {
     el.suggestions = ['Summarize this thread', 'Draft a reply'];
   });
   return (
-    <kitn-prompt-input
+    <kc-prompt-input
       ref={el}
       style={{ display: 'block', width: '100%' }}
       on:submit={(e) => console.log('send:', e.detail.value)}
@@ -119,14 +119,14 @@ function Composer() {
 }`;
 
 const meta = {
-  title: 'Web Components/kitn-prompt-input',
+  title: 'Web Components/kc-prompt-input',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-prompt-input'),
+  argTypes: argTypesFor('kc-prompt-input'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-prompt-input', [
-          '`<kitn-prompt-input>` is the framework-agnostic **web component** version of the chat composer — an auto-resizing textarea with a send button and optional suggestion chips, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
+      description: specDescription('kc-prompt-input', [
+          '`<kc-prompt-input>` is the framework-agnostic **web component** version of the chat composer — an auto-resizing textarea with a send button and optional suggestion chips, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a message composer to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `PromptInput` primitives instead.',
           '**How to use:** register once with `import \'@kitnai/chat/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`submit`, `valuechange`, `suggestionclick`, `search`, `voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files.',
           '**Placement:** pinned to the bottom of a chat surface, full width. Set `loading` while a response streams to show the busy state, and `disabled` to block input entirely.',
@@ -162,7 +162,7 @@ export const InSolidJS: Story = {
 };
 
 const TOOLBAR_SNIPPET = `<!-- show the Search (Globe) + Voice (Mic) toolbar buttons -->
-<kitn-prompt-input id="input" search voice></kitn-prompt-input>
+<kc-prompt-input id="input" search voice></kc-prompt-input>
 
 <script type="module">
   import '@kitnai/chat/elements';
@@ -180,7 +180,7 @@ export const WithVoiceAndSearch: Story = {
 };
 
 const ATTACHMENTS_SNIPPET = `<!-- seed staged attachments without an upload -->
-<kitn-prompt-input id="input" voice></kitn-prompt-input>
+<kc-prompt-input id="input" voice></kc-prompt-input>
 
 <script type="module">
   import '@kitnai/chat/elements';

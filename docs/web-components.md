@@ -6,9 +6,9 @@
 
 | Tag | Purpose |
 |-----|---------|
-| `<kitn-chat>` | Full chat UI — message list plus prompt input |
-| `<kitn-conversation-list>` | Sidebar conversation browser with group support |
-| `<kitn-prompt-input>` | Standalone text-input area with send button |
+| `<kc-chat>` | Full chat UI — message list plus prompt input |
+| `<kc-conversations>` | Sidebar conversation browser with group support |
+| `<kc-prompt-input>` | Standalone text-input area with send button |
 | + 24 composable primitives | See the full roster below |
 
 Each element renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the element bundle — the host does not need SolidJS.
@@ -23,9 +23,9 @@ The authoritative machine-readable API is the **Custom Elements Manifest** at `d
 - **Data in = properties, config = attributes, data out = events.** Object/array data (messages, models, context) must be set as properties; simple config (`theme`, `prose-size`, `search`) also works as attributes.
 - **Opt-in by data/flags.** Features appear when you give them data: pass `models` → a model switcher; pass `context` → a token meter; set `search`/`voice` → those buttons. Omit them → they don't render. Re-theme with `--kitn-*` tokens.
 
-### What `<kitn-chat>` includes vs. the primitive layer
+### What `<kc-chat>` includes vs. the primitive layer
 
-`<kitn-chat>` is the **drop-in** layer. Per message it renders: Markdown + code highlighting, **reasoning** blocks, **tool-call** panels, **attachments**, and **action buttons** (copy/like/dislike/regenerate). It also offers the header (title + model switcher + context meter), a scroll-to-bottom button, suggestions, and the input toolbar.
+`<kc-chat>` is the **drop-in** layer. Per message it renders: Markdown + code highlighting, **reasoning** blocks, **tool-call** panels, **attachments**, and **action buttons** (copy/like/dislike/regenerate). It also offers the header (title + model switcher + context meter), a scroll-to-bottom button, suggestions, and the input toolbar.
 
 Some kit features are **primitive-only** — not surfaced by the web component: **ChainOfThought**, **FeedbackBar**, **ThinkingBar / TextShimmer** (animated "thinking"), **VoiceInput**, **FileUpload**, **SlashCommand**. If you need those, custom layout/placement, or anything the props don't cover, **compose the SolidJS primitives directly** (`import { … } from '@kitnai/chat'` — everything is exported). No forking required: tune via props/tokens, or drop to the primitive layer.
 
@@ -69,13 +69,13 @@ For plain HTML pages:
 
 All rich props (arrays, objects) must be set as **JavaScript properties**, not HTML attributes. Events are standard DOM `CustomEvent`s dispatched on the host element. They do **not** bubble and are **not** composed — listen directly on the element (`el.addEventListener(...)`).
 
-**Boolean attributes** behave like normal HTML: a bare attribute turns the flag on, and `="false"` (or omitting it) turns it off. All of these are equivalent — `<kitn-chat loading>`, `<kitn-chat loading="true">`, and `el.loading = true`; `<kitn-chat loading="false">`, omitting it, and `el.loading = false` all leave it off.
+**Boolean attributes** behave like normal HTML: a bare attribute turns the flag on, and `="false"` (or omitting it) turns it off. All of these are equivalent — `<kc-chat loading>`, `<kc-chat loading="true">`, and `el.loading = true`; `<kc-chat loading="false">`, omitting it, and `el.loading = false` all leave it off.
 
 ```html
 <script type="module">
   import '@kitnai/chat/elements';
 
-  const chat = document.querySelector('kitn-chat');
+  const chat = document.querySelector('kc-chat');
 
   // Set rich props as JS properties
   chat.messages = [
@@ -88,7 +88,7 @@ All rich props (arrays, objects) must be set as **JavaScript properties**, not H
   });
 </script>
 
-<kitn-chat></kitn-chat>
+<kc-chat></kc-chat>
 ```
 
 ### TypeScript
@@ -97,7 +97,7 @@ Importing the elements entry augments `HTMLElementTagNameMap`, so DOM lookups ar
 
 ```ts
 import '@kitnai/chat/elements';
-const chat = document.querySelector('kitn-chat'); // : KitnChatElement | null
+const chat = document.querySelector('kc-chat'); // : KcChatElement | null
 chat!.messages = [/* … */];                        // typed
 ```
 
@@ -108,9 +108,9 @@ A [Custom Elements Manifest](https://github.com/webcomponents/custom-elements-ma
 Typed wrappers are generated for every element under `@kitnai/chat/react` (React is an optional peer dependency). They set rich data as DOM **properties** (so arrays/objects pass through correctly) and expose CustomEvents as `on<Event>` props:
 
 ```tsx
-import { KitnChat } from '@kitnai/chat/react';
+import { KcChat } from '@kitnai/chat/react';
 
-<KitnChat
+<KcChat
   messages={messages}
   models={models}
   onSubmit={(e) => send(e.detail.value)}
@@ -118,7 +118,7 @@ import { KitnChat } from '@kitnai/chat/react';
 />;
 ```
 
-Component names are the PascalCase of the tag (`kitn-chat` → `KitnChat`); event props are `on` + the event name (`messageaction` → `onMessageaction`).
+Component names are the PascalCase of the tag (`kc-chat` → `KcChat`); event props are `on` + the event name (`messageaction` → `onMessageaction`).
 
 ---
 
@@ -128,9 +128,9 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 
 ---
 
-### `<kitn-chat>` / `KitnChat`
+### `<kc-chat>` / `KcChat`
 
-<!-- spec:kitn-chat -->
+<!-- spec:kc-chat -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -175,15 +175,15 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-chat -->
+<!-- /spec:kc-chat -->
 
 A complete chat interface: a scrolling message list (with Markdown rendering, reasoning blocks, tool call panels, and message action buttons) plus a prompt input area with a send button.
 
 ---
 
-### `<kitn-chat-workspace>` / `KitnChatWorkspace`
+### `<kc-workspace>` / `KcWorkspace`
 
-<!-- spec:kitn-chat-workspace -->
+<!-- spec:kc-workspace -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -238,7 +238,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-chat-workspace -->
+<!-- /spec:kc-workspace -->
 
 The full app shell in one tag — a collapsible conversation-list sidebar (left), a drag-to-resize handle, and the complete chat thread (right) — all wired together. Drop in a single element and own the data; the workspace handles layout, resize, and collapse state internally.
 
@@ -277,14 +277,14 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
   });
 </script>
 
-<kitn-chat-workspace id="workspace" style="display: block; height: 100vh;"></kitn-chat-workspace>
+<kc-workspace id="workspace" style="display: block; height: 100vh;"></kc-workspace>
 ```
 
 ---
 
-### `<kitn-conversation-list>` / `KitnConversationList`
+### `<kc-conversations>` / `KcConversations`
 
-<!-- spec:kitn-conversation-list -->
+<!-- spec:kc-conversations -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -308,15 +308,15 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`). Element-specific tokens: `--color-sidebar`, `--color-scrollbar-thumb`.
-<!-- /spec:kitn-conversation-list -->
+<!-- /spec:kc-conversations -->
 
 Sidebar panel listing conversations, optionally grouped. Emits events for navigation; does not manage its own state.
 
 ---
 
-### `<kitn-prompt-input>` / `KitnPromptInput`
+### `<kc-prompt-input>` / `KcPromptInput`
 
-<!-- spec:kitn-prompt-input -->
+<!-- spec:kc-prompt-input -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -348,15 +348,15 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-prompt-input -->
+<!-- /spec:kc-prompt-input -->
 
 Standalone prompt input with a send button. Use when you want just the input area without the message list.
 
 ---
 
-### `<kitn-message>` / `KitnMessage`
+### `<kc-message>` / `KcMessage`
 
-<!-- spec:kitn-message -->
+<!-- spec:kc-message -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -382,15 +382,15 @@ Standalone prompt input with a send button. Use when you want just the input are
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-message -->
+<!-- /spec:kc-message -->
 
 A single message row: renders markdown/plain content, reasoning, tool calls, attachments, and action buttons from one message object.
 
 ---
 
-### `<kitn-markdown>` / `KitnMarkdown`
+### `<kc-markdown>` / `KcMarkdown`
 
-<!-- spec:kitn-markdown -->
+<!-- spec:kc-markdown -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -407,7 +407,7 @@ A single message row: renders markdown/plain content, reasoning, tool calls, att
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-markdown -->
+<!-- /spec:kc-markdown -->
 
 Renders a markdown string with code highlighting.
 
@@ -415,9 +415,9 @@ No events.
 
 ---
 
-### `<kitn-code-block>` / `KitnCodeBlock`
+### `<kc-code-block>` / `KcCodeBlock`
 
-<!-- spec:kitn-code-block -->
+<!-- spec:kc-code-block -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -435,7 +435,7 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`). Element-specific tokens: `--color-code-foreground`.
-<!-- /spec:kitn-code-block -->
+<!-- /spec:kc-code-block -->
 
 A single syntax-highlighted code block with a copy button.
 
@@ -443,9 +443,9 @@ No events.
 
 ---
 
-### `<kitn-reasoning>` / `KitnReasoning`
+### `<kc-reasoning>` / `KcReasoning`
 
-<!-- spec:kitn-reasoning -->
+<!-- spec:kc-reasoning -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -469,15 +469,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-reasoning -->
+<!-- /spec:kc-reasoning -->
 
 Collapsible reasoning/thinking block with optional streaming auto-expand.
 
 ---
 
-### `<kitn-tool>` / `KitnTool`
+### `<kc-tool>` / `KcTool`
 
-<!-- spec:kitn-tool -->
+<!-- spec:kc-tool -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -492,7 +492,7 @@ Collapsible reasoning/thinking block with optional streaming auto-expand.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`). Element-specific tokens: `--color-tool-blue`, `--color-tool-amber`, `--color-tool-green`, `--color-tool-red`.
-<!-- /spec:kitn-tool -->
+<!-- /spec:kc-tool -->
 
 Tool-call panel showing a function call's type, state, input, and output.
 
@@ -500,9 +500,9 @@ No events.
 
 ---
 
-### `<kitn-attachments>` / `KitnAttachments`
+### `<kc-attachments>` / `KcAttachments`
 
-<!-- spec:kitn-attachments -->
+<!-- spec:kc-attachments -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -527,15 +527,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-attachments -->
+<!-- /spec:kc-attachments -->
 
 Renders a list of file/document attachments in grid, inline, or list layouts.
 
 ---
 
-### `<kitn-model-switcher>` / `KitnModelSwitcher`
+### `<kc-model-switcher>` / `KcModelSwitcher`
 
-<!-- spec:kitn-model-switcher -->
+<!-- spec:kc-model-switcher -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -556,15 +556,15 @@ Renders a list of file/document attachments in grid, inline, or list layouts.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-model-switcher -->
+<!-- /spec:kc-model-switcher -->
 
 A dropdown that lets the user switch between available models.
 
 ---
 
-### `<kitn-context-meter>` / `KitnContextMeter`
+### `<kc-context>` / `KcContext`
 
-<!-- spec:kitn-context-meter -->
+<!-- spec:kc-context -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -578,7 +578,7 @@ A dropdown that lets the user switch between available models.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-context-meter -->
+<!-- /spec:kc-context -->
 
 Token-usage meter showing used/max tokens and estimated cost.
 
@@ -586,9 +586,9 @@ No events.
 
 ---
 
-### `<kitn-chain-of-thought>` / `KitnChainOfThought`
+### `<kc-chain-of-thought>` / `KcChainOfThought`
 
-<!-- spec:kitn-chain-of-thought -->
+<!-- spec:kc-chain-of-thought -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -602,7 +602,7 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-chain-of-thought -->
+<!-- /spec:kc-chain-of-thought -->
 
 Displays a list of reasoning steps as a collapsible chain-of-thought.
 
@@ -610,9 +610,9 @@ No events.
 
 ---
 
-### `<kitn-prompt-suggestions>` / `KitnPromptSuggestions`
+### `<kc-suggestions>` / `KcSuggestions`
 
-<!-- spec:kitn-prompt-suggestions -->
+<!-- spec:kc-suggestions -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -636,15 +636,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-prompt-suggestions -->
+<!-- /spec:kc-suggestions -->
 
 Suggestion chips or full-width rows. Can render plain strings or `{ label, value }` pairs.
 
 ---
 
-### `<kitn-source>` / `KitnSource`
+### `<kc-source>` / `KcSource`
 
-<!-- spec:kitn-source -->
+<!-- spec:kc-source -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -662,7 +662,7 @@ Suggestion chips or full-width rows. Can render plain strings or `{ label, value
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-source -->
+<!-- /spec:kc-source -->
 
 An inline citation link that opens a hover card with source details.
 
@@ -670,9 +670,9 @@ No events.
 
 ---
 
-### `<kitn-source-list>` / `KitnSourceList`
+### `<kc-sources>` / `KcSources`
 
-<!-- spec:kitn-source-list -->
+<!-- spec:kc-sources -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -687,17 +687,17 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-source-list -->
+<!-- /spec:kc-sources -->
 
-Renders a list of sources using `<kitn-source>` internally.
+Renders a list of sources using `<kc-source>` internally.
 
 No events.
 
 ---
 
-### `<kitn-feedback-bar>` / `KitnFeedbackBar`
+### `<kc-feedback-bar>` / `KcFeedbackBar`
 
-<!-- spec:kitn-feedback-bar -->
+<!-- spec:kc-feedback-bar -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -719,15 +719,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-feedback-bar -->
+<!-- /spec:kc-feedback-bar -->
 
 A thumbs-up / thumbs-down banner (e.g. "Was this helpful?").
 
 ---
 
-### `<kitn-file-upload>` / `KitnFileUpload`
+### `<kc-file-upload>` / `KcFileUpload`
 
-<!-- spec:kitn-file-upload -->
+<!-- spec:kc-file-upload -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -750,15 +750,15 @@ A thumbs-up / thumbs-down banner (e.g. "Was this helpful?").
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-file-upload -->
+<!-- /spec:kc-file-upload -->
 
 A drag-and-drop / click-to-pick file upload dropzone.
 
 ---
 
-### `<kitn-voice-input>` / `KitnVoiceInput`
+### `<kc-voice-input>` / `KcVoiceInput`
 
-<!-- spec:kitn-voice-input -->
+<!-- spec:kc-voice-input -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -780,15 +780,15 @@ A drag-and-drop / click-to-pick file upload dropzone.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-voice-input -->
+<!-- /spec:kc-voice-input -->
 
 A mic button that records audio and optionally transcribes it via a host-supplied function.
 
 ---
 
-### `<kitn-loader>` / `KitnLoader`
+### `<kc-loader>` / `KcLoader`
 
-<!-- spec:kitn-loader -->
+<!-- spec:kc-loader -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -804,7 +804,7 @@ A mic button that records audio and optionally transcribes it via a host-supplie
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-loader -->
+<!-- /spec:kc-loader -->
 
 An animated loading indicator with 12 style variants.
 
@@ -812,9 +812,9 @@ No events.
 
 ---
 
-### `<kitn-thinking-bar>` / `KitnThinkingBar`
+### `<kc-thinking-bar>` / `KcThinkingBar`
 
-<!-- spec:kitn-thinking-bar -->
+<!-- spec:kc-thinking-bar -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -836,15 +836,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-thinking-bar -->
+<!-- /spec:kc-thinking-bar -->
 
 An animated "thinking" shimmer bar with an optional stop affordance.
 
 ---
 
-### `<kitn-text-shimmer>` / `KitnTextShimmer`
+### `<kc-text-shimmer>` / `KcTextShimmer`
 
-<!-- spec:kitn-text-shimmer -->
+<!-- spec:kc-text-shimmer -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -861,7 +861,7 @@ An animated "thinking" shimmer bar with an optional stop affordance.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-text-shimmer -->
+<!-- /spec:kc-text-shimmer -->
 
 Text with a shimmer animation — useful for "thinking" indicators.
 
@@ -869,9 +869,9 @@ No events.
 
 ---
 
-### `<kitn-response-stream>` / `KitnResponseStream`
+### `<kc-response-stream>` / `KcResponseStream`
 
-<!-- spec:kitn-response-stream -->
+<!-- spec:kc-response-stream -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -894,15 +894,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-response-stream -->
+<!-- /spec:kc-response-stream -->
 
 Renders a string or an `AsyncIterable<string>` with a reveal animation.
 
 ---
 
-### `<kitn-image>` / `KitnImage`
+### `<kc-image>` / `KcImage`
 
-<!-- spec:kitn-image -->
+<!-- spec:kc-image -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -919,7 +919,7 @@ Renders a string or an `AsyncIterable<string>` with a reveal animation.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-image -->
+<!-- /spec:kc-image -->
 
 Renders a base64-encoded or raw-bytes image.
 
@@ -927,9 +927,9 @@ No events.
 
 ---
 
-### `<kitn-checkpoint>` / `KitnCheckpoint`
+### `<kc-checkpoint>` / `KcCheckpoint`
 
-<!-- spec:kitn-checkpoint -->
+<!-- spec:kc-checkpoint -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -952,15 +952,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-checkpoint -->
+<!-- /spec:kc-checkpoint -->
 
 A small button used to mark or navigate to a conversation checkpoint.
 
 ---
 
-### `<kitn-chat-scope-picker>` / `KitnChatScopePicker`
+### `<kc-scope-picker>` / `KcScopePicker`
 
-<!-- spec:kitn-chat-scope-picker -->
+<!-- spec:kc-scope-picker -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -982,15 +982,15 @@ A small button used to mark or navigate to a conversation checkpoint.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-chat-scope-picker -->
+<!-- /spec:kc-scope-picker -->
 
 A dropdown for filtering the chat to specific authors, tags, content type, or date range.
 
 ---
 
-### `<kitn-message-skills>` / `KitnMessageSkills`
+### `<kc-skills>` / `KcSkills`
 
-<!-- spec:kitn-message-skills -->
+<!-- spec:kc-skills -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -1004,7 +1004,7 @@ A dropdown for filtering the chat to specific authors, tags, content type, or da
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-message-skills -->
+<!-- /spec:kc-skills -->
 
 Displays active skills as badges on a message.
 
@@ -1012,9 +1012,9 @@ No events.
 
 ---
 
-### `<kitn-empty>` / `KitnEmpty`
+### `<kc-empty>` / `KcEmpty`
 
-<!-- spec:kitn-empty -->
+<!-- spec:kc-empty -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -1029,7 +1029,7 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kitn-empty -->
+<!-- /spec:kc-empty -->
 
 Empty-state placeholder with a title and description.
 
@@ -1125,7 +1125,7 @@ To **rebrand**, override the kit's **namespaced** tokens — `--kitn-color-*` (a
 Every element accepts `theme="light"`, `theme="dark"`, or `theme="auto"` (default). `auto` follows the OS `prefers-color-scheme` media query.
 
 ```html
-<kitn-chat theme="dark"></kitn-chat>
+<kc-chat theme="dark"></kc-chat>
 ```
 
 ---

@@ -10,10 +10,10 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kitn-tool>` — a collapsible tool-call panel (input/output inspection with a
+ * `<kc-tool>` — a collapsible tool-call panel (input/output inspection with a
  * state badge). Data via the `tool` property; `open` flag starts it expanded.
  */
-defineKitnElement<Props>('kitn-tool', {
+defineKitnElement<Props>('kc-tool', {
   tool: undefined,
   open: false,
 }, (props, { flag }) => (

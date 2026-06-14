@@ -8,14 +8,14 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-chat-scope-picker': JSX.HTMLAttributes<HTMLElement> & {
+      'kc-scope-picker': JSX.HTMLAttributes<HTMLElement> & {
         'current-label'?: string;
       };
     }
   }
 }
 
-/** Render `<kitn-chat-scope-picker>` with author/tag options set as properties. */
+/** Render `<kc-scope-picker>` with author/tag options set as properties. */
 function ScopePickerElement(props: { authors: string[]; tags: string[] }) {
   let el: (HTMLElement & { availableAuthors?: string[]; availableTags?: string[] }) | undefined;
   onMount(() => {
@@ -28,12 +28,12 @@ function ScopePickerElement(props: { authors: string[]; tags: string[] }) {
     });
   });
   return (
-    <kitn-chat-scope-picker ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '40px' }} />
+    <kc-scope-picker ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '40px' }} />
   );
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-chat-scope-picker id="scope"></kitn-chat-scope-picker>
+<kc-scope-picker id="scope"></kc-scope-picker>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -46,14 +46,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-chat-scope-picker',
+  title: 'Web Components/kc-scope-picker',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-chat-scope-picker'),
+  argTypes: argTypesFor('kc-scope-picker'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-chat-scope-picker', [
-          '`<kitn-chat-scope-picker>` is the framework-agnostic **web component** for scoping a chat by author or tag — a dropdown that emits the chosen filters — isolated in **Shadow DOM**.',
+      description: specDescription('kc-scope-picker', [
+          '`<kc-scope-picker>` is the framework-agnostic **web component** for scoping a chat by author or tag — a dropdown that emits the chosen filters — isolated in **Shadow DOM**.',
           '**When to use:** letting users narrow a conversation/search to a subset of content. In SolidJS, use the `ChatScopePicker` primitive.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `availableAuthors` / `availableTags` **properties** (and optionally `current-label`), and listen for the `scopechange` **CustomEvent** (`undefined` filters = \"All Content\").",
           'See the **Code** tab for HTML usage.',

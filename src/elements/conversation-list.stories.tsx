@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
-import './register'; // side effect: registers <kitn-chat>, <kitn-conversation-list>, <kitn-prompt-input>
+import './register'; // side effect: registers <kc-chat>, <kc-conversations>, <kc-prompt-input>
 import type { ConversationGroup, ConversationSummary } from '../types';
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-conversation-list': JSX.HTMLAttributes<HTMLElement>;
+      'kc-conversations': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -63,7 +63,7 @@ type ConversationListEl = HTMLElement & {
   activeId?: string;
 };
 
-/** Live demo of the actual `<kitn-conversation-list>` custom element (Shadow DOM and all). */
+/** Live demo of the actual `<kc-conversations>` custom element (Shadow DOM and all). */
 function ConversationListElement(props: { args?: Record<string, unknown> }) {
   let el: ConversationListEl | undefined;
   onMount(() => {
@@ -83,7 +83,7 @@ function ConversationListElement(props: { args?: Record<string, unknown> }) {
     }
   });
   return (
-    <kitn-conversation-list
+    <kc-conversations
       ref={(e) => (el = e as ConversationListEl)}
       style={{ display: 'block', width: '300px', height: '560px' }}
     />
@@ -91,7 +91,7 @@ function ConversationListElement(props: { args?: Record<string, unknown> }) {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-conversation-list id="list" style="display:block; width:300px; height:100vh;"></kitn-conversation-list>
+<kc-conversations id="list" style="display:block; width:300px; height:100vh;"></kc-conversations>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -141,7 +141,7 @@ function Sidebar() {
     el.activeId = 'c-1';
   });
   return (
-    <kitn-conversation-list
+    <kc-conversations
       ref={el}
       style={{ display: 'block', width: '300px', height: '100vh' }}
       on:select={(e) => console.log('opened:', e.detail.id)}
@@ -152,14 +152,14 @@ function Sidebar() {
 }`;
 
 const meta = {
-  title: 'Web Components/kitn-conversation-list',
+  title: 'Web Components/kc-conversations',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-conversation-list'),
+  argTypes: argTypesFor('kc-conversations'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-conversation-list', [
-          '`<kitn-conversation-list>` is the framework-agnostic **web component** version of the chat sidebar — a searchable, grouped list of conversations with a "new chat" button, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
+      description: specDescription('kc-conversations', [
+          '`<kc-conversations>` is the framework-agnostic **web component** version of the chat sidebar — a searchable, grouped list of conversations with a "new chat" button, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a conversation switcher to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `ConversationList` primitive instead.',
           '**How to use:** register once with `import \'@kitnai/chat/elements\'`, set rich data as JS **properties** (`el.groups = [...]`, `el.conversations = [...]`, `el.activeId = \'c-1\'`), and listen for **CustomEvents** (`select`, `newchat`, `togglesidebar`) directly on the element.',
           '**Placement:** as a fixed-width side panel next to the chat surface. Give it an explicit width and height (e.g. `width: 300px; height: 100vh`).',

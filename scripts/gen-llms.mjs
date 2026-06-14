@@ -51,11 +51,11 @@ npm install solid-js
 This is the single most common mistake. Arrays and objects (\`messages\`, \`models\`, \`context\`, \`suggestions\`, \`slashCommands\`, …) MUST be assigned as JavaScript properties on the element. They CANNOT be passed as HTML attributes — an HTML attribute is always a string and will be ignored or mis-parsed.
 
 \`\`\`js
-const chat = document.querySelector('kitn-chat');
+const chat = document.querySelector('kc-chat');
 chat.messages = [{ id: '1', role: 'assistant', content: 'Hi!' }]; // ✅ property
 \`\`\`
 \`\`\`html
-<kitn-chat messages="[...]"></kitn-chat>  <!-- ❌ never works -->
+<kc-chat messages="[...]"></kc-chat>  <!-- ❌ never works -->
 \`\`\`
 
 Only scalar values (string/number/boolean) work as attributes (e.g. \`placeholder\`, \`loading\`, \`theme\`).
@@ -65,12 +65,12 @@ Only scalar values (string/number/boolean) work as attributes (e.g. \`placeholde
 **Layer 1 — batteries-included web components** (\`import '@kitnai/chat/elements'\`):
 Drop an element into any framework (React, Vue, plain HTML). Data in via JS properties; interactions out via non-bubbling CustomEvents.
 
-- \`<kitn-chat>\` — full chat UI (message list + prompt input). The primary starting point.
-- \`<kitn-conversation-list>\` — sidebar conversation browser with group support.
-- \`<kitn-prompt-input>\` — standalone composer with send button.
+- \`<kc-chat>\` — full chat UI (message list + prompt input). The primary starting point.
+- \`<kc-conversations>\` — sidebar conversation browser with group support.
+- \`<kc-prompt-input>\` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (\`import { … } from '@kitnai/chat'\`):
-All ${count} elements are also exported individually. Use them for custom layouts or features \`<kitn-chat>\` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All ${count} elements are also exported individually. Use them for custom layouts or features \`<kc-chat>\` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -80,7 +80,7 @@ All ${count} elements are also exported individually. Use them for custom layout
 3. **\`theme\` attribute** (\`'light' | 'dark' | 'auto'\`) works on every element. Default \`auto\` follows \`prefers-color-scheme\`.
 4. **Theming via CSS custom properties** — override \`--kitn-color-*\` tokens on \`:root\`; they pierce Shadow DOM.
 
-## ChatMessage schema (required for \`<kitn-chat>\`)
+## ChatMessage schema (required for \`<kc-chat>\`)
 
 \`\`\`ts
 interface ChatMessage {
@@ -99,9 +99,9 @@ interface ChatMessage {
 **Plain HTML / CDN**
 \`\`\`html
 <script type="module" src="https://unpkg.com/@kitnai/chat/elements"></script>
-<kitn-chat style="display:block;height:100vh"></kitn-chat>
+<kc-chat style="display:block;height:100vh"></kc-chat>
 <script type="module">
-  const chat = document.querySelector('kitn-chat');
+  const chat = document.querySelector('kc-chat');
   chat.messages = [];
 </script>
 \`\`\`
@@ -114,7 +114,7 @@ import { KitnChat } from '@kitnai/chat/react';
 
 **Vue** — use the element directly; pass arrays via \`.prop\`:
 \`\`\`vue
-<kitn-chat :messages.prop="messages" @submit="send" />
+<kc-chat :messages.prop="messages" @submit="send" />
 \`\`\`
 
 ## Theming
@@ -193,13 +193,13 @@ npm install @kitnai/chat
 \`\`\`
 
 ### 2 — Pick your layer
-Drop-in: use \`<kitn-chat>\` for a full chat UI in one tag (\`import '@kitnai/chat/elements'\`).
-Composable: combine \`<kitn-message>\`, \`<kitn-prompt-input>\`, \`<kitn-reasoning>\`, … in your own markup.
+Drop-in: use \`<kc-chat>\` for a full chat UI in one tag (\`import '@kitnai/chat/elements'\`).
+Composable: combine \`<kc-message>\`, \`<kc-prompt-input>\`, \`<kc-reasoning>\`, … in your own markup.
 
 ### 3 — Handle \`submit\` and stream
 \`\`\`js
 import '@kitnai/chat/elements';
-const chat = document.querySelector('kitn-chat');
+const chat = document.querySelector('kc-chat');
 chat.messages = [];
 
 chat.addEventListener('submit', async (e) => {
@@ -228,7 +228,7 @@ chat.addEventListener('submit', async (e) => {
 - Tool calls: add \`tools: [{ type: 'search', state: 'output-available', input: {…}, output: {…} }]\`.
 - Model switcher: \`chat.models = [{ id: 'gpt-4o', name: 'GPT-4o' }]; chat.currentModel = 'gpt-4o';\` — listen for \`modelchange\`.
 - Token meter: \`chat.context = { usedTokens: 1200, maxTokens: 128000 };\`.
-- History sidebar: add \`<kitn-conversation-list>\`; listen for \`select\` and \`newchat\`.
+- History sidebar: add \`<kc-conversations>\`; listen for \`select\` and \`newchat\`.
 
 ### 5 — Theme
 Override \`--kitn-color-*\` tokens on \`:root\` (they pierce Shadow DOM).`;

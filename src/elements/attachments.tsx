@@ -31,14 +31,14 @@ interface Props extends Record<string, unknown> {
   emptyText?: string;
 }
 
-/** Events fired by `<kitn-attachments>`. */
+/** Events fired by `<kc-attachments>`. */
 interface Events {
   /** A remove button was clicked. */
   remove: { id: string };
 }
 
 /**
- * `<kitn-attachments>` — the exemplar for the "collapse a compound primitive to
+ * `<kc-attachments>` — the exemplar for the "collapse a compound primitive to
  * ONE configurable element" pattern (Route 1). The presentation knobs that the
  * SolidJS layer expresses by composing sub-parts (`<AttachmentPreview>`,
  * `<AttachmentInfo>`, `<AttachmentHoverCard>`, `<AttachmentRemove>`) become
@@ -52,7 +52,7 @@ interface Events {
  * as an event. For fully-custom hover content, the SolidJS primitives remain the
  * escape hatch (a templated slot — "Route 2" — is a deliberate future add).
  */
-defineKitnElement<Props, Events>('kitn-attachments', {
+defineKitnElement<Props, Events>('kc-attachments', {
   items: [],
   variant: 'grid',
   hoverCard: false,

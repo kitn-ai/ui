@@ -13,18 +13,18 @@ interface Props extends Record<string, unknown> {
   label?: string;
 }
 
-/** Events fired by `<kitn-file-upload>`. */
+/** Events fired by `<kc-file-upload>`. */
 interface Events {
   /** Files were picked or dropped. */
   filesadded: { files: File[] };
 }
 
 /**
- * `<kitn-file-upload>` — a click/drag-drop dropzone. Emits `filesadded`. The
+ * `<kc-file-upload>` — a click/drag-drop dropzone. Emits `filesadded`. The
  * default dropzone label can be replaced with your own markup via the default
  * `<slot>` (a "Route 2" custom-content slot).
  */
-defineKitnElement<Props, Events>('kitn-file-upload', {
+defineKitnElement<Props, Events>('kc-file-upload', {
   multiple: true,
   accept: undefined,
   disabled: false,

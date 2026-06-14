@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-attachments': JSX.HTMLAttributes<HTMLElement> & {
+      'kc-attachments': JSX.HTMLAttributes<HTMLElement> & {
         variant?: string;
         'hover-card'?: boolean | string;
         removable?: boolean | string;
@@ -59,7 +59,7 @@ const imageItems: AttachmentData[] = [
   },
 ];
 
-/** Render `<kitn-attachments>` with an `items` property and the given flags. */
+/** Render `<kc-attachments>` with an `items` property and the given flags. */
 function AttachmentsElement(props: {
   items: AttachmentData[];
   variant?: string;
@@ -82,7 +82,7 @@ function AttachmentsElement(props: {
     }
   });
   return (
-    <kitn-attachments
+    <kc-attachments
       ref={(e) => (el = e as HTMLElement)}
       style={{ display: 'block', padding: '24px', 'max-width': '720px' }}
     />
@@ -90,7 +90,7 @@ function AttachmentsElement(props: {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-attachments id="att" variant="grid" removable></kitn-attachments>
+<kc-attachments id="att" variant="grid" removable></kc-attachments>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -109,7 +109,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const HOVER_SNIPPET = `<!-- inline/list chips with a hover-card image preview -->
-<kitn-attachments id="att" variant="inline" hover-card></kitn-attachments>
+<kc-attachments id="att" variant="inline" hover-card></kc-attachments>
 
 <script type="module">
   import '@kitnai/chat/elements';
@@ -124,14 +124,14 @@ const HOVER_SNIPPET = `<!-- inline/list chips with a hover-card image preview --
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-attachments',
+  title: 'Web Components/kc-attachments',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-attachments'),
+  argTypes: argTypesFor('kc-attachments'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-attachments', [
-          '`<kitn-attachments>` is the framework-agnostic **web component** for a set of file/source attachments, and the exemplar for the "collapse a compound primitive to ONE configurable element" pattern: the sub-parts the SolidJS layer composes become attributes here. Isolated in **Shadow DOM**.',
+      description: specDescription('kc-attachments', [
+          '`<kc-attachments>` is the framework-agnostic **web component** for a set of file/source attachments, and the exemplar for the "collapse a compound primitive to ONE configurable element" pattern: the sub-parts the SolidJS layer composes become attributes here. Isolated in **Shadow DOM**.',
           '**When to use:** rendering attachment chips/tiles in a non-Solid app. In SolidJS, compose the `Attachment*` primitives for fully custom layouts.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the data via the `items` **property**, pick a layout with `variant` (`grid` | `inline` | `list`), add `removable` to get per-item remove buttons (emits a `remove` **CustomEvent** with `{ id }`), and `hover-card` for inline/list previews (image attachments preview their thumbnail).",
           'See the **Code** tab for HTML usage.',

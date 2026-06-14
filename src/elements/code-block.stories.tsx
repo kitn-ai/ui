@@ -8,7 +8,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-code-block': JSX.HTMLAttributes<HTMLElement>;
+      'kc-code-block': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -23,7 +23,7 @@ const pythonCode = `def fib(n):
         a, b = b, a + b
     return a`;
 
-/** Render the actual `<kitn-code-block>` custom element with a `code` property. */
+/** Render the actual `<kc-code-block>` custom element with a `code` property. */
 function CodeBlockElement(props: { code: string; language?: string }) {
   let el: (HTMLElement & { code?: string }) | undefined;
   onMount(() => {
@@ -33,7 +33,7 @@ function CodeBlockElement(props: { code: string; language?: string }) {
     }
   });
   return (
-    <kitn-code-block
+    <kc-code-block
       ref={(e) => (el = e as HTMLElement)}
       style={{ display: 'block', padding: '16px', 'max-width': '720px' }}
     />
@@ -41,7 +41,7 @@ function CodeBlockElement(props: { code: string; language?: string }) {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-code-block id="code" language="ts" code-theme="github-dark-dimmed"></kitn-code-block>
+<kc-code-block id="code" language="ts" code-theme="github-dark-dimmed"></kc-code-block>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -51,14 +51,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-code-block',
+  title: 'Web Components/kc-code-block',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-code-block'),
+  argTypes: argTypesFor('kc-code-block'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-code-block', [
-          '`<kitn-code-block>` is the framework-agnostic **web component** for a single syntax-highlighted code block, complete with a copy button, isolated in **Shadow DOM**.',
+      description: specDescription('kc-code-block', [
+          '`<kc-code-block>` is the framework-agnostic **web component** for a single syntax-highlighted code block, complete with a copy button, isolated in **Shadow DOM**.',
           '**When to use:** dropping a highlighted snippet into a non-Solid app. In SolidJS, compose `CodeBlock` + `CodeBlockCode` directly.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the source via the `code` **property** (`el.code = '...'`), and pick a grammar with the `language` attribute (defaults to `tsx`). Tune highlighting with `code-theme` / `code-highlight`.",
           'See the **Code** tab for HTML usage.',

@@ -5,14 +5,14 @@ import * as FullChat from '../full-chat.stories';
 
 # Getting Started
 
-`<kitn-chat>` is **transport-agnostic**: you give it a `messages` array, it renders the conversation, and it emits a `submit` event when the user sends. You own the request and the streaming; the component owns the UI.
+`<kc-chat>` is **transport-agnostic**: you give it a `messages` array, it renders the conversation, and it emits a `submit` event when the user sends. You own the request and the streaming; the component owns the UI.
 
 ## A web component in ~10 lines
 
 Set rich data as JS **properties** and listen for **events** on the element:
 
 ```html
-<kitn-chat id="chat" style="display:block; height:100vh;"></kitn-chat>
+<kc-chat id="chat" style="display:block; height:100vh;"></kc-chat>
 
 <script type="module">
   import '@kitnai/chat/elements';

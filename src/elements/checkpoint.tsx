@@ -13,17 +13,17 @@ interface Props extends Record<string, unknown> {
   size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
 }
 
-/** Events fired by `<kitn-checkpoint>`. */
+/** Events fired by `<kc-checkpoint>`. */
 interface Events {
   /** The checkpoint was clicked. */
   select: void;
 }
 
 /**
- * `<kitn-checkpoint>` — a bookmark/checkpoint button (optional tooltip + label).
+ * `<kc-checkpoint>` — a bookmark/checkpoint button (optional tooltip + label).
  * Emits `select`.
  */
-defineKitnElement<Props, Events>('kitn-checkpoint', {
+defineKitnElement<Props, Events>('kc-checkpoint', {
   label: undefined,
   tooltip: undefined,
   variant: 'ghost',

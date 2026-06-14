@@ -9,15 +9,15 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-attachments",
-          "name": "KitnAttachmentsElement",
+          "tagName": "kc-attachments",
+          "name": "KcAttachmentsElement",
           "description": "",
           "members": [
             {
               "kind": "field",
               "name": "items",
               "type": {
-                "text": "AttachmentData[]"
+                "text": "{ id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]"
               },
               "description": "The attachments to render. Set as a JS property (array).",
               "privacy": "public"
@@ -125,13 +125,14 @@
               },
               "description": "A remove button was clicked."
             }
-          ]
+          ],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-chain-of-thought",
-          "name": "KitnChainOfThoughtElement",
+          "tagName": "kc-chain-of-thought",
+          "name": "KcChainOfThoughtElement",
           "description": "",
           "members": [
             {
@@ -153,22 +154,23 @@
               "description": "Color mode (auto follows prefers-color-scheme)."
             }
           ],
-          "events": []
+          "events": [],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-chat",
-          "name": "KitnChatElement",
+          "tagName": "kc-chat",
+          "name": "KcChatElement",
           "description": "",
           "members": [
             {
               "kind": "field",
               "name": "messages",
               "type": {
-                "text": "ChatMessage[]"
+                "text": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\")[] }[]"
               },
-              "description": "",
+              "description": "The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`).",
               "privacy": "public"
             },
             {
@@ -177,7 +179,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": "",
+              "description": "Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior.",
               "privacy": "public"
             },
             {
@@ -186,7 +188,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": "",
+              "description": "Placeholder text shown in the empty input.",
               "privacy": "public"
             },
             {
@@ -195,7 +197,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": "",
+              "description": "When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply).",
               "privacy": "public"
             },
             {
@@ -204,7 +206,16 @@
               "type": {
                 "text": "undefined | string[]"
               },
-              "description": "",
+              "description": "Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "suggestionMode",
+              "type": {
+                "text": "undefined | \"submit\" | \"fill\""
+              },
+              "description": "What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input.",
               "privacy": "public"
             },
             {
@@ -213,7 +224,7 @@
               "type": {
                 "text": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
               },
-              "description": "",
+              "description": "Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`.",
               "privacy": "public"
             },
             {
@@ -222,7 +233,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": "",
+              "description": "Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`).",
               "privacy": "public"
             },
             {
@@ -231,7 +242,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": "",
+              "description": "Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true.",
               "privacy": "public"
             },
             {
@@ -247,7 +258,7 @@
               "kind": "field",
               "name": "models",
               "type": {
-                "text": "undefined | ModelOption[]"
+                "text": "undefined | { id: string; name: string; provider?: undefined | string }[]"
               },
               "description": "Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `modelchange` event fires on selection.",
               "privacy": "public"
@@ -301,7 +312,7 @@
               "kind": "field",
               "name": "slashCommands",
               "type": {
-                "text": "undefined | SlashCommandItem[]"
+                "text": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]"
               },
               "description": "Slash commands — when set, typing `/` in the input opens the command palette and fires `slashselect`. Set as a JS property.",
               "privacy": "public"
@@ -339,7 +350,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": ""
+              "description": "Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior."
             },
             {
               "name": "placeholder",
@@ -347,7 +358,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": ""
+              "description": "Placeholder text shown in the empty input."
             },
             {
               "name": "loading",
@@ -355,7 +366,15 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": ""
+              "description": "When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply)."
+            },
+            {
+              "name": "suggestion-mode",
+              "fieldName": "suggestionMode",
+              "type": {
+                "text": "undefined | \"submit\" | \"fill\""
+              },
+              "description": "What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input."
             },
             {
               "name": "prose-size",
@@ -363,7 +382,7 @@
               "type": {
                 "text": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
               },
-              "description": ""
+              "description": "Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`."
             },
             {
               "name": "code-theme",
@@ -371,7 +390,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": ""
+              "description": "Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`)."
             },
             {
               "name": "code-highlight",
@@ -379,7 +398,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": ""
+              "description": "Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true."
             },
             {
               "name": "chat-title",
@@ -434,128 +453,67 @@
             {
               "name": "messageaction",
               "type": {
-                "text": "CustomEvent<unknown>"
+                "text": "CustomEvent<{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }>"
               },
-              "description": ""
+              "description": "An action button on a message was clicked."
             },
             {
               "name": "modelchange",
               "type": {
-                "text": "CustomEvent<unknown>"
+                "text": "CustomEvent<{ modelId: string }>"
               },
-              "description": ""
+              "description": "The header model switcher changed."
             },
             {
               "name": "search",
               "type": {
-                "text": "CustomEvent<unknown>"
+                "text": "CustomEvent<Record<string, never>>"
               },
-              "description": ""
+              "description": "The Search button was clicked."
             },
             {
               "name": "slashselect",
               "type": {
-                "text": "CustomEvent<unknown>"
+                "text": "CustomEvent<{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }>"
               },
-              "description": ""
+              "description": "A slash command was chosen from the palette."
             },
             {
               "name": "submit",
               "type": {
-                "text": "CustomEvent<unknown>"
+                "text": "CustomEvent<{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>"
               },
-              "description": ""
+              "description": "User submitted a message."
             },
             {
               "name": "suggestionclick",
               "type": {
-                "text": "CustomEvent<unknown>"
+                "text": "CustomEvent<{ value: string }>"
               },
-              "description": ""
+              "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`)."
             },
             {
               "name": "valuechange",
               "type": {
-                "text": "CustomEvent<unknown>"
+                "text": "CustomEvent<{ value: string }>"
               },
-              "description": ""
+              "description": "Fired on every input change."
             },
             {
               "name": "voice",
               "type": {
-                "text": "CustomEvent<unknown>"
+                "text": "CustomEvent<Record<string, never>>"
               },
-              "description": ""
+              "description": "The Mic / voice button was clicked."
             }
-          ]
+          ],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-chat-scope-picker",
-          "name": "KitnChatScopePickerElement",
-          "description": "",
-          "members": [
-            {
-              "kind": "field",
-              "name": "availableAuthors",
-              "type": {
-                "text": "string[]"
-              },
-              "description": "Authors to offer as scope filters. Set as a JS property.",
-              "privacy": "public"
-            },
-            {
-              "kind": "field",
-              "name": "availableTags",
-              "type": {
-                "text": "string[]"
-              },
-              "description": "Tags to offer as scope filters. Set as a JS property.",
-              "privacy": "public"
-            },
-            {
-              "kind": "field",
-              "name": "currentLabel",
-              "type": {
-                "text": "undefined | string"
-              },
-              "description": "The label shown on the trigger for the active scope.",
-              "privacy": "public"
-            }
-          ],
-          "attributes": [
-            {
-              "name": "theme",
-              "type": {
-                "text": "'light' | 'dark' | 'auto'"
-              },
-              "description": "Color mode (auto follows prefers-color-scheme)."
-            },
-            {
-              "name": "current-label",
-              "fieldName": "currentLabel",
-              "type": {
-                "text": "undefined | string"
-              },
-              "description": "The label shown on the trigger for the active scope."
-            }
-          ],
-          "events": [
-            {
-              "name": "scopechange",
-              "type": {
-                "text": "CustomEvent<{ filters: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }>"
-              },
-              "description": "A scope was chosen (`undefined` filters = \"All Content\")."
-            }
-          ]
-        },
-        {
-          "kind": "class",
-          "customElement": true,
-          "tagName": "kitn-checkpoint",
-          "name": "KitnCheckpointElement",
+          "tagName": "kc-checkpoint",
+          "name": "KcCheckpointElement",
           "description": "",
           "members": [
             {
@@ -582,7 +540,7 @@
               "type": {
                 "text": "undefined | \"ghost\" | \"default\" | \"outline\""
               },
-              "description": "",
+              "description": "Visual button style.",
               "privacy": "public"
             },
             {
@@ -591,7 +549,7 @@
               "type": {
                 "text": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\""
               },
-              "description": "",
+              "description": "Button size (use an `icon*` size for an icon-only checkpoint).",
               "privacy": "public"
             }
           ],
@@ -625,7 +583,7 @@
               "type": {
                 "text": "undefined | \"ghost\" | \"default\" | \"outline\""
               },
-              "description": ""
+              "description": "Visual button style."
             },
             {
               "name": "size",
@@ -633,7 +591,7 @@
               "type": {
                 "text": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\""
               },
-              "description": ""
+              "description": "Button size (use an `icon*` size for an icon-only checkpoint)."
             }
           ],
           "events": [
@@ -644,13 +602,14 @@
               },
               "description": "The checkpoint was clicked."
             }
-          ]
+          ],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-code-block",
-          "name": "KitnCodeBlockElement",
+          "tagName": "kc-code-block",
+          "name": "KcCodeBlockElement",
           "description": "",
           "members": [
             {
@@ -748,13 +707,18 @@
               "description": "Code text sizing."
             }
           ],
-          "events": []
+          "events": [],
+          "cssProperties": [
+            {
+              "name": "--color-code-foreground"
+            }
+          ]
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-context-meter",
-          "name": "KitnContextMeterElement",
+          "tagName": "kc-context",
+          "name": "KcContextElement",
           "description": "",
           "members": [
             {
@@ -776,31 +740,32 @@
               "description": "Color mode (auto follows prefers-color-scheme)."
             }
           ],
-          "events": []
+          "events": [],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-conversation-list",
-          "name": "KitnConversationListElement",
+          "tagName": "kc-conversations",
+          "name": "KcConversationsElement",
           "description": "",
           "members": [
             {
               "kind": "field",
               "name": "groups",
               "type": {
-                "text": "ConversationGroup[]"
+                "text": "{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]"
               },
-              "description": "",
+              "description": "Pre-bucketed conversation groups (e.g. \"Today\", \"Yesterday\"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property.",
               "privacy": "public"
             },
             {
               "kind": "field",
               "name": "conversations",
               "type": {
-                "text": "ConversationSummary[]"
+                "text": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]"
               },
-              "description": "",
+              "description": "A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property.",
               "privacy": "public"
             },
             {
@@ -809,7 +774,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": "",
+              "description": "The id of the currently-open conversation, highlighted in the list.",
               "privacy": "public"
             }
           ],
@@ -827,38 +792,46 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": ""
+              "description": "The id of the currently-open conversation, highlighted in the list."
             }
           ],
           "events": [
             {
               "name": "newchat",
               "type": {
-                "text": "CustomEvent<unknown>"
+                "text": "CustomEvent<Record<string, never>>"
               },
-              "description": ""
+              "description": "The \"New chat\" button was clicked."
             },
             {
               "name": "select",
               "type": {
-                "text": "CustomEvent<unknown>"
+                "text": "CustomEvent<{ id: string }>"
               },
-              "description": ""
+              "description": "A conversation was selected."
             },
             {
               "name": "togglesidebar",
               "type": {
-                "text": "CustomEvent<unknown>"
+                "text": "CustomEvent<Record<string, never>>"
               },
-              "description": ""
+              "description": "The sidebar toggle was clicked."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--color-sidebar"
+            },
+            {
+              "name": "--color-scrollbar-thumb"
             }
           ]
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-empty",
-          "name": "KitnEmptyElement",
+          "tagName": "kc-empty",
+          "name": "KcEmptyElement",
           "description": "",
           "members": [
             {
@@ -905,13 +878,14 @@
               "description": "Description text."
             }
           ],
-          "events": []
+          "events": [],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-feedback-bar",
-          "name": "KitnFeedbackBarElement",
+          "tagName": "kc-feedback-bar",
+          "name": "KcFeedbackBarElement",
           "description": "",
           "members": [
             {
@@ -947,29 +921,30 @@
               "type": {
                 "text": "CustomEvent"
               },
-              "description": ""
+              "description": "The user dismissed the banner."
             },
             {
               "name": "helpful",
               "type": {
                 "text": "CustomEvent"
               },
-              "description": ""
+              "description": "The user clicked thumbs-up."
             },
             {
               "name": "nothelpful",
               "type": {
                 "text": "CustomEvent"
               },
-              "description": ""
+              "description": "The user clicked thumbs-down."
             }
-          ]
+          ],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-file-upload",
-          "name": "KitnFileUploadElement",
+          "tagName": "kc-file-upload",
+          "name": "KcFileUploadElement",
           "description": "",
           "members": [
             {
@@ -996,7 +971,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": "",
+              "description": "Disable the dropzone — no clicking, no drag-and-drop.",
               "privacy": "public"
             },
             {
@@ -1039,7 +1014,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": ""
+              "description": "Disable the dropzone — no clicking, no drag-and-drop."
             },
             {
               "name": "label",
@@ -1058,13 +1033,14 @@
               },
               "description": "Files were picked or dropped."
             }
-          ]
+          ],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-image",
-          "name": "KitnImageElement",
+          "tagName": "kc-image",
+          "name": "KcImageElement",
           "description": "",
           "members": [
             {
@@ -1137,13 +1113,14 @@
               "description": "MIME type (default `image/png`)."
             }
           ],
-          "events": []
+          "events": [],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-loader",
-          "name": "KitnLoaderElement",
+          "tagName": "kc-loader",
+          "name": "KcLoaderElement",
           "description": "",
           "members": [
             {
@@ -1152,7 +1129,7 @@
               "type": {
                 "text": "undefined | \"circular\" | \"classic\" | \"pulse\" | \"pulse-dot\" | \"dots\" | \"typing\" | \"wave\" | \"bars\" | \"terminal\" | \"text-blink\" | \"text-shimmer\" | \"loading-dots\""
               },
-              "description": "",
+              "description": "The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`.",
               "privacy": "public"
             },
             {
@@ -1161,7 +1138,7 @@
               "type": {
                 "text": "undefined | \"sm\" | \"lg\" | \"md\""
               },
-              "description": "",
+              "description": "Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`.",
               "privacy": "public"
             },
             {
@@ -1188,7 +1165,7 @@
               "type": {
                 "text": "undefined | \"circular\" | \"classic\" | \"pulse\" | \"pulse-dot\" | \"dots\" | \"typing\" | \"wave\" | \"bars\" | \"terminal\" | \"text-blink\" | \"text-shimmer\" | \"loading-dots\""
               },
-              "description": ""
+              "description": "The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`."
             },
             {
               "name": "size",
@@ -1196,7 +1173,7 @@
               "type": {
                 "text": "undefined | \"sm\" | \"lg\" | \"md\""
               },
-              "description": ""
+              "description": "Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`."
             },
             {
               "name": "text",
@@ -1207,13 +1184,14 @@
               "description": "Label for the text-based variants."
             }
           ],
-          "events": []
+          "events": [],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-markdown",
-          "name": "KitnMarkdownElement",
+          "tagName": "kc-markdown",
+          "name": "KcMarkdownElement",
           "description": "",
           "members": [
             {
@@ -1294,20 +1272,21 @@
               "description": "Disable syntax highlighting (no Shiki loads)."
             }
           ],
-          "events": []
+          "events": [],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-message",
-          "name": "KitnMessageElement",
+          "tagName": "kc-message",
+          "name": "KcMessageElement",
           "description": "",
           "members": [
             {
               "kind": "field",
               "name": "message",
               "type": {
-                "text": "undefined | ChatMessage"
+                "text": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\")[] }"
               },
               "description": "The full message object. Set as a JS property.",
               "privacy": "public"
@@ -1345,7 +1324,7 @@
               "type": {
                 "text": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
               },
-              "description": "",
+              "description": "Text/markdown sizing for the message body.",
               "privacy": "public"
             },
             {
@@ -1354,7 +1333,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": "",
+              "description": "Shiki theme name used for fenced code blocks in the content.",
               "privacy": "public"
             },
             {
@@ -1363,7 +1342,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": "",
+              "description": "Disable syntax highlighting for code blocks (no Shiki loads).",
               "privacy": "public"
             }
           ],
@@ -1405,7 +1384,7 @@
               "type": {
                 "text": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
               },
-              "description": ""
+              "description": "Text/markdown sizing for the message body."
             },
             {
               "name": "code-theme",
@@ -1413,7 +1392,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": ""
+              "description": "Shiki theme name used for fenced code blocks in the content."
             },
             {
               "name": "code-highlight",
@@ -1421,7 +1400,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": ""
+              "description": "Disable syntax highlighting for code blocks (no Shiki loads)."
             }
           ],
           "events": [
@@ -1432,48 +1411,21 @@
               },
               "description": "An action button was clicked."
             }
-          ]
+          ],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-message-skills",
-          "name": "KitnMessageSkillsElement",
-          "description": "",
-          "members": [
-            {
-              "kind": "field",
-              "name": "skills",
-              "type": {
-                "text": "{ id: string; name: string }[]"
-              },
-              "description": "The active skills to badge. Set as a JS property.",
-              "privacy": "public"
-            }
-          ],
-          "attributes": [
-            {
-              "name": "theme",
-              "type": {
-                "text": "'light' | 'dark' | 'auto'"
-              },
-              "description": "Color mode (auto follows prefers-color-scheme)."
-            }
-          ],
-          "events": []
-        },
-        {
-          "kind": "class",
-          "customElement": true,
-          "tagName": "kitn-model-switcher",
-          "name": "KitnModelSwitcherElement",
+          "tagName": "kc-model-switcher",
+          "name": "KcModelSwitcherElement",
           "description": "",
           "members": [
             {
               "kind": "field",
               "name": "models",
               "type": {
-                "text": "ModelOption[]"
+                "text": "{ id: string; name: string; provider?: undefined | string }[]"
               },
               "description": "The selectable models. Set as a JS property (array).",
               "privacy": "public"
@@ -1513,13 +1465,14 @@
               },
               "description": "A model was selected."
             }
-          ]
+          ],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-prompt-input",
-          "name": "KitnPromptInputElement",
+          "tagName": "kc-prompt-input",
+          "name": "KcPromptInputElement",
           "description": "",
           "members": [
             {
@@ -1528,7 +1481,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": "",
+              "description": "Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior.",
               "privacy": "public"
             },
             {
@@ -1537,7 +1490,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": "",
+              "description": "Placeholder text shown in the empty input.",
               "privacy": "public"
             },
             {
@@ -1546,7 +1499,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": "",
+              "description": "Disable the input and submit button entirely (non-interactive).",
               "privacy": "public"
             },
             {
@@ -1555,7 +1508,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": "",
+              "description": "Show the loading/streaming state and block submit (use while awaiting a reply).",
               "privacy": "public"
             },
             {
@@ -1564,14 +1517,23 @@
               "type": {
                 "text": "undefined | string[]"
               },
-              "description": "",
+              "description": "Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "suggestionMode",
+              "type": {
+                "text": "undefined | \"submit\" | \"fill\""
+              },
+              "description": "What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input.",
               "privacy": "public"
             },
             {
               "kind": "field",
               "name": "slashCommands",
               "type": {
-                "text": "undefined | SlashCommandItem[]"
+                "text": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]"
               },
               "description": "Slash commands — when set, typing `/` opens the command palette. Set as a JS property.",
               "privacy": "public"
@@ -1593,6 +1555,33 @@
               },
               "description": "Single-line palette rows.",
               "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "search",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "voice",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "attachments",
+              "type": {
+                "text": "undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]"
+              },
+              "description": "Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip).",
+              "privacy": "public"
             }
           ],
           "attributes": [
@@ -1609,7 +1598,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": ""
+              "description": "Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior."
             },
             {
               "name": "placeholder",
@@ -1617,7 +1606,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": ""
+              "description": "Placeholder text shown in the empty input."
             },
             {
               "name": "disabled",
@@ -1625,7 +1614,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": ""
+              "description": "Disable the input and submit button entirely (non-interactive)."
             },
             {
               "name": "loading",
@@ -1633,7 +1622,15 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": ""
+              "description": "Show the loading/streaming state and block submit (use while awaiting a reply)."
+            },
+            {
+              "name": "suggestion-mode",
+              "fieldName": "suggestionMode",
+              "type": {
+                "text": "undefined | \"submit\" | \"fill\""
+              },
+              "description": "What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input."
             },
             {
               "name": "slash-compact",
@@ -1642,131 +1639,75 @@
                 "text": "undefined | false | true"
               },
               "description": "Single-line palette rows."
+            },
+            {
+              "name": "search",
+              "fieldName": "search",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event."
+            },
+            {
+              "name": "voice",
+              "fieldName": "voice",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event."
             }
           ],
           "events": [
             {
+              "name": "search",
+              "type": {
+                "text": "CustomEvent<Record<string, never>>"
+              },
+              "description": "The Search (Globe) toolbar button was clicked."
+            },
+            {
               "name": "slashselect",
               "type": {
-                "text": "CustomEvent<{ command: SlashCommandItem }>"
+                "text": "CustomEvent<{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }>"
               },
               "description": "A slash command was chosen from the palette."
             },
             {
               "name": "submit",
               "type": {
-                "text": "CustomEvent<{ value: string; attachments: AttachmentData[] }>"
+                "text": "CustomEvent<{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>"
               },
-              "description": ""
+              "description": "The user submitted the prompt (Enter or send button) with its attachments."
             },
             {
               "name": "suggestionclick",
               "type": {
                 "text": "CustomEvent<{ value: string }>"
               },
-              "description": ""
+              "description": "A suggestion was clicked while `suggestion-mode=\"fill\"`."
             },
             {
               "name": "valuechange",
               "type": {
                 "text": "CustomEvent<{ value: string }>"
               },
-              "description": ""
+              "description": "The input text changed (fires on every keystroke)."
+            },
+            {
+              "name": "voice",
+              "type": {
+                "text": "CustomEvent<Record<string, never>>"
+              },
+              "description": "The Voice (Mic) toolbar button was clicked."
             }
-          ]
+          ],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-prompt-suggestions",
-          "name": "KitnPromptSuggestionsElement",
-          "description": "",
-          "members": [
-            {
-              "kind": "field",
-              "name": "suggestions",
-              "type": {
-                "text": "string | { label: string; value?: undefined | string }[]"
-              },
-              "description": "The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property.",
-              "privacy": "public"
-            },
-            {
-              "kind": "field",
-              "name": "variant",
-              "type": {
-                "text": "undefined | \"ghost\" | \"default\" | \"outline\""
-              },
-              "description": "",
-              "privacy": "public"
-            },
-            {
-              "kind": "field",
-              "name": "block",
-              "type": {
-                "text": "undefined | false | true"
-              },
-              "description": "Full-width left-aligned rows instead of pills.",
-              "privacy": "public"
-            },
-            {
-              "kind": "field",
-              "name": "highlight",
-              "type": {
-                "text": "undefined | string"
-              },
-              "description": "Substring to highlight within each suggestion.",
-              "privacy": "public"
-            }
-          ],
-          "attributes": [
-            {
-              "name": "theme",
-              "type": {
-                "text": "'light' | 'dark' | 'auto'"
-              },
-              "description": "Color mode (auto follows prefers-color-scheme)."
-            },
-            {
-              "name": "variant",
-              "fieldName": "variant",
-              "type": {
-                "text": "undefined | \"ghost\" | \"default\" | \"outline\""
-              },
-              "description": ""
-            },
-            {
-              "name": "block",
-              "fieldName": "block",
-              "type": {
-                "text": "undefined | false | true"
-              },
-              "description": "Full-width left-aligned rows instead of pills."
-            },
-            {
-              "name": "highlight",
-              "fieldName": "highlight",
-              "type": {
-                "text": "undefined | string"
-              },
-              "description": "Substring to highlight within each suggestion."
-            }
-          ],
-          "events": [
-            {
-              "name": "select",
-              "type": {
-                "text": "CustomEvent<{ value: string }>"
-              },
-              "description": "A suggestion was clicked."
-            }
-          ]
-        },
-        {
-          "kind": "class",
-          "customElement": true,
-          "tagName": "kitn-reasoning",
-          "name": "KitnReasoningElement",
+          "tagName": "kc-reasoning",
+          "name": "KcReasoningElement",
           "description": "",
           "members": [
             {
@@ -1872,13 +1813,14 @@
               },
               "description": "Open state changed (via the trigger or streaming auto-open)."
             }
-          ]
+          ],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-response-stream",
-          "name": "KitnResponseStreamElement",
+          "tagName": "kc-response-stream",
+          "name": "KcResponseStreamElement",
           "description": "",
           "members": [
             {
@@ -1959,13 +1901,106 @@
               },
               "description": "Streaming finished."
             }
-          ]
+          ],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-source",
-          "name": "KitnSourceElement",
+          "tagName": "kc-scope-picker",
+          "name": "KcScopePickerElement",
+          "description": "",
+          "members": [
+            {
+              "kind": "field",
+              "name": "availableAuthors",
+              "type": {
+                "text": "string[]"
+              },
+              "description": "Authors to offer as scope filters. Set as a JS property.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "availableTags",
+              "type": {
+                "text": "string[]"
+              },
+              "description": "Tags to offer as scope filters. Set as a JS property.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "currentLabel",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "The label shown on the trigger for the active scope.",
+              "privacy": "public"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "theme",
+              "type": {
+                "text": "'light' | 'dark' | 'auto'"
+              },
+              "description": "Color mode (auto follows prefers-color-scheme)."
+            },
+            {
+              "name": "current-label",
+              "fieldName": "currentLabel",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "The label shown on the trigger for the active scope."
+            }
+          ],
+          "events": [
+            {
+              "name": "scopechange",
+              "type": {
+                "text": "CustomEvent<{ filters: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }>"
+              },
+              "description": "A scope was chosen (`undefined` filters = \"All Content\")."
+            }
+          ],
+          "cssProperties": []
+        },
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "kc-skills",
+          "name": "KcSkillsElement",
+          "description": "",
+          "members": [
+            {
+              "kind": "field",
+              "name": "skills",
+              "type": {
+                "text": "{ id: string; name: string }[]"
+              },
+              "description": "The active skills to badge. Set as a JS property.",
+              "privacy": "public"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "theme",
+              "type": {
+                "text": "'light' | 'dark' | 'auto'"
+              },
+              "description": "Color mode (auto follows prefers-color-scheme)."
+            }
+          ],
+          "events": [],
+          "cssProperties": []
+        },
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "kc-source",
+          "name": "KcSourceElement",
           "description": "",
           "members": [
             {
@@ -1974,7 +2009,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": "",
+              "description": "The URL this citation links to (the domain also seeds the default label/favicon).",
               "privacy": "public"
             },
             {
@@ -2001,7 +2036,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": "",
+              "description": "Hover-card body text describing the source.",
               "privacy": "public"
             },
             {
@@ -2010,7 +2045,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": "",
+              "description": "Show the source's favicon next to the trigger label.",
               "privacy": "public"
             }
           ],
@@ -2028,7 +2063,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": ""
+              "description": "The URL this citation links to (the domain also seeds the default label/favicon)."
             },
             {
               "name": "label",
@@ -2052,7 +2087,7 @@
               "type": {
                 "text": "undefined | string"
               },
-              "description": ""
+              "description": "Hover-card body text describing the source."
             },
             {
               "name": "show-favicon",
@@ -2060,16 +2095,17 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": ""
+              "description": "Show the source's favicon next to the trigger label."
             }
           ],
-          "events": []
+          "events": [],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-source-list",
-          "name": "KitnSourceListElement",
+          "tagName": "kc-sources",
+          "name": "KcSourcesElement",
           "description": "",
           "members": [
             {
@@ -2108,13 +2144,119 @@
               "description": "Show favicons on all items (per-item `showFavicon` overrides)."
             }
           ],
-          "events": []
+          "events": [],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-text-shimmer",
-          "name": "KitnTextShimmerElement",
+          "tagName": "kc-suggestions",
+          "name": "KcSuggestionsElement",
+          "description": "",
+          "members": [
+            {
+              "kind": "field",
+              "name": "suggestions",
+              "type": {
+                "text": "(string | { label: string; value?: undefined | string })[]"
+              },
+              "description": "The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "type": {
+                "text": "undefined | \"ghost\" | \"default\" | \"outline\""
+              },
+              "description": "Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled).",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "type": {
+                "text": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\""
+              },
+              "description": "Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`).",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "block",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Full-width left-aligned rows instead of pills.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "highlight",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Substring to highlight within each suggestion.",
+              "privacy": "public"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "theme",
+              "type": {
+                "text": "'light' | 'dark' | 'auto'"
+              },
+              "description": "Color mode (auto follows prefers-color-scheme)."
+            },
+            {
+              "name": "variant",
+              "fieldName": "variant",
+              "type": {
+                "text": "undefined | \"ghost\" | \"default\" | \"outline\""
+              },
+              "description": "Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled)."
+            },
+            {
+              "name": "size",
+              "fieldName": "size",
+              "type": {
+                "text": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\""
+              },
+              "description": "Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`)."
+            },
+            {
+              "name": "block",
+              "fieldName": "block",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Full-width left-aligned rows instead of pills."
+            },
+            {
+              "name": "highlight",
+              "fieldName": "highlight",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Substring to highlight within each suggestion."
+            }
+          ],
+          "events": [
+            {
+              "name": "select",
+              "type": {
+                "text": "CustomEvent<{ value: string }>"
+              },
+              "description": "A suggestion was clicked."
+            }
+          ],
+          "cssProperties": []
+        },
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "kc-text-shimmer",
+          "name": "KcTextShimmerElement",
           "description": "",
           "members": [
             {
@@ -2195,13 +2337,14 @@
               "description": "Gradient spread (5–45)."
             }
           ],
-          "events": []
+          "events": [],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-thinking-bar",
-          "name": "KitnThinkingBarElement",
+          "tagName": "kc-thinking-bar",
+          "name": "KcThinkingBarElement",
           "description": "",
           "members": [
             {
@@ -2273,20 +2416,21 @@
               },
               "description": "The \"stop / answer now\" affordance was clicked."
             }
-          ]
+          ],
+          "cssProperties": []
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-tool",
-          "name": "KitnToolElement",
+          "tagName": "kc-tool",
+          "name": "KcToolElement",
           "description": "",
           "members": [
             {
               "kind": "field",
               "name": "tool",
               "type": {
-                "text": "undefined | ToolPart"
+                "text": "undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }"
               },
               "description": "The tool-call to display. Set as a JS property.",
               "privacy": "public"
@@ -2318,13 +2462,27 @@
               "description": "Start expanded."
             }
           ],
-          "events": []
+          "events": [],
+          "cssProperties": [
+            {
+              "name": "--color-tool-blue"
+            },
+            {
+              "name": "--color-tool-amber"
+            },
+            {
+              "name": "--color-tool-green"
+            },
+            {
+              "name": "--color-tool-red"
+            }
+          ]
         },
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kitn-voice-input",
-          "name": "KitnVoiceInputElement",
+          "tagName": "kc-voice-input",
+          "name": "KcVoiceInputElement",
           "description": "",
           "members": [
             {
@@ -2342,7 +2500,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": "",
+              "description": "Disable the mic button (non-interactive).",
               "privacy": "public"
             }
           ],
@@ -2360,7 +2518,7 @@
               "type": {
                 "text": "undefined | false | true"
               },
-              "description": ""
+              "description": "Disable the mic button (non-interactive)."
             }
           ],
           "events": [
@@ -2378,7 +2536,484 @@
               },
               "description": "Transcription completed (the `transcribe` property resolved)."
             }
-          ]
+          ],
+          "cssProperties": []
+        },
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "kc-workspace",
+          "name": "KcWorkspaceElement",
+          "description": "",
+          "members": [
+            {
+              "kind": "field",
+              "name": "groups",
+              "type": {
+                "text": "{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]"
+              },
+              "description": "Pre-bucketed conversation groups for the sidebar. Set as a JS property.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "conversations",
+              "type": {
+                "text": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]"
+              },
+              "description": "Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "activeId",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Id of the open conversation, highlighted in the sidebar.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "messages",
+              "type": {
+                "text": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\")[] }[]"
+              },
+              "description": "The active conversation's message thread, newest last. Set as a JS property.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "placeholder",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "loading",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "suggestions",
+              "type": {
+                "text": "undefined | string[]"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "suggestionMode",
+              "type": {
+                "text": "undefined | \"submit\" | \"fill\""
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "proseSize",
+              "type": {
+                "text": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "codeTheme",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "codeHighlight",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "chatTitle",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "models",
+              "type": {
+                "text": "undefined | { id: string; name: string; provider?: undefined | string }[]"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "currentModel",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "context",
+              "type": {
+                "text": "undefined | { usedTokens: number; maxTokens: number; inputTokens?: undefined | number; outputTokens?: undefined | number; estimatedCost?: undefined | number }"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "scrollButton",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "search",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "voice",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "slashCommands",
+              "type": {
+                "text": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "slashActiveIds",
+              "type": {
+                "text": "undefined | string[]"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "slashCompact",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "sidebarWidth",
+              "type": {
+                "text": "undefined | number"
+              },
+              "description": "Sidebar default width as a percent of the workspace (default 22).",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "sidebarMinWidth",
+              "type": {
+                "text": "undefined | number"
+              },
+              "description": "Sidebar min width in px (default 200).",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "sidebarMaxWidth",
+              "type": {
+                "text": "undefined | number"
+              },
+              "description": "Sidebar max width in px (default 420).",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "sidebarCollapsed",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Initial collapsed state of the sidebar (default false).",
+              "privacy": "public"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "theme",
+              "type": {
+                "text": "'light' | 'dark' | 'auto'"
+              },
+              "description": "Color mode (auto follows prefers-color-scheme)."
+            },
+            {
+              "name": "active-id",
+              "fieldName": "activeId",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Id of the open conversation, highlighted in the sidebar."
+            },
+            {
+              "name": "value",
+              "fieldName": "value",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": ""
+            },
+            {
+              "name": "placeholder",
+              "fieldName": "placeholder",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": ""
+            },
+            {
+              "name": "loading",
+              "fieldName": "loading",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": ""
+            },
+            {
+              "name": "suggestion-mode",
+              "fieldName": "suggestionMode",
+              "type": {
+                "text": "undefined | \"submit\" | \"fill\""
+              },
+              "description": ""
+            },
+            {
+              "name": "prose-size",
+              "fieldName": "proseSize",
+              "type": {
+                "text": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
+              },
+              "description": ""
+            },
+            {
+              "name": "code-theme",
+              "fieldName": "codeTheme",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": ""
+            },
+            {
+              "name": "code-highlight",
+              "fieldName": "codeHighlight",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": ""
+            },
+            {
+              "name": "chat-title",
+              "fieldName": "chatTitle",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": ""
+            },
+            {
+              "name": "current-model",
+              "fieldName": "currentModel",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": ""
+            },
+            {
+              "name": "scroll-button",
+              "fieldName": "scrollButton",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": ""
+            },
+            {
+              "name": "search",
+              "fieldName": "search",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": ""
+            },
+            {
+              "name": "voice",
+              "fieldName": "voice",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": ""
+            },
+            {
+              "name": "slash-compact",
+              "fieldName": "slashCompact",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": ""
+            },
+            {
+              "name": "sidebar-width",
+              "fieldName": "sidebarWidth",
+              "type": {
+                "text": "undefined | number"
+              },
+              "description": "Sidebar default width as a percent of the workspace (default 22)."
+            },
+            {
+              "name": "sidebar-min-width",
+              "fieldName": "sidebarMinWidth",
+              "type": {
+                "text": "undefined | number"
+              },
+              "description": "Sidebar min width in px (default 200)."
+            },
+            {
+              "name": "sidebar-max-width",
+              "fieldName": "sidebarMaxWidth",
+              "type": {
+                "text": "undefined | number"
+              },
+              "description": "Sidebar max width in px (default 420)."
+            },
+            {
+              "name": "sidebar-collapsed",
+              "fieldName": "sidebarCollapsed",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Initial collapsed state of the sidebar (default false)."
+            }
+          ],
+          "events": [
+            {
+              "name": "conversationselect",
+              "type": {
+                "text": "CustomEvent<{ id: string }>"
+              },
+              "description": "A conversation was selected in the sidebar."
+            },
+            {
+              "name": "messageaction",
+              "type": {
+                "text": "CustomEvent<{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }>"
+              },
+              "description": "An action button on a message was clicked."
+            },
+            {
+              "name": "modelchange",
+              "type": {
+                "text": "CustomEvent<{ modelId: string }>"
+              },
+              "description": "The header model switcher changed."
+            },
+            {
+              "name": "newchat",
+              "type": {
+                "text": "CustomEvent<Record<string, never>>"
+              },
+              "description": "The \"New chat\" button was clicked."
+            },
+            {
+              "name": "search",
+              "type": {
+                "text": "CustomEvent<Record<string, never>>"
+              },
+              "description": "The Search button was clicked."
+            },
+            {
+              "name": "sidebartoggle",
+              "type": {
+                "text": "CustomEvent<{ collapsed: false | true }>"
+              },
+              "description": "The sidebar was collapsed or expanded."
+            },
+            {
+              "name": "slashselect",
+              "type": {
+                "text": "CustomEvent<{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }>"
+              },
+              "description": "A slash command was chosen from the palette."
+            },
+            {
+              "name": "submit",
+              "type": {
+                "text": "CustomEvent<{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>"
+              },
+              "description": "User submitted a message."
+            },
+            {
+              "name": "suggestionclick",
+              "type": {
+                "text": "CustomEvent<{ value: string }>"
+              },
+              "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`)."
+            },
+            {
+              "name": "valuechange",
+              "type": {
+                "text": "CustomEvent<{ value: string }>"
+              },
+              "description": "Fired on every input change."
+            },
+            {
+              "name": "voice",
+              "type": {
+                "text": "CustomEvent<Record<string, never>>"
+              },
+              "description": "The Mic / voice button was clicked."
+            }
+          ],
+          "cssProperties": []
         }
       ]
     }

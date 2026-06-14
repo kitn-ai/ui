@@ -7,7 +7,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-feedback-bar': JSX.HTMLAttributes<HTMLElement> & {
+      'kc-feedback-bar': JSX.HTMLAttributes<HTMLElement> & {
         'bar-title'?: string;
         'on:helpful'?: (e: CustomEvent) => void;
         'on:nothelpful'?: (e: CustomEvent) => void;
@@ -18,26 +18,26 @@ declare module 'solid-js' {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-feedback-bar bar-title="Was this helpful?"></kitn-feedback-bar>
+<kc-feedback-bar bar-title="Was this helpful?"></kc-feedback-bar>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
 
-  const bar = document.querySelector('kitn-feedback-bar');
+  const bar = document.querySelector('kc-feedback-bar');
   bar.addEventListener('helpful', () => console.log('👍'));
   bar.addEventListener('nothelpful', () => console.log('👎'));
   bar.addEventListener('close', () => bar.remove());
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-feedback-bar',
+  title: 'Web Components/kc-feedback-bar',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-feedback-bar'),
+  argTypes: argTypesFor('kc-feedback-bar'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-feedback-bar', [
-          '`<kitn-feedback-bar>` is the framework-agnostic **web component** for an inline thumbs up/down feedback banner with a dismiss button — isolated in **Shadow DOM**.',
+      description: specDescription('kc-feedback-bar', [
+          '`<kc-feedback-bar>` is the framework-agnostic **web component** for an inline thumbs up/down feedback banner with a dismiss button — isolated in **Shadow DOM**.',
           '**When to use:** collecting a quick reaction after an answer or a completed task. In SolidJS, use the `FeedbackBar` primitive.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the label via the `bar-title` attribute (`title` is avoided — it's a global HTML attribute), and listen for the `helpful` / `nothelpful` / `close` **CustomEvents**.",
           'See the **Code** tab for HTML usage.',
@@ -53,7 +53,7 @@ type Story = StoryObj;
 export const Default: Story = {
   render: () => (
     <div style={{ padding: '24px', 'max-width': '480px' }}>
-      <kitn-feedback-bar
+      <kc-feedback-bar
         on:helpful={() => console.log('helpful')}
         on:nothelpful={() => console.log('not helpful')}
         on:close={() => console.log('closed')}
@@ -67,7 +67,7 @@ export const Default: Story = {
 export const CustomTitle: Story = {
   render: () => (
     <div style={{ padding: '24px', 'max-width': '480px' }}>
-      <kitn-feedback-bar bar-title="Did this answer your question?" />
+      <kc-feedback-bar bar-title="Did this answer your question?" />
     </div>
   ),
 };

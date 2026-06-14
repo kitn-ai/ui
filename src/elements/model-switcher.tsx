@@ -9,21 +9,21 @@ interface Props extends Record<string, unknown> {
   currentModel?: string;
 }
 
-/** Events fired by `<kitn-model-switcher>`. */
+/** Events fired by `<kc-model-switcher>`. */
 interface Events {
   /** A model was selected. */
   modelchange: { modelId: string };
 }
 
 /**
- * `<kitn-model-switcher>` — an event-emitting leaf element. Data in via the
+ * `<kc-model-switcher>` — an event-emitting leaf element. Data in via the
  * `models` property, selection out via a `modelchange` event. Mirrors the
- * header switcher inside `<kitn-chat>` as a standalone, composable piece.
+ * header switcher inside `<kc-chat>` as a standalone, composable piece.
  *
  * Note: like the underlying primitive, this only renders when more than one
  * model is provided.
  */
-defineKitnElement<Props, Events>('kitn-model-switcher', {
+defineKitnElement<Props, Events>('kc-model-switcher', {
   models: [],
   currentModel: undefined,
 }, (props, { dispatch }) => (

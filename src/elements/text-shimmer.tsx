@@ -13,10 +13,10 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kitn-text-shimmer>` — animated shimmering text. Text via the `text`
+ * `<kc-text-shimmer>` — animated shimmering text. Text via the `text`
  * attribute; `duration`/`spread` tune the effect.
  */
-defineKitnElement<Props>('kitn-text-shimmer', {
+defineKitnElement<Props>('kc-text-shimmer', {
   text: '',
   as: 'span',
   duration: 4,

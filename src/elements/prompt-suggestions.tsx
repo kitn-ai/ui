@@ -19,7 +19,7 @@ interface Props extends Record<string, unknown> {
   highlight?: string;
 }
 
-/** Events fired by `<kitn-prompt-suggestions>`. */
+/** Events fired by `<kc-suggestions>`. */
 interface Events {
   /** A suggestion was clicked. */
   select: { value: string };
@@ -29,11 +29,11 @@ const labelOf = (s: Item) => (typeof s === 'string' ? s : s.label);
 const valueOf = (s: Item) => (typeof s === 'string' ? s : s.value ?? s.label);
 
 /**
- * `<kitn-prompt-suggestions>` — a row/list of suggestion chips. Data via the
+ * `<kc-suggestions>` — a row/list of suggestion chips. Data via the
  * `suggestions` property; `variant`/`block`/`highlight` attributes; emits
  * `select`.
  */
-defineKitnElement<Props, Events>('kitn-prompt-suggestions', {
+defineKitnElement<Props, Events>('kc-suggestions', {
   suggestions: [],
   variant: 'outline',
   size: undefined,

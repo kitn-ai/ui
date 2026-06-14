@@ -14,7 +14,7 @@ const messages: ChatMessage[] = [
 ];
 
 test('renders the list + thread and emits conversationselect and submit', async () => {
-  const el = document.createElement('kitn-chat-workspace') as HTMLElement & { conversations: ConversationSummary[]; messages: ChatMessage[] };
+  const el = document.createElement('kc-workspace') as HTMLElement & { conversations: ConversationSummary[]; messages: ChatMessage[] };
   el.conversations = conversations;
   el.messages = messages;
   document.body.appendChild(el);

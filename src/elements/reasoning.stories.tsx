@@ -8,7 +8,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-reasoning': JSX.HTMLAttributes<HTMLElement>;
+      'kc-reasoning': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -16,7 +16,7 @@ declare module 'solid-js' {
 const sampleText =
   'First I parse the request, then I plan the steps, then I execute and verify each one before responding.';
 
-/** Render the actual `<kitn-reasoning>` custom element with a `text` property. */
+/** Render the actual `<kc-reasoning>` custom element with a `text` property. */
 function ReasoningElement(props: { text: string; streaming?: boolean }) {
   let el: (HTMLElement & { text?: string; streaming?: boolean }) | undefined;
   onMount(() => {
@@ -26,12 +26,12 @@ function ReasoningElement(props: { text: string; streaming?: boolean }) {
     }
   });
   return (
-    <kitn-reasoning ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
+    <kc-reasoning ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
   );
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-reasoning id="reason" label="Reasoning"></kitn-reasoning>
+<kc-reasoning id="reason" label="Reasoning"></kc-reasoning>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -45,14 +45,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-reasoning',
+  title: 'Web Components/kc-reasoning',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-reasoning'),
+  argTypes: argTypesFor('kc-reasoning'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-reasoning', [
-          '`<kitn-reasoning>` is the framework-agnostic **web component** for a collapsible reasoning/thinking block that auto-expands while a thought is `streaming`, isolated in **Shadow DOM**.',
+      description: specDescription('kc-reasoning', [
+          '`<kc-reasoning>` is the framework-agnostic **web component** for a collapsible reasoning/thinking block that auto-expands while a thought is `streaming`, isolated in **Shadow DOM**.',
           '**When to use:** surfacing model chain-of-thought in a non-Solid app. In SolidJS, compose the `Reasoning` primitives directly.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the body via the `text` **property**, set the `streaming` flag while it streams in, optionally drive the controlled `open` property, and listen for the `openchange` **CustomEvent**.",
           'See the **Code** tab for HTML usage.',

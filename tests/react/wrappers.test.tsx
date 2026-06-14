@@ -10,7 +10,7 @@
  */
 import { render, cleanup } from '@testing-library/react';
 import { afterEach, expect, test, vi } from 'vitest';
-import { KitnConversationList, KitnPromptInput, KitnChat } from '@kitnai/chat/react';
+import { KcConversations, KcPromptInput, KcChat } from '@kitnai/chat/react';
 
 afterEach(cleanup);
 
@@ -34,9 +34,9 @@ test('array/object prop reaches the element as a live property (not a string)', 
   const groups = [{ id: 'g1', name: 'Today', sortOrder: 0, createdAt: '2026-06-01' }];
 
   const { container } = render(
-    <KitnConversationList conversations={conversations} groups={groups} />,
+    <KcConversations conversations={conversations} groups={groups} />,
   );
-  const el = container.querySelector('kitn-conversation-list') as unknown as AnyEl;
+  const el = container.querySelector('kc-conversations') as unknown as AnyEl;
   expect(el).toBeTruthy();
 
   // The SAME array instance is on the element — not stringified to an attribute.
@@ -53,8 +53,8 @@ test('array/object prop reaches the element as a live property (not a string)', 
 
 test('on<Event> handler fires with the CustomEvent detail', async () => {
   const onSubmit = vi.fn();
-  const { container } = render(<KitnPromptInput onSubmit={onSubmit} placeholder="Ask..." />);
-  const el = container.querySelector('kitn-prompt-input') as unknown as AnyEl;
+  const { container } = render(<KcPromptInput onSubmit={onSubmit} placeholder="Ask..." />);
+  const el = container.querySelector('kc-prompt-input') as unknown as AnyEl;
   await flush();
 
   const textarea = el.shadowRoot!.querySelector('textarea')!;
@@ -68,8 +68,8 @@ test('on<Event> handler fires with the CustomEvent detail', async () => {
 });
 
 test('boolean prop toggles a feature (loading disables send)', async () => {
-  const { container } = render(<KitnPromptInput loading />);
-  const el = container.querySelector('kitn-prompt-input') as unknown as AnyEl;
+  const { container } = render(<KcPromptInput loading />);
+  const el = container.querySelector('kc-prompt-input') as unknown as AnyEl;
   await flush();
 
   // Boolean reached the element as a real boolean property.
@@ -95,27 +95,27 @@ test('updating a prop re-assigns the element property and re-renders', async () 
   const groups = [{ id: 'g1', name: 'Today', sortOrder: 0, createdAt: '2026-06-01' }];
 
   const { container, rerender } = render(
-    <KitnConversationList conversations={first} groups={groups} />,
+    <KcConversations conversations={first} groups={groups} />,
   );
-  const el = container.querySelector('kitn-conversation-list') as unknown as AnyEl;
+  const el = container.querySelector('kc-conversations') as unknown as AnyEl;
   await flush();
   expect(el.conversations).toBe(first);
   expect(el.shadowRoot?.textContent).toContain('First chat');
 
-  rerender(<KitnConversationList conversations={second} groups={groups} />);
+  rerender(<KcConversations conversations={second} groups={groups} />);
   await flush();
   expect(el.conversations).toBe(second);
   expect(el.shadowRoot?.textContent).toContain('Second chat');
   expect(el.shadowRoot?.textContent).not.toContain('First chat');
 });
 
-test('object prop (messages) on KitnChat reaches the element unstringified', async () => {
+test('object prop (messages) on KcChat reaches the element unstringified', async () => {
   const messages = [
     { id: 'm1', role: 'user' as const, content: 'Hi there' },
     { id: 'm2', role: 'assistant' as const, content: 'Hello!' },
   ];
-  const { container } = render(<KitnChat messages={messages} theme="light" />);
-  const el = container.querySelector('kitn-chat') as unknown as AnyEl;
+  const { container } = render(<KcChat messages={messages} theme="light" />);
+  const el = container.querySelector('kc-chat') as unknown as AnyEl;
   await flush();
 
   expect(el.messages).toBe(messages);

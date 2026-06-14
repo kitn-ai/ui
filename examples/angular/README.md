@@ -1,4 +1,4 @@
-# kitn-chat — Angular example
+# kc-chat — Angular example
 
 A minimal, runnable Angular 19 standalone app demonstrating how to use the
 `@kitnai/chat` web components natively — **no wrappers needed**.
@@ -57,7 +57,7 @@ so the example exercises the in-repo build without needing a published package.
 - `src/app/app.component.ts` — standalone component with `CUSTOM_ELEMENTS_SCHEMA`,
   Angular Signals state, and all event handlers
 - `src/app/app.component.html` — template with `[prop]` / `(event)` bindings on
-  `<kitn-chat-workspace>` and `<kitn-prompt-input>`
+  `<kc-workspace>` and `<kc-prompt-input>`
 - `vite.config.ts` — local-build aliases
 - `src/stubs/` — minimal `.d.ts` stubs that redirect `@kitnai/chat/elements`
   type resolution away from the kit's SolidJS source (runtime uses the real bundle)

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
-import './register'; // side effect: registers <kitn-chat>, <kitn-conversation-list>, <kitn-prompt-input>
+import './register'; // side effect: registers <kc-chat>, <kc-conversations>, <kc-prompt-input>
 import type { ChatMessage } from './chat-types';
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-chat': JSX.HTMLAttributes<HTMLElement>;
+      'kc-chat': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -42,7 +42,7 @@ type ChatEl = HTMLElement & {
   slashCompact?: boolean;
 };
 
-/** Live demo of the actual `<kitn-chat>` custom element (Shadow DOM and all). */
+/** Live demo of the actual `<kc-chat>` custom element (Shadow DOM and all). */
 function ChatElement(props: { args?: Record<string, unknown> }) {
   let el: ChatEl | undefined;
   onMount(() => {
@@ -63,11 +63,11 @@ function ChatElement(props: { args?: Record<string, unknown> }) {
       }
     }
   });
-  return <kitn-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }} />;
+  return <kc-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }} />;
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-chat id="chat" style="display:block; height:100vh;"></kitn-chat>
+<kc-chat id="chat" style="display:block; height:100vh;"></kc-chat>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -94,7 +94,7 @@ function Chat() {
   ];
   onMount(() => { el.messages = messages; });
   return (
-    <kitn-chat
+    <kc-chat
       ref={el}
       style={{ display: 'block', height: '100vh' }}
       on:submit={(e) => console.log('user sent:', e.detail.value)}
@@ -103,14 +103,14 @@ function Chat() {
 }`;
 
 const meta = {
-  title: 'Web Components/kitn-chat',
+  title: 'Web Components/kc-chat',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-chat'),
+  argTypes: argTypesFor('kc-chat'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-chat', [
-          '`<kitn-chat>` is the framework-agnostic **web component** version of the chat UI — a complete message thread plus prompt input, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
+      description: specDescription('kc-chat', [
+          '`<kc-chat>` is the framework-agnostic **web component** version of the chat UI — a complete message thread plus prompt input, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** dropping a full chat into a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the primitives (`ChatContainer`, `Message`, `PromptInput`) instead.',
           '**How to use:** register once with `import \'@kitnai/chat/elements\'`, set rich data as JS **properties** (`el.messages = [...]`), and listen for **CustomEvents** (`submit`, `messageaction`, `valuechange`) directly on the element.',
           '**Placement:** as a top-level panel or full-page surface. Give it an explicit height (e.g. `height: 100vh`).',

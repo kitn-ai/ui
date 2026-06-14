@@ -16,10 +16,10 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kitn-code-block>` — one syntax-highlighted code block (with a copy button).
+ * `<kc-code-block>` — one syntax-highlighted code block (with a copy button).
  * Code via the `code` property; `language`/`code-theme` via attributes.
  */
-defineKitnElement<Props>('kitn-code-block', {
+defineKitnElement<Props>('kc-code-block', {
   code: '',
   language: undefined,
   codeTheme: 'github-dark-dimmed',

@@ -13,11 +13,11 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kitn-image>` — renders a base64 or byte-array image with a skeleton
+ * `<kc-image>` — renders a base64 or byte-array image with a skeleton
  * fallback while it resolves. `base64`/`alt`/`media-type` via attributes;
  * `bytes` via property.
  */
-defineKitnElement<Props>('kitn-image', {
+defineKitnElement<Props>('kc-image', {
   base64: undefined,
   bytes: undefined,
   alt: '',

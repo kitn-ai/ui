@@ -29,7 +29,7 @@ The `@kitnai/chat` entry is shipped as source, so your bundler tree-shakes it do
 
 ## Web components (React, Vue, plain HTML, …)
 
-Build the element bundle, then import it as a **side effect** — that registers `<kitn-chat>`, `<kitn-conversation-list>`, and `<kitn-prompt-input>`:
+Build the element bundle, then import it as a **side effect** — that registers `<kc-chat>`, `<kc-conversations>`, and `<kc-prompt-input>`:
 
 ```bash
 npm run build   # emits dist/kitn-chat.es.js
@@ -60,7 +60,7 @@ The element bundle is a self-contained ES module, so you can load it straight fr
   import 'https://unpkg.com/@kitnai/chat/dist/kitn-chat.es.js';
 </script>
 
-<kitn-chat></kitn-chat>
+<kc-chat></kc-chat>
 ```
 
 - The URLs above track the **latest** release (no version) — they never go stale, so they're ideal for demos and quick starts.

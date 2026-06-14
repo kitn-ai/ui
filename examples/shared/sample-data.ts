@@ -1,5 +1,5 @@
 /**
- * Shared sample data for kitn-chat examples.
+ * Shared sample data for kc-chat examples.
  *
  * Types are defined inline (matching the kit's exported types) so this file
  * has no runtime or compile-time dependency on the kit source — it works in
@@ -48,7 +48,7 @@ export interface SampleSlashCommand {
   category?: string;
 }
 
-/** Message action verbs supported by <kitn-chat>. */
+/** Message action verbs supported by <kc-chat>. */
 export type MessageAction = 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit';
 
 /** Minimal chat message shape (mirrors ChatMessage from @kitnai/chat/elements). */
@@ -105,14 +105,14 @@ export const SAMPLE_MESSAGES: Record<string, SampleMessage[]> = {
     {
       id: 'm1',
       role: 'user',
-      content: 'How do I use kitn-chat web components inside a React app?',
+      content: 'How do I use kc-chat web components inside a React app?',
     },
     {
       id: 'm2',
       role: 'assistant',
       actions: ['copy', 'like', 'dislike'],
       content:
-        "Just use the wrappers from `@kitnai/chat/react`:\n\n```tsx\nimport { KitnChat } from '@kitnai/chat/react';\n\n<KitnChat\n  messages={messages}\n  models={models}\n  onSubmit={(e) => console.log(e.detail)}\n  theme=\"auto\"\n/>\n```\n\nArrays/objects are passed as props and become live DOM properties; events arrive as `on<Event>` callbacks. No refs or `useEffect` needed.",
+        "Just use the wrappers from `@kitnai/chat/react`:\n\n```tsx\nimport { KcChat } from '@kitnai/chat/react';\n\n<KcChat\n  messages={messages}\n  models={models}\n  onSubmit={(e) => console.log(e.detail)}\n  theme=\"auto\"\n/>\n```\n\nArrays/objects are passed as props and become live DOM properties; events arrive as `on<Event>` callbacks. No refs or `useEffect` needed.",
     },
   ],
   'c-2': [

@@ -10,11 +10,11 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kitn-empty>` — an empty-state block. `empty-title`/`description` via
+ * `<kc-empty>` — an empty-state block. `empty-title`/`description` via
  * attributes; slot your own icon into `slot="media"` and actions into the
  * default slot (Route 2 slots).
  */
-defineKitnElement<Props>('kitn-empty', {
+defineKitnElement<Props>('kc-empty', {
   emptyTitle: '',
   description: '',
 }, (props) => (

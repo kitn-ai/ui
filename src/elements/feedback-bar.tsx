@@ -7,7 +7,7 @@ interface Props extends Record<string, unknown> {
   barTitle?: string;
 }
 
-/** Events fired by `<kitn-feedback-bar>`. */
+/** Events fired by `<kc-feedback-bar>`. */
 interface Events {
   /** The user clicked thumbs-up. */
   helpful: void;
@@ -18,10 +18,10 @@ interface Events {
 }
 
 /**
- * `<kitn-feedback-bar>` — an inline thumbs up/down feedback banner. Emits
+ * `<kc-feedback-bar>` — an inline thumbs up/down feedback banner. Emits
  * `helpful` / `nothelpful` / `close`.
  */
-defineKitnElement<Props, Events>('kitn-feedback-bar', {
+defineKitnElement<Props, Events>('kc-feedback-bar', {
   barTitle: 'Was this helpful?',
 }, (props, { dispatch }) => (
   <FeedbackBar

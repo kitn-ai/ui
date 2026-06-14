@@ -8,7 +8,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-markdown': JSX.HTMLAttributes<HTMLElement>;
+      'kc-markdown': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -26,19 +26,19 @@ export function add(a: number, b: number): number {
 }
 \`\`\``;
 
-/** Render the actual `<kitn-markdown>` custom element with a `content` property. */
+/** Render the actual `<kc-markdown>` custom element with a `content` property. */
 function MarkdownElement(props: { content: string }) {
   let el: (HTMLElement & { content?: string }) | undefined;
   onMount(() => {
     if (el) el.content = props.content;
   });
   return (
-    <kitn-markdown ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
+    <kc-markdown ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
   );
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-markdown id="md" code-theme="github-dark-dimmed"></kitn-markdown>
+<kc-markdown id="md" code-theme="github-dark-dimmed"></kc-markdown>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -49,14 +49,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-markdown',
+  title: 'Web Components/kc-markdown',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-markdown'),
+  argTypes: argTypesFor('kc-markdown'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-markdown', [
-          '`<kitn-markdown>` is the framework-agnostic **web component** that renders a markdown string (with fenced-code syntax highlighting via Shiki) as a standalone element, isolated in **Shadow DOM**.',
+      description: specDescription('kc-markdown', [
+          '`<kc-markdown>` is the framework-agnostic **web component** that renders a markdown string (with fenced-code syntax highlighting via Shiki) as a standalone element, isolated in **Shadow DOM**.',
           '**When to use:** showing model output or any markdown in a non-Solid app without pulling in a markdown stack. In SolidJS, use the `Markdown` primitive directly.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the source via the `content` **property** (`el.content = '...'`), and tune rendering with the `prose-size`, `code-theme`, and `code-highlight` attributes.",
           'See the **Code** tab for HTML usage.',

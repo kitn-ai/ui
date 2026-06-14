@@ -40,7 +40,7 @@ interface Props extends Record<string, unknown> {
   attachments?: AttachmentData[];
 }
 
-/** Events fired by `<kitn-prompt-input>`. */
+/** Events fired by `<kc-prompt-input>`. */
 interface Events {
   /** The user submitted the prompt (Enter or send button) with its attachments. */
   submit: { value: string; attachments: AttachmentData[] };
@@ -56,7 +56,7 @@ interface Events {
   voice: Record<string, never>;
 }
 
-defineKitnElement<Props, Events>('kitn-prompt-input', {
+defineKitnElement<Props, Events>('kc-prompt-input', {
   value: undefined,
   placeholder: 'Send a message...',
   disabled: false,

@@ -8,12 +8,12 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-source': JSX.HTMLAttributes<HTMLElement>;
+      'kc-source': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
 
-/** Render the actual `<kitn-source>` custom element configured by attributes. */
+/** Render the actual `<kc-source>` custom element configured by attributes. */
 function SourceElement(props: {
   href: string;
   label?: string;
@@ -30,32 +30,32 @@ function SourceElement(props: {
     if (props.description) el.setAttribute('description', props.description);
     if (props.showFavicon) el.setAttribute('show-favicon', '');
   });
-  return <kitn-source ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '16px' }} />;
+  return <kc-source ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '16px' }} />;
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-source
+<kc-source
   href="https://kitn.dev"
   label="kitn"
   headline="kitn — the kit"
   description="Composable SolidJS + web-component chat UI."
   show-favicon
-></kitn-source>
+></kc-source>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-source',
+  title: 'Web Components/kc-source',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-source'),
+  argTypes: argTypesFor('kc-source'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-source', [
-          '`<kitn-source>` is the framework-agnostic **web component** for a single citation link with a hover-card preview, isolated in **Shadow DOM**.',
-          '**When to use:** inlining a single source citation in a non-Solid app. For multiple sources, use `<kitn-source-list>`; in SolidJS, compose the `Source` primitives.',
+      description: specDescription('kc-source', [
+          '`<kc-source>` is the framework-agnostic **web component** for a single citation link with a hover-card preview, isolated in **Shadow DOM**.',
+          '**When to use:** inlining a single source citation in a non-Solid app. For multiple sources, use `<kc-sources>`; in SolidJS, compose the `Source` primitives.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, then set `href` (the link, also the default label/favicon source), `label`, `headline` (the hover headline — note `headline`, not `title`), `description`, and the `show-favicon` flag via attributes.",
           'See the **Code** tab for HTML usage.',
         ]),

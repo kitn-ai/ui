@@ -22,10 +22,10 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kitn-chain-of-thought>` — step-by-step reasoning with connectors and
+ * `<kc-chain-of-thought>` — step-by-step reasoning with connectors and
  * per-step collapsible detail. Data via the `steps` property.
  */
-defineKitnElement<Props>('kitn-chain-of-thought', {
+defineKitnElement<Props>('kc-chain-of-thought', {
   steps: [],
 }, (props) => (
   <ChainOfThought>

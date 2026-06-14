@@ -8,13 +8,13 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-empty': JSX.HTMLAttributes<HTMLElement>;
+      'kc-empty': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-empty
+<kc-empty
   empty-title="No conversations yet"
   description="Start a new chat to see it appear here."
 >
@@ -38,21 +38,21 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
     </svg>
     New chat
   </button>
-</kitn-empty>
+</kc-empty>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-empty',
+  title: 'Web Components/kc-empty',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-empty'),
+  argTypes: argTypesFor('kc-empty'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-empty', [
-          '`<kitn-empty>` is the framework-agnostic **web component** for an empty-state block — an icon, a title, a description, and actions — isolated in **Shadow DOM**.',
+      description: specDescription('kc-empty', [
+          '`<kc-empty>` is the framework-agnostic **web component** for an empty-state block — an icon, a title, a description, and actions — isolated in **Shadow DOM**.',
           '**When to use:** placeholder UI for an empty list/thread in a non-Solid app. In SolidJS, compose the `Empty*` primitives.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set `empty-title` (note `empty-title`, not `title`) and `description` via attributes, and use the **slots** (\"Route 2\") to project your own icon (`slot=\"media\"`) and actions (the default slot).",
           'See the **Code** tab for HTML usage.',
@@ -64,7 +64,7 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-/** Render the actual `<kitn-empty>` custom element with slotted children. */
+/** Render the actual `<kc-empty>` custom element with slotted children. */
 function EmptyElement() {
   let el: HTMLElement | undefined;
   onMount(() => {
@@ -73,7 +73,7 @@ function EmptyElement() {
     el.setAttribute('description', 'Start a new chat to see it appear here.');
   });
   return (
-    <kitn-empty ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '24px' }}>
+    <kc-empty ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '24px' }}>
       <svg slot="media" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
@@ -99,7 +99,7 @@ function EmptyElement() {
         </svg>
         New chat
       </button>
-    </kitn-empty>
+    </kc-empty>
   );
 }
 

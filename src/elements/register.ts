@@ -21,7 +21,7 @@ import './chat-scope-picker';
 // Phase 3 — input ecosystem
 // (NB: SlashCommand is context-bound to PromptInput — it observes the input
 //  value via usePromptInput() — so it is NOT a standalone element. It will fold
-//  into <kitn-prompt-input> as a `slash-commands` property in a later pass.)
+//  into <kc-prompt-input> as a `slash-commands` property in a later pass.)
 import './prompt-suggestions';
 import './file-upload';
 import './voice-input';

@@ -10,7 +10,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kitn-prompt-suggestions': JSX.HTMLAttributes<HTMLElement> & {
+      'kc-suggestions': JSX.HTMLAttributes<HTMLElement> & {
         variant?: string;
         size?: string;
         block?: boolean | string;
@@ -26,7 +26,7 @@ const suggestions: Item[] = [
   "What's deferred?",
 ];
 
-/** Render `<kitn-prompt-suggestions>` with `suggestions` set as a property. */
+/** Render `<kc-suggestions>` with `suggestions` set as a property. */
 function SuggestionsElement(props: { suggestions: Item[]; variant?: string; size?: string; block?: boolean; highlight?: string }) {
   let el: (HTMLElement & { suggestions?: Item[] }) | undefined;
   onMount(() => {
@@ -38,7 +38,7 @@ function SuggestionsElement(props: { suggestions: Item[]; variant?: string; size
     });
   });
   return (
-    <kitn-prompt-suggestions
+    <kc-suggestions
       ref={(e) => (el = e as HTMLElement)}
       variant={props.variant}
       size={props.size}
@@ -50,7 +50,7 @@ function SuggestionsElement(props: { suggestions: Item[]; variant?: string; size
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kitn-prompt-suggestions id="suggs" variant="outline"></kitn-prompt-suggestions>
+<kc-suggestions id="suggs" variant="outline"></kc-suggestions>
 
 <script type="module">
   import '@kitnai/chat/elements';   // registers the custom elements
@@ -61,14 +61,14 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kitn-prompt-suggestions',
+  title: 'Web Components/kc-suggestions',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kitn-prompt-suggestions'),
+  argTypes: argTypesFor('kc-suggestions'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kitn-prompt-suggestions', [
-          '`<kitn-prompt-suggestions>` is the framework-agnostic **web component** for a row (or list) of clickable suggestion chips — starter prompts or follow-ups — isolated in **Shadow DOM**.',
+      description: specDescription('kc-suggestions', [
+          '`<kc-suggestions>` is the framework-agnostic **web component** for a row (or list) of clickable suggestion chips — starter prompts or follow-ups — isolated in **Shadow DOM**.',
           '**When to use:** offering the user quick prompts to click instead of type, usually above an input. In SolidJS, use the `PromptSuggestion` primitive.',
           "**How to use:** register once with `import '@kitnai/chat/elements'`, set the `suggestions` **property** (strings, or `{ label, value }` when the displayed text differs from the emitted value), choose a `variant` and `size` (`sm` | `md` | `lg`; pills default to `lg`), optionally add the `block` flag for full-width rows or a `highlight` substring to emphasize, and listen for the `select` **CustomEvent**.",
           'See the **Code** tab for HTML usage.',
@@ -112,7 +112,7 @@ export const WithHighlightedSearch: Story = {
   parameters: {
     docs: {
       source: {
-        code: `<kitn-prompt-suggestions id="suggs" highlight="Solid"></kitn-prompt-suggestions>
+        code: `<kc-suggestions id="suggs" highlight="Solid"></kc-suggestions>
 
 <script type="module">
   import '@kitnai/chat/elements';
@@ -147,9 +147,9 @@ export const Sizes: Story = {
     docs: {
       source: {
         code: `<!-- default pill -->
-<kitn-prompt-suggestions variant="outline"></kitn-prompt-suggestions>
+<kc-suggestions variant="outline"></kc-suggestions>
 <!-- smaller pill -->
-<kitn-prompt-suggestions variant="outline" size="sm"></kitn-prompt-suggestions>`,
+<kc-suggestions variant="outline" size="sm"></kc-suggestions>`,
         language: 'html',
       },
     },

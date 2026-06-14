@@ -36,11 +36,11 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kitn-context-meter>` — a token/context-window usage meter with a hover-card
+ * `<kc-context>` — a token/context-window usage meter with a hover-card
  * breakdown (input/output/reasoning/cache + estimated cost). Data via the
  * `context` property.
  */
-defineKitnElement<Props>('kitn-context-meter', {
+defineKitnElement<Props>('kc-context', {
   context: undefined,
 }, (props) => (
   <Show when={props.context}>

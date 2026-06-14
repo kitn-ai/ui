@@ -53,14 +53,14 @@ const light = await runAxe('light');
 await page.emulateMedia({ colorScheme: 'dark' });
 await page.evaluate(() => {
   document.documentElement.classList.add('dark'); document.documentElement.classList.remove('light');
-  document.querySelectorAll('*').forEach((el) => { if (el.tagName.startsWith('KITN-')) el.setAttribute('theme', 'dark'); });
+  document.querySelectorAll('*').forEach((el) => { if (el.tagName.startsWith('KC-')) el.setAttribute('theme', 'dark'); });
 });
 await page.waitForTimeout(400);
 const dark = await runAxe('dark');
 await page.emulateMedia({ colorScheme: 'light' });
 await page.evaluate(() => {
   document.documentElement.classList.remove('dark'); document.documentElement.classList.add('light');
-  document.querySelectorAll('*').forEach((el) => { if (el.tagName.startsWith('KITN-')) el.setAttribute('theme', 'light'); });
+  document.querySelectorAll('*').forEach((el) => { if (el.tagName.startsWith('KC-')) el.setAttribute('theme', 'light'); });
 });
 await page.waitForTimeout(300);
 
@@ -92,8 +92,8 @@ stops.forEach((s, i) => console.log(`${String(i + 1).padStart(2)}. <${s.tag}> ${
 // ---- SPECIFIC: conversation-list interactive controls reachable by keyboard? ----
 console.log('\n======== conversation-list controls (tabbable?) ========');
 const clInfo = await page.evaluate(() => {
-  const el = document.querySelector('kitn-conversation-list');
-  if (!el?.shadowRoot) return { __err: 'no kitn-conversation-list' };
+  const el = document.querySelector('kc-conversations');
+  if (!el?.shadowRoot) return { __err: 'no kc-conversations' };
   const sr = el.shadowRoot;
   const focusables = [...sr.querySelectorAll('button, a, [tabindex], [role="button"], [role="menuitem"]')];
   return {
@@ -111,8 +111,8 @@ console.log(JSON.stringify(clInfo, null, 2));
 // ---- SPECIFIC: model-switcher dropdown trigger tabbable + opens via keyboard? ----
 console.log('\n======== model-switcher trigger reachable & keyboard-openable? ========');
 const ms = await page.evaluate(() => {
-  const el = document.querySelector('kitn-model-switcher');
-  if (!el?.shadowRoot) return { __err: 'no kitn-model-switcher' };
+  const el = document.querySelector('kc-model-switcher');
+  if (!el?.shadowRoot) return { __err: 'no kc-model-switcher' };
   const trg = el.shadowRoot.querySelector('button[aria-haspopup="menu"]');
   if (!trg) return { __err: 'no trigger' };
   return {

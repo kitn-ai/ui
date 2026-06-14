@@ -8,7 +8,7 @@ const conversations: ConversationSummary[] = [{
 }];
 
 test('renders conversations and emits select', async () => {
-  const el = document.createElement('kitn-conversation-list') as HTMLElement & {
+  const el = document.createElement('kc-conversations') as HTMLElement & {
     groups: ConversationGroup[]; conversations: ConversationSummary[]; activeId?: string;
   };
   el.groups = groups;
@@ -28,7 +28,7 @@ test('renders conversations and emits select', async () => {
 });
 
 test('icon-only controls have accessible names (a11y A1)', async () => {
-  const el = document.createElement('kitn-conversation-list') as HTMLElement & {
+  const el = document.createElement('kc-conversations') as HTMLElement & {
     groups: ConversationGroup[]; conversations: ConversationSummary[];
   };
   el.groups = groups;

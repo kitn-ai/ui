@@ -2,7 +2,7 @@ import { For, Show } from 'solid-js';
 import { defineKitnElement } from './define';
 import { Source, SourceTrigger, SourceContent, SourceList } from '../components/source';
 
-// --- <kitn-source> — a single citation link with hover preview ---
+// --- <kc-source> — a single citation link with hover preview ---
 
 interface SourceProps extends Record<string, unknown> {
   /** The URL this citation links to (the domain also seeds the default label/favicon). */
@@ -18,7 +18,7 @@ interface SourceProps extends Record<string, unknown> {
   showFavicon?: boolean;
 }
 
-defineKitnElement<SourceProps>('kitn-source', {
+defineKitnElement<SourceProps>('kc-source', {
   href: '',
   label: undefined,
   headline: '',
@@ -33,7 +33,7 @@ defineKitnElement<SourceProps>('kitn-source', {
   </Show>
 ));
 
-// --- <kitn-source-list> — a wrapped list of citation links ---
+// --- <kc-sources> — a wrapped list of citation links ---
 
 interface SourceItem {
   href: string;
@@ -50,7 +50,7 @@ interface SourceListProps extends Record<string, unknown> {
   showFavicon?: boolean;
 }
 
-defineKitnElement<SourceListProps>('kitn-source-list', {
+defineKitnElement<SourceListProps>('kc-sources', {
   sources: [],
   showFavicon: false,
 }, (props, { flag }) => (

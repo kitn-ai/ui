@@ -35,12 +35,12 @@ An HTML attribute is always a string, so passing `messages`, `models`, `context`
 `suggestions`, or `slashCommands` as an attribute silently fails.
 
 ```js
-const chat = document.querySelector('kitn-chat');
+const chat = document.querySelector('kc-chat');
 chat.messages = [{ id: '1', role: 'assistant', content: 'Hi!' }]; // ✅ property
 ```
 
 ```html
-<kitn-chat messages="[...]"></kitn-chat>  <!-- ❌ never works -->
+<kc-chat messages="[...]"></kc-chat>  <!-- ❌ never works -->
 ```
 
 Only scalar props (string / number / boolean) work as attributes — for example
@@ -60,7 +60,7 @@ Only scalar props (string / number / boolean) work as attributes — for example
 
 ```js
 import '@kitnai/chat/elements';
-const chat = document.querySelector('kitn-chat');
+const chat = document.querySelector('kc-chat');
 chat.messages = [];
 
 chat.addEventListener('submit', async (e) => {
