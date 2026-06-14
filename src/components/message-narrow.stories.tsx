@@ -190,11 +190,11 @@ export const FullExtensionLayout: Story = {
     <ChatConfig proseSize="sm">
       <div class="flex h-screen bg-background relative" style={{ height: '600px' }}>
         <div class="flex-shrink-0 w-[300px] bg-[#161618] p-4 overflow-y-auto">
-          <div class="text-sm text-muted-foreground">Left Nav</div>
+          <div class="text-sm text-white/70">Left Nav</div>
           <div class="mt-2 space-y-1">
             <div class="text-sky-400 text-sm px-2 py-1 bg-sky-400/10 rounded">Content</div>
-            <div class="text-muted-foreground text-sm px-2 py-1">Summary</div>
-            <div class="text-muted-foreground text-sm px-2 py-1">Key Points</div>
+            <div class="text-white/70 text-sm px-2 py-1">Summary</div>
+            <div class="text-white/70 text-sm px-2 py-1">Key Points</div>
           </div>
         </div>
 
@@ -238,7 +238,7 @@ export const FullExtensionLayout: Story = {
                     </div>
                   </ChatContainer>
                   <div class="px-3 pb-3 pt-1 flex-shrink-0">
-                    <div class="bg-muted/40 rounded-lg px-3 py-2.5 text-sm text-muted-foreground/40">
+                    <div class="bg-muted/40 rounded-lg px-3 py-2.5 text-sm text-foreground/75">
                       Ask about this page...
                     </div>
                   </div>
@@ -303,7 +303,7 @@ export const InsideResizablePanel: Story = {
                 </ChatContainer>
 
                 <div class="px-3 pb-3 pt-1 flex-shrink-0">
-                  <div class="bg-muted/40 rounded-lg px-3 py-2.5 text-sm text-muted-foreground/40">
+                  <div class="bg-muted/40 rounded-lg px-3 py-2.5 text-sm text-foreground/75">
                     Ask about this page...
                   </div>
                 </div>

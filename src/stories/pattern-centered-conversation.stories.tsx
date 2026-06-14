@@ -64,8 +64,8 @@ export const Focused: Story = {
                       {answer}
                     </MessageContent>
                     <MessageActions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                      <Button variant="ghost" size="icon-sm" class="rounded-full"><Copy class="size-3.5" /></Button>
-                      <Button variant="ghost" size="icon-sm" class="rounded-full"><ThumbsUp class="size-3.5" /></Button>
+                      <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Copy message"><Copy class="size-3.5" /></Button>
+                      <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
                     </MessageActions>
                   </div>
                 </Message>
@@ -79,7 +79,7 @@ export const Focused: Story = {
               <PromptInput value={input()} onValueChange={setInput} onSubmit={() => setInput('')}>
                 <PromptInputTextarea placeholder="Reply…" class="min-h-[44px] pt-3 pl-4" />
                 <PromptInputActions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
-                  <Button size="icon-sm" class="rounded-full" disabled={!input().trim()}>
+                  <Button size="icon-sm" class="rounded-full" disabled={!input().trim()} aria-label="Send message">
                     <ArrowUp class="size-4" />
                   </Button>
                 </PromptInputActions>

@@ -93,13 +93,13 @@ export const InAssistantMessage: Story = {
             {"Bug in auth middleware. Token expiry check use `<` not `<=`. Fix: update comparison operator in `validateToken()`."}
           </MessageContent>
           <MessageActions class="[&>button]:p-1 [&>button]:rounded [&>button]:text-foreground/60 [&>button]:hover:text-foreground [&>button]:transition-colors">
-            <button>
+            <button aria-label="Copy message">
               <Copy size={14} />
             </button>
-            <button>
+            <button aria-label="Good response">
               <ThumbsUp size={14} />
             </button>
-            <button>
+            <button aria-label="Bad response">
               <ThumbsDown size={14} />
             </button>
           </MessageActions>
@@ -112,13 +112,13 @@ export const InAssistantMessage: Story = {
             causes tokens to be accepted even when they've just expired.
           </MessageContent>
           <MessageActions class="[&>button]:p-1 [&>button]:rounded [&>button]:text-foreground/60 [&>button]:hover:text-foreground [&>button]:transition-colors">
-            <button>
+            <button aria-label="Copy message">
               <Copy size={14} />
             </button>
-            <button>
+            <button aria-label="Good response">
               <ThumbsUp size={14} />
             </button>
-            <button>
+            <button aria-label="Bad response">
               <ThumbsDown size={14} />
             </button>
           </MessageActions>
@@ -152,7 +152,7 @@ export const InConversation: Story = {
             components, render props, and custom hooks for state management.
           </MessageContent>
           <MessageActions class="[&>button]:p-1 [&>button]:rounded [&>button]:text-foreground/60 [&>button]:hover:text-foreground [&>button]:transition-colors">
-            <button><Copy size={14} /></button>
+            <button aria-label="Copy message"><Copy size={14} /></button>
           </MessageActions>
         </Message>
 
@@ -170,7 +170,7 @@ export const InConversation: Story = {
             it easier to share pieces between different builds.
           </MessageContent>
           <MessageActions class="[&>button]:p-1 [&>button]:rounded [&>button]:text-foreground/60 [&>button]:hover:text-foreground [&>button]:transition-colors">
-            <button><Copy size={14} /></button>
+            <button aria-label="Copy message"><Copy size={14} /></button>
           </MessageActions>
         </Message>
 
@@ -196,7 +196,7 @@ export const InConversation: Story = {
 **Custom Hooks**: Extract stateful logic into reusable functions prefixed with \`use\`.`}
           </MessageContent>
           <MessageActions class="[&>button]:p-1 [&>button]:rounded [&>button]:text-foreground/60 [&>button]:hover:text-foreground [&>button]:transition-colors">
-            <button><Copy size={14} /></button>
+            <button aria-label="Copy message"><Copy size={14} /></button>
           </MessageActions>
         </Message>
       </div>

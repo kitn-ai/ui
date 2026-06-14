@@ -59,10 +59,10 @@ export const NewChat: Story = {
                 <PromptInputTextarea placeholder="Ask anything…" class="min-h-[44px] pt-3 pl-4" />
                 <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
                   <div class="flex items-center gap-2">
-                    <Button variant="outline" size="icon-sm" class="rounded-full"><Plus class="size-4" /></Button>
-                    <Button variant="outline" size="sm" class="rounded-full gap-1"><Globe class="size-4" />Search</Button>
+                    <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Add"><Plus class="size-4" /></Button>
+                    <Button variant="outline" size="sm" class="rounded-full gap-1" aria-label="Search the web"><Globe class="size-4" />Search</Button>
                   </div>
-                  <Button size="icon-sm" class="rounded-full" disabled={!input().trim()}>
+                  <Button size="icon-sm" class="rounded-full" disabled={!input().trim()} aria-label="Send message">
                     <ArrowUp class="size-4" />
                   </Button>
                 </PromptInputActions>

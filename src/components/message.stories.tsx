@@ -131,10 +131,10 @@ export const UserAlignedRight: Story = {
             Can you explain how SolidJS reactivity differs from React hooks?
           </MessageContent>
           <MessageActions class="flex gap-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-            <Button variant="ghost" size="icon-sm" class="rounded-full">
+            <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Edit message">
               <Pencil class="size-3.5" />
             </Button>
-            <Button variant="ghost" size="icon-sm" class="rounded-full">
+            <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Copy message">
               <Copy class="size-3.5" />
             </Button>
           </MessageActions>
@@ -197,16 +197,16 @@ export const WithActions: Story = {
             Here is a response with hover actions below it.
           </MessageContent>
           <MessageActions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-            <Button variant="ghost" size="icon-sm" class="rounded-full">
+            <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Copy message">
               <Copy class="size-3.5" />
             </Button>
-            <Button variant="ghost" size="icon-sm" class="rounded-full">
+            <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Good response">
               <ThumbsUp class="size-3.5" />
             </Button>
-            <Button variant="ghost" size="icon-sm" class="rounded-full">
+            <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Bad response">
               <ThumbsDown class="size-3.5" />
             </Button>
-            <Button variant="ghost" size="icon-sm" class="rounded-full">
+            <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Regenerate response">
               <RefreshCw class="size-3.5" />
             </Button>
           </MessageActions>
@@ -250,16 +250,16 @@ Key benefits:
 - Makes large codebases more maintainable`}
           </MessageContent>
           <MessageActions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-            <Button variant="ghost" size="icon-sm" class="rounded-full">
+            <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Copy message">
               <Copy class="size-3.5" />
             </Button>
-            <Button variant="ghost" size="icon-sm" class="rounded-full">
+            <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Good response">
               <ThumbsUp class="size-3.5" />
             </Button>
-            <Button variant="ghost" size="icon-sm" class="rounded-full">
+            <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Bad response">
               <ThumbsDown class="size-3.5" />
             </Button>
-            <Button variant="ghost" size="icon-sm" class="rounded-full">
+            <Button variant="ghost" size="icon-sm" class="rounded-full" aria-label="Regenerate response">
               <RefreshCw class="size-3.5" />
             </Button>
           </MessageActions>

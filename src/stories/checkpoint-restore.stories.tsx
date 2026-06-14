@@ -67,9 +67,9 @@ Key design decisions:
 - Support filtering via query params: \`?status=active&assignee=me\``}
                 </MessageContent>
                 <MessageActions>
-                  <Button variant="ghost" size="icon-sm"><Copy class="size-3.5" /></Button>
-                  <Button variant="ghost" size="icon-sm"><ThumbsUp class="size-3.5" /></Button>
-                  <Button variant="ghost" size="icon-sm"><ThumbsDown class="size-3.5" /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label="Copy message"><Copy class="size-3.5" /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label="Bad response"><ThumbsDown class="size-3.5" /></Button>
                 </MessageActions>
               </div>
             </Message>
@@ -128,9 +128,9 @@ function authMiddleware(req, res, next) {
 **The tradeoff:** you can't instantly revoke JWTs. Mitigate this with short expiry + a blocklist for critical cases (password change, account compromise).`}
                 </MessageContent>
                 <MessageActions>
-                  <Button variant="ghost" size="icon-sm"><Copy class="size-3.5" /></Button>
-                  <Button variant="ghost" size="icon-sm"><ThumbsUp class="size-3.5" /></Button>
-                  <Button variant="ghost" size="icon-sm"><ThumbsDown class="size-3.5" /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label="Copy message"><Copy class="size-3.5" /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label="Bad response"><ThumbsDown class="size-3.5" /></Button>
                 </MessageActions>
               </div>
             </Message>
@@ -197,9 +197,9 @@ interface ApiError {
 Always include the \`requestId\` -- it's invaluable for correlating client errors with server logs.`}
                 </MessageContent>
                 <MessageActions>
-                  <Button variant="ghost" size="icon-sm"><Copy class="size-3.5" /></Button>
-                  <Button variant="ghost" size="icon-sm"><ThumbsUp class="size-3.5" /></Button>
-                  <Button variant="ghost" size="icon-sm"><ThumbsDown class="size-3.5" /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label="Copy message"><Copy class="size-3.5" /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label="Bad response"><ThumbsDown class="size-3.5" /></Button>
                 </MessageActions>
               </div>
             </Message>
@@ -212,7 +212,7 @@ Always include the \`requestId\` -- it's invaluable for correlating client error
           <PromptInput>
             <PromptInputTextarea placeholder="Continue the API design..." />
             <PromptInputActions class="justify-end">
-              <Button variant="default" size="icon-sm" class="rounded-full">
+              <Button variant="default" size="icon-sm" class="rounded-full" aria-label="Send message">
                 <ArrowUp class="size-4" />
               </Button>
             </PromptInputActions>

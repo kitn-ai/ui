@@ -79,7 +79,7 @@ export const SupportAssistant: Story = {
               <PromptInput value={input()} onValueChange={setInput} onSubmit={() => setInput('')}>
                 <PromptInputTextarea placeholder="Message support…" class="min-h-[40px] pt-2.5 pl-3.5" />
                 <PromptInputActions class="mt-1.5 flex w-full items-center justify-end gap-2 px-2.5 pb-2.5">
-                  <Button size="icon-sm" class="rounded-full" disabled={!input().trim()}>
+                  <Button size="icon-sm" class="rounded-full" disabled={!input().trim()} aria-label="Send message">
                     <ArrowUp class="size-4" />
                   </Button>
                 </PromptInputActions>

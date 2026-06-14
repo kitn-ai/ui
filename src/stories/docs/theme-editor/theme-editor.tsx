@@ -110,6 +110,7 @@ export function ThemeEditor() {
         </div>
         <div class="flex items-center gap-2">
           <select
+            aria-label="Theme preset"
             class="bg-input border border-border rounded-md text-xs px-2 h-8"
             value={presetName()}
             onChange={(e) => loadPreset(e.currentTarget.value)}
