@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { FileUpload, FileUploadTrigger } from '../components/file-upload';
 import { Upload } from 'lucide-solid';
 
@@ -24,7 +24,7 @@ interface Events {
  * default dropzone label can be replaced with your own markup via the default
  * `<slot>` (a "Route 2" custom-content slot).
  */
-defineKitnElement<Props, Events>('kc-file-upload', {
+defineWebComponent<Props, Events>('kc-file-upload', {
   multiple: true,
   accept: undefined,
   disabled: false,

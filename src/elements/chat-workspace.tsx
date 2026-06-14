@@ -1,5 +1,5 @@
 import { createSignal, Show } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { ChatThread, type ChatThreadContextUsage } from '../components/chat-thread';
 import { ConversationList } from '../components/conversation-list';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resizable';
@@ -73,7 +73,7 @@ interface Events {
   suggestionclick: { value: string };
 }
 
-defineKitnElement<Props, Events>('kc-workspace', {
+defineWebComponent<Props, Events>('kc-workspace', {
   groups: [], conversations: [], activeId: undefined, messages: [],
   value: undefined, placeholder: 'Send a message...', loading: false,
   suggestions: undefined, suggestionMode: 'submit', proseSize: 'sm',

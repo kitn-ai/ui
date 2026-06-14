@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { ConversationList } from '../components/conversation-list';
 import type { ConversationGroup, ConversationSummary } from '../types';
 
@@ -23,7 +23,7 @@ interface Events {
   togglesidebar: Record<string, never>;
 }
 
-defineKitnElement<Props, Events>('kc-conversations', {
+defineWebComponent<Props, Events>('kc-conversations', {
   groups: [],
   conversations: [],
   activeId: undefined,

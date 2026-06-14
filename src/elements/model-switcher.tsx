@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { ModelSwitcher } from '../components/model-switcher';
 import type { ModelOption } from '../types';
 
@@ -23,7 +23,7 @@ interface Events {
  * Note: like the underlying primitive, this only renders when more than one
  * model is provided.
  */
-defineKitnElement<Props, Events>('kc-model-switcher', {
+defineWebComponent<Props, Events>('kc-model-switcher', {
   models: [],
   currentModel: undefined,
 }, (props, { dispatch }) => (

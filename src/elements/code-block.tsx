@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { CodeBlock, CodeBlockCode } from '../components/code-block';
 import { ChatConfig, useChatConfig, type ProseSize } from '../primitives/chat-config';
 
@@ -19,7 +19,7 @@ interface Props extends Record<string, unknown> {
  * `<kc-code-block>` — one syntax-highlighted code block (with a copy button).
  * Code via the `code` property; `language`/`code-theme` via attributes.
  */
-defineKitnElement<Props>('kc-code-block', {
+defineWebComponent<Props>('kc-code-block', {
   code: '',
   language: undefined,
   codeTheme: 'github-dark-dimmed',

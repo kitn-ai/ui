@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { Loader, type LoaderVariant, type LoaderSize } from '../components/loader';
 
 interface Props extends Record<string, unknown> {
@@ -16,7 +16,7 @@ interface Props extends Record<string, unknown> {
  * `<kc-loader>` — an animated loader. `variant` selects the style (circular,
  * dots, wave, text-shimmer, …); `size` and `text` are attributes.
  */
-defineKitnElement<Props>('kc-loader', {
+defineWebComponent<Props>('kc-loader', {
   variant: 'circular',
   size: 'md',
   text: undefined,

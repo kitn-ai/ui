@@ -1,5 +1,5 @@
 import { For } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { PromptSuggestion } from '../components/prompt-suggestion';
 
 type Item = string | { label: string; value?: string };
@@ -33,7 +33,7 @@ const valueOf = (s: Item) => (typeof s === 'string' ? s : s.value ?? s.label);
  * `suggestions` property; `variant`/`block`/`highlight` attributes; emits
  * `select`.
  */
-defineKitnElement<Props, Events>('kc-suggestions', {
+defineWebComponent<Props, Events>('kc-suggestions', {
   suggestions: [],
   variant: 'outline',
   size: undefined,

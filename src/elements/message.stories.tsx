@@ -18,7 +18,7 @@ const assistantMessage: ChatMessage = {
   id: 'm-a',
   role: 'assistant',
   content:
-    "Here's the plan, with a quick code sample:\n\n```js\nconst kit = useKitn();\n```\n\nThat wires the kit into your component.",
+    "Here's the plan, with a quick code sample:\n\n```js\nconst kit = useChat();\n```\n\nThat wires the kit into your component.",
   reasoning: { text: 'The user wants X, so I should do Y then Z.', label: 'Reasoning' },
   tools: [{ type: 'search', state: 'output-available', input: { query: 'kitn docs' }, output: { hits: 3 } }],
   attachments: [
@@ -63,7 +63,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   const msg = document.getElementById('msg');
   msg.message = {
     id: 'm-a', role: 'assistant',
-    content: "Here's the plan:\\n\\n\\\`\\\`\\\`js\\nconst kit = useKitn();\\n\\\`\\\`\\\`",
+    content: "Here's the plan:\\n\\n\\\`\\\`\\\`js\\nconst kit = useChat();\\n\\\`\\\`\\\`",
     reasoning: { text: 'The user wants X, so I should do Y.' },
     tools: [{ type: 'search', state: 'output-available', output: { hits: 3 } }],
     actions: ['copy', 'like', 'dislike', 'regenerate'],

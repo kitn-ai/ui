@@ -1,5 +1,5 @@
 import { createSignal, onMount, onCleanup, For, Show, type JSX } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { ResizableHandle, normalizeSize } from '../ui/resizable';
 
 type Orientation = 'horizontal' | 'vertical';
@@ -45,7 +45,7 @@ interface GroupEvents extends Record<string, unknown> {
  * divider is interactive only between two unlocked, visible panels. Emits a
  * `change` event (`detail.sizes`, percent) on resize / visibility change.
  */
-defineKitnElement<GroupProps, GroupEvents>('kc-resizable', {
+defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
   orientation: 'horizontal',
 }, (props, { element, dispatch }) => {
   const [items, setItems] = createSignal<ItemInfo[]>([]);
@@ -232,7 +232,7 @@ interface ItemProps extends Record<string, unknown> {
  * renders its own slotted light content (`<slot/>`); the parent `<kc-resizable>`
  * reads its `size`/`min`/`max`/`locked`/`hidden` attributes to lay it out.
  */
-defineKitnElement<ItemProps>('kc-resizable-item', {
+defineWebComponent<ItemProps>('kc-resizable-item', {
   size: undefined,
   min: undefined,
   max: undefined,

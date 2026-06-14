@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { TextShimmer } from '../components/text-shimmer';
 
 interface Props extends Record<string, unknown> {
@@ -16,7 +16,7 @@ interface Props extends Record<string, unknown> {
  * `<kc-text-shimmer>` — animated shimmering text. Text via the `text`
  * attribute; `duration`/`spread` tune the effect.
  */
-defineKitnElement<Props>('kc-text-shimmer', {
+defineWebComponent<Props>('kc-text-shimmer', {
   text: '',
   as: 'span',
   duration: 4,

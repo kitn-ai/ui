@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { Markdown } from '../components/markdown';
 import { ChatConfig, useChatConfig, type ProseSize } from '../primitives/chat-config';
 
@@ -18,7 +18,7 @@ interface Props extends Record<string, unknown> {
  * a standalone element. Content via the `content` property; sizing/highlighting
  * via attributes.
  */
-defineKitnElement<Props>('kc-markdown', {
+defineWebComponent<Props>('kc-markdown', {
   content: '',
   proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',

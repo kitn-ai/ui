@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { FileTree, type FileTreeFile } from '../components/file-tree';
 
 interface Props extends Record<string, unknown> {
@@ -20,7 +20,7 @@ interface Events extends Record<string, unknown> {
  * flat list of `/`-delimited paths (folders are derived). ARIA `tree`/`treeitem`.
  * Selecting a file fires a `select` event (`detail.path`). Fills its container.
  */
-defineKitnElement<Props, Events>('kc-file-tree', {
+defineWebComponent<Props, Events>('kc-file-tree', {
   files: [],
   activeFile: undefined,
   defaultExpanded: undefined,

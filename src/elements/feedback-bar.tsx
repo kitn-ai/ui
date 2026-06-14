@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { FeedbackBar } from '../components/feedback-bar';
 
 interface Props extends Record<string, unknown> {
@@ -21,7 +21,7 @@ interface Events {
  * `<kc-feedback-bar>` — an inline thumbs up/down feedback banner. Emits
  * `helpful` / `nothelpful` / `close`.
  */
-defineKitnElement<Props, Events>('kc-feedback-bar', {
+defineWebComponent<Props, Events>('kc-feedback-bar', {
   barTitle: 'Was this helpful?',
 }, (props, { dispatch }) => (
   <FeedbackBar

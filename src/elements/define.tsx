@@ -1,6 +1,6 @@
 import { customElement } from 'solid-element';
 import { ChatConfig } from '../primitives/chat-config';
-import { KITN_CSS } from './css';
+import { ELEMENT_CSS } from './css';
 import { createSignal, onCleanup, onMount, Show, type JSX } from 'solid-js';
 
 /**
@@ -17,7 +17,7 @@ function getSharedSheet(): CSSStyleSheet | null {
   try {
     if (typeof CSSStyleSheet === 'undefined') throw new Error('no CSSStyleSheet');
     const sheet = new CSSStyleSheet();
-    sheet.replaceSync(KITN_CSS);
+    sheet.replaceSync(ELEMENT_CSS);
     sharedSheet = sheet;
   } catch {
     sharedSheet = null;
@@ -47,7 +47,7 @@ function createDarkMode(getTheme: () => string | undefined) {
  * `{ eventName: detailType }` — which types `dispatch` so a facade can only fire
  * its declared events with the right `detail` shape.
  */
-export interface KitnElementContext<E = Record<string, unknown>> {
+export interface WebComponentContext<E = Record<string, unknown>> {
   /** The custom-element host node. */
   element: HTMLElement;
   /** Fire a non-bubbling, non-composed CustomEvent off the host. Consumers
@@ -74,13 +74,13 @@ function toAttr(name: string): string {
   return name.replace(/([A-Z])/g, '-$1').toLowerCase();
 }
 
-/** Underlying flag resolution; see `KitnElementContext.flag`. */
+/** Underlying flag resolution; see `WebComponentContext.flag`. */
 function resolveFlag(element: HTMLElement, value: unknown, attribute: string): boolean {
   if (value === true) return true;
   return element.hasAttribute(attribute) && element.getAttribute(attribute) !== 'false';
 }
 
-type FacadeComponent<P, E> = (props: P, ctx: KitnElementContext<E>) => JSX.Element;
+type FacadeComponent<P, E> = (props: P, ctx: WebComponentContext<E>) => JSX.Element;
 
 /**
  * Register a Solid facade as a Shadow-DOM custom element.
@@ -94,7 +94,7 @@ type FacadeComponent<P, E> = (props: P, ctx: KitnElementContext<E>) => JSX.Eleme
  *   the element, so bubbling/composed would only cause consumer collisions).
  * - Idempotent: redefining an already-registered tag is a no-op.
  */
-export function defineKitnElement<P extends Record<string, unknown>, E = Record<string, unknown>>(
+export function defineWebComponent<P extends Record<string, unknown>, E = Record<string, unknown>>(
   tag: string,
   propDefaults: P,
   Facade: FacadeComponent<P, E>,
@@ -111,7 +111,7 @@ export function defineKitnElement<P extends Record<string, unknown>, E = Record<
   for (const key of Object.keys(propDefaults)) {
     if (RESERVED.includes(key)) {
       throw new Error(
-        `defineKitnElement(${tag}): prop "${key}" collides with a global HTMLElement ` +
+        `defineWebComponent(${tag}): prop "${key}" collides with a global HTMLElement ` +
         `attribute and will break the element constructor. Rename it (e.g. ` +
         `"bar-title" → barTitle, a source title → headline).`,
       );
@@ -131,10 +131,10 @@ export function defineKitnElement<P extends Record<string, unknown>, E = Record<
     const dispatch = ((type: string, detail?: unknown) =>
       element.dispatchEvent(
         new CustomEvent(type, { detail, bubbles: false, composed: false }),
-      )) as KitnElementContext<E>['dispatch'];
+      )) as WebComponentContext<E>['dispatch'];
 
     // Reads `props[name]` (reactive) and falls back to attribute presence so
-    // bare boolean attributes behave like normal HTML. See KitnElementContext.
+    // bare boolean attributes behave like normal HTML. See WebComponentContext.
     const flag = (name: string) =>
       resolveFlag(element, (props as Record<string, unknown>)[name], toAttr(name));
 
@@ -153,7 +153,7 @@ export function defineKitnElement<P extends Record<string, unknown>, E = Record<
     return (
       <>
         <Show when={!sheet}>
-          <style>{KITN_CSS}</style>
+          <style>{ELEMENT_CSS}</style>
         </Show>
         {/* display:contents — no layout box; carries the .dark token scope and
             re-roots the inherited `color` to the active mode's foreground, so text

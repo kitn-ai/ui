@@ -1,5 +1,5 @@
 import { Show } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { Tool, type ToolPart } from '../components/tool';
 
 interface Props extends Record<string, unknown> {
@@ -13,7 +13,7 @@ interface Props extends Record<string, unknown> {
  * `<kc-tool>` — a collapsible tool-call panel (input/output inspection with a
  * state badge). Data via the `tool` property; `open` flag starts it expanded.
  */
-defineKitnElement<Props>('kc-tool', {
+defineWebComponent<Props>('kc-tool', {
   tool: undefined,
   open: false,
 }, (props, { flag }) => (

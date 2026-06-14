@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '../components/reasoning';
 import { ChatConfig, useChatConfig } from '../primitives/chat-config';
 
@@ -27,7 +27,7 @@ interface Events {
  * while `streaming`. Text via the `text` property; `markdown`/`streaming` flags;
  * `open` is a controlled property; emits `openchange`.
  */
-defineKitnElement<Props, Events>('kc-reasoning', {
+defineWebComponent<Props, Events>('kc-reasoning', {
   text: '',
   label: 'Reasoning',
   open: undefined,

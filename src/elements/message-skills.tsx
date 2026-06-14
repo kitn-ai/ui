@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { MessageSkills } from '../components/message-skills';
 
 interface Skill {
@@ -17,6 +17,6 @@ interface Props extends Record<string, unknown> {
  * `<kc-skills>` — badges showing which skills were active for a
  * message. Data via the `skills` property.
  */
-defineKitnElement<Props>('kc-skills', {
+defineWebComponent<Props>('kc-skills', {
   skills: [],
 }, (props) => <MessageSkills skills={props.skills} />);

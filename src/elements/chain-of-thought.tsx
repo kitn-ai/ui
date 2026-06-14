@@ -1,5 +1,5 @@
 import { For, Show } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import {
   ChainOfThought,
   ChainOfThoughtStep,
@@ -25,7 +25,7 @@ interface Props extends Record<string, unknown> {
  * `<kc-chain-of-thought>` — step-by-step reasoning with connectors and
  * per-step collapsible detail. Data via the `steps` property.
  */
-defineKitnElement<Props>('kc-chain-of-thought', {
+defineWebComponent<Props>('kc-chain-of-thought', {
   steps: [],
 }, (props) => (
   <ChainOfThought>

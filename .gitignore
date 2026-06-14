@@ -7,3 +7,6 @@ src/elements/compiled.css
 
 # Brainstorming visual companion
 .superpowers/
+
+# Throwaway agent git worktrees (full repo copies)
+.claude/worktrees/

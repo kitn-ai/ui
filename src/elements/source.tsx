@@ -1,5 +1,5 @@
 import { For, Show } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { Source, SourceTrigger, SourceContent, SourceList } from '../components/source';
 
 // --- <kc-source> — a single citation link with hover preview ---
@@ -18,7 +18,7 @@ interface SourceProps extends Record<string, unknown> {
   showFavicon?: boolean;
 }
 
-defineKitnElement<SourceProps>('kc-source', {
+defineWebComponent<SourceProps>('kc-source', {
   href: '',
   label: undefined,
   headline: '',
@@ -50,7 +50,7 @@ interface SourceListProps extends Record<string, unknown> {
   showFavicon?: boolean;
 }
 
-defineKitnElement<SourceListProps>('kc-sources', {
+defineWebComponent<SourceListProps>('kc-sources', {
   sources: [],
   showFavicon: false,
 }, (props, { flag }) => (

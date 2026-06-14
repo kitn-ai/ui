@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { ThinkingBar } from '../components/thinking-bar';
 
 interface Props extends Record<string, unknown> {
@@ -21,7 +21,7 @@ interface Events {
  * (one of the primitives the batteries-included `<kc-chat>` does NOT surface).
  * Config via attributes, the only interaction (`stop`) comes back as an event.
  */
-defineKitnElement<Props, Events>('kc-thinking-bar', {
+defineWebComponent<Props, Events>('kc-thinking-bar', {
   text: 'Thinking',
   stoppable: false,
   stopLabel: 'Answer now',
