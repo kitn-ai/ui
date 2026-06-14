@@ -19,6 +19,9 @@ import {
   House,
   Eye,
   Code as CodeIcon,
+  FileText,
+  ExternalLink,
+  Download,
 } from 'lucide-solid';
 
 export type ArtifactTab = 'preview' | 'code';
@@ -449,6 +452,39 @@ function ArtifactCode(props: CodeProps): JSX.Element {
             </CodeBlock>
           </Show>
         </Show>
+      </div>
+    </div>
+  );
+}
+
+// --- ArtifactPdfFallback (internal) ---------------------------------------
+
+/** Shown when inline PDF rendering is disabled or fails (CORS / load / parse). */
+function ArtifactPdfFallback(props: { url: string }): JSX.Element {
+  const name = () => {
+    const path = props.url.split(/[?#]/)[0];
+    return path.slice(path.lastIndexOf('/') + 1) || 'document.pdf';
+  };
+  const linkClass =
+    'inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+  return (
+    <div
+      role="region"
+      aria-label="PDF preview unavailable"
+      class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card p-6 text-center"
+    >
+      <FileText size={40} class="text-muted-foreground" aria-hidden="true" />
+      <div class="text-sm font-medium text-foreground">{name()}</div>
+      <div class="text-xs text-muted-foreground">Can't preview this PDF inline.</div>
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <a class={linkClass} href={props.url} target="_blank" rel="noopener noreferrer">
+          Open in new tab
+          <ExternalLink size={13} aria-hidden="true" />
+        </a>
+        <a class={linkClass} href={props.url} download="">
+          <Download size={13} aria-hidden="true" />
+          Download
+        </a>
       </div>
     </div>
   );
