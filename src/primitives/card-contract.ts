@@ -13,6 +13,8 @@ export interface CardEnvelope<TType extends string = string, TData = unknown> {
   id: string;
   data: TData;
   title?: string;
+  /** Set when the user has resolved this card; renders the chromed read-only view. */
+  resolution?: CardResolution;
 }
 
 /** Context the host pushes to every card; updated when it changes (theme, etc.). */
@@ -39,6 +41,15 @@ export type CardEvent =
   | { kind: 'error'; cardId: string; message: string };
 
 export type CardEventKind = CardEvent['kind'];
+
+/** How a card was resolved by the user — the re-hydration channel for the chromed
+ *  read-only state. Mirrors the two terminal CardEvents (minus `cardId`): the
+ *  resolution is just the event that resolved the card. `at` is optional ISO-8601
+ *  provenance (data only; never rendered). Additive — does not bump the contract
+ *  version. */
+export type CardResolution =
+  | { kind: 'action'; action: string; payload?: unknown; at?: string }
+  | { kind: 'submit-data'; data: unknown; at?: string };
 
 /** What every card is handed (via native context or the iframe bridge). */
 export interface CardHost {
