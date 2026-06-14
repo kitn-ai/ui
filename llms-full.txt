@@ -522,7 +522,7 @@ _No events._
 
 ---
 
-### `kc-link-card` / `KcLinkCard`
+### `kc-link-preview` / `KcLinkPreview`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 

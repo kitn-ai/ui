@@ -285,7 +285,7 @@ export interface KcImageElement extends HTMLElement {
   mediaType?: string;
 }
 
-export interface KcLinkCardElement extends HTMLElement {
+export interface KcLinkPreviewElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** Stable card id correlating every emitted event. Set as an attribute or property. */
@@ -599,7 +599,7 @@ declare global {
     'kc-file-upload': KcFileUploadElement;
     'kc-form': KcFormElement;
     'kc-image': KcImageElement;
-    'kc-link-card': KcLinkCardElement;
+    'kc-link-preview': KcLinkPreviewElement;
     'kc-loader': KcLoaderElement;
     'kc-markdown': KcMarkdownElement;
     'kc-message': KcMessageElement;

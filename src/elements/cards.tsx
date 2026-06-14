@@ -16,7 +16,7 @@ import './form';
 import './confirm-card';
 import './tasks';
 import './choice';
-import './link-card';
+import './link-preview';
 import './embed';
 
 interface Props extends Record<string, unknown> {

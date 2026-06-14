@@ -1350,8 +1350,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-link-card",
-    "className": "KcLinkCardElement",
+    "tag": "kc-link-preview",
+    "className": "KcLinkPreviewElement",
     "props": [
       {
         "name": "cardId",
@@ -1373,9 +1373,9 @@
     "events": [],
     "composedFrom": [
       {
-        "name": "LinkCard",
+        "name": "LinkPreview",
         "group": "Components",
-        "storyId": "components-linkcard--docs"
+        "storyId": "components-linkpreview--docs"
       }
     ],
     "tokens": []

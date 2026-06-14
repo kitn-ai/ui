@@ -109,18 +109,18 @@ export type {
   ChoiceCardEnvelope,
 } from './components/choice-card';
 
-// Card: kc-link-card (OG/link preview) + kc-embed (lazy media embed)
-export { LinkCard } from './components/link-card';
-export type { LinkCardProps } from './components/link-card';
+// Card: kc-link-preview (OG/link preview) + kc-embed (lazy media embed)
+export { LinkPreview } from './components/link-preview';
+export type { LinkPreviewProps } from './components/link-preview';
 export { Embed } from './components/embed';
 export type { EmbedProps } from './components/embed';
 export {
   configureLinkPreview,
   resolveLinkMetadata,
   hasLinkPreviewFetcher,
-  LINK_CARD_TYPE,
+  LINK_PREVIEW_TYPE,
 } from './primitives/link-preview';
-export type { LinkCardData, LinkCardEnvelope, LinkMetadataFetcher } from './primitives/link-preview';
+export type { LinkPreviewData, LinkPreviewEnvelope, LinkMetadataFetcher } from './primitives/link-preview';
 export {
   resolveEmbed,
   parseYouTubeId,

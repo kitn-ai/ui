@@ -10,7 +10,7 @@ import { Form } from '../components/form';
 import { ConfirmCard } from '../components/confirm-card';
 import { TasksCard } from '../components/tasks-card';
 import { ChoiceCard } from '../components/choice-card';
-import { LinkCard } from '../components/link-card';
+import { LinkPreview } from '../components/link-preview';
 import { Embed } from '../components/embed';
 
 /** Solid renderer for one envelope. `host` is the resolved CardHost so each wrapper
@@ -27,7 +27,7 @@ export const BUILTIN_CARD_TAGS: CardTagMap = {
   confirm: 'kc-confirm',
   'tasks': 'kc-tasks',
   choice: 'kc-choice',
-  link: 'kc-link-card',
+  link: 'kc-link-preview',
   embed: 'kc-embed',
 };
 
@@ -50,7 +50,7 @@ export const BUILTIN_CARD_COMPONENTS: CardComponentMap = {
   ),
   // link/embed have no `heading` and emit via an onEmit callback (no context).
   link: (p) => (
-    <LinkCard data={p.envelope.data as never} cardId={p.envelope.id} onEmit={(e) => p.host?.emit(e)} />
+    <LinkPreview data={p.envelope.data as never} cardId={p.envelope.id} onEmit={(e) => p.host?.emit(e)} />
   ),
   embed: (p) => (
     <Embed data={p.envelope.data as never} cardId={p.envelope.id} onEmit={(e) => p.host?.emit(e)} />

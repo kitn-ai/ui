@@ -14,7 +14,7 @@ test('built-in tag map covers exactly the 6 card types', () => {
   expect(BUILTIN_CARD_TAGS.form).toBe('kc-form');
   expect(BUILTIN_CARD_TAGS['tasks']).toBe('kc-tasks');
   expect(BUILTIN_CARD_TAGS.choice).toBe('kc-choice');
-  expect(BUILTIN_CARD_TAGS.link).toBe('kc-link-card');
+  expect(BUILTIN_CARD_TAGS.link).toBe('kc-link-preview');
 });
 
 test('built-in component map covers exactly the 6 card types', () => {

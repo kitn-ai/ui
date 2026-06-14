@@ -400,15 +400,15 @@ export const KcImage = createWebComponent<KcImageProps>(
   {  },
 );
 
-export interface KcLinkCardProps extends WebComponentProps {
+export interface KcLinkPreviewProps extends WebComponentProps {
   /** Stable card id correlating every emitted event. Set as an attribute or property. */
   cardId?: string;
   /** The link payload (OG metadata). Set as a JS **property** (object). */
   data?: { url: string; title?: string; description?: string; image?: string; imageAlt?: string; favicon?: string; domain?: string; siteName?: string };
 }
 
-export const KcLinkCard = createWebComponent<KcLinkCardProps>(
-  'kc-link-card',
+export const KcLinkPreview = createWebComponent<KcLinkPreviewProps>(
+  'kc-link-preview',
   ["theme","cardId","data"],
   {  },
 );
