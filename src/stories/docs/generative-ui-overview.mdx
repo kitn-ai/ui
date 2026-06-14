@@ -1,0 +1,57 @@
+{/* src/stories/docs/generative-ui-overview.mdx */}
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Generative UI/Overview" />
+
+# Generative UI
+
+Agents don't just reply with text — they ask the chat to **render typed, interactive
+cards**: a form to fill, an action to approve, a plan to pick from, a link to preview.
+`@kitnai/chat` does this with a small, typed **Card Contract** and a turnkey dispatcher.
+
+## The loop
+
+```
+agent/server ──CardEnvelope(s)──▶ host sets <kc-cards>.cards
+     ▲                                      │
+     │                              dispatcher renders the right kc-* by `type`
+     │                                      │
+     └── result / next envelopes ◀─ CardPolicy ◀─ kc-card event ◀─ user interacts
+```
+
+## The envelope
+
+Everything an agent sends is a `CardEnvelope`:
+
+```ts
+interface CardEnvelope { type: string; id: string; data: unknown; title?: string }
+```
+
+`type` selects the card (`form`, `confirm`, `task-list`, `link`, `embed`); `data` follows
+that type's **JSON Schema** (shipped in `dist/schemas`, so an agent/server can validate
+before sending); `id` correlates every event back to this card.
+
+## Turnkey: drop `<kc-cards>`
+
+```html
+<kc-cards></kc-cards>
+<script type="module">
+  import '@kitnai/chat/elements';
+  const cards = document.querySelector('kc-cards');
+  cards.cards = [{ type: 'confirm', id: 'deploy', title: 'Deploy?',
+    data: { body: 'Ship it?', actions: [{ id: 'go', label: 'Deploy', default: true }] } }];
+  cards.policy = { onAction: (id, action) => console.log(id, action) };
+</script>
+```
+
+`<kc-cards>` renders one card per envelope and routes every interaction through `policy`
+(or listen for the raw bubbling `kc-card` event). In SolidJS, use `renderCard(envelope)` /
+`<CardRenderer>` inside a `<CardProvider>`.
+
+## Streaming & follow-ups
+
+Update a card's `data` for the **same `id`** and it re-renders in place — so an agent can
+stream into a card as work progresses. Swap the `cards` array to replace a card with a
+follow-up (e.g. a result card after a `confirm`).
+
+See **Cards** for each card type, and **SDK** for the dispatcher in action.
