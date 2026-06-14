@@ -31,8 +31,8 @@ export type { TextareaProps } from './ui/textarea';
 export { Badge } from './ui/badge';
 export type { BadgeProps } from './ui/badge';
 export { Separator } from './ui/separator';
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './ui/resizable';
-export type { ResizablePanelGroupProps, ResizablePanelProps, ResizableHandleProps } from './ui/resizable';
+export { ResizablePanelGroup, ResizablePanel, ResizableHandle, Resizable, normalizeSize, resolveToPx } from './ui/resizable';
+export type { ResizablePanelGroupProps, ResizablePanelProps, ResizableHandleProps, ResizableProps, SizeValue } from './ui/resizable';
 export { Skeleton } from './ui/skeleton';
 
 // Layer 3: AI/Feature Components

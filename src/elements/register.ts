@@ -35,6 +35,7 @@ import './source';
 import './response-stream';
 import './empty';
 import './chain-of-thought';
+import './resizable';
 
 export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';

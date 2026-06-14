@@ -1,0 +1,105 @@
+// tests/elements/resizable-element.test.tsx
+import '../../src/elements/resizable';
+
+// jsdom has no layout, so we only assert DOM structure, attributes and events
+// here. Drag, keyboard and visual layout are verified via Playwright.
+
+/** Build a <kc-resizable> with N <kc-resizable-item> children. */
+function makeGroup(items: Array<Record<string, string>>, attrs: Record<string, string> = {}) {
+  const group = document.createElement('kc-resizable') as HTMLElement;
+  for (const [k, v] of Object.entries(attrs)) group.setAttribute(k, v);
+  for (const it of items) {
+    const item = document.createElement('kc-resizable-item');
+    for (const [k, v] of Object.entries(it)) item.setAttribute(k, v);
+    item.textContent = 'content';
+    group.appendChild(item);
+  }
+  document.body.appendChild(group);
+  return group;
+}
+
+/** Let the MutationObserver / microtasks flush. */
+const flush = () => new Promise((r) => setTimeout(r, 0));
+
+afterEach(() => {
+  document.querySelectorAll('kc-resizable').forEach((e) => e.remove());
+});
+
+test('both kc-resizable and kc-resizable-item register', () => {
+  expect(customElements.get('kc-resizable')).toBeTruthy();
+  expect(customElements.get('kc-resizable-item')).toBeTruthy();
+});
+
+test('N visible items render N-1 handles in the shadow root', async () => {
+  const group = makeGroup([{}, {}, {}]);
+  await flush();
+  const handles = group.shadowRoot!.querySelectorAll('[role="separator"]');
+  expect(handles.length).toBe(2);
+  const panels = group.shadowRoot!.querySelectorAll('[data-panel]');
+  expect(panels.length).toBe(3);
+});
+
+test('a hidden item drops a handle and its panel', async () => {
+  const group = makeGroup([{}, { hidden: '' }, {}]);
+  await flush();
+  const handles = group.shadowRoot!.querySelectorAll('[role="separator"]');
+  expect(handles.length).toBe(1); // 2 visible → 1 handle
+  const panels = group.shadowRoot!.querySelectorAll('[data-panel]');
+  expect(panels.length).toBe(2);
+});
+
+test('size/min/max are reflected onto the panel data-* and flex-basis', async () => {
+  const group = makeGroup([{ size: '280px', min: '100px', max: '400px' }, { size: '25%' }]);
+  await flush();
+  const panels = group.shadowRoot!.querySelectorAll<HTMLElement>('[data-panel]');
+  expect(panels[0].style.flexBasis).toBe('280px');
+  expect(panels[0].dataset.minSize).toBe('100');
+  expect(panels[0].dataset.maxSize).toBe('400');
+  expect(panels[1].style.flexBasis).toBe('25%');
+});
+
+test('a locked neighbor makes the adjacent handle non-interactive (data-static, no tabindex)', async () => {
+  const group = makeGroup([{ locked: '' }, {}]);
+  await flush();
+  const handle = group.shadowRoot!.querySelector('[role="separator"]')! as HTMLElement;
+  expect(handle.hasAttribute('data-static')).toBe(true);
+  expect(handle.hasAttribute('tabindex')).toBe(false);
+});
+
+test('an unlocked pair yields a focusable handle (tabindex=0, no data-static)', async () => {
+  const group = makeGroup([{}, {}]);
+  await flush();
+  const handle = group.shadowRoot!.querySelector('[role="separator"]')! as HTMLElement;
+  expect(handle.hasAttribute('data-static')).toBe(false);
+  expect(handle.getAttribute('tabindex')).toBe('0');
+});
+
+test('change CustomEvent fires when sizes change programmatically (visibility toggle)', async () => {
+  const group = makeGroup([{}, {}, {}]);
+  await flush();
+  let detail: { sizes: number[] } | null = null;
+  group.addEventListener('change', (e) => (detail = (e as CustomEvent).detail));
+  // Hide the middle item — a visibility change should re-layout and emit change.
+  group.children[1].setAttribute('hidden', '');
+  await flush();
+  expect(detail).not.toBeNull();
+  expect(Array.isArray(detail!.sizes)).toBe(true);
+});
+
+test('more than 3 items: extras are ignored (max 3 panels)', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  const group = makeGroup([{}, {}, {}, {}]);
+  await flush();
+  const panels = group.shadowRoot!.querySelectorAll('[data-panel]');
+  expect(panels.length).toBe(3);
+  expect(warn).toHaveBeenCalled();
+  warn.mockRestore();
+});
+
+test('kc-resizable-item renders its slotted light content via a default slot', async () => {
+  const item = document.createElement('kc-resizable-item');
+  document.body.appendChild(item);
+  await flush();
+  expect(item.shadowRoot!.querySelector('slot')).toBeTruthy();
+  item.remove();
+});

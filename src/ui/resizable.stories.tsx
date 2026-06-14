@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './resizable';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle, Resizable } from './resizable';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
@@ -166,5 +166,71 @@ export const NoHandle: Story = {
   <ResizablePanel defaultSize={40}>Panel A</ResizablePanel>
   <ResizableHandle onPanelResize={(delta) => console.log(delta)} />
   <ResizablePanel>Panel B</ResizablePanel>
+</ResizablePanelGroup>`),
+};
+
+/**
+ * The `Resizable` convenience: pass `ResizablePanel` children and it
+ * auto-inserts a handle between each visible pair. A `locked` panel makes its
+ * neighbouring handle a static (non-draggable) divider; a `hidden` panel drops
+ * its divider entirely.
+ */
+export const ConvenienceGroup: Story = {
+  name: 'Resizable (convenience)',
+  render: () => (
+    <div class="h-48 w-full max-w-2xl rounded-lg border border-border overflow-hidden">
+      <Resizable orientation="horizontal" withHandle onChange={(sizes) => console.log('sizes', sizes)}>
+        <ResizablePanel defaultSize="240px" locked>
+          <div class="flex h-full items-center justify-center bg-muted/30 p-4">
+            <span class="text-sm text-muted-foreground">Locked sidebar (240px)</span>
+          </div>
+        </ResizablePanel>
+        <ResizablePanel>
+          <div class="flex h-full items-center justify-center p-4">
+            <span class="text-sm text-muted-foreground">Chat</span>
+          </div>
+        </ResizablePanel>
+        <ResizablePanel defaultSize="30%" minSize="160px">
+          <div class="flex h-full items-center justify-center bg-muted/30 p-4">
+            <span class="text-sm text-muted-foreground">Preview</span>
+          </div>
+        </ResizablePanel>
+      </Resizable>
+    </div>
+  ),
+  ...src(`<Resizable orientation="horizontal" withHandle onChange={(sizes) => console.log(sizes)}>
+  <ResizablePanel defaultSize="240px" locked>Locked sidebar</ResizablePanel>
+  <ResizablePanel>Chat</ResizablePanel>
+  <ResizablePanel defaultSize="30%" minSize="160px">Preview</ResizablePanel>
+</Resizable>`),
+};
+
+/**
+ * Min/max + keyboard: focus the handle (Tab) and use ←/→ to nudge, Home/End to
+ * jump to the panel's min/max. Sizes accept px or %.
+ */
+export const MinMaxKeyboard: Story = {
+  name: 'Min/Max + Keyboard',
+  render: () => (
+    <div class="h-48 w-full max-w-2xl rounded-lg border border-border overflow-hidden">
+      <ResizablePanelGroup orientation="horizontal">
+        <ResizablePanel defaultSize="30%" minSize="120px" maxSize="50%">
+          <div class="flex h-full items-center justify-center bg-muted/30 p-4">
+            <span class="text-sm text-muted-foreground">min 120px · max 50%</span>
+          </div>
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel minSize="160px">
+          <div class="flex h-full items-center justify-center p-4">
+            <span class="text-sm text-muted-foreground">Content (min 160px)</span>
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
+  ),
+  ...src(`<ResizablePanelGroup orientation="horizontal">
+  <ResizablePanel defaultSize="30%" minSize="120px" maxSize="50%">Sidebar</ResizablePanel>
+  <ResizableHandle withHandle />
+  <ResizablePanel minSize="160px">Content</ResizablePanel>
 </ResizablePanelGroup>`),
 };

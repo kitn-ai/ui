@@ -1819,6 +1819,164 @@
         {
           "kind": "class",
           "customElement": true,
+          "tagName": "kc-resizable",
+          "name": "KcResizableElement",
+          "description": "",
+          "members": [
+            {
+              "kind": "field",
+              "name": "orientation",
+              "type": {
+                "text": "undefined | \"horizontal\" | \"vertical\""
+              },
+              "description": "Layout axis: `horizontal` (row, default) or `vertical` (column).",
+              "privacy": "public"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "theme",
+              "type": {
+                "text": "'light' | 'dark' | 'auto'"
+              },
+              "description": "Color mode (auto follows prefers-color-scheme)."
+            },
+            {
+              "name": "orientation",
+              "fieldName": "orientation",
+              "type": {
+                "text": "undefined | \"horizontal\" | \"vertical\""
+              },
+              "description": "Layout axis: `horizontal` (row, default) or `vertical` (column)."
+            }
+          ],
+          "events": [
+            {
+              "name": "change",
+              "type": {
+                "text": "CustomEvent<{ sizes: number[] }>"
+              },
+              "description": "Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent."
+            }
+          ],
+          "cssProperties": []
+        },
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "kc-resizable-item",
+          "name": "KcResizableItemElement",
+          "description": "",
+          "members": [
+            {
+              "kind": "field",
+              "name": "size",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Initial main-axis size: `\"280px\"` (fixed) or `\"25%\"`/`25` (percent). Omitted → flexible.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "min",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Minimum size during resize (px or %).",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "max",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Maximum size during resize (px or %).",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "locked",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Fix this panel's size; adjacent dividers become non-draggable.",
+              "privacy": "public"
+            },
+            {
+              "kind": "field",
+              "name": "hidden",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Hide this panel; its divider is dropped and the rest reflow.",
+              "privacy": "public"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "theme",
+              "type": {
+                "text": "'light' | 'dark' | 'auto'"
+              },
+              "description": "Color mode (auto follows prefers-color-scheme)."
+            },
+            {
+              "name": "size",
+              "fieldName": "size",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Initial main-axis size: `\"280px\"` (fixed) or `\"25%\"`/`25` (percent). Omitted → flexible."
+            },
+            {
+              "name": "min",
+              "fieldName": "min",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Minimum size during resize (px or %)."
+            },
+            {
+              "name": "max",
+              "fieldName": "max",
+              "type": {
+                "text": "undefined | string"
+              },
+              "description": "Maximum size during resize (px or %)."
+            },
+            {
+              "name": "locked",
+              "fieldName": "locked",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Fix this panel's size; adjacent dividers become non-draggable."
+            },
+            {
+              "name": "hidden",
+              "fieldName": "hidden",
+              "type": {
+                "text": "undefined | false | true"
+              },
+              "description": "Hide this panel; its divider is dropped and the rest reflow."
+            }
+          ],
+          "events": [
+            {
+              "name": "change",
+              "type": {
+                "text": "CustomEvent<unknown>"
+              },
+              "description": ""
+            }
+          ],
+          "cssProperties": []
+        },
+        {
+          "kind": "class",
+          "customElement": true,
           "tagName": "kc-response-stream",
           "name": "KcResponseStreamElement",
           "description": "",

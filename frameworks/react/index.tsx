@@ -376,6 +376,39 @@ export const KcReasoning = createKitnComponent<KcReasoningProps>(
   { onOpenchange: 'openchange' },
 );
 
+export interface KcResizableProps extends KitnBaseProps {
+  /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
+  orientation?: "horizontal" | "vertical";
+  /** Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. */
+  onChange?: (event: CustomEvent<{ sizes: number[] }>) => void;
+}
+
+export const KcResizable = createKitnComponent<KcResizableProps>(
+  'kc-resizable',
+  ["theme","orientation"],
+  { onChange: 'change' },
+);
+
+export interface KcResizableItemProps extends KitnBaseProps {
+  /** Initial main-axis size: `"280px"` (fixed) or `"25%"`/`25` (percent). Omitted → flexible. */
+  size?: string;
+  /** Minimum size during resize (px or %). */
+  min?: string;
+  /** Maximum size during resize (px or %). */
+  max?: string;
+  /** Fix this panel's size; adjacent dividers become non-draggable. */
+  locked?: boolean;
+  /** Hide this panel; its divider is dropped and the rest reflow. */
+  hidden?: boolean;
+  onChange?: (event: CustomEvent<unknown>) => void;
+}
+
+export const KcResizableItem = createKitnComponent<KcResizableItemProps>(
+  'kc-resizable-item',
+  ["theme","size","min","max","locked","hidden"],
+  { onChange: 'change' },
+);
+
 export interface KcResponseStreamProps extends KitnBaseProps {
   /** Text to stream. A string, or an `AsyncIterable<string>` (set as a JS property — async iterables can't be HTML attributes). */
   text?: string | AsyncIterable<string>;
