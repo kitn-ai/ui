@@ -10,7 +10,6 @@ test('CardFallback shows the unsupported type and is a polite alert', () => {
   expect(alert.textContent).toContain('mystery');
 });
 
-import { fireEvent } from '@solidjs/testing-library';
 import { CardRenderer, renderCard } from '../../src/components/card-renderer';
 import { CardProvider } from '../../src/primitives/card-host';
 import type { CardEnvelope, CardEvent, CardContext } from '../../src/primitives/card-contract';
