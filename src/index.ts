@@ -29,6 +29,16 @@ export { CARD_EVENT_NAME, emitCardEvent, routeCardEvent, listenForCardEvents } f
 export { validateAgainstSchema } from './primitives/card-validate';
 export type { JsonSchema, ValidationResult } from './primitives/card-validate';
 
+// Card dispatcher (generative-UI host glue)
+export { CardRenderer, renderCard } from './components/card-renderer';
+export type { CardRendererProps } from './components/card-renderer';
+export { CardFallback } from './components/card-fallback';
+export type { CardFallbackProps } from './components/card-fallback';
+export {
+  BUILTIN_CARD_TAGS, BUILTIN_CARD_COMPONENTS, mergeCardTags, mergeCardComponents,
+} from './primitives/card-registry';
+export type { CardComponent, CardComponentMap, CardTagMap } from './primitives/card-registry';
+
 // Card: kc-card (base shell) + kc-form (JSON-Schema form renderer)
 export { Card } from './components/card';
 export type { CardProps } from './components/card';
