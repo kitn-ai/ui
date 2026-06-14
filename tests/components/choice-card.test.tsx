@@ -52,7 +52,7 @@ test('picking an option emits `action` with id + echoed payload', () => {
 
 test('single-shot: a second pick does not emit again', () => {
   const { host, events } = makeHost();
-  const { getByText } = render(() => (
+  const { getByText, queryByRole } = render(() => (
     <ChoiceCard
       host={host}
       cardId="c1"
@@ -60,7 +60,10 @@ test('single-shot: a second pick does not emit again', () => {
     />
   ));
   fireEvent.click(getByText('A'));
-  fireEvent.click(getByText('B'));
+  // After pick the radiogroup is replaced by the read-only resolved view.
+  expect(queryByRole('radiogroup')).toBeNull();
+  // Attempt to interact with the resolved view (click the check-marked label).
+  fireEvent.click(getByText('A'));
   expect(events.filter((e) => e.kind === 'action').length).toBe(1);
   expect(action(events)?.action).toBe('a');
 });
