@@ -20,6 +20,8 @@ type Loader = () => Promise<unknown>;
 const DEFAULT_LANGUAGES: Record<string, Loader> = {
   bash: () => import('@shikijs/langs/bash'),
   javascript: () => import('@shikijs/langs/javascript'),
+  typescript: () => import('@shikijs/langs/typescript'),
+  tsx: () => import('@shikijs/langs/tsx'),
   html: () => import('@shikijs/langs/html'),
   css: () => import('@shikijs/langs/css'),
   json: () => import('@shikijs/langs/json'),
@@ -32,6 +34,8 @@ const DEFAULT_THEMES: Record<string, Loader> = {
 
 const DEFAULT_ALIASES: Record<string, string> = {
   js: 'javascript',
+  ts: 'typescript',
+  jsx: 'tsx',
   sh: 'bash',
   shell: 'bash',
 };
