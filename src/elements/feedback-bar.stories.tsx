@@ -9,8 +9,7 @@ declare module 'solid-js' {
     interface IntrinsicElements {
       'kc-feedback-bar': JSX.HTMLAttributes<HTMLElement> & {
         'bar-title'?: string;
-        'on:helpful'?: (e: CustomEvent) => void;
-        'on:nothelpful'?: (e: CustomEvent) => void;
+        'on:feedback'?: (e: CustomEvent<{ value: 'helpful' | 'not-helpful' }>) => void;
         'on:close'?: (e: CustomEvent) => void;
       };
     }
@@ -24,8 +23,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   import '@kitn.ai/chat/elements';   // registers the custom elements
 
   const bar = document.querySelector('kc-feedback-bar');
-  bar.addEventListener('helpful', () => console.log('👍'));
-  bar.addEventListener('nothelpful', () => console.log('👎'));
+  bar.addEventListener('feedback', (e) => console.log('feedback:', e.detail.value)); // 'helpful' | 'not-helpful'
   bar.addEventListener('close', () => bar.remove());
 </script>`;
 
@@ -39,7 +37,7 @@ const meta = {
       description: specDescription('kc-feedback-bar', [
           '`<kc-feedback-bar>` is the framework-agnostic **web component** for an inline thumbs up/down feedback banner with a dismiss button — isolated in **Shadow DOM**.',
           '**When to use:** collecting a quick reaction after an answer or a completed task. In SolidJS, use the `FeedbackBar` primitive.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the label via the `bar-title` attribute (`title` is avoided — it's a global HTML attribute), and listen for the `helpful` / `nothelpful` / `close` **CustomEvents**.",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the label via the `bar-title` attribute (`title` is avoided — it's a global HTML attribute), and listen for the `feedback` / `close` **CustomEvents**. The `feedback` event carries `{ value: 'helpful' | 'not-helpful' }` in its `detail`.",
           'See the **Code** tab for HTML usage.',
         ]),
     },
@@ -54,8 +52,7 @@ export const Default: Story = {
   render: () => (
     <div style={{ padding: '24px', 'max-width': '480px' }}>
       <kc-feedback-bar
-        on:helpful={() => console.log('helpful')}
-        on:nothelpful={() => console.log('not helpful')}
+        on:feedback={(e) => console.log('feedback:', e.detail.value)}
         on:close={() => console.log('closed')}
       />
     </div>

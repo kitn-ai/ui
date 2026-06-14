@@ -182,7 +182,7 @@ export {
   DotsLoader, TypingLoader, WaveLoader, BarsLoader,
   TerminalLoader, TextBlinkLoader, TextShimmerLoader, TextDotsLoader,
 } from './components/loader';
-export { FeedbackBar } from './components/feedback-bar';
+export { FeedbackBar, type FeedbackValue } from './components/feedback-bar';
 export {
   ChainOfThought, ChainOfThoughtStep, ChainOfThoughtTrigger,
   ChainOfThoughtContent, ChainOfThoughtItem,

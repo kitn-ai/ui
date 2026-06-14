@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { FeedbackBar } from '../components/feedback-bar';
+import { FeedbackBar, type FeedbackValue } from '../components/feedback-bar';
 
 interface Props extends Record<string, unknown> {
   /** The banner label (e.g. "Was this helpful?"). Attribute: `bar-title`
@@ -9,25 +9,22 @@ interface Props extends Record<string, unknown> {
 
 /** Events fired by `<kc-feedback-bar>`. */
 interface Events {
-  /** The user clicked thumbs-up. */
-  helpful: void;
-  /** The user clicked thumbs-down. */
-  nothelpful: void;
+  /** The user rated the response. `value` is `'helpful'` or `'not-helpful'`. */
+  feedback: { value: FeedbackValue };
   /** The user dismissed the banner. */
   close: void;
 }
 
 /**
  * `<kc-feedback-bar>` — an inline thumbs up/down feedback banner. Emits
- * `helpful` / `nothelpful` / `close`.
+ * `feedback` (with `value: 'helpful' | 'not-helpful'`) / `close`.
  */
 defineWebComponent<Props, Events>('kc-feedback-bar', {
   barTitle: 'Was this helpful?',
 }, (props, { dispatch }) => (
   <FeedbackBar
     title={props.barTitle}
-    onHelpful={() => dispatch('helpful')}
-    onNotHelpful={() => dispatch('nothelpful')}
+    onFeedback={(value) => dispatch('feedback', { value })}
     onClose={() => dispatch('close')}
   />
 ));

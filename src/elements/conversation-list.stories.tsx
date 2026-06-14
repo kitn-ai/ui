@@ -110,7 +110,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   list.activeId = 'c-1';
 
   // events are CustomEvents on the element (they do not bubble)
-  list.addEventListener('select', (e) => console.log('opened:', e.detail.id));
+  list.addEventListener('conversationselect', (e) => console.log('opened:', e.detail.id));
   list.addEventListener('newchat', () => console.log('new chat'));
   list.addEventListener('togglesidebar', () => console.log('toggle sidebar'));
 </script>`;
@@ -144,7 +144,7 @@ function Sidebar() {
     <kc-conversations
       ref={el}
       style={{ display: 'block', width: '300px', height: '100vh' }}
-      on:select={(e) => console.log('opened:', e.detail.id)}
+      on:conversationselect={(e) => console.log('opened:', e.detail.id)}
       on:newchat={() => console.log('new chat')}
       on:togglesidebar={() => console.log('toggle sidebar')}
     />
@@ -161,7 +161,7 @@ const meta = {
       description: specDescription('kc-conversations', [
           '`<kc-conversations>` is the framework-agnostic **web component** version of the chat sidebar — a searchable, grouped list of conversations with a "new chat" button, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a conversation switcher to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `ConversationList` primitive instead.',
-          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, set rich data as JS **properties** (`el.groups = [...]`, `el.conversations = [...]`, `el.activeId = \'c-1\'`), and listen for **CustomEvents** (`select`, `newchat`, `togglesidebar`) directly on the element.',
+          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, set rich data as JS **properties** (`el.groups = [...]`, `el.conversations = [...]`, `el.activeId = \'c-1\'`), and listen for **CustomEvents** (`conversationselect`, `newchat`, `togglesidebar`) directly on the element.',
           '**Placement:** as a fixed-width side panel next to the chat surface. Give it an explicit width and height (e.g. `width: 300px; height: 100vh`).',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ]),

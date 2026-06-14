@@ -2,12 +2,13 @@ import { type JSX, Show } from 'solid-js';
 import { cn } from '../utils/cn';
 import { ThumbsUp, ThumbsDown, X } from 'lucide-solid';
 
+export type FeedbackValue = 'helpful' | 'not-helpful';
+
 export interface FeedbackBarProps {
   class?: string;
   title?: string;
   icon?: JSX.Element;
-  onHelpful?: () => void;
-  onNotHelpful?: () => void;
+  onFeedback?: (value: FeedbackValue) => void;
   onClose?: () => void;
 }
 
@@ -29,7 +30,7 @@ export function FeedbackBar(props: FeedbackBarProps) {
             type="button"
             class="text-muted-foreground hover:text-foreground flex size-8 items-center justify-center rounded-md transition-colors"
             aria-label="Helpful"
-            onClick={props.onHelpful}
+            onClick={() => props.onFeedback?.('helpful')}
           >
             <ThumbsUp class="size-4" />
           </button>
@@ -37,7 +38,7 @@ export function FeedbackBar(props: FeedbackBarProps) {
             type="button"
             class="text-muted-foreground hover:text-foreground flex size-8 items-center justify-center rounded-md transition-colors"
             aria-label="Not helpful"
-            onClick={props.onNotHelpful}
+            onClick={() => props.onFeedback?.('not-helpful')}
           >
             <ThumbsDown class="size-4" />
           </button>
