@@ -254,30 +254,22 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
                 </Show>
                 <div class="ml-auto flex flex-wrap items-center gap-2">
                   <For each={actions()}>
-                    {(action) => {
-                      const isChosen = () => res.resolution()?.kind === 'action' && (res.resolution() as { kind: 'action'; action: string }).action === action.id;
-                      return (
-                        <Button
-                          type="button"
-                          variant={buttonVariantForStyle(action.style)}
-                          disabled={res.isResolved() && !isChosen()}
-                          aria-pressed={isChosen() ? 'true' : undefined}
-                          data-action-id={action.id}
-                          data-kc-default={action.default ? 'true' : undefined}
-                          ref={(el) => {
-                            if (local.autofocus && action.id === defaultId()) {
-                              queueMicrotask(() => el.focus());
-                            }
-                          }}
-                          onClick={() => onAction(action)}
-                        >
-                          <Show when={isChosen()}>
-                            <Check size={16} aria-hidden="true" />
-                          </Show>
-                          {action.label}
-                        </Button>
-                      );
-                    }}
+                    {(action) => (
+                      <Button
+                        type="button"
+                        variant={buttonVariantForStyle(action.style)}
+                        data-action-id={action.id}
+                        data-kc-default={action.default ? 'true' : undefined}
+                        ref={(el) => {
+                          if (local.autofocus && action.id === defaultId()) {
+                            queueMicrotask(() => el.focus());
+                          }
+                        }}
+                        onClick={() => onAction(action)}
+                      >
+                        {action.label}
+                      </Button>
+                    )}
                   </For>
                 </div>
               </div>
