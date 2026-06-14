@@ -44,7 +44,9 @@ export default defineConfig({
         // vitest.react.config.ts (`npm run test:react`). They MUST be excluded
         // here, or the global Solid JSX transform would mis-compile their React
         // JSX ("Comp is not a function").
-        exclude: ['**/node_modules/**', 'tests/react/**']
+        // `.claude/**` holds throwaway agent git worktrees (full repo copies);
+        // their duplicated test files must never be collected by the main run.
+        exclude: ['**/node_modules/**', '**/.claude/**', 'tests/react/**', '**/tests/react/**']
       }
     }, {
       extends: true,

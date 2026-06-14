@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { ResponseStream, type Mode } from '../components/response-stream';
 
 interface Props extends Record<string, unknown> {
@@ -23,7 +23,7 @@ interface Events {
  * `<kc-response-stream>` — reveals text with a typewriter or fade animation.
  * Text via the `text` property; `mode`/`speed` attributes; emits `complete`.
  */
-defineKitnElement<Props, Events>('kc-response-stream', {
+defineWebComponent<Props, Events>('kc-response-stream', {
   text: '',
   mode: 'typewriter',
   speed: 20,

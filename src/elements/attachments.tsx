@@ -1,5 +1,5 @@
 import { For, Show } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import {
   Attachments,
   Attachment,
@@ -52,7 +52,7 @@ interface Events {
  * as an event. For fully-custom hover content, the SolidJS primitives remain the
  * escape hatch (a templated slot — "Route 2" — is a deliberate future add).
  */
-defineKitnElement<Props, Events>('kc-attachments', {
+defineWebComponent<Props, Events>('kc-attachments', {
   items: [],
   variant: 'grid',
   hoverCard: false,

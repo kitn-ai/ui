@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { VoiceInput } from '../components/voice-input';
 
 interface Props extends Record<string, unknown> {
@@ -26,7 +26,7 @@ interface Events {
  * canonical **function-property** element: set `el.transcribe` to your async
  * transcriber. Also emits `audiocaptured` (raw blob) and `transcription` (text).
  */
-defineKitnElement<Props, Events>('kc-voice-input', {
+defineWebComponent<Props, Events>('kc-voice-input', {
   transcribe: undefined,
   disabled: false,
 }, (props, { dispatch, flag }) => (

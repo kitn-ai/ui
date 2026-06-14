@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { Artifact, type ArtifactFile, type ArtifactTab } from '../components/artifact';
 
 interface Props extends Record<string, unknown> {
@@ -33,7 +33,7 @@ interface Events extends Record<string, unknown> {
  * component self-navigates the iframe and emits `navigate` / `tabchange` /
  * `fileselect`. Designed to FILL its container (e.g. a `<kc-resizable>` panel).
  */
-defineKitnElement<Props, Events>('kc-artifact', {
+defineWebComponent<Props, Events>('kc-artifact', {
   src: undefined,
   files: [],
   tab: 'preview',

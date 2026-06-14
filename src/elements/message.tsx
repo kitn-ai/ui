@@ -1,5 +1,5 @@
 import { For, Show, type Component } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { ChatConfig, useChatConfig, type ProseSize } from '../primitives/chat-config';
 import { Message, MessageContent, MessageActions } from '../components/message';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from '../components/reasoning';
@@ -45,7 +45,7 @@ const ACTION_ICON: Record<ChatMessageAction, Component<{ class?: string }>> = {
  * object (the same shape `<kc-chat>` uses per message). The keystone of the
  * "compose your own message list" pattern. Emits `messageaction`.
  */
-defineKitnElement<Props, Events>('kc-message', {
+defineWebComponent<Props, Events>('kc-message', {
   message: undefined,
   role: 'assistant',
   content: undefined,

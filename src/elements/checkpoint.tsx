@@ -1,5 +1,5 @@
 import { Show } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { Checkpoint, CheckpointIcon, CheckpointTrigger } from '../components/checkpoint';
 
 interface Props extends Record<string, unknown> {
@@ -23,7 +23,7 @@ interface Events {
  * `<kc-checkpoint>` — a bookmark/checkpoint button (optional tooltip + label).
  * Emits `select`.
  */
-defineKitnElement<Props, Events>('kc-checkpoint', {
+defineWebComponent<Props, Events>('kc-checkpoint', {
   label: undefined,
   tooltip: undefined,
   variant: 'ghost',

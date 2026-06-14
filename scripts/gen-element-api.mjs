@@ -1,4 +1,4 @@
-// Extracts the public API of every `defineKitnElement(...)` custom element from
+// Extracts the public API of every `defineWebComponent(...)` custom element from
 // the facades in src/elements/, using the TypeScript compiler API, and emits:
 //   - custom-elements.json          (Custom Elements Manifest, for IDE/tooling)
 //   - src/elements/jsx-types.d.ts   (HTMLElementTagNameMap + per-element types)
@@ -127,7 +127,7 @@ for (const file of facadeFiles) {
     if (
       ts.isCallExpression(node) &&
       ts.isIdentifier(node.expression) &&
-      node.expression.text === 'defineKitnElement'
+      node.expression.text === 'defineWebComponent'
     ) {
       const tagArg = node.arguments[0];
       if (!tagArg || !ts.isStringLiteralLike(tagArg)) return;

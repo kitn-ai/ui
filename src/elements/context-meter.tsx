@@ -1,5 +1,5 @@
 import { Show } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import {
   Context,
   ContextTrigger,
@@ -40,7 +40,7 @@ interface Props extends Record<string, unknown> {
  * breakdown (input/output/reasoning/cache + estimated cost). Data via the
  * `context` property.
  */
-defineKitnElement<Props>('kc-context', {
+defineWebComponent<Props>('kc-context', {
   context: undefined,
 }, (props) => (
   <Show when={props.context}>

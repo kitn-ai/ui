@@ -16,7 +16,7 @@ import {
   type RefAttributes,
 } from 'react';
 
-export interface KitnBaseProps {
+export interface WebComponentProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   className?: string;
@@ -26,7 +26,7 @@ export interface KitnBaseProps {
   children?: ReactNode;
 }
 
-export function createKitnComponent<P extends KitnBaseProps>(
+export function createWebComponent<P extends WebComponentProps>(
   tagName: string,
   /** DOM-property names to assign from props (incl. `theme`). */
   propNames: readonly string[],

@@ -1,5 +1,5 @@
 import { createEffect, createSignal } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { DefaultPromptInput } from './default-input';
 import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
@@ -56,7 +56,7 @@ interface Events {
   voice: Record<string, never>;
 }
 
-defineKitnElement<Props, Events>('kc-prompt-input', {
+defineWebComponent<Props, Events>('kc-prompt-input', {
   value: undefined,
   placeholder: 'Send a message...',
   disabled: false,

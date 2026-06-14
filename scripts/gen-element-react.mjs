@@ -47,11 +47,11 @@ export function writeReact(root, elements, IMPORTS) {
     const propNames = JSON.stringify(['theme', ...el.props.map((p) => p.name)]);
     const eventMap = `{ ${el.events.map((e) => `${onName(e.name)}: '${e.name}'`).join(', ')} }`;
 
-    return `export interface ${el.className.replace(/Element$/, 'Props')} extends KitnBaseProps {
+    return `export interface ${el.className.replace(/Element$/, 'Props')} extends WebComponentProps {
 ${[...propLines, ...eventLines].join('\n')}
 }
 
-export const ${el.className.replace(/Element$/, '')} = createKitnComponent<${el.className.replace(/Element$/, 'Props')}>(
+export const ${el.className.replace(/Element$/, '')} = createWebComponent<${el.className.replace(/Element$/, 'Props')}>(
   '${el.tag}',
   ${propNames},
   ${eventMap},
@@ -62,7 +62,7 @@ export const ${el.className.replace(/Element$/, '')} = createKitnComponent<${el.
 // Typed React wrappers for every kitn custom element. Usage:
 //   import { KcMessage } from '@kitnai/chat/react';
 //   <KcMessage message={msg} onMessageaction={(e) => …} />
-import { createKitnComponent, type KitnBaseProps } from './runtime';
+import { createWebComponent, type WebComponentProps } from './runtime';
 ${importLines}
 
 ${blocks}

@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage } from '../components/chat-thread';
 import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
@@ -29,7 +29,7 @@ interface Events {
   voice: Record<string, never>;
 }
 
-defineKitnElement<Props, Events>('kc-chat', {
+defineWebComponent<Props, Events>('kc-chat', {
   messages: [], value: undefined, placeholder: 'Send a message...', loading: false,
   suggestions: undefined, suggestionMode: 'submit', proseSize: 'sm',
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,

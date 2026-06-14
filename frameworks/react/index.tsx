@@ -2,10 +2,10 @@
 // Typed React wrappers for every kitn custom element. Usage:
 //   import { KcMessage } from '@kitnai/chat/react';
 //   <KcMessage message={msg} onMessageaction={(e) => …} />
-import { createKitnComponent, type KitnBaseProps } from './runtime';
+import { createWebComponent, type WebComponentProps } from './runtime';
 
 
-export interface KcArtifactProps extends KitnBaseProps {
+export interface KcArtifactProps extends WebComponentProps {
   /** URL the preview iframe frames. Consumer-controlled. */
   src?: string;
   /** Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). */
@@ -26,13 +26,13 @@ export interface KcArtifactProps extends KitnBaseProps {
   onTabchange?: (event: CustomEvent<{ tab: "preview" | "code" }>) => void;
 }
 
-export const KcArtifact = createKitnComponent<KcArtifactProps>(
+export const KcArtifact = createWebComponent<KcArtifactProps>(
   'kc-artifact',
   ["theme","src","files","tab","activeFile","sandbox","iframeTitle"],
   { onFileselect: 'fileselect', onNavigate: 'navigate', onTabchange: 'tabchange' },
 );
 
-export interface KcAttachmentsProps extends KitnBaseProps {
+export interface KcAttachmentsProps extends WebComponentProps {
   /** The attachments to render. Set as a JS property (array). */
   items: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[];
   /** Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. */
@@ -49,24 +49,24 @@ export interface KcAttachmentsProps extends KitnBaseProps {
   onRemove?: (event: CustomEvent<{ id: string }>) => void;
 }
 
-export const KcAttachments = createKitnComponent<KcAttachmentsProps>(
+export const KcAttachments = createWebComponent<KcAttachmentsProps>(
   'kc-attachments',
   ["theme","items","variant","hoverCard","removable","showMediaType","emptyText"],
   { onRemove: 'remove' },
 );
 
-export interface KcChainOfThoughtProps extends KitnBaseProps {
+export interface KcChainOfThoughtProps extends WebComponentProps {
   /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). */
   steps: { label: string; content?: undefined | string }[];
 }
 
-export const KcChainOfThought = createKitnComponent<KcChainOfThoughtProps>(
+export const KcChainOfThought = createWebComponent<KcChainOfThoughtProps>(
   'kc-chain-of-thought',
   ["theme","steps"],
   {  },
 );
 
-export interface KcChatProps extends KitnBaseProps {
+export interface KcChatProps extends WebComponentProps {
   /** The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). */
   messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit")[] }[];
   /** Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior. */
@@ -123,13 +123,13 @@ export interface KcChatProps extends KitnBaseProps {
   onVoice?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
-export const KcChat = createKitnComponent<KcChatProps>(
+export const KcChat = createWebComponent<KcChatProps>(
   'kc-chat',
   ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact"],
   { onMessageaction: 'messageaction', onModelchange: 'modelchange', onSearch: 'search', onSlashselect: 'slashselect', onSubmit: 'submit', onSuggestionclick: 'suggestionclick', onValuechange: 'valuechange', onVoice: 'voice' },
 );
 
-export interface KcCheckpointProps extends KitnBaseProps {
+export interface KcCheckpointProps extends WebComponentProps {
   /** Optional text beside the icon. */
   label?: string;
   /** Tooltip on hover. */
@@ -142,13 +142,13 @@ export interface KcCheckpointProps extends KitnBaseProps {
   onSelect?: (event: CustomEvent) => void;
 }
 
-export const KcCheckpoint = createKitnComponent<KcCheckpointProps>(
+export const KcCheckpoint = createWebComponent<KcCheckpointProps>(
   'kc-checkpoint',
   ["theme","label","tooltip","variant","size"],
   { onSelect: 'select' },
 );
 
-export interface KcCodeBlockProps extends KitnBaseProps {
+export interface KcCodeBlockProps extends WebComponentProps {
   /** The source code to render. */
   code: string;
   /** Language grammar (e.g. `js`, `python`). Defaults to `tsx`. */
@@ -161,24 +161,24 @@ export interface KcCodeBlockProps extends KitnBaseProps {
   proseSize?: "xs" | "sm" | "base" | "lg";
 }
 
-export const KcCodeBlock = createKitnComponent<KcCodeBlockProps>(
+export const KcCodeBlock = createWebComponent<KcCodeBlockProps>(
   'kc-code-block',
   ["theme","code","language","codeTheme","codeHighlight","proseSize"],
   {  },
 );
 
-export interface KcContextProps extends KitnBaseProps {
+export interface KcContextProps extends WebComponentProps {
   /** Token-usage data. Set as a JS property. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; reasoningTokens?: number; cacheTokens?: number; estimatedCost?: number };
 }
 
-export const KcContext = createKitnComponent<KcContextProps>(
+export const KcContext = createWebComponent<KcContextProps>(
   'kc-context',
   ["theme","context"],
   {  },
 );
 
-export interface KcConversationsProps extends KitnBaseProps {
+export interface KcConversationsProps extends WebComponentProps {
   /** Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. */
   groups: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[];
   /** A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. */
@@ -193,26 +193,26 @@ export interface KcConversationsProps extends KitnBaseProps {
   onTogglesidebar?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
-export const KcConversations = createKitnComponent<KcConversationsProps>(
+export const KcConversations = createWebComponent<KcConversationsProps>(
   'kc-conversations',
   ["theme","groups","conversations","activeId"],
   { onNewchat: 'newchat', onSelect: 'select', onTogglesidebar: 'togglesidebar' },
 );
 
-export interface KcEmptyProps extends KitnBaseProps {
+export interface KcEmptyProps extends WebComponentProps {
   /** Title text. Attribute: `empty-title` (`title` is a global HTML attribute). */
   emptyTitle?: string;
   /** Description text. */
   description?: string;
 }
 
-export const KcEmpty = createKitnComponent<KcEmptyProps>(
+export const KcEmpty = createWebComponent<KcEmptyProps>(
   'kc-empty',
   ["theme","emptyTitle","description"],
   {  },
 );
 
-export interface KcFeedbackBarProps extends KitnBaseProps {
+export interface KcFeedbackBarProps extends WebComponentProps {
   /** The banner label (e.g. "Was this helpful?"). Attribute: `bar-title` (`title` is avoided — it's a global HTML attribute). */
   barTitle?: string;
   /** The user dismissed the banner. */
@@ -223,13 +223,13 @@ export interface KcFeedbackBarProps extends KitnBaseProps {
   onNothelpful?: (event: CustomEvent) => void;
 }
 
-export const KcFeedbackBar = createKitnComponent<KcFeedbackBarProps>(
+export const KcFeedbackBar = createWebComponent<KcFeedbackBarProps>(
   'kc-feedback-bar',
   ["theme","barTitle"],
   { onClose: 'close', onHelpful: 'helpful', onNothelpful: 'nothelpful' },
 );
 
-export interface KcFileTreeProps extends KitnBaseProps {
+export interface KcFileTreeProps extends WebComponentProps {
   /** The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`). */
   files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
   /** Selected file path — highlighted in the tree. */
@@ -240,13 +240,13 @@ export interface KcFileTreeProps extends KitnBaseProps {
   onSelect?: (event: CustomEvent<{ path: string }>) => void;
 }
 
-export const KcFileTree = createKitnComponent<KcFileTreeProps>(
+export const KcFileTree = createWebComponent<KcFileTreeProps>(
   'kc-file-tree',
   ["theme","files","activeFile","defaultExpanded"],
   { onSelect: 'select' },
 );
 
-export interface KcFileUploadProps extends KitnBaseProps {
+export interface KcFileUploadProps extends WebComponentProps {
   /** Allow selecting multiple files (default true). */
   multiple?: boolean;
   /** `accept` attribute for the file picker (e.g. `image/*`). */
@@ -259,13 +259,13 @@ export interface KcFileUploadProps extends KitnBaseProps {
   onFilesadded?: (event: CustomEvent<{ files: File[] }>) => void;
 }
 
-export const KcFileUpload = createKitnComponent<KcFileUploadProps>(
+export const KcFileUpload = createWebComponent<KcFileUploadProps>(
   'kc-file-upload',
   ["theme","multiple","accept","disabled","label"],
   { onFilesadded: 'filesadded' },
 );
 
-export interface KcImageProps extends KitnBaseProps {
+export interface KcImageProps extends WebComponentProps {
   /** Base64-encoded image data (pair with `media-type`). */
   base64?: string;
   /** Raw image bytes (set as a JS property). */
@@ -276,13 +276,13 @@ export interface KcImageProps extends KitnBaseProps {
   mediaType?: string;
 }
 
-export const KcImage = createKitnComponent<KcImageProps>(
+export const KcImage = createWebComponent<KcImageProps>(
   'kc-image',
   ["theme","base64","bytes","alt","mediaType"],
   {  },
 );
 
-export interface KcLoaderProps extends KitnBaseProps {
+export interface KcLoaderProps extends WebComponentProps {
   /** The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`. */
   variant?: "circular" | "classic" | "pulse" | "pulse-dot" | "dots" | "typing" | "wave" | "bars" | "terminal" | "text-blink" | "text-shimmer" | "loading-dots";
   /** Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. */
@@ -291,13 +291,13 @@ export interface KcLoaderProps extends KitnBaseProps {
   text?: string;
 }
 
-export const KcLoader = createKitnComponent<KcLoaderProps>(
+export const KcLoader = createWebComponent<KcLoaderProps>(
   'kc-loader',
   ["theme","variant","size","text"],
   {  },
 );
 
-export interface KcMarkdownProps extends KitnBaseProps {
+export interface KcMarkdownProps extends WebComponentProps {
   /** The markdown source to render. */
   content: string;
   /** Text/markdown sizing. */
@@ -308,13 +308,13 @@ export interface KcMarkdownProps extends KitnBaseProps {
   codeHighlight?: boolean;
 }
 
-export const KcMarkdown = createKitnComponent<KcMarkdownProps>(
+export const KcMarkdown = createWebComponent<KcMarkdownProps>(
   'kc-markdown',
   ["theme","content","proseSize","codeTheme","codeHighlight"],
   {  },
 );
 
-export interface KcMessageProps extends KitnBaseProps {
+export interface KcMessageProps extends WebComponentProps {
   /** The full message object. Set as a JS property. */
   message?: { id: string; role: "user" | "assistant"; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string }[]; attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[]; actions?: ("copy" | "like" | "dislike" | "regenerate" | "edit")[] };
   /** Convenience for simple cases when not passing a `message` object. */
@@ -333,13 +333,13 @@ export interface KcMessageProps extends KitnBaseProps {
   onMessageaction?: (event: CustomEvent<{ messageId: string; action: "copy" | "like" | "dislike" | "regenerate" | "edit" }>) => void;
 }
 
-export const KcMessage = createKitnComponent<KcMessageProps>(
+export const KcMessage = createWebComponent<KcMessageProps>(
   'kc-message',
   ["theme","message","role","content","markdown","proseSize","codeTheme","codeHighlight"],
   { onMessageaction: 'messageaction' },
 );
 
-export interface KcModelSwitcherProps extends KitnBaseProps {
+export interface KcModelSwitcherProps extends WebComponentProps {
   /** The selectable models. Set as a JS property (array). */
   models: { id: string; name: string; provider?: undefined | string }[];
   /** The currently-selected model id. Defaults to the first model. */
@@ -348,13 +348,13 @@ export interface KcModelSwitcherProps extends KitnBaseProps {
   onModelchange?: (event: CustomEvent<{ modelId: string }>) => void;
 }
 
-export const KcModelSwitcher = createKitnComponent<KcModelSwitcherProps>(
+export const KcModelSwitcher = createWebComponent<KcModelSwitcherProps>(
   'kc-model-switcher',
   ["theme","models","currentModel"],
   { onModelchange: 'modelchange' },
 );
 
-export interface KcPromptInputProps extends KitnBaseProps {
+export interface KcPromptInputProps extends WebComponentProps {
   /** Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
@@ -393,13 +393,13 @@ export interface KcPromptInputProps extends KitnBaseProps {
   onVoice?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
-export const KcPromptInput = createKitnComponent<KcPromptInputProps>(
+export const KcPromptInput = createWebComponent<KcPromptInputProps>(
   'kc-prompt-input',
   ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","slashCommands","slashActiveIds","slashCompact","search","voice","attachments"],
   { onSearch: 'search', onSlashselect: 'slashselect', onSubmit: 'submit', onSuggestionclick: 'suggestionclick', onValuechange: 'valuechange', onVoice: 'voice' },
 );
 
-export interface KcReasoningProps extends KitnBaseProps {
+export interface KcReasoningProps extends WebComponentProps {
   /** The reasoning text to display. */
   text: string;
   /** Trigger label. */
@@ -414,26 +414,26 @@ export interface KcReasoningProps extends KitnBaseProps {
   onOpenchange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
-export const KcReasoning = createKitnComponent<KcReasoningProps>(
+export const KcReasoning = createWebComponent<KcReasoningProps>(
   'kc-reasoning',
   ["theme","text","label","open","streaming","markdown"],
   { onOpenchange: 'openchange' },
 );
 
-export interface KcResizableProps extends KitnBaseProps {
+export interface KcResizableProps extends WebComponentProps {
   /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
   orientation?: "horizontal" | "vertical";
   /** Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. */
   onChange?: (event: CustomEvent<{ sizes: number[] }>) => void;
 }
 
-export const KcResizable = createKitnComponent<KcResizableProps>(
+export const KcResizable = createWebComponent<KcResizableProps>(
   'kc-resizable',
   ["theme","orientation"],
   { onChange: 'change' },
 );
 
-export interface KcResizableItemProps extends KitnBaseProps {
+export interface KcResizableItemProps extends WebComponentProps {
   /** Initial main-axis size: `"280px"` (fixed) or `"25%"`/`25` (percent). Omitted → flexible. */
   size?: string;
   /** Minimum size during resize (px or %). */
@@ -447,13 +447,13 @@ export interface KcResizableItemProps extends KitnBaseProps {
   onChange?: (event: CustomEvent<unknown>) => void;
 }
 
-export const KcResizableItem = createKitnComponent<KcResizableItemProps>(
+export const KcResizableItem = createWebComponent<KcResizableItemProps>(
   'kc-resizable-item',
   ["theme","size","min","max","locked","hidden"],
   { onChange: 'change' },
 );
 
-export interface KcResponseStreamProps extends KitnBaseProps {
+export interface KcResponseStreamProps extends WebComponentProps {
   /** Text to stream. A string, or an `AsyncIterable<string>` (set as a JS property — async iterables can't be HTML attributes). */
   text?: string | AsyncIterable<string>;
   /** Reveal animation. */
@@ -466,13 +466,13 @@ export interface KcResponseStreamProps extends KitnBaseProps {
   onComplete?: (event: CustomEvent) => void;
 }
 
-export const KcResponseStream = createKitnComponent<KcResponseStreamProps>(
+export const KcResponseStream = createWebComponent<KcResponseStreamProps>(
   'kc-response-stream',
   ["theme","text","mode","speed","as"],
   { onComplete: 'complete' },
 );
 
-export interface KcScopePickerProps extends KitnBaseProps {
+export interface KcScopePickerProps extends WebComponentProps {
   /** Authors to offer as scope filters. Set as a JS property. */
   availableAuthors: string[];
   /** Tags to offer as scope filters. Set as a JS property. */
@@ -483,24 +483,24 @@ export interface KcScopePickerProps extends KitnBaseProps {
   onScopechange?: (event: CustomEvent<{ filters: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }>) => void;
 }
 
-export const KcScopePicker = createKitnComponent<KcScopePickerProps>(
+export const KcScopePicker = createWebComponent<KcScopePickerProps>(
   'kc-scope-picker',
   ["theme","availableAuthors","availableTags","currentLabel"],
   { onScopechange: 'scopechange' },
 );
 
-export interface KcSkillsProps extends KitnBaseProps {
+export interface KcSkillsProps extends WebComponentProps {
   /** The active skills to badge. Set as a JS property. */
   skills: { id: string; name: string }[];
 }
 
-export const KcSkills = createKitnComponent<KcSkillsProps>(
+export const KcSkills = createWebComponent<KcSkillsProps>(
   'kc-skills',
   ["theme","skills"],
   {  },
 );
 
-export interface KcSourceProps extends KitnBaseProps {
+export interface KcSourceProps extends WebComponentProps {
   /** The URL this citation links to (the domain also seeds the default label/favicon). */
   href?: string;
   /** Trigger label (defaults to the domain). */
@@ -513,26 +513,26 @@ export interface KcSourceProps extends KitnBaseProps {
   showFavicon?: boolean;
 }
 
-export const KcSource = createKitnComponent<KcSourceProps>(
+export const KcSource = createWebComponent<KcSourceProps>(
   'kc-source',
   ["theme","href","label","headline","description","showFavicon"],
   {  },
 );
 
-export interface KcSourcesProps extends KitnBaseProps {
+export interface KcSourcesProps extends WebComponentProps {
   /** The sources to render. Set as a JS property. */
   sources: { href: string; title?: undefined | string; description?: undefined | string; label?: undefined | string; showFavicon?: undefined | boolean }[];
   /** Show favicons on all items (per-item `showFavicon` overrides). */
   showFavicon?: boolean;
 }
 
-export const KcSources = createKitnComponent<KcSourcesProps>(
+export const KcSources = createWebComponent<KcSourcesProps>(
   'kc-sources',
   ["theme","sources","showFavicon"],
   {  },
 );
 
-export interface KcSuggestionsProps extends KitnBaseProps {
+export interface KcSuggestionsProps extends WebComponentProps {
   /** The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. */
   suggestions: (string | { label: string; value?: undefined | string })[];
   /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
@@ -547,13 +547,13 @@ export interface KcSuggestionsProps extends KitnBaseProps {
   onSelect?: (event: CustomEvent<{ value: string }>) => void;
 }
 
-export const KcSuggestions = createKitnComponent<KcSuggestionsProps>(
+export const KcSuggestions = createWebComponent<KcSuggestionsProps>(
   'kc-suggestions',
   ["theme","suggestions","variant","size","block","highlight"],
   { onSelect: 'select' },
 );
 
-export interface KcTextShimmerProps extends KitnBaseProps {
+export interface KcTextShimmerProps extends WebComponentProps {
   /** The text to shimmer. */
   text?: string;
   /** Element tag to render as (default `span`). */
@@ -564,13 +564,13 @@ export interface KcTextShimmerProps extends KitnBaseProps {
   spread?: number;
 }
 
-export const KcTextShimmer = createKitnComponent<KcTextShimmerProps>(
+export const KcTextShimmer = createWebComponent<KcTextShimmerProps>(
   'kc-text-shimmer',
   ["theme","text","as","duration","spread"],
   {  },
 );
 
-export interface KcThinkingBarProps extends KitnBaseProps {
+export interface KcThinkingBarProps extends WebComponentProps {
   /** The shimmering label, e.g. "Thinking…". */
   text?: string;
   /** When true, show a "stop" affordance that fires a `stop` event. */
@@ -581,26 +581,26 @@ export interface KcThinkingBarProps extends KitnBaseProps {
   onStop?: (event: CustomEvent) => void;
 }
 
-export const KcThinkingBar = createKitnComponent<KcThinkingBarProps>(
+export const KcThinkingBar = createWebComponent<KcThinkingBarProps>(
   'kc-thinking-bar',
   ["theme","text","stoppable","stopLabel"],
   { onStop: 'stop' },
 );
 
-export interface KcToolProps extends KitnBaseProps {
+export interface KcToolProps extends WebComponentProps {
   /** The tool-call to display. Set as a JS property. */
   tool?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string };
   /** Start expanded. */
   open?: boolean;
 }
 
-export const KcTool = createKitnComponent<KcToolProps>(
+export const KcTool = createWebComponent<KcToolProps>(
   'kc-tool',
   ["theme","tool","open"],
   {  },
 );
 
-export interface KcVoiceInputProps extends KitnBaseProps {
+export interface KcVoiceInputProps extends WebComponentProps {
   /** Transcriber the host supplies — records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event. */
   transcribe?: (audio: Blob) => Promise<string>;
   /** Disable the mic button (non-interactive). */
@@ -611,13 +611,13 @@ export interface KcVoiceInputProps extends KitnBaseProps {
   onTranscription?: (event: CustomEvent<{ text: string }>) => void;
 }
 
-export const KcVoiceInput = createKitnComponent<KcVoiceInputProps>(
+export const KcVoiceInput = createWebComponent<KcVoiceInputProps>(
   'kc-voice-input',
   ["theme","transcribe","disabled"],
   { onAudiocaptured: 'audiocaptured', onTranscription: 'transcription' },
 );
 
-export interface KcWorkspaceProps extends KitnBaseProps {
+export interface KcWorkspaceProps extends WebComponentProps {
   /** Pre-bucketed conversation groups for the sidebar. Set as a JS property. */
   groups: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[];
   /** Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. */
@@ -676,7 +676,7 @@ export interface KcWorkspaceProps extends KitnBaseProps {
   onVoice?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
-export const KcWorkspace = createKitnComponent<KcWorkspaceProps>(
+export const KcWorkspace = createWebComponent<KcWorkspaceProps>(
   'kc-workspace',
   ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed"],
   { onConversationselect: 'conversationselect', onMessageaction: 'messageaction', onModelchange: 'modelchange', onNewchat: 'newchat', onSearch: 'search', onSidebartoggle: 'sidebartoggle', onSlashselect: 'slashselect', onSubmit: 'submit', onSuggestionclick: 'suggestionclick', onValuechange: 'valuechange', onVoice: 'voice' },

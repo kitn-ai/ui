@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { Image } from '../components/image';
 
 interface Props extends Record<string, unknown> {
@@ -17,7 +17,7 @@ interface Props extends Record<string, unknown> {
  * fallback while it resolves. `base64`/`alt`/`media-type` via attributes;
  * `bytes` via property.
  */
-defineKitnElement<Props>('kc-image', {
+defineWebComponent<Props>('kc-image', {
   base64: undefined,
   bytes: undefined,
   alt: '',

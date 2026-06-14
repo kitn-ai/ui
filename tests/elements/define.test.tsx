@@ -1,7 +1,7 @@
-import { defineKitnElement } from '../../src/elements/define';
+import { defineWebComponent } from '../../src/elements/define';
 
 test('registers a custom element that renders content and CSS into its shadow root', async () => {
-  defineKitnElement('kitn-test-el', { label: 'hi' }, (props, { dispatch }) => {
+  defineWebComponent('kitn-test-el', { label: 'hi' }, (props, { dispatch }) => {
     return <button onClick={() => dispatch('pressed', { label: props.label })}>{props.label}</button>;
   });
 
@@ -22,6 +22,6 @@ test('registers a custom element that renders content and CSS into its shadow ro
 });
 
 test('defining the same tag twice is a no-op (idempotent)', () => {
-  defineKitnElement('kitn-test-el2', {}, () => <span>a</span>);
-  expect(() => defineKitnElement('kitn-test-el2', {}, () => <span>b</span>)).not.toThrow();
+  defineWebComponent('kitn-test-el2', {}, () => <span>a</span>);
+  expect(() => defineWebComponent('kitn-test-el2', {}, () => <span>b</span>)).not.toThrow();
 });

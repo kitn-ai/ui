@@ -1,4 +1,4 @@
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { ChatScopePicker } from '../components/chat-scope-picker';
 import type { SearchFilters } from '../types';
 
@@ -22,7 +22,7 @@ interface Events {
  * Options via `available-authors`/`available-tags` properties; emits
  * `scopechange`.
  */
-defineKitnElement<Props, Events>('kc-scope-picker', {
+defineWebComponent<Props, Events>('kc-scope-picker', {
   availableAuthors: [],
   availableTags: [],
   currentLabel: 'All Content',

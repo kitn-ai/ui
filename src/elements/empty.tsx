@@ -1,5 +1,5 @@
 import { Show } from 'solid-js';
-import { defineKitnElement } from './define';
+import { defineWebComponent } from './define';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '../components/empty';
 
 interface Props extends Record<string, unknown> {
@@ -14,7 +14,7 @@ interface Props extends Record<string, unknown> {
  * attributes; slot your own icon into `slot="media"` and actions into the
  * default slot (Route 2 slots).
  */
-defineKitnElement<Props>('kc-empty', {
+defineWebComponent<Props>('kc-empty', {
   emptyTitle: '',
   description: '',
 }, (props) => (
