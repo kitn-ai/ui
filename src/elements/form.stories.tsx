@@ -18,7 +18,7 @@ declare module 'solid-js' {
   }
 }
 
-type FormEl = HTMLElement & { data?: FormDefinition };
+type FormEl = HTMLElement & { data?: FormDefinition; resolution?: Record<string, unknown> };
 
 /** A bordered box the form sits inside. */
 function Frame(props: { children: JSX.Element }) {
@@ -179,6 +179,49 @@ export const AllWidgets: Story = {
 export const Validation: Story = {
   render: () => <FormDemo def={VALIDATION} cardId="card-signup" />,
   parameters: { docs: { source: { code: HTML_SNIPPET(VALIDATION), language: 'html' } } },
+};
+
+const RESOLVED_FORM: FormDefinition = {
+  type: 'object',
+  title: 'Book a demo',
+  'x-kc-order': ['name', 'optIn'],
+  properties: {
+    name: { type: 'string', title: 'Full name' },
+    optIn: { type: 'boolean', title: 'Email me' },
+  },
+};
+
+/** The form after a valid submission — read-only `<dl>` summary + "✓ Submitted", no inputs. */
+export const Resolved: Story = {
+  name: 'Resolved (read-only)',
+  render: () => {
+    let el: FormEl | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.data = RESOLVED_FORM;
+      el.resolution = { kind: 'submit', data: { name: 'Jane Cooper', optIn: true } };
+    });
+    return (
+      <Frame>
+        <kc-form ref={(e) => (el = e as FormEl)} card-id="card-resolved-form" />
+      </Frame>
+    );
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `<kc-form></kc-form>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const form = document.querySelector('kc-form');
+  form.data = ${JSON.stringify(RESOLVED_FORM, null, 2)};
+  // Setting .resolution renders the chromed read-only summary — no inputs or submit button.
+  form.resolution = { kind: 'submit', data: { name: 'Jane Cooper', optIn: true } };
+</script>`,
+        language: 'html',
+      },
+    },
+  },
 };
 
 /** A malformed `data` → the inline error state + an `error` event (no form rendered). */

@@ -18,7 +18,7 @@ declare module 'solid-js' {
   }
 }
 
-type TasksEl = HTMLElement & { data?: TasksCardData };
+type TasksEl = HTMLElement & { data?: TasksCardData; resolution?: Record<string, unknown> };
 
 function Frame(props: { children: JSX.Element }) {
   return <div style={{ 'max-width': '460px' }}>{props.children}</div>;
@@ -169,6 +169,48 @@ export const Bounded: Story = {
 export const WithDescriptions: Story = {
   render: () => <TasksDemo def={WITH_DESCRIPTIONS} cardId="card-desc" heading="Storage cleanup" />,
   parameters: { docs: { source: { code: HTML_SNIPPET(WITH_DESCRIPTIONS, 'card-desc'), language: 'html' } } },
+};
+
+const RESOLVED_TASKS: TasksCardData = {
+  confirmLabel: 'Export',
+  tasks: [
+    { id: 'sum', label: 'Executive summary' },
+    { id: 'data', label: 'Raw data' },
+    { id: 'charts', label: 'Charts' },
+  ],
+};
+
+/** The card after the user confirmed their selection — shows "Selected 2 of 3", no checkboxes or button. */
+export const Resolved: Story = {
+  name: 'Resolved (read-only)',
+  render: () => {
+    let el: TasksEl | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.data = RESOLVED_TASKS;
+      el.resolution = { kind: 'submit', data: { selected: ['sum', 'charts'] } };
+    });
+    return (
+      <Frame>
+        <kc-tasks ref={(e) => (el = e as TasksEl)} card-id="card-resolved-tasks" heading="Export report" />
+      </Frame>
+    );
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `<kc-tasks heading="Export report"></kc-tasks>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const el = document.querySelector('kc-tasks');
+  el.data = ${JSON.stringify(RESOLVED_TASKS, null, 2)};
+  // Setting .resolution renders the chromed read-only view — no checkboxes or confirm button.
+  el.resolution = { kind: 'submit', data: { selected: ['sum', 'charts'] } };
+</script>`,
+        language: 'html',
+      },
+    },
+  },
 };
 
 /** A malformed `data` (empty `tasks`) → the inline error state + an `error` event. */

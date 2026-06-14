@@ -18,7 +18,7 @@ declare module 'solid-js' {
   }
 }
 
-type ChoiceEl = HTMLElement & { data?: ChoiceCardData };
+type ChoiceEl = HTMLElement & { data?: ChoiceCardData; resolution?: Record<string, unknown> };
 
 function Frame(props: { children: JSX.Element }) {
   return <div style={{ 'max-width': '460px' }}>{props.children}</div>;
@@ -174,6 +174,47 @@ export const WithMedia: Story = {
 export const AllowOther: Story = {
   render: () => <ChoiceDemo def={QUICK_REPLIES} cardId="card-replies" />,
   parameters: { docs: { source: { code: HTML_SNIPPET(QUICK_REPLIES, 'card-replies'), language: 'html' } } },
+};
+
+const RESOLVED_CHOICE: ChoiceCardData = {
+  prompt: 'Which plan?',
+  options: [
+    { id: 'free', label: 'Free', meta: '$0' },
+    { id: 'pro', label: 'Pro', meta: '$20/mo' },
+  ],
+};
+
+/** The card after the user chose **Pro** — only the chosen option shown, no radiogroup or Submit. */
+export const Resolved: Story = {
+  name: 'Resolved (read-only)',
+  render: () => {
+    let el: ChoiceEl | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.data = RESOLVED_CHOICE;
+      el.resolution = { kind: 'action', action: 'pro' };
+    });
+    return (
+      <Frame>
+        <kc-choice ref={(e) => (el = e as ChoiceEl)} card-id="card-resolved-choice" heading="Choose a plan" />
+      </Frame>
+    );
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `<kc-choice heading="Choose a plan"></kc-choice>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const el = document.querySelector('kc-choice');
+  el.data = ${JSON.stringify(RESOLVED_CHOICE, null, 2)};
+  // Setting .resolution renders the chromed read-only view — no radiogroup or Submit.
+  el.resolution = { kind: 'action', action: 'pro' };
+</script>`,
+        language: 'html',
+      },
+    },
+  },
 };
 
 /** A malformed `data` (empty `options`) → the inline error state + an `error` event. */
