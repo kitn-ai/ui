@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { onMount, onCleanup, type JSX } from 'solid-js';
+import { createSignal, onMount, type JSX } from 'solid-js';
 import './embed'; // side effect: registers <kc-embed>
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 import type { EmbedCardData } from '../primitives/embed-providers';
 import { configureEmbedAllowlist } from '../primitives/embed-providers';
+import type { CardEvent } from '../primitives/card-contract';
 
 // Custom DOM element — declare the tag for JSX.
 declare module 'solid-js' {
@@ -18,33 +19,47 @@ declare module 'solid-js' {
   }
 }
 
+type EmbedEl = HTMLElement & { cardId?: string; data?: EmbedCardData };
+
 /** A sized box the embed sits in. */
 function Frame(props: { children: JSX.Element }) {
   return <div style={{ width: '100%', 'max-width': '560px' }}>{props.children}</div>;
 }
 
-/** Mount a kc-embed, set its `data` property, and route `open` to a console log. */
-function Embed(props: { cardId: string; data: EmbedCardData }) {
-  let el: HTMLElement & { cardId?: string; data?: EmbedCardData };
-  const onCard = (e: Event) => {
-    const ev = (e as CustomEvent).detail;
-    // eslint-disable-next-line no-console
-    console.log('[kc-card]', ev);
-    if (ev.kind === 'open' && ev.target === 'tab') {
-      window.open(ev.url, '_blank', 'noopener,noreferrer');
-    }
-  };
+/** Mounts a <kc-embed>, sets `.data`, logs emitted CardEvents under the render. */
+function EmbedDemo(props: { cardId: string; data: EmbedCardData }) {
+  const [log, setLog] = createSignal<CardEvent[]>([]);
+  let el: EmbedEl | undefined;
   onMount(() => {
-    if (el) {
-      el.cardId = props.cardId;
-      el.data = props.data;
-    }
-    document.addEventListener('kc-card', onCard);
-    onCleanup(() => document.removeEventListener('kc-card', onCard));
+    if (!el) return;
+    el.cardId = props.cardId;
+    el.data = props.data;
+    el.addEventListener('kc-card', (e) => {
+      const detail = (e as CustomEvent<CardEvent>).detail;
+      setLog((prev) => [...prev, detail]);
+      if (detail.kind === 'open' && detail.target === 'tab') {
+        window.open(detail.url, '_blank', 'noopener,noreferrer');
+      }
+    });
   });
   return (
     <Frame>
-      <kc-embed ref={(e) => (el = e as HTMLElement & { cardId?: string; data?: EmbedCardData })} />
+      <div style={{ display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
+        <kc-embed ref={(e) => (el = e as EmbedEl)} card-id={props.cardId} />
+        <pre
+          style={{
+            margin: 0,
+            'max-height': '180px',
+            overflow: 'auto',
+            background: 'var(--color-muted, #f4f4f5)',
+            'border-radius': '8px',
+            padding: '8px',
+            'font-size': '12px',
+          }}
+        >
+          {log().length === 0 ? '// emitted CardEvents appear here' : JSON.stringify(log(), null, 2)}
+        </pre>
+      </div>
     </Frame>
   );
 }
@@ -68,8 +83,9 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   em.data = { provider: 'youtube', id: 'dQw4w9WgXcQ', title: 'Product intro' };
 
   // NO network to YouTube until the user clicks play (privacy-first lazy facade).
+  // kc-embed emits: ready (on mount), open (on "Open on provider" click), error (blocked/invalid).
   // The optional "Open on YouTube" affordance bubbles a composed \`kc-card\` open event:
-  document.addEventListener('kc-card', (e) => {
+  em.addEventListener('kc-card', (e) => {
     const ev = e.detail;
     if (ev.kind === 'open' && ev.target === 'tab') {
       window.open(ev.url, '_blank', 'noopener,noreferrer');
@@ -98,17 +114,17 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-/** YouTube (lazy) — poster + play; the iframe loads (youtube-nocookie) only on click. */
+/** YouTube (lazy) — poster + play; the iframe loads (youtube-nocookie) only on click. `ready` fires on mount; `open` fires if the "Open on YouTube" link is used. */
 export const YouTube: Story = {
   name: 'YouTube (lazy)',
-  render: () => <Embed cardId={YT_ENVELOPE.id} data={YT_ENVELOPE.data} />,
+  render: () => <EmbedDemo cardId={YT_ENVELOPE.id} data={YT_ENVELOPE.data} />,
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
 };
 
 /** Vimeo — supply a `poster` (Vimeo has no static thumbnail URL). */
 export const Vimeo: Story = {
   render: () => (
-    <Embed
+    <EmbedDemo
       cardId="card-embed-2"
       data={{
         provider: 'vimeo',
@@ -126,7 +142,7 @@ export const Generic: Story = {
   render: () => {
     configureEmbedAllowlist(['https://www.youtube-nocookie.com']);
     return (
-      <Embed
+      <EmbedDemo
         cardId="card-embed-3"
         data={{
           provider: 'generic',
@@ -173,7 +189,7 @@ export const CustomAspectRatio: Story = {
 /** Blocked-embed fallback — the "Open on provider" affordance is always present. */
 export const BlockedFallback: Story = {
   name: 'Blocked-embed fallback',
-  render: () => <Embed cardId="card-embed-5" data={{ provider: 'youtube', id: 'dQw4w9WgXcQ', title: 'Maybe blocked' }} />,
+  render: () => <EmbedDemo cardId="card-embed-5" data={{ provider: 'youtube', id: 'dQw4w9WgXcQ', title: 'Maybe blocked' }} />,
   parameters: {
     docs: {
       description: {
@@ -186,12 +202,12 @@ export const BlockedFallback: Story = {
 
 // A frame-less variant so the 9:16 story controls its own width.
 function EmbedRaw(props: { cardId: string; data: EmbedCardData }) {
-  let el: HTMLElement & { cardId?: string; data?: EmbedCardData };
+  let el: EmbedEl | undefined;
   onMount(() => {
     if (el) {
       el.cardId = props.cardId;
       el.data = props.data;
     }
   });
-  return <kc-embed ref={(e) => (el = e as HTMLElement & { cardId?: string; data?: EmbedCardData })} />;
+  return <kc-embed ref={(e) => (el = e as EmbedEl)} />;
 }
