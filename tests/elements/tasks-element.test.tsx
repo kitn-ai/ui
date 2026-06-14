@@ -182,14 +182,15 @@ test('invalid envelope → inline error + `error` event; no checkboxes', async (
   off();
 });
 
-test('resolved state after submit: rows + confirm disabled, Submitted shown', async () => {
+test('resolved state after submit: read-only summary shown, no controls', async () => {
   const { off } = listen();
   const el = await mount({ tasks: [{ id: 'a', label: 'A', checked: true }] });
   const root = el.shadowRoot!;
   confirmBtn(root).click();
   await flush();
-  expect(confirmBtn(root).disabled).toBe(true);
-  expect(rowCheckbox(root, 'a').disabled).toBe(true);
-  expect(root.querySelector('[role="status"]')?.textContent).toContain('Submitted');
+  // After confirm the interactive controls are gone and the read-only summary appears.
+  expect(root.querySelector('button')).toBeNull();
+  expect(root.querySelector('input[type="checkbox"]')).toBeNull();
+  expect(root.querySelector('[role="status"]')?.textContent).toContain('Selected 1 of 1');
   off();
 });

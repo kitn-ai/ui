@@ -14,9 +14,11 @@ import {
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
 import { Card } from './card';
-import type { CardEnvelope, CardEvent, CardHost } from '../primitives/card-contract';
+import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
+import { useCardResolution } from './use-card-resolution';
 import { emitCardEvent } from '../primitives/card-routing';
 import { useCardHost } from '../primitives/card-host';
+import { Check } from 'lucide-solid';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types (tasks.schema.json) — see src/primitives/card-schemas/tasks.schema.json
@@ -158,6 +160,8 @@ export interface TasksCardProps {
   /** The custom-element host node, for the bubbling `kc-card` fallback emit. */
   hostElement?: HTMLElement;
   class?: string;
+  /** When set, render the chromed read-only summary instead of the interactive controls. */
+  resolution?: CardResolution;
 }
 
 const DEFAULT_DATA: TasksCardData = { tasks: [] };
@@ -171,7 +175,7 @@ const DEFAULT_DATA: TasksCardData = { tasks: [] };
  */
 export function TasksCard(props: TasksCardProps): JSX.Element {
   const merged = mergeProps({ cardId: 'kc-tasks' }, props);
-  const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class']);
+  const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution']);
 
   const ctxHost = useCardHost();
   const uid = createUniqueId();
@@ -189,7 +193,8 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
   const data = createMemo<TasksCardData>(() => local.data ?? DEFAULT_DATA);
 
   const [selected, setSelected] = createSignal<Set<string>>(new Set());
-  const [submitted, setSubmitted] = createSignal(false);
+
+  const res = useCardResolution({ prop: () => local.resolution, data: () => local.data });
 
   // Seed selection from the tasks' initial checked state when a NEW definition arrives.
   createEffect(
@@ -197,7 +202,6 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
       () => local.data,
       () => {
         setSelected(new Set(initialSelected(tasks())));
-        setSubmitted(false);
       },
     ),
   );
@@ -215,10 +219,10 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
   const masterState = createMemo(() => selectAllState(tasks(), selected()));
   const showMaster = createMemo(() => showSelectAll(data(), tasks()));
   const reason = createMemo(() => confirmReason(data(), count()));
-  const confirmEnabled = createMemo(() => canConfirm(data(), count()) && !submitted());
+  const confirmEnabled = createMemo(() => canConfirm(data(), count()) && !res.isResolved());
 
   const toggle = (id: string, on: boolean): void => {
-    if (submitted()) return;
+    if (res.isResolved()) return;
     const next = new Set(selected());
     if (on) {
       // Respect max: block adding past max.
@@ -231,7 +235,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
   };
 
   const toggleAll = (on: boolean): void => {
-    if (submitted()) return;
+    if (res.isResolved()) return;
     const next = new Set(selected());
     for (const id of toggleableIds(tasks())) {
       if (on) next.add(id);
@@ -244,8 +248,26 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
     if (!confirmEnabled()) return;
     const result: TasksCardResult = { selected: selectedInOrder(tasks(), selected()) };
     emit({ kind: 'submit', cardId: local.cardId, data: result });
-    setSubmitted(true);
+    res.setLocal({ kind: 'submit', data: result });
   };
+
+  // Surface the resolved state for host styling.
+  createEffect(() => {
+    const el = local.hostElement;
+    if (!el) return;
+    if (res.isResolved()) el.setAttribute('data-kc-resolved', 'submitted');
+    else el.removeAttribute('data-kc-resolved');
+  });
+
+  const resolvedSummary = createMemo(() => {
+    const r = res.resolution();
+    if (!r || r.kind !== 'submit') return undefined;
+    const sel = (r.data as { selected?: unknown })?.selected;
+    const ids: string[] = Array.isArray(sel) ? (sel as string[]) : [];
+    const all = tasks();
+    const chosen = all.filter((t) => ids.includes(t.id)).map((t) => t.label);
+    return { count: chosen.length, total: all.length, labels: chosen };
+  });
 
   const reasonId = `kc-tl-reason-${uid}`;
   const countId = `kc-tl-count-${uid}`;
@@ -261,128 +283,150 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
         <Card
           heading={local.heading ?? local.data?.heading}
           actions={
-            <div class="flex w-full flex-wrap items-center justify-between gap-2">
-              <span id={countId} aria-live="polite" class="text-xs text-muted-foreground">
-                {count()} selected
-              </span>
-              <div class="ml-auto flex items-center gap-2">
-                <Show when={reason()}>
-                  <span id={reasonId} class="sr-only">
-                    {reason()}
-                  </span>
-                </Show>
-                <Button
-                  type="button"
-                  disabled={!confirmEnabled()}
-                  aria-describedby={reason() ? reasonId : undefined}
-                  onClick={onConfirm}
-                >
-                  {confirmLabel()}
-                </Button>
+            res.isResolved() ? undefined : (
+              <div class="flex w-full flex-wrap items-center justify-between gap-2">
+                <span id={countId} aria-live="polite" class="text-xs text-muted-foreground">
+                  {count()} selected
+                </span>
+                <div class="ml-auto flex items-center gap-2">
+                  <Show when={reason()}>
+                    <span id={reasonId} class="sr-only">
+                      {reason()}
+                    </span>
+                  </Show>
+                  <Button
+                    type="button"
+                    disabled={!confirmEnabled()}
+                    aria-describedby={reason() ? reasonId : undefined}
+                    onClick={onConfirm}
+                  >
+                    {confirmLabel()}
+                  </Button>
+                </div>
               </div>
-            </div>
+            )
           }
         >
-          <div
-            role="group"
-            aria-label={local.heading ?? local.data?.heading ?? 'Tasks'}
-            class={cn('flex flex-col', local.class)}
-            onKeyDown={(e) => {
-              // Enter anywhere in the card (off a checkbox) confirms when enabled.
-              if (e.key !== 'Enter') return;
-              const target = e.target as HTMLElement;
-              if (target.tagName === 'INPUT') return;
-              if (confirmEnabled()) onConfirm();
-            }}
+          <Show
+            when={!res.isResolved()}
+            fallback={<TasksResolved summary={resolvedSummary()!} optimistic={res.isOptimistic()} />}
           >
-            <div class="divide-y divide-border overflow-hidden rounded-lg border border-input">
-              <Show when={showMaster()}>
-                {(() => {
-                  const indeterminate = () => masterState() === 'indeterminate';
-                  return (
-                    <label
-                      class={cn(
-                        'flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors',
-                        masterState() === 'checked'
-                          ? 'bg-accent text-accent-foreground'
-                          : 'text-foreground hover:bg-muted/50',
-                      )}
-                    >
-                      <input
-                        type="checkbox"
-                        class="kc-checkbox"
-                        checked={masterState() === 'checked'}
-                        aria-checked={indeterminate() ? 'mixed' : masterState() === 'checked'}
-                        disabled={submitted()}
-                        ref={(el) => {
-                          createEffect(() => {
-                            el.indeterminate = indeterminate();
-                          });
-                        }}
-                        onChange={(e) => toggleAll(e.currentTarget.checked)}
-                      />
-                      <span>Select all</span>
-                    </label>
-                  );
-                })()}
+            <div
+              role="group"
+              aria-label={local.heading ?? local.data?.heading ?? 'Tasks'}
+              class={cn('flex flex-col', local.class)}
+              onKeyDown={(e) => {
+                // Enter anywhere in the card (off a checkbox) confirms when enabled.
+                if (e.key !== 'Enter') return;
+                const target = e.target as HTMLElement;
+                if (target.tagName === 'INPUT') return;
+                if (confirmEnabled()) onConfirm();
+              }}
+            >
+              <div class="divide-y divide-border overflow-hidden rounded-lg border border-input">
+                <Show when={showMaster()}>
+                  {(() => {
+                    const indeterminate = () => masterState() === 'indeterminate';
+                    return (
+                      <label
+                        class={cn(
+                          'flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors',
+                          masterState() === 'checked'
+                            ? 'bg-accent text-accent-foreground'
+                            : 'text-foreground hover:bg-muted/50',
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          class="kc-checkbox"
+                          checked={masterState() === 'checked'}
+                          aria-checked={indeterminate() ? 'mixed' : masterState() === 'checked'}
+                          ref={(el) => {
+                            createEffect(() => {
+                              el.indeterminate = indeterminate();
+                            });
+                          }}
+                          onChange={(e) => toggleAll(e.currentTarget.checked)}
+                        />
+                        <span>Select all</span>
+                      </label>
+                    );
+                  })()}
+                </Show>
+
+                <For each={tasks()}>
+                  {(task) => {
+                    const checked = () => selected().has(task.id);
+                    const blocked = () =>
+                      task.disabled || (!checked() && isMaxReached(data(), count()));
+                    const descId = `kc-tl-desc-${uid}-${task.id}`;
+                    return (
+                      <label
+                        class={cn(
+                          'flex items-start gap-3 px-3 py-2.5 text-sm transition-colors',
+                          blocked()
+                            ? 'cursor-not-allowed opacity-60'
+                            : 'cursor-pointer hover:bg-muted/50',
+                          checked() && !blocked()
+                            ? 'bg-accent font-medium text-accent-foreground'
+                            : 'text-foreground',
+                        )}
+                        data-task-id={task.id}
+                      >
+                        <input
+                          type="checkbox"
+                          class="kc-checkbox mt-0.5"
+                          checked={checked()}
+                          disabled={blocked()}
+                          aria-disabled={blocked() ? 'true' : undefined}
+                          aria-describedby={task.description ? descId : undefined}
+                          onChange={(e) => toggle(task.id, e.currentTarget.checked)}
+                        />
+                        <span class="flex flex-col gap-0.5">
+                          <span>{task.label}</span>
+                          <Show when={task.description}>
+                            <span id={descId} class="text-xs font-normal text-muted-foreground">
+                              {task.description}
+                            </span>
+                          </Show>
+                        </span>
+                      </label>
+                    );
+                  }}
+                </For>
+              </div>
+
+              <Show when={data().max !== undefined}>
+                <p class="pt-1 text-xs text-muted-foreground">Up to {data().max} selected.</p>
               </Show>
-
-              <For each={tasks()}>
-                {(task) => {
-                  const checked = () => selected().has(task.id);
-                  const blocked = () =>
-                    task.disabled ||
-                    submitted() ||
-                    (!checked() && isMaxReached(data(), count()));
-                  const descId = `kc-tl-desc-${uid}-${task.id}`;
-                  return (
-                    <label
-                      class={cn(
-                        'flex items-start gap-3 px-3 py-2.5 text-sm transition-colors',
-                        blocked()
-                          ? 'cursor-not-allowed opacity-60'
-                          : 'cursor-pointer hover:bg-muted/50',
-                        checked() && !blocked()
-                          ? 'bg-accent font-medium text-accent-foreground'
-                          : 'text-foreground',
-                      )}
-                      data-task-id={task.id}
-                    >
-                      <input
-                        type="checkbox"
-                        class="kc-checkbox mt-0.5"
-                        checked={checked()}
-                        disabled={blocked()}
-                        aria-disabled={blocked() ? 'true' : undefined}
-                        aria-describedby={task.description ? descId : undefined}
-                        onChange={(e) => toggle(task.id, e.currentTarget.checked)}
-                      />
-                      <span class="flex flex-col gap-0.5">
-                        <span>{task.label}</span>
-                        <Show when={task.description}>
-                          <span id={descId} class="text-xs font-normal text-muted-foreground">
-                            {task.description}
-                          </span>
-                        </Show>
-                      </span>
-                    </label>
-                  );
-                }}
-              </For>
             </div>
-
-            <Show when={data().max !== undefined}>
-              <p class="pt-1 text-xs text-muted-foreground">Up to {data().max} selected.</p>
-            </Show>
-
-            <Show when={submitted()}>
-              <p role="status" class="pt-1 text-sm text-muted-foreground">
-                Submitted.
-              </p>
-            </Show>
-          </div>
+          </Show>
         </Card>
       </ErrorBoundary>
     </Show>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Read-only resolved summary presenter.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function TasksResolved(props: {
+  summary: { count: number; total: number; labels: string[] };
+  optimistic: boolean;
+}): JSX.Element {
+  return (
+    <div class="flex flex-col gap-2" role={props.optimistic ? 'status' : undefined}>
+      <p class="flex items-center gap-2 text-sm font-medium text-foreground">
+        <Check size={16} aria-hidden="true" />
+        <span>Selected {props.summary.count} of {props.summary.total}</span>
+      </p>
+      <Show when={props.summary.labels.length > 0}
+        fallback={<p class="text-sm text-muted-foreground">None selected</p>}>
+        <ul class="list-disc pl-5 text-sm text-foreground">
+          <For each={props.summary.labels}>{(l) => <li>{l}</li>}</For>
+        </ul>
+      </Show>
+    </div>
   );
 }
