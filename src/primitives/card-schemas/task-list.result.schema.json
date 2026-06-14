@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kitn.ai/schemas/card/task-list.result.schema.json",
+  "title": "TaskListCardResult",
+  "description": "Payload of CardEvent { kind: 'submit-data' } from a task-list card.",
+  "type": "object",
+  "required": ["selected"],
+  "properties": {
+    "selected": {
+      "type": "array",
+      "description": "Ids of the checked tasks, in the order they appear in `tasks`. Subset of the input task ids.",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  }
+}
