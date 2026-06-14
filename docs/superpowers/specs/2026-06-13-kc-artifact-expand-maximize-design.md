@@ -609,3 +609,76 @@ All six open questions were reviewed and decided. The implementation follows the
    double-handling).
 6. **Instant transition for v1** (respecting `prefers-reduced-motion` regardless).
    A short flex-basis/grid transition is a deferred polish follow-up.
+
+## Addendum (2026-06-14): `standalone` chrome + read-only path
+
+Two chrome additions decided with Rob, folded into the same `artifact.tsx`
+component + `elements/artifact.tsx` facade work as Feature 3. (His "hide the code
+option / any header element" need is already met by Feature 3's `no-*` flags;
+`no-tabs` + default `tab="preview"` gives a preview-only viewer — no new flag.)
+
+### A. `standalone` — corners + border keyed to the container
+
+Today the root is always `rounded-xl border border-border` (artifact.tsx:234). But
+a `<kc-artifact>` usually lives **inside a panel** (e.g. a `<kc-resizable>` cell),
+where rounded corners + a full border are redundant with the container's edges.
+
+- New boolean attribute/prop **`standalone`** (Solid prop `standalone?: boolean`,
+  facade flag `standalone`). **Default `false` = in-panel.**
+- **In-panel (default):** square corners (`rounded-none`) and **no outer border**
+  — the container provides the edge. Internal separators (the toolbar's `border-b`,
+  the code/file-tree dividers) are unchanged.
+- **`standalone` (true):** the current **`rounded-xl` + full `border`** card look,
+  for when the artifact stands on its own.
+- **Expand coupling:** when `standalone`, the expand affordance is **inert** —
+  there is no enclosing `<kc-resizable>` to maximize into. Rule: `standalone`
+  suppresses the expand button (overrides `expandable`); consistent with the
+  "standalone = graceful no-op" decision (#3) — but here we hide it outright rather
+  than relying on the reconcile-revert, since standalone is an explicit signal.
+- This **flips the current default** (always-rounded → square in-panel). Acceptable
+  pre-1.0; existing standalone demos add `standalone` to keep their look. Note in
+  the changelog as a visual default change.
+
+Implementation: the root `class` (artifact.tsx ~234) becomes
+`cn('flex h-full w-full flex-col overflow-hidden bg-card text-card-foreground', local.standalone && 'rounded-xl border border-border', local.class)`
+(read `local.standalone`, never destructure). Facade adds `standalone` to `Props`
++ defaults and passes `standalone={ctx.flag('standalone')}`.
+
+### B. `readonly-path` — show the URL, don't let it be edited
+
+Distinct from `no-path-field` (which hides the address entirely). A consumer may
+want the location **visible but not editable** (e.g. a locked-down preview).
+
+- New boolean attribute/prop **`readonly-path`** (Solid `readonlyPath?: boolean`,
+  facade flag `readonlyPath`). Default `false` (editable, current behavior).
+- When set: the path `<input>` gets `readonly` + `aria-readonly="true"`, the
+  wrapping `<form>` submit is a no-op (no navigate-on-Enter), and the field gets a
+  muted style (e.g. `bg-muted/40 cursor-default`, no focus ring action). It still
+  **reflects** navigation (the value tracks `currentUrl()` as the iframe navigates).
+- Precedence: if both `no-path-field` and `readonly-path` are set, **hidden wins**
+  (the field isn't rendered, so read-only is moot).
+
+Implementation: `ArtifactToolbar` already renders the path `<form>`/`<input>`
+(artifact.tsx ~334–351). Gate editing on a `readonlyPath` prop: set `readonly`,
+swap the class, and early-return from `onSubmitPath` when read-only. Thread
+`readonlyPath` through `ArtifactProps` → `ArtifactToolbar`; facade maps
+`readonlyPath={ctx.flag('readonlyPath')}`.
+
+### Additions to the prop/attr tables
+
+| Affordance/flag | attribute | Solid prop | default | effect |
+|---|---|---|---|---|
+| Standalone chrome | `standalone` | `standalone` | `false` (in-panel) | rounded-xl + border (else square, no border); suppresses expand |
+| Read-only path | `readonly-path` | `readonlyPath` | `false` | path visible + nav-tracking but not editable; submit no-op |
+
+### Tests / stories (additive)
+
+- **artifact unit:** `standalone` toggles the root `rounded-xl`/`border` classes
+  (assert class presence on the shadow root); `standalone` hides the expand button
+  even with `expandable` set; `readonly-path` → input has `readonly` and a submit
+  does not emit `navigate`; `readonly-path` still updates the field value on
+  `navigate`; `no-path-field` + `readonly-path` → no input rendered.
+- **stories:** add `standalone` + `readonly-path` to the "Configurable toolbar"
+  controls story; the in-`<kc-resizable>` "Expand to fill" story shows the default
+  (square, borderless) chrome sitting flush in its panel.
+- a11y unchanged (0 violations); read-only input keeps its `<label>`.
