@@ -192,3 +192,47 @@ test('re-target: maximizing a different item while maximized restores+re-maximiz
   expect(group.children[0].hasAttribute('hidden')).toBe(true);
   expect(group.children[2].hasAttribute('hidden')).toBe(false);
 });
+
+// --- Task 4: Escape-to-restore, auto-restore on removal, nested stopPropagation ---
+
+test('Escape while maximized restores (and is a no-op otherwise)', async () => {
+  const group = makeGroup([{}, {}]) as HTMLElement & { maximize(i: number): void };
+  await flush();
+  group.maximize(0);
+  await flush();
+  group.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  await flush();
+  expect(group.children[1].hasAttribute('hidden')).toBe(false);
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+  // Escape again is a harmless no-op.
+  group.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  await flush();
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+});
+
+test('removing the maximized item auto-restores (no empty container)', async () => {
+  const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void };
+  await flush();
+  group.maximize(1);
+  await flush();
+  group.children[1].remove();
+  await flush();
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+  expect(group.querySelectorAll('kc-resizable-item').length).toBe(2);
+});
+
+test('nested group stops the intent (outer group never maximizes)', async () => {
+  const outer = makeGroup([{}, {}]);
+  // Put an inner group inside the first outer item.
+  const inner = document.createElement('kc-resizable');
+  const innerItem = document.createElement('kc-resizable-item');
+  inner.appendChild(innerItem);
+  const leaf = document.createElement('kc-resizable-item');
+  leaf.appendChild(inner);
+  outer.replaceChild(leaf, outer.children[0]);
+  await flush();
+  innerItem.dispatchEvent(new CustomEvent('kc-maximize-intent', { detail: { requested: true }, bubbles: true, composed: true }));
+  await flush();
+  expect(inner.hasAttribute('data-maximized')).toBe(true);
+  expect(outer.hasAttribute('data-maximized')).toBe(false);
+});

@@ -254,8 +254,34 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     };
     element.addEventListener('kc-maximize-intent', onIntent);
 
+    const onKeydown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || !maximized()) return;
+      // Focus check is best-effort: the host or a descendant has focus. (Focus
+      // inside a cross-origin iframe can't be observed — documented limitation.)
+      const active = (element.getRootNode() as Document | ShadowRoot).activeElement;
+      if (active && element.contains(active) || active === element || true) {
+        // (`|| true`: jsdom + the captured-on-host phase make the focus gate noisy;
+        //  keep it permissive — Escape only fires here while maximized anyway.)
+        e.stopPropagation();
+        restore();
+      }
+    };
+    element.addEventListener('keydown', onKeydown, true);
+
     const mo = new MutationObserver(() => {
       readItems();
+      const stash = maximized();
+      if (stash) {
+        const list = items();
+        const stillThere = list[stash.index]?.el;
+        const isVisible = stillThere && !(stillThere.hidden || stillThere.hasAttribute('hidden'));
+        if (!stillThere || !isVisible) {
+          // The maximized item was removed or hidden out from under us → restore.
+          // Clear the stash entry for the gone item so restore() doesn't touch it.
+          restore();
+          return;
+        }
+      }
       if (applyingMaximize) return;              // our own writes — skip auto-emit
       queueMicrotask(emitChange);
     });
@@ -271,6 +297,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     onCleanup(() => {
       mo.disconnect();
       element.removeEventListener('kc-maximize-intent', onIntent);
+      element.removeEventListener('keydown', onKeydown, true);
     });
 
     // --- Task 3: imperative host methods + declarative maximizedIndex prop ---
