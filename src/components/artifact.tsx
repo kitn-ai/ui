@@ -118,6 +118,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
 
   const [tab, setTab] = createSignal<ArtifactTab>(local.tab);
   const [activeFile, setActiveFile] = createSignal<string | undefined>(local.activeFile);
+  const [reloadKey, setReloadKey] = createSignal(0);
 
   let iframeEl: HTMLIFrameElement | undefined;
 
@@ -196,6 +197,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
       iframeEl.src = 'about:blank';
       iframeEl.src = url || 'about:blank';
     }
+    setReloadKey((k) => k + 1); // re-render the inline PDF viewer too
     local.onNavigate?.(url);
   }
   const goHome = () => {
@@ -260,13 +262,20 @@ export function Artifact(props: ArtifactProps): JSX.Element {
             />
           }
         >
-          <ArtifactPreview
-            ref={(el) => (iframeEl = el)}
-            src={currentUrl}
-            sandbox={local.sandbox}
-            title={local.iframeTitle ?? 'Artifact preview'}
-            onLoad={onIframeLoad}
-          />
+          <Show
+            when={isPdfUrl(currentUrl(), local.files)}
+            fallback={
+              <ArtifactPreview
+                ref={(el) => (iframeEl = el)}
+                src={currentUrl}
+                sandbox={local.sandbox}
+                title={local.iframeTitle ?? 'Artifact preview'}
+                onLoad={onIframeLoad}
+              />
+            }
+          >
+            <ArtifactPdfPreview url={currentUrl()} reloadKey={reloadKey()} />
+          </Show>
         </Show>
       </div>
     </div>
