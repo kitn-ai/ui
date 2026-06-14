@@ -138,9 +138,17 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
 
   // --- Task 2: maximize/restore core ---
 
+  interface SavedItemState {
+    el: HTMLElement;
+    size: string | null;
+    hidden: boolean;
+    locked: boolean;
+  }
   interface MaximizeStash {
-    index: number;
-    saved: { size: string | null; hidden: boolean; locked: boolean }[];
+    /** The element that was maximized (identity anchor for re-target + events). */
+    item: HTMLElement;
+    /** Per-element stash keyed by element identity, not position. */
+    saved: SavedItemState[];
   }
   const [maximized, setMaximized] = createSignal<MaximizeStash | null>(null);
   /** Re-entrancy guard: while we (un)apply maximize attributes, the observer must
@@ -179,21 +187,21 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     if (index < 0) return;
     const current = maximized();
     if (current) {
-      if (current.index === index) return;     // same item → no-op
+      if (current.item === item) return;       // same item → no-op
       restore();                               // different item → re-target
     }
     applyingMaximize = true;
     // Capture the EFFECTIVE current % so a post-drag layout restores faithfully.
     const live = currentSizes(); // visible-order percents (Playwright-verified)
     let visIdx = 0;
-    const saved = list.map((info) => {
+    const saved: SavedItemState[] = list.map((info) => {
       const prev = readAttrState(info.el);
       if (!prev.hidden) {
         // Write the live % back as the stashed size baseline.
         const pct = live[visIdx++];
         if (Number.isFinite(pct) && pct > 0) info.el.setAttribute('size', `${pct}%`);
       }
-      return { size: info.el.getAttribute('size'), hidden: prev.hidden, locked: prev.locked };
+      return { el: info.el, size: info.el.getAttribute('size'), hidden: prev.hidden, locked: prev.locked };
     });
     // Hide every other item; free the maximized one to fill.
     list.forEach((info, i) => {
@@ -205,7 +213,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
         setBoolAttr(info.el, 'hidden', true);
       }
     });
-    setMaximized({ index, saved });
+    setMaximized({ item, saved });
     element.setAttribute('data-maximized', '');
     item.setAttribute('data-maximized-panel', '');
     readItems();
@@ -221,18 +229,19 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
   function restore() {
     const stash = maximized();
     if (!stash) return;
-    const list = items();
     applyingMaximize = true;
-    list.forEach((info, i) => {
-      const s = stash.saved[i];
-      if (!s) return;
-      if (s.size === null) info.el.removeAttribute('size');
-      else info.el.setAttribute('size', s.size);
-      setBoolAttr(info.el, 'hidden', s.hidden);
-      setBoolAttr(info.el, 'locked', s.locked);
-      info.el.removeAttribute('data-maximized-panel');
-    });
-    const prevItem = list[stash.index]?.el;
+    // Re-apply saved state keyed by element identity; items no longer in the DOM
+    // are simply skipped.  This is safe regardless of sibling additions/removals
+    // that happened while maximized (no index drift).
+    for (const s of stash.saved) {
+      if (!s.el.isConnected) continue;
+      if (s.size === null) s.el.removeAttribute('size');
+      else s.el.setAttribute('size', s.size);
+      setBoolAttr(s.el, 'hidden', s.hidden);
+      setBoolAttr(s.el, 'locked', s.locked);
+      s.el.removeAttribute('data-maximized-panel');
+    }
+    const prevItem = stash.item;
     setMaximized(null);
     element.removeAttribute('data-maximized');
     readItems();
@@ -259,16 +268,11 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     element.addEventListener('kc-maximize-intent', onIntent);
 
     const onKeydown = (e: KeyboardEvent) => {
+      // Only act while maximized — the capture listener on the host already
+      // ensures the event originates within the group.
       if (e.key !== 'Escape' || !maximized()) return;
-      // Focus check is best-effort: the host or a descendant has focus. (Focus
-      // inside a cross-origin iframe can't be observed — documented limitation.)
-      const active = (element.getRootNode() as Document | ShadowRoot).activeElement;
-      if (active && element.contains(active) || active === element || true) {
-        // (`|| true`: jsdom + the captured-on-host phase make the focus gate noisy;
-        //  keep it permissive — Escape only fires here while maximized anyway.)
-        e.stopPropagation();
-        restore();
-      }
+      e.stopPropagation();
+      restore();
     };
     element.addEventListener('keydown', onKeydown, true);
 
@@ -276,12 +280,13 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
       readItems();
       const stash = maximized();
       if (stash) {
-        const list = items();
-        const stillThere = list[stash.index]?.el;
-        const isVisible = stillThere && !(stillThere.hidden || stillThere.hasAttribute('hidden'));
-        if (!stillThere || !isVisible) {
+        // Use element identity, not a positional index, to detect whether the
+        // maximized item is still present and visible.
+        const maximizedEl = stash.item;
+        const isConnected = maximizedEl.isConnected && element.contains(maximizedEl);
+        const isVisible = isConnected && !(maximizedEl.hidden || maximizedEl.hasAttribute('hidden'));
+        if (!isConnected || !isVisible) {
           // The maximized item was removed or hidden out from under us → restore.
-          // Clear the stash entry for the gone item so restore() doesn't touch it.
           restore();
           return;
         }
@@ -306,8 +311,6 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
 
     // --- Task 3: imperative host methods + declarative maximizedIndex prop ---
 
-    let applyingIndex = false;
-
     // Imperative host API (assigned onto the element; typed by resizable.d.ts).
     const host = element as unknown as { maximize(i: number): void; restore(): void };
     host.maximize = (i: number) => {
@@ -321,7 +324,6 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
       on(
         () => props.maximizedIndex,
         (idx) => {
-          if (applyingIndex) return;
           if (idx == null) restore();
           else {
             const it = items()[idx]?.el;

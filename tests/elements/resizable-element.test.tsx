@@ -237,6 +237,43 @@ test('nested group stops the intent (outer group never maximizes)', async () => 
   expect(outer.hasAttribute('data-maximized')).toBe(false);
 });
 
+// --- Fix #1 regression: element-keyed stash (index-drift when sibling removed) ---
+
+test('restore after sibling removal re-applies each item its OWN saved state (no index-drift)', async () => {
+  // 3-item group with DISTINCT sizes so a positional mis-assignment is detectable.
+  const group = makeGroup([
+    { size: '20%' },   // A — index 0
+    { size: '50%' },   // B — index 1 (will be maximized)
+    { size: '30%' },   // C — index 2
+  ]) as HTMLElement & { restore(): void };
+  await flush();
+
+  const [a, b, c] = Array.from(group.children) as HTMLElement[];
+
+  // Maximize B (index 1).
+  intentFrom(b, true);
+  await flush();
+
+  // Remove A while maximized — this shifts C from index 2 → index 1.
+  a.remove();
+  await flush();
+
+  // Restore should apply B's own stash to B and C's own stash to C.
+  intentFrom(b, false);
+  await flush();
+
+  // B is still in the group and should have its own stash (size='50%', not hidden, not locked).
+  expect(b.getAttribute('size')).toBe('50%');
+  expect(b.hasAttribute('hidden')).toBe(false);
+
+  // C must have its own size restored ('30%'), NOT B's ('50%').
+  expect(c.getAttribute('size')).toBe('30%');
+  expect(c.hasAttribute('hidden')).toBe(false);
+
+  // The group must no longer be in maximized state.
+  expect(group.hasAttribute('data-maximized')).toBe(false);
+});
+
 // --- Task 5: change-storm guard (one change per maximize/restore) ---
 
 test('maximize and restore each emit exactly one change (no storm)', async () => {
