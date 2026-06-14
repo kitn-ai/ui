@@ -26,6 +26,19 @@ function cssRawPlugin() {
   };
 }
 
+// Two Vitest projects:
+//   • (default) jsdom unit tests
+//   • `storybook` — every *.stories.tsx runs as a browser test (play functions,
+//     smoke render, and axe a11y) via @storybook/addon-vitest + Playwright.
+//
+// Run them:
+//   npm test               # all projects (unit + storybook)
+//   npm run test:storybook # stories-as-tests only (vitest run --project=storybook)
+//
+// a11y-in-test: @storybook/addon-a11y is registered in .storybook/main.ts and
+// the default `a11y.test` is set in .storybook/preview.ts (currently 'todo' =
+// non-failing warnings; set to 'error' to fail on violations).
+//
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   plugins: [cssRawPlugin(), solidPlugin()],
@@ -58,6 +71,14 @@ export default defineConfig({
       })],
       test: {
         name: 'storybook',
+        // NOTE: we deliberately do NOT set a custom `setupFiles` with
+        // `setProjectAnnotations` here. Since Storybook 10.3, @storybook/addon-vitest
+        // auto-provisions the project annotations from `.storybook/main.ts` +
+        // `.storybook/preview` via a virtual module — and that path is the only one
+        // that also wires the SolidJS renderer's `renderToCanvas`. Supplying our own
+        // `setProjectAnnotations` (which the framework package can't fully reconstruct)
+        // breaks rendering. The a11y addon is registered in `main.ts` addons, so its
+        // annotations are picked up by the same auto-provisioning — axe runs per-story.
         browser: {
           enabled: true,
           headless: true,

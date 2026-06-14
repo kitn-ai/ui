@@ -5,6 +5,14 @@ import './styles.css';
 const preview: Preview = {
   parameters: {
     layout: 'fullscreen',
+    // Accessibility (axe) runs per-story in both the Storybook UI panel and the
+    // `vitest --project=storybook` test run. `test: 'todo'` reports violations
+    // as warnings (non-failing) so the test suite stays green while the
+    // component-source a11y audit is in flight. Flip to `'error'` (here, or
+    // per-story/per-component) to make a11y violations fail the test run/CI.
+    a11y: {
+      test: 'todo',
+    },
     options: {
       storySort: {
         // Sidebar order, top to bottom: the docs, the interactive Theming tools
