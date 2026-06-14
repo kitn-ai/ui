@@ -17,3 +17,31 @@ test('card-event schema parses + validates a good/bad event', () => {
   expect(validateAgainstSchema(s, { kind: 'ready', cardId: 'c1' }).valid).toBe(true);
   expect(validateAgainstSchema(s, { cardId: 'c1' }).valid).toBe(false); // missing kind
 });
+
+test('link schema parses + validates a good/bad link payload', () => {
+  const s = load('link.schema.json');
+  expect(
+    validateAgainstSchema(s, {
+      url: 'https://example.com/post',
+      title: 'A post',
+      description: 'Body',
+      image: 'https://example.com/og.png',
+    }).valid,
+  ).toBe(true);
+  expect(validateAgainstSchema(s, { title: 'no url' }).valid).toBe(false); // missing required url
+  // overlong title is rejected (maxLength 300).
+  expect(validateAgainstSchema(s, { url: 'https://x', title: 'a'.repeat(301) }).valid).toBe(false);
+});
+
+test('embed schema parses + validates provider payloads', () => {
+  const s = load('embed.schema.json');
+  expect(validateAgainstSchema(s, { provider: 'youtube', id: 'dQw4w9WgXcQ' }).valid).toBe(true);
+  expect(validateAgainstSchema(s, { provider: 'generic', url: 'https://x/y' }).valid).toBe(true);
+  expect(validateAgainstSchema(s, { provider: 'tiktok', id: 'x' }).valid).toBe(false); // bad enum
+  // id must match the [A-Za-z0-9_-] pattern.
+  expect(validateAgainstSchema(s, { provider: 'youtube', id: 'bad id!' }).valid).toBe(false);
+  // aspectRatio enum is enforced.
+  expect(
+    validateAgainstSchema(s, { provider: 'youtube', id: 'abc', aspectRatio: '21:9' }).valid,
+  ).toBe(false);
+});
