@@ -100,6 +100,10 @@ export interface CardContext {
   /** REMOTE (iframe) cards only: short-lived signed token for provider callbacks.
    *  Never a long-lived secret. Omitted for native cards. */
   authToken?: string;
+  /** Accessibility prefs the host resolves and pushes down. `prefers-reduced-motion`
+   *  does not reliably cross the iframe boundary, so the host forwards it (and any
+   *  future a11y prefs) here. Additive/optional — does NOT bump the contract version. */
+  a11y?: { reducedMotion?: boolean };
 }
 ```
 
@@ -120,7 +124,9 @@ export type CardEvent =
   | { kind: 'send-prompt'; cardId: string; text: string; mode?: 'compose' | 'send'; context?: unknown }
   /** Request to open a URL ('tab' = new tab w/ noopener) or drive the artifact panel. */
   | { kind: 'open'; cardId: string; url: string; target?: 'tab' | 'artifact' }
-  /** Report content height (iframe auto-height; reuses useAutoResize on the card side). */
+  /** Report content height (iframe auto-height). NOTE: the existing `useAutoResize`
+   *  primitive is textarea-only; the transport reports height via a shared
+   *  `ResizeObserver` primitive (`use-resize-observer.ts`), not useAutoResize. */
   | { kind: 'resize'; cardId: string; height: number }
   /** State change the agent should know (AG-UI STATE_DELTA-style). Reserved for
    *  the live/AG-UI layer; defined now so the shape is stable. */
@@ -176,10 +182,17 @@ export interface CardPolicy {
 
 - A Solid **`CardProvider`** supplies a `CardHost` via context; native card
   components read `host.context()` and call `host.emit(event)`.
-- Custom-element cards (the `<kc-*>` wrappers) dispatch a **bubbling**
+- Custom-element cards (the `<kc-*>` wrappers) dispatch a **bubbling, composed**
   `CustomEvent<CardEvent>` named **`kc-card`** (`{ bubbles: true, composed: true }`)
   that a host-level listener routes through the same policy. This lets bare
-  `<kc-form>` work without a Solid host.
+  `<kc-form>` work without a Solid host. **Note:** `defineWebComponent`'s built-in
+  `dispatch` is deliberately non-bubbling/non-composed (for element-local events),
+  so cards do NOT use it for contract events. The contract implementation ships a
+  single shared helper **`emitCardEvent(element, event)`** (fires the bubbling,
+  composed `kc-card` event) that every card imports — defined once, not per-card.
+- A single **`routeCardEvent(policy, event)`** function applies the policy (the
+  same one both the native `kc-card` listener and the remote transport call) so
+  routing lives in exactly one place.
 
 ### Remote (defined by the iframe-transport spec; shapes frozen here)
 
@@ -191,39 +204,50 @@ export interface CardPolicy {
 
 The parallel card specs (A–C in the fan-out) build against these:
 
-1. **Two-layer pattern (matches the codebase):** each card = a Solid component in
-   `src/components/<file>.tsx` + a web-component wrapper in `src/elements/<file>.tsx`
-   via `defineKitnElement`. Tag names exactly: `kc-form`, `kc-confirm`,
-   `kc-task-list`, `kc-link-card`, `kc-embed`.
+1. **Dedicated `src/cards/` home (NOT mixed with primitives):** cards are a distinct
+   product surface, so each card = a Solid component + its `defineWebComponent`
+   wrapper under **`src/cards/`** (e.g. `src/cards/form.tsx` + `src/cards/form.element.tsx`),
+   kept out of `src/components/` (primitives) and `src/elements/`. The remote
+   transport SDK lives under **`src/remote/`**. Tag names exactly: `kc-form`,
+   `kc-confirm`, `kc-task-list`, `kc-link-card`, `kc-embed`. (Element registration +
+   `element-meta.json` discovery must include `src/cards/`.)
 2. **Type discriminator + schema:** each card exports its `type` string and ships
    `src/primitives/card-schemas/<type>.schema.json` for its `data` (and, if it
    submits, a `<type>.result.schema.json`). Provide the matching TS type.
 3. **Consume the contract, don't reinvent it:** read context + emit via the
-   `CardHost` (native) / `kc-card` CustomEvent; never define ad-hoc events.
-4. **SolidJS norm:** never destructure props.
+   `CardHost` (native) / the shared `emitCardEvent` helper; never define ad-hoc
+   events, never hand-roll the `kc-card` CustomEvent, never re-implement validation
+   (consume the shared `card-validate` module).
+4. **SolidJS norm:** never destructure props. Factory is `defineWebComponent`.
 5. **A11y:** native cards are fully keyboard + screen-reader accessible; 0 axe
    violations light + dark (project gate).
-6. **Source-visible stories:** each card gets Storybook stories that show the
-   exact `CardEnvelope` JSON and the live render (the Examples norm).
+6. **Source-visible stories under a dedicated section:** each card gets Storybook
+   stories under the **`Generative UI/`** top-level group (`Generative UI/Cards/*`),
+   separate from `Web Components/*` and `Components/*`. Every story shows the exact
+   `CardEnvelope` JSON + the live render (the Examples norm).
 
 ## Scope of THIS spec (the contract only)
 
 In scope: the types above (`card-contract.ts`), the JSON Schema artifacts for the
-envelope/context/events, the host routing/policy semantics + defaults, the native
-transport API (`CardProvider` + `kc-card` CustomEvent), versioning, and
-boundary-validation requirement.
+envelope/context/events, the host routing/policy (`routeCardEvent` + defaults), the
+native transport API (`CardProvider`, the shared `emitCardEvent` helper, the
+`kc-card` CustomEvent), the shared `card-validate` validator, versioning, and the
+boundary-validation requirement. These are the foundation every card + the remote
+transport import.
 
 **Out of scope (separate specs):** the cards themselves; the iframe wire transport
 + provider runtime; the AG-UI event mapping + live/state/progress. `state` is
 defined here only so its shape is stable for the live layer.
 
-### Validator note (implementation decision, flagged not decided)
+### Validator (decided)
 
-Boundary validation needs a JSON Schema validator. Lean-first preference: a small
-internal validator covering the subset we use (type, enum, required, min/max,
-array items, the `x-kitn-*` hints) to avoid a heavy dependency; fall back to
-documenting an `ajv` opt-in if the subset proves insufficient. The implementation
-plan decides; the **requirement** (validate at the boundary) is fixed here.
+Boundary validation uses a **single shared lean validator** (`card-validate`)
+shipped by this contract's implementation, covering the subset we use (type, enum,
+const, required, min/max, length, pattern, array items/uniqueItems, object
+properties — `x-kitn-*` hints are ignored by it, honored by cards). No heavy
+dependency (no `ajv`) in v1. **Every card and both transports consume this one
+module** — never a per-card re-implementation. (If the subset proves insufficient
+later, an `ajv` opt-in can be documented without changing call sites.)
 
 ## Error handling
 
