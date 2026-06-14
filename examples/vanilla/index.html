@@ -183,7 +183,7 @@
       open(activeId);
 
       // -------------------------------------------------------------- events
-      list.addEventListener('select', (e) => open(e.detail.id));
+      list.addEventListener('conversationselect', (e) => open(e.detail.id));
       list.addEventListener('togglesidebar', () => document.body.classList.toggle('sidebar-open'));
       list.addEventListener('newchat', () => {
         const id = 'c-' + Date.now();

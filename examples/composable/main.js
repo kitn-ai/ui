@@ -80,7 +80,7 @@ list.conversations = [
   { id: 'c3', title: 'Publishing pipeline', scope: { type: 'document' }, messageCount: 8, lastMessageAt: '2026-06-09T09:00:00Z', updatedAt: '2026-06-09T09:00:00Z' },
 ];
 list.activeId = 'c1';
-list.addEventListener('select', (e) => { list.activeId = e.detail.id; log('select', e.detail.id); });
+list.addEventListener('conversationselect', (e) => { list.activeId = e.detail.id; log('conversationselect', e.detail.id); });
 list.addEventListener('newchat', () => log('newchat'));
 
 const pi = document.getElementById('pi');

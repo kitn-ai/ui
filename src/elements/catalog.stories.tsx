@@ -133,7 +133,7 @@ const DROPIN_SNIPPET = `<!-- The drop-in layer: whole surfaces in a single tag -
       messageCount: 12, lastMessageAt: '…', updatedAt: '…' },
   ];
   list.activeId = 'c1';
-  list.addEventListener('select', (e) => (list.activeId = e.detail.id));
+  list.addEventListener('conversationselect', (e) => (list.activeId = e.detail.id));
 
   const input = document.querySelector('kc-prompt-input');
   input.slashCommands = [
@@ -149,7 +149,7 @@ export const BatteriesIncluded: Story = {
     let input!: HTMLElement;
     onMount(() => {
       props(list, { conversations, activeId: 'c1' });
-      list.addEventListener('select', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
+      list.addEventListener('conversationselect', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
       props(input, { slashCommands });
       attrs(input, { placeholder: 'Ask anything…  (try typing /)' });
     });

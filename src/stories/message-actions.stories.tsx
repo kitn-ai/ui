@@ -154,8 +154,7 @@ export const WithFeedbackBar: Story = {
             {showFeedback() && (
               <FeedbackBar
                 title="Was this response helpful?"
-                onHelpful={() => setShowFeedback(false)}
-                onNotHelpful={() => setShowFeedback(false)}
+                onFeedback={() => setShowFeedback(false)}
                 onClose={() => setShowFeedback(false)}
               />
             )}

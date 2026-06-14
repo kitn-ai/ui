@@ -14,7 +14,7 @@ const meta = {
       description: componentDescription([
         'An inline bar that prompts the user to rate a response, with thumbs-up / thumbs-down actions and a dismiss button.',
         '**When to use:** after an assistant message, to collect quick helpful / not-helpful feedback on the answer.',
-        '**How to use:** set a `title`, optionally pass an `icon`, and wire `onHelpful`, `onNotHelpful`, and `onClose` to capture the rating or hide the bar.',
+        '**How to use:** set a `title`, optionally pass an `icon`, and wire `onFeedback` and `onClose` to capture the rating or hide the bar.',
         '**Placement:** directly beneath a completed assistant message, or in a message action row.',
       ]),
     },
@@ -32,14 +32,9 @@ const meta = {
       control: 'text',
       description: 'Additional CSS classes for the root element.',
     },
-    onHelpful: {
-      action: 'helpful',
-      description: 'Fired when the thumbs-up (Helpful) button is clicked.',
-      table: { category: 'Events' },
-    },
-    onNotHelpful: {
-      action: 'notHelpful',
-      description: 'Fired when the thumbs-down (Not helpful) button is clicked.',
+    onFeedback: {
+      action: 'feedback',
+      description: 'Fired with `value: "helpful" | "not-helpful"` when a rating button is clicked.',
       table: { category: 'Events' },
     },
     onClose: {
@@ -50,8 +45,7 @@ const meta = {
   },
   args: {
     title: 'Was this response helpful?',
-    onHelpful: fn(),
-    onNotHelpful: fn(),
+    onFeedback: fn(),
     onClose: fn(),
   },
   render: (args) => <FeedbackBar {...args} />,
@@ -69,15 +63,14 @@ const src = (code: string) => ({
 export const Playground: Story = {
   ...src(`<FeedbackBar
   title="Was this response helpful?"
-  onHelpful={() => {}}
-  onNotHelpful={() => {}}
+  onFeedback={(value) => console.log('feedback:', value)}
   onClose={() => {}}
 />`),
 };
 
 export const CustomTitle: Story = {
   args: { title: 'Rate this answer' },
-  ...src(`<FeedbackBar title="Rate this answer" onHelpful={() => {}} onNotHelpful={() => {}} />`),
+  ...src(`<FeedbackBar title="Rate this answer" onFeedback={(value) => console.log('feedback:', value)} />`),
 };
 
 const SmileyIcon = () => (
@@ -94,7 +87,6 @@ export const WithIcon: Story = {
   ...src(`<FeedbackBar
   title="How did I do?"
   icon={<SmileyIcon />}
-  onHelpful={() => {}}
-  onNotHelpful={() => {}}
+  onFeedback={(value) => console.log('feedback:', value)}
 />`),
 };

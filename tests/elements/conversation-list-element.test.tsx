@@ -7,7 +7,7 @@ const conversations: ConversationSummary[] = [{
   messageCount: 2, lastMessageAt: '2026-06-01T00:00:00Z', updatedAt: '2026-06-01T00:00:00Z',
 }];
 
-test('renders conversations and emits select', async () => {
+test('renders conversations and emits conversationselect', async () => {
   const el = document.createElement('kc-conversations') as HTMLElement & {
     groups: ConversationGroup[]; conversations: ConversationSummary[]; activeId?: string;
   };
@@ -19,10 +19,28 @@ test('renders conversations and emits select', async () => {
   expect(el.shadowRoot!.textContent).toContain('Hello world');
 
   let selected: string | null = null;
-  el.addEventListener('select', (e) => (selected = (e as CustomEvent).detail.id));
+  el.addEventListener('conversationselect', (e) => (selected = (e as CustomEvent).detail.id));
   const item = el.shadowRoot!.querySelector('[data-conversation-id="c1"]') as HTMLElement;
   item.click();
   expect(selected).toBe('c1');
+
+  el.remove();
+});
+
+test('does not emit old "select" event (breaking change)', async () => {
+  const el = document.createElement('kc-conversations') as HTMLElement & {
+    groups: ConversationGroup[]; conversations: ConversationSummary[];
+  };
+  el.groups = groups;
+  el.conversations = conversations;
+  document.body.appendChild(el);
+  await Promise.resolve();
+
+  let selectFired = false;
+  el.addEventListener('select', () => (selectFired = true));
+  const item = el.shadowRoot!.querySelector('[data-conversation-id="c1"]') as HTMLElement;
+  item.click();
+  expect(selectFired).toBe(false);
 
   el.remove();
 });

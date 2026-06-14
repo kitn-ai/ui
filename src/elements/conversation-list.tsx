@@ -16,7 +16,7 @@ interface Props extends Record<string, unknown> {
 
 interface Events {
   /** A conversation was selected. */
-  select: { id: string };
+  conversationselect: { id: string };
   /** The "New chat" button was clicked. */
   newchat: Record<string, never>;
   /** The sidebar toggle was clicked. */
@@ -33,7 +33,7 @@ defineWebComponent<Props, Events>('kc-conversations', {
       groups={props.groups}
       conversations={props.conversations}
       activeId={props.activeId}
-      onSelect={(id) => dispatch('select', { id })}
+      onSelect={(id) => dispatch('conversationselect', { id })}
       onNewChat={() => dispatch('newchat')}
       onToggleSidebar={() => dispatch('togglesidebar')}
     />
