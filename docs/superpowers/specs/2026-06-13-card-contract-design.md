@@ -204,13 +204,18 @@ export interface CardPolicy {
 
 The parallel card specs (A–C in the fan-out) build against these:
 
-1. **Dedicated `src/cards/` home (NOT mixed with primitives):** cards are a distinct
-   product surface, so each card = a Solid component + its `defineWebComponent`
-   wrapper under **`src/cards/`** (e.g. `src/cards/form.tsx` + `src/cards/form.element.tsx`),
-   kept out of `src/components/` (primitives) and `src/elements/`. The remote
-   transport SDK lives under **`src/remote/`**. Tag names exactly: `kc-form`,
-   `kc-confirm`, `kc-task-list`, `kc-link-card`, `kc-embed`. (Element registration +
-   `element-meta.json` discovery must include `src/cards/`.)
+1. **Two-layer pattern, uniform with the rest of the kit:** each card = a Solid
+   component in `src/components/<name>.tsx` + a `defineWebComponent` wrapper in
+   `src/elements/<name>.tsx`, registered in `src/elements/register.ts` — exactly like
+   every other element, so the existing discovery (`gen-element-api.mjs`), React
+   wrappers, JSX types, and `element-meta.json` all work with **zero infra change**.
+   (We deliberately do NOT introduce a `src/cards/` folder: it would force changes to
+   element discovery + a new naming convention for no real benefit, and the card
+   specs already use this layout.) The remote transport SDK lives under
+   **`src/remote/`** (plain modules, not custom elements, so no discovery impact).
+   Cards are kept distinct from primitives at the **Storybook** layer (convention 6),
+   not the folder layer. Tag names exactly: `kc-form`, `kc-confirm`, `kc-task-list`,
+   `kc-link-card`, `kc-embed`.
 2. **Type discriminator + schema:** each card exports its `type` string and ships
    `src/primitives/card-schemas/<type>.schema.json` for its `data` (and, if it
    submits, a `<type>.result.schema.json`). Provide the matching TS type.
