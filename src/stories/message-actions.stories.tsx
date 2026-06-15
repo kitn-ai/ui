@@ -164,3 +164,41 @@ export const WithFeedbackBar: Story = {
     );
   },
 };
+
+export const FullExample: Story = {
+  name: 'Full Example',
+  render: () => (
+    <div class="space-y-6 max-w-2xl p-4">
+      <p class="text-sm text-muted-foreground">
+        Everything at once — avatar, markdown content, and the complete action bar (built-in
+        copy/like/dislike/regenerate plus custom Share &amp; Bookmark), revealed on hover.
+      </p>
+
+      <Message>
+        <MessageAvatar src="" fallback="AI" alt="Assistant" />
+        <div class="group flex-1 space-y-2">
+          <MessageContent markdown>
+{`Use \`anyhow::Result\` for application code and \`thiserror\` for libraries:
+
+\`\`\`rust
+async fn fetch_user(id: u64) -> anyhow::Result<User> {
+    let user = client.get(&format!("/users/{}", id)).send().await?.json().await?;
+    Ok(user)
+}
+\`\`\`
+
+The \`?\` operator propagates errors from any \`Result\`-returning call.`}
+          </MessageContent>
+          <MessageActions class="opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button variant="ghost" size="icon-sm" aria-label="Copy message"><Copy class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Bad response"><ThumbsDown class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Regenerate response"><RefreshCw class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Share"><Share class="size-3.5" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Bookmark"><Bookmark class="size-3.5" /></Button>
+          </MessageActions>
+        </div>
+      </Message>
+    </div>
+  ),
+};

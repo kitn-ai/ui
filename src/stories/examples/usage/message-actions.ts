@@ -408,6 +408,165 @@ export function AssistantReply() {
   },
 };
 
+/** Full Example — everything via one `<kc-message>` payload: avatar, content,
+ *  built-in + custom actions, reveal-on-hover. The "copy this for everything" story. */
+const fullExample: StoryUsage = {
+  intro:
+    'Everything from one `<kc-message>`: avatar, markdown content, the built-in actions plus custom **Share**/**Bookmark**, and reveal-on-hover — all from the `message` payload and `actions-reveal`. (In SolidJS you compose the primitives directly — see the Solid tab.)',
+  snippets: {
+    html: `<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+</script>
+
+<kc-message id="msg" actions-reveal="hover"></kc-message>
+
+<script type="module">
+  const msg = document.getElementById('msg');
+  msg.message = {
+    id: 'm1',
+    role: 'assistant',
+    content: 'Use anyhow::Result for apps and thiserror for libraries.',
+    avatar: { fallback: 'AI', alt: 'Assistant' },
+    actions: [
+      'copy', 'like', 'dislike', 'regenerate',
+      { id: 'share', label: 'Share', icon: 'share' },
+      { id: 'bookmark', label: 'Bookmark', icon: 'bookmark' },
+    ],
+  };
+  msg.addEventListener('messageaction', (e) => {
+    const { messageId, action } = e.detail; // built-in name OR 'share' | 'bookmark'
+    console.log(messageId, action);
+  });
+</script>`,
+
+    react: `import { Message } from '@kitn.ai/chat/react';
+
+export function AssistantReply() {
+  return (
+    <Message
+      actionsReveal="hover"
+      message={{
+        id: 'm1',
+        role: 'assistant',
+        content: 'Use anyhow::Result for apps and thiserror for libraries.',
+        avatar: { fallback: 'AI', alt: 'Assistant' },
+        actions: [
+          'copy', 'like', 'dislike', 'regenerate',
+          { id: 'share', label: 'Share', icon: 'share' },
+          { id: 'bookmark', label: 'Bookmark', icon: 'bookmark' },
+        ],
+      }}
+      onMessageaction={(e) => {
+        const { messageId, action } = e.detail;
+        console.log(messageId, action);
+      }}
+    />
+  );
+}`,
+
+    vue: `<script setup>
+import '@kitn.ai/chat/elements';
+
+const message = {
+  id: 'm1',
+  role: 'assistant',
+  content: 'Use anyhow::Result for apps and thiserror for libraries.',
+  avatar: { fallback: 'AI', alt: 'Assistant' },
+  actions: [
+    'copy', 'like', 'dislike', 'regenerate',
+    { id: 'share', label: 'Share', icon: 'share' },
+    { id: 'bookmark', label: 'Bookmark', icon: 'bookmark' },
+  ],
+};
+
+function onAction(e) {
+  const { messageId, action } = e.detail;
+  console.log(messageId, action);
+}
+</script>
+
+<template>
+  <kc-message :message.prop="message" actions-reveal="hover" @messageaction="onAction" />
+</template>`,
+
+    svelte: `<script>
+  import '@kitn.ai/chat/elements';
+
+  let el;
+  const message = {
+    id: 'm1',
+    role: 'assistant',
+    content: 'Use anyhow::Result for apps and thiserror for libraries.',
+    avatar: { fallback: 'AI', alt: 'Assistant' },
+    actions: [
+      'copy', 'like', 'dislike', 'regenerate',
+      { id: 'share', label: 'Share', icon: 'share' },
+      { id: 'bookmark', label: 'Bookmark', icon: 'bookmark' },
+    ],
+  };
+  $: if (el) el.message = message;
+
+  function onAction(e) {
+    const { messageId, action } = e.detail;
+    console.log(messageId, action);
+  }
+</script>
+
+<kc-message bind:this={el} actions-reveal="hover" on:messageaction={onAction} />`,
+
+    angular: `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+
+@Component({
+  selector: 'app-reply',
+  standalone: true,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  template: \`<kc-message [message]="message" actions-reveal="hover" (messageaction)="onAction($event)"></kc-message>\`,
+})
+export class ReplyComponent {
+  message = {
+    id: 'm1',
+    role: 'assistant',
+    content: 'Use anyhow::Result for apps and thiserror for libraries.',
+    avatar: { fallback: 'AI', alt: 'Assistant' },
+    actions: [
+      'copy', 'like', 'dislike', 'regenerate',
+      { id: 'share', label: 'Share', icon: 'share' },
+      { id: 'bookmark', label: 'Bookmark', icon: 'bookmark' },
+    ],
+  };
+  onAction(e: CustomEvent<{ messageId: string; action: string }>) {
+    const { messageId, action } = e.detail;
+    console.log(messageId, action);
+  }
+}`,
+
+    solid: `import { Message, MessageAvatar, MessageContent, MessageActions, Button } from '@kitn.ai/chat';
+import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Share, Bookmark } from 'lucide-solid';
+
+export function AssistantReply() {
+  return (
+    <Message>
+      <MessageAvatar src="" fallback="AI" alt="Assistant" />
+      {/* group + group-hover reveals the bar on hover */}
+      <div class="group flex-1 space-y-2">
+        <MessageContent markdown>
+          Use anyhow::Result for apps and thiserror for libraries.
+        </MessageContent>
+        <MessageActions class="opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button variant="ghost" size="icon-sm" aria-label="Copy"><Copy class="size-3.5" /></Button>
+          <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
+          <Button variant="ghost" size="icon-sm" aria-label="Bad response"><ThumbsDown class="size-3.5" /></Button>
+          <Button variant="ghost" size="icon-sm" aria-label="Regenerate"><RefreshCw class="size-3.5" /></Button>
+          <Button variant="ghost" size="icon-sm" aria-label="Share"><Share class="size-3.5" /></Button>
+          <Button variant="ghost" size="icon-sm" aria-label="Bookmark"><Bookmark class="size-3.5" /></Button>
+        </MessageActions>
+      </div>
+    </Message>
+  );
+}`,
+  },
+};
+
 /**
  * Example: Message Actions — copy / like / dislike / regenerate (and a feedback
  * bar) on an assistant message. Per-story: the Usage tab shows the snippet for
@@ -421,6 +580,7 @@ const messageActions: ExampleUsage = {
     'Always Visible Actions': alwaysVisible,
     'Copy with Confirmation': copyConfirm,
     'Feedback Bar': feedbackBar,
+    'Full Example': fullExample,
   },
 };
 
