@@ -18,6 +18,184 @@ Prior context: the handoff `docs/handoff/2026-06-13-kc-rename-resizable-artifact
 both ways, theme/locale/context/short-lived-token down, events/auto-height/lifecycle
 up, two thin pieces) and the existing iframe plumbing in `src/components/artifact.tsx`.
 
+> **Ratified 2026-06-14 (session 3).** Scope confirmed: **full v1** (everything below —
+> host SDK + provider runtime + `<kc-remote>` element + the `@kitn.ai/chat/provider`
+> subpath + the mock-provider example + unit tests + the full cross-origin Playwright
+> matrix + the 6 Storybook stories). Built against the **renamed contract**: the terminal
+> data verb is now **`submit`** (was `submit-data`) and the policy handler is **`onSubmit`**;
+> `CardContext.a11y.reducedMotion` already exists, so reduced-motion is carried there. The
+> 5 open questions are now **decided** (see the closing "Resolved decisions" section). The
+> contract is otherwise unchanged (`CARD_CONTRACT_VERSION` stays `'1'`).
+
+---
+
+## v1 Hardening addendum (2026-06-14, post review-panel)
+
+A 4-lens review panel (security / protocol / architecture / testability) raised concrete
+gaps. The items below are **authoritative for v1 and supersede** any conflicting prose or
+code in the original sections that follow. (Consensus moved confidence from ~64 to ~88
+once these are specified.)
+
+### H-A. Frame identity: per-bridge nonce + `event.source` pin (security C2 + protocol H3/H1)
+Origin alone does **not** identify a sender — same-origin sibling frames/popups, or a
+stale timed-out iframe, can pass `event.origin` checks. Therefore:
+- The host mints a cryptographically-random **`nonce`** per bridge instance
+  (`crypto.getRandomValues`) and includes it in the `hello` frame. The runtime MUST echo
+  the exact nonce in `ready` **and in every subsequent up-frame**. The host drops any frame
+  whose `nonce` ≠ the current bridge nonce.
+- The host captures `iframe.contentWindow` at mount and asserts
+  `event.source === iframe.contentWindow` on **every** inbound message, in addition to
+  origin. The runtime locks the host **source window** (`event.source` of the first valid
+  `hello`, which must equal `window.parent`) and rejects later frames from a different
+  source.
+- `destroy()`/timeout/reload increments the bridge **generation** (new nonce); stale frames
+  are rejected by construction. This is the legitimate instance-correlation id.
+
+### H-B. Drop `seq` and `ack` from v1 (protocol H2)
+postMessage is ordered per channel; `seq` was correlation-only and `ack` had no producer or
+consumer. **Remove both from the wire types and `pack()`.** Frame identity is handled by
+H-A's nonce. (Reserve request/response correlation for a v2 note.)
+
+### H-C. `pack()` stamps the negotiated version (protocol M4)
+`pack()` must stamp the **negotiated** version, not the author-time `CARD_CONTRACT_VERSION`.
+Use a per-bridge `packer` closed over the negotiated version + nonce. Receivers drop frames
+whose `version` ≠ negotiated version (`bad-frame`). Validate version strings match
+`/^[0-9]+$/` before `Number()` coercion in `negotiateVersion`; the host asserts
+`ready.acceptedVersion ∈ hostSupportedVersions`.
+
+### H-D. Direction-aware guard + real schema validation before routing (security H2)
+`isCardWireFrame` must check `message.dir`: the **host accepts only `dir:'up'`**, the
+**runtime only `dir:'down'`** (this is the echo/reflection defense the original prose
+claimed but the shown guard omitted). After the structural guard, validate the
+`CardEvent` shape (and `submit`/`action` payloads against the card type's schema via the
+existing `src/primitives/card-validate.ts`) **before** calling `routeCardEvent` — drop +
+warn on failure. Reject payloads containing `__proto__`/`constructor`/`prototype` keys
+(prototype-pollution guard) since nested `data` is forwarded to app handlers.
+
+### H-E. Formal bridge state machine + pre-OPEN outbound buffer (protocol C1/C2/H5/M2)
+Implement an explicit state machine `connecting → open → (error|closed)` driven by
+events `{load, ready, fault, timeout, update, updateContext, destroy, inbound}`:
+- Handle methods called while `connecting` **buffer with latest-wins coalescing**
+  (`render` keeps only the newest pending envelope; `context` the newest; `teardown`/
+  `destroy` supersede all). Flush in order `context → render` on entering `open`.
+- `updateContext(Partial<CardContext>)` merges **locally**, shallow at top level but
+  **replacing `theme`/`theme.tokens` wholesale** (no partial token merges). The wire
+  `context` frame always carries a **full resolved** `CardContext` (so the runtime's
+  `CardHost.context()` is always complete, per the contract's non-optional return).
+- `render` re-render rules: same `envelope.id` → renderer update path (dispose+remount if
+  the renderer has none); different id → dispose current (sync disposer), clear root, mount
+  new. Drop in-flight events whose `cardId` ≠ current.
+- `destroy()`: set a tombstone generation (rejects all future inbound), best-effort
+  `teardown` only if `open`, remove listeners/iframe/timers; second call is a no-op.
+
+### H-F. Enforce the cross-origin precondition (security C1, CRITICAL)
+`allow-same-origin` is only safe because the frame is cross-origin to the host. Therefore
+`mountRemoteCard` MUST **fail closed** (throw, do not mount) if
+`new URL(src).origin === window.location.origin` or `providerOrigin === window.location.origin`,
+and MUST require `new URL(src).origin === providerOrigin`. Unit-tested in `origin.ts`.
+
+### H-G. Drop `allow-popups`; host mediates all opens (security M1)
+Remove `allow-popups` from the default sandbox. The host's `window.open(_, _, 'noopener,noreferrer')`
+(via the `open` verb in `routeCardEvent`) works regardless of the frame sandbox and keeps
+scheme validation in one place. A self-opened popup would be a same-origin sibling
+(re-introducing H-A's risk) — so it's out.
+
+### H-H. authToken redaction (security H3)
+`authToken` must be redacted from **all** logging (a shared `redactFrame()` used at every
+`console.warn`/log site) and `fault`/`error` messages must be **non-reflective** (never echo
+received `context`/`envelope` content). Provider obligation + a test.
+
+### H-I. Host anti-framing obligation (security H4)
+Add to the host's CSP obligations: the host page MUST set `frame-ancestors 'self'`/`'none'`
+(or `X-Frame-Options`) so it can't itself be clickjacked while showing a real card. The
+provider's `frame-ancestors` must list the exact host origin (no wildcards), and
+`form-action 'self'` is a **hard** provider obligation (not just an example).
+
+### H-J. Auto-height: observe a content-sized wrapper + hysteresis + maxHeight fixed-point (protocol H4)
+`observeContentHeight` observes a **content-sized inner wrapper** (`height:max-content`/auto),
+never a host-stretched root, to avoid feedback loops. Emit only when
+`|new − lastEmitted| > THRESHOLD` (≈1–2px). The host clamps to `maxHeight` and, once clamped,
+treats "at maxHeight" as a fixed point (stops reacting to further grow; the frame scrolls).
+
+### H-K. `<kc-remote>` scope (architecture #1)
+"Drop-in interchangeable with native cards" applies to the **event-routing path only**:
+`<kc-remote>` validates (origin+source+nonce+schema) **before** re-emitting the
+bubbling `kc-card` event, so it routes through the same host listener. It mounts
+**standalone** (alongside, not inside, `<kc-cards>`). Injecting remote cards into a
+`<kc-cards>` list (the `type→tag` map can't carry `src`/`providerOrigin`) is a **v2**
+concern. Rename the provider-side renderer interface to **`RemoteCardRenderer`** to avoid
+colliding with the existing exported `CardRenderer` Solid component.
+
+### H-L. Build & test plan (architecture #2 + testability)
+- **Provider subpath:** ship `@kitn.ai/chat/provider` as a **second build entry** —
+  `vite.config.provider.ts` (entry `src/remote/provider-runtime.ts`, `emptyOutDir:false`,
+  output `dist/kitn-chat-provider.es.js`); `package.json build` runs both configs in
+  sequence; add the `./provider` export. The provider bundle contains **only** the bridge +
+  `wire`/`origin`/`version` (no SolidJS, no `<kc-*>`); a provider imports the card elements
+  separately from `@kitn.ai/chat/elements`. State this boundary explicitly.
+- **jsdom handshake tests:** jsdom delivers `event.origin === ""` for `postMessage()`. Tests
+  MUST dispatch `new MessageEvent('message', { data, origin, source })` directly to exercise
+  real origin/source checks. Stub `ResizeObserver` (absent in jsdom) via `vi.stubGlobal`.
+- **Cross-origin matrix:** use **standalone Playwright** (`playwright.config.ts` with two
+  `webServer` entries — Storybook `:6006` + `vite examples/remote-provider --port :6007`),
+  **not** `@vitest/browser-playwright`. Auto-height `clientHeight` assertions live here
+  (jsdom has no layout). Add a `dev:provider` script + a CI `test.yml` (none exists today).
+- **Storybook stories:** `staticDirs` is same-origin only — the cross-origin demo needs the
+  separate `:6007` server (a `concurrently` script). Storybook stories may run same-origin
+  for visual/interaction demos; the **security matrix** is proven by standalone Playwright.
+- **axe:** scope to the **host** page; `context.exclude:[['iframe']]` (axe can't read a
+  cross-origin frame's tree — that's the provider's a11y obligation).
+
+### H-M. Implementation will touch `reasoning.tsx` (architecture #5)
+The "no changes to existing source" non-goal was design-phase only. Extracting
+`use-resize-observer.ts` updates `reasoning.tsx` to consume it (no behavior change). The new
+primitive is just `observe(el, (height)=>void) → disposer`; the textarea-only `useAutoResize`
+is left untouched (Resolved decision #1).
+
+### H-N. Concrete build, dev, and CI artifacts (architecture #2 + testability)
+The artifacts below are explicit deliverables of the plan (they don't exist yet):
+- **`vite.config.provider.ts`** — entry `src/remote/provider-runtime.ts`; `build.lib`
+  output `dist/kitn-chat-provider.es.js`; `emptyOutDir: false` (must NOT clobber the main
+  `dist/kitn-chat.es.js`); **no `solidPlugin()`**; `rollupOptions.external: ['solid-js','solid-js/web']`
+  so the provider bundle carries no SolidJS. The provider imports card elements separately
+  from `@kitn.ai/chat/elements`.
+- **`package.json`**: `"build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts"` (ordering enforced — main first so the provider's `emptyOutDir:false` appends). Postbuild generators stay after both (they only touch the element build; the provider bundle has no elements). Add `"./provider": { "types": "./dist/kitn-chat-provider.d.ts", "default": "./dist/kitn-chat-provider.es.js" }` to `exports`. Add devDeps **`concurrently`** + **`http-server`** (pinned, used via the local bin, not bare `npx`) and `"dev:provider": "vite examples/remote-provider --port 6007 --strictPort"`. The mock provider is a **standalone Vite app** (`examples/remote-provider/` with its own `index.html` + `provider-entry.ts`); `vite <root>` serves that directory as root (valid Vite CLI). **Provider `.d.ts`:** the provider bundle has no hand-authored types file (unlike `./elements`), so `vite.config.provider.ts` uses **`vite-plugin-dts`** (add as devDep, pinned **`^4`** — Vite 6 compatible; `3.x` silently emits no `.d.ts` on Vite 6) to emit a bundled `dist/kitn-chat-provider.d.ts` — without it the `./provider` subpath ships untyped and consumers' `tsc` errors.
+- **`playwright.config.ts`** (standalone — NOT `@vitest/browser-playwright`): two `webServer`
+  entries — `{ command: 'npm run build-storybook && ./node_modules/.bin/http-server storybook-static -p 6006', url: 'http://localhost:6006', reuseExistingServer: !process.env.CI, timeout: 120_000 }` (pinned local bin, never bare `npx`, for hermetic CI) and
+  `{ command: 'npm run dev:provider', url: 'http://localhost:6007', reuseExistingServer: !process.env.CI }`. Use a built+served Storybook in CI (not `storybook dev`) for reliable readiness. Tests live in `tests/e2e/` and use `page.frameLocator()` across origins.
+- **`.github/workflows/test.yml`** — runs `npm run build`, `npm run typecheck`, `npm test`,
+  `npm run test:react`, `npm run test:storybook`, and `npx playwright test` (none exists today).
+- **jsdom unit pattern:** dispatch `window.dispatchEvent(new MessageEvent('message', { data, origin, source }))` (jsdom's `postMessage` forces `origin===""`). For the `event.source === iframe.contentWindow` pin, the test injects a mock window object and passes the SAME reference as `source`. Stub `ResizeObserver` via `vi.stubGlobal`.
+
+### H-O. Protocol leftovers (M5, L1, transition completeness)
+- **`fault` → `onError` needs a `cardId` (M5):** the host passes the **current `envelope.id`**
+  (always known, even pre-render) and prefixes the message with the fault `code`. `onError(envelope.id, \`[\${code}] \${message}\`)`.
+- **`focus-trap-edge` (L1):** do **not** route it through the `action` verb/`routeCardEvent`
+  (it would hit the missing-handler warn and conflate a11y plumbing with app intent). The
+  host SDK **intercepts** it (like `resize`) and moves focus to the next host-focusable; it
+  is transport/a11y plumbing, never forwarded to `CardPolicy`. (Carry it as a dedicated
+  up-message kind, e.g. `{dir:'up',kind:'focus-edge',edge}`, not an `event{action}`.)
+- **State-machine completeness (H-E):** a `fault` or `timeout` while `connecting` →
+  transition to `error` and **discard** the coalesced `context`/`render` buffer.
+- **`updateContext` merge (H-E):** `a11y` (like `theme`) is **replaced wholesale**, not
+  deep-merged — a caller passing `a11y` supplies the complete object. Only the top-level
+  field set is shallow-merged.
+
+### H-P. Security tightening (redaction allowlist, recursive proto-guard)
+- **Redaction is field-positive (security new-risk):** `redactFrame()` logs an
+  **allowlist** of known-safe fields and redacts everything else by default (so a future
+  secret-bearing `context` field can't leak), rather than redacting only `authToken`. The
+  bridge `nonce` is explicitly **must-redact** (never allowlist it for "debuggability" — a
+  logged live nonce is a needless secondary disclosure).
+  Consider a typed `LoggableFrame` so raw frames can't be passed to a logger by accident.
+- **Proto-pollution guard is recursive (H-D):** the `__proto__`/`constructor`/`prototype`
+  key rejection walks nested `data`/`patch`/`context` (e.g. `data.foo.__proto__`), not just
+  top level.
+- **`style-src 'unsafe-inline'` (M4):** documented provider obligation to drop it once on
+  the Constructable-Stylesheets path (kit injects a constructable sheet on modern engines);
+  low residual risk (it's the provider's own-origin CSP), tracked as "should-fix," not v1
+  blocking.
+
 ---
 
 ## Problem
@@ -101,11 +279,11 @@ facade):
 | `src/remote/provider-runtime.ts` | `createCardBridge()` → a `CardHost` impl for the iframe + the handshake responder + `ResizeObserver` height reporting. Provider-side. |
 | `src/remote/origin.ts` | `assertOrigin()` / origin-allowlist helpers, shared by both sides + unit-tested in isolation. |
 | `src/remote/version.ts` | `negotiateVersion()` — pure function, unit-tested. |
-| `src/elements/remote-card.tsx` | OPTIONAL `<kc-remote-card>` facade wrapping `mountRemoteCard` for the no-JS-host / pure-markup path (attributes: `provider-origin`, `src`, `envelope` as a JS prop). Emits a bubbling+composed `kc-card` CustomEvent so it routes through the **native** host listener too — making remote cards drop-in interchangeable with native ones. |
+| `src/elements/remote.tsx` | OPTIONAL `<kc-remote>` facade wrapping `mountRemoteCard` for the no-JS-host / pure-markup path (attributes: `provider-origin`, `src`, `envelope` as a JS prop). Emits a bubbling+composed `kc-card` CustomEvent so it routes through the **native** host listener too — making remote cards drop-in interchangeable with native ones. |
 
 `src/remote/index.ts` re-exports the public surface; `src/index.ts` adds the host
 SDK to the package's published entry (provider runtime ships as a separate subpath
-export `@kitnai/chat/provider` so a provider bundles only the iframe side).
+export `@kitn.ai/chat/provider` so a provider bundles only the iframe side).
 
 **Reuse from existing source (do not duplicate):**
 - **`src/components/artifact.tsx`** iframe plumbing — the `<iframe sandbox … title …>`
@@ -133,9 +311,12 @@ export `@kitnai/chat/provider` so a provider bundles only the iframe side).
 `src/remote/wire.ts`. Every shape inside `payload` is a **contract** type imported
 from `../primitives/card-contract` — never redefined.
 
+> **This block is the v1-canonical wire surface** — reconciled with addendum H-A/H-B/H-C
+> (no `seq`/`ack`; a per-bridge `nonce`; `pack` stamps the negotiated version via a
+> per-bridge packer; the guard is direction-aware).
+
 ```ts
 import {
-  CARD_CONTRACT_VERSION,
   type CardEnvelope,
   type CardContext,
   type CardEvent,
@@ -148,43 +329,52 @@ export const CARD_WIRE_PROTOCOL = 'kitn-card' as const;
 /** The envelope that wraps EVERY message in both directions. */
 export interface WireFrame<M extends WireMessage = WireMessage> {
   protocol: typeof CARD_WIRE_PROTOCOL;
-  /** Negotiated contract version (= CARD_CONTRACT_VERSION at author time). */
+  /** The NEGOTIATED contract version (set by the per-bridge packer, not the
+   *  author-time constant). Receivers drop frames whose version ≠ negotiated. */
   version: string;
-  /** Monotonic per-bridge id; lets a side correlate a reply to a request. */
-  seq: number;
+  /** Per-bridge instance nonce (crypto-random, minted by the host, sent in `hello`).
+   *  The runtime echoes it on EVERY up-frame; the host drops frames with a stale
+   *  nonce. Binds a frame to THIS bridge generation — defeats replay + stale-iframe
+   *  + same-origin-sibling injection (see H-A). */
+  nonce: string;
   /** The contract-shaped message. */
   message: M;
 }
 
 // ── DOWN: host → iframe ────────────────────────────────────────────────────
 export type DownMessage =
-  /** First frame the host sends after the iframe signals it loaded. Begins the
-   *  handshake; advertises the versions the host supports. */
+  /** First frame the host sends after the iframe `load`. Begins the handshake;
+   *  advertises supported versions and establishes the bridge `nonce` (carried on
+   *  the WireFrame). */
   | { dir: 'down'; kind: 'hello'; supportedVersions: string[] }
-  /** Push (or re-push) the envelope to render. Re-sending with the same
-   *  `envelope.id` is an update (re-render); a new id is a new card. */
+  /** Push (or re-push) the envelope to render. Same `envelope.id` = update; new id
+   *  = new card. */
   | { dir: 'down'; kind: 'render'; envelope: CardEnvelope }
-  /** Push (or update) ambient context. Sent right after handshake and again
-   *  whenever theme/locale/token change. */
+  /** Push (or update) ambient context. Sent right after handshake and again on any
+   *  change. ALWAYS a full resolved CardContext (host merges Partial locally — H-E). */
   | { dir: 'down'; kind: 'context'; context: CardContext }
-  /** Host acknowledges a card-up event it has routed (optional, for the runtime
-   *  to clear pending UI; carries the originating `seq`). */
-  | { dir: 'down'; kind: 'ack'; ackSeq: number }
   /** Host tells the runtime to tear down (card dismissed / iframe being reused). */
   | { dir: 'down'; kind: 'teardown' };
+  // NOTE: `ack` removed in v1 (H-B) — postMessage is per-channel ordered; nothing
+  // produced or consumed it.
 
 // ── UP: iframe → host ──────────────────────────────────────────────────────
 export type UpMessage =
   /** Runtime's handshake reply: the single version it picked from the host's
-   *  `supportedVersions`, plus the card types it can render. */
+   *  `supportedVersions` (must be one the host advertised), plus the card types it
+   *  can render. Echoes the bridge `nonce` (on the WireFrame). */
   | { dir: 'up'; kind: 'ready'; acceptedVersion: string; capabilities?: { types?: string[] } }
-  /** A contract CardEvent, verbatim. THIS is the up channel for every verb
-   *  (submit-data | action | send-prompt | open | resize | state | dismiss |
-   *  error | ready). The contract's own `CardEvent['kind']:'ready'` is the
-   *  per-card mount signal; the wire `ready` above is the BRIDGE handshake. */
+  /** A contract CardEvent, verbatim. The up channel for every verb (submit | action
+   *  | send-prompt | open | resize | state | dismiss | error | ready). The contract's
+   *  own `ready` is the per-card mount signal; the wire `ready` is the BRIDGE handshake. */
   | { dir: 'up'; kind: 'event'; event: CardEvent }
-  /** Runtime reports it could not start (bad envelope, unsupported version,
-   *  internal error) — surfaced before/independently of a per-card error. */
+  /** A11y: focus reached the card's first/last focusable and would leave it. The host
+   *  SDK INTERCEPTS this (like `resize`) and moves focus to the next host element — it is
+   *  NEVER routed through `CardPolicy` (H-O). A dedicated kind, not an `event{action}`. */
+  | { dir: 'up'; kind: 'focus-edge'; edge: 'start' | 'end' }
+  /** Runtime reports it could not start (bad envelope, unsupported version, internal
+   *  error). `message` MUST be non-reflective (never echoes received context/envelope
+   *  content — H-H). */
   | { dir: 'up'; kind: 'fault'; code: WireFaultCode; message: string };
 
 export type WireFaultCode =
@@ -195,19 +385,31 @@ export type WireFaultCode =
 
 export type WireMessage = DownMessage | UpMessage;
 
-/** Build an outbound frame. */
-export function pack<M extends WireMessage>(message: M, seq: number): WireFrame<M> {
-  return { protocol: CARD_WIRE_PROTOCOL, version: CARD_CONTRACT_VERSION, seq, message };
+/** A per-bridge packer closed over the negotiated version + bridge nonce (H-C).
+ *  Each bridge instance builds one after `hello` (host) / `ready` (runtime). */
+export function createPacker(version: string, nonce: string) {
+  return function pack<M extends WireMessage>(message: M): WireFrame<M> {
+    return { protocol: CARD_WIRE_PROTOCOL, version, nonce, message };
+  };
 }
 
-/** Structural guard: is this a frame we own? Used right after the origin check
- *  so foreign postMessage traffic is silently ignored. */
-export function isCardWireFrame(data: unknown): data is WireFrame {
+/** Structural + DIRECTION guard (H-D). The host calls it with `'up'`, the runtime
+ *  with `'down'` — rejecting reflected/echoed own-frames. Runs right after the
+ *  origin+source check; foreign/wrong-direction traffic is dropped, never parsed.
+ *  This is a STRUCTURAL guard only (presence/type + direction). The host's post-guard
+ *  step also asserts `frame.nonce === bridgeNonce` and `frame.version === negotiated`
+ *  (the actual binding — H-A/H-C), then validates the CardEvent/payload schema, before
+ *  routing. Do not treat this guard as the complete gate. */
+export function isCardWireFrame(data: unknown, expectedDir: 'up' | 'down'): data is WireFrame {
+  if (typeof data !== 'object' || data === null) return false;
+  const d = data as Record<string, unknown>;
+  const m = d.message as Record<string, unknown> | undefined;
   return (
-    typeof data === 'object' && data !== null &&
-    (data as Record<string, unknown>).protocol === CARD_WIRE_PROTOCOL &&
-    typeof (data as Record<string, unknown>).version === 'string' &&
-    typeof (data as Record<string, unknown>).message === 'object'
+    d.protocol === CARD_WIRE_PROTOCOL &&
+    typeof d.version === 'string' &&
+    typeof d.nonce === 'string' &&
+    typeof m === 'object' && m !== null &&
+    m.dir === expectedDir
   );
 }
 ```
@@ -264,7 +466,9 @@ native `load` event is the trigger to send `hello`. A `ready-probe` (an extra
 unsolicited up-frame *before* `hello`) is accepted as an early trigger but is
 optional — it only matters if the provider doc loads before the host attaches its
 listener (the host attaches the listener **before** setting `iframe.src`, so this
-race is closed by construction; the probe is a defensive nicety).
+race is closed by construction; the probe is a defensive nicety). **v1: the
+`ready-probe` is DROPPED — the runtime sends nothing until `hello` arrives. See
+Resolved decisions #4.**
 
 ### `negotiateVersion` (pure, `src/remote/version.ts`)
 
@@ -293,7 +497,6 @@ export function negotiateVersion(hostVersions: string[], mine: string[]): string
 | `hello` | `supportedVersions: string[]` | once, on iframe `load` | begins handshake; locks expected host origin on the iframe side |
 | `context` | `CardContext` | after `ready`, then on any change | theme `{mode,tokens}`, `locale`, `conversationId`, **short-lived** `authToken` |
 | `render` | `CardEnvelope` | after first `context` | re-send same `id` = update; new `id` = new card |
-| `ack` | `ackSeq: number` | optional, after routing an up-event | lets runtime clear pending state |
 | `teardown` | — | on dismiss / iframe reuse | runtime unmounts + stops observers |
 
 **Theme push (no FOUC):** the host sends `context` with `theme.tokens` (the
@@ -314,7 +517,7 @@ locked provider origin. (See Security.)
 | --- | --- | --- | --- |
 | `ready` (wire) | `acceptedVersion`, `capabilities.types?` | handshake | completes negotiation; not a card event |
 | `event{ready}` | `CardEvent{kind:'ready',cardId}` | `policy` (lifecycle) | per-card mount |
-| `event{submit-data}` | `{cardId,data}` | `policy.onSubmitData` | validated vs the card type's result schema first |
+| `event{submit}` | `{cardId,data}` | `policy.onSubmit` | validated vs the card type's result schema first |
 | `event{action}` | `{cardId,action,payload?}` | `policy.onAction` | named intent |
 | `event{send-prompt}` | `{cardId,text,mode?,context?}` | `policy.onSendPrompt` | **`mode:'send'` downgraded to `'compose'`** unless `policy.maxSendPromptMode==='send'` (contract default) |
 | `event{open}` | `{cardId,url,target?}` | `policy.onOpen` | scheme-validated (http/https/mailto); `'tab'`→`window.open(_,_,'noopener,noreferrer')` |
@@ -419,13 +622,13 @@ sheet path — noted, not blocking.)
      hard backstop (the browser refuses to load it in a disallowed host anyway).
    - **Iframe outbound:** `parent.postMessage(frame, lockedHostOrigin)` — exact,
      never `'*'`. (The runtime knows the host origin from `hello`; until `hello`
-     arrives it sends nothing except the optional `ready-probe`, which it sends to
-     `document.referrer`'s origin if present, else not at all.)
+     arrives it sends **nothing** — the `ready-probe` is dropped in v1, so there is no
+     pre-`hello` outbound frame at all. See Resolved decisions #4.)
    - All of this lives in `src/remote/origin.ts` (`assertOrigin`,
      `lockOrigin`) and is unit-tested in isolation.
 
 2. **Origin allowlist.** `mountRemoteCard` takes a single `providerOrigin`. The
-   `<kc-remote-card>` facade reads `provider-origin` and validates it is a single
+   `<kc-remote>` facade reads `provider-origin` and validates it is a single
    absolute `https:` origin (rejects `*`, lists, or `http:` except `localhost` for
    dev). The host SDK never trusts the iframe's `src` to *imply* the origin — the
    caller states it explicitly and it is pinned.
@@ -445,7 +648,7 @@ sheet path — noted, not blocking.)
 
 6. **Schema validation at the boundary (both shapes + payloads).** On the host,
    inbound `event` frames are validated against the `CardEvent` schema, and
-   `submit-data`/`action` payloads against the card type's published schema, before
+   `submit`/`action` payloads against the card type's published schema, before
    routing (contract requirement). On the iframe, the inbound `envelope.data` is
    validated against the card type's schema before render. Failures fail **loud**
    (host `error`; runtime inline error + `fault{render-failed}`), never render
@@ -487,11 +690,12 @@ do about each:
 
 1. **Focus continuity.** Tab focus *can* cross the iframe boundary natively (the
    iframe participates in the tab order), but the host can't observe focus *inside*
-   the frame. **Mitigation:** the runtime emits an `action{action:'focus-trap-edge',
-   payload:{edge:'start'|'end'}}` when focus would leave the card's first/last
-   focusable, letting the host move focus to the next host element deterministically
-   (opt-in; default browser tab order otherwise). The iframe's own content must be
-   fully keyboard-navigable (provider obligation).
+   the frame. **Mitigation:** the runtime emits the dedicated wire up-message
+   `{kind:'focus-edge', edge:'start'|'end'}` (NOT an `action` event — see H-O) when focus
+   would leave the card's first/last focusable; the host SDK **intercepts** it (like
+   `resize`, never routed through `CardPolicy`) and moves focus to the next host element
+   deterministically (opt-in; default browser tab order otherwise). The iframe's own
+   content must be fully keyboard-navigable (provider obligation).
 
 2. **Screen-reader context.** A screen reader announces the iframe as a frame
    boundary; the card's content is read from the iframe's accessibility tree.
@@ -582,7 +786,8 @@ renderer for the envelope's `type`, and lets the runtime own the bridge.
 ```ts
 import { type CardEnvelope, type CardContext, type CardHost } from '../primitives/card-contract';
 
-export interface CardRenderer {
+export interface RemoteCardRenderer {  // renamed (was CardRenderer) — see H-K; avoids
+  // colliding with the exported Solid <CardRenderer> component.
   /** The card `type` this renderer handles. */
   type: string;
   /** Mount into `root`, given the envelope + a CardHost (context() + emit()).
@@ -594,7 +799,7 @@ export interface CreateCardBridgeOptions {
   /** Element the card mounts into + whose height is observed. */
   root: HTMLElement;
   /** Renderers by card type. Unknown type → contract's unsupported placeholder. */
-  renderers: CardRenderer[];
+  renderers: RemoteCardRenderer[];
   /** Versions this runtime supports (default [CARD_CONTRACT_VERSION]). */
   supportedVersions?: string[];
 }
@@ -617,8 +822,8 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge;
   emits `resize` on change.
 - Renderers reuse the `<kc-*>` catalog: e.g. a `form` renderer mounts `<kc-form>`,
   feeds it `envelope.data`, listens for its `kc-card`/`submit` and calls
-  `host.emit({kind:'submit-data', …})`. The runtime is the bridge; the cards are
-  the existing components — the provider bundles `@kitnai/chat/provider` +
+  `host.emit({kind:'submit', …})`. The runtime is the bridge; the cards are
+  the existing components — the provider bundles `@kitn.ai/chat/provider` +
   whichever `<kc-*>` it renders.
 
 ---
@@ -647,7 +852,7 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge;
 miss, per the project's hard-won norm):**
 - Two dev origins (host on `:6006`, provider on `:6007`) so origin checks are
   **real**, not same-origin shortcuts. Verify: handshake completes; a `<kc-form>`
-  submit in the frame arrives at the host's `onSubmitData`; **measured** auto-height
+  submit in the frame arrives at the host's `onSubmit`; **measured** auto-height
   (host iframe `clientHeight` matches the card's content height after a field
   toggles the card taller/shorter); theme toggle re-paints the framed card to dark
   (measured background); a wrong-origin postMessage is ignored (host policy never
@@ -663,12 +868,12 @@ elements don't re-register on HMR).
 
 ## Storybook / demo story plan
 
-A new `Web Components/kc-remote-card` (+ an `Examples/Remote cards` group), every
+A new `Web Components/kc-remote` (+ an `Examples/Remote cards` group), every
 story **source-visible** (`parameters.docs.source.code`, per the Examples norm):
 
 1. **Remote form (happy path).** A mock provider iframe (served from Storybook
    `staticDirs`, e.g. `examples/remote-provider/`, on a second origin via the
-   preview server) renders a `<kc-form>`; the story logs the routed `submit-data`
+   preview server) renders a `<kc-form>`; the story logs the routed `submit`
    in an actions panel. Shows the `CardEnvelope` JSON next to the live frame.
 2. **Auto-height.** A card whose content grows/shrinks on interaction; the iframe
    visibly resizes. Demonstrates the `resize` verb end-to-end.
@@ -690,37 +895,30 @@ postMessage, not a same-origin shortcut.
 
 ---
 
-## Open questions for review
+## Resolved decisions (2026-06-14)
 
-These are genuine forks the established decisions don't fully resolve:
+The 5 prior open questions are now decided:
 
-1. **Auto-height primitive name/shape.** The contract's `resize` comment says
-   "reuses `useAutoResize`", but that primitive is textarea-only. Plan: extract a
-   shared `use-resize-observer.ts` (from the reasoning.tsx pattern) and build height
-   reporting on it. **Question:** also retrofit `useAutoResize` onto the shared
-   primitive (one resize abstraction), or leave the textarea helper as-is and just
-   add the new one? (Lean: add new, leave textarea helper untouched to avoid
-   churn.)
+1. **Auto-height primitive.** Add a new `src/primitives/use-resize-observer.ts` (the
+   `reasoning.tsx` `ResizeObserver` pattern) and build height reporting on it. **Leave
+   the textarea-only `useAutoResize` untouched** (no retrofit — avoids churn). v1 ships
+   the new primitive only.
 
-2. **`reduced-motion` (and other a11y prefs) in `CardContext`.** Should we add an
-   explicit `a11y?: { reducedMotion?: boolean }` field to `CardContext` in the
-   **contract** (a contract change — needs the contract owner), or smuggle it
-   through `theme.tokens`? (Lean: a small explicit field is cleaner, but it touches
-   the frozen contract, so flagging rather than deciding.)
+2. **`reduced-motion` in `CardContext`.** **Already resolved** — `CardContext.a11y.reducedMotion`
+   exists in the contract today. The host populates it; the runtime reads it. No contract
+   change.
 
-3. **Provider subpath export vs single entry.** Ship the provider runtime as
-   `@kitnai/chat/provider` (separate bundle so a provider doesn't pull the host SDK)
-   vs a single entry with tree-shaking. (Lean: separate subpath — clearer security
-   boundary + smaller provider bundle.)
+3. **Provider subpath export.** **Yes** — ship the provider runtime as a separate
+   `@kitn.ai/chat/provider` subpath (its own bundle), so a provider doesn't pull the host
+   SDK. Clearer security boundary + smaller provider bundle. Add it to `package.json`
+   `exports` alongside `./elements` / `./react`.
 
-4. **`ready-probe` necessity.** The host attaches its listener before setting
-   `src`, which closes the load-before-listener race by construction — so the
-   optional `ready-probe` may be dead weight. Keep it as defensive code or drop it?
-   (Lean: drop; document the listener-before-src ordering as the guarantee.)
+4. **`ready-probe`.** **Dropped.** The host attaches its `message` listener **before**
+   setting `iframe.src`, which closes the load-before-listener race by construction. That
+   ordering is the documented guarantee; the speculative `ready-probe` up-frame is removed
+   from the protocol.
 
-5. **Multi-card-per-iframe routing.** v1 = one card per iframe (or one warm iframe
-   reused for one card at a time via `update`). A future provider may want **N
-   concurrent cards in one iframe** (cheaper). The `cardId` on every event already
-   supports demux — but the down channel would need `render` to carry multiple
-   envelopes + a `remove(cardId)`. Defer to a v2, or design the down channel for it
-   now? (Lean: defer; `cardId` keeps the door open.)
+5. **Multi-card-per-iframe.** **Deferred to v2.** v1 = one card per iframe (a warm iframe
+   may be reused for one card at a time via `update(envelope)`). The `cardId` on every
+   event already supports demux, so the door stays open without designing the multi-render
+   down channel now.

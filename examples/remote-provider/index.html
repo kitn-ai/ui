@@ -1,0 +1,105 @@
+<!doctype html>
+<!--
+  examples/remote-provider/index.html
+  ====================================
+  REFERENCE PROVIDER IFRAME RUNTIME
+  ----------------------------------
+  Copy this file (and provider-entry.ts / provider.ts) as the starting point for
+  your own card-provider iframe. The key requirements for a real provider:
+
+    1. Serve from a different origin than the host page (cross-origin iframe).
+    2. Harden the CSP below — especially `frame-ancestors` (lock to your host's
+       exact origin, not a wildcard) and `script-src` (remove 'unsafe-eval').
+    3. Register one RemoteCardRenderer per card type you support.
+    4. Call createCardBridge({ root, renderers }).start() — that's all the wiring needed.
+
+  CSP REFERENCE — how a production provider should lock down its iframe
+  -----------------------------------------------------------------------
+  The meta tag below documents the TARGET security policy. For this dev example we
+  relax script-src and style-src so Vite's module scripts and HMR can run; a
+  production provider removes those relaxations.
+
+  NOTE: meta CSP does NOT support `frame-ancestors` in all browsers — use a real
+  HTTP `Content-Security-Policy` response header for `frame-ancestors` in production.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Remote Card Provider (dev)</title>
+
+    <!--
+      REFERENCE CSP — copy to your HTTP response header in production.
+
+      Production (tighten these):
+        default-src 'self';
+        script-src  'self';                          ← remove 'unsafe-inline', no CDN
+        style-src   'self' 'unsafe-inline';          ← unsafe-inline needed for shadow-DOM styles injected by the kit
+        img-src     'self' data:;
+        connect-src 'self';
+        frame-ancestors https://YOUR_HOST_ORIGIN;    ← exact origin, no wildcard
+        form-action 'self';
+
+      Dev relaxations (this example only — remove in production):
+        script-src  'self' 'unsafe-eval';            ← needed by Vite HMR
+        connect-src 'self' ws://localhost:6007;      ← Vite WS for HMR
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src  'self' 'unsafe-inline' 'unsafe-eval';
+        style-src   'self' 'unsafe-inline';
+        img-src     'self' data:;
+        connect-src 'self' ws://localhost:6007;
+        frame-ancestors http://localhost:6006 http://localhost:5173;
+        form-action 'self';
+      "
+    />
+
+    <style>
+      /*
+        The provider iframe has no UI of its own — it only contains the mounted card.
+        Zero margin/padding so the host can size the iframe to the card's content height
+        (the bridge reports resize events via CardHost.emit({ kind:'resize', height })).
+      */
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        font-family: system-ui, sans-serif;
+      }
+
+      /* dev-only: a faint outline so you can see the iframe boundary in isolation */
+      body { outline: 1px dashed rgba(100, 100, 255, 0.15); }
+
+      /* If browsed directly (not embedded), show a brief explanation */
+      #standalone-notice {
+        display: none;
+        padding: 16px;
+        color: #555;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      #root is the mount point the bridge hands to each RemoteCardRenderer.mount().
+      Keep it as the direct child of <body> — the height observer wraps this element.
+    -->
+    <div id="root"></div>
+
+    <!--
+      When viewed directly in the browser (not inside an iframe), the bridge will
+      wait for a hello postMessage that never comes — this notice explains why.
+    -->
+    <noscript>
+      <p style="padding:16px;color:#c00">
+        This provider iframe requires JavaScript. Enable JS and load it inside
+        the host page at http://localhost:6006.
+      </p>
+    </noscript>
+
+    <script type="module" src="./provider-entry.ts"></script>
+  </body>
+</html>

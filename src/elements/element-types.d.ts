@@ -390,6 +390,19 @@ export interface KcReasoningElement extends HTMLElement {
   markdown?: boolean;
 }
 
+export interface KcRemoteElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The remote card URL. Attribute: `src`. */
+  src?: string;
+  /** Exact provider origin (https: or http://localhost for dev). Attribute: `provider-origin`. */
+  providerOrigin?: string;
+  /** The card envelope to render. JS property only. */
+  envelope?: Record<string, unknown>;
+  /** Optional routing policy. JS property only. */
+  policy?: Record<string, unknown>;
+}
+
 export interface KcResizableElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -606,6 +619,7 @@ declare global {
     'kc-model-switcher': KcModelSwitcherElement;
     'kc-prompt-input': KcPromptInputElement;
     'kc-reasoning': KcReasoningElement;
+    'kc-remote': KcRemoteElement;
     'kc-resizable': KcResizableElement;
     'kc-resizable-item': KcResizableItemElement;
     'kc-response-stream': KcResponseStreamElement;
