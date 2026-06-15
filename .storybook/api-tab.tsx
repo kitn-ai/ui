@@ -46,13 +46,6 @@ const elements = elementMeta as unknown as ElementSpec[];
 const components = componentMeta as unknown as ComponentSpec[];
 
 const kebab = (n: string) => n.replace(/([A-Z])/g, '-$1').toLowerCase();
-// Matches Storybook's toId for our title segments (lowercase, strip non-alphanumerics).
-const storyKey = (group: string, name: string) => `${group.toLowerCase()}-${name.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
-// Set of valid "group-name" story-id prefixes that DO have a component spec, so
-// the API tab only appears where there's something to show.
-const componentPrefixes = components.map((c) => storyKey(c.group, c.name));
-const matchesComponentStory = (id: string) =>
-  componentPrefixes.some((p) => id === p || id.startsWith(`${p}-`));
 
 // Payloadless events (no detail / empty Record) show as a dash.
 const detailText = (d: string | null) => (!d || d === 'Record<string, never>' ? '—' : d);
@@ -295,14 +288,14 @@ function ApiPanel() {
     const el = elements.find((e) => e.displayName === title.slice(WC_PREFIX.length));
     if (el) return <Wrap><ElementPanel el={el} /></Wrap>;
   } else if (title) {
-    // "Components/<Name>" or "UI/<Name>" (possibly with deeper nesting — the
-    // component name is the second segment).
-    const [group, name] = title.split('/');
-    const comp = components.find((c) => c.group === group && c.name === name);
+    // Component name is always the last path segment — decoupled from the
+    // group-label tier (e.g. "SolidJS (advanced)/Primitives/Button" → "Button").
+    const segs = title.split('/');
+    const name = segs[segs.length - 1];
+    const comp = components.find((c) => c.name === name);
     if (comp) return <Wrap><ComponentPanel comp={comp} /></Wrap>;
-    // Compound family stories (e.g. "UI/Resizable") have no single export named
-    // after the title — render every member of the family instead.
-    const family = components.filter((c) => c.group === group && c.name.startsWith(name));
+    // Compound family (e.g. ".../Resizable") — render every member.
+    const family = components.filter((c) => c.name.startsWith(name));
     if (family.length > 0) return <Wrap>{family.map((c) => <ComponentPanel key={c.name} comp={c} />)}</Wrap>;
   }
   return <Wrap><div style={{ padding: 32, opacity: 0.6 }}>No API spec for this item.</div></Wrap>;
@@ -315,7 +308,7 @@ addons.register(ADDON_ID, () => {
     // Web Components (story ids `web-components-*`) + the SolidJS/UI components
     // that have a generated spec.
     match: ({ storyId }) =>
-      !!storyId && (storyId.startsWith('web-components-') || matchesComponentStory(storyId)),
+      !!storyId && (storyId.startsWith('web-components-') || storyId.startsWith('solidjs-advanced-')),
     render: ({ active }) => (active ? <ApiPanel /> : null),
   });
 });
