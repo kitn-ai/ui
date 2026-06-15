@@ -1,5 +1,63 @@
 # Changelog
 
+## [0.12.0](https://github.com/kitn-ai/chat/compare/@kitn.ai/chat-v0.11.0...@kitn.ai/chat-v0.12.0) (2026-06-15)
+
+
+### Features
+
+* **cards:** add applyResolution round-trip helper ([dde21e3](https://github.com/kitn-ai/chat/commit/dde21e30c5eb4ee083d2b0089af5214b7ecb67d0))
+* **cards:** add CardResolution re-hydration field to the card contract ([d15e743](https://github.com/kitn-ai/chat/commit/d15e7432b21a3b02f831990b96537c0238e1460d))
+* **cards:** add useCardResolution controller (prop &gt; optimistic precedence) ([c2a161b](https://github.com/kitn-ai/chat/commit/c2a161b4bdbcc67d514babad2c7d9addb8dcf7bc))
+* **cards:** chromed read-only resolved state + card-API consistency pass ([35166ee](https://github.com/kitn-ai/chat/commit/35166ee5ff05c35645d4ddb98a07f8e30539064c))
+* **cards:** forward resolution through dispatcher + element facades ([0f9ea6e](https://github.com/kitn-ai/chat/commit/0f9ea6ec4b5521daa02a3b0b7f3debbdcaae11af))
+* **cards:** kc-choice chromed read-only resolved state ([fb95710](https://github.com/kitn-ai/chat/commit/fb95710ed1f568469983bdce71a611975b2be781))
+* **cards:** kc-choice image hover preview for small thumbnails ([e69557b](https://github.com/kitn-ai/chat/commit/e69557bddf0759f6e74d8a1167510ad673785e3a))
+* **cards:** kc-confirm chromed read-only resolved state ([ba3c3a0](https://github.com/kitn-ai/chat/commit/ba3c3a0eb2a6389843ddf0b988fbb1a5abd098fa))
+* **cards:** kc-form chromed read-only summary (summarizeForm + dl view) ([e43cdce](https://github.com/kitn-ai/chat/commit/e43cdcee0045b7dafb7a92d42d108bf86d09559c))
+* **cards:** kc-tasks chromed read-only resolved summary ([d2a2890](https://github.com/kitn-ai/chat/commit/d2a28909ae7325869889f1756dd7fc1cce369af7))
+* **cards:** redesign kc-choice — select+Submit, list-only, unified allowOther ([f3dd422](https://github.com/kitn-ai/chat/commit/f3dd422b3511480715a35d4f5276adfb3beeccbb))
+* **primitives:** shared use-resize-observer; reasoning.tsx consumes it ([a42baec](https://github.com/kitn-ai/chat/commit/a42baecd1490c2c2ed1373259c942d1ea9f92cc9))
+* **remote:** &lt;kc-remote-card&gt; element facade ([bdd6626](https://github.com/kitn-ai/chat/commit/bdd6626e662554da62878f3d564398a00e5e1669))
+* **remote:** AG-UI iframe transport — Phase 1 (host SDK + provider runtime + kc-remote) ([3388cb5](https://github.com/kitn-ai/chat/commit/3388cb5a869762dec1b54cd407ae4dd339e87799))
+* **remote:** AG-UI iframe transport — Phase 2 (cross-origin tests, CI, stories, docs) ([dfe6e5c](https://github.com/kitn-ai/chat/commit/dfe6e5ca4e9947afe16baf9a32a5626e1f8a322b))
+* **remote:** host embed SDK (mountRemoteCard + bridge state machine) ([c8f1ce7](https://github.com/kitn-ai/chat/commit/c8f1ce76fa158de5aa3aeea68fd2ee2138a1353d))
+* **remote:** inbound validation (proto-pollution + known-verb guards) ([b75ff85](https://github.com/kitn-ai/chat/commit/b75ff85e2cedb8c90e176656fb52d117a94a0986))
+* **remote:** origin guards, cross-origin precondition, log redaction ([6fa093e](https://github.com/kitn-ai/chat/commit/6fa093ec73182cc0da5e10ee8b3d698e5d22ad60))
+* **remote:** provider iframe runtime (createCardBridge + RemoteCardRenderer) ([0b2dbb7](https://github.com/kitn-ai/chat/commit/0b2dbb7cd3ba8ab4268ad85b9528960a5bcecf86))
+* **remote:** public host + provider entry points ([e99e463](https://github.com/kitn-ai/chat/commit/e99e46392c78a26e7e7df89cc569cd0d28085fde))
+* **remote:** version negotiation (validated, highest-common) ([9bc4266](https://github.com/kitn-ai/chat/commit/9bc42662f7446443f9da46fd22ab9c0d95e775eb))
+* **remote:** wire protocol types + packer + direction guard ([9cd4004](https://github.com/kitn-ai/chat/commit/9cd4004082c7c5086ed512d7da67c812d8bb84d6))
+* **spec:** add Svelte usage tab + CDN-based HTML snippet ([8c23189](https://github.com/kitn-ai/chat/commit/8c231897b8b45d072d737f14ba570a60b7202962))
+* **spec:** generate displayName for every element ([d5ea56e](https://github.com/kitn-ai/chat/commit/d5ea56eaee90d32d0ee4774858e288ae8b8e8c0d))
+* **spec:** generate per-framework usage snippets ([26fa861](https://github.com/kitn-ai/chat/commit/26fa8615159d5bd6288566607fc18499eb505e8e))
+* **spec:** multi-line framework usage snippets for readability ([6d03add](https://github.com/kitn-ai/chat/commit/6d03addce4f658f6f71479bf407837d2b52d1880))
+* **storybook:** hide the SolidJS (advanced) tier from the default sidebar ([ca692a5](https://github.com/kitn-ai/chat/commit/ca692a5ad2cdf8218e99f20dd31690555c17796f))
+* **storybook:** per-framework usage code-tabs on the API tab ([9d57949](https://github.com/kitn-ai/chat/commit/9d57949dca531bba707d3d70d5cd98f30a0bb5a0))
+* **storybook:** SolidJS tier always present + collapsed (drop hide+toggle) ([61e03bc](https://github.com/kitn-ai/chat/commit/61e03bc46fb222f9f8b4103fcfa457b9945a238b))
+* **storybook:** toolbar toggle to reveal the SolidJS (advanced) tier ([1163f0c](https://github.com/kitn-ai/chat/commit/1163f0c00d4f19e8b474e8c6bcf4938c2f607734))
+* **ui:** HoverCard placement prop; kc-choice preview right-start + larger ([9897759](https://github.com/kitn-ai/chat/commit/9897759a70403451727060efa1e2bcce2cae7bc6))
+
+
+### Bug Fixes
+
+* **cards:** kc-choice store resolution payload consistently with the emitted event ([7012a67](https://github.com/kitn-ai/chat/commit/7012a67f1c47bf92b2c90f0f34dbd603d16bb354))
+* **cards:** kc-confirm store resolution payload consistently with the emitted event ([2f05efc](https://github.com/kitn-ai/chat/commit/2f05efc21ce708d8726517255f82533cdaefa279))
+* **docs:** bare React names in llms.txt headers; hide API tab on SolidJS Overview ([bca01d9](https://github.com/kitn-ai/chat/commit/bca01d981e8ef779e204c32c7f16ba13909ab59a))
+* **docs:** web-components.md headers use bare React wrapper names ([59a52ec](https://github.com/kitn-ai/chat/commit/59a52ec58a446643d5268a85e58bd95c6740258d))
+* **examples:** correct Conversations event prop + Vue isCustomElement prefix ([ac55680](https://github.com/kitn-ai/chat/commit/ac556808e4eaed27f07eca1681f8dc065d51c72f))
+* **remote:** deployed kc-remote stories render the real card (theme-aware) ([cfd3d45](https://github.com/kitn-ai/chat/commit/cfd3d450089e77161ad6a8bbb6b411e05bde2b8f))
+* **remote:** deployed kc-remote stories render the real card directly (theme-aware); extract provider renderers ([d4f9f9f](https://github.com/kitn-ai/chat/commit/d4f9f9fec11a77a42d0414e957ca2448632cd878))
+* **remote:** kc-remote reacts to theme changes; document remount-on-theme; reconcile spec ([0e2c0c6](https://github.com/kitn-ai/chat/commit/0e2c0c64fdf406a5c21d261e665569ca3548dbba))
+* **remote:** kc-remote stories degrade gracefully on deployed Storybook ([d488035](https://github.com/kitn-ai/chat/commit/d48803522c1d24d3bb66b9d51a223abdf55abddf))
+* **remote:** kc-remote stories degrade gracefully on static/deployed Storybook ([923688d](https://github.com/kitn-ai/chat/commit/923688d0a19b22a4025632a8e83eda27be03455d))
+* **remote:** re-render on context only when theme changes (silent token/locale refresh) ([175db26](https://github.com/kitn-ai/chat/commit/175db26c8ba73529b641a25afd255c32a9b0178f))
+* **remote:** restart resize observer per mount; guard message handler from throws ([2b0e3e8](https://github.com/kitn-ai/chat/commit/2b0e3e8bcdb647218f68f64da4f8d4843c1dab8d))
+* **remote:** restrict pre-OPEN buffering to connecting state; harden Retry ([350e3ce](https://github.com/kitn-ai/chat/commit/350e3cec7e0f11ae1d4ce2453cf27ac5d5ac8830))
+* **spec:** narrow framework-usage catch to ENOENT; skip empty html script block ([b1e30c9](https://github.com/kitn-ai/chat/commit/b1e30c9c6c6a3461c46146148e669a4eabbd219b))
+* **storybook:** block-display code pre, reconcile framework tab state ([31bc267](https://github.com/kitn-ai/chat/commit/31bc267858ff2501b574dc7025b8f60793fdeace))
+* **storybook:** show Canvas + API tabs only on component stories, Docs-only on doc pages ([c7d9c8d](https://github.com/kitn-ai/chat/commit/c7d9c8d98de85700e0d35bc2e7ccf0e7b56458a2))
+* **storybook:** slash-free API tab id to satisfy aria-controls (axe) ([c29ff8e](https://github.com/kitn-ai/chat/commit/c29ff8e5ccea19dced8b4fbcacd6b8c2642ecfb7))
+
 ## [0.11.0](https://github.com/kitn-ai/chat/compare/@kitn.ai/chat-v0.10.0...@kitn.ai/chat-v0.11.0) (2026-06-14)
 
 
