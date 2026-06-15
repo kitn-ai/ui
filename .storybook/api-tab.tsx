@@ -23,8 +23,8 @@ let lastFramework = 'html';
 // tab stays focused on the live examples and the (often large) generated spec
 // lives on its own tab. Manager addon = React, built separately from the Solid
 // stories, so there's no framework clash. Renders from the generated metas:
-//   - Web Components/<tag>     → element-meta.json   (properties/attributes/events)
-//   - Components|UI/<Name>     → component-meta.json  (props/callbacks/slots)
+//   - Components/<displayName>             → element-meta.json   (properties/attributes/events)
+//   - Solid (Advanced)/Elements|Primitives → component-meta.json  (props/callbacks/slots)
 
 const ADDON_ID = 'kitn/api';
 const TAB_ID = 'kitn-api-tab';
@@ -290,7 +290,7 @@ function ApiPanel() {
     if (el) return <Wrap><ElementPanel el={el} /></Wrap>;
   } else if (title) {
     // Component name is always the last path segment — decoupled from the
-    // group-label tier (e.g. "SolidJS (advanced)/Primitives/Button" → "Button").
+    // group-label tier (e.g. "Solid (Advanced)/Primitives/Button" → "Button").
     const segs = title.split('/');
     const name = segs[segs.length - 1];
     const comp = components.find((c) => c.name === name);
