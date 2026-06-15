@@ -136,7 +136,7 @@ Prefer the **imperative** SDK when you manage the lifecycle yourself (theme refr
 cards in one warm frame):
 
 ```ts
-import { mountRemoteCard, applyResolution } from '@kitn.ai/chat';
+import { mountRemoteCard } from '@kitn.ai/chat';
 
 const handle = mountRemoteCard({
   container: document.querySelector('#slot'),
@@ -156,6 +156,13 @@ handle.destroy();                                     // teardown + remove the f
 dev) the iframe is pinned to. `src` is the provider page URL (must be on `providerOrigin`).
 `envelope` is the `CardEnvelope` to render. `policy` is the optional `CardPolicy`. `context`
 carries theme/locale/`a11y` and a short-lived `authToken`.
+
+**Theme changes remount; token/locale refreshes are silent (v1).** A host **theme change
+re-renders (remounts) the remote card**, so any in-progress remote-card state (e.g. a
+half-filled form) **resets on a theme toggle** — renderers apply theme imperatively at mount,
+and v1 has no in-place renderer theme hook yet. **Token / locale / `a11y` refreshes are
+silent** (no remount — renderers read `host.context()` on demand). A future refinement is a
+renderer context subscription for live re-theme without remount.
 
 **Security model.** The host mints a per-instance **nonce** and pins every inbound frame on
 **origin + source window + nonce + negotiated protocol version** — a frame failing any check

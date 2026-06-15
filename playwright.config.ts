@@ -16,6 +16,10 @@ import { defineConfig, devices } from '@playwright/test';
  * webServers use the pinned LOCAL vite bin (via npm scripts), never bare `npx`, for
  * hermetic CI. `reuseExistingServer:!CI` lets you keep `dev:host`/`dev:provider`
  * running locally while iterating.
+ *
+ * WARNING: `dev:host` and Storybook BOTH bind :6006 — do NOT run e2e locally while a
+ * Storybook dev server is up, or Playwright (reuseExistingServer) will reuse Storybook
+ * as the host and the suite will fail confusingly. Stop Storybook first.
  */
 export default defineConfig({
   testDir: 'tests/e2e',
