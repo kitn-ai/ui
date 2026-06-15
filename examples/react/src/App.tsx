@@ -8,7 +8,7 @@
  *     slashCommands) are passed as React props and assigned as live DOM
  *     *properties* (NOT stringified to attributes);
  *   - boolean props (loading) reflect correctly;
- *   - events are `on<Event>` handlers (onSubmit, onModelchange, onSelect, …)
+ *   - events are `on<Event>` handlers (onSubmit, onModelchange, onConversationselect, …)
  *     wired to the elements' CustomEvents under the hood;
  *   - refs are forwarded; `theme`/`style`/`className`/`id` pass through.
  *
@@ -278,7 +278,7 @@ export default function App() {
           conversations={conversations}
           activeId={activeId}
           theme={theme}
-          onSelect={handleSelect}
+          onConversationselect={handleSelect}
           onNewchat={handleNewChat}
           onTogglesidebar={handleToggleSidebar}
           style={{

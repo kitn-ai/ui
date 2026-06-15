@@ -6,7 +6,7 @@ A minimal, runnable Angular 19 standalone app demonstrating how to use the
 Angular binds to custom-element DOM properties with `[prop]="value"` and
 listens for CustomEvents with `(eventname)="handler($event)"`.  Adding
 `CUSTOM_ELEMENTS_SCHEMA` to the component is all that's needed to allow the
-`kitn-*` tags.
+`kc-*` tags.
 
 ## Prerequisites
 

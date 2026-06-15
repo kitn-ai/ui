@@ -11,7 +11,7 @@
  *     to Shadow-DOM web components.
  *   - (conversationselect), (submit), (modelchange), (sidebartoggle) listen to the
  *     kit's CustomEvents; `($event as CustomEvent).detail` carries the payload.
- *   - CUSTOM_ELEMENTS_SCHEMA tells Angular to allow unknown `kitn-*` element tags.
+ *   - CUSTOM_ELEMENTS_SCHEMA tells Angular to allow unknown `kc-*` element tags.
  *   - `@kitn.ai/chat/elements` is imported once (main.ts side-effect) to register
  *     the custom elements globally.
  */
@@ -78,7 +78,7 @@ const MOON_SVG =
 @Component({
   selector: 'app-root',
   standalone: true,
-  // CUSTOM_ELEMENTS_SCHEMA is required so Angular accepts the kitn-* tags
+  // CUSTOM_ELEMENTS_SCHEMA is required so Angular accepts the kc-* tags
   // without treating them as unknown Angular components.
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './app.component.html',
