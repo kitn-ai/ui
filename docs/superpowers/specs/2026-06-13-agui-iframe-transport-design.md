@@ -29,6 +29,131 @@ up, two thin pieces) and the existing iframe plumbing in `src/components/artifac
 
 ---
 
+## v1 Hardening addendum (2026-06-14, post review-panel)
+
+A 4-lens review panel (security / protocol / architecture / testability) raised concrete
+gaps. The items below are **authoritative for v1 and supersede** any conflicting prose or
+code in the original sections that follow. (Consensus moved confidence from ~64 to ~88
+once these are specified.)
+
+### H-A. Frame identity: per-bridge nonce + `event.source` pin (security C2 + protocol H3/H1)
+Origin alone does **not** identify a sender — same-origin sibling frames/popups, or a
+stale timed-out iframe, can pass `event.origin` checks. Therefore:
+- The host mints a cryptographically-random **`nonce`** per bridge instance
+  (`crypto.getRandomValues`) and includes it in the `hello` frame. The runtime MUST echo
+  the exact nonce in `ready` **and in every subsequent up-frame**. The host drops any frame
+  whose `nonce` ≠ the current bridge nonce.
+- The host captures `iframe.contentWindow` at mount and asserts
+  `event.source === iframe.contentWindow` on **every** inbound message, in addition to
+  origin. The runtime locks the host **source window** (`event.source` of the first valid
+  `hello`, which must equal `window.parent`) and rejects later frames from a different
+  source.
+- `destroy()`/timeout/reload increments the bridge **generation** (new nonce); stale frames
+  are rejected by construction. This is the legitimate instance-correlation id.
+
+### H-B. Drop `seq` and `ack` from v1 (protocol H2)
+postMessage is ordered per channel; `seq` was correlation-only and `ack` had no producer or
+consumer. **Remove both from the wire types and `pack()`.** Frame identity is handled by
+H-A's nonce. (Reserve request/response correlation for a v2 note.)
+
+### H-C. `pack()` stamps the negotiated version (protocol M4)
+`pack()` must stamp the **negotiated** version, not the author-time `CARD_CONTRACT_VERSION`.
+Use a per-bridge `packer` closed over the negotiated version + nonce. Receivers drop frames
+whose `version` ≠ negotiated version (`bad-frame`). Validate version strings match
+`/^[0-9]+$/` before `Number()` coercion in `negotiateVersion`; the host asserts
+`ready.acceptedVersion ∈ hostSupportedVersions`.
+
+### H-D. Direction-aware guard + real schema validation before routing (security H2)
+`isCardWireFrame` must check `message.dir`: the **host accepts only `dir:'up'`**, the
+**runtime only `dir:'down'`** (this is the echo/reflection defense the original prose
+claimed but the shown guard omitted). After the structural guard, validate the
+`CardEvent` shape (and `submit`/`action` payloads against the card type's schema via the
+existing `src/primitives/card-validate.ts`) **before** calling `routeCardEvent` — drop +
+warn on failure. Reject payloads containing `__proto__`/`constructor`/`prototype` keys
+(prototype-pollution guard) since nested `data` is forwarded to app handlers.
+
+### H-E. Formal bridge state machine + pre-OPEN outbound buffer (protocol C1/C2/H5/M2)
+Implement an explicit state machine `connecting → open → (error|closed)` driven by
+events `{load, ready, fault, timeout, update, updateContext, destroy, inbound}`:
+- Handle methods called while `connecting` **buffer with latest-wins coalescing**
+  (`render` keeps only the newest pending envelope; `context` the newest; `teardown`/
+  `destroy` supersede all). Flush in order `context → render` on entering `open`.
+- `updateContext(Partial<CardContext>)` merges **locally**, shallow at top level but
+  **replacing `theme`/`theme.tokens` wholesale** (no partial token merges). The wire
+  `context` frame always carries a **full resolved** `CardContext` (so the runtime's
+  `CardHost.context()` is always complete, per the contract's non-optional return).
+- `render` re-render rules: same `envelope.id` → renderer update path (dispose+remount if
+  the renderer has none); different id → dispose current (sync disposer), clear root, mount
+  new. Drop in-flight events whose `cardId` ≠ current.
+- `destroy()`: set a tombstone generation (rejects all future inbound), best-effort
+  `teardown` only if `open`, remove listeners/iframe/timers; second call is a no-op.
+
+### H-F. Enforce the cross-origin precondition (security C1, CRITICAL)
+`allow-same-origin` is only safe because the frame is cross-origin to the host. Therefore
+`mountRemoteCard` MUST **fail closed** (throw, do not mount) if
+`new URL(src).origin === window.location.origin` or `providerOrigin === window.location.origin`,
+and MUST require `new URL(src).origin === providerOrigin`. Unit-tested in `origin.ts`.
+
+### H-G. Drop `allow-popups`; host mediates all opens (security M1)
+Remove `allow-popups` from the default sandbox. The host's `window.open(_, _, 'noopener,noreferrer')`
+(via the `open` verb in `routeCardEvent`) works regardless of the frame sandbox and keeps
+scheme validation in one place. A self-opened popup would be a same-origin sibling
+(re-introducing H-A's risk) — so it's out.
+
+### H-H. authToken redaction (security H3)
+`authToken` must be redacted from **all** logging (a shared `redactFrame()` used at every
+`console.warn`/log site) and `fault`/`error` messages must be **non-reflective** (never echo
+received `context`/`envelope` content). Provider obligation + a test.
+
+### H-I. Host anti-framing obligation (security H4)
+Add to the host's CSP obligations: the host page MUST set `frame-ancestors 'self'`/`'none'`
+(or `X-Frame-Options`) so it can't itself be clickjacked while showing a real card. The
+provider's `frame-ancestors` must list the exact host origin (no wildcards), and
+`form-action 'self'` is a **hard** provider obligation (not just an example).
+
+### H-J. Auto-height: observe a content-sized wrapper + hysteresis + maxHeight fixed-point (protocol H4)
+`observeContentHeight` observes a **content-sized inner wrapper** (`height:max-content`/auto),
+never a host-stretched root, to avoid feedback loops. Emit only when
+`|new − lastEmitted| > THRESHOLD` (≈1–2px). The host clamps to `maxHeight` and, once clamped,
+treats "at maxHeight" as a fixed point (stops reacting to further grow; the frame scrolls).
+
+### H-K. `<kc-remote-card>` scope (architecture #1)
+"Drop-in interchangeable with native cards" applies to the **event-routing path only**:
+`<kc-remote-card>` validates (origin+source+nonce+schema) **before** re-emitting the
+bubbling `kc-card` event, so it routes through the same host listener. It mounts
+**standalone** (alongside, not inside, `<kc-cards>`). Injecting remote cards into a
+`<kc-cards>` list (the `type→tag` map can't carry `src`/`providerOrigin`) is a **v2**
+concern. Rename the provider-side renderer interface to **`RemoteCardRenderer`** to avoid
+colliding with the existing exported `CardRenderer` Solid component.
+
+### H-L. Build & test plan (architecture #2 + testability)
+- **Provider subpath:** ship `@kitn.ai/chat/provider` as a **second build entry** —
+  `vite.config.provider.ts` (entry `src/remote/provider-runtime.ts`, `emptyOutDir:false`,
+  output `dist/kitn-chat-provider.es.js`); `package.json build` runs both configs in
+  sequence; add the `./provider` export. The provider bundle contains **only** the bridge +
+  `wire`/`origin`/`version` (no SolidJS, no `<kc-*>`); a provider imports the card elements
+  separately from `@kitn.ai/chat/elements`. State this boundary explicitly.
+- **jsdom handshake tests:** jsdom delivers `event.origin === ""` for `postMessage()`. Tests
+  MUST dispatch `new MessageEvent('message', { data, origin, source })` directly to exercise
+  real origin/source checks. Stub `ResizeObserver` (absent in jsdom) via `vi.stubGlobal`.
+- **Cross-origin matrix:** use **standalone Playwright** (`playwright.config.ts` with two
+  `webServer` entries — Storybook `:6006` + `vite examples/remote-provider --port :6007`),
+  **not** `@vitest/browser-playwright`. Auto-height `clientHeight` assertions live here
+  (jsdom has no layout). Add a `dev:provider` script + a CI `test.yml` (none exists today).
+- **Storybook stories:** `staticDirs` is same-origin only — the cross-origin demo needs the
+  separate `:6007` server (a `concurrently` script). Storybook stories may run same-origin
+  for visual/interaction demos; the **security matrix** is proven by standalone Playwright.
+- **axe:** scope to the **host** page; `context.exclude:[['iframe']]` (axe can't read a
+  cross-origin frame's tree — that's the provider's a11y obligation).
+
+### H-M. Implementation will touch `reasoning.tsx` (architecture #5)
+The "no changes to existing source" non-goal was design-phase only. Extracting
+`use-resize-observer.ts` updates `reasoning.tsx` to consume it (no behavior change). The new
+primitive is just `observe(el, (height)=>void) → disposer`; the textarea-only `useAutoResize`
+is left untouched (Resolved decision #1).
+
+---
+
 ## Problem
 
 The agent/server wants to render a card the host app does **not** pre-bundle. The
@@ -593,7 +718,8 @@ renderer for the envelope's `type`, and lets the runtime own the bridge.
 ```ts
 import { type CardEnvelope, type CardContext, type CardHost } from '../primitives/card-contract';
 
-export interface CardRenderer {
+export interface RemoteCardRenderer {  // renamed (was CardRenderer) — see H-K; avoids
+  // colliding with the exported Solid <CardRenderer> component.
   /** The card `type` this renderer handles. */
   type: string;
   /** Mount into `root`, given the envelope + a CardHost (context() + emit()).
@@ -605,7 +731,7 @@ export interface CreateCardBridgeOptions {
   /** Element the card mounts into + whose height is observed. */
   root: HTMLElement;
   /** Renderers by card type. Unknown type → contract's unsupported placeholder. */
-  renderers: CardRenderer[];
+  renderers: RemoteCardRenderer[];
   /** Versions this runtime supports (default [CARD_CONTRACT_VERSION]). */
   supportedVersions?: string[];
 }
