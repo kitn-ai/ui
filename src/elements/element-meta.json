@@ -176,7 +176,7 @@
       {
         "name": "Artifact",
         "group": "Components",
-        "storyId": "components-artifact--docs"
+        "storyId": "solidjs-advanced-components-artifact--docs"
       }
     ],
     "tokens": []
@@ -252,47 +252,47 @@
       {
         "name": "Attachments",
         "group": "Components",
-        "storyId": "components-attachments--docs"
+        "storyId": "solidjs-advanced-components-attachments--docs"
       },
       {
         "name": "Attachment",
         "group": "Components",
-        "storyId": "components-attachment--docs"
+        "storyId": "solidjs-advanced-components-attachment--docs"
       },
       {
         "name": "AttachmentPreview",
         "group": "Components",
-        "storyId": "components-attachmentpreview--docs"
+        "storyId": "solidjs-advanced-components-attachmentpreview--docs"
       },
       {
         "name": "AttachmentInfo",
         "group": "Components",
-        "storyId": "components-attachmentinfo--docs"
+        "storyId": "solidjs-advanced-components-attachmentinfo--docs"
       },
       {
         "name": "AttachmentRemove",
         "group": "Components",
-        "storyId": "components-attachmentremove--docs"
+        "storyId": "solidjs-advanced-components-attachmentremove--docs"
       },
       {
         "name": "AttachmentHoverCard",
         "group": "Components",
-        "storyId": "components-attachmenthovercard--docs"
+        "storyId": "solidjs-advanced-components-attachmenthovercard--docs"
       },
       {
         "name": "AttachmentHoverCardTrigger",
         "group": "Components",
-        "storyId": "components-attachmenthovercardtrigger--docs"
+        "storyId": "solidjs-advanced-components-attachmenthovercardtrigger--docs"
       },
       {
         "name": "AttachmentHoverCardContent",
         "group": "Components",
-        "storyId": "components-attachmenthovercardcontent--docs"
+        "storyId": "solidjs-advanced-components-attachmenthovercardcontent--docs"
       },
       {
         "name": "AttachmentEmpty",
         "group": "Components",
-        "storyId": "components-attachmentempty--docs"
+        "storyId": "solidjs-advanced-components-attachmentempty--docs"
       }
     ],
     "tokens": []
@@ -341,7 +341,7 @@
       {
         "name": "Card",
         "group": "Components",
-        "storyId": "components-card--docs"
+        "storyId": "solidjs-advanced-components-card--docs"
       }
     ],
     "tokens": []
@@ -381,7 +381,7 @@
       {
         "name": "CardFallback",
         "group": "Components",
-        "storyId": "components-cardfallback--docs"
+        "storyId": "solidjs-advanced-components-cardfallback--docs"
       }
     ],
     "tokens": []
@@ -406,27 +406,27 @@
       {
         "name": "ChainOfThought",
         "group": "Components",
-        "storyId": "components-chainofthought--docs"
+        "storyId": "solidjs-advanced-components-chainofthought--docs"
       },
       {
         "name": "ChainOfThoughtStep",
         "group": "Components",
-        "storyId": "components-chainofthoughtstep--docs"
+        "storyId": "solidjs-advanced-components-chainofthoughtstep--docs"
       },
       {
         "name": "ChainOfThoughtTrigger",
         "group": "Components",
-        "storyId": "components-chainofthoughttrigger--docs"
+        "storyId": "solidjs-advanced-components-chainofthoughttrigger--docs"
       },
       {
         "name": "ChainOfThoughtContent",
         "group": "Components",
-        "storyId": "components-chainofthoughtcontent--docs"
+        "storyId": "solidjs-advanced-components-chainofthoughtcontent--docs"
       },
       {
         "name": "ChainOfThoughtItem",
         "group": "Components",
-        "storyId": "components-chainofthoughtitem--docs"
+        "storyId": "solidjs-advanced-components-chainofthoughtitem--docs"
       }
     ],
     "tokens": []
@@ -654,7 +654,7 @@
       {
         "name": "ChatThread",
         "group": "Components",
-        "storyId": "components-chatthread--docs"
+        "storyId": "solidjs-advanced-components-chatthread--docs"
       }
     ],
     "tokens": []
@@ -711,17 +711,17 @@
       {
         "name": "Checkpoint",
         "group": "Components",
-        "storyId": "components-checkpoint--docs"
+        "storyId": "solidjs-advanced-components-checkpoint--docs"
       },
       {
         "name": "CheckpointIcon",
         "group": "Components",
-        "storyId": "components-checkpointicon--docs"
+        "storyId": "solidjs-advanced-components-checkpointicon--docs"
       },
       {
         "name": "CheckpointTrigger",
         "group": "Components",
-        "storyId": "components-checkpointtrigger--docs"
+        "storyId": "solidjs-advanced-components-checkpointtrigger--docs"
       }
     ],
     "tokens": []
@@ -769,7 +769,7 @@
       {
         "name": "ChoiceCard",
         "group": "Components",
-        "storyId": "components-choicecard--docs"
+        "storyId": "solidjs-advanced-components-choicecard--docs"
       }
     ],
     "tokens": []
@@ -829,12 +829,12 @@
       {
         "name": "CodeBlock",
         "group": "Components",
-        "storyId": "components-codeblock--docs"
+        "storyId": "solidjs-advanced-components-codeblock--docs"
       },
       {
         "name": "CodeBlockCode",
         "group": "Components",
-        "storyId": "components-codeblockcode--docs"
+        "storyId": "solidjs-advanced-components-codeblockcode--docs"
       }
     ],
     "tokens": [
@@ -893,7 +893,7 @@
       {
         "name": "ConfirmCard",
         "group": "Components",
-        "storyId": "components-confirmcard--docs"
+        "storyId": "solidjs-advanced-components-confirmcard--docs"
       }
     ],
     "tokens": []
@@ -917,52 +917,52 @@
       {
         "name": "Context",
         "group": "Components",
-        "storyId": "components-context--docs"
+        "storyId": "solidjs-advanced-components-context--docs"
       },
       {
         "name": "ContextTrigger",
         "group": "Components",
-        "storyId": "components-contexttrigger--docs"
+        "storyId": "solidjs-advanced-components-contexttrigger--docs"
       },
       {
         "name": "ContextContent",
         "group": "Components",
-        "storyId": "components-contextcontent--docs"
+        "storyId": "solidjs-advanced-components-contextcontent--docs"
       },
       {
         "name": "ContextContentHeader",
         "group": "Components",
-        "storyId": "components-contextcontentheader--docs"
+        "storyId": "solidjs-advanced-components-contextcontentheader--docs"
       },
       {
         "name": "ContextContentBody",
         "group": "Components",
-        "storyId": "components-contextcontentbody--docs"
+        "storyId": "solidjs-advanced-components-contextcontentbody--docs"
       },
       {
         "name": "ContextContentFooter",
         "group": "Components",
-        "storyId": "components-contextcontentfooter--docs"
+        "storyId": "solidjs-advanced-components-contextcontentfooter--docs"
       },
       {
         "name": "ContextInputUsage",
         "group": "Components",
-        "storyId": "components-contextinputusage--docs"
+        "storyId": "solidjs-advanced-components-contextinputusage--docs"
       },
       {
         "name": "ContextOutputUsage",
         "group": "Components",
-        "storyId": "components-contextoutputusage--docs"
+        "storyId": "solidjs-advanced-components-contextoutputusage--docs"
       },
       {
         "name": "ContextReasoningUsage",
         "group": "Components",
-        "storyId": "components-contextreasoningusage--docs"
+        "storyId": "solidjs-advanced-components-contextreasoningusage--docs"
       },
       {
         "name": "ContextCacheUsage",
         "group": "Components",
-        "storyId": "components-contextcacheusage--docs"
+        "storyId": "solidjs-advanced-components-contextcacheusage--docs"
       }
     ],
     "tokens": []
@@ -1023,7 +1023,7 @@
       {
         "name": "ConversationList",
         "group": "Components",
-        "storyId": "components-conversationlist--docs"
+        "storyId": "solidjs-advanced-components-conversationlist--docs"
       }
     ],
     "tokens": [
@@ -1058,7 +1058,7 @@
       {
         "name": "Embed",
         "group": "Components",
-        "storyId": "components-embed--docs"
+        "storyId": "solidjs-advanced-components-embed--docs"
       }
     ],
     "tokens": []
@@ -1092,32 +1092,32 @@
       {
         "name": "Empty",
         "group": "Components",
-        "storyId": "components-empty--docs"
+        "storyId": "solidjs-advanced-components-empty--docs"
       },
       {
         "name": "EmptyHeader",
         "group": "Components",
-        "storyId": "components-emptyheader--docs"
+        "storyId": "solidjs-advanced-components-emptyheader--docs"
       },
       {
         "name": "EmptyMedia",
         "group": "Components",
-        "storyId": "components-emptymedia--docs"
+        "storyId": "solidjs-advanced-components-emptymedia--docs"
       },
       {
         "name": "EmptyTitle",
         "group": "Components",
-        "storyId": "components-emptytitle--docs"
+        "storyId": "solidjs-advanced-components-emptytitle--docs"
       },
       {
         "name": "EmptyDescription",
         "group": "Components",
-        "storyId": "components-emptydescription--docs"
+        "storyId": "solidjs-advanced-components-emptydescription--docs"
       },
       {
         "name": "EmptyContent",
         "group": "Components",
-        "storyId": "components-emptycontent--docs"
+        "storyId": "solidjs-advanced-components-emptycontent--docs"
       }
     ],
     "tokens": []
@@ -1155,7 +1155,7 @@
       {
         "name": "FeedbackBar",
         "group": "Components",
-        "storyId": "components-feedbackbar--docs"
+        "storyId": "solidjs-advanced-components-feedbackbar--docs"
       }
     ],
     "tokens": []
@@ -1203,7 +1203,7 @@
       {
         "name": "FileTree",
         "group": "Components",
-        "storyId": "components-filetree--docs"
+        "storyId": "solidjs-advanced-components-filetree--docs"
       }
     ],
     "tokens": []
@@ -1261,12 +1261,12 @@
       {
         "name": "FileUpload",
         "group": "Components",
-        "storyId": "components-fileupload--docs"
+        "storyId": "solidjs-advanced-components-fileupload--docs"
       },
       {
         "name": "FileUploadTrigger",
         "group": "Components",
-        "storyId": "components-fileuploadtrigger--docs"
+        "storyId": "solidjs-advanced-components-fileuploadtrigger--docs"
       }
     ],
     "tokens": []
@@ -1314,7 +1314,7 @@
       {
         "name": "Form",
         "group": "Components",
-        "storyId": "components-form--docs"
+        "storyId": "solidjs-advanced-components-form--docs"
       }
     ],
     "tokens": []
@@ -1363,7 +1363,7 @@
       {
         "name": "Image",
         "group": "Components",
-        "storyId": "components-image--docs"
+        "storyId": "solidjs-advanced-components-image--docs"
       }
     ],
     "tokens": []
@@ -1395,7 +1395,7 @@
       {
         "name": "LinkPreview",
         "group": "Components",
-        "storyId": "components-linkpreview--docs"
+        "storyId": "solidjs-advanced-components-linkpreview--docs"
       }
     ],
     "tokens": []
@@ -1437,7 +1437,7 @@
       {
         "name": "Loader",
         "group": "Components",
-        "storyId": "components-loader--docs"
+        "storyId": "solidjs-advanced-components-loader--docs"
       }
     ],
     "tokens": []
@@ -1489,7 +1489,7 @@
       {
         "name": "Markdown",
         "group": "Components",
-        "storyId": "components-markdown--docs"
+        "storyId": "solidjs-advanced-components-markdown--docs"
       }
     ],
     "tokens": []
@@ -1572,62 +1572,62 @@
       {
         "name": "Message",
         "group": "Components",
-        "storyId": "components-message--docs"
+        "storyId": "solidjs-advanced-components-message--docs"
       },
       {
         "name": "MessageContent",
         "group": "Components",
-        "storyId": "components-messagecontent--docs"
+        "storyId": "solidjs-advanced-components-messagecontent--docs"
       },
       {
         "name": "MessageActions",
         "group": "Components",
-        "storyId": "components-messageactions--docs"
+        "storyId": "solidjs-advanced-components-messageactions--docs"
       },
       {
         "name": "Reasoning",
         "group": "Components",
-        "storyId": "components-reasoning--docs"
+        "storyId": "solidjs-advanced-components-reasoning--docs"
       },
       {
         "name": "ReasoningTrigger",
         "group": "Components",
-        "storyId": "components-reasoningtrigger--docs"
+        "storyId": "solidjs-advanced-components-reasoningtrigger--docs"
       },
       {
         "name": "ReasoningContent",
         "group": "Components",
-        "storyId": "components-reasoningcontent--docs"
+        "storyId": "solidjs-advanced-components-reasoningcontent--docs"
       },
       {
         "name": "Tool",
         "group": "Components",
-        "storyId": "components-tool--docs"
+        "storyId": "solidjs-advanced-components-tool--docs"
       },
       {
         "name": "Attachments",
         "group": "Components",
-        "storyId": "components-attachments--docs"
+        "storyId": "solidjs-advanced-components-attachments--docs"
       },
       {
         "name": "Attachment",
         "group": "Components",
-        "storyId": "components-attachment--docs"
+        "storyId": "solidjs-advanced-components-attachment--docs"
       },
       {
         "name": "AttachmentPreview",
         "group": "Components",
-        "storyId": "components-attachmentpreview--docs"
+        "storyId": "solidjs-advanced-components-attachmentpreview--docs"
       },
       {
         "name": "AttachmentInfo",
         "group": "Components",
-        "storyId": "components-attachmentinfo--docs"
+        "storyId": "solidjs-advanced-components-attachmentinfo--docs"
       },
       {
         "name": "Button",
         "group": "UI",
-        "storyId": "ui-button--docs"
+        "storyId": "solidjs-advanced-primitives-button--docs"
       }
     ],
     "tokens": []
@@ -1667,7 +1667,7 @@
       {
         "name": "ModelSwitcher",
         "group": "Components",
-        "storyId": "components-modelswitcher--docs"
+        "storyId": "solidjs-advanced-components-modelswitcher--docs"
       }
     ],
     "tokens": []
@@ -1884,17 +1884,17 @@
       {
         "name": "Reasoning",
         "group": "Components",
-        "storyId": "components-reasoning--docs"
+        "storyId": "solidjs-advanced-components-reasoning--docs"
       },
       {
         "name": "ReasoningTrigger",
         "group": "Components",
-        "storyId": "components-reasoningtrigger--docs"
+        "storyId": "solidjs-advanced-components-reasoningtrigger--docs"
       },
       {
         "name": "ReasoningContent",
         "group": "Components",
-        "storyId": "components-reasoningcontent--docs"
+        "storyId": "solidjs-advanced-components-reasoningcontent--docs"
       }
     ],
     "tokens": []
@@ -1983,7 +1983,7 @@
       {
         "name": "ResizableHandle",
         "group": "UI",
-        "storyId": "ui-resizablehandle--docs"
+        "storyId": "solidjs-advanced-primitives-resizablehandle--docs"
       }
     ],
     "tokens": []
@@ -2054,7 +2054,7 @@
       {
         "name": "ResizableHandle",
         "group": "UI",
-        "storyId": "ui-resizablehandle--docs"
+        "storyId": "solidjs-advanced-primitives-resizablehandle--docs"
       }
     ],
     "tokens": []
@@ -2112,7 +2112,7 @@
       {
         "name": "ResponseStream",
         "group": "Components",
-        "storyId": "components-responsestream--docs"
+        "storyId": "solidjs-advanced-components-responsestream--docs"
       }
     ],
     "tokens": []
@@ -2162,7 +2162,7 @@
       {
         "name": "ChatScopePicker",
         "group": "Components",
-        "storyId": "components-chatscopepicker--docs"
+        "storyId": "solidjs-advanced-components-chatscopepicker--docs"
       }
     ],
     "tokens": []
@@ -2187,7 +2187,7 @@
       {
         "name": "MessageSkills",
         "group": "Components",
-        "storyId": "components-messageskills--docs"
+        "storyId": "solidjs-advanced-components-messageskills--docs"
       }
     ],
     "tokens": []
@@ -2247,22 +2247,22 @@
       {
         "name": "Source",
         "group": "Components",
-        "storyId": "components-source--docs"
+        "storyId": "solidjs-advanced-components-source--docs"
       },
       {
         "name": "SourceTrigger",
         "group": "Components",
-        "storyId": "components-sourcetrigger--docs"
+        "storyId": "solidjs-advanced-components-sourcetrigger--docs"
       },
       {
         "name": "SourceContent",
         "group": "Components",
-        "storyId": "components-sourcecontent--docs"
+        "storyId": "solidjs-advanced-components-sourcecontent--docs"
       },
       {
         "name": "SourceList",
         "group": "Components",
-        "storyId": "components-sourcelist--docs"
+        "storyId": "solidjs-advanced-components-sourcelist--docs"
       }
     ],
     "tokens": []
@@ -2296,22 +2296,22 @@
       {
         "name": "Source",
         "group": "Components",
-        "storyId": "components-source--docs"
+        "storyId": "solidjs-advanced-components-source--docs"
       },
       {
         "name": "SourceTrigger",
         "group": "Components",
-        "storyId": "components-sourcetrigger--docs"
+        "storyId": "solidjs-advanced-components-sourcetrigger--docs"
       },
       {
         "name": "SourceContent",
         "group": "Components",
-        "storyId": "components-sourcecontent--docs"
+        "storyId": "solidjs-advanced-components-sourcecontent--docs"
       },
       {
         "name": "SourceList",
         "group": "Components",
-        "storyId": "components-sourcelist--docs"
+        "storyId": "solidjs-advanced-components-sourcelist--docs"
       }
     ],
     "tokens": []
@@ -2377,7 +2377,7 @@
       {
         "name": "PromptSuggestion",
         "group": "Components",
-        "storyId": "components-promptsuggestion--docs"
+        "storyId": "solidjs-advanced-components-promptsuggestion--docs"
       }
     ],
     "tokens": []
@@ -2425,7 +2425,7 @@
       {
         "name": "TasksCard",
         "group": "Components",
-        "storyId": "components-taskscard--docs"
+        "storyId": "solidjs-advanced-components-taskscard--docs"
       }
     ],
     "tokens": []
@@ -2477,7 +2477,7 @@
       {
         "name": "TextShimmer",
         "group": "Components",
-        "storyId": "components-textshimmer--docs"
+        "storyId": "solidjs-advanced-components-textshimmer--docs"
       }
     ],
     "tokens": []
@@ -2527,7 +2527,7 @@
       {
         "name": "ThinkingBar",
         "group": "Components",
-        "storyId": "components-thinkingbar--docs"
+        "storyId": "solidjs-advanced-components-thinkingbar--docs"
       }
     ],
     "tokens": []
@@ -2560,7 +2560,7 @@
       {
         "name": "Tool",
         "group": "Components",
-        "storyId": "components-tool--docs"
+        "storyId": "solidjs-advanced-components-tool--docs"
       }
     ],
     "tokens": [
@@ -2611,7 +2611,7 @@
       {
         "name": "VoiceInput",
         "group": "Components",
-        "storyId": "components-voiceinput--docs"
+        "storyId": "solidjs-advanced-components-voiceinput--docs"
       }
     ],
     "tokens": []
@@ -2919,32 +2919,32 @@
       {
         "name": "ChatThread",
         "group": "Components",
-        "storyId": "components-chatthread--docs"
+        "storyId": "solidjs-advanced-components-chatthread--docs"
       },
       {
         "name": "ConversationList",
         "group": "Components",
-        "storyId": "components-conversationlist--docs"
+        "storyId": "solidjs-advanced-components-conversationlist--docs"
       },
       {
         "name": "ResizablePanelGroup",
         "group": "UI",
-        "storyId": "ui-resizablepanelgroup--docs"
+        "storyId": "solidjs-advanced-primitives-resizablepanelgroup--docs"
       },
       {
         "name": "ResizablePanel",
         "group": "UI",
-        "storyId": "ui-resizablepanel--docs"
+        "storyId": "solidjs-advanced-primitives-resizablepanel--docs"
       },
       {
         "name": "ResizableHandle",
         "group": "UI",
-        "storyId": "ui-resizablehandle--docs"
+        "storyId": "solidjs-advanced-primitives-resizablehandle--docs"
       },
       {
         "name": "Button",
         "group": "UI",
-        "storyId": "ui-button--docs"
+        "storyId": "solidjs-advanced-primitives-button--docs"
       }
     ],
     "tokens": []
