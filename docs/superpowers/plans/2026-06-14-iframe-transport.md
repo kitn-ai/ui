@@ -675,7 +675,9 @@ export default defineConfig({
 **Files:** Create `examples/remote-provider/{index.html,provider-entry.ts,vite.config.ts}`.
 
 - [ ] **Step 1: Create `examples/remote-provider/index.html`** — a minimal doc with `<div id="root"></div>`, `<script type="module" src="./provider-entry.ts"></script>`, and a `<meta>` documenting the provider's own CSP (`frame-ancestors http://localhost:6006`, `form-action 'self'`).
-- [ ] **Step 2: Create `provider-entry.ts`** — import `createCardBridge` from the built provider bundle (or `../../src/remote/provider` for dev), register a `RemoteCardRenderer` for `type:'form'` that mounts `<kc-form>` (from `@kitn.ai/chat/elements`), feeds `envelope.data`, listens for its `kc-card` `submit` and calls `host.emit({kind:'submit', cardId, data})`; call `createCardBridge({root, renderers}).start()`.
+- [ ] **Step 2: Create `provider-entry.ts`** — import `createCardBridge` from the built provider bundle (or `../../src/remote/provider` for dev), register **two** `RemoteCardRenderer`s to demonstrate both interaction patterns, then `createCardBridge({root, renderers}).start()`:
+  - **Interactive / data-collecting** — `type:'form'` mounts `<kc-form>` (from `@kitn.ai/chat/elements`), feeds `envelope.data`, listens for its `kc-card` `submit` and calls `host.emit({kind:'submit', cardId, data})`. (Represents the calendar/date-time-picker class: render inputs → user fills → emit.)
+  - **Display-rich / self-contained** — `type:'info'` (a small "weather"-style card) renders a rich read-only view from `envelope.data` (e.g. a heading, a value, a few facts), is internally interactive (a details toggle) but **emits nothing beyond `ready`** — proving the no-round-trip pattern. The bridge still auto-sizes it via `resize`.
 - [ ] **Step 3: Create `examples/remote-provider/vite.config.ts`** — trivial root config so `vite examples/remote-provider` serves it.
 - [ ] **Step 4: Manual smoke** — `npm run build && npm run dev:provider` then open `http://localhost:6007` — confirm it loads without console errors (no host yet → it just waits for `hello`).
 - [ ] **Step 5: Commit** — `git add examples/remote-provider && git commit -m "docs(remote): runnable mock-provider example (reference iframe runtime)"`
@@ -716,7 +718,8 @@ export default defineConfig({
   1. **Remote form (happy path)** — frame renders `<kc-form>`; routed `submit` logged in an actions panel; show the `CardEnvelope` JSON beside the frame.
   2. **Auto-height** — a card that grows/shrinks; the iframe visibly resizes.
   3. **Theme push** — the Storybook light/dark toolbar re-pushes `context`; framed card re-themes.
-  4. **Failure: bad providerOrigin** — inline fallback + Retry.
+  4. **Display-rich / self-contained** — the `type:'info'` "weather"-style card: renders a rich read-only view, internally interactive, emits no data (proves the zero-round-trip pattern); the iframe auto-sizes.
+  5. **Failure: bad providerOrigin** — inline fallback + Retry.
   Add `examples/remote-provider/` to `.storybook/main.ts` `staticDirs` so the same-origin demo provider is served at `/remote-provider/`.
 - [ ] **Step 3: Run** — `npm run test:storybook` → PASS, 0 axe violations (axe scoped to host; the story config uses `a11y: { context: { exclude: [['iframe']] } }` — H-L).
 - [ ] **Step 4: Commit** — `git add src/elements/remote-card.stories.tsx .storybook/main.ts && git commit -m "docs(stories): kc-remote-card stories (happy path, auto-height, theme, failure)"`
