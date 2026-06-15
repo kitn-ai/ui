@@ -49,7 +49,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kc-markdown',
+  title: 'Web Components/Markdown',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-markdown'),
   parameters: {

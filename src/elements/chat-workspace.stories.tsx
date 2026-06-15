@@ -189,7 +189,7 @@ function Workspace() {
 }`;
 
 const meta = {
-  title: 'Web Components/kc-workspace',
+  title: 'Web Components/Workspace',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-workspace'),
   parameters: {

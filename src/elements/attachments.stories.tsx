@@ -124,7 +124,7 @@ const HOVER_SNIPPET = `<!-- inline/list chips with a hover-card image preview --
 </script>`;
 
 const meta = {
-  title: 'Web Components/kc-attachments',
+  title: 'Web Components/Attachments',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-attachments'),
   parameters: {

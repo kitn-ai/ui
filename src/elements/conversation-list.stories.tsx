@@ -152,7 +152,7 @@ function Sidebar() {
 }`;
 
 const meta = {
-  title: 'Web Components/kc-conversations',
+  title: 'Web Components/Conversations',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-conversations'),
   parameters: {

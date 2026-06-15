@@ -74,7 +74,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kc-message',
+  title: 'Web Components/Message',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-message'),
   parameters: {

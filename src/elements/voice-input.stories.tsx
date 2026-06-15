@@ -56,7 +56,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kc-voice-input',
+  title: 'Web Components/VoiceInput',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-voice-input'),
   parameters: {

@@ -24,7 +24,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kc-loader',
+  title: 'Web Components/Loader',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-loader'),
   parameters: {

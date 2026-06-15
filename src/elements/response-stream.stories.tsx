@@ -48,7 +48,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kc-response-stream',
+  title: 'Web Components/ResponseStream',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-response-stream'),
   parameters: {

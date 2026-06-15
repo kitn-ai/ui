@@ -28,7 +28,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kc-feedback-bar',
+  title: 'Web Components/FeedbackBar',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-feedback-bar'),
   parameters: {

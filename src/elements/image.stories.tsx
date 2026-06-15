@@ -44,7 +44,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kc-image',
+  title: 'Web Components/Image',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-image'),
   parameters: {

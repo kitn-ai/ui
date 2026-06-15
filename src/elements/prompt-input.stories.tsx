@@ -119,7 +119,7 @@ function Composer() {
 }`;
 
 const meta = {
-  title: 'Web Components/kc-prompt-input',
+  title: 'Web Components/PromptInput',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-prompt-input'),
   parameters: {
