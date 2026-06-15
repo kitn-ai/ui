@@ -306,14 +306,12 @@ addons.register(ADDON_ID, () => {
   addons.add(TAB_ID, {
     type: types.TAB,
     title: 'API',
-    // Components (story ids `components-*`) + the Solid (Advanced) Elements/Primitives
-    // that have a generated spec.
-    match: ({ storyId }) =>
-      !!storyId && (
-        storyId.startsWith('components-') ||
-        storyId.startsWith('solid-advanced-elements-') ||
-        storyId.startsWith('solid-advanced-primitives-')
-      ),
+    // NOTE: Storybook 10 TAB addons no longer honour a `match`/`route` predicate
+    // (see MIGRATION.md: "Tab addons cannot manually route") — a TAB is added to
+    // EVERY entry. Per-entry visibility is therefore handled in `manager.ts`,
+    // which toggles `previewTabs['kitn-api-tab'].hidden` so this tab only shows
+    // on the component tiers (components-* / solid-advanced-elements|primitives-*)
+    // and stays off the documentation pages.
     render: ({ active }) => (active ? <ApiPanel /> : null),
   });
 });
