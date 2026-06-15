@@ -2,6 +2,7 @@ import { type JSX, splitProps, createSignal, createContext, useContext, createEf
 import { cn } from '../utils/cn';
 import { ChevronDown } from 'lucide-solid';
 import { Markdown } from './markdown';
+import { observeContentHeight } from '../primitives/use-resize-observer';
 
 interface ReasoningContextValue {
   isOpen: () => boolean;
@@ -109,13 +110,11 @@ function ReasoningContent(props: ReasoningContentProps) {
   createEffect(() => {
     if (!contentRef || !innerRef) return;
 
-    const observer = new ResizeObserver(() => {
+    const dispose = observeContentHeight(innerRef, () => {
       if (contentRef && innerRef && isOpen()) {
         contentRef.style.maxHeight = `${innerRef.scrollHeight}px`;
       }
     });
-
-    observer.observe(innerRef);
 
     if (isOpen()) {
       contentRef.style.maxHeight = `${innerRef.scrollHeight}px`;
@@ -123,7 +122,7 @@ function ReasoningContent(props: ReasoningContentProps) {
       contentRef.style.maxHeight = '0px';
     }
 
-    onCleanup(() => observer.disconnect());
+    onCleanup(dispose);
   });
 
   return (
