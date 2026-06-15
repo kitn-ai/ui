@@ -15,6 +15,25 @@ const NO_PANEL_PREFIXES = ['Examples/', 'Patterns/', 'Theming/'];
 // Done via renderLabel (display only) so no story IDs change.
 const SOLID_GROUPS = new Set(['Components', 'UI']);
 
+// Hide the `SolidJS (advanced)/` tier from the sidebar by default so Web
+// Components is the obvious primary surface. The filter uses the
+// `experimental_setFilter` API (confirmed present in Storybook 10.x).
+//
+// API shape:
+//   api.experimental_setFilter(id: string, fn: (item) => boolean): Promise<void>
+//   item has `.title: string` (from BaseIndexEntry via IndexEntry).
+//   Returning `false` HIDES the item; `true` shows it.
+//
+// NOTE: manager addons require a FULL Storybook restart to take effect — HMR
+// does NOT re-run manager.ts registration code.
+const SOLID_TIER = 'SolidJS (advanced)';
+
+addons.register('kitn/solid-tier', (api) => {
+  api.experimental_setFilter('kitn/solid-tier', (item) =>
+    !item.title?.startsWith(SOLID_TIER),
+  );
+});
+
 addons.setConfig({
   sidebar: {
     renderLabel: (item) =>
