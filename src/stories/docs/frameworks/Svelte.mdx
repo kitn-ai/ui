@@ -4,36 +4,191 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Svelte
 
-Svelte's template compiler sets DOM **properties** when you bind with `bind:` or use the `|propname` directive. For custom events, use `on:eventname`:
+Custom elements are **first-class citizens in Svelte**: the compiler sets DOM properties directly
+when you pass non-primitive values, and `on:eventname` wires up CustomEvents with no extra
+boilerplate. No wrappers, no refs, no workarounds needed.
 
-```html
+There are **two ways to build with the kit**, and you can mix them:
+
+1. **`<kc-chat>`** — the batteries-included shell: a whole chat experience in one tag. Fastest start.
+2. **Compose the individual elements** (`<kc-conversations>`, `<kc-markdown>`, `<kc-artifact>`, …)
+   into your own layout when you want full control.
+
+Both are shown below.
+
+## Install & setup
+
+```bash
+npm i @kitn.ai/chat
+```
+
+Register the custom elements once (a side-effect import) near your app entry:
+
+```js
+// e.g. src/main.js or src/app.svelte <script>
+import '@kitn.ai/chat/elements';
+```
+
+- **`@kitn.ai/chat/elements`** — registers every `<kc-*>` element globally. One import is enough
+  for the whole app.
+- **No special config needed**: Svelte sets object and array values as DOM **properties** (not
+  stringified attributes) when you use the `{prop}` shorthand or `prop={value}` syntax. Custom
+  events fire as standard DOM `CustomEvent`s, so `on:eventname` just works.
+- **No CSS to import**: each element is styled inside its own Shadow DOM. Pull in
+  `@kitn.ai/chat/theme.css` only if you want to override design tokens (see **Theming**).
+
+## Quick start — the all-in-one shell
+
+`<kc-chat>` is **transport-agnostic**: give it a `messages` array, handle the `submit` event, and
+stream your model's reply back into state. You own the request; the element owns the UI.
+
+```svelte
 <script>
   import '@kitn.ai/chat/elements';
 
   let messages = [
-    { id: '1', role: 'assistant', content: 'Hello!' }
+    { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
   ];
 
-  function handleSubmit(e) {
-    const text = e.detail.value;
-    messages = [...messages, { id: crypto.randomUUID(), role: 'user', content: text }];
-    // …stream reply
+  async function handleSubmit(e) {
+    const userContent = e.detail.value;
+    const history = [...messages, { id: crypto.randomUUID(), role: 'user', content: userContent }];
+    messages = history;
+
+    const aid = crypto.randomUUID();
+    messages = [...history, { id: aid, role: 'assistant', content: '' }];
+
+    let answer = '';
+    for await (const token of streamFromYourAPI(history)) {
+      answer += token;
+      // Reassign the array (and the changed object) so Svelte detects the update.
+      messages = messages.map((m) => (m.id === aid ? { ...m, content: answer } : m));
+    }
   }
 </script>
 
-<!-- use:action pattern to set properties -->
-<kc-chat
-  use:setProps={{ messages }}
-  style="display: block; height: 100vh"
-  on:submit={handleSubmit}
-/>
-
-<script context="module">
-  function setProps(node, props) {
-    Object.assign(node, props);
-    return {
-      update(newProps) { Object.assign(node, newProps); }
-    };
-  }
-</script>
+<!--
+  The elements are `display: block` and fill their container — lay them out with
+  flex and let the element grow with `flex: 1` rather than hard-coding a height.
+-->
+<div style="display: flex; flex-direction: column; height: 100dvh;">
+  <kc-chat
+    {messages}
+    suggestions={['Summarize the chat', 'Start fresh']}
+    on:submit={handleSubmit}
+    style="flex: 1; min-height: 0;"
+  />
+</div>
 ```
+
+> **`{messages}`** is Svelte shorthand for `messages={messages}`. Because the value is an array,
+> Svelte assigns it as a DOM **property** (not an attribute), so the element always receives a live
+> JS array — never a stringified version. The same applies to any object prop.
+
+## Go further — compose the pieces
+
+`<kc-chat>` is one option, not the only one. Every element can be used on its own, so you can
+assemble your own layout. Here's a multi-conversation shell — a `<kc-conversations>` sidebar next
+to the `<kc-chat>` thread:
+
+```svelte
+<script>
+  import '@kitn.ai/chat/elements';
+
+  let conversations = myConversations;
+  let activeId = conversations[0]?.id;
+  let messages = loadMessages(activeId);
+
+  function handleConversationSelect(e) {
+    activeId = e.detail.id;
+    messages = loadMessages(activeId);
+  }
+</script>
+
+<!--
+  Lay panels out with flex: the sidebar is fixed-width, the thread takes the rest
+  with `flex: 1`. The elements fill whatever box you give them.
+-->
+<div style="display: flex; height: 100dvh;">
+  <kc-conversations
+    {conversations}
+    {activeId}
+    on:conversationselect={handleConversationSelect}
+    on:newchat={() => startNewConversation()}
+    on:togglesidebar={() => sidebarOpen = !sidebarOpen}
+    style="width: 300px; flex-shrink: 0;"
+  />
+
+  <kc-chat
+    {messages}
+    on:submit={(e) => sendMessage(e.detail.value)}
+    style="flex: 1; min-width: 0;"
+  />
+</div>
+```
+
+### Make the panels resizable
+
+Want a draggable divider between the sidebar and the thread? Wrap the panels in `<kc-resizable>`
+with one `<kc-resizable-item>` each — the handles are inserted for you (up to 3 panels). Each item
+takes a `size` (px or `%`) plus optional `min`/`max`; listen for the `change` event
+(`detail.sizes`) to persist the layout.
+
+```svelte
+<script>
+  import '@kitn.ai/chat/elements';
+
+  function handleResize(e) {
+    // e.detail.sizes is an array of the current panel sizes
+    savePanelSizes(e.detail.sizes);
+  }
+</script>
+
+<div style="display: flex; flex-direction: column; height: 100dvh;">
+  <kc-resizable orientation="horizontal" on:change={handleResize} style="flex: 1; min-height: 0;">
+    <kc-resizable-item size="25%" min="200px">
+      <kc-conversations {conversations} {activeId} on:conversationselect={handleConversationSelect} />
+    </kc-resizable-item>
+    <kc-resizable-item>
+      <kc-chat {messages} on:submit={handleSubmit} />
+    </kc-resizable-item>
+  </kc-resizable>
+</div>
+```
+
+You can also drop **standalone display elements** anywhere in your own UI — `<kc-markdown>`,
+`<kc-code-block>`, `<kc-artifact>`, `<kc-reasoning>`, `<kc-tool>` — to render rich AI content
+without adopting the whole chat shell. Each fills its container and is controlled via props and
+events.
+
+> **See it all assembled:** **[Examples → Full Chat App](?path=/story/examples-full-chat-app--default)**
+> wires a sidebar, threaded markdown, reasoning, a tool call, a model switcher, a context meter, and
+> a rich prompt input into one screen — a working reference to crib from.
+
+> **Find every element:** browse the **Components** section in the sidebar. Each element's **API**
+> tab lists its props, events, and copy-paste usage for Svelte (and every other framework).
+
+## Props & events
+
+The rule for all elements: **rich data goes in as properties, interactions come out as events.**
+
+In Svelte, this maps cleanly to the template syntax you already know:
+
+| What | Svelte syntax | Notes |
+|---|---|---|
+| Pass a string | `prop="value"` or `{prop}` shorthand | Standard attribute or property |
+| Pass an array / object | `{prop}` or `prop={value}` | Svelte assigns as DOM property — no stringification |
+| Listen to a CustomEvent | `on:eventname={handler}` | `handler(e)` receives the `CustomEvent`; data is on `e.detail` |
+
+Key events and their `detail` shapes:
+
+| Element | Event | `e.detail` |
+|---|---|---|
+| `kc-chat` | `submit` | `{ value: string }` — the user's input text |
+| `kc-conversations` | `conversationselect` | `{ id: string }` — the selected conversation id |
+| `kc-conversations` | `newchat` | `{}` |
+| `kc-conversations` | `togglesidebar` | `{}` |
+| `kc-resizable` | `change` | `{ sizes: string[] }` — current panel sizes |
+
+No adapters, no special directives: Svelte's compiler handles property assignment on custom elements
+automatically, so `{messages}` always delivers a live JS array to the element.

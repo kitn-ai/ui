@@ -95,7 +95,7 @@ const preview: Preview = {
             'Installation',
             'Getting Started',
             'Frameworks',
-            ['Overview', 'HTML', 'React', 'Vue', 'Svelte', 'Angular'],
+            ['Overview', 'HTML', 'React', 'Svelte', 'Vue', 'Angular', 'Solid'],
             'Recipes',
             ['Streaming (OpenRouter)', 'Text-to-Speech', 'Speech-to-Text'],
             'Accessibility',

@@ -4,60 +4,135 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Vue
 
-In Vue, use the element directly in your template. Pass arrays and objects via the `.prop` modifier (or `:propName.prop` for dynamic bindings) so Vue sets them as DOM properties rather than HTML attributes. Events use the standard `@event` syntax.
+Use the `kc-*` custom elements directly in Vue templates. Pass arrays and objects via the **`.prop`
+modifier** so Vue sets them as live DOM properties (not stringified attributes). Events use the
+standard `@event` syntax.
 
-```html
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import '@kitn.ai/chat/elements';
+There are **two ways to build with the kit**, and you can mix them:
 
-const messages = ref([
-  { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
-]);
+1. **`<kc-chat>`** — the batteries-included shell: a whole chat experience in one tag. Fastest start.
+2. **Compose the individual elements** (`<kc-conversations>`, `<kc-markdown>`, `<kc-artifact>`, …)
+   into your own layout when you want full control.
 
-const handleSubmit = (e: CustomEvent<{ value: string }>) => {
-  const text = e.detail.value;
-  messages.value = [
-    ...messages.value,
-    { id: crypto.randomUUID(), role: 'user', content: text },
-  ];
-  // …stream a reply and append an assistant message
-};
-</script>
+Both are shown below.
 
-<template>
-  <!-- Arrays/objects → .prop modifier; scalars → plain attributes -->
-  <kc-chat
-    :messages.prop="messages"
-    placeholder="Ask anything…"
-    theme="auto"
-    style="display: block; height: 100vh"
-    @submit="handleSubmit"
-  />
-</template>
+## Install & setup
+
+```bash
+npm i @kitn.ai/chat
 ```
 
-## Vue + TypeScript: augmenting JSX types
+Register the custom elements **once**, as a static side-effect import in `main.ts` **before**
+`createApp().mount()`. Vue stamps the tags at mount time — if the elements aren't registered yet,
+array/object props set by Vue are clobbered when the elements upgrade later and the UI renders blank.
 
-Add `@kitn.ai/chat/elements` to your `vite.config.ts` / `env.d.ts` once so Vue's template compiler knows the element's attributes:
+```ts
+// src/main.ts
+import '@kitn.ai/chat/elements'; // MUST come before createApp
+import { createApp } from 'vue';
+import App from './App.vue';
+
+createApp(App).mount('#app');
+```
+
+Tell Vue's template compiler that `kc-*` tags are native custom elements, not Vue components —
+this prevents "Unknown custom element" warnings and ensures `.prop` bindings work correctly:
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+
+export default defineConfig({
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.startsWith('kc-'),
+        },
+      },
+    }),
+  ],
+});
+```
+
+No CSS to import: each element is styled inside its own Shadow DOM. Only pull in
+`@kitn.ai/chat/theme.css` if you want to override design tokens (see **Theming**).
+
+### TypeScript / Volar augmentation
+
+Add a reference to the kit's type declarations once so Vue's template compiler (and Volar) knows
+the element's attributes and properties:
 
 ```ts
 // env.d.ts (or vite-env.d.ts)
 /// <reference types="@kitn.ai/chat/elements" />
 ```
 
-## Sidebar + chat together (Vue)
+## Quick start — the all-in-one shell
 
-Cross-element coordination goes through the host component — the `<kc-conversations>` fires `select`, you update a reactive ref, and pass it into `<kc-chat>`:
+`<kc-chat>` is **transport-agnostic**: give it a `messages` array, handle the `submit` event, and
+stream your model's reply back into state. You own the request; the element owns the UI.
 
-```html
+```vue
+<script setup lang="ts">
+import '@kitn.ai/chat/elements';
+import { ref } from 'vue';
+
+type Message = { id: string; role: 'user' | 'assistant'; content: string };
+
+const messages = ref<Message[]>([
+  { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+]);
+
+const handleSubmit = async (e: CustomEvent<{ value: string }>) => {
+  const history = [...messages.value, { id: crypto.randomUUID(), role: 'user' as const, content: e.detail.value }];
+  messages.value = history;
+
+  const aid = crypto.randomUUID();
+  messages.value = [...history, { id: aid, role: 'assistant', content: '' }];
+
+  let answer = '';
+  for await (const token of streamFromYourAPI(history)) {
+    answer += token;
+    messages.value = messages.value.map((m) => (m.id === aid ? { ...m, content: answer } : m));
+  }
+};
+</script>
+
+<template>
+  <!-- The elements fill their container — use flex and let the element grow with
+       flex: 1 rather than hard-coding a height. -->
+  <div style="display: flex; flex-direction: column; height: 100dvh;">
+    <kc-chat
+      :messages.prop="messages"
+      :suggestions.prop="['Summarize the chat', 'Start fresh']"
+      style="flex: 1; min-height: 0;"
+      @submit="handleSubmit"
+    />
+  </div>
+</template>
+```
+
+## Go further — compose the pieces
+
+`<kc-chat>` is one option, not the only one. Every element can be composed in your own layout.
+Here's a multi-conversation shell — a `<kc-conversations>` sidebar next to the `<kc-chat>` thread:
+
+```vue
 <script setup lang="ts">
 import '@kitn.ai/chat/elements';
 import { ref } from 'vue';
 
 const conversations = ref([
-  { id: 'c1', title: 'First chat', scope: { type: 'document' }, messageCount: 3,
-    lastMessageAt: '2026-06-01T12:00:00Z', updatedAt: '2026-06-01T12:00:00Z' },
+  {
+    id: 'c1',
+    title: 'First chat',
+    scope: { type: 'document' },
+    messageCount: 3,
+    lastMessageAt: '2026-06-01T12:00:00Z',
+    updatedAt: '2026-06-01T12:00:00Z',
+  },
 ]);
 const activeId = ref('c1');
 const messages = ref([{ id: '1', role: 'assistant', content: 'Hi!' }]);
@@ -66,20 +141,98 @@ const onSelect = (e: CustomEvent<{ id: string }>) => {
   activeId.value = e.detail.id;
   // load messages for the selected conversation
 };
+
+const onSubmit = (e: CustomEvent<{ value: string }>) => {
+  // send message and stream reply
+};
 </script>
 
 <template>
-  <div style="display: flex; height: 100vh;">
+  <!-- Lay panels out with flex: the sidebar is fixed-width, the thread takes the rest
+       with flex: 1. The elements fill whatever box you give them. -->
+  <div style="display: flex; height: 100dvh;">
     <kc-conversations
       :conversations.prop="conversations"
       :active-id="activeId"
-      style="width: 260px"
-      @select="onSelect"
+      style="width: 300px; flex-shrink: 0;"
+      @conversationselect="onSelect"
+      @newchat="startNewConversation"
     />
     <kc-chat
       :messages.prop="messages"
-      style="flex: 1"
+      style="flex: 1; min-width: 0;"
+      @submit="onSubmit"
     />
   </div>
 </template>
+```
+
+### Make the panels resizable
+
+Want a draggable divider between the sidebar and the thread? Wrap the panels in `<kc-resizable>`
+with one `<kc-resizable-item>` each — the handles are inserted for you (up to 3 panels). Each item
+takes a `size` (px or `%`) plus optional `min`/`max`; listen for `@change` (`detail.sizes`) to
+persist the layout.
+
+```vue
+<template>
+  <div style="display: flex; flex-direction: column; height: 100dvh;">
+    <kc-resizable orientation="horizontal" style="flex: 1; min-height: 0;">
+      <kc-resizable-item size="25%" min="200px">
+        <kc-conversations
+          :conversations.prop="conversations"
+          :active-id="activeId"
+          @conversationselect="onSelect"
+        />
+      </kc-resizable-item>
+      <kc-resizable-item>
+        <kc-chat :messages.prop="messages" @submit="onSubmit" />
+      </kc-resizable-item>
+    </kc-resizable>
+  </div>
+</template>
+```
+
+You can also drop **standalone display elements** anywhere in your own UI — `<kc-markdown>`,
+`<kc-code-block>`, `<kc-artifact>`, `<kc-reasoning>`, `<kc-tool>` — to render rich AI content
+without adopting the whole chat. Each fills its container and is controlled via props and events.
+
+> **See it all assembled:** **[Examples → Full Chat App](?path=/story/examples-full-chat-app--default)**
+> wires a sidebar, threaded markdown, reasoning, a tool call, a model switcher, a context meter, and
+> a rich prompt input into one screen — a working reference to crib from.
+
+> **Find every element:** browse the **Components** section in the sidebar. Each element's **API**
+> tab lists its props, events, and copy-paste usage for Vue (and every other framework).
+
+## Props & events
+
+The rule for all elements: **rich data (arrays, objects) goes in as DOM properties; interactions
+come out as CustomEvents.**
+
+In Vue templates, use the **`.prop` modifier** to bind rich data as DOM properties rather than
+stringified HTML attributes. Scalar values (strings, booleans, numbers) can go through normal
+attribute bindings. Events use `@event` and carry their payload in `event.detail`.
+
+| Binding type | Vue syntax | When to use |
+|---|---|---|
+| Rich data (array/object) | `:messages.prop="messages"` | Always for arrays and objects |
+| Scalar attribute | `:active-id="activeId"` or `active-id="c1"` | Strings, booleans, numbers |
+| Event | `@conversationselect="onSelect"` | All CustomEvents |
+
+Common events and their `detail` payloads:
+
+| Element | DOM event | `detail` |
+|---|---|---|
+| `kc-chat` | `submit` | `{ value: string }` |
+| `kc-conversations` | `conversationselect` | `{ id: string }` |
+| `kc-conversations` | `newchat` | — |
+| `kc-conversations` | `togglesidebar` | — |
+| `kc-resizable` | `change` | `{ sizes: string[] }` |
+
+Example event handler pattern:
+
+```ts
+const onSelect = (e: CustomEvent<{ id: string }>) => {
+  activeId.value = e.detail.id;
+};
 ```
