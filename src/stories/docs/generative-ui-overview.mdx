@@ -19,17 +19,33 @@ agent/server ──CardEnvelope(s)──▶ host sets <kc-cards>.cards
      └── result / next envelopes ◀─ CardPolicy ◀─ kc-card event ◀─ user interacts
 ```
 
-## The envelope
+## Envelopes vs. cards
+
+Two things are easy to conflate — keeping them straight makes the rest click:
+
+- An **envelope** is what the agent *sends*: an addressed data wrapper, not UI. Like a
+  postal envelope, it *carries* a card spec but isn't the card itself.
+- A **card** is what the user *sees*: the rendered, interactive UI the dispatcher mounts
+  for that envelope (a `kc-form`, `kc-confirm`, … inside the shared card chrome).
+
+The dispatcher's whole job is **envelope in → card out** — one envelope renders one card.
 
 Everything an agent sends is a `CardEnvelope`:
 
 ```ts
-interface CardEnvelope { type: string; id: string; data: unknown; title?: string }
+interface CardEnvelope {
+  type: string;        // selects the card: form | confirm | choice | tasks | link | embed
+  id: string;          // correlates every event back to this card
+  data: unknown;       // follows that type's JSON Schema (shipped in dist/schemas)
+  title?: string;      // optional chrome heading
+  resolution?: CardResolution; // set once the user acts → renders the read-only view
+}
 ```
 
-`type` selects the card (`form`, `confirm`, `tasks`, `link`, `embed`); `data` follows
-that type's **JSON Schema** (shipped in `dist/schemas`, so an agent/server can validate
-before sending); `id` correlates every event back to this card.
+`data` follows the `type`'s **JSON Schema**, so an agent/server can validate before
+sending; `id` correlates every event back to this card. (For **remote** cards, a transport
+`WireFrame` wraps this *same* envelope over `postMessage` — the envelope inside is identical;
+see Remote cards.)
 
 ## Turnkey: drop `<kc-cards>`
 
