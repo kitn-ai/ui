@@ -7,7 +7,7 @@ import { Button } from '../ui/button';
 import { PanelLeftOpen } from 'lucide-solid';
 import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
-import type { ChatMessage, ChatMessageAction } from './chat-types';
+import type { ChatMessage } from './chat-types';
 import type { ProseSize } from '../primitives/chat-config';
 import type { ModelOption, ConversationGroup, ConversationSummary } from '../types';
 
@@ -62,7 +62,7 @@ interface Events {
   /** The header model switcher changed. */
   modelchange: { modelId: string };
   /** An action button on a message was clicked. */
-  messageaction: { messageId: string; action: ChatMessageAction };
+  messageaction: { messageId: string; action: string };
   /** The Search button was clicked. */
   search: Record<string, never>;
   /** The Mic / voice button was clicked. */

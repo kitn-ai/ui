@@ -1,7 +1,10 @@
-import { type JSX, createSignal, splitProps, Show } from "solid-js";
+import { type JSX, For, createSignal, splitProps, Show } from "solid-js";
 import { Copy, Check } from "lucide-solid";
 import { cn } from "../utils/cn";
 import { Markdown } from "./markdown";
+import { Button } from "../ui/button";
+import { actionIcon, BUILTIN_ACTION_LABEL } from "../ui/action-icons";
+import type { ChatMessageAction, CustomAction } from "../elements/chat-types";
 import { useChatConfig, textClass } from "../primitives/chat-config";
 
 // --- Message ---
@@ -105,6 +108,69 @@ function MessageActions(props: MessageActionsProps) {
   );
 }
 
+// --- MessageActionBar ---
+
+export interface MessageActionBarProps {
+  /** Built-in action names and/or custom action descriptors, in order. */
+  actions: (ChatMessageAction | CustomAction)[];
+  /** `'always'` (default) keeps the bar visible; `'hover'` reveals it on
+   *  parent `.group` hover. */
+  reveal?: 'always' | 'hover';
+  /** Fired with the built-in name or the custom action id when a button is clicked. */
+  onAction: (id: string) => void;
+  class?: string;
+}
+
+/** Normalize a bar entry (string built-in or custom object) to a uniform shape. */
+function normalizeAction(a: ChatMessageAction | CustomAction) {
+  if (typeof a === 'string') {
+    return { id: a, label: BUILTIN_ACTION_LABEL[a], Icon: actionIcon(a) };
+  }
+  return { id: a.id, label: a.label, Icon: actionIcon(a.icon) };
+}
+
+/**
+ * The shared message action toolbar. Renders one ghost icon button per entry —
+ * built-in names pull their label+icon from the curated registry; custom
+ * descriptors use their `label` plus `actionIcon(icon)` (label-only when the
+ * icon is unknown or absent). `reveal="hover"` makes the bar fade in on the
+ * parent `.group`'s hover.
+ */
+function MessageActionBar(props: MessageActionBarProps) {
+  return (
+    <MessageActions
+      class={cn(
+        'mt-1 flex gap-0',
+        props.reveal === 'hover' && 'opacity-0 transition-opacity group-hover:opacity-100',
+        props.class,
+      )}
+    >
+      <For each={props.actions}>
+        {(a) => {
+          const item = normalizeAction(a);
+          return (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              class="rounded-full"
+              data-action={item.id}
+              aria-label={item.label}
+              onClick={() => props.onAction(item.id)}
+            >
+              <Show when={item.Icon} fallback={<span class="px-1 text-xs">{item.label}</span>}>
+                {(Icon) => {
+                  const I = Icon();
+                  return <I class="size-3.5" />;
+                }}
+              </Show>
+            </Button>
+          );
+        }}
+      </For>
+    </MessageActions>
+  );
+}
+
 // --- MessageAction ---
 
 export interface MessageActionProps {
@@ -147,4 +213,4 @@ function MessageCopyButton(props: MessageCopyButtonProps) {
   );
 }
 
-export { Message, MessageAvatar, MessageContent, MessageActions, MessageAction, MessageCopyButton };
+export { Message, MessageAvatar, MessageContent, MessageActions, MessageActionBar, MessageAction, MessageCopyButton };

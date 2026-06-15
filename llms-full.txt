@@ -279,7 +279,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `messages` | — | `{ id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit")[] }[]` | The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). |
+| `messages` | — | `{ id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string } }[]` | The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). |
 | `value` | `value` | `undefined \| string` | Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior. |
 | `placeholder` | `placeholder` | `undefined \| string` | Placeholder text shown in the empty input. |
 | `loading` | `loading` | `undefined \| false \| true` | When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). |
@@ -298,12 +298,13 @@ _No events._
 | `slashCommands` | — | `undefined \| { id: string; label: string; description?: undefined \| string; category?: undefined \| string }[]` | Slash commands — when set, typing `/` in the input opens the command palette and fires `slashselect`. Set as a JS property. |
 | `slashActiveIds` | — | `undefined \| string[]` | Command ids to highlight as active in the palette. |
 | `slashCompact` | `slash-compact` | `undefined \| false \| true` | Single-line palette rows. |
+| `actionsReveal` | `actions-reveal` | `undefined \| "always" \| "hover"` | Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `messageaction` | `CustomEvent<{ messageId: string; action: "copy" \| "like" \| "dislike" \| "regenerate" \| "edit" }>` | An action button on a message was clicked. |
+| `messageaction` | `CustomEvent<{ messageId: string; action: string }>` | An action button on a message was clicked. `action` is the built-in name or custom id. |
 | `modelchange` | `CustomEvent<{ modelId: string }>` | The header model switcher changed. |
 | `search` | `CustomEvent<Record<string, never>>` | The Search button was clicked. |
 | `slashselect` | `CustomEvent<{ command: { id: string; label: string; description?: undefined \| string; category?: undefined \| string } }>` | A slash command was chosen from the palette. |
@@ -570,19 +571,22 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `message` | — | `undefined \| { id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit")[] }` | The full message object. Set as a JS property. |
+| `message` | — | `undefined \| { id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string } }` | The full message object. Set as a JS property. |
 | `role` | `role` | `undefined \| "user" \| "assistant"` | Convenience for simple cases when not passing a `message` object. |
 | `content` | `content` | `undefined \| string` | Convenience content (used when `message` is not set). |
 | `markdown` | `markdown` | `undefined \| false \| true` | Force markdown on/off. Defaults to on for assistant, off for user. |
 | `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Text/markdown sizing for the message body. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name used for fenced code blocks in the content. |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting for code blocks (no Shiki loads). |
+| `actionsReveal` | `actions-reveal` | `undefined \| "always" \| "hover"` | Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`). |
+| `avatarSrc` | `avatar-src` | `undefined \| string` | Convenience avatar image URL (used when `message.avatar` is not set). |
+| `avatarFallback` | `avatar-fallback` | `undefined \| string` | Convenience avatar fallback text (used when `message.avatar` is not set). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `messageaction` | `CustomEvent<{ messageId: string; action: "copy" \| "like" \| "dislike" \| "regenerate" \| "edit" }>` | An action button was clicked. |
+| `messageaction` | `CustomEvent<{ messageId: string; action: string }>` | An action button was clicked. `action` is the built-in name or custom id. |
 
 ---
 
@@ -895,7 +899,7 @@ _No events._
 | `groups` | — | `{ id: string; userId?: undefined \| string; teamId?: undefined \| string; name: string; sortOrder: number; createdAt: string }[]` | Pre-bucketed conversation groups for the sidebar. Set as a JS property. |
 | `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]` | Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. |
 | `activeId` | `active-id` | `undefined \| string` | Id of the open conversation, highlighted in the sidebar. |
-| `messages` | — | `{ id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit")[] }[]` | The active conversation's message thread, newest last. Set as a JS property. |
+| `messages` | — | `{ id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string } }[]` | The active conversation's message thread, newest last. Set as a JS property. |
 | `value` | `value` | `undefined \| string` |  |
 | `placeholder` | `placeholder` | `undefined \| string` |  |
 | `loading` | `loading` | `undefined \| false \| true` |  |
@@ -924,7 +928,7 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `conversationselect` | `CustomEvent<{ id: string }>` | A conversation was selected in the sidebar. |
-| `messageaction` | `CustomEvent<{ messageId: string; action: "copy" \| "like" \| "dislike" \| "regenerate" \| "edit" }>` | An action button on a message was clicked. |
+| `messageaction` | `CustomEvent<{ messageId: string; action: string }>` | An action button on a message was clicked. |
 | `modelchange` | `CustomEvent<{ modelId: string }>` | The header model switcher changed. |
 | `newchat` | `CustomEvent<Record<string, never>>` | The "New chat" button was clicked. |
 | `search` | `CustomEvent<Record<string, never>>` | The Search button was clicked. |

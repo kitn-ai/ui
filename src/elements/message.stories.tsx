@@ -43,11 +43,31 @@ const userMessage: ChatMessage = {
   content: 'How do I compose these myself?',
 };
 
-/** Render the actual `<kc-message>` custom element with a `message` property. */
-function MessageElement(props: { message: ChatMessage }) {
+const AVATAR_SVG =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="#10b981"/><text x="32" y="42" font-size="28" text-anchor="middle" fill="white">K</text></svg>',
+  );
+
+/** An assistant message with an avatar (from `message.avatar`) plus custom + built-in actions. */
+const avatarMessage: ChatMessage = {
+  id: 'm-av',
+  role: 'assistant',
+  content: 'I have an avatar, a custom **Share** action, and the built-in copy/like actions.',
+  avatar: { src: AVATAR_SVG, alt: 'Kitn', fallback: 'K' },
+  actions: ['copy', 'like', { id: 'share', label: 'Share', icon: 'share' }],
+};
+
+/** Render the actual `<kc-message>` custom element with a `message` property and optional attrs. */
+function MessageElement(props: { message: ChatMessage; actionsReveal?: 'always' | 'hover' }) {
   let el: (HTMLElement & { message?: ChatMessage }) | undefined;
   onMount(() => {
-    if (el) el.message = props.message;
+    if (!el) return;
+    if (props.actionsReveal) el.setAttribute('actions-reveal', props.actionsReveal);
+    el.message = props.message;
+    el.addEventListener('messageaction', (e) =>
+      console.log('messageaction', (e as CustomEvent).detail.action),
+    );
   });
   return (
     <kc-message ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
@@ -102,4 +122,45 @@ export const Assistant: Story = {
 /** A plain user message (markdown defaults off for the user role). */
 export const User: Story = {
   render: () => <MessageElement message={userMessage} />,
+};
+
+/** An avatar (from `message.avatar`) laid out beside the content column, with a
+ *  custom **Share** action (curated `icon`) alongside the built-in copy/like. */
+export const WithAvatarAndCustomAction: Story = {
+  name: 'Avatar + Custom Action',
+  render: () => <MessageElement message={avatarMessage} />,
+  parameters: {
+    docs: {
+      source: {
+        code: `<kc-message id="msg" style="display:block;"></kc-message>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const msg = document.getElementById('msg');
+  msg.message = {
+    id: 'm-av', role: 'assistant', content: 'I have an avatar and a custom Share action.',
+    avatar: { src: '/k.png', alt: 'Kitn', fallback: 'K' },
+    // built-in names AND custom { id, label, icon } descriptors:
+    actions: ['copy', 'like', { id: 'share', label: 'Share', icon: 'share' }],
+  };
+  msg.addEventListener('messageaction', (e) => console.log(e.detail.action)); // 'copy' | 'like' | 'share'
+</script>`,
+        language: 'html',
+      },
+    },
+  },
+};
+
+/** `actions-reveal="hover"` — the action bar is hidden until you hover the row. */
+export const ActionsRevealOnHover: Story = {
+  name: 'Actions Reveal on Hover',
+  render: () => <MessageElement message={avatarMessage} actionsReveal="hover" />,
+  parameters: {
+    docs: {
+      source: {
+        code: `<!-- actions-reveal: 'always' (default) | 'hover' -->
+<kc-message actions-reveal="hover" id="msg" style="display:block;"></kc-message>`,
+        language: 'html',
+      },
+    },
+  },
 };
