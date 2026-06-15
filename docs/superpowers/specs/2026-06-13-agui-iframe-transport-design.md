@@ -159,7 +159,7 @@ The artifacts below are explicit deliverables of the plan (they don't exist yet)
   `dist/kitn-chat.es.js`); **no `solidPlugin()`**; `rollupOptions.external: ['solid-js','solid-js/web']`
   so the provider bundle carries no SolidJS. The provider imports card elements separately
   from `@kitn.ai/chat/elements`.
-- **`package.json`**: `"build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts"` (ordering enforced — main first so the provider's `emptyOutDir:false` appends). Postbuild generators stay after both (they only touch the element build; the provider bundle has no elements). Add `"./provider": { "types": "./dist/kitn-chat-provider.d.ts", "default": "./dist/kitn-chat-provider.es.js" }` to `exports`. Add devDep **`concurrently`** and `"dev:provider": "vite examples/remote-provider --port 6007"`.
+- **`package.json`**: `"build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts"` (ordering enforced — main first so the provider's `emptyOutDir:false` appends). Postbuild generators stay after both (they only touch the element build; the provider bundle has no elements). Add `"./provider": { "types": "./dist/kitn-chat-provider.d.ts", "default": "./dist/kitn-chat-provider.es.js" }` to `exports`. Add devDeps **`concurrently`** + **`http-server`** (pinned, used via the local bin, not bare `npx`) and `"dev:provider": "vite examples/remote-provider --port 6007 --strictPort"`. The mock provider is a **standalone Vite app** (`examples/remote-provider/` with its own `index.html` + `provider-entry.ts`); `vite <root>` serves that directory as root (valid Vite CLI). **Provider `.d.ts`:** the provider bundle has no hand-authored types file (unlike `./elements`), so `vite.config.provider.ts` uses **`vite-plugin-dts`** (add as devDep) to emit a bundled `dist/kitn-chat-provider.d.ts` — without it the `./provider` subpath ships untyped and consumers' `tsc` errors.
 - **`playwright.config.ts`** (standalone — NOT `@vitest/browser-playwright`): two `webServer`
   entries — `{ command: 'npm run build-storybook && npx http-server storybook-static -p 6006', url: 'http://localhost:6006', reuseExistingServer: !process.env.CI, timeout: 120_000 }` and
   `{ command: 'npm run dev:provider', url: 'http://localhost:6007', reuseExistingServer: !process.env.CI }`. Use a built+served Storybook in CI (not `storybook dev`) for reliable readiness. Tests live in `tests/e2e/` and use `page.frameLocator()` across origins.
@@ -184,7 +184,9 @@ The artifacts below are explicit deliverables of the plan (they don't exist yet)
 ### H-P. Security tightening (redaction allowlist, recursive proto-guard)
 - **Redaction is field-positive (security new-risk):** `redactFrame()` logs an
   **allowlist** of known-safe fields and redacts everything else by default (so a future
-  secret-bearing `context` field can't leak), rather than redacting only `authToken`.
+  secret-bearing `context` field can't leak), rather than redacting only `authToken`. The
+  bridge `nonce` is explicitly **must-redact** (never allowlist it for "debuggability" — a
+  logged live nonce is a needless secondary disclosure).
   Consider a typed `LoggableFrame` so raw frames can't be passed to a logger by accident.
 - **Proto-pollution guard is recursive (H-D):** the `__proto__`/`constructor`/`prototype`
   key rejection walks nested `data`/`patch`/`context` (e.g. `data.foo.__proto__`), not just
@@ -366,6 +368,10 @@ export type UpMessage =
    *  | send-prompt | open | resize | state | dismiss | error | ready). The contract's
    *  own `ready` is the per-card mount signal; the wire `ready` is the BRIDGE handshake. */
   | { dir: 'up'; kind: 'event'; event: CardEvent }
+  /** A11y: focus reached the card's first/last focusable and would leave it. The host
+   *  SDK INTERCEPTS this (like `resize`) and moves focus to the next host element — it is
+   *  NEVER routed through `CardPolicy` (H-O). A dedicated kind, not an `event{action}`. */
+  | { dir: 'up'; kind: 'focus-edge'; edge: 'start' | 'end' }
   /** Runtime reports it could not start (bad envelope, unsupported version, internal
    *  error). `message` MUST be non-reflective (never echoes received context/envelope
    *  content — H-H). */
@@ -488,7 +494,6 @@ export function negotiateVersion(hostVersions: string[], mine: string[]): string
 | `hello` | `supportedVersions: string[]` | once, on iframe `load` | begins handshake; locks expected host origin on the iframe side |
 | `context` | `CardContext` | after `ready`, then on any change | theme `{mode,tokens}`, `locale`, `conversationId`, **short-lived** `authToken` |
 | `render` | `CardEnvelope` | after first `context` | re-send same `id` = update; new `id` = new card |
-| `ack` | `ackSeq: number` | optional, after routing an up-event | lets runtime clear pending state |
 | `teardown` | — | on dismiss / iframe reuse | runtime unmounts + stops observers |
 
 **Theme push (no FOUC):** the host sends `context` with `theme.tokens` (the
@@ -682,11 +687,12 @@ do about each:
 
 1. **Focus continuity.** Tab focus *can* cross the iframe boundary natively (the
    iframe participates in the tab order), but the host can't observe focus *inside*
-   the frame. **Mitigation:** the runtime emits an `action{action:'focus-trap-edge',
-   payload:{edge:'start'|'end'}}` when focus would leave the card's first/last
-   focusable, letting the host move focus to the next host element deterministically
-   (opt-in; default browser tab order otherwise). The iframe's own content must be
-   fully keyboard-navigable (provider obligation).
+   the frame. **Mitigation:** the runtime emits the dedicated wire up-message
+   `{kind:'focus-edge', edge:'start'|'end'}` (NOT an `action` event — see H-O) when focus
+   would leave the card's first/last focusable; the host SDK **intercepts** it (like
+   `resize`, never routed through `CardPolicy`) and moves focus to the next host element
+   deterministically (opt-in; default browser tab order otherwise). The iframe's own
+   content must be fully keyboard-navigable (provider obligation).
 
 2. **Screen-reader context.** A screen reader announces the iframe as a frame
    boundary; the card's content is read from the iframe's accessibility tree.
