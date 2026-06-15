@@ -1,12 +1,18 @@
 import React from 'react';
-import { addons, types, useStorybookApi } from 'storybook/manager-api';
+import { addons, types, useStorybookState } from 'storybook/manager-api';
 import { useTheme } from 'storybook/theming';
+import { SyntaxHighlighter } from 'storybook/internal/components';
 import elementMeta from '../src/elements/element-meta.json';
 import componentMeta from '../src/components/component-meta.json';
 import frameworkUsage from '../src/elements/framework-usage.json';
+import { exampleUsageByTitle, type ExampleUsage } from '../src/stories/examples/usage';
 
 type Usage = { tag: string; displayName: string; hasSolid: boolean; snippets: Record<string, string> };
 const usageByTag = new Map((frameworkUsage as Usage[]).map((u) => [u.tag, u]));
+
+// FrameworkTabs needs only the snippet map + whether a Solid tab exists, so both
+// the generated element usage and the hand-authored Example usage feed it.
+type Snippets = { hasSolid: boolean; snippets: Record<string, string> };
 
 const FRAMEWORKS: { key: string; label: string }[] = [
   { key: 'html', label: 'HTML' },
@@ -18,6 +24,11 @@ const FRAMEWORKS: { key: string; label: string }[] = [
 ];
 // Remembered across elements within a session, so a React dev picks "React" once.
 let lastFramework = 'html';
+
+// Prism language per framework tab (SFCs highlight fine as html; TS/JSX as jsx/tsx).
+const SNIPPET_LANG: Record<string, string> = {
+  html: 'html', react: 'jsx', vue: 'html', svelte: 'html', angular: 'typescript', solid: 'jsx',
+};
 
 // A dedicated "API" tab (next to "Docs") for the generated specs, so the Docs
 // tab stays focused on the live examples and the (often large) generated spec
@@ -90,9 +101,9 @@ function Wrap({ children }: { children: React.ReactNode }) {
   );
 }
 
-function FrameworkTabs({ tag }: { tag: string }) {
-  const { h3, mblock, border, text, muted, theme } = useStyles();
-  const u = usageByTag.get(tag);
+function FrameworkTabs({ usage, heading = 'Usage' }: { usage?: Snippets; heading?: string | null }) {
+  const { h3, border, text, muted, theme } = useStyles();
+  const u = usage;
   const [fw, setFw] = React.useState(lastFramework);
   // active may differ from fw when the current element has no snippet for the
   // remembered framework (e.g. fw='solid' but this element has no Solid tab).
@@ -114,7 +125,7 @@ function FrameworkTabs({ tag }: { tag: string }) {
   const selectedFg = theme.color.inverseText ?? theme.background.content ?? '#fff';
   return (
     <>
-      <h3 style={h3}>Usage</h3>
+      {heading ? <h3 style={h3}>{heading}</h3> : null}
       <div role="tablist" aria-label="Framework" style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
         {tabs.map((f) => (
           <button key={f.key} role="tab" type="button" aria-selected={active === f.key}
@@ -129,7 +140,9 @@ function FrameworkTabs({ tag }: { tag: string }) {
           </button>
         ))}
       </div>
-      <pre style={{ ...mblock, display: 'block', overflowX: 'auto' }}>{u.snippets[active]}</pre>
+      <SyntaxHighlighter language={SNIPPET_LANG[active] ?? 'text'} copyable bordered padded>
+        {u.snippets[active]}
+      </SyntaxHighlighter>
     </>
   );
 }
@@ -143,7 +156,7 @@ function ElementPanel({ el }: { el: ElementSpec }) {
       <div style={{ fontSize: 12, color: muted, marginBottom: 4 }}>Web component</div>
       <h2 style={{ color: text, fontSize: 22, margin: 0 }}><span style={code}>&lt;{el.tag}&gt;</span></h2>
 
-      <FrameworkTabs tag={el.tag} />
+      <FrameworkTabs usage={usageByTag.get(el.tag)} />
 
       <h3 style={h3}>Properties</h3>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -280,10 +293,43 @@ function ComponentPanel({ comp }: { comp: ComponentSpec }) {
   );
 }
 
+// Render `intro` prose with `inline code` spans (the only markdown we use here).
+function InlineCode({ text: t }: { text: string }) {
+  const { code } = useStyles();
+  return <>{t.split(/`([^`]+)`/g).map((p, i) => (i % 2 ? <code key={i} style={code}>{p}</code> : p))}</>;
+}
+
+// Examples/Patterns are granular SolidJS compositions; this teaches "how to
+// build the thing shown" — the Solid tab mirrors the story, the other tabs are
+// the hand-authored web-component equivalent.
+// Examples are SolidJS compositions; the Usage tab teaches how you do the same
+// thing — props + events — in each framework (representative, not a copy of the
+// demo). Content is per-story: eyebrow = example name, title = the story you're
+// on; an example-level fallback covers stories without their own entry.
+function ExamplePanel({ usage, storyName }: { usage: ExampleUsage; storyName?: string }) {
+  const { text, muted } = useStyles();
+  const exampleName = usage.title.split('/').pop() ?? usage.title;
+  const content = (storyName && usage.stories?.[storyName]) || usage;
+  const snippets = content.snippets as Record<string, string>;
+  return (
+    <div style={{ padding: '24px 32px 64px', maxWidth: 1040, margin: '0 auto', color: text, fontSize: 14, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 12, color: muted, marginBottom: 4 }}>{exampleName}</div>
+      <h2 style={{ color: text, fontSize: 22, margin: 0 }}>{storyName ?? exampleName}</h2>
+      <p style={{ color: muted, margin: '8px 0 0' }}><InlineCode text={content.intro} /></p>
+      <FrameworkTabs usage={{ hasSolid: !!snippets.solid, snippets }} heading={null} />
+    </div>
+  );
+}
+
 function ApiPanel() {
-  const api = useStorybookApi();
-  const data = api.getCurrentStoryData() as { title?: string } | undefined;
-  const title = data?.title;
+  // useStorybookState re-renders on navigation and reliably carries the index
+  // entry (with its `title`); getCurrentStoryData() can be empty at tab-render.
+  const { storyId, index } = useStorybookState();
+  const entry = index?.[storyId] as { title?: string; name?: string } | undefined;
+  const title = entry?.title;
+
+  const example = title ? exampleUsageByTitle.get(title) : undefined;
+  if (example) return <Wrap><ExamplePanel usage={example} storyName={entry?.name} /></Wrap>;
 
   if (title && title.startsWith(WC_PREFIX)) {
     const el = elements.find((e) => e.displayName === title.slice(WC_PREFIX.length));
@@ -305,7 +351,7 @@ function ApiPanel() {
 addons.register(ADDON_ID, () => {
   addons.add(TAB_ID, {
     type: types.TAB,
-    title: 'API',
+    title: 'Usage',
     // NOTE: Storybook 10 TAB addons no longer honour a `match`/`route` predicate
     // (see MIGRATION.md: "Tab addons cannot manually route") — a TAB is added to
     // EVERY entry. Per-entry visibility is therefore handled in `manager.ts`,

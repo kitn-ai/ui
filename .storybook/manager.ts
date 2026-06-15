@@ -1,6 +1,7 @@
 import { addons } from 'storybook/manager-api';
 import { STORY_CHANGED, DOCS_RENDERED, SET_INDEX } from 'storybook/internal/core-events';
-import './api-tab'; // registers the "API" tab for Components
+import { exampleUsageStoryIdPrefixes } from '../src/stories/examples/usage';
+import './api-tab'; // registers the "Code" tab for Components + Examples/Patterns
 
 // Storybook 10 controls addon-panel visibility here (the old per-story
 // `parameters.options.showPanel` is no longer honored). The Examples, Patterns,
@@ -53,20 +54,30 @@ const COMPONENT_PREFIXES = [
   'solid-advanced-elements-',
   'solid-advanced-primitives-',
 ];
+// Examples/Patterns get the tab too — but only the entries we've authored
+// "how to build this" code for (derived from the usage modules), so the rest
+// stay Docs-only instead of showing an empty Code tab.
 const wantsApiTab = (storyId: string | undefined): boolean =>
-  !!storyId && COMPONENT_PREFIXES.some((p) => storyId.startsWith(p));
+  !!storyId &&
+  (COMPONENT_PREFIXES.some((p) => storyId.startsWith(p)) ||
+    exampleUsageStoryIdPrefixes.some((p) => storyId.startsWith(p)));
 
-// Update the global `previewTabs.kitn-api-tab.hidden` flag to match the active
-// entry, then nudge the manager to re-read the config (SET_CONFIG) so the tab
-// bar re-renders. Idempotent: bails when the flag is already correct.
+// Update the global `previewTabs` to match the active entry, then nudge the
+// manager to re-read the config (SET_CONFIG) so the tab bar re-renders.
+//
+// Storybook orders tabs by their KEY ORDER in `previewTabs` (entries listed
+// here sort first), so we pin Preview (Canvas) → Docs → Code and rename the
+// built-in Canvas tab to "Preview" in the same place. Idempotent: bails when
+// both the Code-tab hidden flag and the rename are already in place.
 function syncApiTabVisibility(storyId: string | undefined): void {
   const hidden = !wantsApiTab(storyId);
-  const current = addons.getConfig().previewTabs?.[API_TAB_ID]?.hidden;
-  if (current === hidden) return;
+  const cfg = addons.getConfig().previewTabs;
+  if (cfg?.[API_TAB_ID]?.hidden === hidden && cfg?.canvas?.title === 'Demo') return;
   addons.setConfig({
     previewTabs: {
-      ...addons.getConfig().previewTabs,
-      [API_TAB_ID]: { ...addons.getConfig().previewTabs?.[API_TAB_ID], hidden },
+      canvas: { title: 'Demo' },
+      docs: {},
+      [API_TAB_ID]: { hidden },
     },
   });
 }
