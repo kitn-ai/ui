@@ -19,7 +19,7 @@ both ways, theme/locale/context/short-lived-token down, events/auto-height/lifec
 up, two thin pieces) and the existing iframe plumbing in `src/components/artifact.tsx`.
 
 > **Ratified 2026-06-14 (session 3).** Scope confirmed: **full v1** (everything below —
-> host SDK + provider runtime + `<kc-remote-card>` element + the `@kitn.ai/chat/provider`
+> host SDK + provider runtime + `<kc-remote>` element + the `@kitn.ai/chat/provider`
 > subpath + the mock-provider example + unit tests + the full cross-origin Playwright
 > matrix + the 6 Storybook stories). Built against the **renamed contract**: the terminal
 > data verb is now **`submit`** (was `submit-data`) and the policy handler is **`onSubmit`**;
@@ -117,9 +117,9 @@ never a host-stretched root, to avoid feedback loops. Emit only when
 `|new − lastEmitted| > THRESHOLD` (≈1–2px). The host clamps to `maxHeight` and, once clamped,
 treats "at maxHeight" as a fixed point (stops reacting to further grow; the frame scrolls).
 
-### H-K. `<kc-remote-card>` scope (architecture #1)
+### H-K. `<kc-remote>` scope (architecture #1)
 "Drop-in interchangeable with native cards" applies to the **event-routing path only**:
-`<kc-remote-card>` validates (origin+source+nonce+schema) **before** re-emitting the
+`<kc-remote>` validates (origin+source+nonce+schema) **before** re-emitting the
 bubbling `kc-card` event, so it routes through the same host listener. It mounts
 **standalone** (alongside, not inside, `<kc-cards>`). Injecting remote cards into a
 `<kc-cards>` list (the `type→tag` map can't carry `src`/`providerOrigin`) is a **v2**
@@ -279,7 +279,7 @@ facade):
 | `src/remote/provider-runtime.ts` | `createCardBridge()` → a `CardHost` impl for the iframe + the handshake responder + `ResizeObserver` height reporting. Provider-side. |
 | `src/remote/origin.ts` | `assertOrigin()` / origin-allowlist helpers, shared by both sides + unit-tested in isolation. |
 | `src/remote/version.ts` | `negotiateVersion()` — pure function, unit-tested. |
-| `src/elements/remote-card.tsx` | OPTIONAL `<kc-remote-card>` facade wrapping `mountRemoteCard` for the no-JS-host / pure-markup path (attributes: `provider-origin`, `src`, `envelope` as a JS prop). Emits a bubbling+composed `kc-card` CustomEvent so it routes through the **native** host listener too — making remote cards drop-in interchangeable with native ones. |
+| `src/elements/remote.tsx` | OPTIONAL `<kc-remote>` facade wrapping `mountRemoteCard` for the no-JS-host / pure-markup path (attributes: `provider-origin`, `src`, `envelope` as a JS prop). Emits a bubbling+composed `kc-card` CustomEvent so it routes through the **native** host listener too — making remote cards drop-in interchangeable with native ones. |
 
 `src/remote/index.ts` re-exports the public surface; `src/index.ts` adds the host
 SDK to the package's published entry (provider runtime ships as a separate subpath
@@ -628,7 +628,7 @@ sheet path — noted, not blocking.)
      `lockOrigin`) and is unit-tested in isolation.
 
 2. **Origin allowlist.** `mountRemoteCard` takes a single `providerOrigin`. The
-   `<kc-remote-card>` facade reads `provider-origin` and validates it is a single
+   `<kc-remote>` facade reads `provider-origin` and validates it is a single
    absolute `https:` origin (rejects `*`, lists, or `http:` except `localhost` for
    dev). The host SDK never trusts the iframe's `src` to *imply* the origin — the
    caller states it explicitly and it is pinned.
@@ -868,7 +868,7 @@ elements don't re-register on HMR).
 
 ## Storybook / demo story plan
 
-A new `Web Components/kc-remote-card` (+ an `Examples/Remote cards` group), every
+A new `Web Components/kc-remote` (+ an `Examples/Remote cards` group), every
 story **source-visible** (`parameters.docs.source.code`, per the Examples norm):
 
 1. **Remote form (happy path).** A mock provider iframe (served from Storybook

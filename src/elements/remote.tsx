@@ -1,5 +1,5 @@
-// src/elements/remote-card.tsx
-// <kc-remote-card> — Shadow-DOM facade that mounts a sandboxed cross-origin iframe
+// src/elements/remote.tsx
+// <kc-remote> — Shadow-DOM facade that mounts a sandboxed cross-origin iframe
 // card via mountRemoteCard(), re-emits every CardEvent as a bubbling+composed
 // kc-card CustomEvent, and validates the provider-origin before mounting.
 import { onCleanup, onMount } from 'solid-js';
@@ -90,7 +90,7 @@ function buildWrappedPolicy(element: HTMLElement, userPolicy: CardPolicy | undef
 }
 
 /**
- * `<kc-remote-card>` — mounts a sandboxed cross-origin iframe card.
+ * `<kc-remote>` — mounts a sandboxed cross-origin iframe card.
  *
  * Required props:
  *   - `provider-origin` attribute: the exact HTTPS origin of the card provider
@@ -106,7 +106,7 @@ function buildWrappedPolicy(element: HTMLElement, userPolicy: CardPolicy | undef
  * CustomEvent off the host element.
  */
 defineWebComponent<Props>(
-  'kc-remote-card',
+  'kc-remote',
   {
     src: undefined,
     providerOrigin: undefined,
@@ -129,7 +129,7 @@ defineWebComponent<Props>(
       const providerOrigin = props.providerOrigin;
       if (!isValidProviderOrigin(providerOrigin)) {
         renderError(
-          `[kc-remote-card] Invalid provider-origin "${providerOrigin ?? ''}". ` +
+          `[kc-remote] Invalid provider-origin "${providerOrigin ?? ''}". ` +
           `Must be an absolute https: origin, or http://localhost / http://127.0.0.1 for local dev.`,
         );
         return;
@@ -137,13 +137,13 @@ defineWebComponent<Props>(
 
       const src = props.src;
       if (!src) {
-        renderError('[kc-remote-card] Missing required "src" attribute.');
+        renderError('[kc-remote] Missing required "src" attribute.');
         return;
       }
 
       const envelope = props.envelope as CardEnvelope | undefined;
       if (!envelope) {
-        renderError('[kc-remote-card] Missing required "envelope" property.');
+        renderError('[kc-remote] Missing required "envelope" property.');
         return;
       }
 
@@ -178,7 +178,7 @@ defineWebComponent<Props>(
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        renderError(`[kc-remote-card] Mount failed: ${message}`);
+        renderError(`[kc-remote] Mount failed: ${message}`);
         container.remove();
         return;
       }

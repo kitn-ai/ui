@@ -551,6 +551,23 @@ export const KcReasoning = createWebComponent<KcReasoningProps>(
   { onOpenchange: 'openchange' },
 );
 
+export interface KcRemoteProps extends WebComponentProps {
+  /** The remote card URL. Attribute: `src`. */
+  src?: string;
+  /** Exact provider origin (https: or http://localhost for dev). Attribute: `provider-origin`. */
+  providerOrigin?: string;
+  /** The card envelope to render. JS property only. */
+  envelope?: Record<string, unknown>;
+  /** Optional routing policy. JS property only. */
+  policy?: Record<string, unknown>;
+}
+
+export const KcRemote = createWebComponent<KcRemoteProps>(
+  'kc-remote',
+  ["theme","src","providerOrigin","envelope","policy"],
+  {  },
+);
+
 export interface KcResizableProps extends WebComponentProps {
   /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
   orientation?: "horizontal" | "vertical";

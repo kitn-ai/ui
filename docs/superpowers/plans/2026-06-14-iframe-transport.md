@@ -4,14 +4,14 @@
 
 **Goal:** Build the remote (cross-origin sandboxed `<iframe>` + `postMessage`) transport for the Card Contract: a host embed SDK + a provider iframe runtime that carry the exact `CardEnvelope`/`CardContext`/`CardEvent` shapes over a hardened wire, routed through the **same `CardPolicy`** as native cards — plus a runnable mock-provider example and a real cross-origin test matrix.
 
-**Architecture:** A new `src/remote/` folder (peer to `components/`/`elements/`): pure `wire`/`origin`/`version` modules; `host-embed.ts` (`mountRemoteCard` — drops the iframe, runs a nonce-bound handshake, pushes context+render, intercepts `resize`/`focus-edge`, routes everything else via `routeCardEvent`, with a `connecting→open→error|closed` state machine + pre-OPEN latest-wins buffer); `provider-runtime.ts` (`createCardBridge` — handshake responder + `CardHost` + content-height observer). A `<kc-remote-card>` element validates then re-emits `kc-card`. The provider ships as a separate `@kitn.ai/chat/provider` bundle.
+**Architecture:** A new `src/remote/` folder (peer to `components/`/`elements/`): pure `wire`/`origin`/`version` modules; `host-embed.ts` (`mountRemoteCard` — drops the iframe, runs a nonce-bound handshake, pushes context+render, intercepts `resize`/`focus-edge`, routes everything else via `routeCardEvent`, with a `connecting→open→error|closed` state machine + pre-OPEN latest-wins buffer); `provider-runtime.ts` (`createCardBridge` — handshake responder + `CardHost` + content-height observer). A `<kc-remote>` element validates then re-emits `kc-card`. The provider ships as a separate `@kitn.ai/chat/provider` bundle.
 
 **Tech Stack:** TypeScript, SolidJS (elements only; the transport is vanilla DOM), Vite (lib mode, second build entry), vitest+jsdom (unit), standalone Playwright (cross-origin e2e), Storybook.
 
 **Spec (authoritative):** `docs/superpowers/specs/2026-06-13-agui-iframe-transport-design.md` — read the **"v1 Hardening addendum" (H-A … H-P)** and the canonical **"## The wire message types (TS)"** block; they supersede older prose where they conflict.
 
 **Phasing (decided 2026-06-14):** ship in **two PRs** for reviewability.
-- **Phase 1 — core transport + example (Tasks 1–11):** the `src/remote/` modules, `<kc-remote-card>`, the provider bundle/exports, the runnable mock-provider example, and the **unit** test suite (jsdom). Produces working, unit-verified software on its own.
+- **Phase 1 — core transport + example (Tasks 1–11):** the `src/remote/` modules, `<kc-remote>`, the provider bundle/exports, the runnable mock-provider example, and the **unit** test suite (jsdom). Produces working, unit-verified software on its own.
 - **Phase 2 — verification + surfacing (Tasks 12–14):** the real cross-origin **Playwright** matrix + CI workflow, Storybook stories, and the Overview docs. Hardens and documents what Phase 1 built.
 Each phase is its own branch/PR off `main`.
 
@@ -35,12 +35,12 @@ Each phase is its own branch/PR off `main`.
 - `provider.ts` — the `@kitn.ai/chat/provider` entry (re-exports `createCardBridge`, `RemoteCardRenderer`, wire/origin/version).
 
 **Create (element + example + infra):**
-- `src/elements/remote-card.tsx` — `<kc-remote-card>`.
+- `src/elements/remote.tsx` — `<kc-remote>`.
 - `src/primitives/use-resize-observer.ts` — shared ResizeObserver primitive.
 - `examples/remote-provider/{index.html,provider-entry.ts,vite.config.ts}` — mock provider (standalone Vite app, reference runtime).
 - `examples/remote-host/` (host demo page, optional within stories).
 - `vite.config.provider.ts` — second build entry.
-- `playwright.config.ts`, `tests/e2e/remote-card.spec.ts`.
+- `playwright.config.ts`, `tests/e2e/remote-element.spec.ts`.
 - `.github/workflows/test.yml`.
 
 **Modify:**
@@ -607,25 +607,25 @@ test('provider surface (no host SDK)', () => {
 
 ---
 
-## Task 9: `<kc-remote-card>` element
+## Task 9: `<kc-remote>` element
 
-**Files:** Create `src/elements/remote-card.tsx`; Test `tests/elements/remote-card-element.test.tsx`. Follow the `defineWebComponent` pattern of `src/elements/confirm-card.tsx`.
+**Files:** Create `src/elements/remote.tsx`; Test `tests/elements/remote-element.test.tsx`. Follow the `defineWebComponent` pattern of `src/elements/confirm-card.tsx`.
 
 - [ ] **Step 1: Read** `src/elements/confirm-card.tsx` for the facade pattern.
-- [ ] **Step 2: Failing test** — `tests/elements/remote-card-element.test.tsx`:
+- [ ] **Step 2: Failing test** — `tests/elements/remote-element.test.tsx`:
 
 ```tsx
 import { test, expect, afterEach } from 'vitest';
-import '../../src/elements/remote-card';
+import '../../src/elements/remote';
 
-afterEach(() => document.querySelectorAll('kc-remote-card').forEach((e) => e.remove()));
+afterEach(() => document.querySelectorAll('kc-remote').forEach((e) => e.remove()));
 
-test('kc-remote-card registers', () => {
-  expect(customElements.get('kc-remote-card')).toBeTruthy();
+test('kc-remote registers', () => {
+  expect(customElements.get('kc-remote')).toBeTruthy();
 });
 
 test('validates provider-origin: rejects "*" and http (non-localhost)', async () => {
-  const el = document.createElement('kc-remote-card') as HTMLElement & { envelope: unknown };
+  const el = document.createElement('kc-remote') as HTMLElement & { envelope: unknown };
   el.setAttribute('provider-origin', '*');
   el.setAttribute('src', 'https://p.example/card');
   el.envelope = { type: 'form', id: 'f1', data: {} };
@@ -637,9 +637,9 @@ test('validates provider-origin: rejects "*" and http (non-localhost)', async ()
 ```
 
 - [ ] **Step 3: Run → FAIL**.
-- [ ] **Step 4: Implement** — `src/elements/remote-card.tsx`: a `defineWebComponent('kc-remote-card', …)` with props `providerOrigin` (attr `provider-origin`), `src` (attr), `envelope` (JS property), `policy?` (JS property). On mount, validate `providerOrigin` is a single absolute `https:` origin (or `http://localhost*` for dev) — else render inline error. Call `mountRemoteCard({ container: <shadow div>, ... })`. The host SDK already routes through `routeCardEvent`; for the "re-emit `kc-card`" path (H-K), wrap the policy so each validated routed event also dispatches a bubbling+composed `kc-card` CustomEvent via `emitCardEvent(element, event)` — validation (origin/source/nonce/schema) has already happened in `host-embed` before this point. `destroy()` on cleanup.
+- [ ] **Step 4: Implement** — `src/elements/remote.tsx`: a `defineWebComponent('kc-remote', …)` with props `providerOrigin` (attr `provider-origin`), `src` (attr), `envelope` (JS property), `policy?` (JS property). On mount, validate `providerOrigin` is a single absolute `https:` origin (or `http://localhost*` for dev) — else render inline error. Call `mountRemoteCard({ container: <shadow div>, ... })`. The host SDK already routes through `routeCardEvent`; for the "re-emit `kc-card`" path (H-K), wrap the policy so each validated routed event also dispatches a bubbling+composed `kc-card` CustomEvent via `emitCardEvent(element, event)` — validation (origin/source/nonce/schema) has already happened in `host-embed` before this point. `destroy()` on cleanup.
 - [ ] **Step 5: Run → PASS** + typecheck.
-- [ ] **Step 6: Commit** — `git add src/elements/remote-card.tsx tests/elements/remote-card-element.test.tsx && git commit -m "feat(remote): <kc-remote-card> element facade"`
+- [ ] **Step 6: Commit** — `git add src/elements/remote.tsx tests/elements/remote-element.test.tsx && git commit -m "feat(remote): <kc-remote> element facade"`
 
 ---
 
@@ -686,7 +686,7 @@ export default defineConfig({
 
 ## Task 12: Cross-origin Playwright matrix + CI
 
-**Files:** Create `playwright.config.ts`, `tests/e2e/remote-card.spec.ts`, `examples/remote-host/index.html` (host demo), `.github/workflows/test.yml`.
+**Files:** Create `playwright.config.ts`, `tests/e2e/remote-element.spec.ts`, `examples/remote-host/index.html` (host demo), `.github/workflows/test.yml`.
 
 - [ ] **Step 1: Create `examples/remote-host/index.html`** — a host page that imports `mountRemoteCard` and mounts a remote `form` card pointing at `http://localhost:6007`, logging routed events to a `<pre id="log">`. Served by Storybook static or its own vite root on `:6006`.
 - [ ] **Step 2: Create `playwright.config.ts`**:
@@ -702,19 +702,19 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 3: Create `tests/e2e/remote-card.spec.ts`** — the matrix (real two-origin): handshake completes; a `<kc-form>` submit inside the `:6007` frame arrives at the host's `onSubmit` (assert via the host log); **measured** auto-height (host `iframe.clientHeight` changes after a field toggles the card taller — `page.evaluate`); theme toggle re-themes the framed card (measured background); a wrong-origin `postMessage` injected into the host is ignored (host log unchanged); bad `src` → inline fallback + Retry. Use `page.frameLocator('iframe')` for the cross-origin frame.
+- [ ] **Step 3: Create `tests/e2e/remote-element.spec.ts`** — the matrix (real two-origin): handshake completes; a `<kc-form>` submit inside the `:6007` frame arrives at the host's `onSubmit` (assert via the host log); **measured** auto-height (host `iframe.clientHeight` changes after a field toggles the card taller — `page.evaluate`); theme toggle re-themes the framed card (measured background); a wrong-origin `postMessage` injected into the host is ignored (host log unchanged); bad `src` → inline fallback + Retry. Use `page.frameLocator('iframe')` for the cross-origin frame.
 - [ ] **Step 4: Run** — `npx playwright install --with-deps chromium` then `npm run test:e2e` → all pass.
 - [ ] **Step 5: Create `.github/workflows/test.yml`** — a CI job running `npm ci`, `npm run build`, `npm run typecheck`, `npm test`, `npm run test:react`, `npm run test:storybook`, `npx playwright install --with-deps chromium`, `npm run test:e2e`.
-- [ ] **Step 6: Commit** — `git add playwright.config.ts tests/e2e examples/remote-host .github/workflows/test.yml && git commit -m "test(remote): cross-origin Playwright matrix + CI workflow"`
+- [ ] **Step 6: Commit** — `git add playwright.config.ts tests/e2e/ examples/remote-host .github/workflows/test.yml && git commit -m "test(remote): cross-origin Playwright matrix + CI workflow"`
 
 ---
 
 ## Task 13: Storybook stories (source-visible)
 
-**Files:** Create `src/elements/remote-card.stories.tsx` (+ an `Examples/Remote cards` MDX note if useful).
+**Files:** Create `src/elements/remote.stories.tsx` (+ an `Examples/Remote cards` MDX note if useful).
 
 - [ ] **Step 1: Read** `src/elements/choice.stories.tsx` for the element-story pattern.
-- [ ] **Step 2: Implement stories** — a `Web Components/kc-remote-card` (or `Generative UI/Remote`) title. Stories (same-origin provider served from Storybook `staticDirs` for the visual demos; the real cross-origin security matrix is the Playwright suite — H-L):
+- [ ] **Step 2: Implement stories** — a `Web Components/kc-remote` (or `Generative UI/Remote`) title. Stories (same-origin provider served from Storybook `staticDirs` for the visual demos; the real cross-origin security matrix is the Playwright suite — H-L):
   1. **Remote form (happy path)** — frame renders `<kc-form>`; routed `submit` logged in an actions panel; show the `CardEnvelope` JSON beside the frame.
   2. **Auto-height** — a card that grows/shrinks; the iframe visibly resizes.
   3. **Theme push** — the Storybook light/dark toolbar re-pushes `context`; framed card re-themes.
@@ -722,7 +722,7 @@ export default defineConfig({
   5. **Failure: bad providerOrigin** — inline fallback + Retry.
   Add `examples/remote-provider/` to `.storybook/main.ts` `staticDirs` so the same-origin demo provider is served at `/remote-provider/`.
 - [ ] **Step 3: Run** — `npm run test:storybook` → PASS, 0 axe violations (axe scoped to host; the story config uses `a11y: { context: { exclude: [['iframe']] } }` — H-L).
-- [ ] **Step 4: Commit** — `git add src/elements/remote-card.stories.tsx .storybook/main.ts && git commit -m "docs(stories): kc-remote-card stories (happy path, auto-height, theme, failure)"`
+- [ ] **Step 4: Commit** — `git add src/elements/remote.stories.tsx .storybook/main.ts && git commit -m "docs(stories): kc-remote stories (happy path, auto-height, theme, failure)"`
 
 ---
 
@@ -731,17 +731,17 @@ export default defineConfig({
 **Files:** Modify the Generative UI Overview MDX; regenerate meta.
 
 - [ ] **Step 1: Locate the Overview** — `grep -rl "Generative UI" src --include=*.mdx`.
-- [ ] **Step 2: Add a "Remote cards" subsection** — how to register a provider-served card via `<kc-remote-card>` (standalone) or `mountRemoteCard`, the `providerOrigin`/`src`/`envelope` inputs, the security model in one paragraph (origin+source+nonce pinning; short-lived `authToken`; host `frame-ancestors` obligation), and a pointer to `examples/remote-provider/` as the reference runtime. Include a short code sample using `mountRemoteCard` + the `applyResolution` round-trip.
+- [ ] **Step 2: Add a "Remote cards" subsection** — how to register a provider-served card via `<kc-remote>` (standalone) or `mountRemoteCard`, the `providerOrigin`/`src`/`envelope` inputs, the security model in one paragraph (origin+source+nonce pinning; short-lived `authToken`; host `frame-ancestors` obligation), and a pointer to `examples/remote-provider/` as the reference runtime. Include a short code sample using `mountRemoteCard` + the `applyResolution` round-trip.
 - [ ] **Step 3: Full gate** — `npm run build && npm run typecheck && npm run test && npm run test:react && npm run test:storybook && npm run test:e2e`. All green; `git add` regenerated artifacts (`element-meta.json`, `element-types.d.ts`, `frameworks/react/index.tsx`, `llms*.txt`, `docs/web-components.md`).
 - [ ] **Step 4: Commit** — `git add -A && git commit -m "docs(remote): document remote cards + register/usage; regen meta"` (do NOT add `docs/notes.md`).
-- [ ] **Step 5: Open the PR** — `git push -u origin feat/iframe-transport`; open a PR to `main` titled `feat(remote): AG-UI iframe transport (host SDK + provider runtime + kc-remote-card)`, summarizing the feature + the security model + the new `@kitn.ai/chat/provider` subpath. **Call out** that it adds `src/remote/`, a second build entry, and a Playwright/CI setup. Merge via REST ([[gh-cli-projects-classic-bug]]). Pre-1.0 → release-please bumps the minor.
+- [ ] **Step 5: Open the PR** — `git push -u origin feat/iframe-transport`; open a PR to `main` titled `feat(remote): AG-UI iframe transport (host SDK + provider runtime + kc-remote)`, summarizing the feature + the security model + the new `@kitn.ai/chat/provider` subpath. **Call out** that it adds `src/remote/`, a second build entry, and a Playwright/CI setup. Merge via REST ([[gh-cli-projects-classic-bug]]). Pre-1.0 → release-please bumps the minor.
 
 ---
 
 ## Self-Review
 
 **Spec coverage** (against the addendum + body):
-- Wire types/packer/guard (H-B/H-C/H-D) → Task 1. Version (H-C) → Task 2. Origin guards + cross-origin precondition (H-F) + redaction allowlist (H-H/H-P) → Task 3. Direction+schema+proto-pollution (H-D) → Task 4. Resize primitive (H-J, Resolved #1, H-M) → Task 5. Provider runtime + RemoteCardRenderer (H-A/H-E/H-J/H-K) → Task 6. Host SDK + state machine + buffer + nonce/source pin + cross-origin + resize/focus-edge intercept + fault cardId (H-A/H-C/H-E/H-F/H-G/H-O) → Task 7. Exports + provider subpath surface → Task 8. `<kc-remote-card>` scope (H-K) → Task 9. Build/exports/devDeps + `vite-plugin-dts@^4` + `emptyOutDir:false` (H-N) → Task 10. Mock provider example → Task 11. Cross-origin Playwright matrix + jsdom patterns + CI (H-N, H-L) → Task 12. Stories + axe iframe-exclude (H-L) → Task 13. Docs + gate → Task 14. ✓ all addendum items mapped.
+- Wire types/packer/guard (H-B/H-C/H-D) → Task 1. Version (H-C) → Task 2. Origin guards + cross-origin precondition (H-F) + redaction allowlist (H-H/H-P) → Task 3. Direction+schema+proto-pollution (H-D) → Task 4. Resize primitive (H-J, Resolved #1, H-M) → Task 5. Provider runtime + RemoteCardRenderer (H-A/H-E/H-J/H-K) → Task 6. Host SDK + state machine + buffer + nonce/source pin + cross-origin + resize/focus-edge intercept + fault cardId (H-A/H-C/H-E/H-F/H-G/H-O) → Task 7. Exports + provider subpath surface → Task 8. `<kc-remote>` scope (H-K) → Task 9. Build/exports/devDeps + `vite-plugin-dts@^4` + `emptyOutDir:false` (H-N) → Task 10. Mock provider example → Task 11. Cross-origin Playwright matrix + jsdom patterns + CI (H-N, H-L) → Task 12. Stories + axe iframe-exclude (H-L) → Task 13. Docs + gate → Task 14. ✓ all addendum items mapped.
 - Security model (origin/source/nonce, sandbox sans popups, frame-ancestors, send-prompt/open via `routeCardEvent`) → Tasks 3/6/7/9; the `routeCardEvent` reuse means send-prompt downgrade + open scheme-validation come for free (verify in Task 7).
 
 **Placeholder scan:** Tasks 6 and 7 describe the runtime/host behavior as a bulleted contract rather than full literal code (the modules are large stateful vanilla-DOM files); each bullet maps to a spec item + has concrete tests that pin behavior. This is intentional for the two big stateful modules — the tests are the executable spec. All pure modules (1–5, 8) have complete code. No TBD/TODO.

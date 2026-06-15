@@ -1874,6 +1874,47 @@
     "tokens": []
   },
   {
+    "tag": "kc-remote",
+    "className": "KcRemoteElement",
+    "props": [
+      {
+        "name": "src",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The remote card URL. Attribute: `src`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "providerOrigin",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Exact provider origin (https: or http://localhost for dev). Attribute: `provider-origin`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "envelope",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "The card envelope to render. JS property only.",
+        "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "policy",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "Optional routing policy. JS property only.",
+        "displayType": "undefined | Record<string, unknown>"
+      }
+    ],
+    "events": [],
+    "composedFrom": [],
+    "tokens": []
+  },
+  {
     "tag": "kc-resizable",
     "className": "KcResizableElement",
     "props": [
