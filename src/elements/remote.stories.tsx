@@ -19,19 +19,24 @@ declare module 'solid-js' {
 type RemoteEl = HTMLElement & { envelope?: CardEnvelope; policy?: Record<string, unknown> };
 
 /**
- * The reference provider example is served by Storybook's own Vite pipeline at
- * `/remote-provider/` (see `.storybook/main.ts`). <kc-remote> requires the provider
- * to be CROSS-ORIGIN to the host (so `allow-same-origin` can't reach host DOM), so
- * we frame it via the 127.0.0.1 alias of the SAME Storybook server — a genuinely
- * different origin from the `localhost` preview. (The full cross-origin SECURITY
- * matrix is the standalone Playwright suite; these stories are visual demos — H-L.)
+ * The live cross-origin demo only works in **local Storybook dev** (`npm run storybook`):
+ * there, `.storybook/main.ts`'s Vite pipeline serves the reference provider at
+ * `/remote-provider/`, and we frame it via the `127.0.0.1` alias of the SAME dev server
+ * — a genuinely different origin from the `localhost` preview, so `<kc-remote>`'s
+ * cross-origin precondition (provider ≠ host) holds.
+ *
+ * A **static, single-origin deploy** (e.g. the GitHub Pages docs) cannot do this: there
+ * is no second origin and the provider isn't served. So `liveProvider()` returns `null`
+ * there and the stories render an explanatory panel instead of a doomed mount. The real
+ * cross-origin behavior is verified by the standalone Playwright suite (H-L).
  */
-function providerBase(): { origin: string; src: string } {
-  if (typeof window === 'undefined') {
-    return { origin: 'http://127.0.0.1:6006', src: 'http://127.0.0.1:6006/remote-provider/' };
-  }
+function liveProvider(): { origin: string; src: string } | null {
+  if (typeof window === 'undefined') return null;
+  // The deployed/built Storybook (PROD) is single-origin + has no provider middleware.
+  if (import.meta.env.PROD) return null;
   const here = new URL(window.location.href);
-  // Swap localhost ↔ 127.0.0.1 to obtain a cross-origin sibling of the host.
+  if ((here.hostname !== 'localhost' && here.hostname !== '127.0.0.1') || !here.port) return null;
+  // Swap localhost ↔ 127.0.0.1 to obtain a cross-origin sibling of the dev server.
   const alias = here.hostname === '127.0.0.1' ? 'localhost' : '127.0.0.1';
   const origin = `${here.protocol}//${alias}:${here.port}`;
   return { origin, src: `${origin}/remote-provider/` };
@@ -72,9 +77,11 @@ const WEATHER_ENVELOPE: CardEnvelope = {
   },
 };
 
-/** Mounts a <kc-remote>, logs every routed CardEvent (via the bubbling kc-card). */
+/** Mounts a <kc-remote> when a live cross-origin provider is available (local dev),
+ *  logs every routed CardEvent (via the bubbling kc-card). On a static/deployed
+ *  Storybook it renders an explanatory panel instead (no second origin). */
 function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigin?: string; showEnvelope?: boolean }) {
-  const base = providerBase();
+  const live = props.providerOrigin && props.src ? { origin: props.providerOrigin, src: props.src } : liveProvider();
   const [log, setLog] = createSignal<CardEvent[]>([]);
   let el: RemoteEl | undefined;
 
@@ -92,11 +99,28 @@ function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigi
   return (
     <div style={{ display: 'flex', gap: '16px', 'flex-wrap': 'wrap', 'align-items': 'flex-start' }}>
       <div style={{ flex: '1 1 320px', 'min-width': '300px', 'max-width': '460px' }}>
-        <kc-remote
-          ref={(e) => (el = e as RemoteEl)}
-          provider-origin={props.providerOrigin ?? base.origin}
-          src={props.src ?? base.src}
-        />
+        {live ? (
+          <kc-remote ref={(e) => (el = e as RemoteEl)} provider-origin={live.origin} src={live.src} />
+        ) : (
+          <div
+            role="note"
+            style={{
+              border: '1px dashed var(--color-border, #d4d4d8)', 'border-radius': '12px',
+              padding: '16px', 'font-size': '13px', 'line-height': '1.55', color: 'var(--color-foreground, #18181b)',
+            }}
+          >
+            <strong>Live cross-origin demo runs in local Storybook</strong>
+            <p style={{ margin: '8px 0 0' }}>
+              <code>&lt;kc-remote&gt;</code> delivers this card over a sandboxed{' '}
+              <strong>cross-origin</strong> <code>&lt;iframe&gt;</code>, which needs a second
+              origin and the reference provider served by the dev server. A static
+              single-origin docs site can’t provide that, so the element correctly refuses to
+              mount same-origin. Run <code>npm run storybook</code> to see it live; the
+              cross-origin transport is verified by the Playwright e2e matrix. The envelope
+              and the integration code (▶ <em>Show code</em>) are shown regardless.
+            </p>
+          </div>
+        )}
       </div>
       <div style={{ flex: '1 1 280px', 'min-width': '260px', display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
         {props.showEnvelope && (
@@ -104,9 +128,11 @@ function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigi
             {`// CardEnvelope sent down the wire (inside a WireFrame):\n` + JSON.stringify(props.envelope, null, 2)}
           </pre>
         )}
-        <pre style={{ margin: 0, 'max-height': '200px', overflow: 'auto', background: 'var(--color-muted, #f4f4f5)', 'border-radius': '8px', padding: '8px', 'font-size': '12px' }}>
-          {log().length === 0 ? '// routed CardEvents appear here' : JSON.stringify(log(), null, 2)}
-        </pre>
+        {live && (
+          <pre style={{ margin: 0, 'max-height': '200px', overflow: 'auto', background: 'var(--color-muted, #f4f4f5)', 'border-radius': '8px', padding: '8px', 'font-size': '12px' }}>
+            {log().length === 0 ? '// routed CardEvents appear here' : JSON.stringify(log(), null, 2)}
+          </pre>
+        )}
       </div>
     </div>
   );
