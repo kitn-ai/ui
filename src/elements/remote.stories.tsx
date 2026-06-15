@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { createSignal, onMount, onCleanup, type JSX } from 'solid-js';
+import { createSignal, createEffect, onMount, onCleanup, type JSX } from 'solid-js';
 import './remote';
-import type { CardEnvelope, CardEvent } from '../primitives/card-contract';
+import type { CardEnvelope, CardEvent, CardHost } from '../primitives/card-contract';
+import { formRenderer, infoRenderer } from '../../examples/remote-provider/renderers';
 
 declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -77,16 +78,42 @@ const WEATHER_ENVELOPE: CardEnvelope = {
   },
 };
 
+/** The Storybook theme mode, read the way the kit elements do (preview.ts mirrors
+ *  the resolved Storybook theme by toggling `.dark` on the <html>). Falls back to
+ *  the OS preference when not in the Storybook shell. */
+function readThemeMode(): 'light' | 'dark' {
+  if (typeof document === 'undefined') return 'light';
+  if (document.documentElement.classList.contains('dark')) return 'dark';
+  if (document.documentElement.classList.contains('light')) return 'light';
+  if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
+  return 'light';
+}
+
+/** Pick the matching provider renderer for a card type (the SAME renderers the live
+ *  cross-origin provider registers), or null for an unhandled type. */
+function rendererFor(type: string) {
+  if (type === 'form') return formRenderer;
+  if (type === 'info') return infoRenderer;
+  return null;
+}
+
 /** Mounts a <kc-remote> when a live cross-origin provider is available (local dev),
  *  logs every routed CardEvent (via the bubbling kc-card). On a static/deployed
- *  Storybook it renders an explanatory panel instead (no second origin). */
+ *  Storybook (no second origin) it renders the SAME provider renderer's output
+ *  DIRECTLY — so the docs show the real, interactive card — with a slim honest
+ *  banner explaining the production transport. */
 function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigin?: string; showEnvelope?: boolean }) {
   const live = props.providerOrigin && props.src ? { origin: props.providerOrigin, src: props.src } : liveProvider();
   const [log, setLog] = createSignal<CardEvent[]>([]);
+  const [mode, setMode] = createSignal<'light' | 'dark'>(readThemeMode());
   let el: RemoteEl | undefined;
+  let container: HTMLDivElement | undefined;
 
+  const renderer = rendererFor(props.envelope.type);
+
+  // ── Live (local dev): cross-origin <kc-remote>, exactly as before. ──
   onMount(() => {
-    if (!el) return;
+    if (!live || !el) return;
     el.envelope = props.envelope;
     const onCard = (e: Event) => {
       const detail = (e as CustomEvent<CardEvent>).detail;
@@ -96,11 +123,53 @@ function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigi
     onCleanup(() => el?.removeEventListener('kc-card', onCard));
   });
 
+  // ── Static (deployed): render the real card content directly, reusing the
+  //    provider renderer. Re-mount when the theme mode changes so the ThemePush
+  //    story still means something on static. ──
+  if (!live && renderer) {
+    // Track Storybook's light/dark toggle (preview.ts flips `.dark` on <html>).
+    onMount(() => {
+      if (typeof MutationObserver === 'undefined') return;
+      const obs = new MutationObserver(() => setMode(readThemeMode()));
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      onCleanup(() => obs.disconnect());
+    });
+
+    createEffect(() => {
+      const m = mode(); // re-run on theme change
+      if (!container) return;
+      const stubHost: CardHost = {
+        context: () => ({ theme: { mode: m }, locale: 'en' }),
+        emit: (e) => setLog((prev) => [...prev, e]),
+      };
+      const dispose = renderer.mount(container, props.envelope, stubHost);
+      onCleanup(() => {
+        try { dispose(); } catch { /* renderer disposer threw — best-effort */ }
+        if (container) container.replaceChildren();
+      });
+    });
+  }
+
   return (
     <div style={{ display: 'flex', gap: '16px', 'flex-wrap': 'wrap', 'align-items': 'flex-start' }}>
       <div style={{ flex: '1 1 320px', 'min-width': '300px', 'max-width': '460px' }}>
         {live ? (
           <kc-remote ref={(e) => (el = e as RemoteEl)} provider-origin={live.origin} src={live.src} />
+        ) : renderer ? (
+          <div style={{ display: 'flex', 'flex-direction': 'column', gap: '8px' }}>
+            <div
+              ref={(e) => (container = e)}
+              style={{ border: '1px solid var(--color-border, #e4e4e7)', 'border-radius': '12px', overflow: 'hidden' }}
+            />
+            <p
+              role="note"
+              style={{ margin: 0, 'font-size': '12px', 'line-height': '1.5', color: 'var(--color-muted-foreground, #71717a)' }}
+            >
+              Rendered directly for these static docs. In production <code>&lt;kc-remote&gt;</code> delivers this over a
+              sandboxed cross-origin iframe — run <code>npm run storybook</code> for the live transport; the cross-origin
+              model is verified by the Playwright suite.
+            </p>
+          </div>
         ) : (
           <div
             role="note"
@@ -113,11 +182,9 @@ function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigi
             <p style={{ margin: '8px 0 0' }}>
               <code>&lt;kc-remote&gt;</code> delivers this card over a sandboxed{' '}
               <strong>cross-origin</strong> <code>&lt;iframe&gt;</code>, which needs a second
-              origin and the reference provider served by the dev server. A static
-              single-origin docs site can’t provide that, so the element correctly refuses to
-              mount same-origin. Run <code>npm run storybook</code> to see it live; the
-              cross-origin transport is verified by the Playwright e2e matrix. The envelope
-              and the integration code (▶ <em>Show code</em>) are shown regardless.
+              origin and the reference provider served by the dev server. Run{' '}
+              <code>npm run storybook</code> to see it live; the cross-origin transport is
+              verified by the Playwright e2e matrix.
             </p>
           </div>
         )}
@@ -128,11 +195,9 @@ function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigi
             {`// CardEnvelope sent down the wire (inside a WireFrame):\n` + JSON.stringify(props.envelope, null, 2)}
           </pre>
         )}
-        {live && (
-          <pre style={{ margin: 0, 'max-height': '200px', overflow: 'auto', background: 'var(--color-muted, #f4f4f5)', 'border-radius': '8px', padding: '8px', 'font-size': '12px' }}>
-            {log().length === 0 ? '// routed CardEvents appear here' : JSON.stringify(log(), null, 2)}
-          </pre>
-        )}
+        <pre style={{ margin: 0, 'max-height': '200px', overflow: 'auto', background: 'var(--color-muted, #f4f4f5)', 'border-radius': '8px', padding: '8px', 'font-size': '12px' }}>
+          {log().length === 0 ? '// routed CardEvents appear here' : JSON.stringify(log(), null, 2)}
+        </pre>
       </div>
     </div>
   );
