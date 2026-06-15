@@ -82,6 +82,8 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
 
   const cardHost: CardHost = {
     context: () => context ?? defaultContext(),
+    // HOST CONTRACT: the host MUST validate inbound event.cardId against the active card,
+    // because the provider cannot fence a replaced/stale renderer's host.emit calls.
     emit: (event: CardEvent) => postUp({ dir: 'up', kind: 'event', event }),
   };
 
@@ -94,7 +96,9 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
   }
 
   function startObserver(): void {
-    if (stopObserver) return;
+    // Tear down any existing observer so observeContentHeight's internal `last` baseline
+    // re-initializes to -1 and the newly-mounted card always emits its initial height.
+    stopObserver?.(); stopObserver = null;
     stopObserver = observeContentHeight(root, (height) => {
       if (!currentId) return;
       cardHost.emit({ kind: 'resize', cardId: currentId, height });
@@ -109,6 +113,7 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
     el.textContent = `Unsupported card: ${envelope.type}`;
     root.appendChild(el);
     currentId = envelope.id;
+    startObserver(); // placeholder has a height the host must know about
     cardHost.emit({ kind: 'error', cardId: envelope.id, message });
   }
 
@@ -190,23 +195,28 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
     if (data.nonce !== nonce) { warnDrop(data); return; }
     if (data.version !== negotiated) { warnDrop(data); return; }
 
-    const message = data.message;
-    switch (message.kind) {
-      case 'hello':
-        // Re-hello after lock is ignored (bridge identity is fixed for its generation).
-        return;
-      case 'context':
-        context = (message as { context: CardContext }).context;
-        return;
-      case 'render':
-        handleRender((message as { envelope: CardEnvelope }).envelope);
-        return;
-      case 'teardown':
-        teardown();
-        return;
-      default:
-        warnDrop(data);
-        return;
+    try {
+      const message = data.message;
+      switch (message.kind) {
+        case 'hello':
+          // Re-hello after lock is ignored (bridge identity is fixed for its generation).
+          return;
+        case 'context':
+          context = (message as { context: CardContext }).context;
+          return;
+        case 'render':
+          handleRender((message as { envelope: CardEnvelope }).envelope);
+          return;
+        case 'teardown':
+          teardown();
+          return;
+        default:
+          warnDrop(data);
+          return;
+      }
+    } catch (e) {
+      // No throw may escape the message handler — the listener must survive.
+      warnDrop(data);
     }
   }
 
