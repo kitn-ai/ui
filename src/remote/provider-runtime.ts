@@ -68,6 +68,7 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
   // ── Render state (H-E). One card at a time in v1. ──
   let context: CardContext | null = null;
   let currentId: string | null = null;
+  let currentEnvelope: CardEnvelope | null = null;
   let dispose: (() => void) | null = null;
   let stopObserver: (() => void) | null = null;
 
@@ -93,6 +94,7 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
     }
     dispose = null;
     currentId = null;
+    currentEnvelope = null;
   }
 
   function startObserver(): void {
@@ -144,6 +146,7 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
     try {
       dispose = renderer.mount(root, envelope, cardHost) ?? (() => {});
       currentId = envelope.id;
+      currentEnvelope = envelope;
     } catch {
       // NON-REFLECTIVE fault (H-H): never echo envelope/context content.
       dispose = null;
@@ -201,9 +204,14 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
         case 'hello':
           // Re-hello after lock is ignored (bridge identity is fixed for its generation).
           return;
-        case 'context':
+        case 'context': {
           context = (message as { context: CardContext }).context;
+          // Live context push (theme/locale/a11y/token refresh): re-render the current
+          // card so it observes the new host.context(). v1 has no in-place renderer
+          // update hook, so we reuse the documented same-id dispose+remount path.
+          if (currentEnvelope) handleRender(currentEnvelope);
           return;
+        }
         case 'render':
           handleRender((message as { envelope: CardEnvelope }).envelope);
           return;

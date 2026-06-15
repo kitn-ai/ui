@@ -77,6 +77,7 @@
     "build:css": "tailwindcss -i src/elements/styles.css -o src/elements/compiled.css --minify",
     "build:css:watch": "tailwindcss -i src/elements/styles.css -o src/elements/compiled.css --watch",
     "dev:provider": "vite examples/remote-provider --port 6007 --strictPort",
+    "dev:host": "vite examples/remote-host --port 6006 --strictPort",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -93,6 +94,7 @@
     "tailwind-merge": "^2.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@solidjs/testing-library": "^0.8.0",
     "@storybook/addon-a11y": "^10.4.2",
     "@storybook/addon-docs": "^10.3.5",
