@@ -77,8 +77,9 @@ const preview: Preview = {
         // Sidebar order, top to bottom: the docs, the interactive Theming tools
         // (next to the Theming doc), composed Examples/Patterns, then the
         // framework-agnostic **Web Components** (the primary, copy-into-any-app
-        // API) ABOVE the SolidJS-native Components/UI reference — so a reader
-        // reaches the portable elements before the Solid-only building blocks.
+        // API) ABOVE the **SolidJS (advanced)** tier — so a reader reaches the
+        // portable elements before the Solid-only building blocks (which stay
+        // present but collapsed below).
         //
         // NOTE: every top-level group MUST be named explicitly here. The
         // trailing `*` is a catch-all that sorts unlisted groups to the very
@@ -113,8 +114,8 @@ const preview: Preview = {
           ],
           'Patterns',
           'Web Components',
-          'Components',
-          'UI',
+          'SolidJS (advanced)',
+          ['Overview', 'Components', 'Primitives'],
           'Generative UI',
           ['Overview', 'Cards', ['kc-confirm', '*'], 'SDK'],
           '*',
