@@ -3,7 +3,7 @@ import { Badge } from './badge';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'UI/Badge',
+  title: 'SolidJS (advanced)/Primitives/Badge',
   component: Badge,
   tags: ['autodocs'],
   parameters: {

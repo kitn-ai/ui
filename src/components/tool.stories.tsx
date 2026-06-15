@@ -34,7 +34,7 @@ const errorPart: ToolPart = {
 };
 
 const meta = {
-  title: 'Components/Tool',
+  title: 'SolidJS (advanced)/Components/Tool',
   component: Tool,
   tags: ['autodocs'],
   parameters: {

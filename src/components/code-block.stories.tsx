@@ -43,7 +43,7 @@ const cssCode = `:root {
  * props live on `CodeBlockCode`, so `Playground` drives that piece directly.
  */
 const meta = {
-  title: 'Components/CodeBlock',
+  title: 'SolidJS (advanced)/Components/CodeBlock',
   component: CodeBlockCode,
   tags: ['autodocs'],
   parameters: {

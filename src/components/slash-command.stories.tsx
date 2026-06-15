@@ -53,7 +53,7 @@ function SlashDemo(props: { commands: SlashCommandItem[]; activeIds?: string[]; 
 }
 
 const meta = {
-  title: "Components/SlashCommand",
+  title: "SolidJS (advanced)/Components/SlashCommand",
   component: SlashCommand,
   tags: ["autodocs"],
   parameters: {

@@ -4,7 +4,7 @@ import { ThinkingBar } from './thinking-bar';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/ThinkingBar',
+  title: 'SolidJS (advanced)/Components/ThinkingBar',
   component: ThinkingBar,
   tags: ['autodocs'],
   parameters: {

@@ -11,7 +11,7 @@ const multipleModels = [
 ];
 
 const meta = {
-  title: 'Components/ModelSwitcher',
+  title: 'SolidJS (advanced)/Components/ModelSwitcher',
   component: ModelSwitcher,
   tags: ['autodocs'],
   parameters: {

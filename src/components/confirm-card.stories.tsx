@@ -49,7 +49,7 @@ const DESTRUCTIVE: ConfirmCardData = {
 };
 
 const meta = {
-  title: 'Components/ConfirmCard',
+  title: 'SolidJS (advanced)/Components/ConfirmCard',
   component: ConfirmCard,
   tags: ['autodocs'],
   parameters: {

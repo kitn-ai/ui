@@ -5,7 +5,7 @@ import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Message',
+  title: 'SolidJS (advanced)/Components/Message',
   component: Message,
   tags: ['autodocs'],
   parameters: {

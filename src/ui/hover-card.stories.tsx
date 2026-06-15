@@ -4,7 +4,7 @@ import { Button } from './button';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'UI/HoverCard',
+  title: 'SolidJS (advanced)/Primitives/HoverCard',
   component: HoverCard,
   tags: ['autodocs'],
   parameters: {

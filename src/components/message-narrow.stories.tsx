@@ -6,7 +6,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resi
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/Message/Narrow Panel',
+  title: 'SolidJS (advanced)/Components/Message/Narrow Panel',
   component: Message,
   tags: ['autodocs'],
   parameters: {

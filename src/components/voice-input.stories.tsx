@@ -10,7 +10,7 @@ const transcribe = async (_audio: Blob): Promise<string> => {
 };
 
 const meta = {
-  title: 'Components/VoiceInput',
+  title: 'SolidJS (advanced)/Components/VoiceInput',
   component: VoiceInput,
   tags: ['autodocs'],
   parameters: {

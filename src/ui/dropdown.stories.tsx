@@ -5,7 +5,7 @@ import { buttonVariants } from './button';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'UI/Dropdown',
+  title: 'SolidJS (advanced)/Primitives/Dropdown',
   component: Dropdown,
   tags: ['autodocs'],
   parameters: {
