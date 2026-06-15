@@ -71,6 +71,12 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
   let currentEnvelope: CardEnvelope | null = null;
   let dispose: (() => void) | null = null;
   let stopObserver: (() => void) | null = null;
+  // The theme key applied at the current mount. A `context` push only forces a
+  // dispose+remount when the theme actually changes (renderers apply theme
+  // imperatively at mount); token/locale/a11y refreshes are read on-demand via
+  // host.context() and must NOT wipe in-progress card state.
+  let appliedThemeKey: string | null = null;
+  const themeKey = (c: CardContext | null) => JSON.stringify(c?.theme ?? null);
 
   function warnDrop(data: unknown): void {
     try { console.warn('[kc-remote]', redactFrame(data)); } catch { /* best-effort */ }
@@ -95,6 +101,7 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
     dispose = null;
     currentId = null;
     currentEnvelope = null;
+    appliedThemeKey = null;
   }
 
   function startObserver(): void {
@@ -147,6 +154,7 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
       dispose = renderer.mount(root, envelope, cardHost) ?? (() => {});
       currentId = envelope.id;
       currentEnvelope = envelope;
+      appliedThemeKey = themeKey(context);
     } catch {
       // NON-REFLECTIVE fault (H-H): never echo envelope/context content.
       dispose = null;
@@ -205,11 +213,15 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
           // Re-hello after lock is ignored (bridge identity is fixed for its generation).
           return;
         case 'context': {
-          context = (message as { context: CardContext }).context;
-          // Live context push (theme/locale/a11y/token refresh): re-render the current
-          // card so it observes the new host.context(). v1 has no in-place renderer
-          // update hook, so we reuse the documented same-id dispose+remount path.
-          if (currentEnvelope) handleRender(currentEnvelope);
+          const next = (message as { context: CardContext }).context;
+          context = next;
+          // Live context push. Renderers read host.context() on-demand, so silent
+          // token/locale/a11y refreshes need NO remount — storing the new context is
+          // enough. Only a THEME change requires a dispose+remount, since renderers
+          // apply theme imperatively at mount (v1 has no in-place update hook).
+          if (currentEnvelope && themeKey(next) !== appliedThemeKey) {
+            handleRender(currentEnvelope); // handleRender resets appliedThemeKey
+          }
           return;
         }
         case 'render':
