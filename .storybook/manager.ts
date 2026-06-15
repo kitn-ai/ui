@@ -1,4 +1,6 @@
-import { addons } from 'storybook/manager-api';
+import React from 'react';
+import { addons, types } from 'storybook/manager-api';
+import { IconButton } from 'storybook/internal/components';
 import './api-tab'; // registers the "API" tab for Web Components
 
 // Storybook 10 controls addon-panel visibility here (the old per-story
@@ -27,11 +29,38 @@ const SOLID_GROUPS = new Set(['Components', 'UI']);
 // NOTE: manager addons require a FULL Storybook restart to take effect — HMR
 // does NOT re-run manager.ts registration code.
 const SOLID_TIER = 'SolidJS (advanced)';
+let showSolid = false;
+
+const filterFn = (item: { title?: string }) =>
+  showSolid || !item.title?.startsWith(SOLID_TIER);
 
 addons.register('kitn/solid-tier', (api) => {
-  api.experimental_setFilter('kitn/solid-tier', (item) =>
-    !item.title?.startsWith(SOLID_TIER),
-  );
+  const apply = () => api.experimental_setFilter('kitn/solid-tier', filterFn);
+  apply();
+
+  addons.add('kitn/solid-tier/toggle', {
+    type: types.TOOL,
+    title: 'SolidJS layer',
+    render: () => {
+      const [, force] = React.useReducer((n: number) => n + 1, 0);
+      const toggle = () => {
+        showSolid = !showSolid;
+        apply();
+        force();
+      };
+      return React.createElement(
+        IconButton,
+        {
+          active: showSolid,
+          title: showSolid
+            ? 'Hide SolidJS (advanced) layer'
+            : 'Show SolidJS (advanced) layer',
+          onClick: toggle,
+        },
+        'SolidJS',
+      );
+    },
+  });
 });
 
 addons.setConfig({
