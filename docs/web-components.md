@@ -43,13 +43,13 @@ Internally this runs `build:css` (compiles Tailwind to `src/elements/compiled.cs
 
 | File | Format | Notes |
 |------|--------|-------|
-| `dist/kitn-chat.es.js` | ES module | Main entry. ~80 KB gzip; lazy chunks for code highlighting load on demand |
+| `dist/kitn-chat.es.js` | ES module | Main entry. ~110 KB gzip; lazy chunks for code highlighting load on demand |
 
 The build is **ES-module only** by design. A UMD/IIFE build cannot code-split, so it would have to inline every lazy chunk (all the Shiki syntax-highlighting languages) into one multi-MB file. The ES build keeps those chunks lazy and is loadable directly via `<script type="module">` in every modern browser.
 
 ### Register the elements
 
-Import the ES module as a side-effect. It registers all 27 custom elements via `customElements.define`:
+Import the ES module as a side-effect. It registers all **40+ custom elements** via `customElements.define`:
 
 ```js
 import '@kitn.ai/chat/elements';
@@ -108,9 +108,9 @@ A [Custom Elements Manifest](https://github.com/webcomponents/custom-elements-ma
 Typed wrappers are generated for every element under `@kitn.ai/chat/react` (React is an optional peer dependency). They set rich data as DOM **properties** (so arrays/objects pass through correctly) and expose CustomEvents as `on<Event>` props:
 
 ```tsx
-import { KcChat } from '@kitn.ai/chat/react';
+import { Chat } from '@kitn.ai/chat/react';
 
-<KcChat
+<Chat
   messages={messages}
   models={models}
   onSubmit={(e) => send(e.detail.value)}
@@ -118,17 +118,17 @@ import { KcChat } from '@kitn.ai/chat/react';
 />;
 ```
 
-Component names are the PascalCase of the tag (`kc-chat` → `KcChat`); event props are `on` + the event name (`messageaction` → `onMessageaction`).
+Component names are the bare friendly name of the element (`kc-chat` → `Chat`); event props are `on` + the event name (`messageaction` → `onMessageaction`).
 
 ---
 
-## Full Element Reference (27 elements)
+## Full Element Reference (**40+ elements**)
 
 Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, default `'auto'`). Array/object properties are marked with a `—` in the Attribute column — they **must** be set as JS properties.
 
 ---
 
-### `<kc-chat>` / `KcChat`
+### `<kc-chat>` / `Chat`
 
 <!-- spec:kc-chat -->
 #### Properties
@@ -181,7 +181,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 
 ---
 
-### `<kc-workspace>` / `KcWorkspace`
+### `<kc-workspace>` / `Workspace`
 
 <!-- spec:kc-workspace -->
 #### Properties
@@ -282,7 +282,7 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 
 ---
 
-### `<kc-conversations>` / `KcConversations`
+### `<kc-conversations>` / `Conversations`
 
 <!-- spec:kc-conversations -->
 #### Properties
@@ -314,7 +314,7 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 
 ---
 
-### `<kc-prompt-input>` / `KcPromptInput`
+### `<kc-prompt-input>` / `PromptInput`
 
 <!-- spec:kc-prompt-input -->
 #### Properties
@@ -354,7 +354,7 @@ Standalone prompt input with a send button. Use when you want just the input are
 
 ---
 
-### `<kc-message>` / `KcMessage`
+### `<kc-message>` / `Message`
 
 <!-- spec:kc-message -->
 #### Properties
@@ -388,7 +388,7 @@ A single message row: renders markdown/plain content, reasoning, tool calls, att
 
 ---
 
-### `<kc-markdown>` / `KcMarkdown`
+### `<kc-markdown>` / `Markdown`
 
 <!-- spec:kc-markdown -->
 #### Properties
@@ -415,7 +415,7 @@ No events.
 
 ---
 
-### `<kc-code-block>` / `KcCodeBlock`
+### `<kc-code-block>` / `CodeBlock`
 
 <!-- spec:kc-code-block -->
 #### Properties
@@ -443,7 +443,7 @@ No events.
 
 ---
 
-### `<kc-reasoning>` / `KcReasoning`
+### `<kc-reasoning>` / `Reasoning`
 
 <!-- spec:kc-reasoning -->
 #### Properties
@@ -475,7 +475,7 @@ Collapsible reasoning/thinking block with optional streaming auto-expand.
 
 ---
 
-### `<kc-tool>` / `KcTool`
+### `<kc-tool>` / `Tool`
 
 <!-- spec:kc-tool -->
 #### Properties
@@ -500,7 +500,7 @@ No events.
 
 ---
 
-### `<kc-attachments>` / `KcAttachments`
+### `<kc-attachments>` / `Attachments`
 
 <!-- spec:kc-attachments -->
 #### Properties
@@ -533,7 +533,7 @@ Renders a list of file/document attachments in grid, inline, or list layouts.
 
 ---
 
-### `<kc-model-switcher>` / `KcModelSwitcher`
+### `<kc-model-switcher>` / `ModelSwitcher`
 
 <!-- spec:kc-model-switcher -->
 #### Properties
@@ -562,7 +562,7 @@ A dropdown that lets the user switch between available models.
 
 ---
 
-### `<kc-context>` / `KcContext`
+### `<kc-context>` / `Context`
 
 <!-- spec:kc-context -->
 #### Properties
@@ -586,7 +586,7 @@ No events.
 
 ---
 
-### `<kc-chain-of-thought>` / `KcChainOfThought`
+### `<kc-chain-of-thought>` / `ChainOfThought`
 
 <!-- spec:kc-chain-of-thought -->
 #### Properties
@@ -610,7 +610,7 @@ No events.
 
 ---
 
-### `<kc-suggestions>` / `KcSuggestions`
+### `<kc-suggestions>` / `Suggestions`
 
 <!-- spec:kc-suggestions -->
 #### Properties
@@ -642,7 +642,7 @@ Suggestion chips or full-width rows. Can render plain strings or `{ label, value
 
 ---
 
-### `<kc-source>` / `KcSource`
+### `<kc-source>` / `Source`
 
 <!-- spec:kc-source -->
 #### Properties
@@ -670,7 +670,7 @@ No events.
 
 ---
 
-### `<kc-sources>` / `KcSources`
+### `<kc-sources>` / `Sources`
 
 <!-- spec:kc-sources -->
 #### Properties
@@ -695,7 +695,7 @@ No events.
 
 ---
 
-### `<kc-feedback-bar>` / `KcFeedbackBar`
+### `<kc-feedback-bar>` / `FeedbackBar`
 
 <!-- spec:kc-feedback-bar -->
 #### Properties
@@ -724,7 +724,7 @@ A thumbs-up / thumbs-down banner (e.g. "Was this helpful?").
 
 ---
 
-### `<kc-file-upload>` / `KcFileUpload`
+### `<kc-file-upload>` / `FileUpload`
 
 <!-- spec:kc-file-upload -->
 #### Properties
@@ -755,7 +755,7 @@ A drag-and-drop / click-to-pick file upload dropzone.
 
 ---
 
-### `<kc-voice-input>` / `KcVoiceInput`
+### `<kc-voice-input>` / `VoiceInput`
 
 <!-- spec:kc-voice-input -->
 #### Properties
@@ -785,7 +785,7 @@ A mic button that records audio and optionally transcribes it via a host-supplie
 
 ---
 
-### `<kc-loader>` / `KcLoader`
+### `<kc-loader>` / `Loader`
 
 <!-- spec:kc-loader -->
 #### Properties
@@ -811,7 +811,7 @@ No events.
 
 ---
 
-### `<kc-thinking-bar>` / `KcThinkingBar`
+### `<kc-thinking-bar>` / `ThinkingBar`
 
 <!-- spec:kc-thinking-bar -->
 #### Properties
@@ -841,7 +841,7 @@ An animated "thinking" shimmer bar with an optional stop affordance.
 
 ---
 
-### `<kc-text-shimmer>` / `KcTextShimmer`
+### `<kc-text-shimmer>` / `TextShimmer`
 
 <!-- spec:kc-text-shimmer -->
 #### Properties
@@ -868,7 +868,7 @@ No events.
 
 ---
 
-### `<kc-response-stream>` / `KcResponseStream`
+### `<kc-response-stream>` / `ResponseStream`
 
 <!-- spec:kc-response-stream -->
 #### Properties
@@ -899,7 +899,7 @@ Renders a string or an `AsyncIterable<string>` with a reveal animation.
 
 ---
 
-### `<kc-image>` / `KcImage`
+### `<kc-image>` / `Image`
 
 <!-- spec:kc-image -->
 #### Properties
@@ -926,7 +926,7 @@ No events.
 
 ---
 
-### `<kc-checkpoint>` / `KcCheckpoint`
+### `<kc-checkpoint>` / `Checkpoint`
 
 <!-- spec:kc-checkpoint -->
 #### Properties
@@ -957,7 +957,7 @@ A small button used to mark or navigate to a conversation checkpoint.
 
 ---
 
-### `<kc-scope-picker>` / `KcScopePicker`
+### `<kc-scope-picker>` / `ScopePicker`
 
 <!-- spec:kc-scope-picker -->
 #### Properties
@@ -987,7 +987,7 @@ A dropdown for filtering the chat to specific authors, tags, content type, or da
 
 ---
 
-### `<kc-skills>` / `KcSkills`
+### `<kc-skills>` / `Skills`
 
 <!-- spec:kc-skills -->
 #### Properties
@@ -1011,7 +1011,7 @@ No events.
 
 ---
 
-### `<kc-empty>` / `KcEmpty`
+### `<kc-empty>` / `Empty`
 
 <!-- spec:kc-empty -->
 #### Properties
@@ -1167,6 +1167,6 @@ The authoritative source for all element APIs is `dist/custom-elements.json` (ge
 Two human/agent-readable files are generated from the manifest by `scripts/gen-llms.mjs`:
 
 - **`llms.txt`** (~4 KB) — orientation: install, the property-vs-attribute rule, architecture, theming, and framework wiring.
-- **`llms-full.txt`** (~32 KB) — everything in `llms.txt` plus a generated props/events table for each element, a streaming recipe, and a build-a-chat-app runbook.
+- **`llms-full.txt`** (~54 KB) — everything in `llms.txt` plus a generated props/events table for each element, a streaming recipe, and a build-a-chat-app runbook.
 
 Both files are at the repo root, the npm package root (`node_modules/@kitn.ai/chat/llms.txt`), and https://kitn.dev/llms.txt.

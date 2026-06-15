@@ -10,8 +10,8 @@
     @submit="onSubmit"  — `$event` is the raw CustomEvent; `.detail` carries the
                           payload.
 
-  vite.config.ts declares `isCustomElement: (tag) => tag.startsWith('kitn-')`
-  so Vue treats kitn-* tags as native custom elements rather than Vue components
+  vite.config.ts declares `isCustomElement: (tag) => tag.startsWith('kc-')`
+  so Vue treats kc-* tags as native custom elements rather than Vue components
   (no "Unknown custom element" warnings).
 
   `@kitn.ai/chat/elements` is imported once (main.ts side-effect) to register

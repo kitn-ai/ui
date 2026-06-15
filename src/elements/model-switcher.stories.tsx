@@ -54,7 +54,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kc-model-switcher',
+  title: 'Components/ModelSwitcher',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-model-switcher'),
   parameters: {

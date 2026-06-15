@@ -4,7 +4,7 @@ import { ScrollArea } from './scroll-area';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'UI/ScrollArea',
+  title: 'Solid (Advanced)/Primitives/ScrollArea',
   component: ScrollArea,
   tags: ['autodocs'],
   parameters: {

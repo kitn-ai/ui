@@ -1,0 +1,15 @@
+import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const src = readFileSync(resolve(__dirname, '../../frameworks/react/index.tsx'), 'utf8');
+
+describe('generated React wrappers', () => {
+  it('exports bare friendly names, not Kc-prefixed', () => {
+    expect(src).toContain('export const Artifact = createWebComponent<ArtifactProps>(');
+    expect(src).not.toContain('export const KcArtifact ');
+  });
+  it('still binds to the kc- custom element tag', () => {
+    expect(src).toMatch(/export const Artifact[\s\S]*?'kc-artifact'/);
+  });
+});

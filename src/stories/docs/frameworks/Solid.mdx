@@ -1,0 +1,173 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Frameworks/Solid" />
+
+# Solid
+
+The kit is **authored in SolidJS** — the `<kc-*>` web components are compiled from these very
+components. So Solid devs get the richest path of any framework, with **two ways to build** that
+you can freely mix:
+
+1. **Native SolidJS components** (`@kitn.ai/chat`) — `ChatContainer`, `Message`, `PromptInput`, and
+   the rest, composed in your own JSX. Full compositional control and the smallest output for a
+   Solid app. **This is the recommended Solid path.**
+2. The same framework-agnostic **`<kc-*>` web components** (`@kitn.ai/chat/elements`) — the
+   drop-in shells (`<kc-chat>`, …) when you just want batteries included.
+
+Both work in the same app; reach for whichever fits the surface you're building.
+
+## Install & setup
+
+```bash
+npm i @kitn.ai/chat
+```
+
+`solid-js` is a peer dependency — install it if you haven't already:
+
+```bash
+npm i solid-js
+```
+
+Import the design tokens **once**, near your app entry:
+
+```ts
+import '@kitn.ai/chat/theme.css';
+```
+
+The `@kitn.ai/chat` entry ships as **source** (TSX), so your bundler compiles and tree-shakes it
+alongside your own Solid code — you only pay for what you import.
+
+## Quick start — native components
+
+Compose the native components directly in your JSX. Drive the prompt input with a `createSignal`,
+and let the components fill their container — size them with flex / `class="h-full"` rather than a
+hard-coded `height: 100vh`.
+
+```tsx
+import {
+  ChatConfig, ChatContainer, ChatContainerContent,
+  Message, MessageContent,
+  PromptInput, PromptInputTextarea, PromptInputActions,
+} from '@kitn.ai/chat';
+import '@kitn.ai/chat/theme.css';
+import { createSignal } from 'solid-js';
+
+function Chat() {
+  const [input, setInput] = createSignal('');
+
+  // The components fill their box — give them a flex parent and let
+  // ChatContainer grow with `h-full`/flex rather than a fixed viewport height.
+  return (
+    <div class="flex flex-col h-full">
+      <ChatConfig proseSize="sm">
+        <ChatContainer class="h-full">
+          <ChatContainerContent class="space-y-4 p-4">
+            <Message>
+              <MessageContent markdown>{`Ask me anything.`}</MessageContent>
+            </Message>
+          </ChatContainerContent>
+        </ChatContainer>
+        <PromptInput value={input()} onValueChange={setInput} onSubmit={() => setInput('')}>
+          <PromptInputTextarea placeholder="Ask anything..." />
+          <PromptInputActions>{/* your buttons */}</PromptInputActions>
+        </PromptInput>
+      </ChatConfig>
+    </div>
+  );
+}
+```
+
+`<ChatContainer>` is **transport-agnostic**: it owns the conversation UI, you own the request.
+Render your message list inside `<ChatContainerContent>` (a `<For>` over your signal of messages),
+and append the user turn — then stream the assistant reply — in `onSubmit`.
+
+## Go further — compose & the web components
+
+### The native components *are* the granular composition
+
+There's no separate "advanced" component set — the pieces above (`ChatContainer`, `Message`,
+`PromptInput`) plus the feature components (`Markdown`, `CodeBlock`, `Reasoning`, `Tool`,
+`Conversations`, `ModelSwitcher`, …) **are** the building blocks. Assemble them into any layout you
+like: a sidebar next to a thread, a split view, a custom composer — it's all just Solid JSX.
+
+For a resizable layout, use the native `Resizable` convenience component with one `ResizablePanel`
+per pane (handles are auto-inserted between visible panels). Each panel takes `defaultSize`
+(px or `%`) plus optional `minSize`/`maxSize`; listen for `onChange` (an array of percent sizes) to
+persist the layout.
+
+```tsx
+import { Resizable, ResizablePanel } from '@kitn.ai/chat';
+
+function Workspace() {
+  return (
+    <div class="flex flex-col h-full">
+      <Resizable orientation="horizontal" withHandle onChange={(sizes) => persist(sizes)}>
+        <ResizablePanel defaultSize="25%" minSize="200px">
+          {/* your conversation sidebar */}
+        </ResizablePanel>
+        <ResizablePanel>
+          {/* the message thread + prompt input */}
+        </ResizablePanel>
+      </Resizable>
+    </div>
+  );
+}
+```
+
+> **Full reference:** the **[Solid (Advanced)](?path=/docs/solid-advanced-overview--docs)** sidebar
+> tier documents every native building block — the composed **Elements** (message, tool, reasoning,
+> …) and the low-level **Primitives** (button, tooltip, dropdown, …) they're built on.
+
+### Prefer the drop-in shell? Use the web component
+
+When you just want a whole chat in one tag, register the `<kc-*>` elements and use `<kc-chat>`.
+Solid sets rich data as DOM **properties** on custom elements (so arrays/objects pass through
+without stringifying), and you listen for CustomEvents with Solid's `on:` namespace:
+
+```tsx
+import '@kitn.ai/chat/elements'; // registers the <kc-*> elements once
+import { createSignal } from 'solid-js';
+
+function Shell() {
+  const [messages, setMessages] = createSignal([
+    { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+  ]);
+
+  const onSubmit = (e: CustomEvent<{ value: string }>) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: 'user', content: e.detail.value },
+    ]);
+    // ...call your model, then append an assistant message
+  };
+
+  return (
+    <div class="flex flex-col h-full">
+      <kc-chat
+        // `prop:` forces a property assignment (not an attribute) for rich data.
+        prop:messages={messages()}
+        on:submit={onSubmit}
+        style={{ flex: 1, 'min-height': 0 }}
+      />
+    </div>
+  );
+}
+```
+
+For a resizable web-component layout, use `<kc-resizable>` the same way (set properties, listen
+with `on:`) — though in a Solid app the native `Resizable` above gives you tighter control.
+
+> **See it all assembled:** **[Examples → Full Chat App](?path=/story/examples-full-chat-app--default)**
+> wires a sidebar, threaded markdown, reasoning, a tool call, a model switcher, a context meter, and
+> a rich prompt input into one screen — a working reference to crib from.
+
+## When to use which
+
+- **Native components** (`@kitn.ai/chat`) — full compositional control and the **smallest output**
+  for a Solid app, since they compile and tree-shake with your own code. The recommended path when
+  you're building in Solid.
+- **Web components** (`@kitn.ai/chat/elements`) — the **fastest drop-in** and fully
+  framework-agnostic. Reach for `<kc-chat>` (or any `<kc-*>` shell) when you want batteries included
+  or you're sharing UI across frameworks.
+
+Mix freely: a native composed thread on one screen, a drop-in `<kc-chat>` on another.

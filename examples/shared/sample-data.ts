@@ -112,7 +112,7 @@ export const SAMPLE_MESSAGES: Record<string, SampleMessage[]> = {
       role: 'assistant',
       actions: ['copy', 'like', 'dislike'],
       content:
-        "Just use the wrappers from `@kitn.ai/chat/react`:\n\n```tsx\nimport { KcChat } from '@kitn.ai/chat/react';\n\n<KcChat\n  messages={messages}\n  models={models}\n  onSubmit={(e) => console.log(e.detail)}\n  theme=\"auto\"\n/>\n```\n\nArrays/objects are passed as props and become live DOM properties; events arrive as `on<Event>` callbacks. No refs or `useEffect` needed.",
+        "Just use the wrappers from `@kitn.ai/chat/react`:\n\n```tsx\nimport { Chat } from '@kitn.ai/chat/react';\n\n<Chat\n  messages={messages}\n  models={models}\n  onSubmit={(e) => console.log(e.detail)}\n  theme=\"auto\"\n/>\n```\n\nArrays/objects are passed as props and become live DOM properties; events arrive as `on<Event>` callbacks. No refs or `useEffect` needed.",
     },
   ],
   'c-2': [

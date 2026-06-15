@@ -1,0 +1,522 @@
+[
+  {
+    "tag": "kc-artifact",
+    "displayName": "Artifact",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-artifact></kc-artifact>\n<script type=\"module\">\n  const el = document.querySelector('kc-artifact');\n  el.files = /* … */;\n  el.addEventListener('fileselect', (e) => console.log(e.detail));\n  el.addEventListener('maximizechange', (e) => console.log(e.detail));\n  el.addEventListener('navigate', (e) => console.log(e.detail));\n  el.addEventListener('tabchange', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Artifact } from '@kitn.ai/chat/react';\n\n<Artifact\n  files={files}\n  onFileselect={(e) => console.log(e.detail)}\n  onMaximizechange={(e) => console.log(e.detail)}\n  onNavigate={(e) => console.log(e.detail)}\n  onTabchange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-artifact\n  :files.prop=\"files\"\n  @fileselect=\"onFileselect\"\n  @maximizechange=\"onMaximizechange\"\n  @navigate=\"onNavigate\"\n  @tabchange=\"onTabchange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-artifact\n  {files}\n  on:fileselect={onFileselect}\n  on:maximizechange={onMaximizechange}\n  on:navigate={onNavigate}\n  on:tabchange={onTabchange}\n></kc-artifact>",
+      "angular": "<kc-artifact\n  [files]=\"files\"\n  (fileselect)=\"onFileselect($event)\"\n  (maximizechange)=\"onMaximizechange($event)\"\n  (navigate)=\"onNavigate($event)\"\n  (tabchange)=\"onTabchange($event)\"\n></kc-artifact>",
+      "solid": "import { Artifact } from '@kitn.ai/chat';\n\n<Artifact\n  files={files}\n  onFileselect={(e) => console.log(e.detail)}\n  onMaximizechange={(e) => console.log(e.detail)}\n  onNavigate={(e) => console.log(e.detail)}\n  onTabchange={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-attachments",
+    "displayName": "Attachments",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-attachments></kc-attachments>\n<script type=\"module\">\n  const el = document.querySelector('kc-attachments');\n  el.items = /* … */;\n  el.addEventListener('remove', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Attachments } from '@kitn.ai/chat/react';\n\n<Attachments\n  items={items}\n  onRemove={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-attachments\n  :items.prop=\"items\"\n  @remove=\"onRemove\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-attachments\n  {items}\n  on:remove={onRemove}\n></kc-attachments>",
+      "angular": "<kc-attachments\n  [items]=\"items\"\n  (remove)=\"onRemove($event)\"\n></kc-attachments>",
+      "solid": "import { Attachments } from '@kitn.ai/chat';\n\n<Attachments\n  items={items}\n  onRemove={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-card",
+    "displayName": "Card",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-card></kc-card>",
+      "react": "import { Card } from '@kitn.ai/chat/react';\n\n<Card />",
+      "vue": "<kc-card />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-card></kc-card>",
+      "angular": "<kc-card></kc-card>",
+      "solid": "import { Card } from '@kitn.ai/chat';\n\n<Card />"
+    }
+  },
+  {
+    "tag": "kc-cards",
+    "displayName": "Cards",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-cards></kc-cards>",
+      "react": "import { Cards } from '@kitn.ai/chat/react';\n\n<Cards />",
+      "vue": "<kc-cards />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-cards></kc-cards>",
+      "angular": "<kc-cards></kc-cards>"
+    }
+  },
+  {
+    "tag": "kc-chain-of-thought",
+    "displayName": "ChainOfThought",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-chain-of-thought></kc-chain-of-thought>\n<script type=\"module\">\n  const el = document.querySelector('kc-chain-of-thought');\n  el.steps = /* … */;\n</script>",
+      "react": "import { ChainOfThought } from '@kitn.ai/chat/react';\n\n<ChainOfThought\n  steps={steps}\n/>",
+      "vue": "<kc-chain-of-thought\n  :steps.prop=\"steps\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-chain-of-thought\n  {steps}\n></kc-chain-of-thought>",
+      "angular": "<kc-chain-of-thought\n  [steps]=\"steps\"\n></kc-chain-of-thought>",
+      "solid": "import { ChainOfThought } from '@kitn.ai/chat';\n\n<ChainOfThought\n  steps={steps}\n/>"
+    }
+  },
+  {
+    "tag": "kc-chat",
+    "displayName": "Chat",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-chat></kc-chat>\n<script type=\"module\">\n  const el = document.querySelector('kc-chat');\n  el.messages = /* … */;\n  el.addEventListener('messageaction', (e) => console.log(e.detail));\n  el.addEventListener('modelchange', (e) => console.log(e.detail));\n  el.addEventListener('search', (e) => console.log(e.detail));\n  el.addEventListener('slashselect', (e) => console.log(e.detail));\n  el.addEventListener('submit', (e) => console.log(e.detail));\n  el.addEventListener('suggestionclick', (e) => console.log(e.detail));\n  el.addEventListener('valuechange', (e) => console.log(e.detail));\n  el.addEventListener('voice', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Chat } from '@kitn.ai/chat/react';\n\n<Chat\n  messages={messages}\n  onMessageaction={(e) => console.log(e.detail)}\n  onModelchange={(e) => console.log(e.detail)}\n  onSearch={(e) => console.log(e.detail)}\n  onSlashselect={(e) => console.log(e.detail)}\n  onSubmit={(e) => console.log(e.detail)}\n  onSuggestionclick={(e) => console.log(e.detail)}\n  onValuechange={(e) => console.log(e.detail)}\n  onVoice={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-chat\n  :messages.prop=\"messages\"\n  @messageaction=\"onMessageaction\"\n  @modelchange=\"onModelchange\"\n  @search=\"onSearch\"\n  @slashselect=\"onSlashselect\"\n  @submit=\"onSubmit\"\n  @suggestionclick=\"onSuggestionclick\"\n  @valuechange=\"onValuechange\"\n  @voice=\"onVoice\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-chat\n  {messages}\n  on:messageaction={onMessageaction}\n  on:modelchange={onModelchange}\n  on:search={onSearch}\n  on:slashselect={onSlashselect}\n  on:submit={onSubmit}\n  on:suggestionclick={onSuggestionclick}\n  on:valuechange={onValuechange}\n  on:voice={onVoice}\n></kc-chat>",
+      "angular": "<kc-chat\n  [messages]=\"messages\"\n  (messageaction)=\"onMessageaction($event)\"\n  (modelchange)=\"onModelchange($event)\"\n  (search)=\"onSearch($event)\"\n  (slashselect)=\"onSlashselect($event)\"\n  (submit)=\"onSubmit($event)\"\n  (suggestionclick)=\"onSuggestionclick($event)\"\n  (valuechange)=\"onValuechange($event)\"\n  (voice)=\"onVoice($event)\"\n></kc-chat>"
+    }
+  },
+  {
+    "tag": "kc-checkpoint",
+    "displayName": "Checkpoint",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-checkpoint></kc-checkpoint>\n<script type=\"module\">\n  const el = document.querySelector('kc-checkpoint');\n  el.addEventListener('select', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Checkpoint } from '@kitn.ai/chat/react';\n\n<Checkpoint\n  onSelect={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-checkpoint\n  @select=\"onSelect\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-checkpoint\n  on:select={onSelect}\n></kc-checkpoint>",
+      "angular": "<kc-checkpoint\n  (select)=\"onSelect($event)\"\n></kc-checkpoint>",
+      "solid": "import { Checkpoint } from '@kitn.ai/chat';\n\n<Checkpoint\n  onSelect={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-choice",
+    "displayName": "Choice",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-choice></kc-choice>",
+      "react": "import { Choice } from '@kitn.ai/chat/react';\n\n<Choice />",
+      "vue": "<kc-choice />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-choice></kc-choice>",
+      "angular": "<kc-choice></kc-choice>"
+    }
+  },
+  {
+    "tag": "kc-code-block",
+    "displayName": "CodeBlock",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-code-block code=\"…\"></kc-code-block>",
+      "react": "import { CodeBlock } from '@kitn.ai/chat/react';\n\n<CodeBlock\n  code={code}\n/>",
+      "vue": "<kc-code-block\n  :code=\"code\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-code-block\n  {code}\n></kc-code-block>",
+      "angular": "<kc-code-block\n  [code]=\"code\"\n></kc-code-block>",
+      "solid": "import { CodeBlock } from '@kitn.ai/chat';\n\n<CodeBlock\n  code={code}\n/>"
+    }
+  },
+  {
+    "tag": "kc-confirm",
+    "displayName": "Confirm",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-confirm></kc-confirm>",
+      "react": "import { Confirm } from '@kitn.ai/chat/react';\n\n<Confirm />",
+      "vue": "<kc-confirm />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-confirm></kc-confirm>",
+      "angular": "<kc-confirm></kc-confirm>"
+    }
+  },
+  {
+    "tag": "kc-context",
+    "displayName": "Context",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-context></kc-context>",
+      "react": "import { Context } from '@kitn.ai/chat/react';\n\n<Context />",
+      "vue": "<kc-context />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-context></kc-context>",
+      "angular": "<kc-context></kc-context>",
+      "solid": "import { Context } from '@kitn.ai/chat';\n\n<Context />"
+    }
+  },
+  {
+    "tag": "kc-conversations",
+    "displayName": "Conversations",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-conversations></kc-conversations>\n<script type=\"module\">\n  const el = document.querySelector('kc-conversations');\n  el.groups = /* … */;\n  el.conversations = /* … */;\n  el.addEventListener('conversationselect', (e) => console.log(e.detail));\n  el.addEventListener('newchat', (e) => console.log(e.detail));\n  el.addEventListener('togglesidebar', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Conversations } from '@kitn.ai/chat/react';\n\n<Conversations\n  groups={groups}\n  conversations={conversations}\n  onConversationselect={(e) => console.log(e.detail)}\n  onNewchat={(e) => console.log(e.detail)}\n  onTogglesidebar={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-conversations\n  :groups.prop=\"groups\"\n  :conversations.prop=\"conversations\"\n  @conversationselect=\"onConversationselect\"\n  @newchat=\"onNewchat\"\n  @togglesidebar=\"onTogglesidebar\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-conversations\n  {groups}\n  {conversations}\n  on:conversationselect={onConversationselect}\n  on:newchat={onNewchat}\n  on:togglesidebar={onTogglesidebar}\n></kc-conversations>",
+      "angular": "<kc-conversations\n  [groups]=\"groups\"\n  [conversations]=\"conversations\"\n  (conversationselect)=\"onConversationselect($event)\"\n  (newchat)=\"onNewchat($event)\"\n  (togglesidebar)=\"onTogglesidebar($event)\"\n></kc-conversations>"
+    }
+  },
+  {
+    "tag": "kc-embed",
+    "displayName": "Embed",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-embed></kc-embed>",
+      "react": "import { Embed } from '@kitn.ai/chat/react';\n\n<Embed />",
+      "vue": "<kc-embed />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-embed></kc-embed>",
+      "angular": "<kc-embed></kc-embed>",
+      "solid": "import { Embed } from '@kitn.ai/chat';\n\n<Embed />"
+    }
+  },
+  {
+    "tag": "kc-empty",
+    "displayName": "Empty",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-empty></kc-empty>",
+      "react": "import { Empty } from '@kitn.ai/chat/react';\n\n<Empty />",
+      "vue": "<kc-empty />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-empty></kc-empty>",
+      "angular": "<kc-empty></kc-empty>",
+      "solid": "import { Empty } from '@kitn.ai/chat';\n\n<Empty />"
+    }
+  },
+  {
+    "tag": "kc-feedback-bar",
+    "displayName": "FeedbackBar",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-feedback-bar></kc-feedback-bar>\n<script type=\"module\">\n  const el = document.querySelector('kc-feedback-bar');\n  el.addEventListener('close', (e) => console.log(e.detail));\n  el.addEventListener('feedback', (e) => console.log(e.detail));\n</script>",
+      "react": "import { FeedbackBar } from '@kitn.ai/chat/react';\n\n<FeedbackBar\n  onClose={(e) => console.log(e.detail)}\n  onFeedback={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-feedback-bar\n  @close=\"onClose\"\n  @feedback=\"onFeedback\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-feedback-bar\n  on:close={onClose}\n  on:feedback={onFeedback}\n></kc-feedback-bar>",
+      "angular": "<kc-feedback-bar\n  (close)=\"onClose($event)\"\n  (feedback)=\"onFeedback($event)\"\n></kc-feedback-bar>",
+      "solid": "import { FeedbackBar } from '@kitn.ai/chat';\n\n<FeedbackBar\n  onClose={(e) => console.log(e.detail)}\n  onFeedback={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-file-tree",
+    "displayName": "FileTree",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-file-tree></kc-file-tree>\n<script type=\"module\">\n  const el = document.querySelector('kc-file-tree');\n  el.files = /* … */;\n  el.addEventListener('select', (e) => console.log(e.detail));\n</script>",
+      "react": "import { FileTree } from '@kitn.ai/chat/react';\n\n<FileTree\n  files={files}\n  onSelect={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-file-tree\n  :files.prop=\"files\"\n  @select=\"onSelect\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-file-tree\n  {files}\n  on:select={onSelect}\n></kc-file-tree>",
+      "angular": "<kc-file-tree\n  [files]=\"files\"\n  (select)=\"onSelect($event)\"\n></kc-file-tree>",
+      "solid": "import { FileTree } from '@kitn.ai/chat';\n\n<FileTree\n  files={files}\n  onSelect={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-file-upload",
+    "displayName": "FileUpload",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-file-upload></kc-file-upload>\n<script type=\"module\">\n  const el = document.querySelector('kc-file-upload');\n  el.addEventListener('filesadded', (e) => console.log(e.detail));\n</script>",
+      "react": "import { FileUpload } from '@kitn.ai/chat/react';\n\n<FileUpload\n  onFilesadded={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-file-upload\n  @filesadded=\"onFilesadded\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-file-upload\n  on:filesadded={onFilesadded}\n></kc-file-upload>",
+      "angular": "<kc-file-upload\n  (filesadded)=\"onFilesadded($event)\"\n></kc-file-upload>",
+      "solid": "import { FileUpload } from '@kitn.ai/chat';\n\n<FileUpload\n  onFilesadded={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-form",
+    "displayName": "Form",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-form></kc-form>",
+      "react": "import { Form } from '@kitn.ai/chat/react';\n\n<Form />",
+      "vue": "<kc-form />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-form></kc-form>",
+      "angular": "<kc-form></kc-form>",
+      "solid": "import { Form } from '@kitn.ai/chat';\n\n<Form />"
+    }
+  },
+  {
+    "tag": "kc-image",
+    "displayName": "Image",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-image></kc-image>",
+      "react": "import { Image } from '@kitn.ai/chat/react';\n\n<Image />",
+      "vue": "<kc-image />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-image></kc-image>",
+      "angular": "<kc-image></kc-image>",
+      "solid": "import { Image } from '@kitn.ai/chat';\n\n<Image />"
+    }
+  },
+  {
+    "tag": "kc-link-preview",
+    "displayName": "LinkPreview",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-link-preview></kc-link-preview>",
+      "react": "import { LinkPreview } from '@kitn.ai/chat/react';\n\n<LinkPreview />",
+      "vue": "<kc-link-preview />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-link-preview></kc-link-preview>",
+      "angular": "<kc-link-preview></kc-link-preview>",
+      "solid": "import { LinkPreview } from '@kitn.ai/chat';\n\n<LinkPreview />"
+    }
+  },
+  {
+    "tag": "kc-loader",
+    "displayName": "Loader",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-loader></kc-loader>",
+      "react": "import { Loader } from '@kitn.ai/chat/react';\n\n<Loader />",
+      "vue": "<kc-loader />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-loader></kc-loader>",
+      "angular": "<kc-loader></kc-loader>",
+      "solid": "import { Loader } from '@kitn.ai/chat';\n\n<Loader />"
+    }
+  },
+  {
+    "tag": "kc-markdown",
+    "displayName": "Markdown",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-markdown content=\"…\"></kc-markdown>",
+      "react": "import { Markdown } from '@kitn.ai/chat/react';\n\n<Markdown\n  content={content}\n/>",
+      "vue": "<kc-markdown\n  :content=\"content\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-markdown\n  {content}\n></kc-markdown>",
+      "angular": "<kc-markdown\n  [content]=\"content\"\n></kc-markdown>",
+      "solid": "import { Markdown } from '@kitn.ai/chat';\n\n<Markdown\n  content={content}\n/>"
+    }
+  },
+  {
+    "tag": "kc-message",
+    "displayName": "Message",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-message></kc-message>\n<script type=\"module\">\n  const el = document.querySelector('kc-message');\n  el.addEventListener('messageaction', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Message } from '@kitn.ai/chat/react';\n\n<Message\n  onMessageaction={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-message\n  @messageaction=\"onMessageaction\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-message\n  on:messageaction={onMessageaction}\n></kc-message>",
+      "angular": "<kc-message\n  (messageaction)=\"onMessageaction($event)\"\n></kc-message>",
+      "solid": "import { Message } from '@kitn.ai/chat';\n\n<Message\n  onMessageaction={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-model-switcher",
+    "displayName": "ModelSwitcher",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-model-switcher></kc-model-switcher>\n<script type=\"module\">\n  const el = document.querySelector('kc-model-switcher');\n  el.models = /* … */;\n  el.addEventListener('modelchange', (e) => console.log(e.detail));\n</script>",
+      "react": "import { ModelSwitcher } from '@kitn.ai/chat/react';\n\n<ModelSwitcher\n  models={models}\n  onModelchange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-model-switcher\n  :models.prop=\"models\"\n  @modelchange=\"onModelchange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-model-switcher\n  {models}\n  on:modelchange={onModelchange}\n></kc-model-switcher>",
+      "angular": "<kc-model-switcher\n  [models]=\"models\"\n  (modelchange)=\"onModelchange($event)\"\n></kc-model-switcher>",
+      "solid": "import { ModelSwitcher } from '@kitn.ai/chat';\n\n<ModelSwitcher\n  models={models}\n  onModelchange={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-prompt-input",
+    "displayName": "PromptInput",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-prompt-input></kc-prompt-input>\n<script type=\"module\">\n  const el = document.querySelector('kc-prompt-input');\n  el.addEventListener('search', (e) => console.log(e.detail));\n  el.addEventListener('slashselect', (e) => console.log(e.detail));\n  el.addEventListener('submit', (e) => console.log(e.detail));\n  el.addEventListener('suggestionclick', (e) => console.log(e.detail));\n  el.addEventListener('valuechange', (e) => console.log(e.detail));\n  el.addEventListener('voice', (e) => console.log(e.detail));\n</script>",
+      "react": "import { PromptInput } from '@kitn.ai/chat/react';\n\n<PromptInput\n  onSearch={(e) => console.log(e.detail)}\n  onSlashselect={(e) => console.log(e.detail)}\n  onSubmit={(e) => console.log(e.detail)}\n  onSuggestionclick={(e) => console.log(e.detail)}\n  onValuechange={(e) => console.log(e.detail)}\n  onVoice={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-prompt-input\n  @search=\"onSearch\"\n  @slashselect=\"onSlashselect\"\n  @submit=\"onSubmit\"\n  @suggestionclick=\"onSuggestionclick\"\n  @valuechange=\"onValuechange\"\n  @voice=\"onVoice\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-prompt-input\n  on:search={onSearch}\n  on:slashselect={onSlashselect}\n  on:submit={onSubmit}\n  on:suggestionclick={onSuggestionclick}\n  on:valuechange={onValuechange}\n  on:voice={onVoice}\n></kc-prompt-input>",
+      "angular": "<kc-prompt-input\n  (search)=\"onSearch($event)\"\n  (slashselect)=\"onSlashselect($event)\"\n  (submit)=\"onSubmit($event)\"\n  (suggestionclick)=\"onSuggestionclick($event)\"\n  (valuechange)=\"onValuechange($event)\"\n  (voice)=\"onVoice($event)\"\n></kc-prompt-input>",
+      "solid": "import { PromptInput } from '@kitn.ai/chat';\n\n<PromptInput\n  onSearch={(e) => console.log(e.detail)}\n  onSlashselect={(e) => console.log(e.detail)}\n  onSubmit={(e) => console.log(e.detail)}\n  onSuggestionclick={(e) => console.log(e.detail)}\n  onValuechange={(e) => console.log(e.detail)}\n  onVoice={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-reasoning",
+    "displayName": "Reasoning",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-reasoning text=\"…\"></kc-reasoning>\n<script type=\"module\">\n  const el = document.querySelector('kc-reasoning');\n  el.addEventListener('openchange', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Reasoning } from '@kitn.ai/chat/react';\n\n<Reasoning\n  text={text}\n  onOpenchange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-reasoning\n  :text=\"text\"\n  @openchange=\"onOpenchange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-reasoning\n  {text}\n  on:openchange={onOpenchange}\n></kc-reasoning>",
+      "angular": "<kc-reasoning\n  [text]=\"text\"\n  (openchange)=\"onOpenchange($event)\"\n></kc-reasoning>",
+      "solid": "import { Reasoning } from '@kitn.ai/chat';\n\n<Reasoning\n  text={text}\n  onOpenchange={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-remote",
+    "displayName": "Remote",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-remote></kc-remote>",
+      "react": "import { Remote } from '@kitn.ai/chat/react';\n\n<Remote />",
+      "vue": "<kc-remote />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-remote></kc-remote>",
+      "angular": "<kc-remote></kc-remote>"
+    }
+  },
+  {
+    "tag": "kc-resizable",
+    "displayName": "Resizable",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-resizable></kc-resizable>\n<script type=\"module\">\n  const el = document.querySelector('kc-resizable');\n  el.addEventListener('change', (e) => console.log(e.detail));\n  el.addEventListener('maximizechange', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Resizable } from '@kitn.ai/chat/react';\n\n<Resizable\n  onChange={(e) => console.log(e.detail)}\n  onMaximizechange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-resizable\n  @change=\"onChange\"\n  @maximizechange=\"onMaximizechange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-resizable\n  on:change={onChange}\n  on:maximizechange={onMaximizechange}\n></kc-resizable>",
+      "angular": "<kc-resizable\n  (change)=\"onChange($event)\"\n  (maximizechange)=\"onMaximizechange($event)\"\n></kc-resizable>",
+      "solid": "import { Resizable } from '@kitn.ai/chat';\n\n<Resizable\n  onChange={(e) => console.log(e.detail)}\n  onMaximizechange={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-resizable-item",
+    "displayName": "ResizableItem",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-resizable-item></kc-resizable-item>\n<script type=\"module\">\n  const el = document.querySelector('kc-resizable-item');\n  el.addEventListener('change', (e) => console.log(e.detail));\n  el.addEventListener('maximizechange', (e) => console.log(e.detail));\n</script>",
+      "react": "import { ResizableItem } from '@kitn.ai/chat/react';\n\n<ResizableItem\n  onChange={(e) => console.log(e.detail)}\n  onMaximizechange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-resizable-item\n  @change=\"onChange\"\n  @maximizechange=\"onMaximizechange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-resizable-item\n  on:change={onChange}\n  on:maximizechange={onMaximizechange}\n></kc-resizable-item>",
+      "angular": "<kc-resizable-item\n  (change)=\"onChange($event)\"\n  (maximizechange)=\"onMaximizechange($event)\"\n></kc-resizable-item>"
+    }
+  },
+  {
+    "tag": "kc-response-stream",
+    "displayName": "ResponseStream",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-response-stream></kc-response-stream>\n<script type=\"module\">\n  const el = document.querySelector('kc-response-stream');\n  el.addEventListener('complete', (e) => console.log(e.detail));\n</script>",
+      "react": "import { ResponseStream } from '@kitn.ai/chat/react';\n\n<ResponseStream\n  onComplete={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-response-stream\n  @complete=\"onComplete\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-response-stream\n  on:complete={onComplete}\n></kc-response-stream>",
+      "angular": "<kc-response-stream\n  (complete)=\"onComplete($event)\"\n></kc-response-stream>",
+      "solid": "import { ResponseStream } from '@kitn.ai/chat';\n\n<ResponseStream\n  onComplete={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-scope-picker",
+    "displayName": "ScopePicker",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-scope-picker></kc-scope-picker>\n<script type=\"module\">\n  const el = document.querySelector('kc-scope-picker');\n  el.availableAuthors = /* … */;\n  el.availableTags = /* … */;\n  el.addEventListener('scopechange', (e) => console.log(e.detail));\n</script>",
+      "react": "import { ScopePicker } from '@kitn.ai/chat/react';\n\n<ScopePicker\n  availableAuthors={availableAuthors}\n  availableTags={availableTags}\n  onScopechange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-scope-picker\n  :availableAuthors.prop=\"availableAuthors\"\n  :availableTags.prop=\"availableTags\"\n  @scopechange=\"onScopechange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-scope-picker\n  {availableAuthors}\n  {availableTags}\n  on:scopechange={onScopechange}\n></kc-scope-picker>",
+      "angular": "<kc-scope-picker\n  [availableAuthors]=\"availableAuthors\"\n  [availableTags]=\"availableTags\"\n  (scopechange)=\"onScopechange($event)\"\n></kc-scope-picker>"
+    }
+  },
+  {
+    "tag": "kc-skills",
+    "displayName": "Skills",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-skills></kc-skills>\n<script type=\"module\">\n  const el = document.querySelector('kc-skills');\n  el.skills = /* … */;\n</script>",
+      "react": "import { Skills } from '@kitn.ai/chat/react';\n\n<Skills\n  skills={skills}\n/>",
+      "vue": "<kc-skills\n  :skills.prop=\"skills\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-skills\n  {skills}\n></kc-skills>",
+      "angular": "<kc-skills\n  [skills]=\"skills\"\n></kc-skills>"
+    }
+  },
+  {
+    "tag": "kc-source",
+    "displayName": "Source",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-source></kc-source>",
+      "react": "import { Source } from '@kitn.ai/chat/react';\n\n<Source />",
+      "vue": "<kc-source />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-source></kc-source>",
+      "angular": "<kc-source></kc-source>",
+      "solid": "import { Source } from '@kitn.ai/chat';\n\n<Source />"
+    }
+  },
+  {
+    "tag": "kc-sources",
+    "displayName": "Sources",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-sources></kc-sources>\n<script type=\"module\">\n  const el = document.querySelector('kc-sources');\n  el.sources = /* … */;\n</script>",
+      "react": "import { Sources } from '@kitn.ai/chat/react';\n\n<Sources\n  sources={sources}\n/>",
+      "vue": "<kc-sources\n  :sources.prop=\"sources\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-sources\n  {sources}\n></kc-sources>",
+      "angular": "<kc-sources\n  [sources]=\"sources\"\n></kc-sources>"
+    }
+  },
+  {
+    "tag": "kc-suggestions",
+    "displayName": "Suggestions",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-suggestions></kc-suggestions>\n<script type=\"module\">\n  const el = document.querySelector('kc-suggestions');\n  el.suggestions = /* … */;\n  el.addEventListener('select', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Suggestions } from '@kitn.ai/chat/react';\n\n<Suggestions\n  suggestions={suggestions}\n  onSelect={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-suggestions\n  :suggestions.prop=\"suggestions\"\n  @select=\"onSelect\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-suggestions\n  {suggestions}\n  on:select={onSelect}\n></kc-suggestions>",
+      "angular": "<kc-suggestions\n  [suggestions]=\"suggestions\"\n  (select)=\"onSelect($event)\"\n></kc-suggestions>"
+    }
+  },
+  {
+    "tag": "kc-tasks",
+    "displayName": "Tasks",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-tasks></kc-tasks>",
+      "react": "import { Tasks } from '@kitn.ai/chat/react';\n\n<Tasks />",
+      "vue": "<kc-tasks />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-tasks></kc-tasks>",
+      "angular": "<kc-tasks></kc-tasks>"
+    }
+  },
+  {
+    "tag": "kc-text-shimmer",
+    "displayName": "TextShimmer",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-text-shimmer></kc-text-shimmer>",
+      "react": "import { TextShimmer } from '@kitn.ai/chat/react';\n\n<TextShimmer />",
+      "vue": "<kc-text-shimmer />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-text-shimmer></kc-text-shimmer>",
+      "angular": "<kc-text-shimmer></kc-text-shimmer>",
+      "solid": "import { TextShimmer } from '@kitn.ai/chat';\n\n<TextShimmer />"
+    }
+  },
+  {
+    "tag": "kc-thinking-bar",
+    "displayName": "ThinkingBar",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-thinking-bar></kc-thinking-bar>\n<script type=\"module\">\n  const el = document.querySelector('kc-thinking-bar');\n  el.addEventListener('stop', (e) => console.log(e.detail));\n</script>",
+      "react": "import { ThinkingBar } from '@kitn.ai/chat/react';\n\n<ThinkingBar\n  onStop={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-thinking-bar\n  @stop=\"onStop\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-thinking-bar\n  on:stop={onStop}\n></kc-thinking-bar>",
+      "angular": "<kc-thinking-bar\n  (stop)=\"onStop($event)\"\n></kc-thinking-bar>",
+      "solid": "import { ThinkingBar } from '@kitn.ai/chat';\n\n<ThinkingBar\n  onStop={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-tool",
+    "displayName": "Tool",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-tool></kc-tool>",
+      "react": "import { Tool } from '@kitn.ai/chat/react';\n\n<Tool />",
+      "vue": "<kc-tool />",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-tool></kc-tool>",
+      "angular": "<kc-tool></kc-tool>",
+      "solid": "import { Tool } from '@kitn.ai/chat';\n\n<Tool />"
+    }
+  },
+  {
+    "tag": "kc-voice-input",
+    "displayName": "VoiceInput",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-voice-input></kc-voice-input>\n<script type=\"module\">\n  const el = document.querySelector('kc-voice-input');\n  el.addEventListener('audiocaptured', (e) => console.log(e.detail));\n  el.addEventListener('transcription', (e) => console.log(e.detail));\n</script>",
+      "react": "import { VoiceInput } from '@kitn.ai/chat/react';\n\n<VoiceInput\n  onAudiocaptured={(e) => console.log(e.detail)}\n  onTranscription={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-voice-input\n  @audiocaptured=\"onAudiocaptured\"\n  @transcription=\"onTranscription\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-voice-input\n  on:audiocaptured={onAudiocaptured}\n  on:transcription={onTranscription}\n></kc-voice-input>",
+      "angular": "<kc-voice-input\n  (audiocaptured)=\"onAudiocaptured($event)\"\n  (transcription)=\"onTranscription($event)\"\n></kc-voice-input>",
+      "solid": "import { VoiceInput } from '@kitn.ai/chat';\n\n<VoiceInput\n  onAudiocaptured={(e) => console.log(e.detail)}\n  onTranscription={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kc-workspace",
+    "displayName": "Workspace",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-workspace></kc-workspace>\n<script type=\"module\">\n  const el = document.querySelector('kc-workspace');\n  el.groups = /* … */;\n  el.conversations = /* … */;\n  el.messages = /* … */;\n  el.addEventListener('conversationselect', (e) => console.log(e.detail));\n  el.addEventListener('messageaction', (e) => console.log(e.detail));\n  el.addEventListener('modelchange', (e) => console.log(e.detail));\n  el.addEventListener('newchat', (e) => console.log(e.detail));\n  el.addEventListener('search', (e) => console.log(e.detail));\n  el.addEventListener('sidebartoggle', (e) => console.log(e.detail));\n  el.addEventListener('slashselect', (e) => console.log(e.detail));\n  el.addEventListener('submit', (e) => console.log(e.detail));\n  el.addEventListener('suggestionclick', (e) => console.log(e.detail));\n  el.addEventListener('valuechange', (e) => console.log(e.detail));\n  el.addEventListener('voice', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Workspace } from '@kitn.ai/chat/react';\n\n<Workspace\n  groups={groups}\n  conversations={conversations}\n  messages={messages}\n  onConversationselect={(e) => console.log(e.detail)}\n  onMessageaction={(e) => console.log(e.detail)}\n  onModelchange={(e) => console.log(e.detail)}\n  onNewchat={(e) => console.log(e.detail)}\n  onSearch={(e) => console.log(e.detail)}\n  onSidebartoggle={(e) => console.log(e.detail)}\n  onSlashselect={(e) => console.log(e.detail)}\n  onSubmit={(e) => console.log(e.detail)}\n  onSuggestionclick={(e) => console.log(e.detail)}\n  onValuechange={(e) => console.log(e.detail)}\n  onVoice={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-workspace\n  :groups.prop=\"groups\"\n  :conversations.prop=\"conversations\"\n  :messages.prop=\"messages\"\n  @conversationselect=\"onConversationselect\"\n  @messageaction=\"onMessageaction\"\n  @modelchange=\"onModelchange\"\n  @newchat=\"onNewchat\"\n  @search=\"onSearch\"\n  @sidebartoggle=\"onSidebartoggle\"\n  @slashselect=\"onSlashselect\"\n  @submit=\"onSubmit\"\n  @suggestionclick=\"onSuggestionclick\"\n  @valuechange=\"onValuechange\"\n  @voice=\"onVoice\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-workspace\n  {groups}\n  {conversations}\n  {messages}\n  on:conversationselect={onConversationselect}\n  on:messageaction={onMessageaction}\n  on:modelchange={onModelchange}\n  on:newchat={onNewchat}\n  on:search={onSearch}\n  on:sidebartoggle={onSidebartoggle}\n  on:slashselect={onSlashselect}\n  on:submit={onSubmit}\n  on:suggestionclick={onSuggestionclick}\n  on:valuechange={onValuechange}\n  on:voice={onVoice}\n></kc-workspace>",
+      "angular": "<kc-workspace\n  [groups]=\"groups\"\n  [conversations]=\"conversations\"\n  [messages]=\"messages\"\n  (conversationselect)=\"onConversationselect($event)\"\n  (messageaction)=\"onMessageaction($event)\"\n  (modelchange)=\"onModelchange($event)\"\n  (newchat)=\"onNewchat($event)\"\n  (search)=\"onSearch($event)\"\n  (sidebartoggle)=\"onSidebartoggle($event)\"\n  (slashselect)=\"onSlashselect($event)\"\n  (submit)=\"onSubmit($event)\"\n  (suggestionclick)=\"onSuggestionclick($event)\"\n  (valuechange)=\"onValuechange($event)\"\n  (voice)=\"onVoice($event)\"\n></kc-workspace>"
+    }
+  }
+]

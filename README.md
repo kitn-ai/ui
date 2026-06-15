@@ -11,7 +11,7 @@ It can be consumed two ways:
 
 - **~50 composable components** across three layers: headless primitives → accessible UI primitives (built in-house, WCAG 2.1 AA — no third-party UI dependency) → AI feature components.
 - **Shadow-DOM web components** — zero CSS conflicts in any host. The host's styles can't leak in; the kit's Tailwind can't leak out.
-- **Lightweight by design** — a markdown-only `<kc-chat>` is **~61 KB gzip** (one file). Syntax highlighting (Shiki) is loaded **on demand, per-language, with no WASM** — and never loads at all if you don't render code.
+- **Lightweight by design** — a markdown-only `<kc-chat>` is **~110 KB gzip** (one file). Syntax highlighting (Shiki) is loaded **on demand, per-language, with no WASM** — and never loads at all if you don't render code.
 - **Tailwind v4** design tokens — rebrand by overriding `--color-*` custom properties.
 
 ## Install
@@ -387,7 +387,7 @@ cd examples/vue && npm install && npm run dev
 
 | Scenario | Loaded |
 |---|--:|
-| `<kc-chat>`, markdown only (no code blocks) | **~61 KB gzip** (~276 KB raw), one file |
+| `<kc-chat>`, markdown only (no code blocks) | **~110 KB gzip** (~413 KB raw), one file |
 | + a code block | adds Shiki core + JS engine + that language + theme, lazily |
 | Highlighting disabled | Shiki never loads |
 

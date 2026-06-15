@@ -11,7 +11,7 @@ import ts from 'typescript';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createTsHelpers } from './_ts-helpers.mjs';
+import { createTsHelpers, displayNameFromClass } from './_ts-helpers.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const elementsDir = resolve(root, 'src/elements');
@@ -146,7 +146,8 @@ for (const file of facadeFiles) {
       });
       const composed = composedImports(sf);
       const tokens = COMPONENT_TOKENS[tag] ?? [];
-      elements.push({ tag, className: tagToClass(tag), props, events, composedFrom: composed, tokens });
+      const className = tagToClass(tag);
+      elements.push({ tag, className, displayName: displayNameFromClass(className), props, events, composedFrom: composed, tokens });
     }
     ts.forEachChild(node, visit);
   };
@@ -156,10 +157,10 @@ elements.sort((a, b) => a.tag.localeCompare(b.tag));
 
 // Resolve story ids for composedFrom entries (after the loop so all elements are collected).
 for (const el of elements) {
-  el.composedFrom = el.composedFrom.map(({ name, group }) => ({
-    name, group,
-    storyId: `${group.toLowerCase()}-${kebabId(name)}--docs`,
-  }));
+  el.composedFrom = el.composedFrom.map(({ name, group }) => {
+    const seg = group === 'UI' ? 'primitives' : 'elements';
+    return { name, group, storyId: `solid-advanced-${seg}-${kebabId(name)}--docs` };
+  });
 }
 
 function tagToClass(tag) {
@@ -236,4 +237,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Phase 2: regenerate the SolidJS/UI component spec in the same build pass.
   const { generate: generateComponents } = await import('./gen-component-api.mjs');
   generateComponents();
+  // Phase 3: emit per-element, per-framework copy-paste snippets for the API tab.
+  const { writeFrameworkUsage } = await import('./gen-framework-usage.mjs');
+  writeFrameworkUsage(root, elements);
 }

@@ -5,14 +5,17 @@ import * as FullChat from '../full-chat.stories';
 
 # Getting Started
 
-`<kc-chat>` is **transport-agnostic**: you give it a `messages` array, it renders the conversation, and it emits a `submit` event when the user sends. You own the request and the streaming; the component owns the UI.
+`<kc-chat>` is **transport-agnostic**: give it a `messages` array, it renders the conversation and
+emits a `submit` event when the user sends. You own the request and the streaming; the component
+owns the UI.
 
-## A web component in ~10 lines
+## Your first chat in ~10 lines
 
-Set rich data as JS **properties** and listen for **events** on the element:
+Set rich data as JS **properties** and listen for **events**. This is the universal pattern — every
+framework just wraps it in its own binding syntax.
 
 ```html
-<kc-chat id="chat" style="display:block; height:100vh;"></kc-chat>
+<kc-chat id="chat" style="display:block; height:100dvh;"></kc-chat>
 
 <script type="module">
   import '@kitn.ai/chat/elements';
@@ -28,49 +31,35 @@ Set rich data as JS **properties** and listen for **events** on the element:
       ...chat.messages,
       { id: crypto.randomUUID(), role: 'user', content: text },
     ];
-    // ...call your model, then append an assistant message
+    // …call your model, then append an assistant message
   });
 </script>
 ```
 
-> Reactivity tip: assign a **new array** (and a new object for any message you change) when updating `chat.messages` — that's what triggers a re-render.
+> Reactivity tip: assign a **new array** (and a new object for any message you change) when updating
+> `chat.messages` — that's what triggers a re-render.
 
-## The same thing in SolidJS
+## Now pick your stack
 
-```tsx
-import {
-  ChatConfig, ChatContainer, ChatContainerContent,
-  Message, MessageContent,
-  PromptInput, PromptInputTextarea, PromptInputActions,
-} from '@kitn.ai/chat';
-import { createSignal } from 'solid-js';
+That's the raw element. For install, setup, and idiomatic examples in your framework — plus the
+**two ways** to use the kit (the all-in-one `<kc-chat>` and composing the individual elements):
 
-function Chat() {
-  const [input, setInput] = createSignal('');
-  return (
-    <ChatConfig proseSize="sm">
-      <ChatContainer class="h-full">
-        <ChatContainerContent class="space-y-4 p-4">
-          <Message>
-            <MessageContent markdown>{`Ask me anything.`}</MessageContent>
-          </Message>
-        </ChatContainerContent>
-      </ChatContainer>
-      <PromptInput value={input()} onValueChange={setInput} onSubmit={() => setInput('')}>
-        <PromptInputTextarea placeholder="Ask anything..." />
-        <PromptInputActions>{/* your buttons */}</PromptInputActions>
-      </PromptInput>
-    </ChatConfig>
-  );
-}
-```
+[HTML](?path=/docs/docs-frameworks-html--docs) ·
+[React](?path=/docs/docs-frameworks-react--docs) ·
+[Solid](?path=/docs/docs-frameworks-solid--docs) ·
+[Vue](?path=/docs/docs-frameworks-vue--docs) ·
+[Svelte](?path=/docs/docs-frameworks-svelte--docs) ·
+[Angular](?path=/docs/docs-frameworks-angular--docs)
 
 ## A complete example
 
-Everything assembled into a real app — a conversation sidebar, a message thread with markdown, reasoning blocks and a tool call, a model switcher, context-usage meter, and a rich prompt input with attachments:
+Everything assembled into a real app — a conversation sidebar, a message thread with markdown,
+reasoning blocks and a tool call, a model switcher, context-usage meter, and a rich prompt input
+with attachments:
 
 <Canvas of={FullChat.Default} />
 
-Open it full-screen under **Examples → Full Chat App**, then explore each building block on its own page in the sidebar.
+Open it full-screen under **Examples → Full Chat App**, then explore each building block on its own
+page under **Components**.
 
-Ready to make it yours? See **[Theming](?path=/docs/docs-theming--docs)**. Wiring a real model? See **[Integrations](?path=/docs/docs-frameworks-integrations--docs)**.
+Ready to make it yours? See **[Theming](?path=/docs/theming-overview--docs)**.

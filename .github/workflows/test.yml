@@ -21,6 +21,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Install before any test step: `npm test` runs the Storybook browser
+      # project (stories-as-tests via @storybook/addon-vitest), and
+      # `test:storybook` + `test:e2e` also need the browser. Installing here
+      # makes chromium available to every step (was previously installed too
+      # late, after the unit/storybook steps, so they failed to launch a browser).
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
       - name: Build (element bundle + provider subpath)
         run: npm run build
 

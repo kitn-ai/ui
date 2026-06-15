@@ -2,13 +2,13 @@
  * kc-chat React example — using the generated wrappers.
  *
  * The kit is built with SolidJS but ships framework-agnostic custom elements.
- * `@kitn.ai/chat/react` provides typed React wrappers (KcChat, KcPromptInput,
- * KcConversations, …) that make the elements feel native:
+ * `@kitn.ai/chat/react` provides typed React wrappers (Chat, PromptInput,
+ * Conversations, …) that make the elements feel native:
  *   - array/object props (messages, models, conversations, suggestions, context,
  *     slashCommands) are passed as React props and assigned as live DOM
  *     *properties* (NOT stringified to attributes);
  *   - boolean props (loading) reflect correctly;
- *   - events are `on<Event>` handlers (onSubmit, onModelchange, onSelect, …)
+ *   - events are `on<Event>` handlers (onSubmit, onModelchange, onConversationselect, …)
  *     wired to the elements' CustomEvents under the hood;
  *   - refs are forwarded; `theme`/`style`/`className`/`id` pass through.
  *
@@ -20,7 +20,7 @@ import { useState } from 'react';
 // Side-effect import: registers the custom elements globally.
 import '@kitn.ai/chat/elements';
 // Typed React wrappers — the whole point of this example.
-import { KcChat, KcConversations, KcPromptInput } from '@kitn.ai/chat/react';
+import { Chat, Conversations, PromptInput } from '@kitn.ai/chat/react';
 
 // Shared sample data and types (also used by other framework examples).
 import {
@@ -97,7 +97,7 @@ export default function App() {
     setTimeout(() => setToast(null), 1600);
   }
 
-  // ── KcChat handlers ──────────────────────────────────────────────────────
+  // ── Chat handlers ────────────────────────────────────────────────────────
 
   function handleSubmit(e: CustomEvent) {
     const { value, attachments } = (e.detail ?? {}) as { value?: string; attachments?: unknown[] };
@@ -107,7 +107,7 @@ export default function App() {
     const userMsg: ChatMessage = { id: 'u' + generateId(), role: 'user', content: text };
     const replyId = 'a' + generateId();
 
-    // Append to the messages array in React state → re-renders KcChat with a
+    // Append to the messages array in React state → re-renders Chat with a
     // NEW array prop, which the wrapper re-assigns as the element's `messages`.
     setAllMessages((prev) => ({
       ...prev,
@@ -188,7 +188,7 @@ export default function App() {
     showToast(`Model → ${SAMPLE_MODELS.find((m) => m.id === modelId)?.name ?? modelId}`);
   }
 
-  // ── KcConversations handlers ──────────────────────────────────────────
+  // ── Conversations handlers ────────────────────────────────────────────
 
   function handleSelect(e: CustomEvent) {
     const { id } = (e.detail ?? {}) as { id: string };
@@ -219,7 +219,7 @@ export default function App() {
     document.body.classList.toggle('sidebar-open');
   }
 
-  // ── Standalone KcPromptInput handler ────────────────────────────────────
+  // ── Standalone PromptInput handler ──────────────────────────────────────
 
   function handleStandaloneSubmit(e: CustomEvent) {
     const { value } = (e.detail ?? {}) as { value?: string };
@@ -273,12 +273,12 @@ export default function App() {
           Native-feeling React: array/object props + on<Event> handlers + theme.
           No ref / useEffect / addEventListener in sight.
         */}
-        <KcConversations
+        <Conversations
           groups={SAMPLE_GROUPS}
           conversations={conversations}
           activeId={activeId}
           theme={theme}
-          onSelect={handleSelect}
+          onConversationselect={handleSelect}
           onNewchat={handleNewChat}
           onTogglesidebar={handleToggleSidebar}
           style={{
@@ -288,7 +288,7 @@ export default function App() {
           }}
         />
 
-        <KcChat
+        <Chat
           messages={messages}
           models={SAMPLE_MODELS}
           currentModel={currentModel}
@@ -304,15 +304,15 @@ export default function App() {
         />
       </div>
 
-      {/* Standalone KcPromptInput — proves a leaf wrapper works on its own. */}
+      {/* Standalone PromptInput — proves a leaf wrapper works on its own. */}
       <div
         className="standalone-section"
         style={{ borderTop: `1px solid ${borderColor}` }}
       >
         <div className="standalone-label">
-          Standalone &lt;KcPromptInput&gt; (try typing <code>/</code> for slash commands):
+          Standalone &lt;PromptInput&gt; (try typing <code>/</code> for slash commands):
         </div>
-        <KcPromptInput
+        <PromptInput
           placeholder="Standalone prompt input…"
           slashCommands={SAMPLE_SLASH_COMMANDS}
           theme={theme}

@@ -108,8 +108,8 @@ interface ChatMessage {
 
 **React** — typed wrappers auto-set properties and expose \`on<Event>\` props:
 \`\`\`tsx
-import { KcChat } from '@kitn.ai/chat/react';
-<KcChat messages={messages} onSubmit={(e) => send(e.detail.value)} />
+import { Chat } from '@kitn.ai/chat/react';
+<Chat messages={messages} onSubmit={(e) => send(e.detail.value)} />
 \`\`\`
 
 **Vue** — use the element directly; pass arrays via \`.prop\`:
@@ -254,7 +254,7 @@ The same rule applies to every array/object property (\`models\`, \`context\`, \
 function fromElements(elements) {
   return elements.map((el) => ({
     tag: el.tag,
-    reactName: tagToReact(el.tag),
+    reactName: el.displayName ?? tagToReact(el.tag).replace(/^Kc/, ''),
     props: el.props.map((p) => ({
       name: p.name,
       type: p.type,
@@ -277,7 +277,7 @@ function fromManifest(cem) {
     );
     return {
       tag: d.tagName,
-      reactName: tagToReact(d.tagName),
+      reactName: tagToReact(d.tagName).replace(/^Kc/, ''),
       props: (d.members || [])
         .filter((m) => m.kind === 'field')
         .map((m) => ({

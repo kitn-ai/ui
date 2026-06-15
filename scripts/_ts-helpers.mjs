@@ -8,6 +8,12 @@
 
 import ts from 'typescript';
 
+// Friendly element name shared by the React/Solid wrappers, story titles, and the
+// API tab. KcArtifactElement -> Artifact. All element tags start `kc-`, so the
+// className always starts `Kc`.
+export const displayNameFromClass = (className) =>
+  className.replace(/^Kc/, '').replace(/Element$/, '');
+
 export function createTsHelpers(program, checker, { importable = new Set() } = {}) {
   const isScalar = (t) => {
     if (t.isUnion?.()) return t.types.every(isScalar);

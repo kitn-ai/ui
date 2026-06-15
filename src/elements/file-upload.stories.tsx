@@ -30,7 +30,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/kc-file-upload',
+  title: 'Components/FileUpload',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-file-upload'),
   parameters: {

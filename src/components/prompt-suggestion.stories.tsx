@@ -4,7 +4,7 @@ import { PromptSuggestion } from './prompt-suggestion';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Components/PromptSuggestion',
+  title: 'Solid (Advanced)/Elements/PromptSuggestion',
   component: PromptSuggestion,
   tags: ['autodocs'],
   parameters: {
