@@ -74,7 +74,7 @@ the element's attributes and properties:
 `<kc-chat>` is **transport-agnostic**: give it a `messages` array, handle the `submit` event, and
 stream your model's reply back into state. You own the request; the element owns the UI.
 
-```vue
+```html
 <script setup lang="ts">
 import '@kitn.ai/chat/elements';
 import { ref } from 'vue';
@@ -119,7 +119,7 @@ const handleSubmit = async (e: CustomEvent<{ value: string }>) => {
 `<kc-chat>` is one option, not the only one. Every element can be composed in your own layout.
 Here's a multi-conversation shell — a `<kc-conversations>` sidebar next to the `<kc-chat>` thread:
 
-```vue
+```html
 <script setup lang="ts">
 import '@kitn.ai/chat/elements';
 import { ref } from 'vue';
@@ -174,7 +174,7 @@ with one `<kc-resizable-item>` each — the handles are inserted for you (up to 
 takes a `size` (px or `%`) plus optional `min`/`max`; listen for `@change` (`detail.sizes`) to
 persist the layout.
 
-```vue
+```html
 <template>
   <div style="display: flex; flex-direction: column; height: 100dvh;">
     <kc-resizable orientation="horizontal" style="flex: 1; min-height: 0;">

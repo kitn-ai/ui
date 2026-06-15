@@ -42,7 +42,7 @@ import '@kitn.ai/chat/elements';
 `<kc-chat>` is **transport-agnostic**: give it a `messages` array, handle the `submit` event, and
 stream your model's reply back into state. You own the request; the element owns the UI.
 
-```svelte
+```html
 <script>
   import '@kitn.ai/chat/elements';
 
@@ -91,7 +91,7 @@ stream your model's reply back into state. You own the request; the element owns
 assemble your own layout. Here's a multi-conversation shell — a `<kc-conversations>` sidebar next
 to the `<kc-chat>` thread:
 
-```svelte
+```html
 <script>
   import '@kitn.ai/chat/elements';
 
@@ -134,7 +134,7 @@ with one `<kc-resizable-item>` each — the handles are inserted for you (up to 
 takes a `size` (px or `%`) plus optional `min`/`max`; listen for the `change` event
 (`detail.sizes`) to persist the layout.
 
-```svelte
+```html
 <script>
   import '@kitn.ai/chat/elements';
 

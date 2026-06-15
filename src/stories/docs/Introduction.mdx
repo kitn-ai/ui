@@ -15,7 +15,7 @@ Message threads, prompt inputs, streaming responses, markdown + code rendering, 
 
 - **Works in any framework** — drop in the framework-agnostic **web components** (`<kc-chat>`) and they just work in React, Vue, Angular, Svelte, or plain HTML. Authored in SolidJS, so SolidJS apps can also import the components natively for full compositional control.
 - **Zero style conflicts** — the web components render in **Shadow DOM**, so the host page's CSS can't leak in and the kit's Tailwind can't leak out.
-- **Lightweight** — a markdown-only `<kc-chat>` is **~61 KB gzip**, a single file. Syntax highlighting loads **on demand, per language, with no WASM** — and never loads at all if you don't render code.
+- **Lightweight** — a markdown-only `<kc-chat>` is **~110 KB gzip**, a single file. Syntax highlighting loads **on demand, per language, with no WASM** — and never loads at all if you don't render code.
 - **~50 composable components** across three layers: headless primitives → accessible UI primitives (built in-house, WCAG 2.1 AA — no third-party UI dependency) → AI feature components.
 - **Themeable** — restyle everything by overriding a handful of `--color-*` design tokens.
 

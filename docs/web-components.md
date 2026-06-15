@@ -43,13 +43,13 @@ Internally this runs `build:css` (compiles Tailwind to `src/elements/compiled.cs
 
 | File | Format | Notes |
 |------|--------|-------|
-| `dist/kitn-chat.es.js` | ES module | Main entry. ~80 KB gzip; lazy chunks for code highlighting load on demand |
+| `dist/kitn-chat.es.js` | ES module | Main entry. ~110 KB gzip; lazy chunks for code highlighting load on demand |
 
 The build is **ES-module only** by design. A UMD/IIFE build cannot code-split, so it would have to inline every lazy chunk (all the Shiki syntax-highlighting languages) into one multi-MB file. The ES build keeps those chunks lazy and is loadable directly via `<script type="module">` in every modern browser.
 
 ### Register the elements
 
-Import the ES module as a side-effect. It registers all 27 custom elements via `customElements.define`:
+Import the ES module as a side-effect. It registers all **40+ custom elements** via `customElements.define`:
 
 ```js
 import '@kitn.ai/chat/elements';
@@ -122,7 +122,7 @@ Component names are the bare friendly name of the element (`kc-chat` → `Chat`)
 
 ---
 
-## Full Element Reference (27 elements)
+## Full Element Reference (**40+ elements**)
 
 Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, default `'auto'`). Array/object properties are marked with a `—` in the Attribute column — they **must** be set as JS properties.
 
@@ -1167,6 +1167,6 @@ The authoritative source for all element APIs is `dist/custom-elements.json` (ge
 Two human/agent-readable files are generated from the manifest by `scripts/gen-llms.mjs`:
 
 - **`llms.txt`** (~4 KB) — orientation: install, the property-vs-attribute rule, architecture, theming, and framework wiring.
-- **`llms-full.txt`** (~32 KB) — everything in `llms.txt` plus a generated props/events table for each element, a streaming recipe, and a build-a-chat-app runbook.
+- **`llms-full.txt`** (~54 KB) — everything in `llms.txt` plus a generated props/events table for each element, a streaming recipe, and a build-a-chat-app runbook.
 
 Both files are at the repo root, the npm package root (`node_modules/@kitn.ai/chat/llms.txt`), and https://kitn.dev/llms.txt.
