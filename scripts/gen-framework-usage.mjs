@@ -1,10 +1,14 @@
 // Emits src/elements/framework-usage.json — per-element copy-paste snippets for
-// HTML/React/Vue/Angular/Solid, rendered one-at-a-time in the API tab's "Usage"
+// HTML/React/Vue/Angular/Svelte/Solid, rendered one-at-a-time in the API tab's "Usage"
 // block. Generated from element-meta (no drift). The Solid snippet is an
 // approximation from the element's props/events (not the Solid component's exact
 // signature) and only appears when a same-named Solid export exists.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+
+// CDN URL for the self-contained element bundle (registers all kc-* custom elements).
+// Source of truth: Installation.mdx § "Via CDN" and README.md § "Or load from a CDN".
+const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
 
 const onName = (ev) => 'on' + ev[0].toUpperCase() + ev.slice(1);
 const required = (el) => el.props.filter((p) => !p.optional);
@@ -27,15 +31,27 @@ function htmlSnippet(el) {
   ];
   const attrs = req.filter((p) => p.scalar).map((p) => ` ${p.name}="…"`).join('');
   const tag = `<${el.tag}${attrs}></${el.tag}>`;
-  if (!body.length) return tag;
+  const cdnLine = `<script type="module" src="${CDN_ELEMENTS}"></script>`;
+  if (!body.length) return `${cdnLine}\n\n${tag}`;
   return [
+    cdnLine,
+    ``,
     tag,
     `<script type="module">`,
-    `  import '@kitn.ai/chat/elements';`,
     `  const el = document.querySelector('${el.tag}');`,
     ...body,
     `</script>`,
   ].join('\n');
+}
+
+function svelteSnippet(el) {
+  const lines = [
+    ...required(el).map((p) => `{${p.name}}`),
+    ...el.events.map((e) => `on:${e.name}={${onName(e.name)}}`),
+  ];
+  const scriptBlock = `<script>\n  import '@kitn.ai/chat/elements';\n</script>`;
+  const tag = wrapTag(`<${el.tag}`, lines, `></${el.tag}>`) ?? `<${el.tag}></${el.tag}>`;
+  return `${scriptBlock}\n\n${tag}`;
 }
 function vueSnippet(el) {
   const lines = [
@@ -65,6 +81,7 @@ export function buildSnippets(el, hasSolid) {
     html: htmlSnippet(el),
     react: jsxSnippet(el, '@kitn.ai/chat/react'),
     vue: vueSnippet(el),
+    svelte: svelteSnippet(el),
     angular: angularSnippet(el),
   };
   if (hasSolid) snippets.solid = jsxSnippet(el, '@kitn.ai/chat');

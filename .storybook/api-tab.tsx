@@ -12,6 +12,7 @@ const FRAMEWORKS: { key: string; label: string }[] = [
   { key: 'html', label: 'HTML' },
   { key: 'react', label: 'React' },
   { key: 'vue', label: 'Vue' },
+  { key: 'svelte', label: 'Svelte' },
   { key: 'angular', label: 'Angular' },
   { key: 'solid', label: 'Solid' },
 ];
