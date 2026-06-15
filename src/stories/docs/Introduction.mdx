@@ -23,10 +23,10 @@ Message threads, prompt inputs, streaming responses, markdown + code rendering, 
 
 The kit ships at two layers, and the sidebar reflects that. **Use the right one for your stack:**
 
-- **Web Components** — the framework-agnostic `<kitn-*>` custom elements. **This is what to copy into a React, Vue, Angular, Svelte, or plain-HTML app.** Data goes on JS properties, interactions come back as events.
-- **Components · SolidJS** and **UI · SolidJS** — the **native SolidJS** components (feature components) and primitives (Button, Dropdown, HoverCard, …) that the web components are *built from*. Their snippets are SolidJS JSX, so **only copy these into a SolidJS app**.
+- **Components** — the framework-agnostic `<kc-*>` custom elements. **This is what to copy into a React, Vue, Angular, Svelte, or plain-HTML app.** Data goes on JS properties, interactions come back as events.
+- **Solid (Advanced)** — under it, **Elements** (the native SolidJS feature components) and **Primitives** (Button, Dropdown, HoverCard, …) that the web components are *built from*. Their snippets are SolidJS JSX, so **only copy these into a SolidJS app**.
 
-In other words: the `<kc-chat>` web component is a thin facade over the SolidJS `ChatContainer`/`Message`/… components — same UI, different consumption model. When in doubt, reach for **Web Components**.
+In other words: the `<kc-chat>` web component is a thin facade over the SolidJS `ChatContainer`/`Message`/… components — same UI, different consumption model. When in doubt, reach for **Components**.
 
 ## Where to next
 
