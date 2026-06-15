@@ -237,4 +237,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Phase 2: regenerate the SolidJS/UI component spec in the same build pass.
   const { generate: generateComponents } = await import('./gen-component-api.mjs');
   generateComponents();
+  // Phase 3: emit per-element, per-framework copy-paste snippets for the API tab.
+  const { writeFrameworkUsage } = await import('./gen-framework-usage.mjs');
+  writeFrameworkUsage(root, elements);
 }
