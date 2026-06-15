@@ -30,6 +30,10 @@ export { CARD_EVENT_NAME, emitCardEvent, routeCardEvent, listenForCardEvents } f
 export { validateAgainstSchema } from './primitives/card-validate';
 export type { JsonSchema, ValidationResult } from './primitives/card-validate';
 
+// Remote host SDK (iframe transport — host side only; provider runtime ships via ./provider subpath)
+export { mountRemoteCard } from './remote/host-embed';
+export type { MountRemoteCardOptions, RemoteCardHandle } from './remote/host-embed';
+
 // Card dispatcher (generative-UI host glue)
 export { CardRenderer, renderCard } from './components/card-renderer';
 export type { CardRendererProps } from './components/card-renderer';
