@@ -36,8 +36,8 @@ function cssRawPlugin() {
 //   npm run test:storybook # stories-as-tests only (vitest run --project=storybook)
 //
 // a11y-in-test: @storybook/addon-a11y is registered in .storybook/main.ts and
-// the default `a11y.test` is set in .storybook/preview.ts (currently 'todo' =
-// non-failing warnings; set to 'error' to fail on violations).
+// the default `a11y.test` is set in .storybook/preview.ts (currently 'error' =
+// a11y violations FAIL the run; 'todo' would make them non-failing warnings).
 //
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
