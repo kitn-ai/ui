@@ -1,0 +1,58 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Frameworks/Angular" />
+
+# Angular
+
+Angular needs **no wrappers** — its property binding (`[prop]="value"`) assigns the DOM **property** directly, so arrays and objects pass through unstringified. Register the elements once, allow the custom tags with `CUSTOM_ELEMENTS_SCHEMA`, and handle events with `(event)="handler($event)"` (the payload is on `$event.detail`).
+
+```ts
+// main.ts — register the kitn-* elements once, app-wide
+import '@kitn.ai/chat/elements';
+```
+
+```ts
+// app.component.ts
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './app.component.html',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA], // allow the <kitn-*> custom elements
+})
+export class AppComponent {
+  messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
+  models = [{ id: 'opus', name: 'Claude Opus' }];
+  loading = false;
+
+  onSubmit(e: Event) {
+    const { value } = (e as CustomEvent<{ value: string }>).detail;
+    // Reassign a NEW array so change detection re-renders.
+    this.messages = [
+      ...this.messages,
+      { id: crypto.randomUUID(), role: 'user', content: value },
+    ];
+    // …stream the reply, reassigning this.messages with a new array each chunk
+  }
+
+  onModelChange(e: Event) {
+    console.log('model:', (e as CustomEvent<{ modelId: string }>).detail.modelId);
+  }
+}
+```
+
+```html
+<!-- app.component.html -->
+<kc-chat
+  [messages]="messages"
+  [models]="models"
+  [loading]="loading"
+  theme="auto"
+  style="display: block; height: 100vh"
+  (submit)="onSubmit($event)"
+  (modelchange)="onModelChange($event)"
+></kc-chat>
+```
+
+> **Why `[messages]` works:** Angular's `[prop]` binding writes to the element's DOM property (not an attribute), so the property-vs-attribute rule is satisfied automatically. Scalars like `theme` can be plain attributes. `CUSTOM_ELEMENTS_SCHEMA` is required so Angular doesn't error on the unknown `kitn-*` tags.

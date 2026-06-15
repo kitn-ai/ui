@@ -1,0 +1,27 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Frameworks/Overview" />
+
+# Frameworks & Integrations Overview
+
+`@kitn.ai/chat` is transport-agnostic: every element renders `messages` and emits `submit`. You bring the model; the kit owns the UI. This page covers how to wire it up across frameworks — pick yours from the pages below: [HTML](./Html), [React](./React), [Vue](./Vue), [Svelte](./Svelte), or [Angular](./Angular). Recipes for streaming, TTS, and STT are under **Docs/Recipes**.
+
+---
+
+## The #1 rule: properties vs. attributes
+
+Arrays and objects **must** be set as JavaScript **properties** on the DOM element — never as HTML attributes. An HTML attribute is always a string, so passing `messages`, `models`, `context`, `suggestions`, or `slashCommands` as an attribute silently fails or is ignored.
+
+```js
+const chat = document.querySelector('kc-chat');
+
+// ✅ correct — set as a JS property
+chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
+
+// ❌ wrong — HTML attribute, always a string, never works
+// <kc-chat messages="[...]"></kc-chat>
+```
+
+Scalar values (strings, numbers, booleans) work as attributes: `placeholder`, `loading`, `theme`, `prose-size`, and so on.
+
+The kit ships **41 elements** in total — see each framework page for typed wrappers and integration examples.

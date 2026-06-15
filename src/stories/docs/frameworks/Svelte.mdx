@@ -1,0 +1,39 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Frameworks/Svelte" />
+
+# Svelte
+
+Svelte's template compiler sets DOM **properties** when you bind with `bind:` or use the `|propname` directive. For custom events, use `on:eventname`:
+
+```html
+<script>
+  import '@kitn.ai/chat/elements';
+
+  let messages = [
+    { id: '1', role: 'assistant', content: 'Hello!' }
+  ];
+
+  function handleSubmit(e) {
+    const text = e.detail.value;
+    messages = [...messages, { id: crypto.randomUUID(), role: 'user', content: text }];
+    // …stream reply
+  }
+</script>
+
+<!-- use:action pattern to set properties -->
+<kc-chat
+  use:setProps={{ messages }}
+  style="display: block; height: 100vh"
+  on:submit={handleSubmit}
+/>
+
+<script context="module">
+  function setProps(node, props) {
+    Object.assign(node, props);
+    return {
+      update(newProps) { Object.assign(node, newProps); }
+    };
+  }
+</script>
+```

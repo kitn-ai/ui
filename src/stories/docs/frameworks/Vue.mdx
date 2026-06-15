@@ -1,0 +1,85 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Frameworks/Vue" />
+
+# Vue
+
+In Vue, use the element directly in your template. Pass arrays and objects via the `.prop` modifier (or `:propName.prop` for dynamic bindings) so Vue sets them as DOM properties rather than HTML attributes. Events use the standard `@event` syntax.
+
+```html
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import '@kitn.ai/chat/elements';
+
+const messages = ref([
+  { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+]);
+
+const handleSubmit = (e: CustomEvent<{ value: string }>) => {
+  const text = e.detail.value;
+  messages.value = [
+    ...messages.value,
+    { id: crypto.randomUUID(), role: 'user', content: text },
+  ];
+  // …stream a reply and append an assistant message
+};
+</script>
+
+<template>
+  <!-- Arrays/objects → .prop modifier; scalars → plain attributes -->
+  <kc-chat
+    :messages.prop="messages"
+    placeholder="Ask anything…"
+    theme="auto"
+    style="display: block; height: 100vh"
+    @submit="handleSubmit"
+  />
+</template>
+```
+
+## Vue + TypeScript: augmenting JSX types
+
+Add `@kitn.ai/chat/elements` to your `vite.config.ts` / `env.d.ts` once so Vue's template compiler knows the element's attributes:
+
+```ts
+// env.d.ts (or vite-env.d.ts)
+/// <reference types="@kitn.ai/chat/elements" />
+```
+
+## Sidebar + chat together (Vue)
+
+Cross-element coordination goes through the host component — the `<kc-conversations>` fires `select`, you update a reactive ref, and pass it into `<kc-chat>`:
+
+```html
+<script setup lang="ts">
+import '@kitn.ai/chat/elements';
+import { ref } from 'vue';
+
+const conversations = ref([
+  { id: 'c1', title: 'First chat', scope: { type: 'document' }, messageCount: 3,
+    lastMessageAt: '2026-06-01T12:00:00Z', updatedAt: '2026-06-01T12:00:00Z' },
+]);
+const activeId = ref('c1');
+const messages = ref([{ id: '1', role: 'assistant', content: 'Hi!' }]);
+
+const onSelect = (e: CustomEvent<{ id: string }>) => {
+  activeId.value = e.detail.id;
+  // load messages for the selected conversation
+};
+</script>
+
+<template>
+  <div style="display: flex; height: 100vh;">
+    <kc-conversations
+      :conversations.prop="conversations"
+      :active-id="activeId"
+      style="width: 260px"
+      @select="onSelect"
+    />
+    <kc-chat
+      :messages.prop="messages"
+      style="flex: 1"
+    />
+  </div>
+</template>
+```
