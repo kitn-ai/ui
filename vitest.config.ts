@@ -86,7 +86,12 @@ export default defineConfig({
           headless: true,
           provider: playwright({}),
           instances: [{
-            browser: 'chromium'
+            browser: 'chromium',
+            // CI hardening: chromium crashes ("Browser connection was closed /
+            // rpc is closed") partway through the story suite when it exhausts the
+            // tiny default /dev/shm on GitHub runners. Route shared memory to /tmp
+            // and disable the sandbox. No-op locally; required on CI.
+            launchOptions: { args: ['--disable-dev-shm-usage', '--no-sandbox'] },
           }]
         }
       }
