@@ -3,7 +3,6 @@ import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage } from '.
 import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
 import type { ProseSize } from '../primitives/chat-config';
-import type { ChatMessageAction } from './chat-types';
 import type { ModelOption } from '../types';
 
 type Props = Omit<ChatThreadProps,
@@ -17,8 +16,8 @@ interface Events {
   valuechange: { value: string };
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
   suggestionclick: { value: string };
-  /** An action button on a message was clicked. */
-  messageaction: { messageId: string; action: ChatMessageAction };
+  /** An action button on a message was clicked. `action` is the built-in name or custom id. */
+  messageaction: { messageId: string; action: string };
   /** The header model switcher changed. */
   modelchange: { modelId: string };
   /** A slash command was chosen from the palette. */
@@ -35,6 +34,7 @@ defineWebComponent<Props, Events>('kc-chat', {
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
   search: false, voice: false, slashCommands: undefined, slashActiveIds: undefined, slashCompact: false,
+  actionsReveal: 'always',
 }, (props, { dispatch, flag }) => (
   <ChatThread
     messages={props.messages} value={props.value as string | undefined} placeholder={props.placeholder as string}
@@ -46,6 +46,7 @@ defineWebComponent<Props, Events>('kc-chat', {
     scrollButton={props.scrollButton !== false} search={flag('search')} voice={flag('voice')}
     slashCommands={props.slashCommands as SlashCommandItem[] | undefined}
     slashActiveIds={props.slashActiveIds as string[] | undefined} slashCompact={flag('slashCompact')}
+    actionsReveal={props.actionsReveal as 'always' | 'hover'}
     onValueChange={(value) => dispatch('valuechange', { value })}
     onSubmit={(detail) => dispatch('submit', detail)}
     onSuggestionClick={(value) => dispatch('suggestionclick', { value })}

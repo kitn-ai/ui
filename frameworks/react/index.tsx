@@ -122,7 +122,7 @@ export const ChainOfThought = createWebComponent<ChainOfThoughtProps>(
 
 export interface ChatProps extends WebComponentProps {
   /** The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). */
-  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit")[] }[];
+  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[];
   /** Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
@@ -159,8 +159,10 @@ export interface ChatProps extends WebComponentProps {
   slashActiveIds?: string[];
   /** Single-line palette rows. */
   slashCompact?: boolean;
-  /** An action button on a message was clicked. */
-  onMessageaction?: (event: CustomEvent<{ messageId: string; action: "copy" | "like" | "dislike" | "regenerate" | "edit" }>) => void;
+  /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
+  actionsReveal?: "always" | "hover";
+  /** An action button on a message was clicked. `action` is the built-in name or custom id. */
+  onMessageaction?: (event: CustomEvent<{ messageId: string; action: string }>) => void;
   /** The header model switcher changed. */
   onModelchange?: (event: CustomEvent<{ modelId: string }>) => void;
   /** The Search button was clicked. */
@@ -179,7 +181,7 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = createWebComponent<ChatProps>(
   'kc-chat',
-  ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact"],
+  ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact","actionsReveal"],
   { onMessageaction: 'messageaction', onModelchange: 'modelchange', onSearch: 'search', onSlashselect: 'slashselect', onSubmit: 'submit', onSuggestionclick: 'suggestionclick', onValuechange: 'valuechange', onVoice: 'voice' },
 );
 
@@ -447,7 +449,7 @@ export const Markdown = createWebComponent<MarkdownProps>(
 
 export interface MessageProps extends WebComponentProps {
   /** The full message object. Set as a JS property. */
-  message?: { id: string; role: "user" | "assistant"; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string }[]; attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[]; actions?: ("copy" | "like" | "dislike" | "regenerate" | "edit")[] };
+  message?: { id: string; role: "user" | "assistant"; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string }[]; attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[]; actions?: ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string } };
   /** Convenience for simple cases when not passing a `message` object. */
   role?: "user" | "assistant";
   /** Convenience content (used when `message` is not set). */
@@ -460,13 +462,19 @@ export interface MessageProps extends WebComponentProps {
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
-  /** An action button was clicked. */
-  onMessageaction?: (event: CustomEvent<{ messageId: string; action: "copy" | "like" | "dislike" | "regenerate" | "edit" }>) => void;
+  /** Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`). */
+  actionsReveal?: "always" | "hover";
+  /** Convenience avatar image URL (used when `message.avatar` is not set). */
+  avatarSrc?: string;
+  /** Convenience avatar fallback text (used when `message.avatar` is not set). */
+  avatarFallback?: string;
+  /** An action button was clicked. `action` is the built-in name or custom id. */
+  onMessageaction?: (event: CustomEvent<{ messageId: string; action: string }>) => void;
 }
 
 export const Message = createWebComponent<MessageProps>(
   'kc-message',
-  ["theme","message","role","content","markdown","proseSize","codeTheme","codeHighlight"],
+  ["theme","message","role","content","markdown","proseSize","codeTheme","codeHighlight","actionsReveal","avatarSrc","avatarFallback"],
   { onMessageaction: 'messageaction' },
 );
 
@@ -795,7 +803,7 @@ export interface WorkspaceProps extends WebComponentProps {
   /** Id of the open conversation, highlighted in the sidebar. */
   activeId?: string;
   /** The active conversation's message thread, newest last. Set as a JS property. */
-  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit")[] }[];
+  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[];
   value?: string;
   placeholder?: string;
   loading?: boolean;
@@ -825,7 +833,7 @@ export interface WorkspaceProps extends WebComponentProps {
   /** A conversation was selected in the sidebar. */
   onConversationselect?: (event: CustomEvent<{ id: string }>) => void;
   /** An action button on a message was clicked. */
-  onMessageaction?: (event: CustomEvent<{ messageId: string; action: "copy" | "like" | "dislike" | "regenerate" | "edit" }>) => void;
+  onMessageaction?: (event: CustomEvent<{ messageId: string; action: string }>) => void;
   /** The header model switcher changed. */
   onModelchange?: (event: CustomEvent<{ modelId: string }>) => void;
   /** The "New chat" button was clicked. */

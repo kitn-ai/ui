@@ -438,12 +438,12 @@
     "props": [
       {
         "name": "messages",
-        "type": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\")[] }[]",
+        "type": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]",
         "optional": false,
         "scalar": false,
         "description": "The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`).",
         "default": "[]",
-        "displayType": "ChatMessage[]"
+        "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]"
       },
       {
         "name": "value",
@@ -598,14 +598,23 @@
         "description": "Single-line palette rows.",
         "default": "false",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "actionsReveal",
+        "type": "undefined | \"always\" | \"hover\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`).",
+        "default": "'always'",
+        "displayType": "undefined | \"always\" | \"hover\""
       }
     ],
     "events": [
       {
         "name": "messageaction",
-        "detail": "{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }",
-        "description": "An action button on a message was clicked.",
-        "displayDetail": "{ messageId: string; action: ChatMessageAction }"
+        "detail": "{ messageId: string; action: string }",
+        "description": "An action button on a message was clicked. `action` is the built-in name or custom id.",
+        "displayDetail": "{ messageId: string; action: string }"
       },
       {
         "name": "modelchange",
@@ -1501,11 +1510,11 @@
     "props": [
       {
         "name": "message",
-        "type": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\")[] }",
+        "type": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }",
         "optional": true,
         "scalar": false,
         "description": "The full message object. Set as a JS property.",
-        "displayType": "ChatMessage | undefined"
+        "displayType": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }"
       },
       {
         "name": "role",
@@ -1558,14 +1567,39 @@
         "description": "Disable syntax highlighting for code blocks (no Shiki loads).",
         "default": "true",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "actionsReveal",
+        "type": "undefined | \"always\" | \"hover\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`).",
+        "default": "'always'",
+        "displayType": "undefined | \"always\" | \"hover\""
+      },
+      {
+        "name": "avatarSrc",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Convenience avatar image URL (used when `message.avatar` is not set).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "avatarFallback",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Convenience avatar fallback text (used when `message.avatar` is not set).",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
       {
         "name": "messageaction",
-        "detail": "{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }",
-        "description": "An action button was clicked.",
-        "displayDetail": "{ messageId: string; action: ChatMessageAction }"
+        "detail": "{ messageId: string; action: string }",
+        "description": "An action button was clicked. `action` is the built-in name or custom id.",
+        "displayDetail": "{ messageId: string; action: string }"
       }
     ],
     "composedFrom": [
@@ -1575,14 +1609,19 @@
         "storyId": "solid-advanced-elements-message--docs"
       },
       {
+        "name": "MessageAvatar",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-messageavatar--docs"
+      },
+      {
         "name": "MessageContent",
         "group": "Components",
         "storyId": "solid-advanced-elements-messagecontent--docs"
       },
       {
-        "name": "MessageActions",
+        "name": "MessageActionBar",
         "group": "Components",
-        "storyId": "solid-advanced-elements-messageactions--docs"
+        "storyId": "solid-advanced-elements-messageactionbar--docs"
       },
       {
         "name": "Reasoning",
@@ -1623,11 +1662,6 @@
         "name": "AttachmentInfo",
         "group": "Components",
         "storyId": "solid-advanced-elements-attachmentinfo--docs"
-      },
-      {
-        "name": "Button",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-button--docs"
       }
     ],
     "tokens": []
@@ -2649,12 +2683,12 @@
       },
       {
         "name": "messages",
-        "type": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\")[] }[]",
+        "type": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]",
         "optional": false,
         "scalar": false,
         "description": "The active conversation's message thread, newest last. Set as a JS property.",
         "default": "[]",
-        "displayType": "ChatMessage[]"
+        "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]"
       },
       {
         "name": "value",
@@ -2856,9 +2890,9 @@
       },
       {
         "name": "messageaction",
-        "detail": "{ messageId: string; action: \"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" }",
+        "detail": "{ messageId: string; action: string }",
         "description": "An action button on a message was clicked.",
-        "displayDetail": "{ messageId: string; action: ChatMessageAction }"
+        "displayDetail": "{ messageId: string; action: string }"
       },
       {
         "name": "modelchange",

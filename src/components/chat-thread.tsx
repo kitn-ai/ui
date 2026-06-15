@@ -1,7 +1,7 @@
 import { createSignal, For, Show } from 'solid-js';
 import { ChatConfig, useChatConfig } from '../primitives/chat-config';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
-import { Message, MessageContent, MessageActions } from './message';
+import { Message, MessageAvatar, MessageContent, MessageActionBar } from './message';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from './reasoning';
 import { Tool } from './tool';
 import { Attachments, Attachment, AttachmentPreview, AttachmentInfo, type AttachmentData } from './attachments';
@@ -11,12 +11,9 @@ import {
   Context, ContextTrigger, ContextContent, ContextContentHeader,
   ContextContentBody, ContextContentFooter, ContextInputUsage, ContextOutputUsage,
 } from './context';
-import { Button } from '../ui/button';
-import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Pencil } from 'lucide-solid';
-import type { Component } from 'solid-js';
 import { DefaultPromptInput } from '../elements/default-input';
 import type { SlashCommandItem } from './slash-command';
-import type { ChatMessage, ChatMessageAction } from '../elements/chat-types';
+import type { ChatMessage } from '../elements/chat-types';
 import type { ProseSize } from '../primitives/chat-config';
 import type { ModelOption } from '../types';
 
@@ -81,26 +78,23 @@ export interface ChatThreadProps {
   slashActiveIds?: string[];
   /** Single-line palette rows. */
   slashCompact?: boolean;
+  /** Whether each message's action bar is always visible (`'always'`, default)
+   *  or only revealed on hover of that message row (`'hover'`). */
+  actionsReveal?: 'always' | 'hover';
   // callbacks (the facade maps these to dispatch())
   onValueChange?: (value: string) => void;
   onSubmit?: (detail: { value: string; attachments: AttachmentData[] }) => void;
   onSuggestionClick?: (value: string) => void;
   onModelChange?: (modelId: string) => void;
-  onMessageAction?: (detail: { messageId: string; action: ChatMessageAction }) => void;
+  onMessageAction?: (detail: { messageId: string; action: string }) => void;
   onSearch?: () => void;
   onVoice?: () => void;
   onSlashSelect?: (command: SlashCommandItem) => void;
 }
 
-const ACTION_LABEL: Record<ChatMessageAction, string> = {
-  copy: 'Copy', like: 'Like', dislike: 'Dislike', regenerate: 'Regenerate', edit: 'Edit',
-};
-const ACTION_ICON: Record<ChatMessageAction, Component<{ class?: string }>> = {
-  copy: Copy, like: ThumbsUp, dislike: ThumbsDown, regenerate: RefreshCw, edit: Pencil,
-};
-
 export function ChatThread(props: ChatThreadProps) {
   const outer = useChatConfig();
+  const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
   const [internal, setInternal] = createSignal(props.value ?? '');
   const [attachments, setAttachments] = createSignal<AttachmentData[]>([]);
   const current = () => props.value ?? internal();
@@ -148,45 +142,59 @@ export function ChatThread(props: ChatThreadProps) {
           <ChatContainer class="h-full px-4 py-3">
             <ChatContainerContent class="mx-auto w-full max-w-3xl space-y-4">
               <For each={props.messages}>
-                {(m) => (
-                  <Message class={m.role === 'user' ? 'flex-col items-end' : 'flex-col items-start'}>
-                    <Show when={m.reasoning}>
-                      <Reasoning class="mb-2 w-full">
-                        <ReasoningTrigger>{m.reasoning!.label ?? 'Reasoning'}</ReasoningTrigger>
-                        <ReasoningContent markdown>{m.reasoning!.text}</ReasoningContent>
-                      </Reasoning>
-                    </Show>
-                    <For each={m.tools ?? []}>{(tp) => <Tool toolPart={tp} class="mb-2 w-full" />}</For>
-                    <Show when={m.attachments?.length}>
-                      <Attachments variant="inline" class={m.role === 'user' ? 'mb-2 justify-end' : 'mb-2'}>
-                        <For each={m.attachments!}>
-                          {(att) => (<Attachment data={att}><AttachmentPreview /><AttachmentInfo /></Attachment>)}
-                        </For>
-                      </Attachments>
-                    </Show>
-                    <MessageContent
-                      markdown={m.role === 'assistant'}
-                      class={m.role === 'user' ? 'bg-muted text-primary max-w-[85%] rounded-2xl px-4 py-2' : 'bg-transparent p-0'}
+                {(m) => {
+                  const body = (
+                    <>
+                      <Show when={m.reasoning}>
+                        <Reasoning class="mb-2 w-full">
+                          <ReasoningTrigger>{m.reasoning!.label ?? 'Reasoning'}</ReasoningTrigger>
+                          <ReasoningContent markdown>{m.reasoning!.text}</ReasoningContent>
+                        </Reasoning>
+                      </Show>
+                      <For each={m.tools ?? []}>{(tp) => <Tool toolPart={tp} class="mb-2 w-full" />}</For>
+                      <Show when={m.attachments?.length}>
+                        <Attachments variant="inline" class={m.role === 'user' ? 'mb-2 justify-end' : 'mb-2'}>
+                          <For each={m.attachments!}>
+                            {(att) => (<Attachment data={att}><AttachmentPreview /><AttachmentInfo /></Attachment>)}
+                          </For>
+                        </Attachments>
+                      </Show>
+                      <MessageContent
+                        markdown={m.role === 'assistant'}
+                        class={m.role === 'user' ? 'bg-muted text-primary max-w-[85%] rounded-2xl px-4 py-2' : 'bg-transparent p-0'}
+                      >
+                        {m.content}
+                      </MessageContent>
+                      <Show when={m.actions?.length}>
+                        <MessageActionBar
+                          actions={m.actions!}
+                          reveal={reveal()}
+                          onAction={(action) => props.onMessageAction?.({ messageId: m.id, action })}
+                        />
+                      </Show>
+                    </>
+                  );
+                  const rowGroup = reveal() === 'hover' ? 'group ' : '';
+                  return (
+                    <Show
+                      when={m.avatar}
+                      fallback={
+                        <Message class={`${rowGroup}${m.role === 'user' ? 'flex-col items-end' : 'flex-col items-start'}`}>
+                          {body}
+                        </Message>
+                      }
                     >
-                      {m.content}
-                    </MessageContent>
-                    <Show when={m.actions?.length}>
-                      <MessageActions class="mt-1 flex gap-0">
-                        <For each={m.actions!}>
-                          {(a) => (
-                            <Button
-                              variant="ghost" size="icon-sm" class="rounded-full"
-                              data-action={a} aria-label={ACTION_LABEL[a]}
-                              onClick={() => props.onMessageAction?.({ messageId: m.id, action: a })}
-                            >
-                              {(() => { const Icon = ACTION_ICON[a]; return <Icon class="size-3.5" />; })()}
-                            </Button>
-                          )}
-                        </For>
-                      </MessageActions>
+                      {(av) => (
+                        <Message class={rowGroup}>
+                          <MessageAvatar src={av().src ?? ''} alt={av().alt ?? ''} fallback={av().fallback} />
+                          <div class={`flex min-w-0 flex-1 flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
+                            {body}
+                          </div>
+                        </Message>
+                      )}
                     </Show>
-                  </Message>
-                )}
+                  );
+                }}
               </For>
               <ChatContainerScrollAnchor />
             </ChatContainerContent>
