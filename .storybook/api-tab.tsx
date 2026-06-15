@@ -3,6 +3,20 @@ import { addons, types, useStorybookApi } from 'storybook/manager-api';
 import { useTheme } from 'storybook/theming';
 import elementMeta from '../src/elements/element-meta.json';
 import componentMeta from '../src/components/component-meta.json';
+import frameworkUsage from '../src/elements/framework-usage.json';
+
+type Usage = { tag: string; displayName: string; hasSolid: boolean; snippets: Record<string, string> };
+const usageByTag = new Map((frameworkUsage as Usage[]).map((u) => [u.tag, u]));
+
+const FRAMEWORKS: { key: string; label: string }[] = [
+  { key: 'html', label: 'HTML' },
+  { key: 'react', label: 'React' },
+  { key: 'vue', label: 'Vue' },
+  { key: 'angular', label: 'Angular' },
+  { key: 'solid', label: 'Solid' },
+];
+// Remembered across elements within a session, so a React dev picks "React" once.
+let lastFramework = 'html';
 
 // A dedicated "API" tab (next to "Docs") for the generated specs, so the Docs
 // tab stays focused on the live examples and the (often large) generated spec
@@ -19,7 +33,7 @@ type EventSpec = { name: string; detail: string | null; displayDetail: string | 
 type PropSpec = { name: string; type: string; displayType: string; default?: string; optional?: boolean; scalar: boolean; description: string };
 type Composed = { name: string; group: string; storyId?: string };
 type ElementSpec = {
-  tag: string; props: PropSpec[]; events: EventSpec[]; composedFrom: Composed[]; tokens: string[];
+  tag: string; displayName: string; props: PropSpec[]; events: EventSpec[]; composedFrom: Composed[]; tokens: string[];
 };
 type CallbackSpec = { name: string; type: string; displayType: string; description: string };
 type SlotSpec = { name: string; description: string };
@@ -82,6 +96,41 @@ function Wrap({ children }: { children: React.ReactNode }) {
   );
 }
 
+function FrameworkTabs({ tag }: { tag: string }) {
+  const { h3, mblock, border, text, muted } = useStyles();
+  const theme = useTheme();
+  const u = usageByTag.get(tag);
+  const [fw, setFw] = React.useState(lastFramework);
+  if (!u) return null;
+  const tabs = FRAMEWORKS.filter((f) => f.key !== 'solid' || u.hasSolid);
+  const active = u.snippets[fw] ? fw : 'html';
+  const select = (k: string) => { lastFramework = k; setFw(k); };
+  // Use the theme's secondary colour (brand accent) as the selected-tab background.
+  // Fall back to the default text colour so there's always contrast.
+  const selectedBg = theme.color.secondary ?? text;
+  const selectedFg = theme.color.inverseText ?? theme.background.content ?? '#fff';
+  return (
+    <>
+      <h3 style={h3}>Usage</h3>
+      <div role="tablist" aria-label="Framework" style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+        {tabs.map((f) => (
+          <button key={f.key} role="tab" type="button" aria-selected={active === f.key}
+            onClick={() => select(f.key)}
+            style={{
+              font: 'inherit', fontSize: 12, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
+              border: `1px solid ${border}`,
+              background: active === f.key ? selectedBg : 'transparent',
+              color: active === f.key ? selectedFg : muted,
+            }}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+      <pre style={{ ...mblock, whiteSpace: 'pre', overflowX: 'auto' }}>{u.snippets[active]}</pre>
+    </>
+  );
+}
+
 function ElementPanel({ el }: { el: ElementSpec }) {
   const { text, muted, border, code, mblock, h3, th, td } = useStyles();
   const Type = ({ t }: { t: string }) =>
@@ -90,6 +139,8 @@ function ElementPanel({ el }: { el: ElementSpec }) {
     <div style={{ padding: '24px 32px 64px', maxWidth: 1040, margin: '0 auto', color: text, fontSize: 14, lineHeight: 1.5 }}>
       <div style={{ fontSize: 12, color: muted, marginBottom: 4 }}>Web component</div>
       <h2 style={{ color: text, fontSize: 22, margin: 0 }}><span style={code}>&lt;{el.tag}&gt;</span></h2>
+
+      <FrameworkTabs tag={el.tag} />
 
       <h3 style={h3}>Properties</h3>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -232,7 +283,7 @@ function ApiPanel() {
   const title = data?.title;
 
   if (title && title.startsWith(WC_PREFIX)) {
-    const el = elements.find((e) => e.tag === title.slice(WC_PREFIX.length));
+    const el = elements.find((e) => e.displayName === title.slice(WC_PREFIX.length));
     if (el) return <Wrap><ElementPanel el={el} /></Wrap>;
   } else if (title) {
     // "Components/<Name>" or "UI/<Name>" (possibly with deeper nesting — the
