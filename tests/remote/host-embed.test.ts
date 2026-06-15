@@ -90,3 +90,30 @@ test('resize event sizes the iframe and is NOT routed to policy', () => {
   expect(iframe.style.height).toBe('222px');
   expect(routed).toBe(0);
 });
+
+test('updateContext after error does not throw and does not buffer', () => {
+  // Drive the bridge into error via a fault frame, then verify that calling
+  // updateContext neither throws nor writes to the pending buffer (I1 fix).
+  const { posted, contentWindow } = setup();
+  const handle = mountRemoteCard({
+    container: document.body, providerOrigin: 'https://p.example', src: 'https://p.example/card',
+    envelope: { type: 'form', id: 'f1', data: {} },
+    context: { theme: { mode: 'light' }, locale: 'en' },
+    policy: {},
+  });
+  const iframe = document.querySelector('iframe')!;
+  iframe.dispatchEvent(new Event('load'));
+  const nonce = (posted.find((f) => (f as { message: { kind: string } }).message.kind === 'hello') as { nonce: string }).nonce;
+  const pack = createPacker('1', nonce);
+  // Complete handshake so bridge is open.
+  window.dispatchEvent(new MessageEvent('message', { data: pack({ dir: 'up', kind: 'ready', acceptedVersion: '1' }), origin: 'https://p.example', source: contentWindow as unknown as Window }));
+  expect(handle.state()).toBe('open');
+  // Drive into error via a fault frame.
+  window.dispatchEvent(new MessageEvent('message', { data: pack({ dir: 'up', kind: 'fault', code: 'render-error', message: 'boom' }), origin: 'https://p.example', source: contentWindow as unknown as Window }));
+  expect(handle.state()).toBe('error');
+  const countBefore = posted.length;
+  // updateContext in error state must not throw and must not queue anything.
+  expect(() => handle.updateContext({ locale: 'fr' })).not.toThrow();
+  // No new postMessage calls — nothing was buffered or sent.
+  expect(posted.length).toBe(countBefore);
+});

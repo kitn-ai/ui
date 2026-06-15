@@ -115,12 +115,12 @@ export function mountRemoteCard(options: MountRemoteCardOptions): RemoteCardHand
 
   function sendContext(ctx: CardContext): void {
     if (state === 'open') postDown({ dir: 'down', kind: 'context', context: ctx });
-    else pendingContext = ctx; // latest-wins
+    else if (state === 'connecting') pendingContext = ctx; // latest-wins; no buffer in error/closed
   }
 
   function sendRender(envelope: CardEnvelope): void {
     if (state === 'open') postDown({ dir: 'down', kind: 'render', envelope });
-    else pendingRender = envelope; // latest-wins
+    else if (state === 'connecting') pendingRender = envelope; // latest-wins; no buffer in error/closed
   }
 
   function flushBuffer(): void {
@@ -191,6 +191,8 @@ export function mountRemoteCard(options: MountRemoteCardOptions): RemoteCardHand
   }
 
   function retryMount(): void {
+    // Guard: only retry from error state; a double-click (or stray call) is a no-op.
+    if (state !== 'error') return;
     // New generation + new nonce; stale frames from the dead iframe are rejected.
     generation += 1;
     nonce = mintNonce();
@@ -200,10 +202,12 @@ export function mountRemoteCard(options: MountRemoteCardOptions): RemoteCardHand
     pendingRender = null;
     clearTimer();
     if (listener) { window.removeEventListener('message', listener); listener = null; }
+    // Defensively remove any lingering iframe before creating a fresh one.
+    if (iframe) { iframe.remove(); iframe = null; }
     // Always re-push the latest resolved context + envelope after the new handshake.
     pendingContext = currentContext;
     pendingRender = currentEnvelope;
-    // Remove any existing fallback/iframe before re-mounting.
+    // Remove any existing fallback before re-mounting.
     container.querySelectorAll('[data-kc-remote-fallback]').forEach((n) => n.remove());
     createIframe();
   }
