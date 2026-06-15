@@ -98,3 +98,60 @@ test('render→render restarts the observer so the second card emits its initial
 
   bridge.stop();
 });
+
+test('context push with unchanged theme does NOT remount the card', () => {
+  hostStub();
+  const root = document.createElement('div');
+  let mountCount = 0;
+  let capturedHost: { context: () => { theme?: unknown; locale?: string; authToken?: string } } | null = null;
+  const bridge = createCardBridge({
+    root,
+    renderers: [{ type: 'form', mount: (_r, _e, host) => { mountCount++; capturedHost = host as typeof capturedHost; return () => {}; } }],
+  });
+  bridge.start();
+  const pack = createPacker('1', 'NC');
+  const dispatch = (msg: object) =>
+    window.dispatchEvent(new MessageEvent('message', { data: pack(msg as Parameters<ReturnType<typeof createPacker>>[0]), origin: 'https://host.example', source: window.parent as Window }));
+
+  dispatch({ dir: 'down', kind: 'hello', supportedVersions: ['1'] });
+  // Establish the current theme/context, then mount.
+  dispatch({ dir: 'down', kind: 'context', context: { theme: { mode: 'light' }, locale: 'en', authToken: 'tok-1' } });
+  dispatch({ dir: 'down', kind: 'render', envelope: { type: 'form', id: 'f1', data: {} } });
+  expect(mountCount).toBe(1);
+
+  // Silent token/locale refresh: SAME theme, different authToken + locale.
+  dispatch({ dir: 'down', kind: 'context', context: { theme: { mode: 'light' }, locale: 'fr', authToken: 'tok-2' } });
+
+  // No remount — in-progress card state survives.
+  expect(mountCount).toBe(1);
+  // But the renderer's host now reads the NEW context on-demand.
+  expect(capturedHost!.context().authToken).toBe('tok-2');
+  expect(capturedHost!.context().locale).toBe('fr');
+
+  bridge.stop();
+});
+
+test('context push with a CHANGED theme remounts the card', () => {
+  hostStub();
+  const root = document.createElement('div');
+  let mountCount = 0;
+  const bridge = createCardBridge({
+    root,
+    renderers: [{ type: 'form', mount: () => { mountCount++; return () => {}; } }],
+  });
+  bridge.start();
+  const pack = createPacker('1', 'CH');
+  const dispatch = (msg: object) =>
+    window.dispatchEvent(new MessageEvent('message', { data: pack(msg as Parameters<ReturnType<typeof createPacker>>[0]), origin: 'https://host.example', source: window.parent as Window }));
+
+  dispatch({ dir: 'down', kind: 'hello', supportedVersions: ['1'] });
+  dispatch({ dir: 'down', kind: 'context', context: { theme: { mode: 'light' }, locale: 'en' } });
+  dispatch({ dir: 'down', kind: 'render', envelope: { type: 'form', id: 'f1', data: {} } });
+  expect(mountCount).toBe(1);
+
+  // Theme toggle: changed theme.mode → dispose + remount so renderers re-apply theme.
+  dispatch({ dir: 'down', kind: 'context', context: { theme: { mode: 'dark' }, locale: 'en' } });
+  expect(mountCount).toBe(2);
+
+  bridge.stop();
+});

@@ -504,6 +504,12 @@ resolved `--kc-*` values) **before** `render`, so the runtime applies tokens to
 its `:root` before first paint. On host theme toggle, a fresh `context` re-pushes
 tokens; the runtime live-updates CSS variables (no reload).
 
+> **v1 decision (shipped):** theme push does NOT live-update `:root` tokens. Renderers theme
+> imperatively via `theme.mode` at mount, so a theme change triggers a **dispose+remount** of
+> the framed card (in-progress card state resets). Token / locale / `a11y` refresh stays
+> **silent** (no remount — renderers read `host.context()` on demand). A future refinement is
+> a renderer context-subscription / `:root` token-cascade for live re-theme without remount.
+
 **Token handling:** `authToken` is a **short-lived, signed** token minted by the
 host's backend for *this* card/conversation, used by the iframe to call the
 provider's own backend. It is re-pushed on refresh via a new `context`. It is

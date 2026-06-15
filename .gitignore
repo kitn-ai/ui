@@ -10,3 +10,4 @@ src/elements/compiled.css
 
 # Throwaway agent git worktrees (full repo copies)
 .claude/worktrees/
+test-results/

@@ -59,7 +59,9 @@ export default defineConfig({
         // JSX ("Comp is not a function").
         // `.claude/**` holds throwaway agent git worktrees (full repo copies);
         // their duplicated test files must never be collected by the main run.
-        exclude: ['**/node_modules/**', '**/.claude/**', 'tests/react/**', '**/tests/react/**']
+        // `tests/e2e/**` are standalone Playwright specs (`npm run test:e2e`), NOT
+        // vitest tests — collecting them throws "test() called here" under vitest.
+        exclude: ['**/node_modules/**', '**/.claude/**', 'tests/react/**', '**/tests/react/**', 'tests/e2e/**', '**/tests/e2e/**']
       }
     }, {
       extends: true,

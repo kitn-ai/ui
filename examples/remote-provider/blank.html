@@ -1,0 +1,18 @@
+<!doctype html>
+<!--
+  examples/remote-provider/blank.html
+  ===================================
+  A provider-origin page that loads fine but runs NO card bridge — so a host that
+  frames it never receives a `ready`, the handshake times out, and the host SDK
+  falls back to the inline error + Retry. Used by the e2e failure-mode test
+  (host ?bad=1). A real provider would simply not exist at this path.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>No bridge here</title>
+  </head>
+  <body>
+    <p>This provider page intentionally runs no card bridge.</p>
+  </body>
+</html>

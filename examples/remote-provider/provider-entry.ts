@@ -51,6 +51,12 @@ const formRenderer: RemoteCardRenderer = {
     // Optional: use the envelope's title as the card heading.
     if (envelope.title) form.heading = envelope.title;
 
+    // Apply the HOST-pushed theme to the kit element. The host flushes `context`
+    // BEFORE the first `render`, so host.context() already reflects the host theme
+    // at mount; a later theme toggle re-pushes context, and the bridge re-renders
+    // this card (dispose+remount), so this runs again with the new theme.
+    form.setAttribute('theme', host.context().theme?.mode === 'dark' ? 'dark' : 'light');
+
     // The <kc-form> element emits a bubbling CustomEvent named 'kc-card' when the
     // user submits the form. The event detail is a CardEvent { kind, cardId, data }.
     function onKcCard(e: Event) {
@@ -81,7 +87,12 @@ const formRenderer: RemoteCardRenderer = {
 const infoRenderer: RemoteCardRenderer = {
   type: 'info',
 
-  mount(root, envelope) {
+  mount(root, envelope, host) {
+    // Honor the host-pushed theme (re-runs on each context push via dispose+remount).
+    const dark = host.context().theme?.mode === 'dark';
+    const fg = dark ? '#fafafa' : '#18181b';
+    const bg = dark ? '#18181b' : '#ffffff';
+
     // Treat envelope.data as a weather-style payload.
     const d = (envelope.data ?? {}) as Record<string, unknown>;
     const location = String(d['location'] ?? 'Unknown location');
@@ -97,11 +108,13 @@ const infoRenderer: RemoteCardRenderer = {
     const card = document.createElement('div');
     card.setAttribute('role', 'region');
     card.setAttribute('aria-label', `Weather for ${location}`);
+    card.dataset.theme = dark ? 'dark' : 'light';
     card.style.cssText = `
       font-family: system-ui, sans-serif;
       padding: 20px;
       box-sizing: border-box;
-      color: #1a1a2e;
+      color: ${fg};
+      background: ${bg};
     `;
 
     // Heading: location name

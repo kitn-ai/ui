@@ -2,7 +2,7 @@
 // <kc-remote> — Shadow-DOM facade that mounts a sandboxed cross-origin iframe
 // card via mountRemoteCard(), re-emits every CardEvent as a bubbling+composed
 // kc-card CustomEvent, and validates the provider-origin before mounting.
-import { onCleanup, onMount } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
 import { mountRemoteCard } from '../remote/host-embed';
 import type { RemoteCardHandle } from '../remote/host-embed';
@@ -114,6 +114,27 @@ defineWebComponent<Props>(
     policy: undefined,
   },
   (props, { element }) => {
+    // Lifted out of onMount so the theme effect (below) can re-push context to the
+    // live bridge after mount. `undefined` until the iframe is successfully mounted.
+    let handle: RemoteCardHandle | undefined;
+
+    // Resolve dark mode the SAME way native elements do (see createDarkMode in
+    // define.tsx): the `theme` prop is 'light' | 'dark' | 'auto' (default 'auto',
+    // which follows the OS `prefers-color-scheme`). Tracked reactively so a host /
+    // Storybook theme toggle flows through the effect below.
+    const [systemDark, setSystemDark] = createSignal(false);
+    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      setSystemDark(mq.matches);
+      const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+      mq.addEventListener('change', onChange);
+      onCleanup(() => mq.removeEventListener('change', onChange));
+    }
+    const isDark = () => {
+      const theme = (props.theme as string | undefined) ?? 'auto';
+      return theme === 'dark' || (theme === 'auto' && systemDark());
+    };
+
     onMount(() => {
       const shadow = element.shadowRoot;
       if (!shadow) return;
@@ -147,15 +168,11 @@ defineWebComponent<Props>(
         return;
       }
 
-      // Derive a minimal CardContext from the element's theme attribute.
-      const themeAttr = element.getAttribute('theme') ?? 'auto';
-      const systemDark =
-        typeof window !== 'undefined' && typeof window.matchMedia === 'function'
-          ? window.matchMedia('(prefers-color-scheme: dark)').matches
-          : false;
-      const isDark = themeAttr === 'dark' || (themeAttr === 'auto' && systemDark);
+      // Derive a minimal CardContext. Theme resolved the same way native elements
+      // do (isDark(), above); read untracked here so this initial mount doesn't
+      // re-run on theme change — the createEffect below pushes later changes.
       const context: CardContext = {
-        theme: { mode: isDark ? 'dark' : 'light' },
+        theme: { mode: isDark() ? 'dark' : 'light' },
         locale: (typeof navigator !== 'undefined' && navigator.language) || 'en',
       };
 
@@ -166,7 +183,6 @@ defineWebComponent<Props>(
       const container = document.createElement('div');
       shadow.appendChild(container);
 
-      let handle: RemoteCardHandle | undefined;
       try {
         handle = mountRemoteCard({
           container,
@@ -185,7 +201,18 @@ defineWebComponent<Props>(
 
       onCleanup(() => {
         handle?.destroy();
+        handle = undefined;
       });
+    });
+
+    // React to later host/Storybook theme toggles: re-push a fresh resolved theme
+    // to the live bridge so the framed card re-themes (consistent with native
+    // elements). No-op until the iframe has mounted (handle is set). The bridge
+    // does a dispose+remount on a genuine theme change — see provider-runtime.ts;
+    // token/locale refreshes stay silent.
+    createEffect(() => {
+      const mode = isDark() ? 'dark' : 'light';
+      handle?.updateContext({ theme: { mode } });
     });
 
     // This element renders purely into the shadow root via onMount — no JSX return needed.

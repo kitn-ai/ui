@@ -95,4 +95,88 @@ el.addEventListener('kc-card', (e) => {
 (`ready` / `error` / …) and unknown card ids return the same array unchanged. The terminal
 verbs are `action` (confirm / choice) and `submit` (tasks / form).
 
+## Remote cards
+
+Everything above renders cards you **bundle yourself** — the dispatcher mounts a native
+`kc-*` element for each envelope. That native `types` seam stays the easy path: register a
+card type, ship its element, done.
+
+**Remote cards** are the power feature for **provider-owned, cross-origin UI** — a card
+whose code lives on a *different* origin (a partner, a plugin, your own card service) and
+that you don't want to bundle or trust in your DOM. `<kc-remote>` renders it inside a
+**sandboxed cross-origin `<iframe>`** and bridges it to the host over `postMessage`, carrying
+the **exact same** `CardEnvelope` / `CardContext` / `CardEvent` shapes and routing every
+event through the **same `CardPolicy`** as a native card. The envelope inside is identical —
+a transport `WireFrame` just wraps it on the wire.
+
+```html
+<kc-remote
+  provider-origin="https://cards.provider.example"
+  src="https://cards.provider.example/card"
+></kc-remote>
+<script type="module">
+  import '@kitn.ai/chat/elements'; // registers <kc-remote>
+
+  const el = document.querySelector('kc-remote');
+  // The CardEnvelope is set as a JS property — it travels down the wire unchanged.
+  el.envelope = { type: 'form', id: 'signup', title: 'Join the beta',
+    data: { type: 'object', required: ['email'],
+      properties: { email: { type: 'string', title: 'Email', format: 'email' } } } };
+
+  // Every routed event is re-emitted as a bubbling kc-card CustomEvent — persist the
+  // resolution exactly like a native card:
+  el.addEventListener('kc-card', (e) => {
+    if (e.detail.kind === 'submit') save(e.detail.data);
+  });
+  // …or pass a CardPolicy directly: el.policy = { onSubmit: (id, data) => save(data) };
+</script>
+```
+
+Prefer the **imperative** SDK when you manage the lifecycle yourself (theme refresh, swapping
+cards in one warm frame):
+
+```ts
+import { mountRemoteCard } from '@kitn.ai/chat';
+
+const handle = mountRemoteCard({
+  container: document.querySelector('#slot'),
+  providerOrigin: 'https://cards.provider.example',
+  src: 'https://cards.provider.example/card',
+  envelope,
+  context: { theme: { mode: 'dark' }, locale: 'en', authToken },
+  policy: { onSubmit: (cardId, data) => { /* persist via applyResolution, advance the chat */ } },
+});
+
+handle.updateContext({ theme: { mode: 'light' } }); // re-themes the framed card live
+handle.update(nextEnvelope);                          // swap cards in the same iframe
+handle.destroy();                                     // teardown + remove the frame
+```
+
+**Inputs.** `providerOrigin` is the exact origin (`https://…`, or `http://localhost` for
+dev) the iframe is pinned to. `src` is the provider page URL (must be on `providerOrigin`).
+`envelope` is the `CardEnvelope` to render. `policy` is the optional `CardPolicy`. `context`
+carries theme/locale/`a11y` and a short-lived `authToken`.
+
+**Theme changes remount; token/locale refreshes are silent (v1).** A host **theme change
+re-renders (remounts) the remote card**, so any in-progress remote-card state (e.g. a
+half-filled form) **resets on a theme toggle** — renderers apply theme imperatively at mount,
+and v1 has no in-place renderer theme hook yet. **Token / locale / `a11y` refreshes are
+silent** (no remount — renderers read `host.context()` on demand). A future refinement is a
+renderer context subscription for live re-theme without remount.
+
+**Security model.** The host mints a per-instance **nonce** and pins every inbound frame on
+**origin + source window + nonce + negotiated protocol version** — a frame failing any check
+is dropped, so a wrong-origin or forged `postMessage` can't drive your policy. The iframe is
+sandboxed (`allow-scripts allow-forms allow-same-origin`, **no** `allow-popups`) and gets a
+`no-referrer` policy. Any `authToken` you pass should be **short-lived** (the provider sees
+it). The **host page must set `Content-Security-Policy: frame-ancestors 'self'`** (or
+`'none'`) so it can't itself be reframed; the **provider** locks who may embed it with its
+own `frame-ancestors` listing your exact host origin (no wildcards).
+
+**Reference runtime.** `examples/remote-provider/` is the runnable provider iframe a real
+provider copies — it calls `createCardBridge` (from `@kitn.ai/chat/provider`, a SolidJS-free
+bundle) and registers one renderer per card `type`. `examples/remote-host/` is the matching
+host page. The real cross-origin behavior is verified by the standalone Playwright suite
+(`tests/e2e/`).
+
 See **Cards** for each card type, and **SDK** for the dispatcher in action.
