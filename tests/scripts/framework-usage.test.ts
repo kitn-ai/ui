@@ -33,4 +33,17 @@ describe('buildSnippets', () => {
     const s = buildSnippets(artifact, /* hasSolid */ false);
     expect(s.solid).toBeUndefined();
   });
+  it('binds scalar required props as attrs in HTML and :name in Vue (no .prop)', () => {
+    const withScalar = {
+      tag: 'kc-embed',
+      displayName: 'Embed',
+      props: [{ name: 'src', optional: false, scalar: true }],
+      events: [],
+    };
+    const s = buildSnippets(withScalar, false);
+    expect(s.html).toContain('src="…"');
+    expect(s.html).not.toContain('el.src =');
+    expect(s.vue).toContain(':src="src"');
+    expect(s.vue).not.toContain('.prop');
+  });
 });

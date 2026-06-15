@@ -11,13 +11,15 @@ const required = (el) => el.props.filter((p) => !p.optional);
 
 function htmlSnippet(el) {
   const req = required(el);
-  const attrs = req.filter((p) => p.scalar).map((p) => ` ${p.name}="…"`).join('');
   const body = [
     ...req.filter((p) => !p.scalar).map((p) => `  el.${p.name} = /* … */;`),
     ...el.events.map((e) => `  el.addEventListener('${e.name}', (e) => console.log(e.detail));`),
   ];
+  const attrs = req.filter((p) => p.scalar).map((p) => ` ${p.name}="…"`).join('');
+  const tag = `<${el.tag}${attrs}></${el.tag}>`;
+  if (!body.length) return tag;
   return [
-    `<${el.tag}${attrs}></${el.tag}>`,
+    tag,
     `<script type="module">`,
     `  import '@kitn.ai/chat/elements';`,
     `  const el = document.querySelector('${el.tag}');`,
@@ -57,7 +59,10 @@ export function writeFrameworkUsage(root, elements) {
   try {
     const comps = JSON.parse(readFileSync(resolve(root, 'src/components/component-meta.json'), 'utf8'));
     solidNames = new Set(comps.map((c) => c.name));
-  } catch { /* component-meta not generated yet — no Solid tabs */ }
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+    // component-meta not generated yet — no Solid tabs
+  }
   const out = elements.map((el) => {
     const hasSolid = solidNames.has(el.displayName);
     return { tag: el.tag, displayName: el.displayName, hasSolid, snippets: buildSnippets(el, hasSolid) };
