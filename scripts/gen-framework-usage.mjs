@@ -9,6 +9,16 @@ import { resolve } from 'node:path';
 const onName = (ev) => 'on' + ev[0].toUpperCase() + ev.slice(1);
 const required = (el) => el.props.filter((p) => !p.optional);
 
+/** Wraps binding lines into a multi-line tag block.
+ *  open  — e.g. '<Artifact'
+ *  lines — array of binding strings (without leading spaces)
+ *  close — e.g. '/>' or '></kc-artifact>'
+ */
+function wrapTag(open, lines, close) {
+  if (lines.length === 0) return null; // caller handles compact form
+  return `${open}\n${lines.map((l) => `  ${l}`).join('\n')}\n${close}`;
+}
+
 function htmlSnippet(el) {
   const req = required(el);
   const body = [
@@ -28,19 +38,26 @@ function htmlSnippet(el) {
   ].join('\n');
 }
 function vueSnippet(el) {
-  const binds = required(el).map((p) => (p.scalar ? ` :${p.name}="${p.name}"` : ` :${p.name}.prop="${p.name}"`)).join('');
-  const evs = el.events.map((e) => ` @${e.name}="${onName(e.name)}"`).join('');
-  return `<${el.tag}${binds}${evs} />`;
+  const lines = [
+    ...required(el).map((p) => (p.scalar ? `:${p.name}="${p.name}"` : `:${p.name}.prop="${p.name}"`)),
+    ...el.events.map((e) => `@${e.name}="${onName(e.name)}"`),
+  ];
+  return wrapTag(`<${el.tag}`, lines, '/>') ?? `<${el.tag} />`;
 }
 function angularSnippet(el) {
-  const binds = required(el).map((p) => ` [${p.name}]="${p.name}"`).join('');
-  const evs = el.events.map((e) => ` (${e.name})="${onName(e.name)}($event)"`).join('');
-  return `<${el.tag}${binds}${evs}></${el.tag}>`;
+  const lines = [
+    ...required(el).map((p) => `[${p.name}]="${p.name}"`),
+    ...el.events.map((e) => `(${e.name})="${onName(e.name)}($event)"`),
+  ];
+  return wrapTag(`<${el.tag}`, lines, `></${el.tag}>`) ?? `<${el.tag}></${el.tag}>`;
 }
 function jsxSnippet(el, pkg) {
-  const binds = required(el).map((p) => ` ${p.name}={${p.name}}`).join('');
-  const evs = el.events.map((e) => ` ${onName(e.name)}={(e) => console.log(e.detail)}`).join('');
-  return `import { ${el.displayName} } from '${pkg}';\n\n<${el.displayName}${binds}${evs} />`;
+  const lines = [
+    ...required(el).map((p) => `${p.name}={${p.name}}`),
+    ...el.events.map((e) => `${onName(e.name)}={(e) => console.log(e.detail)}`),
+  ];
+  const tag = wrapTag(`<${el.displayName}`, lines, '/>') ?? `<${el.displayName} />`;
+  return `import { ${el.displayName} } from '${pkg}';\n\n${tag}`;
 }
 
 export function buildSnippets(el, hasSolid) {

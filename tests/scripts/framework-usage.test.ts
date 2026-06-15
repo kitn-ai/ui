@@ -11,12 +11,19 @@ const artifact = {
   events: [{ name: 'navigate', detail: 'string' }],
 };
 
+const noBindings = {
+  tag: 'kc-foo',
+  displayName: 'Foo',
+  props: [],
+  events: [],
+};
+
 describe('buildSnippets', () => {
   it('imports the bare React name and binds required props', () => {
     const s = buildSnippets(artifact, /* hasSolid */ true);
     expect(s.react).toContain("import { Artifact } from '@kitn.ai/chat/react'");
     expect(s.react).toContain('files={files}');
-    expect(s.react).toContain('onNavigate={');
+    expect(s.react).toContain('onNavigate={(');
   });
   it('uses the literal tag for HTML, with non-scalar props as JS properties', () => {
     const s = buildSnippets(artifact, true);
@@ -45,5 +52,44 @@ describe('buildSnippets', () => {
     expect(s.html).not.toContain('el.src =');
     expect(s.vue).toContain(':src="src"');
     expect(s.vue).not.toContain('.prop');
+  });
+
+  describe('multi-line shape when bindings exist', () => {
+    it('React: tag on own line, indented bindings, closing on own line', () => {
+      const s = buildSnippets(artifact, true);
+      expect(s.react).toMatch(/<Artifact\n/);
+      expect(s.react).toContain('\n  files={files}');
+      expect(s.react).toMatch(/\n\/>/);
+    });
+    it('Vue: tag on own line, indented bindings, closing on own line', () => {
+      const s = buildSnippets(artifact, true);
+      expect(s.vue).toMatch(/<kc-artifact\n/);
+      expect(s.vue).toContain('\n  :files.prop="files"');
+      expect(s.vue).toContain('\n  @navigate="onNavigate"');
+      expect(s.vue).toMatch(/\n\/>/);
+    });
+    it('Angular: tag on own line, indented bindings, closing on own line', () => {
+      const s = buildSnippets(artifact, true);
+      expect(s.angular).toMatch(/<kc-artifact\n/);
+      expect(s.angular).toContain('\n  [files]="files"');
+      expect(s.angular).toContain('\n  (navigate)="onNavigate($event)"');
+      expect(s.angular).toMatch(/\n><\/kc-artifact>/);
+    });
+  });
+
+  describe('compact single-line form when no bindings', () => {
+    it('React: compact <Foo /> with no newlines inside', () => {
+      const s = buildSnippets(noBindings, false);
+      expect(s.react).toContain('<Foo />');
+      expect(s.react).not.toMatch(/<Foo\n/);
+    });
+    it('Vue: compact <kc-foo />', () => {
+      const s = buildSnippets(noBindings, false);
+      expect(s.vue).toBe('<kc-foo />');
+    });
+    it('Angular: compact <kc-foo></kc-foo>', () => {
+      const s = buildSnippets(noBindings, false);
+      expect(s.angular).toBe('<kc-foo></kc-foo>');
+    });
   });
 });
