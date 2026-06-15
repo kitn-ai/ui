@@ -10,7 +10,7 @@
  */
 import { render, cleanup } from '@testing-library/react';
 import { afterEach, expect, test, vi } from 'vitest';
-import { KcConversations, KcPromptInput, KcChat } from '@kitn.ai/chat/react';
+import { Conversations, PromptInput, Chat } from '@kitn.ai/chat/react';
 
 afterEach(cleanup);
 
@@ -34,7 +34,7 @@ test('array/object prop reaches the element as a live property (not a string)', 
   const groups = [{ id: 'g1', name: 'Today', sortOrder: 0, createdAt: '2026-06-01' }];
 
   const { container } = render(
-    <KcConversations conversations={conversations} groups={groups} />,
+    <Conversations conversations={conversations} groups={groups} />,
   );
   const el = container.querySelector('kc-conversations') as unknown as AnyEl;
   expect(el).toBeTruthy();
@@ -53,7 +53,7 @@ test('array/object prop reaches the element as a live property (not a string)', 
 
 test('on<Event> handler fires with the CustomEvent detail', async () => {
   const onSubmit = vi.fn();
-  const { container } = render(<KcPromptInput onSubmit={onSubmit} placeholder="Ask..." />);
+  const { container } = render(<PromptInput onSubmit={onSubmit} placeholder="Ask..." />);
   const el = container.querySelector('kc-prompt-input') as unknown as AnyEl;
   await flush();
 
@@ -68,7 +68,7 @@ test('on<Event> handler fires with the CustomEvent detail', async () => {
 });
 
 test('boolean prop toggles a feature (loading disables send)', async () => {
-  const { container } = render(<KcPromptInput loading />);
+  const { container } = render(<PromptInput loading />);
   const el = container.querySelector('kc-prompt-input') as unknown as AnyEl;
   await flush();
 
@@ -95,26 +95,26 @@ test('updating a prop re-assigns the element property and re-renders', async () 
   const groups = [{ id: 'g1', name: 'Today', sortOrder: 0, createdAt: '2026-06-01' }];
 
   const { container, rerender } = render(
-    <KcConversations conversations={first} groups={groups} />,
+    <Conversations conversations={first} groups={groups} />,
   );
   const el = container.querySelector('kc-conversations') as unknown as AnyEl;
   await flush();
   expect(el.conversations).toBe(first);
   expect(el.shadowRoot?.textContent).toContain('First chat');
 
-  rerender(<KcConversations conversations={second} groups={groups} />);
+  rerender(<Conversations conversations={second} groups={groups} />);
   await flush();
   expect(el.conversations).toBe(second);
   expect(el.shadowRoot?.textContent).toContain('Second chat');
   expect(el.shadowRoot?.textContent).not.toContain('First chat');
 });
 
-test('object prop (messages) on KcChat reaches the element unstringified', async () => {
+test('object prop (messages) on Chat reaches the element unstringified', async () => {
   const messages = [
     { id: 'm1', role: 'user' as const, content: 'Hi there' },
     { id: 'm2', role: 'assistant' as const, content: 'Hello!' },
   ];
-  const { container } = render(<KcChat messages={messages} theme="light" />);
+  const { container } = render(<Chat messages={messages} theme="light" />);
   const el = container.querySelector('kc-chat') as unknown as AnyEl;
   await flush();
 

@@ -108,9 +108,9 @@ A [Custom Elements Manifest](https://github.com/webcomponents/custom-elements-ma
 Typed wrappers are generated for every element under `@kitn.ai/chat/react` (React is an optional peer dependency). They set rich data as DOM **properties** (so arrays/objects pass through correctly) and expose CustomEvents as `on<Event>` props:
 
 ```tsx
-import { KcChat } from '@kitn.ai/chat/react';
+import { Chat } from '@kitn.ai/chat/react';
 
-<KcChat
+<Chat
   messages={messages}
   models={models}
   onSubmit={(e) => send(e.detail.value)}
@@ -118,7 +118,7 @@ import { KcChat } from '@kitn.ai/chat/react';
 />;
 ```
 
-Component names are the PascalCase of the tag (`kc-chat` → `KcChat`); event props are `on` + the event name (`messageaction` → `onMessageaction`).
+Component names are the bare friendly name of the element (`kc-chat` → `Chat`); event props are `on` + the event name (`messageaction` → `onMessageaction`).
 
 ---
 

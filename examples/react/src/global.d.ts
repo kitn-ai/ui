@@ -4,7 +4,7 @@
  *   import '@kitn.ai/chat/elements';
  *
  * This example uses the typed React wrappers from `@kitn.ai/chat/react`, so it
- * renders <KcChat /> etc. (real React components) rather than raw custom-
+ * renders <Chat /> etc. (real React components) rather than raw custom-
  * element JSX tags — no JSX.IntrinsicElements augmentation is needed.
  *
  * The `/elements` entry's real type module re-exports from the kit's SolidJS

@@ -73,8 +73,8 @@ interface ChatMessage {
 
 **React** — typed wrappers auto-set properties and expose `on<Event>` props:
 ```tsx
-import { KcChat } from '@kitn.ai/chat/react';
-<KcChat messages={messages} onSubmit={(e) => send(e.detail.value)} />
+import { Chat } from '@kitn.ai/chat/react';
+<Chat messages={messages} onSubmit={(e) => send(e.detail.value)} />
 ```
 
 **Vue** — use the element directly; pass arrays via `.prop`:
