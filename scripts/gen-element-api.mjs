@@ -11,7 +11,7 @@ import ts from 'typescript';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createTsHelpers } from './_ts-helpers.mjs';
+import { createTsHelpers, displayNameFromClass } from './_ts-helpers.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const elementsDir = resolve(root, 'src/elements');
@@ -146,7 +146,8 @@ for (const file of facadeFiles) {
       });
       const composed = composedImports(sf);
       const tokens = COMPONENT_TOKENS[tag] ?? [];
-      elements.push({ tag, className: tagToClass(tag), props, events, composedFrom: composed, tokens });
+      const className = tagToClass(tag);
+      elements.push({ tag, className, displayName: displayNameFromClass(className), props, events, composedFrom: composed, tokens });
     }
     ts.forEachChild(node, visit);
   };

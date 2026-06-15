@@ -2,6 +2,7 @@
   {
     "tag": "kc-artifact",
     "className": "KcArtifactElement",
+    "displayName": "Artifact",
     "props": [
       {
         "name": "src",
@@ -183,6 +184,7 @@
   {
     "tag": "kc-attachments",
     "className": "KcAttachmentsElement",
+    "displayName": "Attachments",
     "props": [
       {
         "name": "items",
@@ -298,6 +300,7 @@
   {
     "tag": "kc-card",
     "className": "KcCardElement",
+    "displayName": "Card",
     "props": [
       {
         "name": "heading",
@@ -346,6 +349,7 @@
   {
     "tag": "kc-cards",
     "className": "KcCardsElement",
+    "displayName": "Cards",
     "props": [
       {
         "name": "cards",
@@ -385,6 +389,7 @@
   {
     "tag": "kc-chain-of-thought",
     "className": "KcChainOfThoughtElement",
+    "displayName": "ChainOfThought",
     "props": [
       {
         "name": "steps",
@@ -429,6 +434,7 @@
   {
     "tag": "kc-chat",
     "className": "KcChatElement",
+    "displayName": "Chat",
     "props": [
       {
         "name": "messages",
@@ -656,6 +662,7 @@
   {
     "tag": "kc-checkpoint",
     "className": "KcCheckpointElement",
+    "displayName": "Checkpoint",
     "props": [
       {
         "name": "label",
@@ -722,6 +729,7 @@
   {
     "tag": "kc-choice",
     "className": "KcChoiceElement",
+    "displayName": "Choice",
     "props": [
       {
         "name": "data",
@@ -769,6 +777,7 @@
   {
     "tag": "kc-code-block",
     "className": "KcCodeBlockElement",
+    "displayName": "CodeBlock",
     "props": [
       {
         "name": "code",
@@ -835,6 +844,7 @@
   {
     "tag": "kc-confirm",
     "className": "KcConfirmElement",
+    "displayName": "Confirm",
     "props": [
       {
         "name": "data",
@@ -891,6 +901,7 @@
   {
     "tag": "kc-context",
     "className": "KcContextElement",
+    "displayName": "Context",
     "props": [
       {
         "name": "context",
@@ -959,6 +970,7 @@
   {
     "tag": "kc-conversations",
     "className": "KcConversationsElement",
+    "displayName": "Conversations",
     "props": [
       {
         "name": "groups",
@@ -1022,6 +1034,7 @@
   {
     "tag": "kc-embed",
     "className": "KcEmbedElement",
+    "displayName": "Embed",
     "props": [
       {
         "name": "cardId",
@@ -1053,6 +1066,7 @@
   {
     "tag": "kc-empty",
     "className": "KcEmptyElement",
+    "displayName": "Empty",
     "props": [
       {
         "name": "emptyTitle",
@@ -1111,6 +1125,7 @@
   {
     "tag": "kc-feedback-bar",
     "className": "KcFeedbackBarElement",
+    "displayName": "FeedbackBar",
     "props": [
       {
         "name": "barTitle",
@@ -1148,6 +1163,7 @@
   {
     "tag": "kc-file-tree",
     "className": "KcFileTreeElement",
+    "displayName": "FileTree",
     "props": [
       {
         "name": "files",
@@ -1195,6 +1211,7 @@
   {
     "tag": "kc-file-upload",
     "className": "KcFileUploadElement",
+    "displayName": "FileUpload",
     "props": [
       {
         "name": "multiple",
@@ -1257,6 +1274,7 @@
   {
     "tag": "kc-form",
     "className": "KcFormElement",
+    "displayName": "Form",
     "props": [
       {
         "name": "data",
@@ -1304,6 +1322,7 @@
   {
     "tag": "kc-image",
     "className": "KcImageElement",
+    "displayName": "Image",
     "props": [
       {
         "name": "base64",
@@ -1352,6 +1371,7 @@
   {
     "tag": "kc-link-preview",
     "className": "KcLinkPreviewElement",
+    "displayName": "LinkPreview",
     "props": [
       {
         "name": "cardId",
@@ -1383,6 +1403,7 @@
   {
     "tag": "kc-loader",
     "className": "KcLoaderElement",
+    "displayName": "Loader",
     "props": [
       {
         "name": "variant",
@@ -1424,6 +1445,7 @@
   {
     "tag": "kc-markdown",
     "className": "KcMarkdownElement",
+    "displayName": "Markdown",
     "props": [
       {
         "name": "content",
@@ -1475,6 +1497,7 @@
   {
     "tag": "kc-message",
     "className": "KcMessageElement",
+    "displayName": "Message",
     "props": [
       {
         "name": "message",
@@ -1612,6 +1635,7 @@
   {
     "tag": "kc-model-switcher",
     "className": "KcModelSwitcherElement",
+    "displayName": "ModelSwitcher",
     "props": [
       {
         "name": "models",
@@ -1651,6 +1675,7 @@
   {
     "tag": "kc-prompt-input",
     "className": "KcPromptInputElement",
+    "displayName": "PromptInput",
     "props": [
       {
         "name": "value",
@@ -1800,6 +1825,7 @@
   {
     "tag": "kc-reasoning",
     "className": "KcReasoningElement",
+    "displayName": "Reasoning",
     "props": [
       {
         "name": "text",
@@ -1876,6 +1902,7 @@
   {
     "tag": "kc-remote",
     "className": "KcRemoteElement",
+    "displayName": "Remote",
     "props": [
       {
         "name": "src",
@@ -1917,6 +1944,7 @@
   {
     "tag": "kc-resizable",
     "className": "KcResizableElement",
+    "displayName": "Resizable",
     "props": [
       {
         "name": "orientation",
@@ -1963,6 +1991,7 @@
   {
     "tag": "kc-resizable-item",
     "className": "KcResizableItemElement",
+    "displayName": "ResizableItem",
     "props": [
       {
         "name": "size",
@@ -2033,6 +2062,7 @@
   {
     "tag": "kc-response-stream",
     "className": "KcResponseStreamElement",
+    "displayName": "ResponseStream",
     "props": [
       {
         "name": "text",
@@ -2090,6 +2120,7 @@
   {
     "tag": "kc-scope-picker",
     "className": "KcScopePickerElement",
+    "displayName": "ScopePicker",
     "props": [
       {
         "name": "availableAuthors",
@@ -2139,6 +2170,7 @@
   {
     "tag": "kc-skills",
     "className": "KcSkillsElement",
+    "displayName": "Skills",
     "props": [
       {
         "name": "skills",
@@ -2163,6 +2195,7 @@
   {
     "tag": "kc-source",
     "className": "KcSourceElement",
+    "displayName": "Source",
     "props": [
       {
         "name": "href",
@@ -2237,6 +2270,7 @@
   {
     "tag": "kc-sources",
     "className": "KcSourcesElement",
+    "displayName": "Sources",
     "props": [
       {
         "name": "sources",
@@ -2285,6 +2319,7 @@
   {
     "tag": "kc-suggestions",
     "className": "KcSuggestionsElement",
+    "displayName": "Suggestions",
     "props": [
       {
         "name": "suggestions",
@@ -2350,6 +2385,7 @@
   {
     "tag": "kc-tasks",
     "className": "KcTasksElement",
+    "displayName": "Tasks",
     "props": [
       {
         "name": "data",
@@ -2397,6 +2433,7 @@
   {
     "tag": "kc-text-shimmer",
     "className": "KcTextShimmerElement",
+    "displayName": "TextShimmer",
     "props": [
       {
         "name": "text",
@@ -2448,6 +2485,7 @@
   {
     "tag": "kc-thinking-bar",
     "className": "KcThinkingBarElement",
+    "displayName": "ThinkingBar",
     "props": [
       {
         "name": "text",
@@ -2497,6 +2535,7 @@
   {
     "tag": "kc-tool",
     "className": "KcToolElement",
+    "displayName": "Tool",
     "props": [
       {
         "name": "tool",
@@ -2534,6 +2573,7 @@
   {
     "tag": "kc-voice-input",
     "className": "KcVoiceInputElement",
+    "displayName": "VoiceInput",
     "props": [
       {
         "name": "transcribe",
@@ -2579,6 +2619,7 @@
   {
     "tag": "kc-workspace",
     "className": "KcWorkspaceElement",
+    "displayName": "Workspace",
     "props": [
       {
         "name": "groups",
