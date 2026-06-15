@@ -27,7 +27,7 @@ let lastFramework = 'html';
 //   - Components|UI/<Name>     → component-meta.json  (props/callbacks/slots)
 
 const ADDON_ID = 'kitn/api';
-const TAB_ID = `${ADDON_ID}/tab`;
+const TAB_ID = 'kitn-api-tab';
 const WC_PREFIX = 'Web Components/';
 
 type EventSpec = { name: string; detail: string | null; displayDetail: string | null; description: string };
