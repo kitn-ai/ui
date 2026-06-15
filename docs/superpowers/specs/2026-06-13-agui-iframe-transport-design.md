@@ -159,9 +159,9 @@ The artifacts below are explicit deliverables of the plan (they don't exist yet)
   `dist/kitn-chat.es.js`); **no `solidPlugin()`**; `rollupOptions.external: ['solid-js','solid-js/web']`
   so the provider bundle carries no SolidJS. The provider imports card elements separately
   from `@kitn.ai/chat/elements`.
-- **`package.json`**: `"build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts"` (ordering enforced — main first so the provider's `emptyOutDir:false` appends). Postbuild generators stay after both (they only touch the element build; the provider bundle has no elements). Add `"./provider": { "types": "./dist/kitn-chat-provider.d.ts", "default": "./dist/kitn-chat-provider.es.js" }` to `exports`. Add devDeps **`concurrently`** + **`http-server`** (pinned, used via the local bin, not bare `npx`) and `"dev:provider": "vite examples/remote-provider --port 6007 --strictPort"`. The mock provider is a **standalone Vite app** (`examples/remote-provider/` with its own `index.html` + `provider-entry.ts`); `vite <root>` serves that directory as root (valid Vite CLI). **Provider `.d.ts`:** the provider bundle has no hand-authored types file (unlike `./elements`), so `vite.config.provider.ts` uses **`vite-plugin-dts`** (add as devDep) to emit a bundled `dist/kitn-chat-provider.d.ts` — without it the `./provider` subpath ships untyped and consumers' `tsc` errors.
+- **`package.json`**: `"build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts"` (ordering enforced — main first so the provider's `emptyOutDir:false` appends). Postbuild generators stay after both (they only touch the element build; the provider bundle has no elements). Add `"./provider": { "types": "./dist/kitn-chat-provider.d.ts", "default": "./dist/kitn-chat-provider.es.js" }` to `exports`. Add devDeps **`concurrently`** + **`http-server`** (pinned, used via the local bin, not bare `npx`) and `"dev:provider": "vite examples/remote-provider --port 6007 --strictPort"`. The mock provider is a **standalone Vite app** (`examples/remote-provider/` with its own `index.html` + `provider-entry.ts`); `vite <root>` serves that directory as root (valid Vite CLI). **Provider `.d.ts`:** the provider bundle has no hand-authored types file (unlike `./elements`), so `vite.config.provider.ts` uses **`vite-plugin-dts`** (add as devDep, pinned **`^4`** — Vite 6 compatible; `3.x` silently emits no `.d.ts` on Vite 6) to emit a bundled `dist/kitn-chat-provider.d.ts` — without it the `./provider` subpath ships untyped and consumers' `tsc` errors.
 - **`playwright.config.ts`** (standalone — NOT `@vitest/browser-playwright`): two `webServer`
-  entries — `{ command: 'npm run build-storybook && npx http-server storybook-static -p 6006', url: 'http://localhost:6006', reuseExistingServer: !process.env.CI, timeout: 120_000 }` and
+  entries — `{ command: 'npm run build-storybook && ./node_modules/.bin/http-server storybook-static -p 6006', url: 'http://localhost:6006', reuseExistingServer: !process.env.CI, timeout: 120_000 }` (pinned local bin, never bare `npx`, for hermetic CI) and
   `{ command: 'npm run dev:provider', url: 'http://localhost:6007', reuseExistingServer: !process.env.CI }`. Use a built+served Storybook in CI (not `storybook dev`) for reliable readiness. Tests live in `tests/e2e/` and use `page.frameLocator()` across origins.
 - **`.github/workflows/test.yml`** — runs `npm run build`, `npm run typecheck`, `npm test`,
   `npm run test:react`, `npm run test:storybook`, and `npx playwright test` (none exists today).
@@ -396,7 +396,10 @@ export function createPacker(version: string, nonce: string) {
 /** Structural + DIRECTION guard (H-D). The host calls it with `'up'`, the runtime
  *  with `'down'` — rejecting reflected/echoed own-frames. Runs right after the
  *  origin+source check; foreign/wrong-direction traffic is dropped, never parsed.
- *  (Full CardEvent/payload schema validation happens AFTER this, before routing.) */
+ *  This is a STRUCTURAL guard only (presence/type + direction). The host's post-guard
+ *  step also asserts `frame.nonce === bridgeNonce` and `frame.version === negotiated`
+ *  (the actual binding — H-A/H-C), then validates the CardEvent/payload schema, before
+ *  routing. Do not treat this guard as the complete gate. */
 export function isCardWireFrame(data: unknown, expectedDir: 'up' | 'down'): data is WireFrame {
   if (typeof data !== 'object' || data === null) return false;
   const d = data as Record<string, unknown>;
