@@ -309,7 +309,11 @@ addons.register(ADDON_ID, () => {
     // Web Components (story ids `web-components-*`) + the SolidJS/UI components
     // that have a generated spec.
     match: ({ storyId }) =>
-      !!storyId && (storyId.startsWith('web-components-') || storyId.startsWith('solidjs-advanced-')),
+      !!storyId && (
+        storyId.startsWith('web-components-') ||
+        storyId.startsWith('solidjs-advanced-components-') ||
+        storyId.startsWith('solidjs-advanced-primitives-')
+      ),
     render: ({ active }) => (active ? <ApiPanel /> : null),
   });
 });

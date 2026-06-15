@@ -254,7 +254,7 @@ The same rule applies to every array/object property (\`models\`, \`context\`, \
 function fromElements(elements) {
   return elements.map((el) => ({
     tag: el.tag,
-    reactName: tagToReact(el.tag),
+    reactName: el.displayName ?? tagToReact(el.tag).replace(/^Kc/, ''),
     props: el.props.map((p) => ({
       name: p.name,
       type: p.type,
@@ -277,7 +277,7 @@ function fromManifest(cem) {
     );
     return {
       tag: d.tagName,
-      reactName: tagToReact(d.tagName),
+      reactName: tagToReact(d.tagName).replace(/^Kc/, ''),
       props: (d.members || [])
         .filter((m) => m.kind === 'field')
         .map((m) => ({
