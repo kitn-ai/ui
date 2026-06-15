@@ -97,14 +97,23 @@ function Wrap({ children }: { children: React.ReactNode }) {
 }
 
 function FrameworkTabs({ tag }: { tag: string }) {
-  const { h3, mblock, border, text, muted } = useStyles();
-  const theme = useTheme();
+  const { h3, mblock, border, text, muted, theme } = useStyles();
   const u = usageByTag.get(tag);
   const [fw, setFw] = React.useState(lastFramework);
+  // active may differ from fw when the current element has no snippet for the
+  // remembered framework (e.g. fw='solid' but this element has no Solid tab).
+  const active = u && u.snippets[fw] ? fw : 'html';
+  const select = (k: string) => { lastFramework = k; setFw(k); };
+  // Reconcile React state to the resolved active tab so aria-selected and the
+  // button highlight are never out of sync with the displayed snippet.
+  // Do NOT write lastFramework here — preserving it lets an element WITH a
+  // Solid snippet restore the user's remembered 'solid' choice on next render.
+  React.useLayoutEffect(() => {
+    if (active !== fw) setFw(active);
+  }, [active, fw]);
+  // All hooks are above this guard (React rules satisfied).
   if (!u) return null;
   const tabs = FRAMEWORKS.filter((f) => f.key !== 'solid' || u.hasSolid);
-  const active = u.snippets[fw] ? fw : 'html';
-  const select = (k: string) => { lastFramework = k; setFw(k); };
   // Use the theme's secondary colour (brand accent) as the selected-tab background.
   // Fall back to the default text colour so there's always contrast.
   const selectedBg = theme.color.secondary ?? text;
@@ -126,7 +135,7 @@ function FrameworkTabs({ tag }: { tag: string }) {
           </button>
         ))}
       </div>
-      <pre style={{ ...mblock, whiteSpace: 'pre', overflowX: 'auto' }}>{u.snippets[active]}</pre>
+      <pre style={{ ...mblock, display: 'block', overflowX: 'auto' }}>{u.snippets[active]}</pre>
     </>
   );
 }
