@@ -63,7 +63,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/FileTree',
+  title: 'Components/FileTree',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-file-tree'),
   parameters: {

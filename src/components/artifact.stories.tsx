@@ -33,7 +33,7 @@ const FILES: ArtifactFile[] = [
 ];
 
 const meta = {
-  title: 'SolidJS (advanced)/Components/Artifact',
+  title: 'Solid (Advanced)/Elements/Artifact',
   component: Artifact,
   tags: ['autodocs'],
   parameters: {

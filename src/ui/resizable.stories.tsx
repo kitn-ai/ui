@@ -4,7 +4,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle, Resizable } from 
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'SolidJS (advanced)/Primitives/Resizable',
+  title: 'Solid (Advanced)/Primitives/Resizable',
   component: ResizablePanelGroup,
   tags: ['autodocs'],
   parameters: {

@@ -1,5 +1,5 @@
 import { addons } from 'storybook/manager-api';
-import './api-tab'; // registers the "API" tab for Web Components
+import './api-tab'; // registers the "API" tab for Components
 
 // Storybook 10 controls addon-panel visibility here (the old per-story
 // `parameters.options.showPanel` is no longer honored). The Examples, Patterns,
@@ -8,10 +8,10 @@ import './api-tab'; // registers the "API" tab for Web Components
 // groups; component stories (which use controls) keep their panel.
 const NO_PANEL_PREFIXES = ['Examples/', 'Patterns/', 'Theming/'];
 
-// The `SolidJS (advanced)/` tier is always present in the sidebar but sits below
-// Web Components (via the storySort order in preview.ts) and is collapsed by
-// default like any other group off the active story's path — so Web Components
-// stays the obvious primary surface without hiding the SolidJS layer outright.
+// The `Solid (Advanced)/` tier is always present in the sidebar but sits below
+// Components (via the storySort order in preview.ts) and is collapsed by
+// default like any other group off the active story's path — so Components
+// stays the obvious primary surface without hiding the Solid layer outright.
 addons.setConfig({
   layoutCustomisations: {
     showPanel(state, defaultValue) {

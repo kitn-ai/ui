@@ -15,7 +15,7 @@ const FILES: FileTreeFile[] = [
 ];
 
 const meta = {
-  title: 'SolidJS (advanced)/Components/FileTree',
+  title: 'Solid (Advanced)/Elements/FileTree',
   component: FileTree,
   tags: ['autodocs'],
   parameters: {

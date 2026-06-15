@@ -17,7 +17,7 @@ const baseConversation = {
  * count, with an active (selected) state.
  */
 const meta = {
-  title: 'SolidJS (advanced)/Components/ConversationItem',
+  title: 'Solid (Advanced)/Elements/ConversationItem',
   component: ConversationItem,
   tags: ['autodocs'],
   parameters: {

@@ -158,8 +158,8 @@ elements.sort((a, b) => a.tag.localeCompare(b.tag));
 // Resolve story ids for composedFrom entries (after the loop so all elements are collected).
 for (const el of elements) {
   el.composedFrom = el.composedFrom.map(({ name, group }) => {
-    const seg = group === 'UI' ? 'primitives' : 'components';
-    return { name, group, storyId: `solidjs-advanced-${seg}-${kebabId(name)}--docs` };
+    const seg = group === 'UI' ? 'primitives' : 'elements';
+    return { name, group, storyId: `solid-advanced-${seg}-${kebabId(name)}--docs` };
   });
 }
 

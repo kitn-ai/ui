@@ -4,7 +4,7 @@ import { Textarea } from './textarea';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'SolidJS (advanced)/Primitives/Textarea',
+  title: 'Solid (Advanced)/Primitives/Textarea',
   component: Textarea,
   tags: ['autodocs'],
   parameters: {

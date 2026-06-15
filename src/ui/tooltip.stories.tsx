@@ -4,7 +4,7 @@ import { Button } from './button';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'SolidJS (advanced)/Primitives/Tooltip',
+  title: 'Solid (Advanced)/Primitives/Tooltip',
   component: Tooltip,
   tags: ['autodocs'],
   parameters: {

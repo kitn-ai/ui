@@ -28,7 +28,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/ThinkingBar',
+  title: 'Components/ThinkingBar',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-thinking-bar'),
   parameters: {

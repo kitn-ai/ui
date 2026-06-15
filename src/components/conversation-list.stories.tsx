@@ -26,7 +26,7 @@ const conversations: ConversationSummary[] = [
  * box, and grouped, collapsible lists of `ConversationItem`s.
  */
 const meta = {
-  title: 'SolidJS (advanced)/Components/ConversationList',
+  title: 'Solid (Advanced)/Elements/ConversationList',
   component: ConversationList,
   tags: ['autodocs'],
   parameters: {

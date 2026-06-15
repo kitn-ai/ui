@@ -134,7 +134,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/Artifact',
+  title: 'Components/Artifact',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-artifact'),
   parameters: {

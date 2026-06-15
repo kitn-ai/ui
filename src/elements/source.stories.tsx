@@ -47,7 +47,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/Source',
+  title: 'Components/Source',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-source'),
   parameters: {

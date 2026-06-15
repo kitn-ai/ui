@@ -84,7 +84,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/Resizable',
+  title: 'Components/Resizable',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-resizable'),
   parameters: {

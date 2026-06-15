@@ -39,7 +39,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/Checkpoint',
+  title: 'Components/Checkpoint',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-checkpoint'),
   parameters: {

@@ -46,7 +46,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/ScopePicker',
+  title: 'Components/ScopePicker',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-scope-picker'),
   parameters: {

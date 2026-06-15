@@ -19,7 +19,7 @@ import { buttonVariants } from './button';
  * Plus an `As` polymorphic helper for trigger elements.
  */
 const meta: Meta = {
-  title: 'SolidJS (advanced)/Primitives/Overlay Core',
+  title: 'Solid (Advanced)/Primitives/Overlay Core',
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',

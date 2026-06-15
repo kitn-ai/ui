@@ -61,7 +61,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/Suggestions',
+  title: 'Components/Suggestions',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-suggestions'),
   parameters: {

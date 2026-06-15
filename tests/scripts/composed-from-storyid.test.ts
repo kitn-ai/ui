@@ -6,7 +6,7 @@ describe('composedFrom story ids', () => {
     const links = (meta as any[]).flatMap((e) => e.composedFrom);
     expect(links.length).toBeGreaterThan(0);
     for (const l of links) {
-      expect(l.storyId).toMatch(/^solidjs-advanced-(components|primitives)-[a-z0-9-]+--docs$/);
+      expect(l.storyId).toMatch(/^solid-advanced-(elements|primitives)-[a-z0-9-]+--docs$/);
     }
   });
 });

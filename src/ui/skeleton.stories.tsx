@@ -3,7 +3,7 @@ import { Skeleton } from './skeleton';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'SolidJS (advanced)/Primitives/Skeleton',
+  title: 'Solid (Advanced)/Primitives/Skeleton',
   component: Skeleton,
   tags: ['autodocs'],
   parameters: {

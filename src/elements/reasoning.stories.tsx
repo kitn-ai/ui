@@ -45,7 +45,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/Reasoning',
+  title: 'Components/Reasoning',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-reasoning'),
   parameters: {

@@ -3,7 +3,7 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './collapsib
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'SolidJS (advanced)/Primitives/Collapsible',
+  title: 'Solid (Advanced)/Primitives/Collapsible',
   component: Collapsible,
   tags: ['autodocs'],
   parameters: {

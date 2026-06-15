@@ -24,7 +24,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Web Components/TextShimmer',
+  title: 'Components/TextShimmer',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-text-shimmer'),
   parameters: {

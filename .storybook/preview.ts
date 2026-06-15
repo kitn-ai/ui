@@ -76,15 +76,15 @@ const preview: Preview = {
       storySort: {
         // Sidebar order, top to bottom: the docs, the interactive Theming tools
         // (next to the Theming doc), composed Examples/Patterns, then the
-        // framework-agnostic **Web Components** (the primary, copy-into-any-app
-        // API) ABOVE the **SolidJS (advanced)** tier — so a reader reaches the
+        // framework-agnostic **Components** (the primary, copy-into-any-app
+        // API) ABOVE the **Solid (Advanced)** tier — so a reader reaches the
         // portable elements before the Solid-only building blocks (which stay
         // present but collapsed below).
         //
         // NOTE: every top-level group MUST be named explicitly here. The
         // trailing `*` is a catch-all that sorts unlisted groups to the very
         // bottom — that's why the `Theming` stories group used to strand itself
-        // below "Web Components" (it was only referenced inside the nested Docs
+        // below "Components" (it was only referenced inside the nested Docs
         // sub-order, never as a top-level entry). The nested arrays set the
         // intra-group order (e.g. Examples lead with the full-app "wow" demo
         // rather than sorting alphabetically).
@@ -113,9 +113,9 @@ const preview: Preview = {
             'Checkpoint & Restore',
           ],
           'Patterns',
-          'Web Components',
-          'SolidJS (advanced)',
-          ['Overview', 'Components', 'Primitives'],
+          'Components',
+          'Solid (Advanced)',
+          ['Overview', 'Elements', 'Primitives'],
           'Generative UI',
           ['Overview', 'Cards', ['kc-confirm', '*'], 'SDK'],
           '*',

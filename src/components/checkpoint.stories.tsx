@@ -4,7 +4,7 @@ import { Checkpoint, CheckpointIcon, CheckpointTrigger } from './checkpoint';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'SolidJS (advanced)/Components/Checkpoint',
+  title: 'Solid (Advanced)/Elements/Checkpoint',
   component: Checkpoint,
   tags: ['autodocs'],
   parameters: {

@@ -28,7 +28,7 @@ let lastFramework = 'html';
 
 const ADDON_ID = 'kitn/api';
 const TAB_ID = 'kitn-api-tab';
-const WC_PREFIX = 'Web Components/';
+const WC_PREFIX = 'Components/';
 
 type EventSpec = { name: string; detail: string | null; displayDetail: string | null; description: string };
 type PropSpec = { name: string; type: string; displayType: string; default?: string; optional?: boolean; scalar: boolean; description: string };
@@ -306,13 +306,13 @@ addons.register(ADDON_ID, () => {
   addons.add(TAB_ID, {
     type: types.TAB,
     title: 'API',
-    // Web Components (story ids `web-components-*`) + the SolidJS/UI components
+    // Components (story ids `components-*`) + the Solid (Advanced) Elements/Primitives
     // that have a generated spec.
     match: ({ storyId }) =>
       !!storyId && (
-        storyId.startsWith('web-components-') ||
-        storyId.startsWith('solidjs-advanced-components-') ||
-        storyId.startsWith('solidjs-advanced-primitives-')
+        storyId.startsWith('components-') ||
+        storyId.startsWith('solid-advanced-elements-') ||
+        storyId.startsWith('solid-advanced-primitives-')
       ),
     render: ({ active }) => (active ? <ApiPanel /> : null),
   });

@@ -103,7 +103,7 @@ function Chat() {
 }`;
 
 const meta = {
-  title: 'Web Components/Chat',
+  title: 'Components/Chat',
   tags: ['autodocs'],
   argTypes: argTypesFor('kc-chat'),
   parameters: {
