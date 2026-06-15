@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.13.0](https://github.com/kitn-ai/chat/compare/@kitn.ai/chat-v0.12.0...@kitn.ai/chat-v0.13.0) (2026-06-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* ChatMessage.actions widens to (ChatMessageAction | CustomAction)[] and the messageaction event `action` is now `string` (built-in name or custom id).
+
+### Features
+
+* kc-message/kc-chat actions reveal, avatar payload, custom actions ([3fa7cd6](https://github.com/kitn-ai/chat/commit/3fa7cd673109cc03a522b71b62128af5b9e4a321))
+
 ## [0.12.0](https://github.com/kitn-ai/chat/compare/@kitn.ai/chat-v0.11.0...@kitn.ai/chat-v0.12.0) (2026-06-15)
 
 
