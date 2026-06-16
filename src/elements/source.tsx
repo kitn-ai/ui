@@ -1,4 +1,4 @@
-import { For, Show } from 'solid-js';
+import { createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { defineWebComponent } from './define';
 import { Source, SourceTrigger, SourceContent, SourceList } from '../components/source';
 
@@ -50,18 +50,56 @@ interface SourceListProps extends Record<string, unknown> {
   showFavicon?: boolean;
 }
 
+/** Parse a single light-DOM `<kc-source>` element into a `SourceItem` descriptor.
+ *  Attribute mapping:
+ *   - `href`        → SourceItem.href
+ *   - `label`       → SourceItem.label
+ *   - `headline`    → SourceItem.title  (matches kc-source's prop name; "title" is a
+ *                       reserved HTMLElement attribute so kc-source uses "headline")
+ *   - `description` → SourceItem.description
+ *   - `show-favicon`→ SourceItem.showFavicon (bare boolean attribute)
+ */
+export function parseKcSourceElement(n: Element): SourceItem {
+  return {
+    href: n.getAttribute('href') ?? '',
+    label: n.getAttribute('label') ?? undefined,
+    title: n.getAttribute('headline') ?? undefined,
+    description: n.getAttribute('description') ?? undefined,
+    showFavicon: n.hasAttribute('show-favicon') && n.getAttribute('show-favicon') !== 'false',
+  };
+}
+
 defineWebComponent<SourceListProps>('kc-sources', {
   sources: [],
   showFavicon: false,
-}, (props, { flag }) => (
-  <SourceList>
-    <For each={props.sources}>
-      {(s) => (
-        <Source href={s.href}>
-          <SourceTrigger label={s.label} showFavicon={s.showFavicon ?? flag('showFavicon')} />
-          <SourceContent title={s.title ?? ''} description={s.description ?? ''} />
-        </Source>
-      )}
-    </For>
-  </SourceList>
-));
+}, (props, { element, flag }) => {
+  // Read declarative <kc-source> children from light DOM.
+  // The shadow root has no <slot> for them, so they are invisible — pure data carriers.
+  const [slottedSources, setSlottedSources] = createSignal<SourceItem[]>([]);
+  onMount(() => {
+    const read = () => {
+      const nodes = [...element.querySelectorAll('kc-source')];
+      setSlottedSources(nodes.map(parseKcSourceElement));
+    };
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true, attributes: true, subtree: true });
+    onCleanup(() => observer.disconnect());
+  });
+
+  // Prop sources take precedence; slotted children are appended after.
+  const allSources = () => [...props.sources, ...slottedSources()];
+
+  return (
+    <SourceList>
+      <For each={allSources()}>
+        {(s) => (
+          <Source href={s.href}>
+            <SourceTrigger label={s.label} showFavicon={s.showFavicon ?? flag('showFavicon')} />
+            <SourceContent title={s.title ?? ''} description={s.description ?? ''} />
+          </Source>
+        )}
+      </For>
+    </SourceList>
+  );
+});

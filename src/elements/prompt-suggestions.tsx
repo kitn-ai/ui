@@ -1,4 +1,4 @@
-import { For } from 'solid-js';
+import { For, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { PromptSuggestion } from '../components/prompt-suggestion';
 
@@ -28,10 +28,27 @@ interface Events {
 const labelOf = (s: Item) => (typeof s === 'string' ? s : s.label);
 const valueOf = (s: Item) => (typeof s === 'string' ? s : s.value ?? s.label);
 
+/** Parse a single `<kc-suggestion>` node into an `Item` descriptor. */
+export function parseSuggestionNode(n: Element): Item {
+  const text = n.textContent?.trim() ?? '';
+  const value = n.getAttribute('value') ?? text;
+  return { label: text, value };
+}
+
 /**
  * `<kc-suggestions>` — a row/list of suggestion chips. Data via the
  * `suggestions` property; `variant`/`block`/`highlight` attributes; emits
  * `select`.
+ *
+ * Alternatively, declare chips as `<kc-suggestion>` child elements
+ * (light-DOM data carriers — hidden by the Shadow DOM):
+ *
+ * ```html
+ * <kc-suggestions>
+ *   <kc-suggestion value="vue">Use Vue</kc-suggestion>
+ *   <kc-suggestion value="react">Use React</kc-suggestion>
+ * </kc-suggestions>
+ * ```
  */
 defineWebComponent<Props, Events>('kc-suggestions', {
   suggestions: [],
@@ -39,20 +56,39 @@ defineWebComponent<Props, Events>('kc-suggestions', {
   size: undefined,
   block: false,
   highlight: undefined,
-}, (props, { dispatch, flag }) => (
-  <div class={flag('block') ? 'flex flex-col gap-2' : 'flex flex-wrap gap-2'}>
-    <For each={props.suggestions}>
-      {(s) => (
-        <PromptSuggestion
-          variant={props.variant}
-          size={props.size}
-          block={flag('block')}
-          highlight={props.highlight}
-          onClick={() => dispatch('kc-select', { value: valueOf(s) })}
-        >
-          {labelOf(s)}
-        </PromptSuggestion>
-      )}
-    </For>
-  </div>
-));
+}, (props, { dispatch, flag, element }) => {
+  // Read declarative <kc-suggestion> children from light DOM.
+  // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
+  const [slottedSuggestions, setSlottedSuggestions] = createSignal<Item[]>([]);
+  onMount(() => {
+    const read = () => {
+      const nodes = [...element.querySelectorAll('kc-suggestion')];
+      setSlottedSuggestions(nodes.map(parseSuggestionNode));
+    };
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true, attributes: true, subtree: true });
+    onCleanup(() => observer.disconnect());
+  });
+
+  // Merge prop suggestions (first) with declarative children (after).
+  const allSuggestions = () => [...(props.suggestions ?? []), ...slottedSuggestions()];
+
+  return (
+    <div class={flag('block') ? 'flex flex-col gap-2' : 'flex flex-wrap gap-2'}>
+      <For each={allSuggestions()}>
+        {(s) => (
+          <PromptSuggestion
+            variant={props.variant}
+            size={props.size}
+            block={flag('block')}
+            highlight={props.highlight}
+            onClick={() => dispatch('kc-select', { value: valueOf(s) })}
+          >
+            {labelOf(s)}
+          </PromptSuggestion>
+        )}
+      </For>
+    </div>
+  );
+});

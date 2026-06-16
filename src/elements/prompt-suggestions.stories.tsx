@@ -16,6 +16,10 @@ declare module 'solid-js' {
         block?: boolean | string;
         highlight?: string;
       };
+      /** Light-DOM data carrier for declarative suggestion chips inside `<kc-suggestions>`. */
+      'kc-suggestion': JSX.HTMLAttributes<HTMLElement> & {
+        value?: string;
+      };
     }
   }
 }
@@ -153,6 +157,57 @@ export const Sizes: Story = {
 <kc-suggestions variant="outline" size="sm"></kc-suggestions>`,
         language: 'html',
       },
+    },
+  },
+};
+
+const DECLARATIVE_HTML_SNIPPET = `<!-- Works in any framework or plain HTML — no JS property assignment needed -->
+<kc-suggestions id="suggs" variant="outline">
+  <kc-suggestion value="explain">Explain the architecture</kc-suggestion>
+  <kc-suggestion value="example">Show me a code example</kc-suggestion>
+  <kc-suggestion value="deferred">What's deferred?</kc-suggestion>
+</kc-suggestions>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';   // registers the custom elements
+
+  document.getElementById('suggs').addEventListener('kc-select', (e) => {
+    console.log('kc-select', e.detail.value);
+  });
+</script>`;
+
+/**
+ * Declare each suggestion as a `<kc-suggestion>` child element — no `suggestions`
+ * property or JS array wiring needed. The `value` attribute sets the emitted
+ * value; `textContent` is the displayed label. Children are light-DOM data
+ * carriers hidden by the Shadow DOM — pure data, no visible output of their own.
+ * Mix with the `suggestions` prop: prop items render first, declarative children after.
+ */
+export const DeclarativeSuggestions: Story = {
+  name: 'Declarative Suggestions (kc-suggestion)',
+  render: () => {
+    let el: HTMLElement | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.addEventListener('kc-select', (e) =>
+        console.log('kc-select', (e as CustomEvent<{ value: string }>).detail.value),
+      );
+    });
+    return (
+      <kc-suggestions
+        ref={(e) => (el = e as HTMLElement)}
+        variant="outline"
+        style={{ display: 'block', padding: '24px', 'max-width': '560px' }}
+      >
+        <kc-suggestion value="explain">Explain the architecture</kc-suggestion>
+        <kc-suggestion value="example">Show me a code example</kc-suggestion>
+        <kc-suggestion value="deferred">What's deferred?</kc-suggestion>
+      </kc-suggestions>
+    );
+  },
+  parameters: {
+    docs: {
+      source: { code: DECLARATIVE_HTML_SNIPPET, language: 'html' },
     },
   },
 };

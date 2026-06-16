@@ -9,6 +9,7 @@ declare module 'solid-js' {
   namespace JSX {
     interface IntrinsicElements {
       'kc-sources': JSX.HTMLAttributes<HTMLElement>;
+      'kc-source': JSX.HTMLAttributes<HTMLElement> & { href?: string; label?: string; headline?: string; description?: string; 'show-favicon'?: boolean | '' };
     }
   }
 }
@@ -75,4 +76,67 @@ type Story = StoryObj;
 export const Default: Story = {
   render: () => <SourceListElement />,
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
+};
+
+const DECLARATIVE_HTML_SNIPPET = `<!-- Works in any framework or plain HTML — no JS wiring needed -->
+<kc-sources show-favicon>
+  <kc-source
+    href="https://kitn.dev"
+    label="kitn"
+    headline="kitn — the kit"
+    description="Composable SolidJS + web-component chat UI."
+    show-favicon
+  ></kc-source>
+  <kc-source
+    href="https://solidjs.com"
+    headline="SolidJS"
+    description="A reactive UI library."
+    show-favicon
+  ></kc-source>
+</kc-sources>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';   // registers the custom elements
+</script>`;
+
+/** Declarative sources — `<kc-source>` light-DOM children instead of a `sources`
+ *  property. Each child carries `href`, `label`, `headline`, `description`, and the
+ *  `show-favicon` flag as HTML attributes. Great for plain HTML with no JS wiring. */
+export const DeclarativeSources: Story = {
+  name: 'Declarative Sources (kc-source)',
+  render: () => {
+    let el: HTMLElement | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.setAttribute('show-favicon', '');
+    });
+    return (
+      <kc-sources
+        ref={(e) => (el = e as HTMLElement)}
+        style={{ display: 'block', padding: '16px', 'max-width': '720px' }}
+      >
+        <kc-source
+          href="https://kitn.dev"
+          label="kitn"
+          headline="kitn — the kit"
+          description="Composable SolidJS + web-component chat UI."
+          show-favicon
+        ></kc-source>
+        <kc-source
+          href="https://solidjs.com"
+          headline="SolidJS"
+          description="A reactive UI library."
+          show-favicon
+        ></kc-source>
+      </kc-sources>
+    );
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: DECLARATIVE_HTML_SNIPPET,
+        language: 'html',
+      },
+    },
+  },
 };
