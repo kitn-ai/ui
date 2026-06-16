@@ -16,12 +16,12 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-response-stream>`. */
 interface Events {
   /** Streaming finished. */
-  complete: void;
+  'kc-complete': void;
 }
 
 /**
  * `<kc-response-stream>` — reveals text with a typewriter or fade animation.
- * Text via the `text` property; `mode`/`speed` attributes; emits `complete`.
+ * Text via the `text` property; `mode`/`speed` attributes; emits `kc-complete`.
  */
 defineWebComponent<Props, Events>('kc-response-stream', {
   text: '',
@@ -35,6 +35,6 @@ defineWebComponent<Props, Events>('kc-response-stream', {
     speed={props.speed}
     as={props.as}
     class="text-body"
-    onComplete={() => dispatch('complete')}
+    onComplete={() => dispatch('kc-complete')}
   />
 ));

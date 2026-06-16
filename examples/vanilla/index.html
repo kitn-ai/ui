@@ -183,9 +183,9 @@
       open(activeId);
 
       // -------------------------------------------------------------- events
-      list.addEventListener('conversationselect', (e) => open(e.detail.id));
-      list.addEventListener('togglesidebar', () => document.body.classList.toggle('sidebar-open'));
-      list.addEventListener('newchat', () => {
+      list.addEventListener('kc-conversation-select', (e) => open(e.detail.id));
+      list.addEventListener('kc-toggle-sidebar', () => document.body.classList.toggle('sidebar-open'));
+      list.addEventListener('kc-new-chat', () => {
         const id = 'c-' + Date.now();
         conversations.unshift({ id, title: 'New chat', groupId: 'g-work', scope: { type: 'collection' }, messageCount: 0, lastMessageAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
         list.conversations = [...conversations];
@@ -194,7 +194,7 @@
       });
 
       // Send: append the user message (with any attachments), show loading, stream a reply.
-      chat.addEventListener('submit', (e) => {
+      chat.addEventListener('kc-submit', (e) => {
         const value = (e.detail.value || '').trim();
         const attachments = e.detail.attachments || [];
         if (!value && !attachments.length) return;
@@ -209,12 +209,12 @@
       });
 
       // Header model switcher + input toolbar buttons.
-      chat.addEventListener('modelchange', (e) => { chat.currentModel = e.detail.modelId; toast('Model: ' + e.detail.modelId); });
-      chat.addEventListener('search', () => toast('Web search toggled'));
-      chat.addEventListener('voice', () => toast('Voice input (demo)'));
+      chat.addEventListener('kc-model-change', (e) => { chat.currentModel = e.detail.modelId; toast('Model: ' + e.detail.modelId); });
+      chat.addEventListener('kc-search', () => toast('Web search toggled'));
+      chat.addEventListener('kc-voice', () => toast('Voice input (demo)'));
 
       // Working message actions.
-      chat.addEventListener('messageaction', async (e) => {
+      chat.addEventListener('kc-message-action', async (e) => {
         const { messageId, action } = e.detail;
         const msgs = conversationMessages[activeId] ?? [];
         const msg = msgs.find((m) => m.id === messageId);

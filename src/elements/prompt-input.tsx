@@ -1,12 +1,29 @@
-import { createEffect, createSignal } from 'solid-js';
+import { createEffect, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { DefaultPromptInput } from './default-input';
 import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
+import type { CustomAction } from './chat-types';
+
+/** Parse a single light-DOM `<kc-slash-command>` element into a SlashCommandItem.
+ *  Attribute mapping:
+ *   - `command`     → SlashCommandItem.id       (required; empty string fallback)
+ *   - textContent   → SlashCommandItem.label    (primary); `label` attr as fallback
+ *   - `description` → SlashCommandItem.description
+ *   - `category`    → SlashCommandItem.category
+ */
+export function parseKcSlashCommandElement(n: Element): SlashCommandItem {
+  return {
+    id: n.getAttribute('command') ?? '',
+    label: n.textContent?.trim() || n.getAttribute('label') || n.getAttribute('command') || '',
+    description: n.getAttribute('description') ?? undefined,
+    category: n.getAttribute('category') ?? undefined,
+  };
+}
 
 interface Props extends Record<string, unknown> {
   /** Controlled value of the input. When set, the host owns the text and must
-   *  update it on `valuechange`; leave unset for uncontrolled behavior. */
+   *  update it on `kc-value-change`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -34,6 +51,9 @@ interface Props extends Record<string, unknown> {
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice`
    *  event. */
   voice?: boolean;
+  /** When set and `loading` is true, the send button is replaced by a Stop
+   *  button (square icon, "Stop" aria-label). Clicking it fires `kc-stop`. */
+  stoppable?: boolean;
   /** Attachments to seed the input with (so a consumer can pre-populate staged
    *  files without an upload). Set as a JS property; the element then manages its
    *  own attachment state from there (add via the paperclip, remove per chip). */
@@ -43,17 +63,22 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-prompt-input>`. */
 interface Events {
   /** The user submitted the prompt (Enter or send button) with its attachments. */
-  submit: { value: string; attachments: AttachmentData[] };
+  'kc-submit': { value: string; attachments: AttachmentData[] };
   /** The input text changed (fires on every keystroke). */
-  valuechange: { value: string };
+  'kc-value-change': { value: string };
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
-  suggestionclick: { value: string };
+  'kc-suggestion-click': { value: string };
   /** A slash command was chosen from the palette. */
-  slashselect: { command: SlashCommandItem };
+  'kc-slash-select': { command: SlashCommandItem };
   /** The Search (Globe) toolbar button was clicked. */
-  search: Record<string, never>;
+  'kc-search': Record<string, never>;
   /** The Voice (Mic) toolbar button was clicked. */
-  voice: Record<string, never>;
+  'kc-voice': Record<string, never>;
+  /** The Stop button was clicked while `stoppable` and `loading` are both true. */
+  'kc-stop': Record<string, never>;
+  /** A custom `<kc-action>` toolbar button was clicked. `action` is the `id` of
+   *  the `<kc-action>` element that was clicked. */
+  'kc-toolbar-action': { action: string };
 }
 
 defineWebComponent<Props, Events>('kc-prompt-input', {
@@ -68,8 +93,9 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
   slashCompact: false,
   search: false,
   voice: false,
+  stoppable: false,
   attachments: undefined,
-}, (props, { dispatch, flag }) => {
+}, (props, { dispatch, flag, element }) => {
   const [internal, setInternal] = createSignal(props.value ?? '');
   // Seed staged attachments from the `attachments` property; the element manages
   // its own state from there (paperclip adds, per-chip remove deletes).
@@ -79,23 +105,56 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
   createEffect(() => {
     if (props.attachments) setAttachments(props.attachments);
   });
+
+  // Read declarative <kc-action> and <kc-slash-command> children from light DOM —
+  // same pattern as kc-message. Shadow DOM with no <slot> suppresses them visually;
+  // they are invisible data carriers. One MutationObserver covers both element types.
+  const [toolbarActions, setToolbarActions] = createSignal<CustomAction[]>([]);
+  const [slottedSlashCommands, setSlottedSlashCommands] = createSignal<SlashCommandItem[]>([]);
+  onMount(() => {
+    const readActions = () => {
+      const nodes = [...element.querySelectorAll('kc-action')];
+      setToolbarActions(nodes.map(n => ({
+        id: n.id || n.getAttribute('action') || '',
+        label: n.textContent?.trim() || n.getAttribute('label') || n.id || '',
+        icon: n.getAttribute('icon') ?? undefined,
+        tooltip: n.getAttribute('tooltip') ?? undefined,
+      })));
+    };
+    const readSlashCommands = () => {
+      const nodes = [...element.querySelectorAll('kc-slash-command')];
+      setSlottedSlashCommands(nodes.map(parseKcSlashCommandElement));
+    };
+    const readAll = () => { readActions(); readSlashCommands(); };
+    readAll();
+    const observer = new MutationObserver(readAll);
+    observer.observe(element, { childList: true, attributes: true, subtree: true });
+    onCleanup(() => observer.disconnect());
+  });
+
   const current = () => props.value ?? internal();
 
-  const handleChange = (v: string) => { setInternal(v); dispatch('valuechange', { value: v }); };
+  const handleChange = (v: string) => { setInternal(v); dispatch('kc-value-change', { value: v }); };
   const handleSubmit = () => {
-    dispatch('submit', { value: current(), attachments: attachments() });
+    dispatch('kc-submit', { value: current(), attachments: attachments() });
     setAttachments([]);
   };
   const handleSuggestionClick = (v: string) => {
     if ((props.suggestionMode ?? 'submit') === 'fill') {
       handleChange(v);
-      dispatch('suggestionclick', { value: v });
+      dispatch('kc-suggestion-click', { value: v });
     } else {
       // Default: behave as if the user typed the suggestion and pressed submit.
-      dispatch('submit', { value: v, attachments: attachments() });
+      dispatch('kc-submit', { value: v, attachments: attachments() });
       setAttachments([]);
     }
   };
+
+  // Prop slash commands take precedence; slotted children are appended after.
+  const allSlashCommands = () => [
+    ...(props.slashCommands ?? []),
+    ...slottedSlashCommands(),
+  ];
 
   return (
     <DefaultPromptInput
@@ -103,20 +162,24 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
       placeholder={props.placeholder}
       disabled={flag('disabled')}
       loading={flag('loading')}
+      stoppable={flag('stoppable')}
       suggestions={props.suggestions}
       attachments={attachments()}
-      slashCommands={props.slashCommands}
+      slashCommands={allSlashCommands().length ? allSlashCommands() : undefined}
       slashActiveIds={props.slashActiveIds}
       slashCompact={flag('slashCompact')}
       search={flag('search')}
       voice={flag('voice')}
+      toolbarActions={toolbarActions()}
       onValueChange={handleChange}
       onSubmit={handleSubmit}
       onSuggestionClick={handleSuggestionClick}
       onAttachmentsChange={setAttachments}
-      onSearch={() => dispatch('search')}
-      onVoice={() => dispatch('voice')}
-      onSlashSelect={(command) => dispatch('slashselect', { command })}
+      onSearch={() => dispatch('kc-search')}
+      onVoice={() => dispatch('kc-voice')}
+      onStop={() => dispatch('kc-stop')}
+      onSlashSelect={(command) => dispatch('kc-slash-select', { command })}
+      onAction={(id) => dispatch('kc-toolbar-action', { action: id })}
     />
   );
 });

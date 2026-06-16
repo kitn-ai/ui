@@ -113,11 +113,11 @@ export function Workspace() {
       <Conversations
         conversations={conversations}
         activeId={activeId}
-        onConversationselect={(e) => {
+        onConversationSelect={(e) => {
           setActiveId(e.detail.id);
           setMessages(loadMessages(e.detail.id));
         }}
-        onNewchat={() => startNewConversation()}
+        onNewChat={() => startNewConversation()}
         style={{ width: 300, flexShrink: 0 }}
       />
 
@@ -144,7 +144,7 @@ import { Chat, Conversations, Resizable, ResizableItem } from '@kitn.ai/chat/rea
 <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
   <Resizable orientation="horizontal" style={{ flex: 1, minHeight: 0 }}>
     <ResizableItem size="25%" min="200px">
-      <Conversations conversations={conversations} activeId={activeId} onConversationselect={handleSelect} />
+      <Conversations conversations={conversations} activeId={activeId} onConversationSelect={handleSelect} />
     </ResizableItem>
     <ResizableItem>
       <Chat messages={messages} onSubmit={handleSubmit} />
@@ -170,16 +170,17 @@ The rule for all elements: **rich data goes in as properties, interactions come 
 The wrappers do this for you — pass arrays/objects as props and they're assigned as live DOM
 properties (not stringified), while CustomEvents surface as `on<Event>` handlers.
 
-Event props are `on` + the event name, camel-cased on the first letter only:
+Event props are `on` + the event name with the `kc-` prefix stripped and each
+hyphen-segment PascalCased:
 
 | DOM event | React prop |
 |---|---|
-| `submit` | `onSubmit` |
-| `valuechange` | `onValuechange` |
-| `messageaction` | `onMessageaction` |
-| `modelchange` | `onModelchange` |
-| `conversationselect` | `onConversationselect` |
-| `suggestionclick` | `onSuggestionclick` |
+| `kc-submit` | `onSubmit` |
+| `kc-value-change` | `onValueChange` |
+| `kc-message-action` | `onMessageAction` |
+| `kc-model-change` | `onModelChange` |
+| `kc-conversation-select` | `onConversationSelect` |
+| `kc-suggestion-click` | `onSuggestionClick` |
 
 All **40+ elements** have a typed wrapper:
 
@@ -217,8 +218,8 @@ export function RawChat() {
       const { value } = (e as CustomEvent<{ value: string }>).detail;
       setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: 'user', content: value }]);
     };
-    el.addEventListener('submit', onSubmit);
-    return () => el.removeEventListener('submit', onSubmit);
+    el.addEventListener('kc-submit', onSubmit);
+    return () => el.removeEventListener('kc-submit', onSubmit);
   }, []);
 
   return <kc-chat ref={ref} style={{ display: 'block', height: '100vh' }} />;

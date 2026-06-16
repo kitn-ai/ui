@@ -50,27 +50,27 @@ interface Props extends Record<string, unknown> {
 
 interface Events {
   /** A conversation was selected in the sidebar. */
-  conversationselect: { id: string };
+  'kc-conversation-select': { id: string };
   /** The "New chat" button was clicked. */
-  newchat: Record<string, never>;
+  'kc-new-chat': Record<string, never>;
   /** The sidebar was collapsed or expanded. */
-  sidebartoggle: { collapsed: boolean };
+  'kc-sidebar-toggle': { collapsed: boolean };
   /** User submitted a message. */
-  submit: { value: string; attachments: AttachmentData[] };
+  'kc-submit': { value: string; attachments: AttachmentData[] };
   /** Fired on every input change. */
-  valuechange: { value: string };
+  'kc-value-change': { value: string };
   /** The header model switcher changed. */
-  modelchange: { modelId: string };
+  'kc-model-change': { modelId: string };
   /** An action button on a message was clicked. */
-  messageaction: { messageId: string; action: string };
+  'kc-message-action': { messageId: string; action: string };
   /** The Search button was clicked. */
-  search: Record<string, never>;
+  'kc-search': Record<string, never>;
   /** The Mic / voice button was clicked. */
-  voice: Record<string, never>;
+  'kc-voice': Record<string, never>;
   /** A slash command was chosen from the palette. */
-  slashselect: { command: SlashCommandItem };
+  'kc-slash-select': { command: SlashCommandItem };
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
-  suggestionclick: { value: string };
+  'kc-suggestion-click': { value: string };
 }
 
 defineWebComponent<Props, Events>('kc-workspace', {
@@ -85,7 +85,7 @@ defineWebComponent<Props, Events>('kc-workspace', {
   // Collapse is internal UI state; `sidebarCollapsed` only sets the initial value
   // (not a controlled binding).
   const [collapsed, setCollapsed] = createSignal(props.sidebarCollapsed === true);
-  const toggle = () => { const next = !collapsed(); setCollapsed(next); dispatch('sidebartoggle', { collapsed: next }); };
+  const toggle = () => { const next = !collapsed(); setCollapsed(next); dispatch('kc-sidebar-toggle', { collapsed: next }); };
 
   // Create the thread ONCE and reference the same node in both <Show> branches.
   // It's owned by this component root (not by a Show branch), so toggling the
@@ -102,14 +102,14 @@ defineWebComponent<Props, Events>('kc-workspace', {
       scrollButton={props.scrollButton !== false} search={flag('search')} voice={flag('voice')}
       slashCommands={props.slashCommands as SlashCommandItem[] | undefined}
       slashActiveIds={props.slashActiveIds as string[] | undefined} slashCompact={flag('slashCompact')}
-      onValueChange={(value) => dispatch('valuechange', { value })}
-      onSubmit={(detail) => dispatch('submit', detail)}
-      onSuggestionClick={(value) => dispatch('suggestionclick', { value })}
-      onModelChange={(modelId) => dispatch('modelchange', { modelId })}
-      onMessageAction={(detail) => dispatch('messageaction', detail)}
-      onSearch={() => dispatch('search', {})}
-      onVoice={() => dispatch('voice', {})}
-      onSlashSelect={(command) => dispatch('slashselect', { command })}
+      onValueChange={(value) => dispatch('kc-value-change', { value })}
+      onSubmit={(detail) => dispatch('kc-submit', detail)}
+      onSuggestionClick={(value) => dispatch('kc-suggestion-click', { value })}
+      onModelChange={(modelId) => dispatch('kc-model-change', { modelId })}
+      onMessageAction={(detail) => dispatch('kc-message-action', detail)}
+      onSearch={() => dispatch('kc-search', {})}
+      onVoice={() => dispatch('kc-voice', {})}
+      onSlashSelect={(command) => dispatch('kc-slash-select', { command })}
     />
   );
 
@@ -134,8 +134,8 @@ defineWebComponent<Props, Events>('kc-workspace', {
           <ResizablePanel defaultSize={props.sidebarWidth as number} data-min-size={String(props.sidebarMinWidth)} data-max-size={String(props.sidebarMaxWidth)}>
             <ConversationList
               groups={props.groups} conversations={props.conversations} activeId={props.activeId as string | undefined}
-              onSelect={(id) => dispatch('conversationselect', { id })}
-              onNewChat={() => dispatch('newchat', {})}
+              onSelect={(id) => dispatch('kc-conversation-select', { id })}
+              onNewChat={() => dispatch('kc-new-chat', {})}
               onToggleSidebar={toggle}
             />
           </ResizablePanel>

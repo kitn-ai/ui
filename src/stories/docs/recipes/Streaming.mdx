@@ -9,7 +9,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 > **Security:** never ship an API key to the browser. In production, point `fetch` at your own backend that proxies to OpenRouter and injects the key.
 
 ```js
-chat.addEventListener('submit', async (e) => {
+chat.addEventListener('kc-submit', async (e) => {
   const text = e.detail.value.trim();
   if (!text) return;
 

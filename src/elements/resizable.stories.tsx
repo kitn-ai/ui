@@ -80,7 +80,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <script type="module">
   import '@kitn.ai/chat/elements'; // registers the custom elements
   document.querySelector('kc-resizable')
-    .addEventListener('change', (e) => console.log(e.detail.sizes));
+    .addEventListener('kc-change', (e) => console.log(e.detail.sizes));
 </script>`;
 
 const meta = {
@@ -94,6 +94,7 @@ const meta = {
         '`<kc-resizable>` is the framework-agnostic **web component** for a composable, resizable multi-panel layout (up to **3** `<kc-resizable-item>` panels) with **auto-inserted draggable dividers** — isolated in **Shadow DOM**.',
         '**When to use:** to compose an app shell out of slotted regions without hand-wiring panels and handles — e.g. `list | chat | preview`. In SolidJS, use the `Resizable` convenience (UI/Resizable) directly.',
         "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set `orientation` (`horizontal` row / `vertical` column), and put a `<kc-resizable-item>` per panel. Each item carries `size` (px or %, e.g. `\"280px\"` or `\"25%\"`), `min`/`max`, `locked` (fixed size + non-draggable neighbour), and `hidden` (drops the panel + its divider). Listen for the **`change`** event (`detail.sizes`, percent).",
+        '**Anatomy:** one or more **`<kc-resizable-item>`** light children (each a config-carrier: `size`, `min`, `max`, `locked`, `hidden` attributes; renders its slotted content) with auto-inserted **draggable divider handles** between each visible, unlocked pair. A panel is omitted from layout when `hidden`; its adjacent divider is dropped. Nesting `<kc-resizable>` inside an item allows more than 3 panels.',
         '**Placement:** the layout spine for compose-your-own-chat shells — sidebar + conversation, conversation + inspector, or a three-up list/chat/preview.',
         'See the **Code** tab for HTML usage.',
       ]),
@@ -237,11 +238,11 @@ const EXPAND_TO_FILL_SNIPPET = `<!-- The artifact's "Expand" button (opt-in: exp
 
   // Optional: observe the layout events.
   document.querySelector('kc-resizable')
-    .addEventListener('change', (e) => console.log('change', e.detail.sizes));
+    .addEventListener('kc-change', (e) => console.log('change', e.detail.sizes));
   document.querySelector('kc-resizable')
-    .addEventListener('maximizechange', (e) => console.log('maximizechange', e.detail));
+    .addEventListener('kc-maximize-change', (e) => console.log('maximizechange', e.detail));
   document.querySelector('kc-artifact')
-    .addEventListener('maximizechange', (e) => console.log('artifact maximizechange', e.detail));
+    .addEventListener('kc-maximize-change', (e) => console.log('artifact maximizechange', e.detail));
 </script>
 
 <!-- Cross-element protocol (hand-authored; not generated):
@@ -283,16 +284,16 @@ export const ExpandToFill: Story = {
     onMount(() => {
       if (artifactEl) artifactEl.files = ARTIFACT_FILES;
       if (resizableEl) {
-        resizableEl.addEventListener('change', (e: Event) =>
+        resizableEl.addEventListener('kc-change', (e: Event) =>
           setLog((l) => [`change → ${JSON.stringify((e as CustomEvent).detail.sizes)}`, ...l].slice(0, 6)),
         );
-        resizableEl.addEventListener('maximizechange', (e: Event) =>
-          setLog((l) => [`maximizechange → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
+        resizableEl.addEventListener('kc-maximize-change', (e: Event) =>
+          setLog((l) => [`kc-maximize-change → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
         );
       }
       if (artifactEl) {
-        artifactEl.addEventListener('maximizechange', (e: Event) =>
-          setLog((l) => [`artifact maximizechange → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
+        artifactEl.addEventListener('kc-maximize-change', (e: Event) =>
+          setLog((l) => [`artifact kc-maximize-change → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
         );
       }
     });

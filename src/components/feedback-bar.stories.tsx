@@ -12,9 +12,9 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'An inline bar that prompts the user to rate a response, with thumbs-up / thumbs-down actions and a dismiss button.',
-        '**When to use:** after an assistant message, to collect quick helpful / not-helpful feedback on the answer.',
-        '**How to use:** set a `title`, optionally pass an `icon`, and wire `onFeedback` and `onClose` to capture the rating or hide the bar.',
+        'An inline bar that prompts the user to rate a response. It owns its own flow — it asks, optionally collects a category + comment on a not-helpful vote, then confirms with a thank-you, all in place (the way ChatGPT/Claude do it). It does **not** disappear on a vote; only the close (X) button dismisses it.',
+        '**When to use:** after an assistant message, to collect quick helpful / not-helpful feedback (optionally with a reason).',
+        '**How to use:** set a `title`; for the richer flow set `collect-detail` and pass `categories`. The vote fires `onFeedback` immediately; the optional detail fires `onSubmitDetail`; `onClose` dismisses the bar.',
         '**Placement:** directly beneath a completed assistant message, or in a message action row.',
       ]),
     },
@@ -28,13 +28,30 @@ const meta = {
       control: false,
       description: 'Optional leading icon element shown before the title.',
     },
+    collectDetail: {
+      control: 'boolean',
+      description: 'When on, a not-helpful vote opens an optional detail form (category chips + comment) before the thank-you.',
+    },
+    categories: {
+      control: 'object',
+      description: 'Category chips offered in the detail form.',
+    },
+    thanksMessage: {
+      control: 'text',
+      description: 'Confirmation copy shown after a vote/submit.',
+    },
     class: {
       control: 'text',
       description: 'Additional CSS classes for the root element.',
     },
     onFeedback: {
       action: 'feedback',
-      description: 'Fired with `value: "helpful" | "not-helpful"` when a rating button is clicked.',
+      description: 'Fired with `value: "helpful" | "not-helpful"` immediately when a rating button is clicked (the vote is recorded even if the detail form is skipped).',
+      table: { category: 'Events' },
+    },
+    onSubmitDetail: {
+      action: 'submitDetail',
+      description: 'Fired with `{ value, category?, comment? }` when the optional detail form is submitted.',
       table: { category: 'Events' },
     },
     onClose: {
@@ -46,6 +63,7 @@ const meta = {
   args: {
     title: 'Was this response helpful?',
     onFeedback: fn(),
+    onSubmitDetail: fn(),
     onClose: fn(),
   },
   render: (args) => <FeedbackBar {...args} />,
@@ -87,6 +105,34 @@ export const WithIcon: Story = {
   ...src(`<FeedbackBar
   title="How did I do?"
   icon={<SmileyIcon />}
+  onFeedback={(value) => console.log('feedback:', value)}
+/>`),
+};
+
+/** The full flow: a not-helpful vote opens an optional detail form (category
+ *  chips + comment) before the thank-you. A helpful vote skips straight to thanks.
+ *  Click 👎 to see the detail step. */
+export const WithDetail: Story = {
+  args: {
+    title: 'Was this response helpful?',
+    collectDetail: true,
+    categories: ['Inaccurate', 'Not helpful', 'Unsafe', 'Other'],
+  },
+  ...src(`<FeedbackBar
+  title="Was this response helpful?"
+  collectDetail
+  categories={['Inaccurate', 'Not helpful', 'Unsafe', 'Other']}
+  onFeedback={(value) => console.log('vote:', value)}
+  onSubmitDetail={(d) => console.log('detail:', d)} // { value, category?, comment? }
+/>`),
+};
+
+/** A custom confirmation message shown after the vote. */
+export const CustomThanks: Story = {
+  args: { title: 'Rate this answer', thanksMessage: 'Got it — thanks for helping us improve!' },
+  ...src(`<FeedbackBar
+  title="Rate this answer"
+  thanksMessage="Got it — thanks for helping us improve!"
   onFeedback={(value) => console.log('feedback:', value)}
 />`),
 };

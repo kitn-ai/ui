@@ -64,6 +64,14 @@ const meta = {
       control: 'number',
       description: 'Estimated cost in USD (shown by `ContextContentFooter`).',
     },
+    warnThreshold: {
+      control: 'number',
+      description: 'Fraction (0–1) above which the bar turns yellow. Default `0.7`.',
+    },
+    dangerThreshold: {
+      control: 'number',
+      description: 'Fraction (0–1) above which the bar turns red. Default `0.9`.',
+    },
   },
   args: {
     usedTokens: 85000,
@@ -176,4 +184,46 @@ export const WithCost: Story = {
     estimatedCost: 0.32,
   },
   ...src(usage),
+};
+
+const customThresholdUsage = `<Context
+  usedTokens={110000}
+  maxTokens={200000}
+  inputTokens={70000}
+  outputTokens={40000}
+  estimatedCost={0.65}
+  warnThreshold={0.5}
+  dangerThreshold={0.75}
+>
+  <ContextTrigger />
+  <ContextContent>
+    <ContextContentHeader />
+    <ContextContentBody>
+      <div class="space-y-1">
+        <ContextInputUsage />
+        <ContextOutputUsage />
+      </div>
+    </ContextContentBody>
+    <ContextContentFooter />
+  </ContextContent>
+</Context>`;
+
+/**
+ * Custom thresholds — `warnThreshold=0.5` / `dangerThreshold=0.75` so the bar
+ * turns yellow at 50% and red at 75%. At 55% (110 000 / 200 000) the bar renders
+ * yellow even though the defaults would show green at this level.
+ */
+export const CustomThresholds: Story = {
+  args: {
+    usedTokens: 110000,
+    maxTokens: 200000,
+    inputTokens: 70000,
+    outputTokens: 40000,
+    reasoningTokens: undefined,
+    cacheTokens: undefined,
+    estimatedCost: 0.65,
+    warnThreshold: 0.5,
+    dangerThreshold: 0.75,
+  },
+  ...src(customThresholdUsage),
 };

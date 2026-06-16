@@ -59,7 +59,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
     { path: 'assets/logo.svg', type: 'image' },
   ];
   tree.setAttribute('active-file', 'src/app.ts');
-  tree.addEventListener('select', (e) => console.log('selected', e.detail.path));
+  tree.addEventListener('kc-select', (e) => console.log('selected', e.detail.path));
 </script>`;
 
 const meta = {
@@ -73,6 +73,7 @@ const meta = {
         '`<kc-file-tree>` is the framework-agnostic **web component** for a collapsible, keyboard-navigable **file explorer** built from a flat list of `/`-delimited paths (nested folders are derived automatically). ARIA `tree`/`treeitem`. Isolated in **Shadow DOM**.',
         '**When to use:** any time you need a file/folder tree — the Code tab of `<kc-artifact>` uses it, but it ships public so you can reuse it standalone (a project explorer, an attachments browser, a doc outline).',
         "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set the `files` **property** (a JS array of `{ path, url?, code?, language?, type? }`). Folders come from the `/` in each `path`; `type` picks the icon. Set `active-file` to highlight a row, `default-expanded` to control which folders open. Listen for **`select`** (`detail.path`). Arrow keys navigate; Enter/Space selects or toggles.",
+        '**Anatomy:** a scrollable ARIA `tree` of **folder nodes** (collapsible `treeitem` groups, derived from `/`-delimited path segments) and **file leaf nodes** (selectable `treeitem` rows with a type icon; the `active-file` row is highlighted). Folders auto-expand on first render; click or arrow-key to collapse/expand.',
         '**Placement:** a sidebar/explorer column — inside `<kc-artifact>`, a `<kc-resizable>` panel, or any file-picker surface. It **fills** its container, so give the parent (or the element) a height.',
         'See the **Code** tab for HTML usage.',
       ]),
@@ -91,7 +92,7 @@ export const Playground: Story = {
     onMount(() => {
       if (!el) return;
       el.files = FILES;
-      el.addEventListener('select', (e) => {
+      el.addEventListener('kc-select', (e) => {
         const path = (e as CustomEvent).detail.path as string;
         setSelected(path);
         el.setAttribute('active-file', path);

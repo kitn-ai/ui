@@ -76,7 +76,7 @@ All ${count} elements are also exported individually. Use them for custom layout
 
 1. **Array/object data = JS properties** (see above). Scalars may be attributes.
 2. **Events are non-bubbling \`CustomEvent\`s** — listen directly on the element:
-   \`chat.addEventListener('submit', (e) => console.log(e.detail.value))\`
+   \`chat.addEventListener('kc-submit', (e) => console.log(e.detail.value))\`
 3. **\`theme\` attribute** (\`'light' | 'dark' | 'auto'\`) works on every element. Default \`auto\` follows \`prefers-color-scheme\`.
 4. **Theming via CSS custom properties** — override \`--kc-color-*\` tokens on \`:root\`; they pierce Shadow DOM.
 
@@ -114,7 +114,7 @@ import { Chat } from '@kitn.ai/chat/react';
 
 **Vue** — use the element directly; pass arrays via \`.prop\`:
 \`\`\`vue
-<kc-chat :messages.prop="messages" @submit="send" />
+<kc-chat :messages.prop="messages" @kc-submit="send" />
 \`\`\`
 
 ## Theming
@@ -202,7 +202,7 @@ import '@kitn.ai/chat/elements';
 const chat = document.querySelector('kc-chat');
 chat.messages = [];
 
-chat.addEventListener('submit', async (e) => {
+chat.addEventListener('kc-submit', async (e) => {
   const userText = e.detail.value;
 
   // Append the user message (new array — see streaming note)

@@ -33,7 +33,7 @@ export interface ChatThreadProps {
    *  property (`el.messages = [...]`). */
   messages: ChatMessage[];
   /** Controlled value of the input. When set, the host owns the input text and
-   *  must update it on `valuechange`; leave unset for uncontrolled behavior. */
+   *  must update it on `kc-value-change`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -58,7 +58,7 @@ export interface ChatThreadProps {
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;
   /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the
-   *  header and a `modelchange` event fires on selection. */
+   *  header and a `kc-model-change` event fires on selection. */
   models?: ModelOption[];
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
@@ -72,7 +72,7 @@ export interface ChatThreadProps {
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
   voice?: boolean;
   /** Slash commands — when set, typing `/` in the input opens the command
-   *  palette and fires `slashselect`. Set as a JS property. */
+   *  palette and fires `kc-slash-select`. Set as a JS property. */
   slashCommands?: SlashCommandItem[];
   /** Command ids to highlight as active in the palette. */
   slashActiveIds?: string[];

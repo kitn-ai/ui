@@ -37,8 +37,8 @@ This example shows how to use the `@kitn.ai/chat` web components inside a
     const el = chatRef.current;
     if (!el) return;
     const onSubmit = (e: Event) => { /* handle (e as CustomEvent).detail */ };
-    el.addEventListener('submit', onSubmit);
-    return () => el.removeEventListener('submit', onSubmit);
+    el.addEventListener('kc-submit', onSubmit);
+    return () => el.removeEventListener('kc-submit', onSubmit);
   }, [activeId, allMessages]);
   ```
 

@@ -108,7 +108,7 @@ const handleSubmit = async (e: CustomEvent<{ value: string }>) => {
       :messages.prop="messages"
       :suggestions.prop="['Summarize the chat', 'Start fresh']"
       style="flex: 1; min-height: 0;"
-      @submit="handleSubmit"
+      @kc-submit="handleSubmit"
     />
   </div>
 </template>
@@ -155,13 +155,13 @@ const onSubmit = (e: CustomEvent<{ value: string }>) => {
       :conversations.prop="conversations"
       :active-id="activeId"
       style="width: 300px; flex-shrink: 0;"
-      @conversationselect="onSelect"
-      @newchat="startNewConversation"
+      @kc-conversation-select="onSelect"
+      @kc-new-chat="startNewConversation"
     />
     <kc-chat
       :messages.prop="messages"
       style="flex: 1; min-width: 0;"
-      @submit="onSubmit"
+      @kc-submit="onSubmit"
     />
   </div>
 </template>
@@ -182,11 +182,11 @@ persist the layout.
         <kc-conversations
           :conversations.prop="conversations"
           :active-id="activeId"
-          @conversationselect="onSelect"
+          @kc-conversation-select="onSelect"
         />
       </kc-resizable-item>
       <kc-resizable-item>
-        <kc-chat :messages.prop="messages" @submit="onSubmit" />
+        <kc-chat :messages.prop="messages" @kc-submit="onSubmit" />
       </kc-resizable-item>
     </kc-resizable>
   </div>
@@ -217,7 +217,7 @@ attribute bindings. Events use `@event` and carry their payload in `event.detail
 |---|---|---|
 | Rich data (array/object) | `:messages.prop="messages"` | Always for arrays and objects |
 | Scalar attribute | `:active-id="activeId"` or `active-id="c1"` | Strings, booleans, numbers |
-| Event | `@conversationselect="onSelect"` | All CustomEvents |
+| Event | `@kc-conversation-select="onSelect"` | All CustomEvents |
 
 Common events and their `detail` payloads:
 

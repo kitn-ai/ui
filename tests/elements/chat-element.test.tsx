@@ -24,7 +24,7 @@ test('renders messages and emits submit', async () => {
   expect(el.shadowRoot!.textContent).toContain('Hello! How can I help?');
 
   let submitted: string | null = null;
-  el.addEventListener('submit', (e) => (submitted = (e as CustomEvent).detail.value));
+  el.addEventListener('kc-submit', (e) => (submitted = (e as CustomEvent).detail.value));
   const textarea = el.shadowRoot!.querySelector('textarea')!;
   textarea.value = 'next question';
   textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
@@ -41,7 +41,7 @@ test('emits messageaction when an action button is clicked', async () => {
   await Promise.resolve();
 
   let action: { messageId: string; action: string } | null = null;
-  el.addEventListener('messageaction', (e) => (action = (e as CustomEvent).detail));
+  el.addEventListener('kc-message-action', (e) => (action = (e as CustomEvent).detail));
   const btn = el.shadowRoot!.querySelector('[data-action="copy"]') as HTMLElement;
   btn.click();
   expect(action).toEqual({ messageId: 'm2', action: 'copy' });

@@ -9,7 +9,7 @@
  *   - [groups], [conversations], [activeId], [messages], [models], [currentModel]
  *     set DOM *properties* (not attributes) — essential for passing objects/arrays
  *     to Shadow-DOM web components.
- *   - (conversationselect), (submit), (modelchange), (sidebartoggle) listen to the
+ *   - (kc-conversation-select), (kc-submit), (kc-model-change), (kc-sidebar-toggle) listen to the
  *     kit's CustomEvents; `($event as CustomEvent).detail` carries the payload.
  *   - CUSTOM_ELEMENTS_SCHEMA tells Angular to allow unknown `kc-*` element tags.
  *   - `@kitn.ai/chat/elements` is imported once (main.ts side-effect) to register
@@ -147,7 +147,7 @@ export class AppComponent {
   // ── kc-workspace event handlers ────────────────────────────────────
 
   /**
-   * `(submit)` — fired when the user sends a message.
+   * `(kc-submit)` — fired when the user sends a message.
    * Angular binds CustomEvents by lowercase event name on the element.
    * `$event` is the raw CustomEvent; `.detail` carries the payload.
    */
@@ -190,7 +190,7 @@ export class AppComponent {
   }
 
   /**
-   * `(messageaction)` — copy, like, dislike, regenerate actions on messages.
+   * `(kc-message-action)` — copy, like, dislike, regenerate actions on messages.
    */
   async onMessageAction(event: Event): Promise<void> {
     const { messageId, action } = ((event as CustomEvent).detail ?? {}) as {
@@ -242,7 +242,7 @@ export class AppComponent {
   }
 
   /**
-   * `(modelchange)` — user switched the active model.
+   * `(kc-model-change)` — user switched the active model.
    */
   onModelChange(event: Event): void {
     const { modelId } = ((event as CustomEvent).detail ?? {}) as { modelId: string };
@@ -253,7 +253,7 @@ export class AppComponent {
   }
 
   /**
-   * `(conversationselect)` — user clicked a conversation in the sidebar.
+   * `(kc-conversation-select)` — user clicked a conversation in the sidebar.
    */
   onConversationSelect(event: Event): void {
     const { id } = ((event as CustomEvent).detail ?? {}) as { id: string };
@@ -262,7 +262,7 @@ export class AppComponent {
   }
 
   /**
-   * `(newchat)` — user clicked "New chat" in the sidebar.
+   * `(kc-new-chat)` — user clicked "New chat" in the sidebar.
    */
   onNewChat(): void {
     const id = 'c-' + generateId();
@@ -284,7 +284,7 @@ export class AppComponent {
   }
 
   /**
-   * `(sidebartoggle)` — hamburger / toggle from within the workspace.
+   * `(kc-sidebar-toggle)` — hamburger / toggle from within the workspace.
    */
   onSidebarToggle(): void {
     document.body.classList.toggle('sidebar-open');

@@ -11,21 +11,21 @@ type Props = Omit<ChatThreadProps,
 
 interface Events {
   /** User submitted a message. */
-  submit: { value: string; attachments: AttachmentData[] };
+  'kc-submit': { value: string; attachments: AttachmentData[] };
   /** Fired on every input change. */
-  valuechange: { value: string };
+  'kc-value-change': { value: string };
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
-  suggestionclick: { value: string };
+  'kc-suggestion-click': { value: string };
   /** An action button on a message was clicked. `action` is the built-in name or custom id. */
-  messageaction: { messageId: string; action: string };
+  'kc-message-action': { messageId: string; action: string };
   /** The header model switcher changed. */
-  modelchange: { modelId: string };
+  'kc-model-change': { modelId: string };
   /** A slash command was chosen from the palette. */
-  slashselect: { command: SlashCommandItem };
+  'kc-slash-select': { command: SlashCommandItem };
   /** The Search button was clicked. */
-  search: Record<string, never>;
+  'kc-search': Record<string, never>;
   /** The Mic / voice button was clicked. */
-  voice: Record<string, never>;
+  'kc-voice': Record<string, never>;
 }
 
 defineWebComponent<Props, Events>('kc-chat', {
@@ -47,13 +47,13 @@ defineWebComponent<Props, Events>('kc-chat', {
     slashCommands={props.slashCommands as SlashCommandItem[] | undefined}
     slashActiveIds={props.slashActiveIds as string[] | undefined} slashCompact={flag('slashCompact')}
     actionsReveal={props.actionsReveal as 'always' | 'hover'}
-    onValueChange={(value) => dispatch('valuechange', { value })}
-    onSubmit={(detail) => dispatch('submit', detail)}
-    onSuggestionClick={(value) => dispatch('suggestionclick', { value })}
-    onModelChange={(modelId) => dispatch('modelchange', { modelId })}
-    onMessageAction={(detail) => dispatch('messageaction', detail)}
-    onSearch={() => dispatch('search', {})}
-    onVoice={() => dispatch('voice', {})}
-    onSlashSelect={(command) => dispatch('slashselect', { command })}
+    onValueChange={(value) => dispatch('kc-value-change', { value })}
+    onSubmit={(detail) => dispatch('kc-submit', detail)}
+    onSuggestionClick={(value) => dispatch('kc-suggestion-click', { value })}
+    onModelChange={(modelId) => dispatch('kc-model-change', { modelId })}
+    onMessageAction={(detail) => dispatch('kc-message-action', detail)}
+    onSearch={() => dispatch('kc-search', {})}
+    onVoice={() => dispatch('kc-voice', {})}
+    onSlashSelect={(command) => dispatch('kc-slash-select', { command })}
   />
 ));

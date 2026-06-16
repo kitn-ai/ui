@@ -16,15 +16,15 @@ interface Props extends Record<string, unknown> {
 interface Events {
   /** Raw audio captured (before transcription) — for hosts that prefer to
    *  handle transcription themselves instead of via the `transcribe` property. */
-  audiocaptured: { blob: Blob };
+  'kc-audio-captured': { blob: Blob };
   /** Transcription completed (the `transcribe` property resolved). */
-  transcription: { text: string };
+  'kc-transcription': { text: string };
 }
 
 /**
  * `<kc-voice-input>` — a mic button that records and transcribes. The
  * canonical **function-property** element: set `el.transcribe` to your async
- * transcriber. Also emits `audiocaptured` (raw blob) and `transcription` (text).
+ * transcriber. Also emits `kc-audio-captured` (raw blob) and `kc-transcription` (text).
  */
 defineWebComponent<Props, Events>('kc-voice-input', {
   transcribe: undefined,
@@ -33,9 +33,9 @@ defineWebComponent<Props, Events>('kc-voice-input', {
   <VoiceInput
     disabled={flag('disabled')}
     onTranscribe={async (blob) => {
-      dispatch('audiocaptured', { blob });
+      dispatch('kc-audio-captured', { blob });
       return props.transcribe ? props.transcribe(blob) : '';
     }}
-    onTranscription={(text) => dispatch('transcription', { text })}
+    onTranscription={(text) => dispatch('kc-transcription', { text })}
   />
 ));

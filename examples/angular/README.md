@@ -45,7 +45,7 @@ npm run typecheck
 |---|---|
 | Register elements | `import '@kitn.ai/chat/elements'` (side-effect, in `ngOnInit`) |
 | Pass arrays/objects | `[groups]="groups"` — sets the DOM *property*, not an attribute string |
-| Listen for events | `(conversationselect)="onSelect($event)"` — `($event as CustomEvent).detail` has the payload |
+| Listen for events | `(kc-conversation-select)="onSelect($event)"` — `($event as CustomEvent).detail` has the payload |
 | Allow unknown tags | `schemas: [CUSTOM_ELEMENTS_SCHEMA]` on the standalone component |
 | Theme | `[theme]="theme()"` — passes `'light' \| 'dark' \| 'auto'` |
 

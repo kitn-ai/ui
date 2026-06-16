@@ -23,7 +23,7 @@ interface Props extends Record<string, unknown> {
   variant?: AttachmentVariant;
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
-  /** Show a remove button per item; clicking it fires a `remove` event. */
+  /** Show a remove button per item; clicking it fires a `kc-remove` event. */
   removable?: boolean;
   /** Also show the media type beneath the filename (non-grid variants). */
   showMediaType?: boolean;
@@ -34,7 +34,7 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-attachments>`. */
 interface Events {
   /** A remove button was clicked. */
-  remove: { id: string };
+  'kc-remove': { id: string };
 }
 
 /**
@@ -46,7 +46,7 @@ interface Events {
  *
  *   - icon + label .......... `variant="inline"`
  *   - visual + hover card .... `variant="grid" hover-card`
- *   - removable chips ........ add `removable` (emits `remove` → { id })
+ *   - removable chips ........ add `removable` (emits `kc-remove` → { id })
  *
  * Data in via the `items` property; the only interaction (`remove`) comes back
  * as an event. For fully-custom hover content, the SolidJS primitives remain the
@@ -75,7 +75,7 @@ defineWebComponent<Props, Events>('kc-attachments', {
           {(item) => (
             <Attachment
               data={item}
-              onRemove={removable() ? () => dispatch('remove', { id: item.id }) : undefined}
+              onRemove={removable() ? () => dispatch('kc-remove', { id: item.id }) : undefined}
             >
               <Show
                 when={hoverCard() && variant() !== 'grid'}

@@ -54,7 +54,7 @@ export interface KcAttachmentsElement extends HTMLElement {
   variant?: "grid" | "inline" | "list";
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
-  /** Show a remove button per item; clicking it fires a `remove` event. */
+  /** Show a remove button per item; clicking it fires a `kc-remove` event. */
   removable?: boolean;
   /** Also show the media type beneath the filename (non-grid variants). */
   showMediaType?: boolean;
@@ -97,8 +97,8 @@ export interface KcChatElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). */
-  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[];
-  /** Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior. */
+  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[];
+  /** Controlled value of the input. When set, the host owns the input text and must update it on `kc-value-change`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -116,7 +116,7 @@ export interface KcChatElement extends HTMLElement {
   codeHighlight?: boolean;
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;
-  /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `modelchange` event fires on selection. */
+  /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. */
   models?: { id: string; name: string; provider?: string }[];
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
@@ -128,7 +128,7 @@ export interface KcChatElement extends HTMLElement {
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
   voice?: boolean;
-  /** Slash commands — when set, typing `/` in the input opens the command palette and fires `slashselect`. Set as a JS property. */
+  /** Slash commands — when set, typing `/` in the input opens the command palette and fires `kc-slash-select`. Set as a JS property. */
   slashCommands?: { id: string; label: string; description?: string; category?: string }[];
   /** Command ids to highlight as active in the palette. */
   slashActiveIds?: string[];
@@ -199,6 +199,10 @@ export interface KcContextElement extends HTMLElement {
   theme?: 'light' | 'dark' | 'auto';
   /** Token-usage data. Set as a JS property. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; reasoningTokens?: number; cacheTokens?: number; estimatedCost?: number };
+  /** Fraction (0–1) above which the meter turns yellow. Defaults to `0.7` (70%). */
+  warnThreshold?: number;
+  /** Fraction (0–1) above which the meter turns red. Defaults to `0.9` (90%). */
+  dangerThreshold?: number;
 }
 
 export interface KcConversationsElement extends HTMLElement {
@@ -235,6 +239,18 @@ export interface KcFeedbackBarElement extends HTMLElement {
   theme?: 'light' | 'dark' | 'auto';
   /** The banner label (e.g. "Was this helpful?"). Attribute: `bar-title` (`title` is avoided — it's a global HTML attribute). */
   barTitle?: string;
+  /** When set, a not-helpful vote opens an optional detail form before the thank-you confirmation. Attribute: `collect-detail`. */
+  collectDetail?: boolean;
+  /** Optional category chips for the detail form. Set as a JS property (array). */
+  categories?: string[];
+  /** Heading for the detail form. Attribute: `detail-title`. */
+  detailTitle?: string;
+  /** Placeholder for the detail comment box. Attribute: `detail-placeholder`. */
+  detailPlaceholder?: string;
+  /** Submit button label in the detail form. Attribute: `submit-label`. */
+  submitLabel?: string;
+  /** Confirmation copy shown after a vote/submit. Attribute: `thanks-message`. */
+  thanksMessage?: string;
 }
 
 export interface KcFileTreeElement extends HTMLElement {
@@ -324,7 +340,7 @@ export interface KcMessageElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** The full message object. Set as a JS property. */
-  message?: { id: string; role: "user" | "assistant"; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string }[]; attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[]; actions?: ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string } };
+  message?: { id: string; role: "user" | "assistant"; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string }[]; attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[]; actions?: ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string } };
   /** Convenience for simple cases when not passing a `message` object. */
   role?: "user" | "assistant";
   /** Convenience content (used when `message` is not set). */
@@ -357,7 +373,7 @@ export interface KcModelSwitcherElement extends HTMLElement {
 export interface KcPromptInputElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior. */
+  /** Controlled value of the input. When set, the host owns the text and must update it on `kc-value-change`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -379,6 +395,8 @@ export interface KcPromptInputElement extends HTMLElement {
   search?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. */
   voice?: boolean;
+  /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kc-stop`. */
+  stoppable?: boolean;
   /** Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). */
   attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
 }
@@ -459,6 +477,17 @@ export interface KcScopePickerElement extends HTMLElement {
   currentLabel?: string;
 }
 
+export interface KcScrollButtonElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** CSS id of the scroll container to control. When omitted the element walks up the DOM (outside its own shadow root) to find the nearest scrollable ancestor. Mirrors the `for` convention of `<label for="...">`. */
+  for?: string;
+  /** Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to `'outline'`. */
+  variant?: "ghost" | "default" | "outline";
+  /** Button size token. Defaults to `'icon'` (square). */
+  size?: "sm" | "lg" | "md" | "icon" | "icon-sm";
+}
+
 export interface KcSkillsElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -488,6 +517,8 @@ export interface KcSourcesElement extends HTMLElement {
   sources: { href: string; title?: undefined | string; description?: undefined | string; label?: undefined | string; showFavicon?: undefined | boolean }[];
   /** Show favicons on all items (per-item `showFavicon` overrides). */
   showFavicon?: boolean;
+  /** When true, each citation chip is labelled with its 1-based index in the merged (prop + declarative-children) list (`[1]`, `[2]`, …) instead of the per-item `label` or domain fallback. HTML attribute: `numbered` (boolean — bare attribute or `numbered="true"`). JS property: `el.numbered = true`. */
+  numbered?: boolean;
 }
 
 export interface KcSuggestionsElement extends HTMLElement {
@@ -570,7 +601,7 @@ export interface KcWorkspaceElement extends HTMLElement {
   /** Id of the open conversation, highlighted in the sidebar. */
   activeId?: string;
   /** The active conversation's message thread, newest last. Set as a JS property. */
-  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[];
+  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[];
   value?: string;
   placeholder?: string;
   loading?: boolean;
@@ -632,6 +663,7 @@ declare global {
     'kc-resizable-item': KcResizableItemElement;
     'kc-response-stream': KcResponseStreamElement;
     'kc-scope-picker': KcScopePickerElement;
+    'kc-scroll-button': KcScrollButtonElement;
     'kc-skills': KcSkillsElement;
     'kc-source': KcSourceElement;
     'kc-sources': KcSourcesElement;

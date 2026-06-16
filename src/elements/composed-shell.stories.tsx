@@ -145,9 +145,9 @@ const SHELL_SNIPPET = `<!-- Compose-your-own chat: a resizable shell built from 
   render();
 
   // — interactions out via events —
-  list.addEventListener('select', (e) => (list.activeId = e.detail.id));
-  suggs.addEventListener('select', (e) => (input.value = e.detail.value));
-  input.addEventListener('submit', (e) => {
+  list.addEventListener('kc-select', (e) => (list.activeId = e.detail.id));
+  suggs.addEventListener('kc-select', (e) => (input.value = e.detail.value));
+  input.addEventListener('kc-submit', (e) => {
     thread = [...thread, { id: Date.now() + '', role: 'user', content: e.detail.value }];
     render();
     // …call your backend, append the assistant reply, re-render…
@@ -163,13 +163,13 @@ export const ComposedShell: Story = {
 
     onMount(() => {
       setProps(list, { conversations, activeId: 'c1' });
-      list.addEventListener('select', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
+      list.addEventListener('kc-select', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
       setProps(ctx, { context });
       setProps(suggs, { suggestions: ['Summarize this thread', 'What changed in v0.3?', 'Show me the layout code'] });
-      suggs.addEventListener('select', (e) => ((input as AnyEl).value = (e as CustomEvent).detail.value));
+      suggs.addEventListener('kc-select', (e) => ((input as AnyEl).value = (e as CustomEvent).detail.value));
       setProps(input, { slashCommands });
       setAttrs(input, { search: true, voice: true, placeholder: 'Message the assistant…' });
-      input.addEventListener('submit', (e) => {
+      input.addEventListener('kc-submit', (e) => {
         const value = (e as unknown as CustomEvent).detail.value as string;
         if (!value) return;
         setMessages((m) => [...m, { id: Date.now() + '', role: 'user', content: value }]);
@@ -270,12 +270,12 @@ const DROPIN_SNIPPET = `<!-- Batteries-included: the whole chat surface in one t
       actions: ['copy', 'like', 'dislike'] },
   ];
 
-  chat.addEventListener('submit', (e) => {
+  chat.addEventListener('kc-submit', (e) => {
     chat.messages = [...chat.messages, { id: Date.now() + '', role: 'user', content: e.detail.value }];
     chat.loading = true;
     // …call your backend, then append the reply and clear loading…
   });
-  chat.addEventListener('modelchange', (e) => (chat.currentModel = e.detail.modelId));
+  chat.addEventListener('kc-model-change', (e) => (chat.currentModel = e.detail.modelId));
 </script>`;
 
 export const DropInChat: Story = {
@@ -293,7 +293,7 @@ export const DropInChat: Story = {
         ],
       });
       setAttrs(chat, { 'chat-title': 'Assistant', search: true, voice: true });
-      chat.addEventListener('submit', (e) => {
+      chat.addEventListener('kc-submit', (e) => {
         const value = (e as unknown as CustomEvent).detail.value as string;
         const cur = (chat as AnyEl).messages as unknown[];
         (chat as AnyEl).messages = [...cur, { id: Date.now() + '', role: 'user', content: value }];
@@ -304,7 +304,7 @@ export const DropInChat: Story = {
           (chat as AnyEl).loading = false;
         }, 600);
       });
-      chat.addEventListener('modelchange', (e) => ((chat as AnyEl).currentModel = (e as CustomEvent).detail.modelId));
+      chat.addEventListener('kc-model-change', (e) => ((chat as AnyEl).currentModel = (e as CustomEvent).detail.modelId));
     });
     return (
       <Frame>

@@ -4,6 +4,7 @@ import {
   Message, MessageAvatar, MessageContent, MessageActions,
   FeedbackBar, Button,
 } from '../index';
+import { Tooltip } from '../ui/tooltip';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Share, Bookmark, Check } from 'lucide-solid';
 
 const meta: Meta = {
@@ -154,7 +155,70 @@ export const WithFeedbackBar: Story = {
             {showFeedback() && (
               <FeedbackBar
                 title="Was this response helpful?"
-                onFeedback={() => setShowFeedback(false)}
+                collectDetail
+                categories={['Inaccurate', 'Not helpful', 'Unsafe', 'Other']}
+                onClose={() => setShowFeedback(false)}
+              />
+            )}
+          </div>
+        </Message>
+      </div>
+    );
+  },
+};
+
+export const FullExample: Story = {
+  name: 'Full Example',
+  render: () => {
+    const [copied, setCopied] = createSignal(false);
+    const [showFeedback, setShowFeedback] = createSignal(true);
+
+    const handleCopy = () => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+      <div class="space-y-6 max-w-2xl p-4">
+        <p class="text-sm text-muted-foreground">
+          Everything combined — avatar, markdown, built-in copy/regenerate plus custom
+          Share &amp; Bookmark (with copy→check confirmation), and a Feedback Bar below.
+        </p>
+
+        <Message>
+          <MessageAvatar src="" fallback="AI" alt="Assistant" />
+          <div class="flex-1 space-y-2">
+            <MessageContent markdown>
+{`Use \`anyhow::Result\` for application code and \`thiserror\` for libraries:
+
+\`\`\`rust
+async fn fetch_user(id: u64) -> anyhow::Result<User> {
+    let user = client.get(&format!("/users/{}", id)).send().await?.json().await?;
+    Ok(user)
+}
+\`\`\`
+
+The \`?\` operator propagates errors from any \`Result\`-returning call.`}
+            </MessageContent>
+            <MessageActions>
+              <Tooltip content={copied() ? 'Copied!' : 'Copy'}>
+                <Button variant="ghost" size="icon-sm" aria-label={copied() ? 'Copied' : 'Copy message'} onClick={handleCopy}>
+                  {copied() ? <Check class="size-3.5 text-green-500" /> : <Copy class="size-3.5" />}
+                </Button>
+              </Tooltip>
+              <Tooltip content="Regenerate">
+                <Button variant="ghost" size="icon-sm" aria-label="Regenerate response"><RefreshCw class="size-3.5" /></Button>
+              </Tooltip>
+              <Tooltip content="Share">
+                <Button variant="ghost" size="icon-sm" aria-label="Share"><Share class="size-3.5" /></Button>
+              </Tooltip>
+              <Tooltip content="Bookmark">
+                <Button variant="ghost" size="icon-sm" aria-label="Bookmark"><Bookmark class="size-3.5" /></Button>
+              </Tooltip>
+            </MessageActions>
+            {showFeedback() && (
+              <FeedbackBar
+                title="Was this response helpful?"
                 onClose={() => setShowFeedback(false)}
               />
             )}

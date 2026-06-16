@@ -16,15 +16,23 @@ const REPLY =
   "I'd recommend a hybrid approach: use chrome.storage.sync with a chunking + delta-sync strategy, and upgrade to a backend only if data grows past 80KB or you need real-time collaboration.";
 
 /**
- * Default — a reasoning trace (chain of thought) above an assistant reply.
- * `<kc-chain-of-thought>` renders the steps from a flat `steps` array; the live
- * demo's per-step icons (Search / Calculator / Lightbulb) and the custom
- * copy/like/dislike action bar aren't part of the element's data model, so those
- * are SolidJS-only touches (see the Solid tab).
+ * Reasoning + Answer — a chain-of-thought trace above an assistant reply.
+ *
+ * `<kc-chain-of-thought>` renders from a flat `steps: { label, content }[]`
+ * property. Key gotchas:
+ * - Set `steps` as a **property** (el.steps = [...]), never as an attribute.
+ * - The `steps` shape has no `icon` field — per-step icons (Search /
+ *   Calculator / Lightbulb in this demo) are `ChainOfThoughtTrigger leftIcon`
+ *   props, a SolidJS-only touch. Confirmed in src/elements/chain-of-thought.tsx.
+ * - The element has no events and cannot be controlled (open/closed state).
+ *   For a controlled reasoning block with `streaming` auto-expand + `kc-open-change`,
+ *   use `<kc-reasoning>` instead.
+ * - The copy/like/dislike bar is a separate `MessageActions` composition; it is
+ *   not part of the chain-of-thought model.
  */
 const reasoning: StoryUsage = {
   intro:
-    "Show the model's reasoning above its answer. `<kc-chain-of-thought>` renders a collapsible trace from a `steps` array of `{ label, content }` — set it as a JS property. The element has no events and no per-step icons; the demo's leading icons and the copy/like/dislike bar are SolidJS extras (see the Solid tab). (The live demo composes the SolidJS `ChainOfThought` + `ChainOfThoughtStep` primitives.)",
+    "Show the model's reasoning above its answer. `<kc-chain-of-thought>` renders a collapsible trace from a `steps` array of `{ label, content }` — set it as a JS **property** (not an attribute). The element has no events and the `steps` shape has no icon field: per-step icons are a SolidJS-only touch via `ChainOfThoughtTrigger leftIcon` (see the Solid tab). For a single streaming reasoning block with `kc-open-change`, use `<kc-reasoning>` instead.",
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
@@ -46,7 +54,7 @@ const reasoning: StoryUsage = {
     content: '${REPLY}',
     actions: ['copy', 'like', 'dislike'],
   };
-  msg.addEventListener('messageaction', (e) => console.log(e.detail));
+  msg.addEventListener('kc-message-action', (e) => console.log(e.detail));
 </script>`,
 
     react: `import { ChainOfThought, Message } from '@kitn.ai/chat/react';
@@ -63,7 +71,7 @@ export function ReasonedReply() {
           content: '${REPLY}',
           actions: ['copy', 'like', 'dislike'],
         }}
-        onMessageaction={(e) => console.log(e.detail)}
+        onMessageAction={(e) => console.log(e.detail)}
       />
     </>
   );
@@ -85,7 +93,7 @@ const message = {
 <template>
   <!-- arrays/objects bind as a property -->
   <kc-chain-of-thought :steps.prop="steps" />
-  <kc-message :message.prop="message" @messageaction="(e) => console.log(e.detail)" />
+  <kc-message :message.prop="message" @kc-message-action="(e) => console.log(e.detail)" />
 </template>`,
 
     svelte: `<script>
@@ -106,7 +114,7 @@ const message = {
 </script>
 
 <kc-chain-of-thought bind:this={cotEl} />
-<kc-message bind:this={msgEl} on:messageaction={(e) => console.log(e.detail)} />`,
+<kc-message bind:this={msgEl} on:kc-message-action={(e) => console.log(e.detail)} />`,
 
     angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
@@ -118,7 +126,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
     <kc-chain-of-thought [steps]="steps"></kc-chain-of-thought>
-    <kc-message [message]="message" (messageaction)="log($event)"></kc-message>
+    <kc-message [message]="message" (kc-message-action)="log($event)"></kc-message>
   \`,
 })
 export class ReasonedReplyComponent {
@@ -199,12 +207,17 @@ export function ReasonedReply() {
  * Example: Conversation with Reasoning — a chain-of-thought trace above an
  * assistant reply. Per-story: the Usage tab shows the snippet for the story
  * you're on; the example-level fields below are the fallback.
+ *
+ * Two elements are available:
+ * - `<kc-chain-of-thought>` — multi-step trace from a `steps` array; no events.
+ * - `<kc-reasoning>` — single collapsible block; `streaming` auto-expands it;
+ *   fires `kc-open-change: { open }`.
  */
 const conversationWithReasoning: ExampleUsage = {
   title: 'Examples/Conversation with Reasoning',
-  ...reasoning, // example-level fallback = the only story, "Default"
+  ...reasoning, // example-level fallback = the only story, "Reasoning + Answer"
   stories: {
-    Default: reasoning,
+    'Reasoning + Answer': reasoning,
   },
 };
 

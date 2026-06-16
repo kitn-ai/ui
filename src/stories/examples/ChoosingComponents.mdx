@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Examples/Choosing components" />
+<Meta title="Docs/Choosing Components" />
 
 # Choosing components
 
@@ -30,7 +30,7 @@ around it. These pre-wire the leaf components for you.
   import '@kitn.ai/chat/elements';
   const chat = document.getElementById('chat');
   chat.messages = [{ id: '1', role: 'assistant', content: 'Hi!' }];
-  chat.addEventListener('submit', (e) => {/* call your model */});
+  chat.addEventListener('kc-submit', (e) => {/* call your model */});
 </script>
 ```
 
@@ -60,6 +60,16 @@ is the **preview/canvas** panel. See the worked example in
 **Not chat-specific.** A code viewer, a markdown renderer, loaders, an image with a
 skeleton, an empty-state, a file explorer — useful in any app. They happen to be
 used inside the chat components, but ship public so you can reuse them standalone.
+
+### Generative UI — _agent-controlled cards_
+
+`<kc-cards>` · `<kc-confirm>` · `<kc-choice>` · `<kc-tasks>` · `<kc-form>` · `<kc-link>` · `<kc-embed>` · `<kc-remote>`
+
+A separate family of `kc-*` elements for **typed, interactive cards** that agents push into
+the chat at runtime. They follow the same prop/event contract as the leaf features above
+but are designed to be driven by a `CardEnvelope` payload from the agent, not authored
+in markup. Browse **Generative UI** in the sidebar for the envelope format, the dispatcher,
+and per-card API references.
 
 ## The decision test
 
@@ -92,3 +102,5 @@ Start at the top. Drop a tier each time you need more control.
   explicit. Answers _"how do I wire it myself, and when should I?"_.
 - **Components** — the per-element pages with full API + the When /
   How / Placement notes.
+- **Generative UI** — the agent-card system (`kc-confirm`, `kc-choice`, `kc-tasks`, …):
+  envelope format, dispatcher, and per-card API.

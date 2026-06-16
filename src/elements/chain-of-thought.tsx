@@ -1,4 +1,4 @@
-import { For, Show } from 'solid-js';
+import { For, Show, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import {
   ChainOfThought,
@@ -21,25 +21,72 @@ interface Props extends Record<string, unknown> {
   steps: Step[];
 }
 
+/** Parse a single light-DOM `<kc-step>` element into a `Step` descriptor.
+ *  Attribute mapping:
+ *   - `label`       → Step.label   (the always-visible heading)
+ *   - textContent   → Step.content (optional expandable detail)
+ */
+export function parseKcStepElement(n: Element): Step {
+  return {
+    label: n.getAttribute('label') ?? '',
+    content: n.textContent?.trim() || undefined,
+  };
+}
+
 /**
  * `<kc-chain-of-thought>` — step-by-step reasoning with connectors and
- * per-step collapsible detail. Data via the `steps` property.
+ * per-step collapsible detail.
+ *
+ * **Route 1 — JS property:** set the `steps` property to an array of
+ * `{ label, content? }` objects.
+ *
+ * **Route 2 — declarative children:** compose `<kc-step>` child elements in
+ * light DOM (hidden by the Shadow DOM — pure data carriers). The `label`
+ * attribute becomes the step heading; `textContent` becomes the expandable
+ * detail. Children are merged after any prop steps.
+ *
+ * ```html
+ * <kc-chain-of-thought>
+ *   <kc-step label="Understand the request">The user wants composable web components.</kc-step>
+ *   <kc-step label="Design the API">Route 1: variant + flags; rich data via properties.</kc-step>
+ *   <kc-step label="Build & verify"></kc-step>
+ * </kc-chain-of-thought>
+ * ```
  */
 defineWebComponent<Props>('kc-chain-of-thought', {
   steps: [],
-}, (props) => (
-  <ChainOfThought>
-    <For each={props.steps}>
-      {(step, i) => (
-        <ChainOfThoughtStep isLast={i() === props.steps.length - 1}>
-          <ChainOfThoughtTrigger>{step.label}</ChainOfThoughtTrigger>
-          <Show when={step.content}>
-            <ChainOfThoughtContent>
-              <ChainOfThoughtItem>{step.content}</ChainOfThoughtItem>
-            </ChainOfThoughtContent>
-          </Show>
-        </ChainOfThoughtStep>
-      )}
-    </For>
-  </ChainOfThought>
-));
+}, (props, { element }) => {
+  // Read declarative <kc-step> children from light DOM.
+  // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
+  const [slottedSteps, setSlottedSteps] = createSignal<Step[]>([]);
+  onMount(() => {
+    const read = () => {
+      const nodes = [...element.querySelectorAll('kc-step')];
+      setSlottedSteps(nodes.map(parseKcStepElement));
+    };
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true, attributes: true, subtree: true });
+    onCleanup(() => observer.disconnect());
+  });
+
+  // Prop steps first; declarative children appended after.
+  const allSteps = () => [...props.steps, ...slottedSteps()];
+
+  return (
+    <ChainOfThought>
+      <For each={allSteps()}>
+        {(step, i) => (
+          <ChainOfThoughtStep isLast={i() === allSteps().length - 1}>
+            <ChainOfThoughtTrigger>{step.label}</ChainOfThoughtTrigger>
+            <Show when={step.content}>
+              <ChainOfThoughtContent>
+                <ChainOfThoughtItem>{step.content}</ChainOfThoughtItem>
+              </ChainOfThoughtContent>
+            </Show>
+          </ChainOfThoughtStep>
+        )}
+      </For>
+    </ChainOfThought>
+  );
+});

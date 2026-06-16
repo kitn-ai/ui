@@ -41,7 +41,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   // reason.streaming = true;  // auto-expands while a thought streams in
 
   // events are CustomEvents on the element (they do not bubble)
-  reason.addEventListener('openchange', (e) => console.log('open:', e.detail.open));
+  reason.addEventListener('kc-open-change', (e) => console.log('open:', e.detail.open));
 </script>`;
 
 const meta = {
@@ -54,7 +54,8 @@ const meta = {
       description: specDescription('kc-reasoning', [
           '`<kc-reasoning>` is the framework-agnostic **web component** for a collapsible reasoning/thinking block that auto-expands while a thought is `streaming`, isolated in **Shadow DOM**.',
           '**When to use:** surfacing model chain-of-thought in a non-Solid app. In SolidJS, compose the `Reasoning` primitives directly.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the body via the `text` **property**, set the `streaming` flag while it streams in, optionally drive the controlled `open` property, and listen for the `openchange` **CustomEvent**.",
+          '**Placement:** inline inside an assistant message row, between the content and any tool calls; renders as a block sized to its content.',
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the body via the `text` **property**, set the `streaming` flag while it streams in, optionally drive the controlled `open` property, and listen for the `kc-open-change` **CustomEvent**.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

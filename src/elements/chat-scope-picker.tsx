@@ -14,13 +14,13 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-scope-picker>`. */
 interface Events {
   /** A scope was chosen (`undefined` filters = "All Content"). */
-  scopechange: { filters: SearchFilters | undefined };
+  'kc-scope-change': { filters: SearchFilters | undefined };
 }
 
 /**
  * `<kc-scope-picker>` — a dropdown to scope a chat by author or tag.
  * Options via `available-authors`/`available-tags` properties; emits
- * `scopechange`.
+ * `kc-scope-change`.
  */
 defineWebComponent<Props, Events>('kc-scope-picker', {
   availableAuthors: [],
@@ -31,6 +31,6 @@ defineWebComponent<Props, Events>('kc-scope-picker', {
     currentLabel={props.currentLabel ?? 'All Content'}
     availableAuthors={props.availableAuthors}
     availableTags={props.availableTags}
-    onScopeChange={(filters) => dispatch('scopechange', { filters })}
+    onScopeChange={(filters) => dispatch('kc-scope-change', { filters })}
   />
 ));

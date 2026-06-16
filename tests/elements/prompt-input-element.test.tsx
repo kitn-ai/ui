@@ -13,8 +13,8 @@ test('emits valuechange on input and submit on Enter', async () => {
 
   let changed: string | null = null;
   let submitted: string | null = null;
-  el.addEventListener('valuechange', (e) => (changed = (e as CustomEvent).detail.value));
-  el.addEventListener('submit', (e) => (submitted = (e as CustomEvent).detail.value));
+  el.addEventListener('kc-value-change', (e) => (changed = (e as CustomEvent).detail.value));
+  el.addEventListener('kc-submit', (e) => (submitted = (e as CustomEvent).detail.value));
 
   textarea.value = 'hello';
   // jsdom shadow-DOM events must be `composed:true` to cross the shadow boundary
@@ -43,8 +43,8 @@ test('default suggestionMode "submit": clicking a suggestion emits submit (sends
 
   let submitted: string | null = null;
   let suggestionClicked: string | null = null;
-  el.addEventListener('submit', (e) => (submitted = (e as CustomEvent).detail.value));
-  el.addEventListener('suggestionclick', (e) => (suggestionClicked = (e as CustomEvent).detail.value));
+  el.addEventListener('kc-submit', (e) => (submitted = (e as CustomEvent).detail.value));
+  el.addEventListener('kc-suggestion-click', (e) => (suggestionClicked = (e as CustomEvent).detail.value));
 
   // A real .click() produces a composed event that reaches Solid's delegated
   // listeners across the shadow boundary in jsdom.
@@ -66,8 +66,8 @@ test('suggestionMode "fill": clicking a suggestion fills the input and emits sug
 
   let submitted: string | null = null;
   let clicked: string | null = null;
-  el.addEventListener('submit', (e) => (submitted = (e as CustomEvent).detail.value));
-  el.addEventListener('suggestionclick', (e) => (clicked = (e as CustomEvent).detail.value));
+  el.addEventListener('kc-submit', (e) => (submitted = (e as CustomEvent).detail.value));
+  el.addEventListener('kc-suggestion-click', (e) => (clicked = (e as CustomEvent).detail.value));
 
   suggestionChip(el, 'Bye').click();
   expect(clicked).toBe('Bye');   // fill mode emits suggestionclick
@@ -84,7 +84,7 @@ test('disallows leading whitespace at the start of the prompt', async () => {
 
   const textarea = el.shadowRoot!.querySelector('textarea')!;
   let changed: string | null = null;
-  el.addEventListener('valuechange', (e) => (changed = (e as CustomEvent).detail.value));
+  el.addEventListener('kc-value-change', (e) => (changed = (e as CustomEvent).detail.value));
 
   // Leading spaces are stripped on input.
   textarea.value = '   hello';

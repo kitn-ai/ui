@@ -148,25 +148,25 @@
     ],
     "events": [
       {
-        "name": "fileselect",
+        "name": "kc-file-select",
         "detail": "{ path: string }",
         "description": "Fired when a file is selected. `detail.path`.",
         "displayDetail": "{ path: string }"
       },
       {
-        "name": "maximizechange",
+        "name": "kc-maximize-change",
         "detail": "{ maximized: false | true }",
         "description": "Artifact's own maximize button toggled (consumer-observable; non-bubbling).",
         "displayDetail": "{ maximized: false | true }"
       },
       {
-        "name": "navigate",
+        "name": "kc-navigate",
         "detail": "{ url: string }",
         "description": "Fired when the preview navigates. `detail.url` = the new location.",
         "displayDetail": "{ url: string }"
       },
       {
-        "name": "tabchange",
+        "name": "kc-tab-change",
         "detail": "{ tab: \"preview\" | \"code\" }",
         "description": "Fired when the Preview|Code tab changes. `detail.tab`.",
         "displayDetail": "{ tab: \"preview\" | \"code\" }"
@@ -218,7 +218,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Show a remove button per item; clicking it fires a `remove` event.",
+        "description": "Show a remove button per item; clicking it fires a `kc-remove` event.",
         "default": "false",
         "displayType": "undefined | false | true"
       },
@@ -242,7 +242,7 @@
     ],
     "events": [
       {
-        "name": "remove",
+        "name": "kc-remove",
         "detail": "{ id: string }",
         "description": "A remove button was clicked.",
         "displayDetail": "{ id: string }"
@@ -438,19 +438,19 @@
     "props": [
       {
         "name": "messages",
-        "type": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]",
+        "type": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]",
         "optional": false,
         "scalar": false,
         "description": "The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`).",
         "default": "[]",
-        "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]"
+        "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]"
       },
       {
         "name": "value",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior.",
+        "description": "Controlled value of the input. When set, the host owns the input text and must update it on `kc-value-change`; leave unset for uncontrolled behavior.",
         "displayType": "undefined | string"
       },
       {
@@ -528,7 +528,7 @@
         "type": "undefined | { id: string; name: string; provider?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": "Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `modelchange` event fires on selection.",
+        "description": "Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection.",
         "displayType": "ModelOption[] | undefined"
       },
       {
@@ -579,7 +579,7 @@
         "type": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": "Slash commands — when set, typing `/` in the input opens the command palette and fires `slashselect`. Set as a JS property.",
+        "description": "Slash commands — when set, typing `/` in the input opens the command palette and fires `kc-slash-select`. Set as a JS property.",
         "displayType": "SlashCommandItem[] | undefined"
       },
       {
@@ -611,49 +611,49 @@
     ],
     "events": [
       {
-        "name": "messageaction",
+        "name": "kc-message-action",
         "detail": "{ messageId: string; action: string }",
         "description": "An action button on a message was clicked. `action` is the built-in name or custom id.",
         "displayDetail": "{ messageId: string; action: string }"
       },
       {
-        "name": "modelchange",
+        "name": "kc-model-change",
         "detail": "{ modelId: string }",
         "description": "The header model switcher changed.",
         "displayDetail": "{ modelId: string }"
       },
       {
-        "name": "search",
+        "name": "kc-search",
         "detail": "Record<string, never>",
         "description": "The Search button was clicked.",
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "slashselect",
+        "name": "kc-slash-select",
         "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
         "description": "A slash command was chosen from the palette.",
         "displayDetail": "{ command: SlashCommandItem }"
       },
       {
-        "name": "submit",
+        "name": "kc-submit",
         "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
         "description": "User submitted a message.",
         "displayDetail": "{ value: string; attachments: AttachmentData[] }"
       },
       {
-        "name": "suggestionclick",
+        "name": "kc-suggestion-click",
         "detail": "{ value: string }",
         "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`).",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "valuechange",
+        "name": "kc-value-change",
         "detail": "{ value: string }",
         "description": "Fired on every input change.",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "voice",
+        "name": "kc-voice",
         "detail": "Record<string, never>",
         "description": "The Mic / voice button was clicked.",
         "displayDetail": "Record<string, never>"
@@ -710,7 +710,7 @@
     ],
     "events": [
       {
-        "name": "select",
+        "name": "kc-select",
         "detail": null,
         "description": "The checkpoint was clicked.",
         "displayDetail": null
@@ -919,9 +919,32 @@
         "scalar": false,
         "description": "Token-usage data. Set as a JS property.",
         "displayType": "ContextData | undefined"
+      },
+      {
+        "name": "warnThreshold",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Fraction (0–1) above which the meter turns yellow. Defaults to `0.7` (70%).",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "dangerThreshold",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Fraction (0–1) above which the meter turns red. Defaults to `0.9` (90%).",
+        "displayType": "undefined | number"
       }
     ],
-    "events": [],
+    "events": [
+      {
+        "name": "kc-threshold-change",
+        "detail": "{ level: \"ok\" | \"warn\" | \"danger\" }",
+        "description": "Fires when the computed severity level changes (ok → warn → danger or back). `detail.level` is `'ok'`, `'warn'`, or `'danger'`.",
+        "displayDetail": "{ level: \"ok\" | \"warn\" | \"danger\" }"
+      }
+    ],
     "composedFrom": [
       {
         "name": "Context",
@@ -972,6 +995,16 @@
         "name": "ContextCacheUsage",
         "group": "Components",
         "storyId": "solid-advanced-elements-contextcacheusage--docs"
+      },
+      {
+        "name": "DEFAULT_WARN_THRESHOLD",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-defaultwarnthreshold--docs"
+      },
+      {
+        "name": "DEFAULT_DANGER_THRESHOLD",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-defaultdangerthreshold--docs"
       }
     ],
     "tokens": []
@@ -1010,19 +1043,19 @@
     ],
     "events": [
       {
-        "name": "conversationselect",
+        "name": "kc-conversation-select",
         "detail": "{ id: string }",
         "description": "A conversation was selected.",
         "displayDetail": "{ id: string }"
       },
       {
-        "name": "newchat",
+        "name": "kc-new-chat",
         "detail": "Record<string, never>",
         "description": "The \"New chat\" button was clicked.",
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "togglesidebar",
+        "name": "kc-toggle-sidebar",
         "detail": "Record<string, never>",
         "description": "The sidebar toggle was clicked.",
         "displayDetail": "Record<string, never>"
@@ -1144,20 +1177,74 @@
         "description": "The banner label (e.g. \"Was this helpful?\"). Attribute: `bar-title` (`title` is avoided — it's a global HTML attribute).",
         "default": "'Was this helpful?'",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "collectDetail",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "When set, a not-helpful vote opens an optional detail form before the thank-you confirmation. Attribute: `collect-detail`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "categories",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Optional category chips for the detail form. Set as a JS property (array).",
+        "displayType": "undefined | string[]"
+      },
+      {
+        "name": "detailTitle",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Heading for the detail form. Attribute: `detail-title`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "detailPlaceholder",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Placeholder for the detail comment box. Attribute: `detail-placeholder`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "submitLabel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Submit button label in the detail form. Attribute: `submit-label`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "thanksMessage",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Confirmation copy shown after a vote/submit. Attribute: `thanks-message`.",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
       {
-        "name": "close",
+        "name": "kc-close",
         "detail": null,
         "description": "The user dismissed the banner.",
         "displayDetail": null
       },
       {
-        "name": "feedback",
+        "name": "kc-feedback",
         "detail": "{ value: \"helpful\" | \"not-helpful\" }",
         "description": "The user rated the response. `value` is `'helpful'` or `'not-helpful'`.",
         "displayDetail": "{ value: \"helpful\" | \"not-helpful\" }"
+      },
+      {
+        "name": "kc-feedback-detail",
+        "detail": "{ value: \"helpful\" | \"not-helpful\"; category?: undefined | string; comment?: undefined | string }",
+        "description": "The user submitted the optional detail form (`collect-detail`).",
+        "displayDetail": "{ value: \"helpful\" | \"not-helpful\"; category?: undefined | string; comment?: undefined | string }"
       }
     ],
     "composedFrom": [
@@ -1202,7 +1289,7 @@
     ],
     "events": [
       {
-        "name": "select",
+        "name": "kc-select",
         "detail": "{ path: string }",
         "description": "Fired when a file is selected. `detail.path` = the file's path.",
         "displayDetail": "{ path: string }"
@@ -1260,7 +1347,7 @@
     ],
     "events": [
       {
-        "name": "filesadded",
+        "name": "kc-files-added",
         "detail": "{ files: File[] }",
         "description": "Files were picked or dropped.",
         "displayDetail": "{ files: File[] }"
@@ -1510,11 +1597,11 @@
     "props": [
       {
         "name": "message",
-        "type": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }",
+        "type": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }",
         "optional": true,
         "scalar": false,
         "description": "The full message object. Set as a JS property.",
-        "displayType": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }"
+        "displayType": "undefined | { id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }"
       },
       {
         "name": "role",
@@ -1596,7 +1683,7 @@
     ],
     "events": [
       {
-        "name": "messageaction",
+        "name": "kc-message-action",
         "detail": "{ messageId: string; action: string }",
         "description": "An action button was clicked. `action` is the built-in name or custom id.",
         "displayDetail": "{ messageId: string; action: string }"
@@ -1691,7 +1778,7 @@
     ],
     "events": [
       {
-        "name": "modelchange",
+        "name": "kc-model-change",
         "detail": "{ modelId: string }",
         "description": "A model was selected.",
         "displayDetail": "{ modelId: string }"
@@ -1716,7 +1803,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior.",
+        "description": "Controlled value of the input. When set, the host owns the text and must update it on `kc-value-change`; leave unset for uncontrolled behavior.",
         "displayType": "undefined | string"
       },
       {
@@ -1807,6 +1894,15 @@
         "displayType": "undefined | false | true"
       },
       {
+        "name": "stoppable",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "When set and `loading` is true, the send button is replaced by a Stop button (square icon, \"Stop\" aria-label). Clicking it fires `kc-stop`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
         "name": "attachments",
         "type": "undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]",
         "optional": true,
@@ -1817,37 +1913,49 @@
     ],
     "events": [
       {
-        "name": "search",
+        "name": "kc-search",
         "detail": "Record<string, never>",
         "description": "The Search (Globe) toolbar button was clicked.",
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "slashselect",
+        "name": "kc-slash-select",
         "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
         "description": "A slash command was chosen from the palette.",
         "displayDetail": "{ command: SlashCommandItem }"
       },
       {
-        "name": "submit",
+        "name": "kc-stop",
+        "detail": "Record<string, never>",
+        "description": "The Stop button was clicked while `stoppable` and `loading` are both true.",
+        "displayDetail": "Record<string, never>"
+      },
+      {
+        "name": "kc-submit",
         "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
         "description": "The user submitted the prompt (Enter or send button) with its attachments.",
         "displayDetail": "{ value: string; attachments: AttachmentData[] }"
       },
       {
-        "name": "suggestionclick",
+        "name": "kc-suggestion-click",
         "detail": "{ value: string }",
         "description": "A suggestion was clicked while `suggestion-mode=\"fill\"`.",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "valuechange",
+        "name": "kc-toolbar-action",
+        "detail": "{ action: string }",
+        "description": "A custom `<kc-action>` toolbar button was clicked. `action` is the `id` of the `<kc-action>` element that was clicked.",
+        "displayDetail": "{ action: string }"
+      },
+      {
+        "name": "kc-value-change",
         "detail": "{ value: string }",
         "description": "The input text changed (fires on every keystroke).",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "voice",
+        "name": "kc-voice",
         "detail": "Record<string, never>",
         "description": "The Voice (Mic) toolbar button was clicked.",
         "displayDetail": "Record<string, never>"
@@ -1908,7 +2016,7 @@
     ],
     "events": [
       {
-        "name": "openchange",
+        "name": "kc-open-change",
         "detail": "{ open: false | true }",
         "description": "Open state changed (via the trigger or streaming auto-open).",
         "displayDetail": "{ open: false | true }"
@@ -2001,13 +2109,13 @@
     ],
     "events": [
       {
-        "name": "change",
+        "name": "kc-change",
         "detail": "{ sizes: number[] }",
         "description": "Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent.",
         "displayDetail": "{ sizes: number[] }"
       },
       {
-        "name": "maximizechange",
+        "name": "kc-maximize-change",
         "detail": "{ maximized: false | true; index: null | number }",
         "description": "Observe layout maximize state.",
         "displayDetail": "{ maximized: false | true; index: null | number }"
@@ -2072,13 +2180,13 @@
     ],
     "events": [
       {
-        "name": "change",
+        "name": "kc-change",
         "detail": "unknown",
         "description": "",
         "displayDetail": "unknown"
       },
       {
-        "name": "maximizechange",
+        "name": "kc-maximize-change",
         "detail": "unknown",
         "description": "",
         "displayDetail": "unknown"
@@ -2136,7 +2244,7 @@
     ],
     "events": [
       {
-        "name": "complete",
+        "name": "kc-complete",
         "detail": null,
         "description": "Streaming finished.",
         "displayDetail": null
@@ -2186,7 +2294,7 @@
     ],
     "events": [
       {
-        "name": "scopechange",
+        "name": "kc-scope-change",
         "detail": "{ filters: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }",
         "description": "A scope was chosen (`undefined` filters = \"All Content\").",
         "displayDetail": "{ filters: SearchFilters | undefined }"
@@ -2197,6 +2305,55 @@
         "name": "ChatScopePicker",
         "group": "Components",
         "storyId": "solid-advanced-elements-chatscopepicker--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kc-scroll-button",
+    "className": "KcScrollButtonElement",
+    "displayName": "ScrollButton",
+    "props": [
+      {
+        "name": "for",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "CSS id of the scroll container to control. When omitted the element walks up the DOM (outside its own shadow root) to find the nearest scrollable ancestor. Mirrors the `for` convention of `<label for=\"...\">`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "variant",
+        "type": "undefined | \"ghost\" | \"default\" | \"outline\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to `'outline'`.",
+        "default": "'outline'",
+        "displayType": "undefined | \"ghost\" | \"default\" | \"outline\""
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Button size token. Defaults to `'icon'` (square).",
+        "default": "'icon'",
+        "displayType": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\""
+      }
+    ],
+    "events": [
+      {
+        "name": "kc-scroll",
+        "detail": null,
+        "description": "Emitted when the user clicks the button and `scrollToBottom()` is called. Carries no detail — consumers use it to know a manual scroll occurred.",
+        "displayDetail": null
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Button",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-button--docs"
       }
     ],
     "tokens": []
@@ -2323,6 +2480,15 @@
         "description": "Show favicons on all items (per-item `showFavicon` overrides).",
         "default": "false",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "numbered",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "When true, each citation chip is labelled with its 1-based index in the merged (prop + declarative-children) list (`[1]`, `[2]`, …) instead of the per-item `label` or domain fallback. HTML attribute: `numbered` (boolean — bare attribute or `numbered=\"true\"`). JS property: `el.numbered = true`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [],
@@ -2401,7 +2567,7 @@
     ],
     "events": [
       {
-        "name": "select",
+        "name": "kc-select",
         "detail": "{ value: string }",
         "description": "A suggestion was clicked.",
         "displayDetail": "{ value: string }"
@@ -2551,7 +2717,7 @@
     ],
     "events": [
       {
-        "name": "stop",
+        "name": "kc-stop",
         "detail": null,
         "description": "The \"stop / answer now\" affordance was clicked.",
         "displayDetail": null
@@ -2629,13 +2795,13 @@
     ],
     "events": [
       {
-        "name": "audiocaptured",
+        "name": "kc-audio-captured",
         "detail": "{ blob: Blob }",
         "description": "Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property.",
         "displayDetail": "{ blob: Blob }"
       },
       {
-        "name": "transcription",
+        "name": "kc-transcription",
         "detail": "{ text: string }",
         "description": "Transcription completed (the `transcribe` property resolved).",
         "displayDetail": "{ text: string }"
@@ -2683,12 +2849,12 @@
       },
       {
         "name": "messages",
-        "type": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]",
+        "type": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]",
         "optional": false,
         "scalar": false,
         "description": "The active conversation's message thread, newest last. Set as a JS property.",
         "default": "[]",
-        "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]"
+        "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]"
       },
       {
         "name": "value",
@@ -2883,67 +3049,67 @@
     ],
     "events": [
       {
-        "name": "conversationselect",
+        "name": "kc-conversation-select",
         "detail": "{ id: string }",
         "description": "A conversation was selected in the sidebar.",
         "displayDetail": "{ id: string }"
       },
       {
-        "name": "messageaction",
+        "name": "kc-message-action",
         "detail": "{ messageId: string; action: string }",
         "description": "An action button on a message was clicked.",
         "displayDetail": "{ messageId: string; action: string }"
       },
       {
-        "name": "modelchange",
+        "name": "kc-model-change",
         "detail": "{ modelId: string }",
         "description": "The header model switcher changed.",
         "displayDetail": "{ modelId: string }"
       },
       {
-        "name": "newchat",
+        "name": "kc-new-chat",
         "detail": "Record<string, never>",
         "description": "The \"New chat\" button was clicked.",
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "search",
+        "name": "kc-search",
         "detail": "Record<string, never>",
         "description": "The Search button was clicked.",
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "sidebartoggle",
+        "name": "kc-sidebar-toggle",
         "detail": "{ collapsed: false | true }",
         "description": "The sidebar was collapsed or expanded.",
         "displayDetail": "{ collapsed: false | true }"
       },
       {
-        "name": "slashselect",
+        "name": "kc-slash-select",
         "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
         "description": "A slash command was chosen from the palette.",
         "displayDetail": "{ command: SlashCommandItem }"
       },
       {
-        "name": "submit",
+        "name": "kc-submit",
         "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
         "description": "User submitted a message.",
         "displayDetail": "{ value: string; attachments: AttachmentData[] }"
       },
       {
-        "name": "suggestionclick",
+        "name": "kc-suggestion-click",
         "detail": "{ value: string }",
         "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`).",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "valuechange",
+        "name": "kc-value-change",
         "detail": "{ value: string }",
         "description": "Fired on every input change.",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "voice",
+        "name": "kc-voice",
         "detail": "Record<string, never>",
         "description": "The Mic / voice button was clicked.",
         "displayDetail": "Record<string, never>"

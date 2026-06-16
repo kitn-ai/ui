@@ -19,7 +19,7 @@ test('renders conversations and emits conversationselect', async () => {
   expect(el.shadowRoot!.textContent).toContain('Hello world');
 
   let selected: string | null = null;
-  el.addEventListener('conversationselect', (e) => (selected = (e as CustomEvent).detail.id));
+  el.addEventListener('kc-conversation-select', (e) => (selected = (e as CustomEvent).detail.id));
   const item = el.shadowRoot!.querySelector('[data-conversation-id="c1"]') as HTMLElement;
   item.click();
   expect(selected).toBe('c1');
@@ -37,7 +37,7 @@ test('does not emit old "select" event (breaking change)', async () => {
   await Promise.resolve();
 
   let selectFired = false;
-  el.addEventListener('select', () => (selectFired = true));
+  el.addEventListener('kc-select', () => (selectFired = true));
   const item = el.shadowRoot!.querySelector('[data-conversation-id="c1"]') as HTMLElement;
   item.click();
   expect(selectFired).toBe(false);

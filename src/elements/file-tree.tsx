@@ -12,7 +12,7 @@ interface Props extends Record<string, unknown> {
 
 interface Events extends Record<string, unknown> {
   /** Fired when a file is selected. `detail.path` = the file's path. */
-  select: { path: string };
+  'kc-select': { path: string };
 }
 
 /**
@@ -44,7 +44,7 @@ defineWebComponent<Props, Events>('kc-file-tree', {
           files={props.files}
           activeFile={props.activeFile}
           defaultExpanded={props.defaultExpanded}
-          onSelect={(path) => dispatch('select', { path })}
+          onSelect={(path) => dispatch('kc-select', { path })}
         />
       </div>
     </div>

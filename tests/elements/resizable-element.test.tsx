@@ -79,7 +79,7 @@ test('change CustomEvent fires when sizes change programmatically (visibility to
   const group = makeGroup([{}, {}, {}]);
   await flush();
   let detail: { sizes: number[] } | null = null;
-  group.addEventListener('change', (e) => (detail = (e as CustomEvent).detail));
+  group.addEventListener('kc-change', (e) => (detail = (e as CustomEvent).detail));
   // Hide the middle item — a visibility change should re-layout and emit change.
   group.children[1].setAttribute('hidden', '');
   await flush();
@@ -160,7 +160,7 @@ test('maximize(i) / restore() host methods drive the layout + maximizechange', a
   const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void; restore(): void; maximizedIndex: number | null };
   await flush();
   const events: { maximized: boolean; index: number | null }[] = [];
-  group.addEventListener('maximizechange', (e) => events.push((e as CustomEvent).detail));
+  group.addEventListener('kc-maximize-change', (e) => events.push((e as CustomEvent).detail));
   group.maximize(2);
   await flush();
   expect(group.children[0].hasAttribute('hidden')).toBe(true);
@@ -280,7 +280,7 @@ test('maximize and restore each emit exactly one change (no storm)', async () =>
   const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void; restore(): void };
   await flush();
   let count = 0;
-  group.addEventListener('change', () => count++);
+  group.addEventListener('kc-change', () => count++);
   group.maximize(1);
   await flush();
   const afterMax = count;

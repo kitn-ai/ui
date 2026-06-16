@@ -3,7 +3,8 @@ import { PromptInput, PromptInputTextarea, PromptInputActions } from '../compone
 import { PromptSuggestion } from '../components/prompt-suggestion';
 import { SlashCommand, type SlashCommandItem } from '../components/slash-command';
 import { Button } from '../ui/button';
-import { Paperclip, Globe, Mic } from 'lucide-solid';
+import { Tooltip } from '../ui/tooltip';
+import { Paperclip, Globe, Mic, Square } from 'lucide-solid';
 import {
   Attachments,
   Attachment,
@@ -12,6 +13,8 @@ import {
   AttachmentRemove,
   type AttachmentData,
 } from '../components/attachments';
+import { actionIcon } from '../ui/action-icons';
+import type { CustomAction } from './chat-types';
 
 export interface DefaultPromptInputProps {
   value: string;
@@ -39,6 +42,15 @@ export interface DefaultPromptInputProps {
   onSearch?: () => void;
   onVoice?: () => void;
   onSlashSelect?: (command: SlashCommandItem) => void;
+  /** When `true` and `loading` is also `true`, the send button is replaced by
+   *  a Stop button that calls `onStop`. */
+  stoppable?: boolean;
+  /** Called when the user clicks the Stop button. */
+  onStop?: () => void;
+  /** Custom toolbar action buttons declared as `<kc-action>` light-DOM children. */
+  toolbarActions?: CustomAction[];
+  /** Called when a custom toolbar action button is clicked, with the action id. */
+  onAction?: (id: string) => void;
 }
 
 function fileToAttachment(file: File): AttachmentData {
@@ -69,6 +81,8 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
 
   const sendDisabled = () =>
     props.disabled || props.loading || (!props.value.trim() && attachments().length === 0);
+
+  const showStop = () => !!props.loading && !!props.stoppable;
 
   return (
     <>
@@ -168,19 +182,58 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 <Mic class="size-4" />
               </Button>
             </Show>
+            <For each={props.toolbarActions ?? []}>
+              {(action) => {
+                const Icon = actionIcon(action.icon);
+                const label = action.tooltip ?? action.label;
+                const btn = (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-sm"
+                    class="rounded-full"
+                    aria-label={action.label}
+                    data-action={action.id}
+                    disabled={props.disabled}
+                    onClick={() => props.onAction?.(action.id)}
+                  >
+                    <Show when={Icon} fallback={<span class="px-1 text-xs">{action.label}</span>}>
+                      {(I) => { const C = I(); return <C class="size-4" />; }}
+                    </Show>
+                  </Button>
+                );
+                return Icon ? <Tooltip content={label}>{btn}</Tooltip> : btn;
+              }}
+            </For>
           </div>
-          <Button
-            size="icon-sm"
-            class="rounded-full"
-            data-testid="send"
-            aria-label="Send message"
-            disabled={sendDisabled()}
-            onClick={props.onSubmit}
+          <Show
+            when={showStop()}
+            fallback={
+              <Button
+                size="icon-sm"
+                class="rounded-full"
+                data-testid="send"
+                aria-label="Send message"
+                disabled={sendDisabled()}
+                onClick={props.onSubmit}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+                </svg>
+              </Button>
+            }
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
-            </svg>
-          </Button>
+            <Button
+              size="icon-sm"
+              variant="outline"
+              class="rounded-full"
+              data-testid="stop"
+              aria-label="Stop"
+              onClick={props.onStop}
+            >
+              <Square class="size-3" />
+            </Button>
+          </Show>
         </PromptInputActions>
       </PromptInput>
     </>

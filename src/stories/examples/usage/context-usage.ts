@@ -4,7 +4,22 @@ import type { ExampleUsage, StoryUsage } from './types';
  * Build the web-component snippets. `<kc-context>` takes a single `context`
  * object PROPERTY (`usedTokens`, `maxTokens`, plus optional input/output/
  * reasoning/cache token counts + `estimatedCost`) and renders the trigger,
- * popover, and breakdown for you. It has no events.
+ * popover, and breakdown for you.
+ *
+ * Color thresholds are configurable via numeric properties:
+ *   - `warnThreshold`   (default 0.7)  — fraction above which the bar turns yellow
+ *   - `dangerThreshold` (default 0.9)  — fraction above which the bar turns red
+ *
+ * When the computed severity level changes (`ok` → `warn` → `danger` or back),
+ * `<kc-context>` fires a **`kc-threshold-change`** CustomEvent with
+ * `detail.level` set to `'ok'`, `'warn'`, or `'danger'`.
+ *
+ * Token counts come from the API response `usage` field after each turn:
+ *   inputTokens    ← usage.input_tokens
+ *   outputTokens   ← usage.output_tokens
+ *   cacheTokens    ← usage.cache_read_input_tokens (+ cache_creation_input_tokens)
+ *   reasoningTokens← usage.reasoning_tokens (extended thinking models)
+ * estimatedCost is calculated by the app; there is no built-in cost computation.
  */
 const htmlSnippet = (obj: string) => `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
@@ -69,11 +84,12 @@ export class UsageComponent {
 /**
  * Low Usage (Green) — early in a conversation; input + output rows only.
  * The threshold colour (green/yellow/red) is derived from used/max by the
- * element, so the same markup covers Low/Medium/High — only the numbers change.
+ * element: green ≤ 70%, yellow > 70%, red > 90%. Thresholds are hardcoded —
+ * there is no `warnThreshold`/`dangerThreshold` prop yet (planned gap).
  */
 const lowUsage: StoryUsage = {
   intro:
-    "Show how much of the model's context window is used. Pass a `context` object with `usedTokens` / `maxTokens` (plus optional `inputTokens` / `outputTokens` / `estimatedCost`) to `<kc-context>` — the trigger colour shifts green to red as usage climbs. (The live demo composes the SolidJS `Context` primitives.)",
+    "Show how much of the model's context window is used. Pass a `context` object with `usedTokens` / `maxTokens` (plus optional `inputTokens` / `outputTokens` / `estimatedCost`) to `<kc-context>` as a JS **property** — the trigger colour shifts green → yellow → red as usage climbs. Override the thresholds with `warnThreshold` (default `0.7`) and `dangerThreshold` (default `0.9`) numeric properties. Listen for `kc-threshold-change` to react when severity shifts. (The live demo composes the SolidJS `Context` primitives.)",
   snippets: {
     html: htmlSnippet(`{
     usedTokens: 4200,
@@ -139,11 +155,11 @@ export function UsageIndicator() {
 
 /**
  * Medium Usage (Yellow) — extended conversation with reasoning; adds the
- * reasoning row and crosses the ~75% warning threshold.
+ * reasoning row and crosses the 70% warning threshold.
  */
 const mediumUsage: StoryUsage = {
   intro:
-    "Same element, higher numbers. As `usedTokens / maxTokens` crosses ~75% the trigger turns yellow; include `reasoningTokens` to surface a reasoning row in the breakdown. (The live demo composes the SolidJS `Context` primitives.)",
+    "Same element, higher numbers. As `usedTokens / maxTokens` crosses `warnThreshold` (default 70%) the trigger turns yellow. Pass `warnThreshold` as a numeric property to override. Include `reasoningTokens` to surface a reasoning row in the breakdown — comes from `usage.reasoning_tokens` on extended-thinking models. (The live demo composes the SolidJS `Context` primitives.)",
   snippets: {
     html: htmlSnippet(`{
     usedTokens: 150000,
@@ -214,12 +230,12 @@ export function UsageIndicator() {
 };
 
 /**
- * High Usage (Red) — near the context limit; same rows as Medium, numbers
- * pushed past the danger threshold so the trigger goes red.
+ * High Usage (Red) — near the context limit; numbers pushed past the 90%
+ * danger threshold so the trigger goes red.
  */
 const highUsage: StoryUsage = {
   intro:
-    "Near the limit. Push `usedTokens` toward `maxTokens` and the trigger goes red, signalling the user to start a new conversation. Same markup as Medium — only the counts differ. (The live demo composes the SolidJS `Context` primitives.)",
+    "Near the limit. Push `usedTokens` past `dangerThreshold` (default 90%) of `maxTokens` and the trigger goes red — a cue for the user to start a new conversation. Pass `dangerThreshold` as a numeric property to override. Same markup as Medium — only the counts differ. (The live demo composes the SolidJS `Context` primitives.)",
   snippets: {
     html: htmlSnippet(`{
     usedTokens: 189000,
@@ -292,10 +308,15 @@ export function UsageIndicator() {
 /**
  * Full Breakdown with Cache — detailed usage including cache-hit tokens; adds
  * `cacheTokens` (and the cache row in the Solid composition).
+ *
+ * From the API: `cacheTokens` = `usage.cache_read_input_tokens` from the
+ * response (tokens served from prompt cache). Cache-write tokens
+ * (`usage.cache_creation_input_tokens`) are also counted toward `usedTokens`
+ * but shown under the same row here for simplicity.
  */
 const withCache: StoryUsage = {
   intro:
-    "Show the full breakdown including cache-hit tokens. Add `cacheTokens` to the `context` object and `<kc-context>` includes it in the popover breakdown. (The live demo composes the SolidJS `Context` primitives, adding a `ContextCacheUsage` row.)",
+    "Show the full breakdown including cache-hit tokens. Add `cacheTokens` to the `context` object (sourced from `usage.cache_read_input_tokens` in the API response) and `<kc-context>` includes it in the popover breakdown. (The live demo composes the SolidJS `Context` primitives, adding a `ContextCacheUsage` row.)",
   snippets: {
     html: htmlSnippet(`{
     usedTokens: 82000,
@@ -407,7 +428,7 @@ const inHeaderBar: StoryUsage = {
     { id: 'claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic' },
   ];
   models.currentModel = 'claude-4';
-  models.addEventListener('modelchange', (e) => console.log(e.detail));
+  models.addEventListener('kc-model-change', (e) => console.log(e.detail));
 </script>`,
     react: `import { Context, ModelSwitcher } from '@kitn.ai/chat/react';
 
@@ -418,7 +439,7 @@ export function ChatHeader() {
   ];
   return (
     <header style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      <ModelSwitcher models={models} currentModel="claude-4" onModelchange={(e) => console.log(e.detail)} />
+      <ModelSwitcher models={models} currentModel="claude-4" onModelChange={(e) => console.log(e.detail)} />
       <Context
         context={{
           usedTokens: 67000,
@@ -449,7 +470,7 @@ const models = [
 
 <template>
   <header style="display:flex;align-items:center;gap:0.5rem">
-    <kc-model-switcher :models.prop="models" current-model="claude-4" @modelchange="(e) => console.log(e.detail)" />
+    <kc-model-switcher :models.prop="models" current-model="claude-4" @kc-model-change="(e) => console.log(e.detail)" />
     <kc-context :context.prop="context" />
   </header>
 </template>`,
@@ -474,7 +495,7 @@ const models = [
 </script>
 
 <header style="display:flex;align-items:center;gap:0.5rem">
-  <kc-model-switcher bind:this={modelsEl} current-model="claude-4" on:modelchange={(e) => console.log(e.detail)} />
+  <kc-model-switcher bind:this={modelsEl} current-model="claude-4" on:kc-model-change={(e) => console.log(e.detail)} />
   <kc-context bind:this={ctxEl} />
 </header>`,
     angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
@@ -487,7 +508,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
     <header style="display:flex;align-items:center;gap:0.5rem">
-      <kc-model-switcher [models]="models" current-model="claude-4" (modelchange)="onModelChange($event)"></kc-model-switcher>
+      <kc-model-switcher [models]="models" current-model="claude-4" (kc-model-change)="onModelChange($event)"></kc-model-switcher>
       <kc-context [context]="context"></kc-context>
     </header>
   \`,

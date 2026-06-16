@@ -7,7 +7,7 @@
                           web components.
 
   CustomEvents are listened to with @event="handler":
-    @submit="onSubmit"  — `$event` is the raw CustomEvent; `.detail` carries the
+    @kc-submit="onSubmit"  — `$event` is the raw CustomEvent; `.detail` carries the
                           payload.
 
   vite.config.ts declares `isCustomElement: (tag) => tag.startsWith('kc-')`
@@ -137,7 +137,7 @@ function toggleTheme(): void {
 // ── kc-workspace event handlers ─────────────────────────────────────────
 
 /**
- * @submit — fired when the user sends a message.
+ * @kc-submit — fired when the user sends a message.
  * Vue listens to CustomEvents with @event="handler".
  * `$event` is the raw Event; cast to CustomEvent to access `.detail`.
  */
@@ -179,7 +179,7 @@ function onSubmit(event: Event): void {
 }
 
 /**
- * @messageaction — copy, like, dislike, regenerate actions on messages.
+ * @kc-message-action — copy, like, dislike, regenerate actions on messages.
  */
 async function onMessageAction(event: Event): Promise<void> {
   const { messageId, action } = ((event as CustomEvent).detail ?? {}) as {
@@ -228,7 +228,7 @@ async function onMessageAction(event: Event): Promise<void> {
 }
 
 /**
- * @modelchange — user switched the active model.
+ * @kc-model-change — user switched the active model.
  */
 function onModelChange(event: Event): void {
   const { modelId } = ((event as CustomEvent).detail ?? {}) as { modelId: string };
@@ -239,7 +239,7 @@ function onModelChange(event: Event): void {
 }
 
 /**
- * @conversationselect — user clicked a conversation in the sidebar.
+ * @kc-conversation-select — user clicked a conversation in the sidebar.
  */
 function onConversationSelect(event: Event): void {
   const { id } = ((event as CustomEvent).detail ?? {}) as { id: string };
@@ -248,7 +248,7 @@ function onConversationSelect(event: Event): void {
 }
 
 /**
- * @newchat — user clicked "New chat" in the sidebar.
+ * @kc-new-chat — user clicked "New chat" in the sidebar.
  */
 function onNewChat(): void {
   const id = 'c-' + generateId();
@@ -270,7 +270,7 @@ function onNewChat(): void {
 }
 
 /**
- * @sidebartoggle — hamburger / toggle from within the workspace.
+ * @kc-sidebar-toggle — hamburger / toggle from within the workspace.
  */
 function onSidebarToggle(): void {
   document.body.classList.toggle('sidebar-open');
@@ -344,12 +344,12 @@ function onStandaloneSubmit(event: Event): void {
           - :theme.prop           'light'|'dark'|'auto'
 
         Event bindings (@event):
-          - @submit               — user sends a message
-          - @messageaction        — copy / like / dislike / regenerate
-          - @modelchange          — model picker changed
-          - @conversationselect   — sidebar item clicked
-          - @newchat              — "New chat" button clicked
-          - @sidebartoggle        — hamburger / sidebar toggle
+          - @kc-submit               — user sends a message
+          - @kc-message-action        — copy / like / dislike / regenerate
+          - @kc-model-change          — model picker changed
+          - @kc-conversation-select   — sidebar item clicked
+          - @kc-new-chat              — "New chat" button clicked
+          - @kc-sidebar-toggle        — hamburger / sidebar toggle
       -->
       <kc-workspace
         :groups.prop="groups"
@@ -363,12 +363,12 @@ function onStandaloneSubmit(event: Event): void {
         :slashCommands.prop="slashCommands"
         :loading.prop="loading"
         :theme.prop="theme"
-        @submit="onSubmit"
-        @messageaction="onMessageAction"
-        @modelchange="onModelChange"
-        @conversationselect="onConversationSelect"
-        @newchat="onNewChat"
-        @sidebartoggle="onSidebarToggle"
+        @kc-submit="onSubmit"
+        @kc-message-action="onMessageAction"
+        @kc-model-change="onModelChange"
+        @kc-conversation-select="onConversationSelect"
+        @kc-new-chat="onNewChat"
+        @kc-sidebar-toggle="onSidebarToggle"
         style="flex: 1; min-height: 0;"
       ></kc-workspace>
     </div>
@@ -382,7 +382,7 @@ function onStandaloneSubmit(event: Event): void {
         placeholder="Standalone prompt input…"
         :slashCommands.prop="slashCommands"
         :theme.prop="theme"
-        @submit="onStandaloneSubmit"
+        @kc-submit="onStandaloneSubmit"
       ></kc-prompt-input>
       <ul v-if="draftSubmissions.length > 0" class="draft-list">
         <li v-for="d in draftSubmissions" :key="d">submitted: {{ d }}</li>

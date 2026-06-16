@@ -179,4 +179,8 @@ bundle) and registers one renderer per card `type`. `examples/remote-host/` is t
 host page. The real cross-origin behavior is verified by the standalone Playwright suite
 (`tests/e2e/`).
 
+## Card elements are `kc-*` components too
+
+Each card type (`kc-confirm`, `kc-choice`, `kc-tasks`, `kc-form`, `kc-link`, `kc-embed`, `kc-remote`) is a registered `kc-*` custom element with its own prop/event API — the same model as everything else under **Components**. They live here under **Generative UI / Cards** because they only make sense inside the dispatcher/envelope system, but they follow the same component contract: attributes, JS properties, a `kc-card` event, CSS parts. Browse **Generative UI → Cards** for the per-element API references and live demos.
+
 See **Cards** for each card type, and **SDK** for the dispatcher in action.

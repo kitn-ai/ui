@@ -16,7 +16,7 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-checkpoint>`. */
 interface Events {
   /** The checkpoint was clicked. */
-  select: void;
+  'kc-select': void;
 }
 
 /**
@@ -38,7 +38,7 @@ defineWebComponent<Props, Events>('kc-checkpoint', {
       aria-label={props.label ? undefined : (props.tooltip ?? 'Checkpoint')}
       variant={props.variant}
       size={props.size}
-      onClick={() => dispatch('select')}
+      onClick={() => dispatch('kc-select')}
     >
       <CheckpointIcon />
       <Show when={props.label}><span class="ml-1.5">{props.label}</span></Show>

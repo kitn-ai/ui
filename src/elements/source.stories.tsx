@@ -8,7 +8,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-source': JSX.HTMLAttributes<HTMLElement>;
+      'kc-source': JSX.HTMLAttributes<HTMLElement> & { href?: string; label?: string; headline?: string; description?: string; 'show-favicon'?: boolean | '' };
     }
   }
 }
@@ -56,6 +56,7 @@ const meta = {
       description: specDescription('kc-source', [
           '`<kc-source>` is the framework-agnostic **web component** for a single citation link with a hover-card preview, isolated in **Shadow DOM**.',
           '**When to use:** inlining a single source citation in a non-Solid app. For multiple sources, use `<kc-sources>`; in SolidJS, compose the `Source` primitives.',
+          '**Placement:** inline within message text (beside a sentence or at the end of a paragraph) or as a standalone citation chip below a message; it is an `inline-block` element that fits naturally within flow content.',
           "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set `href` (the link, also the default label/favicon source), `label`, `headline` (the hover headline — note `headline`, not `title`), `description`, and the `show-favicon` flag via attributes.",
           'See the **Code** tab for HTML usage.',
         ]),
