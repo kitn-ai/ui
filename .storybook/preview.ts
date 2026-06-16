@@ -94,6 +94,7 @@ const preview: Preview = {
             'Introduction',
             'Installation',
             'Getting Started',
+            'Choosing Components',
             'Frameworks',
             ['Overview', 'HTML', 'React', 'Svelte', 'Vue', 'Angular', 'Solid'],
             'Recipes',

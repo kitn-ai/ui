@@ -28,6 +28,18 @@ The kit ships at two layers, and the sidebar reflects that. **Use the right one 
 
 In other words: the `<kc-chat>` web component is a thin facade over the SolidJS `ChatContainer`/`Message`/… components — same UI, different consumption model. When in doubt, reach for **Components**.
 
+## Components, Patterns & Recipes
+
+Three sidebar groups answer different questions:
+
+- **Components** — one reusable building block with one job and a documented prop/event API (`kc-message`, `kc-prompt-input`). Answers _"what is this control and how do I configure it?"_
+- **Patterns** — a prescriptive, framework-agnostic solution to a recurring chat-UX problem. Answers _"how do I solve this scenario?"_ A Pattern **stands alone if you delete every code block** — the guidance is the value, not the snippet.
+- **Recipes / Examples** — concrete, copy-paste assemblies tied to specific components, frameworks, or services. **Worthless without their code** — that's what makes them Recipes, not Patterns.
+
+> **The delete-the-code test:** remove every code block. If the page is gutted, it's a Recipe. If the guidance stands alone, it's a Pattern.
+
+Browse **Patterns** for recurring chat-UX solutions (streaming, empty state, message actions) and **Examples** for full assembled apps and task-specific snippets. The **[Choosing Components](?path=/docs/docs-choosing-components--docs)** guide explains which tier of building block to reach for first.
+
 ## Where to next
 
 - **[Installation](?path=/docs/docs-installation--docs)** — add it to your project
