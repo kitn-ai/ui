@@ -101,7 +101,7 @@ const preview: Preview = {
             'Recipes',
             ['Streaming (OpenRouter)', 'Text-to-Speech', 'Speech-to-Text'],
             'Accessibility',
-            'For AI Agents',
+            'Using with AI',
           ],
           'Theming',
           ['Overview', 'Editor', 'Token Reference', 'Typography'],

@@ -1,12 +1,17 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Docs/For AI Agents" />
+<Meta title="Docs/Using with AI" />
 
-# For AI Agents / LLMs
+# Using with AI
 
 `@kitn.ai/chat` ships machine-readable orientation files that follow the
 [llmstxt.org](https://llmstxt.org) convention, so coding agents (Claude Code,
 Copilot, Cursor, Codex, …) can wire up the components correctly without guessing.
+
+The philosophy is **human-led, AI-assisted**: humans own the architecture,
+the design decisions, and the final review. The files below exist so that AI
+tools do the wiring work correctly the first time instead of hallucinating
+prop names or attribute APIs.
 
 **View them now:** <a href="/llms.txt" target="_blank" rel="noreferrer">llms.txt</a> ·
 <a href="/llms-full.txt" target="_blank" rel="noreferrer">llms-full.txt</a>
@@ -14,24 +19,53 @@ Copilot, Cursor, Codex, …) can wire up the components correctly without guessi
 
 ## The files
 
-| File | Audience | Where to find it |
-|---|---|---|
-| <a href="/llms.txt" target="_blank" rel="noreferrer"><code>llms.txt</code></a> | Agents + humans | Repo root, the npm package root (`node_modules/@kitn.ai/chat/llms.txt`), and `https://kitn.dev/llms.txt` |
-| <a href="/llms-full.txt" target="_blank" rel="noreferrer"><code>llms-full.txt</code></a> | Agents | Same locations; the per-element API reference for **every** `kitn-*` element |
-
 Both files are **auto-generated** from `dist/custom-elements.json` by
 `scripts/gen-llms.mjs` during `npm run build`, so they never drift from the
 shipped API. Do not edit them by hand.
 
-- **`llms.txt`** (~4 KB) — a dense orientation: install, the property-vs-attribute
-  rule, the two-layer architecture, theming, and framework wiring. Fast to read.
-- **`llms-full.txt`** (~54 KB) — everything in `llms.txt` plus a generated props/events
-  table for each element, a streaming recipe, and a "build a chat app" runbook.
+| File | Size | Audience | Contents |
+|---|---|---|---|
+| `llms.txt` | ~4 KB | Agents + humans | Dense orientation: install command, the property-vs-attribute rule, two-layer architecture, framework wiring (React / Vue / plain HTML), theming tokens. Fast to read — the right file to paste into a prompt. |
+| `llms-full.txt` | ~60 KB | Agents | Everything in `llms.txt` plus a generated props/events table for every element, a streaming recipe, and a step-by-step "build a chat app" runbook. |
 
-## The #1 rule agents get wrong
+### Where to find them after `npm install`
 
-**Array and object data must be set as JavaScript properties, not HTML attributes.**
-An HTML attribute is always a string, so passing `messages`, `models`, `context`,
+```
+node_modules/@kitn.ai/chat/llms.txt
+node_modules/@kitn.ai/chat/llms-full.txt
+```
+
+Both paths are listed in the package's `files` field and are therefore always
+present after install. They are also copied to `dist/llms/` inside the package
+(at `node_modules/@kitn.ai/chat/dist/llms/llms.txt`), and published at:
+
+- https://kitn.dev/llms.txt
+- https://kitn.dev/llms-full.txt
+
+## How to point an agent at them
+
+| Tool | What to do |
+|---|---|
+| **Claude Code** | Add `@node_modules/@kitn.ai/chat/llms.txt` to `CLAUDE.md`, or run `read node_modules/@kitn.ai/chat/llms-full.txt` inside the session |
+| **GitHub Copilot** | Add the path to `.github/copilot-instructions.md`; workspace indexing picks it up automatically |
+| **Cursor** | Reference the file in `.cursorrules` |
+| **Codex / ChatGPT** | Paste the URL `https://kitn.dev/llms.txt` into the prompt, or fetch it with a browsing tool |
+| **Any agent** | `npm install @kitn.ai/chat` → file is at `node_modules/@kitn.ai/chat/llms.txt` |
+
+For one-off sessions, pasting the content of `llms.txt` directly into the
+system prompt is enough. For a project where the agent will revisit these
+components repeatedly, point it at the installed file path so it always reads
+the version that matches the installed package.
+
+## What agents most need to know
+
+These are the facts that AI tools most commonly get wrong when working with
+`kc-*` elements. They appear in both machine-readable files, but they are
+worth knowing up front.
+
+### 1 — Array and object data goes on JS properties, not HTML attributes
+
+An HTML attribute is always a string. Passing `messages`, `models`, `context`,
 `suggestions`, or `slashCommands` as an attribute silently fails.
 
 ```js
@@ -46,15 +80,33 @@ chat.messages = [{ id: '1', role: 'assistant', content: 'Hi!' }]; // ✅ propert
 Only scalar props (string / number / boolean) work as attributes — for example
 `placeholder`, `loading`, and `theme`.
 
-## How agents consume these files
+### 2 — Events are kebab-case `kc-*` CustomEvents, and they do not bubble
 
-| Tool | How it finds them |
-|---|---|
-| Claude Code | Reference `@llms.txt` in `CLAUDE.md`, or read `node_modules/@kitn.ai/chat/llms-full.txt` |
-| GitHub Copilot | Workspace indexing picks up the file in `node_modules`; reference it from `.github/copilot-instructions.md` |
-| Cursor | Point `.cursorrules` at the installed `llms.txt` |
-| Codex / ChatGPT | Fetch https://kitn.dev/llms.txt directly |
-| Any agent | `npm install @kitn.ai/chat` → file is at `node_modules/@kitn.ai/chat/llms.txt` |
+Listen directly on the element, not on a parent:
+
+```js
+chat.addEventListener('kc-submit', (e) => console.log(e.detail.value));
+```
+
+Common events: `kc-submit`, `kc-feedback`, `kc-model-change`, `kc-new-chat`, `kc-select`.
+
+### 3 — Streaming requires a new array + new object on every chunk
+
+Mutating an existing message object in place does **not** trigger a re-render.
+Replace, don't mutate:
+
+```js
+// ✅ re-renders on every chunk
+chat.messages = chat.messages.map(
+  (m) => (m.id === aid ? { ...m, content: answer } : m)
+);
+
+// ❌ does NOT re-render
+chat.messages[i].content = next;
+```
+
+The same rule applies to every array/object property: always assign a new
+reference.
 
 ## Build a chat app (the runbook agents follow)
 
@@ -86,8 +138,25 @@ chat.addEventListener('kc-submit', async (e) => {
 });
 ```
 
+## Agent Skills (progressive loading) — planned
+
+Web Awesome and similar design systems are moving toward a **skills directory**:
+a structured set of per-component markdown files that AI tools load
+progressively, fetching only the documentation relevant to the current task.
+
+`@kitn.ai/chat` already provides `dist/llms/llms-full.txt` as a single,
+comprehensive reference (60 KB, all 42 elements). A per-element skills
+directory would let agents pull just the `kc-chat` spec when they only need
+that one element, rather than loading the full file.
+
+This is tracked as a follow-up improvement. If you want it sooner, the starting
+point is `scripts/gen-llms.mjs` — it already reads `dist/custom-elements.json`
+and has all the data needed to emit `dist/skills/kc-chat.md`,
+`dist/skills/kc-message.md`, etc.
+
 ## Links
 
-- <a href="/llms.txt" target="_blank" rel="noreferrer"><code>llms.txt</code></a> — orientation (also published at `https://kitn.dev/llms.txt`)
-- <a href="/llms-full.txt" target="_blank" rel="noreferrer"><code>llms-full.txt</code></a> — full per-element reference (also `https://kitn.dev/llms-full.txt`)
+- <a href="/llms.txt" target="_blank" rel="noreferrer"><code>llms.txt</code></a> — orientation (~4 KB; also at `https://kitn.dev/llms.txt`)
+- <a href="/llms-full.txt" target="_blank" rel="noreferrer"><code>llms-full.txt</code></a> — full per-element reference (~60 KB; also at `https://kitn.dev/llms-full.txt`)
 - Custom Elements Manifest — `dist/custom-elements.json` (published at `https://unpkg.com/@kitn.ai/chat/dist/custom-elements.json`)
+- Repository — https://github.com/kitn-ai/chat

@@ -10,6 +10,19 @@ import { resolve } from 'node:path';
 // Source of truth: Installation.mdx § "Via CDN" and README.md § "Or load from a CDN".
 const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
 
+// Some elements have a displayName that doesn't match the Solid export name.
+// Map element displayName → actual Solid export name for those cases.
+// Only add entries where a real Solid export exists (verified against src/index.ts).
+const SOLID_NAME_ALIASES = {
+  Conversations: 'ConversationList',
+  ScopePicker: 'ChatScopePicker',
+  Skills: 'MessageSkills',
+  Sources: 'SourceList',
+  // 'Suggestions' intentionally omitted — the kc-suggestions element composes
+  // individual PromptSuggestion chips; there is no single Solid wrapper component
+  // that mirrors the element's array-of-suggestions API.
+};
+
 // Event names are lower-kebab, kc-prefixed (e.g. `kc-message-action`). React/Solid handler
 // props strip the `kc-` prefix and PascalCase on hyphens → `onMessageAction`.
 const onName = (ev) => 'on' + ev.replace(/^kc-/, '').split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('');
@@ -69,16 +82,17 @@ function angularSnippet(el) {
   ];
   return wrapTag(`<${el.tag}`, lines, `></${el.tag}>`) ?? `<${el.tag}></${el.tag}>`;
 }
-function jsxSnippet(el, pkg) {
+function jsxSnippet(el, pkg, componentName) {
+  const name = componentName ?? el.displayName;
   const lines = [
     ...required(el).map((p) => `${p.name}={${p.name}}`),
     ...el.events.map((e) => `${onName(e.name)}={(e) => console.log(e.detail)}`),
   ];
-  const tag = wrapTag(`<${el.displayName}`, lines, '/>') ?? `<${el.displayName} />`;
-  return `import { ${el.displayName} } from '${pkg}';\n\n${tag}`;
+  const tag = wrapTag(`<${name}`, lines, '/>') ?? `<${name} />`;
+  return `import { ${name} } from '${pkg}';\n\n${tag}`;
 }
 
-export function buildSnippets(el, hasSolid) {
+export function buildSnippets(el, hasSolid, solidName) {
   const snippets = {
     html: htmlSnippet(el),
     react: jsxSnippet(el, '@kitn.ai/chat/react'),
@@ -86,7 +100,7 @@ export function buildSnippets(el, hasSolid) {
     svelte: svelteSnippet(el),
     angular: angularSnippet(el),
   };
-  if (hasSolid) snippets.solid = jsxSnippet(el, '@kitn.ai/chat');
+  if (hasSolid) snippets.solid = jsxSnippet(el, '@kitn.ai/chat', solidName);
   return snippets;
 }
 
@@ -100,8 +114,16 @@ export function writeFrameworkUsage(root, elements) {
     // component-meta not generated yet — no Solid tabs
   }
   const out = elements.map((el) => {
-    const hasSolid = solidNames.has(el.displayName);
-    return { tag: el.tag, displayName: el.displayName, hasSolid, snippets: buildSnippets(el, hasSolid) };
+    // First try exact match; fall back to the alias map for elements whose
+    // displayName doesn't match the Solid export name.
+    const aliasedName = SOLID_NAME_ALIASES[el.displayName];
+    const solidName = solidNames.has(el.displayName)
+      ? el.displayName
+      : aliasedName && solidNames.has(aliasedName)
+        ? aliasedName
+        : undefined;
+    const hasSolid = solidName !== undefined;
+    return { tag: el.tag, displayName: el.displayName, hasSolid, snippets: buildSnippets(el, hasSolid, solidName) };
   });
   writeFileSync(resolve(root, 'src/elements/framework-usage.json'), JSON.stringify(out, null, 2) + '\n');
   console.log(`✓ src/elements/framework-usage.json — ${out.length} elements`);

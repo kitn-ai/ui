@@ -141,13 +141,14 @@
   {
     "tag": "kc-conversations",
     "displayName": "Conversations",
-    "hasSolid": false,
+    "hasSolid": true,
     "snippets": {
       "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-conversations></kc-conversations>\n<script type=\"module\">\n  const el = document.querySelector('kc-conversations');\n  el.groups = /* … */;\n  el.conversations = /* … */;\n  el.addEventListener('kc-conversation-select', (e) => console.log(e.detail));\n  el.addEventListener('kc-new-chat', (e) => console.log(e.detail));\n  el.addEventListener('kc-toggle-sidebar', (e) => console.log(e.detail));\n</script>",
       "react": "import { Conversations } from '@kitn.ai/chat/react';\n\n<Conversations\n  groups={groups}\n  conversations={conversations}\n  onConversationSelect={(e) => console.log(e.detail)}\n  onNewChat={(e) => console.log(e.detail)}\n  onToggleSidebar={(e) => console.log(e.detail)}\n/>",
       "vue": "<kc-conversations\n  :groups.prop=\"groups\"\n  :conversations.prop=\"conversations\"\n  @kc-conversation-select=\"onConversationSelect\"\n  @kc-new-chat=\"onNewChat\"\n  @kc-toggle-sidebar=\"onToggleSidebar\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-conversations\n  {groups}\n  {conversations}\n  on:kc-conversation-select={onConversationSelect}\n  on:kc-new-chat={onNewChat}\n  on:kc-toggle-sidebar={onToggleSidebar}\n></kc-conversations>",
-      "angular": "<kc-conversations\n  [groups]=\"groups\"\n  [conversations]=\"conversations\"\n  (kc-conversation-select)=\"onConversationSelect($event)\"\n  (kc-new-chat)=\"onNewChat($event)\"\n  (kc-toggle-sidebar)=\"onToggleSidebar($event)\"\n></kc-conversations>"
+      "angular": "<kc-conversations\n  [groups]=\"groups\"\n  [conversations]=\"conversations\"\n  (kc-conversation-select)=\"onConversationSelect($event)\"\n  (kc-new-chat)=\"onNewChat($event)\"\n  (kc-toggle-sidebar)=\"onToggleSidebar($event)\"\n></kc-conversations>",
+      "solid": "import { ConversationList } from '@kitn.ai/chat';\n\n<ConversationList\n  groups={groups}\n  conversations={conversations}\n  onConversationSelect={(e) => console.log(e.detail)}\n  onNewChat={(e) => console.log(e.detail)}\n  onToggleSidebar={(e) => console.log(e.detail)}\n/>"
     }
   },
   {
@@ -385,13 +386,14 @@
   {
     "tag": "kc-scope-picker",
     "displayName": "ScopePicker",
-    "hasSolid": false,
+    "hasSolid": true,
     "snippets": {
       "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-scope-picker></kc-scope-picker>\n<script type=\"module\">\n  const el = document.querySelector('kc-scope-picker');\n  el.availableAuthors = /* … */;\n  el.availableTags = /* … */;\n  el.addEventListener('kc-scope-change', (e) => console.log(e.detail));\n</script>",
       "react": "import { ScopePicker } from '@kitn.ai/chat/react';\n\n<ScopePicker\n  availableAuthors={availableAuthors}\n  availableTags={availableTags}\n  onScopeChange={(e) => console.log(e.detail)}\n/>",
       "vue": "<kc-scope-picker\n  :availableAuthors.prop=\"availableAuthors\"\n  :availableTags.prop=\"availableTags\"\n  @kc-scope-change=\"onScopeChange\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-scope-picker\n  {availableAuthors}\n  {availableTags}\n  on:kc-scope-change={onScopeChange}\n></kc-scope-picker>",
-      "angular": "<kc-scope-picker\n  [availableAuthors]=\"availableAuthors\"\n  [availableTags]=\"availableTags\"\n  (kc-scope-change)=\"onScopeChange($event)\"\n></kc-scope-picker>"
+      "angular": "<kc-scope-picker\n  [availableAuthors]=\"availableAuthors\"\n  [availableTags]=\"availableTags\"\n  (kc-scope-change)=\"onScopeChange($event)\"\n></kc-scope-picker>",
+      "solid": "import { ChatScopePicker } from '@kitn.ai/chat';\n\n<ChatScopePicker\n  availableAuthors={availableAuthors}\n  availableTags={availableTags}\n  onScopeChange={(e) => console.log(e.detail)}\n/>"
     }
   },
   {
@@ -410,13 +412,14 @@
   {
     "tag": "kc-skills",
     "displayName": "Skills",
-    "hasSolid": false,
+    "hasSolid": true,
     "snippets": {
       "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-skills></kc-skills>\n<script type=\"module\">\n  const el = document.querySelector('kc-skills');\n  el.skills = /* … */;\n</script>",
       "react": "import { Skills } from '@kitn.ai/chat/react';\n\n<Skills\n  skills={skills}\n/>",
       "vue": "<kc-skills\n  :skills.prop=\"skills\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-skills\n  {skills}\n></kc-skills>",
-      "angular": "<kc-skills\n  [skills]=\"skills\"\n></kc-skills>"
+      "angular": "<kc-skills\n  [skills]=\"skills\"\n></kc-skills>",
+      "solid": "import { MessageSkills } from '@kitn.ai/chat';\n\n<MessageSkills\n  skills={skills}\n/>"
     }
   },
   {
@@ -435,13 +438,14 @@
   {
     "tag": "kc-sources",
     "displayName": "Sources",
-    "hasSolid": false,
+    "hasSolid": true,
     "snippets": {
       "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-sources></kc-sources>\n<script type=\"module\">\n  const el = document.querySelector('kc-sources');\n  el.sources = /* … */;\n</script>",
       "react": "import { Sources } from '@kitn.ai/chat/react';\n\n<Sources\n  sources={sources}\n/>",
       "vue": "<kc-sources\n  :sources.prop=\"sources\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-sources\n  {sources}\n></kc-sources>",
-      "angular": "<kc-sources\n  [sources]=\"sources\"\n></kc-sources>"
+      "angular": "<kc-sources\n  [sources]=\"sources\"\n></kc-sources>",
+      "solid": "import { SourceList } from '@kitn.ai/chat';\n\n<SourceList\n  sources={sources}\n/>"
     }
   },
   {

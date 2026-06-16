@@ -5,6 +5,22 @@ import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
 import type { CustomAction } from './chat-types';
 
+/** Parse a single light-DOM `<kc-slash-command>` element into a SlashCommandItem.
+ *  Attribute mapping:
+ *   - `command`     → SlashCommandItem.id       (required; empty string fallback)
+ *   - textContent   → SlashCommandItem.label    (primary); `label` attr as fallback
+ *   - `description` → SlashCommandItem.description
+ *   - `category`    → SlashCommandItem.category
+ */
+export function parseKcSlashCommandElement(n: Element): SlashCommandItem {
+  return {
+    id: n.getAttribute('command') ?? '',
+    label: n.textContent?.trim() || n.getAttribute('label') || n.getAttribute('command') || '',
+    description: n.getAttribute('description') ?? undefined,
+    category: n.getAttribute('category') ?? undefined,
+  };
+}
+
 interface Props extends Record<string, unknown> {
   /** Controlled value of the input. When set, the host owns the text and must
    *  update it on `kc-value-change`; leave unset for uncontrolled behavior. */
@@ -90,11 +106,13 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
     if (props.attachments) setAttachments(props.attachments);
   });
 
-  // Read declarative <kc-action> children from light DOM — same pattern as kc-message.
-  // Shadow DOM with no <slot> suppresses them visually; they are invisible data carriers.
+  // Read declarative <kc-action> and <kc-slash-command> children from light DOM —
+  // same pattern as kc-message. Shadow DOM with no <slot> suppresses them visually;
+  // they are invisible data carriers. One MutationObserver covers both element types.
   const [toolbarActions, setToolbarActions] = createSignal<CustomAction[]>([]);
+  const [slottedSlashCommands, setSlottedSlashCommands] = createSignal<SlashCommandItem[]>([]);
   onMount(() => {
-    const read = () => {
+    const readActions = () => {
       const nodes = [...element.querySelectorAll('kc-action')];
       setToolbarActions(nodes.map(n => ({
         id: n.id || n.getAttribute('action') || '',
@@ -103,8 +121,13 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
         tooltip: n.getAttribute('tooltip') ?? undefined,
       })));
     };
-    read();
-    const observer = new MutationObserver(read);
+    const readSlashCommands = () => {
+      const nodes = [...element.querySelectorAll('kc-slash-command')];
+      setSlottedSlashCommands(nodes.map(parseKcSlashCommandElement));
+    };
+    const readAll = () => { readActions(); readSlashCommands(); };
+    readAll();
+    const observer = new MutationObserver(readAll);
     observer.observe(element, { childList: true, attributes: true, subtree: true });
     onCleanup(() => observer.disconnect());
   });
@@ -127,6 +150,12 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
     }
   };
 
+  // Prop slash commands take precedence; slotted children are appended after.
+  const allSlashCommands = () => [
+    ...(props.slashCommands ?? []),
+    ...slottedSlashCommands(),
+  ];
+
   return (
     <DefaultPromptInput
       value={current()}
@@ -136,7 +165,7 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
       stoppable={flag('stoppable')}
       suggestions={props.suggestions}
       attachments={attachments()}
-      slashCommands={props.slashCommands}
+      slashCommands={allSlashCommands().length ? allSlashCommands() : undefined}
       slashActiveIds={props.slashActiveIds}
       slashCompact={flag('slashCompact')}
       search={flag('search')}

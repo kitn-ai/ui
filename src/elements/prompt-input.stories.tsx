@@ -11,6 +11,7 @@ declare module 'solid-js' {
     interface IntrinsicElements {
       'kc-prompt-input': JSX.HTMLAttributes<HTMLElement>;
       'kc-action': JSX.HTMLAttributes<HTMLElement> & { icon?: string; tooltip?: string };
+      'kc-slash-command': JSX.HTMLAttributes<HTMLElement> & { command?: string; description?: string; category?: string };
     }
   }
 }
@@ -129,7 +130,8 @@ const meta = {
       description: specDescription('kc-prompt-input', [
           '`<kc-prompt-input>` is the framework-agnostic **web component** version of the chat composer — an auto-resizing textarea with a send button and optional suggestion chips, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a message composer to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `PromptInput` primitives instead.',
-          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`kc-submit`, `kc-value-change`, `kc-suggestion-click`, `kc-search`, `kc-voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files. **Custom toolbar buttons:** place `<kc-action id icon tooltip>` elements as children — they are invisible data carriers (Shadow DOM hides them) that the element reads and renders as extra ghost icon buttons in the left toolbar. Each click fires a `kc-action` CustomEvent with `detail.action` equal to the action id (the same `<kc-action>` descriptor element that `<kc-message>` uses — composition symmetry).',
+          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`kc-submit`, `kc-value-change`, `kc-suggestion-click`, `kc-search`, `kc-voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files. **Custom toolbar buttons:** place `<kc-action id icon tooltip>` elements as children — they are invisible data carriers (Shadow DOM hides them) that the element reads and renders as extra ghost icon buttons in the left toolbar. Each click fires a `kc-toolbar-action` CustomEvent with `detail.action` equal to the action id (the same `<kc-action>` descriptor element that `<kc-message>` uses — composition symmetry).',
+          '**Slash commands (declarative):** place `<kc-slash-command command="id" description="…">Label</kc-slash-command>` elements as children — invisible data carriers merged with the `slashCommands` JS property. Typing `/` opens the palette with the combined list; selecting an item fires `kc-slash-select` with `detail.command`. Prop items appear first; declarative children are appended.',
           '**Placement:** pinned to the bottom of a chat surface, full width. Set `loading` while a response streams to show the busy state, and `disabled` to block input entirely.',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ]),
@@ -224,6 +226,32 @@ const CUSTOM_TOOLBAR_SNIPPET = `<kc-prompt-input id="input" voice></kc-prompt-in
   input.addEventListener('kc-submit', (e) => console.log('submit:', e.detail.value));
 </script>`;
 
+const SLASH_COMMAND_SNIPPET = `<kc-prompt-input id="input" style="display:block; width:100%;"></kc-prompt-input>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const input = document.getElementById('input');
+
+  // Inject <kc-slash-command> children — invisible data carriers read via
+  // querySelectorAll + MutationObserver, merged with any slashCommands property.
+  [
+    { command: 'summarize', description: 'Summarize the thread' },
+    { command: 'translate', description: 'Translate to English' },
+    { command: 'explain',   description: "Explain like I'm five" },
+  ].forEach(({ command, description }) => {
+    const el = document.createElement('kc-slash-command');
+    el.setAttribute('command', command);
+    el.setAttribute('description', description);
+    el.textContent = command; // becomes the label
+    input.appendChild(el);
+  });
+
+  input.addEventListener('kc-slash-select', (e) => {
+    console.log('slash selected:', e.detail.command);
+  });
+</script>`;
+
 /** Composition: place **`<kc-action>`** children inside `<kc-prompt-input>` to add
  *  custom ghost icon buttons in the toolbar. Each click fires a `kc-toolbar-action` event
  *  with `detail.action` equal to the action id — the same `<kc-action>` descriptor
@@ -259,5 +287,45 @@ export const WithCustomToolbarActions: Story = {
     );
   },
   parameters: { docs: { source: { code: CUSTOM_TOOLBAR_SNIPPET, language: 'html' } } },
+};
+
+/** Composition: place **`<kc-slash-command>`** children inside `<kc-prompt-input>`
+ *  to declare slash commands without setting the `slashCommands` JS property.
+ *  Type `/` in the input to open the palette. Each `<kc-slash-command>` child maps:
+ *  `command` attr → id, textContent → label, `description` attr → description.
+ *  Selection fires `kc-slash-select` with `detail.command`.
+ *  Prop (`slashCommands`) and declarative children are merged — prop items first. */
+export const DeclarativeSlashCommands: Story = {
+  name: 'Declarative Slash Commands (kc-slash-command)',
+  render: () => {
+    let el: HTMLElement | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.setAttribute('placeholder', 'Type / to open the command palette…');
+      el.addEventListener('kc-slash-select', (e: Event) => {
+        console.log('slash selected:', (e as CustomEvent<{ command: unknown }>).detail.command);
+      });
+    });
+    return (
+      <div style={{ padding: '16px', width: '100%' }}>
+        <kc-prompt-input
+          ref={(e: HTMLElement) => (el = e)}
+          style={{ display: 'block', width: '100%' }}
+        >
+          {/* <kc-slash-command> children are invisible data carriers — Shadow DOM hides them.
+              The element reads them via querySelectorAll + MutationObserver.
+              command attr → id, textContent → label, description attr → description. */}
+          <kc-slash-command command="summarize" description="Summarize the thread">summarize</kc-slash-command>
+          <kc-slash-command command="translate" description="Translate to English">translate</kc-slash-command>
+          <kc-slash-command command="explain" description="Explain like I'm five">explain</kc-slash-command>
+        </kc-prompt-input>
+        <p style={{ 'margin-top': '8px', 'font-size': '12px', color: 'var(--color-muted-foreground)' }}>
+          Type <code>/</code> in the input to open the command palette. Open the browser
+          console to see <code>kc-slash-select</code> events on selection.
+        </p>
+      </div>
+    );
+  },
+  parameters: { docs: { source: { code: SLASH_COMMAND_SNIPPET, language: 'html' } } },
 };
 

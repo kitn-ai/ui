@@ -63,6 +63,7 @@ const meta = {
           '**When to use:** showing the sources behind an assistant answer in a non-Solid app. For a single citation, use `<kc-source>`; in SolidJS, compose `SourceList` + `Source`.',
           '**Placement:** below an assistant message, above the prompt input — rendered as a wrapping row of citation chips that spans the full message column width.',
           "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the data via the `sources` **property** (each item: `href`, `title`, `description`, `label`, `showFavicon`), and set `show-favicon` to enable favicons for all items (a per-item `showFavicon` overrides it).",
+          '**Anatomy:** a wrapping flex row of **citation chips** — each chip is a `<kc-source>` (or a `sources`-property item): a **trigger button** (domain label or `numbered` index, optional favicon) + a **hover-card** (headline + description, shown on hover/focus). Declarative `<kc-source href="…" headline="…">` children are invisible data carriers merged after the `sources` property list.',
           'See the **Code** tab for HTML usage.',
         ]),
     },
