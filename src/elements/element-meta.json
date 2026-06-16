@@ -1943,6 +1943,12 @@
         "displayDetail": "{ value: string }"
       },
       {
+        "name": "kc-toolbar-action",
+        "detail": "{ action: string }",
+        "description": "A custom `<kc-action>` toolbar button was clicked. `action` is the `id` of the `<kc-action>` element that was clicked.",
+        "displayDetail": "{ action: string }"
+      },
+      {
         "name": "kc-value-change",
         "detail": "{ value: string }",
         "description": "The input text changed (fires on every keystroke).",

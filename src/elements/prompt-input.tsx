@@ -1,8 +1,9 @@
-import { createEffect, createSignal } from 'solid-js';
+import { createEffect, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { DefaultPromptInput } from './default-input';
 import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
+import type { CustomAction } from './chat-types';
 
 interface Props extends Record<string, unknown> {
   /** Controlled value of the input. When set, the host owns the text and must
@@ -59,6 +60,9 @@ interface Events {
   'kc-voice': Record<string, never>;
   /** The Stop button was clicked while `stoppable` and `loading` are both true. */
   'kc-stop': Record<string, never>;
+  /** A custom `<kc-action>` toolbar button was clicked. `action` is the `id` of
+   *  the `<kc-action>` element that was clicked. */
+  'kc-toolbar-action': { action: string };
 }
 
 defineWebComponent<Props, Events>('kc-prompt-input', {
@@ -75,7 +79,7 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
   voice: false,
   stoppable: false,
   attachments: undefined,
-}, (props, { dispatch, flag }) => {
+}, (props, { dispatch, flag, element }) => {
   const [internal, setInternal] = createSignal(props.value ?? '');
   // Seed staged attachments from the `attachments` property; the element manages
   // its own state from there (paperclip adds, per-chip remove deletes).
@@ -85,6 +89,26 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
   createEffect(() => {
     if (props.attachments) setAttachments(props.attachments);
   });
+
+  // Read declarative <kc-action> children from light DOM — same pattern as kc-message.
+  // Shadow DOM with no <slot> suppresses them visually; they are invisible data carriers.
+  const [toolbarActions, setToolbarActions] = createSignal<CustomAction[]>([]);
+  onMount(() => {
+    const read = () => {
+      const nodes = [...element.querySelectorAll('kc-action')];
+      setToolbarActions(nodes.map(n => ({
+        id: n.id || n.getAttribute('action') || '',
+        label: n.textContent?.trim() || n.getAttribute('label') || n.id || '',
+        icon: n.getAttribute('icon') ?? undefined,
+        tooltip: n.getAttribute('tooltip') ?? undefined,
+      })));
+    };
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true, attributes: true, subtree: true });
+    onCleanup(() => observer.disconnect());
+  });
+
   const current = () => props.value ?? internal();
 
   const handleChange = (v: string) => { setInternal(v); dispatch('kc-value-change', { value: v }); };
@@ -117,6 +141,7 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
       slashCompact={flag('slashCompact')}
       search={flag('search')}
       voice={flag('voice')}
+      toolbarActions={toolbarActions()}
       onValueChange={handleChange}
       onSubmit={handleSubmit}
       onSuggestionClick={handleSuggestionClick}
@@ -125,6 +150,7 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
       onVoice={() => dispatch('kc-voice')}
       onStop={() => dispatch('kc-stop')}
       onSlashSelect={(command) => dispatch('kc-slash-select', { command })}
+      onAction={(id) => dispatch('kc-toolbar-action', { action: id })}
     />
   );
 });

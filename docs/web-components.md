@@ -345,6 +345,7 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | `kc-stop` | — | The Stop button was clicked while `stoppable` and `loading` are both true. |
 | `kc-submit` | `{ value: string; attachments: AttachmentData[] }` | The user submitted the prompt (Enter or send button) with its attachments. |
 | `kc-suggestion-click` | `{ value: string }` | A suggestion was clicked while `suggestion-mode="fill"`. |
+| `kc-toolbar-action` | `{ action: string }` | A custom `<kc-action>` toolbar button was clicked. `action` is the `id` of the `<kc-action>` element that was clicked. |
 | `kc-value-change` | `{ value: string }` | The input text changed (fires on every keystroke). |
 | `kc-voice` | — | The Voice (Mic) toolbar button was clicked. |
 

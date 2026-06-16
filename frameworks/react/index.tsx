@@ -550,6 +550,8 @@ export interface PromptInputProps extends WebComponentProps {
   onSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
   onSuggestionClick?: (event: CustomEvent<{ value: string }>) => void;
+  /** A custom `<kc-action>` toolbar button was clicked. `action` is the `id` of the `<kc-action>` element that was clicked. */
+  onToolbarAction?: (event: CustomEvent<{ action: string }>) => void;
   /** The input text changed (fires on every keystroke). */
   onValueChange?: (event: CustomEvent<{ value: string }>) => void;
   /** The Voice (Mic) toolbar button was clicked. */
@@ -559,7 +561,7 @@ export interface PromptInputProps extends WebComponentProps {
 export const PromptInput = createWebComponent<PromptInputProps>(
   'kc-prompt-input',
   ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","slashCommands","slashActiveIds","slashCompact","search","voice","stoppable","attachments"],
-  { onSearch: 'kc-search', onSlashSelect: 'kc-slash-select', onStop: 'kc-stop', onSubmit: 'kc-submit', onSuggestionClick: 'kc-suggestion-click', onValueChange: 'kc-value-change', onVoice: 'kc-voice' },
+  { onSearch: 'kc-search', onSlashSelect: 'kc-slash-select', onStop: 'kc-stop', onSubmit: 'kc-submit', onSuggestionClick: 'kc-suggestion-click', onToolbarAction: 'kc-toolbar-action', onValueChange: 'kc-value-change', onVoice: 'kc-voice' },
 );
 
 export interface ReasoningProps extends WebComponentProps {

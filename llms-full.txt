@@ -649,6 +649,7 @@ _No events._
 | `kc-stop` | `CustomEvent<Record<string, never>>` | The Stop button was clicked while `stoppable` and `loading` are both true. |
 | `kc-submit` | `CustomEvent<{ value: string; attachments: { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[] }>` | The user submitted the prompt (Enter or send button) with its attachments. |
 | `kc-suggestion-click` | `CustomEvent<{ value: string }>` | A suggestion was clicked while `suggestion-mode="fill"`. |
+| `kc-toolbar-action` | `CustomEvent<{ action: string }>` | A custom `<kc-action>` toolbar button was clicked. `action` is the `id` of the `<kc-action>` element that was clicked. |
 | `kc-value-change` | `CustomEvent<{ value: string }>` | The input text changed (fires on every keystroke). |
 | `kc-voice` | `CustomEvent<Record<string, never>>` | The Voice (Mic) toolbar button was clicked. |
 

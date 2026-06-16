@@ -8,6 +8,9 @@ import contextUsage from './context-usage';
 import checkpointRestore from './checkpoint-restore';
 import fullChatApp from './full-chat-app';
 import emptyState from './empty-state';
+import centeredConversation from './pattern-centered-conversation';
+import chatPanelLayout from './pattern-chat-panel-layout';
+import dockedWidget from './pattern-docked-widget';
 
 export type { ExampleUsage, FrameworkKey } from './types';
 
@@ -15,9 +18,9 @@ export type { ExampleUsage, FrameworkKey } from './types';
  * Every Example/Pattern that has hand-authored "how to build this" code.
  * Add a module here and it lights up its Code tab automatically.
  *
- * Element-centric examples only — layout/meta entries (Centered Conversation,
- * Chat Panel Layout, Docked Widget, Composed chat shell, Catalog) intentionally
- * have no Code tab; they don't reduce to a single-element recipe.
+ * Element-centric examples first, then the 4 layout Patterns — each pattern
+ * module carries a `title` that exactly matches its Storybook group title so
+ * the Usage tab appears automatically via `exampleUsageStoryIdPrefixes`.
  */
 export const exampleUsageList: ExampleUsage[] = [
   messageActions,
@@ -28,7 +31,11 @@ export const exampleUsageList: ExampleUsage[] = [
   contextUsage,
   checkpointRestore,
   fullChatApp,
+  // Patterns — layout recipes showing how to compose the building blocks
   emptyState,
+  centeredConversation,
+  chatPanelLayout,
+  dockedWidget,
 ];
 
 /** Lookup by Storybook group title, e.g. `'Examples/Message Actions'`. */

@@ -296,18 +296,25 @@ export function Prompt() {
 /** With Action Buttons — toolbar buttons beside the input. */
 const actionButtons: StoryUsage = {
   intro:
-    'Add toolbar buttons beside the input. `<kc-prompt-input>` has built-in Search and Voice buttons — enable `search` and `voice`, then handle the `search` / `voice` events; attaching files is built in (the paperclip, emitted on `submit` as `attachments`). The demo also shows a custom Sparkles button, which the element doesn\'t expose — for arbitrary extra buttons, compose the SolidJS primitives (see the Solid tab).',
+    'Add toolbar buttons beside the input. `<kc-prompt-input>` has built-in Search and Voice buttons — enable `search` and `voice`, then handle the `search` / `voice` events; attaching files is built in (the paperclip, emitted on `submit` as `attachments`). For extra custom buttons, place `<kc-action id icon tooltip>` children inside `<kc-prompt-input>` — the element reads them as invisible data carriers and renders a ghost icon button per entry in the left toolbar; clicking fires a `kc-action` CustomEvent with `detail.action` = the action id. This is the same `<kc-action>` descriptor element that `<kc-message>` uses (composition symmetry). The Solid tab shows a custom Sparkles button composed directly with the `PromptInput` primitives (the full-control equivalent).',
   snippets: {
     html: `<script type="module">
   import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
 </script>
 
-<kc-prompt-input id="prompt" placeholder="Message..." search voice></kc-prompt-input>
+<!-- Built-in buttons: search (Globe) and voice (Mic). -->
+<!-- Custom toolbar buttons: compose <kc-action> children. -->
+<kc-prompt-input id="prompt" placeholder="Message..." search voice>
+  <kc-action id="attach" icon="paperclip" tooltip="Attach"></kc-action>
+  <kc-action id="sparkles" icon="star" tooltip="AI suggestions"></kc-action>
+</kc-prompt-input>
 
 <script type="module">
   const prompt = document.getElementById('prompt');
   prompt.addEventListener('kc-search', () => console.log('search clicked'));
   prompt.addEventListener('kc-voice', () => console.log('voice clicked'));
+  // kc-toolbar-action fires when any <kc-action> toolbar button is clicked.
+  prompt.addEventListener('kc-toolbar-action', (e) => console.log('toolbar action:', e.detail.action));
   prompt.addEventListener('kc-submit', (e) => {
     const { value, attachments } = e.detail; // attachments from the paperclip
     console.log(value, attachments);
@@ -412,7 +419,8 @@ export function Prompt() {
           <Button variant="ghost" size="icon-sm" aria-label="Attach file"><Paperclip class="size-4 text-muted-foreground" /></Button>
           <Button variant="ghost" size="icon-sm" aria-label="Search the web"><Globe class="size-4 text-muted-foreground" /></Button>
           <Button variant="ghost" size="icon-sm" aria-label="Voice input"><Mic class="size-4 text-muted-foreground" /></Button>
-          {/* Sparkles is a custom button — not exposed by kc-prompt-input */}
+          {/* Sparkles: a custom button composed directly. For the element, use
+              <kc-action id="sparkles" icon="star" tooltip="AI suggestions"> instead. */}
           <Button variant="ghost" size="icon-sm" aria-label="AI suggestions"><Sparkles class="size-4 text-muted-foreground" /></Button>
         </div>
         <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()} aria-label="Send message">

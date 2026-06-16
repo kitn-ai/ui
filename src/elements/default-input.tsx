@@ -3,6 +3,7 @@ import { PromptInput, PromptInputTextarea, PromptInputActions } from '../compone
 import { PromptSuggestion } from '../components/prompt-suggestion';
 import { SlashCommand, type SlashCommandItem } from '../components/slash-command';
 import { Button } from '../ui/button';
+import { Tooltip } from '../ui/tooltip';
 import { Paperclip, Globe, Mic, Square } from 'lucide-solid';
 import {
   Attachments,
@@ -12,6 +13,8 @@ import {
   AttachmentRemove,
   type AttachmentData,
 } from '../components/attachments';
+import { actionIcon } from '../ui/action-icons';
+import type { CustomAction } from './chat-types';
 
 export interface DefaultPromptInputProps {
   value: string;
@@ -44,6 +47,10 @@ export interface DefaultPromptInputProps {
   stoppable?: boolean;
   /** Called when the user clicks the Stop button. */
   onStop?: () => void;
+  /** Custom toolbar action buttons declared as `<kc-action>` light-DOM children. */
+  toolbarActions?: CustomAction[];
+  /** Called when a custom toolbar action button is clicked, with the action id. */
+  onAction?: (id: string) => void;
 }
 
 function fileToAttachment(file: File): AttachmentData {
@@ -175,6 +182,29 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 <Mic class="size-4" />
               </Button>
             </Show>
+            <For each={props.toolbarActions ?? []}>
+              {(action) => {
+                const Icon = actionIcon(action.icon);
+                const label = action.tooltip ?? action.label;
+                const btn = (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-sm"
+                    class="rounded-full"
+                    aria-label={action.label}
+                    data-action={action.id}
+                    disabled={props.disabled}
+                    onClick={() => props.onAction?.(action.id)}
+                  >
+                    <Show when={Icon} fallback={<span class="px-1 text-xs">{action.label}</span>}>
+                      {(I) => { const C = I(); return <C class="size-4" />; }}
+                    </Show>
+                  </Button>
+                );
+                return Icon ? <Tooltip content={label}>{btn}</Tooltip> : btn;
+              }}
+            </For>
           </div>
           <Show
             when={showStop()}

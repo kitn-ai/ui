@@ -10,6 +10,7 @@ declare module 'solid-js' {
   namespace JSX {
     interface IntrinsicElements {
       'kc-prompt-input': JSX.HTMLAttributes<HTMLElement>;
+      'kc-action': JSX.HTMLAttributes<HTMLElement> & { icon?: string; tooltip?: string };
     }
   }
 }
@@ -128,7 +129,7 @@ const meta = {
       description: specDescription('kc-prompt-input', [
           '`<kc-prompt-input>` is the framework-agnostic **web component** version of the chat composer — an auto-resizing textarea with a send button and optional suggestion chips, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a message composer to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `PromptInput` primitives instead.',
-          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`kc-submit`, `kc-value-change`, `kc-suggestion-click`, `kc-search`, `kc-voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files.',
+          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`kc-submit`, `kc-value-change`, `kc-suggestion-click`, `kc-search`, `kc-voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files. **Custom toolbar buttons:** place `<kc-action id icon tooltip>` elements as children — they are invisible data carriers (Shadow DOM hides them) that the element reads and renders as extra ghost icon buttons in the left toolbar. Each click fires a `kc-action` CustomEvent with `detail.action` equal to the action id (the same `<kc-action>` descriptor element that `<kc-message>` uses — composition symmetry).',
           '**Placement:** pinned to the bottom of a chat surface, full width. Set `loading` while a response streams to show the busy state, and `disabled` to block input entirely.',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ]),
@@ -199,5 +200,64 @@ export const WithAttachments: Story = {
   name: 'With Attachments',
   render: () => <PromptInputElement voice attachments={sampleAttachments} />,
   parameters: { docs: { source: { code: ATTACHMENTS_SNIPPET, language: 'html' } } },
+};
+
+const CUSTOM_TOOLBAR_SNIPPET = `<kc-prompt-input id="input" voice></kc-prompt-input>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const input = document.getElementById('input');
+
+  // Inject <kc-action> children as toolbar buttons (declarative composition).
+  ['attach', 'translate', 'bookmark'].forEach((id, i) => {
+    const el = document.createElement('kc-action');
+    el.id = id;
+    el.setAttribute('icon', ['paperclip', 'flag', 'bookmark'][i]);
+    el.setAttribute('tooltip', ['Attach', 'Translate', 'Bookmark'][i]);
+    input.appendChild(el);
+  });
+
+  input.addEventListener('kc-toolbar-action', (e) => {
+    console.log('toolbar action:', e.detail.action);
+  });
+  input.addEventListener('kc-submit', (e) => console.log('submit:', e.detail.value));
+</script>`;
+
+/** Composition: place **`<kc-action>`** children inside `<kc-prompt-input>` to add
+ *  custom ghost icon buttons in the toolbar. Each click fires a `kc-toolbar-action` event
+ *  with `detail.action` equal to the action id — the same `<kc-action>` descriptor
+ *  element that `<kc-message>` uses for its action bar (composition symmetry). */
+export const WithCustomToolbarActions: Story = {
+  name: 'Custom Toolbar Actions (kc-action)',
+  render: () => {
+    let el: HTMLElement | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.setAttribute('placeholder', 'Ask anything...');
+      el.addEventListener('kc-toolbar-action', (e: Event) => {
+        console.log('toolbar action:', (e as CustomEvent<{ action: string }>).detail.action);
+      });
+    });
+    return (
+      <div style={{ padding: '16px', width: '100%' }}>
+        <kc-prompt-input
+          ref={(e: HTMLElement) => (el = e)}
+          style={{ display: 'block', width: '100%' }}
+        >
+          {/* <kc-action> children are invisible data carriers — Shadow DOM hides them.
+              The element reads them via querySelectorAll + MutationObserver and renders
+              a ghost icon button per entry in the left toolbar. Clicking fires kc-action. */}
+          <kc-action id="attach" icon="paperclip" tooltip="Attach" />
+          <kc-action id="translate" icon="flag" tooltip="Translate" />
+          <kc-action id="bookmark" icon="bookmark" tooltip="Bookmark" />
+        </kc-prompt-input>
+        <p style={{ 'margin-top': '8px', 'font-size': '12px', color: 'var(--color-muted-foreground)' }}>
+          Open the browser console to see <code>kc-action</code> events when you click the extra toolbar buttons.
+        </p>
+      </div>
+    );
+  },
+  parameters: { docs: { source: { code: CUSTOM_TOOLBAR_SNIPPET, language: 'html' } } },
 };
 
