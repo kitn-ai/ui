@@ -10,7 +10,7 @@ const artifact = {
     { name: 'files', optional: false, scalar: false },
     { name: 'tab', optional: true, scalar: true },
   ],
-  events: [{ name: 'navigate', detail: 'string' }],
+  events: [{ name: 'kc-navigate', detail: 'string' }],
 };
 
 const noBindings = {
@@ -33,7 +33,7 @@ describe('buildSnippets', () => {
     expect(s.html).toContain(CDN_ELEMENTS);
     expect(s.html).toContain('<kc-artifact');
     expect(s.html).toContain('el.files =');
-    expect(s.html).toContain("addEventListener('navigate'");
+    expect(s.html).toContain("addEventListener('kc-navigate'");
     expect(s.html).not.toContain("import '@kitn.ai/chat/elements'");
   });
   it('uses Vue .prop binding for non-scalar props and Angular bracket binding', () => {
@@ -70,14 +70,14 @@ describe('buildSnippets', () => {
       const s = buildSnippets(artifact, true);
       expect(s.vue).toMatch(/<kc-artifact\n/);
       expect(s.vue).toContain('\n  :files.prop="files"');
-      expect(s.vue).toContain('\n  @navigate="onNavigate"');
+      expect(s.vue).toContain('\n  @kc-navigate="onNavigate"');
       expect(s.vue).toMatch(/\n\/>/);
     });
     it('Angular: tag on own line, indented bindings, closing on own line', () => {
       const s = buildSnippets(artifact, true);
       expect(s.angular).toMatch(/<kc-artifact\n/);
       expect(s.angular).toContain('\n  [files]="files"');
-      expect(s.angular).toContain('\n  (navigate)="onNavigate($event)"');
+      expect(s.angular).toContain('\n  (kc-navigate)="onNavigate($event)"');
       expect(s.angular).toMatch(/\n><\/kc-artifact>/);
     });
   });
@@ -115,13 +115,13 @@ describe('buildSnippets', () => {
     });
     it('binds events with on:eventName={handler}', () => {
       const s = buildSnippets(artifact, true);
-      expect(s.svelte).toContain('on:navigate={onNavigate}');
+      expect(s.svelte).toContain('on:kc-navigate={onNavigate}');
     });
     it('multi-line: tag on own line, indented bindings, closing on own line', () => {
       const s = buildSnippets(artifact, true);
       expect(s.svelte).toMatch(/<kc-artifact\n/);
       expect(s.svelte).toContain('\n  {files}');
-      expect(s.svelte).toContain('\n  on:navigate={onNavigate}');
+      expect(s.svelte).toContain('\n  on:kc-navigate={onNavigate}');
       expect(s.svelte).toMatch(/\n><\/kc-artifact>/);
     });
     it('is present for all elements (not gated on hasSolid)', () => {

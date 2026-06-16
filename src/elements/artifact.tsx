@@ -39,13 +39,13 @@ interface Props extends Record<string, unknown> {
 
 interface Events extends Record<string, unknown> {
   /** Fired when the preview navigates. `detail.url` = the new location. */
-  navigate: { url: string };
+  'kc-navigate': { url: string };
   /** Fired when the Preview|Code tab changes. `detail.tab`. */
-  tabchange: { tab: ArtifactTab };
+  'kc-tab-change': { tab: ArtifactTab };
   /** Fired when a file is selected. `detail.path`. */
-  fileselect: { path: string };
+  'kc-file-select': { path: string };
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
-  maximizechange: { maximized: boolean };
+  'kc-maximize-change': { maximized: boolean };
 }
 
 /**
@@ -53,8 +53,8 @@ interface Events extends Record<string, unknown> {
  * preview iframe with a functional nav toolbar (back · forward · reload · home +
  * editable path field) and a Preview|Code toggle; the Code tab shows a file tree
  * (`<kc-file-tree>`) + the active file's source via `<kc-code-block>`. The
- * component self-navigates the iframe and emits `navigate` / `tabchange` /
- * `fileselect`. Designed to FILL its container (e.g. a `<kc-resizable>` panel).
+ * component self-navigates the iframe and emits `kc-navigate` / `kc-tab-change` /
+ * `kc-file-select`. Designed to FILL its container (e.g. a `<kc-resizable>` panel).
  */
 defineWebComponent<Props, Events>('kc-artifact', {
   src: undefined,
@@ -83,7 +83,7 @@ defineWebComponent<Props, Events>('kc-artifact', {
       new CustomEvent('kc-maximize-intent', { detail: { requested: next }, bubbles: true, composed: true }),
     );
     // 2) The PUBLIC observable event (non-bubbling, on the host).
-    dispatch('maximizechange', { maximized: next });
+    dispatch('kc-maximize-change', { maximized: next });
   };
 
   // Authoritative reconcile: the resizable tells us the effective state.
@@ -127,9 +127,9 @@ defineWebComponent<Props, Events>('kc-artifact', {
           standalone={flag('standalone')}
           readonlyPath={flag('readonlyPath')}
           onMaximizeChange={onMaximizeChange}
-          onNavigate={(url) => dispatch('navigate', { url })}
-          onTabChange={(tab) => dispatch('tabchange', { tab })}
-          onFileSelect={(path) => dispatch('fileselect', { path })}
+          onNavigate={(url) => dispatch('kc-navigate', { url })}
+          onTabChange={(tab) => dispatch('kc-tab-change', { tab })}
+          onFileSelect={(path) => dispatch('kc-file-select', { path })}
         />
       </div>
     </>

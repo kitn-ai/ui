@@ -407,7 +407,7 @@ const inHeaderBar: StoryUsage = {
     { id: 'claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic' },
   ];
   models.currentModel = 'claude-4';
-  models.addEventListener('modelchange', (e) => console.log(e.detail));
+  models.addEventListener('kc-model-change', (e) => console.log(e.detail));
 </script>`,
     react: `import { Context, ModelSwitcher } from '@kitn.ai/chat/react';
 
@@ -418,7 +418,7 @@ export function ChatHeader() {
   ];
   return (
     <header style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      <ModelSwitcher models={models} currentModel="claude-4" onModelchange={(e) => console.log(e.detail)} />
+      <ModelSwitcher models={models} currentModel="claude-4" onModelChange={(e) => console.log(e.detail)} />
       <Context
         context={{
           usedTokens: 67000,
@@ -449,7 +449,7 @@ const models = [
 
 <template>
   <header style="display:flex;align-items:center;gap:0.5rem">
-    <kc-model-switcher :models.prop="models" current-model="claude-4" @modelchange="(e) => console.log(e.detail)" />
+    <kc-model-switcher :models.prop="models" current-model="claude-4" @kc-model-change="(e) => console.log(e.detail)" />
     <kc-context :context.prop="context" />
   </header>
 </template>`,
@@ -474,7 +474,7 @@ const models = [
 </script>
 
 <header style="display:flex;align-items:center;gap:0.5rem">
-  <kc-model-switcher bind:this={modelsEl} current-model="claude-4" on:modelchange={(e) => console.log(e.detail)} />
+  <kc-model-switcher bind:this={modelsEl} current-model="claude-4" on:kc-model-change={(e) => console.log(e.detail)} />
   <kc-context bind:this={ctxEl} />
 </header>`,
     angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
@@ -487,7 +487,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
     <header style="display:flex;align-items:center;gap:0.5rem">
-      <kc-model-switcher [models]="models" current-model="claude-4" (modelchange)="onModelChange($event)"></kc-model-switcher>
+      <kc-model-switcher [models]="models" current-model="claude-4" (kc-model-change)="onModelChange($event)"></kc-model-switcher>
       <kc-context [context]="context"></kc-context>
     </header>
   \`,

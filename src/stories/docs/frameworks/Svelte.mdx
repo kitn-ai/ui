@@ -75,7 +75,7 @@ stream your model's reply back into state. You own the request; the element owns
   <kc-chat
     {messages}
     suggestions={['Summarize the chat', 'Start fresh']}
-    on:submit={handleSubmit}
+    on:kc-submit={handleSubmit}
     style="flex: 1; min-height: 0;"
   />
 </div>
@@ -113,15 +113,15 @@ to the `<kc-chat>` thread:
   <kc-conversations
     {conversations}
     {activeId}
-    on:conversationselect={handleConversationSelect}
-    on:newchat={() => startNewConversation()}
-    on:togglesidebar={() => sidebarOpen = !sidebarOpen}
+    on:kc-conversation-select={handleConversationSelect}
+    on:kc-new-chat={() => startNewConversation()}
+    on:kc-toggle-sidebar={() => sidebarOpen = !sidebarOpen}
     style="width: 300px; flex-shrink: 0;"
   />
 
   <kc-chat
     {messages}
-    on:submit={(e) => sendMessage(e.detail.value)}
+    on:kc-submit={(e) => sendMessage(e.detail.value)}
     style="flex: 1; min-width: 0;"
   />
 </div>
@@ -145,12 +145,12 @@ takes a `size` (px or `%`) plus optional `min`/`max`; listen for the `change` ev
 </script>
 
 <div style="display: flex; flex-direction: column; height: 100dvh;">
-  <kc-resizable orientation="horizontal" on:change={handleResize} style="flex: 1; min-height: 0;">
+  <kc-resizable orientation="horizontal" on:kc-change={handleResize} style="flex: 1; min-height: 0;">
     <kc-resizable-item size="25%" min="200px">
-      <kc-conversations {conversations} {activeId} on:conversationselect={handleConversationSelect} />
+      <kc-conversations {conversations} {activeId} on:kc-conversation-select={handleConversationSelect} />
     </kc-resizable-item>
     <kc-resizable-item>
-      <kc-chat {messages} on:submit={handleSubmit} />
+      <kc-chat {messages} on:kc-submit={handleSubmit} />
     </kc-resizable-item>
   </kc-resizable>
 </div>

@@ -33,6 +33,7 @@ const meta = {
       description: specDescription('kc-loader', [
           '`<kc-loader>` is the framework-agnostic **web component** for an animated busy indicator — a dozen styles (circular, dots, wave, bars, text-shimmer, …) selected via the `variant` attribute, isolated in **Shadow DOM**.',
           '**When to use:** showing a small "working" indicator anywhere outside the chat thread (toolbars, buttons, panels). In SolidJS, use the `Loader` primitive directly.',
+          '**Placement:** inline anywhere a busy state is needed — centered inside a button, floated in a toolbar corner, or as a standalone skeleton in an empty panel; it is `display: inline-flex` by default so it follows normal inline flow.',
           "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set `variant`, `size`, and (for text variants) `text` as plain HTML attributes.",
           'See the **Code** tab for HTML usage.',
         ]),

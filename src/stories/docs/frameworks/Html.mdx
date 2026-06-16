@@ -79,7 +79,7 @@ stream your model's reply back into the property. You own the request; the eleme
     chat.suggestions = ['Summarize the chat', 'Start fresh'];
 
     // Interactions → addEventListener (CustomEvents, they don't bubble)
-    chat.addEventListener('submit', async (e) => {
+    chat.addEventListener('kc-submit', async (e) => {
       const text = e.detail.value;
 
       // Append user message — always assign a NEW array to trigger a re-render
@@ -136,13 +136,13 @@ to the `<kc-chat>` thread:
   sidebar.conversations = myConversations;
   chat.messages = loadMessages(myConversations[0]?.id);
 
-  sidebar.addEventListener('conversationselect', (e) => {
+  sidebar.addEventListener('kc-conversation-select', (e) => {
     chat.messages = loadMessages(e.detail.id);
   });
 
-  sidebar.addEventListener('newchat', () => startNewConversation());
+  sidebar.addEventListener('kc-new-chat', () => startNewConversation());
 
-  chat.addEventListener('submit', (e) => sendMessage(e.detail.value));
+  chat.addEventListener('kc-submit', (e) => sendMessage(e.detail.value));
 </script>
 ```
 
@@ -174,7 +174,7 @@ persist the layout.
   import '@kitn.ai/chat/elements';
 
   const resizable = document.querySelector('kc-resizable');
-  resizable.addEventListener('change', (e) => {
+  resizable.addEventListener('kc-change', (e) => {
     console.log('panel sizes:', e.detail.sizes);
     // persist to localStorage, etc.
   });
@@ -202,8 +202,8 @@ el.messages = [{ id: '1', role: 'assistant', content: 'Hi' }];
 el.conversations = myConversations;
 
 // ✅ Events — addEventListener on the element (CustomEvents, they don't bubble)
-el.addEventListener('submit', (e) => console.log(e.detail.value));
-el.addEventListener('conversationselect', (e) => console.log(e.detail.id));
+el.addEventListener('kc-submit', (e) => console.log(e.detail.value));
+el.addEventListener('kc-conversation-select', (e) => console.log(e.detail.id));
 ```
 
 **Scalar attributes** (strings, booleans, numbers) can go directly in HTML markup:

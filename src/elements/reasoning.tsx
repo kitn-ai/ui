@@ -19,13 +19,13 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-reasoning>`. */
 interface Events {
   /** Open state changed (via the trigger or streaming auto-open). */
-  openchange: { open: boolean };
+  'kc-open-change': { open: boolean };
 }
 
 /**
  * `<kc-reasoning>` — a collapsible reasoning/thinking block that auto-expands
  * while `streaming`. Text via the `text` property; `markdown`/`streaming` flags;
- * `open` is a controlled property; emits `openchange`.
+ * `open` is a controlled property; emits `kc-open-change`.
  */
 defineWebComponent<Props, Events>('kc-reasoning', {
   text: '',
@@ -40,7 +40,7 @@ defineWebComponent<Props, Events>('kc-reasoning', {
       <Reasoning
         open={props.open}
         isStreaming={flag('streaming')}
-        onOpenChange={(open) => dispatch('openchange', { open })}
+        onOpenChange={(open) => dispatch('kc-open-change', { open })}
       >
         <ReasoningTrigger>{props.label}</ReasoningTrigger>
         <ReasoningContent markdown={flag('markdown')}>{props.text}</ReasoningContent>

@@ -59,7 +59,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
     { path: 'assets/logo.svg', type: 'image' },
   ];
   tree.setAttribute('active-file', 'src/app.ts');
-  tree.addEventListener('select', (e) => console.log('selected', e.detail.path));
+  tree.addEventListener('kc-select', (e) => console.log('selected', e.detail.path));
 </script>`;
 
 const meta = {
@@ -91,7 +91,7 @@ export const Playground: Story = {
     onMount(() => {
       if (!el) return;
       el.files = FILES;
-      el.addEventListener('select', (e) => {
+      el.addEventListener('kc-select', (e) => {
         const path = (e as CustomEvent).detail.path as string;
         setSelected(path);
         el.setAttribute('active-file', path);

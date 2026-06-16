@@ -6,7 +6,7 @@ import type { SlashCommandItem } from '../components/slash-command';
 
 interface Props extends Record<string, unknown> {
   /** Controlled value of the input. When set, the host owns the text and must
-   *  update it on `valuechange`; leave unset for uncontrolled behavior. */
+   *  update it on `kc-value-change`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -43,17 +43,17 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-prompt-input>`. */
 interface Events {
   /** The user submitted the prompt (Enter or send button) with its attachments. */
-  submit: { value: string; attachments: AttachmentData[] };
+  'kc-submit': { value: string; attachments: AttachmentData[] };
   /** The input text changed (fires on every keystroke). */
-  valuechange: { value: string };
+  'kc-value-change': { value: string };
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
-  suggestionclick: { value: string };
+  'kc-suggestion-click': { value: string };
   /** A slash command was chosen from the palette. */
-  slashselect: { command: SlashCommandItem };
+  'kc-slash-select': { command: SlashCommandItem };
   /** The Search (Globe) toolbar button was clicked. */
-  search: Record<string, never>;
+  'kc-search': Record<string, never>;
   /** The Voice (Mic) toolbar button was clicked. */
-  voice: Record<string, never>;
+  'kc-voice': Record<string, never>;
 }
 
 defineWebComponent<Props, Events>('kc-prompt-input', {
@@ -81,18 +81,18 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
   });
   const current = () => props.value ?? internal();
 
-  const handleChange = (v: string) => { setInternal(v); dispatch('valuechange', { value: v }); };
+  const handleChange = (v: string) => { setInternal(v); dispatch('kc-value-change', { value: v }); };
   const handleSubmit = () => {
-    dispatch('submit', { value: current(), attachments: attachments() });
+    dispatch('kc-submit', { value: current(), attachments: attachments() });
     setAttachments([]);
   };
   const handleSuggestionClick = (v: string) => {
     if ((props.suggestionMode ?? 'submit') === 'fill') {
       handleChange(v);
-      dispatch('suggestionclick', { value: v });
+      dispatch('kc-suggestion-click', { value: v });
     } else {
       // Default: behave as if the user typed the suggestion and pressed submit.
-      dispatch('submit', { value: v, attachments: attachments() });
+      dispatch('kc-submit', { value: v, attachments: attachments() });
       setAttachments([]);
     }
   };
@@ -114,9 +114,9 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
       onSubmit={handleSubmit}
       onSuggestionClick={handleSuggestionClick}
       onAttachmentsChange={setAttachments}
-      onSearch={() => dispatch('search')}
-      onVoice={() => dispatch('voice')}
-      onSlashSelect={(command) => dispatch('slashselect', { command })}
+      onSearch={() => dispatch('kc-search')}
+      onVoice={() => dispatch('kc-voice')}
+      onSlashSelect={(command) => dispatch('kc-slash-select', { command })}
     />
   );
 });

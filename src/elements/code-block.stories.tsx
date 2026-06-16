@@ -60,6 +60,7 @@ const meta = {
       description: specDescription('kc-code-block', [
           '`<kc-code-block>` is the framework-agnostic **web component** for a single syntax-highlighted code block, complete with a copy button, isolated in **Shadow DOM**.',
           '**When to use:** dropping a highlighted snippet into a non-Solid app. In SolidJS, compose `CodeBlock` + `CodeBlockCode` directly.',
+          '**Placement:** as a block inside a message row, tutorial card, or documentation pane; it is `display: block` and fills container width, so set `max-width` on the parent or the element to control line lengths.',
           "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the source via the `code` **property** (`el.code = '...'`), and pick a grammar with the `language` attribute (defaults to `tsx`). Tune highlighting with `code-theme` / `code-highlight`.",
           'See the **Code** tab for HTML usage.',
         ]),

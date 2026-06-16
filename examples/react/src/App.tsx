@@ -8,7 +8,7 @@
  *     slashCommands) are passed as React props and assigned as live DOM
  *     *properties* (NOT stringified to attributes);
  *   - boolean props (loading) reflect correctly;
- *   - events are `on<Event>` handlers (onSubmit, onModelchange, onConversationselect, …)
+ *   - events are `on<Event>` handlers (onSubmit, onModelChange, onConversationSelect, …)
  *     wired to the elements' CustomEvents under the hood;
  *   - refs are forwarded; `theme`/`style`/`className`/`id` pass through.
  *
@@ -278,9 +278,9 @@ export default function App() {
           conversations={conversations}
           activeId={activeId}
           theme={theme}
-          onConversationselect={handleSelect}
-          onNewchat={handleNewChat}
-          onTogglesidebar={handleToggleSidebar}
+          onConversationSelect={handleSelect}
+          onNewChat={handleNewChat}
+          onToggleSidebar={handleToggleSidebar}
           style={{
             width: 300,
             flexShrink: 0,
@@ -298,8 +298,8 @@ export default function App() {
           loading={loading}
           theme={theme}
           onSubmit={handleSubmit}
-          onModelchange={handleModelChange}
-          onMessageaction={handleMessageAction}
+          onModelChange={handleModelChange}
+          onMessageAction={handleMessageAction}
           style={{ flex: 1, minWidth: 0 }}
         />
       </div>

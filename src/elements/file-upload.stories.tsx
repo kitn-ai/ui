@@ -12,7 +12,7 @@ declare module 'solid-js' {
         accept?: string;
         disabled?: boolean | string;
         label?: string;
-        'on:filesadded'?: (e: CustomEvent<{ files: File[] }>) => void;
+        'on:kc-files-added'?: (e: CustomEvent<{ files: File[] }>) => void;
       };
     }
   }
@@ -25,7 +25,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   import '@kitn.ai/chat/elements';   // registers the custom elements
 
   document.querySelector('kc-file-upload')
-    .addEventListener('filesadded', (e) =>
+    .addEventListener('kc-files-added', (e) =>
       console.log(e.detail.files.map((f) => f.name)));
 </script>`;
 
@@ -39,7 +39,8 @@ const meta = {
       description: specDescription('kc-file-upload', [
           '`<kc-file-upload>` is the framework-agnostic **web component** for a click / drag-and-drop file dropzone — isolated in **Shadow DOM**.',
           '**When to use:** accepting file or image uploads in a non-Solid app. In SolidJS, compose the `FileUpload` primitives.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `accept` / `multiple` / `label` attributes, and listen for the `filesadded` **CustomEvent** (`e.detail.files` is a `File[]`). The default dropzone label can be replaced with your own markup via the default `<slot>`.",
+          '**Placement:** above or replacing the prompt input, or in a dedicated upload panel; fills its container width (set a `max-width` on the parent to constrain the dropzone).',
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `accept` / `multiple` / `label` attributes, and listen for the `kc-files-added` **CustomEvent** (`e.detail.files` is a `File[]`). The default dropzone label can be replaced with your own markup via the default `<slot>`.",
           'See the **Code** tab for HTML usage.',
         ]),
     },
@@ -54,7 +55,7 @@ export const Default: Story = {
   render: () => (
     <div style={{ padding: '24px', 'max-width': '480px' }}>
       <kc-file-upload
-        on:filesadded={(e: CustomEvent<{ files: File[] }>) =>
+        on:kc-files-added={(e: CustomEvent<{ files: File[] }>) =>
           console.log(e.detail.files.map((f) => f.name))}
       />
     </div>

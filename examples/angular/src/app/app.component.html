@@ -53,12 +53,12 @@
         - [theme]           'light'|'dark'|'auto'
 
       Event bindings ((event)):
-        - (submit)              — user sends a message
-        - (messageaction)       — copy / like / dislike / regenerate
-        - (modelchange)         — model picker changed
-        - (conversationselect)  — sidebar item clicked
-        - (newchat)             — "New chat" button clicked
-        - (sidebartoggle)       — hamburger / sidebar toggle
+        - (kc-submit)              — user sends a message
+        - (kc-message-action)       — copy / like / dislike / regenerate
+        - (kc-model-change)         — model picker changed
+        - (kc-conversation-select)  — sidebar item clicked
+        - (kc-new-chat)             — "New chat" button clicked
+        - (kc-sidebar-toggle)       — hamburger / sidebar toggle
     -->
     <kc-workspace
       [groups]="groups"
@@ -72,12 +72,12 @@
       [slashCommands]="slashCommands"
       [loading]="loading()"
       [theme]="theme()"
-      (submit)="onSubmit($event)"
-      (messageaction)="onMessageAction($event)"
-      (modelchange)="onModelChange($event)"
-      (conversationselect)="onConversationSelect($event)"
-      (newchat)="onNewChat()"
-      (sidebartoggle)="onSidebarToggle()"
+      (kc-submit)="onSubmit($event)"
+      (kc-message-action)="onMessageAction($event)"
+      (kc-model-change)="onModelChange($event)"
+      (kc-conversation-select)="onConversationSelect($event)"
+      (kc-new-chat)="onNewChat()"
+      (kc-sidebar-toggle)="onSidebarToggle()"
       style="flex: 1; min-height: 0;"
     ></kc-workspace>
   </div>
@@ -91,7 +91,7 @@
       placeholder="Standalone prompt input…"
       [slashCommands]="slashCommands"
       [theme]="theme()"
-      (submit)="onStandaloneSubmit($event)"
+      (kc-submit)="onStandaloneSubmit($event)"
     ></kc-prompt-input>
     @if (draftSubmissions().length > 0) {
       <ul class="draft-list">

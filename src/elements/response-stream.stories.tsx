@@ -44,7 +44,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   const stream = document.getElementById('stream');
   // text can be a string, or an AsyncIterable<string> for live streaming
   stream.text = "Hello, this reveals one character at a time…";
-  stream.addEventListener('complete', () => console.log('done'));
+  stream.addEventListener('kc-complete', () => console.log('done'));
 </script>`;
 
 const meta = {
@@ -57,7 +57,7 @@ const meta = {
       description: specDescription('kc-response-stream', [
           '`<kc-response-stream>` is the framework-agnostic **web component** that reveals text with a typewriter or fade animation — the building block for streamed assistant replies, isolated in **Shadow DOM**.',
           '**When to use:** animating a response as it arrives. Pass a finished string to replay an animation, or an `AsyncIterable<string>` to drive it from a live stream. In SolidJS, use the `ResponseStream` primitive.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `text` **property** (string or async iterable), tune `mode` (`typewriter` / `fade`) and `speed`, and listen for the `complete` **CustomEvent**.",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `text` **property** (string or async iterable), tune `mode` (`typewriter` / `fade`) and `speed`, and listen for the `kc-complete` **CustomEvent**.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

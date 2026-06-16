@@ -26,9 +26,9 @@ function VoiceElement(props: { disabled?: boolean }) {
       await new Promise((r) => setTimeout(r, 400));
       return 'transcribed text';
     };
-    el.addEventListener('transcription', (e) => {
+    el.addEventListener('kc-transcription', (e) => {
       const ev = e as CustomEvent<{ text: string }>;
-      console.log('transcription', ev.detail.text);
+      console.log('kc-transcription', ev.detail.text);
     });
   });
   return (
@@ -52,7 +52,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
     const text = await myTranscriptionApi(blob);
     return text;
   };
-  voice.addEventListener('transcription', (e) => console.log(e.detail.text));
+  voice.addEventListener('kc-transcription', (e) => console.log(e.detail.text));
 </script>`;
 
 const meta = {
@@ -65,7 +65,8 @@ const meta = {
       description: specDescription('kc-voice-input', [
           '`<kc-voice-input>` is the framework-agnostic **web component** for a mic button that records and transcribes audio — isolated in **Shadow DOM**. It is the canonical **function-property** element.',
           '**When to use:** adding voice dictation to an input in a non-Solid app. In SolidJS, use the `VoiceInput` primitive.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set the `transcribe` **function property** (`el.transcribe = async blob => '...'`) — a value-returning callback can't be modelled as an event. It also emits `audiocaptured` (raw blob) and `transcription` (text) **CustomEvents**.",
+          '**Placement:** inline beside the prompt input field or as an icon button in the composer toolbar; renders as an inline-block sized to the mic button.',
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set the `transcribe` **function property** (`el.transcribe = async blob => '...'`) — a value-returning callback can't be modelled as an event. It also emits `kc-audio-captured` (raw blob) and `kc-transcription` (text) **CustomEvents**.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

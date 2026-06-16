@@ -1,4 +1,5 @@
 import { type JSX, For, createSignal, splitProps, Show } from "solid-js";
+import { Tooltip } from "../ui/tooltip";
 import { Copy, Check } from "lucide-solid";
 import { cn } from "../utils/cn";
 import { Markdown } from "./markdown";
@@ -148,7 +149,10 @@ function MessageActionBar(props: MessageActionBarProps) {
       <For each={props.actions}>
         {(a) => {
           const item = normalizeAction(a);
-          return (
+          const tooltipText = () => (typeof a !== 'string' && a.tooltip) ? a.tooltip : item.label;
+          // Factory (not a shared node): each Show branch gets its own Button so
+          // the eager DOM node is never referenced from two places.
+          const button = () => (
             <Button
               variant="ghost"
               size="icon-sm"
@@ -164,6 +168,13 @@ function MessageActionBar(props: MessageActionBarProps) {
                 }}
               </Show>
             </Button>
+          );
+          // Icon-only buttons get a tooltip; label-only buttons (text already
+          // visible) don't.
+          return (
+            <Show when={item.Icon} fallback={button()}>
+              <Tooltip content={tooltipText()}>{button()}</Tooltip>
+            </Show>
           );
         }}
       </For>

@@ -20,7 +20,7 @@ const typewriter: StoryUsage = {
   const stream = document.getElementById('stream');
   // A plain string is fine as a property; an AsyncIterable<string> MUST be a property.
   stream.text = '${STREAM}';
-  stream.addEventListener('complete', () => console.log('done streaming'));
+  stream.addEventListener('kc-complete', () => console.log('done streaming'));
 </script>`,
 
     react: `import { ResponseStream } from '@kitn.ai/chat/react';
@@ -52,7 +52,7 @@ function onComplete() {
     :text.prop="text"
     mode="typewriter"
     :speed="40"
-    @complete="onComplete"
+    @kc-complete="onComplete"
   />
 </template>`,
 
@@ -72,7 +72,7 @@ function onComplete() {
   bind:this={el}
   mode="typewriter"
   speed="40"
-  on:complete={onComplete}
+  on:kc-complete={onComplete}
 />`,
 
     angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
@@ -88,7 +88,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
       [text]="text"
       mode="typewriter"
       [speed]="40"
-      (complete)="onComplete()"
+      (kc-complete)="onComplete()"
     ></kc-response-stream>
   \`,
 })
@@ -214,7 +214,7 @@ const fade: StoryUsage = {
 <script type="module">
   const stream = document.getElementById('stream');
   stream.text = '${STREAM}';
-  stream.addEventListener('complete', () => console.log('done streaming'));
+  stream.addEventListener('kc-complete', () => console.log('done streaming'));
 </script>`,
 
     react: `import { ResponseStream } from '@kitn.ai/chat/react';
@@ -236,7 +236,7 @@ const text = '${STREAM}';
     :text.prop="text"
     mode="fade"
     :speed="30"
-    @complete="() => console.log('done streaming')"
+    @kc-complete="() => console.log('done streaming')"
   />
 </template>`,
 
@@ -251,7 +251,7 @@ const text = '${STREAM}';
   bind:this={el}
   mode="fade"
   speed="30"
-  on:complete={() => console.log('done streaming')}
+  on:kc-complete={() => console.log('done streaming')}
 />`,
 
     angular: `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -265,7 +265,7 @@ const text = '${STREAM}';
       [text]="text"
       mode="fade"
       [speed]="30"
-      (complete)="log()"
+      (kc-complete)="log()"
     ></kc-response-stream>
   \`,
 })

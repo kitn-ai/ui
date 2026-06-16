@@ -138,7 +138,7 @@
         }, 45);
       }
 
-      chat.addEventListener('submit', (e) => {
+      chat.addEventListener('kc-submit', (e) => {
         const value = (e.detail.value || '').trim();
         if (!value && !(e.detail.attachments || []).length) return;
         chat.messages = [...chat.messages, { id: 'u' + Date.now(), role: 'user', content: value, attachments: (e.detail.attachments || []).length ? e.detail.attachments : undefined }];

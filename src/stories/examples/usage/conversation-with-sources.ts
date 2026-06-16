@@ -33,7 +33,7 @@ const def: StoryUsage = {
     content: '${REPLY}',
     actions: ['copy', 'like', 'dislike'],
   };
-  msg.addEventListener('messageaction', (e) => {
+  msg.addEventListener('kc-message-action', (e) => {
     const { messageId, action } = e.detail; // 'copy' | 'like' | 'dislike'
     console.log(messageId, action);
   });
@@ -63,7 +63,7 @@ export function AnswerWithSources() {
           content: '${REPLY}',
           actions: ['copy', 'like', 'dislike'],
         }}
-        onMessageaction={(e) => {
+        onMessageAction={(e) => {
           const { messageId, action } = e.detail;
           console.log(messageId, action);
         }}
@@ -118,7 +118,7 @@ function onAction(e) {
 
 <template>
   <!-- .prop binds the object/array as a property (attributes only take strings) -->
-  <kc-message :message.prop="message" @messageaction="onAction" />
+  <kc-message :message.prop="message" @kc-message-action="onAction" />
   <kc-sources :sources.prop="sources" show-favicon />
 </template>`,
 
@@ -158,7 +158,7 @@ function onAction(e) {
   }
 </script>
 
-<kc-message bind:this={msgEl} on:messageaction={onAction} />
+<kc-message bind:this={msgEl} on:kc-message-action={onAction} />
 <kc-sources bind:this={srcEl} show-favicon />`,
 
     angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
@@ -170,7 +170,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
-    <kc-message [message]="message" (messageaction)="onAction($event)"></kc-message>
+    <kc-message [message]="message" (kc-message-action)="onAction($event)"></kc-message>
     <kc-sources [sources]="sources" [showFavicon]="true"></kc-sources>
   \`,
 })

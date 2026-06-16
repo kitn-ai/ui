@@ -13,7 +13,7 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-thinking-bar>`. */
 interface Events {
   /** The "stop / answer now" affordance was clicked. */
-  stop: void;
+  'kc-stop': void;
 }
 
 /**
@@ -29,6 +29,6 @@ defineWebComponent<Props, Events>('kc-thinking-bar', {
   <ThinkingBar
     text={props.text}
     stopLabel={props.stopLabel}
-    onStop={flag('stoppable') ? () => dispatch('stop') : undefined}
+    onStop={flag('stoppable') ? () => dispatch('kc-stop') : undefined}
   />
 ));

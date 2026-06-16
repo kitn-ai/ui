@@ -46,7 +46,7 @@ const reasoning: StoryUsage = {
     content: '${REPLY}',
     actions: ['copy', 'like', 'dislike'],
   };
-  msg.addEventListener('messageaction', (e) => console.log(e.detail));
+  msg.addEventListener('kc-message-action', (e) => console.log(e.detail));
 </script>`,
 
     react: `import { ChainOfThought, Message } from '@kitn.ai/chat/react';
@@ -63,7 +63,7 @@ export function ReasonedReply() {
           content: '${REPLY}',
           actions: ['copy', 'like', 'dislike'],
         }}
-        onMessageaction={(e) => console.log(e.detail)}
+        onMessageAction={(e) => console.log(e.detail)}
       />
     </>
   );
@@ -85,7 +85,7 @@ const message = {
 <template>
   <!-- arrays/objects bind as a property -->
   <kc-chain-of-thought :steps.prop="steps" />
-  <kc-message :message.prop="message" @messageaction="(e) => console.log(e.detail)" />
+  <kc-message :message.prop="message" @kc-message-action="(e) => console.log(e.detail)" />
 </template>`,
 
     svelte: `<script>
@@ -106,7 +106,7 @@ const message = {
 </script>
 
 <kc-chain-of-thought bind:this={cotEl} />
-<kc-message bind:this={msgEl} on:messageaction={(e) => console.log(e.detail)} />`,
+<kc-message bind:this={msgEl} on:kc-message-action={(e) => console.log(e.detail)} />`,
 
     angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
@@ -118,7 +118,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
     <kc-chain-of-thought [steps]="steps"></kc-chain-of-thought>
-    <kc-message [message]="message" (messageaction)="log($event)"></kc-message>
+    <kc-message [message]="message" (kc-message-action)="log($event)"></kc-message>
   \`,
 })
 export class ReasonedReplyComponent {

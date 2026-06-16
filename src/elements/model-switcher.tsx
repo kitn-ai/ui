@@ -12,12 +12,12 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-model-switcher>`. */
 interface Events {
   /** A model was selected. */
-  modelchange: { modelId: string };
+  'kc-model-change': { modelId: string };
 }
 
 /**
  * `<kc-model-switcher>` — an event-emitting leaf element. Data in via the
- * `models` property, selection out via a `modelchange` event. Mirrors the
+ * `models` property, selection out via a `kc-model-change` event. Mirrors the
  * header switcher inside `<kc-chat>` as a standalone, composable piece.
  *
  * Note: like the underlying primitive, this only renders when more than one
@@ -30,6 +30,6 @@ defineWebComponent<Props, Events>('kc-model-switcher', {
   <ModelSwitcher
     models={props.models}
     currentModelId={props.currentModel ?? props.models[0]?.id ?? ''}
-    onModelChange={(modelId) => dispatch('modelchange', { modelId })}
+    onModelChange={(modelId) => dispatch('kc-model-change', { modelId })}
   />
 ));

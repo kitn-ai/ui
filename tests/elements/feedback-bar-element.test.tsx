@@ -17,7 +17,7 @@ test('clicking thumbs-up emits feedback event with value "helpful"', async () =>
   await flush();
 
   let detail: { value: string } | null = null;
-  el.addEventListener('feedback', (e) => (detail = (e as CustomEvent).detail));
+  el.addEventListener('kc-feedback', (e) => (detail = (e as CustomEvent).detail));
 
   const thumbsUp = el.shadowRoot!.querySelector<HTMLButtonElement>('button[aria-label="Helpful"]');
   expect(thumbsUp).not.toBeNull();
@@ -34,7 +34,7 @@ test('clicking thumbs-down emits feedback event with value "not-helpful"', async
   await flush();
 
   let detail: { value: string } | null = null;
-  el.addEventListener('feedback', (e) => (detail = (e as CustomEvent).detail));
+  el.addEventListener('kc-feedback', (e) => (detail = (e as CustomEvent).detail));
 
   const thumbsDown = el.shadowRoot!.querySelector<HTMLButtonElement>('button[aria-label="Not helpful"]');
   expect(thumbsDown).not.toBeNull();
@@ -50,7 +50,7 @@ test('clicking close emits close event (unchanged)', async () => {
   await flush();
 
   let closed = false;
-  el.addEventListener('close', () => (closed = true));
+  el.addEventListener('kc-close', () => (closed = true));
 
   const closeBtn = el.shadowRoot!.querySelector<HTMLButtonElement>('button[aria-label="Close"]');
   expect(closeBtn).not.toBeNull();

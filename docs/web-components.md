@@ -83,7 +83,7 @@ All rich props (arrays, objects) must be set as **JavaScript properties**, not H
   ];
 
   // Listen for events via addEventListener
-  chat.addEventListener('submit', (e) => {
+  chat.addEventListener('kc-submit', (e) => {
     console.log('user sent:', e.detail.value);
   });
 </script>
@@ -114,11 +114,11 @@ import { Chat } from '@kitn.ai/chat/react';
   messages={messages}
   models={models}
   onSubmit={(e) => send(e.detail.value)}
-  onMessageaction={(e) => handle(e.detail)}
+  onMessageAction={(e) => handle(e.detail)}
 />;
 ```
 
-Component names are the bare friendly name of the element (`kc-chat` → `Chat`); event props are `on` + the event name (`messageaction` → `onMessageaction`).
+Component names are the bare friendly name of the element (`kc-chat` → `Chat`); event props are `on` + the event name with the `kc-` prefix stripped and each hyphen-segment PascalCased (`kc-message-action` → `onMessageAction`).
 
 ---
 
@@ -135,8 +135,8 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `messages` | — | `{ id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]` | `[]` | The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). |
-| `value` | `value` | `undefined | string` | — | Controlled value of the input. When set, the host owns the input text and must update it on `valuechange`; leave unset for uncontrolled behavior. |
+| `messages` | — | `{ id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]` | `[]` | The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). |
+| `value` | `value` | `undefined | string` | — | Controlled value of the input. When set, the host owns the input text and must update it on `kc-value-change`; leave unset for uncontrolled behavior. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
 | `loading` | `loading` | `undefined | false | true` | `false` | When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). |
 | `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property. |
@@ -145,13 +145,13 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `chatTitle` | `chat-title` | `undefined | string` | — | Optional header title shown on the left of the header. |
-| `models` | — | `ModelOption[] | undefined` | — | Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `modelchange` event fires on selection. |
+| `models` | — | `ModelOption[] | undefined` | — | Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently selected model id (pairs with `models`). |
 | `context` | — | `ContextData | undefined` | — | Optional context-window token usage. When set, a Context token meter is shown in the header. |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the input toolbar; fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the input toolbar; fires a `voice` event. |
-| `slashCommands` | — | `SlashCommandItem[] | undefined` | — | Slash commands — when set, typing `/` in the input opens the command palette and fires `slashselect`. Set as a JS property. |
+| `slashCommands` | — | `SlashCommandItem[] | undefined` | — | Slash commands — when set, typing `/` in the input opens the command palette and fires `kc-slash-select`. Set as a JS property. |
 | `slashActiveIds` | — | `undefined | string[]` | — | Command ids to highlight as active in the palette. |
 | `slashCompact` | `slash-compact` | `undefined | false | true` | `false` | Single-line palette rows. |
 | `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). |
@@ -160,14 +160,14 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `messageaction` | `{ messageId: string; action: string }` | An action button on a message was clicked. `action` is the built-in name or custom id. |
-| `modelchange` | `{ modelId: string }` | The header model switcher changed. |
-| `search` | — | The Search button was clicked. |
-| `slashselect` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
-| `submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
-| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
-| `valuechange` | `{ value: string }` | Fired on every input change. |
-| `voice` | — | The Mic / voice button was clicked. |
+| `kc-message-action` | `{ messageId: string; action: string }` | An action button on a message was clicked. `action` is the built-in name or custom id. |
+| `kc-model-change` | `{ modelId: string }` | The header model switcher changed. |
+| `kc-search` | — | The Search button was clicked. |
+| `kc-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
+| `kc-submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
+| `kc-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
+| `kc-value-change` | `{ value: string }` | Fired on every input change. |
+| `kc-voice` | — | The Mic / voice button was clicked. |
 
 #### Composed from
 
@@ -192,7 +192,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `groups` | — | `ConversationGroup[]` | `[]` | Pre-bucketed conversation groups for the sidebar. Set as a JS property. |
 | `conversations` | — | `ConversationSummary[]` | `[]` | Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. |
 | `activeId` | `active-id` | `undefined | string` | — | Id of the open conversation, highlighted in the sidebar. |
-| `messages` | — | `{ id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]` | `[]` | The active conversation's message thread, newest last. Set as a JS property. |
+| `messages` | — | `{ id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]` | `[]` | The active conversation's message thread, newest last. Set as a JS property. |
 | `value` | `value` | `undefined | string` | — |  |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` |  |
 | `loading` | `loading` | `undefined | false | true` | `false` |  |
@@ -220,17 +220,17 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `conversationselect` | `{ id: string }` | A conversation was selected in the sidebar. |
-| `messageaction` | `{ messageId: string; action: string }` | An action button on a message was clicked. |
-| `modelchange` | `{ modelId: string }` | The header model switcher changed. |
-| `newchat` | — | The "New chat" button was clicked. |
-| `search` | — | The Search button was clicked. |
-| `sidebartoggle` | `{ collapsed: false | true }` | The sidebar was collapsed or expanded. |
-| `slashselect` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
-| `submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
-| `suggestionclick` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
-| `valuechange` | `{ value: string }` | Fired on every input change. |
-| `voice` | — | The Mic / voice button was clicked. |
+| `kc-conversation-select` | `{ id: string }` | A conversation was selected in the sidebar. |
+| `kc-message-action` | `{ messageId: string; action: string }` | An action button on a message was clicked. |
+| `kc-model-change` | `{ modelId: string }` | The header model switcher changed. |
+| `kc-new-chat` | — | The "New chat" button was clicked. |
+| `kc-search` | — | The Search button was clicked. |
+| `kc-sidebar-toggle` | `{ collapsed: false | true }` | The sidebar was collapsed or expanded. |
+| `kc-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
+| `kc-submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
+| `kc-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
+| `kc-value-change` | `{ value: string }` | Fired on every input change. |
+| `kc-voice` | — | The Mic / voice button was clicked. |
 
 #### Composed from
 
@@ -263,12 +263,12 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
     { id: 'claude-4', name: 'Claude 4 Opus', provider: 'Anthropic' },
   ];
 
-  workspace.addEventListener('conversationselect', (e) => {
+  workspace.addEventListener('kc-conversation-select', (e) => {
     // load messages for e.detail.id, then reassign workspace.messages
     console.log('selected', e.detail.id);
   });
 
-  workspace.addEventListener('submit', async (e) => {
+  workspace.addEventListener('kc-submit', async (e) => {
     const text = e.detail.value;
     const history = [...workspace.messages, { id: crypto.randomUUID(), role: 'user', content: text }];
     workspace.messages = history;
@@ -298,9 +298,9 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `conversationselect` | `{ id: string }` | A conversation was selected. |
-| `newchat` | — | The "New chat" button was clicked. |
-| `togglesidebar` | — | The sidebar toggle was clicked. |
+| `kc-conversation-select` | `{ id: string }` | A conversation was selected. |
+| `kc-new-chat` | — | The "New chat" button was clicked. |
+| `kc-toggle-sidebar` | — | The sidebar toggle was clicked. |
 
 #### Composed from
 
@@ -322,7 +322,7 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `value` | `value` | `undefined | string` | — | Controlled value of the input. When set, the host owns the text and must update it on `valuechange`; leave unset for uncontrolled behavior. |
+| `value` | `value` | `undefined | string` | — | Controlled value of the input. When set, the host owns the text and must update it on `kc-value-change`; leave unset for uncontrolled behavior. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the input and submit button entirely (non-interactive). |
 | `loading` | `loading` | `undefined | false | true` | `false` | Show the loading/streaming state and block submit (use while awaiting a reply). |
@@ -339,12 +339,12 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `search` | — | The Search (Globe) toolbar button was clicked. |
-| `slashselect` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
-| `submit` | `{ value: string; attachments: AttachmentData[] }` | The user submitted the prompt (Enter or send button) with its attachments. |
-| `suggestionclick` | `{ value: string }` | A suggestion was clicked while `suggestion-mode="fill"`. |
-| `valuechange` | `{ value: string }` | The input text changed (fires on every keystroke). |
-| `voice` | — | The Voice (Mic) toolbar button was clicked. |
+| `kc-search` | — | The Search (Globe) toolbar button was clicked. |
+| `kc-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
+| `kc-submit` | `{ value: string; attachments: AttachmentData[] }` | The user submitted the prompt (Enter or send button) with its attachments. |
+| `kc-suggestion-click` | `{ value: string }` | A suggestion was clicked while `suggestion-mode="fill"`. |
+| `kc-value-change` | `{ value: string }` | The input text changed (fires on every keystroke). |
+| `kc-voice` | — | The Voice (Mic) toolbar button was clicked. |
 
 #### Theming
 
@@ -362,7 +362,7 @@ Standalone prompt input with a send button. Use when you want just the input are
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `message` | — | `undefined | { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }` | — | The full message object. Set as a JS property. |
+| `message` | — | `undefined | { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }` | — | The full message object. Set as a JS property. |
 | `role` | `role` | `undefined | "user" | "assistant"` | `'assistant'` | Convenience for simple cases when not passing a `message` object. |
 | `content` | `content` | `undefined | string` | — | Convenience content (used when `message` is not set). |
 | `markdown` | `markdown` | `undefined | false | true` | — | Force markdown on/off. Defaults to on for assistant, off for user. |
@@ -377,7 +377,7 @@ Standalone prompt input with a send button. Use when you want just the input are
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `messageaction` | `{ messageId: string; action: string }` | An action button was clicked. `action` is the built-in name or custom id. |
+| `kc-message-action` | `{ messageId: string; action: string }` | An action button was clicked. `action` is the built-in name or custom id. |
 
 #### Composed from
 
@@ -464,7 +464,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `openchange` | `{ open: false | true }` | Open state changed (via the trigger or streaming auto-open). |
+| `kc-open-change` | `{ open: false | true }` | Open state changed (via the trigger or streaming auto-open). |
 
 #### Composed from
 
@@ -514,7 +514,7 @@ No events.
 | `items` | — | `AttachmentData[]` | `[]` | The attachments to render. Set as a JS property (array). |
 | `variant` | `variant` | `undefined | "grid" | "inline" | "list"` | `'grid'` | Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. |
 | `hoverCard` | `hover-card` | `undefined | false | true` | `false` | Wrap each item in a hover card that previews its details. |
-| `removable` | `removable` | `undefined | false | true` | `false` | Show a remove button per item; clicking it fires a `remove` event. |
+| `removable` | `removable` | `undefined | false | true` | `false` | Show a remove button per item; clicking it fires a `kc-remove` event. |
 | `showMediaType` | `show-media-type` | `undefined | false | true` | `false` | Also show the media type beneath the filename (non-grid variants). |
 | `emptyText` | `empty-text` | `undefined | string` | — | Text shown when `items` is empty. |
 
@@ -522,7 +522,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `remove` | `{ id: string }` | A remove button was clicked. |
+| `kc-remove` | `{ id: string }` | A remove button was clicked. |
 
 #### Composed from
 
@@ -551,7 +551,7 @@ Renders a list of file/document attachments in grid, inline, or list layouts.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `modelchange` | `{ modelId: string }` | A model was selected. |
+| `kc-model-change` | `{ modelId: string }` | A model was selected. |
 
 #### Composed from
 
@@ -631,7 +631,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `select` | `{ value: string }` | A suggestion was clicked. |
+| `kc-select` | `{ value: string }` | A suggestion was clicked. |
 
 #### Composed from
 
@@ -707,13 +707,20 @@ No events.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `barTitle` | `bar-title` | `undefined | string` | `'Was this helpful?'` | The banner label (e.g. "Was this helpful?"). Attribute: `bar-title` (`title` is avoided — it's a global HTML attribute). |
+| `collectDetail` | `collect-detail` | `undefined | false | true` | — | When set, a not-helpful vote opens an optional detail form before the thank-you confirmation. Attribute: `collect-detail`. |
+| `categories` | — | `undefined | string[]` | — | Optional category chips for the detail form. Set as a JS property (array). |
+| `detailTitle` | `detail-title` | `undefined | string` | — | Heading for the detail form. Attribute: `detail-title`. |
+| `detailPlaceholder` | `detail-placeholder` | `undefined | string` | — | Placeholder for the detail comment box. Attribute: `detail-placeholder`. |
+| `submitLabel` | `submit-label` | `undefined | string` | — | Submit button label in the detail form. Attribute: `submit-label`. |
+| `thanksMessage` | `thanks-message` | `undefined | string` | — | Confirmation copy shown after a vote/submit. Attribute: `thanks-message`. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `close` | — | The user dismissed the banner. |
-| `feedback` | `{ value: "helpful" | "not-helpful" }` | The user rated the response. `value` is `'helpful'` or `'not-helpful'`. |
+| `kc-close` | — | The user dismissed the banner. |
+| `kc-feedback` | `{ value: "helpful" | "not-helpful" }` | The user rated the response. `value` is `'helpful'` or `'not-helpful'`. |
+| `kc-feedback-detail` | `{ value: "helpful" | "not-helpful"; category?: undefined | string; comment?: undefined | string }` | The user submitted the optional detail form (`collect-detail`). |
 
 #### Composed from
 
@@ -744,7 +751,7 @@ A thumbs-up / thumbs-down banner (e.g. "Was this helpful?").
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `filesadded` | `{ files: File[] }` | Files were picked or dropped. |
+| `kc-files-added` | `{ files: File[] }` | Files were picked or dropped. |
 
 #### Composed from
 
@@ -773,8 +780,8 @@ A drag-and-drop / click-to-pick file upload dropzone.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `audiocaptured` | `{ blob: Blob }` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. |
-| `transcription` | `{ text: string }` | Transcription completed (the `transcribe` property resolved). |
+| `kc-audio-captured` | `{ blob: Blob }` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. |
+| `kc-transcription` | `{ text: string }` | Transcription completed (the `transcribe` property resolved). |
 
 #### Composed from
 
@@ -830,7 +837,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `stop` | — | The "stop / answer now" affordance was clicked. |
+| `kc-stop` | — | The "stop / answer now" affordance was clicked. |
 
 #### Composed from
 
@@ -888,7 +895,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `complete` | — | Streaming finished. |
+| `kc-complete` | — | Streaming finished. |
 
 #### Composed from
 
@@ -946,7 +953,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `select` | — | The checkpoint was clicked. |
+| `kc-select` | — | The checkpoint was clicked. |
 
 #### Composed from
 
@@ -976,7 +983,7 @@ A small button used to mark or navigate to a conversation checkpoint.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `scopechange` | `{ filters: SearchFilters | undefined }` | A scope was chosen (`undefined` filters = "All Content"). |
+| `kc-scope-change` | `{ filters: SearchFilters | undefined }` | A scope was chosen (`undefined` filters = "All Content"). |
 
 #### Composed from
 

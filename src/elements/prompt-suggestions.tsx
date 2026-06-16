@@ -22,7 +22,7 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-suggestions>`. */
 interface Events {
   /** A suggestion was clicked. */
-  select: { value: string };
+  'kc-select': { value: string };
 }
 
 const labelOf = (s: Item) => (typeof s === 'string' ? s : s.label);
@@ -48,7 +48,7 @@ defineWebComponent<Props, Events>('kc-suggestions', {
           size={props.size}
           block={flag('block')}
           highlight={props.highlight}
-          onClick={() => dispatch('select', { value: valueOf(s) })}
+          onClick={() => dispatch('kc-select', { value: valueOf(s) })}
         >
           {labelOf(s)}
         </PromptSuggestion>

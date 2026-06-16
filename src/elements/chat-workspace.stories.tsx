@@ -51,7 +51,7 @@ const sampleMessages: ChatMessage[] = [
     id: 'm2',
     role: 'assistant',
     content:
-      'Use `<kc-workspace>` — set `conversations`, `messages`, and `models` as properties and listen for `conversationselect` + `submit`.',
+      'Use `<kc-workspace>` — set `conversations`, `messages`, and `models` as properties and listen for `kc-conversation-select` + `kc-submit`.',
     actions: ['copy', 'like'],
   },
 ];
@@ -106,9 +106,9 @@ function WorkspaceElement(props: { args?: Record<string, unknown> }) {
           if (name in args) (el as unknown as Record<string, unknown>)[name] = args[name];
         }
       }
-      el.addEventListener('conversationselect', (e) => console.log('select', (e as CustomEvent).detail));
-      el.addEventListener('submit', (e) => console.log('submit', (e as unknown as CustomEvent).detail));
-      el.addEventListener('sidebartoggle', (e) => console.log('sidebartoggle', (e as CustomEvent).detail));
+      el.addEventListener('kc-conversation-select', (e) => console.log('select', (e as CustomEvent).detail));
+      el.addEventListener('kc-submit', (e) => console.log('submit', (e as unknown as CustomEvent).detail));
+      el.addEventListener('kc-sidebar-toggle', (e) => console.log('kc-sidebar-toggle', (e as CustomEvent).detail));
     }
   });
   return (
@@ -144,9 +144,9 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   ];
 
   // events are CustomEvents on the element (they do not bubble)
-  workspace.addEventListener('conversationselect', (e) => console.log('selected conversation:', e.detail.id));
-  workspace.addEventListener('submit', (e) => console.log('user sent:', e.detail.value));
-  workspace.addEventListener('sidebartoggle', (e) => console.log('sidebar collapsed:', e.detail.collapsed));
+  workspace.addEventListener('kc-conversation-select', (e) => console.log('selected conversation:', e.detail.id));
+  workspace.addEventListener('kc-submit', (e) => console.log('user sent:', e.detail.value));
+  workspace.addEventListener('kc-sidebar-toggle', (e) => console.log('sidebar collapsed:', e.detail.collapsed));
 </script>`;
 
 const SOLID_SNIPPET = `import '@kitn.ai/chat/elements'; // registers the custom elements
@@ -176,9 +176,9 @@ function Workspace() {
     el.conversations = conversations;
     el.messages = messages;
     el.activeId = '1';
-    el.addEventListener('conversationselect', (e) => console.log('selected:', e.detail.id));
-    el.addEventListener('submit', (e) => console.log('user sent:', e.detail.value));
-    el.addEventListener('sidebartoggle', (e) => console.log('sidebar collapsed:', e.detail.collapsed));
+    el.addEventListener('kc-conversation-select', (e) => console.log('selected:', e.detail.id));
+    el.addEventListener('kc-submit', (e) => console.log('user sent:', e.detail.value));
+    el.addEventListener('kc-sidebar-toggle', (e) => console.log('sidebar collapsed:', e.detail.collapsed));
   });
   return (
     <kc-workspace
@@ -198,7 +198,7 @@ const meta = {
       description: specDescription('kc-workspace', [
           '`<kc-workspace>` is the full chat shell as a single **web component** — a resizable split layout with a collapsible conversation list on the left and a full message thread on the right, all isolated in **Shadow DOM**. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** dropping an entire chat application shell into a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts and a ready-made list+chat layout. If you *are* in SolidJS and want fine-grained control, compose the `ConversationList` and `ChatThread` primitives directly.',
-          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, set rich data as JS **properties** (`el.conversations = [...]`, `el.messages = [...]`, `el.models = [...]`), and listen for **CustomEvents** (`conversationselect`, `submit`, `sidebartoggle`, `newchat`) directly on the element.',
+          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, set rich data as JS **properties** (`el.conversations = [...]`, `el.messages = [...]`, `el.models = [...]`), and listen for **CustomEvents** (`kc-conversation-select`, `kc-submit`, `kc-sidebar-toggle`, `kc-new-chat`) directly on the element.',
           '**Placement:** as a full-page surface or large panel. Give it an explicit height (e.g. `height: 100vh`). The sidebar is drag-resizable and can be collapsed via the toggle button in its header.',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ]),

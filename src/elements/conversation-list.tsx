@@ -16,11 +16,11 @@ interface Props extends Record<string, unknown> {
 
 interface Events {
   /** A conversation was selected. */
-  conversationselect: { id: string };
+  'kc-conversation-select': { id: string };
   /** The "New chat" button was clicked. */
-  newchat: Record<string, never>;
+  'kc-new-chat': Record<string, never>;
   /** The sidebar toggle was clicked. */
-  togglesidebar: Record<string, never>;
+  'kc-toggle-sidebar': Record<string, never>;
 }
 
 defineWebComponent<Props, Events>('kc-conversations', {
@@ -33,9 +33,9 @@ defineWebComponent<Props, Events>('kc-conversations', {
       groups={props.groups}
       conversations={props.conversations}
       activeId={props.activeId}
-      onSelect={(id) => dispatch('conversationselect', { id })}
-      onNewChat={() => dispatch('newchat')}
-      onToggleSidebar={() => dispatch('togglesidebar')}
+      onSelect={(id) => dispatch('kc-conversation-select', { id })}
+      onNewChat={() => dispatch('kc-new-chat')}
+      onToggleSidebar={() => dispatch('kc-toggle-sidebar')}
     />
   );
 });

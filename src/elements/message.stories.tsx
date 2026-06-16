@@ -10,6 +10,7 @@ declare module 'solid-js' {
   namespace JSX {
     interface IntrinsicElements {
       'kc-message': JSX.HTMLAttributes<HTMLElement>;
+      'kc-action': JSX.HTMLAttributes<HTMLElement> & { icon?: string; tooltip?: string };
     }
   }
 }
@@ -65,8 +66,8 @@ function MessageElement(props: { message: ChatMessage; actionsReveal?: 'always' 
     if (!el) return;
     if (props.actionsReveal) el.setAttribute('actions-reveal', props.actionsReveal);
     el.message = props.message;
-    el.addEventListener('messageaction', (e) =>
-      console.log('messageaction', (e as CustomEvent).detail.action),
+    el.addEventListener('kc-message-action', (e) =>
+      console.log('kc-message-action', (e as CustomEvent).detail.action),
     );
   });
   return (
@@ -90,7 +91,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   };
 
   // events are CustomEvents on the element (they do not bubble)
-  msg.addEventListener('messageaction', (e) => console.log(e.detail.action, e.detail.messageId));
+  msg.addEventListener('kc-message-action', (e) => console.log(e.detail.action, e.detail.messageId));
 </script>`;
 
 const meta = {
@@ -103,7 +104,7 @@ const meta = {
       description: specDescription('kc-message', [
           '`<kc-message>` is the framework-agnostic **web component** for a single message row — markdown/plain content, an optional reasoning block, tool calls, attachments, and action buttons — all rendered from one `message` object (the same shape `<kc-chat>` uses per message). It is the keystone of the "compose your own message list" pattern, isolated in **Shadow DOM**.',
           "**When to use:** building a custom message thread in a non-Solid app, or anywhere you want to lay out the list yourself but keep the kit's rich message rendering. In SolidJS, compose the `Message` primitives for finer control.",
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the whole row via the `message` **property** (`el.message = {...}`), and listen for the `messageaction` **CustomEvent** for action-button clicks. For simple cases, set `role` + `content` attributes instead of a full object.",
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the whole row via the `message` **property** (`el.message = {...}`), and listen for the `kc-message-action` **CustomEvent** for action-button clicks. For simple cases, set `role` + `content` attributes instead of a full object.",
           'See the **Code** tab for HTML usage.',
         ]),
     },
@@ -142,7 +143,58 @@ export const WithAvatarAndCustomAction: Story = {
     // built-in names AND custom { id, label, icon } descriptors:
     actions: ['copy', 'like', { id: 'share', label: 'Share', icon: 'share' }],
   };
-  msg.addEventListener('messageaction', (e) => console.log(e.detail.action)); // 'copy' | 'like' | 'share'
+  msg.addEventListener('kc-message-action', (e) => console.log(e.detail.action)); // 'copy' | 'like' | 'share'
+</script>`,
+        language: 'html',
+      },
+    },
+  },
+};
+
+/** Declarative actions — `<kc-action>` light-DOM children instead of a
+ *  `message.actions` array. Each carries `id`, a curated `icon`, an optional
+ *  `tooltip`, and optional text (the accessible label). Great for plain HTML. */
+export const DeclarativeActions: Story = {
+  name: 'Declarative Actions (kc-action)',
+  render: () => {
+    let el: HTMLElement | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.setAttribute('avatar-fallback', 'AI');
+      el.setAttribute(
+        'content',
+        'Declare each button as a `<kc-action>` child — no `message` object or JS wiring needed.',
+      );
+      el.addEventListener('kc-message-action', (e) =>
+        console.log('kc-message-action', (e as CustomEvent).detail.action),
+      );
+    });
+    return (
+      <kc-message
+        ref={(e) => (el = e as HTMLElement)}
+        style={{ display: 'block', padding: '16px', 'max-width': '720px' }}
+      >
+        <kc-action id="copy" icon="copy" tooltip="Copy"></kc-action>
+        <kc-action id="regenerate" icon="regenerate" tooltip="Regenerate"></kc-action>
+        <kc-action id="share" icon="share" tooltip="Share">Share</kc-action>
+        <kc-action id="bookmark" icon="bookmark" tooltip="Bookmark">Bookmark</kc-action>
+      </kc-message>
+    );
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `<kc-message role="assistant" avatar-fallback="AI" content="..." style="display:block;">
+  <kc-action id="copy" icon="copy" tooltip="Copy"></kc-action>
+  <kc-action id="regenerate" icon="regenerate" tooltip="Regenerate"></kc-action>
+  <kc-action id="share" icon="share" tooltip="Share">Share</kc-action>
+  <kc-action id="bookmark" icon="bookmark" tooltip="Bookmark">Bookmark</kc-action>
+</kc-message>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  document.querySelector('kc-message')
+    .addEventListener('kc-message-action', (e) => console.log(e.detail.action)); // 'copy' | 'share' | …
 </script>`,
         language: 'html',
       },

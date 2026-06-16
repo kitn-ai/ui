@@ -1,4 +1,4 @@
-import { For, Show } from 'solid-js';
+import { For, Show, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { ChatConfig, useChatConfig, type ProseSize } from '../primitives/chat-config';
 import { Message, MessageAvatar, MessageContent, MessageActionBar } from '../components/message';
@@ -34,14 +34,14 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-message>`. */
 interface Events {
   /** An action button was clicked. `action` is the built-in name or custom id. */
-  messageaction: { messageId: string; action: string };
+  'kc-message-action': { messageId: string; action: string };
 }
 
 /**
  * `<kc-message>` — a single message row: markdown/plain content, reasoning,
  * tool calls, attachments, and action buttons, rendered from one `message`
  * object (the same shape `<kc-chat>` uses per message). The keystone of the
- * "compose your own message list" pattern. Emits `messageaction`.
+ * "compose your own message list" pattern. Emits `kc-message-action`.
  */
 defineWebComponent<Props, Events>('kc-message', {
   message: undefined,
@@ -58,6 +58,25 @@ defineWebComponent<Props, Events>('kc-message', {
   const outer = useChatConfig();
   const msg = (): ChatMessage =>
     props.message ?? { id: 'message', role: props.role ?? 'assistant', content: props.content ?? '' };
+
+  // Read declarative <kc-action> children from light DOM.
+  // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
+  const [slottedActions, setSlottedActions] = createSignal<import('../elements/chat-types').CustomAction[]>([]);
+  onMount(() => {
+    const read = () => {
+      const nodes = [...element.querySelectorAll('kc-action')];
+      setSlottedActions(nodes.map(n => ({
+        id: n.id || n.getAttribute('action') || '',
+        label: n.textContent?.trim() || n.getAttribute('label') || n.id || '',
+        icon: n.getAttribute('icon') ?? undefined,
+        tooltip: n.getAttribute('tooltip') ?? undefined,
+      })));
+    };
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true, attributes: true, subtree: true });
+    onCleanup(() => observer.disconnect());
+  });
   const isUser = () => msg().role === 'user';
   const avatar = () =>
     msg().avatar ??
@@ -101,11 +120,11 @@ defineWebComponent<Props, Events>('kc-message', {
       >
         {msg().content}
       </MessageContent>
-      <Show when={msg().actions?.length}>
+      <Show when={(msg().actions?.length ?? 0) > 0 || slottedActions().length > 0}>
         <MessageActionBar
-          actions={msg().actions!}
+          actions={[...(msg().actions ?? []), ...slottedActions()]}
           reveal={reveal()}
-          onAction={(action) => dispatch('messageaction', { messageId: msg().id, action })}
+          onAction={(action) => dispatch('kc-message-action', { messageId: msg().id, action })}
         />
       </Show>
     </>

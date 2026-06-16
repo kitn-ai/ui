@@ -28,7 +28,7 @@ function SwitcherElement(props: { models: ModelOption[]; current?: string }) {
     el.models = props.models;
     el.currentModel = props.current ?? props.models[0]?.id;
     // reflect the selection back so the trigger label updates
-    el.addEventListener('modelchange', (e) => {
+    el.addEventListener('kc-model-change', (e) => {
       const ev = e as CustomEvent<{ modelId: string }>;
       el!.currentModel = ev.detail.modelId;
     });
@@ -50,7 +50,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
     { id: 'sonnet', name: 'Claude Sonnet', provider: 'Anthropic' },
   ];
   ms.currentModel = 'opus';
-  ms.addEventListener('modelchange', (e) => { ms.currentModel = e.detail.modelId; });
+  ms.addEventListener('kc-model-change', (e) => { ms.currentModel = e.detail.modelId; });
 </script>`;
 
 const meta = {
@@ -63,7 +63,8 @@ const meta = {
       description: specDescription('kc-model-switcher', [
           '`<kc-model-switcher>` is the framework-agnostic **web component** for picking the active model — a dropdown showing each model\'s name and provider — isolated in **Shadow DOM**. It mirrors the switcher inside `<kc-chat>` as a standalone, composable piece.',
           '**When to use:** building your own chat header and want the model picker on its own. In SolidJS, use the `ModelSwitcher` primitive.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `models` **property** (and optionally `currentModel`), and listen for the `modelchange` **CustomEvent**. Note: like the underlying primitive, it only renders when more than one model is provided.",
+          '**Placement:** inline in the chat header or toolbar, typically to the left of the context meter; it is a compact `inline-block` dropdown trigger that fits naturally beside other header controls.',
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `models` **property** (and optionally `currentModel`), and listen for the `kc-model-change` **CustomEvent**. Note: like the underlying primitive, it only renders when more than one model is provided.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

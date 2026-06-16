@@ -56,9 +56,9 @@ interface GroupProps extends Record<string, unknown> {
 
 interface GroupEvents extends Record<string, unknown> {
   /** Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. */
-  change: { sizes: number[] };
+  'kc-change': { sizes: number[] };
   /** Observe layout maximize state. */
-  maximizechange: { maximized: boolean; index: number | null };
+  'kc-maximize-change': { maximized: boolean; index: number | null };
 }
 
 /**
@@ -133,7 +133,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
   }
 
   function emitChange() {
-    dispatch('change', { sizes: currentSizes() });
+    dispatch('kc-change', { sizes: currentSizes() });
   }
 
   // --- Task 2: maximize/restore core ---
@@ -223,7 +223,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     queueMicrotask(() => { applyingMaximize = false; });
     // Tell the maximized subtree (and only it) it is now maximized.
     item.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: true }, bubbles: false, composed: true }));
-    dispatch('maximizechange', { maximized: true, index });
+    dispatch('kc-maximize-change', { maximized: true, index });
   }
 
   function restore() {
@@ -252,7 +252,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     // Broadcast restore on the host AND directly on the formerly-maximized item.
     element.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: false }, bubbles: false, composed: true }));
     prevItem?.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: false }, bubbles: false, composed: true }));
-    dispatch('maximizechange', { maximized: false, index: null });
+    dispatch('kc-maximize-change', { maximized: false, index: null });
   }
 
   onMount(() => {

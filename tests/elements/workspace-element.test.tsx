@@ -24,14 +24,14 @@ test('renders the list + thread and emits conversationselect and submit', async 
   expect(el.shadowRoot!.textContent).toContain('Hi there');    // thread
 
   let selected: string | null = null;
-  el.addEventListener('conversationselect', (e) => (selected = (e as CustomEvent).detail.id));
+  el.addEventListener('kc-conversation-select', (e) => (selected = (e as CustomEvent).detail.id));
   // the conversation row is a button containing the title
   const row = [...el.shadowRoot!.querySelectorAll('button')].find((b) => b.textContent?.includes('First chat'))!;
   row.click();
   expect(selected).toBe('c1');
 
   let submitted: string | null = null;
-  el.addEventListener('submit', (e) => (submitted = (e as CustomEvent).detail.value));
+  el.addEventListener('kc-submit', (e) => (submitted = (e as CustomEvent).detail.value));
   const textarea = el.shadowRoot!.querySelector('textarea')!;
   textarea.value = 'q';
   textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));

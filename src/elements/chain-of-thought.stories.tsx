@@ -58,6 +58,7 @@ const meta = {
       description: specDescription('kc-chain-of-thought', [
         '`<kc-chain-of-thought>` is the framework-agnostic **web component** for step-by-step reasoning — a connected list of steps, each with optional collapsible detail — isolated in **Shadow DOM**. The compound primitive collapses to a single `steps` data model (Route 1).',
         '**When to use:** surfacing an agent\'s plan or reasoning trace in a non-Solid app. In SolidJS, compose the `ChainOfThought` primitives for finer control.',
+        '**Placement:** as a block above or below a message, or in a dedicated reasoning panel; it is `display: block` and sizes to content height, so no fixed height is required.',
         "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set the `steps` **property** — an array of `{ label, content? }`. Steps with `content` become expandable.",
         'See the **Code** tab for HTML usage.',
       ]),

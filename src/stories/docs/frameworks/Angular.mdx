@@ -106,7 +106,7 @@ export class AppComponent {
 <div style="display: flex; flex-direction: column; height: 100dvh">
   <kc-chat
     [messages]="messages"
-    (submit)="onSubmit($event)"
+    (kc-submit)="onSubmit($event)"
     style="flex: 1; min-height: 0"
   ></kc-chat>
 </div>
@@ -157,14 +157,14 @@ export class WorkspaceComponent {
   <kc-conversations
     [conversations]="conversations"
     [activeId]="activeId"
-    (conversationselect)="onConversationSelect($event)"
-    (newchat)="onNewChat()"
+    (kc-conversation-select)="onConversationSelect($event)"
+    (kc-new-chat)="onNewChat()"
     style="width: 300px; flex-shrink: 0"
   ></kc-conversations>
 
   <kc-chat
     [messages]="messages"
-    (submit)="onSubmit($event)"
+    (kc-submit)="onSubmit($event)"
     style="flex: 1; min-width: 0"
   ></kc-chat>
 </div>
@@ -181,18 +181,18 @@ to persist the layout.
 <div style="display: flex; flex-direction: column; height: 100dvh">
   <kc-resizable
     orientation="horizontal"
-    (change)="onResize($event)"
+    (kc-change)="onResize($event)"
     style="flex: 1; min-height: 0"
   >
     <kc-resizable-item size="25%" min="200px">
       <kc-conversations
         [conversations]="conversations"
         [activeId]="activeId"
-        (conversationselect)="onConversationSelect($event)"
+        (kc-conversation-select)="onConversationSelect($event)"
       ></kc-conversations>
     </kc-resizable-item>
     <kc-resizable-item>
-      <kc-chat [messages]="messages" (submit)="onSubmit($event)"></kc-chat>
+      <kc-chat [messages]="messages" (kc-submit)="onSubmit($event)"></kc-chat>
     </kc-resizable-item>
   </kc-resizable>
 </div>

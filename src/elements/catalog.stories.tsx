@@ -107,7 +107,7 @@ const meta = {
         component: [
           '# Component catalog',
           'Every `kc-*` web component rendered with minimal sample data, grouped by category — the in-Storybook port of `examples/composable/index.html`. Use it to answer **"what exists?"**, then open each story\'s **Show code** panel to read the exact composition markup.',
-          'Data goes **in via properties** (set with `el.someProp = …` — see each snippet), interactions come **out via events** (`el.addEventListener("submit", …)`). Register everything once with `import "@kitn.ai/chat/elements"`.',
+          'Data goes **in via properties** (set with `el.someProp = …` — see each snippet), interactions come **out via events** (`el.addEventListener("kc-submit", …)`). Register everything once with `import "@kitn.ai/chat/elements"`.',
           'Next: see **Examples / Composed chat shell** to watch these leaves assemble into a real chat, and **Examples / Choosing components** for the mental model of which tier to reach for.',
         ].join('\n\n'),
       },
@@ -133,13 +133,13 @@ const DROPIN_SNIPPET = `<!-- The drop-in layer: whole surfaces in a single tag -
       messageCount: 12, lastMessageAt: '…', updatedAt: '…' },
   ];
   list.activeId = 'c1';
-  list.addEventListener('conversationselect', (e) => (list.activeId = e.detail.id));
+  list.addEventListener('kc-conversation-select', (e) => (list.activeId = e.detail.id));
 
   const input = document.querySelector('kc-prompt-input');
   input.slashCommands = [
     { id: 'summarize', label: '/summarize', description: 'Summarize', category: 'Actions' },
   ];
-  input.addEventListener('submit', (e) => console.log('submit', e.detail.value));
+  input.addEventListener('kc-submit', (e) => console.log('submit', e.detail.value));
 </script>`;
 
 export const BatteriesIncluded: Story = {
@@ -149,7 +149,7 @@ export const BatteriesIncluded: Story = {
     let input!: HTMLElement;
     onMount(() => {
       props(list, { conversations, activeId: 'c1' });
-      list.addEventListener('conversationselect', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
+      list.addEventListener('kc-conversation-select', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
       props(input, { slashCommands });
       attrs(input, { placeholder: 'Ask anything…  (try typing /)' });
     });
@@ -266,7 +266,7 @@ const MEDIA_SNIPPET = `<!-- One element, presentation chosen by attribute -->
   document.getElementById('inline').items = items;
   const grid = document.getElementById('grid');
   grid.items = items;
-  grid.addEventListener('remove', (e) => (grid.items = grid.items.filter((x) => x.id !== e.detail.id)));
+  grid.addEventListener('kc-remove', (e) => (grid.items = grid.items.filter((x) => x.id !== e.detail.id)));
   document.getElementById('img').base64 = '…'; // pair with media-type
   document.getElementById('srcs').sources = [
     { href: 'https://kitn.dev', title: 'kitn', description: '…', showFavicon: true },
@@ -282,7 +282,7 @@ export const AttachmentsAndMedia: Story = {
       attrs(inline, { variant: 'inline', 'hover-card': true });
       props(grid, { items: attachments });
       attrs(grid, { variant: 'grid', removable: true });
-      grid.addEventListener('remove', (e) => {
+      grid.addEventListener('kc-remove', (e) => {
         const id = (e as CustomEvent).detail.id;
         (grid as AnyEl).items = (attachments as { id: string }[]).filter((x) => x.id !== id);
       });
@@ -329,11 +329,11 @@ const COMPOSER_SNIPPET = `<!-- Input affordances you can place anywhere -->
   import '@kitn.ai/chat/elements';
   const suggs = document.getElementById('suggs');
   suggs.suggestions = ['Explain the architecture', 'Show me a code example'];
-  suggs.addEventListener('select', (e) => console.log('select', e.detail.value));
+  suggs.addEventListener('kc-select', (e) => console.log('select', e.detail.value));
 
   const voice = document.getElementById('voice');
   voice.transcribe = async () => 'transcribed text'; // your STT here
-  voice.addEventListener('transcription', (e) => console.log(e.detail.text));
+  voice.addEventListener('kc-transcription', (e) => console.log(e.detail.text));
 </script>`;
 
 export const Composer: Story = {
@@ -380,7 +380,7 @@ const META_SNIPPET = `<!-- The small pieces around a conversation -->
   const ms = document.getElementById('models');
   ms.models = [{ id: 'opus', name: 'Claude Opus', provider: 'Anthropic' }];
   ms.currentModel = 'opus';
-  ms.addEventListener('modelchange', (e) => (ms.currentModel = e.detail.modelId));
+  ms.addEventListener('kc-model-change', (e) => (ms.currentModel = e.detail.modelId));
 
   document.getElementById('ctx').context = { usedTokens: 48200, maxTokens: 200000 };
   const scope = document.getElementById('scope');
@@ -395,7 +395,7 @@ export const HeaderAndMeta: Story = {
     let ms!: HTMLElement, ctx!: HTMLElement, scope!: HTMLElement, cp!: HTMLElement, skills!: HTMLElement, fb!: HTMLElement;
     onMount(() => {
       props(ms, { models, currentModel: 'opus' });
-      ms.addEventListener('modelchange', (e) => ((ms as AnyEl).currentModel = (e as CustomEvent).detail.modelId));
+      ms.addEventListener('kc-model-change', (e) => ((ms as AnyEl).currentModel = (e as CustomEvent).detail.modelId));
       props(ctx, { context });
       props(scope, { availableAuthors: ['Rob', 'Alex'], availableTags: ['design', 'api'] });
       attrs(cp, { label: 'Checkpoint', tooltip: 'Restore' });
@@ -443,7 +443,7 @@ const STATUS_SNIPPET = `<!-- Loaders, streaming text, and empty states -->
   import '@kitn.ai/chat/elements';
   const stream = document.getElementById('stream');
   stream.text = 'This text reveals with a typewriter animation, character by character.';
-  stream.addEventListener('complete', () => console.log('done'));
+  stream.addEventListener('kc-complete', () => console.log('done'));
 </script>`;
 
 export const StatusAndMotion: Story = {

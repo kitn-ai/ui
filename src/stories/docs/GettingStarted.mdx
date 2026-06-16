@@ -25,7 +25,7 @@ framework just wraps it in its own binding syntax.
     { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
   ];
 
-  chat.addEventListener('submit', (e) => {
+  chat.addEventListener('kc-submit', (e) => {
     const text = e.detail.value;
     chat.messages = [
       ...chat.messages,

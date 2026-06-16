@@ -71,15 +71,15 @@ const fullChat: StoryUsage = {
   chat.context = ${CONTEXT};
   chat.suggestions = ${SUGGESTIONS};
 
-  chat.addEventListener('submit', (e) => {
+  chat.addEventListener('kc-submit', (e) => {
     const { value, attachments } = e.detail; // append the user message / call your backend
     console.log('send', value, attachments);
   });
-  chat.addEventListener('messageaction', (e) => {
+  chat.addEventListener('kc-message-action', (e) => {
     const { messageId, action } = e.detail; // 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit'
     console.log(messageId, action);
   });
-  chat.addEventListener('modelchange', (e) => console.log(e.detail.modelId));
+  chat.addEventListener('kc-model-change', (e) => console.log(e.detail.modelId));
 </script>`,
 
     react: `import { Chat } from '@kitn.ai/chat/react';
@@ -96,8 +96,8 @@ export function ChatApp() {
       suggestions={${SUGGESTIONS}}
       messages={${MESSAGES}}
       onSubmit={(e) => console.log('send', e.detail.value, e.detail.attachments)}
-      onMessageaction={(e) => console.log(e.detail.messageId, e.detail.action)}
-      onModelchange={(e) => console.log(e.detail.modelId)}
+      onMessageAction={(e) => console.log(e.detail.messageId, e.detail.action)}
+      onModelChange={(e) => console.log(e.detail.modelId)}
     />
   );
 }`,
@@ -125,9 +125,9 @@ function onAction(e) { console.log(e.detail.messageId, e.detail.action); }
     :models.prop="models"
     :context.prop="context"
     :suggestions.prop="suggestions"
-    @submit="onSubmit"
-    @messageaction="onAction"
-    @modelchange="(e) => console.log(e.detail.modelId)"
+    @kc-submit="onSubmit"
+    @kc-message-action="onAction"
+    @kc-model-change="(e) => console.log(e.detail.modelId)"
   />
 </template>`,
 
@@ -157,9 +157,9 @@ function onAction(e) { console.log(e.detail.messageId, e.detail.action); }
   prose-size="base"
   placeholder="Ask anything..."
   current-model="claude-4"
-  on:submit={onSubmit}
-  on:messageaction={onAction}
-  on:modelchange={(e) => console.log(e.detail.modelId)}
+  on:kc-submit={onSubmit}
+  on:kc-message-action={onAction}
+  on:kc-model-change={(e) => console.log(e.detail.modelId)}
 />`,
 
     angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
@@ -180,9 +180,9 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
       [models]="models"
       [context]="context"
       [suggestions]="suggestions"
-      (submit)="onSubmit($event)"
-      (messageaction)="onAction($event)"
-      (modelchange)="onModel($event)"
+      (kc-submit)="onSubmit($event)"
+      (kc-message-action)="onAction($event)"
+      (kc-model-change)="onModel($event)"
     ></kc-chat>
   \`,
 })

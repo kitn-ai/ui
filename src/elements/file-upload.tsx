@@ -16,7 +16,7 @@ interface Props extends Record<string, unknown> {
 /** Events fired by `<kc-file-upload>`. */
 interface Events {
   /** Files were picked or dropped. */
-  filesadded: { files: File[] };
+  'kc-files-added': { files: File[] };
 }
 
 /**
@@ -34,7 +34,7 @@ defineWebComponent<Props, Events>('kc-file-upload', {
     multiple={flag('multiple')}
     accept={props.accept}
     disabled={flag('disabled')}
-    onFilesAdded={(files) => dispatch('filesadded', { files })}
+    onFilesAdded={(files) => dispatch('kc-files-added', { files })}
   >
     <FileUploadTrigger class="border-border bg-muted/30 hover:bg-muted/60 text-muted-foreground flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-6 py-8 text-sm transition-colors">
       <Upload class="size-5" />

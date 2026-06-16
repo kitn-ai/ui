@@ -63,7 +63,7 @@ import '@kitn.ai/chat/elements';
 const chat = document.querySelector('kc-chat');
 chat.messages = [];
 
-chat.addEventListener('submit', async (e) => {
+chat.addEventListener('kc-submit', async (e) => {
   const userText = e.detail.value;
 
   // Append the user message (new array)

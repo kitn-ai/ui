@@ -15,10 +15,10 @@ const basic: StoryUsage = {
 <script type="module">
   const prompt = document.getElementById('prompt');
   let value = '';
-  prompt.addEventListener('valuechange', (e) => {
+  prompt.addEventListener('kc-value-change', (e) => {
     value = e.detail.value; // track on every keystroke
   });
-  prompt.addEventListener('submit', (e) => {
+  prompt.addEventListener('kc-submit', (e) => {
     const { value, attachments } = e.detail;
     console.log(value, attachments);
   });
@@ -33,7 +33,7 @@ export function Prompt() {
   return (
     <PromptInput
       placeholder="Ask anything..."
-      onValuechange={(e) => setValue(e.detail.value)}
+      onValueChange={(e) => setValue(e.detail.value)}
       onSubmit={(e) => {
         const { value, attachments } = e.detail;
         console.log(value, attachments);
@@ -47,7 +47,7 @@ import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
 import { ref } from 'vue';
 
 const value = ref('');
-function onValuechange(e) {
+function onValueChange(e) {
   value.value = e.detail.value; // track on every keystroke
 }
 function onSubmit(e) {
@@ -59,8 +59,8 @@ function onSubmit(e) {
 <template>
   <kc-prompt-input
     placeholder="Ask anything..."
-    @valuechange="onValuechange"
-    @submit="onSubmit"
+    @kc-value-change="onValueChange"
+    @kc-submit="onSubmit"
   />
 </template>`,
 
@@ -68,7 +68,7 @@ function onSubmit(e) {
   import '@kitn.ai/chat/elements'; // register once
 
   let value = '';
-  function onValuechange(e) {
+  function onValueChange(e) {
     value = e.detail.value; // track on every keystroke
   }
   function onSubmit(e) {
@@ -79,8 +79,8 @@ function onSubmit(e) {
 
 <kc-prompt-input
   placeholder="Ask anything..."
-  on:valuechange={onValuechange}
-  on:submit={onSubmit}
+  on:kc-value-change={onValueChange}
+  on:kc-submit={onSubmit}
 />`,
 
     angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
@@ -94,14 +94,14 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   template: \`
     <kc-prompt-input
       placeholder="Ask anything..."
-      (valuechange)="onValuechange($event)"
-      (submit)="onSubmit($event)"
+      (kc-value-change)="onValueChange($event)"
+      (kc-submit)="onSubmit($event)"
     ></kc-prompt-input>
   \`,
 })
 export class PromptComponent {
   value = '';
-  onValuechange(e: CustomEvent<{ value: string }>) {
+  onValueChange(e: CustomEvent<{ value: string }>) {
     this.value = e.detail.value; // track on every keystroke
   }
   onSubmit(e: CustomEvent<{ value: string; attachments: unknown[] }>) {
@@ -133,7 +133,7 @@ export function Prompt() {
 /** With Suggestion Chips — starter prompts above the input. */
 const suggestions: StoryUsage = {
   intro:
-    'Show starter prompts above the input. Pass a `suggestions` array (as a PROPERTY) and pick `suggestionMode` — `"submit"` (default) sends the prompt immediately, `"fill"` just drops it into the box and fires `suggestionclick`. (The demo groups its chips with the SolidJS `PromptSuggestion` primitive, which the element renders as one flat row.)',
+    'Show starter prompts above the input. Pass a `suggestions` array (as a PROPERTY) and pick `suggestionMode` — `"submit"` (default) sends the prompt immediately, `"fill"` just drops it into the box and fires `kc-suggestion-click`. (The demo groups its chips with the SolidJS `PromptSuggestion` primitive, which the element renders as one flat row.)',
   snippets: {
     html: `<script type="module">
   import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
@@ -153,10 +153,10 @@ const suggestions: StoryUsage = {
     'What are the key takeaways?',
     'Create an outline',
   ];
-  prompt.addEventListener('suggestionclick', (e) => {
+  prompt.addEventListener('kc-suggestion-click', (e) => {
     console.log(e.detail.value); // fires when suggestion-mode="fill"
   });
-  prompt.addEventListener('submit', (e) => console.log(e.detail.value));
+  prompt.addEventListener('kc-submit', (e) => console.log(e.detail.value));
 </script>`,
 
     react: `import { PromptInput } from '@kitn.ai/chat/react';
@@ -174,7 +174,7 @@ export function Prompt() {
       // Arrays are passed straight through as a property.
       suggestions={SUGGESTIONS}
       suggestionMode="fill"
-      onSuggestionclick={(e) => console.log(e.detail.value)}
+      onSuggestionClick={(e) => console.log(e.detail.value)}
       onSubmit={(e) => console.log(e.detail.value)}
     />
   );
@@ -188,7 +188,7 @@ const suggestions = [
   'What are the key takeaways?',
   'Create an outline',
 ];
-function onSuggestionclick(e) { console.log(e.detail.value); }
+function onSuggestionClick(e) { console.log(e.detail.value); }
 function onSubmit(e) { console.log(e.detail.value); }
 </script>
 
@@ -198,8 +198,8 @@ function onSubmit(e) { console.log(e.detail.value); }
     placeholder="Ask about this document..."
     :suggestions.prop="suggestions"
     suggestion-mode="fill"
-    @suggestionclick="onSuggestionclick"
-    @submit="onSubmit"
+    @kc-suggestion-click="onSuggestionClick"
+    @kc-submit="onSubmit"
   />
 </template>`,
 
@@ -215,7 +215,7 @@ function onSubmit(e) { console.log(e.detail.value); }
   // Arrays must be set as a property (attributes only take strings).
   $: if (el) el.suggestions = suggestions;
 
-  function onSuggestionclick(e) { console.log(e.detail.value); }
+  function onSuggestionClick(e) { console.log(e.detail.value); }
   function onSubmit(e) { console.log(e.detail.value); }
 </script>
 
@@ -223,8 +223,8 @@ function onSubmit(e) { console.log(e.detail.value); }
   bind:this={el}
   placeholder="Ask about this document..."
   suggestion-mode="fill"
-  on:suggestionclick={onSuggestionclick}
-  on:submit={onSubmit}
+  on:kc-suggestion-click={onSuggestionClick}
+  on:kc-submit={onSubmit}
 />`,
 
     angular: `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -238,8 +238,8 @@ function onSubmit(e) { console.log(e.detail.value); }
       placeholder="Ask about this document..."
       [suggestions]="suggestions"
       suggestion-mode="fill"
-      (suggestionclick)="onSuggestionclick($event)"
-      (submit)="onSubmit($event)"
+      (kc-suggestion-click)="onSuggestionClick($event)"
+      (kc-submit)="onSubmit($event)"
     ></kc-prompt-input>
   \`,
 })
@@ -250,7 +250,7 @@ export class PromptComponent {
     'What are the key takeaways?',
     'Create an outline',
   ];
-  onSuggestionclick(e: CustomEvent<{ value: string }>) { console.log(e.detail.value); }
+  onSuggestionClick(e: CustomEvent<{ value: string }>) { console.log(e.detail.value); }
   onSubmit(e: CustomEvent<{ value: string }>) { console.log(e.detail.value); }
 }`,
 
@@ -306,9 +306,9 @@ const actionButtons: StoryUsage = {
 
 <script type="module">
   const prompt = document.getElementById('prompt');
-  prompt.addEventListener('search', () => console.log('search clicked'));
-  prompt.addEventListener('voice', () => console.log('voice clicked'));
-  prompt.addEventListener('submit', (e) => {
+  prompt.addEventListener('kc-search', () => console.log('search clicked'));
+  prompt.addEventListener('kc-voice', () => console.log('voice clicked'));
+  prompt.addEventListener('kc-submit', (e) => {
     const { value, attachments } = e.detail; // attachments from the paperclip
     console.log(value, attachments);
   });
@@ -347,9 +347,9 @@ function onSubmit(e) {
     placeholder="Message..."
     search
     voice
-    @search="onSearch"
-    @voice="onVoice"
-    @submit="onSubmit"
+    @kc-search="onSearch"
+    @kc-voice="onVoice"
+    @kc-submit="onSubmit"
   />
 </template>`,
 
@@ -367,9 +367,9 @@ function onSubmit(e) {
   placeholder="Message..."
   search
   voice
-  on:search={onSearch}
-  on:voice={onVoice}
-  on:submit={onSubmit}
+  on:kc-search={onSearch}
+  on:kc-voice={onVoice}
+  on:kc-submit={onSubmit}
 />`,
 
     angular: `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -383,9 +383,9 @@ function onSubmit(e) {
       placeholder="Message..."
       [search]="true"
       [voice]="true"
-      (search)="onSearch()"
-      (voice)="onVoice()"
-      (submit)="onSubmit($event)"
+      (kc-search)="onSearch()"
+      (kc-voice)="onVoice()"
+      (kc-submit)="onSubmit($event)"
     ></kc-prompt-input>
   \`,
 })
@@ -545,10 +545,10 @@ const modelSelector: StoryUsage = {
     { id: 'gemini-2', name: 'Gemini 2.5 Pro', provider: 'Google' },
   ];
   models.currentModel = 'claude-4';
-  models.addEventListener('modelchange', (e) => console.log(e.detail));
+  models.addEventListener('kc-model-change', (e) => console.log(e.detail));
 
   const prompt = document.getElementById('prompt');
-  prompt.addEventListener('submit', (e) => console.log(e.detail.value));
+  prompt.addEventListener('kc-submit', (e) => console.log(e.detail.value));
 </script>`,
 
     react: `import { useState } from 'react';
@@ -564,7 +564,7 @@ export function Prompt() {
   const [modelId, setModelId] = useState('claude-4');
   return (
     <div className="flex flex-col gap-2">
-      <ModelSwitcher models={MODELS} currentModel={modelId} onModelchange={(e) => setModelId(e.detail.modelId)} />
+      <ModelSwitcher models={MODELS} currentModel={modelId} onModelChange={(e) => setModelId(e.detail.modelId)} />
       <PromptInput placeholder="Ask anything..." onSubmit={(e) => console.log(e.detail.value)} />
     </div>
   );
@@ -580,13 +580,13 @@ const models = [
   { id: 'claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic' },
   { id: 'gemini-2', name: 'Gemini 2.5 Pro', provider: 'Google' },
 ];
-function onModelchange(e) { modelId.value = e.detail.modelId; }
+function onModelChange(e) { modelId.value = e.detail.modelId; }
 </script>
 
 <template>
   <div style="display:flex; flex-direction:column; gap:0.5rem">
-    <kc-model-switcher :models.prop="models" :current-model="modelId" @modelchange="onModelchange" />
-    <kc-prompt-input placeholder="Ask anything..." @submit="(e) => console.log(e.detail.value)" />
+    <kc-model-switcher :models.prop="models" :current-model="modelId" @kc-model-change="onModelChange" />
+    <kc-prompt-input placeholder="Ask anything..." @kc-submit="(e) => console.log(e.detail.value)" />
   </div>
 </template>`,
 
@@ -602,12 +602,12 @@ function onModelchange(e) { modelId.value = e.detail.modelId; }
   ];
   // Arrays must be set as a property.
   $: if (el) el.models = models;
-  function onModelchange(e) { modelId = e.detail.modelId; }
+  function onModelChange(e) { modelId = e.detail.modelId; }
 </script>
 
 <div style="display:flex; flex-direction:column; gap:0.5rem">
-  <kc-model-switcher bind:this={el} current-model={modelId} on:modelchange={onModelchange} />
-  <kc-prompt-input placeholder="Ask anything..." on:submit={(e) => console.log(e.detail.value)} />
+  <kc-model-switcher bind:this={el} current-model={modelId} on:kc-model-change={onModelChange} />
+  <kc-prompt-input placeholder="Ask anything..." on:kc-submit={(e) => console.log(e.detail.value)} />
 </div>`,
 
     angular: `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -618,8 +618,8 @@ function onModelchange(e) { modelId.value = e.detail.modelId; }
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
     <div style="display:flex; flex-direction:column; gap:0.5rem">
-      <kc-model-switcher [models]="models" [currentModel]="modelId" (modelchange)="onModelchange($event)"></kc-model-switcher>
-      <kc-prompt-input placeholder="Ask anything..." (submit)="onSubmit($event)"></kc-prompt-input>
+      <kc-model-switcher [models]="models" [currentModel]="modelId" (kc-model-change)="onModelChange($event)"></kc-model-switcher>
+      <kc-prompt-input placeholder="Ask anything..." (kc-submit)="onSubmit($event)"></kc-prompt-input>
     </div>
   \`,
 })
@@ -631,7 +631,7 @@ export class PromptComponent {
     { id: 'claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic' },
     { id: 'gemini-2', name: 'Gemini 2.5 Pro', provider: 'Google' },
   ];
-  onModelchange(e: CustomEvent<{ modelId: string }>) { this.modelId = e.detail.modelId; }
+  onModelChange(e: CustomEvent<{ modelId: string }>) { this.modelId = e.detail.modelId; }
   onSubmit(e: CustomEvent<{ value: string }>) { console.log(e.detail.value); }
 }`,
 

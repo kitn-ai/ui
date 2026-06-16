@@ -60,6 +60,7 @@ const meta = {
       description: specDescription('kc-sources', [
           '`<kc-sources>` is the framework-agnostic **web component** for a wrapped row of citation links (each with its own hover-card preview), isolated in **Shadow DOM**.',
           '**When to use:** showing the sources behind an assistant answer in a non-Solid app. For a single citation, use `<kc-source>`; in SolidJS, compose `SourceList` + `Source`.',
+          '**Placement:** below an assistant message, above the prompt input — rendered as a wrapping row of citation chips that spans the full message column width.',
           "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the data via the `sources` **property** (each item: `href`, `title`, `description`, `label`, `showFavicon`), and set `show-favicon` to enable favicons for all items (a per-item `showFavicon` overrides it).",
           'See the **Code** tab for HTML usage.',
         ]),

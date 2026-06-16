@@ -7,12 +7,14 @@ export type ChatMessageAction = 'copy' | 'like' | 'dislike' | 'regenerate' | 'ed
 /** A host-defined action button. `icon` is a curated registry name (see
  *  `src/ui/action-icons.ts`); unknown/absent icons render label-only. */
 export interface CustomAction {
-  /** Emitted as the `messageaction` detail `action` when clicked. */
+  /** Emitted as the `kc-message-action` detail `action` when clicked. */
   id: string;
   /** Visible/`aria-label` text. */
   label: string;
   /** A curated icon name from the action-icon registry. */
   icon?: string;
+  /** Tooltip text shown on hover. Defaults to `label` when omitted. */
+  tooltip?: string;
 }
 
 /** The speaker avatar for a message row. (Mirrors the `…Data` convention of

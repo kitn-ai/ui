@@ -30,7 +30,7 @@ around it. These pre-wire the leaf components for you.
   import '@kitn.ai/chat/elements';
   const chat = document.getElementById('chat');
   chat.messages = [{ id: '1', role: 'assistant', content: 'Hi!' }];
-  chat.addEventListener('submit', (e) => {/* call your model */});
+  chat.addEventListener('kc-submit', (e) => {/* call your model */});
 </script>
 ```
 

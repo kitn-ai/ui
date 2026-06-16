@@ -58,6 +58,7 @@ const meta = {
       description: specDescription('kc-markdown', [
           '`<kc-markdown>` is the framework-agnostic **web component** that renders a markdown string (with fenced-code syntax highlighting via Shiki) as a standalone element, isolated in **Shadow DOM**.',
           '**When to use:** showing model output or any markdown in a non-Solid app without pulling in a markdown stack. In SolidJS, use the `Markdown` primitive directly.',
+          '**Placement:** as a block inside a message row, doc viewer, or standalone content pane; it is `display: block` and expands to fill its container width, so constrain width on the parent.',
           "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the source via the `content` **property** (`el.content = '...'`), and tune rendering with the `prose-size`, `code-theme`, and `code-highlight` attributes.",
           'See the **Code** tab for HTML usage.',
         ]),

@@ -68,6 +68,7 @@ const meta = {
       description: specDescription('kc-context', [
           '`<kc-context>` is the framework-agnostic **web component** for a token/context-window usage meter — a compact gauge with a hover-card breakdown (input / output / reasoning / cache + estimated cost) — isolated in **Shadow DOM**.',
           '**When to use:** showing how much of the context window a conversation is using, typically in a chat header. In SolidJS, compose the `Context` primitives.',
+          '**Placement:** inline in the chat header or toolbar, beside the model switcher or other header controls; it is a compact `inline-block` element and does not need a dedicated row.',
           "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set the `context` **property** with the usage object. Hover the meter to reveal the breakdown.",
           'See the **Code** tab for HTML usage.',
         ]),

@@ -63,8 +63,8 @@ function PromptInputElement(props: { search?: boolean; voice?: boolean; attachme
         if (name in args) (el as unknown as Record<string, unknown>)[name] = args[name];
       }
     }
-    el.addEventListener('search', () => console.log('search clicked'));
-    el.addEventListener('voice', () => console.log('voice clicked'));
+    el.addEventListener('kc-search', () => console.log('search clicked'));
+    el.addEventListener('kc-voice', () => console.log('voice clicked'));
   });
   return (
     <kc-prompt-input
@@ -87,9 +87,9 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   // input.disabled = true;  // blocks typing and submit
 
   // events are CustomEvents on the element (they do not bubble)
-  input.addEventListener('submit', (e) => console.log('send:', e.detail.value));
-  input.addEventListener('valuechange', (e) => console.log('typing:', e.detail.value));
-  input.addEventListener('suggestionclick', (e) => console.log('picked:', e.detail.value));
+  input.addEventListener('kc-submit', (e) => console.log('send:', e.detail.value));
+  input.addEventListener('kc-value-change', (e) => console.log('typing:', e.detail.value));
+  input.addEventListener('kc-suggestion-click', (e) => console.log('picked:', e.detail.value));
 </script>`;
 
 const SOLID_SNIPPET = `import '@kitn.ai/chat/elements'; // registers the custom elements
@@ -111,9 +111,9 @@ function Composer() {
     <kc-prompt-input
       ref={el}
       style={{ display: 'block', width: '100%' }}
-      on:submit={(e) => console.log('send:', e.detail.value)}
-      on:valuechange={(e) => console.log('typing:', e.detail.value)}
-      on:suggestionclick={(e) => console.log('picked:', e.detail.value)}
+      on:kc-submit={(e) => console.log('send:', e.detail.value)}
+      on:kc-value-change={(e) => console.log('typing:', e.detail.value)}
+      on:kc-suggestion-click={(e) => console.log('picked:', e.detail.value)}
     />
   );
 }`;
@@ -128,7 +128,7 @@ const meta = {
       description: specDescription('kc-prompt-input', [
           '`<kc-prompt-input>` is the framework-agnostic **web component** version of the chat composer — an auto-resizing textarea with a send button and optional suggestion chips, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a message composer to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `PromptInput` primitives instead.',
-          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`submit`, `valuechange`, `suggestionclick`, `search`, `voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files.',
+          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`kc-submit`, `kc-value-change`, `kc-suggestion-click`, `kc-search`, `kc-voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files.',
           '**Placement:** pinned to the bottom of a chat surface, full width. Set `loading` while a response streams to show the busy state, and `disabled` to block input entirely.',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ]),
@@ -167,12 +167,12 @@ const TOOLBAR_SNIPPET = `<!-- show the Search (Globe) + Voice (Mic) toolbar butt
 <script type="module">
   import '@kitn.ai/chat/elements';
   const input = document.getElementById('input');
-  input.addEventListener('search', () => console.log('search clicked'));
-  input.addEventListener('voice', () => console.log('voice clicked'));
+  input.addEventListener('kc-search', () => console.log('search clicked'));
+  input.addEventListener('kc-voice', () => console.log('voice clicked'));
 </script>`;
 
 /** With the **microphone** (and search) toolbar buttons enabled via the `voice`
- *  and `search` flags. Clicking them fires `voice` / `search` CustomEvents. */
+ *  and `search` flags. Clicking them fires `kc-voice` / `kc-search` CustomEvents. */
 export const WithVoiceAndSearch: Story = {
   name: 'With Voice & Search',
   render: () => <PromptInputElement search voice />,

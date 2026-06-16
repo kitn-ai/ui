@@ -45,7 +45,7 @@ test('kc-file-tree fires a `select` event with detail.path on file click', async
   document.body.appendChild(el);
   await flush();
   let detail: { path: string } | null = null;
-  el.addEventListener('select', (e) => (detail = (e as CustomEvent).detail));
+  el.addEventListener('kc-select', (e) => (detail = (e as CustomEvent).detail));
   const fileRow = el.shadowRoot!.querySelector<HTMLElement>('[data-tree-kind="file"]')!;
   fileRow.click();
   expect(detail).not.toBeNull();
@@ -87,7 +87,7 @@ test('kc-artifact tab toggle switches Preview/Code and fires tabchange', async (
   expect(root.querySelector('iframe')).toBeTruthy();
 
   let changed: { tab: string } | null = null;
-  el.addEventListener('tabchange', (e) => (changed = (e as CustomEvent).detail));
+  el.addEventListener('kc-tab-change', (e) => (changed = (e as CustomEvent).detail));
 
   const codeTab = Array.from(root.querySelectorAll<HTMLElement>('[role="tab"]')).find(
     (t) => t.textContent?.includes('Code'),
@@ -118,11 +118,11 @@ test('kc-artifact file-select emits navigate + fileselect and navigates the ifra
   const events: string[] = [];
   let navUrl: string | null = null;
   let selPath: string | null = null;
-  el.addEventListener('navigate', (e) => {
+  el.addEventListener('kc-navigate', (e) => {
     events.push('navigate');
     navUrl = (e as CustomEvent).detail.url;
   });
-  el.addEventListener('fileselect', (e) => {
+  el.addEventListener('kc-file-select', (e) => {
     events.push('fileselect');
     selPath = (e as CustomEvent).detail.path;
   });
@@ -150,7 +150,7 @@ test('kc-artifact resolves a file url from src origin + path when url omitted', 
   document.body.appendChild(el);
   await flush();
   let navUrl: string | null = null;
-  el.addEventListener('navigate', (e) => (navUrl = (e as CustomEvent).detail.url));
+  el.addEventListener('kc-navigate', (e) => (navUrl = (e as CustomEvent).detail.url));
   const row = el.shadowRoot!.querySelector<HTMLElement>('[data-tree-kind="file"]')!;
   row.click();
   await flush();
@@ -191,7 +191,7 @@ test('expandable: expand button fires kc-maximize-intent (bubbles+composed) AND 
     intent = (e as CustomEvent).detail; bubbles = e.bubbles; composed = (e as CustomEvent).composed;
   }, { once: true });
   let mc: { maximized: boolean } | null = null;
-  el.addEventListener('maximizechange', (e) => (mc = (e as CustomEvent).detail));
+  el.addEventListener('kc-maximize-change', (e) => (mc = (e as CustomEvent).detail));
   const expand = el.shadowRoot!.querySelector<HTMLElement>('[aria-label="Expand"]')!;
   expand.click();
   await flush();
@@ -236,7 +236,7 @@ test('readonly-path: input readonly + submit emits no navigate', async () => {
   document.body.appendChild(el);
   await flush();
   const navs: string[] = [];
-  el.addEventListener('navigate', (e) => navs.push((e as CustomEvent).detail.url));
+  el.addEventListener('kc-navigate', (e) => navs.push((e as CustomEvent).detail.url));
   const input = el.shadowRoot!.querySelector<HTMLInputElement>('input#kc-artifact-path')!;
   expect(input.readOnly).toBe(true);
   input.value = 'https://x.test/b';

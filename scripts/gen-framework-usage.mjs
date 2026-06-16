@@ -10,7 +10,9 @@ import { resolve } from 'node:path';
 // Source of truth: Installation.mdx § "Via CDN" and README.md § "Or load from a CDN".
 const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
 
-const onName = (ev) => 'on' + ev[0].toUpperCase() + ev.slice(1);
+// Event names are lower-kebab, kc-prefixed (e.g. `kc-message-action`). React/Solid handler
+// props strip the `kc-` prefix and PascalCase on hyphens → `onMessageAction`.
+const onName = (ev) => 'on' + ev.replace(/^kc-/, '').split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('');
 const required = (el) => el.props.filter((p) => !p.optional);
 
 /** Wraps binding lines into a multi-line tag block.

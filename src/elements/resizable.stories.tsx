@@ -80,7 +80,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <script type="module">
   import '@kitn.ai/chat/elements'; // registers the custom elements
   document.querySelector('kc-resizable')
-    .addEventListener('change', (e) => console.log(e.detail.sizes));
+    .addEventListener('kc-change', (e) => console.log(e.detail.sizes));
 </script>`;
 
 const meta = {
@@ -237,11 +237,11 @@ const EXPAND_TO_FILL_SNIPPET = `<!-- The artifact's "Expand" button (opt-in: exp
 
   // Optional: observe the layout events.
   document.querySelector('kc-resizable')
-    .addEventListener('change', (e) => console.log('change', e.detail.sizes));
+    .addEventListener('kc-change', (e) => console.log('change', e.detail.sizes));
   document.querySelector('kc-resizable')
-    .addEventListener('maximizechange', (e) => console.log('maximizechange', e.detail));
+    .addEventListener('kc-maximize-change', (e) => console.log('maximizechange', e.detail));
   document.querySelector('kc-artifact')
-    .addEventListener('maximizechange', (e) => console.log('artifact maximizechange', e.detail));
+    .addEventListener('kc-maximize-change', (e) => console.log('artifact maximizechange', e.detail));
 </script>
 
 <!-- Cross-element protocol (hand-authored; not generated):
@@ -283,16 +283,16 @@ export const ExpandToFill: Story = {
     onMount(() => {
       if (artifactEl) artifactEl.files = ARTIFACT_FILES;
       if (resizableEl) {
-        resizableEl.addEventListener('change', (e: Event) =>
+        resizableEl.addEventListener('kc-change', (e: Event) =>
           setLog((l) => [`change → ${JSON.stringify((e as CustomEvent).detail.sizes)}`, ...l].slice(0, 6)),
         );
-        resizableEl.addEventListener('maximizechange', (e: Event) =>
-          setLog((l) => [`maximizechange → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
+        resizableEl.addEventListener('kc-maximize-change', (e: Event) =>
+          setLog((l) => [`kc-maximize-change → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
         );
       }
       if (artifactEl) {
-        artifactEl.addEventListener('maximizechange', (e: Event) =>
-          setLog((l) => [`artifact maximizechange → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
+        artifactEl.addEventListener('kc-maximize-change', (e: Event) =>
+          setLog((l) => [`artifact kc-maximize-change → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
         );
       }
     });

@@ -76,7 +76,7 @@ function AttachmentsElement(props: {
     if (props.showMediaType) el.setAttribute('show-media-type', '');
     if (props.removable) {
       el.setAttribute('removable', '');
-      el.addEventListener('remove', ((e: CustomEvent<{ id: string }>) => {
+      el.addEventListener('kc-remove', ((e: CustomEvent<{ id: string }>) => {
         el!.items = (el!.items ?? []).filter((x) => x.id !== e.detail.id);
       }) as EventListener);
     }
@@ -103,7 +103,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   ];
 
   // events are CustomEvents on the element (they do not bubble)
-  att.addEventListener('remove', (e) => {
+  att.addEventListener('kc-remove', (e) => {
     att.items = att.items.filter((x) => x.id !== e.detail.id);
   });
 </script>`;
@@ -133,7 +133,8 @@ const meta = {
       description: specDescription('kc-attachments', [
           '`<kc-attachments>` is the framework-agnostic **web component** for a set of file/source attachments, and the exemplar for the "collapse a compound primitive to ONE configurable element" pattern: the sub-parts the SolidJS layer composes become attributes here. Isolated in **Shadow DOM**.',
           '**When to use:** rendering attachment chips/tiles in a non-Solid app. In SolidJS, compose the `Attachment*` primitives for fully custom layouts.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the data via the `items` **property**, pick a layout with `variant` (`grid` | `inline` | `list`), add `removable` to get per-item remove buttons (emits a `remove` **CustomEvent** with `{ id }`), and `hover-card` for inline/list previews (image attachments preview their thumbnail).",
+          '**Placement:** beneath message content (for received/sent files) or above the prompt input (for staged uploads); fills its container width.',
+          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the data via the `items` **property**, pick a layout with `variant` (`grid` | `inline` | `list`), add `removable` to get per-item remove buttons (emits a `kc-remove` **CustomEvent** with `{ id }`), and `hover-card` for inline/list previews (image attachments preview their thumbnail).",
           'See the **Code** tab for HTML usage.',
         ]),
     },

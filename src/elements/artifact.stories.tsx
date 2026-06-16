@@ -128,9 +128,9 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
     { path: 'assets/logo.svg', url: '…/logo.svg', type: 'image' },
   ];
 
-  el.addEventListener('navigate', (e) => console.log('navigate', e.detail.url));
-  el.addEventListener('tabchange', (e) => console.log('tab', e.detail.tab));
-  el.addEventListener('fileselect', (e) => console.log('file', e.detail.path));
+  el.addEventListener('kc-navigate', (e) => console.log('navigate', e.detail.url));
+  el.addEventListener('kc-tab-change', (e) => console.log('tab', e.detail.tab));
+  el.addEventListener('kc-file-select', (e) => console.log('file', e.detail.path));
 </script>`;
 
 const meta = {
@@ -143,7 +143,7 @@ const meta = {
       description: specDescription('kc-artifact', [
         '`<kc-artifact>` is the framework-agnostic **web component** for a framed, switchable **generated-artifact viewer** — the "canvas / artifacts" pattern (Claude Artifacts, ChatGPT Canvas, V0, bolt). It frames a consumer-served URL in a **sandboxed `<iframe>`** with a functional nav toolbar, and a **Preview | Code** toggle whose Code tab shows a file tree (`<kc-file-tree>`) + the active file source (`<kc-code-block>`). Isolated in **Shadow DOM**.',
         "**When to use:** to show an AI-generated artifact (a web page, doc, image, or PDF your backend hosts) beside the conversation — typically inside a `<kc-resizable>` panel. The component **frames** content; your backend serves it, so relative links, back/forward, reload and multi-format work natively.",
-        "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set `src` to the hosted URL, and set the `files` **property** (a JS array of `{ path, url?, code?, language?, type? }`) for the Code tab tree. The iframe `sandbox` defaults to `allow-scripts allow-forms` (**not** `allow-same-origin`); widen it via the `sandbox` attribute only if you trust the artifact. Listen for **`navigate`** (`detail.url`), **`tabchange`** (`detail.tab`), and **`fileselect`** (`detail.path`).",
+        "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set `src` to the hosted URL, and set the `files` **property** (a JS array of `{ path, url?, code?, language?, type? }`) for the Code tab tree. The iframe `sandbox` defaults to `allow-scripts allow-forms` (**not** `allow-same-origin`); widen it via the `sandbox` attribute only if you trust the artifact. Listen for **`kc-navigate`** (`detail.url`), **`kc-tab-change`** (`detail.tab`), and **`kc-file-select`** (`detail.path`).",
         '**Placement:** the preview/canvas panel of a compose-your-own-chat shell — e.g. `list | chat | artifact`. It **fills** its container, so give the parent (or the element) a height.',
         'See the **Code** tab for HTML usage.',
       ]),
@@ -262,14 +262,14 @@ export const WithEvents: Story = {
     onMount(() => {
       if (!el) return;
       el.files = FILES;
-      el.addEventListener('navigate', (e) =>
+      el.addEventListener('kc-navigate', (e) =>
         setLog((l) => [`navigate → ${(e as CustomEvent).detail.url}`, ...l].slice(0, 6)),
       );
-      el.addEventListener('tabchange', (e) =>
-        setLog((l) => [`tabchange → ${(e as CustomEvent).detail.tab}`, ...l].slice(0, 6)),
+      el.addEventListener('kc-tab-change', (e) =>
+        setLog((l) => [`kc-tab-change → ${(e as CustomEvent).detail.tab}`, ...l].slice(0, 6)),
       );
-      el.addEventListener('fileselect', (e) =>
-        setLog((l) => [`fileselect → ${(e as CustomEvent).detail.path}`, ...l].slice(0, 6)),
+      el.addEventListener('kc-file-select', (e) =>
+        setLog((l) => [`kc-file-select → ${(e as CustomEvent).detail.path}`, ...l].slice(0, 6)),
       );
     });
     return (

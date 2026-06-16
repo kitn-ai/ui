@@ -29,7 +29,7 @@ const defaultStory: StoryUsage = {
 <script type="module">
   const cp = document.getElementById('cp');
   // The 'select' event carries no detail — just react to the click.
-  cp.addEventListener('select', () => {
+  cp.addEventListener('kc-select', () => {
     restoreTo('API structure defined'); // roll back to this checkpoint
   });
 </script>`,
@@ -61,7 +61,7 @@ function onSelect() {
   <kc-checkpoint
     label="API structure defined"
     tooltip="Restore to this point"
-    @select="onSelect"
+    @kc-select="onSelect"
   />
 </template>`,
 
@@ -73,11 +73,11 @@ function onSelect() {
   }
 </script>
 
-<!-- Scalar strings are plain attributes; on:select wires the event directly. -->
+<!-- Scalar strings are plain attributes; on:kc-select wires the event directly. -->
 <kc-checkpoint
   label="API structure defined"
   tooltip="Restore to this point"
-  on:select={onSelect}
+  on:kc-select={onSelect}
 />`,
 
     angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
@@ -92,7 +92,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
     <kc-checkpoint
       label="API structure defined"
       tooltip="Restore to this point"
-      (select)="onSelect()"
+      (kc-select)="onSelect()"
     ></kc-checkpoint>
   \`,
 })
