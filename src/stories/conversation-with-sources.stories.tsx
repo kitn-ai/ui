@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { onMount } from 'solid-js';
 import {
   ChatContainer, ChatContainerContent, ChatContainerScrollAnchor,
   Message, MessageAvatar, MessageContent, MessageActions,
@@ -7,6 +8,27 @@ import {
   Button, Separator,
 } from '../index';
 import { Copy, ThumbsUp, ThumbsDown, ArrowUp } from 'lucide-solid';
+import '../elements/register'; // registers kc-sources / kc-source
+
+// kc-sources / kc-source IntrinsicElements are already declared in
+// src/elements/source-list.stories.tsx (same TS project, merged interface).
+// Re-declare here so this file is self-contained; types must match exactly.
+declare module 'solid-js' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      // Plain HTMLAttributes — `numbered` is set via setAttribute in onMount.
+      'kc-sources': JSX.HTMLAttributes<HTMLElement>;
+      'kc-source': JSX.HTMLAttributes<HTMLElement> & {
+        href?: string;
+        label?: string;
+        headline?: string;
+        description?: string;
+        'show-favicon'?: boolean | '';
+      };
+    }
+  }
+}
 
 const meta: Meta = {
   title: 'Examples/Conversation with Sources',
@@ -323,4 +345,127 @@ export const Numbered: Story = {
       </div>
     </div>
   ),
+};
+
+// ---------------------------------------------------------------------------
+// Numbered Citations (composition) story
+// ---------------------------------------------------------------------------
+
+export const NumberedComposition: Story = {
+  name: 'Numbered Citations (composition)',
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'The **same** numbered-citation strip as the "Numbered Citations" story — but built entirely from `<kc-sources numbered>` + `<kc-source>` children in markup.',
+          '',
+          'No `sources` JS property is set. The `<kc-sources>` element reads its `<kc-source>` light-DOM children via `MutationObserver` and appends them to the merged source list automatically. The `numbered` boolean attribute then labels each chip with its 1-based index.',
+          '',
+          'Attribute reference for `<kc-source>`:',
+          '- `href` — the URL to link to (domain seeds the default label/favicon)',
+          '- `headline` — hover-card heading (**not** `title` — `title` is a reserved HTML attribute)',
+          '- `description` — hover-card body text',
+          '- `label` — custom chip label (ignored when the parent `<kc-sources>` has `numbered`)',
+          '- `show-favicon` — bare boolean attribute to show the domain favicon',
+          '',
+          '`<kc-sources>` attribute reference:',
+          '- `numbered` — auto-labels all chips with their 1-based index from the merged list',
+          '- `show-favicon` — enables favicons for all children (per-item attribute overrides)',
+          '',
+          '**When to choose composition:** great for static/authored citations in plain HTML or any template language — no JS wiring needed beyond the element registration.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: () => {
+    let el: HTMLElement | undefined;
+    onMount(() => {
+      // The `numbered` attribute is a boolean — set it imperatively so it is
+      // registered after the element upgrades (avoids timing issues in SSR/Storybook).
+      el?.setAttribute('numbered', '');
+    });
+    return (
+      <div class="flex flex-col gap-6 p-4 w-full max-w-2xl bg-background rounded-xl shadow-lg">
+        <div>
+          <p class="text-sm text-muted-foreground mb-1">
+            Composition: <code>&lt;kc-sources numbered&gt;</code> with <code>&lt;kc-source&gt;</code> children — chips auto-labelled 1, 2, 3, 4:
+          </p>
+          <kc-sources ref={(e: HTMLElement) => (el = e)} style={{ display: 'block' }}>
+            <kc-source
+              href="https://www.figma.com/blog/webassembly-cut-figmas-load-time-by-3x/"
+              headline="WebAssembly cut Figma's load time by 3x"
+              description="How Figma leveraged WebAssembly to dramatically improve their browser-based design tool performance."
+            />
+            <kc-source
+              href="https://web.dev/case-studies/earth-webassembly"
+              headline="Google Earth and WebAssembly - web.dev"
+              description="Case study on porting Google Earth's C++ rendering engine to WebAssembly for browser delivery."
+            />
+            <kc-source
+              href="https://shopify.engineering/shopify-webassembly"
+              headline="How Shopify Uses WebAssembly"
+              description="Shopify's journey using WebAssembly for Liquid template parsing in their online store editor."
+            />
+            <kc-source
+              href="https://surma.dev/things/js-to-asc/"
+              headline="JavaScript to AssemblyScript - Surma.dev"
+              description="Detailed performance comparison of JS vs AssemblyScript/Wasm for various workloads."
+            />
+          </kc-sources>
+        </div>
+
+        <div>
+          <p class="text-sm text-muted-foreground mb-1">
+            Composition without numbering — chips fall back to domain labels:
+          </p>
+          <kc-sources style={{ display: 'block' }}>
+            <kc-source
+              href="https://www.figma.com/blog/webassembly-cut-figmas-load-time-by-3x/"
+              headline="WebAssembly cut Figma's load time by 3x"
+              description="How Figma leveraged WebAssembly to dramatically improve their browser-based design tool performance."
+            />
+            <kc-source
+              href="https://web.dev/case-studies/earth-webassembly"
+              headline="Google Earth and WebAssembly - web.dev"
+              description="Case study on porting Google Earth's C++ rendering engine to WebAssembly for browser delivery."
+            />
+            <kc-source
+              href="https://shopify.engineering/shopify-webassembly"
+              headline="How Shopify Uses WebAssembly"
+              description="Shopify's journey using WebAssembly for Liquid template parsing in their online store editor."
+            />
+          </kc-sources>
+        </div>
+
+        <div>
+          <p class="text-sm text-muted-foreground mb-1">
+            Composition with favicons and custom labels (no <code>numbered</code>):
+          </p>
+          <kc-sources style={{ display: 'block' }}>
+            <kc-source
+              href="https://www.figma.com/blog/webassembly-cut-figmas-load-time-by-3x/"
+              label="Figma"
+              headline="WebAssembly cut Figma's load time by 3x"
+              description="How Figma leveraged WebAssembly to dramatically improve their browser-based design tool performance."
+              show-favicon
+            />
+            <kc-source
+              href="https://web.dev/case-studies/earth-webassembly"
+              label="web.dev"
+              headline="Google Earth and WebAssembly"
+              description="Case study on porting Google Earth's C++ rendering engine to WebAssembly for browser delivery."
+              show-favicon
+            />
+            <kc-source
+              href="https://shopify.engineering/shopify-webassembly"
+              label="Shopify"
+              headline="How Shopify Uses WebAssembly"
+              description="Shopify's journey using WebAssembly for Liquid template parsing in their online store editor."
+              show-favicon
+            />
+          </kc-sources>
+        </div>
+      </div>
+    );
+  },
 };
