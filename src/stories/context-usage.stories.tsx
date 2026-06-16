@@ -10,7 +10,29 @@ import { createSignal } from 'solid-js';
 
 const meta: Meta = {
   title: 'Examples/Context & Token Usage',
-  parameters: { layout: 'padded' },
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component: [
+          'Show how much of the model\'s context window is consumed. `<kc-context>` (or its SolidJS `Context` primitive) takes token counts and renders a circular meter trigger + hover-card breakdown.',
+          '',
+          '**Color thresholds are hardcoded — no `warnThreshold`/`dangerThreshold` prop yet:**',
+          '- Green (`bg-primary`): usage ≤ 70%',
+          '- Yellow (`bg-yellow-400`): usage > 70%',
+          '- Red (`bg-red-400`): usage > 90%',
+          '',
+          'Confirmed in `src/components/context.tsx` (`ContextContentHeader`, lines 174-179). The thresholds are listed as a planned improvement in the capability-gaps spec.',
+          '',
+          '**Where token counts come from:** read them from the API response `usage` object (`input_tokens`, `output_tokens`, `cache_read_input_tokens`, etc.) after each turn and pass them as props. The element has no events and no internal data fetching.',
+          '',
+          '**Live-update pattern:** for SolidJS, drive the `Context` props from reactive signals that you update after each streaming response completes. The element re-renders automatically when props change.',
+          '',
+          '**`<kc-context>` web-component route:** pass a single `context` object as a **property** (not an attribute — attributes only accept strings). The WC renders the full trigger + popover for you with no composition needed.',
+        ].join('\n'),
+      },
+    },
+  },
 };
 
 export default meta;
@@ -18,6 +40,13 @@ type Story = StoryObj;
 
 export const LowUsage: Story = {
   name: 'Low Usage (Green)',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Early in a conversation. `usedTokens / maxTokens` ≤ 70% → green meter. Only input + output rows shown; omit `reasoningTokens` / `cacheTokens` to hide those rows.',
+      },
+    },
+  },
   render: () => (
     <div class="p-8">
       <p class="text-sm text-muted-foreground mb-4">Early in a conversation -- minimal token usage.</p>
@@ -40,6 +69,13 @@ export const LowUsage: Story = {
 
 export const MediumUsage: Story = {
   name: 'Medium Usage (Yellow)',
+  parameters: {
+    docs: {
+      description: {
+        story: '`usedTokens / maxTokens` > 70% → yellow meter. Add `reasoningTokens` to surface a reasoning row in the breakdown. Threshold is hardcoded at 70% (no prop to change it yet).',
+      },
+    },
+  },
   render: () => (
     <div class="p-8">
       <p class="text-sm text-muted-foreground mb-4">Extended conversation with reasoning -- approaching 75% usage.</p>
@@ -63,6 +99,13 @@ export const MediumUsage: Story = {
 
 export const HighUsage: Story = {
   name: 'High Usage (Red)',
+  parameters: {
+    docs: {
+      description: {
+        story: '`usedTokens / maxTokens` > 90% → red meter. Threshold is hardcoded at 90% (no `dangerThreshold` prop yet). Signal to the user to start a new conversation.',
+      },
+    },
+  },
   render: () => (
     <div class="p-8">
       <p class="text-sm text-muted-foreground mb-4">Near the context limit -- user should consider starting a new conversation.</p>
@@ -86,6 +129,13 @@ export const HighUsage: Story = {
 
 export const WithCacheBreakdown: Story = {
   name: 'Full Breakdown with Cache',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Add `cacheTokens` to expose the cache row. From the API: cache-hit tokens come from `usage.cache_read_input_tokens` in the response; cache-write tokens from `usage.cache_creation_input_tokens`. Both count toward `usedTokens`.',
+      },
+    },
+  },
   render: () => (
     <div class="p-8">
       <p class="text-sm text-muted-foreground mb-4">Detailed usage including cache hit tokens.</p>
@@ -110,6 +160,13 @@ export const WithCacheBreakdown: Story = {
 
 export const InHeaderBar: Story = {
   name: 'In a Header Bar',
+  parameters: {
+    docs: {
+      description: {
+        story: '`Context` (or `<kc-context>`) is a plain inline element — place it anywhere in your header. Here it sits next to a `ModelSwitcher`. Drive both from reactive signals that you update after each API response.',
+      },
+    },
+  },
   render: () => {
     const [modelId, setModelId] = createSignal('claude-4');
     const models: ModelOption[] = [

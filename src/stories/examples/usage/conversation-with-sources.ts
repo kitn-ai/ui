@@ -5,15 +5,24 @@ const REPLY =
   'Figma replaced their asm.js pipeline with Wasm and saw a 3x load-time improvement; Google Earth dropped frame render time from 40ms to 12ms.';
 
 /**
- * Default — an assistant reply with inline citations and copy/like/dislike
- * actions. `<kc-message>` draws the reply + its action bar (from the `actions`
- * array, firing one `messageaction` event) and `<kc-sources>` renders the
- * citation list from a `sources` array (each item is a hover-card with title,
- * description, href, and an optional favicon).
+ * Multi-turn with Citations — two exchanges with inline citations; first without
+ * favicons (numbered labels only), second with `showFavicon`.
+ *
+ * API notes:
+ * - `<kc-sources>` accepts sources via:
+ *   (a) `sources` JS property: `el.sources = [{ href, title, description, label?, showFavicon? }]`
+ *   (b) Declarative `<kc-source>` children: picked up via MutationObserver and
+ *       appended after prop sources. Use `headline` (not `title`) as the attribute
+ *       — `title` is a reserved HTML attribute that conflicts with the CE constructor.
+ *       Confirmed in src/elements/source.tsx.
+ * - No built-in `numbered` prop: `[1][2][3]` labels are set manually via `label`
+ *   on each source item / SourceTrigger. Confirmed in src/elements/source.tsx.
+ * - `showFavicon` on `<kc-sources>` sets the default for all items; per-item
+ *   `showFavicon` on a child `<kc-source>` overrides it.
  */
 const def: StoryUsage = {
   intro:
-    'Answer with cited sources. `<kc-message>` draws the reply + its action bar (`actions: ["copy","like","dislike"]` → one `messageaction` event); `<kc-sources>` renders the citations from a `sources` array — each entry a hover-card with `title`, `description`, `href`, and optional `showFavicon`. (The live demo composes the SolidJS `Message` + `Source`/`SourceList` primitives inside a `ChatContainer`.)',
+    'Answer with cited sources. `<kc-sources>` renders citations from a `sources` JS property array — each entry a hover-card with `title`, `description`, `href`, and optional `label` / `showFavicon`. It also accepts declarative `<kc-source>` children (picked up via MutationObserver). **No built-in numbered labels:** pass `label={1}` / `label={2}` etc. manually. Use `headline` (not `title`) as the `<kc-source>` attribute — `title` is a reserved HTML attribute. (The live demo composes the SolidJS `Source`/`SourceList` primitives.)',
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
@@ -255,12 +264,17 @@ export function AnswerWithSources() {
  * (`<kc-sources>`) and copy/like/dislike actions (`<kc-message>`). Per-story:
  * the Usage tab shows the snippet for the story you're on; the example-level
  * fields below are the fallback.
+ *
+ * Key gotchas:
+ * - No built-in `numbered` prop — set `label` per source item manually.
+ * - `<kc-source>` children use `headline` not `title` (reserved HTML attr).
+ * - `<kc-sources>` accepts both a `sources` property AND declarative children.
  */
 const conversationWithSources: ExampleUsage = {
   title: 'Examples/Conversation with Sources',
-  ...def, // example-level fallback = the single "Default" story
+  ...def, // example-level fallback = the single "Multi-turn with Citations" story
   stories: {
-    Default: def,
+    'Multi-turn with Citations': def,
   },
 };
 

@@ -1,18 +1,23 @@
 import type { ExampleUsage, StoryUsage } from './types';
 
 /**
- * Default — an API-design session with two restore points between exchanges.
- * Clicking a checkpoint rolls the conversation back to that point.
+ * API Design Session with Restore Points — two checkpoints between three
+ * exchanges. Clicking a checkpoint fires `kc-select` (no detail) — the app
+ * is responsible for slicing the message list back to that point.
  *
- * Web components: `<kc-checkpoint>` renders the icon + trigger for you. Set the
- * scalar `label` / `tooltip` attributes and handle the `select` event (no detail
- * payload) to roll back. The element's built-in trigger shows the `label` text —
- * the demo's custom restore icon inside the trigger is a Solid-only touch (see
- * the Solid tab, which composes `Checkpoint` + `CheckpointIcon` + `CheckpointTrigger`).
+ * API notes (confirmed in src/elements/checkpoint.tsx):
+ * - `label`   — optional visible text beside the icon.
+ * - `tooltip` — optional hover text.
+ * - `variant` — 'ghost' | 'default' | 'outline' (default 'ghost').
+ * - `size`    — 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm' (default 'sm').
+ * - `kc-select` fires with NO detail payload — identify the checkpoint by
+ *   which handler you wired, not from the event.
+ * - There is NO `icon` prop on `<kc-checkpoint>` (planned gap). For a custom
+ *   trigger icon, compose the SolidJS `CheckpointTrigger` with custom children.
  */
 const defaultStory: StoryUsage = {
   intro:
-    'Mark a restore point between exchanges. `<kc-checkpoint>` draws the icon and a clickable trigger labelled by `label`, with a `tooltip` on hover, and fires `select` (no detail) when clicked — react to it by rolling the conversation back. A custom icon *inside* the trigger isn\'t a built-in prop; compose the SolidJS `Checkpoint` primitives for that (see the Solid tab).',
+    'Mark a restore point between exchanges. `<kc-checkpoint>` draws the icon and a clickable trigger labelled by `label`, with a `tooltip` on hover, and fires `kc-select` (no detail payload) when clicked — react to it by slicing your message list back to that checkpoint. **"Restoring" is your responsibility; the element just emits an event.** There is no `icon` prop on the WC — compose the SolidJS `CheckpointTrigger` with custom children for a custom icon (see the Solid tab).',
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
@@ -131,14 +136,20 @@ export function RestorePoint() {
 /**
  * Example: Checkpoint & Restore — mark a restore point in a conversation. The
  * story renders a session with two checkpoints between exchanges; clicking one
- * rolls back to that point. Per-story: the Usage tab shows the snippet for the
- * story you're on; the example-level fields below are the fallback.
+ * fires `kc-select` — the app slices its message list to that point. Per-story:
+ * the Usage tab shows the snippet for the story you're on; the example-level
+ * fields below are the fallback.
+ *
+ * Key gotchas:
+ * - `kc-select` carries no detail — identify which checkpoint by which handler.
+ * - Restoring is your state management; the element just emits the event.
+ * - No `icon` prop on the WC; compose SolidJS primitives for custom icons.
  */
 const checkpointRestore: ExampleUsage = {
   title: 'Examples/Checkpoint & Restore',
-  ...defaultStory, // example-level fallback = the primary "Default" story
+  ...defaultStory, // example-level fallback = the primary story
   stories: {
-    Default: defaultStory,
+    'API Design Session with Restore Points': defaultStory,
   },
 };
 

@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { createSignal, For } from 'solid-js';
+import { createSignal, For, Show } from 'solid-js';
 import {
   PromptInput, PromptInputTextarea, PromptInputActions,
   PromptSuggestion, ModelSwitcher, Loader, Button,
+  Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove,
 } from '../index';
 import type { ModelOption } from '../types';
+import type { AttachmentData } from '../index';
 import { ArrowUp, Paperclip, Globe, Mic, Square, Sparkles } from 'lucide-solid';
 
 const meta: Meta = {
@@ -171,6 +173,209 @@ export const WithModelSelector: Story = {
                 <ArrowUp class="size-4" />
               </Button>
             </div>
+          </PromptInputActions>
+        </PromptInput>
+      </div>
+    );
+  },
+};
+
+export const WithFileAttachments: Story = {
+  name: 'With File Attachments',
+  render: () => {
+    const [value, setValue] = createSignal('');
+    const [attachments, setAttachments] = createSignal<AttachmentData[]>([
+      { id: 'a1', type: 'file', filename: 'architecture.pdf', mediaType: 'application/pdf' },
+      { id: 'a2', type: 'file', filename: 'screenshot.png', mediaType: 'image/png', url: 'https://placehold.co/120x80/e2e8f0/94a3b8?text=PNG' },
+    ]);
+    let fileInput: HTMLInputElement | undefined;
+
+    const addFiles = (files: FileList | null) => {
+      if (!files?.length) return;
+      setAttachments((prev) => [
+        ...prev,
+        ...Array.from(files).map((f) => ({
+          id: crypto.randomUUID(),
+          type: 'file' as const,
+          filename: f.name,
+          mediaType: f.type || undefined,
+          url: f.type.startsWith('image/') ? URL.createObjectURL(f) : undefined,
+        })),
+      ]);
+    };
+
+    const removeAttachment = (id: string) =>
+      setAttachments((prev) => prev.filter((a) => a.id !== id));
+
+    const handleSubmit = () => {
+      console.log('submit', { value: value(), attachments: attachments() });
+      setValue('');
+      setAttachments([]);
+    };
+
+    return (
+      <div class="w-full max-w-2xl p-4">
+        <input
+          ref={fileInput}
+          type="file"
+          multiple
+          class="hidden"
+          onChange={(e) => { addFiles(e.currentTarget.files); e.currentTarget.value = ''; }}
+        />
+        <PromptInput value={value()} onValueChange={setValue} onSubmit={handleSubmit}>
+          <Show when={attachments().length > 0}>
+            <div class="px-3 pt-3">
+              <Attachments variant="inline">
+                <For each={attachments()}>
+                  {(att) => (
+                    <Attachment data={att} onRemove={() => removeAttachment(att.id)}>
+                      <AttachmentPreview />
+                      <AttachmentInfo />
+                      <AttachmentRemove />
+                    </Attachment>
+                  )}
+                </For>
+              </Attachments>
+            </div>
+          </Show>
+          <PromptInputTextarea placeholder="Describe or ask about the attached files..." class="pt-3 pl-4" />
+          <PromptInputActions class="justify-between">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Attach file"
+              onClick={() => fileInput?.click()}
+            >
+              <Paperclip class="size-4 text-muted-foreground" />
+            </Button>
+            <Button
+              variant="default"
+              size="icon-sm"
+              class="rounded-full"
+              disabled={!value() && attachments().length === 0}
+              aria-label="Send message"
+            >
+              <ArrowUp class="size-4" />
+            </Button>
+          </PromptInputActions>
+        </PromptInput>
+        <p class="mt-2 text-xs text-muted-foreground">
+          Note: the <code>kc-prompt-input</code> element handles the full attach UX automatically — this story shows how to wire the Solid primitives manually if you need full control.
+        </p>
+      </div>
+    );
+  },
+};
+
+const SUGGESTION_GROUPS = [
+  { label: 'Get started', items: ['Summarize this document', 'What are the key takeaways?', 'Create an outline'] },
+  { label: 'Go deeper', items: ['Compare with similar approaches', 'What are the tradeoffs?', 'Find contradictions'] },
+];
+
+const FULL_MODELS: ModelOption[] = [
+  { id: 'claude-4-opus', name: 'Claude 4 Opus', provider: 'Anthropic' },
+  { id: 'claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic' },
+  { id: 'gemini-2', name: 'Gemini 2.5 Pro', provider: 'Google' },
+];
+
+export const FullExample: Story = {
+  name: 'Full Example',
+  render: () => {
+    const [value, setValue] = createSignal('');
+    const [modelId, setModelId] = createSignal('claude-4-opus');
+    const [streaming, setStreaming] = createSignal(false);
+    let abortRef: ReturnType<typeof setTimeout> | undefined;
+
+    const handleSubmit = () => {
+      if (!value().trim()) return;
+      setStreaming(true);
+      setValue('');
+      // Simulate a streaming reply that finishes after 3 s.
+      // In production: store the AbortController from your fetch() call here,
+      // then call controller.abort() from the Stop button handler instead.
+      abortRef = setTimeout(() => setStreaming(false), 3000);
+    };
+
+    const handleStop = () => {
+      clearTimeout(abortRef);
+      setStreaming(false);
+    };
+
+    return (
+      <div class="w-full max-w-2xl p-4 space-y-4">
+        <p class="text-sm text-muted-foreground">
+          Production-ready composer: model switcher, grouped suggestions, streaming state with Stop,
+          and a send button that enables once you type. Submit → 3-second simulated stream → idle.
+        </p>
+
+        <Show when={!streaming()}>
+          <For each={SUGGESTION_GROUPS}>
+            {(group) => (
+              <div class="space-y-2">
+                <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">{group.label}</span>
+                <div class="flex flex-wrap gap-2">
+                  <For each={group.items}>
+                    {(item) => (
+                      <PromptSuggestion onClick={() => setValue(item)}>
+                        {item}
+                      </PromptSuggestion>
+                    )}
+                  </For>
+                </div>
+              </div>
+            )}
+          </For>
+        </Show>
+
+        <PromptInput
+          value={value()}
+          onValueChange={setValue}
+          onSubmit={handleSubmit}
+          disabled={streaming()}
+          isLoading={streaming()}
+        >
+          <PromptInputTextarea placeholder={streaming() ? 'Generating response...' : 'Ask anything...'} />
+          <PromptInputActions class="justify-between">
+            <Show
+              when={streaming()}
+              fallback={
+                <ModelSwitcher
+                  models={FULL_MODELS}
+                  currentModelId={modelId()}
+                  onModelChange={setModelId}
+                />
+              }
+            >
+              <div class="flex items-center gap-2">
+                <Loader variant="typing" size="sm" />
+                <span class="text-xs text-foreground">Generating…</span>
+              </div>
+            </Show>
+            <Show
+              when={streaming()}
+              fallback={
+                <Button
+                  variant="default"
+                  size="icon-sm"
+                  class="rounded-full"
+                  disabled={!value()}
+                  aria-label="Send message"
+                  onClick={handleSubmit}
+                >
+                  <ArrowUp class="size-4" />
+                </Button>
+              }
+            >
+              <Button
+                variant="outline"
+                size="icon-sm"
+                class="rounded-full"
+                aria-label="Stop generation"
+                onClick={handleStop}
+              >
+                <Square class="size-3" />
+              </Button>
+            </Show>
           </PromptInputActions>
         </PromptInput>
       </div>

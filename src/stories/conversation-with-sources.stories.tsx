@@ -10,13 +10,44 @@ import { Copy, ThumbsUp, ThumbsDown, ArrowUp } from 'lucide-solid';
 
 const meta: Meta = {
   title: 'Examples/Conversation with Sources',
-  parameters: { layout: 'padded' },
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component: [
+          'Show inline citations below an assistant reply. Two routes:',
+          '',
+          '**Prop route (`sources` array):** set `<kc-sources>.sources = [{ href, title, description, label?, showFavicon? }]` as a JS property. Prop sources render first.',
+          '',
+          '**Declarative route (`<kc-source>` children):** place `<kc-source>` elements as children of `<kc-sources>`. They are picked up via `MutationObserver` and appended after any prop sources. Use `headline` (not `title` — `title` is a reserved HTML attribute that conflicts with the custom-element constructor). Confirmed in `src/elements/source.tsx`.',
+          '',
+          '**Gotcha — no built-in `[1][2][3]` numbered citation labels:** there is no `numbered` prop on `<kc-sources>`. To get numbered badges, set `label={1}` / `label={2}` etc. on each `SourceTrigger` (Solid) or the `label` attribute on each `<kc-source>` child. The first exchange in this demo shows labels without favicons; the second adds `showFavicon` on each trigger.',
+          '',
+          '**When to omit favicons:** the favicon is fetched from the link\'s domain. Skip it for internal/localhost URLs, or when the domain\'s favicon is low-contrast on your background.',
+        ].join('\n'),
+      },
+    },
+  },
 };
 
 export default meta;
 type Story = StoryObj;
 
 export const Default: Story = {
+  name: 'Multi-turn with Citations',
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'Two exchanges, two citation styles. First exchange uses `label={1|2|3}` for numbered badges, no favicons. Second exchange adds `showFavicon` per-trigger.',
+          '',
+          '**Note:** there is no `numbered` prop on `<kc-sources>`. Numbered labels are applied manually via the `label` prop on each `SourceTrigger` (Solid) or `label` attribute on each `<kc-source>` child.',
+          '',
+          '**Note:** `<kc-source>` uses `headline` not `title` for the hover-card heading — `title` is a reserved HTML attribute that conflicts with the custom-element constructor (`src/elements/source.tsx`).',
+        ].join('\n'),
+      },
+    },
+  },
   render: () => (
     <div class="flex flex-col h-[650px] w-full max-w-2xl bg-background rounded-xl shadow-lg overflow-hidden">
       <div class="flex items-center px-4 py-3">
