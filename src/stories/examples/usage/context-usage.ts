@@ -4,13 +4,15 @@ import type { ExampleUsage, StoryUsage } from './types';
  * Build the web-component snippets. `<kc-context>` takes a single `context`
  * object PROPERTY (`usedTokens`, `maxTokens`, plus optional input/output/
  * reasoning/cache token counts + `estimatedCost`) and renders the trigger,
- * popover, and breakdown for you. It has no events.
+ * popover, and breakdown for you.
  *
- * Color thresholds are hardcoded (no `warnThreshold`/`dangerThreshold` prop):
- *   - green  (bg-primary)    : usedTokens / maxTokens ≤ 70%
- *   - yellow (bg-yellow-400) : > 70%
- *   - red    (bg-red-400)    : > 90%
- * Confirmed in src/components/context.tsx (ContextContentHeader, lines 174-179).
+ * Color thresholds are configurable via numeric properties:
+ *   - `warnThreshold`   (default 0.7)  — fraction above which the bar turns yellow
+ *   - `dangerThreshold` (default 0.9)  — fraction above which the bar turns red
+ *
+ * When the computed severity level changes (`ok` → `warn` → `danger` or back),
+ * `<kc-context>` fires a **`kc-threshold-change`** CustomEvent with
+ * `detail.level` set to `'ok'`, `'warn'`, or `'danger'`.
  *
  * Token counts come from the API response `usage` field after each turn:
  *   inputTokens    ← usage.input_tokens
@@ -87,7 +89,7 @@ export class UsageComponent {
  */
 const lowUsage: StoryUsage = {
   intro:
-    "Show how much of the model's context window is used. Pass a `context` object with `usedTokens` / `maxTokens` (plus optional `inputTokens` / `outputTokens` / `estimatedCost`) to `<kc-context>` as a JS **property** — the trigger colour shifts green → yellow (> 70%) → red (> 90%) as usage climbs. Thresholds are hardcoded; there is no `warnThreshold` prop yet. (The live demo composes the SolidJS `Context` primitives.)",
+    "Show how much of the model's context window is used. Pass a `context` object with `usedTokens` / `maxTokens` (plus optional `inputTokens` / `outputTokens` / `estimatedCost`) to `<kc-context>` as a JS **property** — the trigger colour shifts green → yellow → red as usage climbs. Override the thresholds with `warnThreshold` (default `0.7`) and `dangerThreshold` (default `0.9`) numeric properties. Listen for `kc-threshold-change` to react when severity shifts. (The live demo composes the SolidJS `Context` primitives.)",
   snippets: {
     html: htmlSnippet(`{
     usedTokens: 4200,
@@ -157,7 +159,7 @@ export function UsageIndicator() {
  */
 const mediumUsage: StoryUsage = {
   intro:
-    "Same element, higher numbers. As `usedTokens / maxTokens` crosses 70% the trigger turns yellow (hardcoded threshold, no prop to change it). Include `reasoningTokens` to surface a reasoning row in the breakdown — comes from `usage.reasoning_tokens` on extended-thinking models. (The live demo composes the SolidJS `Context` primitives.)",
+    "Same element, higher numbers. As `usedTokens / maxTokens` crosses `warnThreshold` (default 70%) the trigger turns yellow. Pass `warnThreshold` as a numeric property to override. Include `reasoningTokens` to surface a reasoning row in the breakdown — comes from `usage.reasoning_tokens` on extended-thinking models. (The live demo composes the SolidJS `Context` primitives.)",
   snippets: {
     html: htmlSnippet(`{
     usedTokens: 150000,
@@ -233,7 +235,7 @@ export function UsageIndicator() {
  */
 const highUsage: StoryUsage = {
   intro:
-    "Near the limit. Push `usedTokens` past 90% of `maxTokens` and the trigger goes red — a cue for the user to start a new conversation. Threshold is hardcoded at 90% (no `dangerThreshold` prop yet). Same markup as Medium — only the counts differ. (The live demo composes the SolidJS `Context` primitives.)",
+    "Near the limit. Push `usedTokens` past `dangerThreshold` (default 90%) of `maxTokens` and the trigger goes red — a cue for the user to start a new conversation. Pass `dangerThreshold` as a numeric property to override. Same markup as Medium — only the counts differ. (The live demo composes the SolidJS `Context` primitives.)",
   snippets: {
     html: htmlSnippet(`{
     usedTokens: 189000,

@@ -278,6 +278,78 @@ const FULL_MODELS: ModelOption[] = [
   { id: 'gemini-2', name: 'Gemini 2.5 Pro', provider: 'Google' },
 ];
 
+export const StoppableStreaming: Story = {
+  name: 'Stoppable / Stop Button (kc-prompt-input)',
+  render: () => {
+    const [loading, setLoading] = createSignal(false);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const handleSubmit = () => {
+      setLoading(true);
+      // Simulate a 3-second stream. In production: store the AbortController from
+      // your fetch() call and call controller.abort() from onStop instead.
+      timer = setTimeout(() => setLoading(false), 3000);
+    };
+
+    const handleStop = () => {
+      clearTimeout(timer);
+      setLoading(false);
+    };
+
+    return (
+      <div class="w-full max-w-2xl p-4 space-y-4">
+        <p class="text-sm text-muted-foreground">
+          The Solid primitive equivalent of <code>stoppable</code> on <code>kc-prompt-input</code>:
+          when <code>loading</code> is true, the send button is replaced by a Stop button (square icon).
+          Clicking Stop fires <code>kc-stop</code> — your handler calls <code>controller.abort()</code>
+          then clears the loading flag. Press Submit to start the simulated 3-second stream.
+        </p>
+        <PromptInput
+          isLoading={loading()}
+          disabled={loading()}
+          onSubmit={handleSubmit}
+          value=""
+          onValueChange={() => {}}
+        >
+          <PromptInputTextarea
+            placeholder={loading() ? 'Generating...' : 'Type something and hit Submit...'}
+          />
+          <PromptInputActions class="justify-end">
+            <Show
+              when={loading()}
+              fallback={
+                <Button
+                  size="icon-sm"
+                  class="rounded-full"
+                  aria-label="Send message"
+                  onClick={handleSubmit}
+                >
+                  <ArrowUp class="size-4" />
+                </Button>
+              }
+            >
+              <Button
+                size="icon-sm"
+                variant="outline"
+                class="rounded-full"
+                aria-label="Stop"
+                data-testid="story-stop-btn"
+                onClick={handleStop}
+              >
+                <Square class="size-3" />
+              </Button>
+            </Show>
+          </PromptInputActions>
+        </PromptInput>
+        <p class="text-xs text-muted-foreground">
+          Element usage: <code>&lt;kc-prompt-input stoppable loading&gt;</code> then listen for
+          {' '}<code>kc-stop</code> to call <code>controller.abort()</code>.
+        </p>
+      </div>
+    );
+  },
+};
+
 export const FullExample: Story = {
   name: 'Full Example',
   render: () => {

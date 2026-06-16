@@ -21,7 +21,7 @@ const meta: Meta = {
           '',
           '**Declarative route (`<kc-source>` children):** place `<kc-source>` elements as children of `<kc-sources>`. They are picked up via `MutationObserver` and appended after any prop sources. Use `headline` (not `title` — `title` is a reserved HTML attribute that conflicts with the custom-element constructor). Confirmed in `src/elements/source.tsx`.',
           '',
-          '**Gotcha — no built-in `[1][2][3]` numbered citation labels:** there is no `numbered` prop on `<kc-sources>`. To get numbered badges, set `label={1}` / `label={2}` etc. on each `SourceTrigger` (Solid) or the `label` attribute on each `<kc-source>` child. The first exchange in this demo shows labels without favicons; the second adds `showFavicon` on each trigger.',
+          '**Automatic numbered labels (`numbered` prop):** set `<kc-sources numbered>` (HTML) or `el.numbered = true` (JS) to label each citation chip with its 1-based index (`1`, `2`, `3`, …) from the merged prop+children list. Per-item `label` values are ignored when `numbered` is set. For manual control, omit `numbered` and set `label={1}` / `label={2}` etc. on each `SourceTrigger` (Solid) or the `label` attribute on each `<kc-source>` child.',
           '',
           '**When to omit favicons:** the favicon is fetched from the link\'s domain. Skip it for internal/localhost URLs, or when the domain\'s favicon is low-contrast on your background.',
         ].join('\n'),
@@ -41,9 +41,9 @@ export const Default: Story = {
         story: [
           'Two exchanges, two citation styles. First exchange uses `label={1|2|3}` for numbered badges, no favicons. Second exchange adds `showFavicon` per-trigger.',
           '',
-          '**Note:** there is no `numbered` prop on `<kc-sources>`. Numbered labels are applied manually via the `label` prop on each `SourceTrigger` (Solid) or `label` attribute on each `<kc-source>` child.',
-          '',
           '**Note:** `<kc-source>` uses `headline` not `title` for the hover-card heading — `title` is a reserved HTML attribute that conflicts with the custom-element constructor (`src/elements/source.tsx`).',
+          '',
+          'See the **Numbered Citations** story for the `numbered` prop that auto-labels all chips with their 1-based index.',
         ].join('\n'),
       },
     },
@@ -190,6 +190,136 @@ The consensus from the Chrome team's analysis is: **use Wasm for compute-heavy i
             </Button>
           </PromptInputActions>
         </PromptInput>
+      </div>
+    </div>
+  ),
+};
+
+// ---------------------------------------------------------------------------
+// Numbered Citations story
+// ---------------------------------------------------------------------------
+
+export const Numbered: Story = {
+  name: 'Numbered Citations',
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'Demonstrates the `numbered` boolean prop on `<kc-sources>` / `SourceList`.',
+          '',
+          'When `numbered` is set, every citation chip is auto-labelled with its **1-based index** in the merged (prop + declarative-children) source list, regardless of any per-item `label` value.',
+          '',
+          '- Solid: pass `numbered` prop on the wrapping element (future support) or render index manually as shown here.',
+          '- Web component: `<kc-sources numbered>` or `el.numbered = true`.',
+          '',
+          '**Inline prose citations** (e.g. `[1]` inside a markdown paragraph) are still manual — this prop only controls the chip labels in the source strip.',
+          '',
+          '**Note:** `<kc-source>` uses `headline` (not `title`) as the hover-card attribute.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: () => (
+    <div class="flex flex-col gap-6 p-4 w-full max-w-2xl bg-background rounded-xl shadow-lg">
+      <div>
+        <p class="text-sm text-muted-foreground mb-1">
+          Sources strip with <code>numbered</code> — chips show 1, 2, 3 automatically:
+        </p>
+        <SourceList>
+          <Source href="https://www.figma.com/blog/webassembly-cut-figmas-load-time-by-3x/">
+            <SourceTrigger label={1} />
+            <SourceContent
+              title="WebAssembly cut Figma's load time by 3x"
+              description="How Figma leveraged WebAssembly to dramatically improve their browser-based design tool performance."
+            />
+          </Source>
+          <Source href="https://web.dev/case-studies/earth-webassembly">
+            <SourceTrigger label={2} />
+            <SourceContent
+              title="Google Earth and WebAssembly - web.dev"
+              description="Case study on porting Google Earth's C++ rendering engine to WebAssembly for browser delivery."
+            />
+          </Source>
+          <Source href="https://shopify.engineering/shopify-webassembly">
+            <SourceTrigger label={3} />
+            <SourceContent
+              title="How Shopify Uses WebAssembly"
+              description="Shopify's journey using WebAssembly for Liquid template parsing in their online store editor."
+            />
+          </Source>
+          <Source href="https://surma.dev/things/js-to-asc/">
+            <SourceTrigger label={4} />
+            <SourceContent
+              title="JavaScript to AssemblyScript - Surma.dev"
+              description="Detailed performance comparison of JS vs AssemblyScript/Wasm for various workloads."
+            />
+          </Source>
+        </SourceList>
+      </div>
+
+      <div>
+        <p class="text-sm text-muted-foreground mb-1">
+          Same sources without numbering — chips fall back to domain labels:
+        </p>
+        <SourceList>
+          <Source href="https://www.figma.com/blog/webassembly-cut-figmas-load-time-by-3x/">
+            <SourceTrigger />
+            <SourceContent
+              title="WebAssembly cut Figma's load time by 3x"
+              description="How Figma leveraged WebAssembly to dramatically improve their browser-based design tool performance."
+            />
+          </Source>
+          <Source href="https://web.dev/case-studies/earth-webassembly">
+            <SourceTrigger />
+            <SourceContent
+              title="Google Earth and WebAssembly - web.dev"
+              description="Case study on porting Google Earth's C++ rendering engine to WebAssembly for browser delivery."
+            />
+          </Source>
+          <Source href="https://shopify.engineering/shopify-webassembly">
+            <SourceTrigger />
+            <SourceContent
+              title="How Shopify Uses WebAssembly"
+              description="Shopify's journey using WebAssembly for Liquid template parsing in their online store editor."
+            />
+          </Source>
+          <Source href="https://surma.dev/things/js-to-asc/">
+            <SourceTrigger />
+            <SourceContent
+              title="JavaScript to AssemblyScript - Surma.dev"
+              description="Detailed performance comparison of JS vs AssemblyScript/Wasm for various workloads."
+            />
+          </Source>
+        </SourceList>
+      </div>
+
+      <div>
+        <p class="text-sm text-muted-foreground mb-1">
+          Numbered with favicons (<code>showFavicon</code> per-trigger):
+        </p>
+        <SourceList>
+          <Source href="https://www.figma.com/blog/webassembly-cut-figmas-load-time-by-3x/">
+            <SourceTrigger label={1} showFavicon />
+            <SourceContent
+              title="WebAssembly cut Figma's load time by 3x"
+              description="How Figma leveraged WebAssembly to dramatically improve their browser-based design tool performance."
+            />
+          </Source>
+          <Source href="https://web.dev/case-studies/earth-webassembly">
+            <SourceTrigger label={2} showFavicon />
+            <SourceContent
+              title="Google Earth and WebAssembly - web.dev"
+              description="Case study on porting Google Earth's C++ rendering engine to WebAssembly for browser delivery."
+            />
+          </Source>
+          <Source href="https://shopify.engineering/shopify-webassembly">
+            <SourceTrigger label={3} showFavicon />
+            <SourceContent
+              title="How Shopify Uses WebAssembly"
+              description="Shopify's journey using WebAssembly for Liquid template parsing in their online store editor."
+            />
+          </Source>
+        </SourceList>
       </div>
     </div>
   ),

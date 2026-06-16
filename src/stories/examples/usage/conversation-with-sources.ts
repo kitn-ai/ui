@@ -15,14 +15,16 @@ const REPLY =
  *       appended after prop sources. Use `headline` (not `title`) as the attribute
  *       — `title` is a reserved HTML attribute that conflicts with the CE constructor.
  *       Confirmed in src/elements/source.tsx.
- * - No built-in `numbered` prop: `[1][2][3]` labels are set manually via `label`
- *   on each source item / SourceTrigger. Confirmed in src/elements/source.tsx.
+ * - `numbered` prop: set `<kc-sources numbered>` / `el.numbered = true` to
+ *   auto-label each chip with its 1-based index from the merged source list.
+ *   Per-item `label` is ignored when `numbered` is active. For manual control,
+ *   omit `numbered` and set `label` per item. Confirmed in src/elements/source.tsx.
  * - `showFavicon` on `<kc-sources>` sets the default for all items; per-item
  *   `showFavicon` on a child `<kc-source>` overrides it.
  */
 const def: StoryUsage = {
   intro:
-    'Answer with cited sources. `<kc-sources>` renders citations from a `sources` JS property array — each entry a hover-card with `title`, `description`, `href`, and optional `label` / `showFavicon`. It also accepts declarative `<kc-source>` children (picked up via MutationObserver). **No built-in numbered labels:** pass `label={1}` / `label={2}` etc. manually. Use `headline` (not `title`) as the `<kc-source>` attribute — `title` is a reserved HTML attribute. (The live demo composes the SolidJS `Source`/`SourceList` primitives.)',
+    'Answer with cited sources. `<kc-sources>` renders citations from a `sources` JS property array — each entry a hover-card with `title`, `description`, `href`, and optional `label` / `showFavicon`. It also accepts declarative `<kc-source>` children (picked up via MutationObserver). **Auto-numbered labels:** add the `numbered` boolean prop/attribute (`<kc-sources numbered>` / `el.numbered = true`) to label each chip with its 1-based index from the merged source list; omit it to use per-item `label` or domain fallback. Use `headline` (not `title`) as the `<kc-source>` attribute — `title` is a reserved HTML attribute. (The live demo composes the SolidJS `Source`/`SourceList` primitives.)',
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
@@ -265,8 +267,8 @@ export function AnswerWithSources() {
  * the Usage tab shows the snippet for the story you're on; the example-level
  * fields below are the fallback.
  *
- * Key gotchas:
- * - No built-in `numbered` prop — set `label` per source item manually.
+ * Key notes:
+ * - `numbered` prop on `<kc-sources>` auto-labels chips 1, 2, 3… from the merged list.
  * - `<kc-source>` children use `headline` not `title` (reserved HTML attr).
  * - `<kc-sources>` accepts both a `sources` property AND declarative children.
  */

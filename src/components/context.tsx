@@ -9,6 +9,27 @@ const ICON_CENTER = 12;
 const ICON_STROKE_WIDTH = 2;
 const PERCENT_MAX = 100;
 
+/** Default fraction (0–1) at which the meter transitions to the warning colour. */
+export const DEFAULT_WARN_THRESHOLD = 0.7;
+/** Default fraction (0–1) at which the meter transitions to the danger colour. */
+export const DEFAULT_DANGER_THRESHOLD = 0.9;
+
+/**
+ * Compute the severity level for a given usage fraction and thresholds.
+ * `pct` is a 0–1 fraction (e.g. `usedTokens / maxTokens`).
+ */
+export function computeSeverity(
+  pct: number,
+  warnThreshold = DEFAULT_WARN_THRESHOLD,
+  dangerThreshold = DEFAULT_DANGER_THRESHOLD,
+): ContextSeverity {
+  if (pct > dangerThreshold) return 'danger';
+  if (pct > warnThreshold) return 'warn';
+  return 'ok';
+}
+
+export type ContextSeverity = 'ok' | 'warn' | 'danger';
+
 interface ContextSchema {
   usedTokens: number;
   maxTokens: number;
@@ -17,6 +38,10 @@ interface ContextSchema {
   reasoningTokens?: number;
   cacheTokens?: number;
   estimatedCost?: number;
+  /** Fraction (0–1) above which the meter turns yellow. Default 0.7. */
+  warnThreshold: number;
+  /** Fraction (0–1) above which the meter turns red. Default 0.9. */
+  dangerThreshold: number;
 }
 
 const ContextCtx = createContext<ContextSchema>();
@@ -43,6 +68,16 @@ export interface ContextProps {
   reasoningTokens?: number;
   cacheTokens?: number;
   estimatedCost?: number;
+  /**
+   * Fraction (0–1) above which the progress bar turns yellow.
+   * Defaults to `0.7` (70%).
+   */
+  warnThreshold?: number;
+  /**
+   * Fraction (0–1) above which the progress bar turns red.
+   * Defaults to `0.9` (90%).
+   */
+  dangerThreshold?: number;
   children?: JSX.Element;
 }
 
@@ -55,6 +90,8 @@ export function Context(props: ContextProps) {
     reasoningTokens: props.reasoningTokens,
     cacheTokens: props.cacheTokens,
     estimatedCost: props.estimatedCost,
+    warnThreshold: props.warnThreshold ?? DEFAULT_WARN_THRESHOLD,
+    dangerThreshold: props.dangerThreshold ?? DEFAULT_DANGER_THRESHOLD,
   }));
 
   return (
@@ -171,10 +208,17 @@ export function ContextContentHeader(props: ContextContentHeaderProps) {
   const total = createMemo(() => fmtCompact.format(ctx.maxTokens));
   const barWidth = createMemo(() => `${Math.min(usedPercent() * PERCENT_MAX, PERCENT_MAX)}%`);
 
+  const severity = createMemo<ContextSeverity>(() => {
+    const pct = usedPercent();
+    if (pct > ctx.dangerThreshold) return 'danger';
+    if (pct > ctx.warnThreshold) return 'warn';
+    return 'ok';
+  });
+
   const colorClass = createMemo(() => {
-    const pct = usedPercent() * PERCENT_MAX;
-    if (pct > 90) return 'bg-red-400';
-    if (pct > 70) return 'bg-yellow-400';
+    const s = severity();
+    if (s === 'danger') return 'bg-red-400';
+    if (s === 'warn') return 'bg-yellow-400';
     return 'bg-primary';
   });
 

@@ -48,6 +48,15 @@ interface SourceListProps extends Record<string, unknown> {
   sources: SourceItem[];
   /** Show favicons on all items (per-item `showFavicon` overrides). */
   showFavicon?: boolean;
+  /**
+   * When true, each citation chip is labelled with its 1-based index in the
+   * merged (prop + declarative-children) list (`[1]`, `[2]`, …) instead of the
+   * per-item `label` or domain fallback.
+   *
+   * HTML attribute: `numbered` (boolean — bare attribute or `numbered="true"`).
+   * JS property:   `el.numbered = true`.
+   */
+  numbered?: boolean;
 }
 
 /** Parse a single light-DOM `<kc-source>` element into a `SourceItem` descriptor.
@@ -72,6 +81,7 @@ export function parseKcSourceElement(n: Element): SourceItem {
 defineWebComponent<SourceListProps>('kc-sources', {
   sources: [],
   showFavicon: false,
+  numbered: false,
 }, (props, { element, flag }) => {
   // Read declarative <kc-source> children from light DOM.
   // The shadow root has no <slot> for them, so they are invisible — pure data carriers.
@@ -90,12 +100,17 @@ defineWebComponent<SourceListProps>('kc-sources', {
   // Prop sources take precedence; slotted children are appended after.
   const allSources = () => [...props.sources, ...slottedSources()];
 
+  const isNumbered = () => flag('numbered');
+
   return (
     <SourceList>
       <For each={allSources()}>
-        {(s) => (
+        {(s, i) => (
           <Source href={s.href}>
-            <SourceTrigger label={s.label} showFavicon={s.showFavicon ?? flag('showFavicon')} />
+            <SourceTrigger
+              label={isNumbered() ? i() + 1 : s.label}
+              showFavicon={s.showFavicon ?? flag('showFavicon')}
+            />
             <SourceContent title={s.title ?? ''} description={s.description ?? ''} />
           </Source>
         )}

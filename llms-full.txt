@@ -3,7 +3,7 @@
 
 # @kitn.ai/chat
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 41 `kitn-*` custom elements: streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 42 `kitn-*` custom elements: streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kc-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/chat'`):
-All 41 elements are also exported individually. Use them for custom layouts or features `<kc-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 42 elements are also exported individually. Use them for custom layouts or features `<kc-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/chat/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 41 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 42 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/chat/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/chat/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (41 elements, generated from custom-elements.json)
+## Element reference (42 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -388,8 +388,14 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `context` | — | `undefined \| { usedTokens: number; maxTokens: number; inputTokens?: undefined \| number; outputTokens?: undefined \| number; reasoningTokens?: undefined \| number; cacheTokens?: undefined \| number; estimatedCost?: undefined \| number }` | Token-usage data. Set as a JS property. |
+| `warnThreshold` | `warn-threshold` | `undefined \| number` | Fraction (0–1) above which the meter turns yellow. Defaults to `0.7` (70%). |
+| `dangerThreshold` | `danger-threshold` | `undefined \| number` | Fraction (0–1) above which the meter turns red. Defaults to `0.9` (90%). |
 
-_No events._
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kc-threshold-change` | `CustomEvent<{ level: "ok" \| "warn" \| "danger" }>` | Fires when the computed severity level changes (ok → warn → danger or back). `detail.level` is `'ok'`, `'warn'`, or `'danger'`. |
 
 ---
 
@@ -631,6 +637,7 @@ _No events._
 | `slashCompact` | `slash-compact` | `undefined \| false \| true` | Single-line palette rows. |
 | `search` | `search` | `undefined \| false \| true` | Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. |
 | `voice` | `voice` | `undefined \| false \| true` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
+| `stoppable` | `stoppable` | `undefined \| false \| true` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kc-stop`. |
 | `attachments` | — | `undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]` | Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
@@ -639,6 +646,7 @@ _No events._
 |---|---|---|
 | `kc-search` | `CustomEvent<Record<string, never>>` | The Search (Globe) toolbar button was clicked. |
 | `kc-slash-select` | `CustomEvent<{ command: { id: string; label: string; description?: undefined \| string; category?: undefined \| string } }>` | A slash command was chosen from the palette. |
+| `kc-stop` | `CustomEvent<Record<string, never>>` | The Stop button was clicked while `stoppable` and `loading` are both true. |
 | `kc-submit` | `CustomEvent<{ value: string; attachments: { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[] }>` | The user submitted the prompt (Enter or send button) with its attachments. |
 | `kc-suggestion-click` | `CustomEvent<{ value: string }>` | A suggestion was clicked while `suggestion-mode="fill"`. |
 | `kc-value-change` | `CustomEvent<{ value: string }>` | The input text changed (fires on every keystroke). |
@@ -757,6 +765,24 @@ _No events._
 
 ---
 
+### `kc-scroll-button` / `ScrollButton`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `for` | `for` | `undefined \| string` | CSS id of the scroll container to control. When omitted the element walks up the DOM (outside its own shadow root) to find the nearest scrollable ancestor. Mirrors the `for` convention of `<label for="...">`. |
+| `variant` | `variant` | `undefined \| "ghost" \| "default" \| "outline"` | Button visual variant: `'outline' \| 'ghost' \| 'default'`. Defaults to `'outline'`. |
+| `size` | `size` | `undefined \| "sm" \| "lg" \| "md" \| "icon" \| "icon-sm"` | Button size token. Defaults to `'icon'` (square). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kc-scroll` | `CustomEvent` | Emitted when the user clicks the button and `scrollToBottom()` is called. Carries no detail — consumers use it to know a manual scroll occurred. |
+
+---
+
 ### `kc-skills` / `Skills`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -793,6 +819,7 @@ _No events._
 |---|---|---|---|
 | `sources` | — | `{ href: string; title?: undefined \| string; description?: undefined \| string; label?: undefined \| string; showFavicon?: undefined \| false \| true }[]` | The sources to render. Set as a JS property. |
 | `showFavicon` | `show-favicon` | `undefined \| false \| true` | Show favicons on all items (per-item `showFavicon` overrides). |
+| `numbered` | `numbered` | `undefined \| false \| true` | When true, each citation chip is labelled with its 1-based index in the merged (prop + declarative-children) list (`[1]`, `[2]`, …) instead of the per-item `label` or domain fallback. HTML attribute: `numbered` (boolean — bare attribute or `numbered="true"`). JS property: `el.numbered = true`. |
 
 _No events._
 

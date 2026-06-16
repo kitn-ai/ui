@@ -3,7 +3,7 @@ import { PromptInput, PromptInputTextarea, PromptInputActions } from '../compone
 import { PromptSuggestion } from '../components/prompt-suggestion';
 import { SlashCommand, type SlashCommandItem } from '../components/slash-command';
 import { Button } from '../ui/button';
-import { Paperclip, Globe, Mic } from 'lucide-solid';
+import { Paperclip, Globe, Mic, Square } from 'lucide-solid';
 import {
   Attachments,
   Attachment,
@@ -39,6 +39,11 @@ export interface DefaultPromptInputProps {
   onSearch?: () => void;
   onVoice?: () => void;
   onSlashSelect?: (command: SlashCommandItem) => void;
+  /** When `true` and `loading` is also `true`, the send button is replaced by
+   *  a Stop button that calls `onStop`. */
+  stoppable?: boolean;
+  /** Called when the user clicks the Stop button. */
+  onStop?: () => void;
 }
 
 function fileToAttachment(file: File): AttachmentData {
@@ -69,6 +74,8 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
 
   const sendDisabled = () =>
     props.disabled || props.loading || (!props.value.trim() && attachments().length === 0);
+
+  const showStop = () => !!props.loading && !!props.stoppable;
 
   return (
     <>
@@ -169,18 +176,34 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
               </Button>
             </Show>
           </div>
-          <Button
-            size="icon-sm"
-            class="rounded-full"
-            data-testid="send"
-            aria-label="Send message"
-            disabled={sendDisabled()}
-            onClick={props.onSubmit}
+          <Show
+            when={showStop()}
+            fallback={
+              <Button
+                size="icon-sm"
+                class="rounded-full"
+                data-testid="send"
+                aria-label="Send message"
+                disabled={sendDisabled()}
+                onClick={props.onSubmit}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+                </svg>
+              </Button>
+            }
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
-            </svg>
-          </Button>
+            <Button
+              size="icon-sm"
+              variant="outline"
+              class="rounded-full"
+              data-testid="stop"
+              aria-label="Stop"
+              onClick={props.onStop}
+            >
+              <Square class="size-3" />
+            </Button>
+          </Show>
         </PromptInputActions>
       </PromptInput>
     </>

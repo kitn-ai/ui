@@ -262,12 +262,18 @@ export const Confirm = createWebComponent<ConfirmProps>(
 export interface ContextProps extends WebComponentProps {
   /** Token-usage data. Set as a JS property. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; reasoningTokens?: number; cacheTokens?: number; estimatedCost?: number };
+  /** Fraction (0–1) above which the meter turns yellow. Defaults to `0.7` (70%). */
+  warnThreshold?: number;
+  /** Fraction (0–1) above which the meter turns red. Defaults to `0.9` (90%). */
+  dangerThreshold?: number;
+  /** Fires when the computed severity level changes (ok → warn → danger or back). `detail.level` is `'ok'`, `'warn'`, or `'danger'`. */
+  onThresholdChange?: (event: CustomEvent<{ level: "ok" | "warn" | "danger" }>) => void;
 }
 
 export const Context = createWebComponent<ContextProps>(
   'kc-context',
-  ["theme","context"],
-  {  },
+  ["theme","context","warnThreshold","dangerThreshold"],
+  { onThresholdChange: 'kc-threshold-change' },
 );
 
 export interface ConversationsProps extends WebComponentProps {
@@ -530,12 +536,16 @@ export interface PromptInputProps extends WebComponentProps {
   search?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. */
   voice?: boolean;
+  /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kc-stop`. */
+  stoppable?: boolean;
   /** Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). */
   attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
   /** The Search (Globe) toolbar button was clicked. */
   onSearch?: (event: CustomEvent<Record<string, never>>) => void;
   /** A slash command was chosen from the palette. */
   onSlashSelect?: (event: CustomEvent<{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }>) => void;
+  /** The Stop button was clicked while `stoppable` and `loading` are both true. */
+  onStop?: (event: CustomEvent<Record<string, never>>) => void;
   /** The user submitted the prompt (Enter or send button) with its attachments. */
   onSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
@@ -548,8 +558,8 @@ export interface PromptInputProps extends WebComponentProps {
 
 export const PromptInput = createWebComponent<PromptInputProps>(
   'kc-prompt-input',
-  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","slashCommands","slashActiveIds","slashCompact","search","voice","attachments"],
-  { onSearch: 'kc-search', onSlashSelect: 'kc-slash-select', onSubmit: 'kc-submit', onSuggestionClick: 'kc-suggestion-click', onValueChange: 'kc-value-change', onVoice: 'kc-voice' },
+  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","slashCommands","slashActiveIds","slashCompact","search","voice","stoppable","attachments"],
+  { onSearch: 'kc-search', onSlashSelect: 'kc-slash-select', onStop: 'kc-stop', onSubmit: 'kc-submit', onSuggestionClick: 'kc-suggestion-click', onValueChange: 'kc-value-change', onVoice: 'kc-voice' },
 );
 
 export interface ReasoningProps extends WebComponentProps {
@@ -664,6 +674,23 @@ export const ScopePicker = createWebComponent<ScopePickerProps>(
   { onScopeChange: 'kc-scope-change' },
 );
 
+export interface ScrollButtonProps extends WebComponentProps {
+  /** CSS id of the scroll container to control. When omitted the element walks up the DOM (outside its own shadow root) to find the nearest scrollable ancestor. Mirrors the `for` convention of `<label for="...">`. */
+  for?: string;
+  /** Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to `'outline'`. */
+  variant?: "ghost" | "default" | "outline";
+  /** Button size token. Defaults to `'icon'` (square). */
+  size?: "sm" | "lg" | "md" | "icon" | "icon-sm";
+  /** Emitted when the user clicks the button and `scrollToBottom()` is called. Carries no detail — consumers use it to know a manual scroll occurred. */
+  onScroll?: (event: CustomEvent) => void;
+}
+
+export const ScrollButton = createWebComponent<ScrollButtonProps>(
+  'kc-scroll-button',
+  ["theme","for","variant","size"],
+  { onScroll: 'kc-scroll' },
+);
+
 export interface SkillsProps extends WebComponentProps {
   /** The active skills to badge. Set as a JS property. */
   skills: { id: string; name: string }[];
@@ -699,11 +726,13 @@ export interface SourcesProps extends WebComponentProps {
   sources: { href: string; title?: undefined | string; description?: undefined | string; label?: undefined | string; showFavicon?: undefined | boolean }[];
   /** Show favicons on all items (per-item `showFavicon` overrides). */
   showFavicon?: boolean;
+  /** When true, each citation chip is labelled with its 1-based index in the merged (prop + declarative-children) list (`[1]`, `[2]`, …) instead of the per-item `label` or domain fallback. HTML attribute: `numbered` (boolean — bare attribute or `numbered="true"`). JS property: `el.numbered = true`. */
+  numbered?: boolean;
 }
 
 export const Sources = createWebComponent<SourcesProps>(
   'kc-sources',
-  ["theme","sources","showFavicon"],
+  ["theme","sources","showFavicon","numbered"],
   {  },
 );
 

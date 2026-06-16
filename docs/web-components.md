@@ -333,6 +333,7 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | `slashCompact` | `slash-compact` | `undefined | false | true` | `false` | Single-line palette rows. |
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
+| `stoppable` | `stoppable` | `undefined | false | true` | `false` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kc-stop`. |
 | `attachments` | — | `AttachmentData[] | undefined` | — | Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). |
 
 #### Events
@@ -341,6 +342,7 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 |-------|-----------|-------------|
 | `kc-search` | — | The Search (Globe) toolbar button was clicked. |
 | `kc-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
+| `kc-stop` | — | The Stop button was clicked while `stoppable` and `loading` are both true. |
 | `kc-submit` | `{ value: string; attachments: AttachmentData[] }` | The user submitted the prompt (Enter or send button) with its attachments. |
 | `kc-suggestion-click` | `{ value: string }` | A suggestion was clicked while `suggestion-mode="fill"`. |
 | `kc-value-change` | `{ value: string }` | The input text changed (fires on every keystroke). |
@@ -574,10 +576,18 @@ A dropdown that lets the user switch between available models.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `context` | — | `ContextData | undefined` | — | Token-usage data. Set as a JS property. |
+| `warnThreshold` | `warn-threshold` | `undefined | number` | — | Fraction (0–1) above which the meter turns yellow. Defaults to `0.7` (70%). |
+| `dangerThreshold` | `danger-threshold` | `undefined | number` | — | Fraction (0–1) above which the meter turns red. Defaults to `0.9` (90%). |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kc-threshold-change` | `{ level: "ok" | "warn" | "danger" }` | Fires when the computed severity level changes (ok → warn → danger or back). `detail.level` is `'ok'`, `'warn'`, or `'danger'`. |
 
 #### Composed from
 
-`Components/Context`, `Components/ContextTrigger`, `Components/ContextContent`, `Components/ContextContentHeader`, `Components/ContextContentBody`, `Components/ContextContentFooter`, `Components/ContextInputUsage`, `Components/ContextOutputUsage`, `Components/ContextReasoningUsage`, `Components/ContextCacheUsage`
+`Components/Context`, `Components/ContextTrigger`, `Components/ContextContent`, `Components/ContextContentHeader`, `Components/ContextContentBody`, `Components/ContextContentFooter`, `Components/ContextInputUsage`, `Components/ContextOutputUsage`, `Components/ContextReasoningUsage`, `Components/ContextCacheUsage`, `Components/DEFAULT_WARN_THRESHOLD`, `Components/DEFAULT_DANGER_THRESHOLD`
 
 #### Theming
 
@@ -683,6 +693,7 @@ No events.
 |----------|-----------|------|---------|-------|
 | `sources` | — | `SourceItem[]` | `[]` | The sources to render. Set as a JS property. |
 | `showFavicon` | `show-favicon` | `undefined | false | true` | `false` | Show favicons on all items (per-item `showFavicon` overrides). |
+| `numbered` | `numbered` | `undefined | false | true` | `false` | When true, each citation chip is labelled with its 1-based index in the merged (prop + declarative-children) list (`[1]`, `[2]`, …) instead of the per-item `label` or domain fallback. HTML attribute: `numbered` (boolean — bare attribute or `numbered="true"`). JS property: `el.numbered = true`. |
 
 #### Composed from
 

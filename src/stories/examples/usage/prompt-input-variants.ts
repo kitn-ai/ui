@@ -428,7 +428,7 @@ export function Prompt() {
 /** Streaming / Loading State — disabled while a reply streams in. */
 const streaming: StoryUsage = {
   intro:
-    'Block input while a reply streams. Set `loading` to show the streaming state and stop accepting submits, and `disabled` to make the box fully non-interactive. (The demo composes the SolidJS `PromptInput` + `Loader` primitives to show the typing/dots indicators and a stop button.)',
+    'Block input while a reply streams. Set `loading` to show the streaming state and stop accepting submits, and `disabled` to make the box fully non-interactive. Add `stoppable` to get a built-in Stop button that fires `kc-stop` — listen for that event and call `controller.abort()` on your fetch/SSE. (The demo composes the SolidJS `PromptInput` + `Loader` primitives to show the typing/dots indicators and a stop button.)',
   snippets: {
     html: `<script type="module">
   import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
@@ -914,8 +914,10 @@ export function Prompt() {
  *    Use both together for the streaming state.
  *  - `isLoading` on the Solid primitive vs `loading` on the element: the Solid
  *    `PromptInput` prop is `isLoading`; the web component attribute is `loading` (kebab).
- *  - Stop button is NOT built into `kc-prompt-input`. Compose it yourself in `PromptInputActions`
- *    and call `controller.abort()` (or `clearTimeout` in the demo) in its onClick handler.
+ *  - Stop button: add `stoppable` to `kc-prompt-input` and listen for `kc-stop` — the element
+ *    fires it when the Stop button is clicked. Call `controller.abort()` in your handler to
+ *    cancel the fetch/SSE. When composing Solid primitives, wire the Square button yourself
+ *    (see FullExample). The element does the toggling for you; the consumer still owns the abort.
  *  - `ModelSwitcher` only renders when `models.length > 1` — a single-model list hides it.
  *  - `suggestions` is a JS property, not an attribute — arrays must be set on the element
  *    reference (not via an HTML attribute string). In the web-component tab note the
@@ -926,7 +928,7 @@ export function Prompt() {
  */
 const fullExample: StoryUsage = {
   intro:
-    'Everything combined: model switcher, grouped suggestion chips, streaming state (with a Stop button), and a send button that enables once you type. Simulates the idle → streaming → idle loop you\'d wire to a real fetch/SSE call. Key gotchas: `kc-submit` always emits `{ value, attachments }` (attachments may be empty); Enter submits, Shift+Enter newlines; `loading` blocks submit while `disabled` kills focus too — use both while streaming; the Stop button is **not** built into the element — compose it yourself and call `controller.abort()` on your own fetch.',
+    'Everything combined: model switcher, grouped suggestion chips, streaming state (with a Stop button), and a send button that enables once you type. Simulates the idle → streaming → idle loop you\'d wire to a real fetch/SSE call. Key gotchas: `kc-submit` always emits `{ value, attachments }` (attachments may be empty); Enter submits, Shift+Enter newlines; `loading` blocks submit while `disabled` kills focus too — use both while streaming; add `stoppable` to enable the built-in Stop button — it fires `kc-stop` when clicked; call `controller.abort()` in your handler to cancel the stream. When composing Solid primitives (the `PromptInput` + `PromptInputActions` pattern), wire the Square button yourself as shown in the Full Example story.',
   snippets: {
     html: `<script type="module">
   import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
@@ -977,7 +979,9 @@ const fullExample: StoryUsage = {
     }
   });
 
-  // The Stop button is NOT built in — compose it yourself.
+  // With stoppable set, kc-stop fires when the built-in Stop button is clicked.
+  // prompt.addEventListener('kc-stop', () => controller?.abort());
+  // OR compose your own stop button outside the element:
   stopBtn.addEventListener('click', () => controller?.abort());
 </script>`,
 
@@ -1030,7 +1034,8 @@ export function Prompt() {
         onSubmit={handleSubmit}
       />
       {streaming && (
-        // Stop button is NOT built into kc-prompt-input — compose it yourself.
+        {/* With stoppable + onStop, kc-prompt-input renders the Stop button for you.
+            Here we compose it manually for illustration. */}
         <button onClick={() => controllerRef.current?.abort()}>Stop</button>
       )}
     </div>
@@ -1089,7 +1094,8 @@ function stop() { controller?.abort(); }
       :placeholder="streaming ? 'Generating...' : 'Ask anything...'"
       @kc-submit="onSubmit"
     />
-    <!-- Stop is NOT built in — compose it yourself -->
+    <!-- Add stoppable + listen for kc-stop to use the built-in Stop button.
+         Here we compose it manually outside the element for illustration. -->
     <button v-if="streaming" @click="stop">Stop</button>
   </div>
 </template>`,
@@ -1144,7 +1150,8 @@ function stop() { controller?.abort(); }
     placeholder={streaming ? 'Generating...' : 'Ask anything...'}
     on:kc-submit={onSubmit}
   />
-  <!-- Stop is NOT built in — compose it yourself -->
+  <!-- Add stoppable + listen for kc-stop to use the built-in Stop button.
+       Here we compose it manually outside the element for illustration. -->
   {#if streaming}
     <button on:click={stop}>Stop</button>
   {/if}
@@ -1304,7 +1311,8 @@ export function Prompt() {
               </Button>
             }
           >
-            {/* Stop is NOT built into kc-prompt-input — compose it here */}
+            {/* Solid primitive: wire the Stop button yourself inside PromptInputActions.
+                With the kc-prompt-input element, add stoppable and listen for kc-stop instead. */}
             <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Stop generation" onClick={handleStop}>
               <Square class="size-3" />
             </Button>

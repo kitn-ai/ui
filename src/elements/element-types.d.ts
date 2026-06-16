@@ -199,6 +199,10 @@ export interface KcContextElement extends HTMLElement {
   theme?: 'light' | 'dark' | 'auto';
   /** Token-usage data. Set as a JS property. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; reasoningTokens?: number; cacheTokens?: number; estimatedCost?: number };
+  /** Fraction (0–1) above which the meter turns yellow. Defaults to `0.7` (70%). */
+  warnThreshold?: number;
+  /** Fraction (0–1) above which the meter turns red. Defaults to `0.9` (90%). */
+  dangerThreshold?: number;
 }
 
 export interface KcConversationsElement extends HTMLElement {
@@ -391,6 +395,8 @@ export interface KcPromptInputElement extends HTMLElement {
   search?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. */
   voice?: boolean;
+  /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kc-stop`. */
+  stoppable?: boolean;
   /** Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). */
   attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
 }
@@ -471,6 +477,17 @@ export interface KcScopePickerElement extends HTMLElement {
   currentLabel?: string;
 }
 
+export interface KcScrollButtonElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** CSS id of the scroll container to control. When omitted the element walks up the DOM (outside its own shadow root) to find the nearest scrollable ancestor. Mirrors the `for` convention of `<label for="...">`. */
+  for?: string;
+  /** Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to `'outline'`. */
+  variant?: "ghost" | "default" | "outline";
+  /** Button size token. Defaults to `'icon'` (square). */
+  size?: "sm" | "lg" | "md" | "icon" | "icon-sm";
+}
+
 export interface KcSkillsElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -500,6 +517,8 @@ export interface KcSourcesElement extends HTMLElement {
   sources: { href: string; title?: undefined | string; description?: undefined | string; label?: undefined | string; showFavicon?: undefined | boolean }[];
   /** Show favicons on all items (per-item `showFavicon` overrides). */
   showFavicon?: boolean;
+  /** When true, each citation chip is labelled with its 1-based index in the merged (prop + declarative-children) list (`[1]`, `[2]`, …) instead of the per-item `label` or domain fallback. HTML attribute: `numbered` (boolean — bare attribute or `numbered="true"`). JS property: `el.numbered = true`. */
+  numbered?: boolean;
 }
 
 export interface KcSuggestionsElement extends HTMLElement {
@@ -644,6 +663,7 @@ declare global {
     'kc-resizable-item': KcResizableItemElement;
     'kc-response-stream': KcResponseStreamElement;
     'kc-scope-picker': KcScopePickerElement;
+    'kc-scroll-button': KcScrollButtonElement;
     'kc-skills': KcSkillsElement;
     'kc-source': KcSourceElement;
     'kc-sources': KcSourcesElement;

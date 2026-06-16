@@ -34,6 +34,9 @@ interface Props extends Record<string, unknown> {
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice`
    *  event. */
   voice?: boolean;
+  /** When set and `loading` is true, the send button is replaced by a Stop
+   *  button (square icon, "Stop" aria-label). Clicking it fires `kc-stop`. */
+  stoppable?: boolean;
   /** Attachments to seed the input with (so a consumer can pre-populate staged
    *  files without an upload). Set as a JS property; the element then manages its
    *  own attachment state from there (add via the paperclip, remove per chip). */
@@ -54,6 +57,8 @@ interface Events {
   'kc-search': Record<string, never>;
   /** The Voice (Mic) toolbar button was clicked. */
   'kc-voice': Record<string, never>;
+  /** The Stop button was clicked while `stoppable` and `loading` are both true. */
+  'kc-stop': Record<string, never>;
 }
 
 defineWebComponent<Props, Events>('kc-prompt-input', {
@@ -68,6 +73,7 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
   slashCompact: false,
   search: false,
   voice: false,
+  stoppable: false,
   attachments: undefined,
 }, (props, { dispatch, flag }) => {
   const [internal, setInternal] = createSignal(props.value ?? '');
@@ -103,6 +109,7 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
       placeholder={props.placeholder}
       disabled={flag('disabled')}
       loading={flag('loading')}
+      stoppable={flag('stoppable')}
       suggestions={props.suggestions}
       attachments={attachments()}
       slashCommands={props.slashCommands}
@@ -116,6 +123,7 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
       onAttachmentsChange={setAttachments}
       onSearch={() => dispatch('kc-search')}
       onVoice={() => dispatch('kc-voice')}
+      onStop={() => dispatch('kc-stop')}
       onSlashSelect={(command) => dispatch('kc-slash-select', { command })}
     />
   );

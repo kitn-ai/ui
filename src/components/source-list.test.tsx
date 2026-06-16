@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
+import { For } from 'solid-js';
 import { Source, SourceTrigger, SourceContent, SourceList } from './source';
 import { parseKcSourceElement } from '../elements/source';
 
@@ -87,5 +88,65 @@ describe('SourceList with Source children', () => {
     const hrefs = [...links].map((a) => a.getAttribute('href'));
     expect(hrefs).toContain('https://kitn.dev');
     expect(hrefs).toContain('https://solidjs.com');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// numbered prop — kc-sources web component behavior reproduced at Solid level
+// ---------------------------------------------------------------------------
+
+describe('numbered citations', () => {
+  /** Helper: render N sources with explicit numeric labels (mirroring numbered mode). */
+  function renderNumbered(sources: { href: string; label?: string | number }[]) {
+    return render(() => (
+      <SourceList>
+        <For each={sources}>
+          {(s, i) => (
+            <Source href={s.href}>
+              {/* When numbered is active the element replaces label with i()+1. */}
+              <SourceTrigger label={i() + 1} />
+              <SourceContent title="" description="" />
+            </Source>
+          )}
+        </For>
+      </SourceList>
+    ));
+  }
+
+  it('labels N sources 1..N in order', () => {
+    const sources = [
+      { href: 'https://kitn.dev' },
+      { href: 'https://solidjs.com' },
+      { href: 'https://vitejs.dev' },
+    ];
+
+    const { container } = renderNumbered(sources);
+
+    // SourceTrigger renders a <span> with the label inside the trigger <a>.
+    // Grab all trigger anchors — they have target="_blank".
+    const triggerLinks = [...container.querySelectorAll('a[target="_blank"]')];
+    // One trigger per source (SourceContent also renders an <a target="_blank">,
+    // so we narrow to ones whose text content is a number 1–N).
+    const labels = triggerLinks
+      .map((a) => a.querySelector('span')?.textContent?.trim())
+      .filter(Boolean);
+
+    expect(labels).toEqual(['1', '2', '3']);
+  });
+
+  it('label sequence resets from 1 for each independent list', () => {
+    const firstSources = [{ href: 'https://kitn.dev' }, { href: 'https://solidjs.com' }];
+    const secondSources = [{ href: 'https://vitejs.dev' }, { href: 'https://vitest.dev' }];
+
+    const { container: c1 } = renderNumbered(firstSources);
+    const { container: c2 } = renderNumbered(secondSources);
+
+    const getLabels = (c: HTMLElement) =>
+      [...c.querySelectorAll('a[target="_blank"]')]
+        .map((a) => a.querySelector('span')?.textContent?.trim())
+        .filter(Boolean);
+
+    expect(getLabels(c1)).toEqual(['1', '2']);
+    expect(getLabels(c2)).toEqual(['1', '2']);
   });
 });
