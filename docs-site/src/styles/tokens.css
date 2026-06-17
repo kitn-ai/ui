@@ -24,6 +24,7 @@
   --kc-surface-2: #18181b;                         /* console body, nested */
   --kc-line: #2e2e34;                              /* component borders (cards/tables) */
   --kc-divider: #26262b;                           /* subtle chrome divider (header/sidebar) */
+  --kc-pressed: rgb(0 0 0 / 0.32);                 /* selected/pressed segmented-control fill */
 
   --kc-ink: #f5f5f6;                               /* strongest text */
   --kc-ink-2: #c3c3c8;                             /* body */
@@ -42,6 +43,7 @@
   --kc-surface-2: #f3f3f6;
   --kc-line: #e6e6e9;
   --kc-divider: #e8e8ea;
+  --kc-pressed: rgb(0 0 0 / 0.07);                 /* selected/pressed segmented-control fill */
   --kc-ink: hsl(220 12% 12%);
   --kc-ink-2: hsl(220 7% 32%);
   --kc-ink-3: hsl(220 5% 46%);

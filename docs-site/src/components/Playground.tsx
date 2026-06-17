@@ -113,20 +113,30 @@ export default function Playground(props: { tag: string }) {
     <div class="not-content my-5 overflow-hidden rounded-xl border border-line bg-surface">
       <Show when={controls.length}>
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-line px-4">
-          <div class="flex flex-wrap items-center gap-x-5 gap-y-1">
+          <div class="flex flex-wrap items-center gap-y-2 py-2.5">
             <For each={enums}>
-              {(c) => (
-                <div class="flex items-center" role="tablist" aria-label={c.prop}>
-                  <For each={c.options}>
-                    {(opt) => (
-                      <button role="tab" aria-selected={state()[c.prop] === opt} onClick={() => set(c.prop, opt)}
-                        class="-mb-px cursor-pointer appearance-none border-x-0 border-t-0 border-b-2 bg-transparent px-3 py-3 text-sm font-semibold capitalize transition-colors"
-                        classList={{ 'border-brand text-ink': state()[c.prop] === opt, 'border-transparent text-ink-3 hover:text-ink': state()[c.prop] !== opt }}>
-                        {opt}
-                      </button>
-                    )}
-                  </For>
-                </div>
+              {(c, i) => (
+                <>
+                  {/* vertical divider between separate option groups */}
+                  <Show when={i() > 0}>
+                    <div class="mx-3 h-5 w-px shrink-0 bg-line" aria-hidden="true" />
+                  </Show>
+                  <div class="inline-flex items-center gap-1" role="radiogroup" aria-label={c.prop}>
+                    <For each={c.options}>
+                      {(opt) => (
+                        <button role="radio" aria-checked={state()[c.prop] === opt} onClick={() => set(c.prop, opt)}
+                          class="cursor-pointer appearance-none rounded-full border-0 px-3 py-1 text-sm capitalize transition-all"
+                          classList={{
+                            // selected: semi-transparent dark fill + pressed-in inset shadow, strong ink text
+                            'bg-[var(--kc-pressed)] text-ink font-semibold shadow-[inset_0_1px_2px_rgb(0_0_0/0.22)]': state()[c.prop] === opt,
+                            'bg-transparent text-ink-3 font-medium hover:text-ink hover:bg-line/60': state()[c.prop] !== opt,
+                          }}>
+                          {opt}
+                        </button>
+                      )}
+                    </For>
+                  </div>
+                </>
               )}
             </For>
           </div>

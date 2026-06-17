@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 import solid from '@astrojs/solid-js';
 import icon from 'astro-icon';
 import tailwindcss from '@tailwindcss/vite';
+import Icons from 'unplugin-icons/vite';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 
@@ -14,7 +15,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 export default defineConfig({
   site: 'https://kitn-ai.github.io',
   base: '/chat',
-  vite: { plugins: [tailwindcss()] },
+  vite: { plugins: [tailwindcss(), Icons({ compiler: 'solid' })] },
   // Render the heading anchor as a CHILD of the heading (behavior: 'append'),
   // so the heading can be a flex row [text · #] — clean gap + hover reveal,
   // and the "#" inherits the heading's font size. (Starlight's default emits it
