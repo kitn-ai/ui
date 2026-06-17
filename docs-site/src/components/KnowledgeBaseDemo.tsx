@@ -356,8 +356,17 @@ export default function KnowledgeBaseDemo() {
     convEl!.addEventListener('kc-conversation-select', onConversationSelect);
 
     if (sidebarItemRef) {
-      sidebarItemRef.appendChild(pickerEl!);
-      sidebarItemRef.appendChild(convEl!);
+      // A <kc-resizable-item> slots its light children into a single
+      // minmax(0,1fr) grid cell, so appending the picker AND the list directly
+      // would land both in the SAME cell (item 2 spilling into an auto implicit
+      // row) and a flex style on the item host is inert. Wrap them in one
+      // flex-column that fills the cell and stacks: picker (intrinsic height)
+      // above conversations (flex:1).
+      const sidebar = document.createElement('div');
+      sidebar.style.cssText = 'display:flex;flex-direction:column;height:100%;min-height:0;width:100%';
+      sidebar.appendChild(pickerEl!);
+      sidebar.appendChild(convEl!);
+      sidebarItemRef.appendChild(sidebar);
     }
 
     // --- Chat main pane ---
@@ -380,12 +389,18 @@ export default function KnowledgeBaseDemo() {
     sourcesEl!.sources = [];
 
     if (chatItemRef) {
-      chatItemRef.appendChild(chatEl!);
+      // Same single-cell constraint as the sidebar: stack chat (flex:1) over the
+      // sources strip (intrinsic height) inside one flex-column that fills the
+      // item's grid cell, instead of appending both children into one cell.
+      const main = document.createElement('div');
+      main.style.cssText = 'display:flex;flex-direction:column;height:100%;min-height:0;width:100%';
+      main.appendChild(chatEl!);
       const strip = document.createElement('div');
       strip.style.cssText =
         'border-top:1px solid var(--color-line, #e5e7eb);padding:10px 16px;background:var(--color-surface, #fff)';
       strip.appendChild(sourcesEl!);
-      chatItemRef.appendChild(strip);
+      main.appendChild(strip);
+      chatItemRef.appendChild(main);
     }
 
     if (resizableRef) customElements.upgrade(resizableRef);
@@ -420,13 +435,11 @@ export default function KnowledgeBaseDemo() {
           size="28%"
           min="220px"
           max="360px"
-          style={{ display: 'flex', 'flex-direction': 'column' }}
         />
         {/* Main pane: chat + sources strip (children appended in onMount) */}
         {/* @ts-expect-error custom element */}
         <kc-resizable-item
           ref={(el: HTMLElement) => (chatItemRef = el)}
-          style={{ display: 'flex', 'flex-direction': 'column' }}
         />
       </kc-resizable>
     </div>
