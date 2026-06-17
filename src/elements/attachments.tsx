@@ -78,7 +78,7 @@ defineWebComponent<Props, Events>('kc-attachments', {
               onRemove={removable() ? () => dispatch('kc-remove', { id: item.id }) : undefined}
             >
               <Show
-                when={hoverCard() && variant() !== 'grid'}
+                when={hoverCard()}
                 fallback={
                   <>
                     <AttachmentPreview />
@@ -89,15 +89,19 @@ defineWebComponent<Props, Events>('kc-attachments', {
                   </>
                 }
               >
-                {/* Hover preview is for compact inline/list chips; grid tiles are
-                    already the visual, so they skip it (wrapping them would also
-                    collapse non-image tiles to the icon's height). */}
+                {/* The trigger carries the layout itself — a bare inline <span>
+                    collapses inline/list rows. Grid wraps just the tile (the
+                    label/details surface in the hover card instead). */}
                 <AttachmentHoverCard>
-                  <AttachmentHoverCardTrigger>
-                    <div class="flex items-center gap-1.5">
-                      <AttachmentPreview />
+                  <AttachmentHoverCardTrigger
+                    class={variant() === 'grid'
+                      ? 'block size-full'
+                      : `flex items-center gap-1.5${variant() === 'list' ? ' w-full' : ''}`}
+                  >
+                    <AttachmentPreview />
+                    <Show when={variant() !== 'grid'}>
                       <AttachmentInfo showMediaType={showMediaType()} />
-                    </div>
+                    </Show>
                   </AttachmentHoverCardTrigger>
                   <AttachmentHoverCardContent>
                     {/* For image attachments, preview the actual thumbnail;

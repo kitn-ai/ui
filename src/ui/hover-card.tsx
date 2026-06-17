@@ -63,13 +63,14 @@ export function HoverCardRoot(props: HoverCardRootProps) {
   );
 }
 
-export interface HoverCardTriggerProps { children: JSX.Element; }
+export interface HoverCardTriggerProps { children: JSX.Element; class?: string; }
 
 export function HoverCardTrigger(props: HoverCardTriggerProps) {
   const ctx = useHoverCard();
   return (
     <As
       as="span"
+      class={props.class}
       ref={ctx.setTrigger}
       onPointerEnter={ctx.enter}
       onPointerLeave={ctx.leave}
