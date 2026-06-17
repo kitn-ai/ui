@@ -21,10 +21,10 @@ import WorkspaceDemo from '../../../components/WorkspaceDemo.tsx';
 
   const ws = document.getElementById('ws');
 
-  // Seed conversations (set as a JS property — array, not attribute).
+  // Seed conversations (assign in JavaScript — arrays can't be attributes).
   ws.conversations = [
     {
-      id: 'c1', title: 'SolidJS reactivity vs React hooks',
+      id: 'c1', title: 'Migrating the dashboard to web components',
       scope: { type: 'collection' }, messageCount: 4,
       lastMessageAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -34,8 +34,8 @@ import WorkspaceDemo from '../../../components/WorkspaceDemo.tsx';
 
   // Seed the active thread.
   ws.messages = [
-    { id: 'u1', role: 'user', content: 'How do signals differ from useState?' },
-    { id: 'a1', role: 'assistant', content: 'Signals update only the DOM nodes that read them …', actions: ['copy', 'like', 'dislike'] },
+    { id: 'u1', role: 'user', content: 'How do I share state across the panels?' },
+    { id: 'a1', role: 'assistant', content: 'Keep one source of truth and reassign it on each change …', actions: ['copy', 'like', 'dislike'] },
   ];
   ws.activeId = 'c1';
 

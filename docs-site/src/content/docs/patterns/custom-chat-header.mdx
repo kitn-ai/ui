@@ -11,7 +11,7 @@ import ChatHeaderDemo from '../../../components/ChatHeaderDemo.tsx';
 <ChatHeaderDemo client:only="solid" />
 
 <Aside type="note" title="kc-chat vs kc-workspace">
-`<kc-chat>` is the **conversation** — thread, composer, header. It has no sidebar of its own, so here the rail and its toggle are wired by the demo (full control over the layout). If you want a **managed, collapsible conversation sidebar** out of the box, reach for [`<kc-workspace>`](/chat/components/workspace/) instead — it owns the sidebar (and its collapse is controllable). Use `kc-chat` + header slots when you want to build the shell yourself; use `kc-workspace` when you don't.
+`<kc-chat>` is the **conversation** — thread, composer, header. It has no sidebar of its own, so here the rail and its toggle are wired by the demo (full control over the layout). If you want a **managed, collapsible conversation sidebar** without wiring it yourself, reach for [`<kc-workspace>`](/chat/components/workspace/) instead — it owns the sidebar (and its collapse is controllable). Use `kc-chat` + header slots when you want to build the shell yourself; use `kc-workspace` when you don't.
 </Aside>
 
 ## How it works
@@ -22,14 +22,14 @@ Project your own controls into the header by giving light-DOM children a `header
 <kc-chat id="chat">
   <!-- left of the title -->
   <div slot="header-start">
-    <button id="toggle" aria-label="Toggle sidebar">☰</button>
+    <button id="toggle" aria-label="Toggle sidebar">Menu</button>
     <kc-model-switcher id="models"></kc-model-switcher>
   </div>
 
   <!-- right of the built-in controls -->
   <div slot="header-end">
     <kc-popover placement="bottom-end">
-      <button slot="trigger" aria-label="Settings">⚙</button>
+      <button slot="trigger" aria-label="Settings">Settings</button>
       <div>
         <label>Temporary chat <kc-switch label="Temporary chat"></kc-switch></label>
       </div>

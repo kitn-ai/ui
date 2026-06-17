@@ -81,7 +81,7 @@ const userMsg = {
 
 ## Pre-populating staged files
 
-Set `prompt.attachments` as a JS property after mount to seed the composer before the user types — for files already linked to this conversation, say. The element manages its own staged list from there: the user can add more with the paperclip, remove chips, and `kc-submit` always delivers the current state:
+Assign `prompt.attachments` in JavaScript after mount to seed the composer before the user types — for files already linked to this conversation, say. The element manages its own staged list from there: the user can add more with the paperclip, remove chips, and `kc-submit` always delivers the current state:
 
 ```js
 prompt.attachments = [
@@ -111,7 +111,6 @@ upload.addEventListener('kc-files-added', (e) => {
     // create an object URL if you want an image preview in the hover card
     url: f.type.startsWith('image/') ? URL.createObjectURL(f) : undefined,
   }));
-  // Set as a JS property — arrays can't be HTML attributes.
   prompt.attachments = [...current, ...added];
 });
 ```

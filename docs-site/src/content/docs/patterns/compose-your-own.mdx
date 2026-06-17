@@ -34,7 +34,7 @@ Three real `kc-*` web components inside a `<kc-resizable>` layout:
 <script type="module">
   import '@kitn.ai/chat/elements';
 
-  // Array/object props must be set as JS properties, not HTML attributes.
+  // Assign arrays and objects in JavaScript — they can't be HTML attributes.
   const list = document.getElementById('list');
   list.conversations = [
     { id: 'c1', title: 'Web component architecture',
@@ -54,7 +54,7 @@ Three real `kc-*` web components inside a `<kc-resizable>` layout:
     thread.innerHTML = '';
     for (const m of msgs) {
       const el = document.createElement('kc-message');
-      el.message = m;  // set as JS property — ChatMessage shape
+      el.message = m;  // the full ChatMessage object
       thread.append(el);
     }
   };
@@ -94,7 +94,7 @@ Three real `kc-*` web components inside a `<kc-resizable>` layout:
 **Key points:**
 
 - `kc-resizable` lays out panels horizontally (or vertically with `orientation="vertical"`). Each `kc-resizable-item` takes a `size`, `min`, and `max` — all as HTML attributes (scalar values).
-- `kc-conversations` accepts a `conversations` JS property (flat array; the element groups by recency automatically). Listen for `kc-conversation-select` to update `activeId`.
+- `kc-conversations` accepts a `conversations` property (flat array; the element groups by recency automatically). Listen for `kc-conversation-select` to update `activeId`.
 - Create one `<kc-message>` per turn and set its `message` property to the full `ChatMessage` object — `{ id, role, content, actions?, reasoning?, tools?, attachments? }`.
 - `kc-prompt-input` fires `kc-submit` with `{ value, attachments }`. Set `loading` to `true` while streaming; the send button disables automatically.
 

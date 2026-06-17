@@ -16,7 +16,7 @@ import '@kitn.ai/chat/elements';
 
 const cards = document.getElementById('cards');
 
-// Set the envelope stream as a JS property — never as an attribute.
+// Assign the envelope stream in JavaScript — arrays can't be HTML attributes.
 cards.cards = [/* CardEnvelope objects, one per card type — see below */];
 
 // Wire a CardPolicy — one callback per interaction verb.

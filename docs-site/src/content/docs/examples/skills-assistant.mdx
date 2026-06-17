@@ -15,7 +15,7 @@ import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
 
 ## How it works
 
-`<kc-chat>` owns the thread and the composer. Pass a `slashCommands` array as a JS property — typing `/` opens the palette, and choosing a command sets the composer to its `label` (for example `/summarize `) ready to send. The chat fires `kc-slash-select` the moment a command is chosen, and `kc-submit` when the message is sent. `<kc-skills>` renders the same capabilities as badges from a separate `skills` property.
+`<kc-chat>` owns the thread and the composer. Pass a `slashCommands` array as a property — typing `/` opens the palette, and choosing a command sets the composer to its `label` (for example `/summarize `) ready to send. The chat fires `kc-slash-select` the moment a command is chosen, and `kc-submit` when the message is sent. `<kc-skills>` renders the same capabilities as badges from a separate `skills` property.
 
 ```html
 <kc-skills id="skills"></kc-skills>

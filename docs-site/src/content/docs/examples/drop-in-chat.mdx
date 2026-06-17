@@ -5,16 +5,13 @@ description: A complete, streaming chat app from a single <kc-chat> element — 
 
 import ChatDemo from '../../../components/ChatDemo.tsx';
 
-<p class="kc-lede">One element gives you the whole experience: a message thread with markdown, reasoning, and tool calls, a composer, and optional header chrome. You bring the model; `<kc-chat>` renders the UI. Send a message below — the reply streams in.</p>
+<p class="kc-lede">One element gives you the whole experience: a message thread with markdown, reasoning, and tool calls, a composer, and optional header chrome. You bring the model; `<kc-chat>` renders the UI. The thread starts empty with a few starter suggestions — click one to begin, and the reply streams in.</p>
 
-<ChatDemo client:only="solid" chatTitle="Assistant" placeholder="Ask anything…" suggestions={["How does SolidJS reactivity work?", "Show me a streaming example"]} messages={[
-  { id: 'u1', role: 'user', content: 'What makes kitn-chat different from rolling my own chat UI?' },
-  { id: 'a1', role: 'assistant', content: "Three things:\n\n1. **Framework-agnostic** — the `kc-*` elements are web components, so they work the same in React, Vue, Svelte, Angular, or plain HTML.\n2. **Shadow-DOM isolated** — their styles never leak into (or out of) your app.\n3. **Batteries included** — streaming markdown, reasoning, tool calls, and generative-UI cards are already handled.", actions: ['copy', 'like', 'dislike'] },
-]} />
+<ChatDemo client:only="solid" chatTitle="Assistant" placeholder="Ask anything…" suggestions={["What makes kitn-chat different from rolling my own?", "Show me a streaming example"]} messages={[]} />
 
 ## Wire it up
 
-Set `messages` as a JS **property**, then handle `kc-submit`: append the user's turn, add an empty assistant message, and grow its `content` as tokens arrive.
+Start with an empty thread and a few `suggestions`. The chips render in the empty state and disappear once the conversation has a message, so they read as conversation starters. Assign both in JavaScript (arrays can't be HTML attributes), then handle `kc-submit`: append the user's turn, add an empty assistant message, and grow its `content` as tokens arrive.
 
 ```html
 <kc-chat id="chat" chat-title="Assistant" placeholder="Ask anything…"></kc-chat>
@@ -23,6 +20,10 @@ Set `messages` as a JS **property**, then handle `kc-submit`: append the user's 
   import '@kitn.ai/chat/elements';
   const chat = document.getElementById('chat');
   chat.messages = [];
+  chat.suggestions = [
+    'What makes kitn-chat different from rolling my own?',
+    'Show me a streaming example',
+  ];
 
   chat.addEventListener('kc-submit', async (e) => {
     const prompt = e.detail.value;
