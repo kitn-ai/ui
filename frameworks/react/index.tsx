@@ -513,6 +513,23 @@ export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
   { onModelChange: 'kc-model-change' },
 );
 
+export interface PopoverProps extends WebComponentProps {
+  /** Floating placement relative to the trigger (floating-ui placement). */
+  placement?: "top" | "right" | "bottom" | "left" | "top-start" | "top-end" | "right-start" | "right-end" | "bottom-start" | "bottom-end" | "left-start" | "left-end";
+  /** Gap in px between the trigger and the panel. */
+  gutter?: number;
+  /** Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour. */
+  open?: boolean;
+  /** The popover wants to open or close (click, Escape, or outside-click). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export const Popover = createWebComponent<PopoverProps>(
+  'kc-popover',
+  ["theme","placement","gutter","open"],
+  { onOpenChange: 'kc-open-change' },
+);
+
 export interface PromptInputProps extends WebComponentProps {
   /** Controlled value of the input. When set, the host owns the text and must update it on `kc-value-change`; leave unset for uncontrolled behavior. */
   value?: string;

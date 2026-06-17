@@ -370,6 +370,17 @@ export interface KcModelSwitcherElement extends HTMLElement {
   currentModel?: string;
 }
 
+export interface KcPopoverElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Floating placement relative to the trigger (floating-ui placement). */
+  placement?: "top" | "right" | "bottom" | "left" | "top-start" | "top-end" | "right-start" | "right-end" | "bottom-start" | "bottom-end" | "left-start" | "left-end";
+  /** Gap in px between the trigger and the panel. */
+  gutter?: number;
+  /** Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour. */
+  open?: boolean;
+}
+
 export interface KcPromptInputElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -656,6 +667,7 @@ declare global {
     'kc-markdown': KcMarkdownElement;
     'kc-message': KcMessageElement;
     'kc-model-switcher': KcModelSwitcherElement;
+    'kc-popover': KcPopoverElement;
     'kc-prompt-input': KcPromptInputElement;
     'kc-reasoning': KcReasoningElement;
     'kc-remote': KcRemoteElement;

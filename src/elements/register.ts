@@ -39,6 +39,7 @@ import './resizable';
 import './file-tree';
 import './artifact';
 import './scroll-button';
+import './popover';
 // Generative-UI cards (Card Contract)
 import './card';
 import './form';

@@ -1816,6 +1816,55 @@
     "tokens": []
   },
   {
+    "tag": "kc-popover",
+    "className": "KcPopoverElement",
+    "displayName": "Popover",
+    "props": [
+      {
+        "name": "placement",
+        "type": "undefined | \"top\" | \"right\" | \"bottom\" | \"left\" | \"top-start\" | \"top-end\" | \"right-start\" | \"right-end\" | \"bottom-start\" | \"bottom-end\" | \"left-start\" | \"left-end\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Floating placement relative to the trigger (floating-ui placement).",
+        "default": "'bottom-start'",
+        "displayType": "undefined | \"top\" | \"right\" | \"bottom\" | \"left\" | \"top-start\" | \"top-end\" | \"right-start\" | \"right-end\" | \"bottom-start\" | \"bottom-end\" | \"left-start\" | \"left-end\""
+      },
+      {
+        "name": "gutter",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Gap in px between the trigger and the panel.",
+        "default": "6",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour.",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kc-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The popover wants to open or close (click, Escape, or outside-click).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Popover",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-popover--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kc-prompt-input",
     "className": "KcPromptInputElement",
     "displayName": "PromptInput",
