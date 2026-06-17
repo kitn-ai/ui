@@ -139,7 +139,9 @@ export interface AttachmentProps extends JSX.HTMLAttributes<HTMLDivElement> {
 
 function Attachment(props: AttachmentProps) {
   const [local, rest] = splitProps(props, ['data', 'onRemove', 'class', 'children']);
-  const { variant } = useAttachmentsContext();
+  // Read the getter reactively — DON'T destructure, or the variant is captured
+  // once and the item never re-lays-out when the container variant changes.
+  const ctx = useAttachmentsContext();
   const mediaCategory = () => getMediaCategory(local.data);
 
   return (
@@ -148,20 +150,20 @@ function Attachment(props: AttachmentProps) {
         get data() { return local.data; },
         get mediaCategory() { return mediaCategory(); },
         get onRemove() { return local.onRemove; },
-        get variant() { return variant; },
+        get variant() { return ctx.variant; },
       }}
     >
       <div
         class={cn(
           'group relative',
-          variant === 'grid' && 'size-24 overflow-hidden rounded-lg',
-          variant === 'inline' && [
+          ctx.variant === 'grid' && 'size-24 overflow-hidden rounded-lg',
+          ctx.variant === 'inline' && [
             'flex h-8 cursor-pointer select-none items-center gap-1.5',
             'rounded-md bg-muted/50 px-1.5 text-foreground',
             'font-medium text-sm transition-all',
             'hover:bg-muted',
           ],
-          variant === 'list' && [
+          ctx.variant === 'list' && [
             'flex w-full items-center gap-3 rounded-lg bg-muted/30 p-3 text-foreground',
             'hover:bg-muted/50',
           ],
@@ -339,10 +341,11 @@ function AttachmentHoverCard(props: AttachmentHoverCardProps) {
 
 export interface AttachmentHoverCardTriggerProps {
   children: JSX.Element;
+  class?: string;
 }
 
 function AttachmentHoverCardTrigger(props: AttachmentHoverCardTriggerProps) {
-  return <HoverCardTrigger>{props.children}</HoverCardTrigger>;
+  return <HoverCardTrigger class={props.class}>{props.children}</HoverCardTrigger>;
 }
 
 export interface AttachmentHoverCardContentProps {
