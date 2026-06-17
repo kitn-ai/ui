@@ -183,8 +183,8 @@ interface CardEnvelope {
 |---|---|---|
 | `submit` | `cardId`, `data` | User submitted data (form, booking) |
 | `action` | `cardId`, `action`, `payload?` | Named action button pressed |
-| `send-prompt` | `text`, `mode`, `context?` | Provider wants to send a chat message |
-| `open` | `url`, `target` | Provider wants to open a URL |
+| `send-prompt` | `cardId`, `text`, `mode?`, `context?` | Provider wants to send a chat message |
+| `open` | `cardId`, `url`, `target?` | Provider wants to open a URL |
 | `state` | `cardId`, `patch` | Ephemeral UI state update |
 | `dismiss` | `cardId` | Card closed itself |
 | `error` | `cardId`, `message` | Render or validation error |
@@ -194,4 +194,4 @@ interface CardEnvelope {
 - **[`kc-remote` reference](/chat/components/remote/)** — all props, origin validation rules, and the security model in full.
 - **[`kc-cards` reference](/chat/components/cards/)** — the card dispatcher: built-in types, `types` overrides, and `CardPolicy`.
 - **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop that drives `cards` into a `<kc-chat>` message thread.
-- **[Full chat app](/chat/examples/drop-in-chat/)** — a complete app wiring `kc-chat`, streaming, and generative-UI cards end to end.
+- **[Generative UI cards](/chat/patterns/generative-ui-cards/)** — render the same cards locally, in-thread.
