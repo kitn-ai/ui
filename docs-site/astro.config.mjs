@@ -102,9 +102,12 @@ export default defineConfig({
           },
           {
             label: 'Examples',
-            link: '/examples/full-chat-app/',
+            link: '/examples/drop-in-chat/',
             id: 'examples',
-            items: [{ label: 'Full Chat App', slug: 'examples/full-chat-app' }],
+            items: [
+              { label: 'Drop-in chat', slug: 'examples/drop-in-chat' },
+              { label: 'Full Chat App', slug: 'examples/full-chat-app' },
+            ],
           },
         ]),
       ],
