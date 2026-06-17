@@ -106,6 +106,7 @@ export default defineConfig({
             id: 'patterns',
             items: [
               { label: 'Compose your own shell', slug: 'patterns/compose-your-own' },
+              { label: 'Button and popover menu', slug: 'patterns/popover-menu' },
               { label: 'Resizable split', slug: 'patterns/resizable-split' },
               { label: 'Empty & first-run state', slug: 'patterns/empty-state' },
               { label: 'Tool calls & reasoning', slug: 'patterns/tool-reasoning' },

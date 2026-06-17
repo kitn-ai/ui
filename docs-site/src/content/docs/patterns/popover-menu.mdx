@@ -1,0 +1,60 @@
+---
+title: Button and popover menu
+description: Build a trigger that opens a popover card of arbitrary content with kc-popover — the ChatGPT-style header menu of a model row, a nested group, and a toggle.
+---
+
+import PopoverMenuDemo from '../../../components/PopoverMenuDemo.tsx';
+
+<p class="kc-lede">A trigger that opens a floating card — a model picker, a settings menu, an account dropdown. `<kc-popover>` handles the open/close, positioning, and dismissal; you slot the trigger and whatever content the card needs. The menu below rebuilds the ChatGPT header popover: a flagship model row, an expandable group, and a toggle.</p>
+
+<PopoverMenuDemo client:only="solid" />
+
+## How it works
+
+`<kc-popover>` takes two slots — `trigger` for the control, and the default slot for the panel. Clicking the trigger toggles the panel; Escape or a click outside closes it (clicks inside don't). The panel is a `role="dialog"` region, not a menu, so it holds any markup — rows, a nested group, a toggle switch.
+
+```html
+<kc-popover placement="bottom-start">
+  <button slot="trigger">GPT-5.5 ▾</button>
+
+  <div>
+    <button class="row">GPT-5.5 — Flagship model</button>
+    <button class="row">Legacy models ▾</button>
+    <label class="row">Temporary chat <span class="switch"></span></label>
+  </div>
+</kc-popover>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  // optional: react to open/close
+  document.querySelector('kc-popover')
+    .addEventListener('kc-open-change', (e) => console.log('open:', e.detail.open));
+</script>
+```
+
+The panel content lives in your light DOM, so your own styles apply to it directly — no shadow-DOM piercing. `kc-popover` only frames and positions the card.
+
+### Controlled or uncontrolled
+
+By default the popover manages its own open state. To drive it from your app, set the `open` property and update it from `kc-open-change`:
+
+```js
+const pop = document.querySelector('kc-popover');
+pop.open = true;                       // open it programmatically
+pop.addEventListener('kc-open-change', (e) => { pop.open = e.detail.open; });
+```
+
+## Props and events
+
+| Name | Type | Notes |
+|---|---|---|
+| `placement` | `Placement` | Floating placement (`bottom-start`, `top`, `right`, …). Defaults to `bottom-start`. |
+| `gutter` | `number` | Gap in px between trigger and panel. Defaults to `6`. |
+| `open` | `boolean` | Controlled open state. Omit for click-to-toggle. |
+| `kc-open-change` | event | Fires `{ open }` on every open/close (click, Escape, outside-click). |
+
+## Next steps
+
+- **[Compose your own shell](/chat/patterns/compose-your-own/)** — drop a header menu into a custom chat layout.
+- **[`kc-model-switcher` reference](/chat/components/model-switcher/)** — the built-in model dropdown when you only need a flat model list.
+- **[Theming](/chat/guides/theming/)** — the tokens the popover panel inherits.
