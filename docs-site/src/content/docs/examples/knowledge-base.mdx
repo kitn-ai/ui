@@ -1,0 +1,117 @@
+---
+title: Knowledge base
+description: A scoped RAG assistant — pick a knowledge base from kc-scope-picker, and conversations, answers, and citations all filter to that scope.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import KnowledgeBaseDemo from '../../../components/KnowledgeBaseDemo.tsx';
+
+<p class="kc-lede">A retrieval assistant where the user picks <strong>which</strong> knowledge base to query. Choosing a scope in `<kc-scope-picker>` filters the `<kc-conversations>` sidebar, retitles the `<kc-chat>` thread, and grounds answers in `<kc-sources>` drawn from that scope. Switch the dropdown, then ask — the citations change with it.</p>
+
+<KnowledgeBaseDemo client:only="solid" />
+
+## How it works
+
+Four web components share one piece of state — the active scope:
+
+- **`<kc-scope-picker>`** emits `kc-scope-change` with the chosen `filters`. `undefined` filters mean "all knowledge".
+- **`<kc-conversations>`** re-renders with only the threads tagged for that scope.
+- **`<kc-chat>`** drives the thread; its `kc-submit` handler fetches a scoped answer.
+- **`<kc-sources numbered>`** shows the citations behind that answer — a separate element below the chat.
+
+`<kc-resizable>` wraps the sidebar and main pane so the user can drag the split.
+
+### Wire the scope to the data
+
+The picker offers tags; map each tag to a knowledge base, then refresh the dependent elements when it changes.
+
+```html
+<kc-resizable orientation="horizontal">
+  <kc-resizable-item size="28%" min="220px" max="360px">
+    <kc-scope-picker id="scope"></kc-scope-picker>
+    <kc-conversations id="threads"></kc-conversations>
+  </kc-resizable-item>
+  <kc-resizable-item>
+    <kc-chat id="chat"></kc-chat>
+    <kc-sources id="srcs" numbered show-favicon></kc-sources>
+  </kc-resizable-item>
+</kc-resizable>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const scope   = document.getElementById('scope');
+  const threads = document.getElementById('threads');
+  const chat    = document.getElementById('chat');
+  const srcs    = document.getElementById('srcs');
+
+  // Offer the knowledge bases as scope tags.
+  scope.availableTags = ['Product Docs', 'API Reference', 'Engineering Wiki'];
+  scope.currentLabel = 'All knowledge';
+
+  let activeScope = 'all';
+
+  // Seed every thread; filter the list to the active scope.
+  const ALL_THREADS = await fetchThreads();
+  const showThreads = () =>
+    threads.conversations =
+      activeScope === 'all'
+        ? ALL_THREADS
+        : ALL_THREADS.filter((t) => t.scope.filters?.tags?.includes(activeScope));
+  showThreads();
+
+  // Scope change → refilter threads, reset the thread, clear stale citations.
+  scope.addEventListener('kc-scope-change', (e) => {
+    activeScope = e.detail.filters?.tags?.[0] ?? 'all';
+    showThreads();
+    chat.messages = [];
+    srcs.sources = [];
+  });
+
+  // Ask → stream a scoped answer, then reveal its citations.
+  chat.addEventListener('kc-submit', async (e) => {
+    const aId = crypto.randomUUID();
+    srcs.sources = [];
+    chat.messages = [
+      ...chat.messages,
+      { id: crypto.randomUUID(), role: 'user', content: e.detail.value },
+      { id: aId, role: 'assistant', content: '' },
+    ];
+    chat.loading = true;
+
+    const { reply, sources } = await fetchAnswer(e.detail.value, activeScope);
+    for await (const token of reply) {
+      chat.messages = chat.messages.map((m) =>
+        m.id === aId ? { ...m, content: m.content + token } : m,
+      );
+    }
+
+    srcs.sources = sources; // citations from the active scope
+    chat.loading = false;
+  });
+</script>
+```
+
+<Aside type="tip">
+Tag each conversation with the scope it belongs to so the sidebar can filter without a server round-trip. A `ConversationSummary` carries `scope.filters.tags` for exactly this — store the knowledge-base name there.
+</Aside>
+
+## The scope payload
+
+`kc-scope-change` carries the same `SearchFilters` your retrieval backend already understands:
+
+| field | type | notes |
+|---|---|---|
+| `tags` | `string[]?` | The knowledge bases / labels to query |
+| `authors` | `string[]?` | Restrict to specific authors |
+| `contentType` | `'transcript' \| 'markdown'?` | Restrict by document type |
+| `dateRange` | `{ from, to }?` | Restrict by date |
+
+`filters` is `undefined` when the user clears the scope (the picker's reset item) — treat that as "search everything".
+
+## Next steps
+
+- **[`kc-scope-picker` reference](/chat/components/scope-picker/)** — `availableAuthors`, `availableTags`, `currentLabel`, and the `kc-scope-change` event.
+- **[`kc-conversations` reference](/chat/components/conversations/)** — grouping, `activeId`, and the `kc-conversation-select` event.
+- **[RAG assistant](/chat/examples/rag-assistant/)** — the single-scope version this example builds on, with numbered inline citations.
+- **[Resizable split layout](/chat/patterns/resizable-split/)** — the sidebar + main-pane layout used here.

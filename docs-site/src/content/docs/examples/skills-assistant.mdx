@@ -1,0 +1,92 @@
+---
+title: Skills & slash commands
+description: An assistant whose capabilities are exposed as slash commands and skill badges — typing / opens a command palette that drives a tailored reply, powered by kc-chat and kc-skills.
+---
+
+import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
+
+<p class="kc-lede">An assistant that surfaces its capabilities as slash commands. Type <code>/</code> in the composer to open the palette, pick a command like <code>/summarize</code> or <code>/code-review</code>, and send it to get a reply tailored to that capability. The badges above the thread show the same skills as <code>&lt;kc-skills&gt;</code>.</p>
+
+<SkillsAssistantDemo
+  client:only="solid"
+  chatTitle="Workspace assistant"
+  placeholder="Type / for commands, or ask anything…"
+/>
+
+## How it works
+
+`<kc-chat>` owns the thread and the composer. Pass a `slashCommands` array as a JS property — typing `/` opens the palette, and choosing a command sets the composer to its `label` (for example `/summarize `) ready to send. The chat fires `kc-slash-select` the moment a command is chosen, and `kc-submit` when the message is sent. `<kc-skills>` renders the same capabilities as badges from a separate `skills` property.
+
+```html
+<kc-skills id="skills"></kc-skills>
+<kc-chat id="chat" chat-title="Workspace assistant"></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+  const skills = document.getElementById('skills');
+
+  // Each command: { id, label, description?, category? }
+  chat.slashCommands = [
+    { id: 'summarize',   label: '/summarize',   description: 'Condense a thread into key points', category: 'Writing' },
+    { id: 'translate',   label: '/translate',   description: 'Translate text into another language', category: 'Writing' },
+    { id: 'code-review', label: '/code-review', description: 'Review a diff for bugs and style', category: 'Engineering' },
+    { id: 'search-docs', label: '/search-docs', description: 'Search the knowledge base', category: 'Engineering' },
+  ];
+
+  // Skill badges: { id, name }
+  skills.skills = [
+    { id: 'summarize',   name: 'Summarize' },
+    { id: 'translate',   name: 'Translate' },
+    { id: 'code-review', name: 'Code Review' },
+    { id: 'search-docs', name: 'Search Docs' },
+  ];
+
+  // Highlight the chosen command as active in the palette.
+  chat.addEventListener('kc-slash-select', (e) => {
+    chat.slashActiveIds = [e.detail.command.id];
+  });
+
+  // Route the submitted prompt by its leading /command token.
+  chat.addEventListener('kc-submit', async (e) => {
+    const prompt = e.detail.value;
+    const command = prompt.trim().match(/^\/(\S+)/)?.[1];
+    const aId = crypto.randomUUID();
+
+    chat.messages = [
+      ...chat.messages,
+      { id: crypto.randomUUID(), role: 'user', content: prompt },
+      { id: aId, role: 'assistant', content: '' },
+    ];
+    chat.loading = true;
+
+    // Dispatch to the matching capability on your backend.
+    const reply = await runCapability(command, prompt);
+    for await (const token of reply) {
+      chat.messages = chat.messages.map((m) =>
+        m.id === aId ? { ...m, content: m.content + token } : m,
+      );
+    }
+    chat.loading = false;
+  });
+</script>
+```
+
+**`slashCommands` shape** — each item in the array:
+
+| field | type | notes |
+|---|---|---|
+| `id` | `string` | Stable identifier; carried on `kc-slash-select` |
+| `label` | `string` | Palette label and what fills the composer (for example `/summarize`) |
+| `description` | `string?` | Secondary text shown beside the label |
+| `category` | `string?` | Groups commands under a heading in the palette |
+
+`slashActiveIds` highlights commands as active in the palette, and `slashCompact` switches to a single-line layout. Set `slashCommands` on `<kc-prompt-input>` directly when you compose the composer yourself instead of using the full `<kc-chat>`.
+
+## Next steps
+
+- **[`kc-chat` reference](/chat/components/chat/)** — the `slashCommands`, `slashActiveIds`, and `slashCompact` props plus the `kc-slash-select` and `kc-submit` events.
+- **[`kc-skills` reference](/chat/components/skills/)** — the `skills` property and the declarative `<kc-skill>` children path.
+- **[Streaming recipe](/chat/guides/recipes/streaming/)** — parsing SSE from your backend and driving the token loop.
+- **[Agentic assistant](/chat/examples/agentic-assistant/)** — tools and multi-step reasoning rendered inline in the thread.

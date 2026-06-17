@@ -1,0 +1,62 @@
+---
+title: Theme editor
+description: A live theme editor — drag color swatches and a radius slider to reskin a running kc-chat in real time, then copy the matching CSS.
+---
+
+import ThemeEditorDemo from '../../../components/ThemeEditorDemo.tsx';
+
+<p class="kc-lede">Edit the brand tokens on the left and watch the conversation reskin instantly. Each swatch writes a `--kc-color-*` custom property straight onto the `<kc-chat>` host, where it pierces the Shadow DOM — the same mechanism you'd ship in production. Pick a preset, fine-tune a color, drag the radius, then copy the CSS.</p>
+
+<ThemeEditorDemo client:only="solid" />
+
+## How it works
+
+The controls don't touch component internals. They set inherited CSS custom properties on the host element, and the kit reads them through the Shadow DOM boundary. Editing live is one `setProperty` call per change:
+
+```html
+<kc-chat id="chat" chat-title="Brand assistant"></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+
+  // Seed the palette.
+  const palette = {
+    '--kc-color-primary': '#7c3aed',
+    '--kc-color-primary-foreground': '#ffffff',
+    '--kc-color-ring': '#7c3aed',
+    '--kc-color-background': '#faf8ff',
+    '--kc-color-card': '#ffffff',
+    '--kc-color-border': '#e6deff',
+    '--kc-radius': '0.625rem',
+  };
+  for (const [token, value] of Object.entries(palette)) {
+    chat.style.setProperty(token, value);
+  }
+
+  // A color input re-skins the running chat on every change — no remount.
+  primaryInput.addEventListener('input', (e) => {
+    chat.style.setProperty('--kc-color-primary', e.target.value);
+  });
+</script>
+```
+
+The editor exposes the five tokens that carry the most visual weight, plus the corner radius:
+
+| Token | Controls |
+|---|---|
+| `--kc-color-primary` | Buttons, links, the send action, active states |
+| `--kc-color-ring` | Keyboard-focus outline — keep it high-contrast |
+| `--kc-color-background` | The chat surface |
+| `--kc-color-card` | Message bubbles and panels |
+| `--kc-color-border` | Dividers and input outlines |
+| `--kc-radius` | Corner rounding; `--radius-sm…xl` derive from it |
+
+Set `--kc-color-primary-foreground` alongside `--kc-color-primary` so text stays legible on your accent. To ship a theme, drop the same block into a stylesheet — on the `kc-chat` selector to scope it, or on `:root` to rebrand every `kc-*` component at once.
+
+## Next steps
+
+- **[Custom theme](/chat/examples/custom-theme/)** — a fixed brand palette that holds in both light and dark mode.
+- **[Theming guide](/chat/guides/theming/)** — the full token reference, dark-mode setup, scoped-subtree theming, and the `--kc-color-*` alias system.
+- **[`kc-chat` reference](/chat/components/chat/)** — `proseSize`, `codeTheme`, and the rest of the non-color appearance controls.

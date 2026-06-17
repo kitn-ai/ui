@@ -1,0 +1,86 @@
+---
+title: Voice assistant
+description: A hands-free chat app — speak a question, watch the reply stream in, and hear it read back aloud with the Web Speech API.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import VoiceAssistantDemo from '../../../components/VoiceAssistantDemo.tsx';
+
+<p class="kc-lede">A hands-free assistant: the mic captures a question, the transcript becomes a chat message, and the streamed reply is read back aloud. This demo simulates the speech-to-text step with a canned transcript — the spoken reply is real, powered by your browser's Web Speech API. Tap the mic in the toolbar to try it.</p>
+
+<VoiceAssistantDemo
+  client:only="solid"
+  chatTitle="Voice assistant"
+  placeholder="Or type a message…"
+/>
+
+## How it works
+
+`<kc-chat>` does the talking on both ends. Its built-in `voice` attribute adds a mic button to the input toolbar and fires a `kc-voice` event when tapped. You own what happens next: capture audio, transcribe it, push the text into the thread, then speak the finished reply with the [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
+
+```html
+<kc-chat id="chat" chat-title="Voice assistant" voice></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+  chat.messages = [];
+
+  // Read the finished reply aloud — guarded so unsupported browsers stay silent.
+  function speak(text) {
+    if (!('speechSynthesis' in window) || !text) return;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    speechSynthesis.cancel(); // stop any previous utterance
+    speechSynthesis.speak(utter);
+  }
+
+  // Run one turn: append the question, stream the reply, then speak it.
+  async function ask(question) {
+    const assistantId = crypto.randomUUID();
+    chat.messages = [
+      ...chat.messages,
+      { id: crypto.randomUUID(), role: 'user', content: question },
+      { id: assistantId, role: 'assistant', content: '' },
+    ];
+    chat.loading = true;
+
+    let answer = '';
+    for await (const token of streamAnswer(question)) {
+      answer += token;
+      chat.messages = chat.messages.map((m) =>
+        m.id === assistantId ? { ...m, content: answer } : m,
+      );
+    }
+
+    chat.loading = false;
+    speak(answer); // hear the reply once it finishes streaming
+  }
+
+  // Mic tapped → record, transcribe, then run the turn with the transcript.
+  chat.addEventListener('kc-voice', async () => {
+    const transcript = await transcribeFromMic(); // your STT pipeline
+    if (transcript) ask(transcript);
+  });
+
+  // Typed messages follow the same path.
+  chat.addEventListener('kc-submit', (e) => {
+    const text = e.detail.value.trim();
+    if (text) ask(text);
+  });
+</script>
+```
+
+Mic capture needs the `MediaRecorder` API and a transcription backend, which can't run in this sandbox — the demo above swaps `transcribeFromMic()` for a canned transcript and a scripted stream so the flow is visible end to end. In production, drop `<kc-voice-input>` into `transcribeFromMic()` to record audio and return text from your speech-to-text provider.
+
+<Aside type="tip" title="Stop speech on the next question">
+Call `speechSynthesis.cancel()` before each new turn so a fresh question cuts off the previous reply mid-sentence instead of queuing behind it. The "Speak reply" control in the demo footer re-reads the latest answer the same way.
+</Aside>
+
+## Next steps
+
+- **[Speech to Text recipe](/chat/guides/recipes/speech-to-text/)** — wire real mic capture with `<kc-voice-input>` and a transcription backend, the piece this demo stubs out.
+- **[Text to Speech recipe](/chat/guides/recipes/text-to-speech/)** — choosing a voice, stopping playback, and swapping the browser-native path for higher-quality cloud TTS.
+- **[`kc-chat` reference](/chat/components/chat/)** — the `voice` attribute, the `kc-voice` event, and the full streaming loop.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the baseline streaming loop this example layers voice on top of.
