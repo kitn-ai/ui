@@ -52,8 +52,8 @@ Point the element at your provider and hand it the envelope:
 
 - **`src`** — URL of the card page inside the provider. Plain HTML attribute.
 - **`provider-origin`** — exact HTTPS origin of the provider (e.g. `https://cards.provider.example`). `http://localhost:PORT` and `http://127.0.0.1:PORT` are accepted for local dev. Wildcards and comma-lists are rejected immediately with an inline error.
-- **`envelope`** — the `CardEnvelope` object. **JS property only** (`el.envelope = { type, id, data, … }`), not an HTML attribute.
-- **`policy`** — optional `CardPolicy` JS property for programmatic event routing (same shape `<kc-cards>` uses). Omit it and all events still surface as bubbling `kc-card` CustomEvents.
+- **`envelope`** — the `CardEnvelope` object. Assign it as a property (`el.envelope = { type, id, data, … }`), not an HTML attribute.
+- **`policy`** — an optional `CardPolicy` for programmatic event routing (same shape `<kc-cards>` uses), also set as a property. Omit it and all events still surface as bubbling `kc-card` CustomEvents.
 
 ## Props
 

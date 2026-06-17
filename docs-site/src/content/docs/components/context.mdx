@@ -28,7 +28,7 @@ Place `<kc-context>` in a chat header or toolbar alongside a model switcher. The
 
 ## Usage
 
-Set `context` as a JS **property** with a usage object:
+Set `context` in JavaScript with a usage object:
 
 ```js
 import '@kitn.ai/chat/elements';
@@ -45,7 +45,7 @@ el.context = {
 };
 ```
 
-- **`context`** is a JS property. The element renders nothing until data arrives — safe to place unconditionally in the header.
+- **`context`** — the element renders nothing until data arrives, so it's safe to place unconditionally in the header.
 - **`warnThreshold` / `dangerThreshold`** are fractional (0–1) number properties, defaulting to `0.7` and `0.9`. Assign directly: `el.warnThreshold = 0.5`.
 
 ## Examples

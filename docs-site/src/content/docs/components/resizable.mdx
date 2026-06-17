@@ -46,7 +46,7 @@ Use `<kc-resizable>` for any app shell built from regions the user should resize
 - **`min` / `max`** — resize bounds in px or %, e.g. `min="140px"` or `max="50%"`.
 - **`locked`** — fixes the panel; adjacent dividers become non-draggable separators.
 - **`hidden`** — removes the panel and its divider; remaining panels reflow. Toggle at runtime to collapse/restore.
-- **`maximizedIndex`** — JS property; set to the zero-based panel index to maximize it (`null` to restore). Call `el.maximize(n)` / `el.restore()` imperatively.
+- **`maximizedIndex`** — set this property to the zero-based panel index to maximize it (`null` to restore). Or call `el.maximize(n)` / `el.restore()` imperatively.
 
 **Expand-to-fill** — when a `<kc-artifact expandable>` fires `kc-maximize-intent` (bubbling, composed), the nearest enclosing `<kc-resizable>` catches it automatically and hides siblings. No wiring needed. **Escape** or **Collapse** restores the layout.
 

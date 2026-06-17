@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-lede">A vertically connected list of reasoning steps — each step shows its label at all times and reveals optional detail on expand.</p>
 
-<Facts items={['Shadow DOM', 'JS property API', 'Declarative kc-step children', 'Expandable detail per step', 'Prop + child steps merge']} />
+<Facts items={['Shadow DOM', 'Property-driven API', 'Declarative kc-step children', 'Expandable detail per step', 'Prop + child steps merge']} />
 
 ## Preview
 
@@ -27,7 +27,7 @@ Place `<kc-chain-of-thought>` above or below an assistant message to show the mo
 
 ## Usage
 
-Set `steps` as a JS property — it does not work as an HTML attribute:
+Set `steps` in JavaScript — it's an array, so it can't be an HTML attribute:
 
 ```html
 <kc-chain-of-thought id="cot"></kc-chain-of-thought>

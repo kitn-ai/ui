@@ -46,8 +46,8 @@ Register elements once, then wire up JS properties and DOM events:
 </script>
 ```
 
-- **Non-scalar props** — `suggestions`, `slashCommands`, `slashActiveIds`, and `attachments` are JS arrays; assign as properties, never as HTML attributes.
-- **Scalar flags** — `placeholder`, `disabled`, `loading`, `search`, `voice`, `stoppable`, `slashCompact`, and `suggestionMode` are plain attributes you can also set as properties.
+- **Array props** — `suggestions`, `slashCommands`, `slashActiveIds`, and `attachments` are arrays, so set them in JavaScript rather than as HTML attributes.
+- **Scalar flags** — `placeholder`, `disabled`, `loading`, `search`, `voice`, `stoppable`, `slashCompact`, and `suggestionMode` work as plain attributes or properties.
 - **Loading + stoppable** — set `loading` while a response streams; add `stoppable` to swap the send button for a Stop button that fires `kc-stop`.
 - **Custom toolbar buttons** — place `<kc-action id icon tooltip>` children inside the element; clicks fire `kc-toolbar-action` with `detail.action`.
 

@@ -27,7 +27,7 @@ Use `<kc-confirm>` when the model proposes an action the user must explicitly ap
 
 ## Usage
 
-Set `data` as a JS **property** and listen for the `kc-card` CustomEvent:
+Set `data` in JavaScript (it's an object) and listen for the `kc-card` CustomEvent:
 
 ```html
 <kc-confirm heading="Run database migration?"></kc-confirm>
@@ -52,7 +52,7 @@ Set `data` as a JS **property** and listen for the `kc-card` CustomEvent:
 </script>
 ```
 
-- **`data`** is a JS property. Shape: `ConfirmCardData` from `@kitn.ai/chat`. Malformed payloads render an inline error.
+- **`data`** — shape: `ConfirmCardData` from `@kitn.ai/chat`. Malformed payloads render an inline error.
 - **Action styles** — `'primary' | 'default' | 'destructive'`. Mark one `default: true` to make it the keyboard default; combine with `autofocus` to focus it on mount.
 - **Restore resolved state** via `el.resolution = { kind: 'action', action: 'approve' }` — useful when replaying past conversations.
 

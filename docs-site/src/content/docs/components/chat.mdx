@@ -28,7 +28,7 @@ Reach for `<kc-chat>` when you need a **drop-in chat panel in a non-Solid codeba
 
 ## Usage
 
-Set rich data as JS **properties**; scalar props as attributes or properties:
+Set rich data (arrays, objects) in JavaScript; scalar props work as attributes or properties:
 
 ```html
 <kc-chat id="chat" style="display:block; height:100vh;"></kc-chat>
@@ -52,7 +52,7 @@ Set rich data as JS **properties**; scalar props as attributes or properties:
 </script>
 ```
 
-- **`messages`** — JS property; each entry: `id`, `role` (`'user' | 'assistant'`), `content` (markdown for assistant), plus optional `actions`, `attachments`, `reasoning`, `tools`, and `avatar`.
+- **`messages`** — each entry: `id`, `role` (`'user' | 'assistant'`), `content` (markdown for assistant), plus optional `actions`, `attachments`, `reasoning`, `tools`, and `avatar`.
 - **`loading`** — flip to `true` while awaiting a reply; the input disables and a typing indicator appears.
 - **Model switcher** — set `models` (`{ id, name, provider? }[]`) and `currentModel`; listen for `kc-model-change`.
 - **Context meter** — set `context` (`{ usedTokens, maxTokens, … }`) to show a token-usage gauge in the header.

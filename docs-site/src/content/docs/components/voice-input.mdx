@@ -1,6 +1,6 @@
 ---
 title: Voice Input
-description: A mic button that records audio and transcribes it — drop it anywhere, wire one async function, and voice dictation just works.
+description: A mic button that records audio and transcribes it — drop it anywhere, wire one async function, and you have voice dictation.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-voice-input</p>
 
-<p class="kc-lede">A self-contained mic button that records audio, hands the `Blob` to your transcription function, and fires the result — plug in any speech-to-text backend and voice dictation is live in minutes.</p>
+<p class="kc-lede">A self-contained mic button that records audio, hands the `Blob` to your transcription function, and fires the result — plug in any speech-to-text backend to get voice dictation.</p>
 
 <Facts items={['Shadow DOM', '2 events', 'Function-property pattern', 'Framework agnostic', 'Disableable']} />
 
@@ -28,7 +28,7 @@ Reach for `<kc-voice-input>` to add mic dictation to a prompt input, search bar,
 
 ## Usage
 
-Assign the `transcribe` **function property** and listen for `kc-transcription`:
+Assign your `transcribe` function to the element and listen for `kc-transcription`:
 
 ```html
 <kc-voice-input id="voice"></kc-voice-input>
@@ -51,7 +51,7 @@ Assign the `transcribe` **function property** and listen for `kc-transcription`:
 </script>
 ```
 
-- **`transcribe`** is a JS property (not an attribute) — assign `async (blob: Blob) => Promise<string>` after the element is in the DOM.
+- **`transcribe`** — assign an `async (blob: Blob) => Promise<string>` function once the element is in the DOM.
 - To handle audio yourself, skip `transcribe` and listen for **`kc-audio-captured`** instead; it fires `{ blob }` immediately after recording stops.
 - **`disabled`** prevents interaction while the assistant is streaming or mic access is pending.
 

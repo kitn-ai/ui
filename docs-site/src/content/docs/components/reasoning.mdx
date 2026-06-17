@@ -28,7 +28,7 @@ Place `<kc-reasoning>` between the assistant message content and any tool calls 
 
 ## Usage
 
-Set `text` as a JS **property**; toggle `streaming` to drive the auto-expand/collapse behaviour:
+Set `text` in JavaScript; toggle `streaming` to drive the auto-expand/collapse behaviour:
 
 ```html
 <kc-reasoning id="reason" label="Reasoning"></kc-reasoning>
@@ -48,7 +48,7 @@ Set `text` as a JS **property**; toggle `streaming` to drive the auto-expand/col
 </script>
 ```
 
-- **`text`** is a JS property — assign with `el.text = '...'`, not as an HTML attribute.
+- **`text`** — assign it with `el.text = '...'`.
 - **`streaming`** — set `true` while the thought arrives; the block auto-expands. Clear it when done; the block collapses.
 - **`open`** — leave unset for uncontrolled behaviour; set explicitly when a parent needs to drive the open state.
 - **`label`** overrides the default trigger text (`"Reasoning"`) — e.g. `"Thinking"` or `"Chain of thought"`.

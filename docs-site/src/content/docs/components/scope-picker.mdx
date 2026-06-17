@@ -16,7 +16,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-lede">A lightweight filter dropdown for narrowing a conversation or search to a specific author or tag — drop it in a chat header and listen for one event.</p>
 
-<Facts items={['Shadow DOM', '1 event', 'Authors + tags sections', '2 JS-property arrays', 'Pairs with any header control']} />
+<Facts items={['Shadow DOM', '1 event', 'Authors + tags sections', '2 array properties', 'Pairs with any header control']} />
 
 ## Preview
 
@@ -28,7 +28,7 @@ Use `<kc-scope-picker>` when your interface has multiple authors or content tags
 
 ## Usage
 
-Set `availableAuthors` and `availableTags` as **JS properties** (arrays can't be serialized to attributes) and listen for `kc-scope-change`:
+Set `availableAuthors` and `availableTags` in JavaScript (arrays can't be HTML attributes) and listen for `kc-scope-change`:
 
 ```html
 <kc-scope-picker id="scope"></kc-scope-picker>

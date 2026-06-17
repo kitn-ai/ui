@@ -27,7 +27,7 @@ Use `<kc-markdown>` to render model output, formatted prose, or documentation ou
 
 ## Usage
 
-Set the `content` **property** with your markdown string:
+Set `content` in JavaScript with your markdown string:
 
 ```html
 <kc-markdown id="md"></kc-markdown>
@@ -40,7 +40,7 @@ Set the `content` **property** with your markdown string:
 </script>
 ```
 
-- **`content`** — JS property only; HTML attributes don't support multiline strings cleanly.
+- **`content`** — assign it in JavaScript; HTML attributes don't support multiline strings cleanly.
 - **`prose-size`** — scales body text: `xs`, `sm` (default), `base`, `lg`. Use `sm` in message bubbles, `base`/`lg` for doc pages.
 - **`code-theme`** — defaults to `github-dark-dimmed`; any [Shiki theme](https://shiki.style/themes) works.
 - **`code-highlight="false"`** — skips Shiki entirely, rendering code fences as plain monospace.

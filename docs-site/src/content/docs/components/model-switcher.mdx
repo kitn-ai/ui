@@ -28,7 +28,7 @@ Reach for `<kc-model-switcher>` when building your own chat header and you want 
 
 ## Usage
 
-Set `models` as a **JS property** and reflect the selection back on `kc-model-change`:
+Set `models` in JavaScript (arrays can't be HTML attributes) and reflect the selection back on `kc-model-change`:
 
 ```html
 <kc-model-switcher id="ms"></kc-model-switcher>
@@ -49,7 +49,7 @@ Set `models` as a **JS property** and reflect the selection back on `kc-model-ch
 </script>
 ```
 
-- **`models`** — JS property only (arrays cannot be HTML attributes). Each item: `{ id: string; name: string; provider?: string }`.
+- **`models`** — an array, so assign it as a property. Each item: `{ id: string; name: string; provider?: string }`.
 - **`currentModel`** — the selected model's `id`. Omit it to default to the first item in the list.
 - **Reflect the selection** — set `el.currentModel = e.detail.modelId` after each `kc-model-change` so the trigger label updates.
 

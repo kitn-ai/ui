@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-lede">Drop in `<kc-cards>` to render a live stream of AI-generated card envelopes — confirmations, task lists, choice pickers, link previews, and custom types — while a single `policy` object routes every user action back to your app.</p>
 
-<Facts items={['Shadow DOM', '3 JS properties', 'Built-in card types', 'Extensible type registry', 'CardFallback for unknown types']} />
+<Facts items={['Shadow DOM', 'Property-driven API', 'Built-in card types', 'Extensible type registry', 'CardFallback for unknown types']} />
 
 ## Preview
 
@@ -27,7 +27,7 @@ Reach for `<kc-cards>` whenever your AI response includes structured interaction
 
 ## Usage
 
-All three props are JS properties — none work as HTML attributes:
+Set all three in JavaScript — they're arrays and objects, so none work as HTML attributes:
 
 ```html
 <kc-cards id="cards"></kc-cards>

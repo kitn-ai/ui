@@ -28,7 +28,7 @@ Reach for `<kc-message>` when building your own thread — a custom layout, a no
 
 ## Usage
 
-Set `message` as a JS **property** and listen for `kc-message-action`:
+Set `message` in JavaScript (objects can't be HTML attributes) and listen for `kc-message-action`:
 
 ```html
 <kc-message id="msg" style="display:block;"></kc-message>
@@ -51,7 +51,7 @@ Set `message` as a JS **property** and listen for `kc-message-action`:
 </script>
 ```
 
-- **`message` is a JS property.** For simple cases, use the scalar `role` + `content` attributes instead of a full object.
+- **`message`** takes the whole object. For simple cases, use the `role` + `content` attributes instead.
 - **Markdown** is on by default for `role="assistant"`, off for `role="user"`. Override with the `markdown` boolean.
 - **`actions`** accepts built-in names (`'copy'`, `'like'`, `'dislike'`, `'regenerate'`, `'edit'`) and/or `{ id, label, icon?, tooltip? }` descriptors. Alternatively, place `<kc-action>` children in the light DOM.
 - **`actionsReveal`** — `'always'` (default) keeps the action bar visible; `'hover'` hides it until the row is hovered.

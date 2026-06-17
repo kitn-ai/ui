@@ -27,7 +27,7 @@ Use `<kc-code-block>` for highlighted snippets outside SolidJS — message bubbl
 
 ## Usage
 
-Set `code` as a JS **property** and `language` as an **attribute**:
+Set `code` in JavaScript (multiline strings don't survive HTML attributes) and `language` as an attribute:
 
 ```html
 <kc-code-block id="cb" language="ts"></kc-code-block>
@@ -41,7 +41,7 @@ Set `code` as a JS **property** and `language` as an **attribute**:
 </script>
 ```
 
-- **`code`** is a JS property — not an attribute. Multiline strings won't survive HTML attribute serialization.
+- **`code`** — assign it in JavaScript; multiline strings won't survive HTML attribute serialization.
 - **`language`** defaults to `tsx`. Pass any [Shiki grammar name](https://shiki.style/languages): `ts`, `python`, `bash`, `json`, `html`.
 - **`code-theme`** defaults to `github-dark-dimmed`. Any [Shiki theme](https://shiki.style/themes) works.
 - **`code-highlight="false"`** skips Shiki entirely — useful for raw log output.

@@ -14,7 +14,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-feedback-bar</p>
 
-<p class="kc-lede">An inline thumbs up/down banner that owns its own flow — asks, optionally collects a category and comment on a 👎 vote, then confirms with a thank-you — all in place, no modal.</p>
+<p class="kc-lede">An inline thumbs up/down banner that owns its own flow — asks, optionally collects a category and comment on a thumbs-down vote, then confirms with a thank-you — all in place, no modal.</p>
 
 <Facts items={['Shadow DOM', '3 events', 'Optional detail form', 'Category chips', 'Customisable copy']} />
 
@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kc-feedback-bar" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-feedback-bar>` at the end of an assistant response, a completed task, or an article. Add `collect-detail` when you want an optional reason on a 👎 vote — the element handles the multi-step flow itself, so you only listen for `kc-feedback-detail`.
+Place `<kc-feedback-bar>` at the end of an assistant response, a completed task, or an article. Add `collect-detail` when you want an optional reason on a thumbs-down vote — the element handles the multi-step flow itself, so you only listen for `kc-feedback-detail`.
 </Aside>
 
 ## Usage
@@ -31,7 +31,7 @@ Place `<kc-feedback-bar>` at the end of an assistant response, a completed task,
 Drop `<kc-feedback-bar>` after any response. The element transitions to a thank-you on vote; the × button fires `kc-close` and you control when the element leaves the DOM.
 
 - **Copy** — override any label via attributes: `bar-title`, `detail-title`, `detail-placeholder`, `submit-label`, `thanks-message`.
-- **Detail form** — add `collect-detail` to open a follow-up form on 👎. Set the `categories` **JS property** (array) to render selectable chips.
+- **Detail form** — add `collect-detail` to open a follow-up form on a thumbs-down vote. Set `categories` in JavaScript (it's an array) to render selectable chips.
 
 ## Examples
 
@@ -47,7 +47,7 @@ Override the question with `bar-title` when "Was this helpful?" doesn't fit the 
 
 ### Collect Detail
 
-Add `collect-detail` for an optional follow-up form on 👎. Listen for `kc-feedback-detail` to receive `{ value, category?, comment? }`.
+Add `collect-detail` for an optional follow-up form on a thumbs-down vote. Listen for `kc-feedback-detail` to receive `{ value, category?, comment? }`.
 
 <Example client:visible tag="kc-feedback-bar" config={{ collectDetail: true }} />
 

@@ -46,7 +46,7 @@ Assign either `base64` (paired with `media-type`) or `bytes` as a property:
 ```
 
 - **`base64`** — scalar attribute or property; pair with `media-type` so the browser decodes correctly.
-- **`bytes`** — JS property only (`Uint8Array`); `media-type` is recommended but not required when the format is detectable.
+- **`bytes`** — assign it in JavaScript (`Uint8Array`); `media-type` is recommended but not required when the format is detectable.
 - **`media-type`** defaults to `image/png`. Override for SVG (`image/svg+xml`), JPEG, or any other MIME type.
 - **`alt`** defaults to an empty string — always provide meaningful alt text.
 

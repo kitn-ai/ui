@@ -15,7 +15,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-lede">A collapsible panel for a single agent tool call — colour-coded state badge, expandable input/output inspector. Drop one after each tool invocation to give users transparency into what the agent did.</p>
 
-<Facts items={['Shadow DOM', '4 states', 'Collapsible inspector', 'Colour-coded badge', 'JS property API']} />
+<Facts items={['Shadow DOM', '4 states', 'Collapsible inspector', 'Colour-coded badge', 'Property-driven API']} />
 
 ## Preview
 
@@ -27,7 +27,7 @@ Place `<kc-tool>` inside an assistant message row — one element per tool call,
 
 ## Usage
 
-Set the call via the `tool` **JS property** — it is not an attribute.
+Set the call via the `tool` property — it's an object, so assign it in JavaScript.
 
 ```html
 <kc-tool id="tool" open></kc-tool>

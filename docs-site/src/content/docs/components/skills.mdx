@@ -15,19 +15,19 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-lede">A horizontal strip of skill badges — set a JS array or compose declarative `<kc-skill>` children to annotate a message with the tools it used.</p>
 
-<Facts items={['Shadow DOM', 'JS property or declarative children', 'Badges wrap automatically', '2 composition paths']} />
+<Facts items={['Shadow DOM', 'Property or declarative children', 'Badges wrap automatically', '2 composition paths']} />
 
 ## Preview
 
 <Playground client:only="solid" tag="kc-skills" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-skills>` beneath an assistant message row to annotate which tools were active. Use the `skills` JS property when skill data comes from app state; use declarative `<kc-skill>` children for server-rendered HTML with no JS wiring.
+Place `<kc-skills>` beneath an assistant message row to annotate which tools were active. Use the `skills` property when skill data comes from app state; use declarative `<kc-skill>` children for server-rendered HTML with no JS wiring.
 </Aside>
 
 ## Usage
 
-Assign the `skills` **JS property** after the element upgrades — arrays cannot be set as HTML attributes:
+Assign the `skills` property after the element upgrades — arrays can't be HTML attributes:
 
 ```html
 <kc-skills id="skills"></kc-skills>

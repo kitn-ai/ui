@@ -13,7 +13,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-link-preview</p>
 
-<p class="kc-lede">Turn a URL and its Open-Graph metadata into a rich, themed preview tile — set one JS property and the card handles image, title, description, favicon, and domain with graceful fallbacks for anything missing.</p>
+<p class="kc-lede">Turn a URL and its Open-Graph metadata into a rich, themed preview tile — assign one property and the card handles image, title, description, favicon, and domain with graceful fallbacks for anything missing.</p>
 
 <Facts items={['Shadow DOM', 'Pure by default — never fetches', 'Optional backend fetcher', 'Graceful image fallback', 'Card Contract events']} />
 
@@ -27,7 +27,7 @@ Use `<kc-link-preview>` when an AI agent surfaces a URL and you want a rich tile
 
 ## Usage
 
-Set the `data` **property** (a JS object — not an attribute):
+Set `data` in JavaScript (it's an object, not an attribute):
 
 ```html
 <kc-link-preview id="lp"></kc-link-preview>
@@ -49,7 +49,7 @@ Set the `data` **property** (a JS object — not an attribute):
 </script>
 ```
 
-- **`data`** — JS property only; every key except `url` is optional.
+- **`data`** — every key except `url` is optional.
 - **`cardId`** — set as `card-id` attribute or `cardId` property; correlates emitted events when multiple cards are in a `<kc-cards>` host.
 - **Pure by default** — the element never makes network calls. For bare `{ url }`, call `configureLinkPreview({ fetchMetadata })` once at startup to point at your backend.
 - **Click** dispatches a bubbling `kc-card` CustomEvent with `{ kind: 'open', url, target: 'tab' }`. A missing or broken image hides the image region silently; an invalid `url` renders a non-clickable "Invalid link" chip.

@@ -28,7 +28,7 @@ Use `<kc-conversations>` for a conversation switcher outside SolidJS — React, 
 
 ## Usage
 
-Set data as JS **properties** and listen for CustomEvents:
+Set the data in JavaScript (it's arrays and objects) and listen for CustomEvents:
 
 ```html
 <kc-conversations id="sidebar" style="display:block; width:300px; height:100vh;"></kc-conversations>
@@ -57,7 +57,7 @@ Set data as JS **properties** and listen for CustomEvents:
 
 **Two data approaches:**
 
-- **JS properties** — `el.conversations` (flat list, auto-bucketed by recency) or `el.groups` (pre-bucketed; supply when you own the section headers). When `groups` is set it takes precedence.
+- **In JavaScript** — `el.conversations` (flat list, auto-bucketed by recency) or `el.groups` (pre-bucketed; supply when you own the section headers). When `groups` is set it takes precedence.
 - **Declarative children** — nest `<kc-conversation>` tags directly; each carries its `id` as an attribute and title as text content. The element reads them on mount and watches via MutationObserver — works in plain HTML, SSR, or any framework that sets innerHTML.
 
 ## Examples
@@ -88,7 +88,7 @@ An empty `conversations` array renders the built-in empty state.
 
 ### Declarative Children
 
-Nested `<kc-conversation>` elements — no JS property wiring needed.
+Nested `<kc-conversation>` elements — no JavaScript wiring needed.
 
 <Example client:visible tag="kc-conversations" data="declarative" />
 
