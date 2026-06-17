@@ -105,7 +105,7 @@ The SSE response follows the OpenAI streaming format (`data: {...}` lines, termi
 
 | Prop | Type | Default | Notes |
 |------|------|---------|-------|
-| `text` | `string \| AsyncIterable<string>` | `''` | Set as a JS property — async iterables cannot be HTML attributes. |
+| `text` | `string \| AsyncIterable<string>` | `''` | Assign it in JavaScript — an async iterable can't be an HTML attribute. |
 | `mode` | `'typewriter' \| 'fade'` | `'typewriter'` | Reveal animation. |
 | `speed` | `number` | `20` | Characters/segments per tick. |
 | `as` | `string` | — | Element tag to render into. |

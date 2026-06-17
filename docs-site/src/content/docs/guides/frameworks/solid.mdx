@@ -5,9 +5,9 @@ description: Use kitn-chat's native SolidJS components from @kitn.ai/chat for fu
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-kitn-chat is **authored in SolidJS** — the `kc-*` web components are compiled from the same components you import directly. Solid apps get two paths that freely mix:
+Solid apps get an extra path the other frameworks don't: the components are authored in SolidJS, so you can import them straight into your JSX instead of going through the `kc-*` web components. Both paths ship in the package and mix freely:
 
-- **Native SolidJS components** (`@kitn.ai/chat`) — import `ChatContainer`, `Message`, `PromptInput`, and the rest directly into your JSX. Full compositional control, tree-shaken alongside your own code. **This is the recommended path for Solid apps.**
+- **Native SolidJS components** (`@kitn.ai/chat`) — import `ChatContainer`, `Message`, `PromptInput`, and the rest directly into your JSX. Full compositional control, tree-shaken alongside your own code. Reach for this in a Solid app.
 - **`kc-*` web components** (`@kitn.ai/chat/elements`) — the drop-in shells when you want batteries included or need to share UI across frameworks.
 
 ## Install

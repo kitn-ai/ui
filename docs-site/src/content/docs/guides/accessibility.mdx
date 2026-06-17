@@ -89,7 +89,7 @@ Tooltips and hover cards (on sources, context meter, attachment previews) confor
 
 The default light and dark palettes both pass AA contrast requirements. The `theme` attribute on every element (`light | dark | auto`) controls which token set loads.
 
-`auto` (the default) follows the OS `prefers-color-scheme` media query — users who enable dark mode at the OS level get it automatically.
+`auto`, the default, follows the OS `prefers-color-scheme` media query, so users who enable dark mode at the OS level get it automatically.
 
 <Aside type="caution" title="Custom tokens need manual verification">
 If you override `--color-*` tokens, contrast checking is your responsibility. The kit's CI audit covers only its own token values.
@@ -110,4 +110,4 @@ Five things the kit cannot enforce for you:
 2. **Verify contrast after token overrides.** Use a tool like the [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/) after changing any `--color-*` value.
 3. **Write meaningful conversation titles.** The conversation list announces the `title` field to screen readers. "React integration help" is more useful than "Chat 1".
 4. **Set a meaningful `placeholder`.** The textarea `placeholder` doubles as an accessible name when no label is associated.
-5. **Use `theme="auto"`.** Forcing `theme="light"` on a user who prefers dark mode creates contrast mismatches between the kit and your host page. `auto` (the default) avoids this.
+5. **Use `theme="auto"`.** Forcing `theme="light"` on a user who prefers dark mode creates contrast mismatches between the kit and your host page. The default `auto` avoids this.

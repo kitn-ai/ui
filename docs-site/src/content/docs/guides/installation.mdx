@@ -1,11 +1,11 @@
 ---
 title: Installation
-description: Install @kitn.ai/chat and register its web components in any framework — React, Vue, Angular, Svelte, or plain HTML.
+description: Install @kitn.ai/chat and register its web components in React, Vue, Angular, Svelte, or plain HTML.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Add `@kitn.ai/chat` to your project and drop `kc-*` web components into any framework. SolidJS is bundled in — the host app needs nothing else.
+Add `@kitn.ai/chat`, register the `kc-*` elements once, and use them in any framework. SolidJS is bundled in, so the host app needs nothing else.
 
 ## Install the package
 
@@ -27,17 +27,17 @@ yarn add @kitn.ai/chat
 </TabItem>
 </Tabs>
 
-## Register the web components
+## Register the elements
 
-Import the element bundle once as a **side effect**. This registers every `kc-*` web component globally — call it once near your app's entry point:
+Import the bundle once for its side effect. This registers every `kc-*` element globally — put it near your app's entry point:
 
 ```js
 import '@kitn.ai/chat/elements';
 ```
 
-The bundle is ESM-only. It works with any modern bundler (`vite`, `webpack`, `esbuild`) and in `<script type="module">` in the browser. **SolidJS is bundled in** — no additional peer dependency.
+The bundle is ESM-only and works with any modern bundler (`vite`, `webpack`, `esbuild`) or directly in a `<script type="module">`. SolidJS is bundled in, so there is no extra peer dependency.
 
-After registration, use the elements directly in your template:
+Once registered, the elements behave like any other HTML tag:
 
 ```html
 <kc-chat style="display: block; height: 100vh;"></kc-chat>
@@ -47,7 +47,7 @@ After registration, use the elements directly in your template:
 
   const chat = document.querySelector('kc-chat');
 
-  // Rich data is set as JS properties, not HTML attributes
+  // Arrays can't be attributes, so set messages in JavaScript.
   chat.messages = [
     { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
   ];
@@ -58,19 +58,19 @@ After registration, use the elements directly in your template:
 </script>
 ```
 
-<Aside type="caution" title="Properties, not attributes">
-Array and object data (`messages`, `models`, `context`, …) must be set as **JS properties**. HTML attributes only work for scalars like `placeholder`, `loading`, and `theme`.
+<Aside type="caution" title="Set arrays and objects in JavaScript">
+`messages`, `models`, `context`, and other array/object data must be assigned in JavaScript — HTML attributes are strings and can't carry them. Scalars like `placeholder`, `loading`, and `theme` work fine as attributes.
 </Aside>
 
-## Import the theme
+## Theme it
 
-The kit injects its own CSS into each web component's Shadow DOM automatically — no stylesheet required to get started. Import `theme.css` only when you want to **override design tokens**:
+Each element injects its own CSS into its Shadow DOM, so the components look right with zero stylesheets. Import `theme.css` only when you want to **override the design tokens**:
 
 ```js
 import '@kitn.ai/chat/theme.css';
 ```
 
-Override tokens on `:root` to rebrand the components:
+Set the `--color-*` tokens on `:root` to rebrand:
 
 ```css
 :root {
@@ -80,11 +80,11 @@ Override tokens on `:root` to rebrand the components:
 }
 ```
 
-Because inherited CSS pierces the Shadow DOM boundary, token overrides propagate into every `kc-*` component automatically.
+Inherited CSS custom properties cross the Shadow DOM boundary, so these overrides reach every `kc-*` element automatically.
 
 ## Via CDN (no build step)
 
-Load the element bundle as a self-contained ES module — no install, no bundler required:
+Load the bundle as a self-contained ES module — no install, no bundler:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/theme.css">
@@ -97,18 +97,18 @@ Load the element bundle as a self-contained ES module — no install, no bundler
 ```
 
 <Aside type="tip" title="Pin versions in production">
-The unpinned CDN URL tracks the latest release — convenient for prototyping, but not for production. Since this package is pre-1.0, a future minor release may include breaking changes. Pin an exact version for production: `https://cdn.jsdelivr.net/npm/@kitn.ai/chat@0.13.0/dist/kitn-chat.es.js`.
+An unpinned CDN URL tracks the latest release — fine for prototyping, risky for production. The package is pre-1.0, so a minor release can break things. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/chat@0.13.0/dist/kitn-chat.es.js`.
 </Aside>
 
 ## SolidJS projects
 
-SolidJS apps can import the components natively for full compositional control. Add `solid-js` as a peer dependency:
+Writing Solid? You can skip the web components and import the native components for full compositional control. Add the peer dependency:
 
 ```sh
 npm install solid-js
 ```
 
-Then import from the root entry (`@kitn.ai/chat`), which ships as source and tree-shakes to only what you use:
+Then import from the root entry (`@kitn.ai/chat`), which ships as source and tree-shakes to what you use:
 
 ```tsx
 import {
@@ -127,12 +127,12 @@ import '@kitn.ai/chat/theme.css';
 
 | Import path | What it provides |
 |---|---|
-| `@kitn.ai/chat/elements` | Web component bundle — registers all `kc-*` elements; use in any framework |
-| `@kitn.ai/chat` | Native SolidJS components — tree-shaken source; SolidJS projects only |
+| `@kitn.ai/chat/elements` | The web components — registers every `kc-*` element; use in any framework |
 | `@kitn.ai/chat/react` | Generated React wrappers with typed props |
-| `@kitn.ai/chat/theme.css` | Design tokens (`--color-*`) for overriding the default theme |
+| `@kitn.ai/chat` | Native SolidJS components — tree-shaken source; Solid projects only |
+| `@kitn.ai/chat/theme.css` | Design tokens (`--color-*`) for overriding the theme |
 | `@kitn.ai/chat/provider` | Remote provider bundle for embedding the kit across origins |
 
 ## Next steps
 
-With the elements registered, head to the framework guide for your stack, or start with the [Getting Started](/chat/guides/getting-started/) walkthrough to render your first chat.
+With the elements registered, head to the [framework guide](/chat/guides/frameworks/overview/) for your stack, or render your first chat in [Getting started](/chat/guides/getting-started/).

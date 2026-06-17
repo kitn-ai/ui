@@ -39,13 +39,13 @@ Every `kc-*` web component follows the same two rules:
 - **Interactions → `addEventListener`.** All events are `CustomEvent`s dispatched on the element itself. They do not bubble.
 
 ```js
-// ✅ Arrays and objects — JS property, not attribute
+// Arrays and objects — set the property in JavaScript, not as an attribute
 el.messages = [{ id: '1', role: 'assistant', content: 'Hi' }];
 
-// ✅ Scalars — safe as attributes or properties
+// Scalars — fine as attributes or properties
 el.setAttribute('theme', 'dark');
 
-// ✅ Events — always addEventListener; they do not bubble
+// Events — always addEventListener; they do not bubble
 el.addEventListener('kc-submit', (e) => console.log(e.detail.value));
 ```
 

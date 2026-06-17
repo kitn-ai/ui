@@ -13,7 +13,7 @@ Both files are generated from `dist/custom-elements.json` by `scripts/gen-llms.m
 
 | File | Size | Use |
 |---|---|---|
-| `llms.txt` | ~4 KB | Orientation: install, the property rule, two-layer architecture, framework wiring, theming. Paste into a prompt. |
+| `llms.txt` | ~4 KB | Orientation: install, the property rule, framework wiring, theming. Paste into a prompt. |
 | `llms-full.txt` | ~60 KB | Everything in `llms.txt` plus a generated props/events table for every element, a streaming recipe, and a build runbook. |
 
 ### Where they live
@@ -53,13 +53,13 @@ These facts appear in both files. They are the three mistakes that produce silen
 An HTML attribute is always a string. Passing `messages`, `models`, `context`, `suggestions`, or `slashCommands` as an attribute silently fails.
 
 ```js
-// ✅ property — works
+// Works — set the property in JavaScript
 const chat = document.querySelector('kc-chat');
 chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
 ```
 
 ```html
-<!-- ❌ attribute — never works -->
+<!-- Fails — an array can't be an HTML attribute -->
 <kc-chat messages="[...]"></kc-chat>
 ```
 
@@ -82,12 +82,12 @@ Common events: `kc-submit`, `kc-feedback`, `kc-model-change`, `kc-new-chat`, `kc
 Mutating an existing message object in place does not trigger a re-render. Replace instead:
 
 ```js
-// ✅ triggers re-render on every chunk
+// Triggers a re-render on every chunk
 chat.messages = chat.messages.map(
   (m) => (m.id === assistantId ? { ...m, content: accumulated } : m)
 );
 
-// ❌ does not trigger re-render
+// Does NOT trigger a re-render
 chat.messages[i].content = accumulated;
 ```
 

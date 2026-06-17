@@ -14,7 +14,7 @@ The element exposes two output channels:
 - **`kc-audio-captured`** — fires immediately when the user stops recording, with the raw `Blob`. Use this if you handle transcription yourself and don't set `transcribe`.
 - **`kc-transcription`** — fires after your `transcribe` function resolves, with `detail.text`. Use this to insert the transcribed text into your input.
 
-The `transcribe` property is a **function property** — it must be set in JavaScript, not as an HTML attribute, because it returns a `Promise<string>`.
+`transcribe` is a function, so you assign it in JavaScript — a function can't be an HTML attribute.
 
 ## Basic setup
 
@@ -28,7 +28,6 @@ Register the web components once, then wire the element:
 
   const voice = document.getElementById('voice');
 
-  // transcribe must be a JS property — it returns a value, so it can't be an event.
   voice.transcribe = async (blob) => {
     const form = new FormData();
     form.append('audio', blob, 'recording.webm');
@@ -224,7 +223,7 @@ function onReplyDone() { voice.disabled = false; }
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `transcribe` | `(audio: Blob) => Promise<string>` | — | Async transcriber. Set as a JS property. When set, the resolved text fires `kc-transcription`. |
+| `transcribe` | `(audio: Blob) => Promise<string>` | — | Async transcriber, assigned in JavaScript. When set, the resolved text fires `kc-transcription`. |
 | `disabled` | `boolean` | `false` | Disables the mic button. |
 
 ### Events
