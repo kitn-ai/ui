@@ -73,7 +73,8 @@ export function Popover(props: PopoverProps) {
           data-closed={presence.state() === 'closed' ? '' : undefined}
           style={{ position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px` }}
           class={cn(
-            'z-50 min-w-[12rem] rounded-lg bg-card p-1 shadow-lg',
+            // text-sm is a sensible menu default; slotted content can override it.
+            'z-50 min-w-[12rem] rounded-lg bg-card p-1 text-sm shadow-lg',
             'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
             props.class,
           )}
