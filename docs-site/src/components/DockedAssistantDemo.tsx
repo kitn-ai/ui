@@ -6,6 +6,8 @@
 import { createSignal, onMount, onCleanup, For } from 'solid-js';
 import { loadKit } from './example/kit';
 import type { ChatMessage } from './ChatDemo';
+import IconMoon from '~icons/lucide/moon';
+import IconSun from '~icons/lucide/sun';
 
 interface Props {
   messages?: ChatMessage[];
@@ -84,7 +86,7 @@ export default function DockedAssistantDemo(props: Props) {
             {bar('3rem')}{bar('3rem')}{bar('3rem')}
             <button type="button" onClick={() => applyTheme(!dark())} aria-label="Toggle theme"
               style={{ display: 'inline-flex', 'align-items': 'center', 'justify-content': 'center', width: '2rem', height: '2rem', 'border-radius': '8px', border: `1px solid ${line()}`, background: 'transparent', color: ink(), cursor: 'pointer' }}>
-              {dark() ? '☾' : '☀'}
+              {dark() ? <IconMoon style={{ width: '1rem', height: '1rem' }} /> : <IconSun style={{ width: '1rem', height: '1rem' }} />}
             </button>
           </div>
         </header>

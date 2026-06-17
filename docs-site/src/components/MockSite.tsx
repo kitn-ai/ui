@@ -6,6 +6,10 @@
 import { createSignal, onMount, onCleanup, For, Show } from 'solid-js';
 import { loadKit } from './example/kit';
 import type { ChatMessage } from './ChatDemo';
+import IconMoon from '~icons/lucide/moon';
+import IconSun from '~icons/lucide/sun';
+import IconMessageCircle from '~icons/lucide/message-circle';
+import IconX from '~icons/lucide/x';
 
 interface Props {
   messages?: ChatMessage[];
@@ -84,7 +88,7 @@ export default function MockSite(props: Props) {
             {bar('3rem')}{bar('3rem')}{bar('3rem')}
             <button type="button" onClick={() => applyTheme(!dark())} aria-label="Toggle theme"
               style={{ display: 'inline-flex', 'align-items': 'center', 'justify-content': 'center', width: '2rem', height: '2rem', 'border-radius': '8px', border: `1px solid ${line()}`, background: 'transparent', color: ink(), cursor: 'pointer' }}>
-              {dark() ? '☾' : '☀'}
+              {dark() ? <IconMoon style={{ width: '1rem', height: '1rem' }} /> : <IconSun style={{ width: '1rem', height: '1rem' }} />}
             </button>
           </div>
         </header>
@@ -121,7 +125,7 @@ export default function MockSite(props: Props) {
       {/* FAB */}
       <button type="button" onClick={() => setOpen(!open())} aria-label={open() ? 'Close chat' : 'Open chat'}
         style={{ position: 'absolute', right: '1.25rem', bottom: '1.25rem', width: '3.25rem', height: '3.25rem', 'border-radius': '999px', border: 'none', background: 'var(--kc-brand)', color: '#fff', cursor: 'pointer', 'box-shadow': '0 8px 24px rgba(214,32,127,0.4)', 'font-size': '1.4rem', 'z-index': 4, display: 'inline-flex', 'align-items': 'center', 'justify-content': 'center' }}>
-        {open() ? '×' : '💬'}
+        {open() ? <IconX style={{ width: '1.4rem', height: '1.4rem' }} /> : <IconMessageCircle style={{ width: '1.4rem', height: '1.4rem' }} />}
       </button>
     </div>
   );
