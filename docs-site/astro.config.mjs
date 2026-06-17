@@ -106,6 +106,7 @@ export default defineConfig({
             id: 'examples',
             items: [
               { label: 'Drop-in chat', slug: 'examples/drop-in-chat' },
+              { label: 'Support widget', slug: 'examples/support-widget' },
               { label: 'Full Chat App', slug: 'examples/full-chat-app' },
             ],
           },
