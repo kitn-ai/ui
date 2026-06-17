@@ -3,11 +3,9 @@ title: Generative UI cards
 description: Let the assistant interrupt with interactive cards — confirm, choose, or fill a form — wired back to the host through a typed CardPolicy.
 ---
 
-import CardsDemo from '../../../components/CardsDemo.tsx';
+import { ConfirmCardDemo, ChoiceCardDemo, FormCardDemo } from '../../../components/CardsDemo.tsx';
 
 <p class="kc-lede">Instead of waiting for the user to type a follow-up, the assistant streams a card directly into the conversation. The user answers it in one click; your `CardPolicy` receives the result.</p>
-
-<CardsDemo client:only="solid" />
 
 ## How it works
 
@@ -19,53 +17,7 @@ import '@kitn.ai/chat/elements';
 const cards = document.getElementById('cards');
 
 // Set the envelope stream as a JS property — never as an attribute.
-cards.cards = [
-  {
-    type: 'confirm',
-    id: 'confirm-deploy',
-    title: 'Deploy to production?',
-    data: {
-      body: 'Apply 2 pending migrations and restart 3 services.',
-      tone: 'warning',
-      actions: [
-        { id: 'deploy', label: 'Deploy now', style: 'primary', default: true },
-        { id: 'cancel', label: 'Cancel' },
-      ],
-    },
-  },
-  {
-    type: 'choice',
-    id: 'choice-notify',
-    title: 'Notification channel',
-    data: {
-      prompt: 'How should we notify users?',
-      options: [
-        { id: 'email', label: 'Email', meta: '~4 200 users' },
-        { id: 'banner', label: 'In-app banner', recommended: true },
-      ],
-      submitLabel: 'Confirm channel',
-    },
-  },
-  {
-    type: 'form',
-    id: 'form-contact',
-    title: 'Rollback contact',
-    data: {
-      type: 'object',
-      required: ['name', 'channel'],
-      'x-kc-submitLabel': 'Save contact',
-      properties: {
-        name: { type: 'string', title: 'Name' },
-        channel: {
-          type: 'string',
-          title: 'Pager channel',
-          enum: ['PagerDuty', 'Slack #oncall', 'SMS'],
-          'x-kc-widget': 'select',
-        },
-      },
-    },
-  },
-];
+cards.cards = [/* CardEnvelope objects, one per card type — see below */];
 
 // Wire a CardPolicy — one callback per interaction verb.
 cards.policy = {
@@ -83,7 +35,7 @@ cards.policy = {
 | `type` | `string` | Built-ins: `confirm`, `choice`, `form`, `tasks`, `link`. Extend via `types` prop. |
 | `id` | `string` | Stable across re-renders; passed back in every policy callback. |
 | `title` | `string` | Rendered as the card heading. |
-| `data` | `unknown` | Shape depends on `type` — see schemas below. |
+| `data` | `unknown` | Shape depends on `type` — see each card below. |
 | `resolution` | `CardResolution` | Set to re-hydrate the read-only state (e.g. on history load). |
 
 **`CardPolicy` callbacks** — only supply the ones you need:
@@ -95,7 +47,13 @@ cards.policy = {
 | `onDismiss(cardId)` | The user dismissed a dismissible card |
 | `onError(cardId, message)` | The card definition was invalid, or the card failed to render |
 
-### `kc-confirm` data shape
+Each card type below is live — interact with it and watch its policy events land in the **Console** beneath the preview.
+
+## `kc-confirm` — ask for a decision
+
+A `confirm` card poses a question and offers one or more actions. Tapping an action fires `onAction(cardId, action)`, where `action` is the button's `id`.
+
+<ConfirmCardDemo client:only="solid" />
 
 ```ts
 {
@@ -112,7 +70,11 @@ cards.policy = {
 }
 ```
 
-### `kc-choice` data shape
+## `kc-choice` — pick from options
+
+A `choice` card presents a list of options; the user selects one and submits. The chosen option's `id` arrives via `onAction(cardId, optionId)`.
+
+<ChoiceCardDemo client:only="solid" />
 
 ```ts
 {
@@ -131,9 +93,11 @@ cards.policy = {
 }
 ```
 
-### `kc-form` data shape
+## `kc-form` — collect structured input
 
-`kc-form` accepts a JSON Schema object subset. Use `x-kc-*` hints to pick widgets and control layout:
+A `form` card renders a JSON Schema subset as fields, validates on submit, and delivers the values object through `onSubmit(cardId, data)`. Use `x-kc-*` hints to pick widgets and control layout.
+
+<FormCardDemo client:only="solid" />
 
 ```ts
 {
@@ -152,7 +116,7 @@ cards.policy = {
 }
 ```
 
-### Streaming cards in as the agent decides
+## Streaming cards in as the agent decides
 
 Append envelopes to the array as the agent generates them — `<kc-cards>` renders whatever is in the array at that moment:
 
@@ -167,7 +131,7 @@ for await (const event of streamFromYourAgent()) {
 }
 ```
 
-### Re-hydrating resolved cards
+## Re-hydrating resolved cards
 
 Pass `resolution` on the envelope to render the read-only (already-answered) state without re-emitting policy events:
 

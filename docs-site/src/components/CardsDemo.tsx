@@ -1,6 +1,10 @@
-/** Live demo for "Generative UI cards" — mounts a <kc-cards> element seeded with three
- *  CardEnvelopes (confirm, choice, form) and a CardPolicy that logs each response. */
-import { createSignal, onMount, onCleanup } from 'solid-js';
+/** Live demos for "Generative UI cards" — one self-contained segment per card type
+ *  (confirm, choice, form). Each segment mounts its own <kc-cards> seeded with a single
+ *  CardEnvelope and a CardPolicy that logs that card's events into a Console strip BELOW
+ *  the preview (mirroring the Playground preview→Console convention). Realistic
+ *  deploy / notify / rollback scenario. Exported per type so the MDX can place each
+ *  segment next to its own narrative. */
+import { createSignal, onMount, onCleanup, For, Show } from 'solid-js';
 import { loadKit } from './example/kit';
 
 type AnyEl = HTMLElement & Record<string, unknown>;
@@ -20,93 +24,95 @@ interface CardPolicy {
   onError?: (cardId: string, message: string) => void;
 }
 
-const CARDS: CardEnvelope[] = [
-  {
-    type: 'confirm',
-    id: 'confirm-deploy',
-    title: 'Deploy to production?',
-    data: {
-      body: 'This will apply 2 pending migrations and restart 3 services. Estimated downtime: ~30 s.',
-      tone: 'warning',
-      actions: [
-        { id: 'deploy', label: 'Deploy now', style: 'primary', default: true },
-        { id: 'cancel', label: 'Cancel' },
-      ],
-    },
+const CONFIRM: CardEnvelope = {
+  type: 'confirm',
+  id: 'confirm-deploy',
+  title: 'Deploy to production?',
+  data: {
+    body: 'This will apply 2 pending migrations and restart 3 services. Estimated downtime: ~30 s.',
+    tone: 'warning',
+    actions: [
+      { id: 'deploy', label: 'Deploy now', style: 'primary', default: true },
+      { id: 'cancel', label: 'Cancel' },
+    ],
   },
-  {
-    type: 'choice',
-    id: 'choice-notify',
-    title: 'How should we notify users?',
-    data: {
-      prompt: 'Pick the notification channel for the maintenance window.',
-      options: [
-        { id: 'email', label: 'Email', description: 'Sent to all active accounts', meta: '~4 200 users' },
-        { id: 'banner', label: 'In-app banner', description: 'Shown on next page load', recommended: true },
-        { id: 'none', label: 'No notification', description: 'Skip — internal deploy only' },
-      ],
-      submitLabel: 'Confirm channel',
-    },
+};
+
+const CHOICE: CardEnvelope = {
+  type: 'choice',
+  id: 'choice-notify',
+  title: 'How should we notify users?',
+  data: {
+    prompt: 'Pick the notification channel for the maintenance window.',
+    options: [
+      { id: 'email', label: 'Email', description: 'Sent to all active accounts', meta: '~4 200 users' },
+      { id: 'banner', label: 'In-app banner', description: 'Shown on next page load', recommended: true },
+      { id: 'none', label: 'No notification', description: 'Skip — internal deploy only' },
+    ],
+    submitLabel: 'Confirm channel',
   },
-  {
-    type: 'form',
-    id: 'form-contact',
-    title: 'Rollback contact',
-    data: {
-      type: 'object',
-      description: 'Who should we page if the deploy needs a rollback?',
-      required: ['name', 'channel'],
-      'x-kc-submitLabel': 'Save contact',
-      properties: {
-        name: {
-          type: 'string',
-          title: 'Name',
-          'x-kc-placeholder': 'e.g. Jane Smith',
-        },
-        channel: {
-          type: 'string',
-          title: 'Pager channel',
-          enum: ['PagerDuty', 'Slack #oncall', 'SMS'],
-          'x-kc-widget': 'select',
-        },
-        notes: {
-          type: 'string',
-          title: 'Notes (optional)',
-          'x-kc-widget': 'textarea',
-          'x-kc-placeholder': 'Any extra context…',
-        },
+};
+
+const FORM: CardEnvelope = {
+  type: 'form',
+  id: 'form-contact',
+  title: 'Rollback contact',
+  data: {
+    type: 'object',
+    description: 'Who should we page if the deploy needs a rollback?',
+    required: ['name', 'channel'],
+    'x-kc-submitLabel': 'Save contact',
+    properties: {
+      name: {
+        type: 'string',
+        title: 'Name',
+        'x-kc-placeholder': 'e.g. Jane Smith',
+      },
+      channel: {
+        type: 'string',
+        title: 'Pager channel',
+        enum: ['PagerDuty', 'Slack #oncall', 'SMS'],
+        'x-kc-widget': 'select',
+      },
+      notes: {
+        type: 'string',
+        title: 'Notes (optional)',
+        'x-kc-widget': 'textarea',
+        'x-kc-placeholder': 'Any extra context…',
       },
     },
   },
-];
+};
 
-export default function CardsDemo() {
+/** A single card type: its own <kc-cards> preview + a Console strip below logging
+ *  this card's CardPolicy events. Mirrors Playground.tsx's preview→Console layout. */
+function CardSegment(props: { envelope: CardEnvelope }) {
   let host: AnyEl | undefined;
   const [log, setLog] = createSignal<string[]>([]);
   const theme = () => document.documentElement.dataset.theme ?? 'light';
 
-  const push = (msg: string) => setLog((prev) => [msg, ...prev].slice(0, 8));
+  const push = (msg: string) => setLog((prev) => [...prev.slice(-5), msg]);
 
   onMount(async () => {
     await loadKit();
     if (!host) return;
     customElements.upgrade(host);
 
-    host.cards = CARDS;
+    host.cards = [props.envelope];
 
     const policy: CardPolicy = {
       onAction: (cardId, action, payload) => {
-        const extra = payload !== undefined ? ` (${JSON.stringify(payload)})` : '';
-        push(`action  •  ${cardId}  →  ${action}${extra}`);
+        const extra = payload !== undefined ? `  (${JSON.stringify(payload)})` : '';
+        push(`onAction  •  ${cardId}  →  ${action}${extra}`);
       },
       onSubmit: (cardId, data) => {
-        push(`submit  •  ${cardId}  →  ${JSON.stringify(data)}`);
+        push(`onSubmit  •  ${cardId}  →  ${JSON.stringify(data)}`);
       },
       onDismiss: (cardId) => {
-        push(`dismiss  •  ${cardId}`);
+        push(`onDismiss  •  ${cardId}`);
       },
       onError: (cardId, message) => {
-        push(`error  •  ${cardId}  →  ${message}`);
+        push(`onError  •  ${cardId}  →  ${message}`);
       },
     };
     host.policy = policy;
@@ -119,26 +125,51 @@ export default function CardsDemo() {
   });
 
   return (
-    <div class="not-content my-5 grid gap-4 rounded-xl border border-line bg-surface p-5"
-         style={{ 'grid-template-columns': '1fr 1fr', 'align-items': 'start' } as any}>
-      {/* Left: card stream */}
-      <div>
+    <div class="not-content my-5 overflow-hidden rounded-xl border border-line bg-surface">
+      {/* Preview */}
+      <div class="p-5">
         {/* @ts-expect-error custom element */}
         <kc-cards ref={(el: HTMLElement) => (host = el as AnyEl)} style={{ display: 'block' }} />
       </div>
 
-      {/* Right: event log */}
-      <div class="flex flex-col gap-2">
-        <p class="text-xs font-semibold uppercase tracking-wide text-ink/50">
-          Policy events
-        </p>
-        <pre
-          class="min-h-[6rem] rounded-lg border border-line bg-surface p-3 font-mono text-xs text-ink"
-          style={{ 'white-space': 'pre-wrap', 'word-break': 'break-all' } as any}
-        >
-          {log().length ? log().join('\n') : 'Interact with a card — events appear here.'}
-        </pre>
+      {/* Console — below the preview, mirroring the Playground convention */}
+      <div class="border-t border-line bg-surface-2 px-4 py-3">
+        <div class="mb-1.5 flex items-center justify-between">
+          <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <span class="size-1.5 rounded-full bg-brand"></span> Console
+          </div>
+          <button type="button" onClick={() => setLog([])} disabled={!log().length}
+            class="cursor-pointer appearance-none border-0 bg-transparent text-xs font-medium text-ink-3 transition-colors hover:text-ink disabled:opacity-40">Clear</button>
+        </div>
+        <div class="min-h-[1.75rem] font-mono text-sm leading-relaxed text-ink-2">
+          <Show when={log().length} fallback={<span class="font-sans text-ink-3">Interact with the card — policy events appear here.</span>}>
+            <For each={log()}>{(line) => <div class="whitespace-pre-wrap break-words">{line}</div>}</For>
+          </Show>
+        </div>
       </div>
     </div>
+  );
+}
+
+export function ConfirmCardDemo() {
+  return <CardSegment envelope={CONFIRM} />;
+}
+
+export function ChoiceCardDemo() {
+  return <CardSegment envelope={CHOICE} />;
+}
+
+export function FormCardDemo() {
+  return <CardSegment envelope={FORM} />;
+}
+
+/** Default export kept for convenience — all three segments stacked. */
+export default function CardsDemo() {
+  return (
+    <>
+      <CardSegment envelope={CONFIRM} />
+      <CardSegment envelope={CHOICE} />
+      <CardSegment envelope={FORM} />
+    </>
   );
 }
