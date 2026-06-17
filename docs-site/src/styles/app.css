@@ -28,3 +28,10 @@
   --font-sans: 'Lato', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
+
+/* Topic switching: on desktop the custom header nav (Docs · Components · Examples)
+   is the switcher, so hide the plugin's in-sidebar topic list there (no redundant
+   topic title in the sidebar). Keep it on mobile, where the header nav collapses. */
+@media (min-width: 50rem) {
+  .starlight-sidebar-topics { display: none; }
+}

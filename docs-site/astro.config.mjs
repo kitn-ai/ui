@@ -5,6 +5,7 @@ import solid from '@astrojs/solid-js';
 import icon from 'astro-icon';
 import tailwindcss from '@tailwindcss/vite';
 import Icons from 'unplugin-icons/vite';
+import starlightSidebarTopics from 'starlight-sidebar-topics';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 
@@ -54,49 +55,58 @@ export default defineConfig({
         SocialIcons: './src/components/overrides/SocialIcons.astro',
         ThemeSelect: './src/components/overrides/ThemeToggle.astro',
       },
-      // segmented like Vercel AI Elements: Docs · Frameworks · Recipes · Components · Examples
-      sidebar: [
-        {
-          label: 'Docs',
-          items: [
-            { label: 'Introduction', slug: 'guides/introduction' },
-            { label: 'Installation', slug: 'guides/installation' },
-            { label: 'Getting Started', slug: 'guides/getting-started' },
-            { label: 'Theming', slug: 'guides/theming' },
-            { label: 'Accessibility', slug: 'guides/accessibility' },
-            { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
-          ],
-        },
-        {
-          label: 'Frameworks',
-          items: [
-            { label: 'Overview', slug: 'guides/frameworks/overview' },
-            { label: 'HTML', slug: 'guides/frameworks/html' },
-            { label: 'React', slug: 'guides/frameworks/react' },
-            { label: 'Vue', slug: 'guides/frameworks/vue' },
-            { label: 'Svelte', slug: 'guides/frameworks/svelte' },
-            { label: 'Angular', slug: 'guides/frameworks/angular' },
-            { label: 'Solid', slug: 'guides/frameworks/solid' },
-          ],
-        },
-        {
-          label: 'Recipes',
-          items: [
-            { label: 'Streaming', slug: 'guides/recipes/streaming' },
-            { label: 'Text to Speech', slug: 'guides/recipes/text-to-speech' },
-            { label: 'Speech to Text', slug: 'guides/recipes/speech-to-text' },
-          ],
-        },
-        {
-          // Auto-listed from src/content/docs/components/*.mdx — each component
-          // page just sets its frontmatter title (+ optional sidebar.order).
-          label: 'Components',
-          items: [{ autogenerate: { directory: 'components' } }],
-        },
-        {
-          label: 'Examples',
-          items: [{ label: 'Full Chat App', slug: 'examples/full-chat-app' }],
-        },
+      // Topic-based sidebars: the header nav (Docs · Components · Examples)
+      // switches between these, each showing only its own pages (no redundant
+      // topic title in the sidebar — the plugin's own switcher is hidden in CSS).
+      plugins: [
+        starlightSidebarTopics([
+          {
+            label: 'Docs',
+            link: '/guides/introduction/',
+            id: 'docs',
+            items: [
+              { label: 'Introduction', slug: 'guides/introduction' },
+              { label: 'Installation', slug: 'guides/installation' },
+              { label: 'Getting Started', slug: 'guides/getting-started' },
+              { label: 'Theming', slug: 'guides/theming' },
+              { label: 'Accessibility', slug: 'guides/accessibility' },
+              { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
+              {
+                label: 'Frameworks',
+                items: [
+                  { label: 'Overview', slug: 'guides/frameworks/overview' },
+                  { label: 'HTML', slug: 'guides/frameworks/html' },
+                  { label: 'React', slug: 'guides/frameworks/react' },
+                  { label: 'Vue', slug: 'guides/frameworks/vue' },
+                  { label: 'Svelte', slug: 'guides/frameworks/svelte' },
+                  { label: 'Angular', slug: 'guides/frameworks/angular' },
+                  { label: 'Solid', slug: 'guides/frameworks/solid' },
+                ],
+              },
+              {
+                label: 'Recipes',
+                items: [
+                  { label: 'Streaming', slug: 'guides/recipes/streaming' },
+                  { label: 'Text to Speech', slug: 'guides/recipes/text-to-speech' },
+                  { label: 'Speech to Text', slug: 'guides/recipes/speech-to-text' },
+                ],
+              },
+            ],
+          },
+          {
+            label: 'Components',
+            link: '/components/attachments/',
+            id: 'components',
+            // Auto-listed from src/content/docs/components/*.mdx.
+            items: [{ autogenerate: { directory: 'components' } }],
+          },
+          {
+            label: 'Examples',
+            link: '/examples/full-chat-app/',
+            id: 'examples',
+            items: [{ label: 'Full Chat App', slug: 'examples/full-chat-app' }],
+          },
+        ]),
       ],
     }),
   ],
