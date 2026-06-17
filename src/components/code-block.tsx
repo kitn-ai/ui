@@ -15,7 +15,10 @@ function CodeBlock(props: CodeBlockProps) {
     <div
       class={cn(
         'not-prose flex w-full flex-col overflow-clip border',
-        'border-border bg-card text-card-foreground rounded-xl',
+        'border-border bg-card text-card-foreground',
+        // Radius is a CSS var (default = rounded-xl) so it can be set to 0 for
+        // flush embedding, e.g. under framework tabs in the docs Code panel.
+        'rounded-[var(--kc-code-radius,0.75rem)]',
         local.class
       )}
       {...rest}
