@@ -63,8 +63,10 @@ export default defineConfig({
           ],
         },
         {
+          // Auto-listed from src/content/docs/components/*.mdx — each component
+          // page just sets its frontmatter title (+ optional sidebar.order).
           label: 'Components',
-          items: [{ label: 'Attachments', slug: 'components/attachments' }],
+          items: [{ autogenerate: { directory: 'components' } }],
         },
         {
           label: 'Examples',
