@@ -136,6 +136,7 @@ export function HoverCardContent(props: HoverCardContentProps) {
             left: `${position.pos().x}px`,
             top: `${position.pos().y}px`,
             background: 'transparent',
+            visibility: position.hidden() ? 'hidden' : 'visible',
             ...gapPaddingStyle(position.pos().placement, GUTTER),
           }}
           class="z-50"

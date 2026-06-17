@@ -155,7 +155,12 @@ export function DropdownContent(props: { children: JSX.Element; class?: string }
           data-expanded={presence.state() === 'open' ? '' : undefined}
           data-closed={presence.state() === 'closed' ? '' : undefined}
           onKeyDown={onKeyDown}
-          style={{ position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px` }}
+          style={{
+            position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px`,
+            // hide (without unmounting) when the trigger scrolls out of view
+            visibility: position.hidden() ? 'hidden' : 'visible',
+            'pointer-events': position.hidden() ? 'none' : undefined,
+          }}
           class={cn(
             'z-50 min-w-[8rem] rounded-lg bg-card p-1 shadow-lg',
             'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',

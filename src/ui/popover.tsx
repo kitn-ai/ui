@@ -71,7 +71,12 @@ export function Popover(props: PopoverProps) {
           role="dialog"
           data-expanded={presence.state() === 'open' ? '' : undefined}
           data-closed={presence.state() === 'closed' ? '' : undefined}
-          style={{ position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px` }}
+          style={{
+            position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px`,
+            // hide (without unmounting) when the trigger scrolls out of view
+            visibility: position.hidden() ? 'hidden' : 'visible',
+            'pointer-events': position.hidden() ? 'none' : undefined,
+          }}
           class={cn(
             // text-sm is a sensible menu default; slotted content can override it.
             'z-50 min-w-[12rem] rounded-lg bg-card p-1 text-sm shadow-lg',
