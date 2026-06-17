@@ -1,0 +1,28 @@
+---
+// Simple sun/moon toggle (replaces Starlight's light/dark/auto dropdown).
+// Persists to the same `starlight-theme` key Starlight's loader reads on boot.
+import { Icon } from 'astro-icon/components';
+---
+<button type="button" aria-label="Toggle dark mode"
+  class="kc-theme-toggle flex size-8 cursor-pointer appearance-none items-center justify-center rounded-md border-0 bg-transparent text-ink-2 transition-colors hover:bg-brand/10 hover:text-ink">
+  <Icon name="lucide:moon" class="kc-moon size-[18px]" />
+  <Icon name="lucide:sun" class="kc-sun size-[18px]" />
+</button>
+
+<script is:inline>
+  // Starlight renders the theme control twice (desktop + mobile); bind each
+  // button once (dataset guard) so a click toggles exactly one step.
+  (() => {
+    const cur = () => document.documentElement.dataset.theme
+      || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.querySelectorAll('.kc-theme-toggle').forEach((btn) => {
+      if (btn.dataset.kcBound) return;
+      btn.dataset.kcBound = '1';
+      btn.addEventListener('click', () => {
+        const next = cur() === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('starlight-theme', next); } catch (e) {}
+      });
+    });
+  })();
+</script>

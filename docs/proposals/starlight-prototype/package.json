@@ -1,0 +1,26 @@
+{
+  "name": "docs-proposals-starlight-prototype",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/solid-js": "^6.0.1",
+    "@astrojs/starlight": "^0.40.0",
+    "@astrojs/starlight-tailwind": "^5.0.0",
+    "@iconify-json/lucide": "^1.2.113",
+    "@tailwindcss/vite": "^4.3.1",
+    "astro": "^6.4.5",
+    "astro-icon": "^1.1.5",
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-slug": "^6.0.0",
+    "sharp": "^0.34.5",
+    "solid-js": "^1.9.13",
+    "tailwindcss": "^4.3.1"
+  }
+}

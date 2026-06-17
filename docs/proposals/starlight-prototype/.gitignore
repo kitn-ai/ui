@@ -1,0 +1,26 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# copied kit build snapshot — Phase 0 wires this to the live kit build
+public/kitn/
+# copied generator output — Phase 0 wires this to the live generators (src/elements/element-meta.json)
+src/data/element-meta.json
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store

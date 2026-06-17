@@ -1,0 +1,12 @@
+---
+// A row of "at a glance" fact pills. items-center keeps the dot + label aligned.
+interface Props { items: string[] }
+const { items } = Astro.props;
+---
+<ul class="not-content mt-5 flex flex-wrap items-center gap-2 p-0">
+  {items.map((f) => (
+    <li class="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-sm font-semibold text-ink-2">
+      <span class="size-1.5 shrink-0 rounded-full bg-brand"></span>{f}
+    </li>
+  ))}
+</ul>

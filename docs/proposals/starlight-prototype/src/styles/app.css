@@ -1,0 +1,30 @@
+/* Tailwind v4 + Starlight, correctly layered so Tailwind utilities can override
+   Starlight chrome without its preflight clobbering Starlight's own styles.
+   Then our design-system tokens, then the @theme that turns those tokens into
+   Tailwind color utilities (bg-surface, text-ink, text-brand, …). */
+@layer base, starlight, theme, components, utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import '@astrojs/starlight-tailwind';
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@import './tokens.css';
+
+/* Design-system colors → Tailwind utilities. `inline` emits var() refs so they
+   track the active theme at runtime. Components use ONLY these. */
+@theme inline {
+  --color-bg: var(--kc-bg);
+  --color-surface: var(--kc-surface);
+  --color-surface-2: var(--kc-surface-2);
+  --color-line: var(--kc-line);
+  --color-ink: var(--kc-ink);
+  --color-ink-2: var(--kc-ink-2);
+  --color-ink-3: var(--kc-ink-3);
+  --color-brand: var(--kc-brand);
+  --color-link: var(--kc-link);
+
+  --font-sans: 'Lato', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
