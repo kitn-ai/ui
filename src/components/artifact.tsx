@@ -482,6 +482,9 @@ function ArtifactToolbar(props: ToolbarProps): JSX.Element {
           />
         </form>
       </Show>
+      <Show when={!props.showPathField()}>
+        <div class="flex-1" aria-hidden="true" />
+      </Show>
       <Show when={props.showExpand()}>
         <Button
           variant="ghost"
