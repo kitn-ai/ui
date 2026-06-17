@@ -35,3 +35,12 @@
 @media (min-width: 50rem) {
   .starlight-sidebar-topics { display: none; }
 }
+
+/* Sidebar links: smaller, uniform text size. Top-level LEAF links (a.large) are
+   normal weight and only bold when selected; group headers (summary, which have
+   children) stay bold to read as sections. */
+#starlight__sidebar a,
+#starlight__sidebar summary { font-size: var(--sl-text-sm); }
+#starlight__sidebar a.large { font-weight: 400; }
+#starlight__sidebar a.large[aria-current='page'] { font-weight: 600; }
+#starlight__sidebar summary { font-weight: 600; }
