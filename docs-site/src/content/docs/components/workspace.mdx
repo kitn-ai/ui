@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kc-workspace" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-workspace>` to embed a complete chat application — sidebar, history, thread, and composer — into a non-SolidJS app with zero style conflicts. In SolidJS, compose `ConversationList` and `ChatThread` directly for finer-grained control.
+Reach for `<kc-workspace>` when you need the whole app shell — **conversation sidebar, history, and collapse** included — dropped in as one tag. If you only need the conversation surface (thread, composer, header), use [`<kc-chat>`](/chat/components/chat/) and add your own controls through its header slots ([Custom chat header](/chat/patterns/custom-chat-header/)). In SolidJS, compose `ConversationList` and `ChatThread` directly for the finest control.
 </Aside>
 
 ## Usage
@@ -62,7 +62,7 @@ Set data as **JS properties** and listen for **CustomEvents** on the element:
 ```
 
 - **JS properties vs attributes** — `groups`, `conversations`, `messages`, `models`, `suggestions`, `slashCommands`, `slashActiveIds`, and `context` must be set as JS properties. Scalar props (`placeholder`, `loading`, sidebar dimensions, etc.) can be attributes or properties.
-- **Sidebar** — drag-resizable and collapsible. Constrain with `sidebarWidth` (percent, default `22`), `sidebarMinWidth`, and `sidebarMaxWidth`. Start collapsed with `sidebarCollapsed`; track changes via `kc-sidebar-toggle`.
+- **Sidebar** — drag-resizable and collapsible. Constrain with `sidebarWidth` (percent, default `22`), `sidebarMinWidth`, and `sidebarMaxWidth`. Collapse is **uncontrolled by default** — the element manages it and fires `kc-sidebar-toggle`. Start collapsed with the `default-sidebar-collapsed` attribute, or **control** it by setting the `sidebarCollapsed` property and updating it from `kc-sidebar-toggle` (lets you persist the choice or collapse from outside the header).
 - **Conversation grouping** — pass a flat `conversations` array and the element auto-buckets by recency, or supply a `groups` array with `groupId` on each conversation for custom grouping.
 
 ## Examples
