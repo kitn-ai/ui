@@ -128,7 +128,7 @@ export default function Playground(props: { tag: string }) {
       </Show>
 
       <Resizer>
-        <div ref={container} />
+        <div ref={container} class="min-h-[3.5rem]" />
       </Resizer>
 
       <Show when={(el.events ?? []).length}>

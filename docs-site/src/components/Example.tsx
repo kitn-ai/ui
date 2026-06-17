@@ -50,7 +50,7 @@ export default function Example(props: Props) {
   return (
     <div class="not-content my-4 overflow-hidden rounded-xl border border-line bg-surface">
       <Resizer>
-        <div ref={container} />
+        <div ref={container} class="min-h-[3.5rem]" />
       </Resizer>
       <CodePanel snippets={() => generateSnippets(el, { ...config, ...sample })} />
     </div>

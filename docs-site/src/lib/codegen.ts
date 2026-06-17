@@ -101,8 +101,13 @@ function resolve(meta: ElementMeta, state: State): Resolved {
     }
     const value = has ? state[p.name] : defaultValue(p);
     if (value === undefined || value === null || value === '') continue;
-    if (value === false) continue; // omit falsy booleans
-    if (value === defaultValue(p) && !has) continue; // skip untouched defaults
+    if (isBooleanProp(p)) {
+      // Omit a boolean only when it matches its default. A boolean whose default
+      // is `true` set to `false` IS meaningful and must be rendered explicitly.
+      if (value === (defaultValue(p) === true)) continue;
+    } else if (value === defaultValue(p) && !has) {
+      continue; // enum/string at its untouched default
+    }
     attrs.push({ name: p.name, value, bool: isBooleanProp(p) });
   }
 
@@ -116,16 +121,24 @@ const handlerName = (evt: string) =>
 // Per-framework renderers
 // ---------------------------------------------------------------------------
 
+// A boolean set to false (only emitted when its default is true) can't be a bare
+// HTML attribute, so it's set as a property; every other framework binds it.
+const falseBool = (a: Resolved['attrs'][number]) => a.bool && a.value === false;
+
 function htmlCode(meta: ElementMeta, r: Resolved): string {
-  const attrs = r.attrs.map((a) => (a.bool ? camelToKebab(a.name) : `${camelToKebab(a.name)}="${a.value}"`));
+  const attrs = r.attrs
+    .filter((a) => !falseBool(a))
+    .map((a) => (a.bool ? camelToKebab(a.name) : `${camelToKebab(a.name)}="${a.value}"`));
+  const falseBools = r.attrs.filter(falseBool);
   const open = `<${meta.tag}${attrs.length ? ' ' + attrs.join(' ') : ''}></${meta.tag}>`;
   const lines = [
     `<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>`,
     '',
     open,
   ];
-  if (r.properties.length || r.events.length) {
+  if (r.properties.length || r.events.length || falseBools.length) {
     lines.push('<script type="module">', `  const el = document.querySelector('${meta.tag}');`);
+    for (const a of falseBools) lines.push(`  el.${a.name} = false;`);
     for (const prop of r.properties) lines.push(`  el.${prop} = ${prop}; // your data`);
     for (const evt of r.events) lines.push(`  el.addEventListener('${evt}', (e) => console.log(e.detail));`);
     lines.push('</script>');
@@ -137,7 +150,7 @@ function jsxCode(meta: ElementMeta, r: Resolved, importLine: string): string {
   const lines: string[] = [importLine, ''];
   const indent = '  ';
   const parts: string[] = [];
-  for (const a of r.attrs) parts.push(a.bool ? a.name : `${a.name}="${a.value}"`);
+  for (const a of r.attrs) parts.push(a.bool ? (a.value ? a.name : `${a.name}={false}`) : `${a.name}="${a.value}"`);
   for (const prop of r.properties) parts.push(`${prop}={${prop}}`);
   for (const evt of r.events) parts.push(`${handlerName(evt)}={(e) => console.log(e.detail)}`);
   const Name = meta.displayName.replace(/\s/g, '');
@@ -148,7 +161,7 @@ function jsxCode(meta: ElementMeta, r: Resolved, importLine: string): string {
 
 function vueCode(meta: ElementMeta, r: Resolved): string {
   const parts: string[] = [];
-  for (const a of r.attrs) parts.push(a.bool ? camelToKebab(a.name) : `${camelToKebab(a.name)}="${a.value}"`);
+  for (const a of r.attrs) parts.push(a.bool ? (a.value ? camelToKebab(a.name) : `:${camelToKebab(a.name)}="false"`) : `${camelToKebab(a.name)}="${a.value}"`);
   for (const prop of r.properties) parts.push(`:${camelToKebab(prop)}.prop="${prop}"`);
   for (const evt of r.events) parts.push(`@${evt}="${handlerName(evt)}"`);
   const indent = '  ';
@@ -160,7 +173,7 @@ function vueCode(meta: ElementMeta, r: Resolved): string {
 
 function svelteCode(meta: ElementMeta, r: Resolved): string {
   const parts: string[] = [];
-  for (const a of r.attrs) parts.push(a.bool ? camelToKebab(a.name) : `${camelToKebab(a.name)}="${a.value}"`);
+  for (const a of r.attrs) parts.push(a.bool ? (a.value ? camelToKebab(a.name) : `${camelToKebab(a.name)}={false}`) : `${camelToKebab(a.name)}="${a.value}"`);
   for (const prop of r.properties) parts.push(`{${prop}}`);
   for (const evt of r.events) parts.push(`on:${evt}={${handlerName(evt)}}`);
   const indent = '  ';
@@ -172,7 +185,7 @@ function svelteCode(meta: ElementMeta, r: Resolved): string {
 
 function angularCode(meta: ElementMeta, r: Resolved): string {
   const parts: string[] = [];
-  for (const a of r.attrs) parts.push(a.bool ? camelToKebab(a.name) : `${camelToKebab(a.name)}="${a.value}"`);
+  for (const a of r.attrs) parts.push(a.bool ? (a.value ? camelToKebab(a.name) : `[${a.name}]="false"`) : `${camelToKebab(a.name)}="${a.value}"`);
   for (const prop of r.properties) parts.push(`[${prop}]="${prop}"`);
   for (const evt of r.events) parts.push(`(${evt})="${handlerName(evt)}($event)"`);
   if (!parts.length) return `<${meta.tag}></${meta.tag}>`;

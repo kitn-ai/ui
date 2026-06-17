@@ -1,0 +1,103 @@
+---
+title: Tasks
+description: Selectable task/plan list that emits a single atomic result when the user confirms — checkboxes, select-all, and gated confirm in one element.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-tasks</p>
+
+<p class="kc-lede">Present a list of tasks the user can check off, then confirm in one go. The card stays quiet while the user picks — only the final confirm fires, carrying the selected ids in a single atomic event.</p>
+
+<Facts items={['Shadow DOM', 'Select-all with indeterminate state', 'Min / max gating', 'Read-only resolved view']} />
+
+## Preview
+
+Toggle the task list and options — this is the real `<kc-tasks>` web component, mounted in a Solid island.
+
+<Playground client:only="solid" tag="kc-tasks" />
+
+<Aside type="tip" title="When to use">
+Use `<kc-tasks>` whenever an AI needs to hand control back to the user before taking action — approving a migration plan, choosing maintenance steps, or picking reviewers. The gated confirm pattern means the model can propose a list and be sure the user explicitly approved exactly the items they wanted.
+</Aside>
+
+## Usage
+
+Feed the card definition via the `data` **property** (not an attribute — it's an object). Set `heading` and `card-id` as attributes. Listen for the bubbling `kc-card` CustomEvent to receive the result.
+
+```js
+const el = document.querySelector('kc-tasks');
+
+el.data = {
+  selectAll: true,
+  confirmLabel: 'Run selected',
+  tasks: [
+    { id: 'lint', label: 'Run linter', checked: true },
+    { id: 'test', label: 'Run unit tests', checked: true },
+    { id: 'build', label: 'Build production bundle' },
+  ],
+};
+
+el.addEventListener('kc-card', (e) => {
+  const ev = e.detail; // CardEvent
+  if (ev.kind === 'submit') {
+    console.log('selected ids:', ev.data.selected); // ['lint', 'test']
+  }
+});
+```
+
+**Toggling rows is purely local state** — the element buffers check states internally and only emits when the user clicks confirm. This keeps the wire quiet and the result atomic.
+
+**Gating rules** — the confirm button is enabled when the number of checked rows is `>= (min ?? (allowEmpty ? 0 : 1))` and `<= (max ?? ∞)`. When `max` is reached, all unchecked rows are disabled so the user can't over-select.
+
+**Resolved state** — once you receive a `submit` event, set `el.resolution = { kind: 'submit', data: { selected: [...] } }` to render the chromed read-only summary. No checkboxes or confirm button are shown.
+
+## Examples
+
+Each example is live — expand **Code** to copy the exact snippet for your framework.
+
+### Select a plan
+
+`selectAll: true` with a couple of rows pre-checked. The select-all header goes indeterminate when only some rows are checked.
+
+<Example client:visible tag="kc-tasks" config={{ heading: 'Approve the plan steps' }} />
+
+### Require at least one
+
+`allowEmpty: false` (the default) keeps the confirm button disabled until the user checks something. Good for a maintenance menu where doing nothing is not an option.
+
+<Example client:visible tag="kc-tasks" config={{ heading: 'Choose maintenance steps' }} data="requireOne" />
+
+### Bounded selection
+
+`min` and `max` let you cap how many rows the user can pick. When `max` is reached, unchecked rows go non-interactive so over-selection is impossible.
+
+<Example client:visible tag="kc-tasks" data="bounded" />
+
+### With descriptions
+
+Each task row accepts an optional `description` field — a secondary line of text linked via `aria-describedby`. Use it for impact notes, caveats, or reversibility hints.
+
+<Example client:visible tag="kc-tasks" config={{ heading: 'Storage cleanup' }} data="withDescriptions" />
+
+### Resolved (read-only)
+
+After the user confirms, set `el.resolution` to render the chromed summary view. The card shows which items were selected and removes the checkboxes and confirm button.
+
+<Example client:visible tag="kc-tasks" config={{ heading: 'Export report' }} data="resolved" />
+
+## Props
+
+<PropTable tag="kc-tasks" />
+
+## Composed from
+
+<ComposedFrom tag="kc-tasks" />
+
+<NeedAHand />
