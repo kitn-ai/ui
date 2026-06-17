@@ -1,0 +1,78 @@
+---
+title: Popover
+description: A button-and-popover card web component — a trigger that toggles a floating panel of arbitrary content, isolated in Shadow DOM.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-popover</p>
+
+<p class="kc-lede">A trigger that toggles a floating card of arbitrary content — a model menu, a settings panel, an account dropdown. The panel is a `role="dialog"` region, not a menu, so it holds anything: rows, toggles, nested groups. Click the trigger below.</p>
+
+<Facts items={['Shadow DOM', '1 event', 'Slotted trigger + panel', 'Escape / outside-click close', 'Floating-positioned']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-popover" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-popover>` for a "button + card" affordance — a header model menu, a settings popover, an account dropdown with mixed controls. For a flat list of commands, a menu is simpler. In SolidJS, the `Popover` primitive does the same without the web-component wrapper.
+</Aside>
+
+## Usage
+
+Slot the control as `slot="trigger"` and the panel as the default slot:
+
+```html
+<kc-popover placement="bottom-start">
+  <button slot="trigger">GPT-5.5 ▾</button>
+
+  <div>
+    <button>GPT-5.5 — Flagship model</button>
+    <button>Legacy models ▾</button>
+    <label>Temporary chat <kc-switch label="Temporary chat"></kc-switch></label>
+  </div>
+</kc-popover>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  document.querySelector('kc-popover')
+    .addEventListener('kc-open-change', (e) => console.log('open:', e.detail.open));
+</script>
+```
+
+- **Slots** — `trigger` is the control; the default slot is the panel. Clicking the trigger toggles it.
+- **Dismissal** — Escape or a click outside closes the panel; clicks **inside** it do not.
+- **`placement`** — floating placement relative to the trigger (`bottom-start`, `top`, `right`, …); defaults to `bottom-start`. The panel flips and shifts to stay on screen.
+- **Controlled** — omit `open` for click-to-toggle, or set the `open` property and drive it from `kc-open-change` to control it yourself.
+- **Panel content lives in your light DOM**, so your own styles apply to it directly — no shadow piercing.
+
+## Examples
+
+### Opens upward
+
+`placement="top-start"` floats the panel above the trigger.
+
+<Example client:visible tag="kc-popover" config={{ placement: 'top-start' }} />
+
+## Props
+
+<PropTable tag="kc-popover" />
+
+## Events
+
+<EventTable tag="kc-popover" />
+
+## Composed from
+
+<ComposedFrom tag="kc-popover" />
+
+<NeedAHand />

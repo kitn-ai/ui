@@ -1,0 +1,75 @@
+---
+title: Switch
+description: A role=switch toggle web component for immediate on/off settings — self-managing, keyboard-operable, isolated in Shadow DOM.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-switch</p>
+
+<p class="kc-lede">A toggle switch for a setting that applies the moment it flips — "Temporary chat", notifications, a feature flag. It manages its own on/off state and reports changes with a single event.</p>
+
+<Facts items={['Shadow DOM', '1 event', 'role="switch"', 'Keyboard operable', 'Self-managing']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-switch" />
+
+<Aside type="tip" title="When to use">
+Use `<kc-switch>` for an immediate on/off setting in a header menu, a settings row, or a preference panel. For a labelled choice submitted with a form, prefer a checkbox. In SolidJS, the `Switch` primitive does the same without the web-component wrapper.
+</Aside>
+
+## Usage
+
+Set the initial state with the `checked` attribute and read changes from `kc-change`:
+
+```html
+<kc-switch checked label="Temporary chat"></kc-switch>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  document.querySelector('kc-switch')
+    .addEventListener('kc-change', (e) => console.log('checked:', e.detail.checked));
+</script>
+```
+
+- **Self-managing** — the switch toggles on click or Space/Enter and tracks its own state; you only listen for `kc-change`.
+- **`checked`** — a bare attribute (`<kc-switch checked>`) starts it on.
+- **`label`** — sets the accessible name (`aria-label`); the switch is visual-only, so always provide one.
+- **`disabled`** — blocks interaction and dims the control.
+
+## Examples
+
+### On
+
+Starts on via the `checked` attribute.
+
+<Example client:visible tag="kc-switch" config={{ checked: true, label: 'Notifications' }} />
+
+### Disabled
+
+Non-interactive and dimmed.
+
+<Example client:visible tag="kc-switch" config={{ disabled: true, label: 'Sync' }} />
+
+## Props
+
+<PropTable tag="kc-switch" />
+
+## Events
+
+<EventTable tag="kc-switch" />
+
+## Composed from
+
+<ComposedFrom tag="kc-switch" />
+
+<NeedAHand />

@@ -215,10 +215,17 @@ export type ControlKind =
   | { prop: string; kind: 'enum'; options: string[]; default?: string }
   | { prop: string; kind: 'string'; default?: string };
 
+// Controlled-value bindings: scalar props that, when set, switch an element into
+// controlled mode and disable its own click-to-toggle UI (e.g. kc-popover `open`,
+// kc-workspace `sidebarCollapsed`). Exposing them as casual Playground toggles
+// makes the live demo look broken, so drive those via the element's own trigger.
+const CONTROLLED_BINDING_PROPS = new Set(['open', 'sidebarCollapsed']);
+
 export function controlsFor(meta: ElementMeta): ControlKind[] {
   const controls: ControlKind[] = [];
   for (const p of meta.props) {
     if (!p.scalar) continue;
+    if (CONTROLLED_BINDING_PROPS.has(p.name)) continue;
     const opts = enumOptions(p);
     if (opts.length) controls.push({ prop: p.name, kind: 'enum', options: opts, default: defaultValue(p) as string });
     else if (isBooleanProp(p)) controls.push({ prop: p.name, kind: 'boolean', default: Boolean(defaultValue(p)) });
