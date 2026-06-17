@@ -7,8 +7,81 @@
     <title>Starboard — About</title>
   </head>
   <body>
-    <h1>About Starboard</h1>
-    <p>Built with kitn-chat artifacts — a sandboxed preview paired with the source.</p>
-    <nav><a href="index.html">← Home</a></nav>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="index.html">
+          <span class="mark" aria-hidden="true"></span>
+          Starboard
+        </a>
+        <nav>
+          <ul class="nav-links">
+            <li><a href="index.html#features">Features</a></li>
+            <li class="hide-sm"><a href="index.html#metrics">Why Starboard</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a class="btn btn-primary" href="index.html#get-started">Start free</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <article class="prose">
+        <span class="eyebrow">About us</span>
+        <h1>We think shipping should feel boring</h1>
+        <p class="lead">
+          Starboard started when our founders spent one too many weekends babysitting a deploy.
+          The release was the scary part of the week, and it shouldn&rsquo;t have been.
+        </p>
+
+        <p>
+          So we built the tool we wished we&rsquo;d had: a control plane that treats every release
+          as a reversible, observable step. Stage a change, watch the signals, and promote it with
+          confidence — or roll it back before anyone notices. The drama is optional now.
+        </p>
+
+        <h2>What we believe</h2>
+        <ul class="value-list">
+          <li>
+            <span class="tick" aria-hidden="true">&#10003;</span>
+            <span><strong>Safe by default.</strong> Every deploy is a checkpoint you can return to instantly.</span>
+          </li>
+          <li>
+            <span class="tick" aria-hidden="true">&#10003;</span>
+            <span><strong>Visible, not magical.</strong> You should always see why a release advanced or paused.</span>
+          </li>
+          <li>
+            <span class="tick" aria-hidden="true">&#10003;</span>
+            <span><strong>Fast enough to be calm.</strong> Eleven-second median deploys mean fewer late nights.</span>
+          </li>
+        </ul>
+
+        <h2 id="contact">Get in touch</h2>
+        <p>
+          We&rsquo;re a small team based across three time zones, and we read every message.
+          Reach out at <a href="about.html#contact">hello@starboard.example</a> — we&rsquo;d love to hear what you&rsquo;re shipping.
+        </p>
+
+        <div class="hero-actions" style="justify-content: flex-start; margin-top: 2rem;">
+          <a class="btn btn-primary" href="index.html">&larr; Back home</a>
+          <a class="btn btn-ghost" href="index.html#get-started">Start free</a>
+        </div>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <a class="brand" href="index.html">
+          <span class="mark" aria-hidden="true"></span>
+          Starboard
+        </a>
+        <ul class="foot-links">
+          <li><a href="index.html#features">Features</a></li>
+          <li><a href="index.html#metrics">Pricing</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="about.html#contact">Contact</a></li>
+        </ul>
+        <p class="copyright">&copy; 2026 Starboard Labs. A generated preview, framed live in the artifact panel.</p>
+      </div>
+    </footer>
   </body>
 </html>
