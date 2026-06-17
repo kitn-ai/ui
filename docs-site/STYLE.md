@@ -29,6 +29,30 @@ Avoid: "simply", "just", "note that", "obviously", "clearly", "basically",
 "please note", and empty qualifiers ("very", "quite", "really"). Don't hedge
 ("you might want to maybe…") — say what to do.
 
+### Sound human, not generated
+
+Write like a sharp engineer explaining something to a colleague — not like a
+model producing documentation. Tells to kill on sight:
+
+- **Marketing/AI filler**: "seamless(ly)", "effortless", "powerful", "robust",
+  "leverage", "utilize" (→ use), "elevate", "unlock", "empower", "delve", "dive
+  in", "in the world of", "when it comes to", "it's worth noting", "rest assured",
+  "the beauty of", "best-in-class", "out of the box" (overused). Cut them.
+- **Stock transitions**: "Furthermore,", "Moreover,", "Additionally,", "In
+  conclusion,", "That said,". Start the sentence with the point instead.
+- **Over-symmetry**: not every list needs three items; not every sentence needs a
+  parallel clause or an em-dash flourish. Vary sentence length. A short blunt
+  sentence is good.
+- **Hollow setups**: "There are several things to consider…", "It is important to
+  understand that…". Just say the thing.
+- **Hype adverbs**: "incredibly", "extremely", "highly", "perfectly". Usually
+  deletable.
+- **Robotic hedging and over-explaining the obvious.** Trust the reader.
+
+Read a draft aloud. If it sounds like a brochure or a chatbot, rewrite it plainer.
+A little personality and a clear opinion ("reach for X when…", "skip Y unless…")
+beats neutral mush.
+
 ## Accuracy (non-negotiable)
 
 Every fact, import path, command, and API must be **verified against the real
@@ -76,17 +100,31 @@ standard). Don't reinvent them.
 
 ## House facts & terminology
 
-- Product: **kitn-chat** (`@kitn.ai/chat`). Custom elements are **`kc-*` web
-  components**, isolated in **Shadow DOM**.
-- Two layers: the **`kc-*` web components** (framework-agnostic, the default DX)
-  and the lower-level **SolidJS primitives** (the escape hatch). Be consistent.
-- Use the term consistently throughout (don't alternate "web component" /
-  "custom element" / "widget" — pick "web component").
+- Product: **kitn-chat** (`@kitn.ai/chat`). It's a set of **web components** —
+  framework-agnostic custom elements, isolated in **Shadow DOM** — that drop into
+  React, Vue, Svelte, Angular, or plain HTML.
+- **Lead with the web components; don't lead with how they're built.** They're
+  authored in SolidJS, but that's an implementation detail, not the pitch — a
+  reader shouldn't need to care that it's Solid to use `<kc-chat>`. Mention the
+  SolidJS primitives only where they're genuinely relevant (deep customization;
+  the "Working with Primitives & UI Components" section), not as a co-headline.
+- The elements are named `kc-*` (e.g. `<kc-chat>`). State that once, plainly;
+  don't keep qualifying it as "the `kc-*` web components (the default)".
+- Pick one term — **"web component"** — and stick to it (not "custom element" /
+  "widget").
+- **Setting array/object data**: the natural framing is JavaScript vs. HTML
+  attributes — e.g. "set `messages` in JavaScript (arrays can't be HTML
+  attributes)" or "assign it as a property". Avoid the stilted, repeated phrase
+  "set as a JS property"; say it like a person would, and don't repeat the
+  explanation on every prop once the page has made the point.
 
 ## Mechanics
 
 - Icons: **Iconify** (`~icons/lucide/<name>` via unplugin-icons in Solid
   islands; `astro-icon` in `.astro`). Never hand-author `<svg>` paths.
+- **No emoji in UI or prose.** Use an Iconify icon instead of `💬`, `☀`/`☾`,
+  `🔊`, `✅`, etc. (in islands, a `~icons/lucide/<name>` component). Emoji read as
+  unpolished and render inconsistently across platforms.
 - Color/spacing: the design tokens (`bg-surface`, `text-ink`, `text-brand`,
   `border-line`, …) — never hard-coded hex.
 - Links: descriptive text, never "click here" or a bare URL. Verify no 404s.
