@@ -3,7 +3,7 @@
  *  an accessor so the playground can feed it live, state-driven code. */
 import { createSignal, createEffect, onMount, For, Show } from 'solid-js';
 import { loadKit } from './kit';
-import { FRAMEWORKS, LANG, type Framework } from '../attachments-code';
+import { FRAMEWORKS, LANG, type Framework } from '../../lib/codegen';
 
 export function CodePanel(props: { snippets: () => Record<Framework, string>; defaultOpen?: boolean }) {
   const [open, setOpen] = createSignal(props.defaultOpen ?? false);

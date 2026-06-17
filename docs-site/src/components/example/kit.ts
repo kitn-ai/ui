@@ -2,6 +2,10 @@
 // kc-* element or the kc-code-block highlighter.
 let p: Promise<unknown> | undefined;
 export function loadKit(): Promise<unknown> {
-  if (!p) p = import(/* @vite-ignore */ `${import.meta.env.BASE_URL}kitn/kitn-chat.es.js`);
+  // BASE_URL is '/chat' (no trailing slash) in the production build but '/chat/'
+  // in dev — normalise so the bundle URL is always '/chat/kitn/…' (a missing
+  // slash silently 404s the bundle on the deployed site).
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  if (!p) p = import(/* @vite-ignore */ `${base}/kitn/kitn-chat.es.js`);
   return p;
 }
