@@ -180,3 +180,11 @@ export const WithHoverCard: Story = {
   render: () => <AttachmentsElement items={imageItems} variant="inline" hoverCard />,
   parameters: { docs: { source: { code: HOVER_SNIPPET, language: 'html' } } },
 };
+
+/** Grid tiles with a hover-card preview — the tile shows only the image; the
+ *  filename + media type surface in the hover card. (Grid previously skipped
+ *  the hover card entirely.) */
+export const GridWithHoverCard: Story = {
+  name: 'Grid With Hover Card',
+  render: () => <AttachmentsElement items={imageItems} variant="grid" hoverCard />,
+};
