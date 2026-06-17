@@ -1,40 +1,50 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
-template: splash # Remove or comment out this line to display the site sidebar on this page.
+title: kitn-chat
+description: Drop-in chat UI web components for any framework — isolated in Shadow DOM, ready for React, Vue, Svelte, Angular, Solid, or plain HTML.
+template: splash
 hero:
-  tagline: Congrats on setting up a new Starlight project!
-  image:
-    file: ../../assets/houston.webp
+  tagline: A complete chat UI toolkit. Framework-agnostic web components, isolated in Shadow DOM — drop them into any app and wire up your model.
   actions:
-    - text: Example Guide
-      link: /guides/example/
+    - text: Get started
+      link: /chat/guides/getting-started/
       icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
+    - text: Browse components
+      link: /chat/components/attachments/
+      variant: minimal
+    - text: GitHub
+      link: https://github.com/kitn-ai/chat
       icon: external
       variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
-
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
+  <Card title="Works in any framework" icon="puzzle">
+    The `kc-*` elements are standard web components. Register them once and use them in React, Vue, Svelte, Angular, Solid, or plain HTML — no wrapper required. A typed React adapter ships too.
+  </Card>
+  <Card title="Isolated by Shadow DOM" icon="seti:html">
+    Every component renders in its own Shadow DOM, so its styles never leak into — or out of — your app. Drop one in and it looks right.
+  </Card>
+  <Card title="Generative UI, built in" icon="rocket">
+    Confirmations, choices, tasks, forms, and artifacts render as first-class cards from a typed envelope — the building blocks of an agentic chat.
+  </Card>
+  <Card title="Themeable & accessible" icon="approve-check">
+    One set of CSS custom properties drives light and dark. Keyboard-operable and axe-tested in CI against WCAG 2.1 AA.
+  </Card>
+</CardGrid>
+
+<CardGrid>
+  <Card title="Install in seconds" icon="download">
+    ```bash
+    npm install @kitn.ai/chat
+    ```
+    ```js
+    import '@kitn.ai/chat/elements';
+    ```
+    [Installation guide →](/chat/guides/installation/)
+  </Card>
+  <Card title="Pick your framework" icon="laptop">
+    Setup and usage for [HTML](/chat/guides/frameworks/html/), [React](/chat/guides/frameworks/react/), [Vue](/chat/guides/frameworks/vue/), [Svelte](/chat/guides/frameworks/svelte/), [Angular](/chat/guides/frameworks/angular/), and [Solid](/chat/guides/frameworks/solid/).
+  </Card>
 </CardGrid>

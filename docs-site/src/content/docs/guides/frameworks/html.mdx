@@ -1,0 +1,224 @@
+---
+title: HTML
+description: Use kitn-chat web components in plain HTML and vanilla JavaScript — no framework, no build tool required.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Drop `<kc-*>` web components into any HTML page with a single import. No framework, no build configuration — the elements register themselves globally and work in every modern browser.
+
+## Install
+
+```bash
+npm install @kitn.ai/chat
+```
+
+Register all web components once with a side-effect import near your app entry:
+
+```js
+import '@kitn.ai/chat/elements';
+```
+
+Every `<kc-*>` tag is then available globally — drop them anywhere in your HTML.
+
+<Aside type="tip" title="No-build option">
+Skip npm entirely and load from a CDN. For quick prototypes this works immediately; for production, pin a specific version to avoid breaking changes (the package is pre-1.0).
+
+```html
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+</script>
+```
+</Aside>
+
+## The property / event contract
+
+Every `kc-*` web component follows the same two rules:
+
+- **Rich data (arrays, objects) → JS properties.** Set them in a `<script>` block, not as HTML attributes. Attributes only work for scalars (strings, booleans, numbers).
+- **Interactions → `addEventListener`.** All events are `CustomEvent`s dispatched on the element itself. They do not bubble.
+
+```js
+// ✅ Arrays and objects — JS property, not attribute
+el.messages = [{ id: '1', role: 'assistant', content: 'Hi' }];
+
+// ✅ Scalars — safe as attributes or properties
+el.setAttribute('theme', 'dark');
+
+// ✅ Events — always addEventListener; they do not bubble
+el.addEventListener('kc-submit', (e) => console.log(e.detail.value));
+```
+
+**Reactivity:** always assign a **new array** (and a new object for any message you change). Mutating an existing array or object in place will not trigger a re-render.
+
+## Complete example — `<kc-chat>`
+
+`<kc-chat>` is the batteries-included shell: give it a `messages` array, handle the `kc-submit` event, and stream your model's reply back. You own the request; the element owns the UI.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    html, body { margin: 0; height: 100%; }
+    .app { display: flex; flex-direction: column; height: 100dvh; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <kc-chat id="chat" style="flex: 1; min-height: 0;"></kc-chat>
+  </div>
+
+  <script type="module">
+    import '@kitn.ai/chat/elements';
+
+    const chat = document.getElementById('chat');
+
+    // Seed an initial assistant message
+    chat.messages = [
+      {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: 'Hello! How can I help?',
+        actions: ['copy', 'like', 'dislike'],
+      },
+    ];
+    chat.suggestions = ['Summarize the chat', 'Start fresh'];
+
+    chat.addEventListener('kc-submit', async (e) => {
+      const text = e.detail.value;
+
+      // Append the user message — always assign a new array
+      const history = [
+        ...chat.messages,
+        { id: crypto.randomUUID(), role: 'user', content: text },
+      ];
+      chat.messages = history;
+      chat.loading = true;
+
+      // Create an empty assistant placeholder to stream into
+      const aid = crypto.randomUUID();
+      chat.messages = [...history, { id: aid, role: 'assistant', content: '' }];
+
+      let answer = '';
+      for await (const token of streamFromYourAPI(history)) {
+        answer += token;
+        // Replace only the placeholder — every other message stays the same
+        chat.messages = chat.messages.map((m) =>
+          m.id === aid ? { ...m, content: answer } : m,
+        );
+      }
+
+      chat.loading = false;
+    });
+  </script>
+</body>
+</html>
+```
+
+## Compose individual elements
+
+`<kc-chat>` is one option, not the only one. Every element can be placed independently. Here's a sidebar + thread layout using `<kc-conversations>` and `<kc-chat>`:
+
+```html
+<style>
+  html, body { margin: 0; height: 100%; }
+  .workspace { display: flex; height: 100dvh; }
+</style>
+
+<div class="workspace">
+  <kc-conversations id="sidebar" style="width: 280px; flex-shrink: 0;"></kc-conversations>
+  <kc-chat id="chat" style="flex: 1; min-width: 0;"></kc-chat>
+</div>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const sidebar = document.getElementById('sidebar');
+  const chat = document.getElementById('chat');
+
+  sidebar.conversations = myConversations;
+  chat.messages = loadMessages(myConversations[0]?.id);
+
+  sidebar.addEventListener('kc-conversation-select', (e) => {
+    chat.messages = loadMessages(e.detail.id);
+  });
+
+  sidebar.addEventListener('kc-new-chat', () => startNewConversation());
+
+  chat.addEventListener('kc-submit', (e) => sendMessage(e.detail.value));
+</script>
+```
+
+### Add a resizable divider
+
+Wrap panels in `<kc-resizable>` with one `<kc-resizable-item>` each — drag handles are inserted automatically. Each item accepts a `size` (px or `%`) and optional `min`/`max`. Listen for `kc-change` to persist the layout.
+
+```html
+<style>
+  html, body { margin: 0; height: 100%; }
+  .app { display: flex; flex-direction: column; height: 100dvh; }
+</style>
+
+<div class="app">
+  <kc-resizable orientation="horizontal" style="flex: 1; min-height: 0;">
+    <kc-resizable-item size="25%" min="200px">
+      <kc-conversations id="sidebar"></kc-conversations>
+    </kc-resizable-item>
+    <kc-resizable-item>
+      <kc-chat id="chat"></kc-chat>
+    </kc-resizable-item>
+  </kc-resizable>
+</div>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const resizable = document.querySelector('kc-resizable');
+  resizable.addEventListener('kc-change', (e) => {
+    localStorage.setItem('panel-sizes', JSON.stringify(e.detail.sizes));
+  });
+</script>
+```
+
+## Standalone display elements
+
+You can drop any single element into an existing page without adopting the full chat shell. `<kc-markdown>`, `<kc-code-block>`, and `<kc-artifact>` are common standalone picks for rendering AI-generated content:
+
+```html
+<script type="module">
+  import '@kitn.ai/chat/elements';
+</script>
+
+<kc-markdown content="## Result\n\nHere is your **summary**."></kc-markdown>
+<kc-code-block code="const greet = (name) => `Hello, ${name}!`;" language="js"></kc-code-block>
+```
+
+Each element fills its container and is controlled entirely through properties and events.
+
+## Key events reference
+
+| Element | Event | `detail` |
+|---|---|---|
+| `kc-chat` | `kc-submit` | `{ value: string }` |
+| `kc-chat` | `kc-model-change` | `{ model: string }` |
+| `kc-conversations` | `kc-conversation-select` | `{ id: string }` |
+| `kc-conversations` | `kc-new-chat` | — |
+| `kc-conversations` | `kc-toggle-sidebar` | — |
+| `kc-resizable` | `kc-change` | `{ sizes: string[] }` |
+
+For the full API of any element — all properties, events, and their types — see the individual component page in the [Components](/chat/components/attachments/) reference.
+
+## Theming
+
+By default each element is styled inside its own Shadow DOM and needs no external CSS. To override design tokens (colors, radii, spacing), load `theme.css`:
+
+```html
+<!-- bundler -->
+<link rel="stylesheet" href="./node_modules/@kitn.ai/chat/theme.css" />
+
+<!-- CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/theme.css" />
+```
+
+Then override any `--color-*` or `--radius-*` custom properties on `:root` or a scoping selector.

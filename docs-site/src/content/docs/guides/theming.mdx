@@ -1,0 +1,168 @@
+---
+title: Theming
+description: Override CSS custom properties to rebrand every kc-* component — colors, radii, typography, and dark mode — without touching component code.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Override `--color-*` design tokens on `:root` to rebrand every `kc-*` web component at once. Because inherited CSS pierces the Shadow DOM boundary, a single CSS rule propagates into all components automatically.
+
+## How tokens work
+
+The kit's appearance is driven entirely by **CSS custom properties** defined in `theme.css`. Each token follows a semantic naming convention borrowed from shadcn/ui — names describe purpose (`--color-primary`), not hue (`--color-blue`) — and surface/text pairs come together:
+
+| Token pair | Controls |
+|---|---|
+| `--color-background` / `--color-foreground` | Page/chat surface and text |
+| `--color-primary` / `--color-primary-foreground` | Buttons, active states, accents |
+| `--color-secondary` / `--color-secondary-foreground` | Secondary buttons, chips |
+| `--color-muted` / `--color-muted-foreground` | Subdued surfaces and placeholder text |
+| `--color-card` / `--color-card-foreground` | Message bubbles, panels |
+| `--color-border` | Dividers and input outlines |
+| `--color-input` | Input field background |
+| `--color-destructive` / `--color-destructive-foreground` | Error and danger states |
+| `--color-ring` | Focus ring (blue by default for WCAG AA contrast) |
+| `--color-sidebar` | Conversation sidebar background |
+| `--color-code-foreground` | Inline code text and chip accent |
+
+Border radii are controlled by `--radius` (default `0.6rem`); `--radius-sm`, `--radius-md`, `--radius-lg`, and `--radius-xl` derive from it automatically.
+
+## Import the stylesheet
+
+The kit injects its own scoped CSS into each component's Shadow DOM automatically — no import required to get started. Import `theme.css` only to override tokens:
+
+```js
+import '@kitn.ai/chat/theme.css';
+```
+
+Or via CDN:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/theme.css">
+```
+
+## Override tokens
+
+Set your overrides on `:root` **after** importing `theme.css`:
+
+```css
+:root {
+  --color-background: hsl(0 0% 6%);
+  --color-foreground: hsl(0 0% 96%);
+  --color-primary: hsl(271 91% 65%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-muted: hsl(0 0% 12%);
+  --color-muted-foreground: hsl(0 0% 55%);
+  --color-border: hsl(0 0% 16%);
+  --color-card: hsl(0 0% 10%);
+  --color-card-foreground: hsl(0 0% 96%);
+  --radius: 0.5rem;
+}
+```
+
+<Aside type="tip" title="Scope to a subtree">
+Assign tokens to a container element instead of `:root` to theme only that section of the page — useful when the kit sits alongside other UI that shouldn't change.
+
+```css
+.my-chat-panel {
+  --color-primary: hsl(271 91% 65%);
+  --color-background: hsl(0 0% 6%);
+}
+```
+</Aside>
+
+## Dark mode
+
+The kit ships both light and dark token sets. Switch modes by toggling the `dark` class on `<html>` (or any ancestor):
+
+```js
+document.documentElement.classList.toggle('dark');
+```
+
+The `.dark` selector in `theme.css` redefines every `--color-*` token for dark surfaces. Override inside `.dark` to customize the dark-mode palette:
+
+```css
+:root {
+  --color-primary: hsl(271 91% 65%);     /* light mode */
+}
+
+.dark {
+  --color-primary: hsl(271 91% 75%);     /* dark mode — brighter for contrast */
+}
+```
+
+<Aside type="note" title="prefers-color-scheme">
+The kit does not automatically apply `.dark` based on `prefers-color-scheme` — that decision belongs to the host app. Add the class in response to the media query if you want OS-level sync:
+
+```js
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+mq.addEventListener('change', (e) => {
+  document.documentElement.classList.toggle('dark', e.matches);
+});
+document.documentElement.classList.toggle('dark', mq.matches);
+```
+</Aside>
+
+## Namespaced overrides (`--kc-color-*`)
+
+Every `--color-*` token resolves through a **`--kc-color-*` alias** before falling back to its default. Override the `--kc-color-*` form to rebrand without importing or redefining the entire `theme.css` token set:
+
+```css
+:root {
+  --kc-color-primary: hsl(271 91% 65%);
+  --kc-color-primary-foreground: hsl(0 0% 100%);
+  --kc-radius: 0.375rem;
+}
+```
+
+This is the lightest-weight override path — no stylesheet import needed.
+
+## Typography
+
+The kit exposes four namespaced typography tokens. Override them to adjust the size of UI chrome (labels, badges, controls) globally:
+
+| Token | Default | Applies to |
+|---|---|---|
+| `--kc-text-caption` | `0.6875rem` | Micro labels, badges, sub-counts |
+| `--kc-text-meta` | `0.75rem` | Controls, toggles, captions |
+| `--kc-text-body` | `0.875rem` | Primary reading text |
+| `--kc-text-title` | `1rem` | Emphasis, headers |
+
+```css
+:root {
+  --kc-text-body: 0.9375rem;   /* bump reading text to 15px */
+}
+```
+
+Message and markdown reading size scales separately via the `proseSize` prop — see [Appearance settings](#appearance-settings) below.
+
+## Appearance settings
+
+`ChatConfig` (SolidJS) and the matching `kc-chat` attributes control non-color appearance:
+
+| Setting | Values | Purpose |
+|---|---|---|
+| `proseSize` | `xs` · `sm` · `base` · `lg` | Message / markdown text size |
+| `codeTheme` | any [Shiki theme name](https://shiki.style/themes) | Syntax-highlight theme for code blocks |
+| `codeHighlight` | `true` / `false` | Disable code highlighting entirely (no Shiki loaded) |
+
+<Tabs>
+<TabItem label="Web component">
+```html
+<kc-chat prose-size="base" code-theme="github-dark-dimmed"></kc-chat>
+```
+</TabItem>
+<TabItem label="SolidJS">
+```tsx
+import { ChatConfig } from '@kitn.ai/chat';
+
+<ChatConfig proseSize="base" codeTheme="github-dark-dimmed">
+  {/* your components */}
+</ChatConfig>
+```
+</TabItem>
+</Tabs>
+
+## Token reference
+
+The full list of overridable tokens lives in `theme.css` (shipped at `@kitn.ai/chat/theme.css`). For a browser-ready version with `:root` and `.dark` blocks pre-separated, use `@kitn.ai/chat/theme.tokens.css` — it is auto-generated from `theme.css` and never drifts.

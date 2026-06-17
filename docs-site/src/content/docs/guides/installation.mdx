@@ -1,0 +1,138 @@
+---
+title: Installation
+description: Install @kitn.ai/chat and register its web components in any framework — React, Vue, Angular, Svelte, or plain HTML.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Add `@kitn.ai/chat` to your project and drop `kc-*` web components into any framework. SolidJS is bundled in — the host app needs nothing else.
+
+## Install the package
+
+<Tabs>
+<TabItem label="npm">
+```sh
+npm install @kitn.ai/chat
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @kitn.ai/chat
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @kitn.ai/chat
+```
+</TabItem>
+</Tabs>
+
+## Register the web components
+
+Import the element bundle once as a **side effect**. This registers every `kc-*` web component globally — call it once near your app's entry point:
+
+```js
+import '@kitn.ai/chat/elements';
+```
+
+The bundle is ESM-only. It works with any modern bundler (`vite`, `webpack`, `esbuild`) and in `<script type="module">` in the browser. **SolidJS is bundled in** — no additional peer dependency.
+
+After registration, use the elements directly in your template:
+
+```html
+<kc-chat style="display: block; height: 100vh;"></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.querySelector('kc-chat');
+
+  // Rich data is set as JS properties, not HTML attributes
+  chat.messages = [
+    { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+  ];
+
+  chat.addEventListener('kc-submit', (e) => {
+    console.log('user sent:', e.detail.value);
+  });
+</script>
+```
+
+<Aside type="caution" title="Properties, not attributes">
+Array and object data (`messages`, `models`, `context`, …) must be set as **JS properties**. HTML attributes only work for scalars like `placeholder`, `loading`, and `theme`.
+</Aside>
+
+## Import the theme
+
+The kit injects its own CSS into each web component's Shadow DOM automatically — no stylesheet required to get started. Import `theme.css` only when you want to **override design tokens**:
+
+```js
+import '@kitn.ai/chat/theme.css';
+```
+
+Override tokens on `:root` to rebrand the components:
+
+```css
+:root {
+  --color-background: #0f0f0f;
+  --color-primary: #7c3aed;
+  --color-muted: #1e1e1e;
+}
+```
+
+Because inherited CSS pierces the Shadow DOM boundary, token overrides propagate into every `kc-*` component automatically.
+
+## Via CDN (no build step)
+
+Load the element bundle as a self-contained ES module — no install, no bundler required:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/theme.css">
+
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+</script>
+
+<kc-chat style="display: block; height: 100vh;"></kc-chat>
+```
+
+<Aside type="tip" title="Pin versions in production">
+The unpinned CDN URL tracks the latest release — convenient for prototyping, but not for production. Since this package is pre-1.0, a future minor release may include breaking changes. Pin an exact version for production: `https://cdn.jsdelivr.net/npm/@kitn.ai/chat@0.13.0/dist/kitn-chat.es.js`.
+</Aside>
+
+## SolidJS projects
+
+SolidJS apps can import the components natively for full compositional control. Add `solid-js` as a peer dependency:
+
+```sh
+npm install solid-js
+```
+
+Then import from the root entry (`@kitn.ai/chat`), which ships as source and tree-shakes to only what you use:
+
+```tsx
+import {
+  ChatContainer,
+  ChatContainerContent,
+  Message,
+  MessageContent,
+  PromptInput,
+  PromptInputTextarea,
+  PromptInputActions,
+} from '@kitn.ai/chat';
+import '@kitn.ai/chat/theme.css';
+```
+
+## Entry points
+
+| Import path | What it provides |
+|---|---|
+| `@kitn.ai/chat/elements` | Web component bundle — registers all `kc-*` elements; use in any framework |
+| `@kitn.ai/chat` | Native SolidJS components — tree-shaken source; SolidJS projects only |
+| `@kitn.ai/chat/react` | Generated React wrappers with typed props |
+| `@kitn.ai/chat/theme.css` | Design tokens (`--color-*`) for overriding the default theme |
+| `@kitn.ai/chat/provider` | Remote provider bundle for embedding the kit across origins |
+
+## Next steps
+
+With the elements registered, head to the framework guide for your stack, or start with the [Getting Started](/chat/guides/getting-started/) walkthrough to render your first chat.

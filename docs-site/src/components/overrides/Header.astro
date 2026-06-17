@@ -13,9 +13,9 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
 const logo = href('kitn-logo.png');
 const nav = [
-  { label: 'Docs', to: 'guides/example' },
+  { label: 'Docs', to: 'guides/introduction' },
   { label: 'Components', to: 'components/attachments' },
-  { label: 'Examples', to: 'guides/example' },
+  { label: 'Examples', to: 'examples/full-chat-app' },
 ];
 ---
 <div class="flex h-full w-full items-center gap-4">

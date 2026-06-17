@@ -1,0 +1,138 @@
+---
+title: Text to Speech
+description: Speak assistant replies aloud using the browser's built-in speech API or a cloud TTS provider.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Make your chat speak. Call a `speak()` function when a reply finishes streaming — no extra dependencies needed for the browser-native path, and a thin backend route for higher-quality cloud voices.
+
+## Browser-native TTS
+
+The [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) is built into every modern browser. Call `speak(answer)` right before you set `chat.loading = false`:
+
+```js
+import '@kitn.ai/chat/elements';
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-US';
+  speechSynthesis.cancel(); // stop any previous utterance
+  speechSynthesis.speak(utter);
+}
+
+const chat = document.getElementById('chat');
+
+chat.addEventListener('kc-submit', async (e) => {
+  const userText = e.detail.value.trim();
+  if (!userText) return;
+
+  const assistantId = crypto.randomUUID();
+  chat.messages = [
+    ...chat.messages,
+    { id: crypto.randomUUID(), role: 'user', content: userText },
+    { id: assistantId, role: 'assistant', content: '' },
+  ];
+  chat.loading = true;
+
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: userText }),
+  });
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let answer = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    answer += decoder.decode(value, { stream: true });
+    chat.messages = chat.messages.map((m) =>
+      m.id === assistantId ? { ...m, content: answer } : m
+    );
+  }
+
+  speak(answer); // speak the completed reply
+  chat.loading = false;
+});
+```
+
+<Aside type="tip" title="Choosing a voice">
+`speechSynthesis.getVoices()` returns the available voices asynchronously — listen for the `voiceschanged` event before calling it. Pass the chosen `SpeechSynthesisVoice` object to `utter.voice` to override the browser default.
+</Aside>
+
+## Cloud TTS
+
+For higher-quality, consistent voices (OpenAI, ElevenLabs, and similar), proxy the TTS call through your backend — never expose provider API keys to the client.
+
+```js
+async function speakCloud(text) {
+  const res = await fetch('/api/tts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text, voice: 'alloy' }),
+  });
+  if (!res.ok) return;
+  const audio = new Audio(URL.createObjectURL(await res.blob()));
+  audio.play();
+}
+```
+
+Replace `speak(answer)` in the streaming handler above with `speakCloud(answer)`.
+
+### Example `/api/tts` route (Node.js / Express)
+
+```js
+// POST /api/tts — proxies to OpenAI TTS, streams back audio
+import OpenAI from 'openai';
+
+const openai = new OpenAI(); // reads OPENAI_API_KEY from environment
+
+app.post('/api/tts', async (req, res) => {
+  const { text, voice = 'alloy' } = req.body;
+  const mp3 = await openai.audio.speech.create({
+    model: 'tts-1',
+    voice,
+    input: text,
+  });
+  res.setHeader('Content-Type', 'audio/mpeg');
+  mp3.body.pipe(res);
+});
+```
+
+<Aside type="caution" title="API key stays server-side">
+The TTS provider key must never reach the browser. Route all TTS requests through your own backend.
+</Aside>
+
+## Stopping playback
+
+For browser-native TTS, call `speechSynthesis.cancel()` at the start of each new reply (the code above already does this) or when the user sends a new message.
+
+For cloud TTS, keep a reference to the `Audio` object and call `.pause()`:
+
+```js
+let currentAudio = null;
+
+async function speakCloud(text) {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  const res = await fetch('/api/tts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text, voice: 'alloy' }),
+  });
+  if (!res.ok) return;
+  currentAudio = new Audio(URL.createObjectURL(await res.blob()));
+  currentAudio.play();
+}
+```
+
+## Related
+
+- [Getting Started](/chat/guides/getting-started/) — streaming replies with `kc-chat`
+- [`kc-chat` component reference](/chat/components/chat/) — all props and events, including `loading`

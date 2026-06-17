@@ -1,0 +1,155 @@
+---
+title: Introduction
+description: kitn-chat is a library of Shadow-DOM web components for building AI chat interfaces that work in any framework.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+**kitn-chat** (`@kitn.ai/chat`) gives you ~50 composable components — message threads, prompt input, streaming responses, markdown and code rendering, reasoning panels, tool-call panels, attachments, and a conversation sidebar — that drop into any web app without touching your existing styles.
+
+## The two-layer architecture
+
+The library ships at two layers. **Reach for the layer that matches your stack.**
+
+### kc-* web components (the default)
+
+The `kc-*` web components are framework-agnostic custom elements. Each one renders in **Shadow DOM**, so your host page's CSS cannot leak in and the kit's Tailwind cannot leak out. You use them as HTML elements, set data as JS properties, and listen for events — the same in React, Vue, Angular, Svelte, and plain HTML.
+
+Register all elements with a single import:
+
+```js
+import '@kitn.ai/chat/elements';
+```
+
+Then use any element as HTML:
+
+```html
+<kc-chat style="display: block; height: 100vh;"></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.querySelector('kc-chat');
+
+  // Array/object data goes on JS properties, not HTML attributes
+  chat.messages = [
+    { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+  ];
+
+  chat.addEventListener('kc-submit', (e) => {
+    console.log('user sent:', e.detail.value);
+  });
+</script>
+```
+
+<Aside type="caution" title="Properties, not attributes">
+Array and object data — `messages`, `models`, `context`, `items` — must be set as **JS properties**, not HTML attributes. Only scalar values (`placeholder`, `loading`, `theme`) work as attributes.
+</Aside>
+
+### SolidJS primitives (the escape hatch)
+
+The kit is authored in **SolidJS**. SolidJS apps can import the components directly from `@kitn.ai/chat` (the `.` export) for full compositional control — tree-shaken by your bundler to exactly what you import. This is an advanced option; the web components work everywhere and require no SolidJS knowledge.
+
+```tsx
+import { ChatContainer, ChatContainerContent, Message, MessageContent, PromptInput, PromptInputTextarea } from '@kitn.ai/chat';
+import '@kitn.ai/chat/theme.css';
+
+function App() {
+  return (
+    <ChatContainer class="h-full">
+      <ChatContainerContent class="space-y-4 p-4">
+        <Message>
+          <MessageContent markdown>{`Hello! How can I help?`}</MessageContent>
+        </Message>
+      </ChatContainerContent>
+      <PromptInput>
+        <PromptInputTextarea placeholder="Ask anything..." />
+      </PromptInput>
+    </ChatContainer>
+  );
+}
+```
+
+## Framework-agnostic by design
+
+The `kc-*` web components work natively in any framework. Each framework has its own idiom for passing properties and binding events:
+
+<Tabs>
+<TabItem label="React">
+```tsx
+import { Chat } from '@kitn.ai/chat/react';
+
+<Chat
+  messages={messages}
+  onSubmit={(e) => handleSubmit(e.detail.value)}
+/>
+```
+</TabItem>
+<TabItem label="Vue">
+```html
+<kc-chat
+  :messages.prop="messages"
+  @kc-submit="handleSubmit"
+/>
+```
+</TabItem>
+<TabItem label="Angular">
+```html
+<kc-chat
+  [messages]="messages"
+  (kc-submit)="handleSubmit($event)"
+></kc-chat>
+```
+</TabItem>
+<TabItem label="Svelte">
+```html
+<script>
+  import '@kitn.ai/chat/elements';
+</script>
+
+<kc-chat
+  {messages}
+  on:kc-submit={handleSubmit}
+></kc-chat>
+```
+</TabItem>
+<TabItem label="HTML">
+```html
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const chat = document.querySelector('kc-chat');
+  chat.messages = messages;
+  chat.addEventListener('kc-submit', handleSubmit);
+</script>
+<kc-chat></kc-chat>
+```
+</TabItem>
+</Tabs>
+
+React users get generated wrappers from `@kitn.ai/chat/react` that surface events as `onEventName` props. Every other framework uses the web components directly.
+
+## What's included
+
+~50 components across three internal layers — headless primitives, accessible UI primitives (built in-house, WCAG 2.1 AA, no third-party UI dependencies), and AI feature components:
+
+| Component | What it does |
+|---|---|
+| `kc-chat` | Full chat panel — messages + prompt input in one element |
+| `kc-workspace` | Chat + conversation sidebar in one element |
+| `kc-message` | A single message row with actions |
+| `kc-prompt-input` | Composer with voice, slash commands, and toolbar |
+| `kc-markdown` | Markdown renderer with optional syntax highlighting |
+| `kc-reasoning` | Expandable reasoning / chain-of-thought panel |
+| `kc-tool` | Tool-call display (name, input, output) |
+| `kc-attachments` | File attachment tiles, chips, or rows |
+| `kc-conversations` | Conversation sidebar with grouping |
+| `kc-artifact` | Multi-file artifact viewer with tabs and maximize |
+
+## Bundle size
+
+A markdown-only `<kc-chat>` loads as **~110 KB gzip** — a single file. Syntax highlighting (Shiki) loads on demand per language with no WASM, and never loads at all if you don't render code blocks.
+
+## Where to go next
+
+- [Installation](/chat/guides/installation/) — add the package and register elements
+- [Getting Started](/chat/guides/getting-started/) — a working chat in a few lines

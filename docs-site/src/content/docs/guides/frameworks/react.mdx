@@ -1,0 +1,234 @@
+---
+title: React
+description: Use kitn-chat's typed React wrappers to drop kc-* web components into any React app with idiomatic JSX, typed props, and onX event handlers.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+`@kitn.ai/chat/react` exports a typed React wrapper for every `kc-*` web component. Pass data as props, handle events with `onX` handlers — no refs, no manual `addEventListener`, no stringified objects.
+
+## Install
+
+```bash
+npm install @kitn.ai/chat
+```
+
+## Set up
+
+Register the web components once at your app entry point, then import the wrappers you need anywhere:
+
+```tsx
+// main.tsx (or wherever you mount your app)
+import '@kitn.ai/chat/elements'; // registers all kc-* elements globally
+```
+
+```tsx
+// Any component file
+import { Chat, Markdown, Reasoning } from '@kitn.ai/chat/react';
+```
+
+Component names are the PascalCase of the tag name: `kc-chat → Chat`, `kc-prompt-input → PromptInput`, `kc-chain-of-thought → ChainOfThought`.
+
+<Aside type="tip" title="No CSS import required">
+Every element is styled inside its own Shadow DOM. Import `@kitn.ai/chat/theme.css` only if you want to override design tokens.
+</Aside>
+
+## The all-in-one shell
+
+`<Chat>` renders a complete thread — message list, prompt input, suggestions, and header chrome — in a single element. It is **transport-agnostic**: pass a `messages` array, handle `onSubmit`, and stream the reply back into state.
+
+```tsx
+import '@kitn.ai/chat/elements';
+import { Chat } from '@kitn.ai/chat/react';
+import { useState } from 'react';
+
+type Message = {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+};
+
+export function App() {
+  const [messages, setMessages] = useState<Message[]>([
+    { id: '1', role: 'assistant', content: 'How can I help?' },
+  ]);
+
+  const handleSubmit = async (e: CustomEvent<{ value: string }>) => {
+    const userMsg: Message = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: e.detail.value,
+    };
+    const history = [...messages, userMsg];
+    setMessages(history);
+
+    const aid = crypto.randomUUID();
+    setMessages([...history, { id: aid, role: 'assistant', content: '' }]);
+
+    let answer = '';
+    for await (const token of streamFromYourAPI(history)) {
+      answer += token;
+      setMessages((prev) =>
+        prev.map((m) => (m.id === aid ? { ...m, content: answer } : m)),
+      );
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
+      <Chat
+        messages={messages}
+        suggestions={['Summarize the chat', 'Start fresh']}
+        onSubmit={handleSubmit}
+        style={{ flex: 1, minHeight: 0 }}
+      />
+    </div>
+  );
+}
+```
+
+`<Chat>` fills its container. Use `flex: 1` (not a hard-coded height) so it adapts to your layout.
+
+## Compose individual elements
+
+Every element has its own wrapper, so you can assemble your own layout. This example pairs a `<Conversations>` sidebar with a `<Chat>` thread:
+
+```tsx
+import '@kitn.ai/chat/elements';
+import { Chat, Conversations } from '@kitn.ai/chat/react';
+import { useState } from 'react';
+
+export function Workspace() {
+  const [activeId, setActiveId] = useState(myConversations[0]?.id);
+  const [messages, setMessages] = useState(loadMessages(activeId));
+
+  return (
+    <div style={{ display: 'flex', height: '100dvh' }}>
+      <Conversations
+        conversations={myConversations}
+        activeId={activeId}
+        onConversationSelect={(e) => {
+          setActiveId(e.detail.id);
+          setMessages(loadMessages(e.detail.id));
+        }}
+        onNewChat={() => startNewConversation()}
+        style={{ width: 280, flexShrink: 0 }}
+      />
+      <Chat
+        messages={messages}
+        onSubmit={(e) => sendMessage(e.detail.value)}
+        style={{ flex: 1, minWidth: 0 }}
+      />
+    </div>
+  );
+}
+```
+
+### Resizable panels
+
+Wrap panels in `<Resizable>` with one `<ResizableItem>` each to add a draggable divider. Each item takes a `size` (px or `%`) and optional `min`/`max`. Listen for `onChange` to persist the layout.
+
+```tsx
+import { Chat, Conversations, Resizable, ResizableItem } from '@kitn.ai/chat/react';
+
+<Resizable orientation="horizontal" style={{ flex: 1, minHeight: 0 }}>
+  <ResizableItem size="25%" min="200px">
+    <Conversations
+      conversations={conversations}
+      activeId={activeId}
+      onConversationSelect={handleSelect}
+    />
+  </ResizableItem>
+  <ResizableItem>
+    <Chat messages={messages} onSubmit={handleSubmit} />
+  </ResizableItem>
+</Resizable>
+```
+
+### Standalone display elements
+
+Drop individual elements anywhere in your UI without adopting a full chat shell — `<Markdown>`, `<CodeBlock>`, `<Reasoning>`, `<Tool>`, `<Artifact>` all work standalone:
+
+```tsx
+import { Markdown, Reasoning, Tool } from '@kitn.ai/chat/react';
+
+<Markdown content={assistantReply} proseSize="sm" />
+<Reasoning text={thinkingText} streaming={isStreaming} />
+<Tool tool={toolCall} open />
+```
+
+## Props and events
+
+**Rich data goes in as props; interactions come out as events.** The wrappers assign arrays and objects directly as DOM properties (not stringified), and surface CustomEvents as `onX` handlers.
+
+Event prop names strip the `kc-` prefix and PascalCase each hyphen-segment:
+
+| DOM event | React prop |
+|---|---|
+| `kc-submit` | `onSubmit` |
+| `kc-value-change` | `onValueChange` |
+| `kc-message-action` | `onMessageAction` |
+| `kc-model-change` | `onModelChange` |
+| `kc-conversation-select` | `onConversationSelect` |
+| `kc-suggestion-click` | `onSuggestionClick` |
+
+Every wrapper also accepts `className`, `style`, `id`, `theme` (`'light' | 'dark' | 'auto'`), and `children` (for slotted content).
+
+<Aside type="tip" title="Image name collision">
+`kc-image` exports as `Image`, which shadows the browser global. Alias it on import: `import { Image as KcImage } from '@kitn.ai/chat/react'`.
+</Aside>
+
+## All available wrappers
+
+```tsx
+import {
+  Artifact, Attachments, Card, Cards, ChainOfThought,
+  Chat, Checkpoint, Choice, CodeBlock, Confirm,
+  Context, Conversations, Embed, Empty, FeedbackBar,
+  FileTree, FileUpload, Form, Image, LinkPreview,
+  Loader, Markdown, Message, ModelSwitcher, PromptInput,
+  Reasoning, Remote, Resizable, ResizableItem, ResponseStream,
+  ScopePicker, ScrollButton, Skills, Source, Sources,
+  Suggestions, Tasks, TextShimmer, ThinkingBar, Tool,
+  VoiceInput, Workspace,
+} from '@kitn.ai/chat/react';
+```
+
+## Raw web component usage
+
+Prefer to use the `kc-*` element directly — for example with React 19's improved custom-element support? Use a `ref` to set object props and wire events manually:
+
+```tsx
+import { useEffect, useRef, useState } from 'react';
+import '@kitn.ai/chat/elements';
+
+export function RawChat() {
+  const ref = useRef<HTMLElement>(null);
+  const [messages, setMessages] = useState([
+    { id: '1', role: 'assistant', content: 'Hello!' },
+  ]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // Arrays/objects must be assigned as DOM properties, not attributes.
+    (el as any).messages = messages;
+  }, [messages]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onSubmit = (e: Event) => {
+      const { value } = (e as CustomEvent<{ value: string }>).detail;
+      setMessages((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), role: 'user', content: value },
+      ]);
+    };
+    el.addEventListener('kc-submit', onSubmit);
+    return () => el.removeEventListener('kc-submit', onSubmit);
+  }, []);
+
+  return <kc-chat ref={ref} style={{ display: 'block', height: '100dvh' }} />;
+}
+```

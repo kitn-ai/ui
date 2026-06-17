@@ -1,0 +1,144 @@
+---
+title: For AI Agents
+description: Machine-readable reference files that let coding agents wire up kitn-chat components correctly the first time.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+`@kitn.ai/chat` ships two auto-generated machine-readable files that follow the [llmstxt.org](https://llmstxt.org) convention. Point your coding agent at them and it will get prop names, event names, and the property-vs-attribute rule right — without hallucinating.
+
+## The files
+
+Both files are generated from `dist/custom-elements.json` by `scripts/gen-llms.mjs` and committed to the repo, so they are included in every published npm package and always match the installed version.
+
+| File | Size | Use |
+|---|---|---|
+| `llms.txt` | ~4 KB | Orientation: install, the property rule, two-layer architecture, framework wiring, theming. Paste into a prompt. |
+| `llms-full.txt` | ~60 KB | Everything in `llms.txt` plus a generated props/events table for every element, a streaming recipe, and a build runbook. |
+
+### Where they live
+
+After `npm install @kitn.ai/chat`, both files are in the package:
+
+```
+node_modules/@kitn.ai/chat/llms.txt
+node_modules/@kitn.ai/chat/llms-full.txt
+```
+
+They are also published at:
+
+- **https://kitn-ai.github.io/chat/llms.txt**
+- **https://kitn-ai.github.io/chat/llms-full.txt**
+
+<Aside type="tip" title="Which file to use">
+For a one-off prompt, paste `llms.txt` (~4 KB). For a project where the agent revisits these components repeatedly, reference the installed path so it always reads the version that matches the installed package.
+</Aside>
+
+## Point an agent at them
+
+| Tool | What to do |
+|---|---|
+| **Claude Code** | Add `@node_modules/@kitn.ai/chat/llms.txt` to `CLAUDE.md`, or run `read node_modules/@kitn.ai/chat/llms-full.txt` in the session |
+| **GitHub Copilot** | Add the path to `.github/copilot-instructions.md`; workspace indexing picks it up |
+| **Cursor** | Reference the file in `.cursorrules` |
+| **Codex / ChatGPT** | Paste `https://kitn-ai.github.io/chat/llms.txt` into the prompt, or fetch it with a browsing tool |
+| **Any agent** | `npm install @kitn.ai/chat` — file is at `node_modules/@kitn.ai/chat/llms.txt` |
+
+## What agents most commonly get wrong
+
+These facts appear in both files. They are the three mistakes that produce silent failures.
+
+### 1 — Array and object data goes on JS properties, not HTML attributes
+
+An HTML attribute is always a string. Passing `messages`, `models`, `context`, `suggestions`, or `slashCommands` as an attribute silently fails.
+
+```js
+// ✅ property — works
+const chat = document.querySelector('kc-chat');
+chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
+```
+
+```html
+<!-- ❌ attribute — never works -->
+<kc-chat messages="[...]"></kc-chat>
+```
+
+Only scalar props — `placeholder`, `loading`, `theme` — work as attributes.
+
+### 2 — Events are non-bubbling `kc-*` CustomEvents
+
+Listen directly on the element, not on a parent:
+
+```js
+chat.addEventListener('kc-submit', (e) => {
+  console.log(e.detail.value); // the text the user typed
+});
+```
+
+Common events: `kc-submit`, `kc-feedback`, `kc-model-change`, `kc-new-chat`, `kc-select`.
+
+### 3 — Streaming requires a new array and a new object on every chunk
+
+Mutating an existing message object in place does not trigger a re-render. Replace instead:
+
+```js
+// ✅ triggers re-render on every chunk
+chat.messages = chat.messages.map(
+  (m) => (m.id === assistantId ? { ...m, content: accumulated } : m)
+);
+
+// ❌ does not trigger re-render
+chat.messages[i].content = accumulated;
+```
+
+The same rule applies to every array/object property: always assign a new reference.
+
+## Runbook: wire a streaming chat in 15 lines
+
+```js
+import '@kitn.ai/chat/elements';
+
+const chat = document.querySelector('kc-chat');
+chat.messages = [];
+
+chat.addEventListener('kc-submit', async (e) => {
+  const userText = e.detail.value;
+
+  // Append user message — new array
+  const history = [
+    ...chat.messages,
+    { id: crypto.randomUUID(), role: 'user', content: userText },
+  ];
+  chat.messages = history;
+  chat.loading = true;
+
+  // Empty assistant placeholder to stream into
+  const assistantId = crypto.randomUUID();
+  chat.messages = [...history, { id: assistantId, role: 'assistant', content: '' }];
+
+  // Stream — replace with a new array + new object on every chunk
+  let accumulated = '';
+  for await (const token of streamFromYourAPI(history)) {
+    accumulated += token;
+    chat.messages = chat.messages.map((m) =>
+      m.id === assistantId ? { ...m, content: accumulated } : m
+    );
+  }
+  chat.loading = false;
+});
+```
+
+## Custom Elements Manifest
+
+The raw machine-readable spec — every property, event, attribute, and type — is published at:
+
+```
+https://unpkg.com/@kitn.ai/chat/dist/custom-elements.json
+```
+
+This is the source from which `llms.txt` and `llms-full.txt` are generated. IDE plugins that consume the [Custom Elements Manifest](https://custom-elements-manifest.open-wc.org/) format can read it directly.
+
+## Related
+
+- [Installation](/chat/guides/installation/) — install the package and register the web components
+- [Getting Started](/chat/guides/getting-started/) — first steps with `<kc-chat>`

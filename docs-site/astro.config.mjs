@@ -54,13 +54,37 @@ export default defineConfig({
         SocialIcons: './src/components/overrides/SocialIcons.astro',
         ThemeSelect: './src/components/overrides/ThemeToggle.astro',
       },
-      // segmented like Vercel AI Elements: Docs · Components · Examples
+      // segmented like Vercel AI Elements: Docs · Frameworks · Recipes · Components · Examples
       sidebar: [
         {
           label: 'Docs',
           items: [
-            { label: 'Introduction', slug: 'guides/example' },
-            { label: 'Installation', slug: 'reference/example' },
+            { label: 'Introduction', slug: 'guides/introduction' },
+            { label: 'Installation', slug: 'guides/installation' },
+            { label: 'Getting Started', slug: 'guides/getting-started' },
+            { label: 'Theming', slug: 'guides/theming' },
+            { label: 'Accessibility', slug: 'guides/accessibility' },
+            { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
+          ],
+        },
+        {
+          label: 'Frameworks',
+          items: [
+            { label: 'Overview', slug: 'guides/frameworks/overview' },
+            { label: 'HTML', slug: 'guides/frameworks/html' },
+            { label: 'React', slug: 'guides/frameworks/react' },
+            { label: 'Vue', slug: 'guides/frameworks/vue' },
+            { label: 'Svelte', slug: 'guides/frameworks/svelte' },
+            { label: 'Angular', slug: 'guides/frameworks/angular' },
+            { label: 'Solid', slug: 'guides/frameworks/solid' },
+          ],
+        },
+        {
+          label: 'Recipes',
+          items: [
+            { label: 'Streaming', slug: 'guides/recipes/streaming' },
+            { label: 'Text to Speech', slug: 'guides/recipes/text-to-speech' },
+            { label: 'Speech to Text', slug: 'guides/recipes/speech-to-text' },
           ],
         },
         {
@@ -71,7 +95,7 @@ export default defineConfig({
         },
         {
           label: 'Examples',
-          items: [{ label: 'Full Chat App', slug: 'guides/example' }],
+          items: [{ label: 'Full Chat App', slug: 'examples/full-chat-app' }],
         },
       ],
     }),
