@@ -95,7 +95,7 @@ export default defineConfig({
           },
           {
             label: 'Components',
-            link: '/components/attachments/',
+            link: '/components/artifact/',
             id: 'components',
             // Auto-listed from src/content/docs/components/*.mdx.
             items: [{ autogenerate: { directory: 'components' } }],

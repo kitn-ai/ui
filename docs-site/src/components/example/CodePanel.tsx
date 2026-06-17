@@ -29,19 +29,19 @@ export function CodePanel(props: { snippets: () => Record<Framework, string>; de
           class="size-[18px] transition-transform duration-200" classList={{ 'rotate-180': open() }} aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
       </button>
       <Show when={open()}>
-        <div class="flex items-center gap-1 border-t border-line px-3 py-2">
+        <div class="flex items-center gap-1 border-t border-b border-line px-3" role="tablist">
           <For each={FRAMEWORKS}>
             {(f) => (
-              <button type="button" onClick={() => setFw(f)}
-                class="cursor-pointer appearance-none rounded-full border-0 px-3 py-1.5 text-sm font-semibold transition-colors"
-                classList={{ 'bg-brand text-white': fw() === f, 'bg-transparent text-ink-3 hover:text-ink': fw() !== f }}>
+              <button type="button" role="tab" aria-selected={fw() === f} onClick={() => setFw(f)}
+                class="-mb-px cursor-pointer appearance-none border-x-0 border-t-0 border-b-2 bg-transparent px-3 py-2 text-sm transition-colors"
+                classList={{ 'border-brand text-ink font-semibold': fw() === f, 'border-transparent text-ink-3 font-medium hover:text-ink': fw() !== f }}>
                 {f}
               </button>
             )}
           </For>
         </div>
-        {/* @ts-expect-error custom element — kc-code-block (Shiki) */}
-        <kc-code-block ref={setCodeEl} style={{ display: 'block' }} />
+        {/* @ts-expect-error custom element — kc-code-block (Shiki); flush (square) top under the tabs */}
+        <kc-code-block ref={setCodeEl} style={{ display: 'block', '--kc-code-radius': '0' }} />
       </Show>
     </div>
   );
