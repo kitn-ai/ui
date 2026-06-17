@@ -1,0 +1,96 @@
+---
+title: ResizableItem
+description: A passive panel slot inside a resizable layout — carries size, min, max, locked, and hidden attributes that the parent kc-resizable reads to lay out and constrain each panel.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-resizable-item</p>
+
+<p class="kc-lede">A passive panel slot that carries layout config for its enclosing `<kc-resizable>`. Place one per panel, set `size`, `min`, `max`, `locked`, or `hidden` as attributes, and the parent group lays it out — no scripting needed.</p>
+
+<Facts items={['Shadow DOM', 'All-attribute API', 'px or % sizes', 'Lockable panel', 'Hideable with reflow']} />
+
+## Preview
+
+Toggle `locked` and `hidden`, or type a `size` value — this is the live `<kc-resizable-item>` web component, mounted in a Solid island. It renders as a scroll container; pair it with `<kc-resizable>` to see the full layout in action.
+
+<Playground client:only="solid" tag="kc-resizable-item" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-resizable-item>` inside every `<kc-resizable>` to define each panel's constraints. Give a panel an explicit `size` when it has a natural default width (e.g. a sidebar at `"260px"` or a preview pane at `"35%"`); leave `size` off the main content area so it fills the remaining space. Use `locked` for fixed-chrome panels like navigation sidebars, and toggle `hidden` to collapse a panel (the adjacent divider drops and the remaining panels reflow automatically). Nest `<kc-resizable>` inside an item when you need more than three panels.
+</Aside>
+
+## Usage
+
+`<kc-resizable-item>` is always a direct child of `<kc-resizable>` — it has no standalone rendering. Register the custom elements once, then declare each panel as a child:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
+
+<kc-resizable orientation="horizontal" style="display:block;height:400px">
+  <kc-resizable-item size="260px" min="160px" locked>
+    <!-- sidebar content -->
+  </kc-resizable-item>
+  <kc-resizable-item>
+    <!-- main content fills remaining space -->
+  </kc-resizable-item>
+  <kc-resizable-item size="35%" min="200px">
+    <!-- preview / inspector pane -->
+  </kc-resizable-item>
+</kc-resizable>
+```
+
+Or register with the npm package and let your bundler tree-shake what it doesn't need:
+
+```ts
+import '@kitn.ai/chat/elements';
+```
+
+**`size`** sets the initial main-axis size. Use `"280px"` for a fixed-pixel start or `"25%"` for a proportional one. Omit it entirely on the flexible panel — it receives all remaining space (`flex: 1 1 0%`).
+
+**`min` / `max`** constrain how far the user can drag. Both accept `px` or `%` — for example `min="120px"` prevents a sidebar from collapsing to nothing, and `max="50%"` stops a pane from swallowing the layout.
+
+**`locked`** is a boolean attribute. When present, the panel's size is fixed and its adjacent divider handle becomes a non-interactive separator. Use it for chrome panels (nav, toolbar) that should never be resized by the user.
+
+**`hidden`** removes the panel from the layout — its divider is dropped and the remaining panels reflow. Toggle the attribute (or `el.hidden`) from JavaScript to collapse/restore a panel on demand.
+
+**Listening for resize events** — events are emitted by the parent `<kc-resizable>`, not by the item itself. Listen for `kc-change` (fires after every drag or visibility change, `detail.sizes` = panel percents) and `kc-maximize-change` on the `<kc-resizable>` host. See the [Resizable](/components/resizable) page for the full event reference and interactive layout demos.
+
+## Examples
+
+Each example shows a live `<kc-resizable-item>` with placeholder content — the item renders as a scroll container. Its layout attributes (`size`, `min`, `max`, `locked`, `hidden`) are read by the enclosing `<kc-resizable>` at runtime; you can confirm their effect in the full layout demos on the [Resizable](/components/resizable) page.
+
+### Flexible panel
+
+No `size` set — the item stretches to fill whatever space its siblings leave. This is the right choice for the primary content area in any layout.
+
+<Example client:visible tag="kc-resizable-item" data="flexible" />
+
+### Sized panel
+
+`size="260px"` sets the initial main-axis width to 260 px. The user can still drag it to resize unless `locked` is also set.
+
+<Example client:visible tag="kc-resizable-item" config={{ size: '260px', min: '140px', max: '50%' }} data="sized" />
+
+### Locked panel
+
+`locked` fixes the panel at its current `size` — adjacent dividers become non-draggable separators. Use this for nav sidebars and tool panels that should never resize.
+
+<Example client:visible tag="kc-resizable-item" config={{ size: '240px', locked: true }} data="locked" />
+
+## Props
+
+<PropTable tag="kc-resizable-item" />
+
+## Composed from
+
+<ComposedFrom tag="kc-resizable-item" />
+
+<NeedAHand />

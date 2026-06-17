@@ -52,6 +52,14 @@ el.addEventListener('kc-card', (e) => {
 });
 ```
 
+**`kc-card` event verbs** — the element emits three frozen Card-contract verbs on the bubbling `kc-card` CustomEvent:
+
+| verb | when | payload |
+|------|------|---------|
+| `ready` | on mount, once the card initialises | `{ kind: 'ready', cardId }` |
+| `submit` | user clicks confirm | `{ kind: 'submit', cardId, data: { selected: string[] } }` |
+| `error` | `data` is malformed (e.g. empty `tasks[]`) | `{ kind: 'error', cardId, message }` — the inline `kc-card` error is also rendered |
+
 **Toggling rows is purely local state** — the element buffers check states internally and only emits when the user clicks confirm. This keeps the wire quiet and the result atomic.
 
 **Gating rules** — the confirm button is enabled when the number of checked rows is `>= (min ?? (allowEmpty ? 0 : 1))` and `<= (max ?? ∞)`. When `max` is reached, all unchecked rows are disabled so the user can't over-select.
@@ -78,7 +86,7 @@ Each example is live — expand **Code** to copy the exact snippet for your fram
 
 `min` and `max` let you cap how many rows the user can pick. When `max` is reached, unchecked rows go non-interactive so over-selection is impossible.
 
-<Example client:visible tag="kc-tasks" data="bounded" />
+<Example client:visible tag="kc-tasks" config={{ heading: 'Pick up to 2 reviewers' }} data="bounded" />
 
 ### With descriptions
 
@@ -91,6 +99,12 @@ Each task row accepts an optional `description` field — a secondary line of te
 After the user confirms, set `el.resolution` to render the chromed summary view. The card shows which items were selected and removes the checkboxes and confirm button.
 
 <Example client:visible tag="kc-tasks" config={{ heading: 'Export report' }} data="resolved" />
+
+### Error state
+
+Passing an empty `tasks` array (or another malformed definition) triggers the inline `kc-card` error view and emits an `error` CardEvent. Listen for `e.detail.kind === 'error'` to surface the failure in your application.
+
+<Example client:visible tag="kc-tasks" data="error" />
 
 ## Props
 

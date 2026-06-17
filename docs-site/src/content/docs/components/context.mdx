@@ -1,0 +1,97 @@
+---
+title: Context
+description: A compact token-usage meter with a hover-card breakdown — drop it into any chat header to keep users aware of how much context window remains.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-context</p>
+
+<p class="kc-lede">A compact token-usage meter with a hover-card breakdown — shows used vs. available context window at a glance, with input, output, reasoning, and cache line items revealed on hover. Drop it into any chat header to keep users aware of how much runway is left.</p>
+
+<Facts items={['Shadow DOM', '1 event', 'Configurable thresholds', 'Hover-card breakdown', 'Estimated cost display']} />
+
+## Preview
+
+Hover the meter to reveal the full token breakdown. This is the live `<kc-context>` web component, mounted in a Solid island, seeded with a realistic mid-conversation usage snapshot.
+
+<Playground client:only="solid" tag="kc-context" />
+
+<Aside type="tip" title="When to use">
+Place `<kc-context>` in a chat header or toolbar alongside a model switcher to give users a live read on how much context window the conversation is consuming. The meter is `inline-block` and compact — it fits neatly next to other header controls without needing its own row. Wire up `kc-threshold-change` to take action (e.g. prompt the user to start a new conversation) when the level reaches `'warn'` or `'danger'`.
+</Aside>
+
+## Usage
+
+Register the custom elements once, then set the `context` **property** with a usage object:
+
+```js
+import '@kitn.ai/chat/elements';
+
+const el = document.querySelector('kc-context');
+el.context = {
+  usedTokens: 48200,
+  maxTokens: 200000,
+  inputTokens: 31000,
+  outputTokens: 17200,
+  reasoningTokens: 4200,  // optional — shown when present
+  cacheTokens: 8000,       // optional — shown when present
+  estimatedCost: 0.42,     // optional — shown in the footer
+};
+```
+
+A few things worth knowing:
+
+- **`context` is a JS property**, not an attribute. Assign it with `el.context = { … }` — the full shape is `{ usedTokens, maxTokens, inputTokens?, outputTokens?, reasoningTokens?, cacheTokens?, estimatedCost? }`.
+- **`warnThreshold` and `dangerThreshold`** are plain number properties (fractional 0–1). They default to `0.7` and `0.9` respectively. Assign them directly: `el.warnThreshold = 0.5`.
+- **The element renders nothing** when `context` is unset — it is invisible until data arrives, so it is safe to place it unconditionally in the header.
+- **`kc-threshold-change`** fires whenever the computed severity level transitions (`'ok'` → `'warn'` → `'danger'` or back). See the **Events** table below for the payload, and the **Code** panel above for the exact listener syntax in your framework.
+
+## Examples
+
+Each example is live — expand **Code** to copy the exact snippet for your framework.
+
+### Default
+
+A meter at roughly 24% usage with a full breakdown (input, output, reasoning, cache, and estimated cost). Hover the meter to reveal the popover.
+
+<Example client:visible tag="kc-context" />
+
+### Warning threshold
+
+At 75% the meter turns yellow — the built-in `warnThreshold` default of `0.7` (70%) is crossed. Hover to inspect the breakdown.
+
+<Example client:visible tag="kc-context" data="warn" />
+
+### Danger threshold
+
+At 92% the meter turns red — above the built-in `dangerThreshold` default of `0.9` (90%). This is the state you want to react to in a `kc-threshold-change` handler.
+
+<Example client:visible tag="kc-context" data="danger" />
+
+### Custom thresholds
+
+Lower `warnThreshold` to `0.5` and `dangerThreshold` to `0.75` so the meter warns earlier. At 55% (110 000 / 200 000) it renders yellow immediately.
+
+<Example client:visible tag="kc-context" data="customThresholds" />
+
+## Props
+
+<PropTable tag="kc-context" />
+
+## Events
+
+<EventTable tag="kc-context" />
+
+## Composed from
+
+<ComposedFrom tag="kc-context" />
+
+<NeedAHand />

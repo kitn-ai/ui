@@ -1,0 +1,100 @@
+---
+title: ScrollButton
+description: A floating "scroll to bottom" button that attaches to any scrollable container — visible when scrolled up, hidden when already at the bottom.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-scroll-button</p>
+
+<p class="kc-lede">A floating chevron button that watches a scrollable container and appears when the user scrolls up — click it to snap back to the bottom. Drop it next to any long list, chat thread, or feed in any framework.</p>
+
+<Facts items={['Shadow DOM', '1 event', '3 button variants', 'Auto-hides at bottom', 'Works via id or ancestor walk']} />
+
+## Preview
+
+Use the **variant** and **size** tabs to explore styles — this is the live `<kc-scroll-button>` web component, mounted in a Solid island. The button appears when the scroll container is not at the bottom; scroll the preview container up to reveal it, or interact with it to see `kc-scroll` logged in the Console.
+
+<Playground client:only="solid" tag="kc-scroll-button" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-scroll-button>` whenever you render a long scrollable list outside SolidJS and want a "jump to latest" affordance — a chat thread, a log pane, an activity feed. Position it as an overlay (absolute/fixed) in the bottom-right corner of the scroll area. In SolidJS, the `ScrollButton` primitive inside a `ChatContainerRoot` does the same job without the web component wrapper.
+</Aside>
+
+## Usage
+
+Register the custom elements once, then point the button at its scroll container using the `for` attribute:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
+
+<div id="my-feed" style="height:400px; overflow-y:auto; position:relative;">
+  <!-- list content -->
+</div>
+
+<!-- Overlay positioned in the bottom-right of the scroll area -->
+<kc-scroll-button for="my-feed"></kc-scroll-button>
+```
+
+Or import from the npm package so the element registers as part of your bundle:
+
+```js
+import '@kitn.ai/chat/elements';
+```
+
+**All three props are scalar attributes** — set them directly in HTML or as attributes in your framework template. There are no JS-property data objects to assign.
+
+**Wiring the scroll target** — use `for` with the DOM `id` of the scrollable container (mirrors the `<label for="...">` convention). When `for` is omitted the element walks up its own composed tree to the nearest scrollable ancestor — useful when `<kc-scroll-button>` is nested or slotted inside the container itself.
+
+**Visibility behaviour** — the button is hidden when the container is within 50 px of the bottom and visible otherwise. The transition is animated (translate + scale + opacity). No polling: it listens to the container's `scroll` event passively.
+
+**Listening for events** — the element fires `kc-scroll` (no detail payload) each time the button is clicked and `scrollToBottom()` completes. Use it to react to manual scroll events — for example, to pause auto-scrolling logic. See the **Events** table below and the **Code** panel in the Preview for the exact listener syntax in every framework.
+
+## Examples
+
+Each example is live — scroll the preview container upward to reveal the button, then click it to jump back to the bottom. Expand **Code** to copy the snippet for your framework.
+
+### Default
+
+The button wired to a sibling scroll container via the `for` attribute. Scroll the list upward — the button appears and snaps back to the bottom on click.
+
+<Example client:visible tag="kc-scroll-button" />
+
+### Ghost variant
+
+The `ghost` variant removes the border and background for a more subtle overlay that sits unobtrusively over light content.
+
+<Example client:visible tag="kc-scroll-button" config={{ variant: 'ghost' }} />
+
+### Solid (default) variant
+
+The `default` variant uses the filled button style from the design system — highest contrast, good for dark or image backgrounds where outline and ghost can get lost.
+
+<Example client:visible tag="kc-scroll-button" config={{ variant: 'default' }} />
+
+### Smaller icon size
+
+Use `size="icon-sm"` to produce a tighter button — fits well in compact panels or when the scroll area is narrow.
+
+<Example client:visible tag="kc-scroll-button" config={{ size: 'icon-sm' }} />
+
+## Props
+
+<PropTable tag="kc-scroll-button" />
+
+## Events
+
+<EventTable tag="kc-scroll-button" />
+
+## Composed from
+
+<ComposedFrom tag="kc-scroll-button" />
+
+<NeedAHand />

@@ -1,0 +1,96 @@
+---
+title: VoiceInput
+description: A mic button that records audio and transcribes it — drop it anywhere, wire one async function, and voice dictation just works.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-voice-input</p>
+
+<p class="kc-lede">A self-contained mic button that handles recording, then hands the raw audio off to your transcription function and fires the result as an event — plug in any speech-to-text backend and voice dictation is live in minutes.</p>
+
+<Facts items={['Shadow DOM', '2 events', 'Function-property pattern', 'Framework agnostic', 'Disableable']} />
+
+## Preview
+
+Toggle `disabled` to see the non-interactive state — this is the live `<kc-voice-input>` web component, mounted in a Solid island.
+
+<Playground client:only="solid" tag="kc-voice-input" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-voice-input>` when you want to add microphone-based dictation to a prompt input, search bar, or form field in **any framework** — Vue, Angular, Svelte, React, or plain HTML. In SolidJS, compose `VoiceInput` from `@kitn.ai/chat` directly for tighter reactive control. The element renders as an inline mic button sized to fit any toolbar.
+</Aside>
+
+## Usage
+
+Register the element once, then wire up the `transcribe` **function property** and listen for the `kc-transcription` event:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
+
+<kc-voice-input id="voice"></kc-voice-input>
+
+<script type="module">
+  const voice = document.getElementById('voice');
+
+  // transcribe is a FUNCTION property — assign it imperatively after the element
+  // is in the DOM. It receives the recorded Blob and must return a Promise<string>.
+  voice.transcribe = async (blob) => {
+    const form = new FormData();
+    form.append('audio', blob, 'recording.webm');
+    const res = await fetch('/api/transcribe', { method: 'POST', body: form });
+    const { text } = await res.json();
+    return text;
+  };
+
+  // Fired when transcription completes — wire the text to your input.
+  voice.addEventListener('kc-transcription', (e) => {
+    document.getElementById('prompt').value = e.detail.text;
+  });
+</script>
+```
+
+A few things worth knowing:
+
+- **`transcribe` is a JS property, not an attribute.** You must assign it with `el.transcribe = async blob => '...'` after the element is in the DOM. It is a function-valued callback — the element calls it with the recorded `Blob` and expects a `Promise<string>` back.
+- **Two event paths** — if you prefer to transcribe outside the element entirely, skip setting `transcribe` and listen for `kc-audio-captured` instead. The event fires with `{ blob: Blob }` immediately after recording stops. The `kc-transcription` event fires only when the `transcribe` function resolves.
+- **`disabled`** is a plain boolean attribute/property. Set it when recording is not yet allowed (e.g. while the assistant is responding).
+- **Registration** — `import '@kitn.ai/chat/elements'` is the recommended one-liner; the CDN `<script>` above is a zero-install alternative for plain HTML pages.
+- Open the **Code** panel in the Preview above to copy the exact framework snippet.
+
+## Examples
+
+Each example is live — expand **Code** to copy the snippet for your framework.
+
+### Default
+
+The out-of-the-box mic button, ready to record. Click it to start capturing; click again to stop. Without a `transcribe` property the raw audio is still emitted via `kc-audio-captured`.
+
+<Example client:visible tag="kc-voice-input" />
+
+### Disabled
+
+Set `disabled` to prevent interaction — useful while the assistant is streaming a response or microphone access has not yet been granted.
+
+<Example client:visible tag="kc-voice-input" config={{ disabled: true }} />
+
+## Props
+
+<PropTable tag="kc-voice-input" />
+
+## Events
+
+<EventTable tag="kc-voice-input" />
+
+## Composed from
+
+<ComposedFrom tag="kc-voice-input" />
+
+<NeedAHand />

@@ -77,6 +77,8 @@ export default function Playground(props: { tag: string }) {
     for (const c of enums) node.setAttribute(camelToKebab(c.prop), String(enumVals[c.prop]));
     node.setAttribute('theme', theme());
     node.style.display = 'block';
+    // light-DOM slot content (child elements props can't express)
+    if (typeof sample.html === 'string') node.innerHTML = sample.html;
     container.replaceChildren(node);
     customElements.upgrade(node);
     setHost(node);
@@ -93,7 +95,7 @@ export default function Playground(props: { tag: string }) {
   createEffect(() => {
     const h = host();
     if (!h) return;
-    for (const [k, v] of Object.entries(sample)) (h as any)[k] = v;
+    for (const [k, v] of Object.entries(sample)) if (k !== 'html') (h as any)[k] = v;
     for (const c of bools) (h as any)[c.prop] = Boolean(state()[c.prop]);
     for (const c of controls) if (c.kind === 'string' && state()[c.prop]) h.setAttribute(camelToKebab(c.prop), String(state()[c.prop]));
   });

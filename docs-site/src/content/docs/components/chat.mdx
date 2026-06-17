@@ -1,0 +1,126 @@
+---
+title: Chat
+description: A full-featured chat UI — thread, prompt composer, and optional header — packaged as a single Shadow DOM web component that drops into any framework.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-chat</p>
+
+<p class="kc-lede">A complete chat UI — scrollable message thread, prompt composer with suggestions and slash commands, and an optional header with model switcher and context meter — delivered as a single Shadow DOM web component that works in React, Vue, Svelte, Angular, or plain HTML without any style bleed.</p>
+
+<Facts items={['Shadow DOM', '8 events', 'Markdown + syntax highlighting', 'Model switcher', 'Slash-command palette', 'Starter suggestions']} />
+
+## Preview
+
+Adjust the controls to try `loading`, `search`, `voice`, and `actions-reveal` — this is the real `<kc-chat>` web component, mounted in a Solid island. Submit a message or click an action button to see events logged in the Console below.
+
+<Playground client:only="solid" tag="kc-chat" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-chat>` when you need a **drop-in chat panel in a non-Solid codebase** — a React app, a Vue shell, a plain HTML page, or an iframe. It isolates all styles in Shadow DOM, bundles its own SolidJS runtime, and requires nothing from the host page. If you are already in SolidJS and want fine-grained control, compose `ChatThread`, `Message`, and `PromptInput` directly instead. Give the element an explicit height (e.g. `height: 100vh` or `height: 600px`) — it fills its block, scroll and all.
+</Aside>
+
+## Usage
+
+Register the custom elements once, then set the rich data as JS **properties** and listen for **CustomEvents**:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
+
+<kc-chat id="chat" style="display:block; height:100vh;"></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements'; // or use the CDN script tag above
+
+  const chat = document.getElementById('chat');
+
+  // Non-scalar props are JS properties — not HTML attributes
+  chat.messages = [
+    { id: '1', role: 'user', content: 'How do I center a div?' },
+    { id: '2', role: 'assistant', content: 'Use `display: grid; place-items: center;`',
+      actions: ['copy', 'like', 'dislike'] },
+  ];
+
+  // Events are CustomEvents dispatched on the element itself
+  chat.addEventListener('kc-submit', (e) => {
+    console.log('user sent:', e.detail.value, 'attachments:', e.detail.attachments);
+  });
+  chat.addEventListener('kc-message-action', (e) => {
+    console.log(e.detail.messageId, e.detail.action); // 'copy' | 'like' | 'dislike' | …
+  });
+</script>
+```
+
+**Key points:**
+
+- `messages` is a **JS property** (set with `el.messages = [...]`, never as an attribute). Each entry carries `id`, `role` (`'user' | 'assistant'`), `content` (markdown for assistant messages), and optional `actions`, `attachments`, `reasoning`, `tools`, and `avatar`.
+- `suggestions`, `models`, `context`, `slashCommands`, and `slashActiveIds` are also JS properties — see the **Props** table for their shapes.
+- Scalar props (`placeholder`, `loading`, `proseSize`, `codeTheme`, etc.) can be set as HTML **attributes** or JS properties — whichever is more convenient.
+- **`loading`** — flip to `true` while awaiting a reply; the input disables and a typing indicator appears. Reset to `false` when the response arrives.
+- **Model switcher** — set `models` (an array of `{ id, name, provider? }`) to show a picker in the header; pair with `currentModel` (the selected id) and listen for `kc-model-change`.
+- **Context meter** — set `context` (`{ usedTokens, maxTokens, inputTokens?, outputTokens?, estimatedCost? }`) to show a token-usage gauge in the header.
+- **Slash commands** — set `slashCommands` to open a command palette when the user types `/`. Listen for `kc-slash-select` to receive the chosen command.
+
+See the **Events** table below for every event payload, and the **Code** panel in the Preview above for the exact per-framework listener syntax.
+
+## Examples
+
+Each example is live — expand **Code** to copy the exact snippet for your framework.
+
+### Basic thread
+
+A two-message exchange with copy, like, and dislike action buttons on the assistant reply. This is the starting point for any integration — set `messages`, wire `kc-submit`, and you have a working chat.
+
+<Example client:visible tag="kc-chat" />
+
+### Loading state
+
+Set `loading` to `true` while waiting for the assistant to respond. The input disables and a typing indicator appears in the thread. Reset it to `false` when the reply arrives.
+
+<Example client:visible tag="kc-chat" config={{ loading: true }} data="loading" />
+
+### Starter suggestions
+
+Pass a `suggestions` array to show clickable starter prompts above the input when the thread is empty. The default `suggestion-mode="submit"` sends the text immediately; use `fill` to just populate the input instead.
+
+<Example client:visible tag="kc-chat" data="withSuggestions" />
+
+### Model switcher and header
+
+Set `models` (an array of model options) and `chat-title` to activate the header bar. The user can pick a model from the dropdown; listen for `kc-model-change` to receive `{ modelId }`.
+
+<Example client:visible tag="kc-chat" config={{ chatTitle: 'Research Assistant' }} data="withModels" />
+
+### Context token meter
+
+Add `context` alongside `models` to show a live token-usage gauge in the header. The meter turns yellow near the warning threshold and red near the danger threshold.
+
+<Example client:visible tag="kc-chat" config={{ chatTitle: 'Research Assistant' }} data="withContext" />
+
+### Slash commands
+
+Set `slashCommands` to enable a command palette that opens when the user types `/`. Listen for `kc-slash-select` to receive the chosen command. Use `slash-compact` for single-line rows in dense layouts.
+
+<Example client:visible tag="kc-chat" data="withSlash" />
+
+## Props
+
+<PropTable tag="kc-chat" />
+
+## Events
+
+<EventTable tag="kc-chat" />
+
+## Composed from
+
+<ComposedFrom tag="kc-chat" />
+
+<NeedAHand />

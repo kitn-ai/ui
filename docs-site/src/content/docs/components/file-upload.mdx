@@ -1,0 +1,84 @@
+---
+title: FileUpload
+description: A click-or-drag dropzone that fires a single event with the selected files — ready to drop into any framework or plain HTML.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-file-upload</p>
+
+<p class="kc-lede">A click-or-drag dropzone that fires one event with the selected files — constrain it to a file type, limit to a single pick, or lock it entirely with a single attribute.</p>
+
+<Facts items={['Shadow DOM', '1 event', 'Click or drag-and-drop', 'Filterable by file type', 'Customisable label']} />
+
+## Preview
+
+Toggle `disabled` or adjust `accept` and `multiple` — this is the live `<kc-file-upload>` web component, mounted in a Solid island. Pick or drop files to see the `kc-files-added` event logged in the Console below.
+
+<Playground client:only="solid" tag="kc-file-upload" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-file-upload>` when you need a standalone dropzone **outside of SolidJS** — above a prompt input, in a dedicated upload panel, or anywhere you want a zero-dependency drag-and-drop target. In SolidJS, compose the `FileUpload` and `FileUploadTrigger` primitives directly for finer control. The element is `display: block` and fills its container width, so set a `max-width` on the parent to constrain the dropzone.
+</Aside>
+
+## Usage
+
+Register the custom elements once with `import '@kitn.ai/chat/elements'` (or load the CDN bundle via `<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js">`), then drop `<kc-file-upload>` in your markup.
+
+All four props are plain HTML **attributes** — no JS property assignment needed:
+
+- `accept` — the standard [`accept` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) (e.g. `image/*`, `.pdf,.docx`). Omit to allow any file type.
+- `multiple` — boolean. Defaults to `true`; set `multiple="false"` (or the property `el.multiple = false`) to restrict to a single file.
+- `disabled` — boolean. Disables both clicking and drag-and-drop.
+- `label` — the default dropzone label text. You can also replace it entirely with your own markup via the default `<slot>`.
+
+**Listening for files** — the element fires one CustomEvent: `kc-files-added`. Its `detail.files` is a native `File[]` — pass them straight to `FormData` or your upload function. See the **Events** table below for the full payload, and the **Code** panel in the Preview for the exact listener syntax in your framework.
+
+## Examples
+
+Each example is live — expand **Code** to copy the snippet for your framework.
+
+### Default
+
+A dropzone that accepts any file type. Click it or drag files onto it; the `kc-files-added` event fires with the selected `File[]`.
+
+<Example client:visible tag="kc-file-upload" />
+
+### Images only
+
+Set `accept="image/*"` and `multiple={false}` to limit the picker to a single image file — useful for avatar or cover-photo uploads.
+
+<Example client:visible tag="kc-file-upload" config={{ accept: 'image/*', multiple: false, label: 'Click or drop an image' }} />
+
+### Custom label
+
+Override the default copy with `label` — helpful when the context makes "Click or drop files to upload" too generic (e.g. inside a document-import panel).
+
+<Example client:visible tag="kc-file-upload" config={{ label: 'Drop your PDF or DOCX here to import' }} />
+
+### Disabled
+
+Set `disabled` to lock the dropzone when uploads are not yet available — for example, while a prior upload is in progress or the user lacks the right permissions.
+
+<Example client:visible tag="kc-file-upload" config={{ disabled: true, label: 'Uploads are disabled' }} />
+
+## Props
+
+<PropTable tag="kc-file-upload" />
+
+## Events
+
+<EventTable tag="kc-file-upload" />
+
+## Composed from
+
+<ComposedFrom tag="kc-file-upload" />
+
+<NeedAHand />

@@ -1,0 +1,97 @@
+---
+title: Markdown
+description: Renders a markdown string — with fenced-code syntax highlighting via Shiki — as a standalone web component that works in any framework or plain HTML.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-markdown</p>
+
+<p class="kc-lede">Turn a raw markdown string into beautifully rendered prose — headings, bold, italic, lists, blockquotes, and syntax-highlighted code fences — in any framework or plain HTML, with a single element.</p>
+
+<Facts items={['Shadow DOM', 'Shiki highlighting', '4 prose sizes', 'GFM support', 'Highlight on/off']} />
+
+## Preview
+
+Adjust `prose-size`, `code-theme`, and `code-highlight` in the controls — this is the live `<kc-markdown>` web component, mounted in a Solid island.
+
+<Playground client:only="solid" tag="kc-markdown" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-markdown>` whenever you need to render model output, formatted prose, or documentation outside of a SolidJS tree — inside a message bubble, a doc viewer, a help panel, or any content pane. In SolidJS, import the `Markdown` primitive directly for finer control. The element is `display: block` and expands to fill its container width, so constrain width on the parent when needed.
+</Aside>
+
+## Usage
+
+Register the custom elements once, then set the `content` **property** with your markdown string:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
+
+<kc-markdown id="md"></kc-markdown>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const md = document.getElementById('md');
+  md.content = '### Hello\nRenders **bold**, _italic_, and `code`.';
+</script>
+```
+
+A few things worth knowing:
+
+- **`content` is a JS property**, not an attribute. Assign it with `el.content = '...'` — HTML attributes don't support multiline strings cleanly, and the element reads the property on every assignment.
+- **`prose-size`** is an attribute. It scales the rendered body text: `xs`, `sm` (default), `base`, or `lg`. Use `sm` inside message bubbles and `base` or `lg` for standalone doc pages.
+- **`code-theme`** is also an attribute. It defaults to `github-dark-dimmed`. Any [Shiki theme](https://shiki.style/themes) works — try `github-light`, `nord`, or `dracula`.
+- Set **`code-highlight="false"`** to skip Shiki entirely and render code fences as plain monospace text — useful for raw log output or environments where loading the highlighter is undesirable.
+- The **Code** panel in the Preview above generates the exact framework snippet as you adjust the controls.
+
+## Examples
+
+Each example is live — expand **Code** to copy the snippet for your framework.
+
+### Default
+
+Headings, bold, italic, a list, a blockquote, and a highlighted TypeScript code fence — the full range of what `<kc-markdown>` handles out of the box.
+
+<Example client:visible tag="kc-markdown" />
+
+### Rich content
+
+A longer piece showcasing ordered lists, unordered lists, blockquotes, and a fenced code block together — representative of typical model output.
+
+<Example client:visible tag="kc-markdown" data="rich" />
+
+### Compact text size
+
+Use `prose-size="xs"` to tighten the font for dense contexts — inside cards, sidebar panels, or tooltips where a full-size body text would feel oversized.
+
+<Example client:visible tag="kc-markdown" config={{ proseSize: 'xs' }} data="short" />
+
+### Large prose
+
+Use `prose-size="lg"` for standalone reading contexts — documentation pages, help articles, or anywhere you want a comfortable, editorial-scale reading experience.
+
+<Example client:visible tag="kc-markdown" config={{ proseSize: 'lg' }} />
+
+### Highlighting disabled
+
+Set `code-highlight` to `false` to render code fences as plain monospace text with no Shiki — no highlighter loads, ideal for raw terminal output or log lines.
+
+<Example client:visible tag="kc-markdown" config={{ codeHighlight: false }} data="plain" />
+
+## Props
+
+<PropTable tag="kc-markdown" />
+
+## Composed from
+
+<ComposedFrom tag="kc-markdown" />
+
+<NeedAHand />

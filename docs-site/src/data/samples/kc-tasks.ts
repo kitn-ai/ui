@@ -32,7 +32,6 @@ const REQUIRE_ONE_DATA = {
 
 // Bounded — min/max keeps confirm gated until 1–2 rows are picked.
 const BOUNDED_DATA = {
-  heading: 'Pick up to 2 reviewers',
   confirmLabel: 'Request review',
   min: 1,
   max: 2,
@@ -55,6 +54,11 @@ const WITH_DESCRIPTIONS_DATA = {
   ],
 };
 
+// Error state — empty tasks array triggers the inline kc-card error + emits an 'error' CardEvent.
+const ERROR_DATA = {
+  tasks: [],
+};
+
 // Resolved — read-only state after user confirmed.
 const RESOLVED_DATA = {
   confirmLabel: 'Export',
@@ -75,5 +79,6 @@ export default {
       data: RESOLVED_DATA,
       resolution: { kind: 'submit', data: { selected: ['sum', 'charts'] } },
     },
+    error: { data: ERROR_DATA },
   },
 };

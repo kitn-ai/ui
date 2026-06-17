@@ -1,0 +1,107 @@
+---
+title: FileTree
+description: A collapsible, keyboard-navigable file explorer built from a flat list of paths — folders derive automatically from the slashes.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-file-tree</p>
+
+<p class="kc-lede">Pass a flat array of paths and get a collapsible, keyboard-navigable file explorer — folders are derived from the slashes automatically, so there's no tree to build by hand.</p>
+
+<Facts items={['Shadow DOM', 'ARIA tree / treeitem', '1 event', 'Derived folder structure', 'Fills its container']} />
+
+## Preview
+
+Click a row, use arrow keys, or toggle `active-file` in the controls — this is the live `<kc-file-tree>` web component, mounted in a Solid island. File-selection events are logged in the Console below.
+
+<Playground client:only="solid" tag="kc-file-tree" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-file-tree>` whenever you need a sidebar-style file explorer — inside `<kc-artifact>`'s Code tab, a `<kc-resizable>` panel, a project-level attachment browser, or any file-picker surface. Because it **fills its container**, give the parent (or the element itself) an explicit height; a `height: 320px` wrapper is all you need for a standalone panel.
+</Aside>
+
+## Usage
+
+Register the custom elements once, then set the `files` **JS property** (not an attribute — it's an array):
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
+
+<kc-file-tree style="display:block;height:320px"></kc-file-tree>
+
+<script type="module">
+  import '@kitn.ai/chat/elements'; // registers the custom elements
+
+  const tree = document.querySelector('kc-file-tree');
+
+  // `files` is a JS property (array). Folders are derived from `/` in each path.
+  tree.files = [
+    { path: 'index.html', type: 'html' },
+    { path: 'src/app.ts', type: 'other' },
+    { path: 'src/lib/format.ts', type: 'other' },
+    { path: 'assets/logo.svg', type: 'image' },
+  ];
+
+  tree.setAttribute('active-file', 'src/app.ts');
+  tree.addEventListener('kc-select', (e) => console.log('selected', e.detail.path));
+</script>
+```
+
+A few things worth knowing:
+
+- **`files` is a JS property** — assign the array with `el.files = [...]`. Each entry needs a `path` string; `type` (`'html' | 'pdf' | 'image' | 'other'`), `language`, `url`, and `code` are optional and pick the file-row icon or source.
+- **Folders are derived** — no explicit folder entries are needed. Any `/` in a path creates the intermediate folder nodes automatically.
+- **`active-file`** is a plain attribute (kebab-case). Set it to highlight a row; update it in response to `kc-select` to keep the selection in sync.
+- **`default-expanded`** is a JS property (`el.defaultExpanded = ['src', 'src/lib']`). Omit it to start with all folders open; pass an array to restrict which folders start expanded. Folder paths use the same slash-delimited format as `files` entries.
+- **Keyboard navigation** — the element is a proper ARIA `tree`. Arrow keys move focus; Enter or Space selects a file or toggles a folder; Home/End jump to the first/last visible row.
+- **Events** — `kc-select` fires on file selection with `{ path: string }` in `detail`. See the **Events** table below and the **Code** panel above for per-framework listener syntax.
+
+## Examples
+
+Each example is live — expand **Code** to copy the exact snippet for your framework.
+
+### Default tree
+
+A mixed project with HTML pages, TypeScript source, CSS, images, and a PDF — click any file row or use arrow keys to navigate. The `src/app.ts` file starts highlighted via `active-file`.
+
+<Example client:visible tag="kc-file-tree" />
+
+### Deeply nested layout
+
+A front-end project with multiple levels of nesting across `src/components`, `src/hooks`, and `docs` — good for verifying that deeply nested folders expand and collapse cleanly.
+
+<Example client:visible tag="kc-file-tree" data="nested" />
+
+### Mixed file types
+
+A design system asset bundle covering every icon variant: SVG images, PDFs, an HTML preview, JSON token files, and a CSS stylesheet.
+
+<Example client:visible tag="kc-file-tree" data="mixedTypes" />
+
+### Controlled expansion
+
+Pass `defaultExpanded` to restrict which folders start open. Here only `src` is open on first render — `tests`, `src/routes`, and `src/middleware` all start collapsed, letting users expand them on demand. `src/index.ts` starts selected.
+
+<Example client:visible tag="kc-file-tree" data="collapsed" />
+
+## Props
+
+<PropTable tag="kc-file-tree" />
+
+## Events
+
+<EventTable tag="kc-file-tree" />
+
+## Composed from
+
+<ComposedFrom tag="kc-file-tree" />
+
+<NeedAHand />

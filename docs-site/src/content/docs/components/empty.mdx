@@ -1,0 +1,91 @@
+---
+title: Empty
+description: A centred empty-state block — icon, title, description, and actions — for when a list or thread has nothing to show yet.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-empty</p>
+
+<p class="kc-lede">A centred empty-state block with a media slot, a title, a description, and a content slot for actions. Reach for it whenever a list, thread, or panel has nothing to show — it keeps the layout grounded rather than leaving the user with a blank screen.</p>
+
+<Facts items={['Shadow DOM', '2 props', 'Media slot', 'Actions slot', 'Works in any framework']} />
+
+## Preview
+
+Type into the `empty-title` and `description` inputs to see the copy update live — this is the real `<kc-empty>` web component, mounted in a Solid island.
+
+<Playground client:only="solid" tag="kc-empty" />
+
+<Aside type="tip" title="When to use">
+Place `<kc-empty>` in the area where content would normally appear — a conversation list, a search results panel, a file explorer — whenever that area is empty. Give the element (or its parent) an explicit height so the vertically-centred layout renders correctly. Project a contextual icon into `slot="media"` and a call-to-action button into the default slot to give users a clear next step.
+</Aside>
+
+## Usage
+
+Register the custom elements once, then set `empty-title` and `description` as plain HTML attributes:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
+
+<kc-empty
+  empty-title="No conversations yet"
+  description="Start a new chat to see it appear here."
+>
+  <!-- slot="media": your own icon, image, or illustration -->
+  <svg slot="media" width="28" height="28" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+
+  <!-- default slot: actions, styled with your own page CSS -->
+  <button>New chat</button>
+</kc-empty>
+```
+
+A few things worth knowing:
+
+- **`empty-title`** — note the `empty-title` attribute name, not `title`. The global HTML `title` attribute is reserved, so the element exposes its own prefixed attribute.
+- **`description`** — a supporting sentence below the heading. Both props default to an empty string; neither is required.
+- **Slots live in the light DOM** — children projected via `slot="media"` and the default slot are your own markup, so style them with your page's CSS rather than the element's shadow styles.
+- **Registration** — the preferred approach is `import '@kitn.ai/chat/elements';` as a module import in your bundle entry. The CDN `<script>` above works for quick prototypes and plain HTML pages.
+- **Height** — the element uses flexbox to vertically centre its content. Its parent needs a height set (e.g. `height: 100%` or `flex: 1`) for the centred layout to take effect.
+- The **Code** panel in the Preview above shows the exact per-framework snippet as you edit the controls.
+
+## Examples
+
+Each example is live — expand **Code** to copy the snippet for your framework.
+
+### Conversation list placeholder
+
+The most common placement: an empty conversations sidebar waiting for the user's first chat.
+
+<Example client:visible tag="kc-empty" config={{ emptyTitle: 'No conversations yet', description: 'Start a new chat to see it appear here.' }} />
+
+### Search with no results
+
+Use a different title and description to communicate a zero-results state rather than a first-run state.
+
+<Example client:visible tag="kc-empty" config={{ emptyTitle: 'No results found', description: 'Try a different search term or clear your filters.' }} />
+
+### Title only
+
+Omitting the description gives a minimal, uncluttered treatment — useful when the empty state is self-explanatory or the layout is tight.
+
+<Example client:visible tag="kc-empty" config={{ emptyTitle: 'Nothing here yet' }} />
+
+## Props
+
+<PropTable tag="kc-empty" />
+
+## Composed from
+
+<ComposedFrom tag="kc-empty" />
+
+<NeedAHand />

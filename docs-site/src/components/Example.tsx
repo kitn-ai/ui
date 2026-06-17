@@ -39,9 +39,13 @@ export default function Example(props: Props) {
     for (const [k, v] of Object.entries(config)) if (typeof v === 'string') node.setAttribute(camelToKebab(k), v);
     node.setAttribute('theme', theme());
     node.style.display = 'block';
+    // `html` in the sample is light-DOM slot content (child elements the generic
+    // API can't express as props) — set it BEFORE upgrade so it's present when
+    // the element first renders.
+    if (typeof sample.html === 'string') node.innerHTML = sample.html;
     container.replaceChildren(node);
     customElements.upgrade(node);
-    for (const [k, v] of Object.entries(sample)) (node as any)[k] = v;
+    for (const [k, v] of Object.entries(sample)) if (k !== 'html') (node as any)[k] = v;
     for (const [k, v] of Object.entries(config)) if (typeof v === 'boolean') (node as any)[k] = v;
     new MutationObserver(() => node.setAttribute('theme', theme()))
       .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });

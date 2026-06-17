@@ -1,0 +1,112 @@
+---
+title: Reasoning
+description: A collapsible block that surfaces a model's chain-of-thought — auto-expands while streaming, collapses when done.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-reasoning</p>
+
+<p class="kc-lede">A collapsible thinking block that shows the model's reasoning process. It auto-expands while the thought is streaming and collapses automatically when streaming stops — no wiring required.</p>
+
+<Facts items={['Shadow DOM', '1 event', 'Auto-expands while streaming', 'Markdown rendering', 'Controlled or uncontrolled']} />
+
+## Preview
+
+Toggle `streaming` and `markdown` to see the live behaviour — this is the real `<kc-reasoning>` web component, mounted in a Solid island. Open and close the block to see `kc-open-change` logged in the Console below.
+
+<Playground client:only="solid" tag="kc-reasoning" />
+
+<Aside type="tip" title="When to use">
+Place `<kc-reasoning>` between the assistant message content and any tool calls whenever the model produces a chain-of-thought trace. Set `streaming` while the thought is arriving and clear it when the stream ends — the element handles expand/collapse automatically. Use the `open` property if you need programmatic control, for instance to re-open a reasoning block from a parent UI button.
+</Aside>
+
+## Usage
+
+Register the custom elements once with `import '@kitn.ai/chat/elements'` (or include the CDN bundle), then set the `text` **property** and the optional `label` attribute:
+
+```html
+<kc-reasoning id="reason" label="Reasoning"></kc-reasoning>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const reason = document.getElementById('reason');
+  reason.text = 'First I parse the request, then I plan the steps, then I execute.';
+
+  // Set while the thought is arriving; clear it when the stream ends.
+  // reason.streaming = true;
+
+  // Drive open state programmatically (optional — leave unset for uncontrolled).
+  // reason.open = true;
+
+  reason.addEventListener('kc-open-change', (e) => {
+    console.log('open:', e.detail.open);
+  });
+</script>
+```
+
+A few things worth knowing:
+
+- **`text` is a JS property**, not an attribute. Assign it with `el.text = '...'` — you cannot pass a multi-sentence string as an HTML attribute.
+- **`streaming`** is a boolean property. Set it to `true` when the thought is arriving and `false` (or clear it) when done. The element auto-expands on entry and collapses on exit.
+- **`open`** is an optional controlled property. Leave it unset for uncontrolled behaviour (the trigger toggles it); set it explicitly when a parent component needs to drive the open state. The element fires `kc-open-change` whenever the state changes so you can sync it.
+- **`markdown`** defaults to `true`. Set it to `false` to render the text as plain pre-formatted content — useful for raw log output.
+- **`label`** is a scalar attribute that overrides the default trigger text (`"Reasoning"`). Change it to match your brand or the model's terminology (e.g. `"Thinking"` or `"Chain of thought"`).
+
+See the **Events** table below for the full `kc-open-change` payload, and expand the **Code** panel above for the exact listener syntax in every supported framework.
+
+## Examples
+
+Each example is live — expand **Code** to copy the exact snippet for your framework.
+
+### Default
+
+A collapsed reasoning block with the default label and uncontrolled open state. Click the trigger to expand and collapse it; watch `kc-open-change` fire in the Console above.
+
+<Example client:visible tag="kc-reasoning" />
+
+### Streaming
+
+With `streaming` set to `true`, the block auto-expands immediately — as it would while a model is actively generating its chain-of-thought. When `streaming` flips back to `false`, the block collapses automatically.
+
+<Example client:visible tag="kc-reasoning" config={{ streaming: true }} />
+
+### Custom label
+
+Override the trigger label with the `label` attribute to match your product's terminology — for example `"Thinking"` instead of the default `"Reasoning"`.
+
+<Example client:visible tag="kc-reasoning" config={{ label: 'Thinking' }} />
+
+### Markdown rendering
+
+With `markdown` enabled (the default), the text is rendered as styled markdown — headings, bold, code spans, and paragraphs all resolve correctly. This example shows a structured multi-step plan.
+
+<Example client:visible tag="kc-reasoning" data="markdown" />
+
+### Markdown disabled
+
+Set `markdown` to `false` to render the text as plain pre-formatted content. Useful for raw model output, log lines, or content that contains literal asterisks or backticks you do not want interpreted.
+
+<Example client:visible tag="kc-reasoning" config={{ markdown: false }} />
+
+## Props
+
+<PropTable tag="kc-reasoning" />
+
+## Events
+
+<EventTable tag="kc-reasoning" />
+
+## Composed from
+
+<ComposedFrom tag="kc-reasoning" />
+
+<NeedAHand />

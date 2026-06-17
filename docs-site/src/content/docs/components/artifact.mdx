@@ -1,0 +1,115 @@
+---
+title: Artifact
+description: A sandboxed preview + code viewer for AI-generated artifacts — frames a hosted URL with a nav toolbar and a switchable Preview|Code panel.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-artifact</p>
+
+<p class="kc-lede">A full-panel artifact viewer that frames a consumer-hosted URL in a sandboxed `<iframe>` with a functional nav toolbar, and pairs it with a switchable Code tab showing a file tree and syntax-highlighted source — the "Claude Artifacts / ChatGPT Canvas" pattern, ready to drop into any framework.</p>
+
+<Facts items={['Shadow DOM', 'Sandboxed iframe', 'Preview + Code tabs', '4 events', 'Configurable toolbar']} />
+
+## Preview
+
+Toggle `tab`, `expandable`, `open-in-tab`, and the `no-*` flags to explore the toolbar options — this is the live `<kc-artifact>` web component, mounted in a Solid island. Switch to the Code tab to browse the file tree and source. Interactions appear in the Console below.
+
+<Playground client:only="solid" tag="kc-artifact" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-artifact>` whenever an AI response produces a runnable or viewable deliverable — a generated web page, a markdown doc, an image, or a PDF — that you want to show beside the conversation. Pair it with `<kc-resizable>` for a draggable split-pane layout (the `list | chat | artifact` shell). The component fills its container, so give the parent — or the element itself — an explicit height.
+</Aside>
+
+## Usage
+
+Register once with `import '@kitn.ai/chat/elements'` (or load the CDN bundle), then point `src` at the hosted URL and set the `files` **property** (a JS array) for the Code tab:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
+
+<kc-artifact
+  src="https://your-backend.example/artifacts/abc/index.html"
+  style="display:block;height:520px"
+></kc-artifact>
+
+<script type="module">
+  const el = document.querySelector('kc-artifact');
+
+  // `files` is a JS property — set it as an array, not an attribute.
+  el.files = [
+    { path: 'index.html', url: '…/index.html', type: 'html', code: '<!DOCTYPE …>' },
+    { path: 'about.html', url: '…/about.html', type: 'html', code: '<!DOCTYPE …>' },
+    { path: 'css/site.css', url: '…/site.css', type: 'other', language: 'css', code: '…' },
+    { path: 'assets/logo.svg', type: 'image' },
+  ];
+
+  el.addEventListener('kc-navigate', (e) => console.log('navigated to', e.detail.url));
+  el.addEventListener('kc-tab-change', (e) => console.log('tab is now', e.detail.tab));
+  el.addEventListener('kc-file-select', (e) => console.log('selected file', e.detail.path));
+</script>
+```
+
+A few things worth knowing:
+
+- **`files` is a JS property**, not an attribute. Each entry has `path` (required), an optional `url` for the iframe preview, optional inline `code` + `language` for the Code tab, and an optional `type` (`'html' | 'pdf' | 'image' | 'other'`). Folders are inferred from the `/`-separated paths.
+- **`src`** is the initial URL loaded in the preview iframe. It is a plain HTML attribute and can be changed at runtime — the toolbar address field tracks live navigation automatically.
+- **The iframe `sandbox`** defaults to `allow-scripts allow-forms` (no `allow-same-origin`). Widen it via the `sandbox` attribute only when you trust the artifact content.
+- **Toolbar affordances** are individually configurable. The five default-shown items each have a corresponding `no-*` flag (`no-nav`, `no-reload`, `no-home`, `no-path-field`, `no-tabs`). Two more are opt-in and hidden by default: `expandable` and `open-in-tab`. When all affordances are hidden the toolbar bar disappears entirely (zero height).
+- **`standalone`** adds rounded corners and a border — use it when the artifact is rendered as an inline tile or modal rather than flush inside a panel. In default (in-panel) mode the element is square and borderless so it fits inside `<kc-resizable>` without double-borders.
+- **Listening for events** — the element fires four CustomEvents: `kc-navigate` (`detail.url`), `kc-tab-change` (`detail.tab`), `kc-file-select` (`detail.path`), and `kc-maximize-change` (`detail.maximized`). See the **Events** table below and the **Code** panel above for exact per-framework syntax.
+
+## Examples
+
+Each example is live — expand **Code** to copy the exact snippet for your framework. Note that in these docs examples the preview iframe is blank (no hosted fixture URL); switch to the Code tab in each example to see the file tree and syntax-highlighted source.
+
+### Code tab view
+
+Opens directly on the Code tab with the CSS file highlighted, showing the file tree sidebar and syntax-highlighted source without needing a hosted URL.
+
+<Example client:visible tag="kc-artifact" config={{ tab: 'code', activeFile: 'css/site.css' }} />
+
+### Minimal — preview only
+
+All five default-shown toolbar affordances suppressed with `no-nav`, `no-reload`, `no-home`, `no-path-field`, and `no-tabs`. The toolbar bar disappears entirely, leaving just the preview iframe — ideal for a chrome-free embedded tile.
+
+<Example client:visible tag="kc-artifact" config={{ noNav: true, noReload: true, noHome: true, noPathField: true, noTabs: true }} />
+
+### Open in new tab
+
+The `open-in-tab` button (opt-in, hidden by default) opens the current preview URL in a new browser tab. It tracks live navigation — clicking it after the user has browsed to a sub-page opens that sub-page, not the original `src`. The button is disabled when the URL is blank.
+
+<Example client:visible tag="kc-artifact" config={{ openInTab: true }} />
+
+### Standalone chrome
+
+`standalone` adds rounded corners and a border — the card-style chrome for an artifact rendered outside a panel layout (e.g. as a modal or inline tile in a message thread). `readonly-path` keeps the address field visible and navigation-tracking but non-editable, useful when your app controls the URL programmatically.
+
+<Example client:visible tag="kc-artifact" config={{ standalone: true, readonlyPath: true }} />
+
+### Expandable with open in new tab
+
+Both opt-in toolbar affordances enabled together: `expandable` reveals an expand-to-fill button that fires `kc-maximize-change`, and `open-in-tab` adds the external-link button. Note that `standalone` suppresses `expandable` (there is no enclosing resizable to expand into).
+
+<Example client:visible tag="kc-artifact" config={{ expandable: true, openInTab: true }} />
+
+## Props
+
+<PropTable tag="kc-artifact" />
+
+## Events
+
+<EventTable tag="kc-artifact" />
+
+## Composed from
+
+<ComposedFrom tag="kc-artifact" />
+
+<NeedAHand />

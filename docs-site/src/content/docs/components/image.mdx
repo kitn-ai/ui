@@ -1,0 +1,91 @@
+---
+title: Image
+description: Renders a base64 or byte-array image with a skeleton placeholder while it resolves — no hosted URL required.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-image</p>
+
+<p class="kc-lede">Display a model-generated or in-memory image directly from a base64 string or raw byte array — no CDN upload, no hosted URL needed.</p>
+
+<Facts items={['Shadow DOM', 'Base64 or Uint8Array input', 'Skeleton while resolving', 'SVG / PNG / JPEG / any MIME type', 'Alt text for accessibility']} />
+
+## Preview
+
+Set `base64` or `bytes` and the image renders immediately — this is the live `<kc-image>` web component, mounted in a Solid island.
+
+<Playground client:only="solid" tag="kc-image" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-image>` when you receive raw image data from a model or API response and need to display it inline — inside a message bubble, a card body, or an artifact preview — without uploading it first. In SolidJS, compose the `Image` primitive directly for finer control. The element is `display: inline-block` and the image fills to the parent container's width, so constrain width on the parent when needed.
+</Aside>
+
+## Usage
+
+Register the custom elements once, then assign either `base64` (paired with `media-type`) or `bytes` as a property:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
+
+<kc-image id="img" media-type="image/png" alt="A generated chart"></kc-image>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';   // registers the custom elements
+
+  const img = document.getElementById('img');
+
+  // Option A — base64 string (attribute-compatible):
+  img.base64 = '<...base64 encoded image data...>';
+
+  // Option B — raw bytes as a property:
+  // img.bytes = new Uint8Array([...]);
+</script>
+```
+
+A few things worth knowing:
+
+- **`base64`** is a scalar attribute — you can set it as `el.base64 = '...'` or as the `base64` HTML attribute. Pair it with the `media-type` attribute so the browser decodes it correctly.
+- **`bytes`** is a **JS property** (non-scalar). It accepts a `Uint8Array` directly — set it as `el.bytes = new Uint8Array([...])`. You do not need `media-type` when using raw bytes if the format is detectable, but providing it is recommended.
+- **`media-type`** defaults to `image/png`. Override it for SVG (`image/svg+xml`), JPEG (`image/jpeg`), or any other MIME type.
+- **`alt`** defaults to an empty string. Always provide meaningful alt text for accessibility — screen readers announce it in place of the image.
+- A **skeleton placeholder** is shown while the image resolves, so layout does not shift unexpectedly on first paint.
+- The **Code** panel in the Preview above generates the exact framework snippet as you adjust the controls.
+
+## Examples
+
+Each example is live — expand **Code** to copy the snippet for your framework.
+
+### Purple star
+
+A base64-encoded SVG rendered with an explicit `media-type` and descriptive alt text — the same setup shown in the Storybook Default story.
+
+<Example client:visible tag="kc-image" />
+
+### Teal circle
+
+A different base64 image to confirm any SVG (or other format) works — swap the `base64` property and the `media-type` attribute for each image you display.
+
+<Example client:visible tag="kc-image" data="circle" />
+
+### With descriptive alt text
+
+Pair the image with a specific `alt` string so screen readers announce the image correctly. Good alt text describes the content or purpose of the image, not its visual appearance.
+
+<Example client:visible tag="kc-image" data="checkmark" />
+
+## Props
+
+<PropTable tag="kc-image" />
+
+## Composed from
+
+<ComposedFrom tag="kc-image" />
+
+<NeedAHand />

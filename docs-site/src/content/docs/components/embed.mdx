@@ -1,0 +1,100 @@
+---
+title: Embed
+description: A privacy-first lazy media embed that renders a poster and play button — no iframe, no third-party JS, no cookies — until the user clicks play.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-embed</p>
+
+<p class="kc-lede">Drop a YouTube, Vimeo, or custom player into any generative-UI response. The element renders a poster and play button first — no provider iframe, scripts, or cookies load until the user opts in.</p>
+
+<Facts items={['Shadow DOM', 'YouTube · Vimeo · generic', 'Privacy-first lazy facade', 'Allowlist required for generic origins', 'Always-present "Open on provider" fallback']} />
+
+## Preview
+
+Interact with the live `<kc-embed>` below — the default data is a YouTube video. Click play to see the iframe load on demand.
+
+<Playground client:only="solid" tag="kc-embed" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-embed>` when an AI response references a video and you want to surface it inline without silently loading third-party scripts on page render. It is ideal for YouTube and Vimeo links inside chat messages, cards, or document previews. For arbitrary iframe content (dashboards, player SDKs) use the `generic` provider — but only after allowlisting the origin with `configureEmbedAllowlist`.
+</Aside>
+
+## Usage
+
+Register the custom elements, then set the `data` **JS property** (not an attribute) on the element. The `card-id` attribute is optional but recommended when using `<kc-embed>` inside a `<kc-cards>` stream so events correlate back to the right card.
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
+
+<kc-embed id="em"></kc-embed>
+
+<script type="module">
+  import '@kitn.ai/chat/elements'; // module-bundler registration
+
+  const em = document.getElementById('em');
+  em.cardId = 'card-embed-1';
+  em.data = { provider: 'youtube', id: 'dQw4w9WgXcQ', title: 'Product intro' };
+</script>
+```
+
+A few things worth knowing:
+
+- **`data` is a JS property**, not an attribute. Assign it with `el.data = { … }`. The object shape is `{ provider, id?, url?, title?, poster?, start?, aspectRatio? }`.
+- **`provider`** is required and must be `'youtube'`, `'vimeo'`, or `'generic'`. YouTube and Vimeo are built-in; no extra configuration is needed.
+- **YouTube** embeds via `youtube-nocookie.com`; **Vimeo** appends `dnt=1`. Neither loads any provider JS until the user clicks play.
+- **`generic` embeds are blocked by default.** Before setting a `generic` payload, call `configureEmbedAllowlist(['https://your-player.example.com'])` (imported from `@kitn.ai/chat`). The element rejects any origin not on the list to prevent an agent from framing an arbitrary URL.
+- **Vimeo has no static thumbnail URL.** Supply a `poster` URL in the payload, or the facade renders without an image.
+- **`aspectRatio`** controls the embed container proportions: `'16:9'` (default), `'4:3'`, `'1:1'`, or `'9:16'` for vertical shorts.
+- **"Open on provider" link** — a persistent affordance is always rendered so a blocked or unplayable embed is never a dead end. When clicked it dispatches an `open` verb via the shared `kc-card` bubbling event (`e.detail.kind === 'open'`, `e.detail.target === 'tab'`). Listen with `el.addEventListener('kc-card', handler)` and open the URL yourself (see the **Code** panel above for the exact per-framework snippet).
+
+## Examples
+
+Each example is live — expand **Code** to copy the snippet for your framework.
+
+### YouTube (lazy)
+
+The default case: a YouTube video rendered as a poster and play button. The provider iframe loads from `youtube-nocookie.com` only when the user clicks play.
+
+<Example client:visible tag="kc-embed" data="youtube" />
+
+### Vimeo
+
+Vimeo works the same way — pass a `poster` URL because Vimeo does not expose a static thumbnail endpoint. The iframe loads with `dnt=1` on play.
+
+<Example client:visible tag="kc-embed" data="vimeo" />
+
+### Generic player
+
+An allowlisted `https` URL framed as a generic embed. Call `configureEmbedAllowlist(['https://your-player.example.com'])` before setting `data` — any origin not on the list is rejected to prevent unintended framing.
+
+<Example client:visible tag="kc-embed" data="generic" />
+
+### Custom aspect ratio (9:16)
+
+Set `aspectRatio` to `'9:16'` for a vertical short. The embed container resizes to match — useful when displaying portrait-orientation video inside a narrow card.
+
+<Example client:visible tag="kc-embed" data="aspectRatio916" />
+
+### Blocked-embed fallback
+
+Some providers refuse framing via `X-Frame-Options` or CSP `frame-ancestors`. The element cannot detect this cross-origin, so the **"Open on provider"** affordance is always visible — a blocked embed is never a dead end.
+
+<Example client:visible tag="kc-embed" data="youtube" />
+
+## Props
+
+<PropTable tag="kc-embed" />
+
+## Composed from
+
+<ComposedFrom tag="kc-embed" />
+
+<NeedAHand />

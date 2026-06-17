@@ -1,0 +1,94 @@
+---
+title: Checkpoint
+description: A compact bookmark button that marks a restore point in a conversation — with an optional label and tooltip.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-checkpoint</p>
+
+<p class="kc-lede">A compact bookmark button for marking a restore point in a conversation thread. Drop it in a message action bar or toolbar, add an optional label and tooltip, and listen for <code>kc-select</code> to act on the click.</p>
+
+<Facts items={['Shadow DOM', '1 event', '3 variants', '5 sizes', 'Icon-only or labeled']} />
+
+## Preview
+
+Toggle `variant` and `size` — this is the live `<kc-checkpoint>` web component, mounted in a Solid island. Click the button to see the `kc-select` event logged in the Console below.
+
+<Playground client:only="solid" tag="kc-checkpoint" />
+
+<Aside type="tip" title="When to use">
+Place `<kc-checkpoint>` inside a message action bar or a chat toolbar wherever users might want to save a restore point and jump back to it later. Use the `ghost` variant (the default) to keep it unobtrusive; switch to `outline` or `default` when the checkpoint needs more visual emphasis. For icon-only buttons, pick an `icon` or `icon-sm` size and always set `tooltip` so screen readers and hovering users know what the button does.
+</Aside>
+
+## Usage
+
+Register the custom elements once with `import '@kitn.ai/chat/elements'` (or load the CDN bundle), then configure `<kc-checkpoint>` with HTML attributes and listen for its `kc-select` CustomEvent:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
+
+<kc-checkpoint label="Restore" tooltip="Restore this checkpoint" variant="outline" size="sm"></kc-checkpoint>
+
+<script type="module">
+  const cp = document.querySelector('kc-checkpoint');
+  cp.addEventListener('kc-select', () => console.log('restore checkpoint'));
+</script>
+```
+
+All four props — `label`, `tooltip`, `variant`, and `size` — are plain HTML attributes (scalars), so they work in every framework without any special JS-property binding.
+
+**Choosing a size** — use `sm` (default) for inline action bars alongside other controls, `icon` or `icon-sm` when no label is shown, and `md` or `lg` for standalone placements where the button needs more tap area.
+
+**Icon-only accessibility** — when omitting `label`, always set `tooltip` so the element can use it as the accessible name (`aria-label`). If neither is set, the element falls back to the name `"Checkpoint"`.
+
+**Listening for events** — `kc-select` fires with no detail payload whenever the button is clicked. See the **Events** table below and the **Code** panel in the Preview for the exact listener syntax in your framework.
+
+## Examples
+
+Each example is live — expand **Code** to copy the snippet for your framework.
+
+### Labeled
+
+A checkpoint button with a visible label. The `outline` variant gives it defined edges while still being lightweight in a message row.
+
+<Example client:visible tag="kc-checkpoint" config={{ label: 'Restore', variant: 'outline' }} />
+
+### Icon only
+
+No label — just the bookmark icon. Use an `icon-sm` size for tight action bars and pair it with a `tooltip` so the intent is always clear.
+
+<Example client:visible tag="kc-checkpoint" config={{ size: 'icon-sm', tooltip: 'Restore this checkpoint' }} />
+
+### Ghost variant (default)
+
+The default `ghost` style blends into any surface. Add a `tooltip` for a hover hint without the visual noise of a border.
+
+<Example client:visible tag="kc-checkpoint" config={{ variant: 'ghost', tooltip: 'Save checkpoint', label: 'Save' }} />
+
+### Default variant
+
+The filled `default` variant raises the button off the surface — useful when the checkpoint action is the primary affordance in its container.
+
+<Example client:visible tag="kc-checkpoint" config={{ variant: 'default', label: 'Checkpoint', size: 'md' }} />
+
+## Props
+
+<PropTable tag="kc-checkpoint" />
+
+## Events
+
+<EventTable tag="kc-checkpoint" />
+
+## Composed from
+
+<ComposedFrom tag="kc-checkpoint" />
+
+<NeedAHand />
