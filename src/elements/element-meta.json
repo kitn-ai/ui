@@ -3188,8 +3188,15 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Initial collapsed state of the sidebar (default false).",
-        "default": "false",
+        "description": "Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultSidebarCollapsed",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML.",
         "displayType": "undefined | false | true"
       }
     ],

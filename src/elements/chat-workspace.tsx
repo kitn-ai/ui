@@ -1,5 +1,6 @@
-import { createSignal, Show } from 'solid-js';
+import { Show } from 'solid-js';
 import { defineWebComponent } from './define';
+import { createControllableSignal } from '../primitives/controllable';
 import { ChatThread, type ChatThreadContextUsage } from '../components/chat-thread';
 import { ConversationList } from '../components/conversation-list';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resizable';
@@ -44,8 +45,13 @@ interface Props extends Record<string, unknown> {
   sidebarMinWidth?: number;
   /** Sidebar max width in px (default 420). */
   sidebarMaxWidth?: number;
-  /** Initial collapsed state of the sidebar (default false). */
+  /** Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed
+   *  = true`) to drive the sidebar from your app, updating it in response to the
+   *  `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it). */
   sidebarCollapsed?: boolean;
+  /** Initial collapsed state when uncontrolled (default false). Use the
+   *  `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
+  defaultSidebarCollapsed?: boolean;
 }
 
 interface Events {
@@ -80,11 +86,18 @@ defineWebComponent<Props, Events>('kc-workspace', {
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
   search: false, voice: false, slashCommands: undefined, slashActiveIds: undefined, slashCompact: false,
-  sidebarWidth: 22, sidebarMinWidth: 200, sidebarMaxWidth: 420, sidebarCollapsed: false,
+  sidebarWidth: 22, sidebarMinWidth: 200, sidebarMaxWidth: 420,
+  sidebarCollapsed: undefined, defaultSidebarCollapsed: undefined,
 }, (props, { dispatch, flag }) => {
-  // Collapse is internal UI state; `sidebarCollapsed` only sets the initial value
-  // (not a controlled binding).
-  const [collapsed, setCollapsed] = createSignal(props.sidebarCollapsed === true);
+  // Controlled/uncontrolled collapse: `sidebarCollapsed` (when set) wins;
+  // otherwise the element manages its own state, seeded from
+  // `defaultSidebarCollapsed`. `toggle` always writes the internal value (a no-op
+  // visually while controlled) and emits `kc-sidebar-toggle` so a controlling app
+  // can update its own state.
+  const [collapsed, setCollapsed] = createControllableSignal(
+    () => props.sidebarCollapsed as boolean | undefined,
+    flag('defaultSidebarCollapsed'),
+  );
   const toggle = () => { const next = !collapsed(); setCollapsed(next); dispatch('kc-sidebar-toggle', { collapsed: next }); };
 
   // Create the thread ONCE and reference the same node in both <Show> branches.

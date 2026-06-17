@@ -652,8 +652,10 @@ export interface KcWorkspaceElement extends HTMLElement {
   sidebarMinWidth?: number;
   /** Sidebar max width in px (default 420). */
   sidebarMaxWidth?: number;
-  /** Initial collapsed state of the sidebar (default false). */
+  /** Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it). */
   sidebarCollapsed?: boolean;
+  /** Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
+  defaultSidebarCollapsed?: boolean;
 }
 
 declare global {

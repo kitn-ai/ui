@@ -911,8 +911,10 @@ export interface WorkspaceProps extends WebComponentProps {
   sidebarMinWidth?: number;
   /** Sidebar max width in px (default 420). */
   sidebarMaxWidth?: number;
-  /** Initial collapsed state of the sidebar (default false). */
+  /** Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it). */
   sidebarCollapsed?: boolean;
+  /** Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
+  defaultSidebarCollapsed?: boolean;
   /** A conversation was selected in the sidebar. */
   onConversationSelect?: (event: CustomEvent<{ id: string }>) => void;
   /** An action button on a message was clicked. */
@@ -939,6 +941,6 @@ export interface WorkspaceProps extends WebComponentProps {
 
 export const Workspace = createWebComponent<WorkspaceProps>(
   'kc-workspace',
-  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed"],
+  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed"],
   { onConversationSelect: 'kc-conversation-select', onMessageAction: 'kc-message-action', onModelChange: 'kc-model-change', onNewChat: 'kc-new-chat', onSearch: 'kc-search', onSidebarToggle: 'kc-sidebar-toggle', onSlashSelect: 'kc-slash-select', onSubmit: 'kc-submit', onSuggestionClick: 'kc-suggestion-click', onValueChange: 'kc-value-change', onVoice: 'kc-voice' },
 );
