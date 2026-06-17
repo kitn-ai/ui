@@ -499,6 +499,15 @@
         "displayType": "undefined | \"submit\" | \"fill\""
       },
       {
+        "name": "persistSuggestions",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
         "name": "proseSize",
         "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
         "optional": true,

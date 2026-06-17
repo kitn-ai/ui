@@ -46,6 +46,10 @@ export interface ChatThreadProps {
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately
    *  as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: 'submit' | 'fill';
+  /** Keep suggestions visible after the conversation starts. By default
+   *  suggestions are conversation starters and hide once `messages` is
+   *  non-empty; set this to keep them always shown. Default false. */
+  persistSuggestions?: boolean;
   /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`).
    *  Defaults to `'sm'`. */
   proseSize?: ProseSize;
@@ -110,6 +114,10 @@ export function ChatThread(props: ChatThreadProps) {
     else { props.onSubmit?.({ value: v, attachments: attachments() }); setAttachments([]); }
   };
   const showHeader = () => !!(props.chatTitle || props.models || props.context || props.headerStart || props.headerEnd);
+  // Suggestions are conversation starters: show only on an empty thread unless
+  // the host opts into persisting them.
+  const visibleSuggestions = () =>
+    props.persistSuggestions || props.messages.length === 0 ? props.suggestions : undefined;
   const showScrollButton = () => props.scrollButton !== false;
 
   return (
@@ -225,7 +233,7 @@ export function ChatThread(props: ChatThreadProps) {
           <div class="mx-auto max-w-3xl">
             <DefaultPromptInput
               value={current()} placeholder={props.placeholder} loading={props.loading === true}
-              suggestions={props.suggestions} attachments={attachments()}
+              suggestions={visibleSuggestions()} attachments={attachments()}
               search={props.search === true} voice={props.voice === true}
               slashCommands={props.slashCommands} slashActiveIds={props.slashActiveIds} slashCompact={props.slashCompact === true}
               onValueChange={handleChange} onSubmit={handleSubmit} onSuggestionClick={handleSuggestionClick}

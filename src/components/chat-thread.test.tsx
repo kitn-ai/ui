@@ -31,3 +31,28 @@ describe('ChatThread header composition', () => {
     expect(getByText('Assistant')).toBeInTheDocument();
   });
 });
+
+describe('ChatThread suggestions gating', () => {
+  const SUGGESTIONS = ['What can you do?', 'Tell me a joke'];
+  const oneMessage = [{ id: '1', role: 'user' as const, content: 'hi' }];
+
+  it('renders suggestions when the thread is empty', () => {
+    const { getByText } = render(() => <ChatThread messages={[]} suggestions={SUGGESTIONS} />);
+    expect(getByText('What can you do?')).toBeInTheDocument();
+    expect(getByText('Tell me a joke')).toBeInTheDocument();
+  });
+
+  it('hides suggestions once the conversation has messages (default)', () => {
+    const { queryByText } = render(() => <ChatThread messages={oneMessage} suggestions={SUGGESTIONS} />);
+    expect(queryByText('What can you do?')).toBeNull();
+    expect(queryByText('Tell me a joke')).toBeNull();
+  });
+
+  it('keeps suggestions visible with messages when persistSuggestions is set', () => {
+    const { getByText } = render(() => (
+      <ChatThread messages={oneMessage} suggestions={SUGGESTIONS} persistSuggestions />
+    ));
+    expect(getByText('What can you do?')).toBeInTheDocument();
+    expect(getByText('Tell me a joke')).toBeInTheDocument();
+  });
+});
