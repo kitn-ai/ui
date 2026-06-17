@@ -1,6 +1,6 @@
 ---
 title: Card
-description: The shared card chrome every native generative-UI card builds on — a themed surface with a heading, description, media region, body slot, and a consistent inline error state.
+description: Themed card chrome — heading, description, media, body, actions footer, and a shared inline error state.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,63 +13,40 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-card</p>
 
-<p class="kc-lede">A themed, Shadow DOM surface that provides the common card chrome — heading, description, media slot, body, actions footer, and a single consistent inline error state. Reach for it when you need a presentational container; for interactive data-driven cards, use the typed cards such as `kc-confirm` or `kc-form`.</p>
+<p class="kc-lede">The shared card chrome all generative-UI cards build on — a themed Shadow DOM surface with heading, description, media, body, and actions slots.</p>
 
 <Facts items={['Shadow DOM', 'Chrome only — no events', '4 scalar attributes', 'Media + actions slots', 'Shared error state']} />
 
 ## Preview
 
-Adjust `heading`, `description`, `error-message`, and `dense` — this is the live `<kc-card>` web component, mounted in a Solid island.
-
 <Playground client:only="solid" tag="kc-card" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-card>` when you want the standard kit card frame around **passive, presentational content** — a summary block, a generated report preview, or any output that does not need user interaction. If the content needs buttons, forms, or choices that follow the card-contract protocol, use a typed card instead (`<kc-confirm>`, `<kc-form>`, `<kc-choice>`, etc.). `<kc-card>` is the foundation all of those compose from.
+Use `<kc-card>` around **passive content** — a summary block, a generated report preview, any output that needs no user interaction. All typed cards (`<kc-confirm>`, `<kc-form>`, `<kc-choice>`, etc.) compose from it.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then set attributes directly on the element:
+All four props are scalar attributes — set them as HTML attributes or DOM properties:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-card heading="Workspace summary" description="Generated just now.">
   <p>Your repository has 3 open pull requests and 12 passing checks.</p>
 </kc-card>
 ```
 
-Or with the npm package (recommended for bundled apps):
-
-```js
-import '@kitn.ai/chat/elements'; // registers all kc-* custom elements
-```
-
-**All four props are scalar attributes** — set them as HTML attributes or as DOM properties, whichever your framework prefers. There are no JS-only array or object props on `<kc-card>`.
-
-**Slots** — the element exposes three content regions via standard named slots:
-
-- **Default slot** — the card body; place any passive content here.
-- `slot="media"` — an optional region above the heading, sized to fill the card width. Drop in an `<img>` or any block element.
-- `slot="actions"` — a footer region below the body, intended for read-only metadata or secondary labels (not interactive controls — see the chrome-only note below).
-
-**Chrome only, no events** — `<kc-card>` emits no CustomEvents and reads no context. Raw light-DOM content slotted into it (such as plain `<button>` elements) is unstyled because light DOM cannot reach shadow CSS. The typed cards that compose it own the card-contract interaction.
-
-**Inline error state** — set the `error-message` attribute to replace the body and actions with the shared kit error UI. Unset it (remove the attribute) to return to the normal view. Every typed card uses this same error path, so the visual treatment is consistent across the whole system.
+- **Default slot** — card body; any passive content.
+- `slot="media"` — full-width region above the heading; drop in an `<img>` or block element.
+- `slot="actions"` — footer for read-only metadata or status labels (not interactive controls).
+- **`error-message`** — replaces the body and actions with the shared inline error UI; remove the attribute to restore the normal view.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
-
-### Content surface
-
-The basic use case: a bordered card chrome with a heading, description, and body text slotted in. This is `<kc-card>` at its most useful — a plain themed container around any passive content.
+### Content Surface
 
 <Example client:visible tag="kc-card" config={{ heading: 'Workspace summary', description: 'Generated just now.' }} />
 
-### With media slot
-
-Drop any block element into `slot="media"` to render a full-width region above the heading — an image preview, a chart, or a generated thumbnail. The slot fills the card width with no side padding.
+### With Media Slot
 
 ```html
 <kc-card heading="Quarterly report" description="Generated just now.">
@@ -80,27 +57,25 @@ Drop any block element into `slot="media"` to render a full-width region above t
 
 <Example client:visible tag="kc-card" config={{ heading: 'Quarterly report', description: 'Generated just now.' }} data="withMedia" />
 
-### With actions slot
+### With Actions Slot
 
-Use `slot="actions"` to place read-only metadata or secondary labels in the card footer — generated timestamps, file sizes, or short status strings. This slot is for **passive labels only**; for interactive controls, use a typed card.
+`slot="actions"` — passive metadata such as timestamps or file sizes in the card footer.
 
 <Example client:visible tag="kc-card" config={{ heading: 'Q2 Financial summary', description: '4 charts generated.' }} data="withActions" />
 
-### Heading only
-
-Omit `description` when a one-liner heading is all the chrome you need — the card adapts its spacing automatically.
+### Heading Only
 
 <Example client:visible tag="kc-card" config={{ heading: 'Quarterly report' }} />
 
-### Inline error state
+### Inline Error State
 
-Set `error-message` to render the shared inline error treatment — the body and actions are replaced with the error UI. Useful when a card's data fetch fails or its content is unavailable.
+Set `error-message` to render the shared inline error treatment — body and actions are replaced.
 
 <Example client:visible tag="kc-card" config={{ heading: 'Share your feedback', errorMessage: "This card couldn't be displayed." }} />
 
 ### Dense
 
-Add the `dense` attribute for compact spacing — useful when several cards appear in a tight list or feed.
+`dense` tightens spacing — useful in a tight list or feed of multiple cards.
 
 <Example client:visible tag="kc-card" config={{ heading: 'Pull request #142', description: 'Opened 2 hours ago by @alex', dense: true }} />
 

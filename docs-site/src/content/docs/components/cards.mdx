@@ -19,27 +19,23 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-The Playground seeds `<kc-cards>` with a mixed stream of built-in card types. All three props are JS properties — there are no scalar controls, so the element renders directly from its sample data.
-
 <Playground client:only="solid" tag="kc-cards" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-cards>` whenever your AI response includes structured interactions — a deployment confirmation, a multi-step plan the user can approve, a list of options to pick from. Pass the server's card envelopes straight into `el.cards`; wire up `el.policy` to handle the results; and the element takes care of rendering, routing, and resolved (read-only) states.
+Reach for `<kc-cards>` whenever your AI response includes structured interactions — a deployment confirmation, a multi-step plan, a list of options. Pass server envelopes into `el.cards`, wire `el.policy` to handle results, and the element takes care of rendering, routing, and resolved (read-only) states.
 </Aside>
 
 ## Usage
 
-Register the element once, then set its three JS properties imperatively — none of them work as HTML attributes:
+All three props are JS properties — none work as HTML attributes:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-cards id="cards"></kc-cards>
 
 <script type="module">
+  import '@kitn.ai/chat/elements';
   const el = document.getElementById('cards');
 
-  // 1. The envelope stream — each item is { type, id, data, title?, resolution? }
   el.cards = [
     { type: 'confirm', id: 'deploy', title: 'Deploy to production?',
       data: { body: 'Apply 3 migrations?', tone: 'warning',
@@ -47,7 +43,6 @@ Register the element once, then set its three JS properties imperatively — non
                         { id: 'no', label: 'Cancel' }] } },
   ];
 
-  // 2. How the host handles what the user does
   el.policy = {
     onAction: (cardId, action, payload) => console.log('action', cardId, action, payload),
     onSubmit: (cardId, data) => console.log('submit', cardId, data),
@@ -57,45 +52,28 @@ Register the element once, then set its three JS properties imperatively — non
 </script>
 ```
 
-A few things worth knowing:
-
-**`cards` is a JS property.** Assign it with `el.cards = [...]` after the element upgrades. Each item is a `CardEnvelope`: `{ type, id, data, title?, resolution? }`. The `type` string selects which built-in child element renders the envelope (see the built-in registry below).
-
-**`policy` is a JS property.** Set `el.policy = { onAction, onSubmit, onOpen, onDismiss, … }` to route child card events. You only need to provide the handlers your app cares about — the rest are silently ignored. The policy is read at event time, so you can set or swap it after the element is in the DOM. See the `CardPolicy` interface in `@kitn.ai/chat` for the full shape.
-
-**`types` is a JS property.** Pass `el.types = { 'my-type': 'my-card-element' }` to register custom type strings that map to your own `<kc-*>` child elements. Your map is merged over the built-ins, so you can also override a built-in type.
-
-**Card events** — child cards emit a `kc-card` custom event that bubbles up to `<kc-cards>`. The element intercepts each event and calls the matching `policy` handler (`onAction`, `onSubmit`, `onOpen`, `onSendPrompt`, `onState`, `onDismiss`, `onError`). The raw event keeps bubbling past `<kc-cards>` (composed: true), so a document-level listener still works if you prefer it.
-
-**Unknown types** — if an envelope's `type` has no registered tag, the element renders a `CardFallback` chip and fires `policy.onError` with a descriptive message. This lets your stream degrade gracefully when the server sends a card type the current client version doesn't know yet.
-
-**Resolved cards** — set `resolution` on an envelope to render the card in its read-only chromed state (e.g. after the user has already acted). The child element receives `{ kind: 'action', action, payload? }` or `{ kind: 'submit', data }` and renders accordingly.
+- **`cards`** — array of `CardEnvelope` objects: `{ type, id, data, title?, resolution? }`. The `type` string selects which built-in child element renders the envelope.
+- **`policy`** — `{ onAction, onSubmit, onOpen, onDismiss, … }`. Provide only the handlers your app needs; the rest are silently ignored. Swap it after mount — it is read at event time.
+- **`types`** — `{ 'my-type': 'my-card-element' }` merges over the built-in registry; override a built-in by reusing its key.
+- **Resolved cards** — set `resolution` on an envelope (`{ kind: 'action', action, payload? }` or `{ kind: 'submit', data }`) to render it in its read-only state after the user has acted.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
-
-### Mixed card stream
-
-The full Storybook demo: a confirm, a task list, a choice picker, and a link preview rendered from a single `cards` array. Each card is interactive — click an action to see the policy fire.
+### Mixed Card Stream
 
 <Example client:visible tag="kc-cards" />
 
-### Single confirm card
-
-A standalone danger-tone confirm that asks the user to confirm a destructive action before proceeding. The `tone` on the data drives the card's visual treatment.
+### Single Confirm Card
 
 <Example client:visible tag="kc-cards" data="confirm" />
 
-### Resolved card
+### Resolved Card
 
-Pass `resolution` on an envelope to render its read-only view — the card shows what the user chose, locked, so it can't be re-acted. Useful when rehydrating a conversation from history.
+Pass `resolution` on an envelope to lock it in its read-only view — useful when rehydrating conversation history.
 
 <Example client:visible tag="kc-cards" data="resolved" />
 
-### Unknown type fallback
-
-When `<kc-cards>` encounters a `type` with no registered tag, it renders a `CardFallback` chip and calls `policy.onError`. Stream new card types from your server without breaking older clients.
+### Unknown Type Fallback
 
 <Example client:visible tag="kc-cards" data="unknownType" />
 

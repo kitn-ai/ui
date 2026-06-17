@@ -13,23 +13,21 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-tasks</p>
 
-<p class="kc-lede">Present a list of tasks the user can check off, then confirm in one go. The card stays quiet while the user picks — only the final confirm fires, carrying the selected ids in a single atomic event.</p>
+<p class="kc-lede">Present a list of tasks the user can check off, then confirm in one go — the card stays quiet while the user picks, and only the final confirm fires with the selected ids in a single atomic event.</p>
 
 <Facts items={['Shadow DOM', 'Select-all with indeterminate state', 'Min / max gating', 'Read-only resolved view']} />
 
 ## Preview
 
-Toggle the task list and options — this is the real `<kc-tasks>` web component, mounted in a Solid island.
-
 <Playground client:only="solid" tag="kc-tasks" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-tasks>` whenever an AI needs to hand control back to the user before taking action — approving a migration plan, choosing maintenance steps, or picking reviewers. The gated confirm pattern means the model can propose a list and be sure the user explicitly approved exactly the items they wanted.
+Use `<kc-tasks>` whenever an AI needs to hand control back to the user before acting — approving a migration plan, choosing maintenance steps, or picking reviewers. The gated confirm ensures the user explicitly approved exactly the items they wanted.
 </Aside>
 
 ## Usage
 
-Feed the card definition via the `data` **property** (not an attribute — it's an object). Set `heading` and `card-id` as attributes. Listen for the bubbling `kc-card` CustomEvent to receive the result.
+Feed the card via the `data` **property** (an object, not an attribute). Listen for the bubbling `kc-card` CustomEvent:
 
 ```js
 const el = document.querySelector('kc-tasks');
@@ -45,64 +43,58 @@ el.data = {
 };
 
 el.addEventListener('kc-card', (e) => {
-  const ev = e.detail; // CardEvent
-  if (ev.kind === 'submit') {
-    console.log('selected ids:', ev.data.selected); // ['lint', 'test']
+  if (e.detail.kind === 'submit') {
+    console.log('selected ids:', e.detail.data.selected);
   }
 });
 ```
 
-**`kc-card` event verbs** — the element emits three frozen Card-contract verbs on the bubbling `kc-card` CustomEvent:
+The element emits three verbs on `kc-card`:
 
 | verb | when | payload |
 |------|------|---------|
-| `ready` | on mount, once the card initialises | `{ kind: 'ready', cardId }` |
+| `ready` | on mount | `{ kind: 'ready', cardId }` |
 | `submit` | user clicks confirm | `{ kind: 'submit', cardId, data: { selected: string[] } }` |
-| `error` | `data` is malformed (e.g. empty `tasks[]`) | `{ kind: 'error', cardId, message }` — the inline `kc-card` error is also rendered |
+| `error` | `data` is malformed | `{ kind: 'error', cardId, message }` |
 
-**Toggling rows is purely local state** — the element buffers check states internally and only emits when the user clicks confirm. This keeps the wire quiet and the result atomic.
-
-**Gating rules** — the confirm button is enabled when the number of checked rows is `>= (min ?? (allowEmpty ? 0 : 1))` and `<= (max ?? ∞)`. When `max` is reached, all unchecked rows are disabled so the user can't over-select.
-
-**Resolved state** — once you receive a `submit` event, set `el.resolution = { kind: 'submit', data: { selected: [...] } }` to render the chromed read-only summary. No checkboxes or confirm button are shown.
+- **Gating** — confirm is enabled when checked count is `>= (min ?? (allowEmpty ? 0 : 1))` and `<= (max ?? ∞)`. When `max` is reached, unchecked rows disable automatically.
+- **Resolved state** — after receiving `submit`, set `el.resolution = { kind: 'submit', data: { selected: [...] } }` to render the read-only summary.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
+### Select a Plan
 
-### Select a plan
-
-`selectAll: true` with a couple of rows pre-checked. The select-all header goes indeterminate when only some rows are checked.
+`selectAll: true` with rows pre-checked; the select-all header goes indeterminate when only some rows are checked.
 
 <Example client:visible tag="kc-tasks" config={{ heading: 'Approve the plan steps' }} />
 
-### Require at least one
+### Require at Least One
 
-`allowEmpty: false` (the default) keeps the confirm button disabled until the user checks something. Good for a maintenance menu where doing nothing is not an option.
+`allowEmpty: false` keeps confirm disabled until the user checks something.
 
 <Example client:visible tag="kc-tasks" config={{ heading: 'Choose maintenance steps' }} data="requireOne" />
 
-### Bounded selection
+### Bounded Selection
 
-`min` and `max` let you cap how many rows the user can pick. When `max` is reached, unchecked rows go non-interactive so over-selection is impossible.
+`min` and `max` cap how many rows the user can pick; over-selection is blocked automatically.
 
 <Example client:visible tag="kc-tasks" config={{ heading: 'Pick up to 2 reviewers' }} data="bounded" />
 
-### With descriptions
+### With Descriptions
 
-Each task row accepts an optional `description` field — a secondary line of text linked via `aria-describedby`. Use it for impact notes, caveats, or reversibility hints.
+Each task row accepts an optional `description` — a secondary line for impact notes, caveats, or reversibility hints.
 
 <Example client:visible tag="kc-tasks" config={{ heading: 'Storage cleanup' }} data="withDescriptions" />
 
-### Resolved (read-only)
+### Resolved (Read-Only)
 
-After the user confirms, set `el.resolution` to render the chromed summary view. The card shows which items were selected and removes the checkboxes and confirm button.
+After confirm, set `el.resolution` to render the chromed summary — checkboxes and confirm button are removed.
 
 <Example client:visible tag="kc-tasks" config={{ heading: 'Export report' }} data="resolved" />
 
-### Error state
+### Error State
 
-Passing an empty `tasks` array (or another malformed definition) triggers the inline `kc-card` error view and emits an `error` CardEvent. Listen for `e.detail.kind === 'error'` to surface the failure in your application.
+An empty `tasks` array (or malformed definition) triggers the inline error view and emits an `error` CardEvent.
 
 <Example client:visible tag="kc-tasks" data="error" />
 

@@ -1,5 +1,5 @@
 ---
-title: LinkPreview
+title: Link Preview
 description: A rich Open-Graph preview card that turns a URL and its metadata into a themed, accessible link tile — no fetching required.
 ---
 
@@ -13,32 +13,30 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-link-preview</p>
 
-<p class="kc-lede">Turn a URL and its Open-Graph metadata into a rich, themed preview tile. Set one JS property and the card handles image, title, description, favicon, and domain — with graceful fallbacks for anything that's missing.</p>
+<p class="kc-lede">Turn a URL and its Open-Graph metadata into a rich, themed preview tile — set one JS property and the card handles image, title, description, favicon, and domain with graceful fallbacks for anything missing.</p>
 
 <Facts items={['Shadow DOM', 'Pure by default — never fetches', 'Optional backend fetcher', 'Graceful image fallback', 'Card Contract events']} />
 
 ## Preview
 
-Set the `data` property (a JS object) to supply the link metadata — this is the live `<kc-link-preview>` web component, mounted in a Solid island.
-
 <Playground client:only="solid" tag="kc-link-preview" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-link-preview>` when an AI agent surfaces a URL as part of a response and you want to render it as a rich tile rather than a plain hyperlink. It fits naturally inside a `<kc-cards>` stream or as a standalone card in a chat thread. If you only have the URL at render time, wire up `configureLinkPreview` to point at your own OG-scraping backend — the card renders a skeleton while it waits and merges the result on arrival.
+Use `<kc-link-preview>` when an AI agent surfaces a URL and you want a rich tile instead of a plain hyperlink. It fits inside a `<kc-cards>` stream or as a standalone card in a thread. If you only have the URL at render time, wire `configureLinkPreview` to your own OG-scraping backend — the card shows a skeleton while it waits.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then set the `data` **property** (a JS object — not an attribute):
+Set the `data` **property** (a JS object — not an attribute):
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-link-preview id="lp"></kc-link-preview>
 
 <script type="module">
+  import '@kitn.ai/chat/elements';
+
   const lp = document.getElementById('lp');
-  lp.cardId = 'card-link-1';   // attribute or property — correlates emitted events
+  lp.cardId = 'card-link-1';
   lp.data = {
     url: 'https://example.com/blog/generative-ui',
     title: 'Generative UI, explained',
@@ -51,33 +49,28 @@ Register the custom elements once, then set the `data` **property** (a JS object
 </script>
 ```
 
-A few things worth knowing:
-
-- **`data` is a JS property**, not an attribute. Assign it with `el.data = { … }` — the shape mirrors the `link` `CardEnvelope` data field. Every key except `url` is optional.
-- **`cardId`** can be set as an HTML attribute (`card-id`) or a JS property. It correlates every event the card emits with the originating envelope, which is essential when multiple cards are rendered inside a `<kc-cards>` host.
-- **Pure by default** — the element never makes network calls. For the bare-`{ url }` case, call `configureLinkPreview({ fetchMetadata })` once at app startup to point at your own OG-scraping backend or proxy. The card shows a skeleton while it waits, then merges the resolved metadata.
-- **Interaction** — the whole card is one link target. Clicking it (or pressing Enter/Space) dispatches the bubbling, composed **`kc-card`** CustomEvent with `{ kind: 'open', url, target: 'tab' }`. Listen for `kc-card` on any ancestor — or let `<kc-cards>` route it through `CardPolicy` automatically. The element also fires `ready` on mount and `error` for an invalid URL.
-- **Graceful degradation** — a missing or broken image simply hides the image region (no error state). An invalid `url` renders a non-clickable "Invalid link" chip and emits one `error` event.
+- **`data`** — JS property only; every key except `url` is optional.
+- **`cardId`** — set as `card-id` attribute or `cardId` property; correlates emitted events when multiple cards are in a `<kc-cards>` host.
+- **Pure by default** — the element never makes network calls. For bare `{ url }`, call `configureLinkPreview({ fetchMetadata })` once at startup to point at your backend.
+- **Click** dispatches a bubbling `kc-card` CustomEvent with `{ kind: 'open', url, target: 'tab' }`. A missing or broken image hides the image region silently; an invalid `url` renders a non-clickable "Invalid link" chip.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
+### Full Preview
 
-### Full preview
-
-All OG fields supplied — image, title, description, site name, domain, and favicon. Click the card to trigger the `kc-card` open event.
+All OG fields supplied — image, title, description, site name, domain, and favicon.
 
 <Example client:visible tag="kc-link-preview" />
 
-### No image
+### No Image
 
-When no `image` is provided the card degrades cleanly to the text-and-domain layout. A missing or broken image never causes an error state.
+When no `image` is provided the card degrades cleanly to the text-and-domain layout.
 
 <Example client:visible tag="kc-link-preview" data="noImage" />
 
-### Bare URL with fetcher
+### Bare URL with Fetcher
 
-Passing only `{ url }` — the bare minimum. The card renders a skeleton until `configureLinkPreview` resolves the metadata from your backend. Wire it up once at app startup:
+Passing only `{ url }` — the card shows a skeleton until `configureLinkPreview` resolves metadata from your backend:
 
 ```ts
 import { configureLinkPreview } from '@kitn.ai/chat';
@@ -90,9 +83,9 @@ configureLinkPreview({
 
 <Example client:visible tag="kc-link-preview" data="bareUrl" />
 
-### Invalid link
+### Invalid Link
 
-When `url` fails validation the card renders a non-clickable "Invalid link" chip and emits a single `error` event via the `kc-card` envelope. No image or metadata region is shown.
+When `url` fails validation the card renders a non-clickable "Invalid link" chip and emits a single `error` event via the `kc-card` envelope.
 
 <Example client:visible tag="kc-link-preview" data="invalidLink" />
 

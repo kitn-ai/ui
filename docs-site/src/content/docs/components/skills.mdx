@@ -13,99 +13,50 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-skills</p>
 
-<p class="kc-lede">A horizontal strip of skill badges that annotates a message with the tools or capabilities it used — set a JS array or compose declarative `<kc-skill>` children, and the element handles the rest.</p>
+<p class="kc-lede">A horizontal strip of skill badges — set a JS array or compose declarative `<kc-skill>` children to annotate a message with the tools it used.</p>
 
 <Facts items={['Shadow DOM', 'JS property or declarative children', 'Badges wrap automatically', '2 composition paths']} />
 
 ## Preview
 
-This is the live `<kc-skills>` web component, mounted in a Solid island. The element has no scalar controls — set the `skills` property array to drive what badges render.
-
 <Playground client:only="solid" tag="kc-skills" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-skills>` beneath an assistant message row to annotate which skills or tools were active during that turn. It fits naturally in a message footer alongside action buttons. Use the JS property API when skill data arrives from your app state; use the declarative `<kc-skill>` children API when you want to stamp badges straight from server-rendered HTML without any JavaScript wiring.
+Place `<kc-skills>` beneath an assistant message row to annotate which tools were active. Use the `skills` JS property when skill data comes from app state; use declarative `<kc-skill>` children for server-rendered HTML with no JS wiring.
 </Aside>
 
 ## Usage
 
-Register the element once, then feed it data via the `skills` **JS property** — you cannot set an array as an HTML attribute, so assignment must happen after the element upgrades:
+Assign the `skills` **JS property** after the element upgrades — arrays cannot be set as HTML attributes:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-skills id="skills"></kc-skills>
-
 <script type="module">
   import '@kitn.ai/chat/elements';
-
-  const el = document.getElementById('skills');
-  el.skills = [
+  document.getElementById('skills').skills = [
     { id: 'web-search', name: 'Web Search' },
     { id: 'code',       name: 'Code' },
-    { id: 'memory',     name: 'Memory' },
   ];
 </script>
 ```
 
-Each entry in the `skills` array is `{ id: string; name: string }`. The `id` is the stable identifier (used internally for deduplication); `name` is the human-readable badge label.
-
-**Declarative children** — as an alternative to the property API, compose `<kc-skill>` child elements. These are light-DOM data carriers that the Shadow DOM hides from view; the text content becomes the badge label and the optional `id` attribute becomes the stable identifier (falls back to the label when absent):
-
-```html
-<kc-skills>
-  <kc-skill id="web-search">Web Search</kc-skill>
-  <kc-skill id="code">Code</kc-skill>
-  <kc-skill id="memory">Memory</kc-skill>
-</kc-skills>
-
-<script type="module">
-  import '@kitn.ai/chat/elements';
-</script>
-```
-
-When you provide **both** the `skills` property and `<kc-skill>` children, the prop items render first and the declarative children are appended after. This makes the declarative path a great way to add static "always-on" badges while your app streams dynamic ones in via the property.
-
-**In SolidJS** — import the `MessageSkills` primitive directly instead of the custom element:
-
-```tsx
-import { MessageSkills } from '@kitn.ai/chat';
-
-<MessageSkills skills={[{ id: 'web-search', name: 'Web Search' }, { id: 'code', name: 'Code' }]} />
-```
-
-See the **Code** panel in the Preview above for the exact snippet in your framework.
+- **Declarative path** — nest `<kc-skill id="…">Label</kc-skill>` children directly; useful for server-rendered HTML with no JS wiring.
+- **Mixed** — when both are provided, prop items render first and declarative children are appended after.
+- **SolidJS** — import `MessageSkills` from `@kitn.ai/chat` and pass a `skills` prop instead.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the snippet for your framework.
-
-### Two skills
-
-The standard case: two active-skill badges set via the `skills` property — one for web search, one for code generation. This matches what you'd see in a typical assistant message footer.
+### Two Skills
 
 <Example client:visible tag="kc-skills" data="twoSkills" />
 
-### Multiple skills
+### Multiple Skills
 
-Passing a larger set of skills via the `skills` property. Badges wrap horizontally when they exceed their container, so long lists stay readable without any extra layout work on your end.
+Badges wrap horizontally when they overflow — no extra layout work needed.
 
 <Example client:visible tag="kc-skills" data="richSkills" />
 
-### Declarative composition
-
-The `<kc-skill>` children API provides an HTML-first alternative: stamp badges directly in markup without any JS array assignment. Each `<kc-skill>` child is a light-DOM data carrier hidden by the Shadow DOM — its text content is the badge label and its optional `id` attribute is the stable identifier.
-
-```html
-<kc-skills>
-  <kc-skill id="web-search">Web Search</kc-skill>
-  <kc-skill id="code">Code</kc-skill>
-  <kc-skill id="memory">Memory</kc-skill>
-</kc-skills>
-<script type="module">import '@kitn.ai/chat/elements';</script>
-```
-
-The live preview below uses the equivalent property path; the Code panel in the **Two skills** example shows the same badges wired via JS property for comparison.
+### Declarative Composition
 
 <Example client:visible tag="kc-skills" />
 

@@ -13,23 +13,21 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-tool</p>
 
-<p class="kc-lede">A collapsible panel that displays a single agent tool call — the call type, a colour-coded state badge, and an expandable view of the input and output payloads. Drop one after each tool invocation in an assistant message to give users a transparent look at what the agent did.</p>
+<p class="kc-lede">A collapsible panel for a single agent tool call — colour-coded state badge, expandable input/output inspector. Drop one after each tool invocation to give users transparency into what the agent did.</p>
 
 <Facts items={['Shadow DOM', '4 states', 'Collapsible inspector', 'Colour-coded badge', 'JS property API']} />
 
 ## Preview
 
-Toggle the `open` control to start the panel expanded, then inspect the live `<kc-tool>` web component mounted in a Solid island.
-
 <Playground client:only="solid" tag="kc-tool" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-tool>` inside an assistant message row — one element per tool call, placed below the text content. It is ideal for any framework that is not SolidJS; in SolidJS, compose the `Tool` primitive directly from `@kitn.ai/chat`. The panel renders as a block sized to its content, so no extra sizing is needed.
+Place `<kc-tool>` inside an assistant message row — one element per tool call, below the text content. In SolidJS, compose the `Tool` primitive from `@kitn.ai/chat` directly; for every other framework, use this web component.
 </Aside>
 
 ## Usage
 
-Register the custom elements once with `import '@kitn.ai/chat/elements'` (or load the CDN bundle as a secondary option), then set the call via the `tool` **JS property**:
+Set the call via the `tool` **JS property** — it is not an attribute.
 
 ```html
 <kc-tool id="tool" open></kc-tool>
@@ -37,8 +35,7 @@ Register the custom elements once with `import '@kitn.ai/chat/elements'` (or loa
 <script type="module">
   import '@kitn.ai/chat/elements';
 
-  const tool = document.getElementById('tool');
-  tool.tool = {
+  document.getElementById('tool').tool = {
     type: 'database_query',
     state: 'output-available',
     input: { table: 'users', limit: 10 },
@@ -47,40 +44,29 @@ Register the custom elements once with `import '@kitn.ai/chat/elements'` (or loa
 </script>
 ```
 
-A few things worth knowing:
-
-- **`tool` is a JS property**, not an attribute. Assign it with `el.tool = { … }` — the full `ToolPart` shape is below.
-- **`state`** drives the colour-coded badge: `'input-streaming'` (blue) while arguments are being assembled, `'input-available'` (amber) while the call is running, `'output-available'` (green) on success, and `'output-error'` (red) on failure.
-- **`open`** is a boolean attribute/property. Set it to start the panel expanded; otherwise it starts collapsed.
-- `<kc-tool>` renders nothing at all until `tool` is set — the `Show` guard means an empty element takes up no space.
-- The element emits no events. When used inside `<kc-message>` or `<kc-chat>`, the enclosing element's `kc-message-action` event covers any parent-level interactions.
-- The **Code** panel in the Preview above generates the exact framework snippet as you adjust the controls.
+- **`state`** drives the badge colour: `input-streaming` (blue) → `input-available` (amber) → `output-available` (green) / `output-error` (red).
+- **`open`** is a boolean attribute; set it to start the panel expanded.
+- The element renders nothing until `tool` is set and emits no events.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the snippet for your framework.
-
-### Completed call
-
-A database query that finished successfully. The green badge confirms the call succeeded; expand the panel to inspect both the input arguments and the output payload.
+### Completed Call
 
 <Example client:visible tag="kc-tool" config={{ open: true }} />
 
-### Running call
+### Running Call
 
-A search call that has sent its input but is still awaiting a response. The amber badge signals the agent is waiting; there is no output section yet.
+Amber badge — input sent, awaiting response.
 
 <Example client:visible tag="kc-tool" data="running" />
 
-### Error state
-
-A call that ended with an error. The red badge and `errorText` field make the failure immediately visible — no log-diving required.
+### Error State
 
 <Example client:visible tag="kc-tool" data="error" />
 
-### Input streaming
+### Input Streaming
 
-The agent is still assembling the arguments — `input-streaming` renders the blue badge so users know the call is being prepared, not stalled.
+Blue badge while the agent assembles arguments.
 
 <Example client:visible tag="kc-tool" data="streaming" />
 

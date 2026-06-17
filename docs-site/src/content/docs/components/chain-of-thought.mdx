@@ -1,5 +1,5 @@
 ---
-title: ChainOfThought
+title: Chain Of Thought
 description: A connected step list that surfaces an agent's reasoning trace — each step has an always-visible label and optional collapsible detail.
 ---
 
@@ -13,30 +13,27 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-chain-of-thought</p>
 
-<p class="kc-lede">A vertically connected list of reasoning steps — each step shows its label at all times and reveals optional detail on expand. Reach for it whenever you need to surface an agent's plan or thinking trace outside of SolidJS.</p>
+<p class="kc-lede">A vertically connected list of reasoning steps — each step shows its label at all times and reveals optional detail on expand.</p>
 
 <Facts items={['Shadow DOM', 'JS property API', 'Declarative kc-step children', 'Expandable detail per step', 'Prop + child steps merge']} />
 
 ## Preview
 
-Set the `steps` property in the Code panel to try different reasoning traces — this is the live `<kc-chain-of-thought>` web component, mounted in a Solid island.
-
 <Playground client:only="solid" tag="kc-chain-of-thought" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-chain-of-thought>` above or below an assistant message to show the model's step-by-step plan or reasoning trace. It is `display: block` and sizes to content height, so no fixed height is required. In SolidJS, compose `ChainOfThought`, `ChainOfThoughtStep`, `ChainOfThoughtTrigger`, and `ChainOfThoughtContent` directly for finer control over animation and interactivity.
+Place `<kc-chain-of-thought>` above or below an assistant message to show the model's step-by-step plan or reasoning trace. It is `display: block` and sizes to content height — no fixed height needed. In SolidJS, compose `ChainOfThought`, `ChainOfThoughtStep`, `ChainOfThoughtTrigger`, and `ChainOfThoughtContent` directly for finer animation control.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then hand the component its data:
+Set `steps` as a JS property — it does not work as an HTML attribute:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-chain-of-thought id="cot"></kc-chain-of-thought>
 
 <script type="module">
+  import '@kitn.ai/chat/elements';
   document.getElementById('cot').steps = [
     { label: 'Understand the request', content: 'The user wants composable web components.' },
     { label: 'Design the API', content: 'Route 1: variant + flags; rich data via properties.' },
@@ -45,15 +42,8 @@ Register the custom elements once, then hand the component its data:
 </script>
 ```
 
-In a bundled project, prefer the ES module import over the CDN script:
-
-```js
-import '@kitn.ai/chat/elements'; // registers all kc-* custom elements
-```
-
-**`steps` is a JS property**, not an HTML attribute — assign it with `el.steps = [...]`. Each item is a plain object with a required `label` string and an optional `content` string. Steps that include `content` render an expand/collapse control; steps without `content` show the label only.
-
-**Declarative children** — as an alternative to the property API, you can author each step as a `<kc-step>` child element in light DOM:
+- Each item needs a `label` string; add `content` to make the step expandable.
+- **Declarative alternative** — author steps as `<kc-step>` children; `label` becomes the heading, `textContent` becomes the collapsible detail. Mix both: property items render first, then `<kc-step>` children append after.
 
 ```html
 <kc-chain-of-thought>
@@ -63,27 +53,21 @@ import '@kitn.ai/chat/elements'; // registers all kc-* custom elements
 </kc-chain-of-thought>
 ```
 
-The `label` attribute becomes the step heading; `textContent` becomes the optional expandable detail. The `<kc-step>` elements are invisible data carriers — the Shadow DOM suppresses them visually. You can also mix both APIs: `steps` property items render first, then any `<kc-step>` children are appended after.
-
 ## Examples
-
-Each example is live — expand **Code** to copy the exact snippet for your framework.
 
 ### Default
 
-A three-step reasoning trace where the first two steps have expandable detail and the last is a label-only summary. Click a step's trigger to expand or collapse its detail.
-
 <Example client:visible tag="kc-chain-of-thought" />
 
-### Agent plan
+### Agent Plan
 
-A longer five-step trace covering a realistic code-review workflow — useful for surfacing what an agent did before presenting its conclusion.
+A five-step trace covering a realistic code-review workflow.
 
 <Example client:visible tag="kc-chain-of-thought" data="agentPlan" />
 
-### Two-step query trace
+### Two-Step Query Trace
 
-A concise trace where every step has expandable detail — shows the component when all steps are collapsible, with no label-only summary at the end.
+Every step has expandable detail — no label-only summary.
 
 <Example client:visible tag="kc-chain-of-thought" data="short" />
 

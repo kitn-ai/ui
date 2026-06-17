@@ -1,5 +1,5 @@
 ---
-title: FileUpload
+title: File Upload
 description: A click-or-drag dropzone that fires a single event with the selected files — ready to drop into any framework or plain HTML.
 ---
 
@@ -20,52 +20,52 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-Toggle `disabled` or adjust `accept` and `multiple` — this is the live `<kc-file-upload>` web component, mounted in a Solid island. Pick or drop files to see the `kc-files-added` event logged in the Console below.
-
 <Playground client:only="solid" tag="kc-file-upload" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-file-upload>` when you need a standalone dropzone **outside of SolidJS** — above a prompt input, in a dedicated upload panel, or anywhere you want a zero-dependency drag-and-drop target. In SolidJS, compose the `FileUpload` and `FileUploadTrigger` primitives directly for finer control. The element is `display: block` and fills its container width, so set a `max-width` on the parent to constrain the dropzone.
+Reach for `<kc-file-upload>` for a standalone dropzone — above a prompt input, in a dedicated upload panel, or anywhere you need a zero-dependency drag-and-drop target. In SolidJS, compose the `FileUpload` and `FileUploadTrigger` primitives directly for finer control. The element is `display: block` and fills its container width; set a `max-width` on the parent to constrain the dropzone.
 </Aside>
 
 ## Usage
 
-Register the custom elements once with `import '@kitn.ai/chat/elements'` (or load the CDN bundle via `<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js">`), then drop `<kc-file-upload>` in your markup.
-
 All four props are plain HTML **attributes** — no JS property assignment needed:
 
-- `accept` — the standard [`accept` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) (e.g. `image/*`, `.pdf,.docx`). Omit to allow any file type.
-- `multiple` — boolean. Defaults to `true`; set `multiple="false"` (or the property `el.multiple = false`) to restrict to a single file.
-- `disabled` — boolean. Disables both clicking and drag-and-drop.
-- `label` — the default dropzone label text. You can also replace it entirely with your own markup via the default `<slot>`.
+```html
+<kc-file-upload accept="image/*" label="Drop an image to upload"></kc-file-upload>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  document.querySelector('kc-file-upload')
+    .addEventListener('kc-files-added', (e) => console.log(e.detail.files));
+</script>
+```
 
-**Listening for files** — the element fires one CustomEvent: `kc-files-added`. Its `detail.files` is a native `File[]` — pass them straight to `FormData` or your upload function. See the **Events** table below for the full payload, and the **Code** panel in the Preview for the exact listener syntax in your framework.
+- **`accept`** — standard [`accept` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) (e.g. `image/*`, `.pdf,.docx`). Omit to allow any file type.
+- **`multiple`** — boolean, defaults to `true`. Set `multiple="false"` to restrict to a single file.
+- **`kc-files-added`** — fires with `detail.files` as a native `File[]`; pass straight to `FormData` or your upload function.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the snippet for your framework.
-
 ### Default
 
-A dropzone that accepts any file type. Click it or drag files onto it; the `kc-files-added` event fires with the selected `File[]`.
+Accepts any file type; click or drag to trigger `kc-files-added`.
 
 <Example client:visible tag="kc-file-upload" />
 
-### Images only
+### Images Only
 
-Set `accept="image/*"` and `multiple={false}` to limit the picker to a single image file — useful for avatar or cover-photo uploads.
+`accept="image/*"` and `multiple={false}` — useful for avatar or cover-photo uploads.
 
 <Example client:visible tag="kc-file-upload" config={{ accept: 'image/*', multiple: false, label: 'Click or drop an image' }} />
 
-### Custom label
+### Custom Label
 
-Override the default copy with `label` — helpful when the context makes "Click or drop files to upload" too generic (e.g. inside a document-import panel).
+Override the default copy with `label` when context makes it too generic.
 
 <Example client:visible tag="kc-file-upload" config={{ label: 'Drop your PDF or DOCX here to import' }} />
 
 ### Disabled
 
-Set `disabled` to lock the dropzone when uploads are not yet available — for example, while a prior upload is in progress or the user lacks the right permissions.
+Lock the dropzone while an upload is in progress or the user lacks permissions.
 
 <Example client:visible tag="kc-file-upload" config={{ disabled: true, label: 'Uploads are disabled' }} />
 

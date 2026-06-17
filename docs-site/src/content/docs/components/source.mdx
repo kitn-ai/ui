@@ -13,75 +13,54 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-source</p>
 
-<p class="kc-lede">A citation chip that shows a domain label (or your own label) and reveals a hover card with a headline and description. Drop it below an assistant message to let users verify where an answer came from.</p>
+<p class="kc-lede">A citation chip that shows a domain label and reveals a hover card with a headline and description — drop it below an assistant message to let users verify where an answer came from.</p>
 
 <Facts items={['Shadow DOM', 'All props are attributes', 'Optional favicon', 'Hover-card preview', 'No events']} />
 
 ## Preview
 
-Toggle `show-favicon` and edit the scalar props to see the live `<kc-source>` web component update in real time.
-
 <Playground client:only="solid" tag="kc-source" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-source>` when you need a **single citation chip** in isolation — for example, inside a custom message template or a tooltip. When an answer has two or more sources, reach for `<kc-sources>` instead: it accepts a `sources` property array and lays the chips out in a wrapping row for you. In SolidJS, compose `Source`, `SourceTrigger`, and `SourceContent` directly.
+Use `<kc-source>` for a **single citation chip** in isolation — inside a custom message template or a tooltip. For two or more sources, reach for `<kc-sources>` instead: it accepts a `sources` array and lays chips out in a wrapping row.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then set the props as HTML attributes:
+All props are plain HTML attributes — no JS property assignment needed:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-source
   href="https://kitn.dev"
   headline="kitn — the kit"
   description="Composable SolidJS + web-component chat UI."
   show-favicon
 ></kc-source>
+<script type="module">import '@kitn.ai/chat/elements';</script>
 ```
 
-Or with the npm package:
-
-```js
-import '@kitn.ai/chat/elements'; // registers all kc-* custom elements
-```
-
-A few things worth knowing:
-
-- **Every prop is a scalar attribute.** `href`, `label`, `headline`, and `description` are plain string attributes; `show-favicon` is a boolean attribute (bare presence = `true`). There is no JS property assignment needed.
-- **`href` is required.** The element renders nothing when `href` is absent — wrap it in a `<Show>` or conditional in your host framework if the URL may not be available at render time.
-- **`label` defaults to the domain.** If you omit it, the chip reads the hostname from `href` (e.g. `kitn.dev`). Pass an explicit `label` when the domain alone is ambiguous or too long.
-- **`headline` vs `title`.** The hover-card heading prop is called `headline` (not `title`) because `title` is a reserved HTML attribute that causes issues in custom element constructors.
-- **`kc-source` emits no events.** Clicking the chip opens the source URL directly. There is nothing to listen for on the element itself.
-- The **Code** panel in the Preview above generates the exact per-framework snippet as you adjust the controls.
+- **`href` is required.** The element renders nothing without it.
+- **`label`** defaults to the hostname (`kitn.dev`). Pass an explicit label when the domain is ambiguous or too long.
+- **`headline`** (not `title`) — `title` is a reserved HTML attribute that conflicts with custom element constructors.
+- Clicking the chip opens the URL directly — the element emits no events.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the snippet for your framework.
-
-### Basic citation
-
-The simplest usage: `href`, `headline`, and `description`. The trigger label defaults to the hostname extracted from `href`.
+### Basic Citation
 
 <Example client:visible tag="kc-source" config={{ href: 'https://kitn.dev', headline: 'kitn — the kit', description: 'Composable SolidJS + web-component chat UI.' }} />
 
-### With favicon
-
-Add `show-favicon` to display the source site's favicon beside the trigger label — a quick visual cue that helps users recognise the origin at a glance.
+### With Favicon
 
 <Example client:visible tag="kc-source" config={{ href: 'https://solidjs.com', headline: 'SolidJS', description: 'A declarative, efficient, and flexible JavaScript library for building user interfaces.', showFavicon: true }} />
 
-### Custom label
+### Custom Label
 
-Override the domain default with `label` when you want a shorter or more recognisable name. The hover card still shows the full headline and description.
+Override the domain default with `label` when you want a shorter or more recognisable name.
 
 <Example client:visible tag="kc-source" config={{ href: 'https://developer.mozilla.org/en-US/docs/Web/API/Web_components', label: 'MDN', headline: 'Web Components — MDN', description: 'A suite of technologies that let you create reusable custom elements.' }} />
 
-### Full detail with favicon
-
-Combine all four text props with `show-favicon` for the richest citation chip. A good default when displaying search-grounded assistant answers.
+### Full Detail with Favicon
 
 <Example client:visible tag="kc-source" config={{ href: 'https://vitejs.dev', label: 'Vite', headline: 'Vite — Next Generation Frontend Tooling', description: 'An opinionated web build tool that serves your source files over native ES modules during development.', showFavicon: true }} />
 

@@ -13,30 +13,27 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-code-block</p>
 
-<p class="kc-lede">Drop in a syntax-highlighted snippet with a built-in copy button. Set one property, pick a language, and Shiki handles the rest — in any framework or plain HTML.</p>
+<p class="kc-lede">Drop in a syntax-highlighted snippet with a built-in copy button — set one property, pick a language, and Shiki handles the rest.</p>
 
 <Facts items={['Shadow DOM', 'Shiki highlighting', '100+ languages', 'Built-in copy button', 'Light / dark themes']} />
 
 ## Preview
 
-Adjust `language`, `code-theme`, and `code-highlight` — this is the live `<kc-code-block>` web component, mounted in a Solid island.
-
 <Playground client:only="solid" tag="kc-code-block" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-code-block>` whenever you need a **highlighted snippet outside of SolidJS** — inside a message bubble, a tutorial card, or any documentation pane. In SolidJS, compose `CodeBlock` and `CodeBlockCode` directly for finer control. The element is `display: block` and fills its container, so constrain width on the parent when needed.
+Use `<kc-code-block>` for highlighted snippets outside SolidJS — message bubbles, tutorial cards, documentation panes. In SolidJS, compose `CodeBlock` and `CodeBlockCode` directly for finer control. The element is `display: block` and fills its container.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then set the `code` **property** and the `language` **attribute**:
+Set `code` as a JS **property** and `language` as an **attribute**:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-code-block id="cb" language="ts"></kc-code-block>
 
 <script type="module">
+  import '@kitn.ai/chat/elements';
   const cb = document.getElementById('cb');
   cb.code = `export function greet(name: string) {
   return \`Hello, \${name}!\`;
@@ -44,51 +41,38 @@ Register the custom elements once, then set the `code` **property** and the `lan
 </script>
 ```
 
-A few things worth knowing:
-
-- **`code` is a JS property**, not an attribute. Assign it with `el.code = '...'` — trying to set it as an HTML attribute will not work for multiline strings.
-- **`language`** is a plain HTML attribute (defaults to `tsx`). Pass any [Shiki grammar name](https://shiki.style/languages), such as `ts`, `python`, `bash`, `json`, or `html`.
-- **`code-theme`** is also an attribute. It defaults to `github-dark-dimmed`. Any [Shiki theme](https://shiki.style/themes) works — try `github-light`, `nord`, or `dracula`.
-- Set **`code-highlight="false"`** to skip Shiki entirely and render plain monospace text — useful for raw log output or untokenisable content.
-- The **Code** panel in the Preview above generates the exact framework snippet as you adjust the controls.
+- **`code`** is a JS property — not an attribute. Multiline strings won't survive HTML attribute serialization.
+- **`language`** defaults to `tsx`. Pass any [Shiki grammar name](https://shiki.style/languages): `ts`, `python`, `bash`, `json`, `html`.
+- **`code-theme`** defaults to `github-dark-dimmed`. Any [Shiki theme](https://shiki.style/themes) works.
+- **`code-highlight="false"`** skips Shiki entirely — useful for raw log output.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the snippet for your framework.
-
 ### TypeScript
-
-A typed function with full Shiki highlighting and the default `github-dark-dimmed` theme.
 
 <Example client:visible tag="kc-code-block" data="typescript" />
 
 ### JavaScript
 
-Async/await with template literals — the `js` grammar handles modern syntax cleanly.
-
 <Example client:visible tag="kc-code-block" data="javascript" />
 
 ### Python
-
-Multi-line Python with a docstring and list comprehension — set `language="python"`.
 
 <Example client:visible tag="kc-code-block" data="python" />
 
 ### Shell / Bash
 
-Script-style bash with `set -euo pipefail` — set `language="bash"` for shell highlighting.
-
 <Example client:visible tag="kc-code-block" data="bash" />
 
-### Compact text size
+### Compact Text Size
 
-Use `prose-size="xs"` to tighten the font for dense snippets or embedded cards.
+`prose-size="xs"` tightens the font for dense snippets or embedded cards.
 
 <Example client:visible tag="kc-code-block" config={{ proseSize: 'xs' }} data="typescript" />
 
-### Highlighting disabled
+### Highlighting Disabled
 
-Set `code-highlight` to `false` to render plain monospace text — no Shiki, no colours. Good for raw terminal output or log lines.
+`code-highlight="false"` renders plain monospace — no Shiki, no colours. Good for terminal output or log lines.
 
 <Example client:visible tag="kc-code-block" config={{ codeHighlight: false }} data="plaintext" />
 

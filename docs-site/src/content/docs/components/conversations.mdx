@@ -14,30 +14,27 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-conversations</p>
 
-<p class="kc-lede">A self-contained sidebar that renders a grouped, scrollable list of past conversations with a "New chat" button and a collapse toggle — drop it into any framework or plain HTML and wire up three events.</p>
+<p class="kc-lede">A self-contained sidebar that renders a grouped, scrollable conversation list with a "New chat" button and collapse toggle — drop it into any framework and wire up three events.</p>
 
 <Facts items={['Shadow DOM', '3 events', 'Auto-bucketing by recency', 'Pre-bucketed groups', 'Declarative child elements']} />
 
 ## Preview
 
-Use the `active-id` control to see the active row highlight update live — this is the real `<kc-conversations>` web component, mounted in a Solid island.
-
 <Playground client:only="solid" tag="kc-conversations" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-conversations>` whenever you need a conversation switcher outside of a SolidJS context — inside a React, Vue, Svelte, or plain HTML app. Shadow DOM keeps the kit's styles isolated so the host page's CSS won't bleed in either direction. If you _are_ in SolidJS and need fine-grained layout control, compose the `ConversationList` primitive directly instead.
+Use `<kc-conversations>` for a conversation switcher outside SolidJS — React, Vue, Svelte, or plain HTML. Shadow DOM keeps styles isolated in both directions. In SolidJS with fine-grained layout needs, compose the `ConversationList` primitive directly.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then set data as JS **properties** and listen for CustomEvents:
+Set data as JS **properties** and listen for CustomEvents:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-conversations id="sidebar" style="display:block; width:300px; height:100vh;"></kc-conversations>
 
 <script type="module">
+  import '@kitn.ai/chat/elements';
   const el = document.getElementById('sidebar');
 
   el.conversations = [
@@ -54,57 +51,44 @@ Register the custom elements once, then set data as JS **properties** and listen
     el.activeId = e.detail.id; // keep the active highlight in sync
   });
   el.addEventListener('kc-new-chat', () => console.log('new chat'));
-  el.addEventListener('kc-toggle-sidebar', () => console.log('sidebar toggled'));
+  el.addEventListener('kc-toggle-sidebar', () => console.log('toggled'));
 </script>
 ```
 
-In module-bundler projects, prefer the import path:
+**Two data approaches:**
 
-```js
-import '@kitn.ai/chat/elements'; // registers all kc-* custom elements
-```
-
-**Providing data — two approaches:**
-
-- **JS properties (recommended for dynamic data)** — set `el.conversations` or `el.groups` after mount. Both are non-scalar; they must be assigned as JS arrays, not HTML attributes. `conversations` is a flat list that the element auto-buckets by recency. `groups` is a pre-bucketed array — supply it when you want to control the section headers yourself (e.g. "Work", "Personal"). When `groups` is provided it takes precedence and `conversations` is ignored.
-
-- **Declarative children (great for server-rendered markup)** — nest `<kc-conversation>` children directly in the tag. Each child carries its `id` as an attribute and its title as text content. No JS property wiring is needed; the element reads them on mount and watches for DOM changes via MutationObserver. Events fire identically to the property-driven path.
-
-**Keeping the active row in sync** — set `activeId` (an attribute/property) to the id of the open conversation. Update it in your `kc-conversation-select` handler to keep the highlight current.
-
-**Events** — the element fires three events; see the **Events** table below and the **Code** panel above for the exact per-framework listener syntax.
+- **JS properties** — `el.conversations` (flat list, auto-bucketed by recency) or `el.groups` (pre-bucketed; supply when you own the section headers). When `groups` is set it takes precedence.
+- **Declarative children** — nest `<kc-conversation>` tags directly; each carries its `id` as an attribute and title as text content. The element reads them on mount and watches via MutationObserver — works in plain HTML, SSR, or any framework that sets innerHTML.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
+### Default List
 
-### Default list
-
-A flat `conversations` array passed as a JS property — the element auto-buckets the items by recency. This is the most common starting point.
+A flat `conversations` array — the element auto-buckets by recency.
 
 <Example client:visible tag="kc-conversations" />
 
-### Active conversation highlighted
+### Active Conversation Highlighted
 
-Set `activeId` to the id of the currently open conversation. The matching row is highlighted and the list scrolls it into view.
+`activeId` highlights the matching row and scrolls it into view.
 
 <Example client:visible tag="kc-conversations" config={{ activeId: 'c-1' }} data="withActive" />
 
-### Pre-bucketed groups
+### Pre-bucketed Groups
 
-Supply a `groups` property alongside `conversations` when you want to own the section headers. Each conversation's `groupId` links it to a group; ungrouped items fall through to an "Other" bucket.
+Supply `groups` to own the section headers; ungrouped items fall to an "Other" bucket.
 
 <Example client:visible tag="kc-conversations" config={{ activeId: 'c-1' }} data="withGroups" />
 
-### Empty state
+### Empty State
 
-When `conversations` is an empty array the element renders its built-in empty state, prompting the user to start a new chat.
+An empty `conversations` array renders the built-in empty state.
 
 <Example client:visible tag="kc-conversations" data="empty" />
 
-### Declarative children
+### Declarative Children
 
-Nest `<kc-conversation>` elements directly in the tag — no JS property wiring needed. Each child carries its `id` as an attribute and its title as text content. The element reads them on mount and watches for DOM changes via MutationObserver, so this path works equally well in plain HTML, server-rendered markup, or any framework that sets innerHTML.
+Nested `<kc-conversation>` elements — no JS property wiring needed.
 
 <Example client:visible tag="kc-conversations" data="declarative" />
 

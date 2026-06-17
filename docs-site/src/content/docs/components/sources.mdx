@@ -13,69 +13,49 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-sources</p>
 
-<p class="kc-lede">A wrapping row of citation chips that renders the sources behind an assistant answer — each chip shows the domain (or a custom label), optionally a favicon, and a hover-card with the title and description.</p>
+<p class="kc-lede">A wrapping row of citation chips that renders the sources behind an assistant answer — each chip shows the domain (or a custom label), an optional favicon, and a hover-card with the title and description.</p>
 
 <Facts items={['Shadow DOM', 'No events', 'Optional favicons', 'Numbered or domain labels', 'Declarative children']} />
 
 ## Preview
 
-Toggle `show-favicon` and `numbered` to see the display modes live — this is the real `<kc-sources>` web component, mounted in a Solid island.
-
 <Playground client:only="solid" tag="kc-sources" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-sources>` directly below an assistant message when the reply cites external references. Use `numbered` when the answer body uses `[1]`, `[2]`, … citation markers. Use the `sources` property for dynamically constructed lists (streaming results, post-processing); use declarative `<kc-source>` children when the markup is static or server-rendered.
+Place `<kc-sources>` directly below an assistant message when the reply cites external references. Use `numbered` when the answer body uses `[1]`, `[2]`, … citation markers. Use the `sources` property for dynamic or streamed lists; use declarative `<kc-source>` children for static or server-rendered markup.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then set the `sources` **JS property** on the element:
+Assign the `sources` **JS property** — it cannot be set as an HTML attribute:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-sources id="srcs" show-favicon></kc-sources>
-
 <script type="module">
   import '@kitn.ai/chat/elements';
-
-  const srcs = document.getElementById('srcs');
-  srcs.sources = [
+  document.getElementById('srcs').sources = [
     { href: 'https://kitn.dev', title: 'kitn — the kit', description: 'Composable chat UI.' },
     { href: 'https://solidjs.com', title: 'SolidJS', description: 'A reactive UI library.' },
   ];
 </script>
 ```
 
-A few things worth knowing:
-
-- **`sources` is a JS property**, not an HTML attribute. Assign it with `el.sources = [...]`. Each item accepts `href` (required), `title`, `description`, `label`, and `showFavicon`.
-- **`show-favicon`** is a boolean HTML attribute (or `el.showFavicon = true`). It enables favicons globally for all chips; a per-item `showFavicon: false` overrides it for that chip.
-- **`numbered`** is a boolean attribute that replaces each chip's domain label (or custom `label`) with its 1-based index (`[1]`, `[2]`, …). Useful when the answer body references `[1]` in-line.
-- **Declarative children** — you can skip the JS property entirely and write `<kc-source href="…" headline="…" description="…">` elements as light-DOM children of `<kc-sources>`. They are invisible data carriers (no shadow slot) picked up by a `MutationObserver`. Prop sources come first; declarative children are appended after. This is ideal for static or server-rendered markup where no JS wiring is needed.
-- `kc-sources` emits no custom events of its own. The hover-cards are display-only.
-
-For the exact per-framework wiring, see the **Code** panel in the Preview above.
+- Each item accepts `href` (required), `title`, `description`, `label`, and `showFavicon`.
+- **`show-favicon`** enables favicons globally; a per-item `showFavicon: false` overrides for that chip.
+- **`numbered`** replaces domain labels with `[1]`, `[2]`, … — useful when the response body uses in-line citation markers.
+- **Declarative path** — write `<kc-source>` elements as light-DOM children of `<kc-sources>`. Prop sources render first; declarative children are appended after.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the snippet for your framework.
-
-### Default with favicons
-
-Three citation chips with favicons enabled globally via `show-favicon`. Hover any chip to see the title and description in the hover-card.
+### Default with Favicons
 
 <Example client:visible tag="kc-sources" config={{ showFavicon: true }} />
 
-### Domain labels only (no favicon)
-
-Without `show-favicon`, each chip falls back to a plain domain label. Clean and compact for minimal UIs.
+### Domain Labels Only
 
 <Example client:visible tag="kc-sources" data="noFavicon" />
 
-### Numbered citations
-
-Set `numbered` to label each chip `[1]`, `[2]`, … — matches in-text citation markers like `[1]` in the response body.
+### Numbered Citations
 
 <Example client:visible tag="kc-sources" config={{ numbered: true }} data="numbered" />
 

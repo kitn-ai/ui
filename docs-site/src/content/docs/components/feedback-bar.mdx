@@ -14,61 +14,52 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-feedback-bar</p>
 
-<p class="kc-lede">An inline thumbs up/down banner that owns its own flow — it asks, optionally collects a category and comment on a not-helpful vote, then confirms with a thank-you — all in place, no modal.</p>
+<p class="kc-lede">An inline thumbs up/down banner that owns its own flow — asks, optionally collects a category and comment on a 👎 vote, then confirms with a thank-you — all in place, no modal.</p>
 
 <Facts items={['Shadow DOM', '3 events', 'Optional detail form', 'Category chips', 'Customisable copy']} />
 
 ## Preview
 
-Toggle the controls to try `collect-detail` — this is the real `<kc-feedback-bar>` web component, mounted in a Solid island. Interact with the thumbs to see events logged in the Console below.
-
 <Playground client:only="solid" tag="kc-feedback-bar" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-feedback-bar>` at the end of an assistant response, a completed task, or an article to collect a quick helpfulness signal. Use `collect-detail` when you want an optional reason on a 👎 vote — the element handles the multi-step flow itself so you only need to listen for `kc-feedback-detail`.
+Place `<kc-feedback-bar>` at the end of an assistant response, a completed task, or an article. Add `collect-detail` when you want an optional reason on a 👎 vote — the element handles the multi-step flow itself, so you only listen for `kc-feedback-detail`.
 </Aside>
 
 ## Usage
 
-Drop `<kc-feedback-bar>` after any response or answer. It renders immediately; the user votes, and the element transitions to a thank-you in place. The close (×) button dismisses it and fires `kc-close` — the element does **not** auto-remove itself, so you control when it leaves the DOM.
+Drop `<kc-feedback-bar>` after any response. The element transitions to a thank-you on vote; the × button fires `kc-close` and you control when the element leaves the DOM.
 
-**Customising copy** — all label text can be overridden via scalar attributes: `bar-title` for the question, `detail-title` and `detail-placeholder` for the follow-up form, `submit-label` for the submit button, and `thanks-message` for the confirmation.
-
-**Collecting detail** — add the `collect-detail` attribute (or boolean property) to open a follow-up form when the user votes 👎. Set the `categories` **property** (a JS array) to render selectable category chips. The form is optional for the user; they can skip straight to submit.
-
-**Listening for events** — the element fires three CustomEvents: `kc-feedback` when the user votes, `kc-feedback-detail` when they submit the optional detail form, and `kc-close` when they dismiss it. See the **Events** table below for each payload, and the **Code** panel above for the exact listener syntax in your framework.
+- **Copy** — override any label via attributes: `bar-title`, `detail-title`, `detail-placeholder`, `submit-label`, `thanks-message`.
+- **Detail form** — add `collect-detail` to open a follow-up form on 👎. Set the `categories` **JS property** (array) to render selectable chips.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
-
 ### Default
-
-The out-of-the-box feedback prompt with default copy. A 👍 or 👎 vote transitions to the thank-you; the × button closes and fires `kc-close`.
 
 <Example client:visible tag="kc-feedback-bar" />
 
-### Custom title
+### Custom Title
 
-Override the question with `bar-title` — useful when "Was this helpful?" doesn't fit the context (e.g. after a form submission or an article).
+Override the question with `bar-title` when "Was this helpful?" doesn't fit the context.
 
 <Example client:visible tag="kc-feedback-bar" config={{ barTitle: 'Did this answer your question?' }} />
 
-### Collect detail
+### Collect Detail
 
-Add `collect-detail` to open an optional follow-up form on a 👎 vote. Listen for `kc-feedback-detail` to receive `{ value, category?, comment? }`.
+Add `collect-detail` for an optional follow-up form on 👎. Listen for `kc-feedback-detail` to receive `{ value, category?, comment? }`.
 
 <Example client:visible tag="kc-feedback-bar" config={{ collectDetail: true }} />
 
-### Collect detail with categories
+### Collect Detail with Categories
 
-Set the `categories` property (an array) alongside `collect-detail` to render selectable chips in the detail form — a fast way for the user to tag the issue without typing.
+Set the `categories` property alongside `collect-detail` to render selectable chips — fast tagging without typing.
 
 <Example client:visible tag="kc-feedback-bar" config={{ collectDetail: true }} data="withCategories" />
 
-### Customising copy
+### Customising Copy
 
-Every label is overridable — `bar-title`, `detail-title`, `detail-placeholder`, `submit-label`, and `thanks-message`. Override only what you need; the rest fall back to sensible defaults.
+Every label is overridable — override only what you need; the rest fall back to defaults.
 
 <Example client:visible tag="kc-feedback-bar" config={{ barTitle: 'Was this response useful?', detailTitle: 'What went wrong?', detailPlaceholder: 'Tell us more (optional)…', submitLabel: 'Send feedback', thanksMessage: 'Got it — thanks for the input.' }} />
 

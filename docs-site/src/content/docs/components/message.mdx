@@ -14,33 +14,29 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-message</p>
 
-<p class="kc-lede">A single message row — markdown content, an optional reasoning block, tool calls, attachments, and action buttons — all rendered from one `message` object. The keystone of the "compose your own message list" pattern.</p>
+<p class="kc-lede">One element, one object — render a complete message row with markdown, reasoning, tool calls, attachments, and action buttons. The keystone of any custom message list.</p>
 
 <Facts items={['Shadow DOM', '1 event', 'User + assistant roles', 'Avatar support', 'Custom actions']} />
 
 ## Preview
 
-Toggle `role` and `actions-reveal` in the controls, then interact with the action buttons to see `kc-message-action` logged in the Console below.
-
 <Playground client:only="solid" tag="kc-message" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-message>` when you want to build your own message list — a custom layout, a non-Solid app, or anywhere you need to control how the thread is iterated. If you want a full chat surface in one tag (thread + input + suggestions), use `<kc-chat>` instead. In SolidJS, compose the `Message`, `MessageContent`, and `MessageActionBar` primitives directly for finer control.
+Reach for `<kc-message>` when building your own thread — a custom layout, a non-Solid app, or anywhere you iterate the message list yourself. For a full chat surface in one tag, use `<kc-chat>`. In SolidJS, compose the `Message`, `MessageContent`, and `MessageActionBar` primitives directly for finer control.
 </Aside>
 
 ## Usage
 
-Register the element once, then set the `message` **JS property** and listen for `kc-message-action`:
+Set `message` as a JS **property** and listen for `kc-message-action`:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-message id="msg" style="display:block;"></kc-message>
 
 <script type="module">
+  import '@kitn.ai/chat/elements';
   const msg = document.getElementById('msg');
 
-  // `message` is a JS property — not an attribute
   msg.message = {
     id: 'm-1', role: 'assistant',
     content: "Here's the plan:\n\n```js\nconst kit = useChat();\n```",
@@ -55,47 +51,34 @@ Register the element once, then set the `message` **JS property** and listen for
 </script>
 ```
 
-A few things worth knowing:
-
-- **`message` is a JS property.** Assign it with `el.message = { … }`. For simple cases where you only need role and text, use the scalar `role` + `content` attributes (or properties) instead of a full object.
-- **Markdown** is on by default for `role="assistant"` and off for `role="user"`. Override with the `markdown` boolean attribute when you need the opposite.
-- **Actions** live in `message.actions` as an array of built-in names (`'copy'`, `'like'`, `'dislike'`, `'regenerate'`, `'edit'`) and/or custom `{ id, label, icon?, tooltip? }` descriptors. The element merges them; every click fires `kc-message-action`. Alternatively, place `<kc-action>` children in the element's light DOM and skip the JS array entirely — handy for plain HTML.
-- **`actionsReveal`** controls when the action bar appears: `'always'` (default) keeps it visible at all times; `'hover'` hides it until the user hovers the row.
-- **Avatars** can come from `message.avatar` (the object), or from the convenience scalar props `avatar-src` / `avatar-fallback` for simple one-off cases.
-
-To import via npm instead of the CDN, use:
-
-```js
-import '@kitn.ai/chat/elements';
-```
-
-See the **Events** table below for the full payload shape, and the **Code** panel in each example for the exact snippet in your framework.
+- **`message` is a JS property.** For simple cases, use the scalar `role` + `content` attributes instead of a full object.
+- **Markdown** is on by default for `role="assistant"`, off for `role="user"`. Override with the `markdown` boolean.
+- **`actions`** accepts built-in names (`'copy'`, `'like'`, `'dislike'`, `'regenerate'`, `'edit'`) and/or `{ id, label, icon?, tooltip? }` descriptors. Alternatively, place `<kc-action>` children in the light DOM.
+- **`actionsReveal`** — `'always'` (default) keeps the action bar visible; `'hover'` hides it until the row is hovered.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
+### Rich Assistant Message
 
-### Rich assistant message
-
-A full assistant turn: markdown content with a fenced code block, a reasoning block, a tool call, an attachment, and built-in action buttons. This is the `message` property in action.
+A full assistant turn: markdown with a fenced code block, a reasoning block, a tool call, an attachment, and built-in actions.
 
 <Example client:visible tag="kc-message" data="assistant" />
 
-### User message
+### User Message
 
-A plain user turn with no actions. Markdown is off by default for `role="user"`, so content renders as plain text.
+A plain user turn with no actions. Markdown is off by default for `role="user"`.
 
 <Example client:visible tag="kc-message" config={{ role: "user" }} data="user" />
 
-### Avatar and custom action
+### Avatar and Custom Action
 
-An assistant message with an avatar image pulled from `message.avatar`, plus a custom `Share` action alongside the built-in `copy` and `like` buttons.
+An avatar pulled from `message.avatar`, plus a custom `Share` action alongside built-in `copy` and `like`.
 
 <Example client:visible tag="kc-message" data="avatarAndCustomAction" />
 
-### Actions reveal on hover
+### Actions Reveal on Hover
 
-Set `actions-reveal="hover"` so the action bar is hidden until the user hovers the message row — a cleaner look in dense threads.
+`actions-reveal="hover"` hides the action bar until the row is hovered — cleaner in dense threads.
 
 <Example client:visible tag="kc-message" config={{ actionsReveal: "hover" }} data="actionsRevealHover" />
 

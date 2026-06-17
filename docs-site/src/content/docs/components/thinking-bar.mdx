@@ -1,5 +1,5 @@
 ---
-title: ThinkingBar
+title: Thinking Bar
 description: An animated "thinking" indicator with an optional stop affordance — drop it in when the assistant is reasoning and let users interrupt if they want an answer sooner.
 ---
 
@@ -14,64 +14,48 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-thinking-bar</p>
 
-<p class="kc-lede">A shimmering "thinking" indicator that signals the assistant is still reasoning. Add the `stoppable` flag and it gains a stop affordance so users can cut the reasoning short and get an answer right away.</p>
+<p class="kc-lede">A shimmering "thinking" indicator that signals the assistant is still reasoning. Add `stoppable` and it gains a stop button that fires `kc-stop` so users can skip to an answer.</p>
 
 <Facts items={['Shadow DOM', 'Animated shimmer', 'Optional stop affordance', '1 event', 'Fully attribute-driven']} />
 
 ## Preview
 
-Toggle `stoppable` to reveal the stop button, and edit `text` and `stop-label` to match your copy. Click Stop in the preview to see `kc-stop` appear in the Console.
-
 <Playground client:only="solid" tag="kc-thinking-bar" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-thinking-bar>` in your message thread while the assistant is generating a response — it sits naturally above the streaming reply. Enable `stoppable` whenever the user should be able to cut a long reasoning step short; it fires `kc-stop` (no payload) so your handler can cancel the in-flight request and instruct the model to answer immediately.
+Place `<kc-thinking-bar>` in the message thread while the assistant is generating a response — it sits naturally above the streaming reply. Enable `stoppable` whenever users should be able to cut a long reasoning step short; handle `kc-stop` to cancel the in-flight request and prompt the model to answer with what it has.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then drop `<kc-thinking-bar>` into your markup:
-
 ```html
-<script type="module">
-  import '@kitn.ai/chat/elements';
-</script>
-
-<kc-thinking-bar text="Thinking"></kc-thinking-bar>
+<kc-thinking-bar text="Thinking" stoppable stop-label="Answer now"></kc-thinking-bar>
 ```
 
-A few things worth knowing:
+All three props are **attributes** — no JS property assignment needed.
 
-- **All three props are attributes.** `text`, `stoppable`, and `stop-label` can all be set as HTML attributes — no JS property assignment needed. Set `stoppable` as a bare boolean attribute (no value) to opt in to the stop button.
-- **`kc-chat` does not surface this element.** `<kc-thinking-bar>` is a standalone primitive you compose yourself — it gives you full control over when it appears and disappears.
-- **Customising copy** — override `text` for the shimmering label (e.g. `"Reasoning…"`) and `stop-label` for the button (e.g. `"Answer now"`).
-- **Listening for `kc-stop`** — add an event listener for the `kc-stop` CustomEvent (no detail payload). This is where you cancel the in-flight request. See the **Events** table below and the **Code** panel in the Preview above for per-framework handler syntax.
+- **`stoppable`** — bare boolean attribute; shows the stop button.
+- **`kc-stop`** — fires with no payload when the stop button is clicked; cancel the in-flight request in your handler.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the snippet for your framework.
-
 ### Default
 
-The bare indicator with default copy. It pulses continuously; remove it from the DOM once the assistant reply arrives.
+Remove the element from the DOM once the assistant reply arrives.
 
 <Example client:visible tag="kc-thinking-bar" config={{ text: 'Thinking' }} />
 
-### Custom label
+### Custom Label
 
-Override `text` with something more specific to your context — useful when the assistant is doing a named task like web search or code analysis.
+Override `text` for a specific task like web search or code analysis.
 
 <Example client:visible tag="kc-thinking-bar" config={{ text: 'Searching the web…' }} />
 
 ### Stoppable
 
-Add `stoppable` to show the stop affordance. Clicking it fires `kc-stop` (no payload) — your handler cancels the request and prompts the model to answer with what it has so far.
-
 <Example client:visible tag="kc-thinking-bar" config={{ text: 'Reasoning', stoppable: true, stopLabel: 'Answer now' }} />
 
-### Custom stop label
-
-Change `stop-label` to match your product's language — "Skip reasoning", "Show answer", or anything else that makes sense in context.
+### Custom Stop Label
 
 <Example client:visible tag="kc-thinking-bar" config={{ text: 'Deep thinking…', stoppable: true, stopLabel: 'Skip reasoning' }} />
 

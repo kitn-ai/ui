@@ -10,33 +10,32 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-remote</p>
 
-<p class="kc-lede">Mount a card from an external provider inside a sandboxed cross-origin iframe — it speaks the same <code>CardEnvelope</code> / <code>CardEvent</code> contract as every built-in card, so your routing policy and event listeners work without change.</p>
+<p class="kc-lede">Mount a card from an external provider in a sandboxed cross-origin iframe — it speaks the same <code>CardEnvelope</code> / <code>CardEvent</code> contract as every built-in card, so your routing policy and event listeners work without change.</p>
 
 <Facts items={['Shadow DOM', 'Cross-origin iframe', 'Auto-sizes from card height', 'Theme + locale push', 'Origin-validated mount']} />
 
 <Aside type="caution" title="Needs a running provider">
-`<kc-remote>` is a **cross-origin transport** — it frames a card served from a *different* origin and bridges its events back. There's no live preview on this static docs site (there's no second origin here to host the provider). Run `npm run storybook` for the full live cross-origin demo, or see the reference provider in `examples/remote-provider/`. The complete transport + security matrix is verified by the Playwright suite.
+`<kc-remote>` is a **cross-origin transport** — it frames a card served from a different origin and bridges its events back. There's no live preview here (no second origin to host the provider). Run `npm run storybook` for the full live demo, or see the reference provider in `examples/remote-provider/`.
 </Aside>
 
 ## When to use
 
-Reach for `<kc-remote>` when a card needs to run code you cannot (or choose not to) bundle into the host app — a third-party widget, a sandboxed form from a partner service, or an internal micro-frontend with its own release cycle. The element handles the iframe lifecycle, height negotiation, theme push, and event routing; your app only supplies a `CardEnvelope` and listens for `kc-card` events.
+Reach for `<kc-remote>` when a card needs to run code you cannot (or choose not to) bundle into the host app — a third-party widget, a sandboxed partner form, or an internal micro-frontend with its own release cycle. The element handles the iframe lifecycle, height negotiation, theme push, and event routing; your app only supplies a `CardEnvelope` and listens for `kc-card` events.
 
 ## Usage
 
-Register the element once, then point it at your provider and hand it the envelope:
+Point the element at your provider and hand it the envelope:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-remote
   provider-origin="https://cards.provider.example"
   src="https://cards.provider.example/card"
 ></kc-remote>
+
 <script type="module">
+  import '@kitn.ai/chat/elements';
   const el = document.querySelector('kc-remote');
 
-  // envelope is a JS PROPERTY — assign it, do not set it as an HTML attribute.
   el.envelope = {
     type: 'form',
     id: 'remote-form-1',
@@ -44,7 +43,6 @@ Register the element once, then point it at your provider and hand it the envelo
     data: { /* … your card data … */ },
   };
 
-  // Every routed CardEvent is re-emitted as a bubbling kc-card CustomEvent.
   el.addEventListener('kc-card', (e) => {
     if (e.detail.kind === 'submit') console.log('submitted', e.detail.data);
     if (e.detail.kind === 'action') console.log('action', e.detail.action);
@@ -52,49 +50,10 @@ Register the element once, then point it at your provider and hand it the envelo
 </script>
 ```
 
-Or, with the ES module entry point:
-
-```js
-import '@kitn.ai/chat/elements'; // registers <kc-remote> and all other kc-* elements
-```
-
-**Two scalar attributes; two JS properties:**
-
-- `src` — the URL of the card page inside the provider. Plain HTML attribute.
-- `provider-origin` — the exact HTTPS origin of that provider (e.g. `https://cards.provider.example`). Plain HTML attribute. For local development, `http://localhost:PORT` and `http://127.0.0.1:PORT` are also accepted. Wildcards (`*`) and comma-lists are rejected immediately and render an inline `role="alert"` error — before any iframe is created.
-- `envelope` — the `CardEnvelope` object to deliver into the iframe. **Set as a JS property** (`el.envelope = { type, id, data, … }`), not an HTML attribute. The element forwards it to the provider unchanged.
-- `policy` — an optional `CardPolicy` object for routing card events programmatically (same shape `<kc-cards>` uses). **Set as a JS property.** When omitted, all events still surface as bubbling `kc-card` CustomEvents.
-
-**Cross-origin requirement:** the provider page must run on a *different* origin than the host — that's the whole point. In local development the dev-server alias trick (`localhost` ↔ `127.0.0.1`) keeps the precondition true; see the Storybook source for the exact pattern.
-
-**Events via the shared `kc-card` envelope:** every `CardEvent` the provider emits is re-dispatched as a bubbling, composed `kc-card` CustomEvent on the host element. The `e.detail` object carries a `kind` discriminant (`'submit'`, `'action'`, `'dismiss'`, `'send-prompt'`, `'open'`, `'state'`, `'error'`) plus the event-specific payload — the same shapes the `CardPolicy` callbacks receive.
-
-**Auto-sizing:** the element listens for `resize` messages from the provider runtime and adjusts the iframe height automatically — no CSS height hacks.
-
-**Theme and locale:** on mount, the element pushes a `CardContext` with the resolved theme mode and browser locale, and re-pushes whenever the host theme changes, so the framed card re-themes live without a reload.
-
-## Delivering a card
-
-The payload you hand `<kc-remote>` is an ordinary `CardEnvelope` — identical to what `<kc-cards>` renders locally. A `form` envelope, for example:
-
-```js
-el.envelope = {
-  type: 'form',
-  id: 'remote-form-1',
-  title: 'Quick question',
-  data: {
-    type: 'object',
-    required: ['email'],
-    properties: {
-      email: { type: 'string', title: 'Email', format: 'email' },
-      role:  { type: 'string', title: 'Role', enum: ['Engineer', 'Designer', 'PM'] },
-    },
-    'x-kc-submitLabel': 'Send',
-  },
-};
-```
-
-The provider renders this inside the sandboxed iframe; submitting it crosses the origin boundary and the routed `submit` event surfaces as a `kc-card` CustomEvent on the host. To preview what a given envelope *looks like* rendered, see [Cards](/chat/components/cards/) — `<kc-remote>` delivers exactly that, cross-origin.
+- **`src`** — URL of the card page inside the provider. Plain HTML attribute.
+- **`provider-origin`** — exact HTTPS origin of the provider (e.g. `https://cards.provider.example`). `http://localhost:PORT` and `http://127.0.0.1:PORT` are accepted for local dev. Wildcards and comma-lists are rejected immediately with an inline error.
+- **`envelope`** — the `CardEnvelope` object. **JS property only** (`el.envelope = { type, id, data, … }`), not an HTML attribute.
+- **`policy`** — optional `CardPolicy` JS property for programmatic event routing (same shape `<kc-cards>` uses). Omit it and all events still surface as bubbling `kc-card` CustomEvents.
 
 ## Props
 

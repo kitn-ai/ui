@@ -1,5 +1,5 @@
 ---
-title: ScopePicker
+title: Scope Picker
 description: A compact dropdown that lets users filter a chat or search by author or tag, firing a single event with the chosen scope.
 ---
 
@@ -14,87 +14,72 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-scope-picker</p>
 
-<p class="kc-lede">A lightweight filter dropdown that lets users narrow a conversation or search to a specific author or tag — drop it in a chat header and listen for one event.</p>
+<p class="kc-lede">A lightweight filter dropdown for narrowing a conversation or search to a specific author or tag — drop it in a chat header and listen for one event.</p>
 
 <Facts items={['Shadow DOM', '1 event', 'Authors + tags sections', '2 JS-property arrays', 'Pairs with any header control']} />
 
 ## Preview
 
-Set the `current-label` attribute to see the trigger label update — this is the live `<kc-scope-picker>` web component, mounted in a Solid island. Open the dropdown and pick a scope to see the `kc-scope-change` event logged in the Console below.
-
 <Playground client:only="solid" tag="kc-scope-picker" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-scope-picker>` when your interface has multiple authors or content tags and you want users to narrow the chat or search to a subset. It fits naturally alongside `<kc-model-switcher>` in a chat header, or above a conversation list beside a search input. In SolidJS, compose `ChatScopePicker` directly for full reactivity.
+Use `<kc-scope-picker>` when your interface has multiple authors or content tags and users need to narrow a view. It fits naturally alongside `<kc-model-switcher>` in a chat header or above a conversation list. In SolidJS, compose `ChatScopePicker` directly for full reactivity.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then set `availableAuthors` and `availableTags` as **JS properties** and listen for `kc-scope-change`:
+Set `availableAuthors` and `availableTags` as **JS properties** (arrays can't be serialized to attributes) and listen for `kc-scope-change`:
 
 ```html
-<script type="module">
-  import '@kitn.ai/chat/elements';
-</script>
-
 <kc-scope-picker id="scope"></kc-scope-picker>
 
 <script type="module">
-  const scope = document.getElementById('scope');
+  import '@kitn.ai/chat/elements';
+  const el = document.getElementById('scope');
 
-  // Both are JS properties — assign arrays directly, not attributes.
-  scope.availableAuthors = ['Alex Chen', 'Jordan Lee'];
-  scope.availableTags    = ['design', 'engineering'];
+  el.availableAuthors = ['Alex Chen', 'Jordan Lee'];
+  el.availableTags    = ['design', 'engineering'];
 
-  // filters is undefined when "All Content" is selected.
-  scope.addEventListener('kc-scope-change', (e) => {
+  el.addEventListener('kc-scope-change', (e) => {
     const { filters } = e.detail;
     console.log(filters ?? 'all');
   });
 </script>
 ```
 
-A few things worth knowing:
-
-- **`availableAuthors` and `availableTags` are JS properties**, not attributes. Assign them with `el.availableAuthors = [...]` — these are arrays, so attribute assignment will not work.
-- **`current-label`** is a plain HTML attribute (defaults to `'All Content'`). It controls the text shown on the trigger button. Update it after a scope is selected to reflect the active filter.
-- **`kc-scope-change`** is the only event. `detail.filters` is `undefined` when the user picks "All Content", or an object `{ authors?: string[], tags?: string[] }` when they pick a specific filter. See the **Events** table below for the full payload shape.
-- The dropdown renders an **Authors** section and a **Tags** section only when those arrays are non-empty — passing an empty array hides that section entirely.
-- A CDN alternative to the module import: `<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>`.
-
-The **Code** panel in the Preview above generates the exact per-framework snippet as you adjust the controls.
+- **`current-label`** — HTML attribute controlling the trigger button text (default `'All Content'`). Update it after each `kc-scope-change` to reflect the active filter.
+- **`kc-scope-change`** — `detail.filters` is `undefined` when "All Content" is selected, or `{ authors?: string[], tags?: string[] }` for a specific filter.
+- Passing an empty array for either property hides that section entirely.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the snippet for your framework.
+### Authors and Tags
 
-### Authors and tags
-
-Both sections populated: the dropdown shows an **Authors** group and a **Tags** group below "All Content". Selecting any item fires `kc-scope-change` with `detail.filters`.
+Both sections populated — the dropdown shows an **Authors** group and a **Tags** group below "All Content".
 
 <Example client:visible tag="kc-scope-picker" />
 
-### Authors only
+### Authors Only
 
-Pass a non-empty `availableAuthors` and an empty `availableTags` to render only the Authors section. Useful when your content isn't tagged but is attributable to specific people.
+Non-empty `availableAuthors`, empty `availableTags` — renders only the Authors section.
 
 <Example client:visible tag="kc-scope-picker" data="authorsOnly" />
 
-### Tags only
+### Tags Only
 
-Pass a non-empty `availableTags` and an empty `availableAuthors` to show only the Tags section. Common for topic-scoped knowledge bases where author attribution isn't relevant.
+Non-empty `availableTags`, empty `availableAuthors` — renders only the Tags section.
 
 <Example client:visible tag="kc-scope-picker" data="tagsOnly" />
 
-### Minimal (no filters)
+### Minimal (No Filters)
 
-When both arrays are empty, the dropdown contains only "All Content". The trigger still renders and works — handy while filter options are loading asynchronously.
+Both arrays empty — the dropdown shows only "All Content". Useful while options are loading asynchronously.
 
 <Example client:visible tag="kc-scope-picker" data="minimal" />
 
-### Custom trigger label
+### Custom Trigger Label
 
-Set `current-label` to reflect an active scope — for example after the user has already picked "Jordan Lee". Your app owns this state and should update the attribute whenever `kc-scope-change` fires.
+Set `current-label` to reflect an already-active scope. Your app owns this state and updates the attribute on each `kc-scope-change`.
 
 <Example client:visible tag="kc-scope-picker" config={{ currentLabel: 'Jordan Lee' }} data="customLabel" />
 

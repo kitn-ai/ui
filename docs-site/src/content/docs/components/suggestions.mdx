@@ -14,90 +14,65 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-suggestions</p>
 
-<p class="kc-lede">A row (or full-width list) of clickable prompt chips — drop it above an input in the empty/welcome state, or below the last assistant message as follow-up shortcuts, and let users click instead of type.</p>
+<p class="kc-lede">A row (or full-width list) of clickable prompt chips — drop it above an input in the welcome state or below the last assistant message as follow-up shortcuts.</p>
 
 <Facts items={['Shadow DOM', '3 chip styles', 'Block layout mode', 'Substring highlight', '1 event']} />
 
 ## Preview
 
-Switch between `outline`, `ghost`, and `default` variants, toggle `block` for full-width rows — this is the live `<kc-suggestions>` web component, mounted in a Solid island. Click a chip and watch the `kc-select` event fire in the Console.
-
 <Playground client:only="solid" tag="kc-suggestions" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-suggestions>` above the prompt input when the thread is empty — a fast welcome state that shows users what the assistant can do. It also works below the last assistant reply as follow-up chips. Pass the `block` flag when you want suggestions to stack as full-width rows (e.g. inside a narrow sidebar panel) rather than wrapping pills. Set `highlight` when you are rendering it as a filtered autocomplete list — the matched substring is visually emphasised in every chip.
+Place `<kc-suggestions>` above the prompt input when the thread is empty to show users what the assistant can do. It also works below the last assistant reply as follow-up chips. Use `block` to stack full-width rows in narrow layouts, and `highlight` for a filtered autocomplete list.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then set the `suggestions` **property** (a JS array) and listen for `kc-select`:
+Assign the `suggestions` JS property and listen for `kc-select`:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-suggestions id="suggs" variant="outline"></kc-suggestions>
-
 <script type="module">
+  import '@kitn.ai/chat/elements';
   const suggs = document.getElementById('suggs');
   suggs.suggestions = ['Explain the architecture', 'Show me a code example'];
   suggs.addEventListener('kc-select', (e) => console.log(e.detail.value));
 </script>
 ```
 
-A few things worth knowing:
-
-- **`suggestions` is a JS property**, not an attribute. Assign an array: `el.suggestions = ['…']`. Each item can be a plain string (the displayed label is also the emitted value) or a `{ label, value }` object when the two differ.
-- **`variant`** is a plain HTML attribute: `outline` (default — bordered pill), `ghost` (no border, subtle hover), or `default` (filled). It controls the chip style across all items.
-- **`block`** is a boolean attribute/property. When set, chips become full-width left-aligned rows instead of wrapping pills — useful in narrow containers.
-- **`highlight`** is a string attribute. Pass the current search query and the matching substring is visually emphasised inside every chip label. This implicitly switches the chips to the list-row layout.
-- The element emits a single `kc-select` CustomEvent whose `detail.value` is the clicked chip's value (the string itself, or `item.value` from the `{ label, value }` form). See the **Events** table below for the full payload, and the **Code** panel in the Preview for the exact listener syntax in your framework.
-
-**Declarative children** — you can also declare chips as `<kc-suggestion>` child elements instead of setting the `suggestions` property. The `value` attribute sets the emitted value; `textContent` is the displayed label. They are light-DOM data carriers hidden by the Shadow DOM and can be mixed with the `suggestions` property (prop items render first, declarative children after):
-
-```html
-<kc-suggestions variant="outline">
-  <kc-suggestion value="explain">Explain the architecture</kc-suggestion>
-  <kc-suggestion value="example">Show me a code example</kc-suggestion>
-</kc-suggestions>
-```
+For the declarative path, use `<kc-suggestion>` children — `value` sets the emitted value, text content is the label. Prop items render first; declarative children are appended after.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
-
-### Default (outline pills)
-
-The out-of-the-box wrapping pill row with `outline` chips. Click any chip to see the `kc-select` event fire.
+### Default (Outline Pills)
 
 <Example client:visible tag="kc-suggestions" config={{ variant: 'outline' }} />
 
-### Ghost variant
+### Ghost Variant
 
-Use `variant="ghost"` for a lighter appearance — no border, just a subtle hover state. Good when you want chips to blend into the surrounding UI rather than stand out.
+`variant="ghost"` — no border, subtle hover. Good when chips should blend into the surrounding UI.
 
 <Example client:visible tag="kc-suggestions" config={{ variant: 'ghost' }} />
 
-### Block layout
+### Block Layout
 
-Add the `block` flag to stack suggestions as full-width left-aligned rows. Handy in narrower layouts like sidebars or constrained panels where wrapping pills would look awkward.
+`block` stacks suggestions as full-width rows — useful in sidebars or constrained panels.
 
 <Example client:visible tag="kc-suggestions" config={{ variant: 'outline', block: true }} />
 
-### With highlighted search
+### With Highlighted Search
 
-Set `highlight` to the current query string and the matching substring is emphasised inside each chip — ideal for a filtered autocomplete or search-suggestion list. The `highlight` attribute also implicitly switches to the list-row layout.
+`highlight` emphasises the matching substring in every chip — ideal for autocomplete or search-suggestion lists.
 
 <Example client:visible tag="kc-suggestions" config={{ highlight: 'Solid' }} data="search" />
 
-### Small chips
-
-Pass `size="sm"` for a tighter chip height — useful when suggestions appear inline alongside other compact UI, or when you just want the visual weight reduced.
+### Small Chips
 
 <Example client:visible tag="kc-suggestions" config={{ variant: 'outline', size: 'sm' }} />
 
-### Label and value differ
+### Label and Value Differ
 
-When the displayed text and the emitted value should differ, pass `{ label, value }` objects instead of plain strings. The label is shown in the chip; the value is what `kc-select` emits.
+Pass `{ label, value }` objects when the displayed text and the emitted value should differ.
 
 <Example client:visible tag="kc-suggestions" config={{ variant: 'outline' }} data="labeled" />
 

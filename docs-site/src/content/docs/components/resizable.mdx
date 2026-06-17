@@ -14,27 +14,21 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-resizable</p>
 
-<p class="kc-lede">Compose a resizable multi-panel shell — sidebar + chat, list + inspector, or a three-up view — by dropping `<kc-resizable-item>` children in and letting the element handle dividers, drag logic, keyboard resize, and expand-to-fill.</p>
+<p class="kc-lede">Compose a draggable multi-panel shell — sidebar + chat, list + inspector, three-up — by placing `<kc-resizable-item>` children inside; dividers, drag logic, keyboard resize, and expand-to-fill are handled for you.</p>
 
 <Facts items={['Shadow DOM', '2 events', 'Up to 3 panels (nest for more)', 'px or % sizing', 'Expand-to-fill protocol']} />
 
 ## Preview
 
-Flip `orientation` to switch between a horizontal row and a vertical column — this is the live `<kc-resizable>` web component shell. Expand **Code** to copy the full multi-panel snippet, including `<kc-resizable-item>` children, for your framework.
-
 <Playground client:only="solid" tag="kc-resizable" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-resizable>` whenever you compose an app shell out of distinct regions the user should be able to resize — a conversation list beside a chat thread, a chat thread beside an artifact preview, or a stacked top/bottom split for a code editor and its output. It owns the drag handles and layout math; your content lives in `<kc-resizable-item>` slots. In SolidJS, use the `Resizable` and `ResizablePanel` components from `@kitn.ai/chat` directly for tighter Solid reactivity integration.
+Use `<kc-resizable>` for any app shell built from regions the user should resize — a conversation list beside a thread, a thread beside an artifact, a stacked code-editor / output split. In SolidJS, use the `Resizable` and `ResizablePanel` components from `@kitn.ai/chat` directly for tighter reactivity integration.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then compose your layout declaratively:
-
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-resizable orientation="horizontal" style="display:block;height:400px">
   <kc-resizable-item size="25%" min="160px"> <!-- list panel --> </kc-resizable-item>
   <kc-resizable-item> <!-- chat panel, fills remaining space --> </kc-resizable-item>
@@ -42,93 +36,54 @@ Register the custom elements once, then compose your layout declaratively:
 </kc-resizable>
 
 <script type="module">
+  import '@kitn.ai/chat/elements';
   document.querySelector('kc-resizable')
     .addEventListener('kc-change', (e) => console.log(e.detail.sizes));
 </script>
 ```
 
-With the npm package (recommended for bundled apps):
+- **`size`** — initial main-axis size: `"280px"` or `"25%"`. Omit for a flexible panel that fills remaining space.
+- **`min` / `max`** — resize bounds in px or %, e.g. `min="140px"` or `max="50%"`.
+- **`locked`** — fixes the panel; adjacent dividers become non-draggable separators.
+- **`hidden`** — removes the panel and its divider; remaining panels reflow. Toggle at runtime to collapse/restore.
+- **`maximizedIndex`** — JS property; set to the zero-based panel index to maximize it (`null` to restore). Call `el.maximize(n)` / `el.restore()` imperatively.
 
-```js
-import '@kitn.ai/chat/elements'; // registers all kc-* custom elements
-```
-
-**Anatomy** — each `<kc-resizable-item>` is a passive config-carrier that renders its own slotted light content. The parent reads each item's attributes via a `MutationObserver` and inserts draggable divider handles between every visible, unlocked pair. There is no data property to pass — the layout is fully declarative via child element attributes:
-
-- **`size`** — initial main-axis size: `"280px"` (fixed) or `"25%"` / `25` (percent). Omit for a flexible panel that fills remaining space.
-- **`min`** / **`max`** — resize bounds in px or %, e.g. `min="140px"` or `max="50%"`.
-- **`locked`** — boolean attribute. Fixes the panel's size; adjacent dividers become non-draggable separators. Pair with `size` to pin an exact dimension.
-- **`hidden`** — boolean attribute. Hides the panel and drops its adjacent divider; remaining panels reflow to fill the space. Toggle it at runtime to show/hide a panel programmatically.
-
-**Panel count** — a single `<kc-resizable>` lays out up to three `<kc-resizable-item>` children. Nest a `<kc-resizable>` inside one of the items to build layouts with more than three regions.
-
-**`orientation`** is a scalar attribute — set it as an HTML attribute (`orientation="vertical"`) or via the DOM property. Defaults to `"horizontal"` (a left-to-right row of panels).
-
-**`maximizedIndex`** is a JS property (non-scalar). Set it to the zero-based index of the panel you want to maximize: `el.maximizedIndex = 2` hides the other panels and expands that one to fill the container. Set to `null` to restore the previous layout. You can also call `el.maximize(index)` and `el.restore()` imperatively. See the Events table for the `kc-maximize-change` detail payload.
-
-**Expand-to-fill protocol** — when a `<kc-artifact>` (or any descendant) fires the `kc-maximize-intent` custom event (bubbling, composed), the nearest enclosing `<kc-resizable>` catches it automatically and hides siblings so the containing panel fills the container. No wiring between the two elements is needed — pressing **Expand** in the artifact toolbar just works. **Escape** or **Collapse** restores the layout.
-
-**Listening for events** — `<kc-resizable>` fires two CustomEvents: `kc-change` after every drag, keyboard resize, or visibility change (`detail.sizes` = panel percents as `number[]`), and `kc-maximize-change` when a panel is maximized or restored (`detail.maximized`, `detail.index`). See the **Events** table and the **Code** panel above for per-framework listener syntax.
+**Expand-to-fill** — when a `<kc-artifact expandable>` fires `kc-maximize-intent` (bubbling, composed), the nearest enclosing `<kc-resizable>` catches it automatically and hides siblings. No wiring needed. **Escape** or **Collapse** restores the layout.
 
 ## Examples
 
-Each example below renders a live `<kc-resizable>` with real draggable panels — grab the divider handle and drag. Expand **Code** to copy the full markup with `<kc-resizable-item>` children for your framework.
-
-### Sidebar + chat
-
-The default horizontal orientation lays panels out as a left-to-right row. Here a `size="28%"` sidebar sits beside a flexible chat pane that fills the remaining space. Drag the divider to resize.
+### Sidebar + Chat
 
 <Example client:visible tag="kc-resizable" config={{ orientation: 'horizontal' }} style="height:220px" />
 
-### Vertical split
-
-Set `orientation="vertical"` to stack panels top-to-bottom — the classic shape for a code editor above its output pane, or a context strip above a main chat area. Drag the horizontal divider to resize.
+### Vertical Split
 
 <Example client:visible tag="kc-resizable" config={{ orientation: 'vertical' }} data="vertical" style="height:280px" />
 
-### Three-panel layout
-
-A single `<kc-resizable>` lays out up to three `<kc-resizable-item>` children with two independent draggable dividers. This is the canonical list + chat + preview shell shape.
+### Three-Panel Layout
 
 <Example client:visible tag="kc-resizable" config={{ orientation: 'horizontal' }} data="threePanel" style="height:220px" />
 
-### Expand-to-fill protocol
+### Expand-to-Fill Protocol
 
-When a `<kc-artifact>` (or any descendant) fires the `kc-maximize-intent` event (bubbling, composed), the nearest enclosing `<kc-resizable>` catches it automatically, hides sibling panels, and lets the containing item fill the container. No manual wiring between the two elements is needed — pressing **Expand** in the artifact toolbar just works.
+Wire `<kc-artifact expandable>` inside an item — pressing **Expand** maximizes that panel automatically:
 
 ```html
-<!-- The artifact's Expand button (opt-in via `expandable`) fires
-     kc-maximize-intent (bubbles:true, composed:true).
-     The nearest <kc-resizable> catches it automatically —
-     no wiring between the two elements needed.            -->
 <kc-resizable orientation="horizontal" style="display:block;height:480px">
   <kc-resizable-item size="20%" min="120px"> …list… </kc-resizable-item>
   <kc-resizable-item min="140px">           …chat… </kc-resizable-item>
   <kc-resizable-item size="35%" min="200px">
-    <!-- expandable adds the ⤢ Expand / Collapse button -->
     <kc-artifact src="…/index.html" expandable></kc-artifact>
   </kc-resizable-item>
 </kc-resizable>
 
 <script type="module">
   import '@kitn.ai/chat/elements';
-
   const r = document.querySelector('kc-resizable');
-  // Fired on every drag / keyboard resize / visibility change.
   r.addEventListener('kc-change', (e) => console.log('sizes', e.detail.sizes));
-  // Fired when a panel is maximized or restored.
   r.addEventListener('kc-maximize-change', (e) => console.log(e.detail));
-  // Restore programmatically: r.restore(); or set r.maximizedIndex = null;
+  // r.restore(); or r.maximizedIndex = null;
 </script>
-```
-
-To drive the layout imperatively (without `<kc-artifact>`):
-
-```js
-const r = document.querySelector('kc-resizable');
-r.maximize(2);        // maximize the third panel (zero-based index)
-r.restore();          // restore the previous layout
-r.maximizedIndex = 2; // declarative equivalent; set null to restore
 ```
 
 ## Props

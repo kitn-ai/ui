@@ -1,5 +1,5 @@
 ---
-title: ModelSwitcher
+title: Model Switcher
 description: A compact dropdown for picking the active AI model — drop it in any chat header and listen for one event.
 ---
 
@@ -14,32 +14,27 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-model-switcher</p>
 
-<p class="kc-lede">A compact dropdown trigger that lets users swap the active AI model mid-conversation. Drop it in any chat header, set a list of models, and handle one event — that's the full API.</p>
+<p class="kc-lede">A compact dropdown trigger that lets users swap the active AI model mid-conversation — set a list of models, handle one event, done.</p>
 
 <Facts items={['Shadow DOM', '1 event', '2 props', 'Property API or declarative children', 'Only renders with 2+ models']} />
 
 ## Preview
 
-Use the controls to try different `current-model` values — this is the live `<kc-model-switcher>` web component, mounted in a Solid island. Select a model to see the `kc-model-change` event logged in the Console below.
-
 <Playground client:only="solid" tag="kc-model-switcher" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-model-switcher>` when you're building your own chat header and want the model picker as a standalone piece — without pulling in the full `<kc-chat>` wrapper. It sits naturally beside a context meter or title in the header bar. The element stays invisible until at least two models are provided, so you can always pass the full list and let the component decide whether to show up.
+Reach for `<kc-model-switcher>` when building your own chat header and you want the model picker as a standalone piece. It sits naturally beside a context meter or title. The element stays invisible until at least two models are provided, so you can always pass the full list and let the component decide whether to show.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then wire up `models` as a **JS property** and listen for `kc-model-change`:
+Set `models` as a **JS property** and reflect the selection back on `kc-model-change`:
 
 ```html
-<script type="module">
-  import '@kitn.ai/chat/elements';
-</script>
-
 <kc-model-switcher id="ms"></kc-model-switcher>
 
 <script type="module">
+  import '@kitn.ai/chat/elements';
   const ms = document.getElementById('ms');
 
   ms.models = [
@@ -49,51 +44,43 @@ Register the custom elements once, then wire up `models` as a **JS property** an
   ms.currentModel = 'claude-opus';
 
   ms.addEventListener('kc-model-change', (e) => {
-    ms.currentModel = e.detail.modelId; // reflect the selection back
+    ms.currentModel = e.detail.modelId;
   });
 </script>
 ```
 
-A few things worth knowing:
+- **`models`** — JS property only (arrays cannot be HTML attributes). Each item: `{ id: string; name: string; provider?: string }`.
+- **`currentModel`** — the selected model's `id`. Omit it to default to the first item in the list.
+- **Reflect the selection** — set `el.currentModel = e.detail.modelId` after each `kc-model-change` so the trigger label updates.
 
-- **`models` is a JS property** — assign it with `el.models = [...]`. Each item is `{ id: string; name: string; provider?: string }`. Setting it as an HTML attribute won't work for arrays.
-- **`currentModel`** is a plain attribute/property (the selected model's `id`). Omit it and the element defaults to the first model in the list.
-- **The element only renders when two or more models are provided.** With zero or one model the trigger is invisible — safe to always pass the full list.
-- **Reflect the selection.** After the user picks a model, set `el.currentModel = e.detail.modelId` so the trigger label updates to show the new selection.
-
-**Declarative child API** — if you'd rather avoid a JS property assignment, you can compose `<kc-model>` light-DOM children instead:
+**Declarative child API** — compose `<kc-model>` children instead of setting the `models` property:
 
 ```html
-<kc-model-switcher id="ms">
+<kc-model-switcher>
   <kc-model id="gpt-4o" provider="OpenAI">GPT-4o</kc-model>
-  <kc-model id="gpt-4o-mini" provider="OpenAI">GPT-4o mini</kc-model>
   <kc-model id="claude-sonnet" provider="Anthropic">Claude Sonnet</kc-model>
 </kc-model-switcher>
 ```
 
-Each `<kc-model>` carries `id` (required), `provider` (optional), and a text label as its text content. Children are light-DOM data carriers hidden by Shadow DOM — no JS property assignment needed. When you mix both approaches, `models` property items render first, declarative children after.
-
-**Listening for events** — the element fires a single `kc-model-change` CustomEvent with `{ modelId: string }` whenever the user selects a model. See the **Events** table below for the full payload and the **Code** panel in the Preview above for the exact listener syntax in your framework.
+Each `<kc-model>` carries `id` (required), `provider` (optional), and a text label. When you mix both approaches, property items render first.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
-
 ### Default
 
-Three Claude models loaded via the `models` property. Selecting any option fires `kc-model-change` with the chosen `modelId`.
+Three Claude models loaded via the `models` property.
 
 <Example client:visible tag="kc-model-switcher" />
 
-### Preselected model
+### Preselected Model
 
-Pass `current-model` to start with a specific model active — here `claude-sonnet` instead of the default first item.
+`current-model="claude-sonnet"` starts with a specific model active rather than the first item.
 
 <Example client:visible tag="kc-model-switcher" config={{ currentModel: 'claude-sonnet' }} data="preselected" />
 
-### Multiple providers
+### Multiple Providers
 
-Mix models from different providers — the dropdown groups them by the `provider` field and shows the provider name alongside each option.
+Models from different providers — the dropdown groups them by the `provider` field.
 
 <Example client:visible tag="kc-model-switcher" data="multiProvider" />
 

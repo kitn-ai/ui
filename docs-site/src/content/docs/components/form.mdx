@@ -1,6 +1,6 @@
 ---
 title: Form
-description: Turns a JSON Schema definition into a themed, validated form card — the agent hands over a schema, the user fills it in, and a typed submission event bubbles back up.
+description: Renders a JSON Schema as a themed, validated form card — the agent supplies the schema, the user fills it in, and a typed submission event bubbles back.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,35 +13,30 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-form</p>
 
-<p class="kc-lede">Point an agent's JSON Schema at `<kc-form>` and get back a fully themed, accessible, client-validated form — complete with labels, widgets, a submit button, and a read-only resolved state — without writing a single input element by hand.</p>
+<p class="kc-lede">Point a JSON Schema at `<kc-form>` and get a fully themed, accessible, client-validated form — labels, widgets, submit button, and a read-only resolved state — without writing a single input element.</p>
 
 <Facts items={['Shadow DOM', 'JSON Schema driven', 'Client-side validation', 'Read-only resolved state', 'Card contract events']} />
 
 ## Preview
 
-The Playground shows the default form definition (a rating, textarea, enum radio, and boolean switch). Open the **Code** panel to see the exact HTML wiring or per-framework snippet.
-
 <Playground client:only="solid" tag="kc-form" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-form>` whenever an agent needs to collect structured input: onboarding questionnaires, task parameters, feedback forms, booking flows, or any agentic step that requires user data before continuing. The schema is the single source of truth for both the UI layout and validation, so you don't maintain them separately.
+Use `<kc-form>` when an agent needs structured input before continuing — onboarding questionnaires, task parameters, feedback forms, or any agentic step that gates on user data. The schema is the single source of truth for both UI layout and validation.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then assign the form definition as a **JS property** — not an HTML attribute — because it is a plain object:
+Assign the form definition as a **JS property** — not an HTML attribute:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-form id="my-form"></kc-form>
 
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers all kc-* custom elements
+  import '@kitn.ai/chat/elements';
 
   const form = document.querySelector('#my-form');
 
-  // `data` is a JSON Schema object (type:'object') with optional x-kc-* UI hints.
   form.data = {
     type: 'object',
     title: 'How did we do?',
@@ -53,56 +48,47 @@ Register the custom elements once, then assign the form definition as a **JS pro
     },
   };
 
-  // `kc-form` has no events of its own — it routes through the Card contract.
-  // A valid submission arrives as a bubbling `kc-card` CustomEvent.
   form.addEventListener('kc-card', (e) => {
-    const ev = e.detail; // CardEvent
-    if (ev.kind === 'submit') console.log('submission data', ev.data);
-    if (ev.kind === 'action') console.log('secondary action', ev.action);
+    if (e.detail.kind === 'submit') console.log('submission data', e.detail.data);
+    if (e.detail.kind === 'action') console.log('secondary action', e.detail.action);
   });
 </script>
 ```
 
-**Key things to know:**
-
-- **`data` is a JS property** (not an attribute). Always assign it with `el.data = { … }`. Import `FormDefinition` from `@kitn.ai/chat` for full TypeScript typing.
-- **The schema maps deterministically to widgets:** `string` → text input; `string` + `enum` → radio group or select; `string` + `format` → typed inputs (email, URL, date); `integer`/`number` → number input; `integer` + `x-kc-widget: 'slider'` → range slider; `integer` + `x-kc-widget: 'rating'` → star rating; `boolean` → switch (or `checkbox` via `x-kc-widget`); `array` → repeater, checkbox group, or tag list; nested `object` → fieldset.
-- **`x-kc-*` UI hints live inside the schema** — `x-kc-order` controls field order, `x-kc-submitLabel` overrides the submit button copy, `x-kc-actions` adds secondary buttons (each fires an `action` CardEvent), `x-kc-placeholder` sets the field placeholder, and `x-kc-dismissible` adds a dismiss affordance.
-- **Events use the Card contract** — `kc-form` never fires its own custom events. Instead it emits a single bubbling `kc-card` CustomEvent with a typed `CardEvent` in `detail`. The relevant kinds are: `submit` (valid submission; `detail.data` is the collected, coerced, validated object), `action` (secondary button clicked; `detail.action` is the id from `x-kc-actions`), `ready` (fired on mount), `dismiss` (when `x-kc-dismissible`), and `error` (malformed definition). See the **Code** panel in the Preview above for the full listener syntax per framework.
-- **`heading`** is a scalar attribute that sets the card chrome title (falls back to `data.title` when omitted).
-- **`resolution`** is a JS property. Set it to `{ kind: 'submit', data: { … } }` after a successful submission to swap the form for a read-only `<dl>` summary.
+- **Schema → widgets** deterministically: `string` → text; `string + enum` → radio/select; `integer + x-kc-widget: 'rating'` → stars; `boolean` → switch; `array` → repeater/checkbox group; nested `object` → fieldset. See the **Every widget** example for the full mapping.
+- **`x-kc-*` hints** in the schema control field order (`x-kc-order`), submit label (`x-kc-submitLabel`), secondary buttons (`x-kc-actions`), placeholder (`x-kc-placeholder`), and dismissibility (`x-kc-dismissible`).
+- **Events use the Card contract** — `kc-form` fires no events of its own; it emits a single bubbling `kc-card` CustomEvent. Relevant kinds: `submit` (`detail.data` is the validated object), `action`, `ready`, `dismiss`, and `error`.
+- **`resolution`** — set `el.resolution = { kind: 'submit', data: { … } }` to swap the form for a read-only `<dl>` summary.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the snippet for your framework.
+### Feedback Form
 
-### Feedback form
-
-A realistic worked example: star rating, free-text textarea, enum radio group, and a boolean switch — plus a secondary Skip action. Submit to see the `kc-card` event payload.
+Star rating, free-text textarea, enum radio group, boolean switch, and a secondary Skip action.
 
 <Example client:visible tag="kc-form" />
 
-### Every widget
+### Every Widget
 
-One form that exercises the full schema-to-widget mapping: text, email, URL, date, password, select, number, slider, rating, switch, checkbox, tag list, checkbox group, repeater, and nested fieldset.
+Exercises the full schema-to-widget mapping: text, email, URL, date, password, select, number, slider, rating, switch, checkbox, tag list, checkbox group, repeater, and nested fieldset.
 
 <Example client:visible tag="kc-form" data="allWidgets" />
 
 ### Validation
 
-Required fields, `minLength`/`maxLength`, `minimum`/`maximum`, and `format: 'email'` — try submitting empty to see inline errors, then fill in valid values.
+Required fields, `minLength`/`maxLength`, `minimum`/`maximum`, and `format: 'email'` — submit empty to see inline errors.
 
 <Example client:visible tag="kc-form" data="validation" />
 
-### Resolved (read-only)
+### Resolved (Read-only)
 
-Set `el.resolution = { kind: 'submit', data: { … } }` after a successful submission to render a read-only `<dl>` summary with a "Submitted" badge — no inputs or submit button remain.
+After a successful submission, set `el.resolution` to render a read-only `<dl>` summary with a "Submitted" badge.
 
 <Example client:visible tag="kc-form" data="resolved" />
 
-### Invalid envelope
+### Invalid Envelope
 
-Pass a non-object schema (e.g. `{ type: 'array' }`) to see the inline error state the card renders. The element also emits a `kc-card` event with `kind: 'error'` so you can surface the problem upstream.
+Pass a non-object schema to see the inline error state; the element also emits `kc-card` with `kind: 'error'`.
 
 <Example client:visible tag="kc-form" data="invalidEnvelope" />
 

@@ -1,5 +1,5 @@
 ---
-title: ResponseStream
+title: Response Stream
 description: Reveals text with a typewriter or fade animation — the building block for streaming assistant replies in any framework.
 ---
 
@@ -14,70 +14,53 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-response-stream</p>
 
-<p class="kc-lede">Animates text into view — character by character, or segment by segment — for live-streamed assistant replies. Pass a finished string to replay the animation, or hand it an <code>AsyncIterable&lt;string&gt;</code> to drive it from a real stream.</p>
+<p class="kc-lede">Animates text into view — character by character or segment by segment — for live-streamed assistant replies, accepting a plain string or an `AsyncIterable<string>`.</p>
 
 <Facts items={['Shadow DOM', '2 animation modes', 'Accepts AsyncIterable', 'Tunable speed', 'Fires kc-complete']} />
 
 ## Preview
 
-Toggle between `typewriter` and `fade` modes and adjust the controls — this is the live `<kc-response-stream>` web component, mounted in a Solid island. Watch the Console below for the `kc-complete` event.
-
 <Playground client:only="solid" tag="kc-response-stream" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-response-stream>` whenever you want to animate text as an assistant reply arrives — either replaying a finished string for visual effect, or driving the reveal in real time from an `AsyncIterable<string>`. The `typewriter` mode (default) is the right choice for most chat UIs; switch to `fade` for softer, document-style reveals. In SolidJS, use the `ResponseStream` primitive directly for finer control.
+`typewriter` (default) suits most chat UIs; `fade` works better for longer document-style answers. In SolidJS, use the `ResponseStream` primitive directly for finer control.
 </Aside>
 
 ## Usage
 
-Register the element once, then set the `text` **property** (not an attribute — async iterables can't be serialised to HTML attributes). Tune `mode` and `speed` as plain HTML attributes. Listen for `kc-complete` to know when the animation finishes.
+Set `text` as a **JS property** (not an attribute — async iterables can't be serialized to HTML). Tune `mode` and `speed` as plain attributes.
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-response-stream id="stream" mode="typewriter" speed="20"></kc-response-stream>
 
 <script type="module">
-  const stream = document.getElementById('stream');
-  // text can be a string, or an AsyncIterable<string> for live streaming
-  stream.text = "Hello, this reveals one character at a time…";
-  stream.addEventListener('kc-complete', () => console.log('done'));
+  import '@kitn.ai/chat/elements';
+  const el = document.getElementById('stream');
+  el.text = "Hello, this reveals one character at a time…";
+  el.addEventListener('kc-complete', () => console.log('done'));
 </script>
 ```
 
-Using ES module imports instead of the CDN bundle? Register the element with:
-
-```js
-import '@kitn.ai/chat/elements';
-```
-
-A few things worth knowing:
-
-- **`text` is a JS property**, not an attribute. Assign it after the element upgrades — `el.text = '...'`. You can also pass an `AsyncIterable<string>` directly for a live-driven stream.
-- **`mode`** is a plain attribute: `"typewriter"` (default) streams character by character; `"fade"` fades in segments.
-- **`speed`** is a numeric attribute controlling characters (typewriter) or segments (fade) per tick. Default is `20`.
-- **`as`** is an optional attribute to change the rendered wrapper element tag (e.g. `"p"`, `"span"`).
-- **`kc-complete`** fires when the last character or segment has been revealed. See the **Events** table below for the detail shape, and the **Code** panel in the Preview above for per-framework listener syntax.
+- **`text`** — string or `AsyncIterable<string>`. Assign after the element upgrades.
+- **`mode`** — `"typewriter"` (default) streams character by character; `"fade"` fades in segments.
+- **`speed`** — chars or segments per tick. Default `20`.
+- **`as`** — optional wrapper element tag, e.g. `"p"` or `"span"`.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
-
-### Typewriter mode
-
-The default mode streams text character by character at 20 chars/tick. This is the most natural feel for a chat assistant reply.
+### Typewriter Mode
 
 <Example client:visible tag="kc-response-stream" config={{ mode: 'typewriter', speed: '20' }} />
 
-### Fade mode
+### Fade Mode
 
-`mode="fade"` fades in the response segment by segment — a softer reveal that suits longer, document-style answers.
+`mode="fade"` fades the response in segment by segment — softer for longer, document-style answers.
 
 <Example client:visible tag="kc-response-stream" config={{ mode: 'fade' }} data="fade" />
 
-### Realistic assistant reply
+### Realistic Assistant Reply
 
-A longer, realistic assistant message showing how `<kc-response-stream>` handles multi-sentence content. Use `speed` to tune pacing — lower values create a more deliberate reveal; higher values let users get to the answer faster.
+A longer message showing multi-sentence pacing. Lower `speed` for a deliberate reveal; higher to get users to the answer faster.
 
 <Example client:visible tag="kc-response-stream" config={{ mode: 'typewriter', speed: '30' }} data="assistantReply" />
 

@@ -1,0 +1,22 @@
+:root { --accent: #d6207f; --ink: #1b1b1f; --muted: #56565c; }
+* { box-sizing: border-box; }
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+  color: var(--ink);
+  line-height: 1.6;
+}
+h1 { color: var(--accent); margin: 0 0 .5rem; font-size: 1.9rem; }
+p { color: var(--muted); }
+nav { margin-top: 1.5rem; }
+a { color: var(--accent); font-weight: 600; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.card {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 14px;
+}
+.card strong { color: var(--ink); }

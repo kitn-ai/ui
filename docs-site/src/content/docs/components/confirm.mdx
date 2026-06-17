@@ -1,6 +1,6 @@
 ---
 title: Confirm
-description: A named-intent approval card that presents a body, optional tone, and a set of action buttons — resolving itself after the user picks one so the same action can never double-fire.
+description: An approval card with a body, optional tone, and labelled action buttons — resolves itself after the user picks so the same action can never double-fire.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,45 +13,38 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-confirm</p>
 
-<p class="kc-lede">A structured approval card that pairs a body message with a small set of labelled action buttons. Drop it into any generative-UI flow where the model needs the user's explicit go-ahead before a consequential operation proceeds.</p>
+<p class="kc-lede">A structured approval card that pairs a body message with labelled action buttons — use it when the model needs an explicit go-ahead before a consequential operation runs.</p>
 
 <Facts items={['Shadow DOM', 'Single kc-card event', 'Resolves on action (no double-fire)', '3 action styles', 'Optional dismiss affordance']} />
 
 ## Preview
 
-Interact with the buttons — this is the live `<kc-confirm>` web component, mounted in a Solid island. Use the **autofocus** toggle in the controls panel to focus the default action on mount; this is useful when a confirm card appears at the end of a stream and you want immediate keyboard accessibility.
-
 <Playground client:only="solid" tag="kc-confirm" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-confirm>` when the model proposes an action that the user should explicitly approve before it runs — deploying to production, deleting files, or sending an email. Tone `warning` signals caution, `danger` signals destructive intent with a visual icon; both use colour **and** iconography so the risk is never communicated by colour alone. For a larger set of equally-weighted choices that are not approval-gated, consider `<kc-choice>` instead.
+Use `<kc-confirm>` when the model proposes an action the user must explicitly approve — deploying, deleting, sending. `tone: 'warning'` signals caution; `tone: 'danger'` signals destructive intent via colour **and** icon. For equally-weighted choices that aren't approval-gated, use `<kc-choice>` instead.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then set the `data` **property** — it is a JS object, not an HTML attribute:
+Set `data` as a JS **property** and listen for the `kc-card` CustomEvent:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-confirm heading="Run database migration?"></kc-confirm>
 
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers the custom elements
-
+  import '@kitn.ai/chat/elements';
   const el = document.querySelector('kc-confirm');
 
-  // `data` is a JS property — never an attribute.
   el.data = {
     body: 'This will apply 3 pending migrations to production. This cannot be undone.',
     tone: 'warning',
     actions: [
       { id: 'approve', label: 'Run migration', style: 'primary', default: true },
-      { id: 'reject', label: 'Cancel' },
+      { id: 'reject',  label: 'Cancel' },
     ],
   };
 
-  // Cards emit ONE `kc-card` CustomEvent carrying a typed CardEvent.
   el.addEventListener('kc-card', (e) => {
     const ev = e.detail; // { kind: 'action', cardId, action, payload? }
     if (ev.kind === 'action') console.log('chose', ev.action);
@@ -59,55 +52,45 @@ Register the custom elements once, then set the `data` **property** — it is a 
 </script>
 ```
 
-A few things worth knowing:
-
-- **`data` is a JS property.** Assign it with `el.data = { … }` — the shape is `ConfirmCardData` from `@kitn.ai/chat`. The element validates the payload on mount and renders an inline error if it is malformed (e.g. empty `actions`).
-- **`heading`** is a plain attribute. It becomes the card chrome title — set it when you want a short, scannable header above the body.
-- **`card-id`** is a plain attribute. It correlates every emitted `kc-card` event back to this card — essential when multiple cards appear in the same flow.
-- **Action styles** — each action accepts `style: 'primary' | 'default' | 'destructive'`. Exactly one action can be `default: true`; it becomes the keyboard default and receives focus when `autofocus` is set (off by default so it does not steal focus mid-stream).
-- **Tone** — `'warning'` adds a caution icon; `'danger'` adds a danger icon and uses destructive accent colouring alongside any `style: 'destructive'` action.
-- **Resolving** — once any action is activated the card resolves itself (other actions disabled, the chosen one marked). To render the resolved state pre-hydrated, set the `resolution` **property**: `el.resolution = { kind: 'action', action: 'approve' }`.
-- **Dismissible** — set `dismissible: true` in the data payload to show a close affordance; clicking it emits `{ kind: 'dismiss', cardId }` via `kc-card`.
-
-The **Code** panel in the Preview above generates the exact framework snippet as you adjust the controls.
+- **`data`** is a JS property. Shape: `ConfirmCardData` from `@kitn.ai/chat`. Malformed payloads render an inline error.
+- **Action styles** — `'primary' | 'default' | 'destructive'`. Mark one `default: true` to make it the keyboard default; combine with `autofocus` to focus it on mount.
+- **Restore resolved state** via `el.resolution = { kind: 'action', action: 'approve' }` — useful when replaying past conversations.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the snippet for your framework.
+### Approve or Reject
 
-### Approve or reject
-
-The canonical two-action pattern: a `warning` tone with a primary confirm action and a plain cancel. This is the shape most tool-approval flows will use.
+The canonical two-action pattern: `warning` tone, primary confirm, plain cancel.
 
 <Example client:visible tag="kc-confirm" config={{ heading: 'Run database migration?' }} />
 
-### Destructive action
+### Destructive Action
 
-Use `tone: 'danger'` with `style: 'destructive'` on the confirm action for operations that permanently destroy data. Both the tone icon and the button colour signal the severity — never relying on colour alone.
+`tone: 'danger'` with `style: 'destructive'` — colour and icon both signal severity.
 
 <Example client:visible tag="kc-confirm" config={{ heading: 'Delete files?' }} data="destructive" />
 
-### Choice set
+### Choice Set
 
-More than two options works naturally — each action is a button. Omit the `heading` attribute when the data payload already includes a `heading` field.
+More than two actions work naturally — each becomes a button.
 
 <Example client:visible tag="kc-confirm" data="choiceSet" />
 
 ### Dismissible
 
-Set `dismissible: true` in the data payload to add a close (×) affordance. Clicking it fires `{ kind: 'dismiss', cardId }` via the `kc-card` event — the card does not remove itself from the DOM.
+`dismissible: true` adds a close (×) affordance that fires `{ kind: 'dismiss', cardId }` — the card stays in the DOM.
 
 <Example client:visible tag="kc-confirm" config={{ heading: 'Send email?' }} data="dismissible" />
 
-### Resolved (read-only)
+### Resolved (Read-only)
 
-Set the `resolution` property to render the chromed read-only view — the chosen action is marked and all buttons are disabled. This is the state you restore when replaying a past conversation.
+Set the `resolution` property to render the chromed read-only view for a replayed conversation.
 
 <Example client:visible tag="kc-confirm" config={{ heading: 'Run database migration?' }} data="resolved" />
 
-### Error state
+### Error State
 
-If the `data` payload is malformed (e.g. an empty `actions` array), the element renders its inline error state and fires `{ kind: 'error', cardId, message }` via `kc-card`. The host can surface a fallback or log the issue without crashing the surrounding UI.
+An empty `actions` array renders the inline error view and fires `{ kind: 'error', cardId, message }`.
 
 <Example client:visible tag="kc-confirm" data="errorState" />
 

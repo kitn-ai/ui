@@ -12,6 +12,11 @@ import { generateSnippets, controlsFor, type ElementMeta, type State } from '../
 import { sampleFor } from '../lib/sample-data';
 
 const camelToKebab = (s: string) => s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+// camelCase / kebab prop name → human control label, e.g. openInTab → "Open in tab".
+const humanize = (s: string) => {
+  const w = s.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/[-_]/g, ' ').toLowerCase().trim().split(/\s+/);
+  return w.map((word, i) => (i === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word)).join(' ');
+};
 
 function Toggle(props: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
@@ -79,6 +84,10 @@ export default function Playground(props: { tag: string }) {
     node.style.display = 'block';
     // light-DOM slot content (child elements props can't express)
     if (typeof sample.html === 'string') node.innerHTML = sample.html;
+    if (typeof sample.previewHeight === 'string' && container) {
+      container.style.height = sample.previewHeight as string;
+      node.style.height = '100%';
+    }
     container.replaceChildren(node);
     customElements.upgrade(node);
     setHost(node);
@@ -95,7 +104,7 @@ export default function Playground(props: { tag: string }) {
   createEffect(() => {
     const h = host();
     if (!h) return;
-    for (const [k, v] of Object.entries(sample)) if (k !== 'html') (h as any)[k] = v;
+    for (const [k, v] of Object.entries(sample)) if (k !== 'html' && k !== 'previewHeight') (h as any)[k] = v;
     for (const c of bools) (h as any)[c.prop] = Boolean(state()[c.prop]);
     for (const c of controls) if (c.kind === 'string' && state()[c.prop]) h.setAttribute(camelToKebab(c.prop), String(state()[c.prop]));
   });
@@ -123,7 +132,7 @@ export default function Playground(props: { tag: string }) {
           </div>
           <div class="flex flex-wrap items-center gap-5 py-2">
             <For each={bools}>
-              {(c) => <Toggle checked={Boolean(state()[c.prop])} onChange={(v) => set(c.prop, v)} label={camelToKebab(c.prop)} />}
+              {(c) => <Toggle checked={Boolean(state()[c.prop])} onChange={(v) => set(c.prop, v)} label={humanize(c.prop)} />}
             </For>
           </div>
         </div>

@@ -14,33 +14,30 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-workspace</p>
 
-<p class="kc-lede">The entire chat application shell as one tag — a collapsible, drag-resizable sidebar paired with a full message thread, fully isolated in Shadow DOM and ready to drop into any framework or plain HTML.</p>
+<p class="kc-lede">The entire chat application shell as one tag — collapsible drag-resizable sidebar, conversation list, and full message thread, isolated in Shadow DOM and droppable into any framework.</p>
 
 <Facts items={['Shadow DOM', '11 events', 'Drag-resizable sidebar', 'Collapsible sidebar', '26 props']} />
 
 ## Preview
 
-Toggle the controls below to explore `loading`, `scroll-button`, `search`, `voice`, and the `suggestion-mode` — this is the live `<kc-workspace>` web component, mounted in a Solid island. Interact with it to see events in the Console.
-
 <Playground client:only="solid" tag="kc-workspace" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-workspace>` when you want to embed a **complete chat application** — sidebar, history, thread, and prompt composer — into a non-SolidJS app (React, Vue, Svelte, Angular, plain HTML) with zero style conflicts. If you are already in SolidJS and need finer-grained control, compose `ConversationList` and `ChatThread` directly and skip the web component layer.
+Reach for `<kc-workspace>` to embed a complete chat application — sidebar, history, thread, and composer — into a non-SolidJS app with zero style conflicts. In SolidJS, compose `ConversationList` and `ChatThread` directly for finer-grained control.
 </Aside>
 
 ## Usage
 
-Register the custom elements once, then set the required data as **JS properties** and listen for **CustomEvents** on the element.
+Set data as **JS properties** and listen for **CustomEvents** on the element:
 
 ```html
 <kc-workspace id="workspace" style="display:block; height:100vh;"></kc-workspace>
 
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers all kc-* custom elements
+  import '@kitn.ai/chat/elements';
 
   const ws = document.getElementById('workspace');
 
-  // Non-scalar props — always set as JS properties, not HTML attributes
   ws.conversations = [
     {
       id: '1',
@@ -55,62 +52,52 @@ Register the custom elements once, then set the required data as **JS properties
     { id: 'm1', role: 'user', content: 'How do I drop the whole chat app in with one tag?' },
     { id: 'm2', role: 'assistant', content: 'Use <kc-workspace> and set the three core properties.' },
   ];
-  ws.models = [
-    { id: 'claude-4-opus', name: 'Claude 4 Opus', provider: 'Anthropic' },
-  ];
+  ws.models = [{ id: 'claude-4-opus', name: 'Claude 4 Opus', provider: 'Anthropic' }];
   ws.activeId = '1';
 
-  // Events are CustomEvents dispatched on the element itself
   ws.addEventListener('kc-conversation-select', (e) => console.log('selected:', e.detail.id));
   ws.addEventListener('kc-submit', (e) => console.log('user sent:', e.detail.value));
-  ws.addEventListener('kc-new-chat', () => console.log('new chat requested'));
-  ws.addEventListener('kc-sidebar-toggle', (e) => console.log('sidebar collapsed:', e.detail.collapsed));
+  ws.addEventListener('kc-sidebar-toggle', (e) => console.log('collapsed:', e.detail.collapsed));
 </script>
 ```
 
-**JS properties vs attributes** — `groups`, `conversations`, `messages`, `models`, `suggestions`, `slashCommands`, `slashActiveIds`, and `context` are arrays or objects and must be set as JS properties (`el.prop = value`). Scalar props like `placeholder`, `loading`, `proseSize`, `codeTheme`, and the sidebar-dimension props can be set as either attributes or properties. See the **Props** table below for the full breakdown, and the **Code** panel in the Preview for the exact snippet generated for each framework.
-
-**Sidebar** — the sidebar is drag-resizable and collapsible. Set `sidebarWidth` (a percent, default `22`), `sidebarMinWidth`, and `sidebarMaxWidth` to constrain the resize range. Set `sidebarCollapsed` to start it collapsed. Listen for `kc-sidebar-toggle` to track collapse state in your own store.
-
-**Conversations and groups** — pass a flat `conversations` array and the element auto-buckets by recency. To supply your own grouping, also set a `groups` array and add a `groupId` to each conversation.
+- **JS properties vs attributes** — `groups`, `conversations`, `messages`, `models`, `suggestions`, `slashCommands`, `slashActiveIds`, and `context` must be set as JS properties. Scalar props (`placeholder`, `loading`, sidebar dimensions, etc.) can be attributes or properties.
+- **Sidebar** — drag-resizable and collapsible. Constrain with `sidebarWidth` (percent, default `22`), `sidebarMinWidth`, and `sidebarMaxWidth`. Start collapsed with `sidebarCollapsed`; track changes via `kc-sidebar-toggle`.
+- **Conversation grouping** — pass a flat `conversations` array and the element auto-buckets by recency, or supply a `groups` array with `groupId` on each conversation for custom grouping.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
-
 ### Default
-
-The full workspace with a conversations sidebar and an active thread. The sidebar is drag-resizable and can be collapsed via its header toggle.
 
 <Example client:visible tag="kc-workspace" />
 
-### Loading state
+### Loading State
 
-Set `loading` to `true` while an assistant reply is streaming. The thread shows a loading indicator until the next message arrives.
+Set `loading` while an assistant reply is streaming.
 
 <Example client:visible tag="kc-workspace" config={{ loading: true }} data="loading" />
 
-### Model switcher
+### Model Switcher
 
-Set the `models` property to surface a model picker in the thread header. Listen for `kc-model-change` to update `currentModel` in your store.
+Set the `models` property to surface a model picker; listen for `kc-model-change` to update your store.
 
 <Example client:visible tag="kc-workspace" data="withModels" />
 
-### Starter suggestions
+### Starter Suggestions
 
-Set the `suggestions` property to show prompt chips on an empty thread. In `suggestion-mode="submit"` (the default) clicking a chip fires `kc-submit`; in `"fill"` mode it populates the input and fires `kc-suggestion-click`.
+Set `suggestions` to show prompt chips on an empty thread. `suggestion-mode="submit"` fires `kc-submit`; `"fill"` populates the input and fires `kc-suggestion-click`.
 
 <Example client:visible tag="kc-workspace" data="withSuggestions" />
 
-### Slash commands
+### Slash Commands
 
-Set `slashCommands` to enable the `/` command palette in the prompt composer. Listen for `kc-slash-select` to receive `{ command }` and act on the selection.
+Set `slashCommands` to enable the `/` command palette; handle `kc-slash-select` to receive `{ command }`.
 
 <Example client:visible tag="kc-workspace" data="withSlash" />
 
-### Sidebar starts collapsed
+### Sidebar Starts Collapsed
 
-Set `sidebarCollapsed` to start with the sidebar hidden — a floating reveal button appears at the top-left of the chat panel. The user can expand it at any time; `kc-sidebar-toggle` fires on every change.
+A floating reveal button appears at the top-left; `kc-sidebar-toggle` fires on every change.
 
 <Example client:visible tag="kc-workspace" config={{ sidebarCollapsed: true }} data="sidebarCollapsed" />
 

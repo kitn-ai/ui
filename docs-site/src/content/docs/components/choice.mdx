@@ -1,6 +1,6 @@
 ---
 title: Choice
-description: A single-select card that presents the model's options as a radiogroup — the user picks one, hits Submit, and you receive a typed action event.
+description: A single-select card — the model offers options, the user picks one and hits Submit, your app receives a typed action event.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,96 +13,74 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kc-tag-sub">kc-choice</p>
 
-<p class="kc-lede">A single-select "pick one of N" card — the model sets the options, the user picks one and hits Submit, and your app receives a clean `action` event. Supports rich rows with images, pricing badges, and a recommended pill, plus an optional free-text escape hatch.</p>
+<p class="kc-lede">A "pick one of N" card — set options as a JS property, the user chooses one, and your app receives a typed `kc-card` action event.</p>
 
 <Facts items={['Shadow DOM', 'Card-contract events', 'Rich option rows', 'Optional free-text escape (allowOther)', 'Resolves to read-only after submit']} />
 
 ## Preview
 
-Interact with the live `<kc-choice>` element below — select a row, then click **Submit** to see the card resolve. Because `kc-choice` emits through the shared `kc-card` CustomEvent envelope rather than element-specific events, the Console is not shown here; wire up a `kc-card` listener to observe the action (see **Usage** below).
-
 <Playground client:only="solid" tag="kc-choice" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-choice>` whenever the model needs the user to pick exactly one option before proceeding — plan selection, template choice, tone preference, or any "next step" branch. It is a Card element: drop it standalone or let `<kc-cards>` dispatch it automatically from a stream of card envelopes. Prefer `<kc-confirm>` when you only need a yes/no, and `<kc-form>` when the user needs to fill multiple fields.
+Use `<kc-choice>` when the model needs the user to pick exactly one option before proceeding — plan selection, tone preference, next-step branching. Drop it standalone or let `<kc-cards>` dispatch it from a stream. Use `<kc-confirm>` for yes/no, `<kc-form>` for multi-field input.
 </Aside>
 
 ## Usage
 
-Register the elements once, then set the `data` **JS property** (not an attribute — the value is an object) and listen for the `kc-card` CustomEvent:
+Set `data` as a JS **property** and listen for the `kc-card` CustomEvent:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>
-
 <kc-choice id="ch" heading="Choose a plan"></kc-choice>
 
 <script type="module">
+  import '@kitn.ai/chat/elements';
   const el = document.getElementById('ch');
 
-  // `data` is the CardEnvelope.data — always set as a JS property.
   el.data = {
     prompt: 'Which plan fits your team?',
     options: [
-      { id: 'free',  label: 'Free',       meta: '$0' },
-      { id: 'pro',   label: 'Pro',        meta: '$12/seat', recommended: true },
-      { id: 'biz',   label: 'Business',   meta: '$29/seat' },
+      { id: 'free',  label: 'Free',     meta: '$0' },
+      { id: 'pro',   label: 'Pro',      meta: '$12/seat', recommended: true },
+      { id: 'biz',   label: 'Business', meta: '$29/seat' },
     ],
   };
 
-  // All Card elements surface a single bubbling `kc-card` CustomEvent.
   el.addEventListener('kc-card', (e) => {
     const ev = e.detail; // CardEvent
-    if (ev.kind === 'action') {
-      console.log('User chose:', ev.action, ev.payload);
-    }
+    if (ev.kind === 'action') console.log('chose:', ev.action, ev.payload);
   });
 </script>
 ```
 
-A few things worth knowing:
-
-- **`data` is a JS property**, never an attribute. Assign it with `el.data = { … }` after the element upgrades.
-- **`heading`** is a plain attribute (string), rendered in the card chrome above the radiogroup.
-- **`cardId`** (attribute `card-id`) correlates every emitted `kc-card` event back to this card instance. Set it when you have a server-generated id; otherwise the element falls back to its DOM `id`.
-- **Option fields** — the only required fields per option are `id` and `label`. Everything else is optional: `description` (secondary line), `meta` (trailing badge, e.g. a price), `recommended` (pill), `media` (leading image with `imageAlt`), `disabled` (inert + skipped in keyboard nav), and `payload` (opaque object echoed back in the event).
-- **`allowOther`** adds a final selectable row that reveals an inline text input. Submit emits `action: '__other__'` with `payload: { text }`.
-- **`submitLabel`** overrides the default "Submit" button label (set it on the `data` object, not as an attribute).
-- **After submit** the card automatically renders a read-only summary. You can also force this state upfront by setting `el.resolution = { kind: 'action', action: 'option-id' }` — useful for restoring persisted choices on reload.
-- **`kc-cards` / `renderCard`** dispatch `kc-choice` automatically when the card envelope carries `type: 'choice'` — no manual wiring needed in a streamed cards flow.
-
-**Card-contract events** — `kc-choice` uses the shared card envelope, so it fires `kc-card` (not a dedicated event per action). The `detail` is a typed `CardEvent`: `{ kind: 'ready', cardId }` on mount, `{ kind: 'action', cardId, action, payload? }` on submit, and `{ kind: 'error', cardId, message }` for a malformed definition. There is no separate Events table for this element — inspect the **Code** panel in the Preview for the exact listener syntax per framework.
+- **`data`** is a JS property — never an attribute. Required fields per option: `id` and `label`. Optional: `description`, `meta`, `recommended`, `media` + `imageAlt`, `disabled`, `payload`.
+- **`allowOther`** appends an "Other…" row revealing an inline text input; submits as `action: '__other__'` with `payload: { text }`.
+- **After submit** the card renders read-only. Restore a resolved state on reload via `el.resolution = { kind: 'action', action: 'option-id' }`.
 
 ## Examples
 
-Each example is live — expand **Code** to copy the exact snippet for your framework.
-
-### Plans with pricing
-
-A realistic plan-picker with a `recommended` pill, trailing `meta` prices, and a disabled legacy row. Select a row and click **Submit** to emit the `action` event and resolve the card.
+### Plans with Pricing
 
 <Example client:visible tag="kc-choice" config={{ heading: 'Choose a plan', cardId: 'card-plans' }} />
 
-### Rows with images
-
-Option rows can carry a leading image via `media.image` (plus `imageAlt` for accessibility). This example also sets a custom `submitLabel` on the `data` object.
+### Rows with Images
 
 <Example client:visible tag="kc-choice" config={{ heading: 'New workspace', cardId: 'card-templates' }} data="templates" />
 
-### Quick replies with free-text escape
+### Quick Replies with Free-Text Escape
 
-`allowOther` appends an "Other…" row that reveals an inline text input when selected. The shared Submit stays disabled until the field is non-empty; submitting emits `action: '__other__'` with `payload: { text }`.
+`allowOther` appends an "Other…" row that reveals an inline text field when selected.
 
 <Example client:visible tag="kc-choice" config={{ cardId: 'card-replies' }} data="quickReplies" />
 
-### Resolved (read-only)
+### Resolved (Read-only)
 
-Set `el.resolution = { kind: 'action', action: 'option-id' }` after assigning `data` to render the post-submit read-only view — no radiogroup, no Submit button. Use this to restore a previously resolved card on page load.
+Pre-render the post-submit view — useful for restoring persisted choices on reload.
 
 <Example client:visible tag="kc-choice" config={{ heading: 'Choose a plan', cardId: 'card-resolved' }} data="resolved" />
 
-### Error state
+### Error State
 
-A malformed definition (empty `options` array) triggers the inline card error view and emits `{ kind: 'error' }` on `kc-card`. Wire up the listener to surface the message in your UI.
+A malformed definition (empty `options`) triggers the inline error view and emits `{ kind: 'error' }`.
 
 <Example client:visible tag="kc-choice" config={{ cardId: 'card-error' }} data="error" />
 

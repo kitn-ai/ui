@@ -43,9 +43,15 @@ export default function Example(props: Props) {
     // API can't express as props) — set it BEFORE upgrade so it's present when
     // the element first renders.
     if (typeof sample.html === 'string') node.innerHTML = sample.html;
+    // `previewHeight` gives fill-the-container elements (kc-artifact, kc-chat …) a
+    // real height so they're not cramped into the default min-height box.
+    if (typeof sample.previewHeight === 'string' && container) {
+      container.style.height = sample.previewHeight;
+      node.style.height = '100%';
+    }
     container.replaceChildren(node);
     customElements.upgrade(node);
-    for (const [k, v] of Object.entries(sample)) if (k !== 'html') (node as any)[k] = v;
+    for (const [k, v] of Object.entries(sample)) if (k !== 'html' && k !== 'previewHeight') (node as any)[k] = v;
     for (const [k, v] of Object.entries(config)) if (typeof v === 'boolean') (node as any)[k] = v;
     new MutationObserver(() => node.setAttribute('theme', theme()))
       .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
