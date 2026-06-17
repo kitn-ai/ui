@@ -27,8 +27,14 @@ const tsconfig = ts.parseJsonConfigFileContent(
   ts.sys,
   root,
 );
-const program = ts.createProgram(facadeFiles, { ...tsconfig.options, noEmit: true });
+const program = ts.createProgram([...facadeFiles, resolve(root, 'src/index.ts')], { ...tsconfig.options, noEmit: true });
 const checker = program.getTypeChecker();
+
+// Type names re-exported from the public entry (src/index.ts) are importable —
+// consumers can `import type { AttachmentData } from '@kitn.ai/chat'`.
+const entrySf = program.getSourceFile(resolve(root, 'src/index.ts'));
+const entrySym = entrySf && checker.getSymbolAtLocation(entrySf);
+const exportedTypeNames = new Set(entrySym ? checker.getExportsOfModule(entrySym).map((s) => s.name) : []);
 
 const toAttr = (name) => name.replace(/([A-Z])/g, '-$1').toLowerCase();
 
@@ -134,7 +140,10 @@ for (const file of facadeFiles) {
       const tag = tagArg.text;
       const props = membersOf(node.typeArguments?.[0]);
       const defaults = defaultsFrom(node.arguments[1]);
-      for (const p of props) p.default = defaults[p.name];
+      for (const p of props) {
+        p.default = defaults[p.name];
+        if (p.typeName && exportedTypeNames.has(p.typeName.replace(/\[\]$/, ''))) p.typeImport = p.typeName.replace(/\[\]$/, '');
+      }
       const typedEvents = membersOf(node.typeArguments?.[1]);
       const detailByName = new Map(typedEvents.map((e) => [e.name, e]));
       // union of typed events and dispatch() literals seen in the file

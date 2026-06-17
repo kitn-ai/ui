@@ -18,7 +18,10 @@
         "optional": false,
         "scalar": false,
         "description": "Files for the Code tab tree + each file's preview `url`. Set as a JS property (array).",
+        "typeName": "FileTreeFile[]",
+        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
         "default": "[]",
+        "typeImport": "FileTreeFile",
         "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
       },
       {
@@ -192,7 +195,10 @@
         "optional": false,
         "scalar": false,
         "description": "The attachments to render. Set as a JS property (array).",
+        "typeName": "AttachmentData[]",
+        "typeShape": "{ id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]",
         "default": "[]",
+        "typeImport": "AttachmentData",
         "displayType": "AttachmentData[]"
       },
       {
@@ -397,6 +403,8 @@
         "optional": false,
         "scalar": false,
         "description": "The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1).",
+        "typeName": "Step[]",
+        "typeShape": "{ label: string; content?: undefined | string }[]",
         "default": "[]",
         "displayType": "{ label: string; content?: undefined | string }[]"
       }
@@ -442,6 +450,8 @@
         "optional": false,
         "scalar": false,
         "description": "The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`).",
+        "typeName": "ChatMessage[]",
+        "typeShape": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]",
         "default": "[]",
         "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]"
       },
@@ -1020,7 +1030,10 @@
         "optional": false,
         "scalar": false,
         "description": "Pre-bucketed conversation groups (e.g. \"Today\", \"Yesterday\"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property.",
+        "typeName": "ConversationGroup[]",
+        "typeShape": "{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]",
         "default": "[]",
+        "typeImport": "ConversationGroup",
         "displayType": "ConversationGroup[]"
       },
       {
@@ -1029,7 +1042,10 @@
         "optional": false,
         "scalar": false,
         "description": "A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property.",
+        "typeName": "ConversationSummary[]",
+        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
         "default": "[]",
+        "typeImport": "ConversationSummary",
         "displayType": "ConversationSummary[]"
       },
       {
@@ -1267,7 +1283,10 @@
         "optional": false,
         "scalar": false,
         "description": "The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`).",
+        "typeName": "FileTreeFile[]",
+        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
         "default": "[]",
+        "typeImport": "FileTreeFile",
         "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
       },
       {
@@ -1764,7 +1783,10 @@
         "optional": false,
         "scalar": false,
         "description": "The selectable models. Set as a JS property (array).",
+        "typeName": "ModelOption[]",
+        "typeShape": "{ id: string; name: string; provider?: undefined | string }[]",
         "default": "[]",
+        "typeImport": "ModelOption",
         "displayType": "{ id: string; name: string; provider?: undefined | string }[]"
       },
       {
@@ -2369,6 +2391,8 @@
         "optional": false,
         "scalar": false,
         "description": "The active skills to badge. Set as a JS property.",
+        "typeName": "Skill[]",
+        "typeShape": "{ id: string; name: string }[]",
         "default": "[]",
         "displayType": "{ id: string; name: string }[]"
       }
@@ -2469,6 +2493,8 @@
         "optional": false,
         "scalar": false,
         "description": "The sources to render. Set as a JS property.",
+        "typeName": "SourceItem[]",
+        "typeShape": "{ href: string; title?: undefined | string; description?: undefined | string; label?: undefined | string; showFavicon?: undefined | false | true }[]",
         "default": "[]",
         "displayType": "SourceItem[]"
       },
@@ -2827,7 +2853,10 @@
         "optional": false,
         "scalar": false,
         "description": "Pre-bucketed conversation groups for the sidebar. Set as a JS property.",
+        "typeName": "ConversationGroup[]",
+        "typeShape": "{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]",
         "default": "[]",
+        "typeImport": "ConversationGroup",
         "displayType": "ConversationGroup[]"
       },
       {
@@ -2836,7 +2865,10 @@
         "optional": false,
         "scalar": false,
         "description": "Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property.",
+        "typeName": "ConversationSummary[]",
+        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
         "default": "[]",
+        "typeImport": "ConversationSummary",
         "displayType": "ConversationSummary[]"
       },
       {
@@ -2853,6 +2885,8 @@
         "optional": false,
         "scalar": false,
         "description": "The active conversation's message thread, newest last. Set as a JS property.",
+        "typeName": "ChatMessage[]",
+        "typeShape": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]",
         "default": "[]",
         "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]"
       },
