@@ -1,4 +1,4 @@
-name: Deploy Storybook to GitHub Pages
+name: Deploy docs site to GitHub Pages
 
 on:
   push:
@@ -25,11 +25,27 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run build-storybook
+          cache-dependency-path: |
+            package-lock.json
+            docs-site/package-lock.json
+
+      # The docs site syncs its element bundle + generated metas from the LIVE
+      # kit build (scripts/sync-kit.mjs, run on prebuild) — so build the kit first.
+      - name: Install kit dependencies
+        run: npm ci
+      - name: Build kit (element bundle + element-meta/theme/schemas)
+        run: npm run build
+
+      - name: Install docs-site dependencies
+        run: npm ci
+        working-directory: docs-site
+      - name: Build docs site (base /chat, prebuild syncs the fresh kit)
+        run: npm run build
+        working-directory: docs-site
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: storybook-static
+          path: docs-site/dist
 
   deploy:
     needs: build
