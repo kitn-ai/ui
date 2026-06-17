@@ -18,20 +18,29 @@
   --kc-brand-hover: hsl(326 84% 47%);
   --kc-accent-soft: hsl(var(--kc-primary) / 0.16);
 
-  --kc-bg: #1b1b1f;                                /* content + header (same color) */
-  --kc-sidebar: #161618;                           /* distinct sidebar nav bg */
-  --kc-surface: #202127;                           /* cards, preview */
-  --kc-surface-2: #18181b;                         /* console body, nested */
-  --kc-line: #2e2e34;                              /* component borders (cards/tables) */
-  --kc-divider: #26262b;                           /* subtle chrome divider (header/sidebar) */
+  /* Neutrals aligned to the kit's DEFAULT DARK theme (warm charcoal family) so a
+     docs page and an embedded kc-* component share the same grays.
+     Source of truth: src/elements/compiled.css `.dark{}` block. */
+  --kc-bg: #171716;                                /* content + header — kit --color-background */
+  --kc-sidebar: #121211;                           /* distinct sidebar nav bg — kit --color-sidebar */
+  --kc-surface: #201f1d;                           /* cards, preview — kit --color-card */
+  --kc-surface-2: #1a1917;                         /* console body, nested — between bg & card */
+  --kc-line: #2d2c2a;                              /* component borders — kit --color-border */
+  --kc-divider: #232220;                           /* subtle chrome divider — between bg & border */
   --kc-pressed: rgb(0 0 0 / 0.32);                 /* selected/pressed segmented-control fill */
 
-  --kc-ink: #f5f5f6;                               /* strongest text */
-  --kc-ink-2: #c3c3c8;                             /* body */
-  --kc-ink-3: #8b8b92;                             /* labels / dim */
+  --kc-ink: #fafafa;                               /* strongest text — kit --color-foreground */
+  --kc-ink-2: #c9c7c2;                             /* body — warm, between foreground & muted */
+  --kc-ink-3: #a7a5a0;                             /* labels / dim — kit --color-muted-foreground */
   --kc-link: hsl(326 95% 72%);                     /* magenta link text, bright on dark */
   --kc-info: #60a5fa;                               /* complementary blue (kitn gradient) */
   --kc-info-soft: color-mix(in oklab, #3b82f6 15%, transparent);
+
+  /* callout/info (Starlight Aside): the blue used on the Artifact page — single
+     source so every note/tip callout matches. */
+  --kc-callout-info: var(--kc-info);
+  --kc-callout-info-bg: var(--kc-info-soft);
+  --kc-callout-info-border: var(--kc-info);
 }
 
 /* ---- light ---- */
@@ -50,6 +59,11 @@
   --kc-link: hsl(326 72% 40%);                     /* darker magenta → AA on white */
   --kc-info: #2563eb;                               /* complementary blue, AA on white */
   --kc-info-soft: color-mix(in oklab, #3b82f6 10%, transparent);
+
+  /* callout/info — same named tokens, light values (track per-theme --kc-info). */
+  --kc-callout-info: var(--kc-info);
+  --kc-callout-info-bg: var(--kc-info-soft);
+  --kc-callout-info-border: var(--kc-info);
 }
 
 /* ---- map Starlight chrome to the same tokens ----
@@ -201,13 +215,18 @@ h1#_top, .sl-markdown-content h1 { font-size: 2rem; font-weight: 700; letter-spa
   box-shadow: none !important;
 }
 
-/* "tip" aside (When to use): Starlight hardcodes it purple — recolor to brand magenta, subtle */
+/* info callouts (note + "tip"/When-to-use): Starlight defaults note→brand-accent
+   tint (magenta) and tip→purple, which clashes page-to-page. Standardize BOTH to
+   the Artifact-page blue, driven by one named token (--kc-callout-info*). */
+.starlight-aside--note,
 .starlight-aside--tip {
-  background-color: var(--kc-info-soft) !important;
-  border-color: var(--kc-info) !important;
+  background-color: var(--kc-callout-info-bg) !important;
+  border-color: var(--kc-callout-info-border) !important;
 }
-.starlight-aside--tip .starlight-aside__title { color: var(--kc-info) !important; }
-.starlight-aside--tip a { color: var(--kc-info) !important; }
+.starlight-aside--note .starlight-aside__title,
+.starlight-aside--tip .starlight-aside__title { color: var(--kc-callout-info) !important; }
+.starlight-aside--note a,
+.starlight-aside--tip a { color: var(--kc-callout-info) !important; }
 
 /* brand logo (white artwork): show as-is on dark, invert to black on light */
 :root[data-theme='light'] .kc-logo-img { filter: invert(1); }
