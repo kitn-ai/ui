@@ -110,6 +110,7 @@ export default defineConfig({
               { label: 'Empty & first-run state', slug: 'patterns/empty-state' },
               { label: 'Tool calls & reasoning', slug: 'patterns/tool-reasoning' },
               { label: 'Generative UI cards', slug: 'patterns/generative-ui-cards' },
+              { label: 'Open an artifact from a message', slug: 'patterns/artifact-from-message' },
               { label: 'Attachments flow', slug: 'patterns/attachments-flow' },
             ],
           },
