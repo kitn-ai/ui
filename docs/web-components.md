@@ -145,10 +145,12 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `chatTitle` | `chat-title` | `undefined | string` | — | Optional header title shown on the left of the header. |
-| `models` | — | `ModelOption[] | undefined` | — | Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. |
+| `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently selected model id (pairs with `models`). |
 | `context` | — | `ContextData | undefined` | — | Optional context-window token usage. When set, a Context token meter is shown in the header. |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
+| `headerStart` | `header-start` | `undefined | false | true` | — | Whether the host has `slot="header-start"` content (left of the title) — set by the `<kc-chat>` facade so a custom control forces the header open. |
+| `headerEnd` | `header-end` | `undefined | false | true` | — | Whether the host has `slot="header-end"` content (right of the controls). |
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the input toolbar; fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the input toolbar; fires a `voice` event. |
 | `slashCommands` | — | `SlashCommandItem[] | undefined` | — | Slash commands — when set, typing `/` in the input opens the command palette and fires `kc-slash-select`. Set as a JS property. |
@@ -202,7 +204,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` |  |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` |  |
 | `chatTitle` | `chat-title` | `undefined | string` | — |  |
-| `models` | — | `ModelOption[] | undefined` | — |  |
+| `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — |  |
 | `currentModel` | `current-model` | `undefined | string` | — |  |
 | `context` | — | `ContextData | undefined` | — |  |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` |  |
@@ -547,7 +549,7 @@ Renders a list of file/document attachments in grid, inline, or list layouts.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `models` | — | `{ id: string; name: string; provider?: undefined | string }[]` | `[]` | The selectable models. Set as a JS property (array). |
+| `models` | — | `{ id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | `[]` | The selectable models. Set as a JS property (array). |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently-selected model id. Defaults to the first model. |
 
 #### Events

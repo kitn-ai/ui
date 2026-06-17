@@ -473,6 +473,18 @@
     }
   },
   {
+    "tag": "kc-switch",
+    "displayName": "Switch",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-switch></kc-switch>\n<script type=\"module\">\n  const el = document.querySelector('kc-switch');\n  el.addEventListener('kc-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Switch } from '@kitn.ai/chat/react';\n\n<Switch\n  onChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-switch\n  @kc-change=\"onChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-switch\n  on:kc-change={onChange}\n></kc-switch>",
+      "angular": "<kc-switch\n  (kc-change)=\"onChange($event)\"\n></kc-switch>"
+    }
+  },
+  {
     "tag": "kc-tasks",
     "displayName": "Tasks",
     "hasSolid": false,

@@ -3,7 +3,7 @@
 
 # @kitn.ai/chat
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 43 `kitn-*` custom elements: streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 44 `kitn-*` custom elements: streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kc-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/chat'`):
-All 43 elements are also exported individually. Use them for custom layouts or features `<kc-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 44 elements are also exported individually. Use them for custom layouts or features `<kc-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/chat/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 43 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 44 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/chat/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/chat/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (43 elements, generated from custom-elements.json)
+## Element reference (44 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -289,10 +289,12 @@ _No events._
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `chatTitle` | `chat-title` | `undefined \| string` | Optional header title shown on the left of the header. |
-| `models` | — | `undefined \| { id: string; name: string; provider?: undefined \| string }[]` | Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. |
+| `models` | — | `undefined \| { id: string; name: string; provider?: undefined \| string; description?: undefined \| string; group?: undefined \| string }[]` | Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. |
 | `currentModel` | `current-model` | `undefined \| string` | The currently selected model id (pairs with `models`). |
 | `context` | — | `undefined \| { usedTokens: number; maxTokens: number; inputTokens?: undefined \| number; outputTokens?: undefined \| number; estimatedCost?: undefined \| number }` | Optional context-window token usage. When set, a Context token meter is shown in the header. |
 | `scrollButton` | `scroll-button` | `undefined \| false \| true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
+| `headerStart` | `header-start` | `undefined \| false \| true` | Whether the host has `slot="header-start"` content (left of the title) — set by the `<kc-chat>` facade so a custom control forces the header open. |
+| `headerEnd` | `header-end` | `undefined \| false \| true` | Whether the host has `slot="header-end"` content (right of the controls). |
 | `search` | `search` | `undefined \| false \| true` | Show a Search (Globe) button in the input toolbar; fires a `search` event. |
 | `voice` | `voice` | `undefined \| false \| true` | Show a Voice (Mic) button in the input toolbar; fires a `voice` event. |
 | `slashCommands` | — | `undefined \| { id: string; label: string; description?: undefined \| string; category?: undefined \| string }[]` | Slash commands — when set, typing `/` in the input opens the command palette and fires `kc-slash-select`. Set as a JS property. |
@@ -609,7 +611,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `models` | — | `{ id: string; name: string; provider?: undefined \| string }[]` | The selectable models. Set as a JS property (array). |
+| `models` | — | `{ id: string; name: string; provider?: undefined \| string; description?: undefined \| string; group?: undefined \| string }[]` | The selectable models. Set as a JS property (array). |
 | `currentModel` | `current-model` | `undefined \| string` | The currently-selected model id. Defaults to the first model. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
@@ -864,6 +866,24 @@ _No events._
 
 ---
 
+### `kc-switch` / `Switch`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `checked` | `checked` | `undefined \| false \| true` | Initial checked state. Bare attribute (`<kc-switch checked>`) turns it on. |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable interaction. |
+| `label` | `label` | `undefined \| string` | Accessible label. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kc-change` | `CustomEvent<{ checked: false \| true }>` | The toggle changed. |
+
+---
+
 ### `kc-tasks` / `Tasks`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -962,7 +982,7 @@ _No events._
 | `codeTheme` | `code-theme` | `undefined \| string` |  |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` |  |
 | `chatTitle` | `chat-title` | `undefined \| string` |  |
-| `models` | — | `undefined \| { id: string; name: string; provider?: undefined \| string }[]` |  |
+| `models` | — | `undefined \| { id: string; name: string; provider?: undefined \| string; description?: undefined \| string; group?: undefined \| string }[]` |  |
 | `currentModel` | `current-model` | `undefined \| string` |  |
 | `context` | — | `undefined \| { usedTokens: number; maxTokens: number; inputTokens?: undefined \| number; outputTokens?: undefined \| number; estimatedCost?: undefined \| number }` |  |
 | `scrollButton` | `scroll-button` | `undefined \| false \| true` |  |

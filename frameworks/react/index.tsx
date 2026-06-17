@@ -142,13 +142,17 @@ export interface ChatProps extends WebComponentProps {
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;
   /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. */
-  models?: { id: string; name: string; provider?: string }[];
+  models?: { id: string; name: string; provider?: string; description?: string; group?: string }[];
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
   /** Optional context-window token usage. When set, a Context token meter is shown in the header. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; estimatedCost?: number };
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
+  /** Whether the host has `slot="header-start"` content (left of the title) — set by the `<kc-chat>` facade so a custom control forces the header open. */
+  headerStart?: boolean;
+  /** Whether the host has `slot="header-end"` content (right of the controls). */
+  headerEnd?: boolean;
   /** Show a Search (Globe) button in the input toolbar; fires a `search` event. */
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
@@ -181,7 +185,7 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = createWebComponent<ChatProps>(
   'kc-chat',
-  ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact","actionsReveal"],
+  ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","search","voice","slashCommands","slashActiveIds","slashCompact","actionsReveal"],
   { onMessageAction: 'kc-message-action', onModelChange: 'kc-model-change', onSearch: 'kc-search', onSlashSelect: 'kc-slash-select', onSubmit: 'kc-submit', onSuggestionClick: 'kc-suggestion-click', onValueChange: 'kc-value-change', onVoice: 'kc-voice' },
 );
 
@@ -500,7 +504,7 @@ export const Message = createWebComponent<MessageProps>(
 
 export interface ModelSwitcherProps extends WebComponentProps {
   /** The selectable models. Set as a JS property (array). */
-  models: { id: string; name: string; provider?: undefined | string }[];
+  models: { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[];
   /** The currently-selected model id. Defaults to the first model. */
   currentModel?: string;
   /** A model was selected. */
@@ -776,6 +780,23 @@ export const Suggestions = createWebComponent<SuggestionsProps>(
   { onSelect: 'kc-select' },
 );
 
+export interface SwitchProps extends WebComponentProps {
+  /** Initial checked state. Bare attribute (`<kc-switch checked>`) turns it on. */
+  checked?: boolean;
+  /** Disable interaction. */
+  disabled?: boolean;
+  /** Accessible label. */
+  label?: string;
+  /** The toggle changed. */
+  onChange?: (event: CustomEvent<{ checked: boolean }>) => void;
+}
+
+export const Switch = createWebComponent<SwitchProps>(
+  'kc-switch',
+  ["theme","checked","disabled","label"],
+  { onChange: 'kc-change' },
+);
+
 export interface TasksProps extends WebComponentProps {
   /** The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/chat` for the full shape. */
   data?: Record<string, unknown>;
@@ -875,7 +896,7 @@ export interface WorkspaceProps extends WebComponentProps {
   codeTheme?: string;
   codeHighlight?: boolean;
   chatTitle?: string;
-  models?: { id: string; name: string; provider?: string }[];
+  models?: { id: string; name: string; provider?: string; description?: string; group?: string }[];
   currentModel?: string;
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; estimatedCost?: number };
   scrollButton?: boolean;

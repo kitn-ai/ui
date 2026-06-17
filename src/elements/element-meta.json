@@ -535,11 +535,11 @@
       },
       {
         "name": "models",
-        "type": "undefined | { id: string; name: string; provider?: undefined | string }[]",
+        "type": "undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
         "optional": true,
         "scalar": false,
         "description": "Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection.",
-        "displayType": "ModelOption[] | undefined"
+        "displayType": "undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]"
       },
       {
         "name": "currentModel",
@@ -564,6 +564,22 @@
         "scalar": true,
         "description": "Show the scroll-to-bottom button inside the scroll area. Default true.",
         "default": "true",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "headerStart",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether the host has `slot=\"header-start\"` content (left of the title) — set by the `<kc-chat>` facade so a custom control forces the header open.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "headerEnd",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether the host has `slot=\"header-end\"` content (right of the controls).",
         "displayType": "undefined | false | true"
       },
       {
@@ -1779,15 +1795,15 @@
     "props": [
       {
         "name": "models",
-        "type": "{ id: string; name: string; provider?: undefined | string }[]",
+        "type": "{ id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
         "optional": false,
         "scalar": false,
         "description": "The selectable models. Set as a JS property (array).",
         "typeName": "ModelOption[]",
-        "typeShape": "{ id: string; name: string; provider?: undefined | string }[]",
+        "typeShape": "{ id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
         "default": "[]",
         "typeImport": "ModelOption",
-        "displayType": "{ id: string; name: string; provider?: undefined | string }[]"
+        "displayType": "{ id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]"
       },
       {
         "name": "currentModel",
@@ -2658,6 +2674,53 @@
     "tokens": []
   },
   {
+    "tag": "kc-switch",
+    "className": "KcSwitchElement",
+    "displayName": "Switch",
+    "props": [
+      {
+        "name": "checked",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial checked state. Bare attribute (`<kc-switch checked>`) turns it on.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable interaction.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Accessible label.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kc-change",
+        "detail": "{ checked: false | true }",
+        "description": "The toggle changed.",
+        "displayDetail": "{ checked: false | true }"
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Switch",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-switch--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kc-tasks",
     "className": "KcTasksElement",
     "displayName": "Tasks",
@@ -3019,11 +3082,11 @@
       },
       {
         "name": "models",
-        "type": "undefined | { id: string; name: string; provider?: undefined | string }[]",
+        "type": "undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
         "optional": true,
         "scalar": false,
         "description": "",
-        "displayType": "ModelOption[] | undefined"
+        "displayType": "undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]"
       },
       {
         "name": "currentModel",

@@ -40,6 +40,7 @@ import './file-tree';
 import './artifact';
 import './scroll-button';
 import './popover';
+import './switch';
 // Generative-UI cards (Card Contract)
 import './card';
 import './form';

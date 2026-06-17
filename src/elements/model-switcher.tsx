@@ -20,14 +20,18 @@ interface Events {
  * Parse a single light-DOM `<kc-model>` element into a `ModelOption` descriptor.
  * Attribute mapping:
  *  - `id`        → ModelOption.id
- *  - textContent → ModelOption.name
- *  - `provider`  → ModelOption.provider (optional)
+ *  - textContent    → ModelOption.name
+ *  - `provider`     → ModelOption.provider (optional)
+ *  - `description`  → ModelOption.description (optional subtitle)
+ *  - `group`        → ModelOption.group (optional collapsible section)
  */
 export function parseKcModelElement(n: Element): ModelOption {
   return {
     id: n.getAttribute('id') ?? '',
     name: n.textContent?.trim() ?? '',
     provider: n.getAttribute('provider') ?? undefined,
+    description: n.getAttribute('description') ?? undefined,
+    group: n.getAttribute('group') ?? undefined,
   };
 }
 

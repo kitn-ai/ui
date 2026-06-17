@@ -1,3 +1,4 @@
+import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
 import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage } from '../components/chat-thread';
 import type { AttachmentData } from '../components/attachments';
@@ -35,7 +36,23 @@ defineWebComponent<Props, Events>('kc-chat', {
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
   search: false, voice: false, slashCommands: undefined, slashActiveIds: undefined, slashCompact: false,
   actionsReveal: 'always',
-}, (props, { dispatch, flag }) => (
+}, (props, { dispatch, flag, element }) => {
+  // Detect consumer-projected header controls so the header opens for them even
+  // without a title/models/context. Mirrors the <kc-model> light-DOM read pattern.
+  const [hasHeaderStart, setHasHeaderStart] = createSignal(false);
+  const [hasHeaderEnd, setHasHeaderEnd] = createSignal(false);
+  onMount(() => {
+    const read = () => {
+      setHasHeaderStart(!!element.querySelector(':scope > [slot="header-start"]'));
+      setHasHeaderEnd(!!element.querySelector(':scope > [slot="header-end"]'));
+    };
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true });
+    onCleanup(() => observer.disconnect());
+  });
+
+  return (
   <ChatThread
     messages={props.messages} value={props.value as string | undefined} placeholder={props.placeholder as string}
     loading={flag('loading')} suggestions={props.suggestions as string[] | undefined}
@@ -55,5 +72,8 @@ defineWebComponent<Props, Events>('kc-chat', {
     onSearch={() => dispatch('kc-search', {})}
     onVoice={() => dispatch('kc-voice', {})}
     onSlashSelect={(command) => dispatch('kc-slash-select', { command })}
+    headerStart={hasHeaderStart()}
+    headerEnd={hasHeaderEnd()}
   />
-));
+  );
+});
