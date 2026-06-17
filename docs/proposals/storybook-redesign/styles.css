@@ -1,0 +1,310 @@
+/* ============================================================================
+   kitn · Storybook redesign — PROPOSAL MOCK stylesheet
+   ----------------------------------------------------------------------------
+   This is a throwaway proposal artifact (not wired into .storybook/). It extends
+   the warm-paper/charcoal + purple "showcase" language already established in
+   examples/composable into the Storybook documentation chrome.
+
+   Fonts: Bricolage Grotesque (display/body) + JetBrains Mono (code, labels,
+   numerals) — identical to the composable showcase so the two surfaces feel
+   like one product.
+   ========================================================================== */
+
+/* ───────────────────────────── design tokens ───────────────────────────── */
+:root {
+  /* warm-paper light (default) */
+  --bg:      #f4f2ec;
+  --surface: #fbfaf6;
+  --raised:  #ffffff;
+  --stage:   #ffffff;
+  --ink:     #1b1a17;
+  --ink-2:   #423f38;
+  --muted:   #5f5a4f;
+  --faint:   #6e685e;   /* AA: 4.93:1 on --bg (small mono labels need 4.5) */
+  --line:    #e2ddd0;
+  --line-2:  #d3cdbd;
+  --accent:  #6d28d9;
+  --accent-2:#8b5cf6;
+  --accent-ghost: rgba(109, 40, 217, .08);
+  --accent-ring:  rgba(109, 40, 217, .22);
+  --good:    #15803d;
+  --warn:    #b45309;
+  --shadow-sm: 0 1px 2px rgba(40, 34, 20, .05);
+  --shadow:    0 1px 2px rgba(40, 34, 20, .04), 0 8px 24px -12px rgba(40, 34, 20, .14);
+  --shadow-lg: 0 1px 3px rgba(40, 34, 20, .06), 0 22px 50px -22px rgba(40, 34, 20, .26);
+  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --rail: 268px;        /* left sidebar */
+  --toc: 224px;         /* on-this-page rail */
+  color-scheme: light;
+}
+:root.dark {
+  --bg:      #121110;
+  --surface: #1a1917;
+  --raised:  #201f1c;
+  --stage:   #171716;
+  --ink:     #f1efe9;
+  --ink-2:   #cbc7bd;
+  --muted:   #908b80;
+  --faint:   #8b857a;   /* AA: 4.80:1 on --surface (was 3.27 — failed) */
+  --line:    #2a2824;
+  --line-2:  #38352f;
+  --accent:  #a78bfa;
+  --accent-2:#c4b5fd;
+  --accent-ghost: rgba(167, 139, 250, .13);
+  --accent-ring:  rgba(167, 139, 250, .3);
+  --good:    #4ade80;
+  --warn:    #fbbf24;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
+  --shadow:    0 1px 2px rgba(0, 0, 0, .3), 0 12px 32px -14px rgba(0, 0, 0, .6);
+  --shadow-lg: 0 1px 3px rgba(0, 0, 0, .4), 0 28px 60px -24px rgba(0, 0, 0, .75);
+  color-scheme: dark;
+}
+
+/* ───────────────────────────── base ───────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 380;
+  font-size: 16px;
+  line-height: 1.65;
+  background: var(--bg);
+  color: var(--ink-2);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background .3s ease, color .3s ease;
+}
+/* faint dot-grid atmosphere — the showcase signature */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: radial-gradient(var(--line-2) 1px, transparent 1px);
+  background-size: 26px 26px;
+  opacity: .4;
+  mask-image: radial-gradient(ellipse 120% 70% at 70% -10%, #000, transparent 70%);
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+::selection { background: var(--accent-ghost); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* scrollbars match the kit */
+* { scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ===========================================================================
+   APP FRAME  —  branded mock of the Storybook manager (sidebar) + preview
+   =========================================================================== */
+.app { position: relative; z-index: 1; display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); min-height: 100vh; }
+
+/* ── left rail (manager sidebar) ── */
+.rail {
+  position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+  border-right: 1px solid var(--line);
+  background: color-mix(in oklab, var(--surface) 70%, transparent);
+  backdrop-filter: blur(8px);
+  padding: 1.3rem 1rem 2rem;
+  display: flex; flex-direction: column; gap: 1.25rem;
+}
+.brand { display: flex; align-items: center; gap: .6rem; padding: .2rem .4rem; }
+.mark { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 24px; height: 24px; flex: none; }
+.mark i { background: var(--accent); border-radius: 3px; display: block; }
+.mark i:nth-child(2), .mark i:nth-child(3) { opacity: .5; }
+.brand .name { font-weight: 700; font-size: 1.06rem; letter-spacing: -.02em; color: var(--ink); line-height: 1; }
+.brand .ver { font: 500 10px/1 var(--font-mono); color: var(--muted); margin-top: 3px; letter-spacing: .03em; }
+
+.search {
+  display: flex; align-items: center; gap: .55rem; width: 100%;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--bg);
+  padding: .5rem .7rem; color: var(--muted); font-size: .86rem; cursor: text;
+}
+.search svg { width: 15px; height: 15px; flex: none; }
+.search .kbd { margin-left: auto; font: 500 10.5px/1 var(--font-mono); color: var(--faint); border: 1px solid var(--line-2); border-radius: 5px; padding: .25rem .35rem; }
+
+.nav { display: flex; flex-direction: column; gap: 1.1rem; }
+.nav-group > .label {
+  font: 600 10.5px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase;
+  color: var(--faint); padding: 0 .55rem .55rem;
+}
+.nav-group ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+.nav-group a {
+  display: flex; align-items: center; gap: .55rem; padding: .42rem .55rem; border-radius: 8px;
+  color: var(--muted); font-size: .9rem; position: relative; transition: background .14s, color .14s;
+}
+.nav-group a:hover { background: var(--accent-ghost); color: var(--ink-2); text-decoration: none; }
+.nav-group a.active { color: var(--ink); background: var(--accent-ghost); font-weight: 500; }
+.nav-group a.active::before {
+  content: ''; position: absolute; left: -1rem; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 16px; background: var(--accent); border-radius: 0 3px 3px 0;
+}
+.nav-group a .dot { width: 6px; height: 6px; border-radius: 2px; background: var(--line-2); flex: none; }
+.nav-group a.active .dot, .nav-group a:hover .dot { background: var(--accent); }
+.nav-group a small { margin-left: auto; font: 500 10px/1 var(--font-mono); color: var(--faint); }
+
+.rail-foot { margin-top: auto; font: 400 11px/1.6 var(--font-mono); color: var(--faint); padding: 0 .55rem; }
+
+/* ── main column ── */
+.main { min-width: 0; display: flex; flex-direction: column; }
+
+/* tab bar (Demo · Docs · Code) — Storybook's preview tabs, restyled */
+.topbar {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; gap: .25rem;
+  padding: .5rem clamp(1rem, 3vw, 2.4rem); height: 52px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklab, var(--bg) 82%, transparent);
+  backdrop-filter: blur(10px);
+}
+.tab {
+  font: 500 13px/1 var(--font-display); color: var(--muted); cursor: pointer;
+  background: none; border: 0; padding: .5rem .8rem; border-radius: 8px; transition: color .14s, background .14s;
+}
+.tab:hover { color: var(--ink-2); background: var(--accent-ghost); }
+.tab.active { color: var(--ink); background: var(--accent-ghost); }
+.tab .demo-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--good); margin-right: .4rem; vertical-align: middle; }
+.topbar .spacer { flex: 1; }
+.theme-btn {
+  display: inline-flex; align-items: center; gap: .45rem; cursor: pointer;
+  font: 500 12.5px/1 var(--font-display); color: var(--ink-2);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: .5rem .85rem;
+  transition: border-color .14s, color .14s;
+}
+.theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+.theme-btn svg { width: 15px; height: 15px; }
+
+/* docs canvas: content + on-this-page rail */
+.canvas { display: grid; grid-template-columns: minmax(0, 1fr) var(--toc); gap: 2.5rem; padding: clamp(1.5rem, 3vw, 3rem) clamp(1rem, 3vw, 3rem) 6rem; max-width: 1180px; width: 100%; }
+.doc { min-width: 0; max-width: 760px; }
+
+/* ── on-this-page rail ── */
+.onthis { position: sticky; top: 76px; align-self: start; font-size: .85rem; }
+.onthis .label { font: 600 10.5px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin-bottom: .85rem; }
+.onthis ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .1rem; border-left: 1px solid var(--line); }
+.onthis a { display: block; padding: .35rem .9rem; color: var(--muted); border-left: 2px solid transparent; margin-left: -1px; transition: color .14s, border-color .14s; }
+.onthis a:hover { color: var(--ink-2); text-decoration: none; }
+.onthis a.active { color: var(--accent); border-color: var(--accent); font-weight: 500; }
+
+/* ===========================================================================
+   DOC PRIMITIVES  —  the reusable, branded building blocks
+   =========================================================================== */
+
+/* eyebrow + hero */
+.eyebrow { font: 600 11px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.hero { padding-bottom: 1.6rem; margin-bottom: 1.8rem; border-bottom: 1px solid var(--line); }
+.hero .tagchip {
+  display: inline-flex; align-items: center; gap: .45rem; margin-top: .9rem;
+  font: 600 13px/1 var(--font-mono); color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: .4rem .6rem;
+}
+.hero .tagchip::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--accent); }
+h1.title { font-family: var(--font-display); font-weight: 600; font-size: clamp(2rem, 4vw, 2.7rem); letter-spacing: -.03em; line-height: 1.02; color: var(--ink); margin: .6rem 0 0; }
+.lede { font-size: 1.12rem; line-height: 1.55; color: var(--ink-2); margin: .9rem 0 0; max-width: 56ch; }
+
+/* "at a glance" fact row */
+.facts { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.3rem; }
+.fact {
+  display: inline-flex; align-items: center; gap: .45rem;
+  font: 500 12px/1 var(--font-mono); color: var(--ink-2);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: .45rem .75rem;
+}
+.fact svg { width: 13px; height: 13px; color: var(--accent); }
+
+/* section heading */
+.doc h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.45rem; letter-spacing: -.02em; color: var(--ink); margin: 2.6rem 0 .9rem; scroll-margin-top: 80px; display: flex; align-items: baseline; gap: .7rem; }
+.doc h2 .num { font: 600 12px/1 var(--font-mono); color: var(--accent); }
+.doc h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.08rem; color: var(--ink); margin: 1.8rem 0 .6rem; }
+.doc p { margin: 0 0 1rem; }
+.doc p:last-child { margin-bottom: 0; }
+
+/* inline code — neutral chip, not the old bright blue */
+code.inline { font: 500 .86em/1 var(--font-mono); background: color-mix(in oklab, var(--muted) 14%, transparent); color: var(--ink); border-radius: 5px; padding: .15em .4em; }
+
+/* callouts */
+.callout {
+  display: grid; grid-template-columns: auto 1fr; gap: .8rem; align-items: start;
+  border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  background: var(--surface); border-radius: 10px; padding: .95rem 1.1rem; margin: 1.2rem 0;
+}
+.callout .ic { width: 18px; height: 18px; color: var(--accent); margin-top: 2px; }
+.callout .ct { font-size: .95rem; line-height: 1.55; }
+.callout .ct strong { color: var(--ink); }
+.callout.tip { border-left-color: var(--accent); }
+.callout.use { border-left-color: var(--good); background: color-mix(in oklab, var(--good) 7%, var(--surface)); }
+.callout.use .ic { color: var(--good); }
+.callout.warn { border-left-color: var(--warn); background: color-mix(in oklab, var(--warn) 8%, var(--surface)); }
+.callout.warn .ic { color: var(--warn); }
+.callout .api-link { color: var(--accent); font-weight: 500; }
+
+/* numbered "how to use" steps */
+.steps { list-style: none; counter-reset: step; margin: 1rem 0; padding: 0; display: flex; flex-direction: column; gap: .9rem; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: auto 1fr; gap: .9rem; align-items: start; }
+.steps li::before {
+  content: counter(step, decimal-leading-zero); font: 600 12px/1 var(--font-mono);
+  color: var(--accent); background: var(--accent-ghost); border: 1px solid var(--accent-ring);
+  width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
+}
+.steps li .body { font-size: .96rem; line-height: 1.55; padding-top: .35rem; }
+.steps li .body strong { color: var(--ink); }
+
+/* prop "at a glance" table */
+.proptable { width: 100%; border-collapse: separate; border-spacing: 0; margin: 1rem 0; font-size: .9rem; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.proptable thead th { text-align: left; font: 600 10.5px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); background: var(--surface); padding: .7rem .9rem; border-bottom: 1px solid var(--line); }
+.proptable td { padding: .7rem .9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+.proptable tr:last-child td { border-bottom: 0; }
+.proptable tbody tr:hover { background: var(--accent-ghost); }
+.proptable .name { font: 600 12.5px/1.3 var(--font-mono); color: var(--ink); }
+.proptable .type { font: 500 11.5px/1.4 var(--font-mono); color: var(--accent); }
+.proptable .def { font: 500 11.5px/1 var(--font-mono); color: var(--muted); }
+.proptable .desc { color: var(--ink-2); }
+
+/* events / pill list */
+.events { display: flex; flex-direction: column; gap: .5rem; margin: 1rem 0; }
+.event { display: flex; align-items: center; gap: .7rem; padding: .65rem .85rem; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.event .nm { font: 600 12.5px/1 var(--font-mono); color: var(--accent); }
+.event .arrow { color: var(--faint); }
+.event .detail { font: 500 11.5px/1 var(--font-mono); color: var(--muted); }
+.event .desc { margin-left: auto; font-size: .86rem; color: var(--muted); }
+
+/* code block — dark terminal in both themes (matches kit) */
+.code { background: #1b1b1a; border: 1px solid #2c2a26; border-radius: 12px; margin: 1rem 0; overflow: hidden; box-shadow: var(--shadow-sm); }
+.code .bar { display: flex; align-items: center; gap: .5rem; padding: .55rem .85rem; border-bottom: 1px solid #2c2a26; }
+.code .bar .lang { font: 600 10.5px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: #8a8377; }
+.code .bar .copy { margin-left: auto; font: 500 11px/1 var(--font-mono); color: #cbc7bd; background: #2a2824; border: 1px solid #38352f; border-radius: 6px; padding: .3rem .5rem; cursor: pointer; }
+.code pre { margin: 0; padding: 1rem 1.1rem; overflow-x: auto; font: 400 13px/1.7 var(--font-mono); color: #e6e6e6; }
+.code .k { color: #c4b5fd; } .code .s { color: #b9d6a0; } .code .c { color: #6f6a60; font-style: italic; } .code .f { color: #e3d27a; } .code .t { color: #9cc7f5; }
+
+/* live demo stage (mock) */
+.stage { background: var(--stage); border: 1px solid var(--line); border-radius: 14px; padding: 1.25rem; box-shadow: var(--shadow); margin: 1rem 0; }
+.stage .badge { display: inline-flex; align-items: center; gap: .4rem; font: 500 11px/1 var(--font-mono); color: var(--good); margin-bottom: .9rem; }
+.stage .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--good); }
+
+/* a faux artifact-viewer for the demo */
+.artifact { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.artifact .head { display: flex; align-items: center; gap: .5rem; padding: .55rem .7rem; border-bottom: 1px solid var(--line); }
+.artifact .seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; }
+.artifact .seg button { font: 500 11.5px/1 var(--font-display); color: var(--muted); background: none; border: 0; padding: .4rem .7rem; cursor: pointer; }
+.artifact .seg button.on { background: var(--accent); color: #fff; }
+.artifact .nav { display: flex; gap: .3rem; margin-left: auto; color: var(--faint); }
+.artifact .url { font: 500 11px/1 var(--font-mono); color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: .35rem .5rem; }
+.artifact .body { display: grid; place-items: center; height: 150px; color: var(--faint); font-size: .85rem; background-image: radial-gradient(var(--line) 1px, transparent 1px); background-size: 18px 18px; }
+
+/* design-system strip footer in the mock */
+.systemstrip { border-top: 1px dashed var(--line-2); margin-top: 3rem; padding-top: 2rem; }
+.systemstrip h2 { margin-top: 0; }
+.swatches { display: flex; gap: .7rem; flex-wrap: wrap; margin: 1rem 0; }
+.swatch { width: 56px; }
+.swatch .chip { height: 44px; border-radius: 9px; border: 1px solid var(--line); }
+.swatch .nm { font: 500 9.5px/1.3 var(--font-mono); color: var(--muted); margin-top: .35rem; display: block; }
+
+/* responsive */
+@media (max-width: 1080px) { .canvas { grid-template-columns: 1fr; } .onthis { display: none; } }
+@media (max-width: 860px) { .app { grid-template-columns: 1fr; } .rail { position: static; height: auto; } }
+
+/* a "this is a mock" ribbon */
+.mock-flag { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 50;
+  font: 500 11px/1 var(--font-mono); color: var(--muted); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 999px; padding: .5rem .9rem; box-shadow: var(--shadow); }
+.mock-flag b { color: var(--accent); }
