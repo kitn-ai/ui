@@ -1,0 +1,124 @@
+---
+title: Empty & first-run state
+description: Show a greeting and starter suggestion chips when the thread has no messages, so new users have somewhere to begin.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import ChatDemo from '../../../components/ChatDemo.tsx';
+
+<p class="kc-lede">`<kc-chat>` renders starter suggestions automatically when its message thread is empty. Set the `suggestions` property and the greeting appears — no extra components needed. Click a chip below to see it in action.</p>
+
+<ChatDemo
+  client:only="solid"
+  chatTitle="Assistant"
+  placeholder="Ask me anything…"
+  messages={[]}
+  suggestions={[
+    "Summarize what you can help me with",
+    "What's the best way to get started?",
+    "Show me an example",
+    "What can you do?",
+  ]}
+/>
+
+## How it works
+
+Pass an empty `messages` array and a `suggestions` property. `<kc-chat>` hides the suggestions as soon as the first message arrives.
+
+```html
+<kc-chat id="chat" chat-title="Assistant" placeholder="Ask me anything…"></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+  chat.messages = [];
+  chat.suggestions = [
+    'Summarize what you can help me with',
+    "What's the best way to get started?",
+    'Show me an example',
+  ];
+
+  chat.addEventListener('kc-submit', async (e) => {
+    const prompt = e.detail.value;
+    const aId = crypto.randomUUID();
+    chat.messages = [
+      ...chat.messages,
+      { id: crypto.randomUUID(), role: 'user', content: prompt },
+      { id: aId, role: 'assistant', content: '' },
+    ];
+    chat.loading = true;
+    // stream tokens into the assistant message…
+    chat.loading = false;
+  });
+</script>
+```
+
+### `submit` vs `fill`
+
+The `suggestionMode` property controls what happens when a user clicks a chip.
+
+| Mode | Behaviour | When to use |
+|------|-----------|-------------|
+| `'submit'` (default) | Sends the prompt immediately, as if the user typed and hit Enter. | Works well when suggestions are complete questions that need no editing. |
+| `'fill'` | Copies the text into the input so the user can edit before sending. | Better for partial prompts or templates (e.g. "Translate this to ___"). |
+
+```js
+// submit mode (default) — one-click send
+chat.suggestionMode = 'submit';
+
+// fill mode — prefills the input, user edits then sends
+chat.suggestionMode = 'fill';
+// listen for fill events (kc-submit still fires when they send)
+chat.addEventListener('kc-suggestion-click', (e) => {
+  console.log('prefilled:', e.detail.value);
+});
+```
+
+<Aside type="tip">
+Use `'fill'` for guided forms or multi-step prompts where the chip is a starting point, not a finished question.
+</Aside>
+
+### Adding a greeting with `<kc-empty>`
+
+`<kc-chat>` renders a built-in empty state when `messages` is empty. For a richer greeting — a branded icon, a headline, or a CTA — compose `<kc-empty>` before the chat or inside a wrapper, and replace it once the first message arrives.
+
+```html
+<div id="shell" style="display:flex; flex-direction:column; height:100%;">
+  <kc-empty
+    id="greeting"
+    empty-title="Hi, I'm your assistant"
+    description="Ask me anything — or pick a prompt below to start."
+  >
+    <!-- slot="media" accepts any icon or image -->
+    <svg slot="media" width="32" height="32" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="1.75">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  </kc-empty>
+
+  <kc-chat id="chat" style="flex:1;"></kc-chat>
+</div>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+  const greeting = document.getElementById('greeting');
+
+  chat.messages = [];
+  chat.suggestions = ['How do I get started?', 'What can you help me with?'];
+
+  chat.addEventListener('kc-submit', (e) => {
+    greeting.remove(); // remove greeting on first message
+    // …handle the submit
+  });
+</script>
+```
+
+## Next steps
+
+- **[`kc-chat` reference](/chat/components/chat/)** — full prop and event list, including `suggestions`, `suggestionMode`, `placeholder`, and `chatTitle`.
+- **[`kc-empty` reference](/chat/components/empty/)** — props and slots for the empty-state block.
+- **[`kc-suggestions` reference](/chat/components/suggestions/)** — standalone suggestion chips for custom layouts outside `<kc-chat>`.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop that runs once a suggestion is submitted.

@@ -1,0 +1,83 @@
+---
+title: Resizable split layout
+description: A two-pane layout where a conversations list and a chat pane sit side-by-side with a draggable divider — the list can go on either side.
+topic: examples
+---
+
+import ResizableSplitDemo from '../../../components/ResizableSplitDemo.tsx';
+
+<p class="kc-lede">Put a sidebar conversation list next to a chat pane and let the user resize both. Drag the divider to redistribute space, or flip the sidebar to the opposite side with the toggle above the demo.</p>
+
+<ResizableSplitDemo client:only="solid" />
+
+## How it works
+
+`<kc-resizable>` lays out its `<kc-resizable-item>` children along a horizontal (or vertical) axis and inserts a draggable divider between each pair. Set `size`, `min`, and `max` on each item to constrain the sidebar; the main pane flexes to fill the rest.
+
+```html
+<kc-resizable orientation="horizontal" style="display:block;height:100%">
+  <!-- sidebar -->
+  <kc-resizable-item size="25%" min="180px" max="340px">
+    <kc-conversations id="conv"></kc-conversations>
+  </kc-resizable-item>
+
+  <!-- main chat -->
+  <kc-resizable-item>
+    <kc-chat id="chat"></kc-chat>
+  </kc-resizable-item>
+</kc-resizable>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const conv = document.getElementById('conv');
+  const chat = document.getElementById('chat');
+
+  // Array/object props MUST be set as JS properties, not HTML attributes.
+  conv.conversations = [
+    {
+      id: 'c1', title: 'Web component architecture',
+      scope: { type: 'document' }, messageCount: 12,
+      lastMessageAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  ];
+  conv.activeId = 'c1';
+
+  chat.messages = [];
+
+  conv.addEventListener('kc-conversation-select', (e) => {
+    // load the selected conversation's messages into chat
+    console.log('selected', e.detail.id);
+  });
+
+  chat.addEventListener('kc-submit', async (e) => {
+    const prompt = e.detail.value;
+    const aId = crypto.randomUUID();
+    chat.messages = [
+      ...chat.messages,
+      { id: crypto.randomUUID(), role: 'user', content: prompt },
+      { id: aId, role: 'assistant', content: '' },
+    ];
+    chat.loading = true;
+    // stream tokens into the assistant message
+    for await (const token of streamFromYourModel(prompt)) {
+      chat.messages = chat.messages.map((m) =>
+        m.id === aId ? { ...m, content: m.content + token } : m,
+      );
+    }
+    chat.loading = false;
+  });
+</script>
+```
+
+To put the sidebar on the right, reverse the child order — put `<kc-resizable-item>` (chat) first, then `<kc-resizable-item>` (conversations).
+
+`<kc-resizable>` fires `kc-change` with `{ sizes: number[] }` (percent) on each drag-end so you can persist or react to the panel sizes.
+
+## Next steps
+
+- **[`kc-conversations` reference](/chat/components/conversations/)** — `groups`, `conversations`, `activeId`, and the `kc-conversation-select` event.
+- **[`kc-chat` reference](/chat/components/chat/)** — the full thread + input element, including models, context meter, and slash commands.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop that drives the chat pane.
+- **[Full Chat App](/chat/examples/drop-in-chat/)** — a complete workspace with sidebar, thread, and prompt input composed together.

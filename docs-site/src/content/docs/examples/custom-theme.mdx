@@ -1,0 +1,82 @@
+---
+title: Custom theme
+description: Rebrand <kc-chat> to any palette by overriding a handful of CSS custom properties — light and dark covered in one pass.
+---
+
+import ChatDemo from '../../../components/ChatDemo.tsx';
+
+<p class="kc-lede">The same `<kc-chat>` element, reskinned to a deep-indigo brand palette. Inherited CSS custom properties pierce the Shadow DOM boundary, so a few `--kc-color-*` overrides on the host element are all it takes. Toggle your system theme or the site's dark-mode switch to see both modes at once.</p>
+
+<ChatDemo
+  client:only="solid"
+  chatTitle="Indigo Assistant"
+  placeholder="Ask anything…"
+  suggestions={["What tokens can I override?", "Does theming work in dark mode?"]}
+  messages={[
+    { id: 'u1', role: 'user', content: 'Does the custom theme apply in dark mode too?' },
+    { id: 'a1', role: 'assistant', content: "Yes — set your `--kc-color-*` tokens for **both** light and dark. The demo above applies indigo overrides on the host element directly, so they hold in whichever mode the page is in.\n\nThe two key tokens for a brand accent are:\n\n- `--kc-color-primary` — buttons, active states, and highlights\n- `--kc-color-ring` — keyboard-focus ring (keep it high-contrast)", actions: ['copy', 'like', 'dislike'] },
+  ]}
+  themeVars={{
+    '--kc-color-primary': 'hsl(243 75% 59%)',
+    '--kc-color-primary-foreground': 'hsl(0 0% 100%)',
+    '--kc-color-ring': 'hsl(243 75% 65%)',
+    '--kc-color-background': 'hsl(244 20% 97%)',
+    '--kc-color-card': 'hsl(244 20% 97%)',
+    '--kc-color-border': 'hsl(243 20% 88%)',
+    '--kc-radius': '0.5rem',
+  }}
+/>
+
+## How it works
+
+The `--kc-color-*` tokens are **inherited** CSS custom properties. Set them on the `<kc-chat>` element (or any ancestor) and they propagate into the Shadow DOM automatically — no stylesheet import required.
+
+```html
+<kc-chat id="chat" chat-title="Indigo Assistant"></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+
+  // Scope the brand tokens to this element only.
+  chat.style.setProperty('--kc-color-primary',            'hsl(243 75% 59%)');
+  chat.style.setProperty('--kc-color-primary-foreground', 'hsl(0 0% 100%)');
+  chat.style.setProperty('--kc-color-ring',               'hsl(243 75% 65%)');
+  chat.style.setProperty('--kc-color-background',         'hsl(244 20% 97%)');
+  chat.style.setProperty('--kc-color-border',             'hsl(243 20% 88%)');
+  chat.style.setProperty('--kc-radius',                   '0.5rem');
+
+  // Wire messages + kc-submit as usual.
+  chat.messages = [];
+  chat.addEventListener('kc-submit', (e) => { /* stream reply */ });
+</script>
+```
+
+To cover both modes in a stylesheet, write separate blocks for light and dark:
+
+```css
+/* light */
+kc-chat {
+  --kc-color-primary:            hsl(243 75% 59%);
+  --kc-color-primary-foreground: hsl(0 0% 100%);
+  --kc-color-ring:               hsl(243 75% 65%);
+  --kc-color-background:         hsl(244 20% 97%);
+  --kc-color-border:             hsl(243 20% 88%);
+  --kc-radius:                   0.5rem;
+}
+
+/* dark — bump primary slightly for contrast on dark surfaces */
+.dark kc-chat {
+  --kc-color-primary:    hsl(243 75% 70%);
+  --kc-color-ring:       hsl(243 75% 72%);
+  --kc-color-background: hsl(243 20% 10%);
+  --kc-color-border:     hsl(243 15% 20%);
+}
+```
+
+## Next steps
+
+- **[Theming guide](/chat/guides/theming/)** — full token reference, dark-mode setup, scoped subtree theming, and the `--kc-color-*` namespaced alias system.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop that backs any `<kc-chat>` instance.
+- **[`kc-chat` reference](/chat/components/chat/)** — `proseSize`, `codeTheme`, and `codeHighlight` for non-color appearance control.

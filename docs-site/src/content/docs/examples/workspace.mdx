@@ -1,0 +1,95 @@
+---
+title: Workspace app
+description: A ChatGPT-style layout — collapsible conversation sidebar beside a live thread — powered by a single <kc-workspace> element.
+---
+
+import WorkspaceDemo from '../../../components/WorkspaceDemo.tsx';
+
+<p class="kc-lede">One element gives you the full workspace: a resizable, collapsible sidebar listing past conversations grouped by recency, plus a streaming chat thread. Select a conversation, start a new one, or send a message below.</p>
+
+<WorkspaceDemo client:only="solid" />
+
+## How it works
+
+`<kc-workspace>` wraps `<kc-conversations>` and `<kc-chat>` inside a resizable split. You pass a flat `conversations` array (the component auto-buckets by recency) and the active thread's `messages`. Three events drive all the interactivity:
+
+```html
+<kc-workspace id="ws"></kc-workspace>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const ws = document.getElementById('ws');
+
+  // Seed conversations (set as a JS property — array, not attribute).
+  ws.conversations = [
+    {
+      id: 'c1', title: 'SolidJS reactivity vs React hooks',
+      scope: { type: 'collection' }, messageCount: 4,
+      lastMessageAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    // … more conversations
+  ];
+
+  // Seed the active thread.
+  ws.messages = [
+    { id: 'u1', role: 'user', content: 'How do signals differ from useState?' },
+    { id: 'a1', role: 'assistant', content: 'Signals update only the DOM nodes that read them …', actions: ['copy', 'like', 'dislike'] },
+  ];
+  ws.activeId = 'c1';
+
+  // Swap the thread when the user picks a conversation.
+  ws.addEventListener('kc-conversation-select', (e) => {
+    ws.activeId = e.detail.id;
+    ws.messages = threadFor(e.detail.id); // load from your store
+  });
+
+  // Clear the thread and start fresh.
+  ws.addEventListener('kc-new-chat', () => {
+    ws.messages = [];
+    ws.activeId = undefined;
+  });
+
+  // Stream a reply — identical pattern to <kc-chat>.
+  ws.addEventListener('kc-submit', async (e) => {
+    const { value } = e.detail;
+    const aId = crypto.randomUUID();
+    ws.messages = [
+      ...ws.messages,
+      { id: crypto.randomUUID(), role: 'user', content: value },
+      { id: aId, role: 'assistant', content: '' },
+    ];
+    ws.loading = true;
+    for await (const token of streamFromYourModel(value)) {
+      ws.messages = ws.messages.map((m) =>
+        m.id === aId ? { ...m, content: m.content + token } : m,
+      );
+    }
+    ws.loading = false;
+  });
+</script>
+```
+
+**Key data shapes:**
+
+- `conversations` — each entry needs `id`, `title`, `scope` (`{ type: 'collection' }`), `messageCount`, `lastMessageAt`, and `updatedAt`. The component uses the timestamps to bucket rows into "Today", "Yesterday", "Last 7 days", etc.
+- `messages` — the same `ChatMessage[]` shape as `<kc-chat>`: `id`, `role`, `content`, plus optional `actions`, `reasoning`, `tools`, and `attachments`.
+
+**Sidebar controls:**
+
+| Prop | Default | Effect |
+|---|---|---|
+| `sidebarWidth` | `22` | Initial sidebar width (%) |
+| `sidebarMinWidth` | `200` | Minimum sidebar width (px) |
+| `sidebarMaxWidth` | `420` | Maximum sidebar width (px) |
+| `sidebarCollapsed` | `false` | Start with sidebar collapsed |
+
+The user can drag the divider to resize or click the sidebar toggle. Listen to `kc-sidebar-toggle` (`detail.collapsed`) to persist the state.
+
+## Next steps
+
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the simpler single-thread starting point and streaming loop.
+- **[`kc-workspace` reference](/chat/components/workspace/)** — every prop and event, including model switcher, context meter, and slash commands.
+- **[`kc-conversations` reference](/chat/components/conversations/)** — use this element standalone when you want to build your own layout instead of using the pre-composed workspace.
+- **[Theming](/chat/guides/theming/)** — brand the sidebar (`--color-sidebar`) and chat thread in one pass.

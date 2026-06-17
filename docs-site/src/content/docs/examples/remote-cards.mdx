@@ -1,0 +1,197 @@
+---
+title: Remote cards
+description: Serve interactive cards (booking, payment, partner forms) from a third-party origin and render them safely in your chat via a sandboxed cross-origin transport.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<p class="kc-lede">A third-party provider hosts its cards on its own origin — a booking widget, a payment form, a partner micro-frontend. `<kc-remote>` frames them in a sandboxed iframe, bridges their events back to your host over `postMessage`, and hands you the same `CardEnvelope` / `CardEvent` contract as every built-in card. No second-origin live demo is possible on this static site — this page is a focused walkthrough.</p>
+
+<Aside type="caution" title="Cross-origin requirement">
+`<kc-remote>` needs a running provider at a different origin. It cannot demo here. Run `npm run storybook` for the full interactive demo, or see the reference app in `examples/remote-provider/`.
+</Aside>
+
+## How it works
+
+The transport has two sides: the **host** (your chat app) and the **provider** (the card server).
+
+```
+Host app                          Provider (different origin)
+────────────────────────────────  ─────────────────────────────────────
+<kc-remote>                       <html id="root">
+  └─ shadow root                    <script> createCardBridge({ … }) </script>
+       └─ <iframe sandbox …>  ←→   </html>
+            postMessage (WireFrame)
+```
+
+On mount, `<kc-remote>` validates `provider-origin`, injects a sandboxed `<iframe>` pointing at `src`, completes a version-negotiated handshake, then pushes the `CardEnvelope` + `CardContext` (theme, locale) down the wire. The provider renders the card using its own renderers; user interactions come back as `CardEvent` messages. On the host side every event re-surfaces as a bubbling `kc-card` `CustomEvent` so your existing listeners work unchanged.
+
+Key security properties baked in — no config needed:
+- The iframe runs with `sandbox="allow-scripts allow-forms"` (no `allow-same-origin`).
+- Inbound `postMessage` frames are accepted only from the pinned `provider-origin` + the source window locked at handshake + a per-instance nonce.
+- Wildcards and comma-lists in `provider-origin` are rejected before any mount.
+
+## Host side: wire up `<kc-remote>`
+
+Register the elements and give the component its three required pieces — `provider-origin`, `src`, and the `envelope` property:
+
+```html
+<kc-remote
+  provider-origin="https://cards.provider.example"
+  src="https://cards.provider.example/card"
+></kc-remote>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const remote = document.querySelector('kc-remote');
+
+  // CardEnvelope — set as a JS property (not an HTML attribute).
+  remote.envelope = {
+    type: 'booking',
+    id: 'booking-1',
+    title: 'Reserve a table',
+    data: {
+      restaurantId: 'r_42',
+      date: '2026-07-04',
+      slots: ['18:00', '19:30', '21:00'],
+    },
+  };
+
+  // Every routed CardEvent surfaces as a bubbling 'kc-card' CustomEvent.
+  remote.addEventListener('kc-card', (e) => {
+    const ev = e.detail; // { kind, cardId, … }
+    if (ev.kind === 'submit') {
+      // e.g. { kind: 'submit', cardId: 'booking-1', data: { slot: '19:30' } }
+      confirmBooking(ev.cardId, ev.data);
+    }
+    if (ev.kind === 'action') {
+      // e.g. { kind: 'action', cardId: 'booking-1', action: 'cancel' }
+    }
+  });
+</script>
+```
+
+Alternatively, pass a `CardPolicy` object for programmatic routing — the same shape `<kc-cards>` uses:
+
+```js
+remote.policy = {
+  onSubmit(cardId, data)          { confirmBooking(cardId, data); },
+  onAction(cardId, action, payload) { handleAction(cardId, action, payload); },
+  onDismiss(cardId)               { removeCard(cardId); },
+};
+```
+
+## Embed inside `<kc-cards>`
+
+When the model streams a mix of built-in and remote cards, use `<kc-cards>` with a `types` override that maps the remote card type to `'kc-remote'`:
+
+```js
+import '@kitn.ai/chat/elements';
+
+const cards = document.querySelector('kc-cards');
+
+// Tell kc-cards to render 'booking' envelopes with <kc-remote>.
+cards.types = { booking: 'kc-remote' };
+
+// The full stream of envelopes — built-in and remote mixed.
+cards.cards = [
+  { type: 'confirm', id: 'c1', title: 'Confirm your order', data: { body: 'Ready to place it?' } },
+  { type: 'booking', id: 'b1', title: 'Reserve a table', data: { restaurantId: 'r_42', slots: ['18:00', '19:30'] } },
+];
+
+// One policy handles events from all children — built-in and remote alike.
+cards.policy = {
+  onSubmit(cardId, data) { console.log('submit from', cardId, data); },
+};
+```
+
+<Aside type="note" title="kc-remote inside kc-cards">
+When `kc-cards` resolves a card to `kc-remote`, it sets the envelope as a DOM property. `kc-remote` still needs `provider-origin` and `src` — set them on the `<kc-cards>` host or include them in each envelope's `data` and read them in a custom `CardPolicy`.
+</Aside>
+
+## Provider side: serve the card
+
+The provider page runs `createCardBridge` from `@kitn.ai/chat/provider` — a SolidJS-free bundle — and registers one `RemoteCardRenderer` per card type:
+
+```ts
+// provider-entry.ts  (runs in the iframe, served from cards.provider.example)
+import { createCardBridge } from '@kitn.ai/chat/provider';
+
+const root = document.getElementById('root')!;
+
+createCardBridge({
+  root,
+  renderers: [
+    {
+      type: 'booking',
+      mount(root, envelope, host) {
+        // `envelope.data` carries whatever the host put in CardEnvelope.data.
+        const { restaurantId, slots } = envelope.data as {
+          restaurantId: string;
+          slots: string[];
+        };
+
+        // Build your card UI (any framework, any DOM).
+        const form = document.createElement('form');
+        for (const slot of slots) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = slot;
+          btn.addEventListener('click', () => {
+            // Forward the user's choice to the host.
+            host.emit({ kind: 'submit', cardId: envelope.id, data: { slot } });
+          });
+          form.appendChild(btn);
+        }
+
+        // host.context() gives you the current theme + locale.
+        const { mode } = host.context().theme;
+        form.style.background = mode === 'dark' ? '#18181b' : '#fff';
+
+        root.appendChild(form);
+
+        // Return a disposer — called before re-mount or teardown.
+        return () => form.remove();
+      },
+    },
+  ],
+}).start();
+```
+
+`host.emit()` accepts any `CardEvent`. The bridge relays it to the host over `postMessage`; `<kc-remote>` re-fires it as a bubbling `kc-card` CustomEvent.
+
+## CardEnvelope shape
+
+```ts
+interface CardEnvelope {
+  type: string;          // maps to a renderer type on the provider
+  id: string;            // stable across re-renders — correlates every CardEvent
+  title?: string;        // optional heading
+  data: unknown;         // passed verbatim to the renderer's mount()
+  resolution?: {         // set to freeze the card in a resolved state
+    kind: 'action';  action: string; payload?: unknown; at?: string;
+  } | {
+    kind: 'submit';  data: unknown; at?: string;
+  };
+}
+```
+
+## CardEvent kinds
+
+| `kind` | Extra fields | When |
+|---|---|---|
+| `submit` | `cardId`, `data` | User submitted data (form, booking) |
+| `action` | `cardId`, `action`, `payload?` | Named action button pressed |
+| `send-prompt` | `text`, `mode`, `context?` | Provider wants to send a chat message |
+| `open` | `url`, `target` | Provider wants to open a URL |
+| `state` | `cardId`, `patch` | Ephemeral UI state update |
+| `dismiss` | `cardId` | Card closed itself |
+| `error` | `cardId`, `message` | Render or validation error |
+
+## Next steps
+
+- **[`kc-remote` reference](/chat/components/remote/)** — all props, origin validation rules, and the security model in full.
+- **[`kc-cards` reference](/chat/components/cards/)** — the card dispatcher: built-in types, `types` overrides, and `CardPolicy`.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop that drives `cards` into a `<kc-chat>` message thread.
+- **[Full chat app](/chat/examples/drop-in-chat/)** — a complete app wiring `kc-chat`, streaming, and generative-UI cards end to end.

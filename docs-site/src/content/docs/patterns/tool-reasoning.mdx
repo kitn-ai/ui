@@ -1,0 +1,154 @@
+---
+title: Tool calls & reasoning
+description: Render an agent's thinking trace and tool invocations inline in a message, progressing through the four-state tool lifecycle.
+---
+
+import ChatDemo from '../../../components/ChatDemo.tsx';
+
+<p class="kc-lede">Agents think before they act and invoke tools to get things done. The `tools` and `reasoning` fields on `ChatMessage` bring both inline — one object per tool call, updated in place as the agent streams its output.</p>
+
+<ChatDemo client:only="solid" chatTitle="Research Agent" placeholder="Ask the agent anything…" messages={[
+  { id: 'u1', role: 'user', content: 'What is the current price of NVDA stock and its 52-week range?' },
+  {
+    id: 'a1',
+    role: 'assistant',
+    content: "Here's what I found for NVIDIA (NVDA):\n\n- **Current price:** $875.40\n- **52-week low:** $402.11\n- **52-week high:** $974.00\n\nThe stock has nearly doubled from its 52-week low, driven by sustained demand for AI training hardware.",
+    reasoning: {
+      text: "The user wants current market data for NVDA. I should use the stock_quote tool to fetch the price and the market_data tool to get the 52-week range. I'll call stock_quote first since I need the current price, then market_data for the range.",
+      label: 'Agent reasoning',
+    },
+    tools: [
+      {
+        type: 'stock_quote',
+        state: 'output-available',
+        toolCallId: 'call_abc123',
+        input: { ticker: 'NVDA', exchange: 'NASDAQ' },
+        output: { price: 875.4, currency: 'USD', timestamp: '2026-06-17T14:30:00Z' },
+      },
+      {
+        type: 'market_data',
+        state: 'output-available',
+        toolCallId: 'call_def456',
+        input: { ticker: 'NVDA', fields: ['52w_low', '52w_high'] },
+        output: { '52w_low': 402.11, '52w_high': 974.0 },
+      },
+    ],
+    actions: ['copy', 'like', 'dislike'],
+  },
+  { id: 'u2', role: 'user', content: 'Now look up the weather in San Francisco.' },
+  {
+    id: 'a2',
+    role: 'assistant',
+    content: '',
+    tools: [
+      {
+        type: 'get_weather',
+        state: 'input-available',
+        toolCallId: 'call_ghi789',
+        input: { city: 'San Francisco', units: 'imperial' },
+      },
+    ],
+  },
+]} reply={(prompt) => `I'll look that up for you. Running the necessary tool calls now — results will appear in a moment.`} />
+
+## How it works
+
+Both `tools` and `reasoning` live directly on the `ChatMessage` object you pass to `<kc-chat>` or `<kc-message>`. Update the message in place as the agent streams — set `tools` as a JS property (array), never as an HTML attribute.
+
+```js
+import '@kitn.ai/chat/elements';
+
+const chat = document.getElementById('chat');
+const aId = crypto.randomUUID();
+const callId = crypto.randomUUID();
+
+// Append an empty assistant message the moment the agent starts
+chat.messages = [
+  ...chat.messages,
+  { id: crypto.randomUUID(), role: 'user', content: prompt },
+  {
+    id: aId,
+    role: 'assistant',
+    content: '',
+    reasoning: { text: '', label: 'Agent reasoning' },
+    tools: [
+      {
+        type: 'search_web',
+        state: 'input-streaming',   // tool call incoming — inputs not yet complete
+        toolCallId: callId,
+      },
+    ],
+  },
+];
+chat.loading = true;
+
+// As the stream arrives, mutate the message array with new array references
+// to drive re-renders. Each state transition is a new array assigned to chat.messages.
+
+// Input fully received → update state to 'input-available'
+chat.messages = chat.messages.map((m) =>
+  m.id === aId
+    ? {
+        ...m,
+        tools: [{ ...m.tools[0], state: 'input-available', input: { query: 'kitn-chat docs' } }],
+      }
+    : m,
+);
+
+// Tool executed successfully → state becomes 'output-available'
+chat.messages = chat.messages.map((m) =>
+  m.id === aId
+    ? {
+        ...m,
+        tools: [{ ...m.tools[0], state: 'output-available', output: { results: ['…'] } }],
+      }
+    : m,
+);
+
+// Tool failed → state becomes 'output-error'
+// chat.messages = chat.messages.map((m) =>
+//   m.id === aId
+//     ? { ...m, tools: [{ ...m.tools[0], state: 'output-error', errorText: 'Rate limit exceeded' }] }
+//     : m
+// );
+
+// Stream the final reply into content
+for await (const token of streamFromYourModel(prompt)) {
+  chat.messages = chat.messages.map((m) =>
+    m.id === aId ? { ...m, content: m.content + token } : m,
+  );
+}
+chat.loading = false;
+```
+
+**Tool lifecycle — four states:**
+
+| `state` | Rendered as | When to set it |
+|---|---|---|
+| `input-streaming` | Spinning loader, "Processing" badge | Tool call chunk received; input is still arriving |
+| `input-available` | Settings icon, "Ready" badge | Input complete; tool is executing |
+| `output-available` | Check icon, "Completed" badge | Tool returned successfully |
+| `output-error` | X icon, "Error" badge + `errorText` | Tool threw or returned an error |
+
+**`reasoning`** is a single `{ text, label? }` object — append tokens to `text` as they stream in. The block auto-expands while reasoning is in progress if you use `<kc-reasoning streaming>` directly; via `<kc-chat>` or `<kc-message>` the block is collapsible once complete.
+
+**`<kc-thinking-bar>`** is the pre-reasoning status bar — show it before the first reasoning token arrives. It fires `kc-stop` when the user clicks "Answer now" (requires `stoppable`):
+
+```html
+<kc-thinking-bar text="Thinking…" stoppable stop-label="Answer now"></kc-thinking-bar>
+
+<script type="module">
+  document.querySelector('kc-thinking-bar').addEventListener('kc-stop', () => {
+    abortController.abort();
+  });
+</script>
+```
+
+## Next steps
+
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the full `kc-submit` streaming loop.
+- **[`kc-message` reference](/chat/components/message/)** — complete `ChatMessage` shape, `actionsReveal`, `proseSize`.
+- **[`kc-tool` reference](/chat/components/tool/)** — `tool` property shape, `open` flag, state tokens.
+- **[`kc-reasoning` reference](/chat/components/reasoning/)** — `streaming` auto-expand, `kc-open-change`.
+- **[`kc-thinking-bar` reference](/chat/components/thinking-bar/)** — `text`, `stoppable`, `kc-stop`.
+- **[Compose your own shell](/chat/patterns/compose-your-own/)** — lay out the thread and composer without `<kc-chat>`.
