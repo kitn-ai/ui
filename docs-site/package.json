@@ -1,10 +1,14 @@
 {
-  "name": "docs-proposals-starlight-prototype",
+  "name": "kitn-chat-docs",
   "type": "module",
   "version": "0.0.1",
+  "private": true,
   "scripts": {
+    "sync:kit": "node scripts/sync-kit.mjs",
+    "predev": "npm run sync:kit",
     "dev": "astro dev",
     "start": "astro dev",
+    "prebuild": "npm run sync:kit",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"

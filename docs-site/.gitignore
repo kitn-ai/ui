@@ -3,10 +3,10 @@ dist/
 # generated types
 .astro/
 
-# copied kit build snapshot — Phase 0 wires this to the live kit build
+# synced from the live kit build by scripts/sync-kit.mjs — never committed
 public/kitn/
-# copied generator output — Phase 0 wires this to the live generators (src/elements/element-meta.json)
-src/data/element-meta.json
+# synced generator metas (element-meta.json, framework-usage.json)
+src/data/*.json
 
 # dependencies
 node_modules/
