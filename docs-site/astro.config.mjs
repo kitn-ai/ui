@@ -123,11 +123,13 @@ export default defineConfig({
             items: [
               { label: 'Drop-in chat', slug: 'examples/drop-in-chat' },
               { label: 'Support widget', slug: 'examples/support-widget' },
+              { label: 'Docked assistant', slug: 'examples/docked-assistant' },
               { label: 'Workspace app', slug: 'examples/workspace' },
               { label: 'Artifacts canvas', slug: 'examples/artifacts-canvas' },
               { label: 'RAG assistant', slug: 'examples/rag-assistant' },
               { label: 'Knowledge base', slug: 'examples/knowledge-base' },
               { label: 'Agentic assistant', slug: 'examples/agentic-assistant' },
+              { label: 'Reasoning assistant', slug: 'examples/reasoning-assistant' },
               { label: 'Skills & slash commands', slug: 'examples/skills-assistant' },
               { label: 'Models & context', slug: 'examples/model-context' },
               { label: 'Voice assistant', slug: 'examples/voice-assistant' },
