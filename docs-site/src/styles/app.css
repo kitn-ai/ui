@@ -36,12 +36,14 @@
   .starlight-sidebar-topics { display: none; }
 }
 
-/* Sidebar links: smaller, uniform text size. Links are normal weight and only
-   bold when selected — including the collapsible group labels, which bold only
-   when the group contains the current page. */
+/* Sidebar links: small, uniform text. Starlight's `.large` class (top-level leaf
+   links AND the group-label span inside <summary>) carries the larger size +
+   font-weight 600 — override it on the class itself so size/weight actually
+   change. Normal weight by default; bold only when selected, and a group label
+   bolds only when its section contains the current page. */
 #starlight__sidebar a,
-#starlight__sidebar summary { font-size: var(--sl-text-sm); }
-#starlight__sidebar a.large { font-weight: 400; }
+#starlight__sidebar summary,
+#starlight__sidebar .large { font-size: var(--sl-text-sm); }
+#starlight__sidebar .large { font-weight: 400; }
 #starlight__sidebar a.large[aria-current='page'] { font-weight: 600; }
-#starlight__sidebar summary { font-weight: 400; }
-#starlight__sidebar details:has(a[aria-current='page']) > summary { font-weight: 600; }
+#starlight__sidebar details:has(a[aria-current='page']) > summary .large { font-weight: 600; }
