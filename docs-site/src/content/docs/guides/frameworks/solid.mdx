@@ -152,11 +152,16 @@ function Workspace() {
 Every feature component works standalone — drop them into any part of your UI without adopting a full chat shell.
 
 ```tsx
-import { Markdown, Reasoning, Tool, Artifact } from '@kitn.ai/chat';
+import {
+  Markdown, Reasoning, ReasoningTrigger, ReasoningContent, Tool, Artifact,
+} from '@kitn.ai/chat';
 
-<Markdown content={assistantReply} proseSize="sm" />
-<Reasoning text={thinkingText} streaming={isStreaming} />
-<Tool tool={toolCall} open />
+<Markdown content={assistantReply} />
+<Reasoning isStreaming={isStreaming}>
+  <ReasoningTrigger>View reasoning</ReasoningTrigger>
+  <ReasoningContent markdown>{thinkingText}</ReasoningContent>
+</Reasoning>
+<Tool toolPart={toolCall} defaultOpen />
 <Artifact files={artifactFiles} />
 ```
 

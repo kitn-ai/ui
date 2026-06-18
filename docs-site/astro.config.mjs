@@ -72,6 +72,15 @@ export default defineConfig({
               { label: 'Accessibility', slug: 'guides/accessibility' },
               { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
               {
+                label: 'Working with primitives',
+                items: [
+                  { label: 'How it\'s built', slug: 'guides/primitives/architecture' },
+                  { label: 'Working with the components directly', slug: 'guides/primitives/using-primitives' },
+                  { label: 'Run the kit locally', slug: 'guides/primitives/development' },
+                  { label: 'Create or modify a component', slug: 'guides/primitives/extending' },
+                ],
+              },
+              {
                 label: 'Frameworks',
                 items: [
                   { label: 'Overview', slug: 'guides/frameworks/overview' },

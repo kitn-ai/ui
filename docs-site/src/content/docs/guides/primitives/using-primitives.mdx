@@ -1,0 +1,106 @@
+---
+title: Working with the components directly
+description: Import kitn-chat's headless primitives, UI primitives, and feature components straight from @kitn.ai/chat for full compositional control in a Solid app.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `kc-*` elements are the fast path. When you want full control over markup and layout — and you're in a Solid app — skip the wrapper and import the underlying pieces from `@kitn.ai/chat`. You compose them in JSX, and your bundler tree-shakes away whatever you don't use.
+
+This page is the catalog, organized by the [four layers](/chat/guides/primitives/architecture/). For a full streaming chat built this way, see the [Solid guide](/chat/guides/frameworks/solid/).
+
+```bash
+npm install @kitn.ai/chat solid-js
+```
+
+```ts
+import '@kitn.ai/chat/theme.css'; // design tokens, once near your entry
+```
+
+<Aside type="tip" title="Ships as source">
+The `.` entry exports raw TSX. Your bundler compiles and tree-shakes it alongside your own Solid code, so you only pay for what you import.
+</Aside>
+
+## Headless primitives
+
+Behavior with no markup — the logic you'd otherwise rewrite per app. These are the layer the `kc-*` elements don't expose, so importing them directly is the main reason to drop down here.
+
+```tsx
+import {
+  useTextStream,
+  useStickToBottom,
+  useAutoResize,
+  useVoiceRecorder,
+} from '@kitn.ai/chat';
+```
+
+- `useTextStream` — drive token-by-token streaming into your own UI.
+- `useStickToBottom` — keep a scroll container pinned to the latest message, yielding when the reader scrolls up.
+- `useAutoResize` — grow a textarea with its content.
+- `useVoiceRecorder` — microphone capture state for a voice composer.
+
+`ChatConfig` (and its `useChatConfig` hook) sets shared options like prose size for everything rendered inside it.
+
+## UI primitives
+
+The kit's own accessible building blocks. Useful on their own, well outside a chat.
+
+```tsx
+import { Button, Switch, Avatar, Badge, Separator } from '@kitn.ai/chat';
+import { Tooltip, HoverCard, Dropdown } from '@kitn.ai/chat';
+import { Resizable, ResizablePanel, ScrollArea } from '@kitn.ai/chat';
+
+<Switch label="Temporary chat" onChange={(on) => setTemporary(on)} />
+<Button variant="ghost" size="icon" aria-label="Add"><PlusIcon /></Button> {/* your icon */}
+```
+
+`Resizable` + `ResizablePanel` build a draggable split — handles drop in automatically between visible panels. See the [Solid guide](/chat/guides/frameworks/solid/) for a full sidebar-plus-chat layout.
+
+## Feature components
+
+The AI surface. Compose a thread, or drop a single component anywhere.
+
+```tsx
+import {
+  ChatContainer,
+  ChatContainerContent,
+  Message,
+  MessageContent,
+  PromptInput,
+  PromptInputTextarea,
+  PromptInputActions,
+} from '@kitn.ai/chat';
+```
+
+Each one also works standalone — render just the part you need:
+
+```tsx
+import {
+  Markdown, Reasoning, ReasoningTrigger, ReasoningContent, Tool, Artifact,
+} from '@kitn.ai/chat';
+
+<Markdown content={assistantReply} />
+<Reasoning isStreaming={isStreaming}>
+  <ReasoningTrigger>View reasoning</ReasoningTrigger>
+  <ReasoningContent markdown>{thinkingText}</ReasoningContent>
+</Reasoning>
+<Tool toolPart={toolCall} defaultOpen />
+<Artifact files={artifactFiles} />
+```
+
+`Reasoning` is a compound: pair it with `ReasoningTrigger` and `ReasoningContent`. Prose size for `Markdown` comes from the surrounding `ChatConfig`, not a prop.
+
+`ChatContainer` is transport-agnostic: it owns the conversation UI, you own the request. Render messages inside `ChatContainerContent` and stream the reply into your signal from `PromptInput`'s `onSubmit`.
+
+## Mix the two
+
+Native components and `kc-*` elements ship in the same package and coexist. Compose primitives where you want control, and drop a `<kc-chat>` shell where you want batteries included — even on different screens of the same app.
+
+<Aside type="note" title="In Solid, pass rich data with prop:">
+When you do use a `kc-*` element inside Solid, bind arrays and objects with `prop:` (`prop:messages={messages()}`) so Solid sets a DOM property instead of stringifying it, and listen with the `on:` namespace (`on:kc-submit`).
+</Aside>
+
+## Next
+
+- [Run the kit locally](/chat/guides/primitives/development/) — the build and Storybook dev loop.
+- [Create or modify a component](/chat/guides/primitives/extending/) — add your own primitive and element.
