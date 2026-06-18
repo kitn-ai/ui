@@ -1,0 +1,164 @@
+---
+title: Generative UI
+description: How an agent renders typed, interactive cards in the chat — the Card Contract, how to make your model emit cards, and how to route the results back.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Your model doesn't have to answer in prose. It can ask the chat to render a **typed, interactive card** — a confirmation to approve, a form to fill, a plan to pick from, a link to preview — and get the user's answer back as structured data. The kit handles rendering and event routing; you decide when a card beats a sentence.
+
+This guide is the model/server side: the contract, how to get your model to emit cards, and how to feed the result back. For the rendering pattern see [Generative UI cards](/chat/patterns/generative-ui-cards/); for each card's props, the component pages ([confirm](/chat/components/confirm/), [choice](/chat/components/choice/), [form](/chat/components/form/), [tasks](/chat/components/tasks/)).
+
+## The loop
+
+```
+agent / server ──CardEnvelope(s)──▶  <kc-cards>.cards
+     ▲                                     │  dispatcher renders the kc-* for each `type`
+     │                                     ▼
+     └──── result ◀── CardPolicy ◀── kc-card event ◀── user interacts
+```
+
+One **envelope** is what the agent *sends* (addressed data, not UI); one **card** is what the user *sees*. The dispatcher's whole job is envelope in → card out.
+
+## The Card Contract
+
+Everything the agent sends is a `CardEnvelope`:
+
+```ts
+interface CardEnvelope {
+  type: string;   // which card — confirm | choice | form | tasks | link | embed
+  id: string;     // stable id; every event correlates back to it
+  data: unknown;  // conforms to that type's JSON Schema
+  title?: string; // optional card-chrome heading
+  resolution?: CardResolution; // set once resolved → renders the read-only view
+}
+```
+
+The built-in types and the element each renders:
+
+| `type` | Use it for | Renders | Terminal event |
+|---|---|---|---|
+| `confirm` | Approve / decline an action | `kc-confirm` | `action` |
+| `choice` | Pick one option from a list | `kc-choice` | `action` |
+| `form` | Collect structured input (JSON-Schema form) | `kc-form` | `submit` |
+| `tasks` | Select from a proposed plan | `kc-tasks` | `submit` |
+| `link` | Preview a URL (title/desc/image) | `kc-link-preview` | — |
+| `embed` | Lazy media embed (YouTube, Vimeo) | `kc-embed` | — |
+
+Each `data` shape has a published **JSON Schema** (shipped in the package under `dist/schemas/`, e.g. `confirm.schema.json`). A `confirm` envelope looks like:
+
+```json
+{
+  "type": "confirm",
+  "id": "deploy-1",
+  "title": "Deploy to production?",
+  "data": {
+    "body": "Applies 2 migrations and restarts 3 services.",
+    "tone": "danger",
+    "actions": [
+      { "id": "deploy", "label": "Deploy now", "style": "primary", "default": true },
+      { "id": "cancel", "label": "Cancel" }
+    ]
+  }
+}
+```
+
+## Prepping your model
+
+There's **no special skill, agent framework, or fine-tune required** — a card is just JSON your model emits and the kit renders. You need two things: the model must (1) know the card types and (2) produce `data` that matches the type's schema. Two practical ways:
+
+### Tool calling (recommended for agents)
+
+Give the model **one tool per card type**, with the tool's parameters set to that card's `data` schema. When the model calls the tool, map the call to an envelope and push it into the chat. This keeps the model on rails — the provider validates arguments against the schema for you.
+
+```ts
+// Tool definition (Anthropic / OpenAI function-calling shape) — params = the card schema.
+const tools = [{
+  name: 'ask_confirm',
+  description: 'Ask the user to approve or decline an action.',
+  input_schema: confirmSchema, // dist/schemas/confirm.schema.json
+}];
+
+// When the model calls it, wrap the args in an envelope and render.
+function onToolCall(call) {
+  if (call.name === 'ask_confirm') {
+    cards.cards = [...cards.cards, { type: 'confirm', id: call.id, data: call.input }];
+  }
+}
+```
+
+### Structured output / JSON mode
+
+If you'd rather have the model return envelopes directly, constrain its output to the
+`CardEnvelope` schema (or a union of your enabled types) and parse them out of the response. Validate before rendering — see below.
+
+<Aside type="tip" title="Prompt guidance">
+Tell the model **when** to reach for a card, not just that it can. e.g. "Use `confirm` before any irreversible action; use `form` to collect more than two fields; otherwise answer in text." Keep `id` stable across a turn so a streamed update lands on the same card.
+</Aside>
+
+### Validate before you render
+
+The data is model-generated, so check it against the schema first. The kit ships a validator:
+
+```ts
+import { validateAgainstSchema } from '@kitn.ai/chat';
+// The card schemas ship in the package at dist/schemas/*.schema.json — load the
+// one for the type (read it on the server, or copy it into your project).
+const result = validateAgainstSchema(envelope.data, confirmSchema);
+if (!result.valid) {
+  // result.errors is a string[] — hand it back to the model to fix the card
+}
+```
+
+## Wiring the host
+
+Render envelopes with `<kc-cards>` and route every interaction through a `CardPolicy`:
+
+```html
+<kc-cards></kc-cards>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const cards = document.querySelector('kc-cards');
+
+  cards.cards = [/* envelopes from your model */];
+
+  cards.policy = {
+    onAction: (cardId, action, payload) => continueTurn(cardId, { action, payload }),
+    onSubmit: (cardId, data) => continueTurn(cardId, { data }),
+  };
+</script>
+```
+
+`onAction` (confirm/choice) and `onSubmit` (form/tasks) are the **terminal** verbs — that's the user's answer. Feed it back into your next model call (as the tool result for the matching `id`, or as a new user turn) so the agent can continue. In React use `<Chat>`-level handlers; in SolidJS use `renderCard` / `<CardRenderer>` inside a `<CardProvider>`.
+
+## Keep resolved cards across reloads
+
+A card flips to a read-only view the moment the user acts. To make that survive a reload, persist the `resolution` with `applyResolution` and store the array:
+
+```ts
+import { applyResolution } from '@kitn.ai/chat';
+
+cards.addEventListener('kc-card', (e) => {
+  cards.cards = applyResolution(cards.cards, e.detail); // resolved → re-hydrates read-only
+  save(cards.cards);
+});
+```
+
+It's pure and safe on every event — non-terminal events and unknown ids return the array unchanged.
+
+## Your own card types
+
+The built-ins cover most flows, but the `type → tag` map is open. Register an element for a new type and merge it in:
+
+```ts
+import { mergeCardTags } from '@kitn.ai/chat';
+const types = mergeCardTags({ chart: 'my-chart-card' }); // built-ins + yours
+// el.types = types  →  <kc-cards> now renders `chart` envelopes with <my-chart-card>
+```
+
+For **provider-owned, cross-origin** cards you don't want to bundle, render them in a sandboxed iframe with `kc-remote` — same envelope, same policy, over `postMessage`. See [remote cards](/chat/examples/remote-cards/).
+
+## Next
+
+- [Generative UI cards](/chat/patterns/generative-ui-cards/) — the rendering pattern, live.
+- [confirm](/chat/components/confirm/) · [choice](/chat/components/choice/) · [form](/chat/components/form/) · [tasks](/chat/components/tasks/) — per-card APIs.
