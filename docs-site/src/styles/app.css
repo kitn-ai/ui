@@ -36,6 +36,10 @@
   .starlight-sidebar-topics { display: none; }
 }
 
+/* The theme editor is a full-bleed tool — give its page the whole content column
+   (TOC is off on that page) instead of the default reading measure. */
+:root:has(.theme-studio-root) { --sl-content-width: 88rem; }
+
 /* Sidebar links: small, uniform text. Starlight's `.large` class (top-level leaf
    links AND the group-label span inside <summary>) carries the larger size +
    font-weight 600 — override it on the class itself so size/weight actually

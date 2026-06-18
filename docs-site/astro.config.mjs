@@ -143,8 +143,16 @@ export default defineConfig({
               { label: 'Models & context', slug: 'examples/model-context' },
               { label: 'Voice assistant', slug: 'examples/voice-assistant' },
               { label: 'Custom theme', slug: 'examples/custom-theme' },
-              { label: 'Theme editor', slug: 'examples/theme-editor' },
               { label: 'Remote cards', slug: 'examples/remote-cards' },
+            ],
+          },
+          {
+            label: 'Theme',
+            link: '/theme/editor/',
+            id: 'theme',
+            icon: 'setting',
+            items: [
+              { label: 'Theme editor', slug: 'theme/editor' },
             ],
           },
         ]),

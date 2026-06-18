@@ -6,6 +6,7 @@ import Search from '@astrojs/starlight/components/Search.astro';
 import MobileMenuToggle from '@astrojs/starlight/components/MobileMenuToggle.astro';
 import SocialIcons from './SocialIcons.astro';
 import ThemeToggle from './ThemeToggle.astro';
+import { Icon } from 'astro-icon/components';
 
 // BASE_URL is '/chat' (no trailing slash) in the production build but '/chat/'
 // in dev — normalise so asset/nav URLs are always '/chat/…'.
@@ -30,6 +31,12 @@ const nav = [
     {nav.map((n) => (
       <a href={href(n.to)} class="text-sm font-semibold text-ink-2 no-underline transition-colors hover:text-ink">{n.label}</a>
     ))}
+    {/* Theme editor is its own thing — set off with a divider + palette icon. */}
+    <span class="text-ink-3" aria-hidden="true">|</span>
+    <a href={href('theme/editor')} class="flex items-center gap-1.5 text-sm font-semibold text-ink-2 no-underline transition-colors hover:text-ink">
+      <Icon name="lucide:palette" class="size-4 shrink-0" />
+      <span>Theme</span>
+    </a>
   </nav>
 
   <div class="ml-auto flex items-center gap-3">
