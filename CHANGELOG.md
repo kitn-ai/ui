@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/kitn-ai/chat/compare/@kitn.ai/chat-v0.14.0...@kitn.ai/chat-v0.14.1) (2026-06-18)
+
+
+### Bug Fixes
+
+* **prompt-input:** typed text uses foreground, not the brand color ([042efe9](https://github.com/kitn-ai/chat/commit/042efe9cfb1edfe168e2e5c70260def4ad6ee6c8))
+
 ## [0.14.0](https://github.com/kitn-ai/chat/compare/@kitn.ai/chat-v0.13.0...@kitn.ai/chat-v0.14.0) (2026-06-18)
 
 
