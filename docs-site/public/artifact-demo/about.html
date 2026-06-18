@@ -13,10 +13,14 @@
           <span class="mark" aria-hidden="true"></span>
           Starboard
         </a>
-        <nav>
+        <nav class="nav">
+          <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+          <label for="nav-toggle" class="nav-burger" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+          </label>
           <ul class="nav-links">
             <li><a href="index.html#features">Features</a></li>
-            <li class="hide-sm"><a href="index.html#metrics">Why Starboard</a></li>
+            <li><a href="index.html#metrics">Why Starboard</a></li>
             <li><a href="about.html">About</a></li>
             <li><a class="btn btn-primary" href="index.html#get-started">Start free</a></li>
           </ul>
@@ -42,15 +46,15 @@
         <h2>What we believe</h2>
         <ul class="value-list">
           <li>
-            <span class="tick" aria-hidden="true">&#10003;</span>
+            <span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
             <span><strong>Safe by default.</strong> Every deploy is a checkpoint you can return to instantly.</span>
           </li>
           <li>
-            <span class="tick" aria-hidden="true">&#10003;</span>
+            <span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
             <span><strong>Visible, not magical.</strong> You should always see why a release advanced or paused.</span>
           </li>
           <li>
-            <span class="tick" aria-hidden="true">&#10003;</span>
+            <span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
             <span><strong>Fast enough to be calm.</strong> Eleven-second median deploys mean fewer late nights.</span>
           </li>
         </ul>
