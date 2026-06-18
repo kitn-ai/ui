@@ -17,6 +17,7 @@ import IconCheck from '~icons/lucide/check';
 import IconCopy from '~icons/lucide/copy';
 import IconImport from '~icons/lucide/clipboard-paste';
 import IconReset from '~icons/lucide/rotate-ccw';
+import IconChevron from '~icons/lucide/chevron-right';
 
 type Palette = Record<string, string>;
 
@@ -104,36 +105,52 @@ function toHex(css: string): string {
 const seedPalette = (mode: 'light' | 'dark'): Palette =>
   Object.fromEntries(ALL_TOKENS.map((t) => [t.token, toHex(mode === 'light' ? t.light : t.dark)]));
 
-/** Brand-token overrides layered onto the live defaults for each preset. */
+/** Brand-token overrides layered onto the live defaults for each preset. Each
+ *  preset tints a cohesive set (accent surface + brand + ring + code) so it reads
+ *  as a designed theme, not a single accent swap. */
 type BrandOverride = { light: Palette; dark: Palette };
 const PRESETS: { name: string; brand?: BrandOverride }[] = [
   { name: 'Default' },
   {
     name: 'Violet',
     brand: {
-      light: { '--kc-color-primary': '#7c3aed', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#7c3aed', '--kc-color-code-foreground': '#7c3aed', '--kc-color-background': '#faf8ff', '--kc-color-border': '#e6deff' },
-      dark: { '--kc-color-primary': '#a78bfa', '--kc-color-primary-foreground': '#1e1b2e', '--kc-color-ring': '#a78bfa', '--kc-color-code-foreground': '#c4b5fd' },
+      light: { '--kc-color-primary': '#7c3aed', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#7c3aed', '--kc-color-code-foreground': '#6d28d9', '--kc-color-accent': '#f3eefe', '--kc-color-accent-foreground': '#4c1d95', '--kc-color-background': '#faf8ff', '--kc-color-border': '#e8e0fb' },
+      dark: { '--kc-color-primary': '#a78bfa', '--kc-color-primary-foreground': '#1e1b2e', '--kc-color-ring': '#a78bfa', '--kc-color-code-foreground': '#c4b5fd', '--kc-color-accent': '#2a2440', '--kc-color-accent-foreground': '#ddd6fe', '--kc-color-background': '#15131c', '--kc-color-card': '#1c1926' },
     },
   },
   {
     name: 'Emerald',
     brand: {
-      light: { '--kc-color-primary': '#059669', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#059669', '--kc-color-code-foreground': '#047857', '--kc-color-background': '#f3fbf7', '--kc-color-border': '#cdeede' },
-      dark: { '--kc-color-primary': '#34d399', '--kc-color-primary-foreground': '#062a1e', '--kc-color-ring': '#34d399', '--kc-color-code-foreground': '#6ee7b7' },
+      light: { '--kc-color-primary': '#059669', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#059669', '--kc-color-code-foreground': '#047857', '--kc-color-accent': '#e6f7ef', '--kc-color-accent-foreground': '#065f46', '--kc-color-background': '#f3fbf7', '--kc-color-border': '#cdeede' },
+      dark: { '--kc-color-primary': '#34d399', '--kc-color-primary-foreground': '#062a1e', '--kc-color-ring': '#34d399', '--kc-color-code-foreground': '#6ee7b7', '--kc-color-accent': '#103027', '--kc-color-accent-foreground': '#a7f3d0', '--kc-color-background': '#0c1714', '--kc-color-card': '#10201b' },
     },
   },
   {
     name: 'Sunset',
     brand: {
-      light: { '--kc-color-primary': '#ea580c', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#ea580c', '--kc-color-code-foreground': '#c2410c', '--kc-color-background': '#fffaf5', '--kc-color-border': '#f6dec9' },
-      dark: { '--kc-color-primary': '#fb923c', '--kc-color-primary-foreground': '#2a1408', '--kc-color-ring': '#fb923c', '--kc-color-code-foreground': '#fdba74' },
+      light: { '--kc-color-primary': '#ea580c', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#ea580c', '--kc-color-code-foreground': '#c2410c', '--kc-color-accent': '#fdeee3', '--kc-color-accent-foreground': '#9a3412', '--kc-color-background': '#fffaf5', '--kc-color-border': '#f6dec9' },
+      dark: { '--kc-color-primary': '#fb923c', '--kc-color-primary-foreground': '#2a1408', '--kc-color-ring': '#fb923c', '--kc-color-code-foreground': '#fdba74', '--kc-color-accent': '#33200f', '--kc-color-accent-foreground': '#fed7aa', '--kc-color-background': '#181206', '--kc-color-card': '#211a0f' },
+    },
+  },
+  {
+    name: 'Ocean',
+    brand: {
+      light: { '--kc-color-primary': '#0284c7', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#0284c7', '--kc-color-code-foreground': '#0369a1', '--kc-color-accent': '#e2f3fb', '--kc-color-accent-foreground': '#075985', '--kc-color-background': '#f5fbfe', '--kc-color-border': '#cce7f3' },
+      dark: { '--kc-color-primary': '#38bdf8', '--kc-color-primary-foreground': '#04212f', '--kc-color-ring': '#38bdf8', '--kc-color-code-foreground': '#7dd3fc', '--kc-color-accent': '#0d2a39', '--kc-color-accent-foreground': '#bae6fd', '--kc-color-background': '#08151c', '--kc-color-card': '#0d1f29' },
+    },
+  },
+  {
+    name: 'Rose',
+    brand: {
+      light: { '--kc-color-primary': '#e11d48', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#e11d48', '--kc-color-code-foreground': '#be123c', '--kc-color-accent': '#fde8ed', '--kc-color-accent-foreground': '#9f1239', '--kc-color-background': '#fff7f9', '--kc-color-border': '#f7d2db' },
+      dark: { '--kc-color-primary': '#fb7185', '--kc-color-primary-foreground': '#2a0a12', '--kc-color-ring': '#fb7185', '--kc-color-code-foreground': '#fda4af', '--kc-color-accent': '#33141c', '--kc-color-accent-foreground': '#fecdd3', '--kc-color-background': '#190a0e', '--kc-color-card': '#221116' },
     },
   },
   {
     name: 'Mono',
     brand: {
-      light: { '--kc-color-primary': '#1f2937', '--kc-color-primary-foreground': '#f9fafb', '--kc-color-ring': '#6b7280', '--kc-color-code-foreground': '#374151' },
-      dark: { '--kc-color-primary': '#e5e7eb', '--kc-color-primary-foreground': '#111827', '--kc-color-ring': '#9ca3af', '--kc-color-code-foreground': '#d1d5db' },
+      light: { '--kc-color-primary': '#1f2937', '--kc-color-primary-foreground': '#f9fafb', '--kc-color-ring': '#6b7280', '--kc-color-code-foreground': '#374151', '--kc-color-accent': '#f1f3f5', '--kc-color-accent-foreground': '#1f2937' },
+      dark: { '--kc-color-primary': '#e5e7eb', '--kc-color-primary-foreground': '#111827', '--kc-color-ring': '#9ca3af', '--kc-color-code-foreground': '#d1d5db', '--kc-color-accent': '#23262b', '--kc-color-accent-foreground': '#e5e7eb' },
     },
   },
 ];
@@ -145,6 +162,16 @@ const CONFIRM_DATA = {
     { id: 'deploy', label: 'Deploy now', style: 'primary', default: true },
     { id: 'cancel', label: 'Cancel' },
   ],
+};
+
+const CHOICE_DATA = {
+  prompt: 'Pick the notification channel for the maintenance window.',
+  options: [
+    { id: 'email', label: 'Email', description: 'Sent to all active accounts', meta: '~4 200 users' },
+    { id: 'banner', label: 'In-app banner', description: 'Shown on next page load', recommended: true },
+    { id: 'none', label: 'No notification', description: 'Internal deploy only' },
+  ],
+  submitLabel: 'Confirm channel',
 };
 
 const SEED_MESSAGES = [
@@ -191,6 +218,7 @@ function parseCss(css: string): { light: Palette; dark: Palette; radius?: number
 export default function ThemeStudio() {
   let chatHost: (HTMLElement & Record<string, unknown>) | undefined;
   let confirmHost: (HTMLElement & Record<string, unknown>) | undefined;
+  let choiceHost: (HTMLElement & Record<string, unknown>) | undefined;
   let promptHost: HTMLElement | undefined;
   let canvasEl: HTMLDivElement | undefined;
   let streamTimer: number | undefined;
@@ -205,6 +233,11 @@ export default function ThemeStudio() {
   const [importing, setImporting] = createSignal(false);
   const [importText, setImportText] = createSignal('');
   const [importError, setImportError] = createSignal('');
+  // Accordion: open the two most-used groups by default, collapse the rest.
+  const [openGroups, setOpenGroups] = createSignal<Record<string, boolean>>(
+    Object.fromEntries(GROUPS.map((g, i) => [g.name, i < 2])),
+  );
+  const toggleGroup = (name: string) => setOpenGroups((o) => ({ ...o, [name]: !o[name] }));
 
   const active = () => (mode() === 'light' ? light() : dark());
 
@@ -219,6 +252,7 @@ export default function ThemeStudio() {
     // Keep each preview host on the studio's mode (independent of the page theme).
     chatHost?.setAttribute('theme', mode());
     confirmHost?.setAttribute('theme', mode());
+    choiceHost?.setAttribute('theme', mode());
     promptHost?.setAttribute('theme', mode());
   });
 
@@ -316,6 +350,11 @@ export default function ThemeStudio() {
       confirmHost.heading = 'Deploy to production?';
       confirmHost.data = CONFIRM_DATA;
     }
+    if (choiceHost) {
+      customElements.upgrade(choiceHost);
+      choiceHost.heading = 'How should we notify users?';
+      choiceHost.data = CHOICE_DATA;
+    }
     setReady(true);
     onCleanup(() => {
       clearTimeout(streamTimer);
@@ -324,12 +363,11 @@ export default function ThemeStudio() {
   });
 
   const swatch = 'h-7 w-7 shrink-0 cursor-pointer rounded-md border border-line bg-transparent p-0';
-  const chip = 'rounded-md px-2.5 py-1 text-xs font-medium';
 
   return (
-    <div class="theme-studio-root not-content my-4 flex flex-col overflow-hidden rounded-xl border border-line bg-surface lg:h-[78vh] lg:min-h-[640px] lg:flex-row">
+    <div class="theme-studio-root not-content my-4 flex flex-col overflow-hidden rounded-xl border border-line bg-surface lg:h-[82vh] lg:min-h-[660px] lg:flex-row">
       {/* Inspector */}
-      <div class="flex w-full shrink-0 flex-col border-b border-line lg:w-[320px] lg:border-b-0 lg:border-r">
+      <div class="flex w-full shrink-0 flex-col border-b border-line lg:w-[330px] lg:border-b-0 lg:border-r">
         {/* Toolbar */}
         <div class="flex items-center justify-between gap-2 border-b border-line px-3 py-2.5">
           <div class="inline-flex overflow-hidden rounded-md border border-line text-xs">
@@ -365,9 +403,10 @@ export default function ThemeStudio() {
                 <button
                   type="button"
                   onClick={() => loadPreset(p.name)}
-                  class="rounded-full border px-2.5 py-1 text-xs transition-colors"
+                  class="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors"
                   classList={{ 'border-brand bg-brand text-white': preset() === p.name, 'border-line text-ink-2 hover:bg-ink/5': preset() !== p.name }}
                 >
+                  <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: p.brand ? p.brand.light['--kc-color-primary'] : '#18181b' }} />
                   {p.name}
                 </button>
               )}
@@ -378,38 +417,53 @@ export default function ThemeStudio() {
           </div>
         </div>
 
-        {/* Token groups */}
-        <div class="min-h-0 flex-1 overflow-auto p-3">
+        {/* Token groups (collapsible) */}
+        <div class="min-h-0 flex-1 overflow-auto py-1">
           <For each={GROUPS}>
             {(group) => (
-              <div class="mb-4">
-                <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink/55">{group.name}</div>
-                <div class="flex flex-col gap-2">
-                  <For each={group.tokens}>
-                    {(t) => (
-                      <label class="flex items-center gap-2.5">
-                        <input
-                          type="color"
-                          value={active()[t.token] ?? '#000000'}
-                          onInput={(e) => setColor(t.token, e.currentTarget.value)}
-                          aria-label={t.label}
-                          class={swatch}
-                        />
-                        <span class="flex min-w-0 flex-col leading-tight">
-                          <span class="truncate text-sm font-medium text-ink">{t.label}</span>
-                          <span class="truncate text-xs text-ink/55">{t.hint}</span>
-                        </span>
-                      </label>
-                    )}
-                  </For>
-                </div>
+              <div class="border-b border-line/60 last:border-0">
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(group.name)}
+                  aria-expanded={openGroups()[group.name]}
+                  class="flex w-full items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-ink/[0.03]"
+                >
+                  <IconChevron class="h-3.5 w-3.5 shrink-0 text-ink-3 transition-transform" classList={{ 'rotate-90': openGroups()[group.name] }} />
+                  <span class="text-xs font-semibold uppercase tracking-wide text-ink-2">{group.name}</span>
+                  <span class="ml-auto flex items-center gap-1">
+                    <For each={group.tokens.slice(0, 5)}>
+                      {(t) => <span class="size-3 rounded-full ring-1 ring-black/10" style={{ background: active()[t.token] ?? 'transparent' }} />}
+                    </For>
+                  </span>
+                </button>
+                <Show when={openGroups()[group.name]}>
+                  <div class="flex flex-col gap-2 px-3 pb-3 pt-0.5">
+                    <For each={group.tokens}>
+                      {(t) => (
+                        <label class="flex items-center gap-2.5">
+                          <input
+                            type="color"
+                            value={active()[t.token] ?? '#000000'}
+                            onInput={(e) => setColor(t.token, e.currentTarget.value)}
+                            aria-label={t.label}
+                            class={swatch}
+                          />
+                          <span class="flex min-w-0 flex-col leading-tight">
+                            <span class="truncate text-sm font-medium text-ink">{t.label}</span>
+                            <span class="truncate text-xs text-ink/55">{t.hint}</span>
+                          </span>
+                        </label>
+                      )}
+                    </For>
+                  </div>
+                </Show>
               </div>
             )}
           </For>
 
           {/* Radius */}
-          <div class="mb-2">
-            <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink/55">Shape</div>
+          <div class="px-3 py-3">
+            <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shape</div>
             <label class="flex items-center gap-2.5 text-sm">
               <input type="range" min="0" max="1.4" step="0.05" value={radius()} onInput={(e) => setRadius(parseFloat(e.currentTarget.value))} class="flex-1" aria-label="Corner radius" />
               <span class="w-14 text-right text-xs tabular-nums text-ink-2">{radius()}rem</span>
@@ -430,21 +484,24 @@ export default function ThemeStudio() {
             <kc-chat ref={(el: HTMLElement) => (chatHost = el as never)} style={{ display: 'block', height: '100%' }} />
           </div>
 
-          {/* Card + standalone composer */}
+          {/* Generative-UI cards — confirm + choice */}
           <div class="grid gap-4 md:grid-cols-2">
             {/* @ts-expect-error custom element */}
             <kc-confirm ref={(el: HTMLElement) => (confirmHost = el as never)} style={{ display: 'block' }} />
             {/* @ts-expect-error custom element */}
-            <kc-prompt-input ref={(el: HTMLElement) => (promptHost = el)} placeholder="Standalone composer…" style={{ display: 'block', 'align-self': 'start' }} />
+            <kc-choice ref={(el: HTMLElement) => (choiceHost = el as never)} style={{ display: 'block' }} />
           </div>
+
+          {/* Standalone composer */}
+          {/* @ts-expect-error custom element */}
+          <kc-prompt-input ref={(el: HTMLElement) => (promptHost = el)} placeholder="Standalone composer…" style={{ display: 'block' }} />
 
           {/* Coverage strip — tokens not surfaced at rest, reading the live vars */}
           <div class="flex flex-wrap items-center gap-2 rounded-xl border p-3" style={{ 'border-color': 'var(--kc-color-border)', color: 'var(--kc-color-foreground)' }}>
             <span class="mr-1 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>Also themed:</span>
-            <span class={chip} style={{ background: 'var(--kc-color-destructive)', color: 'var(--kc-color-destructive-foreground)' }}>Destructive</span>
-            <span class={chip} style={{ background: 'var(--kc-color-secondary)', color: 'var(--kc-color-secondary-foreground)' }}>Secondary</span>
-            <span class={chip} style={{ background: 'var(--kc-color-accent)', color: 'var(--kc-color-accent-foreground)' }}>Accent</span>
-            <span class={chip} style={{ background: 'var(--kc-color-popover)', color: 'var(--kc-color-popover-foreground)', border: '1px solid var(--kc-color-border)' }}>Popover</span>
+            <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-destructive)', color: 'var(--kc-color-destructive-foreground)' }}>Destructive</span>
+            <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-secondary)', color: 'var(--kc-color-secondary-foreground)' }}>Secondary</span>
+            <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-popover)', color: 'var(--kc-color-popover-foreground)', border: '1px solid var(--kc-color-border)' }}>Popover</span>
             <code class="rounded px-1.5 py-0.5 text-xs" style={{ color: 'var(--kc-color-code-foreground)', background: 'color-mix(in oklab, var(--kc-color-code-foreground) 15%, transparent)' }}>inline code</code>
             <span class="ml-1 flex items-center gap-1">
               <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-blue)' }} />
