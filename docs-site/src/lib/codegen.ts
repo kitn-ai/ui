@@ -221,11 +221,12 @@ export type ControlKind =
 // makes the live demo look broken, so drive those via the element's own trigger.
 const CONTROLLED_BINDING_PROPS = new Set(['open', 'sidebarCollapsed']);
 
-// Per-element controls to hide because the element already exposes its own UI for
-// them. kc-artifact has an in-component Preview|Code toggle, so the `tab` enum
-// control is redundant (and looks like a competing second tab strip).
+// Per-element controls to hide. kc-artifact: `tab` is redundant with its own
+// in-component Preview|Code toggle; `sandbox` is set by the sample (the demo opts
+// into allow-same-origin so its iframe can load its own styles) and a freeform
+// string control would both clutter the bar and override that.
 const CONTROL_EXCLUDE: Record<string, Set<string>> = {
-  'kc-artifact': new Set(['tab']),
+  'kc-artifact': new Set(['tab', 'sandbox']),
 };
 
 export function controlsFor(meta: ElementMeta): ControlKind[] {
