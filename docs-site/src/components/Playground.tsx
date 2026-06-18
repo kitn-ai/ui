@@ -18,6 +18,17 @@ const humanize = (s: string) => {
   return w.map((word, i) => (i === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word)).join(' ');
 };
 
+// Optional grouping of boolean toggles for busy elements, so the control bar
+// reads as labeled clusters instead of one long flat row. Tag → ordered groups
+// of prop names; anything not listed falls into a trailing unlabeled group. Every
+// other element keeps the flat row.
+const BOOLEAN_GROUPS: Record<string, { label: string; props: string[] }[]> = {
+  'kc-artifact': [
+    { label: 'Toolbar', props: ['noPathField', 'noTabs', 'noNav', 'noReload', 'noHome', 'openInTab'] },
+    { label: 'Behavior', props: ['expandable', 'maximized', 'standalone', 'readonlyPath'] },
+  ],
+};
+
 function Toggle(props: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
     <button type="button" role="switch" aria-checked={props.checked} onClick={() => props.onChange(!props.checked)}
@@ -39,6 +50,25 @@ export default function Playground(props: { tag: string }) {
   const enums = controls.filter((c) => c.kind === 'enum') as Extract<ReturnType<typeof controlsFor>[number], { kind: 'enum' }>[];
   const bools = controls.filter((c) => c.kind === 'boolean') as Extract<ReturnType<typeof controlsFor>[number], { kind: 'boolean' }>[];
   const sample = sampleFor(props.tag);
+
+  // Resolve the optional boolean grouping for this element (null = flat row).
+  type BoolControl = (typeof bools)[number];
+  const boolGroups: { label: string; items: BoolControl[] }[] | null = (() => {
+    const spec = BOOLEAN_GROUPS[props.tag];
+    if (!spec) return null;
+    const byProp = new Map(bools.map((c) => [c.prop, c]));
+    const used = new Set<string>();
+    const groups = spec
+      .map((g) => {
+        const items = g.props.map((p) => byProp.get(p)).filter((c): c is BoolControl => !!c);
+        items.forEach((c) => used.add(c.prop));
+        return { label: g.label, items };
+      })
+      .filter((g) => g.items.length);
+    const leftover = bools.filter((c) => !used.has(c.prop));
+    if (leftover.length) groups.push({ label: '', items: leftover });
+    return groups;
+  })();
 
   // Control state: every control's prop → current value (seeded from defaults).
   const seed: State = {};
@@ -113,6 +143,7 @@ export default function Playground(props: { tag: string }) {
     <div class="not-content my-5 overflow-hidden rounded-xl border border-line bg-surface">
       <Show when={controls.length}>
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-line px-4">
+          <Show when={enums.length}>
           <div class="flex flex-wrap items-center gap-y-2 py-2.5">
             <For each={enums}>
               {(c, i) => (
@@ -140,11 +171,32 @@ export default function Playground(props: { tag: string }) {
               )}
             </For>
           </div>
-          <div class="flex flex-wrap items-center gap-5 py-2">
-            <For each={bools}>
-              {(c) => <Toggle checked={Boolean(state()[c.prop])} onChange={(v) => set(c.prop, v)} label={humanize(c.prop)} />}
-            </For>
-          </div>
+          </Show>
+          <Show
+            when={boolGroups}
+            fallback={
+              <div class="flex flex-wrap items-center gap-5 py-2">
+                <For each={bools}>
+                  {(c) => <Toggle checked={Boolean(state()[c.prop])} onChange={(v) => set(c.prop, v)} label={humanize(c.prop)} />}
+                </For>
+              </div>
+            }
+          >
+            <div class="flex w-full flex-col gap-2 py-2.5">
+              <For each={boolGroups!}>
+                {(g) => (
+                  <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                    <Show when={g.label}>
+                      <span class="w-16 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-ink-3">{g.label}</span>
+                    </Show>
+                    <For each={g.items}>
+                      {(c) => <Toggle checked={Boolean(state()[c.prop])} onChange={(v) => set(c.prop, v)} label={humanize(c.prop)} />}
+                    </For>
+                  </div>
+                )}
+              </For>
+            </div>
+          </Show>
         </div>
       </Show>
 

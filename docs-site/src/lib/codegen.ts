@@ -221,11 +221,20 @@ export type ControlKind =
 // makes the live demo look broken, so drive those via the element's own trigger.
 const CONTROLLED_BINDING_PROPS = new Set(['open', 'sidebarCollapsed']);
 
+// Per-element controls to hide because the element already exposes its own UI for
+// them. kc-artifact has an in-component Preview|Code toggle, so the `tab` enum
+// control is redundant (and looks like a competing second tab strip).
+const CONTROL_EXCLUDE: Record<string, Set<string>> = {
+  'kc-artifact': new Set(['tab']),
+};
+
 export function controlsFor(meta: ElementMeta): ControlKind[] {
   const controls: ControlKind[] = [];
+  const excluded = CONTROL_EXCLUDE[meta.tag];
   for (const p of meta.props) {
     if (!p.scalar) continue;
     if (CONTROLLED_BINDING_PROPS.has(p.name)) continue;
+    if (excluded?.has(p.name)) continue;
     const opts = enumOptions(p);
     if (opts.length) controls.push({ prop: p.name, kind: 'enum', options: opts, default: defaultValue(p) as string });
     else if (isBooleanProp(p)) controls.push({ prop: p.name, kind: 'boolean', default: Boolean(defaultValue(p)) });
