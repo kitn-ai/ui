@@ -199,7 +199,10 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
       const pct = live[i];
       if (Number.isFinite(pct) && pct > 0) info.el.setAttribute('size', `${pct}%`);
     });
-    persistingSizes = false;
+    // Hold the guard across the MutationObserver microtask (it fires AFTER this
+    // synchronous code), then clear it — otherwise the observer sees the flag
+    // already false and re-reads our own writes. Same pattern as applyingMaximize.
+    queueMicrotask(() => { persistingSizes = false; });
   }
 
   // --- Task 2: maximize/restore core ---
@@ -343,6 +346,11 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     element.addEventListener('keydown', onKeydown, true);
 
     const mo = new MutationObserver(() => {
+      // Skip our OWN per-drag size writes (persistSizes). Re-reading here would
+      // setItems() → re-render the <For>, replacing the ResizableHandle mid-drag
+      // and dropping its pointer capture — the drag stalls after the first move.
+      // (The flag is held across this observer microtask; see persistSizes.)
+      if (persistingSizes) return;
       readItems();
       const stash = maximized();
       if (stash) {
@@ -357,7 +365,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
           return;
         }
       }
-      if (applyingMaximize || persistingSizes) return; // our own writes — skip
+      if (applyingMaximize) return; // our own maximize writes — skip the emit
       queueMicrotask(emitChange);
     });
     mo.observe(element, {
