@@ -79,7 +79,7 @@ export function Popover(props: PopoverProps) {
           }}
           class={cn(
             // text-sm is a sensible menu default; slotted content can override it.
-            'z-50 min-w-[12rem] rounded-lg bg-card p-1 text-sm shadow-lg',
+            'z-50 min-w-[12rem] rounded-lg bg-card p-1 text-sm kc-elevation',
             'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
             props.class,
           )}
