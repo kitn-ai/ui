@@ -161,7 +161,9 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
       onInput={handleInput}
       onKeyDown={handleKeyDown}
       class={cn(
-        'text-primary min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
+        // Typed text uses the normal foreground (light/dark), NOT the brand/accent
+        // color — the composer should read as plain text, not tinted.
+        'text-foreground min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
         textClass(config.proseSize()),
         local.class
       )}
