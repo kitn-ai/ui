@@ -56,6 +56,9 @@
     margin-inline-end: var(--kc-dock-w);
   }
   html.kc-askai-open .kc-askai-backdrop { opacity: 0 !important; pointer-events: none; }
+  /* Sharing space: the panel is a docked sibling with a left border, so the
+     drop shadow is wrong here — keep it only for the overlay (narrow) mode. */
+  html.kc-askai-open .kc-askai-panel { box-shadow: none; }
 }
 
 /* Sidebar links: small, uniform text. Starlight's `.large` class (top-level leaf
