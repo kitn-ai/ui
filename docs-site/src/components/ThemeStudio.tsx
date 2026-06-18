@@ -273,6 +273,7 @@ export default function ThemeStudio() {
   let chatHost: (HTMLElement & Record<string, unknown>) | undefined;
   let confirmHost: (HTMLElement & Record<string, unknown>) | undefined;
   let choiceHost: (HTMLElement & Record<string, unknown>) | undefined;
+  let codeHost: (HTMLElement & Record<string, unknown>) | undefined;
   let promptHost: HTMLElement | undefined;
   let canvasEl: HTMLDivElement | undefined;
   let streamTimer: number | undefined;
@@ -287,6 +288,7 @@ export default function ThemeStudio() {
   const [tracking, setTracking] = createSignal(0); // em
   const [shadowColor, setShadowColor] = createSignal('#000000');
   const [preset, setPreset] = createSignal('Default');
+  const [canvasTab, setCanvasTab] = createSignal<'chat' | 'cards' | 'content'>('chat');
   const [copied, setCopied] = createSignal(false);
   const [codeOpen, setCodeOpen] = createSignal(false);
   const [importOpen, setImportOpen] = createSignal(false);
@@ -457,6 +459,11 @@ export default function ThemeStudio() {
       customElements.upgrade(choiceHost);
       choiceHost.heading = 'How should we notify users?';
       choiceHost.data = CHOICE_DATA;
+    }
+    if (codeHost) {
+      customElements.upgrade(codeHost);
+      codeHost.code = "export function greet(name: string) {\n  // inline `code` and blocks use --kc-font-code\n  return `Hello, ${name}!`;\n}";
+      codeHost.language = 'typescript';
     }
     setReady(true);
     onCleanup(() => {
@@ -637,44 +644,85 @@ export default function ThemeStudio() {
         </div>
 
         {/* Canvas */}
-        <div ref={canvasEl} classList={{ dark: mode() === 'dark' }} class="relative min-w-0 flex-1 overflow-auto p-4">
-        <Show when={!ready()}>
-          <div class="absolute inset-0 grid place-items-center text-sm text-ink/55">Loading preview…</div>
-        </Show>
-        <div class="mx-auto flex max-w-3xl flex-col gap-4">
-          {/* Hero chat */}
-          <div class="h-[420px] overflow-hidden rounded-xl border" style={{ 'border-color': 'var(--kc-color-border)' }}>
-            {/* @ts-expect-error custom element */}
-            <kc-chat ref={(el: HTMLElement) => (chatHost = el as never)} style={{ display: 'block', height: '100%' }} />
+        <div ref={canvasEl} classList={{ dark: mode() === 'dark' }} class="relative min-w-0 flex-1 overflow-auto">
+          <Show when={!ready()}>
+            <div class="absolute inset-0 z-20 grid place-items-center text-sm text-ink/55">Loading preview…</div>
+          </Show>
+
+          {/* Tab bar — themed, sticky. Each tab demonstrates a different slice of
+              the tokens so a developer can see where they apply. */}
+          <div class="sticky top-0 z-10 flex items-center gap-1 border-b px-4 py-2" style={{ 'border-color': 'var(--kc-color-border)', background: 'var(--kc-color-background)' }}>
+            <For each={[['chat', 'Chat'], ['cards', 'Cards'], ['content', 'Content']] as const}>
+              {([id, label]) => (
+                <button
+                  type="button"
+                  onClick={() => setCanvasTab(id)}
+                  class="rounded-md px-3 py-1 text-sm transition-colors"
+                  style={canvasTab() === id
+                    ? { background: 'color-mix(in oklab, var(--kc-color-foreground) 9%, transparent)', color: 'var(--kc-color-foreground)', 'font-weight': '600' }
+                    : { color: 'var(--kc-color-muted-foreground)' }}
+                >
+                  {label}
+                </button>
+              )}
+            </For>
           </div>
 
-          {/* Generative-UI cards — confirm + choice */}
-          <div class="grid gap-4 md:grid-cols-2">
-            {/* @ts-expect-error custom element */}
-            <kc-confirm ref={(el: HTMLElement) => (confirmHost = el as never)} style={{ display: 'block' }} />
-            {/* @ts-expect-error custom element */}
-            <kc-choice ref={(el: HTMLElement) => (choiceHost = el as never)} style={{ display: 'block' }} />
-          </div>
+          <div class="mx-auto max-w-3xl p-4">
+            {/* Chat — a full working example */}
+            <div classList={{ hidden: canvasTab() !== 'chat' }}>
+              <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>A full chat: background, card bubbles, the primary send button, focus ring, and the base font.</p>
+              <div class="h-[440px] overflow-hidden rounded-xl border" style={{ 'border-color': 'var(--kc-color-border)' }}>
+                {/* @ts-expect-error custom element */}
+                <kc-chat ref={(el: HTMLElement) => (chatHost = el as never)} style={{ display: 'block', height: '100%' }} />
+              </div>
+            </div>
 
-          {/* Standalone composer */}
-          {/* @ts-expect-error custom element */}
-          <kc-prompt-input ref={(el: HTMLElement) => (promptHost = el)} placeholder="Standalone composer…" style={{ display: 'block' }} />
+            {/* Cards — generative-UI surfaces */}
+            <div classList={{ hidden: canvasTab() !== 'cards' }}>
+              <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>Cards: the card surface + elevation (shadow color), primary / secondary / destructive buttons, the accent (recommended), and borders.</p>
+              <div class="grid gap-4 md:grid-cols-2">
+                {/* @ts-expect-error custom element */}
+                <kc-confirm ref={(el: HTMLElement) => (confirmHost = el as never)} style={{ display: 'block' }} />
+                {/* @ts-expect-error custom element */}
+                <kc-choice ref={(el: HTMLElement) => (choiceHost = el as never)} style={{ display: 'block' }} />
+              </div>
+            </div>
 
-          {/* Coverage strip — tokens not surfaced at rest, reading the live vars */}
-          <div class="flex flex-wrap items-center gap-2 rounded-xl border p-3" style={{ 'border-color': 'var(--kc-color-border)', color: 'var(--kc-color-foreground)' }}>
-            <span class="mr-1 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>Also themed:</span>
-            <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-destructive)', color: 'var(--kc-color-destructive-foreground)' }}>Destructive</span>
-            <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-secondary)', color: 'var(--kc-color-secondary-foreground)' }}>Secondary</span>
-            <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-popover)', color: 'var(--kc-color-popover-foreground)', border: '1px solid var(--kc-color-border)' }}>Popover</span>
-            <code class="rounded px-1.5 py-0.5 text-xs" style={{ color: 'var(--kc-color-code-foreground)', background: 'color-mix(in oklab, var(--kc-color-code-foreground) 15%, transparent)' }}>inline code</code>
-            <span class="ml-1 flex items-center gap-1">
-              <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-blue)' }} />
-              <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-amber)' }} />
-              <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-green)' }} />
-              <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-red)' }} />
-            </span>
+            {/* Content — the harder-to-see tokens, fonts, and shadow */}
+            <div classList={{ hidden: canvasTab() !== 'content' }} class="flex flex-col gap-5">
+              <div>
+                <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>Code blocks use the <strong>code font</strong> (--kc-font-code) and the code accent.</p>
+                {/* @ts-expect-error custom element */}
+                <kc-code-block ref={(el: HTMLElement) => (codeHost = el as never)} style={{ display: 'block' }} />
+              </div>
+              <div>
+                <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>The composer — base font, input background, and border.</p>
+                {/* @ts-expect-error custom element */}
+                <kc-prompt-input ref={(el: HTMLElement) => (promptHost = el)} placeholder="Ask anything…" style={{ display: 'block' }} />
+              </div>
+              <div>
+                <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>An elevated surface — the shadow tint is <strong>--kc-shadow-color</strong>.</p>
+                <div class="rounded-xl p-4 text-sm" style={{ background: 'var(--kc-color-card)', color: 'var(--kc-color-card-foreground)', border: '1px solid var(--kc-color-border)', 'box-shadow': '0 6px 16px -3px color-mix(in oklab, var(--kc-shadow-color, oklch(0 0 0)) 16%, transparent), 0 3px 8px -3px color-mix(in oklab, var(--kc-shadow-color, oklch(0 0 0)) 12%, transparent)' }}>
+                  Cards, popovers, and menus lift off the page with this shadow. Set it transparent for a flat look.
+                </div>
+              </div>
+              {/* Coverage strip — tokens not surfaced at rest, reading the live vars */}
+              <div class="flex flex-wrap items-center gap-2 rounded-xl border p-3" style={{ 'border-color': 'var(--kc-color-border)', color: 'var(--kc-color-foreground)' }}>
+                <span class="mr-1 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>Also themed:</span>
+                <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-destructive)', color: 'var(--kc-color-destructive-foreground)' }}>Destructive</span>
+                <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-secondary)', color: 'var(--kc-color-secondary-foreground)' }}>Secondary</span>
+                <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-popover)', color: 'var(--kc-color-popover-foreground)', border: '1px solid var(--kc-color-border)' }}>Popover</span>
+                <code class="rounded px-1.5 py-0.5 text-xs" style={{ color: 'var(--kc-color-code-foreground)', background: 'color-mix(in oklab, var(--kc-color-code-foreground) 15%, transparent)' }}>inline code</code>
+                <span class="ml-1 flex items-center gap-1">
+                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-blue)' }} />
+                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-amber)' }} />
+                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-green)' }} />
+                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-red)' }} />
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
         </div>
       </div>
 
