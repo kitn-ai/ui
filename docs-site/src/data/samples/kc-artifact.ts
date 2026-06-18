@@ -63,9 +63,14 @@ const FILES = [
 // unstyled). allow-same-origin lets it reach its own origin for styles/nav.
 const SANDBOX = 'allow-scripts allow-forms allow-same-origin';
 
+// NOTE: `sandbox` is listed BEFORE `src` on purpose. The docs apply sample props
+// to the element in key order; the iframe must have allow-same-origin set BEFORE
+// it starts loading `src`, or the first load gets an opaque origin and its CSS
+// subresource is a cross-site request — which Astro's dev server blocks with 403
+// (the framed page renders unstyled). Set sandbox first → same-origin load → ok.
 export default {
-  sample: { files: FILES, src: url('index.html'), sandbox: SANDBOX, previewHeight: '440px' },
+  sample: { files: FILES, sandbox: SANDBOX, src: url('index.html'), previewHeight: '440px' },
   named: {
-    code: { files: FILES, src: url('index.html'), sandbox: SANDBOX, previewHeight: '440px' },
+    code: { files: FILES, sandbox: SANDBOX, src: url('index.html'), previewHeight: '440px' },
   },
 };
