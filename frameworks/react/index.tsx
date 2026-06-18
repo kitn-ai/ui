@@ -395,7 +395,7 @@ export const FileUpload = createWebComponent<FileUploadProps>(
 );
 
 export interface FormProps extends WebComponentProps {
-  /** The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for the full shape (it is self-referential, so the element types it loosely). */
+  /** The form definition — a JSON Schema (`type:'object'`) + `x-kai-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for the full shape (it is self-referential, so the element types it loosely). */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;

@@ -6,7 +6,7 @@
  * element which requires a full browser environment (Constructable Stylesheets,
  * shadow roots, etc.) and is therefore not suitable for jsdom unit tests.
  * Instead we:
- *   1. Test the exported `parseKcStepElement` helper in isolation — it has no
+ *   1. Test the exported `parseKaiStepElement` helper in isolation — it has no
  *      DOM dependencies beyond `Element`, which jsdom provides perfectly.
  *   2. Test that the merged list of prop + slotted steps renders correctly via
  *      the `ChainOfThoughtStep`/`ChainOfThoughtTrigger` primitives, mirroring
@@ -16,15 +16,15 @@ import { describe, it, expect, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
 import { For, Show } from 'solid-js';
-import { parseKcStepElement } from './chain-of-thought';
+import { parseKaiStepElement } from './chain-of-thought';
 
 afterEach(cleanup);
 
 // ---------------------------------------------------------------------------
-// parseKcStepElement — pure helper
+// parseKaiStepElement — pure helper
 // ---------------------------------------------------------------------------
 
-describe('parseKcStepElement', () => {
+describe('parseKaiStepElement', () => {
   function makeEl(label: string | null, textContent?: string): Element {
     const el = document.createElement('kai-step');
     if (label !== null) el.setAttribute('label', label);
@@ -33,37 +33,37 @@ describe('parseKcStepElement', () => {
   }
 
   it('maps label attribute to Step.label', () => {
-    const step = parseKcStepElement(makeEl('Searching docs', 'Found 3 hits'));
+    const step = parseKaiStepElement(makeEl('Searching docs', 'Found 3 hits'));
     expect(step.label).toBe('Searching docs');
   });
 
   it('maps trimmed textContent to Step.content', () => {
-    const step = parseKcStepElement(makeEl('Step', '  Found 3 hits  '));
+    const step = parseKaiStepElement(makeEl('Step', '  Found 3 hits  '));
     expect(step.content).toBe('Found 3 hits');
   });
 
   it('returns undefined for content when textContent is empty', () => {
-    const step = parseKcStepElement(makeEl('Build & verify', ''));
+    const step = parseKaiStepElement(makeEl('Build & verify', ''));
     expect(step.content).toBeUndefined();
   });
 
   it('returns undefined for content when textContent is whitespace only', () => {
-    const step = parseKcStepElement(makeEl('Build & verify', '   '));
+    const step = parseKaiStepElement(makeEl('Build & verify', '   '));
     expect(step.content).toBeUndefined();
   });
 
   it('falls back to empty string for label when attribute is absent', () => {
-    const step = parseKcStepElement(makeEl(null, 'some detail'));
+    const step = parseKaiStepElement(makeEl(null, 'some detail'));
     expect(step.label).toBe('');
   });
 
   it('returns a well-formed Step for a heading-only element', () => {
-    const step = parseKcStepElement(makeEl('Understand the request'));
+    const step = parseKaiStepElement(makeEl('Understand the request'));
     expect(step).toEqual({ label: 'Understand the request', content: undefined });
   });
 
   it('returns a well-formed Step for a step with detail', () => {
-    const step = parseKcStepElement(makeEl('Searching docs', 'Found 3 hits'));
+    const step = parseKaiStepElement(makeEl('Searching docs', 'Found 3 hits'));
     expect(step).toEqual({ label: 'Searching docs', content: 'Found 3 hits' });
   });
 });
@@ -139,12 +139,12 @@ describe('Step list rendering', () => {
     expect(labels).toEqual(['Prop step', 'Slotted step']);
   });
 
-  it('parseKcStepElement produces steps that render with the correct label and content', () => {
+  it('parseKaiStepElement produces steps that render with the correct label and content', () => {
     const el = document.createElement('kai-step');
     el.setAttribute('label', 'Searching docs');
     el.textContent = 'Found 3 hits';
 
-    const step = parseKcStepElement(el);
+    const step = parseKaiStepElement(el);
     const { getByTestId } = render(() => <StepList items={[step]} />);
 
     expect(getByTestId('step-label')).toHaveTextContent('Searching docs');

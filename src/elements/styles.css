@@ -7,19 +7,19 @@
 @source "../";
 
 @layer base {
-  /* Base typography is token-driven so a theme can restyle it. --kc-font-base is
+  /* Base typography is token-driven so a theme can restyle it. --kai-font-base is
      the family for ALL text/UI (named "base", not "sans", so a serif body works);
-     --kc-tracking is global letter-spacing. Both pierce the Shadow DOM via the
-     var() fallback, exactly like the --kc-color-* tokens. */
+     --kai-tracking is global letter-spacing. Both pierce the Shadow DOM via the
+     var() fallback, exactly like the --kai-color-* tokens. */
   :host {
     display: block;
-    font-family: var(--kc-font-base, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
-    letter-spacing: var(--kc-tracking, normal);
+    font-family: var(--kai-font-base, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+    letter-spacing: var(--kai-tracking, normal);
   }
-  /* Code/monospace surfaces use --kc-font-code (named for its ROLE — code — not
+  /* Code/monospace surfaces use --kai-font-code (named for its ROLE — code — not
      "mono", so any family works). Covers inline code, <pre>, and code blocks. */
   code, kbd, samp, pre {
-    font-family: var(--kc-font-code, ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace);
+    font-family: var(--kai-font-code, ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace);
   }
   * { border-color: var(--color-border); }
 
@@ -33,7 +33,7 @@
 
   /* One token-driven focus ring for EVERY focusable element in the shadow root.
      Blue by default (via --color-ring), consistent in light + dark, and
-     overridable through --kc-color-ring. Uses `outline` (not a box-shadow
+     overridable through --kai-color-ring. Uses `outline` (not a box-shadow
      ring) so it never clips on overflow and follows the element's radius;
      `:focus-visible` so it only appears for keyboard navigation, never on a
      mouse click. Components that render their own ring set
@@ -70,9 +70,9 @@
 @layer components {
   /* Designed radio + checkbox (appearance-none) so the form controls read as
      intentional, theme correctly in light/dark, and have comfortable targets —
-     replacing the weak native defaults. Used via `.kc-radio` / `.kc-checkbox`. */
-  .kc-radio,
-  .kc-checkbox {
+     replacing the weak native defaults. Used via `.kai-radio` / `.kai-checkbox`. */
+  .kai-radio,
+  .kai-checkbox {
     appearance: none;
     -webkit-appearance: none;
     inline-size: 1.125rem;
@@ -88,9 +88,9 @@
     transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease,
       transform 0.1s ease;
   }
-  .kc-radio { border-radius: 9999px; }
-  .kc-checkbox { border-radius: 0.3rem; }
-  .kc-radio::after {
+  .kai-radio { border-radius: 9999px; }
+  .kai-checkbox { border-radius: 0.3rem; }
+  .kai-radio::after {
     content: "";
     inline-size: 0.5rem;
     block-size: 0.5rem;
@@ -99,13 +99,13 @@
     transform: scale(0);
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .kc-radio:checked { border-color: var(--color-primary); }
-  .kc-radio:checked::after { transform: scale(1); }
-  .kc-checkbox:checked {
+  .kai-radio:checked { border-color: var(--color-primary); }
+  .kai-radio:checked::after { transform: scale(1); }
+  .kai-checkbox:checked {
     background-color: var(--color-primary);
     border-color: var(--color-primary);
   }
-  .kc-checkbox::after {
+  .kai-checkbox::after {
     content: "";
     inline-size: 0.8rem;
     block-size: 0.8rem;
@@ -115,23 +115,23 @@
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
   }
-  .kc-checkbox:checked::after { transform: scale(1); }
-  .kc-radio:hover:not(:disabled),
-  .kc-checkbox:hover:not(:disabled) {
+  .kai-checkbox:checked::after { transform: scale(1); }
+  .kai-radio:hover:not(:disabled),
+  .kai-checkbox:hover:not(:disabled) {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 9%, transparent);
   }
-  .kc-radio:active:not(:disabled),
-  .kc-checkbox:active:not(:disabled) { transform: scale(0.92); }
-  .kc-checkbox:checked {
+  .kai-radio:active:not(:disabled),
+  .kai-checkbox:active:not(:disabled) { transform: scale(0.92); }
+  .kai-checkbox:checked {
     box-shadow: 0 1px 4px color-mix(in srgb, var(--color-primary) 26%, transparent);
   }
-  .kc-radio:disabled,
-  .kc-checkbox:disabled { opacity: 0.5; cursor: not-allowed; }
+  .kai-radio:disabled,
+  .kai-checkbox:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* Custom range slider: a filled track (--kc-range-fill set by the widget) and a
+  /* Custom range slider: a filled track (--kai-range-fill set by the widget) and a
      refined thumb that scales on hover/press with a focus halo — no native chrome. */
-  .kc-range {
+  .kai-range {
     appearance: none;
     -webkit-appearance: none;
     inline-size: 100%;
@@ -140,30 +140,30 @@
     cursor: pointer;
     margin: 0;
   }
-  .kc-range::-webkit-slider-runnable-track {
+  .kai-range::-webkit-slider-runnable-track {
     block-size: 0.375rem;
     border-radius: 9999px;
     border: none;
     box-shadow: none;
     background: linear-gradient(
       to right,
-      var(--color-primary) var(--kc-range-fill, 0%),
-      var(--color-muted) var(--kc-range-fill, 0%)
+      var(--color-primary) var(--kai-range-fill, 0%),
+      var(--color-muted) var(--kai-range-fill, 0%)
     );
   }
-  .kc-range::-moz-range-track {
+  .kai-range::-moz-range-track {
     block-size: 0.375rem;
     border-radius: 9999px;
     border: none;
     box-shadow: none;
     background: var(--color-muted);
   }
-  .kc-range::-moz-range-progress {
+  .kai-range::-moz-range-progress {
     block-size: 0.375rem;
     border-radius: 9999px;
     background: var(--color-primary);
   }
-  .kc-range::-webkit-slider-thumb {
+  .kai-range::-webkit-slider-thumb {
     appearance: none;
     -webkit-appearance: none;
     inline-size: 1.125rem;
@@ -175,7 +175,7 @@
     margin-block-start: -0.375rem;
     transition: transform 0.12s ease, box-shadow 0.12s ease;
   }
-  .kc-range::-moz-range-thumb {
+  .kai-range::-moz-range-thumb {
     inline-size: 1.125rem;
     block-size: 1.125rem;
     border-radius: 9999px;
@@ -184,16 +184,16 @@
     box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
   }
-  .kc-range:hover::-webkit-slider-thumb { transform: scale(1.12); }
-  .kc-range:hover::-moz-range-thumb { transform: scale(1.12); }
-  .kc-range:focus-visible { outline: none; }
-  .kc-range:focus-visible::-webkit-slider-thumb,
-  .kc-range:active::-webkit-slider-thumb {
+  .kai-range:hover::-webkit-slider-thumb { transform: scale(1.12); }
+  .kai-range:hover::-moz-range-thumb { transform: scale(1.12); }
+  .kai-range:focus-visible { outline: none; }
+  .kai-range:focus-visible::-webkit-slider-thumb,
+  .kai-range:active::-webkit-slider-thumb {
     box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 14%, transparent);
   }
-  .kc-range:focus-visible::-moz-range-thumb,
-  .kc-range:active::-moz-range-thumb {
+  .kai-range:focus-visible::-moz-range-thumb,
+  .kai-range:active::-moz-range-thumb {
     box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 14%, transparent);
   }
-  .kc-range:disabled { opacity: 0.5; cursor: not-allowed; }
+  .kai-range:disabled { opacity: 0.5; cursor: not-allowed; }
 }

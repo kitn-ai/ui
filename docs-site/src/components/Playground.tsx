@@ -160,7 +160,7 @@ export default function Playground(props: { tag: string }) {
                           class="cursor-pointer appearance-none rounded-full border-0 px-3 py-1 text-sm capitalize transition-all"
                           classList={{
                             // selected: semi-transparent dark fill + pressed-in inset shadow, strong ink text
-                            'bg-[var(--kc-pressed)] text-ink font-semibold shadow-[inset_0_1px_2px_rgb(0_0_0/0.22)]': state()[c.prop] === opt,
+                            'bg-[var(--kai-pressed)] text-ink font-semibold shadow-[inset_0_1px_2px_rgb(0_0_0/0.22)]': state()[c.prop] === opt,
                             'bg-transparent text-ink-3 font-medium hover:text-ink hover:bg-line/60': state()[c.prop] !== opt,
                           }}>
                           {opt}

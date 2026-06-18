@@ -32,7 +32,7 @@ const features = [
         already built as framework-agnostic web components you wire to your model
         or agent loop and drop into any app.
       </p>
-      <a href={href('components/artifact')} class="mt-8 inline-block rounded-full bg-brand px-8 py-3 text-base font-semibold text-white no-underline transition-colors hover:bg-[var(--kc-brand-hover)]">
+      <a href={href('components/artifact')} class="mt-8 inline-block rounded-full bg-brand px-8 py-3 text-base font-semibold text-white no-underline transition-colors hover:bg-[var(--kai-brand-hover)]">
         Browse components
       </a>
     </div>
@@ -41,7 +41,7 @@ const features = [
   <!-- Cards -->
   <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
     {features.map((f) => (
-      <a href={href(f.to)} class="group relative flex flex-col rounded-xl border border-line bg-surface p-8 pb-5 no-underline transition-all duration-300 hover:-translate-y-1 hover:border-[var(--kc-brand)]">
+      <a href={href(f.to)} class="group relative flex flex-col rounded-xl border border-line bg-surface p-8 pb-5 no-underline transition-all duration-300 hover:-translate-y-1 hover:border-[var(--kai-brand)]">
         <div class="mb-4 flex items-start justify-between gap-3">
           <h3 class="text-2xl font-medium text-ink">{f.title}</h3>
           <Icon name={f.icon} class="size-6 shrink-0 text-brand" />

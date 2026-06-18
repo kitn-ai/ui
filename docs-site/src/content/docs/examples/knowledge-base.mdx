@@ -6,7 +6,7 @@ description: A scoped RAG assistant — pick a knowledge base from kai-scope-pic
 import { Aside } from '@astrojs/starlight/components';
 import KnowledgeBaseDemo from '../../../components/KnowledgeBaseDemo.tsx';
 
-<p class="kc-lede">A retrieval assistant where the user picks <strong>which</strong> knowledge base to query. Choosing a scope in `<kai-scope-picker>` filters the `<kai-conversations>` sidebar, retitles the `<kai-chat>` thread, and grounds answers in `<kai-sources>` drawn from that scope. Switch the dropdown, then ask — the citations change with it.</p>
+<p class="kai-lede">A retrieval assistant where the user picks <strong>which</strong> knowledge base to query. Choosing a scope in `<kai-scope-picker>` filters the `<kai-conversations>` sidebar, retitles the `<kai-chat>` thread, and grounds answers in `<kai-sources>` drawn from that scope. Switch the dropdown, then ask — the citations change with it.</p>
 
 <KnowledgeBaseDemo client:only="solid" />
 

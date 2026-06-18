@@ -22,12 +22,12 @@ afterEach(() => {
 const FEEDBACK: FormDefinition = {
   type: 'object',
   required: ['rating'],
-  'x-kc-order': ['rating', 'comments', 'plan', 'contactOk'],
-  'x-kc-submitLabel': 'Send feedback',
-  'x-kc-actions': [{ id: 'skip', label: 'Skip', variant: 'ghost' }],
+  'x-kai-order': ['rating', 'comments', 'plan', 'contactOk'],
+  'x-kai-submitLabel': 'Send feedback',
+  'x-kai-actions': [{ id: 'skip', label: 'Skip', variant: 'ghost' }],
   properties: {
-    rating: { type: 'integer', title: 'Overall rating', minimum: 1, maximum: 5, 'x-kc-widget': 'rating' },
-    comments: { type: 'string', title: 'Comments', maxLength: 500, 'x-kc-widget': 'textarea' },
+    rating: { type: 'integer', title: 'Overall rating', minimum: 1, maximum: 5, 'x-kai-widget': 'rating' },
+    comments: { type: 'string', title: 'Comments', maxLength: 500, 'x-kai-widget': 'textarea' },
     plan: { type: 'string', title: 'Your plan', enum: ['free', 'pro', 'team'], default: 'free' },
     contactOk: { type: 'boolean', title: 'OK to contact me', default: false },
   },
@@ -120,7 +120,7 @@ test('secondary action button emits `action` with its id', async () => {
 
 test('dismissible form emits `dismiss`', async () => {
   const { events, off } = listen();
-  const el = await mount({ ...FEEDBACK, 'x-kc-dismissible': true });
+  const el = await mount({ ...FEEDBACK, 'x-kai-dismissible': true });
   const dismiss = Array.from(el.shadowRoot!.querySelectorAll<HTMLButtonElement>('button')).find(
     (b) => b.textContent?.trim() === 'Dismiss',
   )!;

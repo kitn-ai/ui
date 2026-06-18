@@ -22,7 +22,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 function serveRemoteProvider(): Plugin {
   const dir = resolve(HERE, '../examples/remote-provider');
   return {
-    name: 'kc-serve-remote-provider',
+    name: 'kai-serve-remote-provider',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const url = (req.url ?? '').split('?')[0];

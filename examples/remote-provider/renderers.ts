@@ -53,7 +53,7 @@ export const formRenderer: RemoteCardRenderer = {
 
     // The <kai-form> element emits a bubbling CustomEvent named 'kai-card' when the
     // user submits the form. The event detail is a CardEvent { kind, cardId, data }.
-    function onKcCard(e: Event) {
+    function onKaiCard(e: Event) {
       const ev = e as CustomEvent<{ kind: string; cardId: string; data?: unknown }>;
       const detail = ev.detail;
       if (!detail || detail.kind !== 'submit') return;
@@ -61,12 +61,12 @@ export const formRenderer: RemoteCardRenderer = {
       host.emit({ kind: 'submit', cardId: envelope.id, data: detail.data });
     }
 
-    root.addEventListener('kai-card', onKcCard);
+    root.addEventListener('kai-card', onKaiCard);
     root.appendChild(form);
 
     // Return a disposer — called by the bridge before rendering a new card.
     return () => {
-      root.removeEventListener('kai-card', onKcCard);
+      root.removeEventListener('kai-card', onKaiCard);
       form.remove();
     };
   },

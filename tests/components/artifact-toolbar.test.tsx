@@ -64,7 +64,7 @@ test('no-* flags hide their affordances; all hidden → no toolbar', () => {
   expect(btn(container, 'Back')).toBeNull();
   expect(btn(container, 'Reload')).toBeNull();
   expect(container.querySelector('[role="tablist"]')).toBeNull();
-  expect(container.querySelector('input#kc-artifact-path')).toBeNull();
+  expect(container.querySelector('input#kai-artifact-path')).toBeNull();
   // showAnyToolbar false → the toolbar bar is omitted entirely.
   expect(container.querySelector('[data-artifact-toolbar]')).toBeNull();
 });
@@ -85,7 +85,7 @@ test('readonly-path: input is readonly, submit does not navigate, value still tr
   const { container } = render(() => (
     <Artifact src="https://x.test/a" readonlyPath onNavigate={(u) => nav.push(u)} />
   ));
-  const input = container.querySelector<HTMLInputElement>('input#kc-artifact-path')!;
+  const input = container.querySelector<HTMLInputElement>('input#kai-artifact-path')!;
   expect(input.readOnly).toBe(true);
   expect(input.getAttribute('aria-readonly')).toBe('true');
   input.value = 'https://x.test/b';

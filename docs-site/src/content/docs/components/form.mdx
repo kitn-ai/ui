@@ -11,9 +11,9 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kai-form</p>
+<p class="kai-tag-sub">kai-form</p>
 
-<p class="kc-lede">Point a JSON Schema at `<kai-form>` and get a fully themed, accessible, client-validated form — labels, widgets, submit button, and a read-only resolved state — without writing a single input element.</p>
+<p class="kai-lede">Point a JSON Schema at `<kai-form>` and get a fully themed, accessible, client-validated form — labels, widgets, submit button, and a read-only resolved state — without writing a single input element.</p>
 
 <Facts items={['Shadow DOM', 'JSON Schema driven', 'Client-side validation', 'Read-only resolved state', 'Card contract events']} />
 
@@ -41,10 +41,10 @@ Assign the form definition in JavaScript — it's an object, not an HTML attribu
     type: 'object',
     title: 'How did we do?',
     required: ['rating'],
-    'x-kc-submitLabel': 'Send feedback',
+    'x-kai-submitLabel': 'Send feedback',
     properties: {
-      rating: { type: 'integer', title: 'Overall rating', minimum: 1, maximum: 5, 'x-kc-widget': 'rating' },
-      comments: { type: 'string', title: 'Comments', 'x-kc-widget': 'textarea' },
+      rating: { type: 'integer', title: 'Overall rating', minimum: 1, maximum: 5, 'x-kai-widget': 'rating' },
+      comments: { type: 'string', title: 'Comments', 'x-kai-widget': 'textarea' },
     },
   };
 
@@ -55,8 +55,8 @@ Assign the form definition in JavaScript — it's an object, not an HTML attribu
 </script>
 ```
 
-- **Schema → widgets** deterministically: `string` → text; `string + enum` → radio/select; `integer + x-kc-widget: 'rating'` → stars; `boolean` → switch; `array` → repeater/checkbox group; nested `object` → fieldset. See the **Every widget** example for the full mapping.
-- **`x-kc-*` hints** in the schema control field order (`x-kc-order`), submit label (`x-kc-submitLabel`), secondary buttons (`x-kc-actions`), placeholder (`x-kc-placeholder`), and dismissibility (`x-kc-dismissible`).
+- **Schema → widgets** deterministically: `string` → text; `string + enum` → radio/select; `integer + x-kai-widget: 'rating'` → stars; `boolean` → switch; `array` → repeater/checkbox group; nested `object` → fieldset. See the **Every widget** example for the full mapping.
+- **`x-kai-*` hints** in the schema control field order (`x-kai-order`), submit label (`x-kai-submitLabel`), secondary buttons (`x-kai-actions`), placeholder (`x-kai-placeholder`), and dismissibility (`x-kai-dismissible`).
 - **Events use the Card contract** — `kai-form` fires no events of its own; it emits a single bubbling `kai-card` CustomEvent. Relevant kinds: `submit` (`detail.data` is the validated object), `action`, `ready`, `dismiss`, and `error`.
 - **`resolution`** — set `el.resolution = { kind: 'submit', data: { … } }` to swap the form for a read-only `<dl>` summary.
 

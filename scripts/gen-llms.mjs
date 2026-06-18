@@ -78,7 +78,7 @@ All ${count} elements are also exported individually. Use them for custom layout
 2. **Events are non-bubbling \`CustomEvent\`s** — listen directly on the element:
    \`chat.addEventListener('kai-submit', (e) => console.log(e.detail.value))\`
 3. **\`theme\` attribute** (\`'light' | 'dark' | 'auto'\`) works on every element. Default \`auto\` follows \`prefers-color-scheme\`.
-4. **Theming via CSS custom properties** — override \`--kc-color-*\` tokens on \`:root\`; they pierce Shadow DOM.
+4. **Theming via CSS custom properties** — override \`--kai-color-*\` tokens on \`:root\`; they pierce Shadow DOM.
 
 ## ChatMessage schema (required for \`<kai-chat>\`)
 
@@ -121,9 +121,9 @@ import { Chat } from '@kitn.ai/ui/react';
 
 \`\`\`css
 :root {
-  --kc-color-background: #0f0f0f;
-  --kc-color-primary: #7c3aed;
-  --kc-color-muted: #1e1e1e;
+  --kai-color-background: #0f0f0f;
+  --kai-color-primary: #7c3aed;
+  --kai-color-muted: #1e1e1e;
 }
 \`\`\`
 
@@ -231,7 +231,7 @@ chat.addEventListener('kai-submit', async (e) => {
 - History sidebar: add \`<kai-conversations>\`; listen for \`select\` and \`newchat\`.
 
 ### 5 — Theme
-Override \`--kc-color-*\` tokens on \`:root\` (they pierce Shadow DOM).`;
+Override \`--kai-color-*\` tokens on \`:root\` (they pierce Shadow DOM).`;
 
 const STREAMING_RECIPE = `## Streaming recipe (critical)
 

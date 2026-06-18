@@ -46,8 +46,8 @@ test('array items + minItems + uniqueItems', () => {
   expect(ok({ type: 'array', uniqueItems: true }, ['a', 'a'])).toBe(false);
 });
 
-test('x-kc-* keywords are ignored (not treated as constraints)', () => {
-  expect(ok({ type: 'string', 'x-kc-widget': 'rating' } as JsonSchema, 'x')).toBe(true);
+test('x-kai-* keywords are ignored (not treated as constraints)', () => {
+  expect(ok({ type: 'string', 'x-kai-widget': 'rating' } as JsonSchema, 'x')).toBe(true);
 });
 
 test('errors are reported with paths', () => {

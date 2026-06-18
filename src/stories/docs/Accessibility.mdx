@@ -14,7 +14,7 @@ This page describes the accessibility posture, the keyboard model, known limitat
 
 All text and UI chrome meet WCAG 2.1 AA contrast requirements (4.5:1 for body text, 3:1 for large text and UI components) in the default light and dark palettes.
 
-The `theme` attribute on every element (`light | dark | auto`) controls which token set loads. `auto` (the default) follows the OS `prefers-color-scheme` media query, so users who configure dark mode at the OS level get it automatically. Override either set with `--kc-color-*` tokens — if you do, verify contrast yourself; the kit cannot audit tokens it does not control.
+The `theme` attribute on every element (`light | dark | auto`) controls which token set loads. `auto` (the default) follows the OS `prefers-color-scheme` media query, so users who configure dark mode at the OS level get it automatically. Override either set with `--kai-color-*` tokens — if you do, verify contrast yourself; the kit cannot audit tokens it does not control.
 
 ---
 
@@ -113,7 +113,7 @@ The kit does not carry a "WCAG AA certified" certification — no automated tool
 ## What integrators need to do
 
 1. **Do not hide focus rings.** The kit renders visible focus rings via `:focus-visible`. Do not add `outline: none` or `outline: 0` in your host-page CSS targeting `*` or the element host.
-2. **Verify contrast if you override tokens.** Use a contrast checker after overriding any `--kc-color-*` token.
+2. **Verify contrast if you override tokens.** Use a contrast checker after overriding any `--kai-color-*` token.
 3. **Provide meaningful conversation titles.** The conversation list announces the `title` field to screen readers. "Chat 1" is less useful than "React integration help".
 4. **Set a meaningful `placeholder`.** The textarea placeholder doubles as an accessible name when no label is associated.
 5. **Check your theme choice.** Using `theme="light"` in a page the user has set to dark mode (or vice versa) can create contrast mismatches between kit components and host-page content. `theme="auto"` (the default) avoids this.

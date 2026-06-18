@@ -26,7 +26,7 @@
             "type": "string",
             "minLength": 1,
             "description": "Emitted as CardEvent.action. Must be unique within `options`. (The reserved id '__other__' is used by the allowOther escape.)",
-            "x-kc-unique": true
+            "x-kai-unique": true
           },
           "label": { "type": "string", "minLength": 1, "description": "Visible option label." },
           "description": {
@@ -64,7 +64,7 @@
     },
     "allowOther": {
       "description": "Optional free-text escape ('none of these / specify'). `true` appends a final 'Other…' option; an object customizes its `label`/`placeholder`. Selecting it reveals a text input; the shared Submit button then emits `{ kind:'action', action:'__other__', payload:{ text } }`.",
-      "x-kc-control": "allow-other"
+      "x-kai-control": "allow-other"
     }
   }
 }

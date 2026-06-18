@@ -98,14 +98,14 @@ test('Submit emits `action` with id + echoed payload; bubbling+composed', async 
   off();
 });
 
-test('resolved state after Submit sets data-kc-resolved', async () => {
+test('resolved state after Submit sets data-kai-resolved', async () => {
   const { off } = listen();
   const el = await mount(PLANS);
   radios(el).find((r) => r.dataset.optionId === 'pro')!.click();
   await flush();
   submitButton(el).click();
   await flush();
-  expect(el.getAttribute('data-kc-resolved')).toBe('pro');
+  expect(el.getAttribute('data-kai-resolved')).toBe('pro');
   off();
 });
 

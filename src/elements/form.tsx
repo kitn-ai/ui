@@ -3,7 +3,7 @@ import { Form, type FormDefinition } from '../components/form';
 import type { CardResolution } from '../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {
-  /** The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints
+  /** The form definition — a JSON Schema (`type:'object'`) + `x-kai-*` UI hints
    *  (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object',
    *  properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for
    *  the full shape (it is self-referential, so the element types it loosely). */

@@ -25,7 +25,7 @@ interface Events {
  *  - `description`  → ModelOption.description (optional subtitle)
  *  - `group`        → ModelOption.group (optional collapsible section)
  */
-export function parseKcModelElement(n: Element): ModelOption {
+export function parseKaiModelElement(n: Element): ModelOption {
   return {
     id: n.getAttribute('id') ?? '',
     name: n.textContent?.trim() ?? '',
@@ -72,7 +72,7 @@ defineWebComponent<Props, Events>('kai-model-switcher', {
   onMount(() => {
     const read = () => {
       const nodes = [...element.querySelectorAll('kai-model')];
-      setSlottedModels(nodes.map(parseKcModelElement));
+      setSlottedModels(nodes.map(parseKaiModelElement));
     };
     read();
     const observer = new MutationObserver(read);

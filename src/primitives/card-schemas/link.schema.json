@@ -4,8 +4,8 @@
   "title": "LinkPreviewData",
   "description": "Rich link / Open-Graph preview payload. The card renders from this; it never fetches.",
   "type": "object",
-  "x-kc-card-type": "link",
-  "x-kc-contract-version": "1",
+  "x-kai-card-type": "link",
+  "x-kai-contract-version": "1",
   "required": ["url"],
   "additionalProperties": false,
   "properties": {
@@ -13,7 +13,7 @@
       "type": "string",
       "format": "uri",
       "description": "Canonical destination. Opened via the contract `open` verb (target 'tab').",
-      "x-kc-format": "url"
+      "x-kai-format": "url"
     },
     "title": {
       "type": "string",
@@ -29,7 +29,7 @@
       "type": "string",
       "format": "uri",
       "description": "Preview image (og:image). Optional; the card degrades gracefully when missing or it fails to load.",
-      "x-kc-format": "url"
+      "x-kai-format": "url"
     },
     "imageAlt": {
       "type": "string",
@@ -40,7 +40,7 @@
       "type": "string",
       "format": "uri",
       "description": "Site favicon shown next to the domain.",
-      "x-kc-format": "url"
+      "x-kai-format": "url"
     },
     "domain": {
       "type": "string",

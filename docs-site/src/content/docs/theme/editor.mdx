@@ -6,8 +6,8 @@ tableOfContents: false
 
 import ThemeStudio from '../../../components/ThemeStudio.tsx';
 
-{/* Server-rendered marker: drives the full-screen CSS in app.css (body:has(.kc-fullscreen))
+{/* Server-rendered marker: drives the full-screen CSS in app.css (body:has(.kai-fullscreen))
     so the sidebar, title block, and footer nav are gone with no hydration flash. */}
-<div class="kc-fullscreen" hidden></div>
+<div class="kai-fullscreen" hidden></div>
 
 <ThemeStudio client:only="solid" />

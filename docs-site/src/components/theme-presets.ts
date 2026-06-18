@@ -2,18 +2,18 @@
  *  shadcn-style themes, light + dark. Auto-generated from /r/themes/<slug>.json
  *  (do not hand-edit; re-run scripts/gen-themes if tweakcn updates). Values are the
  *  oklch/rgb strings tweakcn publishes; the studio converts them to hex for the
- *  color inputs. Keys are shadcn token names → mapped onto the kit's --kc-color-*
- *  tokens via SHADCN_TO_KC. `radius` is in rem. 42 themes. */
+ *  color inputs. Keys are shadcn token names → mapped onto the kit's --kai-color-*
+ *  tokens via SHADCN_TO_KAI. `radius` is in rem. 42 themes. */
 export interface ThemePreset {
   name: string;
   radius: number;
-  /** Base text/UI font-family stack (tweakcn font-sans) → --kc-font-base. */
+  /** Base text/UI font-family stack (tweakcn font-sans) → --kai-font-base. */
   fontBase?: string;
-  /** Code font-family stack (tweakcn font-mono) → --kc-font-code. */
+  /** Code font-family stack (tweakcn font-mono) → --kai-font-code. */
   fontCode?: string;
-  /** Letter-spacing (tweakcn letter-spacing) → --kc-tracking. */
+  /** Letter-spacing (tweakcn letter-spacing) → --kai-tracking. */
   tracking?: string;
-  /** Shadow color → --kc-shadow-color. */
+  /** Shadow color → --kai-shadow-color. */
   shadow?: string;
   light: Record<string, string>;
   dark: Record<string, string>;
@@ -400,26 +400,26 @@ export const THEME_PRESETS: ThemePreset[] = [
   },
 ];
 
-/** shadcn token name → the kit's public `--kc-color-*` token. */
-export const SHADCN_TO_KC: Record<string, string> = {
-  "background": '--kc-color-background',
-  "foreground": '--kc-color-foreground',
-  "card": '--kc-color-card',
-  "card-foreground": '--kc-color-card-foreground',
-  "popover": '--kc-color-popover',
-  "popover-foreground": '--kc-color-popover-foreground',
-  "primary": '--kc-color-primary',
-  "primary-foreground": '--kc-color-primary-foreground',
-  "secondary": '--kc-color-secondary',
-  "secondary-foreground": '--kc-color-secondary-foreground',
-  "muted": '--kc-color-muted',
-  "muted-foreground": '--kc-color-muted-foreground',
-  "accent": '--kc-color-accent',
-  "accent-foreground": '--kc-color-accent-foreground',
-  "destructive": '--kc-color-destructive',
-  "destructive-foreground": '--kc-color-destructive-foreground',
-  "border": '--kc-color-border',
-  "input": '--kc-color-input',
-  "ring": '--kc-color-ring',
-  "sidebar": '--kc-color-sidebar',
+/** shadcn token name → the kit's public `--kai-color-*` token. */
+export const SHADCN_TO_KAI: Record<string, string> = {
+  "background": '--kai-color-background',
+  "foreground": '--kai-color-foreground',
+  "card": '--kai-color-card',
+  "card-foreground": '--kai-color-card-foreground',
+  "popover": '--kai-color-popover',
+  "popover-foreground": '--kai-color-popover-foreground',
+  "primary": '--kai-color-primary',
+  "primary-foreground": '--kai-color-primary-foreground',
+  "secondary": '--kai-color-secondary',
+  "secondary-foreground": '--kai-color-secondary-foreground',
+  "muted": '--kai-color-muted',
+  "muted-foreground": '--kai-color-muted-foreground',
+  "accent": '--kai-color-accent',
+  "accent-foreground": '--kai-color-accent-foreground',
+  "destructive": '--kai-color-destructive',
+  "destructive-foreground": '--kai-color-destructive-foreground',
+  "border": '--kai-color-border',
+  "input": '--kai-color-input',
+  "ring": '--kai-color-ring',
+  "sidebar": '--kai-color-sidebar',
 };

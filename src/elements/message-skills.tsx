@@ -23,7 +23,7 @@ interface Props extends Record<string, unknown> {
  *
  * Example: `<kai-skill id="web-search">Web Search</kai-skill>`
  */
-export function parseKcSkillElement(n: Element): Skill {
+export function parseKaiSkillElement(n: Element): Skill {
   const name = n.textContent?.trim() ?? '';
   const id = n.getAttribute('id') ?? name;
   return { id, name };
@@ -70,7 +70,7 @@ defineWebComponent<Props>('kai-skills', {
   onMount(() => {
     const read = () => {
       const nodes = [...element.querySelectorAll('kai-skill')];
-      setSlottedSkills(nodes.map(parseKcSkillElement));
+      setSlottedSkills(nodes.map(parseKaiSkillElement));
     };
     read();
     const observer = new MutationObserver(read);

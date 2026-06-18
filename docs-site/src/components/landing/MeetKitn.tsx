@@ -21,7 +21,7 @@ export default function MeetKitn(props: { size?: number }) {
       <AnimatedLogo
         width={size}
         height={Math.round(size * 0.92)}
-        color="var(--kc-brand)"
+        color="var(--kai-brand)"
         trackCursor
         lookIntensity={2.5}
         expression={EXPRESSIONS[i()]}

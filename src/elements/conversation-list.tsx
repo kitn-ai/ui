@@ -33,7 +33,7 @@ interface Events {
  *  `lastMessageAt`, `updatedAt`) receive safe defaults so the rendered list item
  *  is fully functional with just `id` + title text.
  */
-export function parseKcConversationElement(n: Element): ConversationSummary {
+export function parseKaiConversationElement(n: Element): ConversationSummary {
   return {
     id: n.getAttribute('id') ?? '',
     title: n.textContent?.trim() ?? '',
@@ -56,7 +56,7 @@ defineWebComponent<Props, Events>('kai-conversations', {
   onMount(() => {
     const read = () => {
       const nodes = [...element.querySelectorAll('kai-conversation')];
-      setSlottedConversations(nodes.map(parseKcConversationElement));
+      setSlottedConversations(nodes.map(parseKaiConversationElement));
     };
     read();
     const observer = new MutationObserver(read);

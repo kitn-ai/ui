@@ -12,7 +12,7 @@ import type { CustomAction } from './chat-types';
  *   - `description` → SlashCommandItem.description
  *   - `category`    → SlashCommandItem.category
  */
-export function parseKcSlashCommandElement(n: Element): SlashCommandItem {
+export function parseKaiSlashCommandElement(n: Element): SlashCommandItem {
   return {
     id: n.getAttribute('command') ?? '',
     label: n.textContent?.trim() || n.getAttribute('label') || n.getAttribute('command') || '',
@@ -123,7 +123,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
     };
     const readSlashCommands = () => {
       const nodes = [...element.querySelectorAll('kai-slash-command')];
-      setSlottedSlashCommands(nodes.map(parseKcSlashCommandElement));
+      setSlottedSlashCommands(nodes.map(parseKaiSlashCommandElement));
     };
     const readAll = () => { readActions(); readSlashCommands(); };
     readAll();

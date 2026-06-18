@@ -309,7 +309,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
   const submitPath = (e: Event) => {
     e.preventDefault();
     const input = (e.currentTarget as HTMLFormElement).elements.namedItem(
-      'kc-artifact-path',
+      'kai-artifact-path',
     ) as HTMLInputElement | null;
     if (local.readonlyPath) {
       // Submit is a no-op while read-only; keep the field reflecting currentUrl.
@@ -460,12 +460,12 @@ function ArtifactToolbar(props: ToolbarProps): JSX.Element {
       </Show>
       <Show when={props.showPathField()}>
         <form class="min-w-0 flex-1" onSubmit={(e) => props.onSubmitPath(e)}>
-          <label class="sr-only" for="kc-artifact-path">
+          <label class="sr-only" for="kai-artifact-path">
             Address
           </label>
           <input
-            id="kc-artifact-path"
-            name="kc-artifact-path"
+            id="kai-artifact-path"
+            name="kai-artifact-path"
             type="text"
             spellcheck={false}
             autocomplete="off"

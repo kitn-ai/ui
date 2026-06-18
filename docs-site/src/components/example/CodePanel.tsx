@@ -41,7 +41,7 @@ export function CodePanel(props: { snippets: () => Record<Framework, string>; de
           </For>
         </div>
         {/* @ts-expect-error custom element — kai-code-block (Shiki); flush (square) top under the tabs */}
-        <kai-code-block ref={setCodeEl} style={{ display: 'block', '--kc-code-radius': '0' }} />
+        <kai-code-block ref={setCodeEl} style={{ display: 'block', '--kai-code-radius': '0' }} />
       </Show>
     </div>
   );

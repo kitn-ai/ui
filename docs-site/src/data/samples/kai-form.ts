@@ -6,7 +6,7 @@
 // `named`   = alternate sets a focused <Example data="…"> can opt into
 //
 // kai-form has TWO non-scalar props:
-//   `data`       – FormDefinition: a JSON Schema object + x-kc-* UI hints
+//   `data`       – FormDefinition: a JSON Schema object + x-kai-* UI hints
 //   `resolution` – CardResolution: set to render the chromed read-only summary
 //
 // The default `sample` is the "Feedback" story: a rating, textarea, enum radio,
@@ -17,23 +17,23 @@ const FEEDBACK_DATA = {
   title: 'How did we do?',
   description: 'Two quick questions.',
   required: ['rating', 'contactOk'],
-  'x-kc-order': ['rating', 'comments', 'plan', 'contactOk'],
-  'x-kc-submitLabel': 'Send feedback',
-  'x-kc-actions': [{ id: 'skip', label: 'Skip', variant: 'ghost' }],
+  'x-kai-order': ['rating', 'comments', 'plan', 'contactOk'],
+  'x-kai-submitLabel': 'Send feedback',
+  'x-kai-actions': [{ id: 'skip', label: 'Skip', variant: 'ghost' }],
   properties: {
     rating: {
       type: 'integer',
       title: 'Overall rating',
       minimum: 1,
       maximum: 5,
-      'x-kc-widget': 'rating',
+      'x-kai-widget': 'rating',
     },
     comments: {
       type: 'string',
       title: 'Comments',
       maxLength: 500,
-      'x-kc-widget': 'textarea',
-      'x-kc-placeholder': "What worked, what didn't…",
+      'x-kai-widget': 'textarea',
+      'x-kai-placeholder': "What worked, what didn't…",
     },
     plan: {
       type: 'string',
@@ -53,21 +53,21 @@ const FEEDBACK_DATA = {
 const ALL_WIDGETS_DATA = {
   type: 'object',
   title: 'Every widget',
-  'x-kc-submitLabel': 'Submit all',
+  'x-kai-submitLabel': 'Submit all',
   properties: {
     name: { type: 'string', title: 'Name' },
     bio: { type: 'string', title: 'Bio', maxLength: 300 },
     email: { type: 'string', title: 'Email', format: 'email' },
     website: { type: 'string', title: 'Website', format: 'uri' },
     birthday: { type: 'string', title: 'Birthday', format: 'date' },
-    secret: { type: 'string', title: 'Password', 'x-kc-widget': 'password' },
+    secret: { type: 'string', title: 'Password', 'x-kai-widget': 'password' },
     size: { type: 'string', title: 'Size', enum: ['S', 'M', 'L'] },
     country: { type: 'string', title: 'Country', enum: ['US', 'UK', 'DE', 'FR', 'JP'] },
     age: { type: 'integer', title: 'Age', minimum: 0, maximum: 120 },
-    volume: { type: 'integer', title: 'Volume', minimum: 0, maximum: 11, 'x-kc-widget': 'slider' },
-    stars: { type: 'integer', title: 'Stars', minimum: 1, maximum: 5, 'x-kc-widget': 'rating' },
+    volume: { type: 'integer', title: 'Volume', minimum: 0, maximum: 11, 'x-kai-widget': 'slider' },
+    stars: { type: 'integer', title: 'Stars', minimum: 1, maximum: 5, 'x-kai-widget': 'rating' },
     notify: { type: 'boolean', title: 'Email me updates' },
-    agree: { type: 'boolean', title: 'I agree', 'x-kc-widget': 'checkbox' },
+    agree: { type: 'boolean', title: 'I agree', 'x-kai-widget': 'checkbox' },
     tags: { type: 'array', title: 'Tags', items: { type: 'string' } },
     topics: { type: 'array', title: 'Topics', items: { enum: ['news', 'sports', 'tech'] } },
     contacts: {
@@ -109,7 +109,7 @@ const VALIDATION_DATA = {
 const RESOLVED_FORM_DATA = {
   type: 'object',
   title: 'Book a demo',
-  'x-kc-order': ['name', 'optIn'],
+  'x-kai-order': ['name', 'optIn'],
   properties: {
     name: { type: 'string', title: 'Full name' },
     optIn: { type: 'boolean', title: 'Email me' },

@@ -208,7 +208,7 @@ export function mountRemoteCard(options: MountRemoteCardOptions): RemoteCardHand
     pendingContext = currentContext;
     pendingRender = currentEnvelope;
     // Remove any existing fallback before re-mounting.
-    container.querySelectorAll('[data-kc-remote-fallback]').forEach((n) => n.remove());
+    container.querySelectorAll('[data-kai-remote-fallback]').forEach((n) => n.remove());
     createIframe();
   }
 
@@ -313,7 +313,7 @@ export function mountRemoteCard(options: MountRemoteCardOptions): RemoteCardHand
       clearTimer();
       if (listener) { window.removeEventListener('message', listener); listener = null; }
       if (iframe) { iframe.remove(); iframe = null; }
-      container.querySelectorAll('[data-kc-remote-fallback]').forEach((n) => n.remove());
+      container.querySelectorAll('[data-kai-remote-fallback]').forEach((n) => n.remove());
     },
     state(): BridgeState {
       return state;

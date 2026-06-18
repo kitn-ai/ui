@@ -111,7 +111,7 @@ test('bad src → handshake times out → inline fallback + Retry', async ({ pag
   // The provider path 404s, the iframe never replies ready, the handshake times
   // out (1.5s in the host page), and the SDK swaps in the inline fallback.
   await waitForState(page, 'error');
-  const fallback = page.locator('#card [data-kc-remote-fallback]');
+  const fallback = page.locator('#card [data-kai-remote-fallback]');
   await expect(fallback).toBeVisible();
   await expect(fallback.getByRole('button', { name: 'Retry' })).toBeVisible();
 });

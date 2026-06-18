@@ -3,15 +3,15 @@ import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
 import { For } from 'solid-js';
 import { Source, SourceTrigger, SourceContent, SourceList } from './source';
-import { parseKcSourceElement } from '../elements/source';
+import { parseKaiSourceElement } from '../elements/source';
 
 afterEach(cleanup);
 
 // ---------------------------------------------------------------------------
-// parseKcSourceElement — unit-tests for the attribute→SourceItem mapping
+// parseKaiSourceElement — unit-tests for the attribute→SourceItem mapping
 // ---------------------------------------------------------------------------
 
-describe('parseKcSourceElement', () => {
+describe('parseKaiSourceElement', () => {
   function makeEl(attrs: Record<string, string | null>): Element {
     const el = document.createElement('kai-source');
     for (const [k, v] of Object.entries(attrs)) {
@@ -27,7 +27,7 @@ describe('parseKcSourceElement', () => {
       headline: 'kitn — the kit',
       description: 'Composable SolidJS chat UI.',
     });
-    expect(parseKcSourceElement(el)).toEqual({
+    expect(parseKaiSourceElement(el)).toEqual({
       href: 'https://kitn.dev',
       label: 'kitn',
       title: 'kitn — the kit',
@@ -38,17 +38,17 @@ describe('parseKcSourceElement', () => {
 
   it('sets showFavicon=true for a bare show-favicon attribute', () => {
     const el = makeEl({ href: 'https://kitn.dev', 'show-favicon': '' });
-    expect(parseKcSourceElement(el).showFavicon).toBe(true);
+    expect(parseKaiSourceElement(el).showFavicon).toBe(true);
   });
 
   it('sets showFavicon=false when show-favicon="false"', () => {
     const el = makeEl({ href: 'https://kitn.dev', 'show-favicon': 'false' });
-    expect(parseKcSourceElement(el).showFavicon).toBe(false);
+    expect(parseKaiSourceElement(el).showFavicon).toBe(false);
   });
 
   it('returns undefined for optional attrs when absent', () => {
     const el = makeEl({ href: 'https://kitn.dev' });
-    const item = parseKcSourceElement(el);
+    const item = parseKaiSourceElement(el);
     expect(item.label).toBeUndefined();
     expect(item.title).toBeUndefined();
     expect(item.description).toBeUndefined();
@@ -56,7 +56,7 @@ describe('parseKcSourceElement', () => {
 
   it('falls back to empty string for missing href', () => {
     const el = makeEl({});
-    expect(parseKcSourceElement(el).href).toBe('');
+    expect(parseKaiSourceElement(el).href).toBe('');
   });
 });
 

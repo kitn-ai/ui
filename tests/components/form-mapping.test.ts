@@ -52,17 +52,17 @@ describe('widgetFor — the mapping table', () => {
     });
   }
 
-  test('x-kc-widget overrides the default mapping', () => {
-    expect(widgetFor({ type: 'integer', 'x-kc-widget': 'rating' }, DEFAULT_INLINE_MAX)).toBe('rating');
-    expect(widgetFor({ type: 'number', 'x-kc-widget': 'slider' }, DEFAULT_INLINE_MAX)).toBe('slider');
-    expect(widgetFor({ type: 'string', 'x-kc-widget': 'textarea' }, DEFAULT_INLINE_MAX)).toBe('textarea');
-    expect(widgetFor({ type: 'string', 'x-kc-widget': 'password' }, DEFAULT_INLINE_MAX)).toBe('password');
-    expect(widgetFor({ type: 'boolean', 'x-kc-widget': 'checkbox' }, DEFAULT_INLINE_MAX)).toBe('checkbox');
+  test('x-kai-widget overrides the default mapping', () => {
+    expect(widgetFor({ type: 'integer', 'x-kai-widget': 'rating' }, DEFAULT_INLINE_MAX)).toBe('rating');
+    expect(widgetFor({ type: 'number', 'x-kai-widget': 'slider' }, DEFAULT_INLINE_MAX)).toBe('slider');
+    expect(widgetFor({ type: 'string', 'x-kai-widget': 'textarea' }, DEFAULT_INLINE_MAX)).toBe('textarea');
+    expect(widgetFor({ type: 'string', 'x-kai-widget': 'password' }, DEFAULT_INLINE_MAX)).toBe('password');
+    expect(widgetFor({ type: 'boolean', 'x-kai-widget': 'checkbox' }, DEFAULT_INLINE_MAX)).toBe('checkbox');
   });
 
-  test('unknown x-kc-widget falls back to the default mapping', () => {
+  test('unknown x-kai-widget falls back to the default mapping', () => {
     // An out-of-enum hint must be ignored (forward-compatible), not break.
-    const field = { type: 'string', 'x-kc-widget': 'wormhole' } as unknown as FormField;
+    const field = { type: 'string', 'x-kai-widget': 'wormhole' } as unknown as FormField;
     expect(widgetFor(field, DEFAULT_INLINE_MAX)).toBe('text');
   });
 });
@@ -82,12 +82,12 @@ describe('orderedKeys', () => {
     ...over,
   });
 
-  test('x-kc-order wins', () => {
-    expect(orderedKeys(def({ 'x-kc-order': ['c', 'a', 'b'] }))).toEqual(['c', 'a', 'b']);
+  test('x-kai-order wins', () => {
+    expect(orderedKeys(def({ 'x-kai-order': ['c', 'a', 'b'] }))).toEqual(['c', 'a', 'b']);
   });
 
-  test('x-kc-order ignores unknown keys and appends missing ones', () => {
-    expect(orderedKeys(def({ 'x-kc-order': ['c', 'zzz'] }))).toEqual(['c', 'a', 'b']);
+  test('x-kai-order ignores unknown keys and appends missing ones', () => {
+    expect(orderedKeys(def({ 'x-kai-order': ['c', 'zzz'] }))).toEqual(['c', 'a', 'b']);
   });
 
   test('without order: required first, then declaration order', () => {

@@ -61,7 +61,7 @@ export interface FormField {
   properties?: Record<string, FormField>;
   required?: string[];
   readOnly?: boolean;
-  'x-kc-widget'?:
+  'x-kai-widget'?:
     | 'textarea'
     | 'slider'
     | 'rating'
@@ -70,8 +70,8 @@ export interface FormField {
     | 'checkbox'
     | 'password'
     | 'switch';
-  'x-kc-placeholder'?: string;
-  'x-kc-step'?: number;
+  'x-kai-placeholder'?: string;
+  'x-kai-step'?: number;
 }
 
 /** The form definition = CardEnvelope.data for type:'form'. */
@@ -81,11 +81,11 @@ export interface FormDefinition {
   description?: string;
   required?: string[];
   properties: Record<string, FormField>;
-  'x-kc-order'?: string[];
-  'x-kc-inlineMax'?: number;
-  'x-kc-submitLabel'?: string;
-  'x-kc-dismissible'?: boolean;
-  'x-kc-actions'?: { id: string; label: string; variant?: 'default' | 'ghost' | 'outline' }[];
+  'x-kai-order'?: string[];
+  'x-kai-inlineMax'?: number;
+  'x-kai-submitLabel'?: string;
+  'x-kai-dismissible'?: boolean;
+  'x-kai-actions'?: { id: string; label: string; variant?: 'default' | 'ghost' | 'outline' }[];
 }
 
 export type FormCardEnvelope = CardEnvelope<'form', FormDefinition>;
@@ -131,10 +131,10 @@ const VALID_HINTS = new Set([
 // Pure mapping / validation / coercion helpers (unit-tested in isolation).
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Resolve the widget for a field. An explicit valid `x-kc-widget` always wins;
+/** Resolve the widget for a field. An explicit valid `x-kai-widget` always wins;
  *  otherwise the type/format/enum/constraint combination selects the widget. */
 export function widgetFor(field: FormField, inlineMax: number): WidgetKind {
-  const hint = field['x-kc-widget'];
+  const hint = field['x-kai-widget'];
   if (hint && VALID_HINTS.has(hint)) {
     switch (hint) {
       case 'textarea':
@@ -207,11 +207,11 @@ export function humanize(key: string): string {
   return spaced.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/** Field order: `x-kc-order` (filtered to known keys, missing appended) if
+/** Field order: `x-kai-order` (filtered to known keys, missing appended) if
  *  present, else `required` first then schema declaration order. */
 export function orderedKeys(def: FormDefinition): string[] {
   const all = Object.keys(def.properties ?? {});
-  const order = def['x-kc-order'];
+  const order = def['x-kai-order'];
   if (Array.isArray(order)) {
     const known = order.filter((k) => all.includes(k));
     const rest = all.filter((k) => !known.includes(k));
@@ -311,7 +311,7 @@ export interface FormSummaryRow { key: string; label: string; value: string; }
 
 /** Format one field's value for the read-only summary. */
 export function formatFieldValue(field: FormField | undefined, raw: unknown): string {
-  if (field?.['x-kc-widget'] === 'password') {
+  if (field?.['x-kai-widget'] === 'password') {
     return raw == null || raw === '' ? '—' : '••••';
   }
   if (typeof raw === 'boolean') return raw ? 'Yes' : 'No';
@@ -320,12 +320,12 @@ export function formatFieldValue(field: FormField | undefined, raw: unknown): st
   return String(raw);
 }
 
-/** Build the label→value rows for a submitted form, honoring x-kc-order. */
+/** Build the label→value rows for a submitted form, honoring x-kai-order. */
 export function summarizeForm(def: FormDefinition, data: Record<string, unknown>): FormSummaryRow[] {
   const props = def.properties ?? {};
   const ordered =
-    Array.isArray(def['x-kc-order']) && def['x-kc-order']!.length > 0
-      ? def['x-kc-order']!.filter((k) => k in props)
+    Array.isArray(def['x-kai-order']) && def['x-kai-order']!.length > 0
+      ? def['x-kai-order']!.filter((k) => k in props)
       : Object.keys(props);
   return ordered.map((key) => {
     const field = props[key];
@@ -404,7 +404,7 @@ export function Form(props: FormProps): JSX.Element {
   });
 
   const def = createMemo<FormDefinition>(() => (envelopeValid().ok ? local.data ?? DEFAULT_FORM : DEFAULT_FORM));
-  const inlineMax = () => def()['x-kc-inlineMax'] ?? DEFAULT_INLINE_MAX;
+  const inlineMax = () => def()['x-kai-inlineMax'] ?? DEFAULT_INLINE_MAX;
   const keys = createMemo(() => orderedKeys(def()));
 
   const res = useCardResolution({ prop: () => local.resolution, data: () => local.data });
@@ -441,8 +441,8 @@ export function Form(props: FormProps): JSX.Element {
   createEffect(() => {
     const el = local.hostElement;
     if (!el) return;
-    if (res.isResolved()) el.setAttribute('data-kc-resolved', 'submitted');
-    else el.removeAttribute('data-kc-resolved');
+    if (res.isResolved()) el.setAttribute('data-kai-resolved', 'submitted');
+    else el.removeAttribute('data-kai-resolved');
   });
 
   const setField = (key: string, raw: unknown): void => {
@@ -488,9 +488,9 @@ export function Form(props: FormProps): JSX.Element {
     res.setLocal({ kind: 'submit', data: out });
   };
 
-  const actions = createMemo(() => def()['x-kc-actions'] ?? []);
-  const submitLabel = () => def()['x-kc-submitLabel'] ?? 'Submit';
-  const dismissible = () => def()['x-kc-dismissible'] === true;
+  const actions = createMemo(() => def()['x-kai-actions'] ?? []);
+  const submitLabel = () => def()['x-kai-submitLabel'] ?? 'Submit';
+  const dismissible = () => def()['x-kai-dismissible'] === true;
 
   const summaryRows = createMemo(() => {
     const r = res.resolution();
@@ -582,7 +582,7 @@ export function Form(props: FormProps): JSX.Element {
 
 // A stable per-instance form id so the footer submit button can target the form.
 let formIdCounter = 0;
-const formIdValue = `kc-form-${++formIdCounter}`;
+const formIdValue = `kai-form-${++formIdCounter}`;
 function formId(): string {
   return formIdValue;
 }
@@ -634,7 +634,7 @@ function FieldRow(props: FieldRowProps): JSX.Element {
   const descId = `${id}-desc`;
   const label = () => props.field.title ?? humanize(props.fieldKey);
   const widget = createMemo(() => widgetFor(props.field, props.inlineMax));
-  const placeholder = () => props.field['x-kc-placeholder'];
+  const placeholder = () => props.field['x-kai-placeholder'];
   const describedBy = () =>
     [props.field.description ? descId : '', props.error() ? errorId : '']
       .filter(Boolean)

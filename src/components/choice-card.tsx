@@ -256,8 +256,8 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
     const el = local.hostElement;
     if (!el) return;
     const id = resolvedId();
-    if (id !== undefined) el.setAttribute('data-kc-resolved', id);
-    else el.removeAttribute('data-kc-resolved');
+    if (id !== undefined) el.setAttribute('data-kai-resolved', id);
+    else el.removeAttribute('data-kai-resolved');
   });
 
   const isOther = (opt: ChoiceOption): boolean => opt.id === OTHER_ACTION;
@@ -342,8 +342,8 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
   };
 
   const groupLabel = (): string => local.heading ?? local.data?.prompt ?? 'Choose an option';
-  const promptId = `kc-choice-prompt-${uid}`;
-  const otherInputId = `kc-choice-other-${uid}`;
+  const promptId = `kai-choice-prompt-${uid}`;
+  const otherInputId = `kai-choice-other-${uid}`;
 
   return (
     <Show when={valid()} fallback={<Card heading={local.heading} errorMessage={errorMessage()} />}>
@@ -378,7 +378,7 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
                     const checked = () => selectedId() === opt.id;
                     const tabStop = () =>
                       !opt.disabled && index() === focusIndex() && !res.isResolved();
-                    const descId = `kc-choice-desc-${uid}-${opt.id}`;
+                    const descId = `kai-choice-desc-${uid}-${opt.id}`;
                     const hasDesc = () => Boolean(opt.description);
                     return (
                       <ListRow

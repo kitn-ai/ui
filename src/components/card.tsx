@@ -44,14 +44,14 @@ export function Card(props: CardProps): JSX.Element {
   ]);
 
   const autoId = createUniqueId();
-  const headingId = () => local.headingId ?? `kc-card-heading-${autoId}`;
+  const headingId = () => local.headingId ?? `kai-card-heading-${autoId}`;
   const hasError = () => local.errorMessage !== undefined && local.errorMessage !== '';
   const hasHeader = () => Boolean(local.heading) || Boolean(local.description);
 
   return (
     <div
       class={cn(
-        'flex flex-col rounded-xl border border-border bg-card text-card-foreground kc-elevation-sm',
+        'flex flex-col rounded-xl border border-border bg-card text-card-foreground kai-elevation-sm',
         local.dense ? 'gap-2.5 p-3.5' : 'gap-4 p-5',
         local.class,
       )}

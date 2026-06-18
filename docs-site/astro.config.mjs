@@ -28,7 +28,7 @@ export default defineConfig({
         behavior: 'append',
         // Empty content — the visible "#" is added via CSS ::after so it's NOT
         // part of the heading text (otherwise the TOC reads "Preview#").
-        properties: { className: ['kc-anchor'], 'aria-label': 'Link to this section' },
+        properties: { className: ['kai-anchor'], 'aria-label': 'Link to this section' },
         content: [],
       }],
     ],
@@ -52,7 +52,7 @@ export default defineConfig({
         themes: ['tokyo-night', 'github-light'],
         styleOverrides: {
           borderRadius: '0.6rem',
-          borderColor: 'var(--kc-line)',
+          borderColor: 'var(--kai-line)',
           frames: { frameBoxShadowCssValue: 'none' },
         },
       },

@@ -15,7 +15,7 @@ const DEF: FormDefinition = {
   type: 'object',
   title: 'Book a demo',
   properties: { name: { type: 'string', title: 'Full name' }, optIn: { type: 'boolean', title: 'Email me' } },
-  'x-kc-order': ['name', 'optIn'],
+  'x-kai-order': ['name', 'optIn'],
 };
 
 test('re-hydrated form renders a read-only dl summary, no inputs', () => {

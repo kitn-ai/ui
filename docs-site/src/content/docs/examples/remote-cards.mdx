@@ -5,7 +5,7 @@ description: Serve interactive cards (booking, payment, partner forms) from a th
 
 import { Aside } from '@astrojs/starlight/components';
 
-<p class="kc-lede">A third-party provider hosts its cards on its own origin — a booking widget, a payment form, a partner micro-frontend. `<kai-remote>` frames them in a sandboxed iframe, bridges their events back to your host over `postMessage`, and hands you the same `CardEnvelope` / `CardEvent` contract as every built-in card. No second-origin live demo is possible on this static site — this page is a focused walkthrough.</p>
+<p class="kai-lede">A third-party provider hosts its cards on its own origin — a booking widget, a payment form, a partner micro-frontend. `<kai-remote>` frames them in a sandboxed iframe, bridges their events back to your host over `postMessage`, and hands you the same `CardEnvelope` / `CardEvent` contract as every built-in card. No second-origin live demo is possible on this static site — this page is a focused walkthrough.</p>
 
 <Aside type="caution" title="Cross-origin requirement">
 `<kai-remote>` needs a running provider at a different origin. It cannot demo here. Run `npm run storybook` for the full interactive demo, or see the reference app in `examples/remote-provider/`.

@@ -237,7 +237,7 @@ test('readonly-path: input readonly + submit emits no navigate', async () => {
   await flush();
   const navs: string[] = [];
   el.addEventListener('kai-navigate', (e) => navs.push((e as CustomEvent).detail.url));
-  const input = el.shadowRoot!.querySelector<HTMLInputElement>('input#kc-artifact-path')!;
+  const input = el.shadowRoot!.querySelector<HTMLInputElement>('input#kai-artifact-path')!;
   expect(input.readOnly).toBe(true);
   input.value = 'https://x.test/b';
   input.closest('form')!.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));

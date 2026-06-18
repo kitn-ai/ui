@@ -217,8 +217,8 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
     const el = local.hostElement;
     if (!el) return;
     const r = res.resolution();
-    if (r && r.kind === 'action') el.setAttribute('data-kc-resolved', r.action);
-    else el.removeAttribute('data-kc-resolved');
+    if (r && r.kind === 'action') el.setAttribute('data-kai-resolved', r.action);
+    else el.removeAttribute('data-kai-resolved');
   });
 
   return (
@@ -263,7 +263,7 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
                         type="button"
                         variant={buttonVariantForStyle(action.style)}
                         data-action-id={action.id}
-                        data-kc-default={action.default ? 'true' : undefined}
+                        data-kai-default={action.default ? 'true' : undefined}
                         ref={(el) => {
                           if (local.autofocus && action.id === defaultId()) {
                             queueMicrotask(() => el.focus());

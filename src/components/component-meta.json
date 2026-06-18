@@ -1775,8 +1775,8 @@
     "props": [
       {
         "name": "data",
-        "type": "undefined | { type: \"object\"; title?: undefined | string; description?: undefined | string; required?: undefined | string[]; properties: Record<string, FormField>; x-kc-order?: undefined | string[]; x-kc-inlineMax?: undefined | number; x-kc-submitLabel?: undefined | string; x-kc-dismissible?: undefined | false | true; x-kc-actions?: undefined | { id: string; label: string; variant?: undefined | \"default\" | \"ghost\" | \"outline\" }[] }",
-        "displayType": "undefined | { type: \"object\"; title?: undefined | string; description?: undefined | string; required?: undefined | string[]; properties: Record<string, FormField>; x-kc-order?: undefined | string[]; x-kc-inlineMax?: undefined | number; x-kc-submitLabel?: undefined | string; x-kc-dismissible?: undefined | false | true; x-kc-actions?: undefined | { id: string; label: string; variant?: undefined | \"default\" | \"ghost\" | \"outline\" }[] }",
+        "type": "undefined | { type: \"object\"; title?: undefined | string; description?: undefined | string; required?: undefined | string[]; properties: Record<string, FormField>; x-kai-order?: undefined | string[]; x-kai-inlineMax?: undefined | number; x-kai-submitLabel?: undefined | string; x-kai-dismissible?: undefined | false | true; x-kai-actions?: undefined | { id: string; label: string; variant?: undefined | \"default\" | \"ghost\" | \"outline\" }[] }",
+        "displayType": "undefined | { type: \"object\"; title?: undefined | string; description?: undefined | string; required?: undefined | string[]; properties: Record<string, FormField>; x-kai-order?: undefined | string[]; x-kai-inlineMax?: undefined | number; x-kai-submitLabel?: undefined | string; x-kai-dismissible?: undefined | false | true; x-kai-actions?: undefined | { id: string; label: string; variant?: undefined | \"default\" | \"ghost\" | \"outline\" }[] }",
         "optional": true,
         "scalar": false,
         "description": "The form definition (CardEnvelope.data)."

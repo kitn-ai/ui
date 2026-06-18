@@ -5,7 +5,7 @@ description: Dock a support assistant as a persistent, full-height side panel on
 
 import DockedAssistantDemo from '../../../components/DockedAssistantDemo.tsx';
 
-<p class="kc-lede">Pin a help assistant to the side of your app as a permanent, full-height column — always open, no launcher to find. The panel sits beside the scrolling page; because `<kai-chat>` lives in its own Shadow DOM, the host's CSS stays out and the panel's styles stay in. Scroll the host below, toggle its light/dark, and ask about billing.</p>
+<p class="kai-lede">Pin a help assistant to the side of your app as a permanent, full-height column — always open, no launcher to find. The panel sits beside the scrolling page; because `<kai-chat>` lives in its own Shadow DOM, the host's CSS stays out and the panel's styles stay in. Scroll the host below, toggle its light/dark, and ask about billing.</p>
 
 <DockedAssistantDemo client:only="solid" chatTitle="Support" suggestions={["How do I change my plan?", "Add a teammate to my workspace", "Where are my invoices?"]} messages={[
   { id: 'd0', role: 'assistant', content: "Hi — I'm your support assistant. I'm docked here while you work, so ask anytime. What can I help with?" },

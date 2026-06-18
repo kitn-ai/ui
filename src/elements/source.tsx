@@ -68,7 +68,7 @@ interface SourceListProps extends Record<string, unknown> {
  *   - `description` → SourceItem.description
  *   - `show-favicon`→ SourceItem.showFavicon (bare boolean attribute)
  */
-export function parseKcSourceElement(n: Element): SourceItem {
+export function parseKaiSourceElement(n: Element): SourceItem {
   return {
     href: n.getAttribute('href') ?? '',
     label: n.getAttribute('label') ?? undefined,
@@ -89,7 +89,7 @@ defineWebComponent<SourceListProps>('kai-sources', {
   onMount(() => {
     const read = () => {
       const nodes = [...element.querySelectorAll('kai-source')];
-      setSlottedSources(nodes.map(parseKcSourceElement));
+      setSlottedSources(nodes.map(parseKaiSourceElement));
     };
     read();
     const observer = new MutationObserver(read);

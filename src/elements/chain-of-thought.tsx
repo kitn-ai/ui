@@ -26,7 +26,7 @@ interface Props extends Record<string, unknown> {
  *   - `label`       → Step.label   (the always-visible heading)
  *   - textContent   → Step.content (optional expandable detail)
  */
-export function parseKcStepElement(n: Element): Step {
+export function parseKaiStepElement(n: Element): Step {
   return {
     label: n.getAttribute('label') ?? '',
     content: n.textContent?.trim() || undefined,
@@ -62,7 +62,7 @@ defineWebComponent<Props>('kai-chain-of-thought', {
   onMount(() => {
     const read = () => {
       const nodes = [...element.querySelectorAll('kai-step')];
-      setSlottedSteps(nodes.map(parseKcStepElement));
+      setSlottedSteps(nodes.map(parseKaiStepElement));
     };
     read();
     const observer = new MutationObserver(read);

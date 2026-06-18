@@ -7,7 +7,7 @@ type Orientation = 'horizontal' | 'vertical';
 /** Bubbling, composed intent: a descendant asks the nearest enclosing
  *  <kai-resizable> to maximize the item containing it (filling, hiding siblings)
  *  or to restore. Any panel content may emit it — the protocol is zero-config. */
-export interface KcMaximizeIntentDetail {
+export interface KaiMaximizeIntentDetail {
   /** true = maximize the item containing me; false = restore. */
   requested: boolean;
 }
@@ -15,14 +15,14 @@ export interface KcMaximizeIntentDetail {
 /** Composed, non-bubbling notification the group dispatches DOWN onto the
  *  affected <kai-resizable-item> (on maximize) or the group host + the formerly
  *  maximized item (on restore) so descendant content can sync its affordance. */
-export interface KcMaximizeStateDetail {
+export interface KaiMaximizeStateDetail {
   /** Whether THIS subtree's item is the maximized one. */
   maximized: boolean;
 }
 
 /** Event type names for the cross-element maximize protocol. */
-export const KC_MAXIMIZE_INTENT = 'kai-maximize-intent' as const;
-export const KC_MAXIMIZE_STATE = 'kai-maximize-state' as const;
+export const KAI_MAXIMIZE_INTENT = 'kai-maximize-intent' as const;
+export const KAI_MAXIMIZE_STATE = 'kai-maximize-state' as const;
 
 /** Parsed view of a `<kai-resizable-item>` light child. */
 interface ItemInfo {
@@ -96,10 +96,10 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
       // `persistSizes`) overwrites the live `size` attribute. Stashed on a non-
       // observed data-* attr so dblclick-reset always snaps to the true default,
       // not to wherever the user last dragged. Empty string = no explicit default.
-      if (!el.hasAttribute('data-kc-default-size')) {
-        el.setAttribute('data-kc-default-size', el.getAttribute('size') ?? '');
+      if (!el.hasAttribute('data-kai-default-size')) {
+        el.setAttribute('data-kai-default-size', el.getAttribute('size') ?? '');
       }
-      const defaultSize = el.getAttribute('data-kc-default-size') || undefined;
+      const defaultSize = el.getAttribute('data-kai-default-size') || undefined;
       return {
         el,
         size: el.getAttribute('size') ?? undefined,
@@ -327,7 +327,7 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
   onMount(() => {
     readItems();
     const onIntent = (e: Event) => {
-      const ce = e as CustomEvent<KcMaximizeIntentDetail>;
+      const ce = e as CustomEvent<KaiMaximizeIntentDetail>;
       e.stopPropagation();                       // nearest group wins (nesting)
       const item = findContainingItem(ce.target as Node);
       if (!item) return;                         // outside any item → ignore

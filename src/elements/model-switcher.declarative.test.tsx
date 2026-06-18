@@ -6,20 +6,20 @@
  * element which requires a full browser environment (Constructable Stylesheets,
  * shadow roots, etc.) and is therefore not suitable for jsdom unit tests.
  * Instead we:
- *   1. Test the exported `parseKcModelElement` helper in isolation — it has no
+ *   1. Test the exported `parseKaiModelElement` helper in isolation — it has no
  *      DOM dependencies beyond `Element`, which jsdom provides perfectly.
  *   2. Test that the merged list of prop + slotted models combines correctly,
  *      mirroring the pattern used in `prompt-suggestions.declarative.test.tsx`.
  */
 import { describe, it, expect } from 'vitest';
-import { parseKcModelElement } from './model-switcher';
+import { parseKaiModelElement } from './model-switcher';
 import type { ModelOption } from '../types';
 
 // ---------------------------------------------------------------------------
-// parseKcModelElement — pure helper
+// parseKaiModelElement — pure helper
 // ---------------------------------------------------------------------------
 
-describe('parseKcModelElement', () => {
+describe('parseKaiModelElement', () => {
   function makeNode(textContent: string, id?: string, provider?: string): Element {
     const el = document.createElement('kai-model');
     el.textContent = textContent;
@@ -29,37 +29,37 @@ describe('parseKcModelElement', () => {
   }
 
   it('maps textContent to name', () => {
-    const item = parseKcModelElement(makeNode('GPT-4o', 'gpt-4o'));
+    const item = parseKaiModelElement(makeNode('GPT-4o', 'gpt-4o'));
     expect(item.name).toBe('GPT-4o');
   });
 
   it('maps the id attribute to id', () => {
-    const item = parseKcModelElement(makeNode('GPT-4o', 'gpt-4o'));
+    const item = parseKaiModelElement(makeNode('GPT-4o', 'gpt-4o'));
     expect(item.id).toBe('gpt-4o');
   });
 
   it('maps the provider attribute to provider', () => {
-    const item = parseKcModelElement(makeNode('GPT-4o', 'gpt-4o', 'OpenAI'));
+    const item = parseKaiModelElement(makeNode('GPT-4o', 'gpt-4o', 'OpenAI'));
     expect(item.provider).toBe('OpenAI');
   });
 
   it('sets provider to undefined when the attribute is absent', () => {
-    const item = parseKcModelElement(makeNode('Claude Sonnet', 'sonnet'));
+    const item = parseKaiModelElement(makeNode('Claude Sonnet', 'sonnet'));
     expect(item.provider).toBeUndefined();
   });
 
   it('trims leading/trailing whitespace from textContent (name)', () => {
-    const item = parseKcModelElement(makeNode('  Claude Sonnet  ', 'sonnet'));
+    const item = parseKaiModelElement(makeNode('  Claude Sonnet  ', 'sonnet'));
     expect(item.name).toBe('Claude Sonnet');
   });
 
   it('returns empty string for id when id attribute is absent', () => {
-    const item = parseKcModelElement(makeNode('GPT-4o'));
+    const item = parseKaiModelElement(makeNode('GPT-4o'));
     expect(item.id).toBe('');
   });
 
   it('produces the full ModelOption shape', () => {
-    const item = parseKcModelElement(makeNode('GPT-4o', 'gpt-4o', 'OpenAI'));
+    const item = parseKaiModelElement(makeNode('GPT-4o', 'gpt-4o', 'OpenAI'));
     expect(item).toEqual<ModelOption>({ id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI', description: undefined, group: undefined });
   });
 
@@ -69,7 +69,7 @@ describe('parseKcModelElement', () => {
     el.setAttribute('id', 'gpt-4o');
     el.setAttribute('description', 'Flagship model');
     el.setAttribute('group', 'Legacy models');
-    const item = parseKcModelElement(el);
+    const item = parseKaiModelElement(el);
     expect(item.description).toBe('Flagship model');
     expect(item.group).toBe('Legacy models');
   });
@@ -90,7 +90,7 @@ describe('prop + declarative merge', () => {
 
   it('renders prop items before declarative (slotted) items', () => {
     const propModels: ModelOption[] = [{ id: 'opus', name: 'Claude Opus', provider: 'Anthropic' }];
-    const slottedModels = [makeNode('GPT-4o', 'gpt-4o', 'OpenAI')].map(parseKcModelElement);
+    const slottedModels = [makeNode('GPT-4o', 'gpt-4o', 'OpenAI')].map(parseKaiModelElement);
     const merged = [...propModels, ...slottedModels];
     expect(merged).toHaveLength(2);
     expect(merged[0].id).toBe('opus');
@@ -101,7 +101,7 @@ describe('prop + declarative merge', () => {
     const slottedModels = [
       makeNode('GPT-4o', 'gpt-4o', 'OpenAI'),
       makeNode('GPT-4o mini', 'gpt-4o-mini', 'OpenAI'),
-    ].map(parseKcModelElement);
+    ].map(parseKaiModelElement);
     const merged = [...[], ...slottedModels];
     expect(merged).toHaveLength(2);
     expect(merged[0]).toMatchObject({ id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI' });
@@ -119,11 +119,11 @@ describe('prop + declarative merge', () => {
     expect(merged[1].id).toBe('haiku');
   });
 
-  it('parseKcModelElement produces items with the correct event payload key (id → modelId)', () => {
+  it('parseKaiModelElement produces items with the correct event payload key (id → modelId)', () => {
     // Confirm the parsed `id` field is what gets dispatched as `modelId` in kai-model-change.
     // The element fires: dispatch('kai-model-change', { modelId }) where modelId = item.id.
     const node = makeNode('GPT-4o', 'gpt-4o', 'OpenAI');
-    const parsed = parseKcModelElement(node);
+    const parsed = parseKaiModelElement(node);
     // The model-switcher component passes item.id as the modelId in the event.
     expect(parsed.id).toBe('gpt-4o'); // this becomes e.detail.modelId
   });

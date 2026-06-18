@@ -27,11 +27,11 @@ const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
       </p>
 
       <div class="hero-rise mt-8 flex flex-wrap items-center gap-3" style="--d:180ms">
-        <a href={href('guides/getting-started')} class="group inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-white no-underline transition-colors hover:bg-[var(--kc-brand-hover)]">
+        <a href={href('guides/getting-started')} class="group inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-white no-underline transition-colors hover:bg-[var(--kai-brand-hover)]">
           Get started
           <Icon name="lucide:arrow-right" class="size-4 transition-transform group-hover:translate-x-0.5" />
         </a>
-        <a href={href('components/artifact')} class="inline-flex items-center gap-2 rounded-full border border-line bg-surface/50 px-5 py-3 text-sm font-semibold text-ink no-underline backdrop-blur transition-colors hover:border-[var(--kc-brand)]">
+        <a href={href('components/artifact')} class="inline-flex items-center gap-2 rounded-full border border-line bg-surface/50 px-5 py-3 text-sm font-semibold text-ink no-underline backdrop-blur transition-colors hover:border-[var(--kai-brand)]">
           Browse components
         </a>
       </div>
@@ -40,9 +40,9 @@ const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
       <div class="hero-rise mt-6 flex max-w-sm items-center gap-3 rounded-xl border border-line bg-surface/60 px-4 py-2.5 font-mono text-sm backdrop-blur" style="--d:240ms">
         <span class="select-none text-brand">$</span>
         <code class="min-w-0 flex-1 truncate text-ink">npm i @kitn.ai/ui</code>
-        <button type="button" data-copy="npm i @kitn.ai/ui" aria-label="Copy install command" class="kc-copy flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-ink-3 transition-colors hover:bg-ink/5 hover:text-ink">
-          <Icon name="lucide:copy" class="kc-copy-i size-4" />
-          <Icon name="lucide:check" class="kc-check-i size-4 text-brand" />
+        <button type="button" data-copy="npm i @kitn.ai/ui" aria-label="Copy install command" class="kai-copy flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-ink-3 transition-colors hover:bg-ink/5 hover:text-ink">
+          <Icon name="lucide:copy" class="kai-copy-i size-4" />
+          <Icon name="lucide:check" class="kai-check-i size-4 text-brand" />
         </button>
       </div>
     </div>
@@ -64,8 +64,8 @@ const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
     inset: -20% -10% auto -10%;
     height: 120%;
     background:
-      radial-gradient(46% 48% at 16% 6%, color-mix(in oklab, var(--kc-brand) 24%, transparent) 0%, transparent 66%),
-      radial-gradient(40% 44% at 90% 18%, color-mix(in oklab, var(--kc-info) 18%, transparent) 0%, transparent 68%);
+      radial-gradient(46% 48% at 16% 6%, color-mix(in oklab, var(--kai-brand) 24%, transparent) 0%, transparent 66%),
+      radial-gradient(40% 44% at 90% 18%, color-mix(in oklab, var(--kai-info) 18%, transparent) 0%, transparent 68%);
     pointer-events: none;
     z-index: 0;
   }
@@ -74,8 +74,8 @@ const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(color-mix(in oklab, var(--kc-line) 60%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in oklab, var(--kc-line) 60%, transparent) 1px, transparent 1px);
+      linear-gradient(color-mix(in oklab, var(--kai-line) 60%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--kai-line) 60%, transparent) 1px, transparent 1px);
     background-size: 42px 42px;
     -webkit-mask-image: radial-gradient(120% 85% at 50% 0%, #000 28%, transparent 78%);
     mask-image: radial-gradient(120% 85% at 50% 0%, #000 28%, transparent 78%);
@@ -88,9 +88,9 @@ const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
   .chat-frame { box-shadow: 0 36px 90px -44px rgb(0 0 0 / 0.7); border-radius: 1rem; }
 
   /* Copy button icon swap. */
-  .kc-copy .kc-check-i { display: none; }
-  .kc-copy.copied .kc-copy-i { display: none; }
-  .kc-copy.copied .kc-check-i { display: inline; }
+  .kai-copy .kai-check-i { display: none; }
+  .kai-copy.copied .kai-copy-i { display: none; }
+  .kai-copy.copied .kai-check-i { display: inline; }
 
   /* One orchestrated load-in: staggered rise. */
   .hero-rise { opacity: 0; transform: translateY(14px); animation: heroRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: var(--d, 0ms); }
@@ -99,7 +99,7 @@ const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
 </style>
 
 <script>
-  document.querySelectorAll<HTMLButtonElement>('.kc-copy[data-copy]').forEach((btn) => {
+  document.querySelectorAll<HTMLButtonElement>('.kai-copy[data-copy]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(btn.dataset.copy || '');

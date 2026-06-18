@@ -54,7 +54,7 @@ const FORM_ENVELOPE: CardEnvelope = {
       email: { type: 'string', title: 'Email', format: 'email' },
       role: { type: 'string', title: 'Role', enum: ['Engineer', 'Designer', 'PM'] },
     },
-    'x-kc-submitLabel': 'Send',
+    'x-kai-submitLabel': 'Send',
   },
 };
 

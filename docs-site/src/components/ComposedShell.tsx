@@ -226,7 +226,7 @@ export default function ComposedShell() {
             {/* Composer */}
             <div
               style={{
-                'border-top': '1px solid var(--kc-line, rgba(0,0,0,0.09))',
+                'border-top': '1px solid var(--kai-line, rgba(0,0,0,0.09))',
                 padding: '12px 16px',
               } as any}
             >

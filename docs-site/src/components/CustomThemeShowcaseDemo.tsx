@@ -1,10 +1,10 @@
 /** Custom-theme SHOWCASE — the same <kai-chat> as every other demo, reskinned to
  *  a bold "Aurora" identity (electric magenta accent, cyan focus glow, deep-noir
- *  surfaces, sharp corners). It exists to prove how far the inherited --kc-*
+ *  surfaces, sharp corners). It exists to prove how far the inherited --kai-*
  *  custom properties can push the look WITHOUT piercing the Shadow DOM.
  *
  *  Two things this island does that the plain ChatDemo can't:
- *   1. Swaps a FULL per-mode --kc-* token map when the page theme flips, so the
+ *   1. Swaps a FULL per-mode --kai-* token map when the page theme flips, so the
  *      theme is intentional in BOTH light and dark (not one set of values that
  *      only holds in one mode).
  *   2. Wraps the chat in host-side chrome — an aurora gradient backdrop + a
@@ -20,72 +20,72 @@ interface ChatMessage {
   actions?: string[];
 }
 
-/** Full --kc-* override map for one mode. Every value is self-contained (no
+/** Full --kai-* override map for one mode. Every value is self-contained (no
  *  reliance on the kit's defaults) so the look is deliberate in both modes. */
 type TokenMap = Record<string, string>;
 
 /* Dark "Aurora": neon magenta on near-black indigo, cyan focus glow, code in
  *  cyan, sharp 0.25rem corners. */
 const AURORA_DARK: TokenMap = {
-  '--kc-color-background': 'hsl(252 40% 6%)',
-  '--kc-color-foreground': 'hsl(250 30% 96%)',
-  '--kc-color-card': 'hsl(250 36% 10%)',
-  '--kc-color-card-foreground': 'hsl(250 30% 96%)',
-  '--kc-color-popover': 'hsl(250 38% 9%)',
-  '--kc-color-popover-foreground': 'hsl(250 30% 96%)',
-  '--kc-color-primary': 'hsl(322 90% 58%)',
-  '--kc-color-primary-foreground': 'hsl(250 40% 7%)',
-  '--kc-color-secondary': 'hsl(250 30% 16%)',
-  '--kc-color-secondary-foreground': 'hsl(250 25% 90%)',
-  '--kc-color-muted': 'hsl(250 28% 14%)',
-  '--kc-color-muted-foreground': 'hsl(250 18% 64%)',
-  '--kc-color-accent': 'hsl(250 32% 18%)',
-  '--kc-color-accent-foreground': 'hsl(186 90% 70%)',
-  '--kc-color-border': 'hsl(250 30% 20%)',
-  '--kc-color-input': 'hsl(250 30% 14%)',
-  '--kc-color-ring': 'hsl(186 95% 56%)',
-  '--kc-color-sidebar': 'hsl(252 42% 5%)',
-  '--kc-color-code-foreground': 'hsl(186 90% 66%)',
-  '--kc-color-scrollbar-thumb': 'hsl(322 40% 30%)',
-  '--kc-color-scrollbar-thumb-hover': 'hsl(322 60% 45%)',
-  '--kc-color-tool-blue': 'hsl(186 90% 66%)',
-  '--kc-color-tool-green': 'hsl(160 84% 56%)',
-  '--kc-color-tool-amber': 'hsl(322 90% 68%)',
-  '--kc-color-tool-red': 'hsl(350 90% 68%)',
-  '--kc-radius': '0.25rem',
-  '--kc-text-title': '1.0625rem',
+  '--kai-color-background': 'hsl(252 40% 6%)',
+  '--kai-color-foreground': 'hsl(250 30% 96%)',
+  '--kai-color-card': 'hsl(250 36% 10%)',
+  '--kai-color-card-foreground': 'hsl(250 30% 96%)',
+  '--kai-color-popover': 'hsl(250 38% 9%)',
+  '--kai-color-popover-foreground': 'hsl(250 30% 96%)',
+  '--kai-color-primary': 'hsl(322 90% 58%)',
+  '--kai-color-primary-foreground': 'hsl(250 40% 7%)',
+  '--kai-color-secondary': 'hsl(250 30% 16%)',
+  '--kai-color-secondary-foreground': 'hsl(250 25% 90%)',
+  '--kai-color-muted': 'hsl(250 28% 14%)',
+  '--kai-color-muted-foreground': 'hsl(250 18% 64%)',
+  '--kai-color-accent': 'hsl(250 32% 18%)',
+  '--kai-color-accent-foreground': 'hsl(186 90% 70%)',
+  '--kai-color-border': 'hsl(250 30% 20%)',
+  '--kai-color-input': 'hsl(250 30% 14%)',
+  '--kai-color-ring': 'hsl(186 95% 56%)',
+  '--kai-color-sidebar': 'hsl(252 42% 5%)',
+  '--kai-color-code-foreground': 'hsl(186 90% 66%)',
+  '--kai-color-scrollbar-thumb': 'hsl(322 40% 30%)',
+  '--kai-color-scrollbar-thumb-hover': 'hsl(322 60% 45%)',
+  '--kai-color-tool-blue': 'hsl(186 90% 66%)',
+  '--kai-color-tool-green': 'hsl(160 84% 56%)',
+  '--kai-color-tool-amber': 'hsl(322 90% 68%)',
+  '--kai-color-tool-red': 'hsl(350 90% 68%)',
+  '--kai-radius': '0.25rem',
+  '--kai-text-title': '1.0625rem',
 };
 
 /* Light "Aurora": same neon identity, inverted onto a cool cyan-tinted studio
  *  white. Accent/ring darkened just enough to keep text + focus AA on light. */
 const AURORA_LIGHT: TokenMap = {
-  '--kc-color-background': 'hsl(240 40% 98%)',
-  '--kc-color-foreground': 'hsl(252 45% 12%)',
-  '--kc-color-card': 'hsl(0 0% 100%)',
-  '--kc-color-card-foreground': 'hsl(252 45% 12%)',
-  '--kc-color-popover': 'hsl(0 0% 100%)',
-  '--kc-color-popover-foreground': 'hsl(252 45% 12%)',
-  '--kc-color-primary': 'hsl(322 82% 46%)',
-  '--kc-color-primary-foreground': 'hsl(0 0% 100%)',
-  '--kc-color-secondary': 'hsl(250 60% 96%)',
-  '--kc-color-secondary-foreground': 'hsl(252 45% 20%)',
-  '--kc-color-muted': 'hsl(245 50% 96%)',
-  '--kc-color-muted-foreground': 'hsl(250 14% 42%)',
-  '--kc-color-accent': 'hsl(245 60% 95%)',
-  '--kc-color-accent-foreground': 'hsl(192 90% 30%)',
-  '--kc-color-border': 'hsl(248 40% 90%)',
-  '--kc-color-input': 'hsl(248 40% 92%)',
-  '--kc-color-ring': 'hsl(192 90% 38%)',
-  '--kc-color-sidebar': 'hsl(245 50% 97%)',
-  '--kc-color-code-foreground': 'hsl(192 90% 32%)',
-  '--kc-color-scrollbar-thumb': 'hsl(322 50% 80%)',
-  '--kc-color-scrollbar-thumb-hover': 'hsl(322 60% 62%)',
-  '--kc-color-tool-blue': 'hsl(192 90% 32%)',
-  '--kc-color-tool-green': 'hsl(160 84% 28%)',
-  '--kc-color-tool-amber': 'hsl(322 82% 44%)',
-  '--kc-color-tool-red': 'hsl(350 80% 46%)',
-  '--kc-radius': '0.25rem',
-  '--kc-text-title': '1.0625rem',
+  '--kai-color-background': 'hsl(240 40% 98%)',
+  '--kai-color-foreground': 'hsl(252 45% 12%)',
+  '--kai-color-card': 'hsl(0 0% 100%)',
+  '--kai-color-card-foreground': 'hsl(252 45% 12%)',
+  '--kai-color-popover': 'hsl(0 0% 100%)',
+  '--kai-color-popover-foreground': 'hsl(252 45% 12%)',
+  '--kai-color-primary': 'hsl(322 82% 46%)',
+  '--kai-color-primary-foreground': 'hsl(0 0% 100%)',
+  '--kai-color-secondary': 'hsl(250 60% 96%)',
+  '--kai-color-secondary-foreground': 'hsl(252 45% 20%)',
+  '--kai-color-muted': 'hsl(245 50% 96%)',
+  '--kai-color-muted-foreground': 'hsl(250 14% 42%)',
+  '--kai-color-accent': 'hsl(245 60% 95%)',
+  '--kai-color-accent-foreground': 'hsl(192 90% 30%)',
+  '--kai-color-border': 'hsl(248 40% 90%)',
+  '--kai-color-input': 'hsl(248 40% 92%)',
+  '--kai-color-ring': 'hsl(192 90% 38%)',
+  '--kai-color-sidebar': 'hsl(245 50% 97%)',
+  '--kai-color-code-foreground': 'hsl(192 90% 32%)',
+  '--kai-color-scrollbar-thumb': 'hsl(322 50% 80%)',
+  '--kai-color-scrollbar-thumb-hover': 'hsl(322 60% 62%)',
+  '--kai-color-tool-blue': 'hsl(192 90% 32%)',
+  '--kai-color-tool-green': 'hsl(160 84% 28%)',
+  '--kai-color-tool-amber': 'hsl(322 82% 44%)',
+  '--kai-color-tool-red': 'hsl(350 80% 46%)',
+  '--kai-radius': '0.25rem',
+  '--kai-text-title': '1.0625rem',
 };
 
 const SEED_MESSAGES: ChatMessage[] = [
@@ -98,13 +98,13 @@ const SEED_MESSAGES: ChatMessage[] = [
     id: 'a1',
     role: 'assistant',
     content:
-      "Pure tokens. Nothing here pierces the Shadow DOM — every surface, the magenta accent, the cyan focus ring, the sharp corners and the `inline code` tint all come from a `--kc-*` override map set on the host.\n\n```css\nkai-chat {\n  --kc-color-primary: hsl(322 90% 58%);   /* magenta accent  */\n  --kc-color-ring:    hsl(186 95% 56%);   /* cyan focus glow */\n  --kc-radius:        0.25rem;            /* sharp corners   */\n}\n```\n\nThe aurora glow and the framed shell around me are **host-side chrome** — plain CSS on a wrapper, sitting entirely outside the element. Flip the site's theme and a second, matched token map takes over so it stays intentional in both modes.",
+      "Pure tokens. Nothing here pierces the Shadow DOM — every surface, the magenta accent, the cyan focus ring, the sharp corners and the `inline code` tint all come from a `--kai-*` override map set on the host.\n\n```css\nkai-chat {\n  --kai-color-primary: hsl(322 90% 58%);   /* magenta accent  */\n  --kai-color-ring:    hsl(186 95% 56%);   /* cyan focus glow */\n  --kai-radius:        0.25rem;            /* sharp corners   */\n}\n```\n\nThe aurora glow and the framed shell around me are **host-side chrome** — plain CSS on a wrapper, sitting entirely outside the element. Flip the site's theme and a second, matched token map takes over so it stays intentional in both modes.",
     actions: ['copy', 'like', 'dislike'],
   },
 ];
 
 const REPLY =
-  "Same answer, still all tokens: this reply, the send button, the focus ring you just tabbed through — every pixel is driven by the `--kc-*` map on the host. Swap that map and the component becomes a different product, with zero changes to the element itself.";
+  "Same answer, still all tokens: this reply, the send button, the focus ring you just tabbed through — every pixel is driven by the `--kai-*` map on the host. Swap that map and the component becomes a different product, with zero changes to the element itself.";
 
 let uid = 0;
 const nextId = () => `ct${++uid}`;
@@ -223,10 +223,10 @@ export default function CustomThemeShowcaseDemo() {
           }}
         />
         <span style={{ color: labelColor(), 'font-weight': '700' }}>Aurora theme</span>
-        <span style={{ color: labelMuted() }}>· same component, --kc-* tokens only</span>
+        <span style={{ color: labelMuted() }}>· same component, --kai-* tokens only</span>
       </div>
 
-      {/* The chat. The glow frame is host-side; only --kc-* tokens reach inside. */}
+      {/* The chat. The glow frame is host-side; only --kai-* tokens reach inside. */}
       <div
         class="overflow-hidden rounded-xl"
         style={{

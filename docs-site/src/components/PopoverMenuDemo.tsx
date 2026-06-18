@@ -80,7 +80,7 @@ export default function PopoverMenuDemo() {
               aria-label="Temporary chat"
               onClick={() => setTemporary(!temporary())}
               class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors"
-              style={{ background: temporary() ? 'var(--kc-brand, #d6207f)' : 'var(--color-line, #d4d4d8)' }}
+              style={{ background: temporary() ? 'var(--kai-brand, #d6207f)' : 'var(--color-line, #d4d4d8)' }}
             >
               <span class="inline-block h-4 w-4 rounded-full bg-white transition-transform" style={{ transform: temporary() ? 'translateX(1.125rem)' : 'translateX(0.125rem)' }} />
             </button>

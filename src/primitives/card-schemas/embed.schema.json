@@ -4,8 +4,8 @@
   "title": "EmbedCardData",
   "description": "Lazy media-embed payload (YouTube / Vimeo / generic player URL).",
   "type": "object",
-  "x-kc-card-type": "embed",
-  "x-kc-contract-version": "1",
+  "x-kai-card-type": "embed",
+  "x-kai-contract-version": "1",
   "required": ["provider"],
   "additionalProperties": false,
   "properties": {
@@ -13,7 +13,7 @@
       "type": "string",
       "enum": ["youtube", "vimeo", "generic"],
       "description": "Media provider. 'generic' frames `url` directly (must be an https embeddable player URL whose origin is app-allowlisted).",
-      "x-kc-control": "select"
+      "x-kai-control": "select"
     },
     "id": {
       "type": "string",
@@ -25,7 +25,7 @@
       "type": "string",
       "format": "uri",
       "description": "Full media/watch URL. For youtube/vimeo it is parsed to an id; for 'generic' it is the embeddable player src (https only).",
-      "x-kc-format": "url"
+      "x-kai-format": "url"
     },
     "title": {
       "type": "string",
@@ -36,20 +36,20 @@
       "type": "string",
       "format": "uri",
       "description": "Thumbnail shown before play. When omitted, youtube/vimeo derive a default thumbnail; 'generic' shows a neutral play placeholder.",
-      "x-kc-format": "url"
+      "x-kai-format": "url"
     },
     "start": {
       "type": "integer",
       "minimum": 0,
       "description": "Optional start offset in seconds.",
-      "x-kc-unit": "seconds"
+      "x-kai-unit": "seconds"
     },
     "aspectRatio": {
       "type": "string",
       "enum": ["16:9", "4:3", "1:1", "9:16"],
       "default": "16:9",
       "description": "Player box aspect ratio (CSS aspect-ratio).",
-      "x-kc-control": "select"
+      "x-kai-control": "select"
     }
   },
   "allOf": [

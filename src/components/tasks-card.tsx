@@ -255,8 +255,8 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
   createEffect(() => {
     const el = local.hostElement;
     if (!el) return;
-    if (res.isResolved()) el.setAttribute('data-kc-resolved', 'submitted');
-    else el.removeAttribute('data-kc-resolved');
+    if (res.isResolved()) el.setAttribute('data-kai-resolved', 'submitted');
+    else el.removeAttribute('data-kai-resolved');
   });
 
   const resolvedSummary = createMemo(() => {
@@ -269,8 +269,8 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
     return { count: chosen.length, total: all.length, labels: chosen };
   });
 
-  const reasonId = `kc-tl-reason-${uid}`;
-  const countId = `kc-tl-count-${uid}`;
+  const reasonId = `kai-tl-reason-${uid}`;
+  const countId = `kai-tl-count-${uid}`;
 
   return (
     <Show when={valid()} fallback={<Card heading={local.heading} errorMessage={errorMessage()} />}>
@@ -338,7 +338,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                       >
                         <input
                           type="checkbox"
-                          class="kc-checkbox"
+                          class="kai-checkbox"
                           checked={masterState() === 'checked'}
                           aria-checked={indeterminate() ? 'mixed' : masterState() === 'checked'}
                           ref={(el) => {
@@ -359,7 +359,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                     const checked = () => selected().has(task.id);
                     const blocked = () =>
                       task.disabled || (!checked() && isMaxReached(data(), count()));
-                    const descId = `kc-tl-desc-${uid}-${task.id}`;
+                    const descId = `kai-tl-desc-${uid}-${task.id}`;
                     return (
                       <label
                         class={cn(
@@ -375,7 +375,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                       >
                         <input
                           type="checkbox"
-                          class="kc-checkbox mt-0.5"
+                          class="kai-checkbox mt-0.5"
                           checked={checked()}
                           disabled={blocked()}
                           aria-disabled={blocked() ? 'true' : undefined}
