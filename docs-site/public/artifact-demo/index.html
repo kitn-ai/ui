@@ -13,10 +13,14 @@
           <span class="mark" aria-hidden="true"></span>
           Starboard
         </a>
-        <nav>
+        <nav class="nav">
+          <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+          <label for="nav-toggle" class="nav-burger" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+          </label>
           <ul class="nav-links">
             <li><a href="index.html#features">Features</a></li>
-            <li class="hide-sm"><a href="index.html#metrics">Why Starboard</a></li>
+            <li><a href="index.html#metrics">Why Starboard</a></li>
             <li><a href="about.html">About</a></li>
             <li><a class="btn btn-primary" href="index.html#get-started">Start free</a></li>
           </ul>
@@ -27,15 +31,45 @@
     <main>
       <section class="hero">
         <div class="wrap">
-          <span class="eyebrow">Release management, reimagined</span>
-          <h1>Ship product the moment it&rsquo;s <span class="grad">ready</span></h1>
-          <p class="lead">
-            Starboard turns your release process into a single calm dashboard —
-            staged rollouts, instant rollbacks, and live health checks across every environment.
-          </p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="index.html#get-started">Start free &rarr;</a>
-            <a class="btn btn-ghost" href="about.html">See how it works</a>
+          <div class="hero-copy">
+            <span class="eyebrow">Release management, reimagined</span>
+            <h1>Ship product the moment it&rsquo;s <span class="grad">ready</span></h1>
+            <p class="lead">
+              Starboard turns your release process into a single calm dashboard —
+              staged rollouts, instant rollbacks, and live health checks across every environment.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="index.html#get-started">Start free &rarr;</a>
+              <a class="btn btn-ghost" href="about.html">See how it works</a>
+            </div>
+          </div>
+
+          <div class="hero-visual" aria-hidden="true">
+            <div class="app">
+              <div class="app-bar">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span class="app-title">starboard / production</span>
+              </div>
+              <div class="app-body">
+                <div class="release">
+                  <div class="release-head">
+                    <span class="ver">v2.4.1</span>
+                    <span class="badge">Live</span>
+                  </div>
+                  <div class="bar"><span></span></div>
+                  <div class="rows">
+                    <div class="row"><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Canary 1% &mdash; healthy</div>
+                    <div class="row"><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Rollout 10% &mdash; healthy</div>
+                    <div class="row"><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Full rollout &mdash; complete</div>
+                  </div>
+                </div>
+                <div class="metrics">
+                  <div class="metric"><span class="m-num">11s</span><span class="m-lab">deploy</span></div>
+                  <div class="metric"><span class="m-num">0</span><span class="m-lab">errors</span></div>
+                  <div class="metric"><span class="m-num">100%</span><span class="m-lab">healthy</span></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -48,17 +82,23 @@
           </div>
           <div class="cards">
             <article class="card">
-              <div class="icon" aria-hidden="true">&#9650;</div>
+              <div class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V11M9 21V7M15 21v-8M21 21V4"/></svg>
+              </div>
               <h3>Progressive rollouts</h3>
               <p>Roll out to 1%, then 10%, then everyone — Starboard halts automatically if error rates spike.</p>
             </article>
             <article class="card">
-              <div class="icon" aria-hidden="true">&#8635;</div>
+              <div class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+              </div>
               <h3>One-click rollback</h3>
               <p>Every release is a checkpoint. Revert to any prior version in seconds, no redeploy required.</p>
             </article>
             <article class="card">
-              <div class="icon" aria-hidden="true">&#9678;</div>
+              <div class="icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              </div>
               <h3>Live health signals</h3>
               <p>Latency, errors, and saturation stream into a single view so you always know what good looks like.</p>
             </article>
