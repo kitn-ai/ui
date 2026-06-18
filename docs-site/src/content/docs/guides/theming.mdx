@@ -1,11 +1,11 @@
 ---
 title: Theming
-description: Override CSS custom properties to rebrand every kc-* component — colors, radii, typography, and dark mode — without touching component code.
+description: Override CSS custom properties to rebrand every kai-* component — colors, radii, typography, and dark mode — without touching component code.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Override `--color-*` design tokens on `:root` to rebrand every `kc-*` web component at once. Because inherited CSS pierces the Shadow DOM boundary, a single CSS rule propagates into all components automatically.
+Override `--color-*` design tokens on `:root` to rebrand every `kai-*` web component at once. Because inherited CSS pierces the Shadow DOM boundary, a single CSS rule propagates into all components automatically.
 
 ## How tokens work
 
@@ -138,7 +138,7 @@ Message and markdown reading size scales separately via the `proseSize` prop —
 
 ## Appearance settings
 
-Non-color appearance is controlled by `kc-chat` attributes (and the matching `ChatConfig` props in the SolidJS layer):
+Non-color appearance is controlled by `kai-chat` attributes (and the matching `ChatConfig` props in the SolidJS layer):
 
 | Setting | Values | Purpose |
 |---|---|---|
@@ -149,7 +149,7 @@ Non-color appearance is controlled by `kc-chat` attributes (and the matching `Ch
 <Tabs>
 <TabItem label="Web component">
 ```html
-<kc-chat prose-size="base" code-theme="github-dark-dimmed"></kc-chat>
+<kai-chat prose-size="base" code-theme="github-dark-dimmed"></kai-chat>
 ```
 </TabItem>
 <TabItem label="SolidJS">

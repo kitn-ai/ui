@@ -15,7 +15,7 @@ const messages: ChatMessage[] = [
 ];
 
 test('renders messages and emits submit', async () => {
-  const el = document.createElement('kc-chat') as HTMLElement & { messages: ChatMessage[] };
+  const el = document.createElement('kai-chat') as HTMLElement & { messages: ChatMessage[] };
   el.messages = messages;
   document.body.appendChild(el);
   await Promise.resolve();
@@ -24,7 +24,7 @@ test('renders messages and emits submit', async () => {
   expect(el.shadowRoot!.textContent).toContain('Hello! How can I help?');
 
   let submitted: string | null = null;
-  el.addEventListener('kc-submit', (e) => (submitted = (e as CustomEvent).detail.value));
+  el.addEventListener('kai-submit', (e) => (submitted = (e as CustomEvent).detail.value));
   const textarea = el.shadowRoot!.querySelector('textarea')!;
   textarea.value = 'next question';
   textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
@@ -35,13 +35,13 @@ test('renders messages and emits submit', async () => {
 });
 
 test('emits messageaction when an action button is clicked', async () => {
-  const el = document.createElement('kc-chat') as HTMLElement & { messages: ChatMessage[] };
+  const el = document.createElement('kai-chat') as HTMLElement & { messages: ChatMessage[] };
   el.messages = messages;
   document.body.appendChild(el);
   await Promise.resolve();
 
   let action: { messageId: string; action: string } | null = null;
-  el.addEventListener('kc-message-action', (e) => (action = (e as CustomEvent).detail));
+  el.addEventListener('kai-message-action', (e) => (action = (e as CustomEvent).detail));
   const btn = el.shadowRoot!.querySelector('[data-action="copy"]') as HTMLElement;
   btn.click();
   expect(action).toEqual({ messageId: 'm2', action: 'copy' });
@@ -50,7 +50,7 @@ test('emits messageaction when an action button is clicked', async () => {
 });
 
 test('codeHighlight={false} renders fenced code as plain text (no Shiki)', async () => {
-  const el = document.createElement('kc-chat') as HTMLElement & {
+  const el = document.createElement('kai-chat') as HTMLElement & {
     messages: ChatMessage[]; codeHighlight: boolean;
   };
   el.codeHighlight = false;

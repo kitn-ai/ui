@@ -1,6 +1,6 @@
 /**
  * Unit tests for parseKcSlashCommandElement and the merge behaviour
- * in kc-prompt-input's declarative <kc-slash-command> reader.
+ * in kai-prompt-input's declarative <kai-slash-command> reader.
  *
  * Strategy: test the exported pure helper directly with synthetic DOM elements
  * (no Shadow DOM, no custom element upgrade needed).
@@ -19,7 +19,7 @@ describe('parseKcSlashCommandElement', () => {
     attrs: Record<string, string | null>,
     textContent?: string,
   ): Element {
-    const el = document.createElement('kc-slash-command');
+    const el = document.createElement('kai-slash-command');
     for (const [k, v] of Object.entries(attrs)) {
       if (v !== null) el.setAttribute(k, v);
     }
@@ -82,7 +82,7 @@ describe('parseKcSlashCommandElement', () => {
 
 describe('slashCommands merge (prop + declarative children)', () => {
   function makeEl(command: string, label: string, description?: string): Element {
-    const el = document.createElement('kc-slash-command');
+    const el = document.createElement('kai-slash-command');
     el.setAttribute('command', command);
     el.textContent = label;
     if (description) el.setAttribute('description', description);

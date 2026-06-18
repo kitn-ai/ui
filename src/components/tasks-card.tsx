@@ -69,7 +69,7 @@ export function normalizeTasks(tasks: unknown): { tasks: TasksTask[]; error?: st
     if (typeof task.label !== 'string' || task.label.length === 0) continue;
     if (seen.has(task.id)) {
       // eslint-disable-next-line no-console
-      console.warn(`[kc-tasks] duplicate task id "${task.id}" ignored`);
+      console.warn(`[kai-tasks] duplicate task id "${task.id}" ignored`);
       continue;
     }
     seen.add(task.id);
@@ -155,9 +155,9 @@ export interface TasksCardProps {
   /** The envelope title rendered in the card chrome. */
   heading?: string;
   /** Optional explicit CardHost (otherwise read from a CardProvider, otherwise the
-   *  bubbling `kc-card` CustomEvent off `hostElement`). */
+   *  bubbling `kai-card` CustomEvent off `hostElement`). */
   host?: CardHost;
-  /** The custom-element host node, for the bubbling `kc-card` fallback emit. */
+  /** The custom-element host node, for the bubbling `kai-card` fallback emit. */
   hostElement?: HTMLElement;
   class?: string;
   /** When set, render the chromed read-only summary instead of the interactive controls. */
@@ -174,7 +174,7 @@ const DEFAULT_DATA: TasksCardData = { tasks: [] };
  * input order. Emits `ready` on mount and `error` for an unusable definition.
  */
 export function TasksCard(props: TasksCardProps): JSX.Element {
-  const merged = mergeProps({ cardId: 'kc-tasks' }, props);
+  const merged = mergeProps({ cardId: 'kai-tasks' }, props);
   const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution']);
 
   const ctxHost = useCardHost();

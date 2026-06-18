@@ -13,11 +13,11 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-image>` — renders a base64 or byte-array image with a skeleton
+ * `<kai-image>` — renders a base64 or byte-array image with a skeleton
  * fallback while it resolves. `base64`/`alt`/`media-type` via attributes;
  * `bytes` via property.
  */
-defineWebComponent<Props>('kc-image', {
+defineWebComponent<Props>('kai-image', {
   base64: undefined,
   bytes: undefined,
   alt: '',

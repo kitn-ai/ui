@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>kc-chat — full chat (vanilla / CDN)</title>
+    <title>kai-chat — full chat (vanilla / CDN)</title>
     <link rel="icon" type="image/svg+xml" href="../shared/logo.svg" />
     <style>
       /* No build step: the web components style themselves inside Shadow DOM,
@@ -24,12 +24,12 @@
 
       .app { display: flex; height: calc(100vh - 49px); }
       /* CSS `resize` makes the sidebar drag-resizable horizontally — no JS. */
-      kc-conversations {
+      kai-conversations {
         width: 300px; flex: none; border-right: 1px solid #e5e5e5;
         resize: horizontal; overflow: auto; min-width: 200px; max-width: 460px;
       }
-      body.dark kc-conversations { border-right-color: #27272a; }
-      kc-chat { flex: 1; min-width: 0; }
+      body.dark kai-conversations { border-right-color: #27272a; }
+      kai-chat { flex: 1; min-width: 0; }
 
       .icon-btn {
         display: inline-flex; align-items: center; justify-content: center;
@@ -52,27 +52,27 @@
 
       /* Responsive: the sidebar slides in over the chat on small screens. */
       @media (max-width: 720px) {
-        kc-conversations {
+        kai-conversations {
           position: fixed; inset: 49px auto 0 0; height: calc(100vh - 49px); width: 280px;
           z-index: 10; transform: translateX(-100%); transition: transform .2s ease;
         }
-        body.sidebar-open kc-conversations { transform: translateX(0); box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35); }
+        body.sidebar-open kai-conversations { transform: translateX(0); box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35); }
       }
     </style>
   </head>
   <body>
     <header class="topbar">
-      <span class="brand"><img src="../shared/logo.svg" alt="" />kc-chat</span>
+      <span class="brand"><img src="../shared/logo.svg" alt="" />kai-chat</span>
       <button id="theme-btn" class="icon-btn" type="button" aria-label="Toggle light/dark"></button>
     </header>
     <div class="app">
-      <kc-conversations id="list"></kc-conversations>
-      <kc-chat id="chat"></kc-chat>
+      <kai-conversations id="list"></kai-conversations>
+      <kai-chat id="chat"></kai-chat>
     </div>
     <div id="toast" class="toast"></div>
 
-    <!-- One line from the CDN registers <kc-chat>, <kc-conversations>,
-         <kc-prompt-input>. SolidJS + styles are bundled in. Pin a version
+    <!-- One line from the CDN registers <kai-chat>, <kai-conversations>,
+         <kai-prompt-input>. SolidJS + styles are bundled in. Pin a version
          (…/@kitn.ai/ui@1.2.3) for reproducibility; jsDelivr also works. -->
     <script type="module" src="https://unpkg.com/@kitn.ai/ui"></script>
 
@@ -183,9 +183,9 @@
       open(activeId);
 
       // -------------------------------------------------------------- events
-      list.addEventListener('kc-conversation-select', (e) => open(e.detail.id));
-      list.addEventListener('kc-toggle-sidebar', () => document.body.classList.toggle('sidebar-open'));
-      list.addEventListener('kc-new-chat', () => {
+      list.addEventListener('kai-conversation-select', (e) => open(e.detail.id));
+      list.addEventListener('kai-toggle-sidebar', () => document.body.classList.toggle('sidebar-open'));
+      list.addEventListener('kai-new-chat', () => {
         const id = 'c-' + Date.now();
         conversations.unshift({ id, title: 'New chat', groupId: 'g-work', scope: { type: 'collection' }, messageCount: 0, lastMessageAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
         list.conversations = [...conversations];
@@ -194,7 +194,7 @@
       });
 
       // Send: append the user message (with any attachments), show loading, stream a reply.
-      chat.addEventListener('kc-submit', (e) => {
+      chat.addEventListener('kai-submit', (e) => {
         const value = (e.detail.value || '').trim();
         const attachments = e.detail.attachments || [];
         if (!value && !attachments.length) return;
@@ -209,12 +209,12 @@
       });
 
       // Header model switcher + input toolbar buttons.
-      chat.addEventListener('kc-model-change', (e) => { chat.currentModel = e.detail.modelId; toast('Model: ' + e.detail.modelId); });
-      chat.addEventListener('kc-search', () => toast('Web search toggled'));
-      chat.addEventListener('kc-voice', () => toast('Voice input (demo)'));
+      chat.addEventListener('kai-model-change', (e) => { chat.currentModel = e.detail.modelId; toast('Model: ' + e.detail.modelId); });
+      chat.addEventListener('kai-search', () => toast('Web search toggled'));
+      chat.addEventListener('kai-voice', () => toast('Voice input (demo)'));
 
       // Working message actions.
-      chat.addEventListener('kc-message-action', async (e) => {
+      chat.addEventListener('kai-message-action', async (e) => {
         const { messageId, action } = e.detail;
         const msgs = conversationMessages[activeId] ?? [];
         const msg = msgs.find((m) => m.id === messageId);

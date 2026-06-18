@@ -1,9 +1,9 @@
 /** Header "Ask AI" control + the docked assistant panel it opens.
  *
  *  The assistant isn't wired to a backend yet, so the panel is an honest
- *  preview: an "in development" empty state above a DISABLED <kc-prompt-input>
+ *  preview: an "in development" empty state above a DISABLED <kai-prompt-input>
  *  (the kit's `disabled` prop, dogfooded). The kit bundle is loaded lazily on
- *  first open, so guide pages that don't otherwise mount a kc-* element don't
+ *  first open, so guide pages that don't otherwise mount a kai-* element don't
  *  pay for it up front. Chrome uses the docs design tokens, so it tracks the
  *  site's light/dark automatically. */
 import { createSignal, onMount, onCleanup, Show } from 'solid-js';
@@ -130,11 +130,11 @@ export default function AskAiDock() {
             </p>
           </div>
 
-          {/* Disabled composer — the kit's own kc-prompt-input in its disabled state */}
+          {/* Disabled composer — the kit's own kai-prompt-input in its disabled state */}
           <div class="border-t border-line p-3">
             <Show when={kitReady()} fallback={<div class="h-12 animate-pulse rounded-lg bg-ink/5" />}>
               {/* @ts-expect-error custom element */}
-              <kc-prompt-input
+              <kai-prompt-input
                 ref={(el: HTMLElement) => (promptInput = el)}
                 disabled
                 placeholder="Ask about kitn-chat… (coming soon)"

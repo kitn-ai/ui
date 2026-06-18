@@ -15,20 +15,20 @@ const meta: Meta = {
     docs: {
       description: {
         component: [
-          'Show how much of the model\'s context window is consumed. `<kc-context>` (or its SolidJS `Context` primitive) takes token counts and renders a circular meter trigger + hover-card breakdown.',
+          'Show how much of the model\'s context window is consumed. `<kai-context>` (or its SolidJS `Context` primitive) takes token counts and renders a circular meter trigger + hover-card breakdown.',
           '',
-          '**Color thresholds** are configurable via `warnThreshold` (default `0.7`) and `dangerThreshold` (default `0.9`) props on both `<Context>` and `<kc-context>`:',
+          '**Color thresholds** are configurable via `warnThreshold` (default `0.7`) and `dangerThreshold` (default `0.9`) props on both `<Context>` and `<kai-context>`:',
           '- Green (`bg-primary`): `usedTokens / maxTokens` ≤ `warnThreshold`',
           '- Yellow (`bg-yellow-400`): above `warnThreshold`',
           '- Red (`bg-red-400`): above `dangerThreshold`',
           '',
-          'When the computed severity level changes, `<kc-context>` fires a **`kc-threshold-change`** CustomEvent with `detail.level` set to `\'ok\'`, `\'warn\'`, or `\'danger\'`.',
+          'When the computed severity level changes, `<kai-context>` fires a **`kai-threshold-change`** CustomEvent with `detail.level` set to `\'ok\'`, `\'warn\'`, or `\'danger\'`.',
           '',
           '**Where token counts come from:** read them from the API response `usage` object (`input_tokens`, `output_tokens`, `cache_read_input_tokens`, etc.) after each turn and pass them as props. The element fires no data-fetching events.',
           '',
           '**Live-update pattern:** for SolidJS, drive the `Context` props from reactive signals that you update after each streaming response completes. The element re-renders automatically when props change.',
           '',
-          '**`<kc-context>` web-component route:** pass a single `context` object as a **property** (not an attribute — attributes only accept strings). Set `warnThreshold` / `dangerThreshold` as numeric properties to override defaults. The WC renders the full trigger + popover for you with no composition needed.',
+          '**`<kai-context>` web-component route:** pass a single `context` object as a **property** (not an attribute — attributes only accept strings). Set `warnThreshold` / `dangerThreshold` as numeric properties to override defaults. The WC renders the full trigger + popover for you with no composition needed.',
         ].join('\n'),
       },
     },
@@ -72,7 +72,7 @@ export const MediumUsage: Story = {
   parameters: {
     docs: {
       description: {
-        story: '`usedTokens / maxTokens` > `warnThreshold` (default 70%) → yellow meter. Add `reasoningTokens` to surface a reasoning row in the breakdown. Pass `warnThreshold` to `<Context>` / `<kc-context>` to override the 70% default.',
+        story: '`usedTokens / maxTokens` > `warnThreshold` (default 70%) → yellow meter. Add `reasoningTokens` to surface a reasoning row in the breakdown. Pass `warnThreshold` to `<Context>` / `<kai-context>` to override the 70% default.',
       },
     },
   },
@@ -102,7 +102,7 @@ export const HighUsage: Story = {
   parameters: {
     docs: {
       description: {
-        story: '`usedTokens / maxTokens` > `dangerThreshold` (default 90%) → red meter. Pass `dangerThreshold` to `<Context>` / `<kc-context>` to override the 90% default. Signal to the user to start a new conversation.',
+        story: '`usedTokens / maxTokens` > `dangerThreshold` (default 90%) → red meter. Pass `dangerThreshold` to `<Context>` / `<kai-context>` to override the 90% default. Signal to the user to start a new conversation.',
       },
     },
   },
@@ -163,7 +163,7 @@ export const InHeaderBar: Story = {
   parameters: {
     docs: {
       description: {
-        story: '`Context` (or `<kc-context>`) is a plain inline element — place it anywhere in your header. Here it sits next to a `ModelSwitcher`. Drive both from reactive signals that you update after each API response.',
+        story: '`Context` (or `<kai-context>`) is a plain inline element — place it anywhere in your header. Here it sits next to a `ModelSwitcher`. Drive both from reactive signals that you update after each API response.',
       },
     },
   },

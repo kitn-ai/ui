@@ -54,28 +54,28 @@ An HTML attribute is always a string. Passing `messages`, `models`, `context`, `
 
 ```js
 // Works — set the property in JavaScript
-const chat = document.querySelector('kc-chat');
+const chat = document.querySelector('kai-chat');
 chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
 ```
 
 ```html
 <!-- Fails — an array can't be an HTML attribute -->
-<kc-chat messages="[...]"></kc-chat>
+<kai-chat messages="[...]"></kai-chat>
 ```
 
 Only scalar props — `placeholder`, `loading`, `theme` — work as attributes.
 
-### 2 — Events are non-bubbling `kc-*` CustomEvents
+### 2 — Events are non-bubbling `kai-*` CustomEvents
 
 Listen directly on the element, not on a parent:
 
 ```js
-chat.addEventListener('kc-submit', (e) => {
+chat.addEventListener('kai-submit', (e) => {
   console.log(e.detail.value); // the text the user typed
 });
 ```
 
-Common events: `kc-submit`, `kc-feedback`, `kc-model-change`, `kc-new-chat`, `kc-select`.
+Common events: `kai-submit`, `kai-feedback`, `kai-model-change`, `kai-new-chat`, `kai-select`.
 
 ### 3 — Streaming requires a new array and a new object on every chunk
 
@@ -98,10 +98,10 @@ The same rule applies to every array/object property: always assign a new refere
 ```js
 import '@kitn.ai/ui/elements';
 
-const chat = document.querySelector('kc-chat');
+const chat = document.querySelector('kai-chat');
 chat.messages = [];
 
-chat.addEventListener('kc-submit', async (e) => {
+chat.addEventListener('kai-submit', async (e) => {
   const userText = e.detail.value;
 
   // Append user message — new array
@@ -141,4 +141,4 @@ This is the source from which `llms.txt` and `llms-full.txt` are generated. IDE 
 ## Related
 
 - [Installation](/chat/guides/installation/) — install the package and register the web components
-- [Getting Started](/chat/guides/getting-started/) — first steps with `<kc-chat>`
+- [Getting Started](/chat/guides/getting-started/) — first steps with `<kai-chat>`

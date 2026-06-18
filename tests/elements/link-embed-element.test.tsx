@@ -9,18 +9,18 @@ import { configureEmbedAllowlist, __resetEmbedAllowlistForTests } from '../../sr
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 afterEach(() => {
-  document.querySelectorAll('kc-link-preview, kc-embed').forEach((e) => e.remove());
+  document.querySelectorAll('kai-link-preview, kai-embed').forEach((e) => e.remove());
   __resetEmbedAllowlistForTests();
 });
 
-test('both kc-link-preview and kc-embed register', () => {
-  expect(customElements.get('kc-link-preview')).toBeTruthy();
-  expect(customElements.get('kc-embed')).toBeTruthy();
+test('both kai-link-preview and kai-embed register', () => {
+  expect(customElements.get('kai-link-preview')).toBeTruthy();
+  expect(customElements.get('kai-embed')).toBeTruthy();
 });
 
-describe('kc-link-preview element', () => {
+describe('kai-link-preview element', () => {
   test('renders the preview from the data property', async () => {
-    const el = document.createElement('kc-link-preview') as HTMLElement & {
+    const el = document.createElement('kai-link-preview') as HTMLElement & {
       cardId: string;
       data: unknown;
     };
@@ -34,8 +34,8 @@ describe('kc-link-preview element', () => {
     expect(root.textContent).toContain('Example');
   });
 
-  test('activating the card dispatches a bubbling, composed kc-card open event', async () => {
-    const el = document.createElement('kc-link-preview') as HTMLElement & {
+  test('activating the card dispatches a bubbling, composed kai-card open event', async () => {
+    const el = document.createElement('kai-link-preview') as HTMLElement & {
       cardId: string;
       data: unknown;
     };
@@ -59,9 +59,9 @@ describe('kc-link-preview element', () => {
   });
 });
 
-describe('kc-embed element', () => {
+describe('kai-embed element', () => {
   test('facade has NO iframe before play, exactly one after, open bubbles', async () => {
-    const el = document.createElement('kc-embed') as HTMLElement & {
+    const el = document.createElement('kai-embed') as HTMLElement & {
       cardId: string;
       data: unknown;
     };
@@ -76,7 +76,7 @@ describe('kc-embed element', () => {
     await flush();
     expect(root.querySelectorAll('iframe')).toHaveLength(1);
 
-    // The "Open on YouTube" affordance bubbles a composed kc-card open event.
+    // The "Open on YouTube" affordance bubbles a composed kai-card open event.
     let received: CardEvent | undefined;
     document.addEventListener(CARD_EVENT_NAME, (e) => {
       received = (e as CustomEvent<CardEvent>).detail;
@@ -89,7 +89,7 @@ describe('kc-embed element', () => {
   });
 
   test('generic embed is blocked unless its origin is allowlisted', async () => {
-    const el = document.createElement('kc-embed') as HTMLElement & {
+    const el = document.createElement('kai-embed') as HTMLElement & {
       cardId: string;
       data: unknown;
     };
@@ -102,7 +102,7 @@ describe('kc-embed element', () => {
 
     // Allowlist + re-render a fresh element → now playable.
     configureEmbedAllowlist(['https://player.example.com']);
-    const el2 = document.createElement('kc-embed') as HTMLElement & {
+    const el2 = document.createElement('kai-embed') as HTMLElement & {
       cardId: string;
       data: unknown;
     };

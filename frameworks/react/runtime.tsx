@@ -30,7 +30,7 @@ export function createWebComponent<P extends WebComponentProps>(
   tagName: string,
   /** DOM-property names to assign from props (incl. `theme`). */
   propNames: readonly string[],
-  /** Map of React handler prop → DOM event name, e.g. `{ onMessageAction: 'kc-message-action' }`. */
+  /** Map of React handler prop → DOM event name, e.g. `{ onMessageAction: 'kai-message-action' }`. */
   eventMap: Record<string, string>,
 ): ForwardRefExoticComponent<PropsWithoutRef<P> & RefAttributes<HTMLElement>> {
   const eventEntries = Object.entries(eventMap);

@@ -1,5 +1,5 @@
 /**
- * kc-chat React example — using the generated wrappers.
+ * kai-chat React example — using the generated wrappers.
  *
  * The kit is built with SolidJS but ships framework-agnostic custom elements.
  * `@kitn.ai/ui/react` provides typed React wrappers (Chat, PromptInput,
@@ -251,7 +251,7 @@ export default function App() {
       >
         <span className="topbar-brand">
           <img src="../shared/logo.svg" alt="" width={20} height={20} />
-          kc-chat · React example (generated wrappers)
+          kai-chat · React example (generated wrappers)
         </span>
 
         <button

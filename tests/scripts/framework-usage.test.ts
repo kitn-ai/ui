@@ -4,17 +4,17 @@ import { buildSnippets } from '../../scripts/gen-framework-usage.mjs';
 const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 
 const artifact = {
-  tag: 'kc-artifact',
+  tag: 'kai-artifact',
   displayName: 'Artifact',
   props: [
     { name: 'files', optional: false, scalar: false },
     { name: 'tab', optional: true, scalar: true },
   ],
-  events: [{ name: 'kc-navigate', detail: 'string' }],
+  events: [{ name: 'kai-navigate', detail: 'string' }],
 };
 
 const noBindings = {
-  tag: 'kc-foo',
+  tag: 'kai-foo',
   displayName: 'Foo',
   props: [],
   events: [],
@@ -31,9 +31,9 @@ describe('buildSnippets', () => {
     const s = buildSnippets(artifact, true);
     expect(s.html).toContain('<script type="module" src=');
     expect(s.html).toContain(CDN_ELEMENTS);
-    expect(s.html).toContain('<kc-artifact');
+    expect(s.html).toContain('<kai-artifact');
     expect(s.html).toContain('el.files =');
-    expect(s.html).toContain("addEventListener('kc-navigate'");
+    expect(s.html).toContain("addEventListener('kai-navigate'");
     expect(s.html).not.toContain("import '@kitn.ai/ui/elements'");
   });
   it('uses Vue .prop binding for non-scalar props and Angular bracket binding', () => {
@@ -47,7 +47,7 @@ describe('buildSnippets', () => {
   });
   it('binds scalar required props as attrs in HTML and :name in Vue (no .prop)', () => {
     const withScalar = {
-      tag: 'kc-embed',
+      tag: 'kai-embed',
       displayName: 'Embed',
       props: [{ name: 'src', optional: false, scalar: true }],
       events: [],
@@ -68,17 +68,17 @@ describe('buildSnippets', () => {
     });
     it('Vue: tag on own line, indented bindings, closing on own line', () => {
       const s = buildSnippets(artifact, true);
-      expect(s.vue).toMatch(/<kc-artifact\n/);
+      expect(s.vue).toMatch(/<kai-artifact\n/);
       expect(s.vue).toContain('\n  :files.prop="files"');
-      expect(s.vue).toContain('\n  @kc-navigate="onNavigate"');
+      expect(s.vue).toContain('\n  @kai-navigate="onNavigate"');
       expect(s.vue).toMatch(/\n\/>/);
     });
     it('Angular: tag on own line, indented bindings, closing on own line', () => {
       const s = buildSnippets(artifact, true);
-      expect(s.angular).toMatch(/<kc-artifact\n/);
+      expect(s.angular).toMatch(/<kai-artifact\n/);
       expect(s.angular).toContain('\n  [files]="files"');
-      expect(s.angular).toContain('\n  (kc-navigate)="onNavigate($event)"');
-      expect(s.angular).toMatch(/\n><\/kc-artifact>/);
+      expect(s.angular).toContain('\n  (kai-navigate)="onNavigate($event)"');
+      expect(s.angular).toMatch(/\n><\/kai-artifact>/);
     });
   });
 
@@ -88,19 +88,19 @@ describe('buildSnippets', () => {
       expect(s.react).toContain('<Foo />');
       expect(s.react).not.toMatch(/<Foo\n/);
     });
-    it('Vue: compact <kc-foo />', () => {
+    it('Vue: compact <kai-foo />', () => {
       const s = buildSnippets(noBindings, false);
-      expect(s.vue).toBe('<kc-foo />');
+      expect(s.vue).toBe('<kai-foo />');
     });
-    it('Angular: compact <kc-foo></kc-foo>', () => {
+    it('Angular: compact <kai-foo></kai-foo>', () => {
       const s = buildSnippets(noBindings, false);
-      expect(s.angular).toBe('<kc-foo></kc-foo>');
+      expect(s.angular).toBe('<kai-foo></kai-foo>');
     });
-    it('Svelte compact: <kc-foo></kc-foo> with script block, no binding lines', () => {
+    it('Svelte compact: <kai-foo></kai-foo> with script block, no binding lines', () => {
       const s = buildSnippets(noBindings, false);
       expect(s.svelte).toContain("import '@kitn.ai/ui/elements'");
-      expect(s.svelte).toContain('<kc-foo></kc-foo>');
-      expect(s.svelte).not.toMatch(/<kc-foo\n/);
+      expect(s.svelte).toContain('<kai-foo></kai-foo>');
+      expect(s.svelte).not.toMatch(/<kai-foo\n/);
     });
   });
 
@@ -115,14 +115,14 @@ describe('buildSnippets', () => {
     });
     it('binds events with on:eventName={handler}', () => {
       const s = buildSnippets(artifact, true);
-      expect(s.svelte).toContain('on:kc-navigate={onNavigate}');
+      expect(s.svelte).toContain('on:kai-navigate={onNavigate}');
     });
     it('multi-line: tag on own line, indented bindings, closing on own line', () => {
       const s = buildSnippets(artifact, true);
-      expect(s.svelte).toMatch(/<kc-artifact\n/);
+      expect(s.svelte).toMatch(/<kai-artifact\n/);
       expect(s.svelte).toContain('\n  {files}');
-      expect(s.svelte).toContain('\n  on:kc-navigate={onNavigate}');
-      expect(s.svelte).toMatch(/\n><\/kc-artifact>/);
+      expect(s.svelte).toContain('\n  on:kai-navigate={onNavigate}');
+      expect(s.svelte).toMatch(/\n><\/kai-artifact>/);
     });
     it('is present for all elements (not gated on hasSolid)', () => {
       const withSolid = buildSnippets(artifact, true);

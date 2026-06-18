@@ -1,5 +1,5 @@
 // tests/elements/tasks-element-element.test.tsx
-// Contract integration for <kc-tasks>: row toggles are quiet; only confirm emits
+// Contract integration for <kai-tasks>: row toggles are quiet; only confirm emits
 // `submit` with ids in input order; select-all + min/max/allowEmpty gating.
 import '../../src/elements/tasks';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
@@ -16,7 +16,7 @@ function listen(): { events: CardEvent[]; off: () => void } {
 }
 
 afterEach(() => {
-  document.querySelectorAll('kc-tasks').forEach((e) => e.remove());
+  document.querySelectorAll('kai-tasks').forEach((e) => e.remove());
 });
 
 const PLAN: TasksCardData = {
@@ -31,7 +31,7 @@ const PLAN: TasksCardData = {
 };
 
 async function mount(data: TasksCardData, cardId = 'card-plan-42') {
-  const el = document.createElement('kc-tasks') as HTMLElement & { data: TasksCardData };
+  const el = document.createElement('kai-tasks') as HTMLElement & { data: TasksCardData };
   el.setAttribute('card-id', cardId);
   el.data = data;
   document.body.appendChild(el);
@@ -52,8 +52,8 @@ const confirmBtn = (root: ShadowRoot): HTMLButtonElement =>
     (b) => b.textContent?.includes('Run selected') || b.textContent?.includes('Confirm'),
   )!;
 
-test('kc-tasks registers', () => {
-  expect(customElements.get('kc-tasks')).toBeTruthy();
+test('kai-tasks registers', () => {
+  expect(customElements.get('kai-tasks')).toBeTruthy();
 });
 
 test('mount emits a bubbling `ready`', async () => {

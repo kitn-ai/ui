@@ -14,14 +14,14 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-card>` — the shared, presentational card chrome every native card composes
+ * `<kai-card>` — the shared, presentational card chrome every native card composes
  * from: an optional media region (`slot="media"`), a heading + description, a body
  * (default slot), an actions footer (`slot="actions"`), and one consistent inline
  * **error** state (`error-message`). It emits **no** events and reads no context —
- * it is chrome only; the cards that compose it (e.g. `<kc-form>`) own the contract
+ * it is chrome only; the cards that compose it (e.g. `<kai-form>`) own the contract
  * interaction. Isolated in Shadow DOM; theme-aware via the shared kit tokens.
  */
-defineWebComponent<Props>('kc-card', {
+defineWebComponent<Props>('kai-card', {
   heading: undefined,
   description: undefined,
   errorMessage: undefined,

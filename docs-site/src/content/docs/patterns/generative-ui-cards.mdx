@@ -9,7 +9,7 @@ import { ConfirmCardDemo, ChoiceCardDemo, FormCardDemo } from '../../../componen
 
 ## How it works
 
-Feed `<kc-cards>` an array of **`CardEnvelope`** objects and a **`CardPolicy`**. Each envelope has a `type` (`confirm`, `choice`, `form`), a stable `id`, a `title`, and `data` that conforms to that type's schema. When the user interacts, the matching `CardPolicy` callback fires — no event listeners needed.
+Feed `<kai-cards>` an array of **`CardEnvelope`** objects and a **`CardPolicy`**. Each envelope has a `type` (`confirm`, `choice`, `form`), a stable `id`, a `title`, and `data` that conforms to that type's schema. When the user interacts, the matching `CardPolicy` callback fires — no event listeners needed.
 
 ```js
 import '@kitn.ai/ui/elements';
@@ -49,7 +49,7 @@ cards.policy = {
 
 Each card type below is live — interact with it and watch its policy events land in the **Console** beneath the preview.
 
-## `kc-confirm` — ask for a decision
+## `kai-confirm` — ask for a decision
 
 A `confirm` card poses a question and offers one or more actions. Tapping an action fires `onAction(cardId, action)`, where `action` is the button's `id`.
 
@@ -70,7 +70,7 @@ A `confirm` card poses a question and offers one or more actions. Tapping an act
 }
 ```
 
-## `kc-choice` — pick from options
+## `kai-choice` — pick from options
 
 A `choice` card presents a list of options; the user selects one and submits. The chosen option's `id` arrives via `onAction(cardId, optionId)`.
 
@@ -93,7 +93,7 @@ A `choice` card presents a list of options; the user selects one and submits. Th
 }
 ```
 
-## `kc-form` — collect structured input
+## `kai-form` — collect structured input
 
 A `form` card renders a JSON Schema subset as fields, validates on submit, and delivers the values object through `onSubmit(cardId, data)`. Use `x-kc-*` hints to pick widgets and control layout.
 
@@ -118,7 +118,7 @@ A `form` card renders a JSON Schema subset as fields, validates on submit, and d
 
 ## Streaming cards in as the agent decides
 
-Append envelopes to the array as the agent generates them — `<kc-cards>` renders whatever is in the array at that moment:
+Append envelopes to the array as the agent generates them — `<kai-cards>` renders whatever is in the array at that moment:
 
 ```js
 // Start with nothing; add cards as the model emits them.
@@ -149,8 +149,8 @@ cards.cards = [
 
 ## Next steps
 
-- **[`kc-cards` reference](/chat/components/cards/)** — `types` map for custom card tags, all props.
-- **[`kc-confirm` reference](/chat/components/confirm/)** — `autofocus`, `tone`, full action shapes.
-- **[`kc-choice` reference](/chat/components/choice/)** — `allowOther`, media options.
-- **[`kc-form` reference](/chat/components/form/)** — full JSON Schema subset + every `x-kc-*` hint.
-- **[Drop-in chat](/chat/examples/drop-in-chat/)** — wire cards into a streaming conversation with `<kc-chat>`.
+- **[`kai-cards` reference](/chat/components/cards/)** — `types` map for custom card tags, all props.
+- **[`kai-confirm` reference](/chat/components/confirm/)** — `autofocus`, `tone`, full action shapes.
+- **[`kai-choice` reference](/chat/components/choice/)** — `allowOther`, media options.
+- **[`kai-form` reference](/chat/components/form/)** — full JSON Schema subset + every `x-kc-*` hint.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — wire cards into a streaming conversation with `<kai-chat>`.

@@ -1,5 +1,5 @@
 // tests/elements/confirm-card-element.test.tsx
-// Contract integration for <kc-confirm>: the bubbling `kc-card` CustomEvent reaches
+// Contract integration for <kai-confirm>: the bubbling `kai-card` CustomEvent reaches
 // a document listener with the right `action` payload + resolved single-shot state.
 import '../../src/elements/confirm-card';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
@@ -16,7 +16,7 @@ function listen(): { events: CardEvent[]; off: () => void } {
 }
 
 afterEach(() => {
-  document.querySelectorAll('kc-confirm').forEach((e) => e.remove());
+  document.querySelectorAll('kai-confirm').forEach((e) => e.remove());
 });
 
 const APPROVE: ConfirmCardData = {
@@ -29,7 +29,7 @@ const APPROVE: ConfirmCardData = {
 };
 
 async function mount(data: ConfirmCardData, cardId = 'card-approve-1') {
-  const el = document.createElement('kc-confirm') as HTMLElement & { data: ConfirmCardData };
+  const el = document.createElement('kai-confirm') as HTMLElement & { data: ConfirmCardData };
   el.setAttribute('card-id', cardId);
   el.data = data;
   document.body.appendChild(el);
@@ -37,8 +37,8 @@ async function mount(data: ConfirmCardData, cardId = 'card-approve-1') {
   return el;
 }
 
-test('kc-confirm registers', () => {
-  expect(customElements.get('kc-confirm')).toBeTruthy();
+test('kai-confirm registers', () => {
+  expect(customElements.get('kai-confirm')).toBeTruthy();
 });
 
 test('mount emits a bubbling `ready` reaching the document', async () => {

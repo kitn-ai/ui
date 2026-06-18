@@ -5,7 +5,7 @@ description: Import kitn-chat's headless primitives, UI primitives, and feature 
 
 import { Aside } from '@astrojs/starlight/components';
 
-The `kc-*` elements are the fast path. When you want full control over markup and layout — and you're in a Solid app — skip the wrapper and import the underlying pieces from `@kitn.ai/ui`. You compose them in JSX, and your bundler tree-shakes away whatever you don't use.
+The `kai-*` elements are the fast path. When you want full control over markup and layout — and you're in a Solid app — skip the wrapper and import the underlying pieces from `@kitn.ai/ui`. You compose them in JSX, and your bundler tree-shakes away whatever you don't use.
 
 This page is the catalog, organized by the [four layers](/chat/guides/primitives/architecture/). For a full streaming chat built this way, see the [Solid guide](/chat/guides/frameworks/solid/).
 
@@ -23,7 +23,7 @@ The `.` entry exports raw TSX. Your bundler compiles and tree-shakes it alongsid
 
 ## Headless primitives
 
-Behavior with no markup — the logic you'd otherwise rewrite per app. These are the layer the `kc-*` elements don't expose, so importing them directly is the main reason to drop down here.
+Behavior with no markup — the logic you'd otherwise rewrite per app. These are the layer the `kai-*` elements don't expose, so importing them directly is the main reason to drop down here.
 
 ```tsx
 import {
@@ -94,10 +94,10 @@ import {
 
 ## Mix the two
 
-Native components and `kc-*` elements ship in the same package and coexist. Compose primitives where you want control, and drop a `<kc-chat>` shell where you want batteries included — even on different screens of the same app.
+Native components and `kai-*` elements ship in the same package and coexist. Compose primitives where you want control, and drop a `<kai-chat>` shell where you want batteries included — even on different screens of the same app.
 
 <Aside type="note" title="In Solid, pass rich data with prop:">
-When you do use a `kc-*` element inside Solid, bind arrays and objects with `prop:` (`prop:messages={messages()}`) so Solid sets a DOM property instead of stringifying it, and listen with the `on:` namespace (`on:kc-submit`).
+When you do use a `kai-*` element inside Solid, bind arrays and objects with `prop:` (`prop:messages={messages()}`) so Solid sets a DOM property instead of stringifying it, and listen with the `on:` namespace (`on:kai-submit`).
 </Aside>
 
 ## Next

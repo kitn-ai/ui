@@ -49,26 +49,26 @@ interface Props extends Record<string, unknown> {
   dangerThreshold?: number;
 }
 
-/** Events fired by `<kc-context>`. */
+/** Events fired by `<kai-context>`. */
 interface Events {
   /**
    * Fires when the computed severity level changes (ok → warn → danger or back).
    * `detail.level` is `'ok'`, `'warn'`, or `'danger'`.
    */
-  'kc-threshold-change': { level: ContextSeverity };
+  'kai-threshold-change': { level: ContextSeverity };
 }
 
 /**
- * `<kc-context>` — a token/context-window usage meter with a hover-card
+ * `<kai-context>` — a token/context-window usage meter with a hover-card
  * breakdown (input/output/reasoning/cache + estimated cost). Data via the
  * `context` property.
  *
  * **Color thresholds** are configurable via `warnThreshold` (default `0.7`)
  * and `dangerThreshold` (default `0.9`). When the computed severity level
- * changes, a `kc-threshold-change` event fires with `detail.level` set to
+ * changes, a `kai-threshold-change` event fires with `detail.level` set to
  * `'ok'`, `'warn'`, or `'danger'`.
  */
-defineWebComponent<Props, Events>('kc-context', {
+defineWebComponent<Props, Events>('kai-context', {
   context: undefined,
   warnThreshold: undefined,
   dangerThreshold: undefined,
@@ -82,10 +82,10 @@ defineWebComponent<Props, Events>('kc-context', {
     return computeSeverity(ctx.usedTokens / ctx.maxTokens, warn(), danger());
   });
 
-  // Fire kc-threshold-change only when the level actually changes.
+  // Fire kai-threshold-change only when the level actually changes.
   createEffect(on(severity, (level, prev) => {
     if (prev !== undefined && level !== prev) {
-      dispatch('kc-threshold-change', { level });
+      dispatch('kai-threshold-change', { level });
     }
   }));
 

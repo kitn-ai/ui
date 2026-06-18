@@ -11,18 +11,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-skills</p>
+<p class="kc-tag-sub">kai-skills</p>
 
-<p class="kc-lede">A horizontal strip of skill badges — set a JS array or compose declarative `<kc-skill>` children to annotate a message with the tools it used.</p>
+<p class="kc-lede">A horizontal strip of skill badges — set a JS array or compose declarative `<kai-skill>` children to annotate a message with the tools it used.</p>
 
 <Facts items={['Shadow DOM', 'Property or declarative children', 'Badges wrap automatically', '2 composition paths']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-skills" />
+<Playground client:only="solid" tag="kai-skills" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-skills>` beneath an assistant message row to annotate which tools were active. Use the `skills` property when skill data comes from app state; use declarative `<kc-skill>` children for server-rendered HTML with no JS wiring.
+Place `<kai-skills>` beneath an assistant message row to annotate which tools were active. Use the `skills` property when skill data comes from app state; use declarative `<kai-skill>` children for server-rendered HTML with no JS wiring.
 </Aside>
 
 ## Usage
@@ -30,7 +30,7 @@ Place `<kc-skills>` beneath an assistant message row to annotate which tools wer
 Assign the `skills` property after the element upgrades — arrays can't be HTML attributes:
 
 ```html
-<kc-skills id="skills"></kc-skills>
+<kai-skills id="skills"></kai-skills>
 <script type="module">
   import '@kitn.ai/ui/elements';
   document.getElementById('skills').skills = [
@@ -40,7 +40,7 @@ Assign the `skills` property after the element upgrades — arrays can't be HTML
 </script>
 ```
 
-- **Declarative path** — nest `<kc-skill id="…">Label</kc-skill>` children directly; useful for server-rendered HTML with no JS wiring.
+- **Declarative path** — nest `<kai-skill id="…">Label</kai-skill>` children directly; useful for server-rendered HTML with no JS wiring.
 - **Mixed** — when both are provided, prop items render first and declarative children are appended after.
 - **SolidJS** — import `MessageSkills` from `@kitn.ai/ui` and pass a `skills` prop instead.
 
@@ -48,24 +48,24 @@ Assign the `skills` property after the element upgrades — arrays can't be HTML
 
 ### Two Skills
 
-<Example client:visible tag="kc-skills" data="twoSkills" />
+<Example client:visible tag="kai-skills" data="twoSkills" />
 
 ### Multiple Skills
 
 Badges wrap horizontally when they overflow — no extra layout work needed.
 
-<Example client:visible tag="kc-skills" data="richSkills" />
+<Example client:visible tag="kai-skills" data="richSkills" />
 
 ### Declarative Composition
 
-<Example client:visible tag="kc-skills" />
+<Example client:visible tag="kai-skills" />
 
 ## Props
 
-<PropTable tag="kc-skills" />
+<PropTable tag="kai-skills" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-skills" />
+<ComposedFrom tag="kai-skills" />
 
 <NeedAHand />

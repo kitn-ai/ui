@@ -1,9 +1,9 @@
-/** Voice assistant demo — a hands-free chat app built on <kc-chat>.
+/** Voice assistant demo — a hands-free chat app built on <kai-chat>.
  *
- *  kc-chat's built-in `voice` attribute renders a mic button in the input
- *  toolbar and fires `kc-voice` when clicked. Real mic capture can't run in a
+ *  kai-chat's built-in `voice` attribute renders a mic button in the input
+ *  toolbar and fires `kai-voice` when clicked. Real mic capture can't run in a
  *  docs sandbox, so the mic click inserts a realistic canned transcript and
- *  drives the normal kc-submit streaming flow. The spoken-reply half is REAL:
+ *  drives the normal kai-submit streaming flow. The spoken-reply half is REAL:
  *  the finished reply is read aloud via the Web Speech API, feature-guarded
  *  so unsupported browsers degrade silently. A "Speak reply" control re-reads
  *  the latest answer on demand. */
@@ -124,7 +124,7 @@ export default function VoiceAssistantDemo(props: Props) {
     timer = window.setTimeout(tick, 220);
   };
 
-  // Mic button (kc-voice) → simulate speech-to-text with a canned transcript.
+  // Mic button (kai-voice) → simulate speech-to-text with a canned transcript.
   const onVoice = () => {
     const text = TRANSCRIPTS[transcriptIndex % TRANSCRIPTS.length];
     transcriptIndex += 1;
@@ -148,8 +148,8 @@ export default function VoiceAssistantDemo(props: Props) {
     if (props.placeholder) (host as any).placeholder = props.placeholder;
     host.setAttribute('theme', theme());
 
-    host.addEventListener('kc-voice', onVoice);
-    host.addEventListener('kc-submit', onSubmit);
+    host.addEventListener('kai-voice', onVoice);
+    host.addEventListener('kai-submit', onSubmit);
 
     setReady(true);
 
@@ -162,8 +162,8 @@ export default function VoiceAssistantDemo(props: Props) {
     onCleanup(() => {
       clearTimeout(timer);
       stopSpeaking();
-      host?.removeEventListener('kc-voice', onVoice);
-      host?.removeEventListener('kc-submit', onSubmit);
+      host?.removeEventListener('kai-voice', onVoice);
+      host?.removeEventListener('kai-submit', onSubmit);
       obs.disconnect();
     });
   });
@@ -174,7 +174,7 @@ export default function VoiceAssistantDemo(props: Props) {
       style={{ height: props.height ?? '600px', display: 'flex', 'flex-direction': 'column' }}
     >
       {/* @ts-expect-error custom element */}
-      <kc-chat
+      <kai-chat
         ref={(el: HTMLElement) => (host = el as any)}
         style={{ display: 'block', flex: '1', 'min-height': '0' }}
       />

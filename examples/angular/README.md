@@ -1,4 +1,4 @@
-# kc-chat — Angular example
+# kai-chat — Angular example
 
 A minimal, runnable Angular 19 standalone app demonstrating how to use the
 `@kitn.ai/ui` web components natively — **no wrappers needed**.
@@ -6,7 +6,7 @@ A minimal, runnable Angular 19 standalone app demonstrating how to use the
 Angular binds to custom-element DOM properties with `[prop]="value"` and
 listens for CustomEvents with `(eventname)="handler($event)"`.  Adding
 `CUSTOM_ELEMENTS_SCHEMA` to the component is all that's needed to allow the
-`kc-*` tags.
+`kai-*` tags.
 
 ## Prerequisites
 
@@ -45,7 +45,7 @@ npm run typecheck
 |---|---|
 | Register elements | `import '@kitn.ai/ui/elements'` (side-effect, in `ngOnInit`) |
 | Pass arrays/objects | `[groups]="groups"` — sets the DOM *property*, not an attribute string |
-| Listen for events | `(kc-conversation-select)="onSelect($event)"` — `($event as CustomEvent).detail` has the payload |
+| Listen for events | `(kai-conversation-select)="onSelect($event)"` — `($event as CustomEvent).detail` has the payload |
 | Allow unknown tags | `schemas: [CUSTOM_ELEMENTS_SCHEMA]` on the standalone component |
 | Theme | `[theme]="theme()"` — passes `'light' \| 'dark' \| 'auto'` |
 
@@ -57,7 +57,7 @@ so the example exercises the in-repo build without needing a published package.
 - `src/app/app.component.ts` — standalone component with `CUSTOM_ELEMENTS_SCHEMA`,
   Angular Signals state, and all event handlers
 - `src/app/app.component.html` — template with `[prop]` / `(event)` bindings on
-  `<kc-workspace>` and `<kc-prompt-input>`
+  `<kai-workspace>` and `<kai-prompt-input>`
 - `vite.config.ts` — local-build aliases
 - `src/stubs/` — minimal `.d.ts` stubs that redirect `@kitn.ai/ui/elements`
   type resolution away from the kit's SolidJS source (runtime uses the real bundle)

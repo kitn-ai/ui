@@ -1,5 +1,5 @@
 // src/primitives/link-preview.ts
-// The optional, app-supplied bare-URL → metadata hook for <kc-link-preview>, plus the
+// The optional, app-supplied bare-URL → metadata hook for <kai-link-preview>, plus the
 // `link` card's data type. The card stays PURE: it renders from supplied metadata
 // and never touches the network. CORS forbids reading cross-origin HTML in the
 // browser, so there is intentionally NO built-in network implementation here — an

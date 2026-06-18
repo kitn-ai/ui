@@ -39,10 +39,10 @@ import {
 } from './form-widgets';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Types (the JSON-Schema subset kc-form renders) — see form.schema.json.
+// Types (the JSON-Schema subset kai-form renders) — see form.schema.json.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** A field definition (the JSON Schema subset kc-form renders). */
+/** A field definition (the JSON Schema subset kai-form renders). */
 export interface FormField {
   type: 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object';
   title?: string;
@@ -362,9 +362,9 @@ export interface FormProps {
   /** The envelope title rendered in the card chrome. */
   heading?: string;
   /** Optional explicit CardHost (otherwise read from a CardProvider, otherwise the
-   *  bubbling `kc-card` CustomEvent off `hostElement`). */
+   *  bubbling `kai-card` CustomEvent off `hostElement`). */
   host?: CardHost;
-  /** The custom-element host node, for the bubbling `kc-card` fallback emit. */
+  /** The custom-element host node, for the bubbling `kai-card` fallback emit. */
   hostElement?: HTMLElement;
   class?: string;
   /** When set, render the chromed read-only view instead of the form inputs. */
@@ -378,10 +378,10 @@ const DEFAULT_FORM: FormDefinition = { type: 'object', properties: {} };
  * inside `Card` chrome, validates input against that schema, and emits the
  * collected, coerced, validated object up the Card contract as `submit`.
  * Reads context/emits via a `CardProvider` when present, else the bubbling
- * `kc-card` CustomEvent.
+ * `kai-card` CustomEvent.
  */
 export function Form(props: FormProps): JSX.Element {
-  const merged = mergeProps({ cardId: 'kc-form' }, props);
+  const merged = mergeProps({ cardId: 'kai-form' }, props);
   const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution']);
 
   const ctxHost = useCardHost();

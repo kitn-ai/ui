@@ -12,7 +12,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-attachments</p>
+<p class="kc-tag-sub">kai-attachments</p>
 
 <p class="kc-lede">Render a set of file attachments — one element, three presentations chosen by a single attribute. Tiles for a gallery, chips for inline, rows for a list.</p>
 
@@ -20,7 +20,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-attachments" />
+<Playground client:only="solid" tag="kai-attachments" />
 
 <Aside type="tip" title="When to use">
 Show files a user attached (or the assistant produced) **anywhere in a chat** — the composer, a message body, a sources rail. Set `variant` to fit the space: `grid` for a gallery, `inline` for a compact chip row, `list` for a detailed column.
@@ -28,7 +28,7 @@ Show files a user attached (or the assistant produced) **anywhere in a chat** �
 
 ## Usage
 
-Set `items` in JavaScript (arrays can't be HTML attributes); choose the presentation with the `variant`, `hover-card`, and `removable` attributes; listen for `kc-remove`.
+Set `items` in JavaScript (arrays can't be HTML attributes); choose the presentation with the `variant`, `hover-card`, and `removable` attributes; listen for `kai-remove`.
 
 ## Examples
 
@@ -36,42 +36,42 @@ Set `items` in JavaScript (arrays can't be HTML attributes); choose the presenta
 
 `variant="grid"` — square image tiles for a gallery.
 
-<Example client:visible tag="kc-attachments" config={{ variant: 'grid' }} data="images" />
+<Example client:visible tag="kai-attachments" config={{ variant: 'grid' }} data="images" />
 
 ### Inline
 
 `variant="inline"` — a compact icon + label chip per file, for a composer or message body.
 
-<Example client:visible tag="kc-attachments" config={{ variant: 'inline' }} />
+<Example client:visible tag="kai-attachments" config={{ variant: 'inline' }} />
 
 ### List
 
 `variant="list"` — full-width rows with a preview thumbnail, filename and media type.
 
-<Example client:visible tag="kc-attachments" config={{ variant: 'list' }} />
+<Example client:visible tag="kai-attachments" config={{ variant: 'list' }} />
 
 ### Removable
 
-Add `removable` for a per-item remove button (the **×**); it fires the `kc-remove` event.
+Add `removable` for a per-item remove button (the **×**); it fires the `kai-remove` event.
 
-<Example client:visible tag="kc-attachments" config={{ variant: 'list', removable: true }} />
+<Example client:visible tag="kai-attachments" config={{ variant: 'list', removable: true }} />
 
 ### Hover preview
 
 Add `hover-card` to reveal each item's details on hover — useful on `grid`, where the tile shows only the image.
 
-<Example client:visible tag="kc-attachments" config={{ variant: 'grid', hoverCard: true }} data="images" />
+<Example client:visible tag="kai-attachments" config={{ variant: 'grid', hoverCard: true }} data="images" />
 
 ## Props
 
-<PropTable tag="kc-attachments" />
+<PropTable tag="kai-attachments" />
 
 ## Events
 
-<EventTable tag="kc-attachments" />
+<EventTable tag="kai-attachments" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-attachments" />
+<ComposedFrom tag="kai-attachments" />
 
 <NeedAHand />

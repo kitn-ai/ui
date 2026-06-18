@@ -1,4 +1,4 @@
-/** Live demo for the Workspace example page. Mounts <kc-workspace>, seeds it
+/** Live demo for the Workspace example page. Mounts <kai-workspace>, seeds it
  *  with sample conversations + a thread, and scripts a canned streaming reply
  *  on submit — identical approach to ChatDemo but using the single-element
  *  multi-conversation API. */
@@ -212,9 +212,9 @@ export default function WorkspaceDemo() {
     host.activeId = 'c1';
     host.setAttribute('theme', theme());
 
-    host.addEventListener('kc-conversation-select', onConversationSelect);
-    host.addEventListener('kc-new-chat', onNewChat);
-    host.addEventListener('kc-submit', onSubmit);
+    host.addEventListener('kai-conversation-select', onConversationSelect);
+    host.addEventListener('kai-new-chat', onNewChat);
+    host.addEventListener('kai-submit', onSubmit);
 
     setReady(true);
 
@@ -223,9 +223,9 @@ export default function WorkspaceDemo() {
 
     onCleanup(() => {
       clearTimeout(timer);
-      host?.removeEventListener('kc-conversation-select', onConversationSelect);
-      host?.removeEventListener('kc-new-chat', onNewChat);
-      host?.removeEventListener('kc-submit', onSubmit);
+      host?.removeEventListener('kai-conversation-select', onConversationSelect);
+      host?.removeEventListener('kai-new-chat', onNewChat);
+      host?.removeEventListener('kai-submit', onSubmit);
       obs.disconnect();
     });
   });
@@ -236,7 +236,7 @@ export default function WorkspaceDemo() {
       style={{ height: '560px' }}
     >
       {/* @ts-expect-error custom element */}
-      <kc-workspace ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', height: '100%' }} />
+      <kai-workspace ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', height: '100%' }} />
     </div>
   );
 }

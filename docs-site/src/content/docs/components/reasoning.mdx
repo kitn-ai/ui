@@ -12,7 +12,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-reasoning</p>
+<p class="kc-tag-sub">kai-reasoning</p>
 
 <p class="kc-lede">A collapsible thinking block that auto-expands while the model's thought streams in and collapses when streaming stops — no wiring required.</p>
 
@@ -20,10 +20,10 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-reasoning" />
+<Playground client:only="solid" tag="kai-reasoning" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-reasoning>` between the assistant message content and any tool calls whenever the model produces a chain-of-thought trace. Set `streaming` while the thought arrives and clear it when the stream ends — the element handles expand/collapse automatically. Use `open` for programmatic control, for instance to re-open a block from a parent UI button.
+Place `<kai-reasoning>` between the assistant message content and any tool calls whenever the model produces a chain-of-thought trace. Set `streaming` while the thought arrives and clear it when the stream ends — the element handles expand/collapse automatically. Use `open` for programmatic control, for instance to re-open a block from a parent UI button.
 </Aside>
 
 ## Usage
@@ -31,7 +31,7 @@ Place `<kc-reasoning>` between the assistant message content and any tool calls 
 Set `text` in JavaScript; toggle `streaming` to drive the auto-expand/collapse behaviour:
 
 ```html
-<kc-reasoning id="reason" label="Reasoning"></kc-reasoning>
+<kai-reasoning id="reason" label="Reasoning"></kai-reasoning>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -42,7 +42,7 @@ Set `text` in JavaScript; toggle `streaming` to drive the auto-expand/collapse b
   // Set while thought arrives; clear when stream ends.
   // reason.streaming = true;
 
-  reason.addEventListener('kc-open-change', (e) => {
+  reason.addEventListener('kai-open-change', (e) => {
     console.log('open:', e.detail.open);
   });
 </script>
@@ -59,42 +59,42 @@ Set `text` in JavaScript; toggle `streaming` to drive the auto-expand/collapse b
 
 A collapsed block with uncontrolled open state. Click the trigger to expand and collapse.
 
-<Example client:visible tag="kc-reasoning" />
+<Example client:visible tag="kai-reasoning" />
 
 ### Streaming
 
 `streaming` set to `true` auto-expands the block immediately, as it would while a model generates its chain-of-thought.
 
-<Example client:visible tag="kc-reasoning" config={{ streaming: true }} />
+<Example client:visible tag="kai-reasoning" config={{ streaming: true }} />
 
 ### Custom Label
 
 Override the trigger label with the `label` attribute to match your product's terminology.
 
-<Example client:visible tag="kc-reasoning" config={{ label: 'Thinking' }} />
+<Example client:visible tag="kai-reasoning" config={{ label: 'Thinking' }} />
 
 ### Markdown Rendering
 
 With `markdown` enabled (default), the text renders as styled markdown — headings, bold, code spans, and paragraphs.
 
-<Example client:visible tag="kc-reasoning" data="markdown" />
+<Example client:visible tag="kai-reasoning" data="markdown" />
 
 ### Markdown Disabled
 
 `markdown="false"` renders the text as plain pre-formatted content — useful for raw log output or content with literal backticks.
 
-<Example client:visible tag="kc-reasoning" config={{ markdown: false }} />
+<Example client:visible tag="kai-reasoning" config={{ markdown: false }} />
 
 ## Props
 
-<PropTable tag="kc-reasoning" />
+<PropTable tag="kai-reasoning" />
 
 ## Events
 
-<EventTable tag="kc-reasoning" />
+<EventTable tag="kai-reasoning" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-reasoning" />
+<ComposedFrom tag="kai-reasoning" />
 
 <NeedAHand />

@@ -8,7 +8,7 @@ const conversations: ConversationSummary[] = [{
 }];
 
 test('renders conversations and emits conversationselect', async () => {
-  const el = document.createElement('kc-conversations') as HTMLElement & {
+  const el = document.createElement('kai-conversations') as HTMLElement & {
     groups: ConversationGroup[]; conversations: ConversationSummary[]; activeId?: string;
   };
   el.groups = groups;
@@ -19,7 +19,7 @@ test('renders conversations and emits conversationselect', async () => {
   expect(el.shadowRoot!.textContent).toContain('Hello world');
 
   let selected: string | null = null;
-  el.addEventListener('kc-conversation-select', (e) => (selected = (e as CustomEvent).detail.id));
+  el.addEventListener('kai-conversation-select', (e) => (selected = (e as CustomEvent).detail.id));
   const item = el.shadowRoot!.querySelector('[data-conversation-id="c1"]') as HTMLElement;
   item.click();
   expect(selected).toBe('c1');
@@ -28,7 +28,7 @@ test('renders conversations and emits conversationselect', async () => {
 });
 
 test('does not emit old "select" event (breaking change)', async () => {
-  const el = document.createElement('kc-conversations') as HTMLElement & {
+  const el = document.createElement('kai-conversations') as HTMLElement & {
     groups: ConversationGroup[]; conversations: ConversationSummary[];
   };
   el.groups = groups;
@@ -37,7 +37,7 @@ test('does not emit old "select" event (breaking change)', async () => {
   await Promise.resolve();
 
   let selectFired = false;
-  el.addEventListener('kc-select', () => (selectFired = true));
+  el.addEventListener('kai-select', () => (selectFired = true));
   const item = el.shadowRoot!.querySelector('[data-conversation-id="c1"]') as HTMLElement;
   item.click();
   expect(selectFired).toBe(false);
@@ -46,7 +46,7 @@ test('does not emit old "select" event (breaking change)', async () => {
 });
 
 test('icon-only controls have accessible names (a11y A1)', async () => {
-  const el = document.createElement('kc-conversations') as HTMLElement & {
+  const el = document.createElement('kai-conversations') as HTMLElement & {
     groups: ConversationGroup[]; conversations: ConversationSummary[];
   };
   el.groups = groups;

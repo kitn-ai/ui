@@ -11,7 +11,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-image</p>
+<p class="kc-tag-sub">kai-image</p>
 
 <p class="kc-lede">Display a model-generated or in-memory image directly from a base64 string or raw byte array — no CDN upload, no hosted URL needed.</p>
 
@@ -19,10 +19,10 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-image" />
+<Playground client:only="solid" tag="kai-image" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-image>` when you receive raw image data from a model or API response and need to display it inline — inside a message bubble, a card body, or an artifact preview — without uploading first. The element is `display: inline-block` and fills its container width; constrain width on the parent as needed.
+Use `<kai-image>` when you receive raw image data from a model or API response and need to display it inline — inside a message bubble, a card body, or an artifact preview — without uploading first. The element is `display: inline-block` and fills its container width; constrain width on the parent as needed.
 </Aside>
 
 ## Usage
@@ -30,7 +30,7 @@ Use `<kc-image>` when you receive raw image data from a model or API response an
 Assign either `base64` (paired with `media-type`) or `bytes` as a property:
 
 ```html
-<kc-image id="img" media-type="image/png" alt="A generated chart"></kc-image>
+<kai-image id="img" media-type="image/png" alt="A generated chart"></kai-image>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -56,26 +56,26 @@ Assign either `base64` (paired with `media-type`) or `bytes` as a property:
 
 A base64-encoded SVG with explicit `media-type` and descriptive alt text.
 
-<Example client:visible tag="kc-image" />
+<Example client:visible tag="kai-image" />
 
 ### Teal Circle
 
 A different base64 SVG — swap `base64` and `media-type` for each image you display.
 
-<Example client:visible tag="kc-image" data="circle" />
+<Example client:visible tag="kai-image" data="circle" />
 
 ### With Descriptive Alt Text
 
 Pairs the image with a specific `alt` string so screen readers announce it correctly.
 
-<Example client:visible tag="kc-image" data="checkmark" />
+<Example client:visible tag="kai-image" data="checkmark" />
 
 ## Props
 
-<PropTable tag="kc-image" />
+<PropTable tag="kai-image" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-image" />
+<ComposedFrom tag="kai-image" />
 
 <NeedAHand />

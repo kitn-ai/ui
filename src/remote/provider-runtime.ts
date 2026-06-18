@@ -79,7 +79,7 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
   const themeKey = (c: CardContext | null) => JSON.stringify(c?.theme ?? null);
 
   function warnDrop(data: unknown): void {
-    try { console.warn('[kc-remote]', redactFrame(data)); } catch { /* best-effort */ }
+    try { console.warn('[kai-remote]', redactFrame(data)); } catch { /* best-effort */ }
   }
 
   function postUp(message: WireMessage): void {

@@ -14,18 +14,18 @@ afterEach(() => __resetPdfPreviewForTests());
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 afterEach(() => {
-  document.querySelectorAll('kc-artifact, kc-file-tree').forEach((e) => e.remove());
+  document.querySelectorAll('kai-artifact, kai-file-tree').forEach((e) => e.remove());
 });
 
-test('both kc-artifact and kc-file-tree register', () => {
-  expect(customElements.get('kc-artifact')).toBeTruthy();
-  expect(customElements.get('kc-file-tree')).toBeTruthy();
+test('both kai-artifact and kai-file-tree register', () => {
+  expect(customElements.get('kai-artifact')).toBeTruthy();
+  expect(customElements.get('kai-file-tree')).toBeTruthy();
 });
 
-// --- kc-file-tree ---------------------------------------------------------
+// --- kai-file-tree ---------------------------------------------------------
 
-test('kc-file-tree builds nested folders from /-delimited paths', async () => {
-  const el = document.createElement('kc-file-tree') as HTMLElement & { files: unknown };
+test('kai-file-tree builds nested folders from /-delimited paths', async () => {
+  const el = document.createElement('kai-file-tree') as HTMLElement & { files: unknown };
   el.files = [{ path: 'index.html' }, { path: 'src/app.ts' }, { path: 'src/lib/util.ts' }];
   document.body.appendChild(el);
   await flush();
@@ -39,23 +39,23 @@ test('kc-file-tree builds nested folders from /-delimited paths', async () => {
   expect(root.querySelector('[role="tree"]')).toBeTruthy();
 });
 
-test('kc-file-tree fires a `select` event with detail.path on file click', async () => {
-  const el = document.createElement('kc-file-tree') as HTMLElement & { files: unknown };
+test('kai-file-tree fires a `select` event with detail.path on file click', async () => {
+  const el = document.createElement('kai-file-tree') as HTMLElement & { files: unknown };
   el.files = [{ path: 'index.html', type: 'html' }];
   document.body.appendChild(el);
   await flush();
   let detail: { path: string } | null = null;
-  el.addEventListener('kc-select', (e) => (detail = (e as CustomEvent).detail));
+  el.addEventListener('kai-select', (e) => (detail = (e as CustomEvent).detail));
   const fileRow = el.shadowRoot!.querySelector<HTMLElement>('[data-tree-kind="file"]')!;
   fileRow.click();
   expect(detail).not.toBeNull();
   expect(detail!.path).toBe('index.html');
 });
 
-// --- kc-artifact ----------------------------------------------------------
+// --- kai-artifact ----------------------------------------------------------
 
-test('kc-artifact reflects src + sandbox onto the iframe', async () => {
-  const el = document.createElement('kc-artifact') as HTMLElement & { src: string };
+test('kai-artifact reflects src + sandbox onto the iframe', async () => {
+  const el = document.createElement('kai-artifact') as HTMLElement & { src: string };
   el.setAttribute('src', 'https://example.com/page.html');
   el.setAttribute('sandbox', 'allow-scripts allow-forms allow-popups');
   document.body.appendChild(el);
@@ -67,8 +67,8 @@ test('kc-artifact reflects src + sandbox onto the iframe', async () => {
   expect(iframe.getAttribute('title')).toBeTruthy();
 });
 
-test('kc-artifact defaults the iframe sandbox to allow-scripts allow-forms (no allow-same-origin)', async () => {
-  const el = document.createElement('kc-artifact') as HTMLElement & { src: string };
+test('kai-artifact defaults the iframe sandbox to allow-scripts allow-forms (no allow-same-origin)', async () => {
+  const el = document.createElement('kai-artifact') as HTMLElement & { src: string };
   el.setAttribute('src', 'https://example.com/');
   document.body.appendChild(el);
   await flush();
@@ -77,8 +77,8 @@ test('kc-artifact defaults the iframe sandbox to allow-scripts allow-forms (no a
   expect(iframe.getAttribute('sandbox')).not.toContain('allow-same-origin');
 });
 
-test('kc-artifact tab toggle switches Preview/Code and fires tabchange', async () => {
-  const el = document.createElement('kc-artifact') as HTMLElement & { files: unknown };
+test('kai-artifact tab toggle switches Preview/Code and fires tabchange', async () => {
+  const el = document.createElement('kai-artifact') as HTMLElement & { files: unknown };
   el.files = [{ path: 'a.ts', code: 'const a = 1;', language: 'ts', type: 'other' }];
   document.body.appendChild(el);
   await flush();
@@ -87,7 +87,7 @@ test('kc-artifact tab toggle switches Preview/Code and fires tabchange', async (
   expect(root.querySelector('iframe')).toBeTruthy();
 
   let changed: { tab: string } | null = null;
-  el.addEventListener('kc-tab-change', (e) => (changed = (e as CustomEvent).detail));
+  el.addEventListener('kai-tab-change', (e) => (changed = (e as CustomEvent).detail));
 
   const codeTab = Array.from(root.querySelectorAll<HTMLElement>('[role="tab"]')).find(
     (t) => t.textContent?.includes('Code'),
@@ -101,8 +101,8 @@ test('kc-artifact tab toggle switches Preview/Code and fires tabchange', async (
   expect(root.querySelector('iframe')).toBeNull();
 });
 
-test('kc-artifact file-select emits navigate + fileselect and navigates the iframe', async () => {
-  const el = document.createElement('kc-artifact') as HTMLElement & {
+test('kai-artifact file-select emits navigate + fileselect and navigates the iframe', async () => {
+  const el = document.createElement('kai-artifact') as HTMLElement & {
     files: unknown;
     tab: string;
   };
@@ -118,11 +118,11 @@ test('kc-artifact file-select emits navigate + fileselect and navigates the ifra
   const events: string[] = [];
   let navUrl: string | null = null;
   let selPath: string | null = null;
-  el.addEventListener('kc-navigate', (e) => {
+  el.addEventListener('kai-navigate', (e) => {
     events.push('navigate');
     navUrl = (e as CustomEvent).detail.url;
   });
-  el.addEventListener('kc-file-select', (e) => {
+  el.addEventListener('kai-file-select', (e) => {
     events.push('fileselect');
     selPath = (e as CustomEvent).detail.path;
   });
@@ -139,8 +139,8 @@ test('kc-artifact file-select emits navigate + fileselect and navigates the ifra
   expect(navUrl).toBe('https://cdn.test/about.html');
 });
 
-test('kc-artifact resolves a file url from src origin + path when url omitted', async () => {
-  const el = document.createElement('kc-artifact') as HTMLElement & {
+test('kai-artifact resolves a file url from src origin + path when url omitted', async () => {
+  const el = document.createElement('kai-artifact') as HTMLElement & {
     files: unknown;
     src: string;
   };
@@ -150,7 +150,7 @@ test('kc-artifact resolves a file url from src origin + path when url omitted', 
   document.body.appendChild(el);
   await flush();
   let navUrl: string | null = null;
-  el.addEventListener('kc-navigate', (e) => (navUrl = (e as CustomEvent).detail.url));
+  el.addEventListener('kai-navigate', (e) => (navUrl = (e as CustomEvent).detail.url));
   const row = el.shadowRoot!.querySelector<HTMLElement>('[data-tree-kind="file"]')!;
   row.click();
   await flush();
@@ -158,9 +158,9 @@ test('kc-artifact resolves a file url from src origin + path when url omitted', 
   expect(navUrl).toBe('https://host.test/base/about.html');
 });
 
-test('kc-artifact shows the fallback card for a PDF when inline preview is disabled', async () => {
+test('kai-artifact shows the fallback card for a PDF when inline preview is disabled', async () => {
   configurePdfPreview({ enabled: false });
-  const el = document.createElement('kc-artifact') as HTMLElement & { src: string };
+  const el = document.createElement('kai-artifact') as HTMLElement & { src: string };
   el.src = 'https://example.com/report.pdf';
   document.body.appendChild(el);
   await flush();
@@ -170,8 +170,8 @@ test('kc-artifact shows the fallback card for a PDF when inline preview is disab
   expect(links.some((t) => /Download/i.test(t))).toBe(true);
 });
 
-test('kc-artifact frames non-PDF src in the iframe (no fallback card)', async () => {
-  const el = document.createElement('kc-artifact') as HTMLElement & { src: string };
+test('kai-artifact frames non-PDF src in the iframe (no fallback card)', async () => {
+  const el = document.createElement('kai-artifact') as HTMLElement & { src: string };
   el.src = 'https://example.com/index.html';
   document.body.appendChild(el);
   await flush();
@@ -179,19 +179,19 @@ test('kc-artifact frames non-PDF src in the iframe (no fallback card)', async ()
   expect(root.querySelector('iframe')).toBeTruthy();
 });
 
-test('expandable: expand button fires kc-maximize-intent (bubbles+composed) AND maximizechange', async () => {
-  const el = document.createElement('kc-artifact') as HTMLElement;
+test('expandable: expand button fires kai-maximize-intent (bubbles+composed) AND maximizechange', async () => {
+  const el = document.createElement('kai-artifact') as HTMLElement;
   el.setAttribute('src', 'https://x.test');
   el.setAttribute('expandable', '');
   document.body.appendChild(el);
   await flush();
   let intent: { requested: boolean } | null = null;
   let bubbles = false, composed = false;
-  document.addEventListener('kc-maximize-intent', (e) => {
+  document.addEventListener('kai-maximize-intent', (e) => {
     intent = (e as CustomEvent).detail; bubbles = e.bubbles; composed = (e as CustomEvent).composed;
   }, { once: true });
   let mc: { maximized: boolean } | null = null;
-  el.addEventListener('kc-maximize-change', (e) => (mc = (e as CustomEvent).detail));
+  el.addEventListener('kai-maximize-change', (e) => (mc = (e as CustomEvent).detail));
   const expand = el.shadowRoot!.querySelector<HTMLElement>('[aria-label="Expand"]')!;
   expand.click();
   await flush();
@@ -201,22 +201,22 @@ test('expandable: expand button fires kc-maximize-intent (bubbles+composed) AND 
   expect(mc!.maximized).toBe(true);
 });
 
-test('kc-maximize-state on the host flips the artifact button label', async () => {
-  const el = document.createElement('kc-artifact') as HTMLElement;
+test('kai-maximize-state on the host flips the artifact button label', async () => {
+  const el = document.createElement('kai-artifact') as HTMLElement;
   el.setAttribute('src', 'https://x.test');
   el.setAttribute('expandable', '');
   document.body.appendChild(el);
   await flush();
-  el.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: true }, composed: true }));
+  el.dispatchEvent(new CustomEvent('kai-maximize-state', { detail: { maximized: true }, composed: true }));
   await flush();
   expect(el.shadowRoot!.querySelector('[aria-label="Collapse"]')).toBeTruthy();
-  el.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: false }, composed: true }));
+  el.dispatchEvent(new CustomEvent('kai-maximize-state', { detail: { maximized: false }, composed: true }));
   await flush();
   expect(el.shadowRoot!.querySelector('[aria-label="Expand"]')).toBeTruthy();
 });
 
 test('no-* attributes hide affordances; standalone toggles root chrome', async () => {
-  const el = document.createElement('kc-artifact') as HTMLElement;
+  const el = document.createElement('kai-artifact') as HTMLElement;
   el.setAttribute('src', 'https://x.test');
   el.setAttribute('no-nav', '');
   el.setAttribute('no-tabs', '');
@@ -230,13 +230,13 @@ test('no-* attributes hide affordances; standalone toggles root chrome', async (
 });
 
 test('readonly-path: input readonly + submit emits no navigate', async () => {
-  const el = document.createElement('kc-artifact') as HTMLElement;
+  const el = document.createElement('kai-artifact') as HTMLElement;
   el.setAttribute('src', 'https://x.test/a');
   el.setAttribute('readonly-path', '');
   document.body.appendChild(el);
   await flush();
   const navs: string[] = [];
-  el.addEventListener('kc-navigate', (e) => navs.push((e as CustomEvent).detail.url));
+  el.addEventListener('kai-navigate', (e) => navs.push((e as CustomEvent).detail.url));
   const input = el.shadowRoot!.querySelector<HTMLInputElement>('input#kc-artifact-path')!;
   expect(input.readOnly).toBe(true);
   input.value = 'https://x.test/b';

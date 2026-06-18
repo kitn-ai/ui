@@ -7,7 +7,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-loader': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-loader': JSX.HTMLAttributes<HTMLElement> & {
         variant?: string;
         size?: string;
         text?: string;
@@ -17,7 +17,7 @@ declare module 'solid-js' {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-loader variant="dots" size="md"></kc-loader>
+<kai-loader variant="dots" size="md"></kai-loader>
 
 <script type="module">
   import '@kitn.ai/ui/elements';   // registers the custom elements
@@ -26,12 +26,12 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 const meta = {
   title: 'Components/Loader',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-loader'),
+  argTypes: argTypesFor('kai-loader'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kc-loader', [
-          '`<kc-loader>` is the framework-agnostic **web component** for an animated busy indicator — a dozen styles (circular, dots, wave, bars, text-shimmer, …) selected via the `variant` attribute, isolated in **Shadow DOM**.',
+      description: specDescription('kai-loader', [
+          '`<kai-loader>` is the framework-agnostic **web component** for an animated busy indicator — a dozen styles (circular, dots, wave, bars, text-shimmer, …) selected via the `variant` attribute, isolated in **Shadow DOM**.',
           '**When to use:** showing a small "working" indicator anywhere outside the chat thread (toolbars, buttons, panels). In SolidJS, use the `Loader` primitive directly.',
           '**Placement:** inline anywhere a busy state is needed — centered inside a button, floated in a toolbar corner, or as a standalone skeleton in an empty panel; it is `display: inline-flex` by default so it follows normal inline flow.',
           "**How to use:** register once with `import '@kitn.ai/ui/elements'`, then set `variant`, `size`, and (for text variants) `text` as plain HTML attributes.",
@@ -53,7 +53,7 @@ const VARIANTS = [
 export const Default: Story = {
   render: () => (
     <div style={{ padding: '24px' }}>
-      <kc-loader variant="circular" size="md" />
+      <kai-loader variant="circular" size="md" />
     </div>
   ),
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
@@ -65,7 +65,7 @@ export const AllVariants: Story = {
     <div style={{ display: 'flex', 'flex-wrap': 'wrap', gap: '32px', 'align-items': 'center', padding: '24px' }}>
       {VARIANTS.map((v) => (
         <div style={{ display: 'flex', 'flex-direction': 'column', 'align-items': 'center', gap: '8px', 'min-width': '90px' }}>
-          <kc-loader variant={v} size="md" text="Loading" />
+          <kai-loader variant={v} size="md" text="Loading" />
           <code style={{ 'font-size': '11px', opacity: 0.6 }}>{v}</code>
         </div>
       ))}
@@ -79,7 +79,7 @@ export const Sizes: Story = {
     <div style={{ display: 'flex', gap: '32px', 'align-items': 'center', padding: '24px' }}>
       {['sm', 'md', 'lg'].map((s) => (
         <div style={{ display: 'flex', 'flex-direction': 'column', 'align-items': 'center', gap: '8px' }}>
-          <kc-loader variant="dots" size={s} />
+          <kai-loader variant="dots" size={s} />
           <code style={{ 'font-size': '11px', opacity: 0.6 }}>{s}</code>
         </div>
       ))}

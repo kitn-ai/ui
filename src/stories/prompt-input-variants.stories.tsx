@@ -260,7 +260,7 @@ export const WithFileAttachments: Story = {
           </PromptInputActions>
         </PromptInput>
         <p class="mt-2 text-xs text-muted-foreground">
-          Note: the <code>kc-prompt-input</code> element handles the full attach UX automatically — this story shows how to wire the Solid primitives manually if you need full control.
+          Note: the <code>kai-prompt-input</code> element handles the full attach UX automatically — this story shows how to wire the Solid primitives manually if you need full control.
         </p>
       </div>
     );
@@ -279,7 +279,7 @@ const FULL_MODELS: ModelOption[] = [
 ];
 
 export const StoppableStreaming: Story = {
-  name: 'Stoppable / Stop Button (kc-prompt-input)',
+  name: 'Stoppable / Stop Button (kai-prompt-input)',
   render: () => {
     const [loading, setLoading] = createSignal(false);
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -299,9 +299,9 @@ export const StoppableStreaming: Story = {
     return (
       <div class="w-full max-w-2xl p-4 space-y-4">
         <p class="text-sm text-muted-foreground">
-          The Solid primitive equivalent of <code>stoppable</code> on <code>kc-prompt-input</code>:
+          The Solid primitive equivalent of <code>stoppable</code> on <code>kai-prompt-input</code>:
           when <code>loading</code> is true, the send button is replaced by a Stop button (square icon).
-          Clicking Stop fires <code>kc-stop</code> — your handler calls <code>controller.abort()</code>
+          Clicking Stop fires <code>kai-stop</code> — your handler calls <code>controller.abort()</code>
           then clears the loading flag. Press Submit to start the simulated 3-second stream.
         </p>
         <PromptInput
@@ -342,8 +342,8 @@ export const StoppableStreaming: Story = {
           </PromptInputActions>
         </PromptInput>
         <p class="text-xs text-muted-foreground">
-          Element usage: <code>&lt;kc-prompt-input stoppable loading&gt;</code> then listen for
-          {' '}<code>kc-stop</code> to call <code>controller.abort()</code>.
+          Element usage: <code>&lt;kai-prompt-input stoppable loading&gt;</code> then listen for
+          {' '}<code>kai-stop</code> to call <code>controller.abort()</code>.
         </p>
       </div>
     );

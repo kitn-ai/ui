@@ -1,13 +1,13 @@
 // src/primitives/card-routing.ts
-// Framework-agnostic card-event plumbing: the bubbling kc-card emitter, the single
+// Framework-agnostic card-event plumbing: the bubbling kai-card emitter, the single
 // policy router (used by BOTH the native listener and the remote transport), and a
 // host-side listener helper for the bare-element path.
 import type { CardEvent, CardPolicy } from './card-contract';
 
 /** The single contract event name. */
-export const CARD_EVENT_NAME = 'kc-card';
+export const CARD_EVENT_NAME = 'kai-card';
 
-/** Dispatch a CardEvent as the bubbling, composed `kc-card` event a host listener
+/** Dispatch a CardEvent as the bubbling, composed `kai-card` event a host listener
  *  routes. NB: this is deliberately different from defineWebComponent's built-in
  *  non-bubbling dispatch. */
 export function emitCardEvent(element: HTMLElement, event: CardEvent): void {
@@ -22,7 +22,7 @@ function isSafeUrl(url: string): boolean {
 }
 function warnNoHandler(kind: string): void {
   // eslint-disable-next-line no-console
-  console.warn(`[kc-card] no policy handler for "${kind}"`);
+  console.warn(`[kai-card] no policy handler for "${kind}"`);
 }
 
 /** Apply the contract's policy to one event. The ONE place routing lives. */
@@ -67,7 +67,7 @@ export function routeCardEvent(policy: CardPolicy | undefined, event: CardEvent)
   }
 }
 
-/** Attach a host-level `kc-card` listener that routes every bubbling card event
+/** Attach a host-level `kai-card` listener that routes every bubbling card event
  *  through `policy`. Returns an unsubscribe fn. For the bare-element path. */
 export function listenForCardEvents(
   root: HTMLElement | Document,

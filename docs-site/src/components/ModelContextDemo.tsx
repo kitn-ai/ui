@@ -1,4 +1,4 @@
-/** Models & context demo — mounts a single <kc-chat> wired through its built-in
+/** Models & context demo — mounts a single <kai-chat> wired through its built-in
  *  header controls: the `models` + `currentModel` props render the model
  *  switcher dropdown, and the `context` property renders a live token-usage
  *  meter. Switching models swaps the active label (and the window size, since
@@ -180,8 +180,8 @@ export default function ModelContextDemo(props: Props) {
     if (props.chatTitle) (host as any).chatTitle = props.chatTitle;
     if (props.placeholder) (host as any).placeholder = props.placeholder;
     host.setAttribute('theme', theme());
-    host.addEventListener('kc-submit', onSubmit);
-    host.addEventListener('kc-model-change', onModelChange);
+    host.addEventListener('kai-submit', onSubmit);
+    host.addEventListener('kai-model-change', onModelChange);
 
     setReady(true);
 
@@ -192,8 +192,8 @@ export default function ModelContextDemo(props: Props) {
 
     onCleanup(() => {
       clearTimeout(timer);
-      host?.removeEventListener('kc-submit', onSubmit);
-      host?.removeEventListener('kc-model-change', onModelChange);
+      host?.removeEventListener('kai-submit', onSubmit);
+      host?.removeEventListener('kai-model-change', onModelChange);
       obs.disconnect();
     });
   });
@@ -204,7 +204,7 @@ export default function ModelContextDemo(props: Props) {
       style={{ height: props.height ?? '600px', display: 'flex', 'flex-direction': 'column' }}
     >
       {/* @ts-expect-error custom element */}
-      <kc-chat
+      <kai-chat
         ref={(el: HTMLElement) => (host = el as any)}
         style={{ display: 'block', flex: '1', 'min-height': '0' }}
       />

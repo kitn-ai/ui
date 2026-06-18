@@ -14,11 +14,11 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-markdown>` — renders markdown (with fenced-code syntax highlighting) as
+ * `<kai-markdown>` — renders markdown (with fenced-code syntax highlighting) as
  * a standalone element. Content via the `content` property; sizing/highlighting
  * via attributes.
  */
-defineWebComponent<Props>('kc-markdown', {
+defineWebComponent<Props>('kai-markdown', {
   content: '',
   proseSize: 'sm',
   codeTheme: 'github-dark-dimmed',

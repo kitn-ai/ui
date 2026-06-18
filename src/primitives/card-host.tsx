@@ -1,8 +1,8 @@
 // src/primitives/card-host.tsx
 // The native transport: a Solid context exposing a CardHost (context() + emit()).
 // emit() routes through the contract policy via the shared routeCardEvent. Cards
-// inside <kc-chat>/<CardProvider> use this; bare cards fall back to the bubbling
-// kc-card event (see card-routing.listenForCardEvents).
+// inside <kai-chat>/<CardProvider> use this; bare cards fall back to the bubbling
+// kai-card event (see card-routing.listenForCardEvents).
 import { createContext, useContext, type JSX } from 'solid-js';
 import type { CardContext, CardEvent, CardHost, CardPolicy } from './card-contract';
 import { routeCardEvent } from './card-routing';

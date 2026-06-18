@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-attachments': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-attachments': JSX.HTMLAttributes<HTMLElement> & {
         variant?: string;
         'hover-card'?: boolean | string;
         removable?: boolean | string;
@@ -59,7 +59,7 @@ const imageItems: AttachmentData[] = [
   },
 ];
 
-/** Render `<kc-attachments>` with an `items` property and the given flags. */
+/** Render `<kai-attachments>` with an `items` property and the given flags. */
 function AttachmentsElement(props: {
   items: AttachmentData[];
   variant?: string;
@@ -76,13 +76,13 @@ function AttachmentsElement(props: {
     if (props.showMediaType) el.setAttribute('show-media-type', '');
     if (props.removable) {
       el.setAttribute('removable', '');
-      el.addEventListener('kc-remove', ((e: CustomEvent<{ id: string }>) => {
+      el.addEventListener('kai-remove', ((e: CustomEvent<{ id: string }>) => {
         el!.items = (el!.items ?? []).filter((x) => x.id !== e.detail.id);
       }) as EventListener);
     }
   });
   return (
-    <kc-attachments
+    <kai-attachments
       ref={(e) => (el = e as HTMLElement)}
       style={{ display: 'block', padding: '24px', 'max-width': '720px' }}
     />
@@ -90,7 +90,7 @@ function AttachmentsElement(props: {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-attachments id="att" variant="grid" removable></kc-attachments>
+<kai-attachments id="att" variant="grid" removable></kai-attachments>
 
 <script type="module">
   import '@kitn.ai/ui/elements';   // registers the custom elements
@@ -103,13 +103,13 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   ];
 
   // events are CustomEvents on the element (they do not bubble)
-  att.addEventListener('kc-remove', (e) => {
+  att.addEventListener('kai-remove', (e) => {
     att.items = att.items.filter((x) => x.id !== e.detail.id);
   });
 </script>`;
 
 const HOVER_SNIPPET = `<!-- inline/list chips with a hover-card image preview -->
-<kc-attachments id="att" variant="inline" hover-card></kc-attachments>
+<kai-attachments id="att" variant="inline" hover-card></kai-attachments>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -126,15 +126,15 @@ const HOVER_SNIPPET = `<!-- inline/list chips with a hover-card image preview --
 const meta = {
   title: 'Components/Attachments',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-attachments'),
+  argTypes: argTypesFor('kai-attachments'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kc-attachments', [
-          '`<kc-attachments>` is the framework-agnostic **web component** for a set of file/source attachments, and the exemplar for the "collapse a compound primitive to ONE configurable element" pattern: the sub-parts the SolidJS layer composes become attributes here. Isolated in **Shadow DOM**.',
+      description: specDescription('kai-attachments', [
+          '`<kai-attachments>` is the framework-agnostic **web component** for a set of file/source attachments, and the exemplar for the "collapse a compound primitive to ONE configurable element" pattern: the sub-parts the SolidJS layer composes become attributes here. Isolated in **Shadow DOM**.',
           '**When to use:** rendering attachment chips/tiles in a non-Solid app. In SolidJS, compose the `Attachment*` primitives for fully custom layouts.',
           '**Placement:** beneath message content (for received/sent files) or above the prompt input (for staged uploads); fills its container width.',
-          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the data via the `items` **property**, pick a layout with `variant` (`grid` | `inline` | `list`), add `removable` to get per-item remove buttons (emits a `kc-remove` **CustomEvent** with `{ id }`), and `hover-card` for inline/list previews (image attachments preview their thumbnail).",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the data via the `items` **property**, pick a layout with `variant` (`grid` | `inline` | `list`), add `removable` to get per-item remove buttons (emits a `kai-remove` **CustomEvent** with `{ id }`), and `hover-card` for inline/list previews (image attachments preview their thumbnail).",
           'See the **Code** tab for HTML usage.',
         ]),
     },

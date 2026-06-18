@@ -4,14 +4,14 @@ Framework-agnostic web components for building AI chat interfaces — message th
 
 It can be consumed two ways:
 
-1. **As framework-agnostic web components** *(primary)* — drop `<kc-chat>`, `<kc-conversations>`, and `<kc-prompt-input>` into any project (React, Vue, Angular, Svelte, plain HTML). Each is fully style-isolated via Shadow DOM, and the rendering runtime is bundled in, so the host needs nothing.
+1. **As framework-agnostic web components** *(primary)* — drop `<kai-chat>`, `<kai-conversations>`, and `<kai-prompt-input>` into any project (React, Vue, Angular, Svelte, plain HTML). Each is fully style-isolated via Shadow DOM, and the rendering runtime is bundled in, so the host needs nothing.
 2. **As native SolidJS components** — the kit is authored in SolidJS, so SolidJS apps can import the components directly for full compositional control. (This is a convenience for SolidJS users, not a requirement — the web components work everywhere.)
 
 ## Highlights
 
 - **~50 composable components** across three layers: headless primitives → accessible UI primitives (built in-house, WCAG 2.1 AA — no third-party UI dependency) → AI feature components.
 - **Shadow-DOM web components** — zero CSS conflicts in any host. The host's styles can't leak in; the kit's Tailwind can't leak out.
-- **Lightweight by design** — a markdown-only `<kc-chat>` is **~110 KB gzip** (one file). Syntax highlighting (Shiki) is loaded **on demand, per-language, with no WASM** — and never loads at all if you don't render code.
+- **Lightweight by design** — a markdown-only `<kai-chat>` is **~110 KB gzip** (one file). Syntax highlighting (Shiki) is loaded **on demand, per-language, with no WASM** — and never loads at all if you don't render code.
 - **Tailwind v4** design tokens — rebrand by overriding `--color-*` custom properties.
 
 ## Install
@@ -38,12 +38,12 @@ npm run build   # emits dist/kitn-chat.es.js
 
 ```html
 <body style="height: 100vh; margin: 0;">
-  <kc-chat style="display:block; height:100%;"></kc-chat>
+  <kai-chat style="display:block; height:100%;"></kai-chat>
 
   <script type="module">
     import '@kitn.ai/ui/elements';
 
-    const chat = document.querySelector('kc-chat');
+    const chat = document.querySelector('kai-chat');
 
     // Rich data is set as JS properties (not HTML attributes)
     chat.messages = [
@@ -70,7 +70,7 @@ The element bundle is a self-contained ES module — load it directly from [jsDe
   // …or unpkg: import 'https://unpkg.com/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
-<kc-chat></kc-chat>
+<kai-chat></kai-chat>
 ```
 
 The URLs above track the **latest** release — handy for trying things out. **For production, pin an exact version** (e.g. `@kitn.ai/ui@0.4.0/dist/kitn-chat.es.js`): pinned URLs are immutable and cached far more aggressively, and — since this package is pre-1.0 — pinning shields you from breaking changes in a future minor release. SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To override design tokens, also include `theme.css`:
@@ -113,7 +113,7 @@ The SolidJS entry (`.`) is the kit's raw source (`src/index.ts`) — your bundle
 
 ## Integrations
 
-The components are deliberately **transport-agnostic**: `<kc-chat>` just renders the `messages` array you give it and emits a `submit` event when the user sends. You own the request, the streaming, and any extras like text-to-speech. The patterns below use the web component, but the same wiring applies to the SolidJS API.
+The components are deliberately **transport-agnostic**: `<kai-chat>` just renders the `messages` array you give it and emits a `submit` event when the user sends. You own the request, the streaming, and any extras like text-to-speech. The patterns below use the web component, but the same wiring applies to the SolidJS API.
 
 ### Streaming responses from OpenRouter
 
@@ -122,7 +122,7 @@ The components are deliberately **transport-agnostic**: `<kc-chat>` just renders
 > **Security:** never ship your API key to the browser. In production, point `fetch` at your own backend endpoint that proxies to OpenRouter and injects the key. The parsing below is identical either way.
 
 ```html
-<kc-chat id="chat" style="display:block; height:100vh;"></kc-chat>
+<kai-chat id="chat" style="display:block; height:100vh;"></kai-chat>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -278,7 +278,7 @@ configureCodeHighlighting({
 configureCodeHighlighting({ enabled: false });
 ```
 
-Per element: `<kc-chat codeHighlight={false}>` renders code as plain text.
+Per element: `<kai-chat codeHighlight={false}>` renders code as plain text.
 
 ## Theming
 
@@ -387,7 +387,7 @@ cd examples/vue && npm install && npm run dev
 
 | Scenario | Loaded |
 |---|--:|
-| `<kc-chat>`, markdown only (no code blocks) | **~110 KB gzip** (~413 KB raw), one file |
+| `<kai-chat>`, markdown only (no code blocks) | **~110 KB gzip** (~413 KB raw), one file |
 | + a code block | adds Shiki core + JS engine + that language + theme, lazily |
 | Highlighting disabled | Shiki never loads |
 

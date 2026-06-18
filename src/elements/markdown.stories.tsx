@@ -8,7 +8,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-markdown': JSX.HTMLAttributes<HTMLElement>;
+      'kai-markdown': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -26,19 +26,19 @@ export function add(a: number, b: number): number {
 }
 \`\`\``;
 
-/** Render the actual `<kc-markdown>` custom element with a `content` property. */
+/** Render the actual `<kai-markdown>` custom element with a `content` property. */
 function MarkdownElement(props: { content: string }) {
   let el: (HTMLElement & { content?: string }) | undefined;
   onMount(() => {
     if (el) el.content = props.content;
   });
   return (
-    <kc-markdown ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
+    <kai-markdown ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
   );
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-markdown id="md" code-theme="github-dark-dimmed"></kc-markdown>
+<kai-markdown id="md" code-theme="github-dark-dimmed"></kai-markdown>
 
 <script type="module">
   import '@kitn.ai/ui/elements';   // registers the custom elements
@@ -51,12 +51,12 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 const meta = {
   title: 'Components/Markdown',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-markdown'),
+  argTypes: argTypesFor('kai-markdown'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kc-markdown', [
-          '`<kc-markdown>` is the framework-agnostic **web component** that renders a markdown string (with fenced-code syntax highlighting via Shiki) as a standalone element, isolated in **Shadow DOM**.',
+      description: specDescription('kai-markdown', [
+          '`<kai-markdown>` is the framework-agnostic **web component** that renders a markdown string (with fenced-code syntax highlighting via Shiki) as a standalone element, isolated in **Shadow DOM**.',
           '**When to use:** showing model output or any markdown in a non-Solid app without pulling in a markdown stack. In SolidJS, use the `Markdown` primitive directly.',
           '**Placement:** as a block inside a message row, doc viewer, or standalone content pane; it is `display: block` and expands to fill its container width, so constrain width on the parent.',
           "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the source via the `content` **property** (`el.content = '...'`), and tune rendering with the `prose-size`, `code-theme`, and `code-highlight` attributes.",

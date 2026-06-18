@@ -2,7 +2,7 @@ import { defineWebComponent } from './define';
 import { Switch } from '../ui/switch';
 
 interface Props extends Record<string, unknown> {
-  /** Initial checked state. Bare attribute (`<kc-switch checked>`) turns it on. */
+  /** Initial checked state. Bare attribute (`<kai-switch checked>`) turns it on. */
   checked?: boolean;
   /** Disable interaction. */
   disabled?: boolean;
@@ -10,26 +10,26 @@ interface Props extends Record<string, unknown> {
   label?: string;
 }
 
-/** Events fired by `<kc-switch>`. */
+/** Events fired by `<kai-switch>`. */
 interface Events {
   /** The toggle changed. */
-  'kc-change': { checked: boolean };
+  'kai-change': { checked: boolean };
 }
 
 /**
- * `<kc-switch>` — a toggle switch. Self-manages its on/off state; set the initial
- * state with the `checked` attribute and read changes from `kc-change`.
+ * `<kai-switch>` — a toggle switch. Self-manages its on/off state; set the initial
+ * state with the `checked` attribute and read changes from `kai-change`.
  *
  * ```html
- * <kc-switch checked label="Temporary chat"></kc-switch>
+ * <kai-switch checked label="Temporary chat"></kai-switch>
  * <script type="module">
  *   import '@kitn.ai/ui/elements';
- *   document.querySelector('kc-switch')
- *     .addEventListener('kc-change', (e) => console.log(e.detail.checked));
+ *   document.querySelector('kai-switch')
+ *     .addEventListener('kai-change', (e) => console.log(e.detail.checked));
  * </script>
  * ```
  */
-defineWebComponent<Props, Events>('kc-switch', {
+defineWebComponent<Props, Events>('kai-switch', {
   checked: undefined,
   disabled: undefined,
   label: undefined,
@@ -38,6 +38,6 @@ defineWebComponent<Props, Events>('kc-switch', {
     defaultChecked={flag('checked')}
     disabled={flag('disabled')}
     label={props.label as string | undefined}
-    onChange={(checked) => dispatch('kc-change', { checked })}
+    onChange={(checked) => dispatch('kai-change', { checked })}
   />
 ));

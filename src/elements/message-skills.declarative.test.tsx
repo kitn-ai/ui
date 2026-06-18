@@ -1,5 +1,5 @@
 /**
- * Unit tests for the declarative `<kc-skill>` light-DOM API of `<kc-skills>`.
+ * Unit tests for the declarative `<kai-skill>` light-DOM API of `<kai-skills>`.
  *
  * Strategy: the `defineWebComponent` call registers a real Shadow-DOM custom
  * element which requires a full browser environment (Constructable Stylesheets,
@@ -26,7 +26,7 @@ afterEach(cleanup);
 
 describe('parseKcSkillElement', () => {
   function makeNode(textContent: string, id?: string): Element {
-    const el = document.createElement('kc-skill');
+    const el = document.createElement('kai-skill');
     el.textContent = textContent;
     if (id !== undefined) el.setAttribute('id', id);
     return el;
@@ -93,7 +93,7 @@ describe('MessageSkills rendering with merged skills', () => {
   });
 
   it('parseKcSkillElement produces items that render correctly', () => {
-    const el = document.createElement('kc-skill');
+    const el = document.createElement('kai-skill');
     el.textContent = 'Memory';
     el.setAttribute('id', 'memory');
 

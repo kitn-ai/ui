@@ -1,6 +1,6 @@
 /** Generic interactive playground — data-driven from element-meta.json. Controls
  *  are derived from the element's own props (enum → tabs, boolean → toggle,
- *  string → input); they drive BOTH the live <kc-*> preview AND the copyable
+ *  string → input); they drive BOTH the live <kai-*> preview AND the copyable
  *  per-framework code (lib/codegen). One component for every element — no
  *  per-element playground. Modeled on the approved AttachmentsDemo. */
 import { createSignal, onMount, createEffect, onCleanup, For, Show, createMemo, untrack } from 'solid-js';
@@ -23,7 +23,7 @@ const humanize = (s: string) => {
 // of prop names; anything not listed falls into a trailing unlabeled group. Every
 // other element keeps the flat row.
 const BOOLEAN_GROUPS: Record<string, { label: string; props: string[] }[]> = {
-  'kc-artifact': [
+  'kai-artifact': [
     { label: 'Toolbar', props: ['noPathField', 'noTabs', 'noNav', 'noReload', 'noHome', 'openInTab'] },
     { label: 'Behavior', props: ['expandable', 'maximized', 'standalone', 'readonlyPath'] },
   ],
@@ -104,7 +104,7 @@ export default function Playground(props: { tag: string }) {
   // Remount the element whenever an ENUM control changes — created imperatively
   // with the enum values set as markup attributes BEFORE upgrade, so the first
   // render is correct even for props that aren't reactive after render (matches
-  // how a server-rendered <kc-* attr> upgrades).
+  // how a server-rendered <kai-* attr> upgrades).
   createEffect(() => {
     enumKey(); // track enum changes → remount
     if (!ready() || !container) return;

@@ -1,6 +1,6 @@
 /**
- * Unit tests for the declarative `<kc-suggestion>` light-DOM API of
- * `<kc-suggestions>`.
+ * Unit tests for the declarative `<kai-suggestion>` light-DOM API of
+ * `<kai-suggestions>`.
  *
  * Strategy: the `defineWebComponent` call registers a real Shadow-DOM custom
  * element which requires a full browser environment (Constructable Stylesheets,
@@ -27,7 +27,7 @@ afterEach(cleanup);
 
 describe('parseSuggestionNode', () => {
   function makeNode(textContent: string, value?: string): Element {
-    const el = document.createElement('kc-suggestion');
+    const el = document.createElement('kai-suggestion');
     el.textContent = textContent;
     if (value !== undefined) el.setAttribute('value', value);
     return el;
@@ -150,7 +150,7 @@ describe('suggestion chip rendering and click events', () => {
   it('parseSuggestionNode produces items that render and fire the correct value', () => {
     // End-to-end: parse a DOM node → render it → click → verify event value.
     const onSelect = vi.fn();
-    const el = document.createElement('kc-suggestion');
+    const el = document.createElement('kai-suggestion');
     el.textContent = 'Use Vue';
     el.setAttribute('value', 'vue');
 

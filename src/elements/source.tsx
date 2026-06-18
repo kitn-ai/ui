@@ -2,7 +2,7 @@ import { createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { defineWebComponent } from './define';
 import { Source, SourceTrigger, SourceContent, SourceList } from '../components/source';
 
-// --- <kc-source> — a single citation link with hover preview ---
+// --- <kai-source> — a single citation link with hover preview ---
 
 interface SourceProps extends Record<string, unknown> {
   /** The URL this citation links to (the domain also seeds the default label/favicon). */
@@ -18,7 +18,7 @@ interface SourceProps extends Record<string, unknown> {
   showFavicon?: boolean;
 }
 
-defineWebComponent<SourceProps>('kc-source', {
+defineWebComponent<SourceProps>('kai-source', {
   href: '',
   label: undefined,
   headline: '',
@@ -33,7 +33,7 @@ defineWebComponent<SourceProps>('kc-source', {
   </Show>
 ));
 
-// --- <kc-sources> — a wrapped list of citation links ---
+// --- <kai-sources> — a wrapped list of citation links ---
 
 interface SourceItem {
   href: string;
@@ -59,12 +59,12 @@ interface SourceListProps extends Record<string, unknown> {
   numbered?: boolean;
 }
 
-/** Parse a single light-DOM `<kc-source>` element into a `SourceItem` descriptor.
+/** Parse a single light-DOM `<kai-source>` element into a `SourceItem` descriptor.
  *  Attribute mapping:
  *   - `href`        → SourceItem.href
  *   - `label`       → SourceItem.label
- *   - `headline`    → SourceItem.title  (matches kc-source's prop name; "title" is a
- *                       reserved HTMLElement attribute so kc-source uses "headline")
+ *   - `headline`    → SourceItem.title  (matches kai-source's prop name; "title" is a
+ *                       reserved HTMLElement attribute so kai-source uses "headline")
  *   - `description` → SourceItem.description
  *   - `show-favicon`→ SourceItem.showFavicon (bare boolean attribute)
  */
@@ -78,17 +78,17 @@ export function parseKcSourceElement(n: Element): SourceItem {
   };
 }
 
-defineWebComponent<SourceListProps>('kc-sources', {
+defineWebComponent<SourceListProps>('kai-sources', {
   sources: [],
   showFavicon: false,
   numbered: false,
 }, (props, { element, flag }) => {
-  // Read declarative <kc-source> children from light DOM.
+  // Read declarative <kai-source> children from light DOM.
   // The shadow root has no <slot> for them, so they are invisible — pure data carriers.
   const [slottedSources, setSlottedSources] = createSignal<SourceItem[]>([]);
   onMount(() => {
     const read = () => {
-      const nodes = [...element.querySelectorAll('kc-source')];
+      const nodes = [...element.querySelectorAll('kai-source')];
       setSlottedSources(nodes.map(parseKcSourceElement));
     };
     read();

@@ -27,7 +27,7 @@ export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
  * actions footer, and one consistent inline **error** state (the contract's
  * "never a broken/partial card" rule). It is intentionally chrome-only: it reads
  * no `CardContext` and emits no `CardEvent` — the cards that compose it (e.g.
- * `kc-form`) own the contract interaction.
+ * `kai-form`) own the contract interaction.
  */
 export function Card(props: CardProps): JSX.Element {
   const merged = mergeProps({ dense: false }, props);

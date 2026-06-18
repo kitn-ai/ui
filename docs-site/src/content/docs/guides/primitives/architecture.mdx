@@ -1,13 +1,13 @@
 ---
 title: How it's built
-description: The layered architecture behind the kc-* web components — headless primitives, UI primitives, feature components, and the Solid-to-custom-element facade.
+description: The layered architecture behind the kai-* web components — headless primitives, UI primitives, feature components, and the Solid-to-custom-element facade.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-You don't need to know any of this to use `<kc-chat>`. Read it when you want to go deeper: import a building block directly, compose your own layout, or change the kit itself.
+You don't need to know any of this to use `<kai-chat>`. Read it when you want to go deeper: import a building block directly, compose your own layout, or change the kit itself.
 
-Every `kc-*` element is a thin Shadow-DOM wrapper around a SolidJS component. The interesting parts — the streaming, the auto-resize, the stick-to-bottom scroll, the accessible toggles — live in plain Solid code underneath. The web component is just the last mile that turns that code into a custom element any framework can use.
+Every `kai-*` element is a thin Shadow-DOM wrapper around a SolidJS component. The interesting parts — the streaming, the auto-resize, the stick-to-bottom scroll, the accessible toggles — live in plain Solid code underneath. The web component is just the last mile that turns that code into a custom element any framework can use.
 
 ## Four layers
 
@@ -19,16 +19,16 @@ The source (`src/`) stacks in four layers, each built on the one below.
 
 **3. Feature components** (`src/components/`) — the AI surface, assembled from the layers below: `ChatContainer`, `Message`, `PromptInput`, `Markdown`, `Reasoning`, `Tool`, `Artifact`, `ConversationList`, the generative-UI cards, and the rest. This is where "a chat message with copy actions" or "a streaming reasoning panel" actually takes shape.
 
-**4. The element facade** (`src/elements/`) — each feature component wrapped as a `kc-*` custom element. This layer adds Shadow DOM, the design-token stylesheet, prop/attribute handling, and `kc-*` CustomEvents. It's deliberately thin: most files are a few lines mapping props and events onto the component underneath.
+**4. The element facade** (`src/elements/`) — each feature component wrapped as a `kai-*` custom element. This layer adds Shadow DOM, the design-token stylesheet, prop/attribute handling, and `kai-*` CustomEvents. It's deliberately thin: most files are a few lines mapping props and events onto the component underneath.
 
 ```
 src/primitives/   →  behavior (useTextStream, useStickToBottom, card contract)
 src/ui/           →  accessible building blocks (Button, Switch, Resizable)
 src/components/   →  AI feature components (ChatContainer, Message, PromptInput)
-src/elements/     →  kc-* custom elements (the Shadow-DOM facade)
+src/elements/     →  kai-* custom elements (the Shadow-DOM facade)
 ```
 
-The package exposes two of these layers directly. `@kitn.ai/ui` (the `.` export) gives you layers 1–3 as Solid source; `@kitn.ai/ui/elements` gives you layer 4, the registered `kc-*` elements. [Working with the components directly](/chat/guides/primitives/using-primitives/) covers the first; the rest of the docs cover the second.
+The package exposes two of these layers directly. `@kitn.ai/ui` (the `.` export) gives you layers 1–3 as Solid source; `@kitn.ai/ui/elements` gives you layer 4, the registered `kai-*` elements. [Working with the components directly](/chat/guides/primitives/using-primitives/) covers the first; the rest of the docs cover the second.
 
 ## Why Solid behind a custom element
 
@@ -38,13 +38,13 @@ So the architecture gives you both. Inside a Solid app you can skip the wrapper 
 
 ## The facade, concretely
 
-`<kc-switch>` is a good small example — the whole element is the wrapper around the `Switch` UI primitive:
+`<kai-switch>` is a good small example — the whole element is the wrapper around the `Switch` UI primitive:
 
 ```tsx
 import { defineWebComponent } from './define';
 import { Switch } from '../ui/switch';
 
-defineWebComponent('kc-switch', {
+defineWebComponent('kai-switch', {
   checked: undefined,
   disabled: undefined,
   label: undefined,
@@ -53,7 +53,7 @@ defineWebComponent('kc-switch', {
     defaultChecked={flag('checked')}
     disabled={flag('disabled')}
     label={props.label}
-    onChange={(checked) => dispatch('kc-change', { checked })}
+    onChange={(checked) => dispatch('kai-change', { checked })}
   />
 ));
 ```
@@ -63,16 +63,16 @@ defineWebComponent('kc-switch', {
 - Registers the tag and renders the component into its **Shadow DOM**.
 - Adopts the compiled kit stylesheet into each shadow root (one shared `CSSStyleSheet`, not a copy per instance), so Tailwind classes resolve inside.
 - Adds a `theme` prop to every element (`light` / `dark` / `auto`, default `auto` follows the OS) that toggles the dark token scope.
-- Hands the facade two helpers: `dispatch(type, detail)` fires a `kc-*` `CustomEvent` off the host, and `flag(name)` resolves a boolean the way HTML authors expect — `<el checked>`, `<el checked="true">`, and `el.checked = true` all read as on.
+- Hands the facade two helpers: `dispatch(type, detail)` fires a `kai-*` `CustomEvent` off the host, and `flag(name)` resolves a boolean the way HTML authors expect — `<el checked>`, `<el checked="true">`, and `el.checked = true` all read as on.
 
 That last point matters: a *bare* boolean attribute parses to `undefined`, not `true`, so facades use `flag()` rather than the raw prop for any on/off prop.
 
 <Aside type="note" title="Two names for the same thing">
-A UI primitive and its element are a pair: `Switch` (the Solid component) and `<kc-switch>` (the element). Only the elements are prefixed `kc-*`, because they claim global custom-element tag names; the Solid components are scoped imports, so they keep their plain names.
+A UI primitive and its element are a pair: `Switch` (the Solid component) and `<kai-switch>` (the element). Only the elements are prefixed `kai-*`, because they claim global custom-element tag names; the Solid components are scoped imports, so they keep their plain names.
 </Aside>
 
 ## Where to go next
 
 - [Working with the components directly](/chat/guides/primitives/using-primitives/) — import the primitives and feature components into a Solid app.
 - [Run the kit locally](/chat/guides/primitives/development/) — clone, build, and the Storybook dev loop.
-- [Create or modify a component](/chat/guides/primitives/extending/) — add a primitive and expose it as a `kc-*` element.
+- [Create or modify a component](/chat/guides/primitives/extending/) — add a primitive and expose it as a `kai-*` element.

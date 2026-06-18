@@ -100,7 +100,7 @@ export function mountRemoteCard(options: MountRemoteCardOptions): RemoteCardHand
   let listener: ((e: MessageEvent) => void) | null = null;
 
   function warn(data: unknown): void {
-    try { console.warn('[kc-remote]', redactFrame(data)); } catch { /* best-effort */ }
+    try { console.warn('[kai-remote]', redactFrame(data)); } catch { /* best-effort */ }
   }
 
   function postDown(message: WireMessage): void {

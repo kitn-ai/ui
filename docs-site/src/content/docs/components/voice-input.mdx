@@ -12,7 +12,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-voice-input</p>
+<p class="kc-tag-sub">kai-voice-input</p>
 
 <p class="kc-lede">A self-contained mic button that records audio, hands the `Blob` to your transcription function, and fires the result — plug in any speech-to-text backend to get voice dictation.</p>
 
@@ -20,18 +20,18 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-voice-input" />
+<Playground client:only="solid" tag="kai-voice-input" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-voice-input>` to add mic dictation to a prompt input, search bar, or form field in any framework. In SolidJS, compose `VoiceInput` from `@kitn.ai/ui` directly for tighter reactive control.
+Reach for `<kai-voice-input>` to add mic dictation to a prompt input, search bar, or form field in any framework. In SolidJS, compose `VoiceInput` from `@kitn.ai/ui` directly for tighter reactive control.
 </Aside>
 
 ## Usage
 
-Assign your `transcribe` function to the element and listen for `kc-transcription`:
+Assign your `transcribe` function to the element and listen for `kai-transcription`:
 
 ```html
-<kc-voice-input id="voice"></kc-voice-input>
+<kai-voice-input id="voice"></kai-voice-input>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -45,38 +45,38 @@ Assign your `transcribe` function to the element and listen for `kc-transcriptio
     return (await res.json()).text;
   };
 
-  voice.addEventListener('kc-transcription', (e) => {
+  voice.addEventListener('kai-transcription', (e) => {
     document.getElementById('prompt').value = e.detail.text;
   });
 </script>
 ```
 
 - **`transcribe`** — assign an `async (blob: Blob) => Promise<string>` function once the element is in the DOM.
-- To handle audio yourself, skip `transcribe` and listen for **`kc-audio-captured`** instead; it fires `{ blob }` immediately after recording stops.
+- To handle audio yourself, skip `transcribe` and listen for **`kai-audio-captured`** instead; it fires `{ blob }` immediately after recording stops.
 - **`disabled`** prevents interaction while the assistant is streaming or mic access is pending.
 
 ## Examples
 
 ### Default
 
-Without a `transcribe` property the raw audio is still emitted via `kc-audio-captured`.
+Without a `transcribe` property the raw audio is still emitted via `kai-audio-captured`.
 
-<Example client:visible tag="kc-voice-input" />
+<Example client:visible tag="kai-voice-input" />
 
 ### Disabled
 
-<Example client:visible tag="kc-voice-input" config={{ disabled: true }} />
+<Example client:visible tag="kai-voice-input" config={{ disabled: true }} />
 
 ## Props
 
-<PropTable tag="kc-voice-input" />
+<PropTable tag="kai-voice-input" />
 
 ## Events
 
-<EventTable tag="kc-voice-input" />
+<EventTable tag="kai-voice-input" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-voice-input" />
+<ComposedFrom tag="kai-voice-input" />
 
 <NeedAHand />

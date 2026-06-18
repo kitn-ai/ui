@@ -1,7 +1,7 @@
-/** Skills & slash-commands demo — mounts <kc-chat> with a realistic
- *  `slashCommands` list and a <kc-skills> strip of the assistant's
+/** Skills & slash-commands demo — mounts <kai-chat> with a realistic
+ *  `slashCommands` list and a <kai-skills> strip of the assistant's
  *  capabilities. Typing "/" in the composer opens the command palette;
- *  choosing one (kc-slash-select) drives a tailored scripted streamed reply.
+ *  choosing one (kai-slash-select) drives a tailored scripted streamed reply.
  *  Commands and skills are set as JS PROPERTIES after kit load. */
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { loadKit } from './example/kit';
@@ -67,8 +67,8 @@ const REPLIES: Record<string, string> = {
   'search-docs':
     'Found three relevant pages in the docs:\n\n' +
     '1. **Streaming replies** — driving the token loop from an SSE response.\n' +
-    '2. **Theming** — overriding brand tokens via `kc-chat` CSS variables.\n' +
-    '3. **Slash commands** — wiring `slashCommands` and the `kc-slash-select` event.\n\n' +
+    '2. **Theming** — overriding brand tokens via `kai-chat` CSS variables.\n' +
+    '3. **Slash commands** — wiring `slashCommands` and the `kai-slash-select` event.\n\n' +
     'Want me to open any of these, or narrow the search?',
 };
 
@@ -146,7 +146,7 @@ export default function SkillsAssistantDemo(props: Props) {
     streamReply(aId, (id && REPLIES[id]) || FALLBACK_REPLY);
   };
 
-  // Surface which command the user picked from the palette (kc-slash-select).
+  // Surface which command the user picked from the palette (kai-slash-select).
   // Highlight it as active in the palette via slashActiveIds.
   const onSlashSelect = (e: Event) => {
     const cmd = (e as CustomEvent).detail?.command as SlashCommandItem | undefined;
@@ -164,8 +164,8 @@ export default function SkillsAssistantDemo(props: Props) {
     if (props.chatTitle) (host as any).chatTitle = props.chatTitle;
     if (props.placeholder) (host as any).placeholder = props.placeholder;
     host.setAttribute('theme', theme());
-    host.addEventListener('kc-submit', onSubmit);
-    host.addEventListener('kc-slash-select', onSlashSelect);
+    host.addEventListener('kai-submit', onSubmit);
+    host.addEventListener('kai-slash-select', onSlashSelect);
 
     if (skillsEl) {
       customElements.upgrade(skillsEl);
@@ -183,8 +183,8 @@ export default function SkillsAssistantDemo(props: Props) {
 
     onCleanup(() => {
       clearTimeout(timer);
-      host?.removeEventListener('kc-submit', onSubmit);
-      host?.removeEventListener('kc-slash-select', onSlashSelect);
+      host?.removeEventListener('kai-submit', onSubmit);
+      host?.removeEventListener('kai-slash-select', onSlashSelect);
       obs.disconnect();
     });
   });
@@ -202,10 +202,10 @@ export default function SkillsAssistantDemo(props: Props) {
         }}
       >
         {/* @ts-expect-error custom element */}
-        <kc-skills ref={(el: HTMLElement) => (skillsEl = el as any)} />
+        <kai-skills ref={(el: HTMLElement) => (skillsEl = el as any)} />
       </div>
       {/* @ts-expect-error custom element */}
-      <kc-chat
+      <kai-chat
         ref={(el: HTMLElement) => (host = el as any)}
         style={{ display: 'block', flex: '1', 'min-height': '0' }}
       />

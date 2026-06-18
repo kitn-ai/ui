@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://kitn.ai/schemas/card/form.result.schema.json",
-  "title": "kc-form submit payload",
+  "title": "kai-form submit payload",
   "description": "The CardEvent {kind:'submit'} `data` for a form card: an object that validates against the form-definition schema that was sent down in CardEnvelope.data. Standard JSON Schema validation (type/enum/required/min-max/length/pattern) holds. Optional empty strings are omitted.",
   "type": "object"
 }

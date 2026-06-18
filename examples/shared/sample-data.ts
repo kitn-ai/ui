@@ -1,5 +1,5 @@
 /**
- * Shared sample data for kc-chat examples.
+ * Shared sample data for kai-chat examples.
  *
  * Types are defined inline (matching the kit's exported types) so this file
  * has no runtime or compile-time dependency on the kit source — it works in
@@ -48,7 +48,7 @@ export interface SampleSlashCommand {
   category?: string;
 }
 
-/** Message action verbs supported by <kc-chat>. */
+/** Message action verbs supported by <kai-chat>. */
 export type MessageAction = 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit';
 
 /** Minimal chat message shape (mirrors ChatMessage from @kitn.ai/ui/elements). */
@@ -105,7 +105,7 @@ export const SAMPLE_MESSAGES: Record<string, SampleMessage[]> = {
     {
       id: 'm1',
       role: 'user',
-      content: 'How do I use kc-chat web components inside a React app?',
+      content: 'How do I use kai-chat web components inside a React app?',
     },
     {
       id: 'm2',

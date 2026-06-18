@@ -13,17 +13,17 @@ interface Props extends Record<string, unknown> {
   as?: string;
 }
 
-/** Events fired by `<kc-response-stream>`. */
+/** Events fired by `<kai-response-stream>`. */
 interface Events {
   /** Streaming finished. */
-  'kc-complete': void;
+  'kai-complete': void;
 }
 
 /**
- * `<kc-response-stream>` — reveals text with a typewriter or fade animation.
- * Text via the `text` property; `mode`/`speed` attributes; emits `kc-complete`.
+ * `<kai-response-stream>` — reveals text with a typewriter or fade animation.
+ * Text via the `text` property; `mode`/`speed` attributes; emits `kai-complete`.
  */
-defineWebComponent<Props, Events>('kc-response-stream', {
+defineWebComponent<Props, Events>('kai-response-stream', {
   text: '',
   mode: 'typewriter',
   speed: 20,
@@ -35,6 +35,6 @@ defineWebComponent<Props, Events>('kc-response-stream', {
     speed={props.speed}
     as={props.as}
     class="text-body"
-    onComplete={() => dispatch('kc-complete')}
+    onComplete={() => dispatch('kai-complete')}
   />
 ));

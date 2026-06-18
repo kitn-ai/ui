@@ -13,10 +13,10 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-text-shimmer>` — animated shimmering text. Text via the `text`
+ * `<kai-text-shimmer>` — animated shimmering text. Text via the `text`
  * attribute; `duration`/`spread` tune the effect.
  */
-defineWebComponent<Props>('kc-text-shimmer', {
+defineWebComponent<Props>('kai-text-shimmer', {
   text: '',
   as: 'span',
   duration: 4,

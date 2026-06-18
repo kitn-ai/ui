@@ -5,7 +5,7 @@ import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
 import type { CustomAction } from './chat-types';
 
-/** Parse a single light-DOM `<kc-slash-command>` element into a SlashCommandItem.
+/** Parse a single light-DOM `<kai-slash-command>` element into a SlashCommandItem.
  *  Attribute mapping:
  *   - `command`     → SlashCommandItem.id       (required; empty string fallback)
  *   - textContent   → SlashCommandItem.label    (primary); `label` attr as fallback
@@ -23,7 +23,7 @@ export function parseKcSlashCommandElement(n: Element): SlashCommandItem {
 
 interface Props extends Record<string, unknown> {
   /** Controlled value of the input. When set, the host owns the text and must
-   *  update it on `kc-value-change`; leave unset for uncontrolled behavior. */
+   *  update it on `kai-value-change`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -52,7 +52,7 @@ interface Props extends Record<string, unknown> {
    *  event. */
   voice?: boolean;
   /** When set and `loading` is true, the send button is replaced by a Stop
-   *  button (square icon, "Stop" aria-label). Clicking it fires `kc-stop`. */
+   *  button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
   stoppable?: boolean;
   /** Attachments to seed the input with (so a consumer can pre-populate staged
    *  files without an upload). Set as a JS property; the element then manages its
@@ -60,28 +60,28 @@ interface Props extends Record<string, unknown> {
   attachments?: AttachmentData[];
 }
 
-/** Events fired by `<kc-prompt-input>`. */
+/** Events fired by `<kai-prompt-input>`. */
 interface Events {
   /** The user submitted the prompt (Enter or send button) with its attachments. */
-  'kc-submit': { value: string; attachments: AttachmentData[] };
+  'kai-submit': { value: string; attachments: AttachmentData[] };
   /** The input text changed (fires on every keystroke). */
-  'kc-value-change': { value: string };
+  'kai-value-change': { value: string };
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
-  'kc-suggestion-click': { value: string };
+  'kai-suggestion-click': { value: string };
   /** A slash command was chosen from the palette. */
-  'kc-slash-select': { command: SlashCommandItem };
+  'kai-slash-select': { command: SlashCommandItem };
   /** The Search (Globe) toolbar button was clicked. */
-  'kc-search': Record<string, never>;
+  'kai-search': Record<string, never>;
   /** The Voice (Mic) toolbar button was clicked. */
-  'kc-voice': Record<string, never>;
+  'kai-voice': Record<string, never>;
   /** The Stop button was clicked while `stoppable` and `loading` are both true. */
-  'kc-stop': Record<string, never>;
-  /** A custom `<kc-action>` toolbar button was clicked. `action` is the `id` of
-   *  the `<kc-action>` element that was clicked. */
-  'kc-toolbar-action': { action: string };
+  'kai-stop': Record<string, never>;
+  /** A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of
+   *  the `<kai-action>` element that was clicked. */
+  'kai-toolbar-action': { action: string };
 }
 
-defineWebComponent<Props, Events>('kc-prompt-input', {
+defineWebComponent<Props, Events>('kai-prompt-input', {
   value: undefined,
   placeholder: 'Send a message...',
   disabled: false,
@@ -106,14 +106,14 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
     if (props.attachments) setAttachments(props.attachments);
   });
 
-  // Read declarative <kc-action> and <kc-slash-command> children from light DOM —
-  // same pattern as kc-message. Shadow DOM with no <slot> suppresses them visually;
+  // Read declarative <kai-action> and <kai-slash-command> children from light DOM —
+  // same pattern as kai-message. Shadow DOM with no <slot> suppresses them visually;
   // they are invisible data carriers. One MutationObserver covers both element types.
   const [toolbarActions, setToolbarActions] = createSignal<CustomAction[]>([]);
   const [slottedSlashCommands, setSlottedSlashCommands] = createSignal<SlashCommandItem[]>([]);
   onMount(() => {
     const readActions = () => {
-      const nodes = [...element.querySelectorAll('kc-action')];
+      const nodes = [...element.querySelectorAll('kai-action')];
       setToolbarActions(nodes.map(n => ({
         id: n.id || n.getAttribute('action') || '',
         label: n.textContent?.trim() || n.getAttribute('label') || n.id || '',
@@ -122,7 +122,7 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
       })));
     };
     const readSlashCommands = () => {
-      const nodes = [...element.querySelectorAll('kc-slash-command')];
+      const nodes = [...element.querySelectorAll('kai-slash-command')];
       setSlottedSlashCommands(nodes.map(parseKcSlashCommandElement));
     };
     const readAll = () => { readActions(); readSlashCommands(); };
@@ -134,18 +134,18 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
 
   const current = () => props.value ?? internal();
 
-  const handleChange = (v: string) => { setInternal(v); dispatch('kc-value-change', { value: v }); };
+  const handleChange = (v: string) => { setInternal(v); dispatch('kai-value-change', { value: v }); };
   const handleSubmit = () => {
-    dispatch('kc-submit', { value: current(), attachments: attachments() });
+    dispatch('kai-submit', { value: current(), attachments: attachments() });
     setAttachments([]);
   };
   const handleSuggestionClick = (v: string) => {
     if ((props.suggestionMode ?? 'submit') === 'fill') {
       handleChange(v);
-      dispatch('kc-suggestion-click', { value: v });
+      dispatch('kai-suggestion-click', { value: v });
     } else {
       // Default: behave as if the user typed the suggestion and pressed submit.
-      dispatch('kc-submit', { value: v, attachments: attachments() });
+      dispatch('kai-submit', { value: v, attachments: attachments() });
       setAttachments([]);
     }
   };
@@ -175,11 +175,11 @@ defineWebComponent<Props, Events>('kc-prompt-input', {
       onSubmit={handleSubmit}
       onSuggestionClick={handleSuggestionClick}
       onAttachmentsChange={setAttachments}
-      onSearch={() => dispatch('kc-search')}
-      onVoice={() => dispatch('kc-voice')}
-      onStop={() => dispatch('kc-stop')}
-      onSlashSelect={(command) => dispatch('kc-slash-select', { command })}
-      onAction={(id) => dispatch('kc-toolbar-action', { action: id })}
+      onSearch={() => dispatch('kai-search')}
+      onVoice={() => dispatch('kai-voice')}
+      onStop={() => dispatch('kai-stop')}
+      onSlashSelect={(command) => dispatch('kai-slash-select', { command })}
+      onAction={(id) => dispatch('kai-toolbar-action', { action: id })}
     />
   );
 });

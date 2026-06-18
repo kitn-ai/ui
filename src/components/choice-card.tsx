@@ -83,7 +83,7 @@ export function normalizeOptions(options: unknown): {
     if (typeof opt.label !== 'string' || opt.label.length === 0) continue;
     if (seen.has(opt.id)) {
       // eslint-disable-next-line no-console
-      console.warn(`[kc-choice] duplicate option id "${opt.id}" ignored`);
+      console.warn(`[kai-choice] duplicate option id "${opt.id}" ignored`);
       continue;
     }
     seen.add(opt.id);
@@ -157,9 +157,9 @@ export interface ChoiceCardProps {
   /** The envelope title rendered in the card chrome. */
   heading?: string;
   /** Optional explicit CardHost (otherwise read from a CardProvider, otherwise the
-   *  bubbling `kc-card` CustomEvent off `hostElement`). */
+   *  bubbling `kai-card` CustomEvent off `hostElement`). */
   host?: CardHost;
-  /** The custom-element host node, for the bubbling `kc-card` fallback emit. */
+  /** The custom-element host node, for the bubbling `kai-card` fallback emit. */
   hostElement?: HTMLElement;
   class?: string;
   /** When set, render the chromed read-only view instead of the interactive radiogroup. */
@@ -179,7 +179,7 @@ export interface ChoiceCardProps {
  * error state).
  */
 export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
-  const merged = mergeProps({ cardId: 'kc-choice' }, props);
+  const merged = mergeProps({ cardId: 'kai-choice' }, props);
   const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution']);
 
   const ctxHost = useCardHost();

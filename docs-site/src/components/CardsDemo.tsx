@@ -1,5 +1,5 @@
 /** Live demos for "Generative UI cards" — one self-contained segment per card type
- *  (confirm, choice, form). Each segment mounts its own <kc-cards> seeded with a single
+ *  (confirm, choice, form). Each segment mounts its own <kai-cards> seeded with a single
  *  CardEnvelope and a CardPolicy that logs that card's events into a Console strip BELOW
  *  the preview (mirroring the Playground preview→Console convention). Realistic
  *  deploy / notify / rollback scenario. Exported per type so the MDX can place each
@@ -84,7 +84,7 @@ const FORM: CardEnvelope = {
   },
 };
 
-/** A single card type: its own <kc-cards> preview + a Console strip below logging
+/** A single card type: its own <kai-cards> preview + a Console strip below logging
  *  this card's CardPolicy events. Mirrors Playground.tsx's preview→Console layout. */
 function CardSegment(props: { envelope: CardEnvelope }) {
   let host: AnyEl | undefined;
@@ -129,7 +129,7 @@ function CardSegment(props: { envelope: CardEnvelope }) {
       {/* Preview */}
       <div class="p-5">
         {/* @ts-expect-error custom element */}
-        <kc-cards ref={(el: HTMLElement) => (host = el as AnyEl)} style={{ display: 'block' }} />
+        <kai-cards ref={(el: HTMLElement) => (host = el as AnyEl)} style={{ display: 'block' }} />
       </div>
 
       {/* Console — below the preview, mirroring the Playground convention */}

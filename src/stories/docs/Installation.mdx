@@ -10,14 +10,14 @@ npm install @kitn.ai/ui
 
 The package ships two entry points — pick whichever fits your stack, and you can mix them:
 
-- **`@kitn.ai/ui/elements`** — the framework-agnostic **web components** (`<kc-chat>`, …). Works
+- **`@kitn.ai/ui/elements`** — the framework-agnostic **web components** (`<kai-chat>`, …). Works
   in React, Vue, Angular, Svelte, or plain HTML. **This is what most apps use.**
 - **`@kitn.ai/ui`** — the native **SolidJS** components, if you're building in SolidJS.
 
 ## Web components (React, Vue, Angular, Svelte, HTML)
 
-Import the element bundle once as a **side effect** — that registers `<kc-chat>` and every other
-`<kc-*>` element globally:
+Import the element bundle once as a **side effect** — that registers `<kai-chat>` and every other
+`<kai-*>` element globally:
 
 ```js
 import '@kitn.ai/ui/elements';
@@ -45,7 +45,7 @@ install, no bundler. It's published on both <a href="https://www.jsdelivr.com/pa
   import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
-<kc-chat></kc-chat>
+<kai-chat></kai-chat>
 ```
 
 - The URL above tracks the **latest** release (no version) — great for demos and quick starts.

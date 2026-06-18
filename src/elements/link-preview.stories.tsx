@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, onMount, type JSX } from 'solid-js';
-import './link-preview'; // side effect: registers <kc-link-preview>
+import './link-preview'; // side effect: registers <kai-link-preview>
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 import type { LinkPreviewData } from '../primitives/link-preview';
 import { configureLinkPreview } from '../primitives/link-preview';
@@ -11,7 +11,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-link-preview': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-link-preview': JSX.HTMLAttributes<HTMLElement> & {
         'card-id'?: string;
         ref?: (el: HTMLElement) => void;
       };
@@ -26,7 +26,7 @@ function Frame(props: { children: JSX.Element }) {
   return <div style={{ width: '100%', 'max-width': '420px' }}>{props.children}</div>;
 }
 
-/** Mounts a <kc-link-preview>, sets `.data`, logs emitted CardEvents under the render. */
+/** Mounts a <kai-link-preview>, sets `.data`, logs emitted CardEvents under the render. */
 function LinkPreviewDemo(props: { cardId: string; data: LinkPreviewData }) {
   const [log, setLog] = createSignal<CardEvent[]>([]);
   let el: LinkPreviewEl | undefined;
@@ -34,7 +34,7 @@ function LinkPreviewDemo(props: { cardId: string; data: LinkPreviewData }) {
     if (!el) return;
     el.cardId = props.cardId;
     el.data = props.data;
-    el.addEventListener('kc-card', (e) => {
+    el.addEventListener('kai-card', (e) => {
       const detail = (e as CustomEvent<CardEvent>).detail;
       setLog((prev) => [...prev, detail]);
       if (detail.kind === 'open' && detail.target === 'tab') {
@@ -45,7 +45,7 @@ function LinkPreviewDemo(props: { cardId: string; data: LinkPreviewData }) {
   return (
     <Frame>
       <div style={{ display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
-        <kc-link-preview ref={(e) => (el = e as LinkPreviewEl)} card-id={props.cardId} />
+        <kai-link-preview ref={(e) => (el = e as LinkPreviewEl)} card-id={props.cardId} />
         <pre
           style={{
             margin: 0,
@@ -82,7 +82,7 @@ const FULL_ENVELOPE = {
 } satisfies { type: string; id: string; title: string; data: LinkPreviewData };
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-link-preview id="lc"></kc-link-preview>
+<kai-link-preview id="lc"></kai-link-preview>
 
 <script type="module">
   import '@kitn.ai/ui/elements'; // registers the custom elements
@@ -92,9 +92,9 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   // \`data\` is a JS property (the CardEnvelope \`data\`):
   lc.data = ${JSON.stringify(FULL_ENVELOPE.data, null, 2).replace(/\n/g, '\n  ')};
 
-  // Cards bubble a composed \`kc-card\` event carrying a typed CardEvent.
-  // kc-link-preview emits: ready (on mount), open (on click), error (invalid/broken url).
-  lc.addEventListener('kc-card', (e) => {
+  // Cards bubble a composed \`kai-card\` event carrying a typed CardEvent.
+  // kai-link-preview emits: ready (on mount), open (on click), error (invalid/broken url).
+  lc.addEventListener('kai-card', (e) => {
     const ev = e.detail; // CardEvent
     if (ev.kind === 'open' && ev.target === 'tab') {
       window.open(ev.url, '_blank', 'noopener,noreferrer');
@@ -103,16 +103,16 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Generative UI/Cards/kc-link-preview',
+  title: 'Generative UI/Cards/kai-link-preview',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-link-preview'),
+  argTypes: argTypesFor('kai-link-preview'),
   parameters: {
     layout: 'padded',
     docs: {
-      description: specDescription('kc-link-preview', [
-        '`<kc-link-preview>` is a themed, accessible **rich link / Open-Graph preview** card for the generative-UI feature. It speaks the **Card Contract**: data down (a `link` `CardEnvelope`), events up (only the `open` verb, plus lifecycle `ready` / failure `error`).',
+      description: specDescription('kai-link-preview', [
+        '`<kai-link-preview>` is a themed, accessible **rich link / Open-Graph preview** card for the generative-UI feature. It speaks the **Card Contract**: data down (a `link` `CardEnvelope`), events up (only the `open` verb, plus lifecycle `ready` / failure `error`).',
         '**Pure by default:** the card renders from the metadata you supply (`title`, `description`, `image`, `favicon`, `siteName`, `domain`) — it **never fetches**. For the bare-`{ url }` case, an app may opt in to a resolver with `configureLinkPreview({ fetchMetadata })` (CORS means OG scraping needs YOUR backend; there is no built-in network call).',
-        '**Interaction:** the whole card is one link target. Activating it (click / Enter / Space) dispatches the bubbling, composed **`kc-card`** event with `{ kind: \'open\', url, target: \'tab\' }` so a host-level listener routes it through `CardPolicy` (which performs the navigation, after scheme validation).',
+        '**Interaction:** the whole card is one link target. Activating it (click / Enter / Space) dispatches the bubbling, composed **`kai-card`** event with `{ kind: \'open\', url, target: \'tab\' }` so a host-level listener routes it through `CardPolicy` (which performs the navigation, after scheme validation).',
         '**Graceful degradation:** a missing/broken image drops the image region (not an error); an invalid url renders a non-clickable "Invalid link" chip and emits one `error`.',
         'See the **Code** tab for the `CardEnvelope` JSON + HTML wiring.',
       ]),

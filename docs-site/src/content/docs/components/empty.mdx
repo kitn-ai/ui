@@ -11,7 +11,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-empty</p>
+<p class="kc-tag-sub">kai-empty</p>
 
 <p class="kc-lede">A centred empty-state block with a media slot, a title, a description, and a content slot for actions — keeps layouts grounded instead of leaving users with a blank screen.</p>
 
@@ -19,16 +19,16 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-empty" />
+<Playground client:only="solid" tag="kai-empty" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-empty>` where content would normally appear — a conversation list, search results panel, file explorer — whenever that area is empty. Give the element or its parent an explicit height so vertical centering renders correctly. Project a contextual icon into `slot="media"` and a CTA into the default slot.
+Place `<kai-empty>` where content would normally appear — a conversation list, search results panel, file explorer — whenever that area is empty. Give the element or its parent an explicit height so vertical centering renders correctly. Project a contextual icon into `slot="media"` and a CTA into the default slot.
 </Aside>
 
 ## Usage
 
 ```html
-<kc-empty
+<kai-empty
   empty-title="No conversations yet"
   description="Start a new chat to see it appear here."
 >
@@ -37,7 +37,7 @@ Place `<kc-empty>` where content would normally appear — a conversation list, 
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
   <button>New chat</button>
-</kc-empty>
+</kai-empty>
 ```
 
 - **`empty-title`** — use this attribute, not `title` (which is a reserved HTML attribute).
@@ -48,24 +48,24 @@ Place `<kc-empty>` where content would normally appear — a conversation list, 
 
 ### Conversation List Placeholder
 
-<Example client:visible tag="kc-empty" config={{ emptyTitle: 'No conversations yet', description: 'Start a new chat to see it appear here.' }} />
+<Example client:visible tag="kai-empty" config={{ emptyTitle: 'No conversations yet', description: 'Start a new chat to see it appear here.' }} />
 
 ### Search with No Results
 
-<Example client:visible tag="kc-empty" config={{ emptyTitle: 'No results found', description: 'Try a different search term or clear your filters.' }} />
+<Example client:visible tag="kai-empty" config={{ emptyTitle: 'No results found', description: 'Try a different search term or clear your filters.' }} />
 
 ### Title Only
 
 Omitting the description gives a minimal, uncluttered treatment.
 
-<Example client:visible tag="kc-empty" config={{ emptyTitle: 'Nothing here yet' }} />
+<Example client:visible tag="kai-empty" config={{ emptyTitle: 'Nothing here yet' }} />
 
 ## Props
 
-<PropTable tag="kc-empty" />
+<PropTable tag="kai-empty" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-empty" />
+<ComposedFrom tag="kai-empty" />
 
 <NeedAHand />

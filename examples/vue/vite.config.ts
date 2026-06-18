@@ -14,10 +14,10 @@ export default defineConfig({
     vue({
       template: {
         compilerOptions: {
-          // Tell Vue's compiler that kc-* tags are native custom elements,
+          // Tell Vue's compiler that kai-* tags are native custom elements,
           // not Vue components — prevents "Unknown custom element" warnings
           // and ensures Vue sets DOM *properties* (not attributes) via .prop.
-          isCustomElement: (tag) => tag.startsWith('kc-'),
+          isCustomElement: (tag) => tag.startsWith('kai-'),
         },
       },
     }),

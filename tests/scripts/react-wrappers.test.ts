@@ -10,6 +10,6 @@ describe('generated React wrappers', () => {
     expect(src).not.toContain('export const KcArtifact ');
   });
   it('still binds to the kc- custom element tag', () => {
-    expect(src).toMatch(/export const Artifact[\s\S]*?'kc-artifact'/);
+    expect(src).toMatch(/export const Artifact[\s\S]*?'kai-artifact'/);
   });
 });

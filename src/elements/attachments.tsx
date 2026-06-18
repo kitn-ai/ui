@@ -23,7 +23,7 @@ interface Props extends Record<string, unknown> {
   variant?: AttachmentVariant;
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
-  /** Show a remove button per item; clicking it fires a `kc-remove` event. */
+  /** Show a remove button per item; clicking it fires a `kai-remove` event. */
   removable?: boolean;
   /** Also show the media type beneath the filename (non-grid variants). */
   showMediaType?: boolean;
@@ -31,14 +31,14 @@ interface Props extends Record<string, unknown> {
   emptyText?: string;
 }
 
-/** Events fired by `<kc-attachments>`. */
+/** Events fired by `<kai-attachments>`. */
 interface Events {
   /** A remove button was clicked. */
-  'kc-remove': { id: string };
+  'kai-remove': { id: string };
 }
 
 /**
- * `<kc-attachments>` — the exemplar for the "collapse a compound primitive to
+ * `<kai-attachments>` — the exemplar for the "collapse a compound primitive to
  * ONE configurable element" pattern (Route 1). The presentation knobs that the
  * SolidJS layer expresses by composing sub-parts (`<AttachmentPreview>`,
  * `<AttachmentInfo>`, `<AttachmentHoverCard>`, `<AttachmentRemove>`) become
@@ -46,13 +46,13 @@ interface Events {
  *
  *   - icon + label .......... `variant="inline"`
  *   - visual + hover card .... `variant="grid" hover-card`
- *   - removable chips ........ add `removable` (emits `kc-remove` → { id })
+ *   - removable chips ........ add `removable` (emits `kai-remove` → { id })
  *
  * Data in via the `items` property; the only interaction (`remove`) comes back
  * as an event. For fully-custom hover content, the SolidJS primitives remain the
  * escape hatch (a templated slot — "Route 2" — is a deliberate future add).
  */
-defineWebComponent<Props, Events>('kc-attachments', {
+defineWebComponent<Props, Events>('kai-attachments', {
   items: [],
   variant: 'grid',
   hoverCard: false,
@@ -75,7 +75,7 @@ defineWebComponent<Props, Events>('kc-attachments', {
           {(item) => (
             <Attachment
               data={item}
-              onRemove={removable() ? () => dispatch('kc-remove', { id: item.id }) : undefined}
+              onRemove={removable() ? () => dispatch('kai-remove', { id: item.id }) : undefined}
             >
               <Show
                 when={hoverCard()}

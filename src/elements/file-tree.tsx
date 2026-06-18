@@ -12,15 +12,15 @@ interface Props extends Record<string, unknown> {
 
 interface Events extends Record<string, unknown> {
   /** Fired when a file is selected. `detail.path` = the file's path. */
-  'kc-select': { path: string };
+  'kai-select': { path: string };
 }
 
 /**
- * `<kc-file-tree>` — a collapsible, keyboard-navigable file explorer built from a
+ * `<kai-file-tree>` — a collapsible, keyboard-navigable file explorer built from a
  * flat list of `/`-delimited paths (folders are derived). ARIA `tree`/`treeitem`.
  * Selecting a file fires a `select` event (`detail.path`). Fills its container.
  */
-defineWebComponent<Props, Events>('kc-file-tree', {
+defineWebComponent<Props, Events>('kai-file-tree', {
   files: [],
   activeFile: undefined,
   defaultExpanded: undefined,
@@ -44,7 +44,7 @@ defineWebComponent<Props, Events>('kc-file-tree', {
           files={props.files}
           activeFile={props.activeFile}
           defaultExpanded={props.defaultExpanded}
-          onSelect={(path) => dispatch('kc-select', { path })}
+          onSelect={(path) => dispatch('kai-select', { path })}
         />
       </div>
     </div>

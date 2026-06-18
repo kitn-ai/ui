@@ -110,7 +110,7 @@ function ResizablePanel(props: ResizablePanelProps) {
   // fills the panel on width AND height without needing `height:100%`, in both
   // orientations. (A flex panel only stretches the CROSS axis, collapsing the
   // main axis to content size — the bug this replaces.) Mirrors the
-  // `<kc-resizable>` web-component panel and the Shoelace/Web Awesome grid layout.
+  // `<kai-resizable>` web-component panel and the Shoelace/Web Awesome grid layout.
   // min:0 on BOTH axes enables shrink-to-scroll; overflow hidden.
   const sizeStyle = (): Record<string, string> => {
     const basis = normalizeSize(local.defaultSize);
@@ -176,7 +176,7 @@ export interface ResizableHandleProps extends JSX.HTMLAttributes<HTMLDivElement>
   /** Render as a static, non-interactive divider (e.g. between locked panels). */
   static?: boolean;
   /** Explicit axis; overrides `ResizableContext`. Needed by facades that render
-   * handles outside a context provider (e.g. `<kc-resizable>`). */
+   * handles outside a context provider (e.g. `<kai-resizable>`). */
   orientation?: Orientation;
 }
 

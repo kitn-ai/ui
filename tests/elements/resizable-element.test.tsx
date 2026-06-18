@@ -5,12 +5,12 @@ import type { KcMaximizeIntentDetail, KcMaximizeStateDetail } from '../../src/el
 // jsdom has no layout, so we only assert DOM structure, attributes and events
 // here. Drag, keyboard and visual layout are verified via Playwright.
 
-/** Build a <kc-resizable> with N <kc-resizable-item> children. */
+/** Build a <kai-resizable> with N <kai-resizable-item> children. */
 function makeGroup(items: Array<Record<string, string>>, attrs: Record<string, string> = {}) {
-  const group = document.createElement('kc-resizable') as HTMLElement;
+  const group = document.createElement('kai-resizable') as HTMLElement;
   for (const [k, v] of Object.entries(attrs)) group.setAttribute(k, v);
   for (const it of items) {
-    const item = document.createElement('kc-resizable-item');
+    const item = document.createElement('kai-resizable-item');
     for (const [k, v] of Object.entries(it)) item.setAttribute(k, v);
     item.textContent = 'content';
     group.appendChild(item);
@@ -23,12 +23,12 @@ function makeGroup(items: Array<Record<string, string>>, attrs: Record<string, s
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 afterEach(() => {
-  document.querySelectorAll('kc-resizable').forEach((e) => e.remove());
+  document.querySelectorAll('kai-resizable').forEach((e) => e.remove());
 });
 
-test('both kc-resizable and kc-resizable-item register', () => {
-  expect(customElements.get('kc-resizable')).toBeTruthy();
-  expect(customElements.get('kc-resizable-item')).toBeTruthy();
+test('both kai-resizable and kai-resizable-item register', () => {
+  expect(customElements.get('kai-resizable')).toBeTruthy();
+  expect(customElements.get('kai-resizable-item')).toBeTruthy();
 });
 
 test('N visible items render N-1 handles in the shadow root', async () => {
@@ -79,7 +79,7 @@ test('change CustomEvent fires when sizes change programmatically (visibility to
   const group = makeGroup([{}, {}, {}]);
   await flush();
   let detail: { sizes: number[] } | null = null;
-  group.addEventListener('kc-change', (e) => (detail = (e as CustomEvent).detail));
+  group.addEventListener('kai-change', (e) => (detail = (e as CustomEvent).detail));
   // Hide the middle item — a visibility change should re-layout and emit change.
   group.children[1].setAttribute('hidden', '');
   await flush();
@@ -97,8 +97,8 @@ test('more than 3 items: extras are ignored (max 3 panels)', async () => {
   warn.mockRestore();
 });
 
-test('kc-resizable-item renders its slotted light content via a default slot', async () => {
-  const item = document.createElement('kc-resizable-item');
+test('kai-resizable-item renders its slotted light content via a default slot', async () => {
+  const item = document.createElement('kai-resizable-item');
   document.body.appendChild(item);
   await flush();
   expect(item.shadowRoot!.querySelector('slot')).toBeTruthy();
@@ -115,7 +115,7 @@ test('exports the maximize protocol detail types (compile-time shape check)', ()
 // --- Task 2: maximize/restore core ---
 
 function intentFrom(item: Element, requested: boolean) {
-  item.dispatchEvent(new CustomEvent('kc-maximize-intent', { detail: { requested }, bubbles: true, composed: true }));
+  item.dispatchEvent(new CustomEvent('kai-maximize-intent', { detail: { requested }, bubbles: true, composed: true }));
 }
 
 test('maximize hides siblings, clears the maximized item size/locked, reflects data-maximized', async () => {
@@ -149,7 +149,7 @@ test('restore returns each item to its stashed size/hidden/locked', async () => 
 test('intent from outside any item is ignored', async () => {
   const group = makeGroup([{}, {}]);
   await flush();
-  group.dispatchEvent(new CustomEvent('kc-maximize-intent', { detail: { requested: true }, bubbles: true, composed: true }));
+  group.dispatchEvent(new CustomEvent('kai-maximize-intent', { detail: { requested: true }, bubbles: true, composed: true }));
   await flush();
   expect(group.hasAttribute('data-maximized')).toBe(false);
 });
@@ -160,7 +160,7 @@ test('maximize(i) / restore() host methods drive the layout + maximizechange', a
   const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void; restore(): void; maximizedIndex: number | null };
   await flush();
   const events: { maximized: boolean; index: number | null }[] = [];
-  group.addEventListener('kc-maximize-change', (e) => events.push((e as CustomEvent).detail));
+  group.addEventListener('kai-maximize-change', (e) => events.push((e as CustomEvent).detail));
   group.maximize(2);
   await flush();
   expect(group.children[0].hasAttribute('hidden')).toBe(true);
@@ -218,20 +218,20 @@ test('removing the maximized item auto-restores (no empty container)', async () 
   group.children[1].remove();
   await flush();
   expect(group.hasAttribute('data-maximized')).toBe(false);
-  expect(group.querySelectorAll('kc-resizable-item').length).toBe(2);
+  expect(group.querySelectorAll('kai-resizable-item').length).toBe(2);
 });
 
 test('nested group stops the intent (outer group never maximizes)', async () => {
   const outer = makeGroup([{}, {}]);
   // Put an inner group inside the first outer item.
-  const inner = document.createElement('kc-resizable');
-  const innerItem = document.createElement('kc-resizable-item');
+  const inner = document.createElement('kai-resizable');
+  const innerItem = document.createElement('kai-resizable-item');
   inner.appendChild(innerItem);
-  const leaf = document.createElement('kc-resizable-item');
+  const leaf = document.createElement('kai-resizable-item');
   leaf.appendChild(inner);
   outer.replaceChild(leaf, outer.children[0]);
   await flush();
-  innerItem.dispatchEvent(new CustomEvent('kc-maximize-intent', { detail: { requested: true }, bubbles: true, composed: true }));
+  innerItem.dispatchEvent(new CustomEvent('kai-maximize-intent', { detail: { requested: true }, bubbles: true, composed: true }));
   await flush();
   expect(inner.hasAttribute('data-maximized')).toBe(true);
   expect(outer.hasAttribute('data-maximized')).toBe(false);
@@ -280,7 +280,7 @@ test('maximize and restore each emit exactly one change (no storm)', async () =>
   const group = makeGroup([{}, {}, {}]) as HTMLElement & { maximize(i: number): void; restore(): void };
   await flush();
   let count = 0;
-  group.addEventListener('kc-change', () => count++);
+  group.addEventListener('kai-change', () => count++);
   group.maximize(1);
   await flush();
   const afterMax = count;

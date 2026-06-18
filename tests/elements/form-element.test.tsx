@@ -1,5 +1,5 @@
 // tests/elements/form-element.test.tsx
-// Contract integration: the bubbling `kc-card` CustomEvent reaches a document
+// Contract integration: the bubbling `kai-card` CustomEvent reaches a document
 // listener (the requirement defineWebComponent's default dispatch does NOT meet).
 import '../../src/elements/form';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
@@ -16,7 +16,7 @@ function listen(): { events: CardEvent[]; off: () => void } {
 }
 
 afterEach(() => {
-  document.querySelectorAll('kc-form').forEach((e) => e.remove());
+  document.querySelectorAll('kai-form').forEach((e) => e.remove());
 });
 
 const FEEDBACK: FormDefinition = {
@@ -34,7 +34,7 @@ const FEEDBACK: FormDefinition = {
 };
 
 async function mount(data: FormDefinition, cardId = 'card-feedback-7f3') {
-  const el = document.createElement('kc-form') as HTMLElement & { data: FormDefinition };
+  const el = document.createElement('kai-form') as HTMLElement & { data: FormDefinition };
   el.setAttribute('card-id', cardId);
   el.data = data;
   document.body.appendChild(el);
@@ -42,11 +42,11 @@ async function mount(data: FormDefinition, cardId = 'card-feedback-7f3') {
   return el;
 }
 
-test('kc-form registers', () => {
-  expect(customElements.get('kc-form')).toBeTruthy();
+test('kai-form registers', () => {
+  expect(customElements.get('kai-form')).toBeTruthy();
 });
 
-test('mount emits a bubbling `ready` kc-card event reaching the document', async () => {
+test('mount emits a bubbling `ready` kai-card event reaching the document', async () => {
   const { events, off } = listen();
   await mount(FEEDBACK);
   expect(events.some((e) => e.kind === 'ready' && e.cardId === 'card-feedback-7f3')).toBe(true);

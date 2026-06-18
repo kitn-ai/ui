@@ -12,7 +12,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-model-switcher</p>
+<p class="kc-tag-sub">kai-model-switcher</p>
 
 <p class="kc-lede">A compact dropdown trigger that lets users swap the active AI model mid-conversation — set a list of models, handle one event, done.</p>
 
@@ -20,18 +20,18 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-model-switcher" />
+<Playground client:only="solid" tag="kai-model-switcher" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-model-switcher>` when building your own chat header and you want the model picker as a standalone piece. It sits naturally beside a context meter or title. The element stays invisible until at least two models are provided, so you can always pass the full list and let the component decide whether to show.
+Reach for `<kai-model-switcher>` when building your own chat header and you want the model picker as a standalone piece. It sits naturally beside a context meter or title. The element stays invisible until at least two models are provided, so you can always pass the full list and let the component decide whether to show.
 </Aside>
 
 ## Usage
 
-Set `models` in JavaScript (arrays can't be HTML attributes) and reflect the selection back on `kc-model-change`:
+Set `models` in JavaScript (arrays can't be HTML attributes) and reflect the selection back on `kai-model-change`:
 
 ```html
-<kc-model-switcher id="ms"></kc-model-switcher>
+<kai-model-switcher id="ms"></kai-model-switcher>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -43,7 +43,7 @@ Set `models` in JavaScript (arrays can't be HTML attributes) and reflect the sel
   ];
   ms.currentModel = 'claude-opus';
 
-  ms.addEventListener('kc-model-change', (e) => {
+  ms.addEventListener('kai-model-change', (e) => {
     ms.currentModel = e.detail.modelId;
   });
 </script>
@@ -51,18 +51,18 @@ Set `models` in JavaScript (arrays can't be HTML attributes) and reflect the sel
 
 - **`models`** — an array, so assign it as a property. Each item: `{ id: string; name: string; provider?: string }`.
 - **`currentModel`** — the selected model's `id`. Omit it to default to the first item in the list.
-- **Reflect the selection** — set `el.currentModel = e.detail.modelId` after each `kc-model-change` so the trigger label updates.
+- **Reflect the selection** — set `el.currentModel = e.detail.modelId` after each `kai-model-change` so the trigger label updates.
 
-**Declarative child API** — compose `<kc-model>` children instead of setting the `models` property:
+**Declarative child API** — compose `<kai-model>` children instead of setting the `models` property:
 
 ```html
-<kc-model-switcher>
-  <kc-model id="gpt-4o" provider="OpenAI">GPT-4o</kc-model>
-  <kc-model id="claude-sonnet" provider="Anthropic">Claude Sonnet</kc-model>
-</kc-model-switcher>
+<kai-model-switcher>
+  <kai-model id="gpt-4o" provider="OpenAI">GPT-4o</kai-model>
+  <kai-model id="claude-sonnet" provider="Anthropic">Claude Sonnet</kai-model>
+</kai-model-switcher>
 ```
 
-Each `<kc-model>` carries `id` (required), `provider` (optional), and a text label. When you mix both approaches, property items render first.
+Each `<kai-model>` carries `id` (required), `provider` (optional), and a text label. When you mix both approaches, property items render first.
 
 ## Examples
 
@@ -70,30 +70,30 @@ Each `<kc-model>` carries `id` (required), `provider` (optional), and a text lab
 
 Three Claude models loaded via the `models` property.
 
-<Example client:visible tag="kc-model-switcher" />
+<Example client:visible tag="kai-model-switcher" />
 
 ### Preselected Model
 
 `current-model="claude-sonnet"` starts with a specific model active rather than the first item.
 
-<Example client:visible tag="kc-model-switcher" config={{ currentModel: 'claude-sonnet' }} data="preselected" />
+<Example client:visible tag="kai-model-switcher" config={{ currentModel: 'claude-sonnet' }} data="preselected" />
 
 ### Multiple Providers
 
 Models from different providers — the dropdown groups them by the `provider` field.
 
-<Example client:visible tag="kc-model-switcher" data="multiProvider" />
+<Example client:visible tag="kai-model-switcher" data="multiProvider" />
 
 ## Props
 
-<PropTable tag="kc-model-switcher" />
+<PropTable tag="kai-model-switcher" />
 
 ## Events
 
-<EventTable tag="kc-model-switcher" />
+<EventTable tag="kai-model-switcher" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-model-switcher" />
+<ComposedFrom tag="kai-model-switcher" />
 
 <NeedAHand />

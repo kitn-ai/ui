@@ -16,10 +16,10 @@ import VoiceAssistantDemo from '../../../components/VoiceAssistantDemo.tsx';
 
 ## How it works
 
-`<kc-chat>` does the talking on both ends. Its built-in `voice` attribute adds a mic button to the input toolbar and fires a `kc-voice` event when tapped. You own what happens next: capture audio, transcribe it, push the text into the thread, then speak the finished reply with the [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
+`<kai-chat>` does the talking on both ends. Its built-in `voice` attribute adds a mic button to the input toolbar and fires a `kai-voice` event when tapped. You own what happens next: capture audio, transcribe it, push the text into the thread, then speak the finished reply with the [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
 
 ```html
-<kc-chat id="chat" chat-title="Voice assistant" voice></kc-chat>
+<kai-chat id="chat" chat-title="Voice assistant" voice></kai-chat>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -59,20 +59,20 @@ import VoiceAssistantDemo from '../../../components/VoiceAssistantDemo.tsx';
   }
 
   // Mic tapped → record, transcribe, then run the turn with the transcript.
-  chat.addEventListener('kc-voice', async () => {
+  chat.addEventListener('kai-voice', async () => {
     const transcript = await transcribeFromMic(); // your STT pipeline
     if (transcript) ask(transcript);
   });
 
   // Typed messages follow the same path.
-  chat.addEventListener('kc-submit', (e) => {
+  chat.addEventListener('kai-submit', (e) => {
     const text = e.detail.value.trim();
     if (text) ask(text);
   });
 </script>
 ```
 
-Mic capture needs the `MediaRecorder` API and a transcription backend, which can't run in this sandbox — the demo above swaps `transcribeFromMic()` for a canned transcript and a scripted stream so the flow is visible end to end. In production, drop `<kc-voice-input>` into `transcribeFromMic()` to record audio and return text from your speech-to-text provider.
+Mic capture needs the `MediaRecorder` API and a transcription backend, which can't run in this sandbox — the demo above swaps `transcribeFromMic()` for a canned transcript and a scripted stream so the flow is visible end to end. In production, drop `<kai-voice-input>` into `transcribeFromMic()` to record audio and return text from your speech-to-text provider.
 
 <Aside type="tip" title="Stop speech on the next question">
 Call `speechSynthesis.cancel()` before each new turn so a fresh question cuts off the previous reply mid-sentence instead of queuing behind it. The "Speak reply" control in the demo footer re-reads the latest answer the same way.
@@ -80,7 +80,7 @@ Call `speechSynthesis.cancel()` before each new turn so a fresh question cuts of
 
 ## Next steps
 
-- **[Speech to Text recipe](/chat/guides/recipes/speech-to-text/)** — wire real mic capture with `<kc-voice-input>` and a transcription backend, the piece this demo stubs out.
+- **[Speech to Text recipe](/chat/guides/recipes/speech-to-text/)** — wire real mic capture with `<kai-voice-input>` and a transcription backend, the piece this demo stubs out.
 - **[Text to Speech recipe](/chat/guides/recipes/text-to-speech/)** — choosing a voice, stopping playback, and swapping the browser-native path for higher-quality cloud TTS.
-- **[`kc-chat` reference](/chat/components/chat/)** — the `voice` attribute, the `kc-voice` event, and the full streaming loop.
+- **[`kai-chat` reference](/chat/components/chat/)** — the `voice` attribute, the `kai-voice` event, and the full streaming loop.
 - **[Drop-in chat](/chat/examples/drop-in-chat/)** — the baseline streaming loop this example layers voice on top of.

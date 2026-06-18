@@ -5,7 +5,7 @@ import * as FullChat from '../full-chat.stories';
 
 # Getting Started
 
-`<kc-chat>` is **transport-agnostic**: give it a `messages` array, it renders the conversation and
+`<kai-chat>` is **transport-agnostic**: give it a `messages` array, it renders the conversation and
 emits a `submit` event when the user sends. You own the request and the streaming; the component
 owns the UI.
 
@@ -15,7 +15,7 @@ Set rich data as JS **properties** and listen for **events**. This is the univer
 framework just wraps it in its own binding syntax.
 
 ```html
-<kc-chat id="chat" style="display:block; height:100dvh;"></kc-chat>
+<kai-chat id="chat" style="display:block; height:100dvh;"></kai-chat>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -25,7 +25,7 @@ framework just wraps it in its own binding syntax.
     { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
   ];
 
-  chat.addEventListener('kc-submit', (e) => {
+  chat.addEventListener('kai-submit', (e) => {
     const text = e.detail.value;
     chat.messages = [
       ...chat.messages,
@@ -42,7 +42,7 @@ framework just wraps it in its own binding syntax.
 ## Now pick your stack
 
 That's the raw element. For install, setup, and idiomatic examples in your framework — plus the
-**two ways** to use the kit (the all-in-one `<kc-chat>` and composing the individual elements):
+**two ways** to use the kit (the all-in-one `<kai-chat>` and composing the individual elements):
 
 [HTML](?path=/docs/docs-frameworks-html--docs) ·
 [React](?path=/docs/docs-frameworks-react--docs) ·

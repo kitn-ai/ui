@@ -2,7 +2,7 @@ import type { Preview } from 'storybook-solidjs-vite';
 import { themes } from 'storybook/theming';
 import './styles.css';
 
-// Storybook's dark toggle adds `.dark` to the preview <html>, but the `kc-*`
+// Storybook's dark toggle adds `.dark` to the preview <html>, but the `kai-*`
 // custom elements render in SHADOW DOM, which a light-DOM class can't cross — so
 // they'd otherwise fall back to their own `theme="auto"` (the OS preference) and
 // ignore the toggle. Mirror the resolved Storybook theme onto each element's
@@ -13,7 +13,7 @@ if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined') 
     const dark = document.documentElement.classList.contains('dark');
     const root = document.querySelector('#storybook-root') ?? document.body;
     root.querySelectorAll('*').forEach((el) => {
-      if (el.tagName.toLowerCase().startsWith('kc-')) {
+      if (el.tagName.toLowerCase().startsWith('kai-')) {
         el.setAttribute('theme', dark ? 'dark' : 'light');
       }
     });
@@ -121,7 +121,7 @@ const preview: Preview = {
           'Solid (Advanced)',
           ['Overview', 'Elements', 'Primitives'],
           'Generative UI',
-          ['Overview', 'Cards', ['kc-confirm', '*'], 'SDK'],
+          ['Overview', 'Cards', ['kai-confirm', '*'], 'SDK'],
           '*',
         ],
       },

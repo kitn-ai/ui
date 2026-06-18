@@ -19,7 +19,7 @@
   --kc-accent-soft: hsl(var(--kc-primary) / 0.16);
 
   /* Neutrals aligned to the kit's DEFAULT DARK theme (warm charcoal family) so a
-     docs page and an embedded kc-* component share the same grays.
+     docs page and an embedded kai-* component share the same grays.
      Source of truth: src/elements/compiled.css `.dark{}` block. */
   --kc-bg: #171716;                                /* content + header — kit --color-background */
   --kc-sidebar: #121211;                           /* distinct sidebar nav bg — kit --color-sidebar */

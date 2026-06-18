@@ -12,10 +12,10 @@ This guide is the model/server side: the contract, how to get your model to emit
 ## The loop
 
 ```
-agent / server ──CardEnvelope(s)──▶  <kc-cards>.cards
-     ▲                                     │  dispatcher renders the kc-* for each `type`
+agent / server ──CardEnvelope(s)──▶  <kai-cards>.cards
+     ▲                                     │  dispatcher renders the kai-* for each `type`
      │                                     ▼
-     └──── result ◀── CardPolicy ◀── kc-card event ◀── user interacts
+     └──── result ◀── CardPolicy ◀── kai-card event ◀── user interacts
 ```
 
 One **envelope** is what the agent *sends* (addressed data, not UI); one **card** is what the user *sees*. The dispatcher's whole job is envelope in → card out.
@@ -38,12 +38,12 @@ The built-in types and the element each renders:
 
 | `type` | Use it for | Renders | Terminal event |
 |---|---|---|---|
-| `confirm` | Approve / decline an action | `kc-confirm` | `action` |
-| `choice` | Pick one option from a list | `kc-choice` | `action` |
-| `form` | Collect structured input (JSON-Schema form) | `kc-form` | `submit` |
-| `tasks` | Select from a proposed plan | `kc-tasks` | `submit` |
-| `link` | Preview a URL (title/desc/image) | `kc-link-preview` | — |
-| `embed` | Lazy media embed (YouTube, Vimeo) | `kc-embed` | — |
+| `confirm` | Approve / decline an action | `kai-confirm` | `action` |
+| `choice` | Pick one option from a list | `kai-choice` | `action` |
+| `form` | Collect structured input (JSON-Schema form) | `kai-form` | `submit` |
+| `tasks` | Select from a proposed plan | `kai-tasks` | `submit` |
+| `link` | Preview a URL (title/desc/image) | `kai-link-preview` | — |
+| `embed` | Lazy media embed (YouTube, Vimeo) | `kai-embed` | — |
 
 Each `data` shape has a published **JSON Schema** (shipped in the package under `dist/schemas/`, e.g. `confirm.schema.json`). A `confirm` envelope looks like:
 
@@ -112,13 +112,13 @@ if (!result.valid) {
 
 ## Wiring the host
 
-Render envelopes with `<kc-cards>` and route every interaction through a `CardPolicy`:
+Render envelopes with `<kai-cards>` and route every interaction through a `CardPolicy`:
 
 ```html
-<kc-cards></kc-cards>
+<kai-cards></kai-cards>
 <script type="module">
   import '@kitn.ai/ui/elements';
-  const cards = document.querySelector('kc-cards');
+  const cards = document.querySelector('kai-cards');
 
   cards.cards = [/* envelopes from your model */];
 
@@ -138,7 +138,7 @@ A card flips to a read-only view the moment the user acts. To make that survive 
 ```ts
 import { applyResolution } from '@kitn.ai/ui';
 
-cards.addEventListener('kc-card', (e) => {
+cards.addEventListener('kai-card', (e) => {
   cards.cards = applyResolution(cards.cards, e.detail); // resolved → re-hydrates read-only
   save(cards.cards);
 });
@@ -153,10 +153,10 @@ The built-ins cover most flows, but the `type → tag` map is open. Register an 
 ```ts
 import { mergeCardTags } from '@kitn.ai/ui';
 const types = mergeCardTags({ chart: 'my-chart-card' }); // built-ins + yours
-// el.types = types  →  <kc-cards> now renders `chart` envelopes with <my-chart-card>
+// el.types = types  →  <kai-cards> now renders `chart` envelopes with <my-chart-card>
 ```
 
-For **provider-owned, cross-origin** cards you don't want to bundle, render them in a sandboxed iframe with `kc-remote` — same envelope, same policy, over `postMessage`. See [remote cards](/chat/examples/remote-cards/).
+For **provider-owned, cross-origin** cards you don't want to bundle, render them in a sandboxed iframe with `kai-remote` — same envelope, same policy, over `postMessage`. See [remote cards](/chat/examples/remote-cards/).
 
 ## Next
 

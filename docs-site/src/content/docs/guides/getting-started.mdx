@@ -5,7 +5,7 @@ description: Install @kitn.ai/ui, register the web components, and render a work
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Drop `<kc-chat>` into a page, wire two things, and you have a live chat UI. This guide goes from install to an element that handles real submissions.
+Drop `<kai-chat>` into a page, wire two things, and you have a live chat UI. This guide goes from install to an element that handles real submissions.
 
 ## Install
 
@@ -17,7 +17,7 @@ That's it for web components — SolidJS ships inside the bundle. (You only add 
 
 ## Register the elements
 
-One import registers every `kc-*` element in the browser's custom element registry. Run it once — at the top of your entry file, or in a `<script type="module">`:
+One import registers every `kai-*` element in the browser's custom element registry. Run it once — at the top of your entry file, or in a `<script type="module">`:
 
 ```js
 import '@kitn.ai/ui/elements';
@@ -40,7 +40,7 @@ Pin an exact version in production (e.g. `@kitn.ai/ui@0.13.0/dist/...`). The pac
 You'll lean on two patterns over and over: set rich data on a JavaScript property, and listen for the element's `CustomEvent`s. Here they are in plain HTML.
 
 ```html
-<kc-chat id="chat" style="display:block; height:100dvh;"></kc-chat>
+<kai-chat id="chat" style="display:block; height:100dvh;"></kai-chat>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -52,8 +52,8 @@ You'll lean on two patterns over and over: set rich data on a JavaScript propert
     { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
   ];
 
-  // kc-submit fires when the user sends.
-  chat.addEventListener('kc-submit', (e) => {
+  // kai-submit fires when the user sends.
+  chat.addEventListener('kai-submit', (e) => {
     const userMessage = { id: crypto.randomUUID(), role: 'user', content: e.detail.value };
     chat.messages = [...chat.messages, userMessage];
     // Call your model here, then append an assistant message.
@@ -64,15 +64,15 @@ You'll lean on two patterns over and over: set rich data on a JavaScript propert
 From that example:
 
 - `messages` is a property. Assign a **new array** to trigger a re-render — mutating in place won't.
-- `kc-submit` carries the input on `e.detail.value`, and any staged files on `e.detail.attachments`.
+- `kai-submit` carries the input on `e.detail.value`, and any staged files on `e.detail.attachments`.
 - Give the element an explicit height. It fills its block, scrolling and all.
 
 ## Stream a reply
 
-`<kc-chat>` is transport-agnostic — it renders whatever you hand it. To stream, push an empty assistant message, then swap it for a fresh object on each chunk.
+`<kai-chat>` is transport-agnostic — it renders whatever you hand it. To stream, push an empty assistant message, then swap it for a fresh object on each chunk.
 
 ```js
-chat.addEventListener('kc-submit', async (e) => {
+chat.addEventListener('kai-submit', async (e) => {
   const userText = e.detail.value.trim();
   if (!userText) return;
 
@@ -118,13 +118,13 @@ The element behaves the same everywhere. Only the binding syntax differs.
 <Tabs>
 <TabItem label="HTML">
 ```html
-<kc-chat id="chat" style="display:block; height:100dvh;"></kc-chat>
+<kai-chat id="chat" style="display:block; height:100dvh;"></kai-chat>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
   const chat = document.getElementById('chat');
   chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
-  chat.addEventListener('kc-submit', (e) => console.log(e.detail.value));
+  chat.addEventListener('kai-submit', (e) => console.log(e.detail.value));
 </script>
 ```
 </TabItem>
@@ -147,10 +147,10 @@ export function App() {
 <TabItem label="Vue">
 ```vue
 <template>
-  <kc-chat
+  <kai-chat
     :messages.prop="messages"
     style="display:block; height:100dvh;"
-    @kc-submit="onSubmit"
+    @kai-submit="onSubmit"
   />
 </template>
 
@@ -168,20 +168,20 @@ const onSubmit = (e) => console.log(e.detail.value);
   const messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
 </script>
 
-<kc-chat
+<kai-chat
   {messages}
   style="display:block; height:100dvh;"
-  on:kc-submit={(e) => console.log(e.detail.value)}
-></kc-chat>
+  on:kai-submit={(e) => console.log(e.detail.value)}
+></kai-chat>
 ```
 </TabItem>
 <TabItem label="Angular">
 ```html
-<kc-chat
+<kai-chat
   [messages]="messages"
   style="display:block; height:100dvh;"
-  (kc-submit)="onSubmit($event)"
-></kc-chat>
+  (kai-submit)="onSubmit($event)"
+></kai-chat>
 ```
 </TabItem>
 <TabItem label="SolidJS">
@@ -228,4 +228,4 @@ Arrays and objects — `messages`, `models`, `context`, `attachments` — must b
 ## What's next
 
 - **[Frameworks](/chat/guides/frameworks/overview/)** — idiomatic wiring for React, Vue, Angular, Svelte, and SolidJS.
-- **[Components](/chat/components/chat/)** — full props, events, and examples for `kc-chat` and every other element.
+- **[Components](/chat/components/chat/)** — full props, events, and examples for `kai-chat` and every other element.

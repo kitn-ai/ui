@@ -18,29 +18,29 @@ const REPLY =
 /**
  * Reasoning + Answer — a chain-of-thought trace above an assistant reply.
  *
- * `<kc-chain-of-thought>` renders from a flat `steps: { label, content }[]`
+ * `<kai-chain-of-thought>` renders from a flat `steps: { label, content }[]`
  * property. Key gotchas:
  * - Set `steps` as a **property** (el.steps = [...]), never as an attribute.
  * - The `steps` shape has no `icon` field — per-step icons (Search /
  *   Calculator / Lightbulb in this demo) are `ChainOfThoughtTrigger leftIcon`
  *   props, a SolidJS-only touch. Confirmed in src/elements/chain-of-thought.tsx.
  * - The element has no events and cannot be controlled (open/closed state).
- *   For a controlled reasoning block with `streaming` auto-expand + `kc-open-change`,
- *   use `<kc-reasoning>` instead.
+ *   For a controlled reasoning block with `streaming` auto-expand + `kai-open-change`,
+ *   use `<kai-reasoning>` instead.
  * - The copy/like/dislike bar is a separate `MessageActions` composition; it is
  *   not part of the chain-of-thought model.
  */
 const reasoning: StoryUsage = {
   intro:
-    "Show the model's reasoning above its answer. `<kc-chain-of-thought>` renders a collapsible trace from a `steps` array of `{ label, content }` — set it as a JS **property** (not an attribute). The element has no events and the `steps` shape has no icon field: per-step icons are a SolidJS-only touch via `ChainOfThoughtTrigger leftIcon` (see the Solid tab). For a single streaming reasoning block with `kc-open-change`, use `<kc-reasoning>` instead.",
+    "Show the model's reasoning above its answer. `<kai-chain-of-thought>` renders a collapsible trace from a `steps` array of `{ label, content }` — set it as a JS **property** (not an attribute). The element has no events and the `steps` shape has no icon field: per-step icons are a SolidJS-only touch via `ChainOfThoughtTrigger leftIcon` (see the Solid tab). For a single streaming reasoning block with `kai-open-change`, use `<kai-reasoning>` instead.",
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
   import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
-<kc-chain-of-thought id="cot"></kc-chain-of-thought>
-<kc-message id="msg"></kc-message>
+<kai-chain-of-thought id="cot"></kai-chain-of-thought>
+<kai-message id="msg"></kai-message>
 
 <script type="module">
   const cot = document.getElementById('cot');
@@ -54,7 +54,7 @@ const reasoning: StoryUsage = {
     content: '${REPLY}',
     actions: ['copy', 'like', 'dislike'],
   };
-  msg.addEventListener('kc-message-action', (e) => console.log(e.detail));
+  msg.addEventListener('kai-message-action', (e) => console.log(e.detail));
 </script>`,
 
     react: `import { ChainOfThought, Message } from '@kitn.ai/ui/react';
@@ -92,8 +92,8 @@ const message = {
 
 <template>
   <!-- arrays/objects bind as a property -->
-  <kc-chain-of-thought :steps.prop="steps" />
-  <kc-message :message.prop="message" @kc-message-action="(e) => console.log(e.detail)" />
+  <kai-chain-of-thought :steps.prop="steps" />
+  <kai-message :message.prop="message" @kai-message-action="(e) => console.log(e.detail)" />
 </template>`,
 
     svelte: `<script>
@@ -113,8 +113,8 @@ const message = {
   $: if (msgEl) msgEl.message = message;
 </script>
 
-<kc-chain-of-thought bind:this={cotEl} />
-<kc-message bind:this={msgEl} on:kc-message-action={(e) => console.log(e.detail)} />`,
+<kai-chain-of-thought bind:this={cotEl} />
+<kai-message bind:this={msgEl} on:kai-message-action={(e) => console.log(e.detail)} />`,
 
     angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
@@ -125,8 +125,8 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
-    <kc-chain-of-thought [steps]="steps"></kc-chain-of-thought>
-    <kc-message [message]="message" (kc-message-action)="log($event)"></kc-message>
+    <kai-chain-of-thought [steps]="steps"></kai-chain-of-thought>
+    <kai-message [message]="message" (kai-message-action)="log($event)"></kai-message>
   \`,
 })
 export class ReasonedReplyComponent {
@@ -190,7 +190,7 @@ export function ReasonedReply() {
 
         <MessageContent markdown>${REPLY}</MessageContent>
 
-        {/* Custom action bar — not part of the kc-chain-of-thought model */}
+        {/* Custom action bar — not part of the kai-chain-of-thought model */}
         <MessageActions>
           <Button variant="ghost" size="icon-sm" aria-label="Copy message"><Copy class="size-3.5" /></Button>
           <Button variant="ghost" size="icon-sm" aria-label="Good response"><ThumbsUp class="size-3.5" /></Button>
@@ -209,9 +209,9 @@ export function ReasonedReply() {
  * you're on; the example-level fields below are the fallback.
  *
  * Two elements are available:
- * - `<kc-chain-of-thought>` — multi-step trace from a `steps` array; no events.
- * - `<kc-reasoning>` — single collapsible block; `streaming` auto-expands it;
- *   fires `kc-open-change: { open }`.
+ * - `<kai-chain-of-thought>` — multi-step trace from a `steps` array; no events.
+ * - `<kai-reasoning>` — single collapsible block; `streaming` auto-expands it;
+ *   fires `kai-open-change: { open }`.
  */
 const conversationWithReasoning: ExampleUsage = {
   title: 'Examples/Conversation with Reasoning',

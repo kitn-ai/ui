@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-tool': JSX.HTMLAttributes<HTMLElement>;
+      'kai-tool': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -27,7 +27,7 @@ const runningTool: ToolPart = {
   input: { query: 'kitn docs' },
 };
 
-/** Render the actual `<kc-tool>` custom element with a `tool` property. */
+/** Render the actual `<kai-tool>` custom element with a `tool` property. */
 function ToolElement(props: { tool: ToolPart; open?: boolean }) {
   let el: (HTMLElement & { tool?: ToolPart; open?: boolean }) | undefined;
   onMount(() => {
@@ -37,12 +37,12 @@ function ToolElement(props: { tool: ToolPart; open?: boolean }) {
     }
   });
   return (
-    <kc-tool ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
+    <kai-tool ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
   );
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-tool id="tool" open></kc-tool>
+<kai-tool id="tool" open></kai-tool>
 
 <script type="module">
   import '@kitn.ai/ui/elements';   // registers the custom elements
@@ -59,12 +59,12 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 const meta = {
   title: 'Components/Tool',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-tool'),
+  argTypes: argTypesFor('kai-tool'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kc-tool', [
-          '`<kc-tool>` is the framework-agnostic **web component** for a single tool-call panel — a collapsible input/output inspector with a state badge — isolated in **Shadow DOM**.',
+      description: specDescription('kai-tool', [
+          '`<kai-tool>` is the framework-agnostic **web component** for a single tool-call panel — a collapsible input/output inspector with a state badge — isolated in **Shadow DOM**.',
           '**When to use:** rendering an agent/tool-call trace in a non-Solid app. In SolidJS, use the `Tool` primitive directly.',
           '**Placement:** inline inside an assistant message row, one element per tool call, below the text content; renders as a block sized to its content.',
           "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the call via the `tool` **property** (`el.tool = {...}`), and add the `open` flag to start it expanded.",

@@ -12,7 +12,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-feedback-bar</p>
+<p class="kc-tag-sub">kai-feedback-bar</p>
 
 <p class="kc-lede">An inline thumbs up/down banner that owns its own flow — asks, optionally collects a category and comment on a thumbs-down vote, then confirms with a thank-you — all in place, no modal.</p>
 
@@ -20,15 +20,15 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-feedback-bar" />
+<Playground client:only="solid" tag="kai-feedback-bar" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-feedback-bar>` at the end of an assistant response, a completed task, or an article. Add `collect-detail` when you want an optional reason on a thumbs-down vote — the element handles the multi-step flow itself, so you only listen for `kc-feedback-detail`.
+Place `<kai-feedback-bar>` at the end of an assistant response, a completed task, or an article. Add `collect-detail` when you want an optional reason on a thumbs-down vote — the element handles the multi-step flow itself, so you only listen for `kai-feedback-detail`.
 </Aside>
 
 ## Usage
 
-Drop `<kc-feedback-bar>` after any response. The element transitions to a thank-you on vote; the × button fires `kc-close` and you control when the element leaves the DOM.
+Drop `<kai-feedback-bar>` after any response. The element transitions to a thank-you on vote; the × button fires `kai-close` and you control when the element leaves the DOM.
 
 - **Copy** — override any label via attributes: `bar-title`, `detail-title`, `detail-placeholder`, `submit-label`, `thanks-message`.
 - **Detail form** — add `collect-detail` to open a follow-up form on a thumbs-down vote. Set `categories` in JavaScript (it's an array) to render selectable chips.
@@ -37,42 +37,42 @@ Drop `<kc-feedback-bar>` after any response. The element transitions to a thank-
 
 ### Default
 
-<Example client:visible tag="kc-feedback-bar" />
+<Example client:visible tag="kai-feedback-bar" />
 
 ### Custom Title
 
 Override the question with `bar-title` when "Was this helpful?" doesn't fit the context.
 
-<Example client:visible tag="kc-feedback-bar" config={{ barTitle: 'Did this answer your question?' }} />
+<Example client:visible tag="kai-feedback-bar" config={{ barTitle: 'Did this answer your question?' }} />
 
 ### Collect Detail
 
-Add `collect-detail` for an optional follow-up form on a thumbs-down vote. Listen for `kc-feedback-detail` to receive `{ value, category?, comment? }`.
+Add `collect-detail` for an optional follow-up form on a thumbs-down vote. Listen for `kai-feedback-detail` to receive `{ value, category?, comment? }`.
 
-<Example client:visible tag="kc-feedback-bar" config={{ collectDetail: true }} />
+<Example client:visible tag="kai-feedback-bar" config={{ collectDetail: true }} />
 
 ### Collect Detail with Categories
 
 Set the `categories` property alongside `collect-detail` to render selectable chips — fast tagging without typing.
 
-<Example client:visible tag="kc-feedback-bar" config={{ collectDetail: true }} data="withCategories" />
+<Example client:visible tag="kai-feedback-bar" config={{ collectDetail: true }} data="withCategories" />
 
 ### Customising Copy
 
 Every label is overridable — override only what you need; the rest fall back to defaults.
 
-<Example client:visible tag="kc-feedback-bar" config={{ barTitle: 'Was this response useful?', detailTitle: 'What went wrong?', detailPlaceholder: 'Tell us more (optional)…', submitLabel: 'Send feedback', thanksMessage: 'Got it — thanks for the input.' }} />
+<Example client:visible tag="kai-feedback-bar" config={{ barTitle: 'Was this response useful?', detailTitle: 'What went wrong?', detailPlaceholder: 'Tell us more (optional)…', submitLabel: 'Send feedback', thanksMessage: 'Got it — thanks for the input.' }} />
 
 ## Props
 
-<PropTable tag="kc-feedback-bar" />
+<PropTable tag="kai-feedback-bar" />
 
 ## Events
 
-<EventTable tag="kc-feedback-bar" />
+<EventTable tag="kai-feedback-bar" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-feedback-bar" />
+<ComposedFrom tag="kai-feedback-bar" />
 
 <NeedAHand />

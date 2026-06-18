@@ -1,5 +1,5 @@
 /**
- * Unit tests for the `kc-scroll-button` scroll-target resolution logic.
+ * Unit tests for the `kai-scroll-button` scroll-target resolution logic.
  *
  * Strategy: `defineWebComponent` requires a real browser environment
  * (Constructable Stylesheets, shadow roots) and is not suitable for jsdom.
@@ -83,7 +83,7 @@ describe('findScrollableAncestor', () => {
 
 // ---------------------------------------------------------------------------
 // Visibility toggle logic — ScrollButtonUI mirrors the render logic inside
-// kc-scroll-button's facade.
+// kai-scroll-button's facade.
 // ---------------------------------------------------------------------------
 
 /** Minimal SolidJS component that mirrors the button render in scroll-button.tsx. */

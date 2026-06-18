@@ -10,11 +10,11 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-empty>` — an empty-state block. `empty-title`/`description` via
+ * `<kai-empty>` — an empty-state block. `empty-title`/`description` via
  * attributes; slot your own icon into `slot="media"` and actions into the
  * default slot (Route 2 slots).
  */
-defineWebComponent<Props>('kc-empty', {
+defineWebComponent<Props>('kai-empty', {
   emptyTitle: '',
   description: '',
 }, (props) => (

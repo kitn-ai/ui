@@ -5,7 +5,7 @@ import { ResizableHandle, normalizeSize } from '../ui/resizable';
 type Orientation = 'horizontal' | 'vertical';
 
 /** Bubbling, composed intent: a descendant asks the nearest enclosing
- *  <kc-resizable> to maximize the item containing it (filling, hiding siblings)
+ *  <kai-resizable> to maximize the item containing it (filling, hiding siblings)
  *  or to restore. Any panel content may emit it — the protocol is zero-config. */
 export interface KcMaximizeIntentDetail {
   /** true = maximize the item containing me; false = restore. */
@@ -13,7 +13,7 @@ export interface KcMaximizeIntentDetail {
 }
 
 /** Composed, non-bubbling notification the group dispatches DOWN onto the
- *  affected <kc-resizable-item> (on maximize) or the group host + the formerly
+ *  affected <kai-resizable-item> (on maximize) or the group host + the formerly
  *  maximized item (on restore) so descendant content can sync its affordance. */
 export interface KcMaximizeStateDetail {
   /** Whether THIS subtree's item is the maximized one. */
@@ -21,10 +21,10 @@ export interface KcMaximizeStateDetail {
 }
 
 /** Event type names for the cross-element maximize protocol. */
-export const KC_MAXIMIZE_INTENT = 'kc-maximize-intent' as const;
-export const KC_MAXIMIZE_STATE = 'kc-maximize-state' as const;
+export const KC_MAXIMIZE_INTENT = 'kai-maximize-intent' as const;
+export const KC_MAXIMIZE_STATE = 'kai-maximize-state' as const;
 
-/** Parsed view of a `<kc-resizable-item>` light child. */
+/** Parsed view of a `<kai-resizable-item>` light child. */
 interface ItemInfo {
   el: HTMLElement;
   size?: string;
@@ -58,36 +58,36 @@ interface GroupProps extends Record<string, unknown> {
 
 interface GroupEvents extends Record<string, unknown> {
   /** Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. */
-  'kc-change': { sizes: number[] };
+  'kai-change': { sizes: number[] };
   /** Observe layout maximize state. */
-  'kc-maximize-change': { maximized: boolean; index: number | null };
+  'kai-maximize-change': { maximized: boolean; index: number | null };
 }
 
 /**
- * `<kc-resizable>` — a composable, resizable multi-panel layout (up to 3 panels)
- * with auto-inserted draggable dividers. It lays out its `<kc-resizable-item>`
+ * `<kai-resizable>` — a composable, resizable multi-panel layout (up to 3 panels)
+ * with auto-inserted draggable dividers. It lays out its `<kai-resizable-item>`
  * light children along an axis (`orientation`), reading each item's `size`,
  * `min`, `max`, `locked` and `hidden` attributes via a `MutationObserver`. A
  * divider is interactive only between two unlocked, visible panels. Emits a
  * `change` event (`detail.sizes`, percent) on resize / visibility change.
  */
-defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
+defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
   orientation: 'horizontal',
   maximizedIndex: null,
 }, (props, { element, dispatch }) => {
   const [items, setItems] = createSignal<ItemInfo[]>([]);
   const orientation = (): Orientation => (props.orientation === 'vertical' ? 'vertical' : 'horizontal');
 
-  /** Read the current `<kc-resizable-item>` light children + their attributes. */
+  /** Read the current `<kai-resizable-item>` light children + their attributes. */
   function readItems() {
     const all = Array.from(element.children).filter(
-      (c): c is HTMLElement => c.tagName.toLowerCase() === 'kc-resizable-item',
+      (c): c is HTMLElement => c.tagName.toLowerCase() === 'kai-resizable-item',
     );
     if (all.length > MAX_ITEMS) {
       // eslint-disable-next-line no-console
       console.warn(
-        `<kc-resizable>: only the first ${MAX_ITEMS} <kc-resizable-item> children are laid out ` +
-        `(got ${all.length}). Nest <kc-resizable> for more.`,
+        `<kai-resizable>: only the first ${MAX_ITEMS} <kai-resizable-item> children are laid out ` +
+        `(got ${all.length}). Nest <kai-resizable> for more.`,
       );
     }
     const capped = all.slice(0, MAX_ITEMS);
@@ -132,7 +132,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     // unconditionally `setItems(parsed)`, the <For> re-keys and each panel's
     // flex-basis is re-derived from the item's `size` ATTRIBUTE — wiping out any
     // size the user dragged (which lives only as inline flex-basis on the panel
-    // div, set by ResizableHandle.settleToPercent). The composite <kc-workspace>
+    // div, set by ResizableHandle.settleToPercent). The composite <kai-workspace>
     // never hits this because it renders Solid panels directly with no re-read.
     //
     // So: only commit a new items() array when the panel LAYOUT actually changed —
@@ -174,7 +174,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
   }
 
   function emitChange() {
-    dispatch('kc-change', { sizes: currentSizes() });
+    dispatch('kai-change', { sizes: currentSizes() });
   }
 
   /** Guard: while writing `size` attributes back from a live layout, the
@@ -224,11 +224,11 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
    *  NOT emit a mid-flight `change`. The final relayout emits the real one. */
   let applyingMaximize = false;
 
-  /** Find the capped <kc-resizable-item> ancestor of an event target, if any. */
+  /** Find the capped <kai-resizable-item> ancestor of an event target, if any. */
   function findContainingItem(node: Node | null): HTMLElement | null {
     let el = node instanceof Element ? node : node?.parentElement ?? null;
     // The intent is composed; its target may be inside the artifact's shadow.
-    // Resolve to a direct light child <kc-resizable-item> of THIS group.
+    // Resolve to a direct light child <kai-resizable-item> of THIS group.
     const capped = items().map((i) => i.el);
     while (el) {
       if (el instanceof HTMLElement && capped.includes(el)) return el;
@@ -291,8 +291,8 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     // so its queueMicrotask(emitChange) sees the guard and skips (storm guard).
     queueMicrotask(() => { applyingMaximize = false; });
     // Tell the maximized subtree (and only it) it is now maximized.
-    item.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: true }, bubbles: false, composed: true }));
-    dispatch('kc-maximize-change', { maximized: true, index });
+    item.dispatchEvent(new CustomEvent('kai-maximize-state', { detail: { maximized: true }, bubbles: false, composed: true }));
+    dispatch('kai-maximize-change', { maximized: true, index });
   }
 
   function restore() {
@@ -319,9 +319,9 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     // so its queueMicrotask(emitChange) sees the guard and skips (storm guard).
     queueMicrotask(() => { applyingMaximize = false; });
     // Broadcast restore on the host AND directly on the formerly-maximized item.
-    element.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: false }, bubbles: false, composed: true }));
-    prevItem?.dispatchEvent(new CustomEvent('kc-maximize-state', { detail: { maximized: false }, bubbles: false, composed: true }));
-    dispatch('kc-maximize-change', { maximized: false, index: null });
+    element.dispatchEvent(new CustomEvent('kai-maximize-state', { detail: { maximized: false }, bubbles: false, composed: true }));
+    prevItem?.dispatchEvent(new CustomEvent('kai-maximize-state', { detail: { maximized: false }, bubbles: false, composed: true }));
+    dispatch('kai-maximize-change', { maximized: false, index: null });
   }
 
   onMount(() => {
@@ -334,7 +334,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
       if (ce.detail.requested) maximizeItem(item);
       else restore();
     };
-    element.addEventListener('kc-maximize-intent', onIntent);
+    element.addEventListener('kai-maximize-intent', onIntent);
 
     const onKeydown = (e: KeyboardEvent) => {
       // Only act while maximized — the capture listener on the host already
@@ -370,7 +370,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     });
     mo.observe(element, {
       childList: true,
-      // Attribute changes happen on the <kc-resizable-item> *children*, so we
+      // Attribute changes happen on the <kai-resizable-item> *children*, so we
       // must observe the subtree (filtered to the config attributes) — not just
       // the host's own attributes.
       subtree: true,
@@ -379,7 +379,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     });
     onCleanup(() => {
       mo.disconnect();
-      element.removeEventListener('kc-maximize-intent', onIntent);
+      element.removeEventListener('kai-maximize-intent', onIntent);
       element.removeEventListener('keydown', onKeydown, true);
     });
 
@@ -469,7 +469,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
                   //
                   // For the FILL, the panel is itself a `display:grid` with a single
                   // `minmax(0,1fr)` cell on BOTH axes. A grid item (the slotted
-                  // `<kc-resizable-item>`) stretches to fill its cell on both axes by
+                  // `<kai-resizable-item>`) stretches to fill its cell on both axes by
                   // default (`place-items:stretch`), and a `1fr` track inside a
                   // definite-sized grid is a *definite* length — so content fills
                   // height AND width whether or not it sets `height:100%`, in both
@@ -517,11 +517,11 @@ interface ItemProps extends Record<string, unknown> {
 }
 
 /**
- * `<kc-resizable-item>` — a passive config-carrier inside `<kc-resizable>`. It
- * renders its own slotted light content (`<slot/>`); the parent `<kc-resizable>`
+ * `<kai-resizable-item>` — a passive config-carrier inside `<kai-resizable>`. It
+ * renders its own slotted light content (`<slot/>`); the parent `<kai-resizable>`
  * reads its `size`/`min`/`max`/`locked`/`hidden` attributes to lay it out.
  */
-defineWebComponent<ItemProps>('kc-resizable-item', {
+defineWebComponent<ItemProps>('kai-resizable-item', {
   size: undefined,
   min: undefined,
   max: undefined,

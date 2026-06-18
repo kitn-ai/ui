@@ -8,7 +8,7 @@
  * live in ./renderers so the static Storybook docs can reuse them verbatim):
  *
  *   1. form  — interactive / data-collecting card.
- *              Mounts <kc-form>, forwards submit to the host via CardHost.emit.
+ *              Mounts <kai-form>, forwards submit to the host via CardHost.emit.
  *              Round-trip: host → render → user fills → submit → host receives data.
  *
  *   2. info  — display-rich / self-contained card.

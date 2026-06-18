@@ -11,7 +11,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-tasks</p>
+<p class="kc-tag-sub">kai-tasks</p>
 
 <p class="kc-lede">Present a list of tasks the user can check off, then confirm in one go — the card stays quiet while the user picks, and only the final confirm fires with the selected ids in a single atomic event.</p>
 
@@ -19,18 +19,18 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-tasks" />
+<Playground client:only="solid" tag="kai-tasks" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-tasks>` whenever an AI needs to hand control back to the user before acting — approving a migration plan, choosing maintenance steps, or picking reviewers. The gated confirm ensures the user explicitly approved exactly the items they wanted.
+Use `<kai-tasks>` whenever an AI needs to hand control back to the user before acting — approving a migration plan, choosing maintenance steps, or picking reviewers. The gated confirm ensures the user explicitly approved exactly the items they wanted.
 </Aside>
 
 ## Usage
 
-Feed the card via the `data` property (an object, so set it in JavaScript). Listen for the bubbling `kc-card` CustomEvent:
+Feed the card via the `data` property (an object, so set it in JavaScript). Listen for the bubbling `kai-card` CustomEvent:
 
 ```js
-const el = document.querySelector('kc-tasks');
+const el = document.querySelector('kai-tasks');
 
 el.data = {
   selectAll: true,
@@ -42,14 +42,14 @@ el.data = {
   ],
 };
 
-el.addEventListener('kc-card', (e) => {
+el.addEventListener('kai-card', (e) => {
   if (e.detail.kind === 'submit') {
     console.log('selected ids:', e.detail.data.selected);
   }
 });
 ```
 
-The element emits three verbs on `kc-card`:
+The element emits three verbs on `kai-card`:
 
 | verb | when | payload |
 |------|------|---------|
@@ -66,44 +66,44 @@ The element emits three verbs on `kc-card`:
 
 `selectAll: true` with rows pre-checked; the select-all header goes indeterminate when only some rows are checked.
 
-<Example client:visible tag="kc-tasks" config={{ heading: 'Approve the plan steps' }} />
+<Example client:visible tag="kai-tasks" config={{ heading: 'Approve the plan steps' }} />
 
 ### Require at Least One
 
 `allowEmpty: false` keeps confirm disabled until the user checks something.
 
-<Example client:visible tag="kc-tasks" config={{ heading: 'Choose maintenance steps' }} data="requireOne" />
+<Example client:visible tag="kai-tasks" config={{ heading: 'Choose maintenance steps' }} data="requireOne" />
 
 ### Bounded Selection
 
 `min` and `max` cap how many rows the user can pick; over-selection is blocked automatically.
 
-<Example client:visible tag="kc-tasks" config={{ heading: 'Pick up to 2 reviewers' }} data="bounded" />
+<Example client:visible tag="kai-tasks" config={{ heading: 'Pick up to 2 reviewers' }} data="bounded" />
 
 ### With Descriptions
 
 Each task row accepts an optional `description` — a secondary line for impact notes, caveats, or reversibility hints.
 
-<Example client:visible tag="kc-tasks" config={{ heading: 'Storage cleanup' }} data="withDescriptions" />
+<Example client:visible tag="kai-tasks" config={{ heading: 'Storage cleanup' }} data="withDescriptions" />
 
 ### Resolved (Read-Only)
 
 After confirm, set `el.resolution` to render the chromed summary — checkboxes and confirm button are removed.
 
-<Example client:visible tag="kc-tasks" config={{ heading: 'Export report' }} data="resolved" />
+<Example client:visible tag="kai-tasks" config={{ heading: 'Export report' }} data="resolved" />
 
 ### Error State
 
 An empty `tasks` array (or malformed definition) triggers the inline error view and emits an `error` CardEvent.
 
-<Example client:visible tag="kc-tasks" data="error" />
+<Example client:visible tag="kai-tasks" data="error" />
 
 ## Props
 
-<PropTable tag="kc-tasks" />
+<PropTable tag="kai-tasks" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-tasks" />
+<ComposedFrom tag="kai-tasks" />
 
 <NeedAHand />

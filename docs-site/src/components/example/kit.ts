@@ -1,5 +1,5 @@
 // Load the kit bundle once (idempotent) — shared by every island that mounts a
-// kc-* element or the kc-code-block highlighter.
+// kai-* element or the kai-code-block highlighter.
 let p: Promise<unknown> | undefined;
 export function loadKit(): Promise<unknown> {
   // BASE_URL is '/chat' (no trailing slash) in the production build but '/chat/'

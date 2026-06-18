@@ -1,26 +1,26 @@
 ---
 title: RAG assistant
-description: A docs assistant that answers questions and cites the sources it used — numbered inline citations powered by kc-chat and kc-sources.
+description: A docs assistant that answers questions and cites the sources it used — numbered inline citations powered by kai-chat and kai-sources.
 ---
 
 import RagAssistantDemo from '../../../components/RagAssistantDemo.tsx';
 
-<p class="kc-lede">A knowledge-base assistant that grounds every answer in retrieved documents. The reply body uses `[1]`, `[2]`, `[3]` markers; `<kc-sources numbered>` renders the matching citation strip below. Ask something to see a new streamed answer with citations.</p>
+<p class="kc-lede">A knowledge-base assistant that grounds every answer in retrieved documents. The reply body uses `[1]`, `[2]`, `[3]` markers; `<kai-sources numbered>` renders the matching citation strip below. Ask something to see a new streamed answer with citations.</p>
 
 <RagAssistantDemo
   client:only="solid"
   chatTitle="Docs assistant"
   placeholder="Ask about the docs…"
-  suggestions={["How does WebAssembly improve performance?", "What is Shadow DOM isolation?", "When should I use kc-sources?"]}
+  suggestions={["How does WebAssembly improve performance?", "What is Shadow DOM isolation?", "When should I use kai-sources?"]}
 />
 
 ## How it works
 
-`<kc-chat>` handles the Q&A thread. `<kc-sources>` is a **separate element** placed below it — pass the citation list as a property and set `numbered` to auto-label each chip `[1]`, `[2]`, `[3]` to match the markers in the reply text.
+`<kai-chat>` handles the Q&A thread. `<kai-sources>` is a **separate element** placed below it — pass the citation list as a property and set `numbered` to auto-label each chip `[1]`, `[2]`, `[3]` to match the markers in the reply text.
 
 ```html
-<kc-chat id="chat" chat-title="Docs assistant"></kc-chat>
-<kc-sources id="srcs" numbered show-favicon></kc-sources>
+<kai-chat id="chat" chat-title="Docs assistant"></kai-chat>
+<kai-sources id="srcs" numbered show-favicon></kai-sources>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -30,7 +30,7 @@ import RagAssistantDemo from '../../../components/RagAssistantDemo.tsx';
 
   chat.messages = [];
 
-  chat.addEventListener('kc-submit', async (e) => {
+  chat.addEventListener('kai-submit', async (e) => {
     const prompt = e.detail.value;
     const aId = crypto.randomUUID();
 
@@ -73,7 +73,7 @@ import RagAssistantDemo from '../../../components/RagAssistantDemo.tsx';
 
 ## Next steps
 
-- **[`kc-sources` reference](/chat/components/sources/)** — `numbered`, `showFavicon`, and the declarative `<kc-source>` children path.
-- **[`kc-source` reference](/chat/components/source/)** — single citation chips and their hover-card props (`headline`, `description`).
+- **[`kai-sources` reference](/chat/components/sources/)** — `numbered`, `showFavicon`, and the declarative `<kai-source>` children path.
+- **[`kai-source` reference](/chat/components/source/)** — single citation chips and their hover-card props (`headline`, `description`).
 - **[Streaming recipe](/chat/guides/recipes/streaming/)** — parsing SSE from your RAG backend and driving the token loop.
 - **[Drop-in chat](/chat/examples/drop-in-chat/)** — the baseline streaming loop this example builds on.

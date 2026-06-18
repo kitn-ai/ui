@@ -1,6 +1,6 @@
 /** Live demo for the "Artifacts canvas beside chat" example.
- *  A split coding/agent layout: <kc-chat> on the LEFT, and on the RIGHT a
- *  <kc-file-tree> above a <kc-artifact>, all inside a <kc-resizable>.
+ *  A split coding/agent layout: <kai-chat> on the LEFT, and on the RIGHT a
+ *  <kai-file-tree> above a <kai-artifact>, all inside a <kai-resizable>.
  *  Selecting a file in the tree loads it into the artifact (Code source +
  *  preview src). Elements are built imperatively so arrays/objects are set as
  *  JS PROPERTIES, and the same-origin fixtures in public/artifact-demo/ frame
@@ -139,14 +139,14 @@ interface Props {
 }
 
 export default function ArtifactsCanvasDemo(props: Props) {
-  // kc-resizable roots + item wrappers (declarative in JSX)
+  // kai-resizable roots + item wrappers (declarative in JSX)
   let outerRef: HTMLElement | undefined;   // chat | (tree/artifact column)
   let rightRef: HTMLElement | undefined;   // vertical: tree above artifact
   let chatItemRef: HTMLElement | undefined;
   let treeItemRef: HTMLElement | undefined;
   let artifactItemRef: HTMLElement | undefined;
 
-  // The kc-* elements created imperatively (so props are set as JS properties)
+  // The kai-* elements created imperatively (so props are set as JS properties)
   let chatEl: (HTMLElement & { messages?: ChatMsg[]; [k: string]: unknown }) | undefined;
   let treeEl: (HTMLElement & { files?: ProjectFile[]; activeFile?: string }) | undefined;
   let artifactEl: (HTMLElement & { files?: ProjectFile[]; activeFile?: string; src?: string; tab?: string }) | undefined;
@@ -213,29 +213,29 @@ export default function ArtifactsCanvasDemo(props: Props) {
   onMount(async () => {
     await loadKit();
 
-    // --- kc-chat (left pane) ---
-    chatEl = document.createElement('kc-chat') as typeof chatEl;
+    // --- kai-chat (left pane) ---
+    chatEl = document.createElement('kai-chat') as typeof chatEl;
     chatEl!.style.cssText = 'display:block;height:100%;width:100%';
     chatEl!.setAttribute('theme', theme());
     (chatEl as any).chatTitle = 'Build agent';
     (chatEl as any).placeholder = 'Ask the agent to change the project…';
     customElements.upgrade(chatEl!);
     chatEl!.messages = SEED_MESSAGES;
-    chatEl!.addEventListener('kc-submit', onSubmit);
+    chatEl!.addEventListener('kai-submit', onSubmit);
     chatItemRef?.appendChild(chatEl!);
 
-    // --- kc-file-tree (top-right) ---
-    treeEl = document.createElement('kc-file-tree') as typeof treeEl;
+    // --- kai-file-tree (top-right) ---
+    treeEl = document.createElement('kai-file-tree') as typeof treeEl;
     treeEl!.style.cssText = 'display:block;height:100%;width:100%';
     treeEl!.setAttribute('theme', theme());
     customElements.upgrade(treeEl!);
     treeEl!.files = FILES;
     treeEl!.activeFile = 'index.html';
-    treeEl!.addEventListener('kc-select', onSelect);
+    treeEl!.addEventListener('kai-select', onSelect);
     treeItemRef?.appendChild(treeEl!);
 
-    // --- kc-artifact (bottom-right canvas) ---
-    artifactEl = document.createElement('kc-artifact') as typeof artifactEl;
+    // --- kai-artifact (bottom-right canvas) ---
+    artifactEl = document.createElement('kai-artifact') as typeof artifactEl;
     artifactEl!.style.cssText = 'display:block;height:100%;width:100%';
     artifactEl!.setAttribute('theme', theme());
     artifactEl!.setAttribute('iframe-title', 'Starboard artifact preview');
@@ -251,7 +251,7 @@ export default function ArtifactsCanvasDemo(props: Props) {
     artifactEl!.tab = 'preview';
     // Keep the standalone tree and the canvas in sync when the user picks a
     // file from the artifact's own Code-tab tree, too.
-    artifactEl!.addEventListener('kc-file-select', onSelect);
+    artifactEl!.addEventListener('kai-file-select', onSelect);
     artifactItemRef?.appendChild(artifactEl!);
 
     // Upgrade the resizable roots so they read their light children.
@@ -263,9 +263,9 @@ export default function ArtifactsCanvasDemo(props: Props) {
 
     onCleanup(() => {
       clearTimeout(timer);
-      chatEl?.removeEventListener('kc-submit', onSubmit);
-      treeEl?.removeEventListener('kc-select', onSelect);
-      artifactEl?.removeEventListener('kc-file-select', onSelect);
+      chatEl?.removeEventListener('kai-submit', onSubmit);
+      treeEl?.removeEventListener('kai-select', onSelect);
+      artifactEl?.removeEventListener('kai-file-select', onSelect);
       obs.disconnect();
     });
   });
@@ -277,41 +277,41 @@ export default function ArtifactsCanvasDemo(props: Props) {
     >
       {/* Outer split: chat | canvas column */}
       {/* @ts-expect-error custom element */}
-      <kc-resizable
+      <kai-resizable
         ref={(el: HTMLElement) => (outerRef = el)}
         orientation="horizontal"
         style={{ display: 'block', height: '100%' }}
       >
-        {/* Left: chat — kc-chat appended imperatively in onMount */}
+        {/* Left: chat — kai-chat appended imperatively in onMount */}
         {/* @ts-expect-error custom element */}
-        <kc-resizable-item
+        <kai-resizable-item
           ref={(el: HTMLElement) => (chatItemRef = el)}
           size="42%"
           min="280px"
         />
         {/* Right: a nested vertical split — file tree above the artifact canvas */}
         {/* @ts-expect-error custom element */}
-        <kc-resizable-item min="320px">
+        <kai-resizable-item min="320px">
           {/* @ts-expect-error custom element */}
-          <kc-resizable
+          <kai-resizable
             ref={(el: HTMLElement) => (rightRef = el)}
             orientation="vertical"
             style={{ display: 'block', height: '100%' }}
           >
-            {/* file tree — kc-file-tree appended imperatively in onMount */}
+            {/* file tree — kai-file-tree appended imperatively in onMount */}
             {/* @ts-expect-error custom element */}
-            <kc-resizable-item
+            <kai-resizable-item
               ref={(el: HTMLElement) => (treeItemRef = el)}
               size="34%"
               min="120px"
               max="60%"
             />
-            {/* artifact canvas — kc-artifact appended imperatively in onMount */}
+            {/* artifact canvas — kai-artifact appended imperatively in onMount */}
             {/* @ts-expect-error custom element */}
-            <kc-resizable-item ref={(el: HTMLElement) => (artifactItemRef = el)} min="200px" />
-          </kc-resizable>
-        </kc-resizable-item>
-      </kc-resizable>
+            <kai-resizable-item ref={(el: HTMLElement) => (artifactItemRef = el)} min="200px" />
+          </kai-resizable>
+        </kai-resizable-item>
+      </kai-resizable>
     </div>
   );
 }

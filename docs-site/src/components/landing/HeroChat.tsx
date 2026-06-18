@@ -1,4 +1,4 @@
-/** Landing hero chat — a live <kc-chat> that anchors the hero. Seeded with one
+/** Landing hero chat — a live <kai-chat> that anchors the hero. Seeded with one
  *  realistic agent exchange (reasoning + streamed markdown answer), a model
  *  switcher, and a context meter, so a visitor sees the real component working
  *  the moment the page loads. Submitting streams a canned reply. Modeled on the
@@ -91,17 +91,17 @@ export default function HeroChat() {
     (host as any).currentModel = 'sonnet';
     (host as any).context = { usedTokens: 24500, maxTokens: 200000 };
     host.setAttribute('theme', theme());
-    host.addEventListener('kc-submit', onSubmit);
+    host.addEventListener('kai-submit', onSubmit);
     setReady(true);
     const obs = new MutationObserver(() => host?.setAttribute('theme', theme()));
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    onCleanup(() => { clearTimeout(timer); host?.removeEventListener('kc-submit', onSubmit); obs.disconnect(); });
+    onCleanup(() => { clearTimeout(timer); host?.removeEventListener('kai-submit', onSubmit); obs.disconnect(); });
   });
 
   return (
     <div class="not-content h-full overflow-hidden rounded-2xl border border-line bg-surface" style={{ display: 'flex', 'flex-direction': 'column' }}>
       {/* @ts-expect-error custom element */}
-      <kc-chat ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', flex: '1', 'min-height': '0' }} />
+      <kai-chat ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', flex: '1', 'min-height': '0' }} />
     </div>
   );
 }

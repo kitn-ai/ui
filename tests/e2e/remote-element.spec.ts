@@ -30,12 +30,12 @@ function frame(page: Page): FrameLocator {
 test('handshake completes — bridge reaches "open" and the framed card renders', async ({ page }) => {
   await page.goto(`${HOST}/`);
   await waitForState(page, 'open');
-  // The provider's <kc-form> renders its Send button inside the frame (shadow DOM
+  // The provider's <kai-form> renders its Send button inside the frame (shadow DOM
   // is pierced by Playwright's role locators).
   await expect(frame(page).getByRole('button', { name: 'Send' })).toBeVisible();
 });
 
-test('cross-origin <kc-form> submit reaches the host onSubmit', async ({ page }) => {
+test('cross-origin <kai-form> submit reaches the host onSubmit', async ({ page }) => {
   await page.goto(`${HOST}/`);
   await waitForState(page, 'open');
 

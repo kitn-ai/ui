@@ -12,30 +12,30 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-thinking-bar</p>
+<p class="kc-tag-sub">kai-thinking-bar</p>
 
-<p class="kc-lede">A shimmering "thinking" indicator that signals the assistant is still reasoning. Add `stoppable` and it gains a stop button that fires `kc-stop` so users can skip to an answer.</p>
+<p class="kc-lede">A shimmering "thinking" indicator that signals the assistant is still reasoning. Add `stoppable` and it gains a stop button that fires `kai-stop` so users can skip to an answer.</p>
 
 <Facts items={['Shadow DOM', 'Animated shimmer', 'Optional stop affordance', '1 event', 'Fully attribute-driven']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-thinking-bar" />
+<Playground client:only="solid" tag="kai-thinking-bar" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-thinking-bar>` in the message thread while the assistant is generating a response — it sits naturally above the streaming reply. Enable `stoppable` whenever users should be able to cut a long reasoning step short; handle `kc-stop` to cancel the in-flight request and prompt the model to answer with what it has.
+Place `<kai-thinking-bar>` in the message thread while the assistant is generating a response — it sits naturally above the streaming reply. Enable `stoppable` whenever users should be able to cut a long reasoning step short; handle `kai-stop` to cancel the in-flight request and prompt the model to answer with what it has.
 </Aside>
 
 ## Usage
 
 ```html
-<kc-thinking-bar text="Thinking" stoppable stop-label="Answer now"></kc-thinking-bar>
+<kai-thinking-bar text="Thinking" stoppable stop-label="Answer now"></kai-thinking-bar>
 ```
 
 All three props are **attributes** — no JavaScript needed.
 
 - **`stoppable`** — bare boolean attribute; shows the stop button.
-- **`kc-stop`** — fires with no payload when the stop button is clicked; cancel the in-flight request in your handler.
+- **`kai-stop`** — fires with no payload when the stop button is clicked; cancel the in-flight request in your handler.
 
 ## Examples
 
@@ -43,32 +43,32 @@ All three props are **attributes** — no JavaScript needed.
 
 Remove the element from the DOM once the assistant reply arrives.
 
-<Example client:visible tag="kc-thinking-bar" config={{ text: 'Thinking' }} />
+<Example client:visible tag="kai-thinking-bar" config={{ text: 'Thinking' }} />
 
 ### Custom Label
 
 Override `text` for a specific task like web search or code analysis.
 
-<Example client:visible tag="kc-thinking-bar" config={{ text: 'Searching the web…' }} />
+<Example client:visible tag="kai-thinking-bar" config={{ text: 'Searching the web…' }} />
 
 ### Stoppable
 
-<Example client:visible tag="kc-thinking-bar" config={{ text: 'Reasoning', stoppable: true, stopLabel: 'Answer now' }} />
+<Example client:visible tag="kai-thinking-bar" config={{ text: 'Reasoning', stoppable: true, stopLabel: 'Answer now' }} />
 
 ### Custom Stop Label
 
-<Example client:visible tag="kc-thinking-bar" config={{ text: 'Deep thinking…', stoppable: true, stopLabel: 'Skip reasoning' }} />
+<Example client:visible tag="kai-thinking-bar" config={{ text: 'Deep thinking…', stoppable: true, stopLabel: 'Skip reasoning' }} />
 
 ## Props
 
-<PropTable tag="kc-thinking-bar" />
+<PropTable tag="kai-thinking-bar" />
 
 ## Events
 
-<EventTable tag="kc-thinking-bar" />
+<EventTable tag="kai-thinking-bar" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-thinking-bar" />
+<ComposedFrom tag="kai-thinking-bar" />
 
 <NeedAHand />

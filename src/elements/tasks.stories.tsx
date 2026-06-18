@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-tasks': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-tasks': JSX.HTMLAttributes<HTMLElement> & {
         heading?: string;
         'card-id'?: string;
         ref?: (el: HTMLElement) => void;
@@ -24,14 +24,14 @@ function Frame(props: { children: JSX.Element }) {
   return <div style={{ 'max-width': '460px' }}>{props.children}</div>;
 }
 
-/** Mounts a <kc-tasks>, sets `.data`, logs the emitted CardEvent under the render. */
+/** Mounts a <kai-tasks>, sets `.data`, logs the emitted CardEvent under the render. */
 function TasksDemo(props: { def: TasksCardData; cardId: string; heading?: string }) {
   const [log, setLog] = createSignal<CardEvent[]>([]);
   let el: TasksEl | undefined;
   onMount(() => {
     if (!el) return;
     el.data = props.def;
-    el.addEventListener('kc-card', (e) => {
+    el.addEventListener('kai-card', (e) => {
       const detail = (e as CustomEvent<CardEvent>).detail;
       setLog((prev) => [...prev, detail]);
     });
@@ -39,7 +39,7 @@ function TasksDemo(props: { def: TasksCardData; cardId: string; heading?: string
   return (
     <Frame>
       <div style={{ display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
-        <kc-tasks ref={(e) => (el = e as TasksEl)} card-id={props.cardId} heading={props.heading} />
+        <kai-tasks ref={(e) => (el = e as TasksEl)} card-id={props.cardId} heading={props.heading} />
         <pre
           style={{
             margin: 0,
@@ -112,16 +112,16 @@ const HEADING_MAP: Record<string, string | undefined> = {
 
 const HTML_SNIPPET = (def: TasksCardData, cardId: string) => {
   const heading = HEADING_MAP[cardId];
-  return `<kc-tasks${heading ? ` heading="${heading}"` : ''}></kc-tasks>
+  return `<kai-tasks${heading ? ` heading="${heading}"` : ''}></kai-tasks>
 <script type="module">
   import '@kitn.ai/ui/elements'; // registers the custom elements
 
-  const el = document.querySelector('kc-tasks');
+  const el = document.querySelector('kai-tasks');
   // \`data\` is the CardEnvelope.data (set as a property).
   el.data = ${JSON.stringify(def, null, 2)};
 
-  // Toggling rows is local; only CONFIRM emits — a single bubbling \`kc-card\` event.
-  el.addEventListener('kc-card', (e) => {
+  // Toggling rows is local; only CONFIRM emits — a single bubbling \`kai-card\` event.
+  el.addEventListener('kai-card', (e) => {
     const ev = e.detail; // { kind:'submit', cardId, data:{ selected } } | ...
     if (ev.kind === 'submit') console.log('selected', ev.data.selected);
   });
@@ -129,17 +129,17 @@ const HTML_SNIPPET = (def: TasksCardData, cardId: string) => {
 };
 
 const meta = {
-  title: 'Generative UI/Cards/kc-tasks',
+  title: 'Generative UI/Cards/kai-tasks',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-tasks'),
+  argTypes: argTypesFor('kai-tasks'),
   parameters: {
     layout: 'padded',
     docs: {
-      description: specDescription('kc-tasks', [
-        "`<kc-tasks>` is a **selectable** task/plan list (set via the `data` **property**): checkbox rows + an optional select-all + a confirm button. The user picks a subset, confirms, and the card emits the Card contract's **`submit`** verb up a bubbling **`kc-card`** CustomEvent of `{ kind: 'submit', cardId, data: { selected } }` — the checked ids in **input order**. Toggling rows is local UI state; **only the final confirm emits** (the wire stays quiet, the result atomic).",
-        '**Anatomy:** `<kc-card>` chrome (optional heading) → **select-all row** (shown when `selectAll:true` and ≥2 toggleable tasks; indeterminate state when partially checked) → **task rows** (one per `tasks[]` item: checkbox + label + optional description; disabled when `max` reached or `task.disabled`) → **card footer** (selected-count label + confirm `<Button>`, disabled until gating passes; replaced by a read-only resolved summary after submission).',
+      description: specDescription('kai-tasks', [
+        "`<kai-tasks>` is a **selectable** task/plan list (set via the `data` **property**): checkbox rows + an optional select-all + a confirm button. The user picks a subset, confirms, and the card emits the Card contract's **`submit`** verb up a bubbling **`kai-card`** CustomEvent of `{ kind: 'submit', cardId, data: { selected } }` — the checked ids in **input order**. Toggling rows is local UI state; **only the final confirm emits** (the wire stays quiet, the result atomic).",
+        '**Anatomy:** `<kai-card>` chrome (optional heading) → **select-all row** (shown when `selectAll:true` and ≥2 toggleable tasks; indeterminate state when partially checked) → **task rows** (one per `tasks[]` item: checkbox + label + optional description; disabled when `max` reached or `task.disabled`) → **card footer** (selected-count label + confirm `<Button>`, disabled until gating passes; replaced by a read-only resolved summary after submission).',
         '**Gating:** confirm is enabled when `selectedCount >= (min ?? (allowEmpty ? 0 : 1))` and `<= (max ?? ∞)`. Select-all checks every toggleable (non-`disabled`) row and shows an **indeterminate** (`aria-checked="mixed"`) state when only some are checked. When `max` is reached, unchecked rows become non-toggleable. v1 is **select/approve only** (a future `mode:\'progress\'` is reserved in the schema).',
-        '**Events** (all frozen Card-contract verbs): `ready` on mount, `submit` on confirm, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**. The same shapes flow over the remote iframe transport unchanged.',
+        '**Events** (all frozen Card-contract verbs): `ready` on mount, `submit` on confirm, `error` for a malformed definition (renders the inline `kai-card` error). It **never invents events**. The same shapes flow over the remote iframe transport unchanged.',
       ]),
     },
   },
@@ -193,17 +193,17 @@ export const Resolved: Story = {
     });
     return (
       <Frame>
-        <kc-tasks ref={(e) => (el = e as TasksEl)} card-id="card-resolved-tasks" heading="Export report" />
+        <kai-tasks ref={(e) => (el = e as TasksEl)} card-id="card-resolved-tasks" heading="Export report" />
       </Frame>
     );
   },
   parameters: {
     docs: {
       source: {
-        code: `<kc-tasks heading="Export report"></kc-tasks>
+        code: `<kai-tasks heading="Export report"></kai-tasks>
 <script type="module">
   import '@kitn.ai/ui/elements';
-  const el = document.querySelector('kc-tasks');
+  const el = document.querySelector('kai-tasks');
   el.data = ${JSON.stringify(RESOLVED_TASKS, null, 2)};
   // Setting .resolution renders the chromed read-only view — no checkboxes or confirm button.
   el.resolution = { kind: 'submit', data: { selected: ['sum', 'charts'] } };
@@ -220,13 +220,13 @@ export const ErrorState: Story = {
   parameters: {
     docs: {
       source: {
-        code: `<kc-tasks></kc-tasks>
+        code: `<kai-tasks></kai-tasks>
 <script type="module">
   import '@kitn.ai/ui/elements';
-  const el = document.querySelector('kc-tasks');
+  const el = document.querySelector('kai-tasks');
   // No tasks → inline error state + an \`error\` event.
   el.data = { tasks: [] };
-  el.addEventListener('kc-card', (e) => {
+  el.addEventListener('kai-card', (e) => {
     if (e.detail.kind === 'error') console.warn('tasks error:', e.detail.message);
   });
 </script>`,

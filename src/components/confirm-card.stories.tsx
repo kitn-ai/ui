@@ -56,7 +56,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'The SolidJS layer behind `<kc-confirm>`. Pass a `host` (a `CardHost`) to receive the emitted `CardEvent`s directly (the native-host path), or wrap in a `CardProvider`. Activating an action emits the `action` verb and resolves the card.',
+        'The SolidJS layer behind `<kai-confirm>`. Pass a `host` (a `CardHost`) to receive the emitted `CardEvent`s directly (the native-host path), or wrap in a `CardProvider`. Activating an action emits the `action` verb and resolves the card.',
       ]),
     },
   },

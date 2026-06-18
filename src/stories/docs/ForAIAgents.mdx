@@ -60,7 +60,7 @@ the version that matches the installed package.
 ## What agents most need to know
 
 These are the facts that AI tools most commonly get wrong when working with
-`kc-*` elements. They appear in both machine-readable files, but they are
+`kai-*` elements. They appear in both machine-readable files, but they are
 worth knowing up front.
 
 ### 1 — Array and object data goes on JS properties, not HTML attributes
@@ -69,26 +69,26 @@ An HTML attribute is always a string. Passing `messages`, `models`, `context`,
 `suggestions`, or `slashCommands` as an attribute silently fails.
 
 ```js
-const chat = document.querySelector('kc-chat');
+const chat = document.querySelector('kai-chat');
 chat.messages = [{ id: '1', role: 'assistant', content: 'Hi!' }]; // ✅ property
 ```
 
 ```html
-<kc-chat messages="[...]"></kc-chat>  <!-- ❌ never works -->
+<kai-chat messages="[...]"></kai-chat>  <!-- ❌ never works -->
 ```
 
 Only scalar props (string / number / boolean) work as attributes — for example
 `placeholder`, `loading`, and `theme`.
 
-### 2 — Events are kebab-case `kc-*` CustomEvents, and they do not bubble
+### 2 — Events are kebab-case `kai-*` CustomEvents, and they do not bubble
 
 Listen directly on the element, not on a parent:
 
 ```js
-chat.addEventListener('kc-submit', (e) => console.log(e.detail.value));
+chat.addEventListener('kai-submit', (e) => console.log(e.detail.value));
 ```
 
-Common events: `kc-submit`, `kc-feedback`, `kc-model-change`, `kc-new-chat`, `kc-select`.
+Common events: `kai-submit`, `kai-feedback`, `kai-model-change`, `kai-new-chat`, `kai-select`.
 
 ### 3 — Streaming requires a new array + new object on every chunk
 
@@ -112,10 +112,10 @@ reference.
 
 ```js
 import '@kitn.ai/ui/elements';
-const chat = document.querySelector('kc-chat');
+const chat = document.querySelector('kai-chat');
 chat.messages = [];
 
-chat.addEventListener('kc-submit', async (e) => {
+chat.addEventListener('kai-submit', async (e) => {
   const userText = e.detail.value;
 
   // Append the user message (new array)
@@ -146,13 +146,13 @@ progressively, fetching only the documentation relevant to the current task.
 
 `@kitn.ai/ui` already provides `dist/llms/llms-full.txt` as a single,
 comprehensive reference (60 KB, all 42 elements). A per-element skills
-directory would let agents pull just the `kc-chat` spec when they only need
+directory would let agents pull just the `kai-chat` spec when they only need
 that one element, rather than loading the full file.
 
 This is tracked as a follow-up improvement. If you want it sooner, the starting
 point is `scripts/gen-llms.mjs` — it already reads `dist/custom-elements.json`
-and has all the data needed to emit `dist/skills/kc-chat.md`,
-`dist/skills/kc-message.md`, etc.
+and has all the data needed to emit `dist/skills/kai-chat.md`,
+`dist/skills/kai-message.md`, etc.
 
 ## Links
 

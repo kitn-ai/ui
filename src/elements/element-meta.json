@@ -1,7 +1,7 @@
 [
   {
-    "tag": "kc-artifact",
-    "className": "KcArtifactElement",
+    "tag": "kai-artifact",
+    "className": "KaiArtifactElement",
     "displayName": "Artifact",
     "props": [
       {
@@ -151,25 +151,25 @@
     ],
     "events": [
       {
-        "name": "kc-file-select",
+        "name": "kai-file-select",
         "detail": "{ path: string }",
         "description": "Fired when a file is selected. `detail.path`.",
         "displayDetail": "{ path: string }"
       },
       {
-        "name": "kc-maximize-change",
+        "name": "kai-maximize-change",
         "detail": "{ maximized: false | true }",
         "description": "Artifact's own maximize button toggled (consumer-observable; non-bubbling).",
         "displayDetail": "{ maximized: false | true }"
       },
       {
-        "name": "kc-navigate",
+        "name": "kai-navigate",
         "detail": "{ url: string }",
         "description": "Fired when the preview navigates. `detail.url` = the new location.",
         "displayDetail": "{ url: string }"
       },
       {
-        "name": "kc-tab-change",
+        "name": "kai-tab-change",
         "detail": "{ tab: \"preview\" | \"code\" }",
         "description": "Fired when the Preview|Code tab changes. `detail.tab`.",
         "displayDetail": "{ tab: \"preview\" | \"code\" }"
@@ -185,8 +185,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-attachments",
-    "className": "KcAttachmentsElement",
+    "tag": "kai-attachments",
+    "className": "KaiAttachmentsElement",
     "displayName": "Attachments",
     "props": [
       {
@@ -224,7 +224,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Show a remove button per item; clicking it fires a `kc-remove` event.",
+        "description": "Show a remove button per item; clicking it fires a `kai-remove` event.",
         "default": "false",
         "displayType": "undefined | false | true"
       },
@@ -248,7 +248,7 @@
     ],
     "events": [
       {
-        "name": "kc-remove",
+        "name": "kai-remove",
         "detail": "{ id: string }",
         "description": "A remove button was clicked.",
         "displayDetail": "{ id: string }"
@@ -304,8 +304,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-card",
-    "className": "KcCardElement",
+    "tag": "kai-card",
+    "className": "KaiCardElement",
     "displayName": "Card",
     "props": [
       {
@@ -353,8 +353,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-cards",
-    "className": "KcCardsElement",
+    "tag": "kai-cards",
+    "className": "KaiCardsElement",
     "displayName": "Cards",
     "props": [
       {
@@ -393,8 +393,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-chain-of-thought",
-    "className": "KcChainOfThoughtElement",
+    "tag": "kai-chain-of-thought",
+    "className": "KaiChainOfThoughtElement",
     "displayName": "ChainOfThought",
     "props": [
       {
@@ -440,8 +440,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-chat",
-    "className": "KcChatElement",
+    "tag": "kai-chat",
+    "className": "KaiChatElement",
     "displayName": "Chat",
     "props": [
       {
@@ -460,7 +460,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Controlled value of the input. When set, the host owns the input text and must update it on `kc-value-change`; leave unset for uncontrolled behavior.",
+        "description": "Controlled value of the input. When set, the host owns the input text and must update it on `kai-value-change`; leave unset for uncontrolled behavior.",
         "displayType": "undefined | string"
       },
       {
@@ -547,7 +547,7 @@
         "type": "undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": "Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection.",
+        "description": "Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kai-model-change` event fires on selection.",
         "displayType": "undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]"
       },
       {
@@ -580,7 +580,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Whether the host has `slot=\"header-start\"` content (left of the title) — set by the `<kc-chat>` facade so a custom control forces the header open.",
+        "description": "Whether the host has `slot=\"header-start\"` content (left of the title) — set by the `<kai-chat>` facade so a custom control forces the header open.",
         "displayType": "undefined | false | true"
       },
       {
@@ -614,7 +614,7 @@
         "type": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": "Slash commands — when set, typing `/` in the input opens the command palette and fires `kc-slash-select`. Set as a JS property.",
+        "description": "Slash commands — when set, typing `/` in the input opens the command palette and fires `kai-slash-select`. Set as a JS property.",
         "displayType": "SlashCommandItem[] | undefined"
       },
       {
@@ -646,49 +646,49 @@
     ],
     "events": [
       {
-        "name": "kc-message-action",
+        "name": "kai-message-action",
         "detail": "{ messageId: string; action: string }",
         "description": "An action button on a message was clicked. `action` is the built-in name or custom id.",
         "displayDetail": "{ messageId: string; action: string }"
       },
       {
-        "name": "kc-model-change",
+        "name": "kai-model-change",
         "detail": "{ modelId: string }",
         "description": "The header model switcher changed.",
         "displayDetail": "{ modelId: string }"
       },
       {
-        "name": "kc-search",
+        "name": "kai-search",
         "detail": "Record<string, never>",
         "description": "The Search button was clicked.",
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "kc-slash-select",
+        "name": "kai-slash-select",
         "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
         "description": "A slash command was chosen from the palette.",
         "displayDetail": "{ command: SlashCommandItem }"
       },
       {
-        "name": "kc-submit",
+        "name": "kai-submit",
         "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
         "description": "User submitted a message.",
         "displayDetail": "{ value: string; attachments: AttachmentData[] }"
       },
       {
-        "name": "kc-suggestion-click",
+        "name": "kai-suggestion-click",
         "detail": "{ value: string }",
         "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`).",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "kc-value-change",
+        "name": "kai-value-change",
         "detail": "{ value: string }",
         "description": "Fired on every input change.",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "kc-voice",
+        "name": "kai-voice",
         "detail": "Record<string, never>",
         "description": "The Mic / voice button was clicked.",
         "displayDetail": "Record<string, never>"
@@ -704,8 +704,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-checkpoint",
-    "className": "KcCheckpointElement",
+    "tag": "kai-checkpoint",
+    "className": "KaiCheckpointElement",
     "displayName": "Checkpoint",
     "props": [
       {
@@ -745,7 +745,7 @@
     ],
     "events": [
       {
-        "name": "kc-select",
+        "name": "kai-select",
         "detail": null,
         "description": "The checkpoint was clicked.",
         "displayDetail": null
@@ -771,8 +771,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-choice",
-    "className": "KcChoiceElement",
+    "tag": "kai-choice",
+    "className": "KaiChoiceElement",
     "displayName": "Choice",
     "props": [
       {
@@ -819,8 +819,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-code-block",
-    "className": "KcCodeBlockElement",
+    "tag": "kai-code-block",
+    "className": "KaiCodeBlockElement",
     "displayName": "CodeBlock",
     "props": [
       {
@@ -886,8 +886,8 @@
     ]
   },
   {
-    "tag": "kc-confirm",
-    "className": "KcConfirmElement",
+    "tag": "kai-confirm",
+    "className": "KaiConfirmElement",
     "displayName": "Confirm",
     "props": [
       {
@@ -943,8 +943,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-context",
-    "className": "KcContextElement",
+    "tag": "kai-context",
+    "className": "KaiContextElement",
     "displayName": "Context",
     "props": [
       {
@@ -974,7 +974,7 @@
     ],
     "events": [
       {
-        "name": "kc-threshold-change",
+        "name": "kai-threshold-change",
         "detail": "{ level: \"ok\" | \"warn\" | \"danger\" }",
         "description": "Fires when the computed severity level changes (ok → warn → danger or back). `detail.level` is `'ok'`, `'warn'`, or `'danger'`.",
         "displayDetail": "{ level: \"ok\" | \"warn\" | \"danger\" }"
@@ -1045,8 +1045,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-conversations",
-    "className": "KcConversationsElement",
+    "tag": "kai-conversations",
+    "className": "KaiConversationsElement",
     "displayName": "Conversations",
     "props": [
       {
@@ -1084,19 +1084,19 @@
     ],
     "events": [
       {
-        "name": "kc-conversation-select",
+        "name": "kai-conversation-select",
         "detail": "{ id: string }",
         "description": "A conversation was selected.",
         "displayDetail": "{ id: string }"
       },
       {
-        "name": "kc-new-chat",
+        "name": "kai-new-chat",
         "detail": "Record<string, never>",
         "description": "The \"New chat\" button was clicked.",
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "kc-toggle-sidebar",
+        "name": "kai-toggle-sidebar",
         "detail": "Record<string, never>",
         "description": "The sidebar toggle was clicked.",
         "displayDetail": "Record<string, never>"
@@ -1115,8 +1115,8 @@
     ]
   },
   {
-    "tag": "kc-embed",
-    "className": "KcEmbedElement",
+    "tag": "kai-embed",
+    "className": "KaiEmbedElement",
     "displayName": "Embed",
     "props": [
       {
@@ -1147,8 +1147,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-empty",
-    "className": "KcEmptyElement",
+    "tag": "kai-empty",
+    "className": "KaiEmptyElement",
     "displayName": "Empty",
     "props": [
       {
@@ -1206,8 +1206,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-feedback-bar",
-    "className": "KcFeedbackBarElement",
+    "tag": "kai-feedback-bar",
+    "className": "KaiFeedbackBarElement",
     "displayName": "FeedbackBar",
     "props": [
       {
@@ -1270,19 +1270,19 @@
     ],
     "events": [
       {
-        "name": "kc-close",
+        "name": "kai-close",
         "detail": null,
         "description": "The user dismissed the banner.",
         "displayDetail": null
       },
       {
-        "name": "kc-feedback",
+        "name": "kai-feedback",
         "detail": "{ value: \"helpful\" | \"not-helpful\" }",
         "description": "The user rated the response. `value` is `'helpful'` or `'not-helpful'`.",
         "displayDetail": "{ value: \"helpful\" | \"not-helpful\" }"
       },
       {
-        "name": "kc-feedback-detail",
+        "name": "kai-feedback-detail",
         "detail": "{ value: \"helpful\" | \"not-helpful\"; category?: undefined | string; comment?: undefined | string }",
         "description": "The user submitted the optional detail form (`collect-detail`).",
         "displayDetail": "{ value: \"helpful\" | \"not-helpful\"; category?: undefined | string; comment?: undefined | string }"
@@ -1298,8 +1298,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-file-tree",
-    "className": "KcFileTreeElement",
+    "tag": "kai-file-tree",
+    "className": "KaiFileTreeElement",
     "displayName": "FileTree",
     "props": [
       {
@@ -1333,7 +1333,7 @@
     ],
     "events": [
       {
-        "name": "kc-select",
+        "name": "kai-select",
         "detail": "{ path: string }",
         "description": "Fired when a file is selected. `detail.path` = the file's path.",
         "displayDetail": "{ path: string }"
@@ -1349,8 +1349,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-file-upload",
-    "className": "KcFileUploadElement",
+    "tag": "kai-file-upload",
+    "className": "KaiFileUploadElement",
     "displayName": "FileUpload",
     "props": [
       {
@@ -1391,7 +1391,7 @@
     ],
     "events": [
       {
-        "name": "kc-files-added",
+        "name": "kai-files-added",
         "detail": "{ files: File[] }",
         "description": "Files were picked or dropped.",
         "displayDetail": "{ files: File[] }"
@@ -1412,8 +1412,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-form",
-    "className": "KcFormElement",
+    "tag": "kai-form",
+    "className": "KaiFormElement",
     "displayName": "Form",
     "props": [
       {
@@ -1460,8 +1460,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-image",
-    "className": "KcImageElement",
+    "tag": "kai-image",
+    "className": "KaiImageElement",
     "displayName": "Image",
     "props": [
       {
@@ -1509,8 +1509,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-link-preview",
-    "className": "KcLinkPreviewElement",
+    "tag": "kai-link-preview",
+    "className": "KaiLinkPreviewElement",
     "displayName": "LinkPreview",
     "props": [
       {
@@ -1541,8 +1541,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-loader",
-    "className": "KcLoaderElement",
+    "tag": "kai-loader",
+    "className": "KaiLoaderElement",
     "displayName": "Loader",
     "props": [
       {
@@ -1583,8 +1583,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-markdown",
-    "className": "KcMarkdownElement",
+    "tag": "kai-markdown",
+    "className": "KaiMarkdownElement",
     "displayName": "Markdown",
     "props": [
       {
@@ -1635,8 +1635,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-message",
-    "className": "KcMessageElement",
+    "tag": "kai-message",
+    "className": "KaiMessageElement",
     "displayName": "Message",
     "props": [
       {
@@ -1727,7 +1727,7 @@
     ],
     "events": [
       {
-        "name": "kc-message-action",
+        "name": "kai-message-action",
         "detail": "{ messageId: string; action: string }",
         "description": "An action button was clicked. `action` is the built-in name or custom id.",
         "displayDetail": "{ messageId: string; action: string }"
@@ -1798,8 +1798,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-model-switcher",
-    "className": "KcModelSwitcherElement",
+    "tag": "kai-model-switcher",
+    "className": "KaiModelSwitcherElement",
     "displayName": "ModelSwitcher",
     "props": [
       {
@@ -1825,7 +1825,7 @@
     ],
     "events": [
       {
-        "name": "kc-model-change",
+        "name": "kai-model-change",
         "detail": "{ modelId: string }",
         "description": "A model was selected.",
         "displayDetail": "{ modelId: string }"
@@ -1841,8 +1841,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-popover",
-    "className": "KcPopoverElement",
+    "tag": "kai-popover",
+    "className": "KaiPopoverElement",
     "displayName": "Popover",
     "props": [
       {
@@ -1874,7 +1874,7 @@
     ],
     "events": [
       {
-        "name": "kc-open-change",
+        "name": "kai-open-change",
         "detail": "{ open: false | true }",
         "description": "The popover wants to open or close (click, Escape, or outside-click).",
         "displayDetail": "{ open: false | true }"
@@ -1890,8 +1890,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-prompt-input",
-    "className": "KcPromptInputElement",
+    "tag": "kai-prompt-input",
+    "className": "KaiPromptInputElement",
     "displayName": "PromptInput",
     "props": [
       {
@@ -1899,7 +1899,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Controlled value of the input. When set, the host owns the text and must update it on `kc-value-change`; leave unset for uncontrolled behavior.",
+        "description": "Controlled value of the input. When set, the host owns the text and must update it on `kai-value-change`; leave unset for uncontrolled behavior.",
         "displayType": "undefined | string"
       },
       {
@@ -1994,7 +1994,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "When set and `loading` is true, the send button is replaced by a Stop button (square icon, \"Stop\" aria-label). Clicking it fires `kc-stop`.",
+        "description": "When set and `loading` is true, the send button is replaced by a Stop button (square icon, \"Stop\" aria-label). Clicking it fires `kai-stop`.",
         "default": "false",
         "displayType": "undefined | false | true"
       },
@@ -2009,49 +2009,49 @@
     ],
     "events": [
       {
-        "name": "kc-search",
+        "name": "kai-search",
         "detail": "Record<string, never>",
         "description": "The Search (Globe) toolbar button was clicked.",
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "kc-slash-select",
+        "name": "kai-slash-select",
         "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
         "description": "A slash command was chosen from the palette.",
         "displayDetail": "{ command: SlashCommandItem }"
       },
       {
-        "name": "kc-stop",
+        "name": "kai-stop",
         "detail": "Record<string, never>",
         "description": "The Stop button was clicked while `stoppable` and `loading` are both true.",
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "kc-submit",
+        "name": "kai-submit",
         "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
         "description": "The user submitted the prompt (Enter or send button) with its attachments.",
         "displayDetail": "{ value: string; attachments: AttachmentData[] }"
       },
       {
-        "name": "kc-suggestion-click",
+        "name": "kai-suggestion-click",
         "detail": "{ value: string }",
         "description": "A suggestion was clicked while `suggestion-mode=\"fill\"`.",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "kc-toolbar-action",
+        "name": "kai-toolbar-action",
         "detail": "{ action: string }",
-        "description": "A custom `<kc-action>` toolbar button was clicked. `action` is the `id` of the `<kc-action>` element that was clicked.",
+        "description": "A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of the `<kai-action>` element that was clicked.",
         "displayDetail": "{ action: string }"
       },
       {
-        "name": "kc-value-change",
+        "name": "kai-value-change",
         "detail": "{ value: string }",
         "description": "The input text changed (fires on every keystroke).",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "kc-voice",
+        "name": "kai-voice",
         "detail": "Record<string, never>",
         "description": "The Voice (Mic) toolbar button was clicked.",
         "displayDetail": "Record<string, never>"
@@ -2061,8 +2061,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-reasoning",
-    "className": "KcReasoningElement",
+    "tag": "kai-reasoning",
+    "className": "KaiReasoningElement",
     "displayName": "Reasoning",
     "props": [
       {
@@ -2112,7 +2112,7 @@
     ],
     "events": [
       {
-        "name": "kc-open-change",
+        "name": "kai-open-change",
         "detail": "{ open: false | true }",
         "description": "Open state changed (via the trigger or streaming auto-open).",
         "displayDetail": "{ open: false | true }"
@@ -2138,8 +2138,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-remote",
-    "className": "KcRemoteElement",
+    "tag": "kai-remote",
+    "className": "KaiRemoteElement",
     "displayName": "Remote",
     "props": [
       {
@@ -2180,8 +2180,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-resizable",
-    "className": "KcResizableElement",
+    "tag": "kai-resizable",
+    "className": "KaiResizableElement",
     "displayName": "Resizable",
     "props": [
       {
@@ -2205,13 +2205,13 @@
     ],
     "events": [
       {
-        "name": "kc-change",
+        "name": "kai-change",
         "detail": "{ sizes: number[] }",
         "description": "Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent.",
         "displayDetail": "{ sizes: number[] }"
       },
       {
-        "name": "kc-maximize-change",
+        "name": "kai-maximize-change",
         "detail": "{ maximized: false | true; index: null | number }",
         "description": "Observe layout maximize state.",
         "displayDetail": "{ maximized: false | true; index: null | number }"
@@ -2227,8 +2227,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-resizable-item",
-    "className": "KcResizableItemElement",
+    "tag": "kai-resizable-item",
+    "className": "KaiResizableItemElement",
     "displayName": "ResizableItem",
     "props": [
       {
@@ -2276,13 +2276,13 @@
     ],
     "events": [
       {
-        "name": "kc-change",
+        "name": "kai-change",
         "detail": "unknown",
         "description": "",
         "displayDetail": "unknown"
       },
       {
-        "name": "kc-maximize-change",
+        "name": "kai-maximize-change",
         "detail": "unknown",
         "description": "",
         "displayDetail": "unknown"
@@ -2298,8 +2298,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-response-stream",
-    "className": "KcResponseStreamElement",
+    "tag": "kai-response-stream",
+    "className": "KaiResponseStreamElement",
     "displayName": "ResponseStream",
     "props": [
       {
@@ -2340,7 +2340,7 @@
     ],
     "events": [
       {
-        "name": "kc-complete",
+        "name": "kai-complete",
         "detail": null,
         "description": "Streaming finished.",
         "displayDetail": null
@@ -2356,8 +2356,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-scope-picker",
-    "className": "KcScopePickerElement",
+    "tag": "kai-scope-picker",
+    "className": "KaiScopePickerElement",
     "displayName": "ScopePicker",
     "props": [
       {
@@ -2390,7 +2390,7 @@
     ],
     "events": [
       {
-        "name": "kc-scope-change",
+        "name": "kai-scope-change",
         "detail": "{ filters: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }",
         "description": "A scope was chosen (`undefined` filters = \"All Content\").",
         "displayDetail": "{ filters: SearchFilters | undefined }"
@@ -2406,8 +2406,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-scroll-button",
-    "className": "KcScrollButtonElement",
+    "tag": "kai-scroll-button",
+    "className": "KaiScrollButtonElement",
     "displayName": "ScrollButton",
     "props": [
       {
@@ -2439,7 +2439,7 @@
     ],
     "events": [
       {
-        "name": "kc-scroll",
+        "name": "kai-scroll",
         "detail": null,
         "description": "Emitted when the user clicks the button and `scrollToBottom()` is called. Carries no detail — consumers use it to know a manual scroll occurred.",
         "displayDetail": null
@@ -2455,8 +2455,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-skills",
-    "className": "KcSkillsElement",
+    "tag": "kai-skills",
+    "className": "KaiSkillsElement",
     "displayName": "Skills",
     "props": [
       {
@@ -2482,8 +2482,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-source",
-    "className": "KcSourceElement",
+    "tag": "kai-source",
+    "className": "KaiSourceElement",
     "displayName": "Source",
     "props": [
       {
@@ -2557,8 +2557,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-sources",
-    "className": "KcSourcesElement",
+    "tag": "kai-sources",
+    "className": "KaiSourcesElement",
     "displayName": "Sources",
     "props": [
       {
@@ -2617,8 +2617,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-suggestions",
-    "className": "KcSuggestionsElement",
+    "tag": "kai-suggestions",
+    "className": "KaiSuggestionsElement",
     "displayName": "Suggestions",
     "props": [
       {
@@ -2667,7 +2667,7 @@
     ],
     "events": [
       {
-        "name": "kc-select",
+        "name": "kai-select",
         "detail": "{ value: string }",
         "description": "A suggestion was clicked.",
         "displayDetail": "{ value: string }"
@@ -2683,8 +2683,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-switch",
-    "className": "KcSwitchElement",
+    "tag": "kai-switch",
+    "className": "KaiSwitchElement",
     "displayName": "Switch",
     "props": [
       {
@@ -2692,7 +2692,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Initial checked state. Bare attribute (`<kc-switch checked>`) turns it on.",
+        "description": "Initial checked state. Bare attribute (`<kai-switch checked>`) turns it on.",
         "displayType": "undefined | false | true"
       },
       {
@@ -2714,7 +2714,7 @@
     ],
     "events": [
       {
-        "name": "kc-change",
+        "name": "kai-change",
         "detail": "{ checked: false | true }",
         "description": "The toggle changed.",
         "displayDetail": "{ checked: false | true }"
@@ -2730,8 +2730,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-tasks",
-    "className": "KcTasksElement",
+    "tag": "kai-tasks",
+    "className": "KaiTasksElement",
     "displayName": "Tasks",
     "props": [
       {
@@ -2778,8 +2778,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-text-shimmer",
-    "className": "KcTextShimmerElement",
+    "tag": "kai-text-shimmer",
+    "className": "KaiTextShimmerElement",
     "displayName": "TextShimmer",
     "props": [
       {
@@ -2830,8 +2830,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-thinking-bar",
-    "className": "KcThinkingBarElement",
+    "tag": "kai-thinking-bar",
+    "className": "KaiThinkingBarElement",
     "displayName": "ThinkingBar",
     "props": [
       {
@@ -2864,7 +2864,7 @@
     ],
     "events": [
       {
-        "name": "kc-stop",
+        "name": "kai-stop",
         "detail": null,
         "description": "The \"stop / answer now\" affordance was clicked.",
         "displayDetail": null
@@ -2880,8 +2880,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-tool",
-    "className": "KcToolElement",
+    "tag": "kai-tool",
+    "className": "KaiToolElement",
     "displayName": "Tool",
     "props": [
       {
@@ -2918,8 +2918,8 @@
     ]
   },
   {
-    "tag": "kc-voice-input",
-    "className": "KcVoiceInputElement",
+    "tag": "kai-voice-input",
+    "className": "KaiVoiceInputElement",
     "displayName": "VoiceInput",
     "props": [
       {
@@ -2942,13 +2942,13 @@
     ],
     "events": [
       {
-        "name": "kc-audio-captured",
+        "name": "kai-audio-captured",
         "detail": "{ blob: Blob }",
         "description": "Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property.",
         "displayDetail": "{ blob: Blob }"
       },
       {
-        "name": "kc-transcription",
+        "name": "kai-transcription",
         "detail": "{ text: string }",
         "description": "Transcription completed (the `transcribe` property resolved).",
         "displayDetail": "{ text: string }"
@@ -2964,8 +2964,8 @@
     "tokens": []
   },
   {
-    "tag": "kc-workspace",
-    "className": "KcWorkspaceElement",
+    "tag": "kai-workspace",
+    "className": "KaiWorkspaceElement",
     "displayName": "Workspace",
     "props": [
       {
@@ -3197,7 +3197,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it).",
+        "description": "Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kai-sidebar-toggle` event. Omit for uncontrolled (the element manages it).",
         "displayType": "undefined | false | true"
       },
       {
@@ -3211,67 +3211,67 @@
     ],
     "events": [
       {
-        "name": "kc-conversation-select",
+        "name": "kai-conversation-select",
         "detail": "{ id: string }",
         "description": "A conversation was selected in the sidebar.",
         "displayDetail": "{ id: string }"
       },
       {
-        "name": "kc-message-action",
+        "name": "kai-message-action",
         "detail": "{ messageId: string; action: string }",
         "description": "An action button on a message was clicked.",
         "displayDetail": "{ messageId: string; action: string }"
       },
       {
-        "name": "kc-model-change",
+        "name": "kai-model-change",
         "detail": "{ modelId: string }",
         "description": "The header model switcher changed.",
         "displayDetail": "{ modelId: string }"
       },
       {
-        "name": "kc-new-chat",
+        "name": "kai-new-chat",
         "detail": "Record<string, never>",
         "description": "The \"New chat\" button was clicked.",
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "kc-search",
+        "name": "kai-search",
         "detail": "Record<string, never>",
         "description": "The Search button was clicked.",
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "kc-sidebar-toggle",
+        "name": "kai-sidebar-toggle",
         "detail": "{ collapsed: false | true }",
         "description": "The sidebar was collapsed or expanded.",
         "displayDetail": "{ collapsed: false | true }"
       },
       {
-        "name": "kc-slash-select",
+        "name": "kai-slash-select",
         "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
         "description": "A slash command was chosen from the palette.",
         "displayDetail": "{ command: SlashCommandItem }"
       },
       {
-        "name": "kc-submit",
+        "name": "kai-submit",
         "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
         "description": "User submitted a message.",
         "displayDetail": "{ value: string; attachments: AttachmentData[] }"
       },
       {
-        "name": "kc-suggestion-click",
+        "name": "kai-suggestion-click",
         "detail": "{ value: string }",
         "description": "A suggestion chip was clicked (only in `suggestion-mode=\"fill\"`).",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "kc-value-change",
+        "name": "kai-value-change",
         "detail": "{ value: string }",
         "description": "Fired on every input change.",
         "displayDetail": "{ value: string }"
       },
       {
-        "name": "kc-voice",
+        "name": "kai-voice",
         "detail": "Record<string, never>",
         "description": "The Mic / voice button was clicked.",
         "displayDetail": "Record<string, never>"

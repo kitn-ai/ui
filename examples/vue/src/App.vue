@@ -1,5 +1,5 @@
 <!--
-  kc-chat Vue 3 example — using web components natively.
+  kai-chat Vue 3 example — using web components natively.
 
   Vue can bind to custom-element DOM properties with the `.prop` modifier:
     :prop.prop="value"  — sets the DOM *property* (not a stringified attribute);
@@ -7,11 +7,11 @@
                           web components.
 
   CustomEvents are listened to with @event="handler":
-    @kc-submit="onSubmit"  — `$event` is the raw CustomEvent; `.detail` carries the
+    @kai-submit="onSubmit"  — `$event` is the raw CustomEvent; `.detail` carries the
                           payload.
 
-  vite.config.ts declares `isCustomElement: (tag) => tag.startsWith('kc-')`
-  so Vue treats kc-* tags as native custom elements rather than Vue components
+  vite.config.ts declares `isCustomElement: (tag) => tag.startsWith('kai-')`
+  so Vue treats kai-* tags as native custom elements rather than Vue components
   (no "Unknown custom element" warnings).
 
   `@kitn.ai/ui/elements` is imported once (main.ts side-effect) to register
@@ -134,10 +134,10 @@ function toggleTheme(): void {
   theme.value = wasDark ? 'light' : 'dark';
 }
 
-// ── kc-workspace event handlers ─────────────────────────────────────────
+// ── kai-workspace event handlers ─────────────────────────────────────────
 
 /**
- * @kc-submit — fired when the user sends a message.
+ * @kai-submit — fired when the user sends a message.
  * Vue listens to CustomEvents with @event="handler".
  * `$event` is the raw Event; cast to CustomEvent to access `.detail`.
  */
@@ -179,7 +179,7 @@ function onSubmit(event: Event): void {
 }
 
 /**
- * @kc-message-action — copy, like, dislike, regenerate actions on messages.
+ * @kai-message-action — copy, like, dislike, regenerate actions on messages.
  */
 async function onMessageAction(event: Event): Promise<void> {
   const { messageId, action } = ((event as CustomEvent).detail ?? {}) as {
@@ -228,7 +228,7 @@ async function onMessageAction(event: Event): Promise<void> {
 }
 
 /**
- * @kc-model-change — user switched the active model.
+ * @kai-model-change — user switched the active model.
  */
 function onModelChange(event: Event): void {
   const { modelId } = ((event as CustomEvent).detail ?? {}) as { modelId: string };
@@ -239,7 +239,7 @@ function onModelChange(event: Event): void {
 }
 
 /**
- * @kc-conversation-select — user clicked a conversation in the sidebar.
+ * @kai-conversation-select — user clicked a conversation in the sidebar.
  */
 function onConversationSelect(event: Event): void {
   const { id } = ((event as CustomEvent).detail ?? {}) as { id: string };
@@ -248,7 +248,7 @@ function onConversationSelect(event: Event): void {
 }
 
 /**
- * @kc-new-chat — user clicked "New chat" in the sidebar.
+ * @kai-new-chat — user clicked "New chat" in the sidebar.
  */
 function onNewChat(): void {
   const id = 'c-' + generateId();
@@ -270,13 +270,13 @@ function onNewChat(): void {
 }
 
 /**
- * @kc-sidebar-toggle — hamburger / toggle from within the workspace.
+ * @kai-sidebar-toggle — hamburger / toggle from within the workspace.
  */
 function onSidebarToggle(): void {
   document.body.classList.toggle('sidebar-open');
 }
 
-// ── Standalone kc-prompt-input handler ───────────────────────────────────────
+// ── Standalone kai-prompt-input handler ───────────────────────────────────────
 
 function onStandaloneSubmit(event: Event): void {
   const { value } = ((event as CustomEvent).detail ?? {}) as { value?: string };
@@ -288,7 +288,7 @@ function onStandaloneSubmit(event: Event): void {
 
 <template>
   <!--
-    kc-chat Vue 3 example template.
+    kai-chat Vue 3 example template.
 
     Key Vue web-component patterns:
       :prop.prop="value"   — the `.prop` modifier sets the DOM *property*
@@ -305,7 +305,7 @@ function onStandaloneSubmit(event: Event): void {
     <header class="topbar" :style="{ borderBottom: '1px solid ' + borderColor }">
       <span class="topbar-brand">
         <img src="../../shared/logo.svg" alt="" width="20" height="20" />
-        kc-chat &middot; Vue example (web components)
+        kai-chat &middot; Vue example (web components)
       </span>
 
       <button
@@ -321,13 +321,13 @@ function onStandaloneSubmit(event: Event): void {
       ></button>
     </header>
 
-    <!-- Main area: the flagship <kc-workspace> element.
+    <!-- Main area: the flagship <kai-workspace> element.
          :prop.prop sets DOM properties; @event listens for CustomEvents.
          The `.prop` modifier is critical — without it Vue would stringify
          arrays/objects as attributes and the elements would receive "[object Object]". -->
     <div class="main-area">
       <!--
-        <kc-workspace> is the batteries-included shell: sidebar +
+        <kai-workspace> is the batteries-included shell: sidebar +
         conversation list + chat panel + resize handle, all in one element.
 
         Property bindings (:prop.prop):
@@ -344,14 +344,14 @@ function onStandaloneSubmit(event: Event): void {
           - :theme.prop           'light'|'dark'|'auto'
 
         Event bindings (@event):
-          - @kc-submit               — user sends a message
-          - @kc-message-action        — copy / like / dislike / regenerate
-          - @kc-model-change          — model picker changed
-          - @kc-conversation-select   — sidebar item clicked
-          - @kc-new-chat              — "New chat" button clicked
-          - @kc-sidebar-toggle        — hamburger / sidebar toggle
+          - @kai-submit               — user sends a message
+          - @kai-message-action        — copy / like / dislike / regenerate
+          - @kai-model-change          — model picker changed
+          - @kai-conversation-select   — sidebar item clicked
+          - @kai-new-chat              — "New chat" button clicked
+          - @kai-sidebar-toggle        — hamburger / sidebar toggle
       -->
-      <kc-workspace
+      <kai-workspace
         :groups.prop="groups"
         :conversations.prop="conversations"
         :activeId.prop="activeId"
@@ -363,27 +363,27 @@ function onStandaloneSubmit(event: Event): void {
         :slashCommands.prop="slashCommands"
         :loading.prop="loading"
         :theme.prop="theme"
-        @kc-submit="onSubmit"
-        @kc-message-action="onMessageAction"
-        @kc-model-change="onModelChange"
-        @kc-conversation-select="onConversationSelect"
-        @kc-new-chat="onNewChat"
-        @kc-sidebar-toggle="onSidebarToggle"
+        @kai-submit="onSubmit"
+        @kai-message-action="onMessageAction"
+        @kai-model-change="onModelChange"
+        @kai-conversation-select="onConversationSelect"
+        @kai-new-chat="onNewChat"
+        @kai-sidebar-toggle="onSidebarToggle"
         style="flex: 1; min-height: 0;"
-      ></kc-workspace>
+      ></kai-workspace>
     </div>
 
-    <!-- Standalone <kc-prompt-input> — proves a leaf element works on its own. -->
+    <!-- Standalone <kai-prompt-input> — proves a leaf element works on its own. -->
     <div class="standalone-section" :style="{ borderTop: '1px solid ' + borderColor }">
       <div class="standalone-label">
-        Standalone &lt;kc-prompt-input&gt; (try typing <code>/</code> for slash commands):
+        Standalone &lt;kai-prompt-input&gt; (try typing <code>/</code> for slash commands):
       </div>
-      <kc-prompt-input
+      <kai-prompt-input
         placeholder="Standalone prompt input…"
         :slashCommands.prop="slashCommands"
         :theme.prop="theme"
-        @kc-submit="onStandaloneSubmit"
-      ></kc-prompt-input>
+        @kai-submit="onStandaloneSubmit"
+      ></kai-prompt-input>
       <ul v-if="draftSubmissions.length > 0" class="draft-list">
         <li v-for="d in draftSubmissions" :key="d">submitted: {{ d }}</li>
       </ul>

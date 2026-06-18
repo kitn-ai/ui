@@ -24,7 +24,7 @@ function speak(text) {
 
 const chat = document.getElementById('chat');
 
-chat.addEventListener('kc-submit', async (e) => {
+chat.addEventListener('kai-submit', async (e) => {
   const userText = e.detail.value.trim();
   if (!userText) return;
 
@@ -134,5 +134,5 @@ async function speakCloud(text) {
 
 ## Related
 
-- [Getting Started](/chat/guides/getting-started/) — streaming replies with `kc-chat`
-- [`kc-chat` component reference](/chat/components/chat/) — all props and events, including `loading`
+- [Getting Started](/chat/guides/getting-started/) — streaming replies with `kai-chat`
+- [`kai-chat` component reference](/chat/components/chat/) — all props and events, including `loading`

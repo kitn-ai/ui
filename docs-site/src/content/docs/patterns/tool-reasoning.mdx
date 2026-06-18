@@ -53,7 +53,7 @@ import ChatDemo from '../../../components/ChatDemo.tsx';
 
 ## How it works
 
-Both `tools` and `reasoning` live directly on the `ChatMessage` object you pass to `<kc-chat>` or `<kc-message>`. Update the message in place as the agent streams. Since the message carries arrays, you assign it in JavaScript rather than as an HTML attribute.
+Both `tools` and `reasoning` live directly on the `ChatMessage` object you pass to `<kai-chat>` or `<kai-message>`. Update the message in place as the agent streams. Since the message carries arrays, you assign it in JavaScript rather than as an HTML attribute.
 
 ```js
 import '@kitn.ai/ui/elements';
@@ -130,15 +130,15 @@ chat.loading = false;
 | `output-available` | Check icon, "Completed" badge | Tool returned successfully |
 | `output-error` | X icon, "Error" badge + `errorText` | Tool threw or returned an error |
 
-**`reasoning`** is a single `{ text, label? }` object — append tokens to `text` as they stream in. The block auto-expands while reasoning is in progress if you use `<kc-reasoning streaming>` directly; via `<kc-chat>` or `<kc-message>` the block is collapsible once complete.
+**`reasoning`** is a single `{ text, label? }` object — append tokens to `text` as they stream in. The block auto-expands while reasoning is in progress if you use `<kai-reasoning streaming>` directly; via `<kai-chat>` or `<kai-message>` the block is collapsible once complete.
 
-**`<kc-thinking-bar>`** is the pre-reasoning status bar — show it before the first reasoning token arrives. It fires `kc-stop` when the user clicks "Answer now" (requires `stoppable`):
+**`<kai-thinking-bar>`** is the pre-reasoning status bar — show it before the first reasoning token arrives. It fires `kai-stop` when the user clicks "Answer now" (requires `stoppable`):
 
 ```html
-<kc-thinking-bar text="Thinking…" stoppable stop-label="Answer now"></kc-thinking-bar>
+<kai-thinking-bar text="Thinking…" stoppable stop-label="Answer now"></kai-thinking-bar>
 
 <script type="module">
-  document.querySelector('kc-thinking-bar').addEventListener('kc-stop', () => {
+  document.querySelector('kai-thinking-bar').addEventListener('kai-stop', () => {
     abortController.abort();
   });
 </script>
@@ -146,9 +146,9 @@ chat.loading = false;
 
 ## Next steps
 
-- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the full `kc-submit` streaming loop.
-- **[`kc-message` reference](/chat/components/message/)** — complete `ChatMessage` shape, `actionsReveal`, `proseSize`.
-- **[`kc-tool` reference](/chat/components/tool/)** — `tool` property shape, `open` flag, state tokens.
-- **[`kc-reasoning` reference](/chat/components/reasoning/)** — `streaming` auto-expand, `kc-open-change`.
-- **[`kc-thinking-bar` reference](/chat/components/thinking-bar/)** — `text`, `stoppable`, `kc-stop`.
-- **[Compose your own shell](/chat/patterns/compose-your-own/)** — lay out the thread and composer without `<kc-chat>`.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the full `kai-submit` streaming loop.
+- **[`kai-message` reference](/chat/components/message/)** — complete `ChatMessage` shape, `actionsReveal`, `proseSize`.
+- **[`kai-tool` reference](/chat/components/tool/)** — `tool` property shape, `open` flag, state tokens.
+- **[`kai-reasoning` reference](/chat/components/reasoning/)** — `streaming` auto-expand, `kai-open-change`.
+- **[`kai-thinking-bar` reference](/chat/components/thinking-bar/)** — `text`, `stoppable`, `kai-stop`.
+- **[Compose your own shell](/chat/patterns/compose-your-own/)** — lay out the thread and composer without `<kai-chat>`.

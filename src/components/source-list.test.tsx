@@ -13,7 +13,7 @@ afterEach(cleanup);
 
 describe('parseKcSourceElement', () => {
   function makeEl(attrs: Record<string, string | null>): Element {
-    const el = document.createElement('kc-source');
+    const el = document.createElement('kai-source');
     for (const [k, v] of Object.entries(attrs)) {
       if (v !== null) el.setAttribute(k, v);
     }
@@ -92,7 +92,7 @@ describe('SourceList with Source children', () => {
 });
 
 // ---------------------------------------------------------------------------
-// numbered prop — kc-sources web component behavior reproduced at Solid level
+// numbered prop — kai-sources web component behavior reproduced at Solid level
 // ---------------------------------------------------------------------------
 
 describe('numbered citations', () => {

@@ -12,7 +12,7 @@ type IconComponent = Component<{ class?: string }>;
  *
  * Fixed allow-list — NO arbitrary SVG/URL. Covers the five built-in action
  * icons plus the common custom ones a host is likely to want. Reused across
- * `kc-message`/`kc-chat` (and, later, kc-checkpoint/kc-empty).
+ * `kai-message`/`kai-chat` (and, later, kai-checkpoint/kai-empty).
  */
 const ICONS: Record<string, IconComponent> = {
   // built-in action icons

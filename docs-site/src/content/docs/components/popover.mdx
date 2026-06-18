@@ -11,7 +11,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-popover</p>
+<p class="kc-tag-sub">kai-popover</p>
 
 <p class="kc-lede">A trigger that toggles a floating card of arbitrary content — a model menu, a settings panel, an account dropdown. The panel is a `role="dialog"` region, not a menu, so it holds anything: rows, toggles, nested groups. Click a position around the trigger below to see each placement.</p>
 
@@ -22,7 +22,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <PopoverPlayground client:only="solid" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-popover>` for a "button + card" affordance — a header model menu, a settings popover, an account dropdown with mixed controls. For a flat list of commands, a menu is simpler. In SolidJS, the `Popover` primitive does the same without the web-component wrapper.
+Reach for `<kai-popover>` for a "button + card" affordance — a header model menu, a settings popover, an account dropdown with mixed controls. For a flat list of commands, a menu is simpler. In SolidJS, the `Popover` primitive does the same without the web-component wrapper.
 </Aside>
 
 ## Usage
@@ -30,40 +30,40 @@ Reach for `<kc-popover>` for a "button + card" affordance — a header model men
 Slot the control as `slot="trigger"` and the panel as the default slot:
 
 ```html
-<kc-popover placement="bottom-start">
+<kai-popover placement="bottom-start">
   <button slot="trigger">GPT-5.5 ▾</button>
 
   <div>
     <button>GPT-5.5 — Flagship model</button>
     <button>Legacy models ▾</button>
-    <label>Temporary chat <kc-switch label="Temporary chat"></kc-switch></label>
+    <label>Temporary chat <kai-switch label="Temporary chat"></kai-switch></label>
   </div>
-</kc-popover>
+</kai-popover>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
 
-  document.querySelector('kc-popover')
-    .addEventListener('kc-open-change', (e) => console.log('open:', e.detail.open));
+  document.querySelector('kai-popover')
+    .addEventListener('kai-open-change', (e) => console.log('open:', e.detail.open));
 </script>
 ```
 
 - **Slots** — `trigger` is the control; the default slot is the panel. Clicking the trigger toggles it.
 - **Dismissal** — Escape or a click outside closes the panel; clicks **inside** it do not.
 - **`placement`** — floating placement relative to the trigger (`bottom-start`, `top`, `right`, …); defaults to `bottom-start`. The panel flips and shifts to stay on screen.
-- **Controlled** — omit `open` for click-to-toggle, or set the `open` property and drive it from `kc-open-change` to control it yourself.
+- **Controlled** — omit `open` for click-to-toggle, or set the `open` property and drive it from `kai-open-change` to control it yourself.
 - **Panel content lives in your light DOM**, so your own styles apply to it directly — no shadow piercing. **Font size, spacing, icons** are all yours: style the slotted content however you like (the panel defaults to a compact `text-sm` and inherits from there). Use your own icon library for chevrons and row icons.
 
 ## Props
 
-<PropTable tag="kc-popover" />
+<PropTable tag="kai-popover" />
 
 ## Events
 
-<EventTable tag="kc-popover" />
+<EventTable tag="kai-popover" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-popover" />
+<ComposedFrom tag="kai-popover" />
 
 <NeedAHand />

@@ -1,5 +1,5 @@
 <!--
-  kc-chat Angular example template.
+  kai-chat Angular example template.
 
   Key Angular web-component patterns:
     [prop]="value"    — sets the DOM *property* (not an attribute string); this is
@@ -18,7 +18,7 @@
   <header class="topbar" [style.borderBottom]="'1px solid ' + borderColor">
     <span class="topbar-brand">
       <img src="../shared/logo.svg" alt="" width="20" height="20" />
-      kc-chat · Angular example (web components)
+      kai-chat · Angular example (web components)
     </span>
 
     <button
@@ -32,11 +32,11 @@
     ></button>
   </header>
 
-  <!-- Main area: the flagship <kc-workspace> element.
+  <!-- Main area: the flagship <kai-workspace> element.
        [prop] sets DOM properties; (event) listens for CustomEvents. -->
   <div class="main-area">
     <!--
-      <kc-workspace> is the batteries-included shell: sidebar +
+      <kai-workspace> is the batteries-included shell: sidebar +
       conversation list + chat panel + resize handle, all in one element.
 
       Property bindings ([prop]):
@@ -53,14 +53,14 @@
         - [theme]           'light'|'dark'|'auto'
 
       Event bindings ((event)):
-        - (kc-submit)              — user sends a message
-        - (kc-message-action)       — copy / like / dislike / regenerate
-        - (kc-model-change)         — model picker changed
-        - (kc-conversation-select)  — sidebar item clicked
-        - (kc-new-chat)             — "New chat" button clicked
-        - (kc-sidebar-toggle)       — hamburger / sidebar toggle
+        - (kai-submit)              — user sends a message
+        - (kai-message-action)       — copy / like / dislike / regenerate
+        - (kai-model-change)         — model picker changed
+        - (kai-conversation-select)  — sidebar item clicked
+        - (kai-new-chat)             — "New chat" button clicked
+        - (kai-sidebar-toggle)       — hamburger / sidebar toggle
     -->
-    <kc-workspace
+    <kai-workspace
       [groups]="groups"
       [conversations]="conversations()"
       [activeId]="activeId()"
@@ -72,27 +72,27 @@
       [slashCommands]="slashCommands"
       [loading]="loading()"
       [theme]="theme()"
-      (kc-submit)="onSubmit($event)"
-      (kc-message-action)="onMessageAction($event)"
-      (kc-model-change)="onModelChange($event)"
-      (kc-conversation-select)="onConversationSelect($event)"
-      (kc-new-chat)="onNewChat()"
-      (kc-sidebar-toggle)="onSidebarToggle()"
+      (kai-submit)="onSubmit($event)"
+      (kai-message-action)="onMessageAction($event)"
+      (kai-model-change)="onModelChange($event)"
+      (kai-conversation-select)="onConversationSelect($event)"
+      (kai-new-chat)="onNewChat()"
+      (kai-sidebar-toggle)="onSidebarToggle()"
       style="flex: 1; min-height: 0;"
-    ></kc-workspace>
+    ></kai-workspace>
   </div>
 
-  <!-- Standalone <kc-prompt-input> — proves a leaf element works on its own. -->
+  <!-- Standalone <kai-prompt-input> — proves a leaf element works on its own. -->
   <div class="standalone-section" [style.borderTop]="'1px solid ' + borderColor">
     <div class="standalone-label">
-      Standalone &lt;kc-prompt-input&gt; (try typing <code>/</code> for slash commands):
+      Standalone &lt;kai-prompt-input&gt; (try typing <code>/</code> for slash commands):
     </div>
-    <kc-prompt-input
+    <kai-prompt-input
       placeholder="Standalone prompt input…"
       [slashCommands]="slashCommands"
       [theme]="theme()"
-      (kc-submit)="onStandaloneSubmit($event)"
-    ></kc-prompt-input>
+      (kai-submit)="onStandaloneSubmit($event)"
+    ></kai-prompt-input>
     @if (draftSubmissions().length > 0) {
       <ul class="draft-list">
         @for (d of draftSubmissions(); track d) {

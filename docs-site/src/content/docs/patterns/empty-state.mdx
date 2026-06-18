@@ -7,19 +7,19 @@ import { Aside } from '@astrojs/starlight/components';
 import EmptyStateDemo from '../../../components/EmptyStateDemo.tsx';
 import ChatDemo from '../../../components/ChatDemo.tsx';
 
-<p class="kc-lede">A new user lands on a blank thread — give them somewhere to start. Compose a `<kc-empty>` block (icon, headline, subtext) with `<kc-suggestions>` chips **inside** it, so the greeting and the starter prompts read as one piece. Click a chip below to start the conversation.</p>
+<p class="kc-lede">A new user lands on a blank thread — give them somewhere to start. Compose a `<kai-empty>` block (icon, headline, subtext) with `<kai-suggestions>` chips **inside** it, so the greeting and the starter prompts read as one piece. Click a chip below to start the conversation.</p>
 
 <EmptyStateDemo client:only="solid" />
 
 ## Compose the empty block
 
-`<kc-empty>` is a slotted block: an icon in `slot="media"`, the `empty-title` and `description` attributes, and a **default slot** for actions. Drop `<kc-suggestions>` into that default slot and the chips render as part of the first-run composition — not as a separate bar.
+`<kai-empty>` is a slotted block: an icon in `slot="media"`, the `empty-title` and `description` attributes, and a **default slot** for actions. Drop `<kai-suggestions>` into that default slot and the chips render as part of the first-run composition — not as a separate bar.
 
-When a chip is clicked, `<kc-suggestions>` fires `kc-select` with the chosen value. Swap the empty block for `<kc-chat>` and stream the reply.
+When a chip is clicked, `<kai-suggestions>` fires `kai-select` with the chosen value. Swap the empty block for `<kai-chat>` and stream the reply.
 
 ```html
 <div id="shell" style="height:100%">
-  <kc-empty
+  <kai-empty
     id="greeting"
     empty-title="Hi, I'm your assistant"
     description="Ask me anything — or pick a starter below to begin."
@@ -29,8 +29,8 @@ When a chip is clicked, `<kc-suggestions>` fires `kc-select` with the chosen val
          stroke="currentColor" stroke-width="1.75"><path d="M9.5 3 11 8l5 1.5-5 1.5L9.5 16 8 11 3 9.5 8 8z"/></svg>
 
     <!-- default slot: suggestions live INSIDE the empty block -->
-    <kc-suggestions id="starters"></kc-suggestions>
-  </kc-empty>
+    <kai-suggestions id="starters"></kai-suggestions>
+  </kai-empty>
 </div>
 
 <script type="module">
@@ -44,10 +44,10 @@ When a chip is clicked, `<kc-suggestions>` fires `kc-select` with the chosen val
     'Stream tokens from my own backend',
   ];
 
-  starters.addEventListener('kc-select', (e) => {
+  starters.addEventListener('kai-select', (e) => {
     const prompt = e.detail.value;
     // replace the empty block with a live chat, then stream the reply
-    shell.innerHTML = '<kc-chat id="chat" style="height:100%"></kc-chat>';
+    shell.innerHTML = '<kai-chat id="chat" style="height:100%"></kai-chat>';
     const chat = document.getElementById('chat');
     chat.messages = [{ id: crypto.randomUUID(), role: 'user', content: prompt }];
     // …append an assistant message and patch its content as tokens arrive
@@ -56,12 +56,12 @@ When a chip is clicked, `<kc-suggestions>` fires `kc-select` with the chosen val
 ```
 
 <Aside type="note">
-`<kc-empty>`'s default slot is unstyled light DOM, so anything you place there — suggestion chips, a "New chat" button, a sign-in CTA — keeps your page's own styling.
+`<kai-empty>`'s default slot is unstyled light DOM, so anything you place there — suggestion chips, a "New chat" button, a sign-in CTA — keeps your page's own styling.
 </Aside>
 
-## The simple path: `<kc-chat>`'s built-in suggestions
+## The simple path: `<kai-chat>`'s built-in suggestions
 
-If you don't need a custom greeting, `<kc-chat>` renders starter suggestions on its own when the thread is empty. Set the `suggestions` property and the chips appear inside the chat's own empty state — no extra components.
+If you don't need a custom greeting, `<kai-chat>` renders starter suggestions on its own when the thread is empty. Set the `suggestions` property and the chips appear inside the chat's own empty state — no extra components.
 
 <ChatDemo
   client:only="solid"
@@ -76,10 +76,10 @@ If you don't need a custom greeting, `<kc-chat>` renders starter suggestions on 
   ]}
 />
 
-Pass an empty `messages` array and a `suggestions` property. `<kc-chat>` hides the suggestions as soon as the first message arrives.
+Pass an empty `messages` array and a `suggestions` property. `<kai-chat>` hides the suggestions as soon as the first message arrives.
 
 ```html
-<kc-chat id="chat" chat-title="Assistant" placeholder="Ask me anything…"></kc-chat>
+<kai-chat id="chat" chat-title="Assistant" placeholder="Ask me anything…"></kai-chat>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -92,7 +92,7 @@ Pass an empty `messages` array and a `suggestions` property. `<kc-chat>` hides t
     'Show me an example',
   ];
 
-  chat.addEventListener('kc-submit', async (e) => {
+  chat.addEventListener('kai-submit', async (e) => {
     const prompt = e.detail.value;
     const aId = crypto.randomUUID();
     chat.messages = [
@@ -122,8 +122,8 @@ chat.suggestionMode = 'submit';
 
 // fill mode — prefills the input, user edits then sends
 chat.suggestionMode = 'fill';
-// listen for fill events (kc-submit still fires when they send)
-chat.addEventListener('kc-suggestion-click', (e) => {
+// listen for fill events (kai-submit still fires when they send)
+chat.addEventListener('kai-suggestion-click', (e) => {
   console.log('prefilled:', e.detail.value);
 });
 ```
@@ -134,7 +134,7 @@ Use `'fill'` for guided forms or multi-step prompts where the chip is a starting
 
 ## Next steps
 
-- **[`kc-chat` reference](/chat/components/chat/)** — full prop and event list, including `suggestions`, `suggestionMode`, `placeholder`, and `chatTitle`.
-- **[`kc-empty` reference](/chat/components/empty/)** — props and slots for the empty-state block.
-- **[`kc-suggestions` reference](/chat/components/suggestions/)** — standalone suggestion chips for custom layouts outside `<kc-chat>`.
+- **[`kai-chat` reference](/chat/components/chat/)** — full prop and event list, including `suggestions`, `suggestionMode`, `placeholder`, and `chatTitle`.
+- **[`kai-empty` reference](/chat/components/empty/)** — props and slots for the empty-state block.
+- **[`kai-suggestions` reference](/chat/components/suggestions/)** — standalone suggestion chips for custom layouts outside `<kai-chat>`.
 - **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop that runs once a suggestion is submitted.

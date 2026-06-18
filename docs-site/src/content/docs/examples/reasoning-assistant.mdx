@@ -1,6 +1,6 @@
 ---
 title: Reasoning assistant
-description: A multi-turn engineering assistant that shows its step-by-step reasoning in a collapsible block before every answer — the "thinking" UX, powered by kc-chat.
+description: A multi-turn engineering assistant that shows its step-by-step reasoning in a collapsible block before every answer — the "thinking" UX, powered by kai-chat.
 ---
 
 import ReasoningAssistantDemo from '../../../components/ReasoningAssistantDemo.tsx';
@@ -16,10 +16,10 @@ import ReasoningAssistantDemo from '../../../components/ReasoningAssistantDemo.t
 
 ## How it works
 
-Reasoning lives on the message, not in a separate element. Each `ChatMessage` can carry a `reasoning` object alongside its `content`; `<kc-chat>` renders it as a collapsible block above the answer. The `label` is the trigger text (defaults to `Reasoning`) and `text` is rendered as markdown.
+Reasoning lives on the message, not in a separate element. Each `ChatMessage` can carry a `reasoning` object alongside its `content`; `<kai-chat>` renders it as a collapsible block above the answer. The `label` is the trigger text (defaults to `Reasoning`) and `text` is rendered as markdown.
 
 ```html
-<kc-chat id="chat" chat-title="Senior engineer assistant"></kc-chat>
+<kai-chat id="chat" chat-title="Senior engineer assistant"></kai-chat>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -27,7 +27,7 @@ Reasoning lives on the message, not in a separate element. Each `ChatMessage` ca
   const chat = document.getElementById('chat');
   chat.messages = [];
 
-  chat.addEventListener('kc-submit', async (e) => {
+  chat.addEventListener('kai-submit', async (e) => {
     const prompt = e.detail.value;
     const aId = crypto.randomUUID();
 
@@ -69,6 +69,6 @@ Attaching `reasoning` only after the answer finishes keeps the thinking indicato
 ## Next steps
 
 - **[Agentic assistant](/chat/examples/agentic-assistant/)** — the same reasoning block paired with live tool calls per turn.
-- **[`kc-chat` reference](/chat/components/chat/)** — the full `messages` schema, `loading`, and the `kc-submit` event.
+- **[`kai-chat` reference](/chat/components/chat/)** — the full `messages` schema, `loading`, and the `kai-submit` event.
 - **[Streaming recipe](/chat/guides/recipes/streaming/)** — driving the token loop from a real backend.
 - **[Drop-in chat](/chat/examples/drop-in-chat/)** — the baseline streaming loop this example builds on.

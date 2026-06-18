@@ -3,7 +3,7 @@
  *  How it works: every kit color is a CSS custom property the consumer can
  *  override. The studio writes the active palette as inline `--kc-color-*` /
  *  `--kc-radius` properties on a single canvas wrapper; custom properties
- *  inherit through the Shadow DOM, so every `kc-*` element inside the canvas
+ *  inherit through the Shadow DOM, so every `kai-*` element inside the canvas
  *  reskins at once — the exact mechanism you'd ship in a stylesheet.
  *
  *  Light and dark are edited independently (each canvas host runs at the studio's
@@ -25,7 +25,7 @@ import IconClose from '~icons/lucide/x';
 import { THEME_PRESETS, SHADCN_TO_KC } from './theme-presets';
 import { sampleFor } from '../lib/sample-data';
 
-/** Mount a kc-* element into `container`, seeded from the docs sample-data registry
+/** Mount a kai-* element into `container`, seeded from the docs sample-data registry
  *  (the same verified data the component pages use) so the showroom shows real,
  *  correct components reskinned by the active theme. */
 function mountSample(container: HTMLElement, tag: string, mode: string): HTMLElement {
@@ -46,25 +46,25 @@ function mountSample(container: HTMLElement, tag: string, mode: string): HTMLEle
 /** Showroom items: real kit elements seeded from sample data, grouped by tab. */
 type Slot = { tag: string; label: string; note?: string; h?: string };
 const CARD_SLOTS: Slot[] = [
-  { tag: 'kc-confirm', label: 'Confirm', note: 'Approve / decline — primary + secondary' },
-  { tag: 'kc-choice', label: 'Choice', note: 'Pick one — accent marks the pick' },
-  { tag: 'kc-tasks', label: 'Tasks', note: 'Selectable plan — checkboxes + confirm' },
-  { tag: 'kc-form', label: 'Form', note: 'Inputs, selects, submit' },
-  { tag: 'kc-link-preview', label: 'Link preview', note: 'Surface + muted text' },
+  { tag: 'kai-confirm', label: 'Confirm', note: 'Approve / decline — primary + secondary' },
+  { tag: 'kai-choice', label: 'Choice', note: 'Pick one — accent marks the pick' },
+  { tag: 'kai-tasks', label: 'Tasks', note: 'Selectable plan — checkboxes + confirm' },
+  { tag: 'kai-form', label: 'Form', note: 'Inputs, selects, submit' },
+  { tag: 'kai-link-preview', label: 'Link preview', note: 'Surface + muted text' },
 ];
 const COMPONENT_SLOTS: Slot[] = [
-  { tag: 'kc-model-switcher', label: 'Model switcher' },
-  { tag: 'kc-context', label: 'Context meter' },
-  { tag: 'kc-tool', label: 'Tool call', note: 'Tool hues' },
-  { tag: 'kc-reasoning', label: 'Reasoning' },
-  { tag: 'kc-chain-of-thought', label: 'Chain of thought' },
-  { tag: 'kc-code-block', label: 'Code block', note: 'Code font + accent' },
-  { tag: 'kc-loader', label: 'Loader', note: 'Primary' },
-  { tag: 'kc-feedback-bar', label: 'Feedback bar' },
-  { tag: 'kc-prompt-input', label: 'Composer', note: 'Base font + input' },
-  { tag: 'kc-conversations', label: 'Conversations', h: '15rem' },
-  { tag: 'kc-file-tree', label: 'File tree', h: '15rem' },
-  { tag: 'kc-attachments', label: 'Attachments' },
+  { tag: 'kai-model-switcher', label: 'Model switcher' },
+  { tag: 'kai-context', label: 'Context meter' },
+  { tag: 'kai-tool', label: 'Tool call', note: 'Tool hues' },
+  { tag: 'kai-reasoning', label: 'Reasoning' },
+  { tag: 'kai-chain-of-thought', label: 'Chain of thought' },
+  { tag: 'kai-code-block', label: 'Code block', note: 'Code font + accent' },
+  { tag: 'kai-loader', label: 'Loader', note: 'Primary' },
+  { tag: 'kai-feedback-bar', label: 'Feedback bar' },
+  { tag: 'kai-prompt-input', label: 'Composer', note: 'Base font + input' },
+  { tag: 'kai-conversations', label: 'Conversations', h: '15rem' },
+  { tag: 'kai-file-tree', label: 'File tree', h: '15rem' },
+  { tag: 'kai-attachments', label: 'Attachments' },
 ];
 
 /** Shared modal: centered panel + backdrop, portaled to <body> so the editor's
@@ -311,7 +311,7 @@ const SEED_MESSAGES = [
 ];
 
 const REPLY =
-  'Drop these tokens on `:root` to rebrand every `kc-*` element, or scope them to one wrapper to theme a single section. Same block, light and dark — `:root` for light, `.dark` for the dark overrides.';
+  'Drop these tokens on `:root` to rebrand every `kai-*` element, or scope them to one wrapper to theme a single section. Same block, light and dark — `:root` for light, `.dark` for the dark overrides.';
 
 let uid = 0;
 const nextId = () => `s${++uid}`;
@@ -405,7 +405,7 @@ export default function ThemeStudio() {
   const hslActive = () => !isIdentity(hsl());
 
   // Apply the active palette + radius onto the canvas wrapper. Custom properties
-  // inherit through every kc-* shadow root inside, so the whole canvas reskins.
+  // inherit through every kai-* shadow root inside, so the whole canvas reskins.
   createEffect(() => {
     if (!canvasEl || !Object.keys(active()).length) return;
     const p = effActive();
@@ -420,10 +420,10 @@ export default function ThemeStudio() {
     canvasEl.style.setProperty('--kc-shadow-color', shadowColor());
     ensureFont(fontBase());
     ensureFont(fontCode());
-    // Keep every kc-* in the canvas on the studio's mode (independent of the page
+    // Keep every kai-* in the canvas on the studio's mode (independent of the page
     // theme) — covers the chat plus all showroom elements, however many.
     canvasEl.querySelectorAll('*').forEach((el) => {
-      if (el.tagName.toLowerCase().startsWith('kc-')) el.setAttribute('theme', mode());
+      if (el.tagName.toLowerCase().startsWith('kai-')) el.setAttribute('theme', mode());
     });
   });
 
@@ -581,7 +581,7 @@ export default function ThemeStudio() {
       ];
       chatHost.currentModel = 'sonnet';
       chatHost.context = { usedTokens: 18500, maxTokens: 200000 };
-      chatHost.addEventListener('kc-submit', onSubmit);
+      chatHost.addEventListener('kai-submit', onSubmit);
     }
     // Mount the showroom (cards + components) from verified sample data.
     for (const s of slots) {
@@ -590,7 +590,7 @@ export default function ThemeStudio() {
     setReady(true);
     onCleanup(() => {
       clearTimeout(streamTimer);
-      chatHost?.removeEventListener('kc-submit', onSubmit);
+      chatHost?.removeEventListener('kai-submit', onSubmit);
     });
   });
 
@@ -873,7 +873,7 @@ export default function ThemeStudio() {
               <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>A full chat — messages, model switcher, context meter, suggestions, the composer, and the base font.</p>
               <div class="h-[460px] overflow-hidden rounded-xl border" style={{ 'border-color': 'var(--kc-color-border)' }}>
                 {/* @ts-expect-error custom element */}
-                <kc-chat ref={(el: HTMLElement) => (chatHost = el as never)} style={{ display: 'block', height: '100%' }} />
+                <kai-chat ref={(el: HTMLElement) => (chatHost = el as never)} style={{ display: 'block', height: '100%' }} />
               </div>
             </div>
 
@@ -912,7 +912,7 @@ export default function ThemeStudio() {
 
       <Show when={codeOpen()}>
         <Modal title="Theme CSS" wide onClose={() => setCodeOpen(false)}>
-          <p class="mb-3 text-xs text-ink-2">Drop this on <code class="rounded bg-ink/5 px-1">:root</code> to rebrand every <code class="rounded bg-ink/5 px-1">kc-*</code> element; the <code class="rounded bg-ink/5 px-1">.dark</code> block holds the dark overrides.</p>
+          <p class="mb-3 text-xs text-ink-2">Drop this on <code class="rounded bg-ink/5 px-1">:root</code> to rebrand every <code class="rounded bg-ink/5 px-1">kai-*</code> element; the <code class="rounded bg-ink/5 px-1">.dark</code> block holds the dark overrides.</p>
           <div class="relative">
             <button type="button" onClick={copyCss} class="absolute right-2 top-2 flex items-center gap-1.5 rounded-md border border-line bg-surface px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:bg-ink/5">{copied() ? <IconCheck class="h-3.5 w-3.5" /> : <IconCopy class="h-3.5 w-3.5" />}{copied() ? 'Copied' : 'Copy'}</button>
             <pre class="max-h-[62vh] overflow-auto rounded-lg border border-line bg-surface-2 p-3 pr-20 font-mono text-xs leading-relaxed text-ink"><code>{buildCss(effLight(), effDark(), extras())}</code></pre>

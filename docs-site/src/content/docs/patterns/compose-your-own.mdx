@@ -1,35 +1,35 @@
 ---
 title: Compose your own shell
-description: Step down from <kc-chat> and assemble the sidebar, message thread, and composer yourself for complete layout control.
+description: Step down from <kai-chat> and assemble the sidebar, message thread, and composer yourself for complete layout control.
 ---
 
 import ComposedShell from '../../../components/ComposedShell.tsx';
 
-<p class="kc-lede">When `<kc-chat>` doesn't fit your layout — you need a third panel, a draggable sidebar, or a bespoke header — compose the shell from its leaf components. You own the data flow; the components handle the rendering.</p>
+<p class="kc-lede">When `<kai-chat>` doesn't fit your layout — you need a third panel, a draggable sidebar, or a bespoke header — compose the shell from its leaf components. You own the data flow; the components handle the rendering.</p>
 
 <ComposedShell client:only="solid" />
 
 ## How it works
 
-Three real `kc-*` web components inside a `<kc-resizable>` layout:
+Three real `kai-*` web components inside a `<kai-resizable>` layout:
 
 ```html
-<kc-resizable orientation="horizontal" style="display:block;height:560px">
+<kai-resizable orientation="horizontal" style="display:block;height:560px">
 
   <!-- Sidebar: conversation list -->
-  <kc-resizable-item size="22%" min="160px" max="40%">
-    <kc-conversations id="list" style="display:block;height:100%"></kc-conversations>
-  </kc-resizable-item>
+  <kai-resizable-item size="22%" min="160px" max="40%">
+    <kai-conversations id="list" style="display:block;height:100%"></kai-conversations>
+  </kai-resizable-item>
 
   <!-- Main: scrolling thread + composer -->
-  <kc-resizable-item>
+  <kai-resizable-item>
     <div class="chat-col">
       <div id="thread" class="messages"></div>
-      <kc-prompt-input id="input" placeholder="Message the assistant…"></kc-prompt-input>
+      <kai-prompt-input id="input" placeholder="Message the assistant…"></kai-prompt-input>
     </div>
-  </kc-resizable-item>
+  </kai-resizable-item>
 
-</kc-resizable>
+</kai-resizable>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -43,7 +43,7 @@ Three real `kc-*` web components inside a `<kc-resizable>` layout:
   ];
   list.activeId = 'c1';
 
-  // Build a <kc-message> per turn — you control the thread array.
+  // Build a <kai-message> per turn — you control the thread array.
   const thread = document.getElementById('thread');
   let msgs = [
     { id: 'u1', role: 'user', content: 'Hello!' },
@@ -53,7 +53,7 @@ Three real `kc-*` web components inside a `<kc-resizable>` layout:
   const render = () => {
     thread.innerHTML = '';
     for (const m of msgs) {
-      const el = document.createElement('kc-message');
+      const el = document.createElement('kai-message');
       el.message = m;  // the full ChatMessage object
       thread.append(el);
     }
@@ -61,14 +61,14 @@ Three real `kc-*` web components inside a `<kc-resizable>` layout:
   render();
 
   // Conversation switch
-  list.addEventListener('kc-conversation-select', (e) => {
+  list.addEventListener('kai-conversation-select', (e) => {
     list.activeId = e.detail.id;
     // load the thread for the selected conversation…
   });
 
   // Submit: append user turn, then stream the assistant reply
   const input = document.getElementById('input');
-  input.addEventListener('kc-submit', async (e) => {
+  input.addEventListener('kai-submit', async (e) => {
     const prompt = e.detail.value;
     const aId = crypto.randomUUID();
 
@@ -93,28 +93,28 @@ Three real `kc-*` web components inside a `<kc-resizable>` layout:
 
 **Key points:**
 
-- `kc-resizable` lays out panels horizontally (or vertically with `orientation="vertical"`). Each `kc-resizable-item` takes a `size`, `min`, and `max` — all as HTML attributes (scalar values).
-- `kc-conversations` accepts a `conversations` property (flat array; the element groups by recency automatically). Listen for `kc-conversation-select` to update `activeId`.
-- Create one `<kc-message>` per turn and set its `message` property to the full `ChatMessage` object — `{ id, role, content, actions?, reasoning?, tools?, attachments? }`.
-- `kc-prompt-input` fires `kc-submit` with `{ value, attachments }`. Set `loading` to `true` while streaming; the send button disables automatically.
+- `kai-resizable` lays out panels horizontally (or vertically with `orientation="vertical"`). Each `kai-resizable-item` takes a `size`, `min`, and `max` — all as HTML attributes (scalar values).
+- `kai-conversations` accepts a `conversations` property (flat array; the element groups by recency automatically). Listen for `kai-conversation-select` to update `activeId`.
+- Create one `<kai-message>` per turn and set its `message` property to the full `ChatMessage` object — `{ id, role, content, actions?, reasoning?, tools?, attachments? }`.
+- `kai-prompt-input` fires `kai-submit` with `{ value, attachments }`. Set `loading` to `true` while streaming; the send button disables automatically.
 
 ## Adding a third panel
 
-Insert another `<kc-resizable-item>` for anything — a `<kc-artifact>` preview, a canvas, or a debug inspector:
+Insert another `<kai-resizable-item>` for anything — a `<kai-artifact>` preview, a canvas, or a debug inspector:
 
 ```html
-<kc-resizable-item size="32%" min="240px">
-  <kc-artifact id="preview" style="display:block;height:100%"></kc-artifact>
-</kc-resizable-item>
+<kai-resizable-item size="32%" min="240px">
+  <kai-artifact id="preview" style="display:block;height:100%"></kai-artifact>
+</kai-resizable-item>
 ```
 
 Toggle it with the `hidden` boolean attribute/property; the remaining panels reflow automatically.
 
 ## Next steps
 
-- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the 90% path: one `<kc-chat>` element with no manual wiring.
-- **[Streaming recipe](/chat/guides/recipes/streaming/)** — wire the `kc-submit` loop to a real SSE stream.
-- **[`kc-resizable` reference](/chat/components/resizable/)** — `orientation`, `maximizedIndex`, `kc-change`.
-- **[`kc-conversations` reference](/chat/components/conversations/)** — `groups` vs `conversations`, `activeId`, events.
-- **[`kc-message` reference](/chat/components/message/)** — `message` shape, `actionsReveal`, `proseSize`.
-- **[`kc-prompt-input` reference](/chat/components/prompt-input/)** — `loading`, `stoppable`, `slashCommands`, `kc-toolbar-action`.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the 90% path: one `<kai-chat>` element with no manual wiring.
+- **[Streaming recipe](/chat/guides/recipes/streaming/)** — wire the `kai-submit` loop to a real SSE stream.
+- **[`kai-resizable` reference](/chat/components/resizable/)** — `orientation`, `maximizedIndex`, `kai-change`.
+- **[`kai-conversations` reference](/chat/components/conversations/)** — `groups` vs `conversations`, `activeId`, events.
+- **[`kai-message` reference](/chat/components/message/)** — `message` shape, `actionsReveal`, `proseSize`.
+- **[`kai-prompt-input` reference](/chat/components/prompt-input/)** — `loading`, `stoppable`, `slashCommands`, `kai-toolbar-action`.

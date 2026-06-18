@@ -11,10 +11,10 @@ const TYPES = ['form', 'confirm', 'tasks', 'choice', 'link', 'embed'];
 
 test('built-in tag map covers exactly the 6 card types', () => {
   expect(Object.keys(BUILTIN_CARD_TAGS).sort()).toEqual([...TYPES].sort());
-  expect(BUILTIN_CARD_TAGS.form).toBe('kc-form');
-  expect(BUILTIN_CARD_TAGS['tasks']).toBe('kc-tasks');
-  expect(BUILTIN_CARD_TAGS.choice).toBe('kc-choice');
-  expect(BUILTIN_CARD_TAGS.link).toBe('kc-link-preview');
+  expect(BUILTIN_CARD_TAGS.form).toBe('kai-form');
+  expect(BUILTIN_CARD_TAGS['tasks']).toBe('kai-tasks');
+  expect(BUILTIN_CARD_TAGS.choice).toBe('kai-choice');
+  expect(BUILTIN_CARD_TAGS.link).toBe('kai-link-preview');
 });
 
 test('built-in component map covers exactly the 6 card types', () => {
@@ -26,8 +26,8 @@ test('mergeCardTags overrides + adds without mutating the built-ins', () => {
   const merged = mergeCardTags({ form: 'my-form', poll: 'my-poll' });
   expect(merged.form).toBe('my-form');
   expect(merged.poll).toBe('my-poll');
-  expect(merged.confirm).toBe('kc-confirm');
-  expect(BUILTIN_CARD_TAGS.form).toBe('kc-form'); // built-ins untouched
+  expect(merged.confirm).toBe('kai-confirm');
+  expect(BUILTIN_CARD_TAGS.form).toBe('kai-form'); // built-ins untouched
 });
 
 test('mergeCardComponents merges, undefined override = built-ins only', () => {

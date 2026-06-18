@@ -51,11 +51,11 @@ npm install solid-js
 This is the single most common mistake. Arrays and objects (\`messages\`, \`models\`, \`context\`, \`suggestions\`, \`slashCommands\`, …) MUST be assigned as JavaScript properties on the element. They CANNOT be passed as HTML attributes — an HTML attribute is always a string and will be ignored or mis-parsed.
 
 \`\`\`js
-const chat = document.querySelector('kc-chat');
+const chat = document.querySelector('kai-chat');
 chat.messages = [{ id: '1', role: 'assistant', content: 'Hi!' }]; // ✅ property
 \`\`\`
 \`\`\`html
-<kc-chat messages="[...]"></kc-chat>  <!-- ❌ never works -->
+<kai-chat messages="[...]"></kai-chat>  <!-- ❌ never works -->
 \`\`\`
 
 Only scalar values (string/number/boolean) work as attributes (e.g. \`placeholder\`, \`loading\`, \`theme\`).
@@ -65,22 +65,22 @@ Only scalar values (string/number/boolean) work as attributes (e.g. \`placeholde
 **Layer 1 — batteries-included web components** (\`import '@kitn.ai/ui/elements'\`):
 Drop an element into any framework (React, Vue, plain HTML). Data in via JS properties; interactions out via non-bubbling CustomEvents.
 
-- \`<kc-chat>\` — full chat UI (message list + prompt input). The primary starting point.
-- \`<kc-conversations>\` — sidebar conversation browser with group support.
-- \`<kc-prompt-input>\` — standalone composer with send button.
+- \`<kai-chat>\` — full chat UI (message list + prompt input). The primary starting point.
+- \`<kai-conversations>\` — sidebar conversation browser with group support.
+- \`<kai-prompt-input>\` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (\`import { … } from '@kitn.ai/ui'\`):
-All ${count} elements are also exported individually. Use them for custom layouts or features \`<kc-chat>\` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All ${count} elements are also exported individually. Use them for custom layouts or features \`<kai-chat>\` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
 1. **Array/object data = JS properties** (see above). Scalars may be attributes.
 2. **Events are non-bubbling \`CustomEvent\`s** — listen directly on the element:
-   \`chat.addEventListener('kc-submit', (e) => console.log(e.detail.value))\`
+   \`chat.addEventListener('kai-submit', (e) => console.log(e.detail.value))\`
 3. **\`theme\` attribute** (\`'light' | 'dark' | 'auto'\`) works on every element. Default \`auto\` follows \`prefers-color-scheme\`.
 4. **Theming via CSS custom properties** — override \`--kc-color-*\` tokens on \`:root\`; they pierce Shadow DOM.
 
-## ChatMessage schema (required for \`<kc-chat>\`)
+## ChatMessage schema (required for \`<kai-chat>\`)
 
 \`\`\`ts
 interface ChatMessage {
@@ -99,9 +99,9 @@ interface ChatMessage {
 **Plain HTML / CDN**
 \`\`\`html
 <script type="module" src="https://unpkg.com/@kitn.ai/ui/elements"></script>
-<kc-chat style="display:block;height:100vh"></kc-chat>
+<kai-chat style="display:block;height:100vh"></kai-chat>
 <script type="module">
-  const chat = document.querySelector('kc-chat');
+  const chat = document.querySelector('kai-chat');
   chat.messages = [];
 </script>
 \`\`\`
@@ -114,7 +114,7 @@ import { Chat } from '@kitn.ai/ui/react';
 
 **Vue** — use the element directly; pass arrays via \`.prop\`:
 \`\`\`vue
-<kc-chat :messages.prop="messages" @kc-submit="send" />
+<kai-chat :messages.prop="messages" @kai-submit="send" />
 \`\`\`
 
 ## Theming
@@ -193,16 +193,16 @@ npm install @kitn.ai/ui
 \`\`\`
 
 ### 2 — Pick your layer
-Drop-in: use \`<kc-chat>\` for a full chat UI in one tag (\`import '@kitn.ai/ui/elements'\`).
-Composable: combine \`<kc-message>\`, \`<kc-prompt-input>\`, \`<kc-reasoning>\`, … in your own markup.
+Drop-in: use \`<kai-chat>\` for a full chat UI in one tag (\`import '@kitn.ai/ui/elements'\`).
+Composable: combine \`<kai-message>\`, \`<kai-prompt-input>\`, \`<kai-reasoning>\`, … in your own markup.
 
 ### 3 — Handle \`submit\` and stream
 \`\`\`js
 import '@kitn.ai/ui/elements';
-const chat = document.querySelector('kc-chat');
+const chat = document.querySelector('kai-chat');
 chat.messages = [];
 
-chat.addEventListener('kc-submit', async (e) => {
+chat.addEventListener('kai-submit', async (e) => {
   const userText = e.detail.value;
 
   // Append the user message (new array — see streaming note)
@@ -228,7 +228,7 @@ chat.addEventListener('kc-submit', async (e) => {
 - Tool calls: add \`tools: [{ type: 'search', state: 'output-available', input: {…}, output: {…} }]\`.
 - Model switcher: \`chat.models = [{ id: 'gpt-4o', name: 'GPT-4o' }]; chat.currentModel = 'gpt-4o';\` — listen for \`modelchange\`.
 - Token meter: \`chat.context = { usedTokens: 1200, maxTokens: 128000 };\`.
-- History sidebar: add \`<kc-conversations>\`; listen for \`select\` and \`newchat\`.
+- History sidebar: add \`<kai-conversations>\`; listen for \`select\` and \`newchat\`.
 
 ### 5 — Theme
 Override \`--kc-color-*\` tokens on \`:root\` (they pierce Shadow DOM).`;
@@ -254,7 +254,7 @@ The same rule applies to every array/object property (\`models\`, \`context\`, \
 function fromElements(elements) {
   return elements.map((el) => ({
     tag: el.tag,
-    reactName: el.displayName ?? tagToReact(el.tag).replace(/^Kc/, ''),
+    reactName: el.displayName ?? tagToReact(el.tag).replace(/^Kai/, ''),
     props: el.props.map((p) => ({
       name: p.name,
       type: p.type,
@@ -277,7 +277,7 @@ function fromManifest(cem) {
     );
     return {
       tag: d.tagName,
-      reactName: tagToReact(d.tagName).replace(/^Kc/, ''),
+      reactName: tagToReact(d.tagName).replace(/^Kai/, ''),
       props: (d.members || [])
         .filter((m) => m.kind === 'field')
         .map((m) => ({

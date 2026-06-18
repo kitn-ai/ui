@@ -44,7 +44,7 @@ export {
 } from './primitives/card-registry';
 export type { CardComponent, CardComponentMap, CardTagMap } from './primitives/card-registry';
 
-// Card: kc-card (base shell) + kc-form (JSON-Schema form renderer)
+// Card: kai-card (base shell) + kai-form (JSON-Schema form renderer)
 export { Card } from './components/card';
 export type { CardProps } from './components/card';
 export { Form, validateForm, buildResult, widgetFor, orderedKeys, coerceValue } from './components/form';
@@ -57,7 +57,7 @@ export type {
   WidgetKind,
 } from './components/form';
 
-// Card: kc-confirm (approval) + kc-tasks (selectable plan)
+// Card: kai-confirm (approval) + kai-tasks (selectable plan)
 export {
   ConfirmCard,
   CONFIRM_CARD_TYPE,
@@ -95,7 +95,7 @@ export type {
   SelectAllState,
 } from './components/tasks-card';
 
-// Card: kc-choice (single-select option card)
+// Card: kai-choice (single-select option card)
 export {
   ChoiceCard,
   CHOICE_CARD_TYPE,
@@ -114,7 +114,7 @@ export type {
   ChoiceCardEnvelope,
 } from './components/choice-card';
 
-// Card: kc-link-preview (OG/link preview) + kc-embed (lazy media embed)
+// Card: kai-link-preview (OG/link preview) + kai-embed (lazy media embed)
 export { LinkPreview } from './components/link-preview';
 export type { LinkPreviewProps } from './components/link-preview';
 export { Embed } from './components/embed';

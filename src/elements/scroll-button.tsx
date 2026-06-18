@@ -16,12 +16,12 @@ interface Props extends Record<string, unknown> {
   size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
 }
 
-/** Events fired by `<kc-scroll-button>`. */
+/** Events fired by `<kai-scroll-button>`. */
 interface Events {
   /** Emitted when the user clicks the button and `scrollToBottom()` is
    *  called. Carries no detail — consumers use it to know a manual scroll
    *  occurred. */
-  'kc-scroll': void;
+  'kai-scroll': void;
 }
 
 const SCROLL_THRESHOLD = 50;
@@ -42,7 +42,7 @@ function findScrollableAncestor(startEl: HTMLElement): HTMLElement | null {
 }
 
 /**
- * `<kc-scroll-button>` — a floating "scroll to bottom" button for any
+ * `<kai-scroll-button>` — a floating "scroll to bottom" button for any
  * scrollable container. It is visible when the container is scrolled up
  * (hidden when at the bottom) and scrolls the container to the bottom on
  * click.
@@ -51,15 +51,15 @@ function findScrollableAncestor(startEl: HTMLElement): HTMLElement | null {
  * container by its DOM `id`:
  * ```html
  * <div id="my-chat" style="overflow:auto; height:400px">...</div>
- * <kc-scroll-button for="my-chat"></kc-scroll-button>
+ * <kai-scroll-button for="my-chat"></kai-scroll-button>
  * ```
  * When `for` is omitted the element walks upward from its host to the nearest
  * scrollable ancestor — useful when it is slotted or nested inside the
  * container.
  *
- * Emits `kc-scroll` (no detail) each time the button is clicked.
+ * Emits `kai-scroll` (no detail) each time the button is clicked.
  */
-defineWebComponent<Props, Events>('kc-scroll-button', {
+defineWebComponent<Props, Events>('kai-scroll-button', {
   for: undefined,
   variant: 'outline',
   size: 'icon',
@@ -117,7 +117,7 @@ defineWebComponent<Props, Events>('kc-scroll-button', {
       )}
       onClick={() => {
         scrollToBottom();
-        dispatch('kc-scroll');
+        dispatch('kai-scroll');
       }}
     >
       <ChevronDown class="h-5 w-5" />

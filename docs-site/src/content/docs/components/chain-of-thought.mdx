@@ -11,18 +11,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-chain-of-thought</p>
+<p class="kc-tag-sub">kai-chain-of-thought</p>
 
 <p class="kc-lede">A vertically connected list of reasoning steps — each step shows its label at all times and reveals optional detail on expand.</p>
 
-<Facts items={['Shadow DOM', 'Property-driven API', 'Declarative kc-step children', 'Expandable detail per step', 'Prop + child steps merge']} />
+<Facts items={['Shadow DOM', 'Property-driven API', 'Declarative kai-step children', 'Expandable detail per step', 'Prop + child steps merge']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-chain-of-thought" />
+<Playground client:only="solid" tag="kai-chain-of-thought" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-chain-of-thought>` above or below an assistant message to show the model's step-by-step plan or reasoning trace. It is `display: block` and sizes to content height — no fixed height needed. In SolidJS, compose `ChainOfThought`, `ChainOfThoughtStep`, `ChainOfThoughtTrigger`, and `ChainOfThoughtContent` directly for finer animation control.
+Place `<kai-chain-of-thought>` above or below an assistant message to show the model's step-by-step plan or reasoning trace. It is `display: block` and sizes to content height — no fixed height needed. In SolidJS, compose `ChainOfThought`, `ChainOfThoughtStep`, `ChainOfThoughtTrigger`, and `ChainOfThoughtContent` directly for finer animation control.
 </Aside>
 
 ## Usage
@@ -30,7 +30,7 @@ Place `<kc-chain-of-thought>` above or below an assistant message to show the mo
 Set `steps` in JavaScript — it's an array, so it can't be an HTML attribute:
 
 ```html
-<kc-chain-of-thought id="cot"></kc-chain-of-thought>
+<kai-chain-of-thought id="cot"></kai-chain-of-thought>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -43,40 +43,40 @@ Set `steps` in JavaScript — it's an array, so it can't be an HTML attribute:
 ```
 
 - Each item needs a `label` string; add `content` to make the step expandable.
-- **Declarative alternative** — author steps as `<kc-step>` children; `label` becomes the heading, `textContent` becomes the collapsible detail. Mix both: property items render first, then `<kc-step>` children append after.
+- **Declarative alternative** — author steps as `<kai-step>` children; `label` becomes the heading, `textContent` becomes the collapsible detail. Mix both: property items render first, then `<kai-step>` children append after.
 
 ```html
-<kc-chain-of-thought>
-  <kc-step label="Understand the request">The user wants composable web components.</kc-step>
-  <kc-step label="Design the API">Route 1: variant + flags; rich data via properties.</kc-step>
-  <kc-step label="Build &amp; verify"></kc-step>
-</kc-chain-of-thought>
+<kai-chain-of-thought>
+  <kai-step label="Understand the request">The user wants composable web components.</kai-step>
+  <kai-step label="Design the API">Route 1: variant + flags; rich data via properties.</kai-step>
+  <kai-step label="Build &amp; verify"></kai-step>
+</kai-chain-of-thought>
 ```
 
 ## Examples
 
 ### Default
 
-<Example client:visible tag="kc-chain-of-thought" />
+<Example client:visible tag="kai-chain-of-thought" />
 
 ### Agent Plan
 
 A five-step trace covering a realistic code-review workflow.
 
-<Example client:visible tag="kc-chain-of-thought" data="agentPlan" />
+<Example client:visible tag="kai-chain-of-thought" data="agentPlan" />
 
 ### Two-Step Query Trace
 
 Every step has expandable detail — no label-only summary.
 
-<Example client:visible tag="kc-chain-of-thought" data="short" />
+<Example client:visible tag="kai-chain-of-thought" data="short" />
 
 ## Props
 
-<PropTable tag="kc-chain-of-thought" />
+<PropTable tag="kai-chain-of-thought" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-chain-of-thought" />
+<ComposedFrom tag="kai-chain-of-thought" />
 
 <NeedAHand />

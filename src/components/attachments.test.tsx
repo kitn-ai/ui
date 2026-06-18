@@ -1,7 +1,7 @@
 /**
  * Unit tests for the Attachments SolidJS primitives.
  *
- * Covers two bugs found while dogfooding `kc-attachments` in the docs site:
+ * Covers two bugs found while dogfooding `kai-attachments` in the docs site:
  *   1. The per-item layout was not reactive to a post-render variant change —
  *      `Attachment` destructured `variant` from context, capturing it once.
  *   2. `AttachmentHoverCardTrigger` could not carry layout, so the hover trigger

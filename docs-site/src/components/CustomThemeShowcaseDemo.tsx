@@ -1,4 +1,4 @@
-/** Custom-theme SHOWCASE — the same <kc-chat> as every other demo, reskinned to
+/** Custom-theme SHOWCASE — the same <kai-chat> as every other demo, reskinned to
  *  a bold "Aurora" identity (electric magenta accent, cyan focus glow, deep-noir
  *  surfaces, sharp corners). It exists to prove how far the inherited --kc-*
  *  custom properties can push the look WITHOUT piercing the Shadow DOM.
@@ -92,13 +92,13 @@ const SEED_MESSAGES: ChatMessage[] = [
   {
     id: 'u1',
     role: 'user',
-    content: "This is the exact same `<kc-chat>` from the other examples — how is it this different?",
+    content: "This is the exact same `<kai-chat>` from the other examples — how is it this different?",
   },
   {
     id: 'a1',
     role: 'assistant',
     content:
-      "Pure tokens. Nothing here pierces the Shadow DOM — every surface, the magenta accent, the cyan focus ring, the sharp corners and the `inline code` tint all come from a `--kc-*` override map set on the host.\n\n```css\nkc-chat {\n  --kc-color-primary: hsl(322 90% 58%);   /* magenta accent  */\n  --kc-color-ring:    hsl(186 95% 56%);   /* cyan focus glow */\n  --kc-radius:        0.25rem;            /* sharp corners   */\n}\n```\n\nThe aurora glow and the framed shell around me are **host-side chrome** — plain CSS on a wrapper, sitting entirely outside the element. Flip the site's theme and a second, matched token map takes over so it stays intentional in both modes.",
+      "Pure tokens. Nothing here pierces the Shadow DOM — every surface, the magenta accent, the cyan focus ring, the sharp corners and the `inline code` tint all come from a `--kc-*` override map set on the host.\n\n```css\nkai-chat {\n  --kc-color-primary: hsl(322 90% 58%);   /* magenta accent  */\n  --kc-color-ring:    hsl(186 95% 56%);   /* cyan focus glow */\n  --kc-radius:        0.25rem;            /* sharp corners   */\n}\n```\n\nThe aurora glow and the framed shell around me are **host-side chrome** — plain CSS on a wrapper, sitting entirely outside the element. Flip the site's theme and a second, matched token map takes over so it stays intentional in both modes.",
     actions: ['copy', 'like', 'dislike'],
   },
 ];
@@ -162,7 +162,7 @@ export default function CustomThemeShowcaseDemo() {
     const m = theme();
     setMode(m);
     applyTheme(m);
-    host.addEventListener('kc-submit', onSubmit);
+    host.addEventListener('kai-submit', onSubmit);
 
     const obs = new MutationObserver(() => {
       const next = theme();
@@ -172,7 +172,7 @@ export default function CustomThemeShowcaseDemo() {
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     onCleanup(() => {
       clearTimeout(timer);
-      host?.removeEventListener('kc-submit', onSubmit);
+      host?.removeEventListener('kai-submit', onSubmit);
       obs.disconnect();
     });
   });
@@ -239,7 +239,7 @@ export default function CustomThemeShowcaseDemo() {
         }}
       >
         {/* @ts-expect-error custom element */}
-        <kc-chat ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', height: '100%' }} />
+        <kai-chat ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', height: '100%' }} />
       </div>
     </div>
   );

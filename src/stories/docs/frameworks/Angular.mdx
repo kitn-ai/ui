@@ -10,8 +10,8 @@ custom tags with `CUSTOM_ELEMENTS_SCHEMA`, and handle events with `(event)="hand
 
 There are **two ways to build with the kit**, and you can mix them:
 
-1. **`<kc-chat>`** — the batteries-included shell: a whole chat experience in one tag. Fastest start.
-2. **Compose the individual elements** (`<kc-conversations>`, `<kc-markdown>`, `<kc-artifact>`, …)
+1. **`<kai-chat>`** — the batteries-included shell: a whole chat experience in one tag. Fastest start.
+2. **Compose the individual elements** (`<kai-conversations>`, `<kai-markdown>`, `<kai-artifact>`, …)
    into your own layout when you want full control.
 
 Both are shown below.
@@ -24,7 +24,7 @@ npm i @kitn.ai/ui
 
 Register the custom elements once as a static side-effect import in `main.ts`, **before**
 `bootstrapApplication(...)`. Then add `CUSTOM_ELEMENTS_SCHEMA` to each standalone component that
-uses `<kc-*>` tags:
+uses `<kai-*>` tags:
 
 ```ts
 // main.ts — import BEFORE bootstrapApplication so elements are defined first
@@ -44,21 +44,21 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   selector: 'app-root',
   standalone: true,
   templateUrl: './app.component.html',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA], // required: allows <kc-*> tags in the template
+  schemas: [CUSTOM_ELEMENTS_SCHEMA], // required: allows <kai-*> tags in the template
 })
 export class AppComponent { /* … */ }
 ```
 
-- **`@kitn.ai/ui/elements`** — the side-effect import that registers every `<kc-*>` element
+- **`@kitn.ai/ui/elements`** — the side-effect import that registers every `<kai-*>` element
   globally. Import it once, in `main.ts`.
 - **`CUSTOM_ELEMENTS_SCHEMA`** — tells the Angular compiler to accept unknown element names (the
-  `<kc-*>` tags). Add it to every standalone component whose template uses them.
+  `<kai-*>` tags). Add it to every standalone component whose template uses them.
 - No CSS to import: each element is styled inside its own Shadow DOM. Only pull in
   `@kitn.ai/ui/theme.css` if you want to override design tokens (see **Theming**).
 
 ## Quick start — the all-in-one shell
 
-`<kc-chat>` is **transport-agnostic**: give it a `messages` array, handle the `submit` event, and
+`<kai-chat>` is **transport-agnostic**: give it a `messages` array, handle the `submit` event, and
 stream your model's reply back into state. You own the request; the component owns the UI.
 
 ```ts
@@ -104,19 +104,19 @@ export class AppComponent {
 <!-- The elements are display:block and fill their container — lay them out with flex
      and let the element grow with flex:1 rather than hard-coding a height. -->
 <div style="display: flex; flex-direction: column; height: 100dvh">
-  <kc-chat
+  <kai-chat
     [messages]="messages"
-    (kc-submit)="onSubmit($event)"
+    (kai-submit)="onSubmit($event)"
     style="flex: 1; min-height: 0"
-  ></kc-chat>
+  ></kai-chat>
 </div>
 ```
 
 ## Go further — compose the pieces
 
-`<kc-chat>` is one option, not the only one. You can assemble your own layout from individual
-elements. Here is a multi-conversation shell — a `<kc-conversations>` sidebar next to the
-`<kc-chat>` thread:
+`<kai-chat>` is one option, not the only one. You can assemble your own layout from individual
+elements. Here is a multi-conversation shell — a `<kai-conversations>` sidebar next to the
+`<kai-chat>` thread:
 
 ```ts
 // workspace.component.ts
@@ -154,47 +154,47 @@ export class WorkspaceComponent {
 <!-- Lay panels out with flex: the sidebar is fixed-width, the thread takes the rest
      with flex:1. The elements fill whatever box you give them. -->
 <div style="display: flex; height: 100dvh">
-  <kc-conversations
+  <kai-conversations
     [conversations]="conversations"
     [activeId]="activeId"
-    (kc-conversation-select)="onConversationSelect($event)"
-    (kc-new-chat)="onNewChat()"
+    (kai-conversation-select)="onConversationSelect($event)"
+    (kai-new-chat)="onNewChat()"
     style="width: 300px; flex-shrink: 0"
-  ></kc-conversations>
+  ></kai-conversations>
 
-  <kc-chat
+  <kai-chat
     [messages]="messages"
-    (kc-submit)="onSubmit($event)"
+    (kai-submit)="onSubmit($event)"
     style="flex: 1; min-width: 0"
-  ></kc-chat>
+  ></kai-chat>
 </div>
 ```
 
 ### Make the panels resizable
 
-Want a draggable divider between the sidebar and the thread? Wrap the panels in `<kc-resizable>`
-with one `<kc-resizable-item>` each — the handles are inserted for you (up to 3 panels). Each item
+Want a draggable divider between the sidebar and the thread? Wrap the panels in `<kai-resizable>`
+with one `<kai-resizable-item>` each — the handles are inserted for you (up to 3 panels). Each item
 takes a `size` (px or `%`) plus optional `min`/`max`; listen for `(change)` (`$event.detail.sizes`)
 to persist the layout.
 
 ```html
 <div style="display: flex; flex-direction: column; height: 100dvh">
-  <kc-resizable
+  <kai-resizable
     orientation="horizontal"
-    (kc-change)="onResize($event)"
+    (kai-change)="onResize($event)"
     style="flex: 1; min-height: 0"
   >
-    <kc-resizable-item size="25%" min="200px">
-      <kc-conversations
+    <kai-resizable-item size="25%" min="200px">
+      <kai-conversations
         [conversations]="conversations"
         [activeId]="activeId"
-        (kc-conversation-select)="onConversationSelect($event)"
-      ></kc-conversations>
-    </kc-resizable-item>
-    <kc-resizable-item>
-      <kc-chat [messages]="messages" (kc-submit)="onSubmit($event)"></kc-chat>
-    </kc-resizable-item>
-  </kc-resizable>
+        (kai-conversation-select)="onConversationSelect($event)"
+      ></kai-conversations>
+    </kai-resizable-item>
+    <kai-resizable-item>
+      <kai-chat [messages]="messages" (kai-submit)="onSubmit($event)"></kai-chat>
+    </kai-resizable-item>
+  </kai-resizable>
 </div>
 ```
 
@@ -206,8 +206,8 @@ onResize(e: Event) {
 }
 ```
 
-You can also drop **standalone display elements** anywhere in your own UI — `<kc-markdown>`,
-`<kc-code-block>`, `<kc-artifact>`, `<kc-reasoning>`, `<kc-tool>` — to render rich AI content
+You can also drop **standalone display elements** anywhere in your own UI — `<kai-markdown>`,
+`<kai-code-block>`, `<kai-artifact>`, `<kai-reasoning>`, `<kai-tool>` — to render rich AI content
 without adopting the whole chat. Each fills its container and is controlled via `[prop]` bindings
 and `(event)` listeners.
 
@@ -229,17 +229,17 @@ read the payload from `$event.detail`:
 
 | Element | Property binding | Event | `$event.detail` |
 |---|---|---|---|
-| `kc-chat` | `[messages]="messages"` | `(submit)` | `{ value: string }` |
-| `kc-conversations` | `[conversations]="…"` | `(conversationselect)` | `{ id: string }` |
-| `kc-conversations` | `[groups]="…"` | `(newchat)` | — |
-| `kc-conversations` | — | `(togglesidebar)` | — |
-| `kc-resizable` | `orientation="horizontal"` | `(change)` | `{ sizes: string[] }` |
-| `kc-resizable-item` | `size="25%"` `min="200px"` `max="…"` | — | — |
+| `kai-chat` | `[messages]="messages"` | `(submit)` | `{ value: string }` |
+| `kai-conversations` | `[conversations]="…"` | `(conversationselect)` | `{ id: string }` |
+| `kai-conversations` | `[groups]="…"` | `(newchat)` | — |
+| `kai-conversations` | — | `(togglesidebar)` | — |
+| `kai-resizable` | `orientation="horizontal"` | `(change)` | `{ sizes: string[] }` |
+| `kai-resizable-item` | `size="25%"` `min="200px"` `max="…"` | — | — |
 
 > **Scalar attributes** like `orientation="horizontal"` or `theme="dark"` can be plain HTML
 > attributes (no brackets). Use `[prop]="…"` only when passing non-string values (arrays, objects,
 > booleans) or Angular expressions.
 
 > **`CUSTOM_ELEMENTS_SCHEMA` is required** in every standalone component (or NgModule) whose
-> template contains `<kc-*>` tags. Without it, the Angular compiler rejects unknown element names at
+> template contains `<kai-*>` tags. Without it, the Angular compiler rejects unknown element names at
 > build time.

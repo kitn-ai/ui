@@ -1,6 +1,6 @@
 /**
- * Unit tests for the declarative `<kc-model>` light-DOM API of
- * `<kc-model-switcher>`.
+ * Unit tests for the declarative `<kai-model>` light-DOM API of
+ * `<kai-model-switcher>`.
  *
  * Strategy: the `defineWebComponent` call registers a real Shadow-DOM custom
  * element which requires a full browser environment (Constructable Stylesheets,
@@ -21,7 +21,7 @@ import type { ModelOption } from '../types';
 
 describe('parseKcModelElement', () => {
   function makeNode(textContent: string, id?: string, provider?: string): Element {
-    const el = document.createElement('kc-model');
+    const el = document.createElement('kai-model');
     el.textContent = textContent;
     if (id !== undefined) el.setAttribute('id', id);
     if (provider !== undefined) el.setAttribute('provider', provider);
@@ -64,7 +64,7 @@ describe('parseKcModelElement', () => {
   });
 
   it('maps the description and group attributes', () => {
-    const el = document.createElement('kc-model');
+    const el = document.createElement('kai-model');
     el.textContent = 'GPT-4o';
     el.setAttribute('id', 'gpt-4o');
     el.setAttribute('description', 'Flagship model');
@@ -81,7 +81,7 @@ describe('parseKcModelElement', () => {
 
 describe('prop + declarative merge', () => {
   function makeNode(textContent: string, id: string, provider?: string): Element {
-    const el = document.createElement('kc-model');
+    const el = document.createElement('kai-model');
     el.textContent = textContent;
     el.setAttribute('id', id);
     if (provider !== undefined) el.setAttribute('provider', provider);
@@ -120,8 +120,8 @@ describe('prop + declarative merge', () => {
   });
 
   it('parseKcModelElement produces items with the correct event payload key (id → modelId)', () => {
-    // Confirm the parsed `id` field is what gets dispatched as `modelId` in kc-model-change.
-    // The element fires: dispatch('kc-model-change', { modelId }) where modelId = item.id.
+    // Confirm the parsed `id` field is what gets dispatched as `modelId` in kai-model-change.
+    // The element fires: dispatch('kai-model-change', { modelId }) where modelId = item.id.
     const node = makeNode('GPT-4o', 'gpt-4o', 'OpenAI');
     const parsed = parseKcModelElement(node);
     // The model-switcher component passes item.id as the modelId in the event.

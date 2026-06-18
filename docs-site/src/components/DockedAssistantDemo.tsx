@@ -1,7 +1,7 @@
 /** A placeholder "host site" (header · hero · scrolling content grid) with a
  *  support assistant DOCKED as a persistent full-height column on the right —
  *  always open, no FAB. The host's own light/dark toggle re-themes the docked
- *  <kc-chat>. The chat streams a canned reply on kc-submit (see ChatDemo for the
+ *  <kai-chat>. The chat streams a canned reply on kai-submit (see ChatDemo for the
  *  same scripted-reply approach). */
 import { createSignal, onMount, onCleanup, For } from 'solid-js';
 import { loadKit } from './example/kit';
@@ -58,9 +58,9 @@ export default function DockedAssistantDemo(props: Props) {
       if (props.chatTitle) (host as any).chatTitle = props.chatTitle;
       (host as any).proseSize = 'sm';
       host.setAttribute('theme', dark() ? 'dark' : 'light');
-      host.addEventListener('kc-submit', onSubmit);
+      host.addEventListener('kai-submit', onSubmit);
     }
-    onCleanup(() => { clearTimeout(timer); host?.removeEventListener('kc-submit', onSubmit); });
+    onCleanup(() => { clearTimeout(timer); host?.removeEventListener('kai-submit', onSubmit); });
   });
 
   // re-theme the docked chat when the host site toggles
@@ -115,7 +115,7 @@ export default function DockedAssistantDemo(props: Props) {
       {/* docked chat — a fixed-width, full-height column on the right */}
       <div style={{ width: '360px', 'flex-shrink': 0, height: '100%', 'border-left': `1px solid ${line()}` }}>
         {/* @ts-expect-error custom element */}
-        <kc-chat ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', height: '100%' }} />
+        <kai-chat ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', height: '100%' }} />
       </div>
     </div>
   );

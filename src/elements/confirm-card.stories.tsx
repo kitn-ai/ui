@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-confirm': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-confirm': JSX.HTMLAttributes<HTMLElement> & {
         heading?: string;
         'card-id'?: string;
         ref?: (el: HTMLElement) => void;
@@ -24,14 +24,14 @@ function Frame(props: { children: JSX.Element }) {
   return <div style={{ 'max-width': '460px' }}>{props.children}</div>;
 }
 
-/** Mounts a <kc-confirm>, sets `.data`, logs the emitted CardEvent under the render. */
+/** Mounts a <kai-confirm>, sets `.data`, logs the emitted CardEvent under the render. */
 function ConfirmDemo(props: { def: ConfirmCardData; cardId: string; heading?: string }) {
   const [log, setLog] = createSignal<CardEvent[]>([]);
   let el: ConfirmEl | undefined;
   onMount(() => {
     if (!el) return;
     el.data = props.def;
-    el.addEventListener('kc-card', (e) => {
+    el.addEventListener('kai-card', (e) => {
       const detail = (e as CustomEvent<CardEvent>).detail;
       setLog((prev) => [...prev, detail]);
     });
@@ -39,7 +39,7 @@ function ConfirmDemo(props: { def: ConfirmCardData; cardId: string; heading?: st
   return (
     <Frame>
       <div style={{ display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
-        <kc-confirm ref={(e) => (el = e as ConfirmEl)} card-id={props.cardId} heading={props.heading} />
+        <kai-confirm ref={(e) => (el = e as ConfirmEl)} card-id={props.cardId} heading={props.heading} />
         <pre
           style={{
             margin: 0,
@@ -104,16 +104,16 @@ const HEADING_MAP: Record<string, string | undefined> = {
 
 const HTML_SNIPPET = (def: ConfirmCardData, cardId: string) => {
   const heading = HEADING_MAP[cardId];
-  return `<kc-confirm${heading ? ` heading="${heading}"` : ''}></kc-confirm>
+  return `<kai-confirm${heading ? ` heading="${heading}"` : ''}></kai-confirm>
 <script type="module">
   import '@kitn.ai/ui/elements'; // registers the custom elements
 
-  const el = document.querySelector('kc-confirm');
+  const el = document.querySelector('kai-confirm');
   // \`data\` is the CardEnvelope.data (set as a property).
   el.data = ${JSON.stringify(def, null, 2)};
 
-  // Cards bubble ONE \`kc-card\` CustomEvent carrying a typed CardEvent.
-  el.addEventListener('kc-card', (e) => {
+  // Cards bubble ONE \`kai-card\` CustomEvent carrying a typed CardEvent.
+  el.addEventListener('kai-card', (e) => {
     const ev = e.detail; // { kind:'action', cardId, action, payload? } | { kind:'dismiss', ... } | ...
     if (ev.kind === 'action') console.log('chose', ev.action);
   });
@@ -121,16 +121,16 @@ const HTML_SNIPPET = (def: ConfirmCardData, cardId: string) => {
 };
 
 const meta = {
-  title: 'Generative UI/Cards/kc-confirm',
+  title: 'Generative UI/Cards/kai-confirm',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-confirm'),
+  argTypes: argTypesFor('kai-confirm'),
   parameters: {
     layout: 'padded',
     docs: {
-      description: specDescription('kc-confirm', [
-        "`<kc-confirm>` is a **named-intent approval** card (set via the `data` **property**): a title + body + a small set of action buttons. Activating an action emits the Card contract's **`action`** verb up a bubbling **`kc-card`** CustomEvent of `{ kind: 'action', cardId, action, payload? }`, then **resolves** the card (other actions disabled, the chosen one marked) so the same approval can't double-fire.",
+      description: specDescription('kai-confirm', [
+        "`<kai-confirm>` is a **named-intent approval** card (set via the `data` **property**): a title + body + a small set of action buttons. Activating an action emits the Card contract's **`action`** verb up a bubbling **`kai-card`** CustomEvent of `{ kind: 'action', cardId, action, payload? }`, then **resolves** the card (other actions disabled, the chosen one marked) so the same approval can't double-fire.",
         '**Action styles:** `primary` (filled accent), `default` (outline), `destructive` (red/danger). A `tone:\'danger\'` and any destructive action add a warning icon + danger accent — never color alone. At most one action can be `default:true` (the keyboard default; gets focus only when `autofocus` is set, which is **off** by default to avoid focus-stealing mid-stream).',
-        '**Events** (all frozen Card-contract verbs): `ready` on mount, `action` on choice, `dismiss` for the optional close affordance (`dismissible:true`), `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**. The same shapes flow over the remote iframe transport unchanged.',
+        '**Events** (all frozen Card-contract verbs): `ready` on mount, `action` on choice, `dismiss` for the optional close affordance (`dismissible:true`), `error` for a malformed definition (renders the inline `kai-card` error). It **never invents events**. The same shapes flow over the remote iframe transport unchanged.',
       ]),
     },
   },
@@ -183,17 +183,17 @@ export const Resolved: Story = {
     });
     return (
       <Frame>
-        <kc-confirm ref={(e) => (el = e as ConfirmEl)} card-id="card-resolved-confirm" heading="Run database migration?" />
+        <kai-confirm ref={(e) => (el = e as ConfirmEl)} card-id="card-resolved-confirm" heading="Run database migration?" />
       </Frame>
     );
   },
   parameters: {
     docs: {
       source: {
-        code: `<kc-confirm heading="Run database migration?"></kc-confirm>
+        code: `<kai-confirm heading="Run database migration?"></kai-confirm>
 <script type="module">
   import '@kitn.ai/ui/elements';
-  const el = document.querySelector('kc-confirm');
+  const el = document.querySelector('kai-confirm');
   el.data = ${JSON.stringify(RESOLVED_CONFIRM, null, 2)};
   // Setting .resolution renders the chromed read-only view — no interactive controls.
   el.resolution = { kind: 'action', action: 'approve' };
@@ -210,13 +210,13 @@ export const ErrorState: Story = {
   parameters: {
     docs: {
       source: {
-        code: `<kc-confirm></kc-confirm>
+        code: `<kai-confirm></kai-confirm>
 <script type="module">
   import '@kitn.ai/ui/elements';
-  const el = document.querySelector('kc-confirm');
+  const el = document.querySelector('kai-confirm');
   // No actions → inline error state + an \`error\` event.
   el.data = { actions: [] };
-  el.addEventListener('kc-card', (e) => {
+  el.addEventListener('kai-card', (e) => {
     if (e.detail.kind === 'error') console.warn('confirm error:', e.detail.message);
   });
 </script>`,

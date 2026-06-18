@@ -12,11 +12,11 @@ cards**: a form to fill, an action to approve, a plan to pick from, a link to pr
 ## The loop
 
 ```
-agent/server ──CardEnvelope(s)──▶ host sets <kc-cards>.cards
+agent/server ──CardEnvelope(s)──▶ host sets <kai-cards>.cards
      ▲                                      │
-     │                              dispatcher renders the right kc-* by `type`
+     │                              dispatcher renders the right kai-* by `type`
      │                                      │
-     └── result / next envelopes ◀─ CardPolicy ◀─ kc-card event ◀─ user interacts
+     └── result / next envelopes ◀─ CardPolicy ◀─ kai-card event ◀─ user interacts
 ```
 
 ## Envelopes vs. cards
@@ -26,7 +26,7 @@ Two things are easy to conflate — keeping them straight makes the rest click:
 - An **envelope** is what the agent *sends*: an addressed data wrapper, not UI. Like a
   postal envelope, it *carries* a card spec but isn't the card itself.
 - A **card** is what the user *sees*: the rendered, interactive UI the dispatcher mounts
-  for that envelope (a `kc-form`, `kc-confirm`, … inside the shared card chrome).
+  for that envelope (a `kai-form`, `kai-confirm`, … inside the shared card chrome).
 
 The dispatcher's whole job is **envelope in → card out** — one envelope renders one card.
 
@@ -47,21 +47,21 @@ sending; `id` correlates every event back to this card. (For **remote** cards, a
 `WireFrame` wraps this *same* envelope over `postMessage` — the envelope inside is identical;
 see Remote cards.)
 
-## Turnkey: drop `<kc-cards>`
+## Turnkey: drop `<kai-cards>`
 
 ```html
-<kc-cards></kc-cards>
+<kai-cards></kai-cards>
 <script type="module">
   import '@kitn.ai/ui/elements';
-  const cards = document.querySelector('kc-cards');
+  const cards = document.querySelector('kai-cards');
   cards.cards = [{ type: 'confirm', id: 'deploy', title: 'Deploy?',
     data: { body: 'Ship it?', actions: [{ id: 'go', label: 'Deploy', default: true }] } }];
   cards.policy = { onAction: (id, action) => console.log(id, action) };
 </script>
 ```
 
-`<kc-cards>` renders one card per envelope and routes every interaction through `policy`
-(or listen for the raw bubbling `kc-card` event). In SolidJS, use `renderCard(envelope)` /
+`<kai-cards>` renders one card per envelope and routes every interaction through `policy`
+(or listen for the raw bubbling `kai-card` event). In SolidJS, use `renderCard(envelope)` /
 `<CardRenderer>` inside a `<CardProvider>`.
 
 ## Streaming & follow-ups
@@ -69,12 +69,12 @@ see Remote cards.)
 Swap the `cards` array to add, replace, or remove cards — e.g. replace a `confirm` with a
 result card once the user acts. For **live streaming into a single card**, the SolidJS
 `<CardRenderer>` re-renders reactively as its envelope's `data` changes, so an agent can
-stream into it as work progresses. (Keyed-by-`id` in-place updates within a `<kc-cards>`
+stream into it as work progresses. (Keyed-by-`id` in-place updates within a `<kai-cards>`
 list are a planned refinement.)
 
 ## Resolved cards
 
-Interactive cards (`kc-confirm`, `kc-choice`, `kc-tasks`, `kc-form`) flip to a **chromed
+Interactive cards (`kai-confirm`, `kai-choice`, `kai-tasks`, `kai-form`) flip to a **chromed
 read-only** view the moment the user acts — optimistically, before any server round-trip.
 
 To make that survive a **reload or history re-hydration**, the card reads an optional
@@ -84,48 +84,48 @@ back into the array with the `applyResolution` helper:
 ```ts
 import { applyResolution } from '@kitn.ai/ui';
 
-// <kc-cards> is controlled — persist the resolution so it survives reload:
-el.addEventListener('kc-card', (e) => {
+// <kai-cards> is controlled — persist the resolution so it survives reload:
+el.addEventListener('kai-card', (e) => {
   el.cards = applyResolution(el.cards, e.detail); // resolved cards re-hydrate read-only
   // …then save el.cards to your store/server.
 });
 ```
 
-`applyResolution` is pure and safe to call on every `kc-card` event — non-terminal events
+`applyResolution` is pure and safe to call on every `kai-card` event — non-terminal events
 (`ready` / `error` / …) and unknown card ids return the same array unchanged. The terminal
 verbs are `action` (confirm / choice) and `submit` (tasks / form).
 
 ## Remote cards
 
 Everything above renders cards you **bundle yourself** — the dispatcher mounts a native
-`kc-*` element for each envelope. That native `types` seam stays the easy path: register a
+`kai-*` element for each envelope. That native `types` seam stays the easy path: register a
 card type, ship its element, done.
 
 **Remote cards** are the power feature for **provider-owned, cross-origin UI** — a card
 whose code lives on a *different* origin (a partner, a plugin, your own card service) and
-that you don't want to bundle or trust in your DOM. `<kc-remote>` renders it inside a
+that you don't want to bundle or trust in your DOM. `<kai-remote>` renders it inside a
 **sandboxed cross-origin `<iframe>`** and bridges it to the host over `postMessage`, carrying
 the **exact same** `CardEnvelope` / `CardContext` / `CardEvent` shapes and routing every
 event through the **same `CardPolicy`** as a native card. The envelope inside is identical —
 a transport `WireFrame` just wraps it on the wire.
 
 ```html
-<kc-remote
+<kai-remote
   provider-origin="https://cards.provider.example"
   src="https://cards.provider.example/card"
-></kc-remote>
+></kai-remote>
 <script type="module">
-  import '@kitn.ai/ui/elements'; // registers <kc-remote>
+  import '@kitn.ai/ui/elements'; // registers <kai-remote>
 
-  const el = document.querySelector('kc-remote');
+  const el = document.querySelector('kai-remote');
   // The CardEnvelope is set as a JS property — it travels down the wire unchanged.
   el.envelope = { type: 'form', id: 'signup', title: 'Join the beta',
     data: { type: 'object', required: ['email'],
       properties: { email: { type: 'string', title: 'Email', format: 'email' } } } };
 
-  // Every routed event is re-emitted as a bubbling kc-card CustomEvent — persist the
+  // Every routed event is re-emitted as a bubbling kai-card CustomEvent — persist the
   // resolution exactly like a native card:
-  el.addEventListener('kc-card', (e) => {
+  el.addEventListener('kai-card', (e) => {
     if (e.detail.kind === 'submit') save(e.detail.data);
   });
   // …or pass a CardPolicy directly: el.policy = { onSubmit: (id, data) => save(data) };
@@ -179,8 +179,8 @@ bundle) and registers one renderer per card `type`. `examples/remote-host/` is t
 host page. The real cross-origin behavior is verified by the standalone Playwright suite
 (`tests/e2e/`).
 
-## Card elements are `kc-*` components too
+## Card elements are `kai-*` components too
 
-Each card type (`kc-confirm`, `kc-choice`, `kc-tasks`, `kc-form`, `kc-link`, `kc-embed`, `kc-remote`) is a registered `kc-*` custom element with its own prop/event API — the same model as everything else under **Components**. They live here under **Generative UI / Cards** because they only make sense inside the dispatcher/envelope system, but they follow the same component contract: attributes, JS properties, a `kc-card` event, CSS parts. Browse **Generative UI → Cards** for the per-element API references and live demos.
+Each card type (`kai-confirm`, `kai-choice`, `kai-tasks`, `kai-form`, `kai-link`, `kai-embed`, `kai-remote`) is a registered `kai-*` custom element with its own prop/event API — the same model as everything else under **Components**. They live here under **Generative UI / Cards** because they only make sense inside the dispatcher/envelope system, but they follow the same component contract: attributes, JS properties, a `kai-card` event, CSS parts. Browse **Generative UI → Cards** for the per-element API references and live demos.
 
 See **Cards** for each card type, and **SDK** for the dispatcher in action.

@@ -1,4 +1,4 @@
-/** Reusable live chat demo. Mounts <kc-chat>, seeds it, and scripts a canned
+/** Reusable live chat demo. Mounts <kai-chat>, seeds it, and scripts a canned
  *  STREAMING assistant reply on submit — so Examples/Patterns pages show a
  *  working chat with no backend. The same island powers the drop-in, docked,
  *  and custom-themed demos by varying props. */
@@ -79,17 +79,17 @@ export default function ChatDemo(props: Props) {
     }
     if (props.themeVars) for (const [k, v] of Object.entries(props.themeVars)) host.style.setProperty(k, v);
     host.setAttribute('theme', theme());
-    host.addEventListener('kc-submit', onSubmit);
+    host.addEventListener('kai-submit', onSubmit);
     setReady(true);
     const obs = new MutationObserver(() => host?.setAttribute('theme', theme()));
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    onCleanup(() => { clearTimeout(timer); host?.removeEventListener('kc-submit', onSubmit); obs.disconnect(); });
+    onCleanup(() => { clearTimeout(timer); host?.removeEventListener('kai-submit', onSubmit); obs.disconnect(); });
   });
 
   return (
     <div class="not-content my-5 overflow-hidden rounded-xl border border-line bg-surface" style={{ height: props.height ?? '560px' }}>
       {/* @ts-expect-error custom element */}
-      <kc-chat ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', height: '100%' }} />
+      <kai-chat ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', height: '100%' }} />
     </div>
   );
 }

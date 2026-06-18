@@ -34,7 +34,7 @@ export default function Example(props: Props) {
     await loadKit();
     if (!container) return;
     // Enum (string) config → attributes set BEFORE upgrade for a correct first
-    // render (matches a server-rendered <kc-* attr>); booleans/data → properties.
+    // render (matches a server-rendered <kai-* attr>); booleans/data → properties.
     const node = document.createElement(props.tag) as HTMLElement;
     for (const [k, v] of Object.entries(config)) if (typeof v === 'string') node.setAttribute(camelToKebab(k), v);
     node.setAttribute('theme', theme());
@@ -43,7 +43,7 @@ export default function Example(props: Props) {
     // API can't express as props) — set it BEFORE upgrade so it's present when
     // the element first renders.
     if (typeof sample.html === 'string') node.innerHTML = sample.html;
-    // `previewHeight` gives fill-the-container elements (kc-artifact, kc-chat …) a
+    // `previewHeight` gives fill-the-container elements (kai-artifact, kai-chat …) a
     // real height so they're not cramped into the default min-height box.
     if (typeof sample.previewHeight === 'string' && container) {
       container.style.height = sample.previewHeight;

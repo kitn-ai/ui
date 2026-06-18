@@ -2,10 +2,10 @@
  *  The Claude/ChatGPT canvas reveal: the conversation starts full-width with NO
  *  artifact on screen. An assistant turn carries a custom `open-preview` action
  *  (and shows the generated file as an attachment); clicking it fires
- *  `kc-message-action`, and the host reveals a <kc-artifact> panel by un-hiding a
- *  <kc-resizable-item>. A close button collapses the panel back to full width.
+ *  `kai-message-action`, and the host reveals a <kai-artifact> panel by un-hiding a
+ *  <kai-resizable-item>. A close button collapses the panel back to full width.
  *
- *  The trigger is fully prop-driven — a real kc-chat custom action + its real
+ *  The trigger is fully prop-driven — a real kai-chat custom action + its real
  *  event — not a CSS/shadow hack. The same-origin fixtures in public/artifact-demo/
  *  frame live in the preview iframe. */
 import { createSignal, createEffect, onMount, onCleanup } from 'solid-js';
@@ -76,7 +76,7 @@ const FILES: ProjectFile[] = [
   { path: 'styles.css', type: 'other', language: 'css', code: STYLES_CSS, url: url('styles.css') },
 ];
 
-// The action that reveals the artifact. `id` comes back in the kc-message-action
+// The action that reveals the artifact. `id` comes back in the kai-message-action
 // detail. Omitting `icon` renders it label-only — a clear text CTA among the
 // icon-only built-in actions, rather than another inscrutable glyph.
 const OPEN_ACTION = { id: 'open-preview', label: 'Preview', tooltip: 'Open the artifact' };
@@ -125,9 +125,9 @@ interface Props {
 export default function ArtifactRevealDemo(props: Props) {
   const [open, setOpen] = createSignal(false);
 
-  let outerRef: HTMLElement | undefined;       // kc-resizable (chat | artifact)
-  let chatItemRef: HTMLElement | undefined;     // kc-resizable-item (chat)
-  let artifactItemRef: HTMLElement | undefined; // kc-resizable-item (artifact, hidden until open)
+  let outerRef: HTMLElement | undefined;       // kai-resizable (chat | artifact)
+  let chatItemRef: HTMLElement | undefined;     // kai-resizable-item (chat)
+  let artifactItemRef: HTMLElement | undefined; // kai-resizable-item (artifact, hidden until open)
   let artifactMountRef: HTMLDivElement | undefined;
 
   let chatEl: (HTMLElement & { messages?: ChatMsg[]; [k: string]: unknown }) | undefined;
@@ -184,20 +184,20 @@ export default function ArtifactRevealDemo(props: Props) {
   onMount(async () => {
     await loadKit();
 
-    // --- kc-chat (always present) ---
-    chatEl = document.createElement('kc-chat') as typeof chatEl;
+    // --- kai-chat (always present) ---
+    chatEl = document.createElement('kai-chat') as typeof chatEl;
     chatEl!.style.cssText = 'display:block;height:100%;width:100%';
     chatEl!.setAttribute('theme', theme());
     (chatEl as any).chatTitle = 'Assistant';
     (chatEl as any).placeholder = 'Ask for a change…';
     customElements.upgrade(chatEl!);
     chatEl!.messages = SEED_MESSAGES;
-    chatEl!.addEventListener('kc-message-action', onMessageAction);
-    chatEl!.addEventListener('kc-submit', onSubmit);
+    chatEl!.addEventListener('kai-message-action', onMessageAction);
+    chatEl!.addEventListener('kai-submit', onSubmit);
     chatItemRef?.appendChild(chatEl!);
 
-    // --- kc-artifact (revealed on demand) ---
-    artifactEl = document.createElement('kc-artifact') as typeof artifactEl;
+    // --- kai-artifact (revealed on demand) ---
+    artifactEl = document.createElement('kai-artifact') as typeof artifactEl;
     artifactEl!.style.cssText = 'display:block;height:100%;width:100%';
     artifactEl!.setAttribute('theme', theme());
     artifactEl!.setAttribute('iframe-title', 'Starboard artifact preview');
@@ -224,8 +224,8 @@ export default function ArtifactRevealDemo(props: Props) {
 
     onCleanup(() => {
       clearTimeout(timer);
-      chatEl?.removeEventListener('kc-message-action', onMessageAction);
-      chatEl?.removeEventListener('kc-submit', onSubmit);
+      chatEl?.removeEventListener('kai-message-action', onMessageAction);
+      chatEl?.removeEventListener('kai-submit', onSubmit);
       obs.disconnect();
     });
   });
@@ -236,18 +236,18 @@ export default function ArtifactRevealDemo(props: Props) {
       style={{ height: props.height ?? '560px' }}
     >
       {/* @ts-expect-error custom element */}
-      <kc-resizable
+      <kai-resizable
         ref={(el: HTMLElement) => (outerRef = el)}
         orientation="horizontal"
         style={{ display: 'block', height: '100%' }}
       >
         {/* Chat — fills when the artifact panel is hidden */}
         {/* @ts-expect-error custom element */}
-        <kc-resizable-item ref={(el: HTMLElement) => (chatItemRef = el)} min="280px" />
+        <kai-resizable-item ref={(el: HTMLElement) => (chatItemRef = el)} min="280px" />
 
         {/* Artifact panel — hidden until an `open-preview` action fires */}
         {/* @ts-expect-error custom element */}
-        <kc-resizable-item ref={(el: HTMLElement) => (artifactItemRef = el)} size="54%" min="360px" hidden>
+        <kai-resizable-item ref={(el: HTMLElement) => (artifactItemRef = el)} size="54%" min="360px" hidden>
           <div style={{ display: 'flex', 'flex-direction': 'column', height: '100%' }}>
             <div
               class="flex items-center justify-between border-b border-line bg-surface px-3 py-2"
@@ -265,8 +265,8 @@ export default function ArtifactRevealDemo(props: Props) {
             </div>
             <div ref={(el: HTMLDivElement) => (artifactMountRef = el)} style={{ flex: '1', 'min-height': '0' }} />
           </div>
-        </kc-resizable-item>
-      </kc-resizable>
+        </kai-resizable-item>
+      </kai-resizable>
     </div>
   );
 }

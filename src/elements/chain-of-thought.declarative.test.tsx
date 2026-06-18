@@ -1,6 +1,6 @@
 /**
- * Unit tests for the declarative `<kc-step>` light-DOM API of
- * `<kc-chain-of-thought>`.
+ * Unit tests for the declarative `<kai-step>` light-DOM API of
+ * `<kai-chain-of-thought>`.
  *
  * Strategy: the `defineWebComponent` call registers a real Shadow-DOM custom
  * element which requires a full browser environment (Constructable Stylesheets,
@@ -26,7 +26,7 @@ afterEach(cleanup);
 
 describe('parseKcStepElement', () => {
   function makeEl(label: string | null, textContent?: string): Element {
-    const el = document.createElement('kc-step');
+    const el = document.createElement('kai-step');
     if (label !== null) el.setAttribute('label', label);
     if (textContent !== undefined) el.textContent = textContent;
     return el;
@@ -140,7 +140,7 @@ describe('Step list rendering', () => {
   });
 
   it('parseKcStepElement produces steps that render with the correct label and content', () => {
-    const el = document.createElement('kc-step');
+    const el = document.createElement('kai-step');
     el.setAttribute('label', 'Searching docs');
     el.textContent = 'Found 3 hits';
 

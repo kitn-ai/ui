@@ -47,7 +47,7 @@ interface Props extends Record<string, unknown> {
   sidebarMaxWidth?: number;
   /** Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed
    *  = true`) to drive the sidebar from your app, updating it in response to the
-   *  `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it). */
+   *  `kai-sidebar-toggle` event. Omit for uncontrolled (the element manages it). */
   sidebarCollapsed?: boolean;
   /** Initial collapsed state when uncontrolled (default false). Use the
    *  `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
@@ -56,30 +56,30 @@ interface Props extends Record<string, unknown> {
 
 interface Events {
   /** A conversation was selected in the sidebar. */
-  'kc-conversation-select': { id: string };
+  'kai-conversation-select': { id: string };
   /** The "New chat" button was clicked. */
-  'kc-new-chat': Record<string, never>;
+  'kai-new-chat': Record<string, never>;
   /** The sidebar was collapsed or expanded. */
-  'kc-sidebar-toggle': { collapsed: boolean };
+  'kai-sidebar-toggle': { collapsed: boolean };
   /** User submitted a message. */
-  'kc-submit': { value: string; attachments: AttachmentData[] };
+  'kai-submit': { value: string; attachments: AttachmentData[] };
   /** Fired on every input change. */
-  'kc-value-change': { value: string };
+  'kai-value-change': { value: string };
   /** The header model switcher changed. */
-  'kc-model-change': { modelId: string };
+  'kai-model-change': { modelId: string };
   /** An action button on a message was clicked. */
-  'kc-message-action': { messageId: string; action: string };
+  'kai-message-action': { messageId: string; action: string };
   /** The Search button was clicked. */
-  'kc-search': Record<string, never>;
+  'kai-search': Record<string, never>;
   /** The Mic / voice button was clicked. */
-  'kc-voice': Record<string, never>;
+  'kai-voice': Record<string, never>;
   /** A slash command was chosen from the palette. */
-  'kc-slash-select': { command: SlashCommandItem };
+  'kai-slash-select': { command: SlashCommandItem };
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
-  'kc-suggestion-click': { value: string };
+  'kai-suggestion-click': { value: string };
 }
 
-defineWebComponent<Props, Events>('kc-workspace', {
+defineWebComponent<Props, Events>('kai-workspace', {
   groups: [], conversations: [], activeId: undefined, messages: [],
   value: undefined, placeholder: 'Send a message...', loading: false,
   suggestions: undefined, suggestionMode: 'submit', proseSize: 'sm',
@@ -92,13 +92,13 @@ defineWebComponent<Props, Events>('kc-workspace', {
   // Controlled/uncontrolled collapse: `sidebarCollapsed` (when set) wins;
   // otherwise the element manages its own state, seeded from
   // `defaultSidebarCollapsed`. `toggle` always writes the internal value (a no-op
-  // visually while controlled) and emits `kc-sidebar-toggle` so a controlling app
+  // visually while controlled) and emits `kai-sidebar-toggle` so a controlling app
   // can update its own state.
   const [collapsed, setCollapsed] = createControllableSignal(
     () => props.sidebarCollapsed as boolean | undefined,
     flag('defaultSidebarCollapsed'),
   );
-  const toggle = () => { const next = !collapsed(); setCollapsed(next); dispatch('kc-sidebar-toggle', { collapsed: next }); };
+  const toggle = () => { const next = !collapsed(); setCollapsed(next); dispatch('kai-sidebar-toggle', { collapsed: next }); };
 
   // Create the thread ONCE and reference the same node in both <Show> branches.
   // It's owned by this component root (not by a Show branch), so toggling the
@@ -115,14 +115,14 @@ defineWebComponent<Props, Events>('kc-workspace', {
       scrollButton={props.scrollButton !== false} search={flag('search')} voice={flag('voice')}
       slashCommands={props.slashCommands as SlashCommandItem[] | undefined}
       slashActiveIds={props.slashActiveIds as string[] | undefined} slashCompact={flag('slashCompact')}
-      onValueChange={(value) => dispatch('kc-value-change', { value })}
-      onSubmit={(detail) => dispatch('kc-submit', detail)}
-      onSuggestionClick={(value) => dispatch('kc-suggestion-click', { value })}
-      onModelChange={(modelId) => dispatch('kc-model-change', { modelId })}
-      onMessageAction={(detail) => dispatch('kc-message-action', detail)}
-      onSearch={() => dispatch('kc-search', {})}
-      onVoice={() => dispatch('kc-voice', {})}
-      onSlashSelect={(command) => dispatch('kc-slash-select', { command })}
+      onValueChange={(value) => dispatch('kai-value-change', { value })}
+      onSubmit={(detail) => dispatch('kai-submit', detail)}
+      onSuggestionClick={(value) => dispatch('kai-suggestion-click', { value })}
+      onModelChange={(modelId) => dispatch('kai-model-change', { modelId })}
+      onMessageAction={(detail) => dispatch('kai-message-action', detail)}
+      onSearch={() => dispatch('kai-search', {})}
+      onVoice={() => dispatch('kai-voice', {})}
+      onSlashSelect={(command) => dispatch('kai-slash-select', { command })}
     />
   );
 
@@ -147,8 +147,8 @@ defineWebComponent<Props, Events>('kc-workspace', {
           <ResizablePanel defaultSize={props.sidebarWidth as number} data-min-size={String(props.sidebarMinWidth)} data-max-size={String(props.sidebarMaxWidth)}>
             <ConversationList
               groups={props.groups} conversations={props.conversations} activeId={props.activeId as string | undefined}
-              onSelect={(id) => dispatch('kc-conversation-select', { id })}
-              onNewChat={() => dispatch('kc-new-chat', {})}
+              onSelect={(id) => dispatch('kai-conversation-select', { id })}
+              onNewChat={() => dispatch('kai-new-chat', {})}
               onToggleSidebar={toggle}
             />
           </ResizablePanel>

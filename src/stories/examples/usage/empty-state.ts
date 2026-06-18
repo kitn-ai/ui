@@ -3,7 +3,7 @@ import type { ExampleUsage, StoryUsage } from './types';
 /** New Chat — a centered greeting (icon + title + description), starter suggestion chips, and a composer. */
 const newChat: StoryUsage = {
   intro:
-    "The new-chat zero state. `<kc-empty>` renders the centered greeting from two scalar props — `emptyTitle` (DOM attribute `empty-title`, since `title` is a global HTML attribute) and `description`. The icon, the starter suggestion chips, and the composer below aren't part of `<kc-empty>` — compose those with the SolidJS `Empty` + `PromptSuggestion` + `PromptInput` primitives (see the Solid tab).",
+    "The new-chat zero state. `<kai-empty>` renders the centered greeting from two scalar props — `emptyTitle` (DOM attribute `empty-title`, since `title` is a global HTML attribute) and `description`. The icon, the starter suggestion chips, and the composer below aren't part of `<kai-empty>` — compose those with the SolidJS `Empty` + `PromptSuggestion` + `PromptInput` primitives (see the Solid tab).",
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
@@ -11,12 +11,12 @@ const newChat: StoryUsage = {
 </script>
 
 <!-- Scalars are plain attributes. Note the kebab-case empty-title. -->
-<kc-empty
+<kai-empty
   empty-title="How can I help today?"
   description="Ask anything, or start from one of these."
-></kc-empty>
+></kai-empty>
 
-<!-- The icon, suggestion chips, and composer are not part of <kc-empty>;
+<!-- The icon, suggestion chips, and composer are not part of <kai-empty>;
      compose them yourself (see the Solid tab). -->`,
 
     react: `import { Empty } from '@kitn.ai/ui/react';
@@ -38,7 +38,7 @@ import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 <template>
   <!-- Scalars as plain attributes; empty-title is kebab-case. -->
-  <kc-empty
+  <kai-empty
     empty-title="How can I help today?"
     description="Ask anything, or start from one of these."
   />
@@ -50,10 +50,10 @@ import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 </script>
 
 <!-- Scalars as attributes; empty-title is kebab-case. -->
-<kc-empty
+<kai-empty
   empty-title="How can I help today?"
   description="Ask anything, or start from one of these."
-></kc-empty>
+></kai-empty>
 <!-- Icon, suggestions, and composer are composed separately. -->`,
 
     angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
@@ -66,10 +66,10 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   // empty-title is kebab-case; both props are scalar strings.
   template: \`
-    <kc-empty
+    <kai-empty
       empty-title="How can I help today?"
       description="Ask anything, or start from one of these."
-    ></kc-empty>
+    ></kai-empty>
   \`,
 })
 export class NewChatComponent {}`,
@@ -127,7 +127,7 @@ export function NewChat() {
 };
 
 /**
- * Pattern: Empty State — the new-chat zero state. `<kc-empty>` covers the
+ * Pattern: Empty State — the new-chat zero state. `<kai-empty>` covers the
  * centered greeting (`emptyTitle` + `description`); the icon, starter
  * suggestion chips, and composer are SolidJS primitive composition. Per-story:
  * the Usage tab shows the snippet for the story you're on; the example-level

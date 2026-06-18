@@ -14,7 +14,7 @@ const messages: ChatMessage[] = [
 ];
 
 test('renders the list + thread and emits conversationselect and submit', async () => {
-  const el = document.createElement('kc-workspace') as HTMLElement & { conversations: ConversationSummary[]; messages: ChatMessage[] };
+  const el = document.createElement('kai-workspace') as HTMLElement & { conversations: ConversationSummary[]; messages: ChatMessage[] };
   el.conversations = conversations;
   el.messages = messages;
   document.body.appendChild(el);
@@ -24,14 +24,14 @@ test('renders the list + thread and emits conversationselect and submit', async 
   expect(el.shadowRoot!.textContent).toContain('Hi there');    // thread
 
   let selected: string | null = null;
-  el.addEventListener('kc-conversation-select', (e) => (selected = (e as CustomEvent).detail.id));
+  el.addEventListener('kai-conversation-select', (e) => (selected = (e as CustomEvent).detail.id));
   // the conversation row is a button containing the title
   const row = [...el.shadowRoot!.querySelectorAll('button')].find((b) => b.textContent?.includes('First chat'))!;
   row.click();
   expect(selected).toBe('c1');
 
   let submitted: string | null = null;
-  el.addEventListener('kc-submit', (e) => (submitted = (e as CustomEvent).detail.value));
+  el.addEventListener('kai-submit', (e) => (submitted = (e as CustomEvent).detail.value));
   const textarea = el.shadowRoot!.querySelector('textarea')!;
   textarea.value = 'q';
   textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));

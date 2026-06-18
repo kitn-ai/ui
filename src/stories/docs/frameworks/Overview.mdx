@@ -13,13 +13,13 @@ Recipes for streaming, text-to-speech, and speech-to-text live under **Docs/Reci
 
 You can adopt the kit at whatever level you need — and mix the two freely:
 
-1. **`<kc-chat>` — the all-in-one shell.** One tag gives you a whole chat experience (message
+1. **`<kai-chat>` — the all-in-one shell.** One tag gives you a whole chat experience (message
    thread, prompt input, model switcher, …). The fastest way to ship.
-2. **Compose the individual elements.** Assemble `<kc-conversations>`, `<kc-message>`,
-   `<kc-prompt-input>`, `<kc-markdown>`, `<kc-artifact>`, … into your own layout for full control —
+2. **Compose the individual elements.** Assemble `<kai-conversations>`, `<kai-message>`,
+   `<kai-prompt-input>`, `<kai-markdown>`, `<kai-artifact>`, … into your own layout for full control —
    or drop a single display element into an app you already have.
 
-`<kc-chat>` is the quick start, **not** the only way in. Every framework page shows both paths,
+`<kai-chat>` is the quick start, **not** the only way in. Every framework page shows both paths,
 and each element's **API** tab (under **Components**) lists its full props, events, and copy-paste
 usage for every framework.
 
@@ -30,13 +30,13 @@ attributes. An HTML attribute is always a string, so passing `messages`, `models
 `suggestions`, or `slashCommands` as an attribute silently fails.
 
 ```js
-const chat = document.querySelector('kc-chat');
+const chat = document.querySelector('kai-chat');
 
 // ✅ correct — set as a JS property
 chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
 
 // ❌ wrong — an HTML attribute is always a string, never works
-// <kc-chat messages="[...]"></kc-chat>
+// <kai-chat messages="[...]"></kai-chat>
 ```
 
 Scalar values (strings, numbers, booleans) work fine as attributes: `placeholder`, `loading`,

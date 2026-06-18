@@ -1,6 +1,6 @@
 /**
- * Unit tests for the declarative `<kc-conversation>` light-DOM API of
- * `<kc-conversations>`.
+ * Unit tests for the declarative `<kai-conversation>` light-DOM API of
+ * `<kai-conversations>`.
  *
  * Strategy: `defineWebComponent` registers a real Shadow-DOM custom element
  * and is not suitable for jsdom unit tests. Instead:
@@ -24,7 +24,7 @@ afterEach(cleanup);
 
 describe('parseKcConversationElement', () => {
   function makeEl(attrs: Record<string, string | null>, textContent = ''): Element {
-    const el = document.createElement('kc-conversation');
+    const el = document.createElement('kai-conversation');
     for (const [k, v] of Object.entries(attrs)) {
       if (v !== null) el.setAttribute(k, v);
     }
@@ -125,7 +125,7 @@ describe('conversation merge order', () => {
 
   it('parseKcConversationElement produces items that render and fire correct id', () => {
     const onSelect = vi.fn();
-    const el = document.createElement('kc-conversation');
+    const el = document.createElement('kai-conversation');
     el.setAttribute('id', 'c-99');
     el.textContent = 'My conversation';
 

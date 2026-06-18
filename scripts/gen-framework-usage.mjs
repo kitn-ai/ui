@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-// CDN URL for the self-contained element bundle (registers all kc-* custom elements).
+// CDN URL for the self-contained element bundle (registers all kai-* custom elements).
 // Source of truth: Installation.mdx § "Via CDN" and README.md § "Or load from a CDN".
 const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 
@@ -18,20 +18,20 @@ const SOLID_NAME_ALIASES = {
   ScopePicker: 'ChatScopePicker',
   Skills: 'MessageSkills',
   Sources: 'SourceList',
-  // 'Suggestions' intentionally omitted — the kc-suggestions element composes
+  // 'Suggestions' intentionally omitted — the kai-suggestions element composes
   // individual PromptSuggestion chips; there is no single Solid wrapper component
   // that mirrors the element's array-of-suggestions API.
 };
 
-// Event names are lower-kebab, kc-prefixed (e.g. `kc-message-action`). React/Solid handler
-// props strip the `kc-` prefix and PascalCase on hyphens → `onMessageAction`.
-const onName = (ev) => 'on' + ev.replace(/^kc-/, '').split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+// Event names are lower-kebab, kai-prefixed (e.g. `kai-message-action`). React/Solid handler
+// props strip the `kai-` prefix and PascalCase on hyphens → `onMessageAction`.
+const onName = (ev) => 'on' + ev.replace(/^kai-/, '').split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('');
 const required = (el) => el.props.filter((p) => !p.optional);
 
 /** Wraps binding lines into a multi-line tag block.
  *  open  — e.g. '<Artifact'
  *  lines — array of binding strings (without leading spaces)
- *  close — e.g. '/>' or '></kc-artifact>'
+ *  close — e.g. '/>' or '></kai-artifact>'
  */
 function wrapTag(open, lines, close) {
   if (lines.length === 0) return null; // caller handles compact form

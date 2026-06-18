@@ -11,7 +11,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-loader</p>
+<p class="kc-tag-sub">kai-loader</p>
 
 <p class="kc-lede">An animated busy indicator that fits anywhere — buttons, toolbars, empty panels, or standalone skeletons — with twelve visual styles from a single `variant` attribute.</p>
 
@@ -19,10 +19,10 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-loader" />
+<Playground client:only="solid" tag="kai-loader" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-loader>` for a "working" indicator outside the chat thread — inside a send button, a toolbar corner, or as a panel placeholder. In SolidJS, use the `Loader` primitive directly for finer composition control.
+Use `<kai-loader>` for a "working" indicator outside the chat thread — inside a send button, a toolbar corner, or as a panel placeholder. In SolidJS, use the `Loader` primitive directly for finer composition control.
 </Aside>
 
 ## Usage
@@ -30,7 +30,7 @@ Use `<kc-loader>` for a "working" indicator outside the chat thread — inside a
 All props are plain HTML attributes — no binding layer required:
 
 ```html
-<kc-loader variant="dots" size="md"></kc-loader>
+<kai-loader variant="dots" size="md"></kai-loader>
 ```
 
 - **`variant`** — `circular` for generic waits, `wave`/`bars` for audio or processing, `text-shimmer` for an AI "thinking" state.
@@ -43,44 +43,44 @@ All props are plain HTML attributes — no binding layer required:
 
 The out-of-the-box circular spinner — no attributes needed.
 
-<Example client:visible tag="kc-loader" config={{ variant: 'circular', size: 'md' }} />
+<Example client:visible tag="kai-loader" config={{ variant: 'circular', size: 'md' }} />
 
 ### Dots
 
 Three-dot pulse — works well inside buttons or inline next to text.
 
-<Example client:visible tag="kc-loader" config={{ variant: 'dots', size: 'md' }} />
+<Example client:visible tag="kai-loader" config={{ variant: 'dots', size: 'md' }} />
 
 ### Wave
 
 Rhythmic wave — great for audio processing or streaming output.
 
-<Example client:visible tag="kc-loader" config={{ variant: 'wave', size: 'md' }} />
+<Example client:visible tag="kai-loader" config={{ variant: 'wave', size: 'md' }} />
 
 ### Text Shimmer
 
 Animates a label with a shimmer sweep — ideal for AI "Thinking…" states.
 
-<Example client:visible tag="kc-loader" config={{ variant: 'text-shimmer', size: 'md', text: 'Thinking…' }} />
+<Example client:visible tag="kai-loader" config={{ variant: 'text-shimmer', size: 'md', text: 'Thinking…' }} />
 
 ### Sizes
 
-<Example client:visible tag="kc-loader" config={{ variant: 'dots', size: 'sm' }} />
+<Example client:visible tag="kai-loader" config={{ variant: 'dots', size: 'sm' }} />
 
-<Example client:visible tag="kc-loader" config={{ variant: 'dots', size: 'lg' }} />
+<Example client:visible tag="kai-loader" config={{ variant: 'dots', size: 'lg' }} />
 
 ### Terminal
 
 Retro blinking cursor — a good touch for developer tools or code-generation states.
 
-<Example client:visible tag="kc-loader" config={{ variant: 'terminal', size: 'md' }} />
+<Example client:visible tag="kai-loader" config={{ variant: 'terminal', size: 'md' }} />
 
 ## Props
 
-<PropTable tag="kc-loader" />
+<PropTable tag="kai-loader" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-loader" />
+<ComposedFrom tag="kai-loader" />
 
 <NeedAHand />

@@ -18,16 +18,16 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-form>` — renders a JSON-Schema **form definition** (set via the `data`
- * property) into themed, accessible widgets inside `<kc-card>` chrome, validates
+ * `<kai-form>` — renders a JSON-Schema **form definition** (set via the `data`
+ * property) into themed, accessible widgets inside `<kai-card>` chrome, validates
  * input client-side, and emits the collected, coerced, validated object up the
- * Card contract as a bubbling **`kc-card`** CustomEvent of `{ kind:'submit' }`.
+ * Card contract as a bubbling **`kai-card`** CustomEvent of `{ kind:'submit' }`.
  * It also emits `ready` on mount, `action`/`dismiss` for secondary affordances, and
  * `error` for a malformed definition. Routes through a `CardProvider` when present,
- * else the bubbling `kc-card` event (so a bare `<kc-form>` works without a host).
+ * else the bubbling `kai-card` event (so a bare `<kai-form>` works without a host).
  * Isolated in Shadow DOM; theme-aware via the shared kit tokens.
  */
-defineWebComponent<Props>('kc-form', {
+defineWebComponent<Props>('kai-form', {
   data: undefined,
   cardId: undefined,
   heading: undefined,
@@ -35,7 +35,7 @@ defineWebComponent<Props>('kc-form', {
 }, (props, { element }) => (
   <Form
     data={props.data as FormDefinition | undefined}
-    cardId={props.cardId ?? (element.id || 'kc-form')}
+    cardId={props.cardId ?? (element.id || 'kai-form')}
     heading={props.heading}
     resolution={props.resolution as CardResolution | undefined}
     hostElement={element}

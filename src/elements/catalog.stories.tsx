@@ -15,12 +15,12 @@ import {
 
 /**
  * Examples / Catalog — the `examples/composable/index.html` showcase, ported into
- * Storybook as source-visible web-component stories. Every kc-* element rendered
+ * Storybook as source-visible web-component stories. Every kai-* element rendered
  * with minimal sample data, grouped by category, so a developer can answer
  * "what exists?" without leaving Storybook — and read the exact markup via the
  * "Show code" panel on each story.
  *
- * Convention (matches the per-element stories): the kc-* tags are custom DOM
+ * Convention (matches the per-element stories): the kai-* tags are custom DOM
  * elements declared as JSX intrinsics elsewhere with only the standard
  * attributes; element-specific attributes and object/array PROPERTIES are set
  * imperatively through a `ref` (see `wire`/`attrs`/`props`), so this file stays
@@ -42,7 +42,7 @@ const attrs = (el: HTMLElement, a: Record<string, string | boolean>) => {
   }
 };
 
-// The kc-* tags are declared as JSX intrinsics by the per-element story files
+// The kai-* tags are declared as JSX intrinsics by the per-element story files
 // (global `declare module 'solid-js'` augmentations). We only ever pass `style`
 // and `ref` here, so no local re-declaration is needed.
 
@@ -106,8 +106,8 @@ const meta = {
       description: {
         component: [
           '# Component catalog',
-          'Every `kc-*` web component rendered with minimal sample data, grouped by category — the in-Storybook port of `examples/composable/index.html`. Use it to answer **"what exists?"**, then open each story\'s **Show code** panel to read the exact composition markup.',
-          'Data goes **in via properties** (set with `el.someProp = …` — see each snippet), interactions come **out via events** (`el.addEventListener("kc-submit", …)`). Register everything once with `import "@kitn.ai/ui/elements"`.',
+          'Every `kai-*` web component rendered with minimal sample data, grouped by category — the in-Storybook port of `examples/composable/index.html`. Use it to answer **"what exists?"**, then open each story\'s **Show code** panel to read the exact composition markup.',
+          'Data goes **in via properties** (set with `el.someProp = …` — see each snippet), interactions come **out via events** (`el.addEventListener("kai-submit", …)`). Register everything once with `import "@kitn.ai/ui/elements"`.',
           'Next: see **Examples / Composed chat shell** to watch these leaves assemble into a real chat, and **Examples / Choosing components** for the mental model of which tier to reach for.',
         ].join('\n\n'),
       },
@@ -121,25 +121,25 @@ type Story = StoryObj;
 // ── 01 · Batteries-included ──────────────────────────────────────────────────
 
 const DROPIN_SNIPPET = `<!-- The drop-in layer: whole surfaces in a single tag -->
-<kc-conversations style="display:block;height:320px"></kc-conversations>
-<kc-prompt-input placeholder="Ask anything…  (try typing /)"></kc-prompt-input>
+<kai-conversations style="display:block;height:320px"></kai-conversations>
+<kai-prompt-input placeholder="Ask anything…  (try typing /)"></kai-prompt-input>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
 
-  const list = document.querySelector('kc-conversations');
+  const list = document.querySelector('kai-conversations');
   list.conversations = [
     { id: 'c1', title: 'Web component architecture', scope: { type: 'document' },
       messageCount: 12, lastMessageAt: '…', updatedAt: '…' },
   ];
   list.activeId = 'c1';
-  list.addEventListener('kc-conversation-select', (e) => (list.activeId = e.detail.id));
+  list.addEventListener('kai-conversation-select', (e) => (list.activeId = e.detail.id));
 
-  const input = document.querySelector('kc-prompt-input');
+  const input = document.querySelector('kai-prompt-input');
   input.slashCommands = [
     { id: 'summarize', label: '/summarize', description: 'Summarize', category: 'Actions' },
   ];
-  input.addEventListener('kc-submit', (e) => console.log('submit', e.detail.value));
+  input.addEventListener('kai-submit', (e) => console.log('submit', e.detail.value));
 </script>`;
 
 export const BatteriesIncluded: Story = {
@@ -149,19 +149,19 @@ export const BatteriesIncluded: Story = {
     let input!: HTMLElement;
     onMount(() => {
       props(list, { conversations, activeId: 'c1' });
-      list.addEventListener('kc-conversation-select', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
+      list.addEventListener('kai-conversation-select', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
       props(input, { slashCommands });
       attrs(input, { placeholder: 'Ask anything…  (try typing /)' });
     });
     return (
       <Grid>
-        <Spec tag="kc-conversations" note="sidebar list with grouping & selection" tall>
+        <Spec tag="kai-conversations" note="sidebar list with grouping & selection" tall>
           <div style={{ height: '300px', border: '1px solid var(--color-border,#e4e4e7)', 'border-radius': '8px', overflow: 'hidden' }}>
-            <kc-conversations ref={(e) => (list = e)} style={{ display: 'block', height: '100%' }} />
+            <kai-conversations ref={(e) => (list = e)} style={{ display: 'block', height: '100%' }} />
           </div>
         </Spec>
-        <Spec tag="kc-prompt-input" note='slash commands — type "/"'>
-          <kc-prompt-input ref={(e) => (input = e)} />
+        <Spec tag="kai-prompt-input" note='slash commands — type "/"'>
+          <kai-prompt-input ref={(e) => (input = e)} />
         </Spec>
       </Grid>
     );
@@ -172,13 +172,13 @@ export const BatteriesIncluded: Story = {
 // ── 02 · Messages ────────────────────────────────────────────────────────────
 
 const MESSAGES_SNIPPET = `<!-- Compose your own message list from the parts a turn is made of -->
-<kc-message id="assistant"></kc-message>
-<kc-message id="user"></kc-message>
-<kc-markdown id="md"></kc-markdown>
-<kc-reasoning id="reason" label="Reasoning" streaming></kc-reasoning>
-<kc-chain-of-thought id="cot"></kc-chain-of-thought>
-<kc-code-block id="code" language="ts"></kc-code-block>
-<kc-tool id="tool" open></kc-tool>
+<kai-message id="assistant"></kai-message>
+<kai-message id="user"></kai-message>
+<kai-markdown id="md"></kai-markdown>
+<kai-reasoning id="reason" label="Reasoning" streaming></kai-reasoning>
+<kai-chain-of-thought id="cot"></kai-chain-of-thought>
+<kai-code-block id="code" language="ts"></kai-code-block>
+<kai-tool id="tool" open></kai-tool>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -220,26 +220,26 @@ export const Messages: Story = {
     });
     return (
       <Grid>
-        <Spec tag="kc-message" note='role="assistant" — reasoning + tool + attachment + actions'>
-          <kc-message ref={(e) => (msgA = e)} />
+        <Spec tag="kai-message" note='role="assistant" — reasoning + tool + attachment + actions'>
+          <kai-message ref={(e) => (msgA = e)} />
         </Spec>
-        <Spec tag="kc-message" note='role="user"'>
-          <kc-message ref={(e) => (msgU = e)} />
+        <Spec tag="kai-message" note='role="user"'>
+          <kai-message ref={(e) => (msgU = e)} />
         </Spec>
-        <Spec tag="kc-markdown" note="token-themed markdown + fenced code">
-          <kc-markdown ref={(e) => (md = e)} />
+        <Spec tag="kai-markdown" note="token-themed markdown + fenced code">
+          <kai-markdown ref={(e) => (md = e)} />
         </Spec>
-        <Spec tag="kc-reasoning" note="collapsible thinking; auto-opens while streaming">
-          <kc-reasoning ref={(e) => (reason = e)} />
+        <Spec tag="kai-reasoning" note="collapsible thinking; auto-opens while streaming">
+          <kai-reasoning ref={(e) => (reason = e)} />
         </Spec>
-        <Spec tag="kc-chain-of-thought" note="step-by-step reasoning with connectors">
-          <kc-chain-of-thought ref={(e) => (cot = e)} />
+        <Spec tag="kai-chain-of-thought" note="step-by-step reasoning with connectors">
+          <kai-chain-of-thought ref={(e) => (cot = e)} />
         </Spec>
-        <Spec tag="kc-code-block" note='language="ts" — highlighted, copyable'>
-          <kc-code-block ref={(e) => (code = e)} />
+        <Spec tag="kai-code-block" note='language="ts" — highlighted, copyable'>
+          <kai-code-block ref={(e) => (code = e)} />
         </Spec>
-        <Spec tag="kc-tool" note="open — input, output, state badge">
-          <kc-tool ref={(e) => (tool = e)} />
+        <Spec tag="kai-tool" note="open — input, output, state badge">
+          <kai-tool ref={(e) => (tool = e)} />
         </Spec>
       </Grid>
     );
@@ -250,12 +250,12 @@ export const Messages: Story = {
 // ── 03 · Attachments & media ─────────────────────────────────────────────────
 
 const MEDIA_SNIPPET = `<!-- One element, presentation chosen by attribute -->
-<kc-attachments id="inline" variant="inline" hover-card></kc-attachments>
-<kc-attachments id="grid" variant="grid" removable></kc-attachments>
-<kc-image id="img" alt="demo" style="width:96px"></kc-image>
-<kc-source href="https://kitn.dev" headline="kitn — the kit"
-  description="Composable chat UI." show-favicon></kc-source>
-<kc-sources id="srcs"></kc-sources>
+<kai-attachments id="inline" variant="inline" hover-card></kai-attachments>
+<kai-attachments id="grid" variant="grid" removable></kai-attachments>
+<kai-image id="img" alt="demo" style="width:96px"></kai-image>
+<kai-source href="https://kitn.dev" headline="kitn — the kit"
+  description="Composable chat UI." show-favicon></kai-source>
+<kai-sources id="srcs"></kai-sources>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -266,7 +266,7 @@ const MEDIA_SNIPPET = `<!-- One element, presentation chosen by attribute -->
   document.getElementById('inline').items = items;
   const grid = document.getElementById('grid');
   grid.items = items;
-  grid.addEventListener('kc-remove', (e) => (grid.items = grid.items.filter((x) => x.id !== e.detail.id)));
+  grid.addEventListener('kai-remove', (e) => (grid.items = grid.items.filter((x) => x.id !== e.detail.id)));
   document.getElementById('img').base64 = '…'; // pair with media-type
   document.getElementById('srcs').sources = [
     { href: 'https://kitn.dev', title: 'kitn', description: '…', showFavicon: true },
@@ -282,7 +282,7 @@ export const AttachmentsAndMedia: Story = {
       attrs(inline, { variant: 'inline', 'hover-card': true });
       props(grid, { items: attachments });
       attrs(grid, { variant: 'grid', removable: true });
-      grid.addEventListener('kc-remove', (e) => {
+      grid.addEventListener('kai-remove', (e) => {
         const id = (e as CustomEvent).detail.id;
         (grid as AnyEl).items = (attachments as { id: string }[]).filter((x) => x.id !== id);
       });
@@ -296,20 +296,20 @@ export const AttachmentsAndMedia: Story = {
     });
     return (
       <Grid>
-        <Spec tag="kc-attachments" note='variant="inline" hover-card'>
-          <kc-attachments ref={(e) => (inline = e)} />
+        <Spec tag="kai-attachments" note='variant="inline" hover-card'>
+          <kai-attachments ref={(e) => (inline = e)} />
         </Spec>
-        <Spec tag="kc-attachments" note='variant="grid" removable'>
-          <kc-attachments ref={(e) => (grid = e)} />
+        <Spec tag="kai-attachments" note='variant="grid" removable'>
+          <kai-attachments ref={(e) => (grid = e)} />
         </Spec>
-        <Spec tag="kc-image" note="base64 / byte-array image with skeleton">
-          <kc-image ref={(e) => (img = e)} style={{ width: '96px' }} />
+        <Spec tag="kai-image" note="base64 / byte-array image with skeleton">
+          <kai-image ref={(e) => (img = e)} style={{ width: '96px' }} />
         </Spec>
-        <Spec tag="kc-source" note="show-favicon — citation with hover preview">
-          <kc-source ref={(e) => (src = e)} />
+        <Spec tag="kai-source" note="show-favicon — citation with hover preview">
+          <kai-source ref={(e) => (src = e)} />
         </Spec>
-        <Spec tag="kc-sources" note="wrapped row of citations">
-          <kc-sources ref={(e) => (srcs = e)} />
+        <Spec tag="kai-sources" note="wrapped row of citations">
+          <kai-sources ref={(e) => (srcs = e)} />
         </Spec>
       </Grid>
     );
@@ -320,20 +320,20 @@ export const AttachmentsAndMedia: Story = {
 // ── 04 · Composer ────────────────────────────────────────────────────────────
 
 const COMPOSER_SNIPPET = `<!-- Input affordances you can place anywhere -->
-<kc-suggestions id="suggs"></kc-suggestions>
-<kc-file-upload></kc-file-upload>
-<kc-voice-input id="voice"></kc-voice-input>
-<kc-thinking-bar text="Thinking…" stoppable></kc-thinking-bar>
+<kai-suggestions id="suggs"></kai-suggestions>
+<kai-file-upload></kai-file-upload>
+<kai-voice-input id="voice"></kai-voice-input>
+<kai-thinking-bar text="Thinking…" stoppable></kai-thinking-bar>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
   const suggs = document.getElementById('suggs');
   suggs.suggestions = ['Explain the architecture', 'Show me a code example'];
-  suggs.addEventListener('kc-select', (e) => console.log('select', e.detail.value));
+  suggs.addEventListener('kai-select', (e) => console.log('select', e.detail.value));
 
   const voice = document.getElementById('voice');
   voice.transcribe = async () => 'transcribed text'; // your STT here
-  voice.addEventListener('kc-transcription', (e) => console.log(e.detail.text));
+  voice.addEventListener('kai-transcription', (e) => console.log(e.detail.text));
 </script>`;
 
 export const Composer: Story = {
@@ -347,16 +347,16 @@ export const Composer: Story = {
     });
     return (
       <Grid>
-        <Spec tag="kc-suggestions" note="suggestion chips; click fires select">
-          <kc-suggestions ref={(e) => (suggs = e)} />
+        <Spec tag="kai-suggestions" note="suggestion chips; click fires select">
+          <kai-suggestions ref={(e) => (suggs = e)} />
         </Spec>
-        <Spec tag="kc-file-upload" note="click / drag-drop dropzone">
-          <kc-file-upload />
+        <Spec tag="kai-file-upload" note="click / drag-drop dropzone">
+          <kai-file-upload />
         </Spec>
-        <Spec tag="kc-voice-input · kc-thinking-bar" note="mic capture + shimmering thinking bar">
+        <Spec tag="kai-voice-input · kai-thinking-bar" note="mic capture + shimmering thinking bar">
           <div style={{ display: 'flex', gap: '8px', 'align-items': 'center' }}>
-            <kc-voice-input ref={(e) => (voice = e)} />
-            <kc-thinking-bar ref={(e) => (think = e)} style={{ flex: '1' }} />
+            <kai-voice-input ref={(e) => (voice = e)} />
+            <kai-thinking-bar ref={(e) => (think = e)} style={{ flex: '1' }} />
           </div>
         </Spec>
       </Grid>
@@ -368,19 +368,19 @@ export const Composer: Story = {
 // ── 05 · Header & meta ───────────────────────────────────────────────────────
 
 const META_SNIPPET = `<!-- The small pieces around a conversation -->
-<kc-model-switcher id="models"></kc-model-switcher>
-<kc-context id="ctx"></kc-context>
-<kc-scope-picker id="scope"></kc-scope-picker>
-<kc-checkpoint label="Checkpoint" tooltip="Restore"></kc-checkpoint>
-<kc-skills id="skills"></kc-skills>
-<kc-feedback-bar bar-title="Was this helpful?"></kc-feedback-bar>
+<kai-model-switcher id="models"></kai-model-switcher>
+<kai-context id="ctx"></kai-context>
+<kai-scope-picker id="scope"></kai-scope-picker>
+<kai-checkpoint label="Checkpoint" tooltip="Restore"></kai-checkpoint>
+<kai-skills id="skills"></kai-skills>
+<kai-feedback-bar bar-title="Was this helpful?"></kai-feedback-bar>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
   const ms = document.getElementById('models');
   ms.models = [{ id: 'opus', name: 'Claude Opus', provider: 'Anthropic' }];
   ms.currentModel = 'opus';
-  ms.addEventListener('kc-model-change', (e) => (ms.currentModel = e.detail.modelId));
+  ms.addEventListener('kai-model-change', (e) => (ms.currentModel = e.detail.modelId));
 
   document.getElementById('ctx').context = { usedTokens: 48200, maxTokens: 200000 };
   const scope = document.getElementById('scope');
@@ -395,7 +395,7 @@ export const HeaderAndMeta: Story = {
     let ms!: HTMLElement, ctx!: HTMLElement, scope!: HTMLElement, cp!: HTMLElement, skills!: HTMLElement, fb!: HTMLElement;
     onMount(() => {
       props(ms, { models, currentModel: 'opus' });
-      ms.addEventListener('kc-model-change', (e) => ((ms as AnyEl).currentModel = (e as CustomEvent).detail.modelId));
+      ms.addEventListener('kai-model-change', (e) => ((ms as AnyEl).currentModel = (e as CustomEvent).detail.modelId));
       props(ctx, { context });
       props(scope, { availableAuthors: ['Rob', 'Alex'], availableTags: ['design', 'api'] });
       attrs(cp, { label: 'Checkpoint', tooltip: 'Restore' });
@@ -404,23 +404,23 @@ export const HeaderAndMeta: Story = {
     });
     return (
       <Grid>
-        <Spec tag="kc-model-switcher" note="model dropdown; emits modelchange">
-          <kc-model-switcher ref={(e) => (ms = e)} />
+        <Spec tag="kai-model-switcher" note="model dropdown; emits modelchange">
+          <kai-model-switcher ref={(e) => (ms = e)} />
         </Spec>
-        <Spec tag="kc-context" note="token-usage meter with breakdown">
-          <kc-context ref={(e) => (ctx = e)} />
+        <Spec tag="kai-context" note="token-usage meter with breakdown">
+          <kai-context ref={(e) => (ctx = e)} />
         </Spec>
-        <Spec tag="kc-scope-picker" note="scope a chat by author or tag">
-          <kc-scope-picker ref={(e) => (scope = e)} />
+        <Spec tag="kai-scope-picker" note="scope a chat by author or tag">
+          <kai-scope-picker ref={(e) => (scope = e)} />
         </Spec>
-        <Spec tag="kc-checkpoint · kc-skills" note="bookmark button + active-skill badges">
+        <Spec tag="kai-checkpoint · kai-skills" note="bookmark button + active-skill badges">
           <div style={{ display: 'flex', gap: '8px', 'align-items': 'center' }}>
-            <kc-checkpoint ref={(e) => (cp = e)} />
-            <kc-skills ref={(e) => (skills = e)} />
+            <kai-checkpoint ref={(e) => (cp = e)} />
+            <kai-skills ref={(e) => (skills = e)} />
           </div>
         </Spec>
-        <Spec tag="kc-feedback-bar" note="inline thumbs up/down banner">
-          <kc-feedback-bar ref={(e) => (fb = e)} />
+        <Spec tag="kai-feedback-bar" note="inline thumbs up/down banner">
+          <kai-feedback-bar ref={(e) => (fb = e)} />
         </Spec>
       </Grid>
     );
@@ -431,19 +431,19 @@ export const HeaderAndMeta: Story = {
 // ── 06 · Status & motion ─────────────────────────────────────────────────────
 
 const STATUS_SNIPPET = `<!-- Loaders, streaming text, and empty states -->
-<kc-loader variant="circular"></kc-loader>
-<kc-loader variant="dots"></kc-loader>
-<kc-text-shimmer text="Generating response…"></kc-text-shimmer>
-<kc-response-stream id="stream" speed="30"></kc-response-stream>
-<kc-empty empty-title="No conversations yet" description="Start chatting to see them here.">
+<kai-loader variant="circular"></kai-loader>
+<kai-loader variant="dots"></kai-loader>
+<kai-text-shimmer text="Generating response…"></kai-text-shimmer>
+<kai-response-stream id="stream" speed="30"></kai-response-stream>
+<kai-empty empty-title="No conversations yet" description="Start chatting to see them here.">
   <span slot="media">✦</span>
-</kc-empty>
+</kai-empty>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
   const stream = document.getElementById('stream');
   stream.text = 'This text reveals with a typewriter animation, character by character.';
-  stream.addEventListener('kc-complete', () => console.log('done'));
+  stream.addEventListener('kai-complete', () => console.log('done'));
 </script>`;
 
 export const StatusAndMotion: Story = {
@@ -464,25 +464,25 @@ export const StatusAndMotion: Story = {
     });
     return (
       <Grid>
-        <Spec tag="kc-loader" note="twelve loader styles">
+        <Spec tag="kai-loader" note="twelve loader styles">
           <div style={{ display: 'flex', gap: '24px', 'align-items': 'center', 'flex-wrap': 'wrap' }}>
-            <kc-loader ref={(e) => (l1 = e)} />
-            <kc-loader ref={(e) => (l2 = e)} />
-            <kc-loader ref={(e) => (l3 = e)} />
-            <kc-loader ref={(e) => (l4 = e)} />
-            <kc-loader ref={(e) => (l5 = e)} />
+            <kai-loader ref={(e) => (l1 = e)} />
+            <kai-loader ref={(e) => (l2 = e)} />
+            <kai-loader ref={(e) => (l3 = e)} />
+            <kai-loader ref={(e) => (l4 = e)} />
+            <kai-loader ref={(e) => (l5 = e)} />
           </div>
         </Spec>
-        <Spec tag="kc-text-shimmer" note="animated shimmering text">
-          <kc-text-shimmer ref={(e) => (shimmer = e)} />
+        <Spec tag="kai-text-shimmer" note="animated shimmering text">
+          <kai-text-shimmer ref={(e) => (shimmer = e)} />
         </Spec>
-        <Spec tag="kc-response-stream" note='mode="typewriter" — emits complete'>
-          <kc-response-stream ref={(e) => (stream = e)} />
+        <Spec tag="kai-response-stream" note='mode="typewriter" — emits complete'>
+          <kai-response-stream ref={(e) => (stream = e)} />
         </Spec>
-        <Spec tag="kc-empty" note="empty-state layout — media & default slots">
-          <kc-empty ref={(e) => (empty = e)}>
+        <Spec tag="kai-empty" note="empty-state layout — media & default slots">
+          <kai-empty ref={(e) => (empty = e)}>
             <span slot="media">✦</span>
-          </kc-empty>
+          </kai-empty>
         </Spec>
       </Grid>
     );

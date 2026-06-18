@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-form': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-form': JSX.HTMLAttributes<HTMLElement> & {
         heading?: string;
         'card-id'?: string;
         ref?: (el: HTMLElement) => void;
@@ -25,14 +25,14 @@ function Frame(props: { children: JSX.Element }) {
   return <div style={{ 'max-width': '460px' }}>{props.children}</div>;
 }
 
-/** Mounts a <kc-form>, sets `.data`, logs the emitted CardEvent under the render. */
+/** Mounts a <kai-form>, sets `.data`, logs the emitted CardEvent under the render. */
 function FormDemo(props: { def: FormDefinition; cardId: string }) {
   const [log, setLog] = createSignal<CardEvent[]>([]);
   let el: FormEl | undefined;
   onMount(() => {
     if (!el) return;
     el.data = props.def;
-    el.addEventListener('kc-card', (e) => {
+    el.addEventListener('kai-card', (e) => {
       const detail = (e as CustomEvent<CardEvent>).detail;
       setLog((prev) => [...prev, detail]);
     });
@@ -40,7 +40,7 @@ function FormDemo(props: { def: FormDefinition; cardId: string }) {
   return (
     <Frame>
       <div style={{ display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
-        <kc-form ref={(e) => (el = e as FormEl)} card-id={props.cardId} />
+        <kai-form ref={(e) => (el = e as FormEl)} card-id={props.cardId} />
         <pre
           style={{
             margin: 0,
@@ -128,33 +128,33 @@ const VALIDATION: FormDefinition = {
   },
 };
 
-const HTML_SNIPPET = (def: FormDefinition) => `<kc-form></kc-form>
+const HTML_SNIPPET = (def: FormDefinition) => `<kai-form></kai-form>
 <script type="module">
   import '@kitn.ai/ui/elements'; // registers the custom elements
 
-  const form = document.querySelector('kc-form');
+  const form = document.querySelector('kai-form');
   // \`data\` is the CardEnvelope.data — a JSON Schema + x-kc-* UI hints (set as a property).
   form.data = ${JSON.stringify(def, null, 2)};
 
-  // Cards bubble ONE \`kc-card\` CustomEvent carrying a typed CardEvent.
-  form.addEventListener('kc-card', (e) => {
+  // Cards bubble ONE \`kai-card\` CustomEvent carrying a typed CardEvent.
+  form.addEventListener('kai-card', (e) => {
     const ev = e.detail; // { kind:'submit', cardId, data } | { kind:'action', ... } | ...
     if (ev.kind === 'submit') console.log('submission', ev.data);
   });
 </script>`;
 
 const meta = {
-  title: 'Generative UI/Cards/kc-form',
+  title: 'Generative UI/Cards/kai-form',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-form'),
+  argTypes: argTypesFor('kai-form'),
   parameters: {
     layout: 'padded',
     docs: {
-      description: specDescription('kc-form', [
-        '`<kc-form>` turns an agent\'s **JSON Schema** "shape" (set via the `data` **property**) into a themed, accessible, validated form inside `<kc-card>` chrome. A valid submission is emitted **up the Card contract** as a bubbling **`kc-card`** CustomEvent of `{ kind: \'submit\', cardId, data }`.',
-        '**Anatomy:** `<kc-card>` chrome (optional heading from `data.title` or `heading` attr) → **field rows** (one per schema property in `x-kc-order` / key order: label + widget; `object` properties become a `<fieldset>`, `array` items become a repeater/checkbox-group/tag-list) → **card footer** (`x-kc-submitLabel` submit `<Button>` + optional `x-kc-actions` secondary buttons; replaced by a read-only `<dl>` summary after a resolved submission).',
+      description: specDescription('kai-form', [
+        '`<kai-form>` turns an agent\'s **JSON Schema** "shape" (set via the `data` **property**) into a themed, accessible, validated form inside `<kai-card>` chrome. A valid submission is emitted **up the Card contract** as a bubbling **`kai-card`** CustomEvent of `{ kind: \'submit\', cardId, data }`.',
+        '**Anatomy:** `<kai-card>` chrome (optional heading from `data.title` or `heading` attr) → **field rows** (one per schema property in `x-kc-order` / key order: label + widget; `object` properties become a `<fieldset>`, `array` items become a repeater/checkbox-group/tag-list) → **card footer** (`x-kc-submitLabel` submit `<Button>` + optional `x-kc-actions` secondary buttons; replaced by a read-only `<dl>` summary after a resolved submission).',
         '**The mapping is deterministic:** `string`→text, `string`+`enum`→radio/select, `string`+`format`→typed inputs, `number`/`integer`→number (or `slider`/`rating` via `x-kc-widget`), `boolean`→switch, `array`→checkbox-group / multi-select / repeater / tag-list, nested `object`→fieldset. `x-kc-*` hints (`x-kc-widget`, `x-kc-order`, `x-kc-submitLabel`, `x-kc-actions`, `x-kc-dismissible`, …) refine the UI and live **inside** the schema, so one source of truth drives both the form and validation.',
-        "**Events** (all frozen Card-contract verbs): `ready` on mount, `submit` on a valid submit, `action` for secondary buttons (`x-kc-actions`), `dismiss` when dismissible, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**.",
+        "**Events** (all frozen Card-contract verbs): `ready` on mount, `submit` on a valid submit, `action` for secondary buttons (`x-kc-actions`), `dismiss` when dismissible, `error` for a malformed definition (renders the inline `kai-card` error). It **never invents events**.",
         '**The same `CardEnvelope`/`CardEvent` shapes flow over the remote iframe transport unchanged** — this is the *native* card. See the **Code** tab for the full envelope JSON + the HTML wiring.',
       ]),
     },
@@ -204,17 +204,17 @@ export const Resolved: Story = {
     });
     return (
       <Frame>
-        <kc-form ref={(e) => (el = e as FormEl)} card-id="card-resolved-form" />
+        <kai-form ref={(e) => (el = e as FormEl)} card-id="card-resolved-form" />
       </Frame>
     );
   },
   parameters: {
     docs: {
       source: {
-        code: `<kc-form></kc-form>
+        code: `<kai-form></kai-form>
 <script type="module">
   import '@kitn.ai/ui/elements';
-  const form = document.querySelector('kc-form');
+  const form = document.querySelector('kai-form');
   form.data = ${JSON.stringify(RESOLVED_FORM, null, 2)};
   // Setting .resolution renders the chromed read-only summary — no inputs or submit button.
   form.resolution = { kind: 'submit', data: { name: 'Jane Cooper', optIn: true } };
@@ -231,13 +231,13 @@ export const InvalidEnvelope: Story = {
   parameters: {
     docs: {
       source: {
-        code: `<kc-form></kc-form>
+        code: `<kai-form></kai-form>
 <script type="module">
   import '@kitn.ai/ui/elements';
-  const form = document.querySelector('kc-form');
+  const form = document.querySelector('kai-form');
   // A definition that isn't a JSON-Schema object → inline error + an \`error\` event.
   form.data = { type: 'array' };
-  form.addEventListener('kc-card', (e) => {
+  form.addEventListener('kai-card', (e) => {
     if (e.detail.kind === 'error') console.warn('form error:', e.detail.message);
   });
 </script>`,

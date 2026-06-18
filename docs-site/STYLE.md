@@ -105,11 +105,11 @@ standard). Don't reinvent them.
   React, Vue, Svelte, Angular, or plain HTML.
 - **Lead with the web components; don't lead with how they're built.** They're
   authored in SolidJS, but that's an implementation detail, not the pitch — a
-  reader shouldn't need to care that it's Solid to use `<kc-chat>`. Mention the
+  reader shouldn't need to care that it's Solid to use `<kai-chat>`. Mention the
   SolidJS primitives only where they're genuinely relevant (deep customization;
   the "Working with Primitives & UI Components" section), not as a co-headline.
-- The elements are named `kc-*` (e.g. `<kc-chat>`). State that once, plainly;
-  don't keep qualifying it as "the `kc-*` web components (the default)".
+- The elements are named `kai-*` (e.g. `<kai-chat>`). State that once, plainly;
+  don't keep qualifying it as "the `kai-*` web components (the default)".
 - Pick one term — **"web component"** — and stick to it (not "custom element" /
   "widget").
 - **Setting array/object data**: the natural framing is JavaScript vs. HTML

@@ -17,11 +17,11 @@ const meta: Meta = {
         component: [
           'Show a model\'s chain-of-thought trace above its answer. Two elements cover this:',
           '',
-          '**`<kc-chain-of-thought>`** — the flat, data-driven route. Pass a `steps` array of `{ label, content }` objects as a **property** (not an attribute — attributes only accept strings). The element renders collapsible steps with connector lines automatically.',
+          '**`<kai-chain-of-thought>`** — the flat, data-driven route. Pass a `steps` array of `{ label, content }` objects as a **property** (not an attribute — attributes only accept strings). The element renders collapsible steps with connector lines automatically.',
           '',
           '**Gotcha — no per-step icons in the element:** the `steps` shape has no `icon` field. The Search/Calculator/Lightbulb icons in the live demo are `ChainOfThoughtTrigger leftIcon` props, a SolidJS-only touch. If you need branded step icons, compose the SolidJS primitives directly (see the Solid tab).',
           '',
-          '**`<kc-reasoning>`** — a single collapsible reasoning block (text + label). Better for raw LLM thinking output: pass `text` as a property, add `streaming` while the stream is live (auto-expands then re-collapses), and `markdown` (defaults to `true`). It fires `kc-open-change: { open }` when toggled.',
+          '**`<kai-reasoning>`** — a single collapsible reasoning block (text + label). Better for raw LLM thinking output: pass `text` as a property, add `streaming` while the stream is live (auto-expands then re-collapses), and `markdown` (defaults to `true`). It fires `kai-open-change: { open }` when toggled.',
           '',
           'The live demo composes the SolidJS `ChainOfThought` + step primitives for full icon control.',
         ].join('\n'),
@@ -41,7 +41,7 @@ export const Default: Story = {
         story: [
           'Four-step chain-of-thought trace above a technical answer. Key points:',
           '',
-          '- The `ChainOfThought` steps here use `leftIcon` (Search/Calculator/Lightbulb) — a **SolidJS-only** prop on `ChainOfThoughtTrigger`. The `<kc-chain-of-thought>` element\'s `steps` array has no icon field.',
+          '- The `ChainOfThought` steps here use `leftIcon` (Search/Calculator/Lightbulb) — a **SolidJS-only** prop on `ChainOfThoughtTrigger`. The `<kai-chain-of-thought>` element\'s `steps` array has no icon field.',
           '- Each step is independently collapsible — `ChainOfThoughtStep isLast` removes the trailing connector line.',
           '- The copy/like/dislike bar is a separate `MessageActions` composition; it is not part of the chain-of-thought model.',
         ].join('\n'),

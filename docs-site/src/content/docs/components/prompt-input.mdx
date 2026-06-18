@@ -11,7 +11,7 @@ import EventTable from '../../../components/EventTable.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-prompt-input</p>
+<p class="kc-tag-sub">kai-prompt-input</p>
 
 <p class="kc-lede">A Shadow DOM chat composer — auto-resizing textarea, send button, suggestion chips, attachments, and an extensible toolbar. Drop it into any framework without style conflicts.</p>
 
@@ -19,10 +19,10 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-prompt-input" />
+<Playground client:only="solid" tag="kai-prompt-input" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-prompt-input>` whenever you need a chat composer outside of SolidJS — React, Vue, Svelte, Angular, or plain HTML. It manages its own input state uncontrolled by default; listen for `kc-submit` to receive the typed text and any staged attachments. Pin it to the bottom of a chat surface at full width for the canonical layout.
+Reach for `<kai-prompt-input>` whenever you need a chat composer outside of SolidJS — React, Vue, Svelte, Angular, or plain HTML. It manages its own input state uncontrolled by default; listen for `kai-submit` to receive the typed text and any staged attachments. Pin it to the bottom of a chat surface at full width for the canonical layout.
 </Aside>
 
 ## Usage
@@ -30,7 +30,7 @@ Reach for `<kc-prompt-input>` whenever you need a chat composer outside of Solid
 Register elements once, then wire up JS properties and DOM events:
 
 ```html
-<kc-prompt-input id="input" style="display:block; width:100%;"></kc-prompt-input>
+<kai-prompt-input id="input" style="display:block; width:100%;"></kai-prompt-input>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -41,60 +41,60 @@ Register elements once, then wire up JS properties and DOM events:
     { id: 'summarize', label: '/summarize', description: 'Summarize', category: 'Actions' },
   ];
 
-  input.addEventListener('kc-submit', (e) => console.log('send:', e.detail.value, e.detail.attachments));
-  input.addEventListener('kc-value-change', (e) => console.log('typing:', e.detail.value));
+  input.addEventListener('kai-submit', (e) => console.log('send:', e.detail.value, e.detail.attachments));
+  input.addEventListener('kai-value-change', (e) => console.log('typing:', e.detail.value));
 </script>
 ```
 
 - **Array props** — `suggestions`, `slashCommands`, `slashActiveIds`, and `attachments` are arrays, so set them in JavaScript rather than as HTML attributes.
 - **Scalar flags** — `placeholder`, `disabled`, `loading`, `search`, `voice`, `stoppable`, `slashCompact`, and `suggestionMode` work as plain attributes or properties.
-- **Loading + stoppable** — set `loading` while a response streams; add `stoppable` to swap the send button for a Stop button that fires `kc-stop`.
-- **Custom toolbar buttons** — place `<kc-action id icon tooltip>` children inside the element; clicks fire `kc-toolbar-action` with `detail.action`.
+- **Loading + stoppable** — set `loading` while a response streams; add `stoppable` to swap the send button for a Stop button that fires `kai-stop`.
+- **Custom toolbar buttons** — place `<kai-action id icon tooltip>` children inside the element; clicks fire `kai-toolbar-action` with `detail.action`.
 
 ## Examples
 
 ### Default
 
-Out-of-the-box composer with starter suggestions. Type and press Enter (or click a chip) to fire `kc-submit`.
+Out-of-the-box composer with starter suggestions. Type and press Enter (or click a chip) to fire `kai-submit`.
 
-<Example client:visible tag="kc-prompt-input" data="withSuggestions" />
+<Example client:visible tag="kai-prompt-input" data="withSuggestions" />
 
 ### With Voice and Search
 
-`search` and `voice` flags add Globe and Mic buttons to the toolbar, firing `kc-search` and `kc-voice` respectively.
+`search` and `voice` flags add Globe and Mic buttons to the toolbar, firing `kai-search` and `kai-voice` respectively.
 
-<Example client:visible tag="kc-prompt-input" config={{ search: true, voice: true }} data="withSuggestions" />
+<Example client:visible tag="kai-prompt-input" config={{ search: true, voice: true }} data="withSuggestions" />
 
 ### Slash-Command Palette
 
-Set `slashCommands` to enable the palette. Typing `/` opens it; selecting an entry fires `kc-slash-select`. Use `slashActiveIds` to highlight active commands.
+Set `slashCommands` to enable the palette. Typing `/` opens it; selecting an entry fires `kai-slash-select`. Use `slashActiveIds` to highlight active commands.
 
-<Example client:visible tag="kc-prompt-input" data="withSlashCommands" />
+<Example client:visible tag="kai-prompt-input" data="withSlashCommands" />
 
 ### Pre-Seeded Attachments
 
 Set `attachments` to pre-populate staged files. The element manages attachment state — the paperclip adds more, each chip has a remove button.
 
-<Example client:visible tag="kc-prompt-input" data="withAttachments" />
+<Example client:visible tag="kai-prompt-input" data="withAttachments" />
 
 ### Loading State
 
-`loading` blocks submit while a response streams. `stoppable` swaps send for a Stop button that fires `kc-stop`.
+`loading` blocks submit while a response streams. `stoppable` swaps send for a Stop button that fires `kai-stop`.
 
-<Example client:visible tag="kc-prompt-input" config={{ loading: true, stoppable: true }} data="withSuggestions" />
+<Example client:visible tag="kai-prompt-input" config={{ loading: true, stoppable: true }} data="withSuggestions" />
 
 ### Disabled
 
 `disabled` makes the composer entirely non-interactive — useful for read-only or locked states.
 
-<Example client:visible tag="kc-prompt-input" config={{ disabled: true }} data="withSuggestions" />
+<Example client:visible tag="kai-prompt-input" config={{ disabled: true }} data="withSuggestions" />
 
 ## Props
 
-<PropTable tag="kc-prompt-input" />
+<PropTable tag="kai-prompt-input" />
 
 ## Events
 
-<EventTable tag="kc-prompt-input" />
+<EventTable tag="kai-prompt-input" />
 
 <NeedAHand />

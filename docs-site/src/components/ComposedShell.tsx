@@ -1,5 +1,5 @@
-/** Live demo for "Compose your own shell" — assembles kc-resizable / kc-resizable-item /
- *  kc-conversations / kc-message / kc-prompt-input without <kc-chat>. Uses an imperative
+/** Live demo for "Compose your own shell" — assembles kai-resizable / kai-resizable-item /
+ *  kai-conversations / kai-message / kai-prompt-input without <kai-chat>. Uses an imperative
  *  render loop for the message thread (same approach as the Storybook composed-shell story).
  *  Props are set as JS properties; events wired in onMount. */
 import { onMount, onCleanup } from 'solid-js';
@@ -42,18 +42,18 @@ const CONVERSATIONS = [
 ];
 
 const SEED_MESSAGES: ChatMessage[] = [
-  { id: 'u1', role: 'user', content: 'How does this shell differ from using `<kc-chat>`?' },
+  { id: 'u1', role: 'user', content: 'How does this shell differ from using `<kai-chat>`?' },
   {
     id: 'a1',
     role: 'assistant',
     content:
-      '`<kc-chat>` is the 90% path — one element gives you the full thread, composer, and header chrome. **This shell** steps down one layer:\n\n- `<kc-resizable>` owns the layout (sidebar | main | any extra panels).\n- `<kc-conversations>` renders the list.\n- Each `<kc-message>` is a separate element you create and wire.\n- `<kc-prompt-input>` is the standalone composer.\n\nYou control the data flow and can slot in anything — a canvas, an artifact viewer, a debug inspector.',
+      '`<kai-chat>` is the 90% path — one element gives you the full thread, composer, and header chrome. **This shell** steps down one layer:\n\n- `<kai-resizable>` owns the layout (sidebar | main | any extra panels).\n- `<kai-conversations>` renders the list.\n- Each `<kai-message>` is a separate element you create and wire.\n- `<kai-prompt-input>` is the standalone composer.\n\nYou control the data flow and can slot in anything — a canvas, an artifact viewer, a debug inspector.',
     actions: ['copy', 'like', 'dislike'],
   },
 ];
 
 const DEFAULT_REPLY =
-  "Because you're composing the shell yourself, you can rearrange panels, hide the sidebar, add a third column for previews, or wire each component to a different data source — none of which `<kc-chat>` exposes directly. The tradeoff is more wiring; the payoff is complete layout control.";
+  "Because you're composing the shell yourself, you can rearrange panels, hide the sidebar, add a third column for previews, or wire each component to a different data source — none of which `<kai-chat>` exposes directly. The tradeoff is more wiring; the payoff is complete layout control.";
 
 let uid = 0;
 const nextId = () => `cs${++uid}`;
@@ -69,7 +69,7 @@ export default function ComposedShell() {
 
   const theme = () => document.documentElement.dataset.theme ?? 'light';
 
-  /** Rebuild the <kc-message> list inside the thread container. */
+  /** Rebuild the <kai-message> list inside the thread container. */
   const renderThread = () => {
     if (!threadEl) return;
     // Reuse existing elements where possible, create new ones as needed.
@@ -77,7 +77,7 @@ export default function ComposedShell() {
     thread.forEach((m, i) => {
       let el = existing[i] as AnyEl | undefined;
       if (!el) {
-        el = document.createElement('kc-message') as unknown as AnyEl;
+        el = document.createElement('kai-message') as unknown as AnyEl;
         el.setAttribute('theme', theme());
         threadEl!.append(el as unknown as HTMLElement);
       }
@@ -140,14 +140,14 @@ export default function ComposedShell() {
       listEl.conversations = CONVERSATIONS;
       listEl.activeId = 'c1';
       listEl.setAttribute('theme', theme());
-      listEl.addEventListener('kc-conversation-select', onConversationSelect);
+      listEl.addEventListener('kai-conversation-select', onConversationSelect);
     }
 
     if (inputEl) {
       customElements.upgrade(inputEl as HTMLElement);
       inputEl.setAttribute('placeholder', 'Message the assistant…');
       inputEl.setAttribute('theme', theme());
-      inputEl.addEventListener('kc-submit', onSubmit);
+      inputEl.addEventListener('kai-submit', onSubmit);
     }
 
     // Seed initial messages.
@@ -167,8 +167,8 @@ export default function ComposedShell() {
 
     onCleanup(() => {
       clearTimeout(timer);
-      listEl?.removeEventListener('kc-conversation-select', onConversationSelect);
-      inputEl?.removeEventListener('kc-submit', onSubmit);
+      listEl?.removeEventListener('kai-conversation-select', onConversationSelect);
+      inputEl?.removeEventListener('kai-submit', onSubmit);
       obs.disconnect();
     });
   });
@@ -179,23 +179,23 @@ export default function ComposedShell() {
       style={{ height: '560px' }}
     >
       {/* @ts-expect-error custom element */}
-      <kc-resizable
+      <kai-resizable
         orientation="horizontal"
         style={{ display: 'block', height: '100%' }}
       >
         {/* Sidebar — conversation list */}
         {/* @ts-expect-error custom element */}
-        <kc-resizable-item size="22%" min="160px" max="40%">
+        <kai-resizable-item size="22%" min="160px" max="40%">
           {/* @ts-expect-error custom element */}
-          <kc-conversations
+          <kai-conversations
             ref={(el: HTMLElement) => (listEl = el as AnyEl)}
             style={{ display: 'block', height: '100%' }}
           />
-        </kc-resizable-item>
+        </kai-resizable-item>
 
         {/* Main — scrolling thread + composer */}
         {/* @ts-expect-error custom element */}
-        <kc-resizable-item>
+        <kai-resizable-item>
           <div
             style={{
               height: '100%',
@@ -216,7 +216,7 @@ export default function ComposedShell() {
                 gap: '12px',
               } as any}
             >
-              {/* <kc-message> elements are created imperatively inside renderThread() */}
+              {/* <kai-message> elements are created imperatively inside renderThread() */}
               <div
                 ref={(el: HTMLElement) => (threadEl = el)}
                 style={{ display: 'flex', 'flex-direction': 'column', gap: '12px' } as any}
@@ -231,14 +231,14 @@ export default function ComposedShell() {
               } as any}
             >
               {/* @ts-expect-error custom element */}
-              <kc-prompt-input
+              <kai-prompt-input
                 ref={(el: HTMLElement) => (inputEl = el as AnyEl)}
                 style={{ display: 'block' }}
               />
             </div>
           </div>
-        </kc-resizable-item>
-      </kc-resizable>
+        </kai-resizable-item>
+      </kai-resizable>
     </div>
   );
 }

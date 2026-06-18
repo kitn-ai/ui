@@ -1,14 +1,14 @@
 ---
 title: Solid
-description: Use kitn-chat's native SolidJS components from @kitn.ai/ui for full compositional control, or drop in the kc-* web components for a batteries-included shell.
+description: Use kitn-chat's native SolidJS components from @kitn.ai/ui for full compositional control, or drop in the kai-* web components for a batteries-included shell.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Solid apps get an extra path the other frameworks don't: the components are authored in SolidJS, so you can import them straight into your JSX instead of going through the `kc-*` web components. Both paths ship in the package and mix freely:
+Solid apps get an extra path the other frameworks don't: the components are authored in SolidJS, so you can import them straight into your JSX instead of going through the `kai-*` web components. Both paths ship in the package and mix freely:
 
 - **Native SolidJS components** (`@kitn.ai/ui`) — import `ChatContainer`, `Message`, `PromptInput`, and the rest directly into your JSX. Full compositional control, tree-shaken alongside your own code. Reach for this in a Solid app.
-- **`kc-*` web components** (`@kitn.ai/ui/elements`) — the drop-in shells when you want batteries included or need to share UI across frameworks.
+- **`kai-*` web components** (`@kitn.ai/ui/elements`) — the drop-in shells when you want batteries included or need to share UI across frameworks.
 
 ## Install
 
@@ -167,7 +167,7 @@ import {
 
 ## Using the web component shell
 
-When you want a complete chat in one tag, register the `kc-*` elements and use `<kc-chat>`. In Solid, pass rich data with `prop:` (forces a DOM property assignment, not a stringified attribute) and listen for CustomEvents with Solid's `on:` namespace.
+When you want a complete chat in one tag, register the `kai-*` elements and use `<kai-chat>`. In Solid, pass rich data with `prop:` (forces a DOM property assignment, not a stringified attribute) and listen for CustomEvents with Solid's `on:` namespace.
 
 ```tsx
 import '@kitn.ai/ui/elements';
@@ -192,9 +192,9 @@ function Shell() {
 
   return (
     <div style={{ display: 'flex', 'flex-direction': 'column', height: '100dvh' }}>
-      <kc-chat
+      <kai-chat
         prop:messages={messages()}
-        on:kc-submit={handleSubmit}
+        on:kai-submit={handleSubmit}
         style={{ flex: 1, 'min-height': 0 }}
       />
     </div>
@@ -228,6 +228,6 @@ Without `prop:`, Solid serializes objects to strings — breaking array props. U
 | **Composition** | Full JSX control | Single element, attribute-driven |
 | **Signals** | Native `createSignal` | `prop:` + `on:` bindings |
 
-Mix freely: native components on one screen, a `<kc-chat>` shell on another.
+Mix freely: native components on one screen, a `<kai-chat>` shell on another.
 
 See [Installation](/chat/guides/installation/) for bundler configuration and CDN options.

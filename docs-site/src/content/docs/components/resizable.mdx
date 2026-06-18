@@ -12,33 +12,33 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-resizable</p>
+<p class="kc-tag-sub">kai-resizable</p>
 
-<p class="kc-lede">Compose a draggable multi-panel shell — sidebar + chat, list + inspector, three-up — by placing `<kc-resizable-item>` children inside; dividers, drag logic, keyboard resize, and expand-to-fill are handled for you.</p>
+<p class="kc-lede">Compose a draggable multi-panel shell — sidebar + chat, list + inspector, three-up — by placing `<kai-resizable-item>` children inside; dividers, drag logic, keyboard resize, and expand-to-fill are handled for you.</p>
 
 <Facts items={['Shadow DOM', '2 events', 'Up to 3 panels (nest for more)', 'px or % sizing', 'Expand-to-fill protocol']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-resizable" />
+<Playground client:only="solid" tag="kai-resizable" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-resizable>` for any app shell built from regions the user should resize — a conversation list beside a thread, a thread beside an artifact, a stacked code-editor / output split. In SolidJS, use the `Resizable` and `ResizablePanel` components from `@kitn.ai/ui` directly for tighter reactivity integration.
+Use `<kai-resizable>` for any app shell built from regions the user should resize — a conversation list beside a thread, a thread beside an artifact, a stacked code-editor / output split. In SolidJS, use the `Resizable` and `ResizablePanel` components from `@kitn.ai/ui` directly for tighter reactivity integration.
 </Aside>
 
 ## Usage
 
 ```html
-<kc-resizable orientation="horizontal" style="display:block;height:400px">
-  <kc-resizable-item size="25%" min="160px"> <!-- list panel --> </kc-resizable-item>
-  <kc-resizable-item> <!-- chat panel, fills remaining space --> </kc-resizable-item>
-  <kc-resizable-item size="30%"> <!-- preview panel --> </kc-resizable-item>
-</kc-resizable>
+<kai-resizable orientation="horizontal" style="display:block;height:400px">
+  <kai-resizable-item size="25%" min="160px"> <!-- list panel --> </kai-resizable-item>
+  <kai-resizable-item> <!-- chat panel, fills remaining space --> </kai-resizable-item>
+  <kai-resizable-item size="30%"> <!-- preview panel --> </kai-resizable-item>
+</kai-resizable>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
-  document.querySelector('kc-resizable')
-    .addEventListener('kc-change', (e) => console.log(e.detail.sizes));
+  document.querySelector('kai-resizable')
+    .addEventListener('kai-change', (e) => console.log(e.detail.sizes));
 </script>
 ```
 
@@ -48,54 +48,54 @@ Use `<kc-resizable>` for any app shell built from regions the user should resize
 - **`hidden`** — removes the panel and its divider; remaining panels reflow. Toggle at runtime to collapse/restore.
 - **`maximizedIndex`** — set this property to the zero-based panel index to maximize it (`null` to restore). Or call `el.maximize(n)` / `el.restore()` imperatively.
 
-**Expand-to-fill** — when a `<kc-artifact expandable>` fires `kc-maximize-intent` (bubbling, composed), the nearest enclosing `<kc-resizable>` catches it automatically and hides siblings. No wiring needed. **Escape** or **Collapse** restores the layout.
+**Expand-to-fill** — when a `<kai-artifact expandable>` fires `kai-maximize-intent` (bubbling, composed), the nearest enclosing `<kai-resizable>` catches it automatically and hides siblings. No wiring needed. **Escape** or **Collapse** restores the layout.
 
 ## Examples
 
 ### Sidebar + Chat
 
-<Example client:visible tag="kc-resizable" config={{ orientation: 'horizontal' }} />
+<Example client:visible tag="kai-resizable" config={{ orientation: 'horizontal' }} />
 
 ### Vertical Split
 
-<Example client:visible tag="kc-resizable" config={{ orientation: 'vertical' }} data="vertical" />
+<Example client:visible tag="kai-resizable" config={{ orientation: 'vertical' }} data="vertical" />
 
 ### Three-Panel Layout
 
-<Example client:visible tag="kc-resizable" config={{ orientation: 'horizontal' }} data="threePanel" />
+<Example client:visible tag="kai-resizable" config={{ orientation: 'horizontal' }} data="threePanel" />
 
 ### Expand-to-Fill Protocol
 
-Wire `<kc-artifact expandable>` inside an item — pressing **Expand** maximizes that panel automatically:
+Wire `<kai-artifact expandable>` inside an item — pressing **Expand** maximizes that panel automatically:
 
 ```html
-<kc-resizable orientation="horizontal" style="display:block;height:480px">
-  <kc-resizable-item size="20%" min="120px"> …list… </kc-resizable-item>
-  <kc-resizable-item min="140px">           …chat… </kc-resizable-item>
-  <kc-resizable-item size="35%" min="200px">
-    <kc-artifact src="…/index.html" expandable></kc-artifact>
-  </kc-resizable-item>
-</kc-resizable>
+<kai-resizable orientation="horizontal" style="display:block;height:480px">
+  <kai-resizable-item size="20%" min="120px"> …list… </kai-resizable-item>
+  <kai-resizable-item min="140px">           …chat… </kai-resizable-item>
+  <kai-resizable-item size="35%" min="200px">
+    <kai-artifact src="…/index.html" expandable></kai-artifact>
+  </kai-resizable-item>
+</kai-resizable>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
-  const r = document.querySelector('kc-resizable');
-  r.addEventListener('kc-change', (e) => console.log('sizes', e.detail.sizes));
-  r.addEventListener('kc-maximize-change', (e) => console.log(e.detail));
+  const r = document.querySelector('kai-resizable');
+  r.addEventListener('kai-change', (e) => console.log('sizes', e.detail.sizes));
+  r.addEventListener('kai-maximize-change', (e) => console.log(e.detail));
   // r.restore(); or r.maximizedIndex = null;
 </script>
 ```
 
 ## Props
 
-<PropTable tag="kc-resizable" />
+<PropTable tag="kai-resizable" />
 
 ## Events
 
-<EventTable tag="kc-resizable" />
+<EventTable tag="kai-resizable" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-resizable" />
+<ComposedFrom tag="kai-resizable" />
 
 <NeedAHand />

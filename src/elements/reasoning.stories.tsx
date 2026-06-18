@@ -8,7 +8,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-reasoning': JSX.HTMLAttributes<HTMLElement>;
+      'kai-reasoning': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
@@ -16,7 +16,7 @@ declare module 'solid-js' {
 const sampleText =
   'First I parse the request, then I plan the steps, then I execute and verify each one before responding.';
 
-/** Render the actual `<kc-reasoning>` custom element with a `text` property. */
+/** Render the actual `<kai-reasoning>` custom element with a `text` property. */
 function ReasoningElement(props: { text: string; streaming?: boolean }) {
   let el: (HTMLElement & { text?: string; streaming?: boolean }) | undefined;
   onMount(() => {
@@ -26,12 +26,12 @@ function ReasoningElement(props: { text: string; streaming?: boolean }) {
     }
   });
   return (
-    <kc-reasoning ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
+    <kai-reasoning ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
   );
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-reasoning id="reason" label="Reasoning"></kc-reasoning>
+<kai-reasoning id="reason" label="Reasoning"></kai-reasoning>
 
 <script type="module">
   import '@kitn.ai/ui/elements';   // registers the custom elements
@@ -41,21 +41,21 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   // reason.streaming = true;  // auto-expands while a thought streams in
 
   // events are CustomEvents on the element (they do not bubble)
-  reason.addEventListener('kc-open-change', (e) => console.log('open:', e.detail.open));
+  reason.addEventListener('kai-open-change', (e) => console.log('open:', e.detail.open));
 </script>`;
 
 const meta = {
   title: 'Components/Reasoning',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-reasoning'),
+  argTypes: argTypesFor('kai-reasoning'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kc-reasoning', [
-          '`<kc-reasoning>` is the framework-agnostic **web component** for a collapsible reasoning/thinking block that auto-expands while a thought is `streaming`, isolated in **Shadow DOM**.',
+      description: specDescription('kai-reasoning', [
+          '`<kai-reasoning>` is the framework-agnostic **web component** for a collapsible reasoning/thinking block that auto-expands while a thought is `streaming`, isolated in **Shadow DOM**.',
           '**When to use:** surfacing model chain-of-thought in a non-Solid app. In SolidJS, compose the `Reasoning` primitives directly.',
           '**Placement:** inline inside an assistant message row, between the content and any tool calls; renders as a block sized to its content.',
-          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the body via the `text` **property**, set the `streaming` flag while it streams in, optionally drive the controlled `open` property, and listen for the `kc-open-change` **CustomEvent**.",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the body via the `text` **property**, set the `streaming` flag while it streams in, optionally drive the controlled `open` property, and listen for the `kai-open-change` **CustomEvent**.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

@@ -1,6 +1,6 @@
 // tests/elements/choice-element.test.tsx
-// Contract integration for <kc-choice>: clicking a row SELECTS it (no emit); the
-// Submit button emits the bubbling `kc-card` `action` event with the right payload +
+// Contract integration for <kai-choice>: clicking a row SELECTS it (no emit); the
+// Submit button emits the bubbling `kai-card` `action` event with the right payload +
 // resolved single-shot state, plus the unified allowOther flow. Modeled on
 // confirm-card-element.test.tsx.
 import '../../src/elements/choice';
@@ -18,7 +18,7 @@ function listen(): { events: CardEvent[]; off: () => void } {
 }
 
 afterEach(() => {
-  document.querySelectorAll('kc-choice').forEach((e) => e.remove());
+  document.querySelectorAll('kai-choice').forEach((e) => e.remove());
 });
 
 const PLANS: ChoiceCardData = {
@@ -30,7 +30,7 @@ const PLANS: ChoiceCardData = {
 };
 
 async function mount(data: ChoiceCardData, cardId = 'card-choice-1') {
-  const el = document.createElement('kc-choice') as HTMLElement & { data: ChoiceCardData };
+  const el = document.createElement('kai-choice') as HTMLElement & { data: ChoiceCardData };
   el.setAttribute('card-id', cardId);
   el.data = data;
   document.body.appendChild(el);
@@ -46,8 +46,8 @@ const submitButton = (el: HTMLElement) =>
     (b) => b.textContent?.trim() === 'Submit',
   )!;
 
-test('kc-choice registers', () => {
-  expect(customElements.get('kc-choice')).toBeTruthy();
+test('kai-choice registers', () => {
+  expect(customElements.get('kai-choice')).toBeTruthy();
 });
 
 test('mount emits a bubbling `ready` reaching the document', async () => {

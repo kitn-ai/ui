@@ -9,7 +9,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-artifact",
+          "tagName": "kai-artifact",
           "name": "KcArtifactElement",
           "description": "",
           "members": [
@@ -145,7 +145,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-attachments",
+          "tagName": "kai-attachments",
           "name": "KcAttachmentsElement",
           "description": "",
           "members": [
@@ -267,7 +267,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-chain-of-thought",
+          "tagName": "kai-chain-of-thought",
           "name": "KcChainOfThoughtElement",
           "description": "",
           "members": [
@@ -296,7 +296,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-chat",
+          "tagName": "kai-chat",
           "name": "KcChatElement",
           "description": "",
           "members": [
@@ -648,7 +648,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-checkpoint",
+          "tagName": "kai-checkpoint",
           "name": "KcCheckpointElement",
           "description": "",
           "members": [
@@ -744,7 +744,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-code-block",
+          "tagName": "kai-code-block",
           "name": "KcCodeBlockElement",
           "description": "",
           "members": [
@@ -853,7 +853,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-context",
+          "tagName": "kai-context",
           "name": "KcContextElement",
           "description": "",
           "members": [
@@ -882,7 +882,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-conversations",
+          "tagName": "kai-conversations",
           "name": "KcConversationsElement",
           "description": "",
           "members": [
@@ -966,7 +966,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-empty",
+          "tagName": "kai-empty",
           "name": "KcEmptyElement",
           "description": "",
           "members": [
@@ -1020,7 +1020,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-feedback-bar",
+          "tagName": "kai-feedback-bar",
           "name": "KcFeedbackBarElement",
           "description": "",
           "members": [
@@ -1079,7 +1079,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-file-tree",
+          "tagName": "kai-file-tree",
           "name": "KcFileTreeElement",
           "description": "",
           "members": [
@@ -1142,7 +1142,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-file-upload",
+          "tagName": "kai-file-upload",
           "name": "KcFileUploadElement",
           "description": "",
           "members": [
@@ -1238,7 +1238,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-image",
+          "tagName": "kai-image",
           "name": "KcImageElement",
           "description": "",
           "members": [
@@ -1318,7 +1318,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-loader",
+          "tagName": "kai-loader",
           "name": "KcLoaderElement",
           "description": "",
           "members": [
@@ -1389,7 +1389,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-markdown",
+          "tagName": "kai-markdown",
           "name": "KcMarkdownElement",
           "description": "",
           "members": [
@@ -1477,7 +1477,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-message",
+          "tagName": "kai-message",
           "name": "KcMessageElement",
           "description": "",
           "members": [
@@ -1616,7 +1616,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-model-switcher",
+          "tagName": "kai-model-switcher",
           "name": "KcModelSwitcherElement",
           "description": "",
           "members": [
@@ -1670,7 +1670,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-prompt-input",
+          "tagName": "kai-prompt-input",
           "name": "KcPromptInputElement",
           "description": "",
           "members": [
@@ -1905,7 +1905,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-reasoning",
+          "tagName": "kai-reasoning",
           "name": "KcReasoningElement",
           "description": "",
           "members": [
@@ -2018,7 +2018,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-resizable",
+          "tagName": "kai-resizable",
           "name": "KcResizableElement",
           "description": "",
           "members": [
@@ -2063,7 +2063,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-resizable-item",
+          "tagName": "kai-resizable-item",
           "name": "KcResizableItemElement",
           "description": "",
           "members": [
@@ -2176,7 +2176,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-response-stream",
+          "tagName": "kai-response-stream",
           "name": "KcResponseStreamElement",
           "description": "",
           "members": [
@@ -2264,7 +2264,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-scope-picker",
+          "tagName": "kai-scope-picker",
           "name": "KcScopePickerElement",
           "description": "",
           "members": [
@@ -2327,7 +2327,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-skills",
+          "tagName": "kai-skills",
           "name": "KcSkillsElement",
           "description": "",
           "members": [
@@ -2356,7 +2356,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-source",
+          "tagName": "kai-source",
           "name": "KcSourceElement",
           "description": "",
           "members": [
@@ -2461,7 +2461,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-sources",
+          "tagName": "kai-sources",
           "name": "KcSourcesElement",
           "description": "",
           "members": [
@@ -2507,7 +2507,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-suggestions",
+          "tagName": "kai-suggestions",
           "name": "KcSuggestionsElement",
           "description": "",
           "members": [
@@ -2612,7 +2612,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-text-shimmer",
+          "tagName": "kai-text-shimmer",
           "name": "KcTextShimmerElement",
           "description": "",
           "members": [
@@ -2700,7 +2700,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-thinking-bar",
+          "tagName": "kai-thinking-bar",
           "name": "KcThinkingBarElement",
           "description": "",
           "members": [
@@ -2779,7 +2779,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-tool",
+          "tagName": "kai-tool",
           "name": "KcToolElement",
           "description": "",
           "members": [
@@ -2838,7 +2838,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-voice-input",
+          "tagName": "kai-voice-input",
           "name": "KcVoiceInputElement",
           "description": "",
           "members": [
@@ -2899,7 +2899,7 @@
         {
           "kind": "class",
           "customElement": true,
-          "tagName": "kc-workspace",
+          "tagName": "kai-workspace",
           "name": "KcWorkspaceElement",
           "description": "",
           "members": [

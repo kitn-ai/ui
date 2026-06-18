@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>kc-chat — floating widget (vanilla / CDN)</title>
+    <title>kai-chat — floating widget (vanilla / CDN)</title>
     <link rel="icon" type="image/svg+xml" href="../shared/logo.svg" />
     <style>
       html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
@@ -52,7 +52,7 @@
         width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
       }
       .panel-header .close:hover { background: rgba(255, 255, 255, 0.18); }
-      kc-chat { flex: 1; min-height: 0; }
+      kai-chat { flex: 1; min-height: 0; }
 
       @media (max-width: 480px) {
         .panel { right: 12px; left: 12px; width: auto; bottom: 84px; height: calc(100vh - 100px); }
@@ -63,9 +63,9 @@
     <div class="page">
       <h1>Your product</h1>
       <p>
-        This is a stand-in marketing page. The kc-chat web component is embedded
+        This is a stand-in marketing page. The kai-chat web component is embedded
         as a floating support widget in the bottom-right — click the bubble to open
-        it. It's the same <code>&lt;kc-chat&gt;</code> element, just dropped into a
+        it. It's the same <code>&lt;kai-chat&gt;</code> element, just dropped into a
         floating panel. No build step; loaded straight from the CDN.
       </p>
     </div>
@@ -81,7 +81,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
         </button>
       </div>
-      <kc-chat id="chat" theme="light"></kc-chat>
+      <kai-chat id="chat" theme="light"></kai-chat>
     </div>
 
     <button id="fab" class="fab" type="button" aria-label="Open chat" aria-expanded="false"></button>
@@ -138,7 +138,7 @@
         }, 45);
       }
 
-      chat.addEventListener('kc-submit', (e) => {
+      chat.addEventListener('kai-submit', (e) => {
         const value = (e.detail.value || '').trim();
         if (!value && !(e.detail.attachments || []).length) return;
         chat.messages = [...chat.messages, { id: 'u' + Date.now(), role: 'user', content: value, attachments: (e.detail.attachments || []).length ? e.detail.attachments : undefined }];

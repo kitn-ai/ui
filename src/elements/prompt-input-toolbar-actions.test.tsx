@@ -1,5 +1,5 @@
 /**
- * Unit tests for custom `<kc-action>` toolbar buttons in DefaultPromptInput.
+ * Unit tests for custom `<kai-action>` toolbar buttons in DefaultPromptInput.
  *
  * Strategy: test DefaultPromptInput (the Solid component) directly — the
  * defineWebComponent custom element requires a full browser environment

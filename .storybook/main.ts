@@ -12,7 +12,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
  * /remote-provider/ THROUGH Storybook's own Vite pipeline, so its `.ts` entry is
  * transformed and runnable in the browser (a raw staticDir can't transform TS).
  *
- * <kc-remote> enforces a cross-origin precondition (providerOrigin !== hostOrigin),
+ * <kai-remote> enforces a cross-origin precondition (providerOrigin !== hostOrigin),
  * so the stories frame the provider via the 127.0.0.1 alias of the SAME Storybook
  * server — a genuinely different origin from the localhost preview, satisfying the
  * precondition without a second server. The real cross-origin SECURITY matrix is
@@ -58,7 +58,7 @@ const config: StorybookConfig = {
     { from: '../llms.txt', to: '/llms.txt' },
     { from: '../llms-full.txt', to: '/llms-full.txt' },
     // Sample artifact (cross-linked HTML pages + image + PDF) framed by
-    // <kc-artifact> stories at a stable URL — no backend needed.
+    // <kai-artifact> stories at a stable URL — no backend needed.
     { from: '../examples/artifact-fixtures', to: '/artifact-fixtures' },
   ],
   addons: [

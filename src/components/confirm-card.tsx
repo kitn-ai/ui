@@ -65,7 +65,7 @@ export function buttonVariantForStyle(
       return 'outline';
     default:
       // eslint-disable-next-line no-console
-      console.warn(`[kc-confirm] unknown action style "${style as string}"; using default`);
+      console.warn(`[kai-confirm] unknown action style "${style as string}"; using default`);
       return 'outline';
   }
 }
@@ -88,7 +88,7 @@ export function normalizeActions(actions: unknown): {
     if (typeof action.label !== 'string' || action.label.length === 0) continue;
     if (seen.has(action.id)) {
       // eslint-disable-next-line no-console
-      console.warn(`[kc-confirm] duplicate action id "${action.id}" ignored`);
+      console.warn(`[kai-confirm] duplicate action id "${action.id}" ignored`);
       continue;
     }
     seen.add(action.id);
@@ -97,7 +97,7 @@ export function normalizeActions(actions: unknown): {
       : undefined;
     if (action.style !== undefined && style === undefined) {
       // eslint-disable-next-line no-console
-      console.warn(`[kc-confirm] unknown action style "${String(action.style)}"; using default`);
+      console.warn(`[kai-confirm] unknown action style "${String(action.style)}"; using default`);
     }
     out.push({
       id: action.id,
@@ -128,9 +128,9 @@ export interface ConfirmCardProps {
   /** The envelope title rendered in the card chrome. */
   heading?: string;
   /** Optional explicit CardHost (otherwise read from a CardProvider, otherwise the
-   *  bubbling `kc-card` CustomEvent off `hostElement`). */
+   *  bubbling `kai-card` CustomEvent off `hostElement`). */
   host?: CardHost;
-  /** The custom-element host node, for the bubbling `kc-card` fallback emit. */
+  /** The custom-element host node, for the bubbling `kai-card` fallback emit. */
   hostElement?: HTMLElement;
   /** Focus the default action on mount. Default OFF (no focus-stealing mid-stream). */
   autofocus?: boolean;
@@ -148,7 +148,7 @@ export interface ConfirmCardProps {
  * close affordance, and `error` for an unusable definition (inline error state).
  */
 export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
-  const merged = mergeProps({ cardId: 'kc-confirm', autofocus: false }, props);
+  const merged = mergeProps({ cardId: 'kai-confirm', autofocus: false }, props);
   const [local] = splitProps(merged, [
     'data',
     'cardId',

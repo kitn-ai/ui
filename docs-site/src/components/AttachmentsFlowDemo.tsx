@@ -1,15 +1,15 @@
 /** Live demos for "Attachments flow".
  *
  *  PRIMARY (InlineAttachDemo): the realistic, ship-it path. A bare
- *  <kc-prompt-input> exposes its built-in paperclip — clicking it stages files
- *  as removable chips inside the composer, no extra wiring. On kc-submit the
- *  user turn renders as a kc-message with attachments; the assistant replies.
+ *  <kai-prompt-input> exposes its built-in paperclip — clicking it stages files
+ *  as removable chips inside the composer, no extra wiring. On kai-submit the
+ *  user turn renders as a kai-message with attachments; the assistant replies.
  *
  *  SECONDARY (DropZoneAttachDemo): the optional "dedicated drop target" variant.
- *  A standalone <kc-file-upload> drop zone sits above the thread and feeds files
- *  into the composer via kc-files-added → prompt.attachments.
+ *  A standalone <kai-file-upload> drop zone sits above the thread and feeds files
+ *  into the composer via kai-files-added → prompt.attachments.
  *
- *  Both use imperative DOM so kc-* props are set as JS properties, not HTML
+ *  Both use imperative DOM so kai-* props are set as JS properties, not HTML
  *  attributes. */
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { loadKit } from './example/kit';
@@ -40,7 +40,7 @@ const REPLY = (filenames: string[]) =>
         filenames.length === 1
           ? `**${filenames[0]}**`
           : `${filenames.length} files (${filenames.map((f) => `**${f}**`).join(', ')})`
-      }. The \`kc-submit\` event carries \`{ value, attachments }\` — forward the \`attachments\` array straight to your model API.`;
+      }. The \`kai-submit\` event carries \`{ value, attachments }\` — forward the \`attachments\` array straight to your model API.`;
 
 let uid = 0;
 const nextId = () => `af${++uid}`;
@@ -66,7 +66,7 @@ function useThread(getPrompt: () => AnyEl | undefined) {
     thread.forEach((m, i) => {
       let el = existing[i];
       if (!el) {
-        el = document.createElement('kc-message') as unknown as AnyEl;
+        el = document.createElement('kai-message') as unknown as AnyEl;
         el.setAttribute('theme', theme());
         threadEl!.append(el as unknown as HTMLElement);
       }
@@ -164,7 +164,7 @@ function InlineAttachDemo() {
       customElements.upgrade(promptEl as HTMLElement);
       promptEl.setAttribute('placeholder', 'Attach a file with the paperclip, then ask…');
       promptEl.setAttribute('theme', t.theme());
-      promptEl.addEventListener('kc-submit', t.onSubmit);
+      promptEl.addEventListener('kai-submit', t.onSubmit);
     }
     t.renderThread();
 
@@ -176,7 +176,7 @@ function InlineAttachDemo() {
 
     onCleanup(() => {
       t.dispose();
-      promptEl?.removeEventListener('kc-submit', t.onSubmit);
+      promptEl?.removeEventListener('kai-submit', t.onSubmit);
       obs.disconnect();
     });
   });
@@ -202,7 +202,7 @@ function InlineAttachDemo() {
         } as any}
       >
         {/* @ts-expect-error custom element */}
-        <kc-prompt-input
+        <kai-prompt-input
           ref={(el: HTMLElement) => (promptEl = el as AnyEl)}
           style={{ display: 'block' }}
         />
@@ -258,13 +258,13 @@ function DropZoneAttachDemo() {
     if (uploadEl) {
       customElements.upgrade(uploadEl as HTMLElement);
       uploadEl.setAttribute('theme', t.theme());
-      uploadEl.addEventListener('kc-files-added', onFilesAdded);
+      uploadEl.addEventListener('kai-files-added', onFilesAdded);
     }
     if (promptEl) {
       customElements.upgrade(promptEl as HTMLElement);
       promptEl.setAttribute('placeholder', 'Files dropped above land here…');
       promptEl.setAttribute('theme', t.theme());
-      promptEl.addEventListener('kc-submit', onSubmitWrapped);
+      promptEl.addEventListener('kai-submit', onSubmitWrapped);
     }
     t.renderThread();
 
@@ -278,8 +278,8 @@ function DropZoneAttachDemo() {
 
     onCleanup(() => {
       t.dispose();
-      uploadEl?.removeEventListener('kc-files-added', onFilesAdded);
-      promptEl?.removeEventListener('kc-submit', onSubmitWrapped);
+      uploadEl?.removeEventListener('kai-files-added', onFilesAdded);
+      promptEl?.removeEventListener('kai-submit', onSubmitWrapped);
       obs.disconnect();
     });
   });
@@ -297,7 +297,7 @@ function DropZoneAttachDemo() {
         } as any}
       >
         {/* @ts-expect-error custom element */}
-        <kc-file-upload
+        <kai-file-upload
           ref={(el: HTMLElement) => (uploadEl = el as AnyEl)}
           label="Drop files here or click to browse"
           style={{ display: 'block' }}
@@ -330,7 +330,7 @@ function DropZoneAttachDemo() {
           </div>
         )}
         {/* @ts-expect-error custom element */}
-        <kc-prompt-input
+        <kai-prompt-input
           ref={(el: HTMLElement) => (promptEl = el as AnyEl)}
           style={{ display: 'block' }}
         />

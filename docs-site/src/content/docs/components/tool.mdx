@@ -11,7 +11,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-tool</p>
+<p class="kc-tag-sub">kai-tool</p>
 
 <p class="kc-lede">A collapsible panel for a single agent tool call — colour-coded state badge, expandable input/output inspector. Drop one after each tool invocation to give users transparency into what the agent did.</p>
 
@@ -19,10 +19,10 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-tool" />
+<Playground client:only="solid" tag="kai-tool" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-tool>` inside an assistant message row — one element per tool call, below the text content. In SolidJS, compose the `Tool` primitive from `@kitn.ai/ui` directly; for every other framework, use this web component.
+Place `<kai-tool>` inside an assistant message row — one element per tool call, below the text content. In SolidJS, compose the `Tool` primitive from `@kitn.ai/ui` directly; for every other framework, use this web component.
 </Aside>
 
 ## Usage
@@ -30,7 +30,7 @@ Place `<kc-tool>` inside an assistant message row — one element per tool call,
 Set the call via the `tool` property — it's an object, so assign it in JavaScript.
 
 ```html
-<kc-tool id="tool" open></kc-tool>
+<kai-tool id="tool" open></kai-tool>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -52,30 +52,30 @@ Set the call via the `tool` property — it's an object, so assign it in JavaScr
 
 ### Completed Call
 
-<Example client:visible tag="kc-tool" config={{ open: true }} />
+<Example client:visible tag="kai-tool" config={{ open: true }} />
 
 ### Running Call
 
 Amber badge — input sent, awaiting response.
 
-<Example client:visible tag="kc-tool" data="running" />
+<Example client:visible tag="kai-tool" data="running" />
 
 ### Error State
 
-<Example client:visible tag="kc-tool" data="error" />
+<Example client:visible tag="kai-tool" data="error" />
 
 ### Input Streaming
 
 Blue badge while the agent assembles arguments.
 
-<Example client:visible tag="kc-tool" data="streaming" />
+<Example client:visible tag="kai-tool" data="streaming" />
 
 ## Props
 
-<PropTable tag="kc-tool" />
+<PropTable tag="kai-tool" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-tool" />
+<ComposedFrom tag="kai-tool" />
 
 <NeedAHand />

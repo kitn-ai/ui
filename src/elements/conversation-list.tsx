@@ -17,14 +17,14 @@ interface Props extends Record<string, unknown> {
 
 interface Events {
   /** A conversation was selected. */
-  'kc-conversation-select': { id: string };
+  'kai-conversation-select': { id: string };
   /** The "New chat" button was clicked. */
-  'kc-new-chat': Record<string, never>;
+  'kai-new-chat': Record<string, never>;
   /** The sidebar toggle was clicked. */
-  'kc-toggle-sidebar': Record<string, never>;
+  'kai-toggle-sidebar': Record<string, never>;
 }
 
-/** Parse a single light-DOM `<kc-conversation>` element into a `ConversationSummary`.
+/** Parse a single light-DOM `<kai-conversation>` element into a `ConversationSummary`.
  *  Attribute mapping:
  *   - `id`       → ConversationSummary.id
  *   - `group-id` → ConversationSummary.groupId (optional)
@@ -45,17 +45,17 @@ export function parseKcConversationElement(n: Element): ConversationSummary {
   };
 }
 
-defineWebComponent<Props, Events>('kc-conversations', {
+defineWebComponent<Props, Events>('kai-conversations', {
   groups: [],
   conversations: [],
   activeId: undefined,
 }, (props, { dispatch, element }) => {
-  // Read declarative <kc-conversation> children from light DOM.
+  // Read declarative <kai-conversation> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
   const [slottedConversations, setSlottedConversations] = createSignal<ConversationSummary[]>([]);
   onMount(() => {
     const read = () => {
-      const nodes = [...element.querySelectorAll('kc-conversation')];
+      const nodes = [...element.querySelectorAll('kai-conversation')];
       setSlottedConversations(nodes.map(parseKcConversationElement));
     };
     read();
@@ -72,9 +72,9 @@ defineWebComponent<Props, Events>('kc-conversations', {
       groups={props.groups}
       conversations={allConversations()}
       activeId={props.activeId}
-      onSelect={(id) => dispatch('kc-conversation-select', { id })}
-      onNewChat={() => dispatch('kc-new-chat')}
-      onToggleSidebar={() => dispatch('kc-toggle-sidebar')}
+      onSelect={(id) => dispatch('kai-conversation-select', { id })}
+      onNewChat={() => dispatch('kai-new-chat')}
+      onToggleSidebar={() => dispatch('kai-toggle-sidebar')}
     />
   );
 });

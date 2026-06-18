@@ -20,9 +20,9 @@ const reactImportPath = (srcElementsRel) =>
     ? `../../src/elements/${srcElementsRel.slice(2)}`
     : `../../src/${srcElementsRel.slice(3)}`;
 
-// Event names are lower-kebab, kc-prefixed (e.g. `kc-message-action`). The React/Solid
-// handler prop strips the `kc-` prefix and PascalCases on hyphens → `onMessageAction`.
-const onName = (ev) => 'on' + ev.replace(/^kc-/, '').split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+// Event names are lower-kebab, kai-prefixed (e.g. `kai-message-action`). The React/Solid
+// handler prop strips the `kai-` prefix and PascalCases on hyphens → `onMessageAction`.
+const onName = (ev) => 'on' + ev.replace(/^kai-/, '').split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('');
 
 export function writeReact(root, elements, IMPORTS) {
   const used = new Set();

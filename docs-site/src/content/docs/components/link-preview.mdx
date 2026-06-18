@@ -11,7 +11,7 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-link-preview</p>
+<p class="kc-tag-sub">kai-link-preview</p>
 
 <p class="kc-lede">Turn a URL and its Open-Graph metadata into a rich, themed preview tile — assign one property and the card handles image, title, description, favicon, and domain with graceful fallbacks for anything missing.</p>
 
@@ -19,10 +19,10 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-link-preview" />
+<Playground client:only="solid" tag="kai-link-preview" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-link-preview>` when an AI agent surfaces a URL and you want a rich tile instead of a plain hyperlink. It fits inside a `<kc-cards>` stream or as a standalone card in a thread. If you only have the URL at render time, wire `configureLinkPreview` to your own OG-scraping backend — the card shows a skeleton while it waits.
+Use `<kai-link-preview>` when an AI agent surfaces a URL and you want a rich tile instead of a plain hyperlink. It fits inside a `<kai-cards>` stream or as a standalone card in a thread. If you only have the URL at render time, wire `configureLinkPreview` to your own OG-scraping backend — the card shows a skeleton while it waits.
 </Aside>
 
 ## Usage
@@ -30,7 +30,7 @@ Use `<kc-link-preview>` when an AI agent surfaces a URL and you want a rich tile
 Set `data` in JavaScript (it's an object, not an attribute):
 
 ```html
-<kc-link-preview id="lp"></kc-link-preview>
+<kai-link-preview id="lp"></kai-link-preview>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -50,9 +50,9 @@ Set `data` in JavaScript (it's an object, not an attribute):
 ```
 
 - **`data`** — every key except `url` is optional.
-- **`cardId`** — set as `card-id` attribute or `cardId` property; correlates emitted events when multiple cards are in a `<kc-cards>` host.
+- **`cardId`** — set as `card-id` attribute or `cardId` property; correlates emitted events when multiple cards are in a `<kai-cards>` host.
 - **Pure by default** — the element never makes network calls. For bare `{ url }`, call `configureLinkPreview({ fetchMetadata })` once at startup to point at your backend.
-- **Click** dispatches a bubbling `kc-card` CustomEvent with `{ kind: 'open', url, target: 'tab' }`. A missing or broken image hides the image region silently; an invalid `url` renders a non-clickable "Invalid link" chip.
+- **Click** dispatches a bubbling `kai-card` CustomEvent with `{ kind: 'open', url, target: 'tab' }`. A missing or broken image hides the image region silently; an invalid `url` renders a non-clickable "Invalid link" chip.
 
 ## Examples
 
@@ -60,13 +60,13 @@ Set `data` in JavaScript (it's an object, not an attribute):
 
 All OG fields supplied — image, title, description, site name, domain, and favicon.
 
-<Example client:visible tag="kc-link-preview" />
+<Example client:visible tag="kai-link-preview" />
 
 ### No Image
 
 When no `image` is provided the card degrades cleanly to the text-and-domain layout.
 
-<Example client:visible tag="kc-link-preview" data="noImage" />
+<Example client:visible tag="kai-link-preview" data="noImage" />
 
 ### Bare URL with Fetcher
 
@@ -81,20 +81,20 @@ configureLinkPreview({
 });
 ```
 
-<Example client:visible tag="kc-link-preview" data="bareUrl" />
+<Example client:visible tag="kai-link-preview" data="bareUrl" />
 
 ### Invalid Link
 
-When `url` fails validation the card renders a non-clickable "Invalid link" chip and emits a single `error` event via the `kc-card` envelope.
+When `url` fails validation the card renders a non-clickable "Invalid link" chip and emits a single `error` event via the `kai-card` envelope.
 
-<Example client:visible tag="kc-link-preview" data="invalidLink" />
+<Example client:visible tag="kai-link-preview" data="invalidLink" />
 
 ## Props
 
-<PropTable tag="kc-link-preview" />
+<PropTable tag="kai-link-preview" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-link-preview" />
+<ComposedFrom tag="kai-link-preview" />
 
 <NeedAHand />

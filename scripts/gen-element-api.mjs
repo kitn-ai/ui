@@ -105,9 +105,9 @@ const composedImports = (sourceFile) => {
 // The few elements with element-specific tokens; everything else is themed by
 // the global token set (see the Theming → Token Reference story).
 const COMPONENT_TOKENS = {
-  'kc-tool': ['--color-tool-blue', '--color-tool-amber', '--color-tool-green', '--color-tool-red'],
-  'kc-code-block': ['--color-code-foreground'],
-  'kc-conversations': ['--color-sidebar', '--color-scrollbar-thumb'],
+  'kai-tool': ['--color-tool-blue', '--color-tool-amber', '--color-tool-green', '--color-tool-red'],
+  'kai-code-block': ['--color-code-foreground'],
+  'kai-conversations': ['--color-sidebar', '--color-scrollbar-thumb'],
 };
 
 // collect dispatch('name') literals per source file

@@ -3,7 +3,7 @@
 
 // ── boot guard: if the bundle didn't register the elements, show how to run it ──
 setTimeout(() => {
-  if (!customElements.get('kc-chat')) {
+  if (!customElements.get('kai-chat')) {
     const link = document.getElementById('boot-link');
     if (location.protocol.startsWith('http')) link.href = location.origin + '/examples/composable/index.html';
     document.getElementById('boot-error').style.display = 'block';
@@ -58,8 +58,8 @@ const attachments = [
 const chat = document.getElementById('chat');
 chat.models = models; chat.currentModel = 'opus'; chat.context = ctx;
 chat.suggestions = ['Summarize this thread', 'What changed in v0.3?'];
-chat.messages = [{ id: '1', role: 'assistant', content: 'Hi! I\'m the **drop-in** `<kc-chat>`. Ask me anything.', actions: ['copy', 'like', 'dislike'] }];
-chat.addEventListener('kc-submit', (e) => {
+chat.messages = [{ id: '1', role: 'assistant', content: 'Hi! I\'m the **drop-in** `<kai-chat>`. Ask me anything.', actions: ['copy', 'like', 'dislike'] }];
+chat.addEventListener('kai-submit', (e) => {
   log('submit', e.detail.value);
   chat.messages = [...chat.messages, { id: Date.now() + '', role: 'user', content: e.detail.value }];
   chat.loading = true;
@@ -68,10 +68,10 @@ chat.addEventListener('kc-submit', (e) => {
     chat.loading = false;
   }, 600);
 });
-chat.addEventListener('kc-model-change', (e) => { chat.currentModel = e.detail.modelId; log('modelchange', e.detail.modelId); });
-chat.addEventListener('kc-message-action', (e) => log('messageaction', `${e.detail.action} · ${e.detail.messageId}`));
-chat.addEventListener('kc-search', () => log('search', '(clicked)'));
-chat.addEventListener('kc-voice', () => log('voice', '(clicked)'));
+chat.addEventListener('kai-model-change', (e) => { chat.currentModel = e.detail.modelId; log('modelchange', e.detail.modelId); });
+chat.addEventListener('kai-message-action', (e) => log('messageaction', `${e.detail.action} · ${e.detail.messageId}`));
+chat.addEventListener('kai-search', () => log('search', '(clicked)'));
+chat.addEventListener('kai-voice', () => log('voice', '(clicked)'));
 
 const list = document.getElementById('list');
 list.conversations = [
@@ -80,8 +80,8 @@ list.conversations = [
   { id: 'c3', title: 'Publishing pipeline', scope: { type: 'document' }, messageCount: 8, lastMessageAt: '2026-06-09T09:00:00Z', updatedAt: '2026-06-09T09:00:00Z' },
 ];
 list.activeId = 'c1';
-list.addEventListener('kc-conversation-select', (e) => { list.activeId = e.detail.id; log('conversationselect', e.detail.id); });
-list.addEventListener('kc-new-chat', () => log('newchat'));
+list.addEventListener('kai-conversation-select', (e) => { list.activeId = e.detail.id; log('conversationselect', e.detail.id); });
+list.addEventListener('kai-new-chat', () => log('newchat'));
 
 const pi = document.getElementById('pi');
 pi.slashCommands = [
@@ -89,8 +89,8 @@ pi.slashCommands = [
   { id: 'translate', label: '/translate', description: 'Translate the last message', category: 'Actions' },
   { id: 'image', label: '/image', description: 'Generate an image', category: 'Tools' },
 ];
-pi.addEventListener('kc-slash-select', (e) => log('slashselect', e.detail.command.id));
-pi.addEventListener('kc-submit', (e) => { log('submit', e.detail.value); pi.value = ''; });
+pi.addEventListener('kai-slash-select', (e) => log('slashselect', e.detail.command.id));
+pi.addEventListener('kai-submit', (e) => { log('submit', e.detail.value); pi.value = ''; });
 
 // ── messages ──
 document.getElementById('msg-a').message = {
@@ -101,7 +101,7 @@ document.getElementById('msg-a').message = {
   attachments: [attachments[0]],
   actions: ['copy', 'like', 'dislike', 'regenerate'],
 };
-document.getElementById('msg-a').addEventListener('kc-message-action', (e) => log('messageaction', e.detail.action));
+document.getElementById('msg-a').addEventListener('kai-message-action', (e) => log('messageaction', e.detail.action));
 document.getElementById('msg-u').message = { id: 'm-u', role: 'user', content: 'How do I compose these myself?' };
 document.getElementById('md').content = '### Markdown\nRenders **bold**, _italic_, `code`, and lists:\n- one\n- two\n\n> and blockquotes.';
 document.getElementById('code').code = 'export function add(a: number, b: number): number {\n  return a + b;\n}';
@@ -117,7 +117,7 @@ document.getElementById('cot').steps = [
 document.getElementById('att-inline').items = attachments;
 const attGrid = document.getElementById('att-grid');
 attGrid.items = attachments;
-attGrid.addEventListener('kc-remove', (e) => { attGrid.items = attGrid.items.filter((x) => x.id !== e.detail.id); log('remove', e.detail.id); });
+attGrid.addEventListener('kai-remove', (e) => { attGrid.items = attGrid.items.filter((x) => x.id !== e.detail.id); log('remove', e.detail.id); });
 document.getElementById('img').base64 = btoa(unescape(encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="16" fill="#7c3aed"/><text x="48" y="62" font-size="44" text-anchor="middle" fill="white">★</text></svg>')));
 document.getElementById('img').setAttribute('media-type', 'image/svg+xml');
@@ -129,34 +129,34 @@ document.getElementById('srcs').sources = [
 // ── composer ──
 const suggs = document.getElementById('suggs');
 suggs.suggestions = ['Explain the architecture', 'Show me a code example', 'What\'s deferred?'];
-suggs.addEventListener('kc-select', (e) => { pi.value = e.detail.value; log('select', e.detail.value); });
-document.getElementById('fu').addEventListener('kc-files-added', (e) => log('filesadded', e.detail.files.map((f) => f.name).join(', ')));
+suggs.addEventListener('kai-select', (e) => { pi.value = e.detail.value; log('select', e.detail.value); });
+document.getElementById('fu').addEventListener('kai-files-added', (e) => log('filesadded', e.detail.files.map((f) => f.name).join(', ')));
 const voice = document.getElementById('voice');
 voice.transcribe = async () => { await new Promise((r) => setTimeout(r, 400)); return 'transcribed text'; };
-voice.addEventListener('kc-transcription', (e) => log('transcription', e.detail.text));
-document.getElementById('think').addEventListener('kc-stop', () => log('stop', 'thinking'));
+voice.addEventListener('kai-transcription', (e) => log('transcription', e.detail.text));
+document.getElementById('think').addEventListener('kai-stop', () => log('stop', 'thinking'));
 
 // ── header & meta ──
 const ms = document.getElementById('models');
 ms.models = models; ms.currentModel = 'opus';
-ms.addEventListener('kc-model-change', (e) => { ms.currentModel = e.detail.modelId; log('modelchange', e.detail.modelId); });
+ms.addEventListener('kai-model-change', (e) => { ms.currentModel = e.detail.modelId; log('modelchange', e.detail.modelId); });
 document.getElementById('ctx').context = ctx;
 const scope = document.getElementById('scope');
 scope.availableAuthors = ['Rob', 'Alex']; scope.availableTags = ['design', 'api'];
-scope.addEventListener('kc-scope-change', (e) => log('scopechange', JSON.stringify(e.detail.filters ?? 'all')));
-document.getElementById('cp').addEventListener('kc-select', () => log('select', 'checkpoint'));
+scope.addEventListener('kai-scope-change', (e) => log('scopechange', JSON.stringify(e.detail.filters ?? 'all')));
+document.getElementById('cp').addEventListener('kai-select', () => log('select', 'checkpoint'));
 document.getElementById('skills').skills = [{ id: 's1', name: 'web-search' }, { id: 's2', name: 'code' }];
 const fb = document.getElementById('fb');
 fb.addEventListener('helpful', () => log('feedback', 'helpful'));
 fb.addEventListener('nothelpful', () => log('feedback', 'not helpful'));
-fb.addEventListener('kc-close', () => log('feedback', 'closed'));
+fb.addEventListener('kai-close', () => log('feedback', 'closed'));
 
 // ── status & motion ──
 const stream = document.getElementById('stream');
 const streamText = 'This text reveals with a typewriter animation, streamed character by character — exactly how you\'d render a live assistant reply.';
 const runStream = () => { stream.text = streamText; };
 runStream();
-stream.addEventListener('kc-complete', () => log('complete', 'stream'));
+stream.addEventListener('kai-complete', () => log('complete', 'stream'));
 document.getElementById('replay').addEventListener('click', () => { stream.text = ''; requestAnimationFrame(runStream); });
 
 // ── theme toggle (OS-aware on first paint; explicit override on click) ──

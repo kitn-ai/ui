@@ -5,24 +5,24 @@ description: Attach files from the composer's paperclip, send them with the prom
 
 import { InlineAttachDemo, DropZoneAttachDemo } from '../../../components/AttachmentsFlowDemo.tsx';
 
-<p class="kc-lede">`<kc-prompt-input>` ships with an attach button. Click the paperclip, pick a file, send — `kc-submit` delivers `{ value, attachments }` together, and the user's `<kc-message>` renders the files inline. You own the upload logic; kitn-chat handles the staging and display.</p>
+<p class="kc-lede">`<kai-prompt-input>` ships with an attach button. Click the paperclip, pick a file, send — `kai-submit` delivers `{ value, attachments }` together, and the user's `<kai-message>` renders the files inline. You own the upload logic; kitn-chat handles the staging and display.</p>
 
 <InlineAttachDemo client:only="solid" />
 
-The paperclip, the removable chips, and the staged-file state are all built in. You don't wire an upload component for the common case — you just read `kc-submit`.
+The paperclip, the removable chips, and the staged-file state are all built in. You don't wire an upload component for the common case — you just read `kai-submit`.
 
 ## How it works
 
-**1 — Read the payload from `kc-submit`**
+**1 — Read the payload from `kai-submit`**
 
-The composer stages files internally as the user picks them. On submit, `kc-submit` carries the staged list alongside the text — always an array, even when empty:
+The composer stages files internally as the user picks them. On submit, `kai-submit` carries the staged list alongside the text — always an array, even when empty:
 
 ```js
 import '@kitn.ai/ui/elements';
 
 const prompt = document.getElementById('prompt');
 
-prompt.addEventListener('kc-submit', async (e) => {
+prompt.addEventListener('kai-submit', async (e) => {
   const { value, attachments } = e.detail;
   // attachments: AttachmentData[] — always an array, never undefined
 
@@ -49,11 +49,11 @@ prompt.addEventListener('kc-submit', async (e) => {
 });
 ```
 
-`<kc-chat>` carries the same composer and fires the same `kc-submit` — the paperclip works there with zero extra setup too.
+`<kai-chat>` carries the same composer and fires the same `kai-submit` — the paperclip works there with zero extra setup too.
 
 **2 — Render attachments on the user message**
 
-Pass `attachments` in the `ChatMessage` object. `<kc-chat>` and `<kc-message>` render them inline beneath the message text — the same display the [`<kc-attachments>`](/chat/components/attachments/) element uses — with no extra wiring:
+Pass `attachments` in the `ChatMessage` object. `<kai-chat>` and `<kai-message>` render them inline beneath the message text — the same display the [`<kai-attachments>`](/chat/components/attachments/) element uses — with no extra wiring:
 
 ```js
 // The message shape — attachments is optional; omit it for text-only turns.
@@ -81,7 +81,7 @@ const userMsg = {
 
 ## Pre-populating staged files
 
-Assign `prompt.attachments` in JavaScript after mount to seed the composer before the user types — for files already linked to this conversation, say. The element manages its own staged list from there: the user can add more with the paperclip, remove chips, and `kc-submit` always delivers the current state:
+Assign `prompt.attachments` in JavaScript after mount to seed the composer before the user types — for files already linked to this conversation, say. The element manages its own staged list from there: the user can add more with the paperclip, remove chips, and `kai-submit` always delivers the current state:
 
 ```js
 prompt.attachments = [
@@ -91,17 +91,17 @@ prompt.attachments = [
 
 ## Optional: a dedicated drop zone
 
-When you want a large drop target for a whole page or panel — not just the composer's paperclip — add a standalone `<kc-file-upload>` and feed its files into the composer. The round-trip from `kc-submit` onward is identical; you're only changing how files get staged.
+When you want a large drop target for a whole page or panel — not just the composer's paperclip — add a standalone `<kai-file-upload>` and feed its files into the composer. The round-trip from `kai-submit` onward is identical; you're only changing how files get staged.
 
 <DropZoneAttachDemo client:only="solid" />
 
-`<kc-file-upload>` fires `kc-files-added` when the user picks or drops files. Convert each `File` to an `AttachmentData` and append it to `prompt.attachments`:
+`<kai-file-upload>` fires `kai-files-added` when the user picks or drops files. Convert each `File` to an `AttachmentData` and append it to `prompt.attachments`:
 
 ```js
 const upload = document.getElementById('upload');
 const prompt = document.getElementById('prompt');
 
-upload.addEventListener('kc-files-added', (e) => {
+upload.addEventListener('kai-files-added', (e) => {
   const current = prompt.attachments ?? [];
   const added = e.detail.files.map((f) => ({
     id: crypto.randomUUID(),
@@ -115,12 +115,12 @@ upload.addEventListener('kc-files-added', (e) => {
 });
 ```
 
-The drop zone and the paperclip stack: files from either path land in the same staged list and ride along on the next `kc-submit`.
+The drop zone and the paperclip stack: files from either path land in the same staged list and ride along on the next `kai-submit`.
 
 ## Next steps
 
-- **[`kc-prompt-input` reference](/chat/components/prompt-input/)** — `attachments` property, the built-in paperclip, `kc-submit` detail, `loading`, `stoppable`.
-- **[`kc-attachments` reference](/chat/components/attachments/)** — standalone display of `AttachmentData[]` with `variant`, `hoverCard`, and `removable`.
-- **[`kc-file-upload` reference](/chat/components/file-upload/)** — `accept`, `multiple`, `kc-files-added`.
-- **[`kc-message` reference](/chat/components/message/)** — full `ChatMessage` shape including `attachments`.
-- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the complete `kc-submit` streaming loop with `<kc-chat>`.
+- **[`kai-prompt-input` reference](/chat/components/prompt-input/)** — `attachments` property, the built-in paperclip, `kai-submit` detail, `loading`, `stoppable`.
+- **[`kai-attachments` reference](/chat/components/attachments/)** — standalone display of `AttachmentData[]` with `variant`, `hoverCard`, and `removable`.
+- **[`kai-file-upload` reference](/chat/components/file-upload/)** — `accept`, `multiple`, `kai-files-added`.
+- **[`kai-message` reference](/chat/components/message/)** — full `ChatMessage` shape including `attachments`.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the complete `kai-submit` streaming loop with `<kai-chat>`.

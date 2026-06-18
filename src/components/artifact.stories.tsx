@@ -103,8 +103,8 @@ export const Controlled: Story = {
             files={FILES}
             iframeTitle="Starboard artifact preview"
             onNavigate={(url) => push(`navigate → ${url}`)}
-            onTabChange={(t) => push(`kc-tab-change → ${t}`)}
-            onFileSelect={(p) => push(`kc-file-select → ${p}`)}
+            onTabChange={(t) => push(`kai-tab-change → ${t}`)}
+            onFileSelect={(p) => push(`kai-file-select → ${p}`)}
           />
         </div>
         <pre class="m-0 min-h-24 max-w-[900px] rounded-lg bg-muted px-3 py-2.5 text-xs text-muted-foreground">

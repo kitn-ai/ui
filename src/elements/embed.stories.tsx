@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, onMount, type JSX } from 'solid-js';
-import './embed'; // side effect: registers <kc-embed>
+import './embed'; // side effect: registers <kai-embed>
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 import type { EmbedCardData } from '../primitives/embed-providers';
 import { configureEmbedAllowlist } from '../primitives/embed-providers';
@@ -11,7 +11,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-embed': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-embed': JSX.HTMLAttributes<HTMLElement> & {
         'card-id'?: string;
         ref?: (el: HTMLElement) => void;
       };
@@ -26,7 +26,7 @@ function Frame(props: { children: JSX.Element }) {
   return <div style={{ width: '100%', 'max-width': '560px' }}>{props.children}</div>;
 }
 
-/** Mounts a <kc-embed>, sets `.data`, logs emitted CardEvents under the render. */
+/** Mounts a <kai-embed>, sets `.data`, logs emitted CardEvents under the render. */
 function EmbedDemo(props: { cardId: string; data: EmbedCardData }) {
   const [log, setLog] = createSignal<CardEvent[]>([]);
   let el: EmbedEl | undefined;
@@ -34,7 +34,7 @@ function EmbedDemo(props: { cardId: string; data: EmbedCardData }) {
     if (!el) return;
     el.cardId = props.cardId;
     el.data = props.data;
-    el.addEventListener('kc-card', (e) => {
+    el.addEventListener('kai-card', (e) => {
       const detail = (e as CustomEvent<CardEvent>).detail;
       setLog((prev) => [...prev, detail]);
       if (detail.kind === 'open' && detail.target === 'tab') {
@@ -45,7 +45,7 @@ function EmbedDemo(props: { cardId: string; data: EmbedCardData }) {
   return (
     <Frame>
       <div style={{ display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
-        <kc-embed ref={(e) => (el = e as EmbedEl)} card-id={props.cardId} />
+        <kai-embed ref={(e) => (el = e as EmbedEl)} card-id={props.cardId} />
         <pre
           style={{
             margin: 0,
@@ -72,7 +72,7 @@ const YT_ENVELOPE = {
 } satisfies { type: string; id: string; title: string; data: EmbedCardData };
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-embed id="em"></kc-embed>
+<kai-embed id="em"></kai-embed>
 
 <script type="module">
   import '@kitn.ai/ui/elements'; // registers the custom elements
@@ -83,9 +83,9 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   em.data = { provider: 'youtube', id: 'dQw4w9WgXcQ', title: 'Product intro' };
 
   // NO network to YouTube until the user clicks play (privacy-first lazy facade).
-  // kc-embed emits: ready (on mount), open (on "Open on provider" click), error (blocked/invalid).
-  // The optional "Open on YouTube" affordance bubbles a composed \`kc-card\` open event:
-  em.addEventListener('kc-card', (e) => {
+  // kai-embed emits: ready (on mount), open (on "Open on provider" click), error (blocked/invalid).
+  // The optional "Open on YouTube" affordance bubbles a composed \`kai-card\` open event:
+  em.addEventListener('kai-card', (e) => {
     const ev = e.detail;
     if (ev.kind === 'open' && ev.target === 'tab') {
       window.open(ev.url, '_blank', 'noopener,noreferrer');
@@ -94,16 +94,16 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Generative UI/Cards/kc-embed',
+  title: 'Generative UI/Cards/kai-embed',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-embed'),
+  argTypes: argTypesFor('kai-embed'),
   parameters: {
     layout: 'padded',
     docs: {
-      description: specDescription('kc-embed', [
-        '`<kc-embed>` is a **privacy-first lazy media embed** (YouTube / Vimeo / allowlisted generic player) for the generative-UI feature. It speaks the **Card Contract**: data down (an `embed` `CardEnvelope`), events up (only the `open` verb, plus lifecycle `ready` / failure `error`).',
+      description: specDescription('kai-embed', [
+        '`<kai-embed>` is a **privacy-first lazy media embed** (YouTube / Vimeo / allowlisted generic player) for the generative-UI feature. It speaks the **Card Contract**: data down (an `embed` `CardEnvelope`), events up (only the `open` verb, plus lifecycle `ready` / failure `error`).',
         '**Lazy facade:** the initial render is just a **poster + play button** — NO provider iframe, NO third-party JS, NO cookies until the user clicks play. YouTube loads via `youtube-nocookie.com`; Vimeo with `dnt=1`. This buys privacy (no tracking until opt-in) and performance (no player JS on load).',
-        '**Security:** `generic` embeds frame an arbitrary https URL, so they are **rejected unless the app allowlists their origin** with `configureEmbedAllowlist([...])` (defaults to empty — an agent cannot frame an arbitrary origin). The player iframe is sandboxed for a *trusted provider* (`allow-scripts allow-same-origin` on a cross-origin player) — contrast `<kc-artifact>`, which trusts nothing.',
+        '**Security:** `generic` embeds frame an arbitrary https URL, so they are **rejected unless the app allowlists their origin** with `configureEmbedAllowlist([...])` (defaults to empty — an agent cannot frame an arbitrary origin). The player iframe is sandboxed for a *trusted provider* (`allow-scripts allow-same-origin` on a cross-origin player) — contrast `<kai-artifact>`, which trusts nothing.',
         '**Never a dead end:** a persistent "Open on {provider}" affordance dispatches the `open` verb (so a provider that refuses framing still has a way out). Set `data` as a JS property; `card-id` via attribute.',
         'See the **Code** tab for the `CardEnvelope` JSON + HTML wiring.',
       ]),
@@ -209,5 +209,5 @@ function EmbedRaw(props: { cardId: string; data: EmbedCardData }) {
       el.data = props.data;
     }
   });
-  return <kc-embed ref={(e) => (el = e as EmbedEl)} />;
+  return <kai-embed ref={(e) => (el = e as EmbedEl)} />;
 }

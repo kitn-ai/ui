@@ -11,26 +11,26 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-choice</p>
+<p class="kc-tag-sub">kai-choice</p>
 
-<p class="kc-lede">A "pick one of N" card — set the options in JavaScript, the user chooses one, and your app receives a typed `kc-card` action event.</p>
+<p class="kc-lede">A "pick one of N" card — set the options in JavaScript, the user chooses one, and your app receives a typed `kai-card` action event.</p>
 
 <Facts items={['Shadow DOM', 'Card-contract events', 'Rich option rows', 'Optional free-text escape (allowOther)', 'Resolves to read-only after submit']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-choice" />
+<Playground client:only="solid" tag="kai-choice" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-choice>` when the model needs the user to pick exactly one option before proceeding — plan selection, tone preference, next-step branching. Drop it standalone or let `<kc-cards>` dispatch it from a stream. Use `<kc-confirm>` for yes/no, `<kc-form>` for multi-field input.
+Use `<kai-choice>` when the model needs the user to pick exactly one option before proceeding — plan selection, tone preference, next-step branching. Drop it standalone or let `<kai-cards>` dispatch it from a stream. Use `<kai-confirm>` for yes/no, `<kai-form>` for multi-field input.
 </Aside>
 
 ## Usage
 
-Set `data` in JavaScript (it's an object) and listen for the `kc-card` CustomEvent:
+Set `data` in JavaScript (it's an object) and listen for the `kai-card` CustomEvent:
 
 ```html
-<kc-choice id="ch" heading="Choose a plan"></kc-choice>
+<kai-choice id="ch" heading="Choose a plan"></kai-choice>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -45,7 +45,7 @@ Set `data` in JavaScript (it's an object) and listen for the `kc-card` CustomEve
     ],
   };
 
-  el.addEventListener('kc-card', (e) => {
+  el.addEventListener('kai-card', (e) => {
     const ev = e.detail; // CardEvent
     if (ev.kind === 'action') console.log('chose:', ev.action, ev.payload);
   });
@@ -60,36 +60,36 @@ Set `data` in JavaScript (it's an object) and listen for the `kc-card` CustomEve
 
 ### Plans with Pricing
 
-<Example client:visible tag="kc-choice" config={{ heading: 'Choose a plan', cardId: 'card-plans' }} />
+<Example client:visible tag="kai-choice" config={{ heading: 'Choose a plan', cardId: 'card-plans' }} />
 
 ### Rows with Images
 
-<Example client:visible tag="kc-choice" config={{ heading: 'New workspace', cardId: 'card-templates' }} data="templates" />
+<Example client:visible tag="kai-choice" config={{ heading: 'New workspace', cardId: 'card-templates' }} data="templates" />
 
 ### Quick Replies with Free-Text Escape
 
 `allowOther` appends an "Other…" row that reveals an inline text field when selected.
 
-<Example client:visible tag="kc-choice" config={{ cardId: 'card-replies' }} data="quickReplies" />
+<Example client:visible tag="kai-choice" config={{ cardId: 'card-replies' }} data="quickReplies" />
 
 ### Resolved (Read-only)
 
 Pre-render the post-submit view — useful for restoring persisted choices on reload.
 
-<Example client:visible tag="kc-choice" config={{ heading: 'Choose a plan', cardId: 'card-resolved' }} data="resolved" />
+<Example client:visible tag="kai-choice" config={{ heading: 'Choose a plan', cardId: 'card-resolved' }} data="resolved" />
 
 ### Error State
 
 A malformed definition (empty `options`) triggers the inline error view and emits `{ kind: 'error' }`.
 
-<Example client:visible tag="kc-choice" config={{ cardId: 'card-error' }} data="error" />
+<Example client:visible tag="kai-choice" config={{ cardId: 'card-error' }} data="error" />
 
 ## Props
 
-<PropTable tag="kc-choice" />
+<PropTable tag="kai-choice" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-choice" />
+<ComposedFrom tag="kai-choice" />
 
 <NeedAHand />

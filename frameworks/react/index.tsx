@@ -49,9 +49,9 @@ export interface ArtifactProps extends WebComponentProps {
 }
 
 export const Artifact = createWebComponent<ArtifactProps>(
-  'kc-artifact',
+  'kai-artifact',
   ["theme","src","files","tab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath"],
-  { onFileSelect: 'kc-file-select', onMaximizeChange: 'kc-maximize-change', onNavigate: 'kc-navigate', onTabChange: 'kc-tab-change' },
+  { onFileSelect: 'kai-file-select', onMaximizeChange: 'kai-maximize-change', onNavigate: 'kai-navigate', onTabChange: 'kai-tab-change' },
 );
 
 export interface AttachmentsProps extends WebComponentProps {
@@ -61,7 +61,7 @@ export interface AttachmentsProps extends WebComponentProps {
   variant?: "grid" | "inline" | "list";
   /** Wrap each item in a hover card that previews its details. */
   hoverCard?: boolean;
-  /** Show a remove button per item; clicking it fires a `kc-remove` event. */
+  /** Show a remove button per item; clicking it fires a `kai-remove` event. */
   removable?: boolean;
   /** Also show the media type beneath the filename (non-grid variants). */
   showMediaType?: boolean;
@@ -72,9 +72,9 @@ export interface AttachmentsProps extends WebComponentProps {
 }
 
 export const Attachments = createWebComponent<AttachmentsProps>(
-  'kc-attachments',
+  'kai-attachments',
   ["theme","items","variant","hoverCard","removable","showMediaType","emptyText"],
-  { onRemove: 'kc-remove' },
+  { onRemove: 'kai-remove' },
 );
 
 export interface CardProps extends WebComponentProps {
@@ -89,7 +89,7 @@ export interface CardProps extends WebComponentProps {
 }
 
 export const Card = createWebComponent<CardProps>(
-  'kc-card',
+  'kai-card',
   ["theme","heading","description","errorMessage","dense"],
   {  },
 );
@@ -104,7 +104,7 @@ export interface CardsProps extends WebComponentProps {
 }
 
 export const Cards = createWebComponent<CardsProps>(
-  'kc-cards',
+  'kai-cards',
   ["theme","cards","types","policy"],
   {  },
 );
@@ -115,7 +115,7 @@ export interface ChainOfThoughtProps extends WebComponentProps {
 }
 
 export const ChainOfThought = createWebComponent<ChainOfThoughtProps>(
-  'kc-chain-of-thought',
+  'kai-chain-of-thought',
   ["theme","steps"],
   {  },
 );
@@ -123,7 +123,7 @@ export const ChainOfThought = createWebComponent<ChainOfThoughtProps>(
 export interface ChatProps extends WebComponentProps {
   /** The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). */
   messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[];
-  /** Controlled value of the input. When set, the host owns the input text and must update it on `kc-value-change`; leave unset for uncontrolled behavior. */
+  /** Controlled value of the input. When set, the host owns the input text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -143,7 +143,7 @@ export interface ChatProps extends WebComponentProps {
   codeHighlight?: boolean;
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;
-  /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. */
+  /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kai-model-change` event fires on selection. */
   models?: { id: string; name: string; provider?: string; description?: string; group?: string }[];
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
@@ -151,7 +151,7 @@ export interface ChatProps extends WebComponentProps {
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; estimatedCost?: number };
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
-  /** Whether the host has `slot="header-start"` content (left of the title) — set by the `<kc-chat>` facade so a custom control forces the header open. */
+  /** Whether the host has `slot="header-start"` content (left of the title) — set by the `<kai-chat>` facade so a custom control forces the header open. */
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
@@ -159,7 +159,7 @@ export interface ChatProps extends WebComponentProps {
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
   voice?: boolean;
-  /** Slash commands — when set, typing `/` in the input opens the command palette and fires `kc-slash-select`. Set as a JS property. */
+  /** Slash commands — when set, typing `/` in the input opens the command palette and fires `kai-slash-select`. Set as a JS property. */
   slashCommands?: { id: string; label: string; description?: string; category?: string }[];
   /** Command ids to highlight as active in the palette. */
   slashActiveIds?: string[];
@@ -186,9 +186,9 @@ export interface ChatProps extends WebComponentProps {
 }
 
 export const Chat = createWebComponent<ChatProps>(
-  'kc-chat',
+  'kai-chat',
   ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","search","voice","slashCommands","slashActiveIds","slashCompact","actionsReveal"],
-  { onMessageAction: 'kc-message-action', onModelChange: 'kc-model-change', onSearch: 'kc-search', onSlashSelect: 'kc-slash-select', onSubmit: 'kc-submit', onSuggestionClick: 'kc-suggestion-click', onValueChange: 'kc-value-change', onVoice: 'kc-voice' },
+  { onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSearch: 'kai-search', onSlashSelect: 'kai-slash-select', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );
 
 export interface CheckpointProps extends WebComponentProps {
@@ -205,9 +205,9 @@ export interface CheckpointProps extends WebComponentProps {
 }
 
 export const Checkpoint = createWebComponent<CheckpointProps>(
-  'kc-checkpoint',
+  'kai-checkpoint',
   ["theme","label","tooltip","variant","size"],
-  { onSelect: 'kc-select' },
+  { onSelect: 'kai-select' },
 );
 
 export interface ChoiceProps extends WebComponentProps {
@@ -222,7 +222,7 @@ export interface ChoiceProps extends WebComponentProps {
 }
 
 export const Choice = createWebComponent<ChoiceProps>(
-  'kc-choice',
+  'kai-choice',
   ["theme","data","cardId","heading","resolution"],
   {  },
 );
@@ -241,7 +241,7 @@ export interface CodeBlockProps extends WebComponentProps {
 }
 
 export const CodeBlock = createWebComponent<CodeBlockProps>(
-  'kc-code-block',
+  'kai-code-block',
   ["theme","code","language","codeTheme","codeHighlight","proseSize"],
   {  },
 );
@@ -260,7 +260,7 @@ export interface ConfirmProps extends WebComponentProps {
 }
 
 export const Confirm = createWebComponent<ConfirmProps>(
-  'kc-confirm',
+  'kai-confirm',
   ["theme","data","cardId","heading","autofocus","resolution"],
   {  },
 );
@@ -277,9 +277,9 @@ export interface ContextProps extends WebComponentProps {
 }
 
 export const Context = createWebComponent<ContextProps>(
-  'kc-context',
+  'kai-context',
   ["theme","context","warnThreshold","dangerThreshold"],
-  { onThresholdChange: 'kc-threshold-change' },
+  { onThresholdChange: 'kai-threshold-change' },
 );
 
 export interface ConversationsProps extends WebComponentProps {
@@ -298,9 +298,9 @@ export interface ConversationsProps extends WebComponentProps {
 }
 
 export const Conversations = createWebComponent<ConversationsProps>(
-  'kc-conversations',
+  'kai-conversations',
   ["theme","groups","conversations","activeId"],
-  { onConversationSelect: 'kc-conversation-select', onNewChat: 'kc-new-chat', onToggleSidebar: 'kc-toggle-sidebar' },
+  { onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onToggleSidebar: 'kai-toggle-sidebar' },
 );
 
 export interface EmbedProps extends WebComponentProps {
@@ -311,7 +311,7 @@ export interface EmbedProps extends WebComponentProps {
 }
 
 export const Embed = createWebComponent<EmbedProps>(
-  'kc-embed',
+  'kai-embed',
   ["theme","cardId","data"],
   {  },
 );
@@ -324,7 +324,7 @@ export interface EmptyProps extends WebComponentProps {
 }
 
 export const Empty = createWebComponent<EmptyProps>(
-  'kc-empty',
+  'kai-empty',
   ["theme","emptyTitle","description"],
   {  },
 );
@@ -353,9 +353,9 @@ export interface FeedbackBarProps extends WebComponentProps {
 }
 
 export const FeedbackBar = createWebComponent<FeedbackBarProps>(
-  'kc-feedback-bar',
+  'kai-feedback-bar',
   ["theme","barTitle","collectDetail","categories","detailTitle","detailPlaceholder","submitLabel","thanksMessage"],
-  { onClose: 'kc-close', onFeedback: 'kc-feedback', onFeedbackDetail: 'kc-feedback-detail' },
+  { onClose: 'kai-close', onFeedback: 'kai-feedback', onFeedbackDetail: 'kai-feedback-detail' },
 );
 
 export interface FileTreeProps extends WebComponentProps {
@@ -370,9 +370,9 @@ export interface FileTreeProps extends WebComponentProps {
 }
 
 export const FileTree = createWebComponent<FileTreeProps>(
-  'kc-file-tree',
+  'kai-file-tree',
   ["theme","files","activeFile","defaultExpanded"],
-  { onSelect: 'kc-select' },
+  { onSelect: 'kai-select' },
 );
 
 export interface FileUploadProps extends WebComponentProps {
@@ -389,9 +389,9 @@ export interface FileUploadProps extends WebComponentProps {
 }
 
 export const FileUpload = createWebComponent<FileUploadProps>(
-  'kc-file-upload',
+  'kai-file-upload',
   ["theme","multiple","accept","disabled","label"],
-  { onFilesAdded: 'kc-files-added' },
+  { onFilesAdded: 'kai-files-added' },
 );
 
 export interface FormProps extends WebComponentProps {
@@ -406,7 +406,7 @@ export interface FormProps extends WebComponentProps {
 }
 
 export const Form = createWebComponent<FormProps>(
-  'kc-form',
+  'kai-form',
   ["theme","data","cardId","heading","resolution"],
   {  },
 );
@@ -423,7 +423,7 @@ export interface ImageProps extends WebComponentProps {
 }
 
 export const Image = createWebComponent<ImageProps>(
-  'kc-image',
+  'kai-image',
   ["theme","base64","bytes","alt","mediaType"],
   {  },
 );
@@ -436,7 +436,7 @@ export interface LinkPreviewProps extends WebComponentProps {
 }
 
 export const LinkPreview = createWebComponent<LinkPreviewProps>(
-  'kc-link-preview',
+  'kai-link-preview',
   ["theme","cardId","data"],
   {  },
 );
@@ -451,7 +451,7 @@ export interface LoaderProps extends WebComponentProps {
 }
 
 export const Loader = createWebComponent<LoaderProps>(
-  'kc-loader',
+  'kai-loader',
   ["theme","variant","size","text"],
   {  },
 );
@@ -468,7 +468,7 @@ export interface MarkdownProps extends WebComponentProps {
 }
 
 export const Markdown = createWebComponent<MarkdownProps>(
-  'kc-markdown',
+  'kai-markdown',
   ["theme","content","proseSize","codeTheme","codeHighlight"],
   {  },
 );
@@ -499,9 +499,9 @@ export interface MessageProps extends WebComponentProps {
 }
 
 export const Message = createWebComponent<MessageProps>(
-  'kc-message',
+  'kai-message',
   ["theme","message","role","content","markdown","proseSize","codeTheme","codeHighlight","actionsReveal","avatarSrc","avatarFallback"],
-  { onMessageAction: 'kc-message-action' },
+  { onMessageAction: 'kai-message-action' },
 );
 
 export interface ModelSwitcherProps extends WebComponentProps {
@@ -514,9 +514,9 @@ export interface ModelSwitcherProps extends WebComponentProps {
 }
 
 export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
-  'kc-model-switcher',
+  'kai-model-switcher',
   ["theme","models","currentModel"],
-  { onModelChange: 'kc-model-change' },
+  { onModelChange: 'kai-model-change' },
 );
 
 export interface PopoverProps extends WebComponentProps {
@@ -531,13 +531,13 @@ export interface PopoverProps extends WebComponentProps {
 }
 
 export const Popover = createWebComponent<PopoverProps>(
-  'kc-popover',
+  'kai-popover',
   ["theme","placement","gutter","open"],
-  { onOpenChange: 'kc-open-change' },
+  { onOpenChange: 'kai-open-change' },
 );
 
 export interface PromptInputProps extends WebComponentProps {
-  /** Controlled value of the input. When set, the host owns the text and must update it on `kc-value-change`; leave unset for uncontrolled behavior. */
+  /** Controlled value of the input. When set, the host owns the text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -559,7 +559,7 @@ export interface PromptInputProps extends WebComponentProps {
   search?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. */
   voice?: boolean;
-  /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kc-stop`. */
+  /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
   stoppable?: boolean;
   /** Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). */
   attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
@@ -573,7 +573,7 @@ export interface PromptInputProps extends WebComponentProps {
   onSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
   onSuggestionClick?: (event: CustomEvent<{ value: string }>) => void;
-  /** A custom `<kc-action>` toolbar button was clicked. `action` is the `id` of the `<kc-action>` element that was clicked. */
+  /** A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of the `<kai-action>` element that was clicked. */
   onToolbarAction?: (event: CustomEvent<{ action: string }>) => void;
   /** The input text changed (fires on every keystroke). */
   onValueChange?: (event: CustomEvent<{ value: string }>) => void;
@@ -582,9 +582,9 @@ export interface PromptInputProps extends WebComponentProps {
 }
 
 export const PromptInput = createWebComponent<PromptInputProps>(
-  'kc-prompt-input',
+  'kai-prompt-input',
   ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","slashCommands","slashActiveIds","slashCompact","search","voice","stoppable","attachments"],
-  { onSearch: 'kc-search', onSlashSelect: 'kc-slash-select', onStop: 'kc-stop', onSubmit: 'kc-submit', onSuggestionClick: 'kc-suggestion-click', onToolbarAction: 'kc-toolbar-action', onValueChange: 'kc-value-change', onVoice: 'kc-voice' },
+  { onSearch: 'kai-search', onSlashSelect: 'kai-slash-select', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );
 
 export interface ReasoningProps extends WebComponentProps {
@@ -603,9 +603,9 @@ export interface ReasoningProps extends WebComponentProps {
 }
 
 export const Reasoning = createWebComponent<ReasoningProps>(
-  'kc-reasoning',
+  'kai-reasoning',
   ["theme","text","label","open","streaming","markdown"],
-  { onOpenChange: 'kc-open-change' },
+  { onOpenChange: 'kai-open-change' },
 );
 
 export interface RemoteProps extends WebComponentProps {
@@ -620,7 +620,7 @@ export interface RemoteProps extends WebComponentProps {
 }
 
 export const Remote = createWebComponent<RemoteProps>(
-  'kc-remote',
+  'kai-remote',
   ["theme","src","providerOrigin","envelope","policy"],
   {  },
 );
@@ -637,9 +637,9 @@ export interface ResizableProps extends WebComponentProps {
 }
 
 export const Resizable = createWebComponent<ResizableProps>(
-  'kc-resizable',
+  'kai-resizable',
   ["theme","orientation","maximizedIndex"],
-  { onChange: 'kc-change', onMaximizeChange: 'kc-maximize-change' },
+  { onChange: 'kai-change', onMaximizeChange: 'kai-maximize-change' },
 );
 
 export interface ResizableItemProps extends WebComponentProps {
@@ -658,9 +658,9 @@ export interface ResizableItemProps extends WebComponentProps {
 }
 
 export const ResizableItem = createWebComponent<ResizableItemProps>(
-  'kc-resizable-item',
+  'kai-resizable-item',
   ["theme","size","min","max","locked","hidden"],
-  { onChange: 'kc-change', onMaximizeChange: 'kc-maximize-change' },
+  { onChange: 'kai-change', onMaximizeChange: 'kai-maximize-change' },
 );
 
 export interface ResponseStreamProps extends WebComponentProps {
@@ -677,9 +677,9 @@ export interface ResponseStreamProps extends WebComponentProps {
 }
 
 export const ResponseStream = createWebComponent<ResponseStreamProps>(
-  'kc-response-stream',
+  'kai-response-stream',
   ["theme","text","mode","speed","as"],
-  { onComplete: 'kc-complete' },
+  { onComplete: 'kai-complete' },
 );
 
 export interface ScopePickerProps extends WebComponentProps {
@@ -694,9 +694,9 @@ export interface ScopePickerProps extends WebComponentProps {
 }
 
 export const ScopePicker = createWebComponent<ScopePickerProps>(
-  'kc-scope-picker',
+  'kai-scope-picker',
   ["theme","availableAuthors","availableTags","currentLabel"],
-  { onScopeChange: 'kc-scope-change' },
+  { onScopeChange: 'kai-scope-change' },
 );
 
 export interface ScrollButtonProps extends WebComponentProps {
@@ -711,9 +711,9 @@ export interface ScrollButtonProps extends WebComponentProps {
 }
 
 export const ScrollButton = createWebComponent<ScrollButtonProps>(
-  'kc-scroll-button',
+  'kai-scroll-button',
   ["theme","for","variant","size"],
-  { onScroll: 'kc-scroll' },
+  { onScroll: 'kai-scroll' },
 );
 
 export interface SkillsProps extends WebComponentProps {
@@ -722,7 +722,7 @@ export interface SkillsProps extends WebComponentProps {
 }
 
 export const Skills = createWebComponent<SkillsProps>(
-  'kc-skills',
+  'kai-skills',
   ["theme","skills"],
   {  },
 );
@@ -741,7 +741,7 @@ export interface SourceProps extends WebComponentProps {
 }
 
 export const Source = createWebComponent<SourceProps>(
-  'kc-source',
+  'kai-source',
   ["theme","href","label","headline","description","showFavicon"],
   {  },
 );
@@ -756,7 +756,7 @@ export interface SourcesProps extends WebComponentProps {
 }
 
 export const Sources = createWebComponent<SourcesProps>(
-  'kc-sources',
+  'kai-sources',
   ["theme","sources","showFavicon","numbered"],
   {  },
 );
@@ -777,13 +777,13 @@ export interface SuggestionsProps extends WebComponentProps {
 }
 
 export const Suggestions = createWebComponent<SuggestionsProps>(
-  'kc-suggestions',
+  'kai-suggestions',
   ["theme","suggestions","variant","size","block","highlight"],
-  { onSelect: 'kc-select' },
+  { onSelect: 'kai-select' },
 );
 
 export interface SwitchProps extends WebComponentProps {
-  /** Initial checked state. Bare attribute (`<kc-switch checked>`) turns it on. */
+  /** Initial checked state. Bare attribute (`<kai-switch checked>`) turns it on. */
   checked?: boolean;
   /** Disable interaction. */
   disabled?: boolean;
@@ -794,9 +794,9 @@ export interface SwitchProps extends WebComponentProps {
 }
 
 export const Switch = createWebComponent<SwitchProps>(
-  'kc-switch',
+  'kai-switch',
   ["theme","checked","disabled","label"],
-  { onChange: 'kc-change' },
+  { onChange: 'kai-change' },
 );
 
 export interface TasksProps extends WebComponentProps {
@@ -811,7 +811,7 @@ export interface TasksProps extends WebComponentProps {
 }
 
 export const Tasks = createWebComponent<TasksProps>(
-  'kc-tasks',
+  'kai-tasks',
   ["theme","data","cardId","heading","resolution"],
   {  },
 );
@@ -828,7 +828,7 @@ export interface TextShimmerProps extends WebComponentProps {
 }
 
 export const TextShimmer = createWebComponent<TextShimmerProps>(
-  'kc-text-shimmer',
+  'kai-text-shimmer',
   ["theme","text","as","duration","spread"],
   {  },
 );
@@ -845,9 +845,9 @@ export interface ThinkingBarProps extends WebComponentProps {
 }
 
 export const ThinkingBar = createWebComponent<ThinkingBarProps>(
-  'kc-thinking-bar',
+  'kai-thinking-bar',
   ["theme","text","stoppable","stopLabel"],
-  { onStop: 'kc-stop' },
+  { onStop: 'kai-stop' },
 );
 
 export interface ToolProps extends WebComponentProps {
@@ -858,7 +858,7 @@ export interface ToolProps extends WebComponentProps {
 }
 
 export const Tool = createWebComponent<ToolProps>(
-  'kc-tool',
+  'kai-tool',
   ["theme","tool","open"],
   {  },
 );
@@ -875,9 +875,9 @@ export interface VoiceInputProps extends WebComponentProps {
 }
 
 export const VoiceInput = createWebComponent<VoiceInputProps>(
-  'kc-voice-input',
+  'kai-voice-input',
   ["theme","transcribe","disabled"],
-  { onAudioCaptured: 'kc-audio-captured', onTranscription: 'kc-transcription' },
+  { onAudioCaptured: 'kai-audio-captured', onTranscription: 'kai-transcription' },
 );
 
 export interface WorkspaceProps extends WebComponentProps {
@@ -913,7 +913,7 @@ export interface WorkspaceProps extends WebComponentProps {
   sidebarMinWidth?: number;
   /** Sidebar max width in px (default 420). */
   sidebarMaxWidth?: number;
-  /** Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it). */
+  /** Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kai-sidebar-toggle` event. Omit for uncontrolled (the element manages it). */
   sidebarCollapsed?: boolean;
   /** Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
   defaultSidebarCollapsed?: boolean;
@@ -942,7 +942,7 @@ export interface WorkspaceProps extends WebComponentProps {
 }
 
 export const Workspace = createWebComponent<WorkspaceProps>(
-  'kc-workspace',
+  'kai-workspace',
   ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed"],
-  { onConversationSelect: 'kc-conversation-select', onMessageAction: 'kc-message-action', onModelChange: 'kc-model-change', onNewChat: 'kc-new-chat', onSearch: 'kc-search', onSidebarToggle: 'kc-sidebar-toggle', onSlashSelect: 'kc-slash-select', onSubmit: 'kc-submit', onSuggestionClick: 'kc-suggestion-click', onValueChange: 'kc-value-change', onVoice: 'kc-voice' },
+  { onConversationSelect: 'kai-conversation-select', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onSidebarToggle: 'kai-sidebar-toggle', onSlashSelect: 'kai-slash-select', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );

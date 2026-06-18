@@ -20,24 +20,24 @@ interface Props extends Record<string, unknown> {
   thanksMessage?: string;
 }
 
-/** Events fired by `<kc-feedback-bar>`. */
+/** Events fired by `<kai-feedback-bar>`. */
 interface Events {
   /** The user rated the response. `value` is `'helpful'` or `'not-helpful'`. */
-  'kc-feedback': { value: FeedbackValue };
+  'kai-feedback': { value: FeedbackValue };
   /** The user submitted the optional detail form (`collect-detail`). */
-  'kc-feedback-detail': FeedbackDetail;
+  'kai-feedback-detail': FeedbackDetail;
   /** The user dismissed the banner. */
-  'kc-close': void;
+  'kai-close': void;
 }
 
 /**
- * `<kc-feedback-bar>` — an inline thumbs up/down feedback banner that owns its
+ * `<kai-feedback-bar>` — an inline thumbs up/down feedback banner that owns its
  * own flow: it asks, optionally collects a category + comment on a not-helpful
  * vote (`collect-detail`), then confirms with a thank-you — all in place. Emits
- * `kc-feedback` (`{ value }`), `kc-feedback-detail` (`{ value, category?, comment? }`),
- * and `kc-close`.
+ * `kai-feedback` (`{ value }`), `kai-feedback-detail` (`{ value, category?, comment? }`),
+ * and `kai-close`.
  */
-defineWebComponent<Props, Events>('kc-feedback-bar', {
+defineWebComponent<Props, Events>('kai-feedback-bar', {
   barTitle: 'Was this helpful?',
   collectDetail: undefined,
   categories: undefined,
@@ -54,8 +54,8 @@ defineWebComponent<Props, Events>('kc-feedback-bar', {
     detailPlaceholder={props.detailPlaceholder}
     submitLabel={props.submitLabel}
     thanksMessage={props.thanksMessage}
-    onFeedback={(value) => dispatch('kc-feedback', { value })}
-    onSubmitDetail={(detail) => dispatch('kc-feedback-detail', detail)}
-    onClose={() => dispatch('kc-close')}
+    onFeedback={(value) => dispatch('kai-feedback', { value })}
+    onSubmitDetail={(detail) => dispatch('kai-feedback-detail', detail)}
+    onClose={() => dispatch('kai-close')}
   />
 ));

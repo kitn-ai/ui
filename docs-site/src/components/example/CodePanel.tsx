@@ -1,5 +1,5 @@
 /** Expand/collapse code panel — full-width clickable bar + framework tabs +
- *  syntax-highlighted code (dogfooding the kit's <kc-code-block>). `snippets` is
+ *  syntax-highlighted code (dogfooding the kit's <kai-code-block>). `snippets` is
  *  an accessor so the playground can feed it live, state-driven code. */
 import { createSignal, createEffect, onMount, For, Show } from 'solid-js';
 import { loadKit } from './kit';
@@ -40,8 +40,8 @@ export function CodePanel(props: { snippets: () => Record<Framework, string>; de
             )}
           </For>
         </div>
-        {/* @ts-expect-error custom element — kc-code-block (Shiki); flush (square) top under the tabs */}
-        <kc-code-block ref={setCodeEl} style={{ display: 'block', '--kc-code-radius': '0' }} />
+        {/* @ts-expect-error custom element — kai-code-block (Shiki); flush (square) top under the tabs */}
+        <kai-code-block ref={setCodeEl} style={{ display: 'block', '--kc-code-radius': '0' }} />
       </Show>
     </div>
   );

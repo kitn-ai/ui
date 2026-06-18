@@ -5,10 +5,10 @@ description: Serve interactive cards (booking, payment, partner forms) from a th
 
 import { Aside } from '@astrojs/starlight/components';
 
-<p class="kc-lede">A third-party provider hosts its cards on its own origin — a booking widget, a payment form, a partner micro-frontend. `<kc-remote>` frames them in a sandboxed iframe, bridges their events back to your host over `postMessage`, and hands you the same `CardEnvelope` / `CardEvent` contract as every built-in card. No second-origin live demo is possible on this static site — this page is a focused walkthrough.</p>
+<p class="kc-lede">A third-party provider hosts its cards on its own origin — a booking widget, a payment form, a partner micro-frontend. `<kai-remote>` frames them in a sandboxed iframe, bridges their events back to your host over `postMessage`, and hands you the same `CardEnvelope` / `CardEvent` contract as every built-in card. No second-origin live demo is possible on this static site — this page is a focused walkthrough.</p>
 
 <Aside type="caution" title="Cross-origin requirement">
-`<kc-remote>` needs a running provider at a different origin. It cannot demo here. Run `npm run storybook` for the full interactive demo, or see the reference app in `examples/remote-provider/`.
+`<kai-remote>` needs a running provider at a different origin. It cannot demo here. Run `npm run storybook` for the full interactive demo, or see the reference app in `examples/remote-provider/`.
 </Aside>
 
 ## How it works
@@ -18,33 +18,33 @@ The transport has two sides: the **host** (your chat app) and the **provider** (
 ```
 Host app                          Provider (different origin)
 ────────────────────────────────  ─────────────────────────────────────
-<kc-remote>                       <html id="root">
+<kai-remote>                       <html id="root">
   └─ shadow root                    <script> createCardBridge({ … }) </script>
        └─ <iframe sandbox …>  ←→   </html>
             postMessage (WireFrame)
 ```
 
-On mount, `<kc-remote>` validates `provider-origin`, injects a sandboxed `<iframe>` pointing at `src`, completes a version-negotiated handshake, then pushes the `CardEnvelope` + `CardContext` (theme, locale) down the wire. The provider renders the card using its own renderers; user interactions come back as `CardEvent` messages. On the host side every event re-surfaces as a bubbling `kc-card` `CustomEvent` so your existing listeners work unchanged.
+On mount, `<kai-remote>` validates `provider-origin`, injects a sandboxed `<iframe>` pointing at `src`, completes a version-negotiated handshake, then pushes the `CardEnvelope` + `CardContext` (theme, locale) down the wire. The provider renders the card using its own renderers; user interactions come back as `CardEvent` messages. On the host side every event re-surfaces as a bubbling `kai-card` `CustomEvent` so your existing listeners work unchanged.
 
 Key security properties baked in — no config needed:
 - The iframe runs with `sandbox="allow-scripts allow-forms"` (no `allow-same-origin`).
 - Inbound `postMessage` frames are accepted only from the pinned `provider-origin` + the source window locked at handshake + a per-instance nonce.
 - Wildcards and comma-lists in `provider-origin` are rejected before any mount.
 
-## Host side: wire up `<kc-remote>`
+## Host side: wire up `<kai-remote>`
 
 Register the elements and give the component its three required pieces — `provider-origin`, `src`, and the `envelope` property:
 
 ```html
-<kc-remote
+<kai-remote
   provider-origin="https://cards.provider.example"
   src="https://cards.provider.example/card"
-></kc-remote>
+></kai-remote>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
 
-  const remote = document.querySelector('kc-remote');
+  const remote = document.querySelector('kai-remote');
 
   // Assign the CardEnvelope in JavaScript — objects can't be HTML attributes.
   remote.envelope = {
@@ -58,8 +58,8 @@ Register the elements and give the component its three required pieces — `prov
     },
   };
 
-  // Every routed CardEvent surfaces as a bubbling 'kc-card' CustomEvent.
-  remote.addEventListener('kc-card', (e) => {
+  // Every routed CardEvent surfaces as a bubbling 'kai-card' CustomEvent.
+  remote.addEventListener('kai-card', (e) => {
     const ev = e.detail; // { kind, cardId, … }
     if (ev.kind === 'submit') {
       // e.g. { kind: 'submit', cardId: 'booking-1', data: { slot: '19:30' } }
@@ -72,7 +72,7 @@ Register the elements and give the component its three required pieces — `prov
 </script>
 ```
 
-Alternatively, pass a `CardPolicy` object for programmatic routing — the same shape `<kc-cards>` uses:
+Alternatively, pass a `CardPolicy` object for programmatic routing — the same shape `<kai-cards>` uses:
 
 ```js
 remote.policy = {
@@ -82,17 +82,17 @@ remote.policy = {
 };
 ```
 
-## Embed inside `<kc-cards>`
+## Embed inside `<kai-cards>`
 
-When the model streams a mix of built-in and remote cards, use `<kc-cards>` with a `types` override that maps the remote card type to `'kc-remote'`:
+When the model streams a mix of built-in and remote cards, use `<kai-cards>` with a `types` override that maps the remote card type to `'kai-remote'`:
 
 ```js
 import '@kitn.ai/ui/elements';
 
-const cards = document.querySelector('kc-cards');
+const cards = document.querySelector('kai-cards');
 
-// Tell kc-cards to render 'booking' envelopes with <kc-remote>.
-cards.types = { booking: 'kc-remote' };
+// Tell kai-cards to render 'booking' envelopes with <kai-remote>.
+cards.types = { booking: 'kai-remote' };
 
 // The full stream of envelopes — built-in and remote mixed.
 cards.cards = [
@@ -106,8 +106,8 @@ cards.policy = {
 };
 ```
 
-<Aside type="note" title="kc-remote inside kc-cards">
-When `kc-cards` resolves a card to `kc-remote`, it sets the envelope as a DOM property. `kc-remote` still needs `provider-origin` and `src` — set them on the `<kc-cards>` host or include them in each envelope's `data` and read them in a custom `CardPolicy`.
+<Aside type="note" title="kai-remote inside kai-cards">
+When `kai-cards` resolves a card to `kai-remote`, it sets the envelope as a DOM property. `kai-remote` still needs `provider-origin` and `src` — set them on the `<kai-cards>` host or include them in each envelope's `data` and read them in a custom `CardPolicy`.
 </Aside>
 
 ## Provider side: serve the card
@@ -159,7 +159,7 @@ createCardBridge({
 }).start();
 ```
 
-`host.emit()` accepts any `CardEvent`. The bridge relays it to the host over `postMessage`; `<kc-remote>` re-fires it as a bubbling `kc-card` CustomEvent.
+`host.emit()` accepts any `CardEvent`. The bridge relays it to the host over `postMessage`; `<kai-remote>` re-fires it as a bubbling `kai-card` CustomEvent.
 
 ## CardEnvelope shape
 
@@ -191,7 +191,7 @@ interface CardEnvelope {
 
 ## Next steps
 
-- **[`kc-remote` reference](/chat/components/remote/)** — all props, origin validation rules, and the security model in full.
-- **[`kc-cards` reference](/chat/components/cards/)** — the card dispatcher: built-in types, `types` overrides, and `CardPolicy`.
-- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop that drives `cards` into a `<kc-chat>` message thread.
+- **[`kai-remote` reference](/chat/components/remote/)** — all props, origin validation rules, and the security model in full.
+- **[`kai-cards` reference](/chat/components/cards/)** — the card dispatcher: built-in types, `types` overrides, and `CardPolicy`.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop that drives `cards` into a `<kai-chat>` message thread.
 - **[Generative UI cards](/chat/patterns/generative-ui-cards/)** — render the same cards locally, in-thread.

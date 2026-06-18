@@ -11,18 +11,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-form</p>
+<p class="kc-tag-sub">kai-form</p>
 
-<p class="kc-lede">Point a JSON Schema at `<kc-form>` and get a fully themed, accessible, client-validated form — labels, widgets, submit button, and a read-only resolved state — without writing a single input element.</p>
+<p class="kc-lede">Point a JSON Schema at `<kai-form>` and get a fully themed, accessible, client-validated form — labels, widgets, submit button, and a read-only resolved state — without writing a single input element.</p>
 
 <Facts items={['Shadow DOM', 'JSON Schema driven', 'Client-side validation', 'Read-only resolved state', 'Card contract events']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-form" />
+<Playground client:only="solid" tag="kai-form" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-form>` when an agent needs structured input before continuing — onboarding questionnaires, task parameters, feedback forms, or any agentic step that gates on user data. The schema is the single source of truth for both UI layout and validation.
+Use `<kai-form>` when an agent needs structured input before continuing — onboarding questionnaires, task parameters, feedback forms, or any agentic step that gates on user data. The schema is the single source of truth for both UI layout and validation.
 </Aside>
 
 ## Usage
@@ -30,7 +30,7 @@ Use `<kc-form>` when an agent needs structured input before continuing — onboa
 Assign the form definition in JavaScript — it's an object, not an HTML attribute:
 
 ```html
-<kc-form id="my-form"></kc-form>
+<kai-form id="my-form"></kai-form>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -48,7 +48,7 @@ Assign the form definition in JavaScript — it's an object, not an HTML attribu
     },
   };
 
-  form.addEventListener('kc-card', (e) => {
+  form.addEventListener('kai-card', (e) => {
     if (e.detail.kind === 'submit') console.log('submission data', e.detail.data);
     if (e.detail.kind === 'action') console.log('secondary action', e.detail.action);
   });
@@ -57,7 +57,7 @@ Assign the form definition in JavaScript — it's an object, not an HTML attribu
 
 - **Schema → widgets** deterministically: `string` → text; `string + enum` → radio/select; `integer + x-kc-widget: 'rating'` → stars; `boolean` → switch; `array` → repeater/checkbox group; nested `object` → fieldset. See the **Every widget** example for the full mapping.
 - **`x-kc-*` hints** in the schema control field order (`x-kc-order`), submit label (`x-kc-submitLabel`), secondary buttons (`x-kc-actions`), placeholder (`x-kc-placeholder`), and dismissibility (`x-kc-dismissible`).
-- **Events use the Card contract** — `kc-form` fires no events of its own; it emits a single bubbling `kc-card` CustomEvent. Relevant kinds: `submit` (`detail.data` is the validated object), `action`, `ready`, `dismiss`, and `error`.
+- **Events use the Card contract** — `kai-form` fires no events of its own; it emits a single bubbling `kai-card` CustomEvent. Relevant kinds: `submit` (`detail.data` is the validated object), `action`, `ready`, `dismiss`, and `error`.
 - **`resolution`** — set `el.resolution = { kind: 'submit', data: { … } }` to swap the form for a read-only `<dl>` summary.
 
 ## Examples
@@ -66,38 +66,38 @@ Assign the form definition in JavaScript — it's an object, not an HTML attribu
 
 Star rating, free-text textarea, enum radio group, boolean switch, and a secondary Skip action.
 
-<Example client:visible tag="kc-form" />
+<Example client:visible tag="kai-form" />
 
 ### Every Widget
 
 Exercises the full schema-to-widget mapping: text, email, URL, date, password, select, number, slider, rating, switch, checkbox, tag list, checkbox group, repeater, and nested fieldset.
 
-<Example client:visible tag="kc-form" data="allWidgets" />
+<Example client:visible tag="kai-form" data="allWidgets" />
 
 ### Validation
 
 Required fields, `minLength`/`maxLength`, `minimum`/`maximum`, and `format: 'email'` — submit empty to see inline errors.
 
-<Example client:visible tag="kc-form" data="validation" />
+<Example client:visible tag="kai-form" data="validation" />
 
 ### Resolved (Read-only)
 
 After a successful submission, set `el.resolution` to render a read-only `<dl>` summary with a "Submitted" badge.
 
-<Example client:visible tag="kc-form" data="resolved" />
+<Example client:visible tag="kai-form" data="resolved" />
 
 ### Invalid Envelope
 
-Pass a non-object schema to see the inline error state; the element also emits `kc-card` with `kind: 'error'`.
+Pass a non-object schema to see the inline error state; the element also emits `kai-card` with `kind: 'error'`.
 
-<Example client:visible tag="kc-form" data="invalidEnvelope" />
+<Example client:visible tag="kai-form" data="invalidEnvelope" />
 
 ## Props
 
-<PropTable tag="kc-form" />
+<PropTable tag="kai-form" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-form" />
+<ComposedFrom tag="kai-form" />
 
 <NeedAHand />

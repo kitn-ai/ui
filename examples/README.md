@@ -17,7 +17,7 @@ npm run examples   # serves the repo root on http://localhost:8000
 Then open:
 
 - **Composable showcase** — http://localhost:8000/examples/composable/index.html
-  (the full roster of individual elements + the batteries-included `<kc-chat>`)
+  (the full roster of individual elements + the batteries-included `<kai-chat>`)
 - Vanilla CDN showcase — http://localhost:8000/examples/vanilla/index.html
 - Floating widget — http://localhost:8000/examples/widget/index.html
 

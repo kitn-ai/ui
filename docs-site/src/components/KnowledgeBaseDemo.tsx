@@ -1,11 +1,11 @@
 /** Knowledge base demo — a scoped RAG assistant.
  *
- *  A <kc-scope-picker> chooses a knowledge scope (Product Docs / API Reference /
- *  Engineering Wiki). The choice filters the <kc-conversations> sidebar list and
- *  swaps which <kc-sources> citations the <kc-chat> answer grounds itself in.
- *  Everything is laid out with <kc-resizable> (sidebar + main pane).
+ *  A <kai-scope-picker> chooses a knowledge scope (Product Docs / API Reference /
+ *  Engineering Wiki). The choice filters the <kai-conversations> sidebar list and
+ *  swaps which <kai-sources> citations the <kai-chat> answer grounds itself in.
+ *  Everything is laid out with <kai-resizable> (sidebar + main pane).
  *
- *  All kc-* elements are real, prop-driven, and upgraded after loadKit(); arrays
+ *  All kai-* elements are real, prop-driven, and upgraded after loadKit(); arrays
  *  and objects are set as JS PROPERTIES, never serialized to attributes. */
 import { onMount, onCleanup } from 'solid-js';
 import { loadKit } from './example/kit';
@@ -338,25 +338,25 @@ export default function KnowledgeBaseDemo() {
     const t = theme();
 
     // --- Scope picker ---
-    pickerEl = document.createElement('kc-scope-picker') as typeof pickerEl;
+    pickerEl = document.createElement('kai-scope-picker') as typeof pickerEl;
     pickerEl!.style.cssText = 'display:block;padding:10px 12px';
     pickerEl!.setAttribute('theme', t);
     customElements.upgrade(pickerEl!);
     pickerEl!.availableTags = SCOPE_TAGS;
     pickerEl!.currentLabel = SCOPE_LABEL.all;
-    pickerEl!.addEventListener('kc-scope-change', onScopeChange);
+    pickerEl!.addEventListener('kai-scope-change', onScopeChange);
 
     // --- Conversations sidebar ---
-    convEl = document.createElement('kc-conversations') as typeof convEl;
+    convEl = document.createElement('kai-conversations') as typeof convEl;
     convEl!.style.cssText = 'display:block;flex:1;min-height:0;width:100%';
     convEl!.setAttribute('theme', t);
     customElements.upgrade(convEl!);
     convEl!.groups = GROUPS;
     convEl!.conversations = conversationsForScope('all');
-    convEl!.addEventListener('kc-conversation-select', onConversationSelect);
+    convEl!.addEventListener('kai-conversation-select', onConversationSelect);
 
     if (sidebarItemRef) {
-      // A <kc-resizable-item> slots its light children into a single
+      // A <kai-resizable-item> slots its light children into a single
       // minmax(0,1fr) grid cell, so appending the picker AND the list directly
       // would land both in the SAME cell (item 2 spilling into an auto implicit
       // row) and a flex style on the item host is inert. Wrap them in one
@@ -370,7 +370,7 @@ export default function KnowledgeBaseDemo() {
     }
 
     // --- Chat main pane ---
-    chatEl = document.createElement('kc-chat') as typeof chatEl;
+    chatEl = document.createElement('kai-chat') as typeof chatEl;
     chatEl!.style.cssText = 'display:block;flex:1;min-height:0;width:100%';
     chatEl!.setAttribute('theme', t);
     customElements.upgrade(chatEl!);
@@ -378,10 +378,10 @@ export default function KnowledgeBaseDemo() {
     chatEl!.placeholder = CONTENT.all.placeholder;
     chatEl!.suggestions = CONTENT.all.suggestions;
     chatEl!.messages = [CONTENT.all.greeting];
-    chatEl!.addEventListener('kc-submit', onSubmit);
+    chatEl!.addEventListener('kai-submit', onSubmit);
 
     // --- Sources strip below the chat ---
-    sourcesEl = document.createElement('kc-sources') as typeof sourcesEl;
+    sourcesEl = document.createElement('kai-sources') as typeof sourcesEl;
     sourcesEl!.style.cssText = 'display:block';
     sourcesEl!.setAttribute('theme', t);
     customElements.upgrade(sourcesEl!);
@@ -410,9 +410,9 @@ export default function KnowledgeBaseDemo() {
 
     onCleanup(() => {
       clearTimeout(timer);
-      pickerEl?.removeEventListener('kc-scope-change', onScopeChange);
-      chatEl?.removeEventListener('kc-submit', onSubmit);
-      convEl?.removeEventListener('kc-conversation-select', onConversationSelect);
+      pickerEl?.removeEventListener('kai-scope-change', onScopeChange);
+      chatEl?.removeEventListener('kai-submit', onSubmit);
+      convEl?.removeEventListener('kai-conversation-select', onConversationSelect);
       obs.disconnect();
     });
   });
@@ -423,14 +423,14 @@ export default function KnowledgeBaseDemo() {
       style={{ height: '620px' }}
     >
       {/* @ts-expect-error custom element */}
-      <kc-resizable
+      <kai-resizable
         ref={(el: HTMLElement) => (resizableRef = el)}
         orientation="horizontal"
         style={{ display: 'block', height: '100%' }}
       >
         {/* Sidebar: scope picker + conversation list (children appended in onMount) */}
         {/* @ts-expect-error custom element */}
-        <kc-resizable-item
+        <kai-resizable-item
           ref={(el: HTMLElement) => (sidebarItemRef = el)}
           size="28%"
           min="220px"
@@ -438,10 +438,10 @@ export default function KnowledgeBaseDemo() {
         />
         {/* Main pane: chat + sources strip (children appended in onMount) */}
         {/* @ts-expect-error custom element */}
-        <kc-resizable-item
+        <kai-resizable-item
           ref={(el: HTMLElement) => (chatItemRef = el)}
         />
-      </kc-resizable>
+      </kai-resizable>
     </div>
   );
 }

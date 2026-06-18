@@ -10,7 +10,7 @@ import type { CardPolicy } from '../../src/primitives/card-contract';
 
 afterEach(() => { document.body.innerHTML = ''; vi.restoreAllMocks(); });
 
-test('emitCardEvent dispatches a bubbling, composed kc-card event', () => {
+test('emitCardEvent dispatches a bubbling, composed kai-card event', () => {
   const el = document.createElement('div');
   document.body.appendChild(el);
   const seen = vi.fn();
