@@ -22,6 +22,49 @@ import IconChevron from '~icons/lucide/chevron-right';
 import IconCode from '~icons/lucide/code';
 import IconClose from '~icons/lucide/x';
 import { THEME_PRESETS, SHADCN_TO_KC } from './theme-presets';
+import { sampleFor } from '../lib/sample-data';
+
+/** Mount a kc-* element into `container`, seeded from the docs sample-data registry
+ *  (the same verified data the component pages use) so the showroom shows real,
+ *  correct components reskinned by the active theme. */
+function mountSample(container: HTMLElement, tag: string, mode: string): HTMLElement {
+  const sample = sampleFor(tag);
+  const node = document.createElement(tag) as HTMLElement & Record<string, unknown>;
+  node.style.display = 'block';
+  node.setAttribute('theme', mode);
+  if (typeof sample.html === 'string') node.innerHTML = sample.html as string;
+  container.replaceChildren(node);
+  if (typeof customElements !== 'undefined') customElements.upgrade(node);
+  for (const [k, v] of Object.entries(sample)) {
+    if (k === 'html' || k === 'previewHeight') continue;
+    (node as Record<string, unknown>)[k] = v;
+  }
+  return node;
+}
+
+/** Showroom items: real kit elements seeded from sample data, grouped by tab. */
+type Slot = { tag: string; label: string; note?: string; h?: string };
+const CARD_SLOTS: Slot[] = [
+  { tag: 'kc-confirm', label: 'Confirm', note: 'Approve / decline — primary + secondary' },
+  { tag: 'kc-choice', label: 'Choice', note: 'Pick one — accent marks the pick' },
+  { tag: 'kc-tasks', label: 'Tasks', note: 'Selectable plan — checkboxes + confirm' },
+  { tag: 'kc-form', label: 'Form', note: 'Inputs, selects, submit' },
+  { tag: 'kc-link-preview', label: 'Link preview', note: 'Surface + muted text' },
+];
+const COMPONENT_SLOTS: Slot[] = [
+  { tag: 'kc-model-switcher', label: 'Model switcher' },
+  { tag: 'kc-context', label: 'Context meter' },
+  { tag: 'kc-tool', label: 'Tool call', note: 'Tool hues' },
+  { tag: 'kc-reasoning', label: 'Reasoning' },
+  { tag: 'kc-chain-of-thought', label: 'Chain of thought' },
+  { tag: 'kc-code-block', label: 'Code block', note: 'Code font + accent' },
+  { tag: 'kc-loader', label: 'Loader', note: 'Primary' },
+  { tag: 'kc-feedback-bar', label: 'Feedback bar' },
+  { tag: 'kc-prompt-input', label: 'Composer', note: 'Base font + input' },
+  { tag: 'kc-conversations', label: 'Conversations', h: '15rem' },
+  { tag: 'kc-file-tree', label: 'File tree', h: '15rem' },
+  { tag: 'kc-attachments', label: 'Attachments' },
+];
 
 /** Shared modal: centered panel + backdrop, portaled to <body> so the editor's
  *  overflow can't clip it. Escape/backdrop close is wired by the caller. */
@@ -199,25 +242,6 @@ function matchFont(stack: string | undefined, list: { value: string }[]): string
   return hit ? hit.value : '';
 }
 
-const CONFIRM_DATA = {
-  body: 'This applies 2 pending migrations and restarts 3 services. Estimated downtime: ~30 s.',
-  tone: 'danger',
-  actions: [
-    { id: 'deploy', label: 'Deploy now', style: 'primary', default: true },
-    { id: 'cancel', label: 'Cancel' },
-  ],
-};
-
-const CHOICE_DATA = {
-  prompt: 'Pick the notification channel for the maintenance window.',
-  options: [
-    { id: 'email', label: 'Email', description: 'Sent to all active accounts', meta: '~4 200 users' },
-    { id: 'banner', label: 'In-app banner', description: 'Shown on next page load', recommended: true },
-    { id: 'none', label: 'No notification', description: 'Internal deploy only' },
-  ],
-  submitLabel: 'Confirm channel',
-};
-
 const SEED_MESSAGES = [
   { id: 'm1', role: 'user', content: 'Can I match the chat to my brand?' },
   {
@@ -271,12 +295,11 @@ function parseCss(css: string): { light: Palette; dark: Palette; radius?: number
 
 export default function ThemeStudio() {
   let chatHost: (HTMLElement & Record<string, unknown>) | undefined;
-  let confirmHost: (HTMLElement & Record<string, unknown>) | undefined;
-  let choiceHost: (HTMLElement & Record<string, unknown>) | undefined;
-  let codeHost: (HTMLElement & Record<string, unknown>) | undefined;
-  let promptHost: HTMLElement | undefined;
   let canvasEl: HTMLDivElement | undefined;
   let streamTimer: number | undefined;
+  // Showroom slots: { container, tag } captured during render, mounted after loadKit.
+  const slots: { el: HTMLElement; tag: string }[] = [];
+  const registerSlot = (el: HTMLElement | undefined, tag: string) => { if (el) slots.push({ el, tag }); };
 
   const [ready, setReady] = createSignal(false);
   const [mode, setMode] = createSignal<'light' | 'dark'>('light');
@@ -288,7 +311,13 @@ export default function ThemeStudio() {
   const [tracking, setTracking] = createSignal(0); // em
   const [shadowColor, setShadowColor] = createSignal('#000000');
   const [preset, setPreset] = createSignal('Default');
-  const [canvasTab, setCanvasTab] = createSignal<'chat' | 'cards' | 'content'>('chat');
+  // Custom presets the user saves (persisted to localStorage).
+  type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; fontBase: string; fontCode: string; tracking: number; shadow: string };
+  const PRESET_KEY = 'kc-theme-studio-presets';
+  const [saved, setSaved] = createSignal<SavedPreset[]>([]);
+  const persistSaved = (list: SavedPreset[]) => { setSaved(list); try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch { /* storage blocked */ } };
+  const [canvasTab, setCanvasTab] = createSignal<'chat' | 'cards' | 'components'>('chat');
+  const [inspectorTab, setInspectorTab] = createSignal<'colors' | 'typography' | 'other'>('colors');
   const [copied, setCopied] = createSignal(false);
   const [codeOpen, setCodeOpen] = createSignal(false);
   const [importOpen, setImportOpen] = createSignal(false);
@@ -323,11 +352,11 @@ export default function ThemeStudio() {
     canvasEl.style.setProperty('--kc-shadow-color', shadowColor());
     ensureFont(fontBase());
     ensureFont(fontCode());
-    // Keep each preview host on the studio's mode (independent of the page theme).
-    chatHost?.setAttribute('theme', mode());
-    confirmHost?.setAttribute('theme', mode());
-    choiceHost?.setAttribute('theme', mode());
-    promptHost?.setAttribute('theme', mode());
+    // Keep every kc-* in the canvas on the studio's mode (independent of the page
+    // theme) — covers the chat plus all showroom elements, however many.
+    canvasEl.querySelectorAll('*').forEach((el) => {
+      if (el.tagName.toLowerCase().startsWith('kc-')) el.setAttribute('theme', mode());
+    });
   });
 
   const setColor = (token: string, hex: string) => {
@@ -336,6 +365,15 @@ export default function ThemeStudio() {
   };
 
   const loadTheme = (name: string) => {
+    // A user-saved preset stores full palettes + extras — apply directly.
+    const s = saved().find((x) => x.name === name);
+    if (s) {
+      setLight(s.light); setDark(s.dark); setRadius(s.radius);
+      setFontBase(s.fontBase); setFontCode(s.fontCode); setTracking(s.tracking); setShadowColor(s.shadow);
+      ensureFont(s.fontBase); ensureFont(s.fontCode);
+      setPreset(name);
+      return;
+    }
     const l = seedPalette('light');
     const d = seedPalette('dark');
     const t = THEME_PRESETS.find((x) => x.name === name);
@@ -366,6 +404,22 @@ export default function ThemeStudio() {
   };
 
   const reset = () => loadTheme('Default');
+
+  const saveCurrent = () => {
+    const name = (typeof prompt === 'function' ? prompt('Name this theme:', preset() === 'Custom' ? '' : preset()) : '')?.trim();
+    if (!name) return;
+    const p: SavedPreset = { name, light: light(), dark: dark(), radius: radius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor() };
+    persistSaved([...saved().filter((x) => x.name !== name), p]);
+    setPreset(name);
+  };
+  const deleteSaved = (name: string) => persistSaved(saved().filter((x) => x.name !== name));
+
+  /** Swatch dots for a row — handles saved presets (full palette) + built-ins. */
+  const dotsFor = (name: string): string[] => {
+    const s = saved().find((x) => x.name === name);
+    if (s) return ['--kc-color-primary', '--kc-color-accent', '--kc-color-secondary', '--kc-color-background', '--kc-color-foreground'].map((k) => s.light[k] || '#888888');
+    return themeDots(name);
+  };
 
   const copyCss = async () => {
     try {
@@ -420,6 +474,7 @@ export default function ThemeStudio() {
   };
 
   onMount(async () => {
+    try { setSaved(JSON.parse(localStorage.getItem(PRESET_KEY) || '[]')); } catch { /* ignore */ }
     loadTheme('Default');
     const onDocDown = (e: PointerEvent) => {
       if (themeOpen() && themeMenu && !themeMenu.contains(e.target as Node)) setThemeOpen(false);
@@ -448,22 +503,12 @@ export default function ThemeStudio() {
         { id: 'opus', name: 'Claude Opus', provider: 'Anthropic' },
       ];
       chatHost.currentModel = 'sonnet';
+      chatHost.context = { usedTokens: 18500, maxTokens: 200000 };
       chatHost.addEventListener('kc-submit', onSubmit);
     }
-    if (confirmHost) {
-      customElements.upgrade(confirmHost);
-      confirmHost.heading = 'Deploy to production?';
-      confirmHost.data = CONFIRM_DATA;
-    }
-    if (choiceHost) {
-      customElements.upgrade(choiceHost);
-      choiceHost.heading = 'How should we notify users?';
-      choiceHost.data = CHOICE_DATA;
-    }
-    if (codeHost) {
-      customElements.upgrade(codeHost);
-      codeHost.code = "export function greet(name: string) {\n  // inline `code` and blocks use --kc-font-code\n  return `Hello, ${name}!`;\n}";
-      codeHost.language = 'typescript';
+    // Mount the showroom (cards + components) from verified sample data.
+    for (const s of slots) {
+      try { mountSample(s.el, s.tag, mode()); } catch { /* skip a misbehaving element */ }
     }
     setReady(true);
     onCleanup(() => {
@@ -473,6 +518,17 @@ export default function ThemeStudio() {
   });
 
   const swatch = 'h-7 w-7 shrink-0 cursor-pointer rounded-md border border-line bg-transparent p-0';
+
+  /** One showroom item: a labeled, bordered slot the element mounts into. */
+  const ShowSlot = (props: { s: Slot }) => (
+    <div class="flex flex-col gap-1.5 rounded-xl border p-3" style={{ 'border-color': 'var(--kc-color-border)' }}>
+      <div class="flex items-baseline justify-between gap-2">
+        <span class="text-xs font-semibold" style={{ color: 'var(--kc-color-foreground)' }}>{props.s.label}</span>
+        <Show when={props.s.note}><span class="text-[11px]" style={{ color: 'var(--kc-color-muted-foreground)' }}>{props.s.note}</span></Show>
+      </div>
+      <div ref={(el) => registerSlot(el, props.s.tag)} style={props.s.h ? { height: props.s.h, overflow: 'auto' } : undefined} />
+    </div>
+  );
 
   return (
     <div class="theme-studio-root not-content my-4 flex flex-col overflow-hidden rounded-xl border border-line bg-surface lg:h-[82vh] lg:min-h-[660px]">
@@ -488,22 +544,40 @@ export default function ThemeStudio() {
             class="flex w-[260px] max-w-[60vw] items-center gap-2 rounded-md border border-line px-2.5 py-1.5 text-sm text-ink transition-colors hover:bg-ink/5"
           >
             <span class="flex items-center gap-0.5">
-              <For each={themeDots(preset())}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
+              <For each={dotsFor(preset())}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
             </span>
             <span class="truncate font-medium">{preset()}</span>
             <IconChevron class="ml-auto h-3.5 w-3.5 shrink-0 text-ink-3 transition-transform" classList={{ 'rotate-90': themeOpen() }} />
           </button>
           <Show when={themeOpen()}>
             <div class="absolute left-0 top-full z-50 mt-1 w-[300px] max-w-[80vw] overflow-hidden rounded-lg border border-line bg-surface shadow-xl">
-              <div class="border-b border-line p-2">
+              <div class="flex items-center gap-2 border-b border-line p-2">
                 <input
                   value={themeSearch()}
                   onInput={(e) => setThemeSearch(e.currentTarget.value)}
                   placeholder="Search themes…"
-                  class="w-full rounded-md border border-line bg-surface px-2 py-1 text-sm text-ink"
+                  class="min-w-0 flex-1 rounded-md border border-line bg-surface px-2 py-1 text-sm text-ink"
                 />
+                <button type="button" onClick={saveCurrent} title="Save the current theme" class="shrink-0 rounded-md border border-line px-2 py-1 text-xs text-ink-2 transition-colors hover:bg-ink/5">Save</button>
               </div>
               <div class="max-h-[60vh] overflow-auto">
+                <Show when={saved().filter((s) => s.name.toLowerCase().includes(themeSearch().toLowerCase())).length}>
+                  <div class="px-2.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-ink/45">Your themes</div>
+                  <For each={saved().filter((s) => s.name.toLowerCase().includes(themeSearch().toLowerCase()))}>
+                    {(s) => (
+                      <div class="group flex w-full items-center gap-2 px-2.5 py-1.5 text-sm transition-colors hover:bg-ink/5" classList={{ 'bg-ink/[0.07] font-semibold text-ink': preset() === s.name, 'text-ink-2': preset() !== s.name }}>
+                        <button type="button" onClick={() => { loadTheme(s.name); setThemeOpen(false); setThemeSearch(''); }} class="flex min-w-0 flex-1 items-center gap-2 text-left">
+                          <span class="flex items-center gap-0.5">
+                            <For each={dotsFor(s.name)}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
+                          </span>
+                          <span class="truncate">{s.name}</span>
+                        </button>
+                        <button type="button" onClick={() => deleteSaved(s.name)} aria-label={`Delete ${s.name}`} class="shrink-0 rounded p-0.5 text-ink-3 opacity-0 transition-opacity hover:text-ink group-hover:opacity-100"><IconClose class="size-3.5" /></button>
+                      </div>
+                    )}
+                  </For>
+                  <div class="mx-2.5 my-1 border-t border-line/60" />
+                </Show>
                 <For each={filteredThemes()}>
                   {(name) => (
                     <button
@@ -513,13 +587,13 @@ export default function ThemeStudio() {
                       classList={{ 'bg-ink/[0.07] font-semibold text-ink': preset() === name, 'text-ink-2': preset() !== name }}
                     >
                       <span class="flex items-center gap-0.5">
-                        <For each={themeDots(name)}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
+                        <For each={dotsFor(name)}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
                       </span>
                       <span class="truncate">{name}</span>
                     </button>
                   )}
                 </For>
-                <Show when={!filteredThemes().length}>
+                <Show when={!filteredThemes().length && !saved().filter((s) => s.name.toLowerCase().includes(themeSearch().toLowerCase())).length}>
                   <div class="px-2.5 py-3 text-center text-xs text-ink/55">No themes match.</div>
                 </Show>
               </div>
@@ -541,8 +615,17 @@ export default function ThemeStudio() {
 
       {/* Body: inspector · canvas */}
       <div class="flex min-h-0 flex-1 flex-col lg:flex-row">
-        {/* Inspector — collapsible token groups + radius */}
+        {/* Inspector — Colors / Typography / Other tabs */}
         <div class="flex w-full shrink-0 flex-col overflow-auto border-b border-line lg:w-[330px] lg:border-b-0 lg:border-r">
+          <div class="sticky top-0 z-10 flex items-center gap-1 border-b border-line bg-surface px-3 py-2">
+            <For each={[['colors', 'Colors'], ['typography', 'Typography'], ['other', 'Other']] as const}>
+              {([id, label]) => (
+                <button type="button" onClick={() => setInspectorTab(id)} class="rounded-md px-2.5 py-1 text-sm transition-colors" classList={{ 'bg-ink/[0.07] font-semibold text-ink': inspectorTab() === id, 'text-ink-3 hover:text-ink': inspectorTab() !== id }}>{label}</button>
+              )}
+            </For>
+          </div>
+
+          <Show when={inspectorTab() === 'colors'}>
           <For each={GROUPS}>
             {(group) => (
               <div class="border-b border-line/60 last:border-0">
@@ -584,19 +667,11 @@ export default function ThemeStudio() {
               </div>
             )}
           </For>
+          </Show>
 
-          {/* Radius */}
+          {/* Typography tab */}
+          <Show when={inspectorTab() === 'typography'}>
           <div class="px-3 py-3">
-            <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shape</div>
-            <label class="flex items-center gap-2.5 text-sm">
-              <input type="range" min="0" max="1.4" step="0.05" value={radius()} onInput={(e) => setRadius(parseFloat(e.currentTarget.value))} class="flex-1" style={{ 'accent-color': 'var(--kc-ink-3)' }} aria-label="Corner radius" />
-              <span class="w-14 text-right text-xs tabular-nums text-ink-2">{radius()}rem</span>
-            </label>
-          </div>
-
-          {/* Typography */}
-          <div class="border-t border-line/60 px-3 py-3">
-            <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Typography</div>
             <label class="mb-2.5 flex flex-col gap-1">
               <span class="text-sm font-medium text-ink">Body font</span>
               <select
@@ -629,8 +704,17 @@ export default function ThemeStudio() {
               <span class="w-14 text-right text-xs tabular-nums text-ink-2">{tracking().toFixed(3)}em</span>
             </label>
           </div>
+          </Show>
 
-          {/* Shadow */}
+          {/* Other tab — shape + shadow */}
+          <Show when={inspectorTab() === 'other'}>
+          <div class="px-3 py-3">
+            <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shape</div>
+            <label class="flex items-center gap-2.5 text-sm">
+              <input type="range" min="0" max="1.4" step="0.05" value={radius()} onInput={(e) => { setRadius(parseFloat(e.currentTarget.value)); setPreset('Custom'); }} class="flex-1" style={{ 'accent-color': 'var(--kc-ink-3)' }} aria-label="Corner radius" />
+              <span class="w-14 text-right text-xs tabular-nums text-ink-2">{radius()}rem</span>
+            </label>
+          </div>
           <div class="border-t border-line/60 px-3 py-3">
             <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shadow</div>
             <label class="flex items-center gap-2.5">
@@ -641,6 +725,7 @@ export default function ThemeStudio() {
               </span>
             </label>
           </div>
+          </Show>
         </div>
 
         {/* Canvas */}
@@ -652,7 +737,7 @@ export default function ThemeStudio() {
           {/* Tab bar — themed, sticky. Each tab demonstrates a different slice of
               the tokens so a developer can see where they apply. */}
           <div class="sticky top-0 z-10 flex items-center gap-1 border-b px-4 py-2" style={{ 'border-color': 'var(--kc-color-border)', background: 'var(--kc-color-background)' }}>
-            <For each={[['chat', 'Chat'], ['cards', 'Cards'], ['content', 'Content']] as const}>
+            <For each={[['chat', 'Chat'], ['cards', 'Cards'], ['components', 'Components']] as const}>
               {([id, label]) => (
                 <button
                   type="button"
@@ -668,44 +753,29 @@ export default function ThemeStudio() {
             </For>
           </div>
 
-          <div class="mx-auto max-w-3xl p-4">
+          <div class="mx-auto max-w-4xl p-4">
             {/* Chat — a full working example */}
             <div classList={{ hidden: canvasTab() !== 'chat' }}>
-              <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>A full chat: background, card bubbles, the primary send button, focus ring, and the base font.</p>
-              <div class="h-[440px] overflow-hidden rounded-xl border" style={{ 'border-color': 'var(--kc-color-border)' }}>
+              <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>A full chat — messages, model switcher, context meter, suggestions, the composer, and the base font.</p>
+              <div class="h-[460px] overflow-hidden rounded-xl border" style={{ 'border-color': 'var(--kc-color-border)' }}>
                 {/* @ts-expect-error custom element */}
                 <kc-chat ref={(el: HTMLElement) => (chatHost = el as never)} style={{ display: 'block', height: '100%' }} />
               </div>
             </div>
 
-            {/* Cards — generative-UI surfaces */}
+            {/* Cards — generative-UI surfaces, from real sample data */}
             <div classList={{ hidden: canvasTab() !== 'cards' }}>
-              <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>Cards: the card surface + elevation (shadow color), primary / secondary / destructive buttons, the accent (recommended), and borders.</p>
-              <div class="grid gap-4 md:grid-cols-2">
-                {/* @ts-expect-error custom element */}
-                <kc-confirm ref={(el: HTMLElement) => (confirmHost = el as never)} style={{ display: 'block' }} />
-                {/* @ts-expect-error custom element */}
-                <kc-choice ref={(el: HTMLElement) => (choiceHost = el as never)} style={{ display: 'block' }} />
+              <p class="mb-3 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>Generative-UI cards — surfaces + elevation, primary / secondary / destructive buttons, accents, and inputs.</p>
+              <div class="grid gap-4 lg:grid-cols-2">
+                <For each={CARD_SLOTS}>{(s) => <ShowSlot s={s} />}</For>
               </div>
             </div>
 
-            {/* Content — the harder-to-see tokens, fonts, and shadow */}
-            <div classList={{ hidden: canvasTab() !== 'content' }} class="flex flex-col gap-5">
-              <div>
-                <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>Code blocks use the <strong>code font</strong> (--kc-font-code) and the code accent.</p>
-                {/* @ts-expect-error custom element */}
-                <kc-code-block ref={(el: HTMLElement) => (codeHost = el as never)} style={{ display: 'block' }} />
-              </div>
-              <div>
-                <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>The composer — base font, input background, and border.</p>
-                {/* @ts-expect-error custom element */}
-                <kc-prompt-input ref={(el: HTMLElement) => (promptHost = el)} placeholder="Ask anything…" style={{ display: 'block' }} />
-              </div>
-              <div>
-                <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>An elevated surface — the shadow tint is <strong>--kc-shadow-color</strong>.</p>
-                <div class="rounded-xl p-4 text-sm" style={{ background: 'var(--kc-color-card)', color: 'var(--kc-color-card-foreground)', border: '1px solid var(--kc-color-border)', 'box-shadow': '0 6px 16px -3px color-mix(in oklab, var(--kc-shadow-color, oklch(0 0 0)) 16%, transparent), 0 3px 8px -3px color-mix(in oklab, var(--kc-shadow-color, oklch(0 0 0)) 12%, transparent)' }}>
-                  Cards, popovers, and menus lift off the page with this shadow. Set it transparent for a flat look.
-                </div>
+            {/* Components — a cross-section of the kit portfolio */}
+            <div classList={{ hidden: canvasTab() !== 'components' }} class="flex flex-col gap-4">
+              <p class="text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>A cross-section of the kit — see your colors, fonts, and shadow across the components you'll actually ship.</p>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <For each={COMPONENT_SLOTS}>{(s) => <ShowSlot s={s} />}</For>
               </div>
               {/* Coverage strip — tokens not surfaced at rest, reading the live vars */}
               <div class="flex flex-wrap items-center gap-2 rounded-xl border p-3" style={{ 'border-color': 'var(--kc-color-border)', color: 'var(--kc-color-foreground)' }}>
