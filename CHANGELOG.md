@@ -1,5 +1,57 @@
 # Changelog
 
+## [0.14.0](https://github.com/kitn-ai/chat/compare/@kitn.ai/chat-v0.13.0...@kitn.ai/chat-v0.14.0) (2026-06-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* `sidebarCollapsed` no longer just seeds the initial state — when set it now controls the sidebar (the element won't self-toggle away from it). To start collapsed but keep the element managing it, use `defaultSidebarCollapsed` (or the `default-sidebar-collapsed` attribute).
+* composite gaps — prompt-input stoppable/kc-stop, context thresholds, sources numbered, kc-scroll-button
+* DX foundation — self-contained FeedbackBar, kc-action children, kebab kc- events
+
+### Features
+
+* add kc-popover element (button + popover card primitive) ([5095c59](https://github.com/kitn-ai/chat/commit/5095c596c481122eeac829ad0e23c4c435295af1))
+* **chat:** suggestions default to empty-thread, add persistSuggestions (U5) ([82e6c61](https://github.com/kitn-ai/chat/commit/82e6c61b34f95d473a28bcbcc400a5b6cbb223c0))
+* child-elements reference doc, prompt-input toolbar &lt;kc-action&gt; composition, Patterns Usage tabs ([ffedb99](https://github.com/kitn-ai/chat/commit/ffedb99b440dcc9e67d3776ed1889e30ab9d2df1))
+* **code-block:** radius CSS var + Vue/Svelte highlighting ([e8762bd](https://github.com/kitn-ai/chat/commit/e8762bdbc8825ce99d9b0f624f0bfc135bdb28e1))
+* composite gaps — prompt-input stoppable/kc-stop, context thresholds, sources numbered, kc-scroll-button ([6baa261](https://github.com/kitn-ai/chat/commit/6baa2616317b98f561efabad222d9c9d563b5d89))
+* composition path (declarative children) for conversations, chain-of-thought, model-switcher, skills + dual data/composition stories ([204126f](https://github.com/kitn-ai/chat/commit/204126fed6b0e6641e5f849a01442f3c8b07b31c))
+* controlled sidebar collapse on kc-workspace ([44656a1](https://github.com/kitn-ai/chat/commit/44656a1fb5ee9035a0345eff200339e5e64f2642))
+* declarative children for kc-suggestions (&lt;kc-suggestion&gt;) and kc-sources (&lt;kc-source&gt;) ([a29d259](https://github.com/kitn-ai/chat/commit/a29d259da8fe405b1c3da9aa2f672b283372caa0))
+* **docs-site:** ChatDemo island + Drop-in chat example (Examples foundation) ([b798bf6](https://github.com/kitn-ai/chat/commit/b798bf64fe0342eba4a90f6d21e1ad600bd1295d))
+* **docs-site:** conflict-free fan-out infra (glob samples + autogen sidebar) ([9346ef9](https://github.com/kitn-ai/chat/commit/9346ef949996b7c258564ebc47119d38014724fb))
+* **docs-site:** Examples (apps) + Patterns (segments) sections ([fe7959d](https://github.com/kitn-ai/chat/commit/fe7959d01d9a0a387844a52a84a6eb7bb4cd7455))
+* **docs-site:** generic data-driven component-page machinery ([9b86564](https://github.com/kitn-ai/chat/commit/9b86564df163c5dc6a216f4bdfa87d630606bc03))
+* **docs-site:** MockSite island + Support widget example ([7785d7b](https://github.com/kitn-ai/chat/commit/7785d7b5b36aa03b5a2dd2b926d9a5c6537d1975))
+* **docs-site:** segmented controls, type chips, Iconify icons ([39480e5](https://github.com/kitn-ai/chat/commit/39480e51398475ec38c51ffdf579299de6bb4316))
+* **docs:** add "Open an artifact from a message" pattern ([9fc220c](https://github.com/kitn-ai/chat/commit/9fc220c6f80f412b3aec4beeb88c91f98972741e))
+* **docs:** align dark-mode tokens to component defaults + standardize callout blue (U1, U12) ([931cb12](https://github.com/kitn-ai/chat/commit/931cb122fe0057ba24becf3bfcb8a12ddb13b006))
+* **docs:** six new example apps — artifacts canvas, theme editor, models & context, knowledge base, voice, skills ([6dd9e71](https://github.com/kitn-ai/chat/commit/6dd9e7171b1413df63bd991be278777f20fe7c92))
+* DX foundation — self-contained FeedbackBar, kc-action children, kebab kc- events ([0e6b82e](https://github.com/kitn-ai/chat/commit/0e6b82ef9b75c7adf9484367a9eb6172a1f45e7a))
+* **elements:** emit named type, shape, and importability for object props ([991a966](https://github.com/kitn-ai/chat/commit/991a966397e242b11f0640719f3bf4a724d82478))
+* header-composition kit — kc-switch, kc-chat header slots, grouped model-switcher ([0519b57](https://github.com/kitn-ai/chat/commit/0519b57da687af41d967d61bf799b665f535acd5))
+* **prompt-input:** disabled state + leading/trailing slots (U3, U9) ([d12dc4e](https://github.com/kitn-ai/chat/commit/d12dc4ee56399adefbb69fe688e9af9353b8bcc8))
+* slash-command composition, Solid usage tabs, Anatomy sections, Using-with-AI doc ([0438453](https://github.com/kitn-ai/chat/commit/043845347c50a0292a8347b5ed56b9b43306d616))
+* **theme:** add font, tracking, and shadow-color tokens ([2368b5e](https://github.com/kitn-ai/chat/commit/2368b5e9a86804686ec9fbe5b00995961c92328f))
+
+
+### Bug Fixes
+
+* **artifact:** keep Preview/Code tabs right-aligned without a path field (U13) ([9c18e74](https://github.com/kitn-ai/chat/commit/9c18e74fee21501eefbae0d6c81d80fd0e04ab46))
+* **attachments:** hover-card layout + reactive variant in kc-attachments ([#78](https://github.com/kitn-ai/chat/issues/78)) ([683a02e](https://github.com/kitn-ai/chat/commit/683a02ee0a7311e9673d0e45636fa9c1614bd2c8))
+* **cards:** propagate theme to child cards reactively ([d31ac45](https://github.com/kitn-ai/chat/commit/d31ac45c44afb7a70be8b99dd90bc5e6f4116499))
+* **conversations:** drop the section-label background (U11) ([124c555](https://github.com/kitn-ai/chat/commit/124c555cc0d9d18effd9d2a5951360d3d54d7e02))
+* **docs-site:** Components nav → first item, underline code tabs, flush code viewer ([89da0d6](https://github.com/kitn-ai/chat/commit/89da0d6378c32e176e091f24e402e4d7b65879fd))
+* **docs-site:** Examples/Patterns audit fixes (Opus 8 good / 2 revise / 1 fix) ([41cf39a](https://github.com/kitn-ai/chat/commit/41cf39af084958d6d1ad38adacfea3da8c0bde27))
+* **docs-site:** target .large span so sidebar size/weight actually apply ([0887e18](https://github.com/kitn-ai/chat/commit/0887e18676272fa6c27271322bb785dd3b76ff6f))
+* **docs-site:** topic-based sidebars + logo layout shift ([e71d2df](https://github.com/kitn-ai/chat/commit/e71d2dfd5924ceff699ad67a444b68e83e743ad0))
+* **docs:** knowledge-base preview layout — wrap multi-child resizable items (U21) ([ea6435c](https://github.com/kitn-ai/chat/commit/ea6435c017786f77dcb745e408248237a3f3468e))
+* **overlay:** hide floating panels when the trigger scrolls out of view ([6562da8](https://github.com/kitn-ai/chat/commit/6562da830865dfefaa381cd631971d94c38f6445))
+* **popover:** default the panel to a compact text-sm ([b6c1220](https://github.com/kitn-ai/chat/commit/b6c122082359e47678a0a40abe36f6bf37845f04))
+* **resizable:** keep dragging when sizes persist mid-drag ([7a0458e](https://github.com/kitn-ai/chat/commit/7a0458e0e27dba2fecc46eafcc39b21ffffb47bb))
+* **resizable:** preserve dragged sizes across content changes + dbl-click restore (U10) ([ed46578](https://github.com/kitn-ai/chat/commit/ed46578f876aa70b3f273c655bd5a49e025d0be0))
+
 ## [0.13.0](https://github.com/kitn-ai/chat/compare/@kitn.ai/chat-v0.12.0...@kitn.ai/chat-v0.13.0) (2026-06-15)
 
 
