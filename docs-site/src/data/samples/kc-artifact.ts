@@ -57,9 +57,15 @@ const FILES = [
   { path: 'styles.css', type: 'other', language: 'css', code: STYLES_CSS, url: url('styles.css') },
 ];
 
+// The demo files are first-party + trusted, so opt into `allow-same-origin`: the
+// default `allow-scripts allow-forms` sandbox gives the framed document an opaque
+// origin, which can't load its own relative stylesheet (the preview renders
+// unstyled). allow-same-origin lets it reach its own origin for styles/nav.
+const SANDBOX = 'allow-scripts allow-forms allow-same-origin';
+
 export default {
-  sample: { files: FILES, src: url('index.html'), previewHeight: '440px' },
+  sample: { files: FILES, src: url('index.html'), sandbox: SANDBOX, previewHeight: '440px' },
   named: {
-    code: { files: FILES, src: url('index.html'), previewHeight: '440px' },
+    code: { files: FILES, src: url('index.html'), sandbox: SANDBOX, previewHeight: '440px' },
   },
 };
