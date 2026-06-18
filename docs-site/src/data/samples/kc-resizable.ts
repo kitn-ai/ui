@@ -17,12 +17,17 @@ export default {
   // Default playground + horizontal Example: a sidebar + chat split.
   sample: {
     html: `<kc-resizable-item size="28%" min="140px" style="display:block;height:100%"><div style="${MUTED_BG}">Sidebar</div></kc-resizable-item><kc-resizable-item style="display:block;height:100%"><div style="${PANE_STYLE}">Chat</div></kc-resizable-item>`,
+    // A resizable layout fills its container, so give the preview real height —
+    // the default min-height box is too short to see panels (especially vertical).
+    previewHeight: '340px',
   },
 
   named: {
-    // Vertical orientation Example: a top/bottom code-editor + output split.
+    // Vertical orientation Example: a top/bottom code-editor + output split. Taller
+    // still, so the stacked top/bottom panels and the divider are clearly visible.
     vertical: {
       html: `<kc-resizable-item size="55%" min="80px" style="display:block;height:100%"><div style="${MUTED_BG}">Editor</div></kc-resizable-item><kc-resizable-item style="display:block;height:100%"><div style="${PANE_STYLE}">Output</div></kc-resizable-item>`,
+      previewHeight: '460px',
     },
 
     // Three-panel Example: list + chat + preview.
