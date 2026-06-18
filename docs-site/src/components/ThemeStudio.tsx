@@ -18,6 +18,7 @@ import IconCopy from '~icons/lucide/copy';
 import IconImport from '~icons/lucide/clipboard-paste';
 import IconReset from '~icons/lucide/rotate-ccw';
 import IconChevron from '~icons/lucide/chevron-right';
+import { THEME_PRESETS, SHADCN_TO_KC } from './theme-presets';
 
 type Palette = Record<string, string>;
 
@@ -89,71 +90,36 @@ const GROUPS: Group[] = [
 const ALL_TOKENS = GROUPS.flatMap((g) => g.tokens);
 const DEFAULT_RADIUS = 0.6; // rem — kit default --kc-radius
 
-/** Resolve any CSS color string to #rrggbb for a native color input. */
+/** Resolve any CSS color (hex, hsl, oklch, named…) to #rrggbb for a native color
+ *  input. Uses a canvas so CSS Color 4 formats like oklch convert to real sRGB
+ *  bytes — getComputedStyle returns oklch unconverted in some engines. */
+let _cv: HTMLCanvasElement | undefined;
 function toHex(css: string): string {
-  const el = document.createElement('div');
-  el.style.color = css;
-  el.style.display = 'none';
-  document.body.appendChild(el);
-  const rgb = getComputedStyle(el).color;
-  el.remove();
-  const m = rgb.match(/\d+(\.\d+)?/g);
-  if (!m) return '#000000';
-  return '#' + m.slice(0, 3).map((x) => Math.round(+x).toString(16).padStart(2, '0')).join('');
+  if (/^#[0-9a-fA-F]{6}$/.test(css)) return css.toLowerCase();
+  _cv ??= document.createElement('canvas');
+  _cv.width = _cv.height = 1;
+  const ctx = _cv.getContext('2d');
+  if (!ctx) return '#000000';
+  ctx.clearRect(0, 0, 1, 1);
+  ctx.fillStyle = '#000000';
+  ctx.fillStyle = css; // invalid input is ignored → stays #000000
+  ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+  return '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
 }
 
 const seedPalette = (mode: 'light' | 'dark'): Palette =>
   Object.fromEntries(ALL_TOKENS.map((t) => [t.token, toHex(mode === 'light' ? t.light : t.dark)]));
 
-/** Brand-token overrides layered onto the live defaults for each preset. Each
- *  preset tints a cohesive set (accent surface + brand + ring + code) so it reads
- *  as a designed theme, not a single accent swap. */
-type BrandOverride = { light: Palette; dark: Palette };
-const PRESETS: { name: string; brand?: BrandOverride }[] = [
-  { name: 'Default' },
-  {
-    name: 'Violet',
-    brand: {
-      light: { '--kc-color-primary': '#7c3aed', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#7c3aed', '--kc-color-code-foreground': '#6d28d9', '--kc-color-accent': '#f3eefe', '--kc-color-accent-foreground': '#4c1d95', '--kc-color-background': '#faf8ff', '--kc-color-border': '#e8e0fb' },
-      dark: { '--kc-color-primary': '#a78bfa', '--kc-color-primary-foreground': '#1e1b2e', '--kc-color-ring': '#a78bfa', '--kc-color-code-foreground': '#c4b5fd', '--kc-color-accent': '#2a2440', '--kc-color-accent-foreground': '#ddd6fe', '--kc-color-background': '#15131c', '--kc-color-card': '#1c1926' },
-    },
-  },
-  {
-    name: 'Emerald',
-    brand: {
-      light: { '--kc-color-primary': '#059669', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#059669', '--kc-color-code-foreground': '#047857', '--kc-color-accent': '#e6f7ef', '--kc-color-accent-foreground': '#065f46', '--kc-color-background': '#f3fbf7', '--kc-color-border': '#cdeede' },
-      dark: { '--kc-color-primary': '#34d399', '--kc-color-primary-foreground': '#062a1e', '--kc-color-ring': '#34d399', '--kc-color-code-foreground': '#6ee7b7', '--kc-color-accent': '#103027', '--kc-color-accent-foreground': '#a7f3d0', '--kc-color-background': '#0c1714', '--kc-color-card': '#10201b' },
-    },
-  },
-  {
-    name: 'Sunset',
-    brand: {
-      light: { '--kc-color-primary': '#ea580c', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#ea580c', '--kc-color-code-foreground': '#c2410c', '--kc-color-accent': '#fdeee3', '--kc-color-accent-foreground': '#9a3412', '--kc-color-background': '#fffaf5', '--kc-color-border': '#f6dec9' },
-      dark: { '--kc-color-primary': '#fb923c', '--kc-color-primary-foreground': '#2a1408', '--kc-color-ring': '#fb923c', '--kc-color-code-foreground': '#fdba74', '--kc-color-accent': '#33200f', '--kc-color-accent-foreground': '#fed7aa', '--kc-color-background': '#181206', '--kc-color-card': '#211a0f' },
-    },
-  },
-  {
-    name: 'Ocean',
-    brand: {
-      light: { '--kc-color-primary': '#0284c7', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#0284c7', '--kc-color-code-foreground': '#0369a1', '--kc-color-accent': '#e2f3fb', '--kc-color-accent-foreground': '#075985', '--kc-color-background': '#f5fbfe', '--kc-color-border': '#cce7f3' },
-      dark: { '--kc-color-primary': '#38bdf8', '--kc-color-primary-foreground': '#04212f', '--kc-color-ring': '#38bdf8', '--kc-color-code-foreground': '#7dd3fc', '--kc-color-accent': '#0d2a39', '--kc-color-accent-foreground': '#bae6fd', '--kc-color-background': '#08151c', '--kc-color-card': '#0d1f29' },
-    },
-  },
-  {
-    name: 'Rose',
-    brand: {
-      light: { '--kc-color-primary': '#e11d48', '--kc-color-primary-foreground': '#ffffff', '--kc-color-ring': '#e11d48', '--kc-color-code-foreground': '#be123c', '--kc-color-accent': '#fde8ed', '--kc-color-accent-foreground': '#9f1239', '--kc-color-background': '#fff7f9', '--kc-color-border': '#f7d2db' },
-      dark: { '--kc-color-primary': '#fb7185', '--kc-color-primary-foreground': '#2a0a12', '--kc-color-ring': '#fb7185', '--kc-color-code-foreground': '#fda4af', '--kc-color-accent': '#33141c', '--kc-color-accent-foreground': '#fecdd3', '--kc-color-background': '#190a0e', '--kc-color-card': '#221116' },
-    },
-  },
-  {
-    name: 'Mono',
-    brand: {
-      light: { '--kc-color-primary': '#1f2937', '--kc-color-primary-foreground': '#f9fafb', '--kc-color-ring': '#6b7280', '--kc-color-code-foreground': '#374151', '--kc-color-accent': '#f1f3f5', '--kc-color-accent-foreground': '#1f2937' },
-      dark: { '--kc-color-primary': '#e5e7eb', '--kc-color-primary-foreground': '#111827', '--kc-color-ring': '#9ca3af', '--kc-color-code-foreground': '#d1d5db', '--kc-color-accent': '#23262b', '--kc-color-accent-foreground': '#e5e7eb' },
-    },
-  },
-];
+/** All selectable themes: the kit default + the ported tweakcn presets. */
+const ALL_THEME_NAMES = ['Default', ...THEME_PRESETS.map((t) => t.name)];
+
+/** A few representative swatches for a theme's dropdown row (light palette). */
+function themeDots(name: string): string[] {
+  const t = THEME_PRESETS.find((x) => x.name === name);
+  if (!t) return ['#18181b', '#f4f4f5', '#e5e7eb', '#ffffff', '#3f3f46']; // Default
+  return [t.light.primary, t.light.accent, t.light.secondary, t.light.background, t.light.foreground].map(toHex);
+}
 
 const CONFIRM_DATA = {
   body: 'This applies 2 pending migrations and restarts 3 services. Estimated downtime: ~30 s.',
@@ -233,6 +199,10 @@ export default function ThemeStudio() {
   const [importing, setImporting] = createSignal(false);
   const [importText, setImportText] = createSignal('');
   const [importError, setImportError] = createSignal('');
+  const [themeOpen, setThemeOpen] = createSignal(false);
+  const [themeSearch, setThemeSearch] = createSignal('');
+  let themeMenu: HTMLDivElement | undefined;
+  const filteredThemes = () => ALL_THEME_NAMES.filter((n) => n.toLowerCase().includes(themeSearch().toLowerCase()));
   // Accordion: open the two most-used groups by default, collapse the rest.
   const [openGroups, setOpenGroups] = createSignal<Record<string, boolean>>(
     Object.fromEntries(GROUPS.map((g, i) => [g.name, i < 2])),
@@ -261,21 +231,29 @@ export default function ThemeStudio() {
     setPreset('Custom');
   };
 
-  const loadPreset = (name: string) => {
-    const def = PRESETS.find((p) => p.name === name);
+  const loadTheme = (name: string) => {
     const l = seedPalette('light');
     const d = seedPalette('dark');
-    if (def?.brand) {
-      Object.assign(l, def.brand.light);
-      Object.assign(d, def.brand.dark);
+    const t = THEME_PRESETS.find((x) => x.name === name);
+    if (t) {
+      for (const [k, tok] of Object.entries(SHADCN_TO_KC)) {
+        if (t.light[k]) l[tok] = toHex(t.light[k]);
+        if (t.dark[k]) d[tok] = toHex(t.dark[k]);
+      }
+      // The kit has a code-foreground token tweakcn doesn't — derive it from the
+      // theme's ring so inline code stays on-brand.
+      if (t.light.ring) l['--kc-color-code-foreground'] = toHex(t.light.ring);
+      if (t.dark.ring) d['--kc-color-code-foreground'] = toHex(t.dark.ring);
+      setRadius(t.radius);
+    } else {
+      setRadius(DEFAULT_RADIUS);
     }
     setLight(l);
     setDark(d);
-    setRadius(DEFAULT_RADIUS);
     setPreset(name);
   };
 
-  const reset = () => loadPreset('Default');
+  const reset = () => loadTheme('Default');
 
   const copyCss = async () => {
     try {
@@ -330,7 +308,12 @@ export default function ThemeStudio() {
   };
 
   onMount(async () => {
-    loadPreset('Default');
+    loadTheme('Default');
+    const onDocDown = (e: PointerEvent) => {
+      if (themeOpen() && themeMenu && !themeMenu.contains(e.target as Node)) setThemeOpen(false);
+    };
+    document.addEventListener('pointerdown', onDocDown);
+    onCleanup(() => document.removeEventListener('pointerdown', onDocDown));
     await loadKit();
     if (chatHost) {
       customElements.upgrade(chatHost);
@@ -394,27 +377,55 @@ export default function ThemeStudio() {
           </div>
         </Show>
 
-        {/* Presets */}
-        <div class="border-b border-line p-3">
-          <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink/55">Presets</div>
-          <div class="flex flex-wrap gap-1.5">
-            <For each={PRESETS}>
-              {(p) => (
-                <button
-                  type="button"
-                  onClick={() => loadPreset(p.name)}
-                  class="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors"
-                  classList={{ 'border-brand bg-brand text-white': preset() === p.name, 'border-line text-ink-2 hover:bg-ink/5': preset() !== p.name }}
-                >
-                  <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: p.brand ? p.brand.light['--kc-color-primary'] : '#18181b' }} />
-                  {p.name}
-                </button>
-              )}
-            </For>
-            <Show when={preset() === 'Custom'}>
-              <span class="rounded-full border border-dashed border-line px-2.5 py-1 text-xs text-ink/55">Custom</span>
-            </Show>
-          </div>
+        {/* Theme selector — searchable dropdown of the kit default + tweakcn presets */}
+        <div ref={themeMenu} class="relative border-b border-line p-3">
+          <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink/55">Theme</div>
+          <button
+            type="button"
+            onClick={() => setThemeOpen((v) => !v)}
+            aria-haspopup="listbox"
+            aria-expanded={themeOpen()}
+            class="flex w-full items-center gap-2 rounded-md border border-line px-2.5 py-1.5 text-sm text-ink transition-colors hover:bg-ink/5"
+          >
+            <span class="flex items-center gap-0.5">
+              <For each={themeDots(preset())}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
+            </span>
+            <span class="truncate">{preset()}</span>
+            <IconChevron class="ml-auto h-3.5 w-3.5 shrink-0 text-ink-3 transition-transform" classList={{ 'rotate-90': themeOpen() }} />
+          </button>
+          <Show when={themeOpen()}>
+            <div class="absolute inset-x-3 top-full z-50 mt-1 max-h-80 overflow-auto rounded-lg border border-line bg-surface shadow-xl">
+              <div class="sticky top-0 border-b border-line bg-surface p-2">
+                <input
+                  value={themeSearch()}
+                  onInput={(e) => setThemeSearch(e.currentTarget.value)}
+                  placeholder="Search themes…"
+                  class="w-full rounded-md border border-line bg-surface px-2 py-1 text-sm text-ink"
+                />
+              </div>
+              <For each={filteredThemes()}>
+                {(name) => (
+                  <button
+                    type="button"
+                    onClick={() => { loadTheme(name); setThemeOpen(false); setThemeSearch(''); }}
+                    class="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-ink/5"
+                    classList={{ 'bg-brand/10 font-medium text-brand': preset() === name, 'text-ink-2': preset() !== name }}
+                  >
+                    <span class="flex items-center gap-0.5">
+                      <For each={themeDots(name)}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
+                    </span>
+                    <span class="truncate">{name}</span>
+                  </button>
+                )}
+              </For>
+              <Show when={!filteredThemes().length}>
+                <div class="px-2.5 py-3 text-center text-xs text-ink/55">No themes match.</div>
+              </Show>
+            </div>
+          </Show>
+          <Show when={preset() === 'Custom'}>
+            <p class="mt-1.5 text-[11px] text-ink/55">Custom — edited from a preset.</p>
+          </Show>
         </div>
 
         {/* Token groups (collapsible) */}

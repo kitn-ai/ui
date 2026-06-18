@@ -36,9 +36,32 @@
   .starlight-sidebar-topics { display: none; }
 }
 
-/* The theme editor is a full-bleed tool — give its page the whole content column
-   (TOC is off on that page) instead of the default reading measure. */
-:root:has(.theme-studio-root) { --sl-content-width: 88rem; }
+/* The theme editor is a full-screen tool: header + editor only. The marker
+   `.kc-fullscreen` is server-rendered (the editor island is client:only), so the
+   chrome is hidden with no hydration flash. */
+/* Full width + reclaim the space the (hidden) sidebar reserved on the left. */
+:root:has(.kc-fullscreen) { --sl-content-width: 100%; --sl-content-inline-start: 0rem; --sl-sidebar-width: 0rem; }
+body:has(.kc-fullscreen) #starlight__sidebar,
+body:has(.kc-fullscreen) .pagination-links,
+body:has(.kc-fullscreen) footer,
+body:has(.kc-fullscreen) .content-panel:has(h1) { display: none; }
+/* The page itself never scrolls — the editor's own panes scroll internally. */
+html:has(.kc-fullscreen), body:has(.kc-fullscreen) { overflow: hidden; }
+/* Zero the content padding/border + any reserved sidebar inset so the editor
+   fills the whole pane edge-to-edge. */
+body:has(.kc-fullscreen) .content-panel { padding: 0; border: 0; }
+body:has(.kc-fullscreen) .sl-markdown-content { margin: 0; }
+body:has(.kc-fullscreen) .main-frame,
+body:has(.kc-fullscreen) .main-pane { padding-inline-start: 0; padding-block-end: 0; overflow: hidden; }
+/* The editor fills exactly the viewport below the header, full-bleed. */
+body:has(.kc-fullscreen) .theme-studio-root {
+  margin: 0;
+  border-radius: 0;
+  border-inline: 0;
+  border-top: 0;
+  height: calc(100dvh - var(--sl-nav-height));
+  min-height: 0;
+}
 
 /* Ask AI dock. The panel itself is portaled to <body> and fixed to the right.
    Width of the dock: */
