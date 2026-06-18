@@ -146,7 +146,7 @@ export function HoverCardContent(props: HoverCardContentProps) {
             data-expanded={presence.state() === 'open' ? '' : undefined}
             data-closed={presence.state() === 'closed' ? '' : undefined}
             class={cn(
-              'rounded-lg bg-card shadow-lg',
+              'rounded-lg bg-card kc-elevation',
               'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
               props.class,
             )}

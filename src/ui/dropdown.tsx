@@ -162,7 +162,7 @@ export function DropdownContent(props: { children: JSX.Element; class?: string }
             'pointer-events': position.hidden() ? 'none' : undefined,
           }}
           class={cn(
-            'z-50 min-w-[8rem] rounded-lg bg-card p-1 shadow-lg',
+            'z-50 min-w-[8rem] rounded-lg bg-card p-1 kc-elevation',
             'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
             props.class,
           )}

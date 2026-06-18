@@ -51,7 +51,7 @@ export function Card(props: CardProps): JSX.Element {
   return (
     <div
       class={cn(
-        'flex flex-col rounded-xl border border-border bg-card text-card-foreground shadow-sm',
+        'flex flex-col rounded-xl border border-border bg-card text-card-foreground kc-elevation-sm',
         local.dense ? 'gap-2.5 p-3.5' : 'gap-4 p-5',
         local.class,
       )}
