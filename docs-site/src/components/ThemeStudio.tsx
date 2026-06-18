@@ -174,6 +174,62 @@ function toHex(css: string): string {
   return '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
 }
 
+/** A global palette nudge: hue is a degree offset, saturation/lightness are
+ *  multipliers. Identity (no change) is { h: 0, s: 1, l: 1 }. */
+type Hsl = { h: number; s: number; l: number };
+const HSL_IDENTITY: Hsl = { h: 0, s: 1, l: 1 };
+const isIdentity = (a: Hsl) => a.h === 0 && a.s === 1 && a.l === 1;
+
+/** #rrggbb → [hue 0–360, sat 0–1, light 0–1]. */
+function hexToHsl(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  let h = 0;
+  if (d) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h = h * 60;
+    if (h < 0) h += 360;
+  }
+  const l = (max + min) / 2;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  return [h, s, l];
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  h = ((h % 360) + 360) % 360;
+  s = Math.min(1, Math.max(0, s));
+  l = Math.min(1, Math.max(0, l));
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+  if (h < 60) { r = c; g = x; }
+  else if (h < 120) { r = x; g = c; }
+  else if (h < 180) { g = c; b = x; }
+  else if (h < 240) { g = x; b = c; }
+  else if (h < 300) { r = x; b = c; }
+  else { r = c; b = x; }
+  const to = (v: number) => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+  return '#' + to(r) + to(g) + to(b);
+}
+
+/** Apply the HSL nudge to one hex color. */
+function shiftHsl(hex: string, a: Hsl): string {
+  const px = /^#[0-9a-fA-F]{6}$/.test(hex) ? hex : toHex(hex);
+  const [h, s, l] = hexToHsl(px);
+  return hslToHex(h + a.h, s * a.s, l * a.l);
+}
+
+/** Apply the nudge across a whole palette (no-op at identity, so colors round-trip
+ *  losslessly when the adjustment is unused). */
+function shiftPalette(p: Palette, a: Hsl): Palette {
+  if (isIdentity(a)) return p;
+  return Object.fromEntries(Object.entries(p).map(([k, v]) => [k, shiftHsl(v, a)]));
+}
+
 const seedPalette = (mode: 'light' | 'dark'): Palette =>
   Object.fromEntries(ALL_TOKENS.map((t) => [t.token, toHex(mode === 'light' ? t.light : t.dark)]));
 
@@ -311,6 +367,8 @@ export default function ThemeStudio() {
   const [fontCode, setFontCode] = createSignal('');
   const [tracking, setTracking] = createSignal(0); // em
   const [shadowColor, setShadowColor] = createSignal('#000000');
+  // Global HSL nudge — layered non-destructively over the edited palette.
+  const [hsl, setHsl] = createSignal<Hsl>({ ...HSL_IDENTITY });
   const [preset, setPreset] = createSignal('Default');
   // Custom presets the user saves (persisted to localStorage).
   type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; fontBase: string; fontCode: string; tracking: number; shadow: string };
@@ -340,12 +398,17 @@ export default function ThemeStudio() {
 
   const active = () => (mode() === 'light' ? light() : dark());
   const extras = (): ThemeExtras => ({ radius: radius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor() });
+  // The palette as the canvas/export actually see it: base colors + the HSL nudge.
+  const effLight = () => shiftPalette(light(), hsl());
+  const effDark = () => shiftPalette(dark(), hsl());
+  const effActive = () => (mode() === 'light' ? effLight() : effDark());
+  const hslActive = () => !isIdentity(hsl());
 
   // Apply the active palette + radius onto the canvas wrapper. Custom properties
   // inherit through every kc-* shadow root inside, so the whole canvas reskins.
   createEffect(() => {
     if (!canvasEl || !Object.keys(active()).length) return;
-    const p = active();
+    const p = effActive();
     for (const t of ALL_TOKENS) canvasEl.style.setProperty(t.token, p[t.token]);
     canvasEl.style.setProperty('--kc-radius', `${radius()}rem`);
     canvasEl.style.background = p['--kc-color-background'];
@@ -370,6 +433,7 @@ export default function ThemeStudio() {
   };
 
   const loadTheme = (name: string) => {
+    setHsl({ ...HSL_IDENTITY }); // a fresh theme starts from an un-nudged palette
     // A user-saved preset stores full palettes + extras — apply directly.
     const s = saved().find((x) => x.name === name);
     if (s) {
@@ -418,7 +482,7 @@ export default function ThemeStudio() {
   const commitSave = () => {
     const name = saveName().trim();
     if (!name) { setSaveError('Give the theme a name.'); return; }
-    const p: SavedPreset = { name, light: light(), dark: dark(), radius: radius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor() };
+    const p: SavedPreset = { name, light: effLight(), dark: effDark(), radius: radius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor() };
     persistSaved([...saved().filter((x) => x.name !== name), p]);
     setPreset(name);
     setSaveOpen(false);
@@ -434,7 +498,7 @@ export default function ThemeStudio() {
 
   const copyCss = async () => {
     try {
-      await navigator.clipboard.writeText(buildCss(light(), dark(), extras()));
+      await navigator.clipboard.writeText(buildCss(effLight(), effDark(), extras()));
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -531,6 +595,33 @@ export default function ThemeStudio() {
   });
 
   const swatch = 'h-7 w-7 shrink-0 cursor-pointer rounded-md border border-line bg-transparent p-0';
+
+  /** A labeled slider paired with a number field for exact entry. The slider
+   *  tracks live while dragging; the field commits on change/Enter (clamped). */
+  const SliderRow = (props: { label: string; value: number; min: number; max: number; step: number; unit?: string; onInput: (n: number) => void }) => {
+    const clamp = (n: number) => Math.min(props.max, Math.max(props.min, n));
+    return (
+      <div class="flex items-center gap-2.5 text-sm">
+        <span class="w-[4.5rem] shrink-0 text-ink-2">{props.label}</span>
+        <input
+          type="range" min={props.min} max={props.max} step={props.step} value={props.value}
+          onInput={(e) => props.onInput(parseFloat(e.currentTarget.value))}
+          class="min-w-0 flex-1" style={{ 'accent-color': 'var(--kc-ink-3)' }} aria-label={props.label}
+        />
+        <input
+          type="number" min={props.min} max={props.max} step={props.step} value={props.value}
+          onChange={(e) => {
+            const n = parseFloat(e.currentTarget.value);
+            if (Number.isNaN(n)) { e.currentTarget.value = String(props.value); return; }
+            props.onInput(clamp(n));
+          }}
+          class="w-16 shrink-0 rounded-md border border-line bg-surface px-1.5 py-1 text-right text-xs tabular-nums text-ink [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          aria-label={`${props.label} value`}
+        />
+        <span class="w-7 shrink-0 text-xs text-ink-3">{props.unit ?? ''}</span>
+      </div>
+    );
+  };
 
   /** One showroom item: a labeled, bordered slot the element mounts into. */
   const ShowSlot = (props: { s: Slot }) => (
@@ -629,7 +720,7 @@ export default function ThemeStudio() {
       {/* Body: inspector · canvas */}
       <div class="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* Inspector — Colors / Typography / Other tabs */}
-        <div class="flex w-full shrink-0 flex-col overflow-auto border-b border-line lg:w-[330px] lg:border-b-0 lg:border-r">
+        <div class="flex w-full shrink-0 flex-col overflow-auto border-b border-line lg:w-[380px] lg:border-b-0 lg:border-r">
           <div class="sticky top-0 z-10 flex items-center gap-1 border-b border-line bg-surface px-3 py-2">
             <For each={[['colors', 'Colors'], ['typography', 'Typography'], ['other', 'Other']] as const}>
               {([id, label]) => (
@@ -639,6 +730,9 @@ export default function ThemeStudio() {
           </div>
 
           <Show when={inspectorTab() === 'colors'}>
+          <Show when={hslActive()}>
+            <p class="border-b border-line/60 px-3 py-2 text-xs text-ink/55">A global HSL adjustment is active — swatches show base colors. Reset it in <span class="font-medium text-ink-2">Other</span> to edit them directly.</p>
+          </Show>
           <For each={GROUPS}>
             {(group) => (
               <div class="border-b border-line/60 last:border-0">
@@ -711,22 +805,29 @@ export default function ThemeStudio() {
                 </Show>
               </select>
             </label>
-            <label class="flex items-center gap-2.5 text-sm">
-              <span class="w-16 shrink-0 text-ink">Tracking</span>
-              <input type="range" min="-0.05" max="0.2" step="0.005" value={tracking()} onInput={(e) => { setTracking(parseFloat(e.currentTarget.value)); setPreset('Custom'); }} class="flex-1" style={{ 'accent-color': 'var(--kc-ink-3)' }} aria-label="Letter spacing" />
-              <span class="w-14 text-right text-xs tabular-nums text-ink-2">{tracking().toFixed(3)}em</span>
-            </label>
+            <SliderRow label="Tracking" value={tracking()} min={-0.05} max={0.2} step={0.005} unit="em" onInput={(n) => { setTracking(n); setPreset('Custom'); }} />
           </div>
           </Show>
 
-          {/* Other tab — shape + shadow */}
+          {/* Other tab — HSL adjustment + shape + shadow */}
           <Show when={inspectorTab() === 'other'}>
           <div class="px-3 py-3">
+            <div class="mb-2 flex items-center justify-between gap-2">
+              <span class="text-xs font-semibold uppercase tracking-wide text-ink-2">HSL adjustment</span>
+              <Show when={hslActive()}>
+                <button type="button" onClick={() => { setHsl({ ...HSL_IDENTITY }); setPreset('Custom'); }} class="rounded px-1.5 py-0.5 text-[11px] text-ink-3 transition-colors hover:bg-ink/5 hover:text-ink">Reset</button>
+              </Show>
+            </div>
+            <p class="mb-2.5 text-xs text-ink/55">Nudge the whole palette at once. Layered over your colors — reset to leave them untouched.</p>
+            <div class="flex flex-col gap-2.5">
+              <SliderRow label="Hue" value={hsl().h} min={-180} max={180} step={1} unit="deg" onInput={(n) => { setHsl((a) => ({ ...a, h: n })); setPreset('Custom'); }} />
+              <SliderRow label="Saturation" value={hsl().s} min={0} max={2} step={0.05} unit="x" onInput={(n) => { setHsl((a) => ({ ...a, s: n })); setPreset('Custom'); }} />
+              <SliderRow label="Lightness" value={hsl().l} min={0} max={2} step={0.05} unit="x" onInput={(n) => { setHsl((a) => ({ ...a, l: n })); setPreset('Custom'); }} />
+            </div>
+          </div>
+          <div class="border-t border-line/60 px-3 py-3">
             <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shape</div>
-            <label class="flex items-center gap-2.5 text-sm">
-              <input type="range" min="0" max="1.4" step="0.05" value={radius()} onInput={(e) => { setRadius(parseFloat(e.currentTarget.value)); setPreset('Custom'); }} class="flex-1" style={{ 'accent-color': 'var(--kc-ink-3)' }} aria-label="Corner radius" />
-              <span class="w-14 text-right text-xs tabular-nums text-ink-2">{radius()}rem</span>
-            </label>
+            <SliderRow label="Radius" value={radius()} min={0} max={1.4} step={0.05} unit="rem" onInput={(n) => { setRadius(n); setPreset('Custom'); }} />
           </div>
           <div class="border-t border-line/60 px-3 py-3">
             <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shadow</div>
@@ -814,7 +915,7 @@ export default function ThemeStudio() {
           <p class="mb-3 text-xs text-ink-2">Drop this on <code class="rounded bg-ink/5 px-1">:root</code> to rebrand every <code class="rounded bg-ink/5 px-1">kc-*</code> element; the <code class="rounded bg-ink/5 px-1">.dark</code> block holds the dark overrides.</p>
           <div class="relative">
             <button type="button" onClick={copyCss} class="absolute right-2 top-2 flex items-center gap-1.5 rounded-md border border-line bg-surface px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:bg-ink/5">{copied() ? <IconCheck class="h-3.5 w-3.5" /> : <IconCopy class="h-3.5 w-3.5" />}{copied() ? 'Copied' : 'Copy'}</button>
-            <pre class="max-h-[62vh] overflow-auto rounded-lg border border-line bg-surface-2 p-3 pr-20 font-mono text-xs leading-relaxed text-ink"><code>{buildCss(light(), dark(), extras())}</code></pre>
+            <pre class="max-h-[62vh] overflow-auto rounded-lg border border-line bg-surface-2 p-3 pr-20 font-mono text-xs leading-relaxed text-ink"><code>{buildCss(effLight(), effDark(), extras())}</code></pre>
           </div>
         </Modal>
       </Show>
