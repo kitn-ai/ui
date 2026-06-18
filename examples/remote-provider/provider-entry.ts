@@ -17,7 +17,7 @@
  *              back to the host — proves the zero-round-trip pattern.
  *
  * Production providers:
- *   - Import from '@kitn.ai/chat/provider' (the published bundle) instead of the
+ *   - Import from '@kitn.ai/ui/provider' (the published bundle) instead of the
  *     src/ paths below.
  *   - Register only the card types relevant to their domain.
  *   - Harden the CSP (see index.html comments).

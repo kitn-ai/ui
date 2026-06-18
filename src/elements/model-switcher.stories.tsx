@@ -49,7 +49,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-model-switcher id="ms"></kc-model-switcher>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const ms = document.getElementById('ms');
   ms.models = [
@@ -71,7 +71,7 @@ const meta = {
           '`<kc-model-switcher>` is the framework-agnostic **web component** for picking the active model — a dropdown showing each model\'s name and provider — isolated in **Shadow DOM**. It mirrors the switcher inside `<kc-chat>` as a standalone, composable piece.',
           '**When to use:** building your own chat header and want the model picker on its own. In SolidJS, use the `ModelSwitcher` primitive.',
           '**Placement:** inline in the chat header or toolbar, typically to the left of the context meter; it is a compact `inline-block` dropdown trigger that fits naturally beside other header controls.',
-          "**How to use — property API:** register once with `import '@kitn.ai/chat/elements'`, set the `models` **property** (each item: `{ id, name, provider? }`) and optionally `currentModel`, and listen for the `kc-model-change` **CustomEvent** (payload: `{ modelId }`). Note: like the underlying primitive, it only renders when more than one model is provided.",
+          "**How to use — property API:** register once with `import '@kitn.ai/ui/elements'`, set the `models` **property** (each item: `{ id, name, provider? }`) and optionally `currentModel`, and listen for the `kc-model-change` **CustomEvent** (payload: `{ modelId }`). Note: like the underlying primitive, it only renders when more than one model is provided.",
           "**How to use — declarative API:** compose `<kc-model>` light-DOM children instead of (or in addition to) setting the `models` property. Each `<kc-model id=\"gpt-4o\" provider=\"OpenAI\">GPT-4o</kc-model>` carries `id` (required), `provider` (optional), and a text label as its content. Children are hidden data carriers — no JS property assignment needed. Prop `models` items render first; `<kc-model>` children follow.",
           'See the **Code** tab for HTML usage.',
         ]),
@@ -114,7 +114,7 @@ const DECLARATIVE_HTML_SNIPPET = `<!-- Works in any framework or plain HTML — 
 </kc-model-switcher>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   document.getElementById('ms').addEventListener('kc-model-change', (e) => {
     console.log('selected model:', e.detail.modelId);
@@ -164,7 +164,7 @@ const GROUPED_HTML_SNIPPET = `<kc-model-switcher id="ms">
 </kc-model-switcher>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   document.getElementById('ms').addEventListener('kc-model-change', (e) => {
     console.log('selected model:', e.detail.modelId);
   });

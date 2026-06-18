@@ -2,7 +2,7 @@
 
 ## Overview
 
-`@kitn.ai/chat` ships 27 framework-agnostic custom elements built on the SolidJS kit.
+`@kitn.ai/ui` ships 27 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
@@ -27,7 +27,7 @@ The authoritative machine-readable API is the **Custom Elements Manifest** at `d
 
 `<kc-chat>` is the **drop-in** layer. Per message it renders: Markdown + code highlighting, **reasoning** blocks, **tool-call** panels, **attachments**, and **action buttons** (copy/like/dislike/regenerate). It also offers the header (title + model switcher + context meter), a scroll-to-bottom button, suggestions, and the input toolbar.
 
-Some kit features are **primitive-only** — not surfaced by the web component: **ChainOfThought**, **FeedbackBar**, **ThinkingBar / TextShimmer** (animated "thinking"), **VoiceInput**, **FileUpload**, **SlashCommand**. If you need those, custom layout/placement, or anything the props don't cover, **compose the SolidJS primitives directly** (`import { … } from '@kitn.ai/chat'` — everything is exported). No forking required: tune via props/tokens, or drop to the primitive layer.
+Some kit features are **primitive-only** — not surfaced by the web component: **ChainOfThought**, **FeedbackBar**, **ThinkingBar / TextShimmer** (animated "thinking"), **VoiceInput**, **FileUpload**, **SlashCommand**. If you need those, custom layout/placement, or anything the props don't cover, **compose the SolidJS primitives directly** (`import { … } from '@kitn.ai/ui'` — everything is exported). No forking required: tune via props/tokens, or drop to the primitive layer.
 
 ---
 
@@ -52,7 +52,7 @@ The build is **ES-module only** by design. A UMD/IIFE build cannot code-split, s
 Import the ES module as a side-effect. It registers all **40+ custom elements** via `customElements.define`:
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
 The `./elements` export in `package.json` resolves to `dist/kitn-chat.es.js`.
@@ -73,7 +73,7 @@ All rich props (arrays, objects) must be set as **JavaScript properties**, not H
 
 ```html
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const chat = document.querySelector('kc-chat');
 
@@ -96,7 +96,7 @@ All rich props (arrays, objects) must be set as **JavaScript properties**, not H
 Importing the elements entry augments `HTMLElementTagNameMap`, so DOM lookups are typed (props autocompleted, wrong assignments rejected):
 
 ```ts
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 const chat = document.querySelector('kc-chat'); // : KcChatElement | null
 chat!.messages = [/* … */];                        // typed
 ```
@@ -105,10 +105,10 @@ A [Custom Elements Manifest](https://github.com/webcomponents/custom-elements-ma
 
 ### React
 
-Typed wrappers are generated for every element under `@kitn.ai/chat/react` (React is an optional peer dependency). They set rich data as DOM **properties** (so arrays/objects pass through correctly) and expose CustomEvents as `on<Event>` props:
+Typed wrappers are generated for every element under `@kitn.ai/ui/react` (React is an optional peer dependency). They set rich data as DOM **properties** (so arrays/objects pass through correctly) and expose CustomEvents as `on<Event>` props:
 
 ```tsx
-import { Chat } from '@kitn.ai/chat/react';
+import { Chat } from '@kitn.ai/ui/react';
 
 <Chat
   messages={messages}
@@ -251,7 +251,7 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 
 ```html
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const workspace = document.getElementById('workspace');
 
@@ -1143,8 +1143,8 @@ To **rebrand**, override the kit's **namespaced** tokens — `--kc-color-*` (and
 ```
 
 > **Two stylesheets — pick by how you consume the kit:**
-> - **Tailwind builds** (composing the SolidJS primitives): `@import "@kitn.ai/chat/theme.css"` in your CSS.
-> - **Plain HTML / CDN** (web components): `<link rel="stylesheet" href="…/@kitn.ai/chat/theme.tokens.css">` — only needed to theme your own host-page markup; the elements carry their own tokens.
+> - **Tailwind builds** (composing the SolidJS primitives): `@import "@kitn.ai/ui/theme.css"` in your CSS.
+> - **Plain HTML / CDN** (web components): `<link rel="stylesheet" href="…/@kitn.ai/ui/theme.tokens.css">` — only needed to theme your own host-page markup; the elements carry their own tokens.
 
 ### Theme attribute
 
@@ -1171,7 +1171,7 @@ A small default set loads on demand: `bash`/`sh`, `javascript`/`js`, `html`, `cs
 ### Configure or disable
 
 ```js
-import { configureCodeHighlighting } from '@kitn.ai/chat/elements';
+import { configureCodeHighlighting } from '@kitn.ai/ui/elements';
 
 configureCodeHighlighting({
   languages: {
@@ -1196,4 +1196,4 @@ Two human/agent-readable files are generated from the manifest by `scripts/gen-l
 - **`llms.txt`** (~4 KB) — orientation: install, the property-vs-attribute rule, architecture, theming, and framework wiring.
 - **`llms-full.txt`** (~54 KB) — everything in `llms.txt` plus a generated props/events table for each element, a streaming recipe, and a build-a-chat-app runbook.
 
-Both files are at the repo root, the npm package root (`node_modules/@kitn.ai/chat/llms.txt`), and https://kitn.dev/llms.txt.
+Both files are at the repo root, the npm package root (`node_modules/@kitn.ai/ui/llms.txt`), and https://kitn.dev/llms.txt.

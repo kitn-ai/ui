@@ -1,0 +1,30 @@
+---
+// "Meet kitn-chat" — the brand beat, mirroring kitn.ai's "Meet Kitn": the brand
+// aurora as a full-bleed background, the animated cat (click to change its mood,
+// tracks the cursor), a bold headline, and a tagline with emphasized keywords.
+import MeetKitn from './MeetKitn.tsx';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const bg = `${base}/landing/ai-bg.jpg`;
+---
+
+<section class="band-dark relative isolate flex min-h-[480px] items-center justify-center overflow-hidden lg:min-h-[580px]">
+  <img src={bg} alt="" aria-hidden="true" class="absolute inset-0 z-0 size-full object-cover" />
+  <div class="absolute inset-0 z-0 bg-black/30"></div>
+
+  <div class="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-7 px-6 py-20 text-center">
+    <div class="flex justify-center">
+      <MeetKitn client:load size={172} />
+    </div>
+    <h2 class="text-balance text-[2rem] font-extrabold leading-[1.08] tracking-[-0.02em] text-white sm:text-5xl lg:text-[3.4rem]">
+      You bring the model.<br class="hidden sm:block" />
+      <span class="text-brand">AI/UI</span> brings the interface.
+    </h2>
+    <p class="max-w-xl text-lg leading-relaxed text-white/70 lg:text-xl">
+      <span class="font-bold text-white">Streaming</span>,
+      <span class="font-bold text-white">tool calls</span>,
+      <span class="font-bold text-white">reasoning</span>, generative-UI cards,
+      artifacts, and voice — the agent UI, already built and battle-tested. Wire
+      up your model or harness and ship.
+    </p>
+  </div>
+</section>

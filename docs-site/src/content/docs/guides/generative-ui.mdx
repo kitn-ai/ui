@@ -101,7 +101,7 @@ Tell the model **when** to reach for a card, not just that it can. e.g. "Use `co
 The data is model-generated, so check it against the schema first. The kit ships a validator:
 
 ```ts
-import { validateAgainstSchema } from '@kitn.ai/chat';
+import { validateAgainstSchema } from '@kitn.ai/ui';
 // The card schemas ship in the package at dist/schemas/*.schema.json — load the
 // one for the type (read it on the server, or copy it into your project).
 const result = validateAgainstSchema(envelope.data, confirmSchema);
@@ -117,7 +117,7 @@ Render envelopes with `<kc-cards>` and route every interaction through a `CardPo
 ```html
 <kc-cards></kc-cards>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const cards = document.querySelector('kc-cards');
 
   cards.cards = [/* envelopes from your model */];
@@ -136,7 +136,7 @@ Render envelopes with `<kc-cards>` and route every interaction through a `CardPo
 A card flips to a read-only view the moment the user acts. To make that survive a reload, persist the `resolution` with `applyResolution` and store the array:
 
 ```ts
-import { applyResolution } from '@kitn.ai/chat';
+import { applyResolution } from '@kitn.ai/ui';
 
 cards.addEventListener('kc-card', (e) => {
   cards.cards = applyResolution(cards.cards, e.detail); // resolved → re-hydrates read-only
@@ -151,7 +151,7 @@ It's pure and safe on every event — non-terminal events and unknown ids return
 The built-ins cover most flows, but the `type → tag` map is open. Register an element for a new type and merge it in:
 
 ```ts
-import { mergeCardTags } from '@kitn.ai/chat';
+import { mergeCardTags } from '@kitn.ai/ui';
 const types = mergeCardTags({ chart: 'my-chart-card' }); // built-ins + yours
 // el.types = types  →  <kc-cards> now renders `chart` envelopes with <my-chart-card>
 ```

@@ -12,8 +12,8 @@ Display each token as it arrives — no buffering, no flash of finished content.
 `kc-chat` streams by appending an empty assistant message, then replacing its `content` as tokens arrive. Set `loading = true` during the request so the input is disabled and the loading state shows; set it back to `false` when the stream ends.
 
 ```js
-import '@kitn.ai/chat/elements';
-import '@kitn.ai/chat/theme.css';
+import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/theme.css';
 
 const chat = document.querySelector('kc-chat');
 
@@ -115,7 +115,7 @@ The SSE response follows the OpenAI streaming format (`data: {...}` lines, termi
 ### Feeding an AsyncIterable
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 const el = document.querySelector('kc-response-stream');
 

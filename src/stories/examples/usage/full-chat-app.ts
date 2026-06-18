@@ -51,7 +51,7 @@ const fullChat: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-chat
@@ -82,7 +82,7 @@ const fullChat: StoryUsage = {
   chat.addEventListener('kc-model-change', (e) => console.log(e.detail.modelId));
 </script>`,
 
-    react: `import { Chat } from '@kitn.ai/chat/react';
+    react: `import { Chat } from '@kitn.ai/ui/react';
 
 export function ChatApp() {
   return (
@@ -103,7 +103,7 @@ export function ChatApp() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 // Object/array props use the .prop modifier in the template.
 const messages = ${MESSAGES};
@@ -132,7 +132,7 @@ function onAction(e) { console.log(e.detail.messageId, e.detail.action); }
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let el;
   // Object/array props are set as properties via bind:this.
@@ -162,7 +162,7 @@ function onAction(e) { console.log(e.detail.messageId, e.detail.action); }
   on:kc-model-change={(e) => console.log(e.detail.modelId)}
 />`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -206,7 +206,7 @@ import {
   Message, MessageContent, MessageActions,
   PromptInput, PromptInputTextarea, PromptInputActions,
   ConversationList, ModelSwitcher, PromptSuggestion, ScrollButton, Button,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, ArrowUp } from 'lucide-solid';
 
 export function ChatApp() {

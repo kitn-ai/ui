@@ -63,7 +63,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-context id="ctx"></kc-context>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   document.getElementById('ctx').context = {
     usedTokens: 48200, maxTokens: 200000,
@@ -77,7 +77,7 @@ const CUSTOM_THRESHOLDS_SNIPPET = `<!-- Custom thresholds: warn at 50%, danger a
 <kc-context id="ctx"></kc-context>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const el = document.getElementById('ctx');
   el.context = {
@@ -109,7 +109,7 @@ const meta = {
           '`<kc-context>` is the framework-agnostic **web component** for a token/context-window usage meter — a compact gauge with a hover-card breakdown (input / output / reasoning / cache + estimated cost) — isolated in **Shadow DOM**.',
           '**When to use:** showing how much of the context window a conversation is using, typically in a chat header. In SolidJS, compose the `Context` primitives.',
           '**Placement:** inline in the chat header or toolbar, beside the model switcher or other header controls; it is a compact `inline-block` element and does not need a dedicated row.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set the `context` **property** with the usage object. Hover the meter to reveal the breakdown.",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, then set the `context` **property** with the usage object. Hover the meter to reveal the breakdown.",
           '**Color thresholds** are configurable via `warnThreshold` (default `0.7`) and `dangerThreshold` (default `0.9`) number properties. When the computed severity level changes, the element fires a **`kc-threshold-change`** event with `detail.level` set to `\'ok\'`, `\'warn\'`, or `\'danger\'`.',
           'See the **Code** tab for HTML usage.',
         ]),

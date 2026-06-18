@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Using with AI
 
-`@kitn.ai/chat` ships machine-readable orientation files that follow the
+`@kitn.ai/ui` ships machine-readable orientation files that follow the
 [llmstxt.org](https://llmstxt.org) convention, so coding agents (Claude Code,
 Copilot, Cursor, Codex, …) can wire up the components correctly without guessing.
 
@@ -31,13 +31,13 @@ shipped API. Do not edit them by hand.
 ### Where to find them after `npm install`
 
 ```
-node_modules/@kitn.ai/chat/llms.txt
-node_modules/@kitn.ai/chat/llms-full.txt
+node_modules/@kitn.ai/ui/llms.txt
+node_modules/@kitn.ai/ui/llms-full.txt
 ```
 
 Both paths are listed in the package's `files` field and are therefore always
 present after install. They are also copied to `dist/llms/` inside the package
-(at `node_modules/@kitn.ai/chat/dist/llms/llms.txt`), and published at:
+(at `node_modules/@kitn.ai/ui/dist/llms/llms.txt`), and published at:
 
 - https://kitn.dev/llms.txt
 - https://kitn.dev/llms-full.txt
@@ -46,11 +46,11 @@ present after install. They are also copied to `dist/llms/` inside the package
 
 | Tool | What to do |
 |---|---|
-| **Claude Code** | Add `@node_modules/@kitn.ai/chat/llms.txt` to `CLAUDE.md`, or run `read node_modules/@kitn.ai/chat/llms-full.txt` inside the session |
+| **Claude Code** | Add `@node_modules/@kitn.ai/ui/llms.txt` to `CLAUDE.md`, or run `read node_modules/@kitn.ai/ui/llms-full.txt` inside the session |
 | **GitHub Copilot** | Add the path to `.github/copilot-instructions.md`; workspace indexing picks it up automatically |
 | **Cursor** | Reference the file in `.cursorrules` |
 | **Codex / ChatGPT** | Paste the URL `https://kitn.dev/llms.txt` into the prompt, or fetch it with a browsing tool |
-| **Any agent** | `npm install @kitn.ai/chat` → file is at `node_modules/@kitn.ai/chat/llms.txt` |
+| **Any agent** | `npm install @kitn.ai/ui` → file is at `node_modules/@kitn.ai/ui/llms.txt` |
 
 For one-off sessions, pasting the content of `llms.txt` directly into the
 system prompt is enough. For a project where the agent will revisit these
@@ -111,7 +111,7 @@ reference.
 ## Build a chat app (the runbook agents follow)
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 const chat = document.querySelector('kc-chat');
 chat.messages = [];
 
@@ -144,7 +144,7 @@ Web Awesome and similar design systems are moving toward a **skills directory**:
 a structured set of per-component markdown files that AI tools load
 progressively, fetching only the documentation relevant to the current task.
 
-`@kitn.ai/chat` already provides `dist/llms/llms-full.txt` as a single,
+`@kitn.ai/ui` already provides `dist/llms/llms-full.txt` as a single,
 comprehensive reference (60 KB, all 42 elements). A per-element skills
 directory would let agents pull just the `kc-chat` spec when they only need
 that one element, rather than loading the full file.
@@ -158,5 +158,5 @@ and has all the data needed to emit `dist/skills/kc-chat.md`,
 
 - <a href="/llms.txt" target="_blank" rel="noreferrer"><code>llms.txt</code></a> — orientation (~4 KB; also at `https://kitn.dev/llms.txt`)
 - <a href="/llms-full.txt" target="_blank" rel="noreferrer"><code>llms-full.txt</code></a> — full per-element reference (~60 KB; also at `https://kitn.dev/llms-full.txt`)
-- Custom Elements Manifest — `dist/custom-elements.json` (published at `https://unpkg.com/@kitn.ai/chat/dist/custom-elements.json`)
+- Custom Elements Manifest — `dist/custom-elements.json` (published at `https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json`)
 - Repository — https://github.com/kitn-ai/chat

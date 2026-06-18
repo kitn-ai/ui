@@ -1,0 +1,40 @@
+---
+// Closing CTA — plain (no background), separated from the dark theme-editor band
+// by a hairline divider. Flat buttons.
+import { Icon } from 'astro-icon/components';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
+---
+
+<section class="border-t border-line">
+  <div class="mx-auto max-w-3xl px-6 py-20 text-center sm:py-24">
+    <h2 class="text-balance text-3xl font-medium leading-[1.08] tracking-[-0.02em] text-ink md:text-4xl lg:text-5xl">
+      Start building your <span class="text-brand">AI interface</span>.
+    </h2>
+    <p class="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-ink-2">
+      Open source, MIT-licensed, and ready for production. Install it, drop in a
+      component, and wire up your model.
+    </p>
+
+    <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
+      <a href={href('guides/getting-started')} class="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-bold text-white no-underline transition-colors hover:bg-[var(--kc-brand-hover)]">
+        Get started
+        <Icon name="lucide:arrow-right" class="size-4" />
+      </a>
+      <a href="https://github.com/kitn-ai/chat" class="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-6 py-3 text-sm font-semibold text-ink no-underline transition-colors hover:border-[var(--kc-ink-3)]">
+        <Icon name="lucide:github" class="size-4" />
+        Star on GitHub
+      </a>
+    </div>
+
+    <div class="mx-auto mt-6 flex max-w-xs items-center gap-3 rounded-xl border border-line bg-surface px-4 py-2.5 font-mono text-sm">
+      <span class="select-none text-brand">$</span>
+      <code class="min-w-0 flex-1 truncate text-ink">npm i @kitn.ai/ui</code>
+      <button type="button" data-copy="npm i @kitn.ai/ui" aria-label="Copy install command" class="kc-copy flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-ink-3 transition-colors hover:bg-ink/10 hover:text-ink">
+        <Icon name="lucide:copy" class="kc-copy-i size-4" />
+        <Icon name="lucide:check" class="kc-check-i size-4 text-brand" />
+      </button>
+    </div>
+  </div>
+</section>

@@ -33,7 +33,7 @@ Set `data` in JavaScript (it's an object) and listen for the `kc-card` CustomEve
 <kc-confirm heading="Run database migration?"></kc-confirm>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const el = document.querySelector('kc-confirm');
 
   el.data = {
@@ -52,7 +52,7 @@ Set `data` in JavaScript (it's an object) and listen for the `kc-card` CustomEve
 </script>
 ```
 
-- **`data`** — shape: `ConfirmCardData` from `@kitn.ai/chat`. Malformed payloads render an inline error.
+- **`data`** — shape: `ConfirmCardData` from `@kitn.ai/ui`. Malformed payloads render an inline error.
 - **Action styles** — `'primary' | 'default' | 'destructive'`. Mark one `default: true` to make it the keyboard default; combine with `autofocus` to focus it on mount.
 - **Restore resolved state** via `el.resolution = { kind: 'action', action: 'approve' }` — useful when replaying past conversations.
 

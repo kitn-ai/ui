@@ -14,7 +14,7 @@
   so Vue treats kc-* tags as native custom elements rather than Vue components
   (no "Unknown custom element" warnings).
 
-  `@kitn.ai/chat/elements` is imported once (main.ts side-effect) to register
+  `@kitn.ai/ui/elements` is imported once (main.ts side-effect) to register
   the custom elements globally — BEFORE this component mounts.
 -->
 

@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kc-voice-input" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-voice-input>` to add mic dictation to a prompt input, search bar, or form field in any framework. In SolidJS, compose `VoiceInput` from `@kitn.ai/chat` directly for tighter reactive control.
+Reach for `<kc-voice-input>` to add mic dictation to a prompt input, search bar, or form field in any framework. In SolidJS, compose `VoiceInput` from `@kitn.ai/ui` directly for tighter reactive control.
 </Aside>
 
 ## Usage
@@ -34,7 +34,7 @@ Assign your `transcribe` function to the element and listen for `kc-transcriptio
 <kc-voice-input id="voice"></kc-voice-input>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const voice = document.getElementById('voice');
 

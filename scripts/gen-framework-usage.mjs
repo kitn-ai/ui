@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 
 // CDN URL for the self-contained element bundle (registers all kc-* custom elements).
 // Source of truth: Installation.mdx § "Via CDN" and README.md § "Or load from a CDN".
-const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 
 // Some elements have a displayName that doesn't match the Solid export name.
 // Map element displayName → actual Solid export name for those cases.
@@ -64,7 +64,7 @@ function svelteSnippet(el) {
     ...required(el).map((p) => `{${p.name}}`),
     ...el.events.map((e) => `on:${e.name}={${onName(e.name)}}`),
   ];
-  const scriptBlock = `<script>\n  import '@kitn.ai/chat/elements';\n</script>`;
+  const scriptBlock = `<script>\n  import '@kitn.ai/ui/elements';\n</script>`;
   const tag = wrapTag(`<${el.tag}`, lines, `></${el.tag}>`) ?? `<${el.tag}></${el.tag}>`;
   return `${scriptBlock}\n\n${tag}`;
 }
@@ -95,12 +95,12 @@ function jsxSnippet(el, pkg, componentName) {
 export function buildSnippets(el, hasSolid, solidName) {
   const snippets = {
     html: htmlSnippet(el),
-    react: jsxSnippet(el, '@kitn.ai/chat/react'),
+    react: jsxSnippet(el, '@kitn.ai/ui/react'),
     vue: vueSnippet(el),
     svelte: svelteSnippet(el),
     angular: angularSnippet(el),
   };
-  if (hasSolid) snippets.solid = jsxSnippet(el, '@kitn.ai/chat', solidName);
+  if (hasSolid) snippets.solid = jsxSnippet(el, '@kitn.ai/ui', solidName);
   return snippets;
 }
 

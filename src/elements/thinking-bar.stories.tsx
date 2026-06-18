@@ -21,7 +21,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-thinking-bar text="Thinking" stoppable stop-label="Answer now"></kc-thinking-bar>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   document.querySelector('kc-thinking-bar')
     .addEventListener('kc-stop', () => console.log('user asked to stop'));
@@ -37,7 +37,7 @@ const meta = {
       description: specDescription('kc-thinking-bar', [
           '`<kc-thinking-bar>` is the framework-agnostic **web component** for an animated "thinking" indicator with an optional stop affordance — a pure leaf element isolated in **Shadow DOM**. (`<kc-chat>` does not surface this; compose it yourself.)',
           '**When to use:** showing that the assistant is reasoning, optionally letting the user interrupt with "Answer now". In SolidJS, use the `ThinkingBar` primitive.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `text`/`stop-label` attributes, add the `stoppable` flag to show the stop button, and listen for the `kc-stop` **CustomEvent**.",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the `text`/`stop-label` attributes, add the `stoppable` flag to show the stop button, and listen for the `kc-stop` **CustomEvent**.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

@@ -5,7 +5,7 @@ import type { CardResolution } from '../primitives/card-contract';
 interface Props extends Record<string, unknown> {
   /** The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints
    *  (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object',
-   *  properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/chat` for
+   *  properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for
    *  the full shape (it is self-referential, so the element types it loosely). */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */

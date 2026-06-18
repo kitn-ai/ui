@@ -36,7 +36,7 @@ const reasoning: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-chain-of-thought id="cot"></kc-chain-of-thought>
@@ -57,7 +57,7 @@ const reasoning: StoryUsage = {
   msg.addEventListener('kc-message-action', (e) => console.log(e.detail));
 </script>`,
 
-    react: `import { ChainOfThought, Message } from '@kitn.ai/chat/react';
+    react: `import { ChainOfThought, Message } from '@kitn.ai/ui/react';
 
 export function ReasonedReply() {
   const steps = ${STEPS};
@@ -78,7 +78,7 @@ export function ReasonedReply() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 const steps = ${STEPS};
 
@@ -97,7 +97,7 @@ const message = {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let cotEl;
   let msgEl;
@@ -116,7 +116,7 @@ const message = {
 <kc-chain-of-thought bind:this={cotEl} />
 <kc-message bind:this={msgEl} on:kc-message-action={(e) => console.log(e.detail)} />`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -144,7 +144,7 @@ export class ReasonedReplyComponent {
   Message, MessageAvatar, MessageContent, MessageActions,
   ChainOfThought, ChainOfThoughtStep, ChainOfThoughtTrigger, ChainOfThoughtContent, ChainOfThoughtItem,
   Button,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 import { Search, Calculator, Lightbulb, Copy, ThumbsUp, ThumbsDown } from 'lucide-solid';
 
 export function ReasonedReply() {

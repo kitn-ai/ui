@@ -114,7 +114,7 @@ const HTML_SNIPPET = (def: TasksCardData, cardId: string) => {
   const heading = HEADING_MAP[cardId];
   return `<kc-tasks${heading ? ` heading="${heading}"` : ''}></kc-tasks>
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/ui/elements'; // registers the custom elements
 
   const el = document.querySelector('kc-tasks');
   // \`data\` is the CardEnvelope.data (set as a property).
@@ -202,7 +202,7 @@ export const Resolved: Story = {
       source: {
         code: `<kc-tasks heading="Export report"></kc-tasks>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const el = document.querySelector('kc-tasks');
   el.data = ${JSON.stringify(RESOLVED_TASKS, null, 2)};
   // Setting .resolution renders the chromed read-only view — no checkboxes or confirm button.
@@ -222,7 +222,7 @@ export const ErrorState: Story = {
       source: {
         code: `<kc-tasks></kc-tasks>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const el = document.querySelector('kc-tasks');
   // No tasks → inline error state + an \`error\` event.
   el.data = { tasks: [] };

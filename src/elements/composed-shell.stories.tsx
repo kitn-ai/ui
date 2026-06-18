@@ -111,7 +111,7 @@ const SHELL_SNIPPET = `<!-- Compose-your-own chat: a resizable shell built from 
 </kc-resizable>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   // — data in via properties —
   const list = document.getElementById('list');
@@ -258,7 +258,7 @@ const DROPIN_SNIPPET = `<!-- Batteries-included: the whole chat surface in one t
   style="display:block;height:560px"></kc-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const chat = document.getElementById('chat');
   chat.models = [{ id: 'opus', name: 'Claude Opus', provider: 'Anthropic' }];

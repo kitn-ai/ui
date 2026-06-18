@@ -50,7 +50,7 @@ function Frame(props: { children: JSX.Element }) {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { Textarea } from '@kitn.ai/chat';`;
+const IMPORT = `import { Textarea } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

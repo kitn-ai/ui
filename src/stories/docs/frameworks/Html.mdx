@@ -19,18 +19,18 @@ Both are shown below.
 ## Install & setup
 
 ```bash
-npm i @kitn.ai/chat
+npm i @kitn.ai/ui
 ```
 
 Register the custom elements once (a side-effect import), then use the tags anywhere in your HTML:
 
 ```js
 // Once, near your app entry — registers all <kc-*> elements globally.
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
 - No CSS to import: each element is styled inside its own Shadow DOM. Only pull in
-  `@kitn.ai/chat/theme.css` if you want to override design tokens (see **Theming**).
+  `@kitn.ai/ui/theme.css` if you want to override design tokens (see **Theming**).
 
 ### No-build / CDN option
 
@@ -38,7 +38,7 @@ No bundler? Load the module directly from a CDN and you're done:
 
 ```html
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 ```
 
@@ -54,7 +54,7 @@ stream your model's reply back into the property. You own the request; the eleme
 <html>
 <head>
   <!-- optional: only needed to override design tokens -->
-  <link rel="stylesheet" href="./node_modules/@kitn.ai/chat/theme.css" />
+  <link rel="stylesheet" href="./node_modules/@kitn.ai/ui/theme.css" />
   <style>
     html, body { margin: 0; height: 100%; }
     .app { display: flex; flex-direction: column; height: 100dvh; }
@@ -68,7 +68,7 @@ stream your model's reply back into the property. You own the request; the eleme
   </div>
 
   <script type="module">
-    import '@kitn.ai/chat/elements';
+    import '@kitn.ai/ui/elements';
 
     const chat = document.getElementById('chat');
 
@@ -127,7 +127,7 @@ to the `<kc-chat>` thread:
 </div>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const sidebar = document.getElementById('sidebar');
   const chat = document.getElementById('chat');
@@ -171,7 +171,7 @@ persist the layout.
 </div>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const resizable = document.querySelector('kc-resizable');
   resizable.addEventListener('kc-change', (e) => {

@@ -42,7 +42,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-skills id="skills"></kc-skills>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const skills = document.getElementById('skills');
   skills.skills = [
@@ -62,7 +62,7 @@ const meta = {
           '`<kc-skills>` is the framework-agnostic **web component** that badges which skills were active for a message, isolated in **Shadow DOM**.',
           '**When to use:** annotating a message row with the skills/tools it used, in a non-Solid app. In SolidJS, use the `MessageSkills` primitive directly.',
           '**Placement:** beneath or inline with the message content, typically in the footer of a message row alongside action buttons; it is `display: block` and wraps badges horizontally.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`. Then either (a) set the `skills` **property** to an array of `{ id, name }` objects, or (b) compose `<kc-skill>` child elements — light-DOM data carriers hidden by the Shadow DOM — where the tag's text content is the badge label and the optional `id` attribute is the stable identifier. When both are provided, prop items render first and declarative children are appended after.",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`. Then either (a) set the `skills` **property** to an array of `{ id, name }` objects, or (b) compose `<kc-skill>` child elements — light-DOM data carriers hidden by the Shadow DOM — where the tag's text content is the badge label and the optional `id` attribute is the stable identifier. When both are provided, prop items render first and declarative children are appended after.",
           'See the **Code** tab for HTML usage.',
         ]),
     },
@@ -86,7 +86,7 @@ const DECLARATIVE_HTML_SNIPPET = `<!-- Works in any framework or plain HTML — 
 </kc-skills>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 </script>`;
 
 /**

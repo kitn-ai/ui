@@ -44,7 +44,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-voice-input id="voice"></kc-voice-input>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const voice = document.getElementById('voice');
   // transcribe is a FUNCTION property — your async transcriber
@@ -66,7 +66,7 @@ const meta = {
           '`<kc-voice-input>` is the framework-agnostic **web component** for a mic button that records and transcribes audio — isolated in **Shadow DOM**. It is the canonical **function-property** element.',
           '**When to use:** adding voice dictation to an input in a non-Solid app. In SolidJS, use the `VoiceInput` primitive.',
           '**Placement:** inline beside the prompt input field or as an icon button in the composer toolbar; renders as an inline-block sized to the mic button.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, then set the `transcribe` **function property** (`el.transcribe = async blob => '...'`) — a value-returning callback can't be modelled as an event. It also emits `kc-audio-captured` (raw blob) and `kc-transcription` (text) **CustomEvents**.",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, then set the `transcribe` **function property** (`el.transcribe = async blob => '...'`) — a value-returning callback can't be modelled as an event. It also emits `kc-audio-captured` (raw blob) and `kc-transcription` (text) **CustomEvents**.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

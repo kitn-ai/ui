@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildSnippets } from '../../scripts/gen-framework-usage.mjs';
 
-const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 
 const artifact = {
   tag: 'kc-artifact',
@@ -23,7 +23,7 @@ const noBindings = {
 describe('buildSnippets', () => {
   it('imports the bare React name and binds required props', () => {
     const s = buildSnippets(artifact, /* hasSolid */ true);
-    expect(s.react).toContain("import { Artifact } from '@kitn.ai/chat/react'");
+    expect(s.react).toContain("import { Artifact } from '@kitn.ai/ui/react'");
     expect(s.react).toContain('files={files}');
     expect(s.react).toContain('onNavigate={(');
   });
@@ -34,7 +34,7 @@ describe('buildSnippets', () => {
     expect(s.html).toContain('<kc-artifact');
     expect(s.html).toContain('el.files =');
     expect(s.html).toContain("addEventListener('kc-navigate'");
-    expect(s.html).not.toContain("import '@kitn.ai/chat/elements'");
+    expect(s.html).not.toContain("import '@kitn.ai/ui/elements'");
   });
   it('uses Vue .prop binding for non-scalar props and Angular bracket binding', () => {
     const s = buildSnippets(artifact, true);
@@ -98,7 +98,7 @@ describe('buildSnippets', () => {
     });
     it('Svelte compact: <kc-foo></kc-foo> with script block, no binding lines', () => {
       const s = buildSnippets(noBindings, false);
-      expect(s.svelte).toContain("import '@kitn.ai/chat/elements'");
+      expect(s.svelte).toContain("import '@kitn.ai/ui/elements'");
       expect(s.svelte).toContain('<kc-foo></kc-foo>');
       expect(s.svelte).not.toMatch(/<kc-foo\n/);
     });
@@ -107,7 +107,7 @@ describe('buildSnippets', () => {
   describe('Svelte snippet', () => {
     it('has elements import in script block', () => {
       const s = buildSnippets(artifact, true);
-      expect(s.svelte).toContain("import '@kitn.ai/chat/elements'");
+      expect(s.svelte).toContain("import '@kitn.ai/ui/elements'");
     });
     it('binds required props with {name} shorthand', () => {
       const s = buildSnippets(artifact, true);

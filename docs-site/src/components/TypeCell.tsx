@@ -94,7 +94,7 @@ export default function TypeCell(props: { type: string; name: string; label?: st
               </div>
               <Show when={props.import}>
                 <div class="border-t border-line px-4 py-2.5 font-mono text-xs text-ink-3">
-                  {`import type { ${props.import} } from '@kitn.ai/chat'`}
+                  {`import type { ${props.import} } from '@kitn.ai/ui'`}
                 </div>
               </Show>
             </div>

@@ -1,9 +1,9 @@
 /**
  * Ambient module declaration for the side-effect-only registration import:
  *
- *   import '@kitn.ai/chat/elements';
+ *   import '@kitn.ai/ui/elements';
  *
- * This example uses the typed React wrappers from `@kitn.ai/chat/react`, so it
+ * This example uses the typed React wrappers from `@kitn.ai/ui/react`, so it
  * renders <Chat /> etc. (real React components) rather than raw custom-
  * element JSX tags — no JSX.IntrinsicElements augmentation is needed.
  *
@@ -12,7 +12,7 @@
  * it for its side effect (registering the custom elements), we declare it here
  * as an opaque module so the build doesn't pull in the Solid sources.
  */
-declare module '@kitn.ai/chat/elements';
+declare module '@kitn.ai/ui/elements';
 
 /** Allow plain `.css` side-effect imports (e.g. `import './App.css'`). */
 declare module '*.css';

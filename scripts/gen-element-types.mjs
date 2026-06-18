@@ -48,7 +48,7 @@ export function writeTypes(root, elements, _toAttr, IMPORTS) {
 // \`document.querySelector('kc-message')\` is typed and gets prop autocomplete.
 ${importLines}
 
-// Re-exports for \`import { … } from '@kitn.ai/chat/elements'\`.
+// Re-exports for \`import { … } from '@kitn.ai/ui/elements'\`.
 export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';

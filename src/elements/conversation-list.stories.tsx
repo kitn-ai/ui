@@ -95,7 +95,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-conversations id="list" style="display:block; width:300px; height:100vh;"></kc-conversations>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const list = document.getElementById('list');
   list.groups = [
@@ -116,9 +116,9 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   list.addEventListener('kc-toggle-sidebar', () => console.log('toggle sidebar'));
 </script>`;
 
-const SOLID_SNIPPET = `import '@kitn.ai/chat/elements'; // registers the custom elements
+const SOLID_SNIPPET = `import '@kitn.ai/ui/elements'; // registers the custom elements
 import { onMount } from 'solid-js';
-import type { ConversationGroup, ConversationSummary } from '@kitn.ai/chat';
+import type { ConversationGroup, ConversationSummary } from '@kitn.ai/ui';
 
 function Sidebar() {
   let el: HTMLElement & {
@@ -162,7 +162,7 @@ const meta = {
       description: specDescription('kc-conversations', [
           '`<kc-conversations>` is the framework-agnostic **web component** version of the chat sidebar — a searchable, grouped list of conversations with a "new chat" button, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a conversation switcher to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `ConversationList` primitive instead.',
-          '**How to use — data-driven:** register once with `import \'@kitn.ai/chat/elements\'`, then set rich data as JS **properties** (`el.groups = [...]`, `el.conversations = [...]`, `el.activeId = \'c-1\'`) and listen for **CustomEvents** (`kc-conversation-select`, `kc-new-chat`, `kc-toggle-sidebar`) directly on the element.',
+          '**How to use — data-driven:** register once with `import \'@kitn.ai/ui/elements\'`, then set rich data as JS **properties** (`el.groups = [...]`, `el.conversations = [...]`, `el.activeId = \'c-1\'`) and listen for **CustomEvents** (`kc-conversation-select`, `kc-new-chat`, `kc-toggle-sidebar`) directly on the element.',
           '**How to use — declarative:** alternatively, compose `<kc-conversation>` child elements directly in markup — each child carries its `id` as an attribute and its title as text content (`<kc-conversation id="c-1">Q2 plan</kc-conversation>`). No JS property wiring needed; the element reads them on mount and re-reads on DOM changes via MutationObserver. Events fire identically to the data-driven path.',
           '**Anatomy:** **header** (collapse/sidebar toggle button + "New chat" button) → **group headers** (one per `ConversationGroup`, labelled by `group.name`) → **conversation rows** (`<kc-conversation>` items or JS-property rows; active row is highlighted; each row is a button firing `kc-conversation-select`). Declarative `<kc-conversation id="…">title</kc-conversation>` children are invisible data carriers (no shadow slot) merged with the `conversations` property list.',
           '**Placement:** as a fixed-width side panel next to the chat surface. Give it an explicit width and height (e.g. `width: 300px; height: 100vh`).',
@@ -199,7 +199,7 @@ const DECLARATIVE_HTML_SNIPPET = `<!-- Works in any framework or plain HTML — 
 </kc-conversations>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   // Events fire exactly the same as the data-driven approach.
   document.getElementById('list')

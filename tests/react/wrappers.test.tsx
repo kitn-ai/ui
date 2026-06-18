@@ -1,5 +1,5 @@
 /**
- * Proves the generated `@kitn.ai/chat/react` wrappers behave like native React
+ * Proves the generated `@kitn.ai/ui/react` wrappers behave like native React
  * components: array/object props reach the element as LIVE DOM properties (not
  * stringified attributes), `on<Event>` handlers fire on the element's
  * CustomEvents, boolean props toggle features, and prop updates re-assign.
@@ -10,7 +10,7 @@
  */
 import { render, cleanup } from '@testing-library/react';
 import { afterEach, expect, test, vi } from 'vitest';
-import { Conversations, PromptInput, Chat } from '@kitn.ai/chat/react';
+import { Conversations, PromptInput, Chat } from '@kitn.ai/ui/react';
 
 afterEach(cleanup);
 

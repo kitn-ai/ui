@@ -41,7 +41,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-chain-of-thought id="cot"></kc-chain-of-thought>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   document.getElementById('cot').steps = [
     { label: 'Understand the request', content: 'The user wants a composable set.' },
@@ -61,7 +61,7 @@ const meta = {
         '`<kc-chain-of-thought>` is the framework-agnostic **web component** for step-by-step reasoning — a connected list of steps, each with optional collapsible detail — isolated in **Shadow DOM**. The compound primitive collapses to a single `steps` data model (Route 1).',
         '**When to use:** surfacing an agent\'s plan or reasoning trace in a non-Solid app. In SolidJS, compose the `ChainOfThought` primitives for finer control.',
         '**Placement:** as a block above or below a message, or in a dedicated reasoning panel; it is `display: block` and sizes to content height, so no fixed height is required.',
-        "**How to use:** register once with `import '@kitn.ai/chat/elements'`. **Property API:** set the `steps` **property** — an array of `{ label, content? }` objects; steps with `content` become expandable. **Declarative API:** compose `<kc-step label=\"…\">…detail…</kc-step>` child elements directly in the HTML — the `label` attribute becomes the heading, `textContent` the optional expandable detail. Declarative children are merged after any prop steps.",
+        "**How to use:** register once with `import '@kitn.ai/ui/elements'`. **Property API:** set the `steps` **property** — an array of `{ label, content? }` objects; steps with `content` become expandable. **Declarative API:** compose `<kc-step label=\"…\">…detail…</kc-step>` child elements directly in the HTML — the `label` attribute becomes the heading, `textContent` the optional expandable detail. Declarative children are merged after any prop steps.",
         'See the **Code** tab for HTML usage.',
       ]),
     },
@@ -85,7 +85,7 @@ const DECLARATIVE_HTML_SNIPPET = `<!-- Works in any framework or plain HTML — 
 </kc-chain-of-thought>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 </script>`;
 
 /**

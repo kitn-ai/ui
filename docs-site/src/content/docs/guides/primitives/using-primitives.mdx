@@ -1,20 +1,20 @@
 ---
 title: Working with the components directly
-description: Import kitn-chat's headless primitives, UI primitives, and feature components straight from @kitn.ai/chat for full compositional control in a Solid app.
+description: Import kitn-chat's headless primitives, UI primitives, and feature components straight from @kitn.ai/ui for full compositional control in a Solid app.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-The `kc-*` elements are the fast path. When you want full control over markup and layout — and you're in a Solid app — skip the wrapper and import the underlying pieces from `@kitn.ai/chat`. You compose them in JSX, and your bundler tree-shakes away whatever you don't use.
+The `kc-*` elements are the fast path. When you want full control over markup and layout — and you're in a Solid app — skip the wrapper and import the underlying pieces from `@kitn.ai/ui`. You compose them in JSX, and your bundler tree-shakes away whatever you don't use.
 
 This page is the catalog, organized by the [four layers](/chat/guides/primitives/architecture/). For a full streaming chat built this way, see the [Solid guide](/chat/guides/frameworks/solid/).
 
 ```bash
-npm install @kitn.ai/chat solid-js
+npm install @kitn.ai/ui solid-js
 ```
 
 ```ts
-import '@kitn.ai/chat/theme.css'; // design tokens, once near your entry
+import '@kitn.ai/ui/theme.css'; // design tokens, once near your entry
 ```
 
 <Aside type="tip" title="Ships as source">
@@ -31,7 +31,7 @@ import {
   useStickToBottom,
   useAutoResize,
   useVoiceRecorder,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 ```
 
 - `useTextStream` — drive token-by-token streaming into your own UI.
@@ -46,9 +46,9 @@ import {
 The kit's own accessible building blocks. Useful on their own, well outside a chat.
 
 ```tsx
-import { Button, Switch, Avatar, Badge, Separator } from '@kitn.ai/chat';
-import { Tooltip, HoverCard, Dropdown } from '@kitn.ai/chat';
-import { Resizable, ResizablePanel, ScrollArea } from '@kitn.ai/chat';
+import { Button, Switch, Avatar, Badge, Separator } from '@kitn.ai/ui';
+import { Tooltip, HoverCard, Dropdown } from '@kitn.ai/ui';
+import { Resizable, ResizablePanel, ScrollArea } from '@kitn.ai/ui';
 
 <Switch label="Temporary chat" onChange={(on) => setTemporary(on)} />
 <Button variant="ghost" size="icon" aria-label="Add"><PlusIcon /></Button> {/* your icon */}
@@ -69,7 +69,7 @@ import {
   PromptInput,
   PromptInputTextarea,
   PromptInputActions,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 ```
 
 Each one also works standalone — render just the part you need:
@@ -77,7 +77,7 @@ Each one also works standalone — render just the part you need:
 ```tsx
 import {
   Markdown, Reasoning, ReasoningTrigger, ReasoningContent, Tool, Artifact,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 
 <Markdown content={assistantReply} />
 <Reasoning isStreaming={isStreaming}>

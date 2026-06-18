@@ -24,7 +24,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '@kitn.ai/chat';`;
+const IMPORT = `import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

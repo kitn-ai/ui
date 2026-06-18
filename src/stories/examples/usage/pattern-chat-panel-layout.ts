@@ -10,7 +10,7 @@ const chatGptStyle: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!--
@@ -77,7 +77,7 @@ import {
   Message, MessageAvatar, MessageContent, MessageActions,
   PromptInput, PromptInputTextarea, PromptInputActions,
   Button,
-} from '@kitn.ai/chat/react';
+} from '@kitn.ai/ui/react';
 
 /**
  * Chat Panel Layout — compact vertical panel for embedding inside a page.
@@ -141,7 +141,7 @@ export function ChatPanel() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 const input = ref('');
@@ -212,7 +212,7 @@ function onSubmit(e) {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   let input = '';
 </script>
 
@@ -273,7 +273,7 @@ function onSubmit(e) {
 
 </div>`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -351,7 +351,7 @@ import {
   Message, MessageAvatar, MessageContent, MessageActions,
   PromptInput, PromptInputTextarea, PromptInputActions,
   ScrollButton, Button,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 import { Copy, ArrowUp } from 'lucide-solid';
 
 /**

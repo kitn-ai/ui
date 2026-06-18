@@ -33,7 +33,7 @@ Assign the `suggestions` property and listen for `kc-select`:
 ```html
 <kc-suggestions id="suggs" variant="outline"></kc-suggestions>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const suggs = document.getElementById('suggs');
   suggs.suggestions = ['Explain the architecture', 'Show me a code example'];
   suggs.addEventListener('kc-select', (e) => console.log(e.detail.value));

@@ -23,7 +23,7 @@ import type { ExampleUsage, StoryUsage } from './types';
  */
 const htmlSnippet = (obj: string) => `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-context id="ctx"></kc-context>
@@ -34,7 +34,7 @@ const htmlSnippet = (obj: string) => `<!-- Register the elements once (CDN or bu
   ctx.context = ${obj};
 </script>`;
 
-const reactSnippet = (obj: string) => `import { Context } from '@kitn.ai/chat/react';
+const reactSnippet = (obj: string) => `import { Context } from '@kitn.ai/ui/react';
 
 export function UsageIndicator() {
   return (
@@ -43,7 +43,7 @@ export function UsageIndicator() {
 }`;
 
 const vueSnippet = (obj: string) => `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 const context = ${obj};
 </script>
@@ -54,7 +54,7 @@ const context = ${obj};
 </template>`;
 
 const svelteSnippet = (obj: string) => `<script>
-  import '@kitn.ai/chat/elements'; // register once
+  import '@kitn.ai/ui/elements'; // register once
 
   let el;
   const context = ${obj};
@@ -65,7 +65,7 @@ const svelteSnippet = (obj: string) => `<script>
 
 <kc-context bind:this={el} />`;
 
-const angularSnippet = (obj: string) => `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+const angularSnippet = (obj: string) => `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component/module.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -130,7 +130,7 @@ const lowUsage: StoryUsage = {
   Context, ContextTrigger, ContextContent,
   ContextContentHeader, ContextContentBody, ContextContentFooter,
   ContextInputUsage, ContextOutputUsage,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 
 export function UsageIndicator() {
   return (
@@ -205,7 +205,7 @@ const mediumUsage: StoryUsage = {
   Context, ContextTrigger, ContextContent,
   ContextContentHeader, ContextContentBody, ContextContentFooter,
   ContextInputUsage, ContextOutputUsage, ContextReasoningUsage,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 
 export function UsageIndicator() {
   return (
@@ -281,7 +281,7 @@ const highUsage: StoryUsage = {
   Context, ContextTrigger, ContextContent,
   ContextContentHeader, ContextContentBody, ContextContentFooter,
   ContextInputUsage, ContextOutputUsage, ContextReasoningUsage,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 
 export function UsageIndicator() {
   return (
@@ -367,7 +367,7 @@ const withCache: StoryUsage = {
   Context, ContextTrigger, ContextContent,
   ContextContentHeader, ContextContentBody, ContextContentFooter,
   ContextInputUsage, ContextOutputUsage, ContextReasoningUsage, ContextCacheUsage,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 
 export function UsageIndicator() {
   return (
@@ -403,7 +403,7 @@ const inHeaderBar: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <header style="display:flex;align-items:center;gap:0.5rem">
@@ -430,7 +430,7 @@ const inHeaderBar: StoryUsage = {
   models.currentModel = 'claude-4';
   models.addEventListener('kc-model-change', (e) => console.log(e.detail));
 </script>`,
-    react: `import { Context, ModelSwitcher } from '@kitn.ai/chat/react';
+    react: `import { Context, ModelSwitcher } from '@kitn.ai/ui/react';
 
 export function ChatHeader() {
   const models = [
@@ -453,7 +453,7 @@ export function ChatHeader() {
   );
 }`,
     vue: `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 const context = {
   usedTokens: 67000,
@@ -475,7 +475,7 @@ const models = [
   </header>
 </template>`,
     svelte: `<script>
-  import '@kitn.ai/chat/elements'; // register once
+  import '@kitn.ai/ui/elements'; // register once
 
   let ctxEl, modelsEl;
   const context = {
@@ -498,7 +498,7 @@ const models = [
   <kc-model-switcher bind:this={modelsEl} current-model="claude-4" on:kc-model-change={(e) => console.log(e.detail)} />
   <kc-context bind:this={ctxEl} />
 </header>`,
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component/module.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -533,8 +533,8 @@ import {
   ContextContentHeader, ContextContentBody, ContextContentFooter,
   ContextInputUsage, ContextOutputUsage,
   ModelSwitcher,
-} from '@kitn.ai/chat';
-import type { ModelOption } from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
+import type { ModelOption } from '@kitn.ai/ui';
 
 export function ChatHeader() {
   const [modelId, setModelId] = createSignal('claude-4');

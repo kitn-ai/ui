@@ -72,7 +72,7 @@ const BASE_MESSAGES = [
     id: 'm-2',
     role: 'assistant',
     content:
-      'Use `<kc-workspace>` — set `conversations`, `messages`, and `models` as JS properties and listen for `kc-conversation-select` and `kc-submit`.\n\n```html\n<kc-workspace id="workspace" style="display:block; height:100vh;"></kc-workspace>\n\n<script type="module">\n  import \'@kitn.ai/chat/elements\';\n  const ws = document.getElementById(\'workspace\');\n  ws.conversations = [...];\n  ws.messages = [...];\n  ws.addEventListener(\'kc-submit\', (e) => console.log(e.detail.value));\n</script>\n```\n\nThat\'s the whole setup. The sidebar, thread, and prompt composer are all wired up internally.',
+      'Use `<kc-workspace>` — set `conversations`, `messages`, and `models` as JS properties and listen for `kc-conversation-select` and `kc-submit`.\n\n```html\n<kc-workspace id="workspace" style="display:block; height:100vh;"></kc-workspace>\n\n<script type="module">\n  import \'@kitn.ai/ui/elements\';\n  const ws = document.getElementById(\'workspace\');\n  ws.conversations = [...];\n  ws.messages = [...];\n  ws.addEventListener(\'kc-submit\', (e) => console.log(e.detail.value));\n</script>\n```\n\nThat\'s the whole setup. The sidebar, thread, and prompt composer are all wired up internally.',
     actions: ['copy', 'like', 'dislike'],
   },
 ];

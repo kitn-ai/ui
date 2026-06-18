@@ -5,7 +5,7 @@ import type { CardResolution } from '../primitives/card-contract';
 interface Props extends Record<string, unknown> {
   /** The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY:
    *  `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from
-   *  `@kitn.ai/chat` for the full shape. */
+   *  `@kitn.ai/ui` for the full shape. */
   data?: Record<string, unknown>;
   /** Stable card id correlating every emitted CardEvent. Attribute: `card-id`. */
   cardId?: string;

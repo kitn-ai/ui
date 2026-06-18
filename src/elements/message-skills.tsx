@@ -38,7 +38,7 @@ export function parseKcSkillElement(n: Element): Skill {
  * ```html
  * <kc-skills id="skills"></kc-skills>
  * <script type="module">
- *   import '@kitn.ai/chat/elements';
+ *   import '@kitn.ai/ui/elements';
  *   document.getElementById('skills').skills = [
  *     { id: 'web-search', name: 'Web Search' },
  *     { id: 'code',       name: 'Code' },
@@ -54,7 +54,7 @@ export function parseKcSkillElement(n: Element): Skill {
  *   <kc-skill id="code">Code</kc-skill>
  * </kc-skills>
  * <script type="module">
- *   import '@kitn.ai/chat/elements';
+ *   import '@kitn.ai/ui/elements';
  * </script>
  * ```
  *

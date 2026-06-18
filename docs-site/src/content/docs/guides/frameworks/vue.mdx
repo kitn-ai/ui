@@ -10,7 +10,7 @@ Drop `kc-*` web components directly into Vue 3 templates. Bind arrays and object
 ## Install
 
 ```bash
-npm install @kitn.ai/chat
+npm install @kitn.ai/ui
 ```
 
 ## Register elements
@@ -19,7 +19,7 @@ Import the element bundle **once**, before `createApp().mount()`. Vue stamps tag
 
 ```ts
 // src/main.ts
-import '@kitn.ai/chat/elements'; // must come before createApp
+import '@kitn.ai/ui/elements'; // must come before createApp
 import { createApp } from 'vue';
 import App from './App.vue';
 
@@ -54,7 +54,7 @@ Add this reference once to give Volar and the template compiler full type covera
 
 ```ts
 // env.d.ts
-/// <reference types="@kitn.ai/chat/elements" />
+/// <reference types="@kitn.ai/ui/elements" />
 ```
 
 ## Binding rules
@@ -75,7 +75,7 @@ The `.prop` modifier forces Vue to set the value as a live DOM property rather t
 
 ```vue
 <script setup lang="ts">
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 type Message = { id: string; role: 'user' | 'assistant'; content: string };
@@ -124,7 +124,7 @@ The elements fill their container. Give the parent `display: flex; flex-directio
 
 ```vue
 <script setup lang="ts">
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 const conversations = ref([
@@ -172,10 +172,10 @@ You can also drop standalone display elements — `<kc-markdown>`, `<kc-code-blo
 
 ## Theming
 
-Each element is styled inside its own Shadow DOM. No CSS import is required for the elements themselves. Pull in `@kitn.ai/chat/theme.css` only when you want to override design tokens:
+Each element is styled inside its own Shadow DOM. No CSS import is required for the elements themselves. Pull in `@kitn.ai/ui/theme.css` only when you want to override design tokens:
 
 ```ts
-import '@kitn.ai/chat/theme.css';
+import '@kitn.ai/ui/theme.css';
 ```
 
 See the [Theming guide](/chat/guides/theming/) for available tokens.

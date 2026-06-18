@@ -1,0 +1,47 @@
+---
+// "Make it yours" — token theming + the live theme editor. Fixed-dark band with
+// a framed screenshot (drop shadow, no glow).
+import { Icon } from 'astro-icon/components';
+import SectionHeader from './SectionHeader.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
+const shot = `${base}/landing/theme-editor.png`;
+---
+
+<section class="band-dark">
+  <div class="mx-auto max-w-[80rem] px-6 py-16 lg:py-24">
+    <SectionHeader icon="lucide:palette" label="Make it yours" />
+    <div class="grid items-center gap-12 lg:grid-cols-[1fr_1.25fr]">
+    <div>
+      <h2 class="text-balance text-3xl font-medium leading-[1.08] tracking-[-0.02em] text-ink md:text-4xl lg:text-5xl">
+        Match your brand — <span class="text-brand">without forking</span> anything.
+      </h2>
+      <p class="mt-5 text-lg leading-relaxed text-ink-2">
+        Every color, font, radius, and shadow is a CSS custom property. Override a
+        handful of <code class="kc-inline">--kc-*</code> tokens and the whole UI
+        reskins, light and dark. Or design it live: 40+ presets, font and shape
+        controls, and export-ready CSS you can paste straight into your app.
+      </p>
+      <a href={href('theme/editor')} class="mt-7 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-white no-underline transition-colors hover:bg-[var(--kc-brand-hover)]">
+        <Icon name="lucide:palette" class="size-4" />
+        Open the theme editor
+      </a>
+    </div>
+
+    <div class="te-frame overflow-hidden rounded-xl border border-line bg-surface-2">
+      <div class="flex items-center gap-2 border-b border-line bg-surface px-3.5 py-2.5">
+        <span class="size-3 rounded-full bg-[#ff5f57]"></span>
+        <span class="size-3 rounded-full bg-[#febc2e]"></span>
+        <span class="size-3 rounded-full bg-[#28c840]"></span>
+      </div>
+      <img src={shot} alt="The AI/UI theme editor" loading="lazy" class="block w-full" />
+    </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .te-frame { box-shadow: 0 30px 70px -40px rgb(0 0 0 / 0.7); }
+  .kc-inline { font-family: var(--sl-font-mono, monospace); font-size: 0.88em; color: var(--kc-link); }
+</style>

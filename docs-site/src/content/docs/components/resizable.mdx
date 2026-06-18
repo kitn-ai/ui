@@ -23,7 +23,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kc-resizable" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-resizable>` for any app shell built from regions the user should resize — a conversation list beside a thread, a thread beside an artifact, a stacked code-editor / output split. In SolidJS, use the `Resizable` and `ResizablePanel` components from `@kitn.ai/chat` directly for tighter reactivity integration.
+Use `<kc-resizable>` for any app shell built from regions the user should resize — a conversation list beside a thread, a thread beside an artifact, a stacked code-editor / output split. In SolidJS, use the `Resizable` and `ResizablePanel` components from `@kitn.ai/ui` directly for tighter reactivity integration.
 </Aside>
 
 ## Usage
@@ -36,7 +36,7 @@ Use `<kc-resizable>` for any app shell built from regions the user should resize
 </kc-resizable>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   document.querySelector('kc-resizable')
     .addEventListener('kc-change', (e) => console.log(e.detail.sizes));
 </script>
@@ -78,7 +78,7 @@ Wire `<kc-artifact expandable>` inside an item — pressing **Expand** maximizes
 </kc-resizable>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const r = document.querySelector('kc-resizable');
   r.addEventListener('kc-change', (e) => console.log('sizes', e.detail.sizes));
   r.addEventListener('kc-maximize-change', (e) => console.log(e.detail));

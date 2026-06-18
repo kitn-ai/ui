@@ -10,7 +10,7 @@ const supportAssistant: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!--
@@ -93,7 +93,7 @@ import {
   Message, MessageAvatar, MessageContent,
   PromptInput, PromptInputTextarea, PromptInputActions,
   Button,
-} from '@kitn.ai/chat/react';
+} from '@kitn.ai/ui/react';
 
 /**
  * Docked Widget — a compact chat bubble docked to the bottom-right of the page.
@@ -167,7 +167,7 @@ export function DockedWidget() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 const input = ref('');
@@ -240,7 +240,7 @@ function onSubmit(e) {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   let input = '';
   let open = true;
 </script>
@@ -304,7 +304,7 @@ function onSubmit(e) {
 </div>
 {/if}`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { NgIf } from '@angular/common';
@@ -386,7 +386,7 @@ import {
   Message, MessageAvatar, MessageContent,
   PromptInput, PromptInputTextarea, PromptInputActions,
   Button,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 import { ArrowUp, X } from 'lucide-solid';
 
 /**

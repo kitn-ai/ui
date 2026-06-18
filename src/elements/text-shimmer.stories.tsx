@@ -20,7 +20,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-text-shimmer text="Thinking…" duration="3" spread="20"></kc-text-shimmer>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 </script>`;
 
 const meta = {
@@ -34,7 +34,7 @@ const meta = {
           '`<kc-text-shimmer>` is the framework-agnostic **web component** for animated shimmering text — a gradient sweep across a label, isolated in **Shadow DOM**.',
           '**When to use:** signalling a quiet, in-progress state ("Thinking…", "Generating…") inline. In SolidJS, use the `TextShimmer` primitive.',
           '**Placement:** inline within a status row, toolbar label, or above a streaming content area — it renders as an inline `span` so it flows naturally alongside other text or icons.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `text` attribute, and tune `duration` (seconds) and `spread` (gradient width, 5–45).",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the `text` attribute, and tune `duration` (seconds) and `spread` (gradient width, 5–45).",
           'See the **Code** tab for HTML usage.',
         ]),
     },

@@ -122,7 +122,7 @@ const HTML_SNIPPET = (def: ChoiceCardData, cardId: string) => {
   const heading = HEADING_MAP[cardId];
   return `<kc-choice${heading ? ` heading="${heading}"` : ''}></kc-choice>
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/ui/elements'; // registers the custom elements
 
   const el = document.querySelector('kc-choice');
   // \`data\` is the CardEnvelope.data (set as a property).
@@ -205,7 +205,7 @@ export const Resolved: Story = {
       source: {
         code: `<kc-choice heading="Choose a plan"></kc-choice>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const el = document.querySelector('kc-choice');
   el.data = ${JSON.stringify(RESOLVED_CHOICE, null, 2)};
   // Setting .resolution renders the chromed read-only view — no radiogroup or Submit.
@@ -225,7 +225,7 @@ export const ErrorState: Story = {
       source: {
         code: `<kc-choice></kc-choice>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const el = document.querySelector('kc-choice');
   // No options → inline error state + an \`error\` event.
   el.data = { options: [] };

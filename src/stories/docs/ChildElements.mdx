@@ -16,7 +16,7 @@ Set the element's array property from JavaScript. The parent re-renders reactive
 <kc-suggestions id="s"></kc-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   document.getElementById('s').suggestions = [
     { label: 'Summarise this', value: 'summarise' },
@@ -36,7 +36,7 @@ Place `<kc-*>` child elements directly in markup. They live in the light DOM but
 </kc-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 </script>
 ```
 
@@ -235,7 +235,7 @@ The same set of suggestions rendered both ways — identical output, different a
 <kc-suggestions id="s1"></kc-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   document.getElementById('s1').suggestions = [
     { label: 'Explain quantum computing', value: 'explain-quantum' },
     { label: 'Write a haiku', value: 'haiku' },
@@ -254,7 +254,7 @@ The same set of suggestions rendered both ways — identical output, different a
 </kc-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 </script>
 ```
 

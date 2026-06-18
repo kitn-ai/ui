@@ -1,6 +1,6 @@
 # kitn-chat docs site
 
-The public documentation + DX surface for [`@kitn.ai/chat`](https://www.npmjs.com/package/@kitn.ai/chat),
+The public documentation + DX surface for [`@kitn.ai/ui`](https://www.npmjs.com/package/@kitn.ai/ui),
 built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build).
 Doc widgets are authored in **Solid** (the kit's own language); the real `kc-*` web
 components are embedded live in MDX so every example is the actual component.

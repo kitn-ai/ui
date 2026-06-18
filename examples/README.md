@@ -28,12 +28,12 @@ Then open:
 ## Framework examples (their own dev servers)
 
 - **`react/`**, **`solid/`**, **`angular/`**, and **`vue/`** are Vite apps. `cd` in, `npm install`, `npm run dev`.
-  They alias `@kitn.ai/chat/elements` to the local `dist/kitn-chat.es.js`, so run
+  They alias `@kitn.ai/ui/elements` to the local `dist/kitn-chat.es.js`, so run
   `npm run build` at the repo root first, then start any example's dev server.
 
   | Directory | Framework | Kit API used |
   |---|---|---|
-  | `react/` | React 19 | Generated wrappers from `@kitn.ai/chat/react` |
+  | `react/` | React 19 | Generated wrappers from `@kitn.ai/ui/react` |
   | `solid/` | SolidJS | Raw SolidJS component API |
   | `angular/` | Angular 19 | Web components via `[prop]`/`(event)` + `CUSTOM_ELEMENTS_SCHEMA` |
   | `vue/` | Vue 3 | Web components via `:prop.prop` modifier + `@event` bindings; `isCustomElement` in vite.config |

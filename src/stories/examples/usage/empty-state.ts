@@ -7,7 +7,7 @@ const newChat: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!-- Scalars are plain attributes. Note the kebab-case empty-title. -->
@@ -19,7 +19,7 @@ const newChat: StoryUsage = {
 <!-- The icon, suggestion chips, and composer are not part of <kc-empty>;
      compose them yourself (see the Solid tab). -->`,
 
-    react: `import { Empty } from '@kitn.ai/chat/react';
+    react: `import { Empty } from '@kitn.ai/ui/react';
 
 export function NewChat() {
   // Icon, suggestion chips, and composer aren't props on <Empty> —
@@ -33,7 +33,7 @@ export function NewChat() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 </script>
 
 <template>
@@ -46,7 +46,7 @@ import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements'; // register once
+  import '@kitn.ai/ui/elements'; // register once
 </script>
 
 <!-- Scalars as attributes; empty-title is kebab-case. -->
@@ -56,7 +56,7 @@ import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
 ></kc-empty>
 <!-- Icon, suggestions, and composer are composed separately. -->`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -78,7 +78,7 @@ export class NewChatComponent {}`,
 import {
   ChatConfig, Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent,
   PromptSuggestion, PromptInput, PromptInputTextarea, PromptInputActions, Button,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 import { Sparkles, Plus, Globe, ArrowUp } from 'lucide-solid';
 
 const SUGGESTIONS = [

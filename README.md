@@ -1,4 +1,4 @@
-# @kitn.ai/chat
+# @kitn.ai/ui
 
 Framework-agnostic web components for building AI chat interfaces — message threads, prompt inputs, streaming responses, markdown + code rendering, reasoning/tool panels, attachments, and a conversation sidebar. Drop them into any app: React, Vue, Angular, Svelte, or plain HTML.
 
@@ -17,7 +17,7 @@ It can be consumed two ways:
 ## Install
 
 ```bash
-npm install @kitn.ai/chat
+npm install @kitn.ai/ui
 ```
 
 SolidJS consumers also need `solid-js` (a peer dependency):
@@ -41,7 +41,7 @@ npm run build   # emits dist/kitn-chat.es.js
   <kc-chat style="display:block; height:100%;"></kc-chat>
 
   <script type="module">
-    import '@kitn.ai/chat/elements';
+    import '@kitn.ai/ui/elements';
 
     const chat = document.querySelector('kc-chat');
 
@@ -62,21 +62,21 @@ The element bundle is **ES-module only** and loads via `<script type="module">` 
 
 #### Or load from a CDN (no build, no npm)
 
-The element bundle is a self-contained ES module — load it directly from [jsDelivr](https://www.jsdelivr.com/package/npm/@kitn.ai/chat) or [unpkg](https://unpkg.com/browse/@kitn.ai/chat/), no install or bundler required:
+The element bundle is a self-contained ES module — load it directly from [jsDelivr](https://www.jsdelivr.com/package/npm/@kitn.ai/ui) or [unpkg](https://unpkg.com/browse/@kitn.ai/ui/), no install or bundler required:
 
 ```html
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
-  // …or unpkg: import 'https://unpkg.com/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  // …or unpkg: import 'https://unpkg.com/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-chat></kc-chat>
 ```
 
-The URLs above track the **latest** release — handy for trying things out. **For production, pin an exact version** (e.g. `@kitn.ai/chat@0.4.0/dist/kitn-chat.es.js`): pinned URLs are immutable and cached far more aggressively, and — since this package is pre-1.0 — pinning shields you from breaking changes in a future minor release. SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To override design tokens, also include `theme.css`:
+The URLs above track the **latest** release — handy for trying things out. **For production, pin an exact version** (e.g. `@kitn.ai/ui@0.4.0/dist/kitn-chat.es.js`): pinned URLs are immutable and cached far more aggressively, and — since this package is pre-1.0 — pinning shields you from breaking changes in a future minor release. SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To override design tokens, also include `theme.css`:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/theme.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/theme.css">
 ```
 
 ### Option B — SolidJS components
@@ -86,8 +86,8 @@ import {
   ChatConfig, ChatContainer, ChatContainerContent,
   Message, MessageContent,
   PromptInput, PromptInputTextarea, PromptInputActions,
-} from '@kitn.ai/chat';
-import '@kitn.ai/chat/theme.css';
+} from '@kitn.ai/ui';
+import '@kitn.ai/ui/theme.css';
 
 function App() {
   const [input, setInput] = createSignal('');
@@ -125,7 +125,7 @@ The components are deliberately **transport-agnostic**: `<kc-chat>` just renders
 <kc-chat id="chat" style="display:block; height:100vh;"></kc-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const chat = document.getElementById('chat');
   chat.messages = [];
@@ -268,7 +268,7 @@ Syntax highlighting uses [Shiki](https://shiki.style) and is wired to be as ligh
 - Default languages: `javascript`/`js`, `typescript`/`ts`, `tsx`, `json`, `bash`/`sh`. Add more or turn it off:
 
 ```js
-import { configureCodeHighlighting } from '@kitn.ai/chat/elements'; // or '@kitn.ai/chat'
+import { configureCodeHighlighting } from '@kitn.ai/ui/elements'; // or '@kitn.ai/ui'
 
 configureCodeHighlighting({
   languages: { python: () => import('@shikijs/langs/python') },
@@ -292,7 +292,7 @@ Visual appearance is driven by `--color-*` CSS custom properties in `theme.css`.
 }
 ```
 
-For SolidJS usage, import `@kitn.ai/chat/theme.css` once. For web components the kit's CSS is injected into each shadow root automatically; only `theme.css` (design tokens) is optional to include.
+For SolidJS usage, import `@kitn.ai/ui/theme.css` once. For web components the kit's CSS is injected into each shadow root automatically; only `theme.css` (design tokens) is optional to include.
 
 ## For AI agents / LLMs
 
@@ -301,7 +301,7 @@ The package ships [llmstxt.org](https://llmstxt.org)-style files so coding agent
 - **[`llms.txt`](./llms.txt)** — dense orientation: install, the property-vs-attribute rule, the two-layer architecture, theming, and framework wiring.
 - **[`llms-full.txt`](./llms-full.txt)** — the above plus a generated props/events reference for every `kitn-*` element, a streaming recipe, and a build runbook.
 
-Both are auto-generated from `dist/custom-elements.json` during `npm run build` (so they never drift) and are published in the npm package — find them at `node_modules/@kitn.ai/chat/llms.txt` after install.
+Both are auto-generated from `dist/custom-elements.json` during `npm run build` (so they never drift) and are published in the npm package — find them at `node_modules/@kitn.ai/ui/llms.txt` after install.
 
 > **#1 thing agents get wrong:** array/object data (`messages`, `models`, `context`, …) must be set as **JS properties**, not HTML attributes. Only scalars (`placeholder`, `loading`, `theme`) work as attributes.
 
@@ -373,7 +373,7 @@ cd examples/angular && npm install && npm run dev
 cd examples/vue && npm install && npm run dev
 ```
 
-- `examples/react` — uses the generated React wrappers from `@kitn.ai/chat/react`
+- `examples/react` — uses the generated React wrappers from `@kitn.ai/ui/react`
 - `examples/solid` — uses the raw SolidJS component API
 - `examples/angular` — uses the web components natively via Angular's `[prop]` / `(event)` bindings with `CUSTOM_ELEMENTS_SCHEMA` (no wrappers needed)
 - `examples/vue` — uses the web components natively via Vue's `:prop.prop` modifier and `@event` bindings; `isCustomElement` in `vite.config.ts` prevents Vue treating `kitn-*` tags as Vue components

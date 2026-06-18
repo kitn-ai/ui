@@ -23,7 +23,7 @@ interface Events {
  * ```html
  * <kc-switch checked label="Temporary chat"></kc-switch>
  * <script type="module">
- *   import '@kitn.ai/chat/elements';
+ *   import '@kitn.ai/ui/elements';
  *   document.querySelector('kc-switch')
  *     .addEventListener('kc-change', (e) => console.log(e.detail.checked));
  * </script>

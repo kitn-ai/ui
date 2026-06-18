@@ -12,7 +12,7 @@
  *   - (kc-conversation-select), (kc-submit), (kc-model-change), (kc-sidebar-toggle) listen to the
  *     kit's CustomEvents; `($event as CustomEvent).detail` carries the payload.
  *   - CUSTOM_ELEMENTS_SCHEMA tells Angular to allow unknown `kc-*` element tags.
- *   - `@kitn.ai/chat/elements` is imported once (main.ts side-effect) to register
+ *   - `@kitn.ai/ui/elements` is imported once (main.ts side-effect) to register
  *     the custom elements globally.
  */
 

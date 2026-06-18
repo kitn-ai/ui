@@ -4,8 +4,8 @@
 // have to be defined (upgraded) by then — otherwise the property writes hit a plain,
 // not-yet-upgraded element and are clobbered by the element's empty defaults on
 // upgrade → the sidebar/chat render BLANK.
-import '@kitn.ai/chat/elements';
-import '@kitn.ai/chat/theme.css';
+import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/theme.css';
 
 import { createApp } from 'vue';
 import App from './App.vue';

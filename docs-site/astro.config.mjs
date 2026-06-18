@@ -37,7 +37,13 @@ export default defineConfig({
     icon(),
     solid(),
     starlight({
-      title: 'kitn',
+      title: 'AI/UI',
+      favicon: '/favicon.svg',
+      head: [
+        { tag: 'link', attrs: { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/chat/favicon-32.png' } },
+        { tag: 'link', attrs: { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/chat/favicon-16.png' } },
+        { tag: 'link', attrs: { rel: 'apple-touch-icon', sizes: '180x180', href: '/chat/apple-touch-icon.png' } },
+      ],
       // Single entry: Tailwind (layered for Starlight) + the kitn design system.
       customCss: ['./src/styles/app.css'],
       // Code blocks: vibrant Tokyo Night tokens on a near-black bg (matches the

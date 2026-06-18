@@ -780,7 +780,7 @@
         "type": "undefined | Record<string, unknown>",
         "optional": true,
         "scalar": false,
-        "description": "The choice definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { prompt, options:[…], allowOther?, submitLabel? }`. Import `ChoiceCardData` from `@kitn.ai/chat` for the full shape.",
+        "description": "The choice definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { prompt, options:[…], allowOther?, submitLabel? }`. Import `ChoiceCardData` from `@kitn.ai/ui` for the full shape.",
         "displayType": "undefined | Record<string, unknown>"
       },
       {
@@ -895,7 +895,7 @@
         "type": "undefined | Record<string, unknown>",
         "optional": true,
         "scalar": false,
-        "description": "The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from `@kitn.ai/chat` for the full shape.",
+        "description": "The confirm definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { body, tone, actions:[…] }`. Import `ConfirmCardData` from `@kitn.ai/ui` for the full shape.",
         "displayType": "undefined | Record<string, unknown>"
       },
       {
@@ -1421,7 +1421,7 @@
         "type": "undefined | Record<string, unknown>",
         "optional": true,
         "scalar": false,
-        "description": "The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/chat` for the full shape (it is self-referential, so the element types it loosely).",
+        "description": "The form definition — a JSON Schema (`type:'object'`) + `x-kc-*` UI hints (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { type:'object', properties:{…} }`. Import the `FormDefinition` type from `@kitn.ai/ui` for the full shape (it is self-referential, so the element types it loosely).",
         "displayType": "undefined | Record<string, unknown>"
       },
       {
@@ -2739,7 +2739,7 @@
         "type": "undefined | Record<string, unknown>",
         "optional": true,
         "scalar": false,
-        "description": "The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/chat` for the full shape.",
+        "description": "The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/ui` for the full shape.",
         "displayType": "undefined | Record<string, unknown>"
       },
       {

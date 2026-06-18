@@ -35,7 +35,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-image id="img" media-type="image/png" alt="A chart"></kc-image>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const img = document.getElementById('img');
   img.base64 = '<...base64 image data...>';
@@ -54,7 +54,7 @@ const meta = {
           '`<kc-image>` is the framework-agnostic **web component** that renders a base64 or byte-array image, showing a skeleton fallback while it resolves, isolated in **Shadow DOM**.',
           '**When to use:** displaying model-generated or in-memory images (without a hosted URL) in a non-Solid app. In SolidJS, use the `Image` primitive directly.',
           '**Placement:** inside a message bubble, card body, or artifact preview panel; size it via the parent container — the element is `display: inline-block` and the image fills to the parent\'s width.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set `base64` (paired with the `media-type` attribute) or set raw `bytes` as a **property**, and add `alt` text.",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set `base64` (paired with the `media-type` attribute) or set raw `bytes` as a **property**, and add `alt` text.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

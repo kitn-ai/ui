@@ -80,7 +80,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-prompt-input id="input" style="display:block; width:100%;"></kc-prompt-input>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const input = document.getElementById('input');
   input.placeholder = 'Ask anything...';
@@ -94,7 +94,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   input.addEventListener('kc-suggestion-click', (e) => console.log('picked:', e.detail.value));
 </script>`;
 
-const SOLID_SNIPPET = `import '@kitn.ai/chat/elements'; // registers the custom elements
+const SOLID_SNIPPET = `import '@kitn.ai/ui/elements'; // registers the custom elements
 import { onMount } from 'solid-js';
 
 function Composer() {
@@ -130,7 +130,7 @@ const meta = {
       description: specDescription('kc-prompt-input', [
           '`<kc-prompt-input>` is the framework-agnostic **web component** version of the chat composer — an auto-resizing textarea with a send button and optional suggestion chips, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a message composer to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `PromptInput` primitives instead.',
-          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`kc-submit`, `kc-value-change`, `kc-suggestion-click`, `kc-search`, `kc-voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files. **Custom toolbar buttons:** place `<kc-action id icon tooltip>` elements as children — they are invisible data carriers (Shadow DOM hides them) that the element reads and renders as extra ghost icon buttons in the left toolbar. Each click fires a `kc-toolbar-action` CustomEvent with `detail.action` equal to the action id (the same `<kc-action>` descriptor element that `<kc-message>` uses — composition symmetry).',
+          '**How to use:** register once with `import \'@kitn.ai/ui/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`kc-submit`, `kc-value-change`, `kc-suggestion-click`, `kc-search`, `kc-voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files. **Custom toolbar buttons:** place `<kc-action id icon tooltip>` elements as children — they are invisible data carriers (Shadow DOM hides them) that the element reads and renders as extra ghost icon buttons in the left toolbar. Each click fires a `kc-toolbar-action` CustomEvent with `detail.action` equal to the action id (the same `<kc-action>` descriptor element that `<kc-message>` uses — composition symmetry).',
           '**Slash commands (declarative):** place `<kc-slash-command command="id" description="…">Label</kc-slash-command>` elements as children — invisible data carriers merged with the `slashCommands` JS property. Typing `/` opens the palette with the combined list; selecting an item fires `kc-slash-select` with `detail.command`. Prop items appear first; declarative children are appended.',
           '**Placement:** pinned to the bottom of a chat surface, full width. Set `loading` while a response streams to show the busy state, and `disabled` to block input entirely.',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
@@ -168,7 +168,7 @@ const TOOLBAR_SNIPPET = `<!-- show the Search (Globe) + Voice (Mic) toolbar butt
 <kc-prompt-input id="input" search voice></kc-prompt-input>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const input = document.getElementById('input');
   input.addEventListener('kc-search', () => console.log('search clicked'));
   input.addEventListener('kc-voice', () => console.log('voice clicked'));
@@ -186,7 +186,7 @@ const ATTACHMENTS_SNIPPET = `<!-- seed staged attachments without an upload -->
 <kc-prompt-input id="input" voice></kc-prompt-input>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const input = document.getElementById('input');
   input.attachments = [
     { id: 'a1', type: 'file', filename: 'architecture.png',
@@ -207,7 +207,7 @@ export const WithAttachments: Story = {
 const CUSTOM_TOOLBAR_SNIPPET = `<kc-prompt-input id="input" voice></kc-prompt-input>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const input = document.getElementById('input');
 
@@ -229,7 +229,7 @@ const CUSTOM_TOOLBAR_SNIPPET = `<kc-prompt-input id="input" voice></kc-prompt-in
 const SLASH_COMMAND_SNIPPET = `<kc-prompt-input id="input" style="display:block; width:100%;"></kc-prompt-input>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const input = document.getElementById('input');
 

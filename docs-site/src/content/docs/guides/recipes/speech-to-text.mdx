@@ -24,7 +24,7 @@ Register the web components once, then wire the element:
 <kc-voice-input id="voice"></kc-voice-input>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const voice = document.getElementById('voice');
 
@@ -60,7 +60,7 @@ Alternatively, place `<kc-voice-input>` beside the chat element and push the tra
 </div>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const chat = document.getElementById('chat');
   const voice = document.getElementById('voice');
@@ -85,7 +85,7 @@ Alternatively, place `<kc-voice-input>` beside the chat element and push the tra
 <Tabs>
 <TabItem label="React">
 ```tsx
-import { VoiceInput } from '@kitn.ai/chat/react';
+import { VoiceInput } from '@kitn.ai/ui/react';
 
 export function VoiceButton({ onTranscription }: { onTranscription: (text: string) => void }) {
   return (
@@ -113,7 +113,7 @@ export function VoiceButton({ onTranscription }: { onTranscription: (text: strin
 </template>
 
 <script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { onMounted, ref } from 'vue';
 
 const voiceRef = ref(null);
@@ -136,7 +136,7 @@ const onTranscription = (e) => emit('transcription', e.detail.text);
 <TabItem label="Svelte">
 ```svelte
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let voiceEl;
 
@@ -165,7 +165,7 @@ const onTranscription = (e) => emit('transcription', e.detail.text);
 <TabItem label="SolidJS">
 ```tsx
 import { onMount } from 'solid-js';
-import { VoiceInput } from '@kitn.ai/chat';
+import { VoiceInput } from '@kitn.ai/ui';
 
 export function VoiceButton(props: { onTranscription: (text: string) => void }) {
   return (

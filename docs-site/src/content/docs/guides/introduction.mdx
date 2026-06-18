@@ -1,11 +1,11 @@
 ---
 title: Introduction
-description: kitn-chat is a set of Shadow-DOM web components for building AI chat interfaces in any framework.
+description: AI/UI is a set of Shadow-DOM web components for building AI chat and agent interfaces in any framework.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-**kitn-chat** (`@kitn.ai/chat`) is a set of web components for AI chat UIs — message threads, prompt input, streaming responses, markdown and code rendering, reasoning and tool-call panels, attachments, a conversation sidebar, and more. Around 50 elements, all named `kc-*`, all droppable into the app you already have.
+**AI/UI** (`@kitn.ai/ui`) is a set of web components for AI chat and agent UIs — message threads, prompt input, streaming responses, markdown and code rendering, reasoning and tool-call panels, attachments, a conversation sidebar, and more. Around 50 elements, all named `kc-*`, all droppable into the app you already have.
 
 ## What you're working with
 
@@ -16,7 +16,7 @@ Each element renders inside its own **Shadow DOM**. Your page's CSS can't leak i
 Register everything with one import:
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
 Then it's just HTML:
@@ -25,7 +25,7 @@ Then it's just HTML:
 <kc-chat style="display: block; height: 100vh;"></kc-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const chat = document.querySelector('kc-chat');
 
@@ -53,7 +53,7 @@ Same element everywhere. Only the syntax for passing a property and binding an e
 <Tabs>
 <TabItem label="React">
 ```tsx
-import { Chat } from '@kitn.ai/chat/react';
+import { Chat } from '@kitn.ai/ui/react';
 
 <Chat
   messages={messages}
@@ -80,7 +80,7 @@ import { Chat } from '@kitn.ai/chat/react';
 <TabItem label="Svelte">
 ```html
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 </script>
 
 <kc-chat
@@ -92,7 +92,7 @@ import { Chat } from '@kitn.ai/chat/react';
 <TabItem label="HTML">
 ```html
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const chat = document.querySelector('kc-chat');
   chat.messages = messages;
   chat.addEventListener('kc-submit', handleSubmit);
@@ -102,7 +102,7 @@ import { Chat } from '@kitn.ai/chat/react';
 </TabItem>
 </Tabs>
 
-React is the one framework that gets a thin extra layer: `@kitn.ai/chat/react` ships typed wrappers that turn events into `onEventName` props, so you skip the `.prop` and `addEventListener` ceremony. Everywhere else, you use the elements straight.
+React is the one framework that gets a thin extra layer: `@kitn.ai/ui/react` ships typed wrappers that turn events into `onEventName` props, so you skip the `.prop` and `addEventListener` ceremony. Everywhere else, you use the elements straight.
 
 ## What's in the box
 

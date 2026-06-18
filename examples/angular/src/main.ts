@@ -4,7 +4,7 @@ import 'zone.js';
 // [messages]/… DOM properties when it stamps the `<kc-*>` tags, so the elements
 // have to be defined (upgraded) by then — otherwise the property writes hit a plain,
 // not-yet-upgraded element and are clobbered by the element's empty defaults on upgrade.
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 

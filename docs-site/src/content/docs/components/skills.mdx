@@ -32,7 +32,7 @@ Assign the `skills` property after the element upgrades — arrays can't be HTML
 ```html
 <kc-skills id="skills"></kc-skills>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   document.getElementById('skills').skills = [
     { id: 'web-search', name: 'Web Search' },
     { id: 'code',       name: 'Code' },
@@ -42,7 +42,7 @@ Assign the `skills` property after the element upgrades — arrays can't be HTML
 
 - **Declarative path** — nest `<kc-skill id="…">Label</kc-skill>` children directly; useful for server-rendered HTML with no JS wiring.
 - **Mixed** — when both are provided, prop items render first and declarative children are appended after.
-- **SolidJS** — import `MessageSkills` from `@kitn.ai/chat` and pass a `skills` prop instead.
+- **SolidJS** — import `MessageSkills` from `@kitn.ai/ui` and pass a `skills` prop instead.
 
 ## Examples
 

@@ -93,7 +93,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-attachments id="att" variant="grid" removable></kc-attachments>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const att = document.getElementById('att');
   att.items = [
@@ -112,7 +112,7 @@ const HOVER_SNIPPET = `<!-- inline/list chips with a hover-card image preview --
 <kc-attachments id="att" variant="inline" hover-card></kc-attachments>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const att = document.getElementById('att');
   // image attachments show their thumbnail in the hover card on hover;
@@ -134,7 +134,7 @@ const meta = {
           '`<kc-attachments>` is the framework-agnostic **web component** for a set of file/source attachments, and the exemplar for the "collapse a compound primitive to ONE configurable element" pattern: the sub-parts the SolidJS layer composes become attributes here. Isolated in **Shadow DOM**.',
           '**When to use:** rendering attachment chips/tiles in a non-Solid app. In SolidJS, compose the `Attachment*` primitives for fully custom layouts.',
           '**Placement:** beneath message content (for received/sent files) or above the prompt input (for staged uploads); fills its container width.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the data via the `items` **property**, pick a layout with `variant` (`grid` | `inline` | `list`), add `removable` to get per-item remove buttons (emits a `kc-remove` **CustomEvent** with `{ id }`), and `hover-card` for inline/list previews (image attachments preview their thumbnail).",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the data via the `items` **property**, pick a layout with `variant` (`grid` | `inline` | `list`), add `removable` to get per-item remove buttons (emits a `kc-remove` **CustomEvent** with `{ id }`), and `hover-card` for inline/list previews (image attachments preview their thumbnail).",
           'See the **Code** tab for HTML usage.',
         ]),
     },

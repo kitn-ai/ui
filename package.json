@@ -1,5 +1,5 @@
 {
-  "name": "@kitn.ai/chat",
+  "name": "@kitn.ai/ui",
   "version": "0.14.1",
   "type": "module",
   "description": "Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. Authored in SolidJS.",

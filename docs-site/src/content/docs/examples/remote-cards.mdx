@@ -42,7 +42,7 @@ Register the elements and give the component its three required pieces — `prov
 ></kc-remote>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const remote = document.querySelector('kc-remote');
 
@@ -87,7 +87,7 @@ remote.policy = {
 When the model streams a mix of built-in and remote cards, use `<kc-cards>` with a `types` override that maps the remote card type to `'kc-remote'`:
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 const cards = document.querySelector('kc-cards');
 
@@ -112,11 +112,11 @@ When `kc-cards` resolves a card to `kc-remote`, it sets the envelope as a DOM pr
 
 ## Provider side: serve the card
 
-The provider page runs `createCardBridge` from `@kitn.ai/chat/provider` — a SolidJS-free bundle — and registers one `RemoteCardRenderer` per card type:
+The provider page runs `createCardBridge` from `@kitn.ai/ui/provider` — a SolidJS-free bundle — and registers one `RemoteCardRenderer` per card type:
 
 ```ts
 // provider-entry.ts  (runs in the iframe, served from cards.provider.example)
-import { createCardBridge } from '@kitn.ai/chat/provider';
+import { createCardBridge } from '@kitn.ai/ui/provider';
 
 const root = document.getElementById('root')!;
 

@@ -1,0 +1,91 @@
+---
+// "What you can build" — a tabbed explorer (like kitn.ai's "Solutions" tabs)
+// that swaps a framed, real product screenshot + a short pitch per use case.
+// Fixed-dark band. Tabs switch via a tiny vanilla script.
+import { Icon } from 'astro-icon/components';
+import SectionHeader from './SectionHeader.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
+const img = (f: string) => `${base}/landing/${f}`;
+
+const tabs = [
+  { id: 'workspace', label: 'Agentic workspaces', icon: 'lucide:panel-left', file: 'workspace.png', title: 'Build a real AI workspace', body: 'A collapsible conversation sidebar, resizable panes, and a file tree — the shell for a coding agent or an internal copilot.', to: 'examples/workspace' },
+  { id: 'rag', label: 'Knowledge & RAG', icon: 'lucide:library-big', file: 'rag.png', title: 'Answers that show their receipts', body: 'Stream grounded responses with sources and citations, so users can trust — and verify — what the model says.', to: 'examples/rag-assistant' },
+  { id: 'reasoning', label: 'Reasoning agents', icon: 'lucide:brain', file: 'reasoning.png', title: 'Show the work', body: 'Collapsible reasoning traces stream alongside the answer — perfect for debugging copilots and analyst agents.', to: 'examples/reasoning-assistant' },
+  { id: 'artifact', label: 'Artifacts', icon: 'lucide:app-window', file: 'artifact.png', title: 'Render what the model makes', body: 'Preview generated sites, code, and documents in a sandboxed, resizable panel — the Claude- and ChatGPT-style canvas.', to: 'examples/artifacts-canvas' },
+];
+---
+
+<section class="band-dark relative" data-usecases>
+  <div class="mx-auto max-w-[80rem] px-6 py-16 lg:py-24">
+    <SectionHeader icon="lucide:layout-template" label="What you can build" />
+    <h2 class="max-w-2xl text-balance text-3xl font-medium leading-[1.08] tracking-[-0.02em] text-ink md:text-4xl lg:text-5xl">
+      Ship any <span class="text-brand">AI surface</span> — not just a chatbox.
+    </h2>
+
+    <!-- Tabs -->
+    <div class="mt-9 flex flex-wrap gap-2" role="tablist" aria-label="Use cases">
+      {tabs.map((t, i) => (
+        <button
+          type="button"
+          role="tab"
+          data-tab={t.id}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          class="uc-tab inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink-2 transition-colors"
+        >
+          <Icon name={t.icon} class="size-4" />
+          {t.label}
+        </button>
+      ))}
+    </div>
+
+    <!-- Panels -->
+    <div class="mt-8">
+      {tabs.map((t, i) => (
+        <div data-panel={t.id} hidden={i !== 0} class="grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:items-center">
+          <div class="uc-frame overflow-hidden rounded-xl border border-line bg-surface-2">
+            <div class="flex items-center gap-2 border-b border-line bg-surface-2 px-3.5 py-2.5">
+              <span class="size-3 rounded-full bg-[#ff5f57]"></span>
+              <span class="size-3 rounded-full bg-[#febc2e]"></span>
+              <span class="size-3 rounded-full bg-[#28c840]"></span>
+            </div>
+            <img src={img(t.file)} alt={t.title} loading="lazy" class="block aspect-[16/10] w-full object-cover object-top" />
+          </div>
+          <div>
+            <h3 class="text-2xl font-black tracking-tight text-ink">{t.title}</h3>
+            <p class="mt-3 text-lg leading-relaxed text-ink-2">{t.body}</p>
+            <a href={href(t.to)} class="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-brand no-underline hover:underline">
+              See the example
+              <Icon name="lucide:arrow-right" class="size-4" />
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .uc-tab[aria-selected='true'] {
+    background: var(--kc-brand);
+    border-color: var(--kc-brand);
+    color: #fff;
+  }
+  .uc-tab:not([aria-selected='true']):hover { border-color: var(--kc-ink-3); color: var(--kc-ink); }
+  .uc-frame { box-shadow: 0 30px 70px -40px rgb(0 0 0 / 0.7); }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-usecases]').forEach((root) => {
+    const tabs = root.querySelectorAll<HTMLButtonElement>('[data-tab]');
+    const panels = root.querySelectorAll<HTMLElement>('[data-panel]');
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const id = tab.dataset.tab;
+        tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+        panels.forEach((p) => { p.hidden = p.dataset.panel !== id; });
+      });
+    });
+  });
+</script>

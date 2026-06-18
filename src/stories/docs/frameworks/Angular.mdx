@@ -19,7 +19,7 @@ Both are shown below.
 ## Install & setup
 
 ```bash
-npm i @kitn.ai/chat
+npm i @kitn.ai/ui
 ```
 
 Register the custom elements once as a static side-effect import in `main.ts`, **before**
@@ -28,7 +28,7 @@ uses `<kc-*>` tags:
 
 ```ts
 // main.ts — import BEFORE bootstrapApplication so elements are defined first
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
@@ -49,12 +49,12 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 export class AppComponent { /* … */ }
 ```
 
-- **`@kitn.ai/chat/elements`** — the side-effect import that registers every `<kc-*>` element
+- **`@kitn.ai/ui/elements`** — the side-effect import that registers every `<kc-*>` element
   globally. Import it once, in `main.ts`.
 - **`CUSTOM_ELEMENTS_SCHEMA`** — tells the Angular compiler to accept unknown element names (the
   `<kc-*>` tags). Add it to every standalone component whose template uses them.
 - No CSS to import: each element is styled inside its own Shadow DOM. Only pull in
-  `@kitn.ai/chat/theme.css` if you want to override design tokens (see **Theming**).
+  `@kitn.ai/ui/theme.css` if you want to override design tokens (see **Theming**).
 
 ## Quick start — the all-in-one shell
 

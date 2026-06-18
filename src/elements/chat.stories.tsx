@@ -70,7 +70,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-chat id="chat" style="display:block; height:100vh;"></kc-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const chat = document.getElementById('chat');
   chat.messages = [
@@ -82,9 +82,9 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
   chat.addEventListener('kc-submit', (e) => console.log('user sent:', e.detail.value));
 </script>`;
 
-const SOLID_SNIPPET = `import '@kitn.ai/chat/elements'; // registers the custom elements
+const SOLID_SNIPPET = `import '@kitn.ai/ui/elements'; // registers the custom elements
 import { onMount } from 'solid-js';
-import type { ChatMessage } from '@kitn.ai/chat/elements';
+import type { ChatMessage } from '@kitn.ai/ui/elements';
 
 function Chat() {
   let el: HTMLElement & { messages?: ChatMessage[] };
@@ -112,7 +112,7 @@ const meta = {
       description: specDescription('kc-chat', [
           '`<kc-chat>` is the framework-agnostic **web component** version of the chat UI — a complete message thread plus prompt input, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** dropping a full chat into a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the primitives (`ChatContainer`, `Message`, `PromptInput`) instead.',
-          '**How to use:** register once with `import \'@kitn.ai/chat/elements\'`, set rich data as JS **properties** (`el.messages = [...]`), and listen for **CustomEvents** (`kc-submit`, `kc-message-action`, `kc-value-change`) directly on the element.',
+          '**How to use:** register once with `import \'@kitn.ai/ui/elements\'`, set rich data as JS **properties** (`el.messages = [...]`), and listen for **CustomEvents** (`kc-submit`, `kc-message-action`, `kc-value-change`) directly on the element.',
           '**Anatomy:** **header** (model switcher + context-meter, shown when `models`/`context` props are set) → **message list** (scrollable thread of `<Message>` rows, each rendered per `role`; a scroll-to-bottom button appears when scrolled up) → **prompt composer** (`<PromptInput>`: textarea + toolbar with suggestions, slash-command palette, voice/search buttons, and optional attachment area).',
           '**Placement:** as a top-level panel or full-page surface. Give it an explicit height (e.g. `height: 100vh`).',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',

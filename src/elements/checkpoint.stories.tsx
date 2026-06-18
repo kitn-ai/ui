@@ -31,7 +31,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-checkpoint label="Restore" tooltip="Restore this checkpoint" variant="outline" size="sm"></kc-checkpoint>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const cp = document.querySelector('kc-checkpoint');
   // events are CustomEvents on the element (they do not bubble)
@@ -49,7 +49,7 @@ const meta = {
           '`<kc-checkpoint>` is the framework-agnostic **web component** for a bookmark/checkpoint button (with an optional tooltip and label), isolated in **Shadow DOM**.',
           '**When to use:** marking a restore point in a conversation in a non-Solid app. In SolidJS, compose the `Checkpoint` primitives.',
           '**Placement:** inline inside a message row (e.g. in the action bar) or in a chat toolbar; it is a compact `inline-block` button and does not need a dedicated row.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set `label`, `tooltip`, `variant` (`ghost` | `default` | `outline`), and `size` via attributes, and listen for the `kc-select` **CustomEvent** on click.",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set `label`, `tooltip`, `variant` (`ghost` | `default` | `outline`), and `size` via attributes, and listen for the `kc-select` **CustomEvent** on click.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

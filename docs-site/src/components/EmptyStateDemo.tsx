@@ -23,7 +23,7 @@ const SUGGESTIONS = [
 
 const REPLIES: Record<string, string> = {
   'How do I add kitn-chat to a React app?':
-    'Install the package, then import the React adapter:\n\n```bash\nnpm i @kitn.ai/chat\n```\n\n```tsx\nimport { Chat } from \'@kitn.ai/chat/react\';\n\nexport default function App() {\n  return <Chat messages={messages} onSubmit={send} />;\n}\n```\n\nThe adapter wraps the same `kc-*` web components, so every prop and event maps straight through.',
+    'Install the package, then import the React adapter:\n\n```bash\nnpm i @kitn.ai/ui\n```\n\n```tsx\nimport { Chat } from \'@kitn.ai/ui/react\';\n\nexport default function App() {\n  return <Chat messages={messages} onSubmit={send} />;\n}\n```\n\nThe adapter wraps the same `kc-*` web components, so every prop and event maps straight through.',
   'Theme the components to match my brand':
     'Every component reads from design tokens, so one block of CSS custom properties restyles the whole kit:\n\n```css\n:root {\n  --color-brand: oklch(0.62 0.21 13);\n  --color-surface: oklch(0.99 0 0);\n  --radius: 0.75rem;\n}\n```\n\nNo shadow-piercing and no per-component overrides — set the tokens once and every `kc-*` element follows.',
   'Stream tokens from my own backend':

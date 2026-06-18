@@ -15,7 +15,7 @@ declare module 'solid-js' {
 const HTML_SNIPPET = `<kc-switch checked label="Temporary chat"></kc-switch>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
   document.querySelector('kc-switch')
     .addEventListener('kc-change', (e) => console.log('checked:', e.detail.checked));
 </script>`;

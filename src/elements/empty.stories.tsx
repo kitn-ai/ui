@@ -41,7 +41,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </kc-empty>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 </script>`;
 
 const meta = {
@@ -55,7 +55,7 @@ const meta = {
           '`<kc-empty>` is the framework-agnostic **web component** for an empty-state block — an icon, a title, a description, and actions — isolated in **Shadow DOM**.',
           '**When to use:** placeholder UI for an empty list/thread in a non-Solid app. In SolidJS, compose the `Empty*` primitives.',
           '**Placement:** filling the main content area where a conversation list or message thread would appear; give it (or its parent) a height so the centered layout renders correctly.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set `empty-title` (note `empty-title`, not `title`) and `description` via attributes, and use the **slots** (\"Route 2\") to project your own icon (`slot=\"media\"`) and actions (the default slot).",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set `empty-title` (note `empty-title`, not `title`) and `description` via attributes, and use the **slots** (\"Route 2\") to project your own icon (`slot=\"media\"`) and actions (the default slot).",
           'See the **Code** tab for HTML usage.',
         ]),
     },

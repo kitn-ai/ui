@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Install @kitn.ai/chat, register the web components, and render a working chat UI in a few lines.
+description: Install @kitn.ai/ui, register the web components, and render a working chat UI in a few lines.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
@@ -10,7 +10,7 @@ Drop `<kc-chat>` into a page, wire two things, and you have a live chat UI. This
 ## Install
 
 ```bash
-npm install @kitn.ai/chat
+npm install @kitn.ai/ui
 ```
 
 That's it for web components — SolidJS ships inside the bundle. (You only add `solid-js` separately if you import the native Solid components; see the [SolidJS guide](/chat/guides/frameworks/solid/).)
@@ -20,7 +20,7 @@ That's it for web components — SolidJS ships inside the bundle. (You only add 
 One import registers every `kc-*` element in the browser's custom element registry. Run it once — at the top of your entry file, or in a `<script type="module">`:
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
 <Aside type="tip" title="No bundler? Use the CDN">
@@ -28,11 +28,11 @@ Load the bundle straight from a CDN — no install, no build step:
 
 ```html
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 ```
 
-Pin an exact version in production (e.g. `@kitn.ai/chat@0.13.0/dist/...`). The package is pre-1.0, so a minor release can break things.
+Pin an exact version in production (e.g. `@kitn.ai/ui@0.13.0/dist/...`). The package is pre-1.0, so a minor release can break things.
 </Aside>
 
 ## Your first chat
@@ -43,7 +43,7 @@ You'll lean on two patterns over and over: set rich data on a JavaScript propert
 <kc-chat id="chat" style="display:block; height:100dvh;"></kc-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const chat = document.getElementById('chat');
 
@@ -121,7 +121,7 @@ The element behaves the same everywhere. Only the binding syntax differs.
 <kc-chat id="chat" style="display:block; height:100dvh;"></kc-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const chat = document.getElementById('chat');
   chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
   chat.addEventListener('kc-submit', (e) => console.log(e.detail.value));
@@ -130,7 +130,7 @@ The element behaves the same everywhere. Only the binding syntax differs.
 </TabItem>
 <TabItem label="React">
 ```tsx
-import { Chat } from '@kitn.ai/chat/react';
+import { Chat } from '@kitn.ai/ui/react';
 
 export function App() {
   const messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
@@ -155,7 +155,7 @@ export function App() {
 </template>
 
 <script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 const messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
 const onSubmit = (e) => console.log(e.detail.value);
 </script>
@@ -164,7 +164,7 @@ const onSubmit = (e) => console.log(e.detail.value);
 <TabItem label="Svelte">
 ```svelte
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
 </script>
 
@@ -188,8 +188,8 @@ const onSubmit = (e) => console.log(e.detail.value);
 ```tsx
 // Solid apps can compose the native components instead of the element.
 import { createSignal } from 'solid-js';
-import '@kitn.ai/chat/theme.css';
-import { ChatConfig, ChatContainer, ChatContainerContent, Message, MessageContent, PromptInput, PromptInputTextarea, PromptInputActions } from '@kitn.ai/chat';
+import '@kitn.ai/ui/theme.css';
+import { ChatConfig, ChatContainer, ChatContainerContent, Message, MessageContent, PromptInput, PromptInputTextarea, PromptInputActions } from '@kitn.ai/ui';
 
 function App() {
   const [input, setInput] = createSignal('');

@@ -85,7 +85,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-link-preview id="lc"></kc-link-preview>
 
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/ui/elements'; // registers the custom elements
 
   const lc = document.getElementById('lc');
   lc.cardId = 'card-link-1';
@@ -187,7 +187,7 @@ export const BareUrlWithFetcher: Story = {
   parameters: {
     docs: {
       source: {
-        code: `import { configureLinkPreview } from '@kitn.ai/chat';
+        code: `import { configureLinkPreview } from '@kitn.ai/ui';
 
 // Opt in once (points at YOUR backend/proxy — there is no built-in network call):
 configureLinkPreview({

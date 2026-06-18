@@ -10,7 +10,7 @@ Angular binds to DOM properties natively with `[prop]="value"` and listens to Cu
 ## Install
 
 ```bash
-npm install @kitn.ai/chat
+npm install @kitn.ai/ui
 ```
 
 ## Register the elements
@@ -19,7 +19,7 @@ Import the element bundle once as a side-effect in `main.ts`, **before** `bootst
 
 ```ts
 // main.ts
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
@@ -43,7 +43,7 @@ export class AppComponent {}
 ```
 
 <Aside type="tip" title="No CSS import needed">
-Each element styles itself inside Shadow DOM. Import `@kitn.ai/chat/theme.css` only if you want to override design tokens.
+Each element styles itself inside Shadow DOM. Import `@kitn.ai/ui/theme.css` only if you want to override design tokens.
 </Aside>
 
 ## Quick start — the all-in-one shell

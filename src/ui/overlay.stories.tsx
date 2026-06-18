@@ -82,7 +82,7 @@ export const MinimalPopover: Story = {
   parameters: {
     docs: {
       source: {
-        code: `import { createPresence, usePosition, useDismiss } from '@kitn.ai/chat';
+        code: `import { createPresence, usePosition, useDismiss } from '@kitn.ai/ui';
 
 function PopoverDemo() {
   const [open, setOpen] = createSignal(false);

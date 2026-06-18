@@ -1,0 +1,11 @@
+---
+// Consistent section eyebrow — icon + label over a hairline divider. Adapted
+// from the kitn.ai section-header pattern so every landing band reads the same.
+import { Icon } from 'astro-icon/components';
+interface Props { icon: string; label: string; }
+const { icon, label } = Astro.props;
+---
+<div class="mb-6 flex items-center border-b border-line pb-3 text-ink-2">
+  <Icon name={icon} class="mr-2 size-5 text-brand" />
+  <span class="text-base font-semibold">{label}</span>
+</div>

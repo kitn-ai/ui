@@ -28,7 +28,7 @@ const def: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!-- Composition approach: declarative children, no JS wiring needed for sources -->
@@ -64,7 +64,7 @@ const def: StoryUsage = {
   // src.sources = [{ href, title, description, label?, showFavicon? }, …];
 </script>`,
 
-    react: `import { Message, Sources } from '@kitn.ai/chat/react';
+    react: `import { Message, Sources } from '@kitn.ai/ui/react';
 
 export function AnswerWithSources() {
   return (
@@ -101,7 +101,7 @@ export function AnswerWithSources() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 const message = {
   id: 'm1',
@@ -137,7 +137,7 @@ function onAction(e) {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements'; // register once
+  import '@kitn.ai/ui/elements'; // register once
 
   let msgEl;
 
@@ -175,7 +175,7 @@ function onAction(e) {
 <kc-sources bind:this={srcEl} show-favicon />
 $: if (srcEl) srcEl.sources = sources; -->`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component/module.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -216,12 +216,12 @@ export class AnswerComponent {
   }
 }`,
 
-    solid: `import { ChatContainer, ChatContainerContent } from '@kitn.ai/chat';
+    solid: `import { ChatContainer, ChatContainerContent } from '@kitn.ai/ui';
 import {
   Message, MessageAvatar, MessageContent, MessageActions,
   Source, SourceTrigger, SourceContent, SourceList,
   Button,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 import { Copy, ThumbsUp, ThumbsDown } from 'lucide-solid';
 
 export function AnswerWithSources() {
@@ -288,7 +288,7 @@ const compositionStory: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!-- Composition: no JS needed for sources — just declare children -->
@@ -331,7 +331,7 @@ const compositionStory: StoryUsage = {
 </script>`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 const message = {
   id: 'm1',
@@ -374,7 +374,7 @@ function onAction(e) {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements'; // register once
+  import '@kitn.ai/ui/elements'; // register once
 
   let msgEl;
 
@@ -418,7 +418,7 @@ function onAction(e) {
   ></kc-source>
 </kc-sources>`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component/module.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -467,7 +467,7 @@ export class NumberedCitationsComponent {
   }
 }`,
 
-    react: `import { Message, Sources } from '@kitn.ai/chat/react';
+    react: `import { Message, Sources } from '@kitn.ai/ui/react';
 
 // React uses the data-array approach (the Sources component wraps kc-sources).
 export function NumberedCitations() {
@@ -514,12 +514,12 @@ export function NumberedCitations() {
   );
 }`,
 
-    solid: `import { ChatContainer, ChatContainerContent } from '@kitn.ai/chat';
+    solid: `import { ChatContainer, ChatContainerContent } from '@kitn.ai/ui';
 import {
   Message, MessageAvatar, MessageContent, MessageActions,
   Source, SourceTrigger, SourceContent, SourceList,
   Button,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 import { Copy, ThumbsUp, ThumbsDown } from 'lucide-solid';
 
 // Solid uses the primitive components; numbered chips via label={index}.

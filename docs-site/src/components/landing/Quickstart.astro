@@ -1,0 +1,54 @@
+---
+// Quickstart — install → register → use, in three short steps. Flat code cards.
+import { Icon } from 'astro-icon/components';
+import SectionHeader from './SectionHeader.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
+
+const steps = [
+  { n: '01', title: 'Install', lang: 'bash', code: 'npm i @kitn.ai/ui' },
+  { n: '02', title: 'Register the elements', lang: 'js', code: "import '@kitn.ai/ui/elements';" },
+  { n: '03', title: 'Drop one in', lang: 'html', code: '<kc-chat></kc-chat>' },
+];
+---
+
+<section class="mx-auto max-w-[80rem] px-6 py-20 sm:py-24">
+  <SectionHeader icon="lucide:terminal" label="Quickstart" />
+  <div class="max-w-2xl">
+    <h2 class="text-balance text-3xl font-medium leading-[1.08] tracking-[-0.02em] text-ink md:text-4xl lg:text-5xl">
+      Up and running in <span class="text-brand">three lines</span>.
+    </h2>
+    <p class="mt-4 text-lg leading-relaxed text-ink-2">
+      No build step, no wrapper, no config. Register the custom elements once,
+      then use them anywhere in your markup — and set <code class="kc-inline">messages</code>
+      in JavaScript to wire up your model.
+    </p>
+  </div>
+
+  <ol class="mt-12 grid gap-4 md:grid-cols-3">
+    {steps.map((s) => (
+      <li class="flex flex-col rounded-2xl border border-line bg-surface p-6">
+        <div class="flex items-center gap-3">
+          <span class="font-mono text-sm font-bold text-brand">{s.n}</span>
+          <h3 class="text-base font-bold text-ink">{s.title}</h3>
+        </div>
+        <pre class="kc-code mt-4 overflow-x-auto rounded-lg border border-line bg-surface-2 p-4"><code class={`language-${s.lang}`}>{s.code}</code></pre>
+      </li>
+    ))}
+  </ol>
+
+  <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-2">
+    <a href={href('guides/getting-started')} class="inline-flex items-center gap-1.5 font-bold text-brand no-underline hover:underline">
+      Read the full guide
+      <Icon name="lucide:arrow-right" class="size-4" />
+    </a>
+    <span class="text-ink-3">Using a framework? Setup for <a href={href('guides/frameworks/react')} class="font-semibold text-ink-2 underline-offset-2 hover:underline">React</a>, <a href={href('guides/frameworks/vue')} class="font-semibold text-ink-2 underline-offset-2 hover:underline">Vue</a>, <a href={href('guides/frameworks/svelte')} class="font-semibold text-ink-2 underline-offset-2 hover:underline">Svelte</a>, <a href={href('guides/frameworks/angular')} class="font-semibold text-ink-2 underline-offset-2 hover:underline">Angular</a> &amp; <a href={href('guides/frameworks/solid')} class="font-semibold text-ink-2 underline-offset-2 hover:underline">Solid</a>.</span>
+  </div>
+</section>
+
+<style>
+  .kc-code { font-family: var(--sl-font-mono, monospace); font-size: 0.9rem; line-height: 1.5; }
+  .kc-code code { color: var(--kc-ink); white-space: pre; }
+  .kc-inline { font-family: var(--sl-font-mono, monospace); font-size: 0.88em; color: var(--kc-link); }
+</style>

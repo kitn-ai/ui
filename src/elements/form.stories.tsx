@@ -130,7 +130,7 @@ const VALIDATION: FormDefinition = {
 
 const HTML_SNIPPET = (def: FormDefinition) => `<kc-form></kc-form>
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/ui/elements'; // registers the custom elements
 
   const form = document.querySelector('kc-form');
   // \`data\` is the CardEnvelope.data — a JSON Schema + x-kc-* UI hints (set as a property).
@@ -213,7 +213,7 @@ export const Resolved: Story = {
       source: {
         code: `<kc-form></kc-form>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const form = document.querySelector('kc-form');
   form.data = ${JSON.stringify(RESOLVED_FORM, null, 2)};
   // Setting .resolution renders the chromed read-only summary — no inputs or submit button.
@@ -233,7 +233,7 @@ export const InvalidEnvelope: Story = {
       source: {
         code: `<kc-form></kc-form>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const form = document.querySelector('kc-form');
   // A definition that isn't a JSON-Schema object → inline error + an \`error\` event.
   form.data = { type: 'array' };

@@ -7,7 +7,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 Agents don't just reply with text — they ask the chat to **render typed, interactive
 cards**: a form to fill, an action to approve, a plan to pick from, a link to preview.
-`@kitn.ai/chat` does this with a small, typed **Card Contract** and a turnkey dispatcher.
+`@kitn.ai/ui` does this with a small, typed **Card Contract** and a turnkey dispatcher.
 
 ## The loop
 
@@ -52,7 +52,7 @@ see Remote cards.)
 ```html
 <kc-cards></kc-cards>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const cards = document.querySelector('kc-cards');
   cards.cards = [{ type: 'confirm', id: 'deploy', title: 'Deploy?',
     data: { body: 'Ship it?', actions: [{ id: 'go', label: 'Deploy', default: true }] } }];
@@ -82,7 +82,7 @@ To make that survive a **reload or history re-hydration**, the card reads an opt
 back into the array with the `applyResolution` helper:
 
 ```ts
-import { applyResolution } from '@kitn.ai/chat';
+import { applyResolution } from '@kitn.ai/ui';
 
 // <kc-cards> is controlled — persist the resolution so it survives reload:
 el.addEventListener('kc-card', (e) => {
@@ -115,7 +115,7 @@ a transport `WireFrame` just wraps it on the wire.
   src="https://cards.provider.example/card"
 ></kc-remote>
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers <kc-remote>
+  import '@kitn.ai/ui/elements'; // registers <kc-remote>
 
   const el = document.querySelector('kc-remote');
   // The CardEnvelope is set as a JS property — it travels down the wire unchanged.
@@ -136,7 +136,7 @@ Prefer the **imperative** SDK when you manage the lifecycle yourself (theme refr
 cards in one warm frame):
 
 ```ts
-import { mountRemoteCard } from '@kitn.ai/chat';
+import { mountRemoteCard } from '@kitn.ai/ui';
 
 const handle = mountRemoteCard({
   container: document.querySelector('#slot'),
@@ -174,7 +174,7 @@ it). The **host page must set `Content-Security-Policy: frame-ancestors 'self'`*
 own `frame-ancestors` listing your exact host origin (no wildcards).
 
 **Reference runtime.** `examples/remote-provider/` is the runnable provider iframe a real
-provider copies — it calls `createCardBridge` (from `@kitn.ai/chat/provider`, a SolidJS-free
+provider copies — it calls `createCardBridge` (from `@kitn.ai/ui/provider`, a SolidJS-free
 bundle) and registers one renderer per card `type`. `examples/remote-host/` is the matching
 host page. The real cross-origin behavior is verified by the standalone Playwright suite
 (`tests/e2e/`).

@@ -106,7 +106,7 @@ const HTML_SNIPPET = (def: ConfirmCardData, cardId: string) => {
   const heading = HEADING_MAP[cardId];
   return `<kc-confirm${heading ? ` heading="${heading}"` : ''}></kc-confirm>
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/ui/elements'; // registers the custom elements
 
   const el = document.querySelector('kc-confirm');
   // \`data\` is the CardEnvelope.data (set as a property).
@@ -192,7 +192,7 @@ export const Resolved: Story = {
       source: {
         code: `<kc-confirm heading="Run database migration?"></kc-confirm>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const el = document.querySelector('kc-confirm');
   el.data = ${JSON.stringify(RESOLVED_CONFIRM, null, 2)};
   // Setting .resolution renders the chromed read-only view — no interactive controls.
@@ -212,7 +212,7 @@ export const ErrorState: Story = {
       source: {
         code: `<kc-confirm></kc-confirm>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const el = document.querySelector('kc-confirm');
   // No actions → inline error state + an \`error\` event.
   el.data = { actions: [] };

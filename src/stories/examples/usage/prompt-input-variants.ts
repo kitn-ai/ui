@@ -7,7 +7,7 @@ const basic: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-prompt-input id="prompt" placeholder="Ask anything..."></kc-prompt-input>
@@ -25,7 +25,7 @@ const basic: StoryUsage = {
 </script>`,
 
     react: `import { useState } from 'react';
-import { PromptInput } from '@kitn.ai/chat/react';
+import { PromptInput } from '@kitn.ai/ui/react';
 
 export function Prompt() {
   const [value, setValue] = useState('');
@@ -43,7 +43,7 @@ export function Prompt() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 import { ref } from 'vue';
 
 const value = ref('');
@@ -65,7 +65,7 @@ function onSubmit(e) {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements'; // register once
+  import '@kitn.ai/ui/elements'; // register once
 
   let value = '';
   function onValueChange(e) {
@@ -83,7 +83,7 @@ function onSubmit(e) {
   on:kc-submit={onSubmit}
 />`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component/module.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -111,7 +111,7 @@ export class PromptComponent {
 }`,
 
     solid: `import { createSignal } from 'solid-js';
-import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn.ai/chat';
+import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn.ai/ui';
 import { ArrowUp } from 'lucide-solid';
 
 export function Prompt() {
@@ -136,7 +136,7 @@ const suggestions: StoryUsage = {
     'Show starter prompts above the input. Pass a `suggestions` array (as a PROPERTY) and pick `suggestionMode` — `"submit"` (default) sends the prompt immediately, `"fill"` just drops it into the box and fires `kc-suggestion-click`. (The demo groups its chips with the SolidJS `PromptSuggestion` primitive, which the element renders as one flat row.)',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-prompt-input
@@ -159,7 +159,7 @@ const suggestions: StoryUsage = {
   prompt.addEventListener('kc-submit', (e) => console.log(e.detail.value));
 </script>`,
 
-    react: `import { PromptInput } from '@kitn.ai/chat/react';
+    react: `import { PromptInput } from '@kitn.ai/ui/react';
 
 const SUGGESTIONS = [
   'Summarize this document',
@@ -181,7 +181,7 @@ export function Prompt() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 const suggestions = [
   'Summarize this document',
@@ -204,7 +204,7 @@ function onSubmit(e) { console.log(e.detail.value); }
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let el;
   const suggestions = [
@@ -255,7 +255,7 @@ export class PromptComponent {
 }`,
 
     solid: `import { createSignal, For } from 'solid-js';
-import { PromptInput, PromptInputTextarea, PromptInputActions, PromptSuggestion, Button } from '@kitn.ai/chat';
+import { PromptInput, PromptInputTextarea, PromptInputActions, PromptSuggestion, Button } from '@kitn.ai/ui';
 import { ArrowUp } from 'lucide-solid';
 
 const GROUPS = [
@@ -299,7 +299,7 @@ const actionButtons: StoryUsage = {
     'Add toolbar buttons beside the input. `<kc-prompt-input>` has built-in Search and Voice buttons — enable `search` and `voice`, then handle the `search` / `voice` events; attaching files is built in (the paperclip, emitted on `submit` as `attachments`). For extra custom buttons, place `<kc-action id icon tooltip>` children inside `<kc-prompt-input>` — the element reads them as invisible data carriers and renders a ghost icon button per entry in the left toolbar; clicking fires a `kc-toolbar-action` CustomEvent with `detail.action` = the action id. This is the same `<kc-action>` descriptor element that `<kc-message>` uses (composition symmetry). The Solid tab shows a custom Sparkles button composed directly with the `PromptInput` primitives (the full-control equivalent).',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!-- Built-in buttons: search (Globe) and voice (Mic). -->
@@ -321,7 +321,7 @@ const actionButtons: StoryUsage = {
   });
 </script>`,
 
-    react: `import { PromptInput } from '@kitn.ai/chat/react';
+    react: `import { PromptInput } from '@kitn.ai/ui/react';
 
 export function Prompt() {
   return (
@@ -340,7 +340,7 @@ export function Prompt() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 function onSearch() { console.log('search clicked'); }
 function onVoice() { console.log('voice clicked'); }
 function onSubmit(e) {
@@ -361,7 +361,7 @@ function onSubmit(e) {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   function onSearch() { console.log('search clicked'); }
   function onVoice() { console.log('voice clicked'); }
   function onSubmit(e) {
@@ -406,7 +406,7 @@ export class PromptComponent {
 }`,
 
     solid: `import { createSignal } from 'solid-js';
-import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn.ai/chat';
+import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn.ai/ui';
 import { ArrowUp, Paperclip, Globe, Mic, Sparkles } from 'lucide-solid';
 
 export function Prompt() {
@@ -439,7 +439,7 @@ const streaming: StoryUsage = {
     'Block input while a reply streams. Set `loading` to show the streaming state and stop accepting submits, and `disabled` to make the box fully non-interactive. Add `stoppable` to get a built-in Stop button that fires `kc-stop` — listen for that event and call `controller.abort()` on your fetch/SSE. (The demo composes the SolidJS `PromptInput` + `Loader` primitives to show the typing/dots indicators and a stop button.)',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-prompt-input id="prompt" placeholder="Generating response..." loading disabled></kc-prompt-input>
@@ -453,7 +453,7 @@ const streaming: StoryUsage = {
   }
 </script>`,
 
-    react: `import { PromptInput } from '@kitn.ai/chat/react';
+    react: `import { PromptInput } from '@kitn.ai/ui/react';
 
 export function Prompt({ isStreaming }: { isStreaming: boolean }) {
   return (
@@ -466,7 +466,7 @@ export function Prompt({ isStreaming }: { isStreaming: boolean }) {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 const isStreaming = ref(true);
 </script>
@@ -480,7 +480,7 @@ const isStreaming = ref(true);
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   let isStreaming = true;
 </script>
 
@@ -508,7 +508,7 @@ export class PromptComponent {
   isStreaming = true;
 }`,
 
-    solid: `import { PromptInput, PromptInputTextarea, PromptInputActions, Loader, Button } from '@kitn.ai/chat';
+    solid: `import { PromptInput, PromptInputTextarea, PromptInputActions, Loader, Button } from '@kitn.ai/ui';
 import { Square } from 'lucide-solid';
 
 export function Prompt() {
@@ -541,7 +541,7 @@ const modelSelector: StoryUsage = {
     'Put a model picker beside the input. `<kc-prompt-input>` doesn\'t expose a model-switcher prop — pair it with the standalone `<kc-model-switcher>` element (bind `models` and `currentModel`, handle `modelchange`) and lay them out side by side. (The demo composes the SolidJS `PromptInput` + `ModelSwitcher` primitives in the actions row.)',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <div style="display:flex; flex-direction:column; gap:0.5rem">
@@ -565,7 +565,7 @@ const modelSelector: StoryUsage = {
 </script>`,
 
     react: `import { useState } from 'react';
-import { PromptInput, ModelSwitcher } from '@kitn.ai/chat/react';
+import { PromptInput, ModelSwitcher } from '@kitn.ai/ui/react';
 
 const MODELS = [
   { id: 'claude-4', name: 'Claude 4 Opus', provider: 'Anthropic' },
@@ -584,7 +584,7 @@ export function Prompt() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 const modelId = ref('claude-4');
@@ -604,7 +604,7 @@ function onModelChange(e) { modelId.value = e.detail.modelId; }
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let el;
   let modelId = 'claude-4';
@@ -649,8 +649,8 @@ export class PromptComponent {
 }`,
 
     solid: `import { createSignal } from 'solid-js';
-import { PromptInput, PromptInputTextarea, PromptInputActions, ModelSwitcher, Button } from '@kitn.ai/chat';
-import type { ModelOption } from '@kitn.ai/chat';
+import { PromptInput, PromptInputTextarea, PromptInputActions, ModelSwitcher, Button } from '@kitn.ai/ui';
+import type { ModelOption } from '@kitn.ai/ui';
 import { ArrowUp, Paperclip } from 'lucide-solid';
 
 const MODELS: ModelOption[] = [
@@ -686,7 +686,7 @@ const withFileAttachments: StoryUsage = {
     'The `kc-prompt-input` element has a built-in paperclip: clicking it opens a file picker, previews appear above the textarea (removable chips), and `kc-submit` always carries `{ value, attachments: AttachmentData[] }` — even when the array is empty. To pre-populate staged files, set `prompt.attachments = [...]` as a JS **property** after mount; the element then manages its own attachment state from there. The Solid demo wires the `Attachments`/`Attachment`/`AttachmentPreview`/`AttachmentInfo`/`AttachmentRemove` primitives manually for full control — use the element if you want the paperclip UX for free.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!-- The element renders the paperclip, file picker, and removable chips automatically. -->
@@ -708,7 +708,7 @@ const withFileAttachments: StoryUsage = {
 </script>`,
 
     react: `import { useRef } from 'react';
-import { PromptInput } from '@kitn.ai/chat/react';
+import { PromptInput } from '@kitn.ai/ui/react';
 
 const SEED = [
   { id: 'a1', type: 'file', filename: 'architecture.pdf', mediaType: 'application/pdf' },
@@ -735,7 +735,7 @@ export function Prompt() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref, onMounted } from 'vue';
 
 const promptEl = ref(null);
@@ -764,7 +764,7 @@ function onSubmit(e) {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   import { onMount } from 'svelte';
 
   let promptEl;
@@ -821,8 +821,8 @@ export class PromptComponent implements AfterViewInit {
 import {
   PromptInput, PromptInputTextarea, PromptInputActions, Button,
   Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove,
-} from '@kitn.ai/chat';
-import type { AttachmentData } from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
+import type { AttachmentData } from '@kitn.ai/ui';
 import { ArrowUp, Paperclip } from 'lucide-solid';
 
 // The Solid PromptInput primitives don't wire the paperclip for you — that's
@@ -939,7 +939,7 @@ const fullExample: StoryUsage = {
     'Everything combined: model switcher, grouped suggestion chips, streaming state (with a Stop button), and a send button that enables once you type. Simulates the idle → streaming → idle loop you\'d wire to a real fetch/SSE call. Key gotchas: `kc-submit` always emits `{ value, attachments }` (attachments may be empty); Enter submits, Shift+Enter newlines; `loading` blocks submit while `disabled` kills focus too — use both while streaming; add `stoppable` to enable the built-in Stop button — it fires `kc-stop` when clicked; call `controller.abort()` in your handler to cancel the stream. When composing Solid primitives (the `PromptInput` + `PromptInputActions` pattern), wire the Square button yourself as shown in the Full Example story.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <div style="max-width:42rem; padding:1rem; display:flex; flex-direction:column; gap:1rem">
@@ -994,7 +994,7 @@ const fullExample: StoryUsage = {
 </script>`,
 
     react: `import { useState, useRef } from 'react';
-import { PromptInput, ModelSwitcher } from '@kitn.ai/chat/react';
+import { PromptInput, ModelSwitcher } from '@kitn.ai/ui/react';
 
 const MODELS = [
   { id: 'claude-4-opus', name: 'Claude 4 Opus', provider: 'Anthropic' },
@@ -1051,7 +1051,7 @@ export function Prompt() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 const MODELS = [
@@ -1109,7 +1109,7 @@ function stop() { controller?.abort(); }
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const MODELS = [
     { id: 'claude-4-opus', name: 'Claude 4 Opus', provider: 'Anthropic' },
@@ -1232,8 +1232,8 @@ export class PromptComponent {
 }`,
 
     solid: `import { createSignal, For, Show } from 'solid-js';
-import { PromptInput, PromptInputTextarea, PromptInputActions, PromptSuggestion, ModelSwitcher, Loader, Button } from '@kitn.ai/chat';
-import type { ModelOption } from '@kitn.ai/chat';
+import { PromptInput, PromptInputTextarea, PromptInputActions, PromptSuggestion, ModelSwitcher, Loader, Button } from '@kitn.ai/ui';
+import type { ModelOption } from '@kitn.ai/ui';
 import { ArrowUp, Square } from 'lucide-solid';
 
 const MODELS: ModelOption[] = [

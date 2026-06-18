@@ -5,14 +5,14 @@ import { Meta } from '@storybook/addon-docs/blocks';
 # Installation
 
 ```bash
-npm install @kitn.ai/chat
+npm install @kitn.ai/ui
 ```
 
 The package ships two entry points — pick whichever fits your stack, and you can mix them:
 
-- **`@kitn.ai/chat/elements`** — the framework-agnostic **web components** (`<kc-chat>`, …). Works
+- **`@kitn.ai/ui/elements`** — the framework-agnostic **web components** (`<kc-chat>`, …). Works
   in React, Vue, Angular, Svelte, or plain HTML. **This is what most apps use.**
-- **`@kitn.ai/chat`** — the native **SolidJS** components, if you're building in SolidJS.
+- **`@kitn.ai/ui`** — the native **SolidJS** components, if you're building in SolidJS.
 
 ## Web components (React, Vue, Angular, Svelte, HTML)
 
@@ -20,7 +20,7 @@ Import the element bundle once as a **side effect** — that registers `<kc-chat
 `<kc-*>` element globally:
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
 - The bundle is **ESM-only** and loads via `<script type="module">` or any modern bundler.
@@ -38,18 +38,18 @@ Then head to your framework's page for setup + examples:
 ### Via CDN (no build step, no npm)
 
 The element bundle is a self-contained ES module, so you can load it straight from a CDN — no
-install, no bundler. It's published on both <a href="https://www.jsdelivr.com/package/npm/@kitn.ai/chat" target="_blank" rel="noreferrer">jsDelivr</a> and <a href="https://unpkg.com/browse/@kitn.ai/chat/" target="_blank" rel="noreferrer">unpkg</a>:
+install, no bundler. It's published on both <a href="https://www.jsdelivr.com/package/npm/@kitn.ai/ui" target="_blank" rel="noreferrer">jsDelivr</a> and <a href="https://unpkg.com/browse/@kitn.ai/ui/" target="_blank" rel="noreferrer">unpkg</a>:
 
 ```html
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-chat></kc-chat>
 ```
 
 - The URL above tracks the **latest** release (no version) — great for demos and quick starts.
-- **For production, pin an exact version** — e.g. `.../npm/@kitn.ai/chat@0.4.0/dist/kitn-chat.es.js`.
+- **For production, pin an exact version** — e.g. `.../npm/@kitn.ai/ui@0.4.0/dist/kitn-chat.es.js`.
   Pinned URLs are immutable and cached aggressively, and — since this package is **pre-1.0** —
   pinning shields you from breaking changes in a future minor. A range (`@0` / `@0.4`) won't: pre-1.0
   it can still resolve to a breaking minor.
@@ -57,7 +57,7 @@ install, no bundler. It's published on both <a href="https://www.jsdelivr.com/pa
   **same CDN** automatically. To override design tokens, also pull in `theme.css`:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/theme.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/theme.css">
 ```
 
 ## SolidJS projects
@@ -70,11 +70,11 @@ npm install solid-js
 ```
 
 ```tsx
-import { ChatContainer, Message, MessageContent, PromptInput } from '@kitn.ai/chat';
-import '@kitn.ai/chat/theme.css';
+import { ChatContainer, Message, MessageContent, PromptInput } from '@kitn.ai/ui';
+import '@kitn.ai/ui/theme.css';
 ```
 
-The `@kitn.ai/chat` entry ships as source, so your bundler tree-shakes it to exactly what you
+The `@kitn.ai/ui` entry ships as source, so your bundler tree-shakes it to exactly what you
 import. See the [Solid](?path=/docs/docs-frameworks-solid--docs) page and the **Solid (Advanced)**
 section for the full component + primitive reference.
 

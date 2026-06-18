@@ -9,7 +9,7 @@ const hover: StoryUsage = {
     'Render an assistant message with an action bar that reveals on hover. Declare each button as a `<kc-action id icon tooltip>` child of `<kc-message>` and set `actions-reveal="hover"` — the element owns the fade (no consumer CSS). React passes the `actions` array instead; the Solid demo uses the primitives with `group`/`group-hover`.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-message id="msg" role="assistant" avatar-fallback="AI" content="${REPLY}" actions-reveal="hover">
@@ -26,7 +26,7 @@ const hover: StoryUsage = {
   });
 </script>`,
 
-    react: `import { Message } from '@kitn.ai/chat/react';
+    react: `import { Message } from '@kitn.ai/ui/react';
 
 export function AssistantReply() {
   return (
@@ -47,7 +47,7 @@ export function AssistantReply() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 function onAction(e) {
   const { messageId, action } = e.detail;
@@ -65,7 +65,7 @@ function onAction(e) {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   function onAction(e) {
     const { messageId, action } = e.detail;
@@ -101,7 +101,7 @@ export class ReplyComponent {
   }
 }`,
 
-    solid: `import { Message, MessageAvatar, MessageContent, MessageActions, Button, Tooltip } from '@kitn.ai/chat';
+    solid: `import { Message, MessageAvatar, MessageContent, MessageActions, Button, Tooltip } from '@kitn.ai/ui';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw } from 'lucide-solid';
 
 export function AssistantReply() {
@@ -130,7 +130,7 @@ const alwaysVisible: StoryUsage = {
     "Keep the bar always visible (the default). Declare each button as a `<kc-action id icon tooltip>` child — built-in-style (copy/like/…) and custom (share/bookmark) are all just `<kc-action>` elements, and `<kc-message>` fires `messageaction` with the id. (React passes them as the `actions` array.)",
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-message id="msg" role="assistant" avatar-fallback="AI" content="${REPLY}">
@@ -146,7 +146,7 @@ const alwaysVisible: StoryUsage = {
   document.getElementById('msg').addEventListener('kc-message-action', (e) => console.log(e.detail));
 </script>`,
 
-    react: `import { Message } from '@kitn.ai/chat/react';
+    react: `import { Message } from '@kitn.ai/ui/react';
 
 export function AssistantReply() {
   return (
@@ -167,7 +167,7 @@ export function AssistantReply() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 </script>
 
 <template>
@@ -182,7 +182,7 @@ import '@kitn.ai/chat/elements';
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 </script>
 
 <kc-message role="assistant" avatar-fallback="AI" content="${REPLY}" on:kc-message-action={(e) => console.log(e.detail)}>
@@ -215,7 +215,7 @@ export class ReplyComponent {
   log(e: CustomEvent) { console.log(e.detail); }
 }`,
 
-    solid: `import { Message, MessageAvatar, MessageContent, MessageActions, Button, Tooltip } from '@kitn.ai/chat';
+    solid: `import { Message, MessageAvatar, MessageContent, MessageActions, Button, Tooltip } from '@kitn.ai/ui';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Share, Bookmark } from 'lucide-solid';
 
 export function AssistantReply() {
@@ -245,7 +245,7 @@ const copyConfirm: StoryUsage = {
     'Listen for `messageaction` with `action: "copy"` and write to the clipboard yourself — `<kc-message>` only emits the event; it does not touch the clipboard. In SolidJS you can also swap the icon to a check for 2 seconds as a visual confirmation (see the Solid tab).',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-message id="msg" role="assistant" avatar-fallback="AI" content="${REPLY}">
@@ -261,7 +261,7 @@ const copyConfirm: StoryUsage = {
   });
 </script>`,
 
-    react: `import { Message } from '@kitn.ai/chat/react';
+    react: `import { Message } from '@kitn.ai/ui/react';
 
 const content = '${REPLY}';
 
@@ -277,7 +277,7 @@ export function AssistantReply() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 const content = '${REPLY}';
 
@@ -295,7 +295,7 @@ function onAction(e) {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const content = '${REPLY}';
 
@@ -332,7 +332,7 @@ export class ReplyComponent {
 }`,
 
     solid: `import { createSignal } from 'solid-js';
-import { Message, MessageAvatar, MessageContent, MessageActions, Button, Tooltip } from '@kitn.ai/chat';
+import { Message, MessageAvatar, MessageContent, MessageActions, Button, Tooltip } from '@kitn.ai/ui';
 import { Copy, Check, ThumbsUp, ThumbsDown } from 'lucide-solid';
 
 export function AssistantReply() {
@@ -370,7 +370,7 @@ const feedbackBar: StoryUsage = {
     'Ask for feedback under a reply. `<kc-feedback-bar>` owns the whole flow — it asks, optionally collects a category + comment on a not-helpful vote (`collect-detail`), then confirms with a thank-you **in place** (it does not disappear on a vote; only `close` removes it). It fires `feedback` (`{ value }`), `feedbackdetail` (`{ value, category?, comment? }`), and `close`.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <kc-feedback-bar id="fb" bar-title="Was this response helpful?" collect-detail></kc-feedback-bar>
@@ -383,7 +383,7 @@ const feedbackBar: StoryUsage = {
   fb.addEventListener('kc-close', () => fb.remove());
 </script>`,
 
-    react: `import { FeedbackBar } from '@kitn.ai/chat/react';
+    react: `import { FeedbackBar } from '@kitn.ai/ui/react';
 
 <FeedbackBar
   barTitle="Was this response helpful?"
@@ -395,7 +395,7 @@ const feedbackBar: StoryUsage = {
 />`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 function onFeedback(e) { console.log(e.detail.value); }
 function onDetail(e) { console.log(e.detail); }
 </script>
@@ -411,7 +411,7 @@ function onDetail(e) { console.log(e.detail); }
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   let fb;
   $: if (fb) fb.categories = ['Inaccurate', 'Not helpful', 'Unsafe', 'Other'];
   function onFeedback(e) { console.log(e.detail.value); }
@@ -449,7 +449,7 @@ export class FeedbackComponent {
 }`,
 
     solid: `import { createSignal, Show } from 'solid-js';
-import { Message, MessageAvatar, MessageContent, FeedbackBar } from '@kitn.ai/chat';
+import { Message, MessageAvatar, MessageContent, FeedbackBar } from '@kitn.ai/ui';
 
 export function AssistantReply() {
   const [show, setShow] = createSignal(true);
@@ -482,7 +482,7 @@ const fullExample: StoryUsage = {
     'Every feature combined: avatar, markdown content, the action bar (copy/regenerate plus custom **Share**/**Bookmark** with tooltips), a copy→clipboard handler with visual confirmation, and a **Feedback Bar** below. Like/dislike are omitted since the Feedback Bar covers that. Icon-only buttons get tooltips automatically; override the text with a `tooltip` field on custom actions. In SolidJS wrap each button with `<Tooltip>` (see the Solid tab).',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <div style="max-width:42rem; padding:1rem; display:flex; flex-direction:column; gap:0.5rem">
@@ -516,7 +516,7 @@ const fullExample: StoryUsage = {
 </script>`,
 
     react: `import { useState } from 'react';
-import { Message, FeedbackBar } from '@kitn.ai/chat/react';
+import { Message, FeedbackBar } from '@kitn.ai/ui/react';
 
 export function AssistantReply() {
   const [showFeedback, setShowFeedback] = useState(true);
@@ -552,7 +552,7 @@ export function AssistantReply() {
 
     vue: `<script setup>
 import { ref } from 'vue';
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 const content = 'Use anyhow::Result for apps and thiserror for libraries.';
 const showFeedback = ref(true);
@@ -579,7 +579,7 @@ function onAction(e) {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const content = 'Use anyhow::Result for apps and thiserror for libraries.';
   let showFeedback = true;
@@ -636,7 +636,7 @@ export class ReplyComponent {
 }`,
 
     solid: `import { createSignal, Show } from 'solid-js';
-import { Message, MessageAvatar, MessageContent, MessageActions, FeedbackBar, Button, Tooltip } from '@kitn.ai/chat';
+import { Message, MessageAvatar, MessageContent, MessageActions, FeedbackBar, Button, Tooltip } from '@kitn.ai/ui';
 import { Copy, Check, RefreshCw, Share, Bookmark } from 'lucide-solid';
 
 export function AssistantReply() {

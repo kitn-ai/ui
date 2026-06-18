@@ -1,50 +1,26 @@
 ---
-title: kitn-chat
-description: Drop-in chat UI web components for any framework — isolated in Shadow DOM, ready for React, Vue, Svelte, Angular, Solid, or plain HTML.
+title: The web UI for AI agents
+description: Framework-agnostic web components for AI chat and agents — streaming, tool calls, reasoning, generative-UI cards, and artifacts. Drop them into React, Vue, Svelte, Angular, or plain HTML.
 template: splash
-hero:
-  tagline: A complete chat UI toolkit. Framework-agnostic web components, isolated in Shadow DOM — drop them into any app and wire up your model.
-  actions:
-    - text: Get started
-      link: /chat/guides/getting-started/
-      icon: right-arrow
-    - text: Browse components
-      link: /chat/components/attachments/
-      variant: minimal
-    - text: GitHub
-      link: https://github.com/kitn-ai/chat
-      icon: external
-      variant: minimal
+tableOfContents: false
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import Hero from '../../components/landing/Hero.astro';
+import LogoStrip from '../../components/landing/LogoStrip.astro';
+import BrandMoment from '../../components/landing/BrandMoment.astro';
+import Features from '../../components/landing/Features.astro';
+import UseCases from '../../components/landing/UseCases.astro';
+import Quickstart from '../../components/landing/Quickstart.astro';
+import ThemeEditorShowcase from '../../components/landing/ThemeEditorShowcase.astro';
+import FinalCta from '../../components/landing/FinalCta.astro';
 
-<CardGrid stagger>
-  <Card title="Works in any framework" icon="puzzle">
-    The `kc-*` elements are standard web components. Register them once and use them in React, Vue, Svelte, Angular, Solid, or plain HTML — no wrapper required. A typed React adapter ships too.
-  </Card>
-  <Card title="Isolated by Shadow DOM" icon="seti:html">
-    Every component renders in its own Shadow DOM, so its styles never leak into — or out of — your app. Drop one in and it looks right.
-  </Card>
-  <Card title="Generative UI, built in" icon="rocket">
-    Confirmations, choices, tasks, forms, and artifacts render as first-class cards from a typed envelope — the building blocks of an agentic chat.
-  </Card>
-  <Card title="Themeable & accessible" icon="approve-check">
-    One set of CSS custom properties drives light and dark. Keyboard-operable and axe-tested in CI against WCAG 2.1 AA.
-  </Card>
-</CardGrid>
-
-<CardGrid>
-  <Card title="Install in seconds" icon="download">
-    ```bash
-    npm install @kitn.ai/chat
-    ```
-    ```js
-    import '@kitn.ai/chat/elements';
-    ```
-    [Installation guide →](/chat/guides/installation/)
-  </Card>
-  <Card title="Pick your framework" icon="laptop">
-    Setup and usage for [HTML](/chat/guides/frameworks/html/), [React](/chat/guides/frameworks/react/), [Vue](/chat/guides/frameworks/vue/), [Svelte](/chat/guides/frameworks/svelte/), [Angular](/chat/guides/frameworks/angular/), and [Solid](/chat/guides/frameworks/solid/).
-  </Card>
-</CardGrid>
+<div class="landing-page not-content">
+  <Hero />
+  <LogoStrip />
+  <BrandMoment />
+  <Features />
+  <UseCases />
+  <Quickstart />
+  <ThemeEditorShowcase />
+  <FinalCta />
+</div>

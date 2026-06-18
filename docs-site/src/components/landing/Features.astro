@@ -1,0 +1,56 @@
+---
+// Capability section — layout adapted from the kitn.ai platform section:
+// eyebrow + divider, a large light-weight two-column header, then a row of
+// cards with the icon top-right and an arrow bottom-right.
+import { Icon } from 'astro-icon/components';
+import SectionHeader from './SectionHeader.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
+
+const features = [
+  { title: 'Conversation', icon: 'lucide:message-square', to: 'components/chat', body: 'Token-by-token streaming, rich markdown, code highlighting, and message actions. The chat surface, done right.' },
+  { title: 'Agentic UI', icon: 'lucide:brain', to: 'components/reasoning', body: 'Tool calls and reasoning render inline — show the work as your agent thinks, calls tools, and acts.' },
+  { title: 'Generative UI', icon: 'lucide:layout-grid', to: 'guides/generative-ui', body: 'Confirmations, choices, tasks, and forms render as typed, interactive cards the model can drive.' },
+  { title: 'Artifacts & files', icon: 'lucide:app-window', to: 'components/artifact', body: 'Preview live code, docs, and sites in a sandboxed panel — plus drag-and-drop files and image input.' },
+];
+---
+
+<section class="mx-auto max-w-[80rem] px-6 py-16 lg:py-24">
+  <SectionHeader icon="lucide:blocks" label="AI/UI" />
+
+  <!-- Two-column header -->
+  <div class="mb-14 grid grid-cols-1 gap-8 lg:grid-cols-2">
+    <h2 class="text-balance text-3xl font-medium leading-[1.05] tracking-[-0.02em] text-ink md:text-5xl lg:text-6xl">
+      Built for<br class="hidden md:block" />
+      AI-native apps
+    </h2>
+    <div class="self-center">
+      <p class="text-lg leading-relaxed text-ink-2 lg:text-xl">
+        AI/UI is the web UI layer for AI agents and harnesses — streaming, tool
+        calls, reasoning, generative-UI cards, and artifacts. The hard parts,
+        already built as framework-agnostic web components you wire to your model
+        or agent loop and drop into any app.
+      </p>
+      <a href={href('components/artifact')} class="mt-8 inline-block rounded-full bg-brand px-8 py-3 text-base font-semibold text-white no-underline transition-colors hover:bg-[var(--kc-brand-hover)]">
+        Browse components
+      </a>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+    {features.map((f) => (
+      <a href={href(f.to)} class="group relative flex flex-col rounded-xl border border-line bg-surface p-8 pb-5 no-underline transition-all duration-300 hover:-translate-y-1 hover:border-[var(--kc-brand)]">
+        <div class="mb-4 flex items-start justify-between gap-3">
+          <h3 class="text-2xl font-medium text-ink">{f.title}</h3>
+          <Icon name={f.icon} class="size-6 shrink-0 text-brand" />
+        </div>
+        <p class="text-[0.98rem] leading-relaxed text-ink-2">{f.body}</p>
+        <div class="mt-8 flex justify-end text-ink-3">
+          <Icon name="lucide:arrow-right" class="size-7 transition-transform duration-300 group-hover:translate-x-2 group-hover:text-brand" />
+        </div>
+      </a>
+    ))}
+  </div>
+</section>

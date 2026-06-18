@@ -33,7 +33,7 @@ Set `data` in JavaScript (it's an object, not an attribute):
 <kc-link-preview id="lp"></kc-link-preview>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const lp = document.getElementById('lp');
   lp.cardId = 'card-link-1';
@@ -73,7 +73,7 @@ When no `image` is provided the card degrades cleanly to the text-and-domain lay
 Passing only `{ url }` — the card shows a skeleton until `configureLinkPreview` resolves metadata from your backend:
 
 ```ts
-import { configureLinkPreview } from '@kitn.ai/chat';
+import { configureLinkPreview } from '@kitn.ai/ui';
 
 configureLinkPreview({
   fetchMetadata: (url) =>

@@ -79,7 +79,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-message id="msg" style="display:block;"></kc-message>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const msg = document.getElementById('msg');
   msg.message = {
@@ -104,7 +104,7 @@ const meta = {
       description: specDescription('kc-message', [
           '`<kc-message>` is the framework-agnostic **web component** for a single message row — markdown/plain content, an optional reasoning block, tool calls, attachments, and action buttons — all rendered from one `message` object (the same shape `<kc-chat>` uses per message). It is the keystone of the "compose your own message list" pattern, isolated in **Shadow DOM**.',
           "**When to use:** building a custom message thread in a non-Solid app, or anywhere you want to lay out the list yourself but keep the kit's rich message rendering. In SolidJS, compose the `Message` primitives for finer control.",
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the whole row via the `message` **property** (`el.message = {...}`), and listen for the `kc-message-action` **CustomEvent** for action-button clicks. For simple cases, set `role` + `content` attributes instead of a full object.",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the whole row via the `message` **property** (`el.message = {...}`), and listen for the `kc-message-action` **CustomEvent** for action-button clicks. For simple cases, set `role` + `content` attributes instead of a full object.",
           'See the **Code** tab for HTML usage.',
         ]),
     },
@@ -135,7 +135,7 @@ export const WithAvatarAndCustomAction: Story = {
       source: {
         code: `<kc-message id="msg" style="display:block;"></kc-message>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const msg = document.getElementById('msg');
   msg.message = {
     id: 'm-av', role: 'assistant', content: 'I have an avatar and a custom Share action.',
@@ -192,7 +192,7 @@ export const DeclarativeActions: Story = {
 </kc-message>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   document.querySelector('kc-message')
     .addEventListener('kc-message-action', (e) => console.log(e.detail.action)); // 'copy' | 'share' | …
 </script>`,

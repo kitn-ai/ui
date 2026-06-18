@@ -1,5 +1,5 @@
 {
-  "name": "@kitn.ai/chat-example-angular",
+  "name": "@kitn.ai/ui-example-angular",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -14,7 +14,7 @@
     "@angular/compiler": "^19.0.0",
     "@angular/core": "^19.0.0",
     "@angular/platform-browser": "^19.0.0",
-    "@kitn.ai/chat": "^0.4.0",
+    "@kitn.ai/ui": "^0.4.0",
     "zone.js": "^0.15.0"
   },
   "devDependencies": {

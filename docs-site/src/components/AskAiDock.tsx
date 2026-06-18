@@ -32,7 +32,7 @@ export default function AskAiDock() {
     setOpen(true);
     // Wide viewports: push the page over to share the space (see app.css).
     // Narrow: the class is inert (media query opts out) and the panel overlays.
-    document.documentElement.classList.add('kc-askai-open');
+    document.documentElement.classList.add('kc-askc-open');
     requestAnimationFrame(() => setEntered(true));
     if (!kitReady()) {
       await loadKit();
@@ -49,7 +49,7 @@ export default function AskAiDock() {
 
   const closeDock = () => {
     setEntered(false);
-    document.documentElement.classList.remove('kc-askai-open');
+    document.documentElement.classList.remove('kc-askc-open');
     closeTimer = window.setTimeout(() => {
       setOpen(false);
       triggerBtn?.focus(); // return focus once the trigger is visible again
@@ -65,7 +65,7 @@ export default function AskAiDock() {
     onCleanup(() => {
       document.removeEventListener('keydown', onKey);
       themeObserver?.disconnect();
-      document.documentElement.classList.remove('kc-askai-open');
+      document.documentElement.classList.remove('kc-askc-open');
     });
   });
 
@@ -90,7 +90,7 @@ export default function AskAiDock() {
             shares space (push mode) so the docs stay fully readable. */}
         <div
           onClick={closeDock}
-          class="kc-askai-backdrop fixed inset-0 z-[200] bg-black/30 transition-opacity duration-200"
+          class="kc-askc-backdrop fixed inset-0 z-[200] bg-black/30 transition-opacity duration-200"
           classList={{ 'opacity-100': entered(), 'opacity-0': !entered() }}
           aria-hidden="true"
         />
@@ -98,7 +98,7 @@ export default function AskAiDock() {
         <div
           role="dialog"
           aria-label="Ask AI"
-          class="kc-askai-panel fixed inset-y-0 right-0 z-[201] flex w-[var(--kc-dock-w)] max-w-[calc(100vw-2rem)] flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-200 ease-out"
+          class="kc-askc-panel fixed inset-y-0 right-0 z-[201] flex w-[var(--kc-dock-w)] max-w-[calc(100vw-2rem)] flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-200 ease-out"
           classList={{ 'translate-x-0': entered(), 'translate-x-full': !entered() }}
         >
           {/* Header */}

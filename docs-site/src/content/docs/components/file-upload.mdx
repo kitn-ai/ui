@@ -33,7 +33,7 @@ All four props are plain HTML attributes — nothing to set in JavaScript:
 ```html
 <kc-file-upload accept="image/*" label="Drop an image to upload"></kc-file-upload>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   document.querySelector('kc-file-upload')
     .addEventListener('kc-files-added', (e) => console.log(e.detail.files));
 </script>

@@ -88,7 +88,7 @@ type Story = StoryObj<typeof meta>;
 const IMPORT = `import {
   ChatContainerRoot, ChatContainerContent, ChatContainerScrollAnchor,
   Message, MessageAvatar, MessageContent,
-} from '@kitn.ai/chat';`;
+} from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });

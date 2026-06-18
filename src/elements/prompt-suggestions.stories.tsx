@@ -57,7 +57,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-suggestions id="suggs" variant="outline"></kc-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const suggs = document.getElementById('suggs');
   suggs.suggestions = ['Explain the architecture', 'Show me a code example'];
@@ -75,7 +75,7 @@ const meta = {
           '`<kc-suggestions>` is the framework-agnostic **web component** for a row (or list) of clickable suggestion chips — starter prompts or follow-ups — isolated in **Shadow DOM**.',
           '**When to use:** offering the user quick prompts to click instead of type, usually above an input. In SolidJS, use the `PromptSuggestion` primitive.',
           '**Placement:** above the prompt input in the empty/welcome state, or below the last assistant message as follow-up chips; it is a `block` element and takes the full width of its container.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `suggestions` **property** (strings, or `{ label, value }` when the displayed text differs from the emitted value), choose a `variant` and `size` (`sm` | `md` | `lg`; pills default to `lg`), optionally add the `block` flag for full-width rows or a `highlight` substring to emphasize, and listen for the `kc-select` **CustomEvent**.",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the `suggestions` **property** (strings, or `{ label, value }` when the displayed text differs from the emitted value), choose a `variant` and `size` (`sm` | `md` | `lg`; pills default to `lg`), optionally add the `block` flag for full-width rows or a `highlight` substring to emphasize, and listen for the `kc-select` **CustomEvent**.",
           'See the **Code** tab for HTML usage.',
         ]),
     },
@@ -120,7 +120,7 @@ export const WithHighlightedSearch: Story = {
         code: `<kc-suggestions id="suggs" highlight="Solid"></kc-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const suggs = document.getElementById('suggs');
   suggs.suggestions = [
     'How does SolidJS handle reactivity?',
@@ -169,7 +169,7 @@ const DECLARATIVE_HTML_SNIPPET = `<!-- Works in any framework or plain HTML — 
 </kc-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   document.getElementById('suggs').addEventListener('kc-select', (e) => {
     console.log('kc-select', e.detail.value);

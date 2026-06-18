@@ -22,7 +22,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Playground client:only="solid" tag="kc-tool" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-tool>` inside an assistant message row — one element per tool call, below the text content. In SolidJS, compose the `Tool` primitive from `@kitn.ai/chat` directly; for every other framework, use this web component.
+Place `<kc-tool>` inside an assistant message row — one element per tool call, below the text content. In SolidJS, compose the `Tool` primitive from `@kitn.ai/ui` directly; for every other framework, use this web component.
 </Aside>
 
 ## Usage
@@ -33,7 +33,7 @@ Set the call via the `tool` property — it's an object, so assign it in JavaScr
 <kc-tool id="tool" open></kc-tool>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   document.getElementById('tool').tool = {
     type: 'database_query',

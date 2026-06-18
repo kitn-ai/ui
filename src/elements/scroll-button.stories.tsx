@@ -27,7 +27,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 <kc-scroll-button for="my-chat"></kc-scroll-button>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const btn = document.querySelector('kc-scroll-button');
   btn.addEventListener('kc-scroll', () => console.log('scrolled to bottom'));

@@ -21,7 +21,7 @@ const HTML_SNIPPET = `<kc-popover placement="bottom-start">
 </kc-popover>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
   document.querySelector('kc-popover')
     .addEventListener('kc-open-change', (e) => console.log('open:', e.detail.open));
 </script>`;

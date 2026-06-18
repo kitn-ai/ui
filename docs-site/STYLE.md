@@ -6,7 +6,7 @@ thinking about what *this* reader needs.**
 
 ## Who you're writing for
 
-A developer evaluating or integrating `@kitn.ai/chat`. They want to **understand
+A developer evaluating or integrating `@kitn.ai/ui`. They want to **understand
 fast, then do**: see what a thing is, why they'd use it, and the exact code to
 make it work. They are not reading for pleasure — they are scanning to ship.
 
@@ -58,9 +58,9 @@ beats neutral mush.
 Every fact, import path, command, and API must be **verified against the real
 source** — never invented or assumed:
 
-- Package + entry points: `package.json` `exports` — `@kitn.ai/chat/elements`
-  (web components, any framework), `@kitn.ai/chat/react` (React adapter), `.`
-  (SolidJS layer), `@kitn.ai/chat/theme.css`, `@kitn.ai/chat/provider`.
+- Package + entry points: `package.json` `exports` — `@kitn.ai/ui/elements`
+  (web components, any framework), `@kitn.ai/ui/react` (React adapter), `.`
+  (SolidJS layer), `@kitn.ai/ui/theme.css`, `@kitn.ai/ui/provider`.
 - Real usage per framework: `src/elements/framework-usage.json` and the existing
   `src/stories/docs/**` MDX (the current source of truth — improve, don't copy).
 - Element APIs: `src/elements/element-meta.json`. Theme tokens: `theme.css` /
@@ -89,7 +89,7 @@ description: <one tight sentence — shows in search + meta>
 - Use `<Tabs>`/`<TabItem>` (Starlight) for the same step across frameworks.
 - Code fences must have the correct language and be **runnable + realistic** (no
   `foo`/`bar`; use real element names, real props).
-- Register the elements with `import '@kitn.ai/chat/elements';` as the primary
+- Register the elements with `import '@kitn.ai/ui/elements';` as the primary
   path; show the CDN `<script>` only as a secondary option.
 
 ## Component pages
@@ -100,7 +100,7 @@ standard). Don't reinvent them.
 
 ## House facts & terminology
 
-- Product: **kitn-chat** (`@kitn.ai/chat`). It's a set of **web components** —
+- Product: **kitn-chat** (`@kitn.ai/ui`). It's a set of **web components** —
   framework-agnostic custom elements, isolated in **Shadow DOM** — that drop into
   React, Vue, Svelte, Angular, or plain HTML.
 - **Lead with the web components; don't lead with how they're built.** They're

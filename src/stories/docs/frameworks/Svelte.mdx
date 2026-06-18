@@ -19,23 +19,23 @@ Both are shown below.
 ## Install & setup
 
 ```bash
-npm i @kitn.ai/chat
+npm i @kitn.ai/ui
 ```
 
 Register the custom elements once (a side-effect import) near your app entry:
 
 ```js
 // e.g. src/main.js or src/app.svelte <script>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
-- **`@kitn.ai/chat/elements`** — registers every `<kc-*>` element globally. One import is enough
+- **`@kitn.ai/ui/elements`** — registers every `<kc-*>` element globally. One import is enough
   for the whole app.
 - **No special config needed**: Svelte sets object and array values as DOM **properties** (not
   stringified attributes) when you use the `{prop}` shorthand or `prop={value}` syntax. Custom
   events fire as standard DOM `CustomEvent`s, so `on:eventname` just works.
 - **No CSS to import**: each element is styled inside its own Shadow DOM. Pull in
-  `@kitn.ai/chat/theme.css` only if you want to override design tokens (see **Theming**).
+  `@kitn.ai/ui/theme.css` only if you want to override design tokens (see **Theming**).
 
 ## Quick start — the all-in-one shell
 
@@ -44,7 +44,7 @@ stream your model's reply back into state. You own the request; the element owns
 
 ```html
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let messages = [
     { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
@@ -93,7 +93,7 @@ to the `<kc-chat>` thread:
 
 ```html
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let conversations = myConversations;
   let activeId = conversations[0]?.id;
@@ -136,7 +136,7 @@ takes a `size` (px or `%`) plus optional `min`/`max`; listen for the `change` ev
 
 ```html
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   function handleResize(e) {
     // e.detail.sizes is an array of the current panel sizes

@@ -11,16 +11,16 @@ The `kc-*` web components drop into React, Vue, Angular, Svelte, or plain HTML w
 
 | Entry | Use it for |
 |---|---|
-| `@kitn.ai/chat/elements` | Any framework — registers every `kc-*` element |
-| `@kitn.ai/chat/react` | React — typed wrappers with camelCase props and event handlers |
-| `@kitn.ai/chat` | SolidJS — native Solid components for full compositional control |
+| `@kitn.ai/ui/elements` | Any framework — registers every `kc-*` element |
+| `@kitn.ai/ui/react` | React — typed wrappers with camelCase props and event handlers |
+| `@kitn.ai/ui` | SolidJS — native Solid components for full compositional control |
 
 ## Any framework: the web components
 
-Import `@kitn.ai/chat/elements` once for its side effect. It registers every `kc-*` element; after that they work like built-in HTML.
+Import `@kitn.ai/ui/elements` once for its side effect. It registers every `kc-*` element; after that they work like built-in HTML.
 
 ```ts
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
 Then use them in your templates:
@@ -31,7 +31,7 @@ Then use them in your templates:
     <kc-chat style="display:block; height:100%;"></kc-chat>
 
     <script type="module">
-      import '@kitn.ai/chat/elements';
+      import '@kitn.ai/ui/elements';
 
       const chat = document.querySelector('kc-chat');
       chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
@@ -42,7 +42,7 @@ Then use them in your templates:
   <TabItem label="Vue">
     ```vue
     <script setup>
-    import '@kitn.ai/chat/elements';
+    import '@kitn.ai/ui/elements';
     const messages = ref([{ id: '1', role: 'assistant', content: 'Hello!' }]);
     </script>
 
@@ -57,7 +57,7 @@ Then use them in your templates:
   <TabItem label="Svelte">
     ```svelte
     <script>
-    import '@kitn.ai/chat/elements';
+    import '@kitn.ai/ui/elements';
     let messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
     </script>
 
@@ -70,7 +70,7 @@ Then use them in your templates:
   <TabItem label="Angular">
     ```ts
     // app.module.ts
-    import '@kitn.ai/chat/elements';
+    import '@kitn.ai/ui/elements';
     ```
 
     ```html
@@ -114,10 +114,10 @@ The events don't bubble — listen on the element itself.
 
 ## React adapter
 
-`@kitn.ai/chat/react` exports a typed component for every element. Props take arrays and objects directly (no `.prop` modifier), and events arrive as camelCase handler props that receive the `CustomEvent`.
+`@kitn.ai/ui/react` exports a typed component for every element. Props take arrays and objects directly (no `.prop` modifier), and events arrive as camelCase handler props that receive the `CustomEvent`.
 
 ```tsx
-import { Chat } from '@kitn.ai/chat/react';
+import { Chat } from '@kitn.ai/ui/react';
 
 export function MyChatApp() {
   return (
@@ -136,7 +136,7 @@ The React adapter ships full types for every prop and event, including the `Chat
 
 ## SolidJS native components
 
-Writing Solid? Skip the element wrapper and compose the kit's native components from `@kitn.ai/chat`. They tree-shake to exactly what you import and mix freely with your own primitives.
+Writing Solid? Skip the element wrapper and compose the kit's native components from `@kitn.ai/ui`. They tree-shake to exactly what you import and mix freely with your own primitives.
 
 ```tsx
 import { createSignal } from 'solid-js';
@@ -149,8 +149,8 @@ import {
   PromptInput,
   PromptInputTextarea,
   PromptInputActions,
-} from '@kitn.ai/chat';
-import '@kitn.ai/chat/theme.css';
+} from '@kitn.ai/ui';
+import '@kitn.ai/ui/theme.css';
 
 export function App() {
   const [input, setInput] = createSignal('');

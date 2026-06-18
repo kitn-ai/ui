@@ -34,7 +34,7 @@ Set `text` in JavaScript (async iterables can't be serialized to an HTML attribu
 <kc-response-stream id="stream" mode="typewriter" speed="20"></kc-response-stream>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const el = document.getElementById('stream');
   el.text = "Hello, this reveals one character at a time…";
   el.addEventListener('kc-complete', () => console.log('done'));

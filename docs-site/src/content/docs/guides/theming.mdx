@@ -32,13 +32,13 @@ Border radii are controlled by `--radius` (default `0.6rem`); `--radius-sm`, `--
 The kit injects its own scoped CSS into each component's Shadow DOM automatically — no import required to get started. Import `theme.css` only to override tokens:
 
 ```js
-import '@kitn.ai/chat/theme.css';
+import '@kitn.ai/ui/theme.css';
 ```
 
 Or via CDN:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/theme.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/theme.css">
 ```
 
 ## Override tokens
@@ -154,7 +154,7 @@ Non-color appearance is controlled by `kc-chat` attributes (and the matching `Ch
 </TabItem>
 <TabItem label="SolidJS">
 ```tsx
-import { ChatConfig } from '@kitn.ai/chat';
+import { ChatConfig } from '@kitn.ai/ui';
 
 <ChatConfig proseSize="base" codeTheme="github-dark-dimmed">
   {/* your components */}
@@ -165,4 +165,4 @@ import { ChatConfig } from '@kitn.ai/chat';
 
 ## Token reference
 
-The full list of overridable tokens lives in `theme.css` (shipped at `@kitn.ai/chat/theme.css`). For a browser-ready version with `:root` and `.dark` blocks pre-separated, use `@kitn.ai/chat/theme.tokens.css` — it is auto-generated from `theme.css` and never drifts.
+The full list of overridable tokens lives in `theme.css` (shipped at `@kitn.ai/ui/theme.css`). For a browser-ready version with `:root` and `.dark` blocks pre-separated, use `@kitn.ai/ui/theme.tokens.css` — it is auto-generated from `theme.css` and never drifts.

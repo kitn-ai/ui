@@ -10,17 +10,17 @@ import { Aside } from '@astrojs/starlight/components';
 ## Install
 
 ```bash
-npm install @kitn.ai/chat
+npm install @kitn.ai/ui
 ```
 
 Register every `kc-*` element once, near your app entry point:
 
 ```js
 // src/main.js  or inside a <script> block in your root component
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
-One import covers your entire app. No CSS import is needed — each element is styled inside its own Shadow DOM. Add `@kitn.ai/chat/theme.css` only if you want to override design tokens (see [Theming](/chat/guides/theming/)).
+One import covers your entire app. No CSS import is needed — each element is styled inside its own Shadow DOM. Add `@kitn.ai/ui/theme.css` only if you want to override design tokens (see [Theming](/chat/guides/theming/)).
 
 ## Pass data and handle events
 
@@ -44,7 +44,7 @@ Svelte detects non-primitive values and assigns them as DOM properties rather th
 
 ```svelte
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let messages = [
     { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
@@ -90,7 +90,7 @@ Compose `<kc-conversations>` alongside `<kc-chat>` for a multi-thread layout. Ea
 
 ```svelte
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let conversations = loadConversations();
   let activeId = conversations[0]?.id;

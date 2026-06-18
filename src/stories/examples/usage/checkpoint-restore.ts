@@ -21,7 +21,7 @@ const defaultStory: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!-- Scalar strings bind as plain attributes. -->
@@ -39,7 +39,7 @@ const defaultStory: StoryUsage = {
   });
 </script>`,
 
-    react: `import { Checkpoint } from '@kitn.ai/chat/react';
+    react: `import { Checkpoint } from '@kitn.ai/ui/react';
 
 export function RestorePoint() {
   return (
@@ -54,7 +54,7 @@ export function RestorePoint() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 function onSelect() {
   restoreTo('API structure defined'); // roll back to this checkpoint
@@ -71,7 +71,7 @@ function onSelect() {
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements'; // register once
+  import '@kitn.ai/ui/elements'; // register once
 
   function onSelect() {
     restoreTo('API structure defined'); // roll back to this checkpoint
@@ -85,7 +85,7 @@ function onSelect() {
   on:kc-select={onSelect}
 />`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component/module.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -108,7 +108,7 @@ export class RestorePointComponent {
 }`,
 
     solid: `import { createSignal } from 'solid-js';
-import { Checkpoint, CheckpointIcon, CheckpointTrigger } from '@kitn.ai/chat';
+import { Checkpoint, CheckpointIcon, CheckpointTrigger } from '@kitn.ai/ui';
 import { RotateCcw } from 'lucide-solid';
 
 export function RestorePoint() {

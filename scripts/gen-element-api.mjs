@@ -31,7 +31,7 @@ const program = ts.createProgram([...facadeFiles, resolve(root, 'src/index.ts')]
 const checker = program.getTypeChecker();
 
 // Type names re-exported from the public entry (src/index.ts) are importable —
-// consumers can `import type { AttachmentData } from '@kitn.ai/chat'`.
+// consumers can `import type { AttachmentData } from '@kitn.ai/ui'`.
 const entrySf = program.getSourceFile(resolve(root, 'src/index.ts'));
 const entrySym = entrySf && checker.getSymbolAtLocation(entrySf);
 const exportedTypeNames = new Set(entrySym ? checker.getExportsOfModule(entrySym).map((s) => s.name) : []);

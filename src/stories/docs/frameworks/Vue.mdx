@@ -19,7 +19,7 @@ Both are shown below.
 ## Install & setup
 
 ```bash
-npm i @kitn.ai/chat
+npm i @kitn.ai/ui
 ```
 
 Register the custom elements **once**, as a static side-effect import in `main.ts` **before**
@@ -28,7 +28,7 @@ array/object props set by Vue are clobbered when the elements upgrade later and 
 
 ```ts
 // src/main.ts
-import '@kitn.ai/chat/elements'; // MUST come before createApp
+import '@kitn.ai/ui/elements'; // MUST come before createApp
 import { createApp } from 'vue';
 import App from './App.vue';
 
@@ -57,7 +57,7 @@ export default defineConfig({
 ```
 
 No CSS to import: each element is styled inside its own Shadow DOM. Only pull in
-`@kitn.ai/chat/theme.css` if you want to override design tokens (see **Theming**).
+`@kitn.ai/ui/theme.css` if you want to override design tokens (see **Theming**).
 
 ### TypeScript / Volar augmentation
 
@@ -66,7 +66,7 @@ the element's attributes and properties:
 
 ```ts
 // env.d.ts (or vite-env.d.ts)
-/// <reference types="@kitn.ai/chat/elements" />
+/// <reference types="@kitn.ai/ui/elements" />
 ```
 
 ## Quick start — the all-in-one shell
@@ -76,7 +76,7 @@ stream your model's reply back into state. You own the request; the element owns
 
 ```html
 <script setup lang="ts">
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 type Message = { id: string; role: 'user' | 'assistant'; content: string };
@@ -121,7 +121,7 @@ Here's a multi-conversation shell — a `<kc-conversations>` sidebar next to the
 
 ```html
 <script setup lang="ts">
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 const conversations = ref([

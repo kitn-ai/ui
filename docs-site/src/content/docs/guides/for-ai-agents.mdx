@@ -5,7 +5,7 @@ description: Machine-readable reference files that let coding agents wire up kit
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-`@kitn.ai/chat` ships two auto-generated machine-readable files that follow the [llmstxt.org](https://llmstxt.org) convention. Point your coding agent at them and it will get prop names, event names, and the property-vs-attribute rule right — without hallucinating.
+`@kitn.ai/ui` ships two auto-generated machine-readable files that follow the [llmstxt.org](https://llmstxt.org) convention. Point your coding agent at them and it will get prop names, event names, and the property-vs-attribute rule right — without hallucinating.
 
 ## The files
 
@@ -18,11 +18,11 @@ Both files are generated from `dist/custom-elements.json` by `scripts/gen-llms.m
 
 ### Where they live
 
-After `npm install @kitn.ai/chat`, both files are in the package:
+After `npm install @kitn.ai/ui`, both files are in the package:
 
 ```
-node_modules/@kitn.ai/chat/llms.txt
-node_modules/@kitn.ai/chat/llms-full.txt
+node_modules/@kitn.ai/ui/llms.txt
+node_modules/@kitn.ai/ui/llms-full.txt
 ```
 
 They are also published at:
@@ -38,11 +38,11 @@ For a one-off prompt, paste `llms.txt` (~4 KB). For a project where the agent re
 
 | Tool | What to do |
 |---|---|
-| **Claude Code** | Add `@node_modules/@kitn.ai/chat/llms.txt` to `CLAUDE.md`, or run `read node_modules/@kitn.ai/chat/llms-full.txt` in the session |
+| **Claude Code** | Add `@node_modules/@kitn.ai/ui/llms.txt` to `CLAUDE.md`, or run `read node_modules/@kitn.ai/ui/llms-full.txt` in the session |
 | **GitHub Copilot** | Add the path to `.github/copilot-instructions.md`; workspace indexing picks it up |
 | **Cursor** | Reference the file in `.cursorrules` |
 | **Codex / ChatGPT** | Paste `https://kitn-ai.github.io/chat/llms.txt` into the prompt, or fetch it with a browsing tool |
-| **Any agent** | `npm install @kitn.ai/chat` — file is at `node_modules/@kitn.ai/chat/llms.txt` |
+| **Any agent** | `npm install @kitn.ai/ui` — file is at `node_modules/@kitn.ai/ui/llms.txt` |
 
 ## What agents most commonly get wrong
 
@@ -96,7 +96,7 @@ The same rule applies to every array/object property: always assign a new refere
 ## Runbook: wire a streaming chat in 15 lines
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 const chat = document.querySelector('kc-chat');
 chat.messages = [];
@@ -133,7 +133,7 @@ chat.addEventListener('kc-submit', async (e) => {
 The raw machine-readable spec — every property, event, attribute, and type — is published at:
 
 ```
-https://unpkg.com/@kitn.ai/chat/dist/custom-elements.json
+https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 ```
 
 This is the source from which `llms.txt` and `llms-full.txt` are generated. IDE plugins that consume the [Custom Elements Manifest](https://custom-elements-manifest.open-wc.org/) format can read it directly.

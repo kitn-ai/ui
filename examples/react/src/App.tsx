@@ -2,7 +2,7 @@
  * kc-chat React example — using the generated wrappers.
  *
  * The kit is built with SolidJS but ships framework-agnostic custom elements.
- * `@kitn.ai/chat/react` provides typed React wrappers (Chat, PromptInput,
+ * `@kitn.ai/ui/react` provides typed React wrappers (Chat, PromptInput,
  * Conversations, …) that make the elements feel native:
  *   - array/object props (messages, models, conversations, suggestions, context,
  *     slashCommands) are passed as React props and assigned as live DOM
@@ -18,9 +18,9 @@
 import { useState } from 'react';
 
 // Side-effect import: registers the custom elements globally.
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 // Typed React wrappers — the whole point of this example.
-import { Chat, Conversations, PromptInput } from '@kitn.ai/chat/react';
+import { Chat, Conversations, PromptInput } from '@kitn.ai/ui/react';
 
 // Shared sample data and types (also used by other framework examples).
 import {

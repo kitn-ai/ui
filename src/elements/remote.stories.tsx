@@ -208,7 +208,7 @@ const HTML_SNIPPET = (envelope: CardEnvelope) => `<kc-remote
   src="https://cards.provider.example/card"
 ></kc-remote>
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers <kc-remote>
+  import '@kitn.ai/ui/elements'; // registers <kc-remote>
 
   const el = document.querySelector('kc-remote');
   // The CardEnvelope is set as a JS PROPERTY (it travels down the wire unchanged).
@@ -303,7 +303,7 @@ export const Failure: Story = {
         code: `<!-- provider-origin must be a single absolute origin (https, or http://localhost for dev). -->
 <kc-remote provider-origin="*" src="https://cards.provider.example/card"></kc-remote>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   document.querySelector('kc-remote').envelope = ${JSON.stringify(FORM_ENVELOPE, null, 2)};
   // "*" is rejected → an inline accessible error renders instead of an iframe.
 </script>`,
