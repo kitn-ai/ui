@@ -348,54 +348,27 @@ export default function ThemeStudio() {
   const swatch = 'h-7 w-7 shrink-0 cursor-pointer rounded-md border border-line bg-transparent p-0';
 
   return (
-    <div class="theme-studio-root not-content my-4 flex flex-col overflow-hidden rounded-xl border border-line bg-surface lg:h-[82vh] lg:min-h-[660px] lg:flex-row">
-      {/* Inspector */}
-      <div class="flex w-full shrink-0 flex-col border-b border-line lg:w-[330px] lg:border-b-0 lg:border-r">
-        {/* Toolbar */}
-        <div class="flex items-center justify-between gap-2 border-b border-line px-3 py-2.5">
-          <div class="inline-flex overflow-hidden rounded-md border border-line text-xs">
-            <button type="button" class="px-2.5 py-1 transition-colors" classList={{ 'bg-brand text-white': mode() === 'light', 'text-ink-2': mode() !== 'light' }} onClick={() => setMode('light')}>Light</button>
-            <button type="button" class="px-2.5 py-1 transition-colors" classList={{ 'bg-brand text-white': mode() === 'dark', 'text-ink-2': mode() !== 'dark' }} onClick={() => setMode('dark')}>Dark</button>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button type="button" onClick={() => setImporting((v) => !v)} title="Paste CSS to import" class="flex items-center gap-1 rounded-md border border-line px-2 py-1 text-xs text-ink-2 transition-colors hover:bg-ink/5"><IconImport class="h-3.5 w-3.5" /></button>
-            <button type="button" onClick={reset} title="Reset to defaults" class="flex items-center gap-1 rounded-md border border-line px-2 py-1 text-xs text-ink-2 transition-colors hover:bg-ink/5"><IconReset class="h-3.5 w-3.5" /></button>
-            <button type="button" onClick={copyCss} class="flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-xs font-medium transition-colors hover:bg-ink/5">{copied() ? <IconCheck class="h-3.5 w-3.5" /> : <IconCopy class="h-3.5 w-3.5" />}{copied() ? 'Copied' : 'Copy CSS'}</button>
-          </div>
-        </div>
-
-        <Show when={importing()}>
-          <div class="border-b border-line p-3">
-            <textarea
-              value={importText()}
-              onInput={(e) => setImportText(e.currentTarget.value)}
-              placeholder={':root {\n  --kc-color-primary: #7c3aed;\n}\n.dark {\n  --kc-color-primary: #a78bfa;\n}'}
-              class="h-28 w-full resize-none rounded-md border border-line bg-surface p-2 font-mono text-xs text-ink"
-            />
-            <Show when={importError()}><p class="mt-1 text-xs text-red-500">{importError()}</p></Show>
-            <button type="button" onClick={applyImport} class="mt-2 w-full rounded-md bg-brand px-3 py-1.5 text-xs font-semibold text-white transition-[filter] hover:brightness-110">Apply pasted tokens</button>
-          </div>
-        </Show>
-
+    <div class="theme-studio-root not-content my-4 flex flex-col overflow-hidden rounded-xl border border-line bg-surface lg:h-[82vh] lg:min-h-[660px]">
+      {/* Full-width toolbar: theme selector (left) · mode + actions (right) */}
+      <div class="flex items-center justify-between gap-3 border-b border-line px-3 py-2.5">
         {/* Theme selector — searchable dropdown of the kit default + tweakcn presets */}
-        <div ref={themeMenu} class="relative border-b border-line p-3">
-          <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink/55">Theme</div>
+        <div ref={themeMenu} class="relative">
           <button
             type="button"
             onClick={() => setThemeOpen((v) => !v)}
             aria-haspopup="listbox"
             aria-expanded={themeOpen()}
-            class="flex w-full items-center gap-2 rounded-md border border-line px-2.5 py-1.5 text-sm text-ink transition-colors hover:bg-ink/5"
+            class="flex w-[260px] max-w-[60vw] items-center gap-2 rounded-md border border-line px-2.5 py-1.5 text-sm text-ink transition-colors hover:bg-ink/5"
           >
             <span class="flex items-center gap-0.5">
               <For each={themeDots(preset())}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
             </span>
-            <span class="truncate">{preset()}</span>
+            <span class="truncate font-medium">{preset()}</span>
             <IconChevron class="ml-auto h-3.5 w-3.5 shrink-0 text-ink-3 transition-transform" classList={{ 'rotate-90': themeOpen() }} />
           </button>
           <Show when={themeOpen()}>
-            <div class="absolute inset-x-3 top-full z-50 mt-1 max-h-80 overflow-auto rounded-lg border border-line bg-surface shadow-xl">
-              <div class="sticky top-0 border-b border-line bg-surface p-2">
+            <div class="absolute left-0 top-full z-50 mt-1 w-[300px] max-w-[80vw] overflow-hidden rounded-lg border border-line bg-surface shadow-xl">
+              <div class="border-b border-line p-2">
                 <input
                   value={themeSearch()}
                   onInput={(e) => setThemeSearch(e.currentTarget.value)}
@@ -403,33 +376,59 @@ export default function ThemeStudio() {
                   class="w-full rounded-md border border-line bg-surface px-2 py-1 text-sm text-ink"
                 />
               </div>
-              <For each={filteredThemes()}>
-                {(name) => (
-                  <button
-                    type="button"
-                    onClick={() => { loadTheme(name); setThemeOpen(false); setThemeSearch(''); }}
-                    class="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-ink/5"
-                    classList={{ 'bg-brand/10 font-medium text-brand': preset() === name, 'text-ink-2': preset() !== name }}
-                  >
-                    <span class="flex items-center gap-0.5">
-                      <For each={themeDots(name)}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
-                    </span>
-                    <span class="truncate">{name}</span>
-                  </button>
-                )}
-              </For>
-              <Show when={!filteredThemes().length}>
-                <div class="px-2.5 py-3 text-center text-xs text-ink/55">No themes match.</div>
-              </Show>
+              <div class="max-h-[60vh] overflow-auto">
+                <For each={filteredThemes()}>
+                  {(name) => (
+                    <button
+                      type="button"
+                      onClick={() => { loadTheme(name); setThemeOpen(false); setThemeSearch(''); }}
+                      class="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-ink/5"
+                      classList={{ 'bg-ink/[0.07] font-semibold text-ink': preset() === name, 'text-ink-2': preset() !== name }}
+                    >
+                      <span class="flex items-center gap-0.5">
+                        <For each={themeDots(name)}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
+                      </span>
+                      <span class="truncate">{name}</span>
+                    </button>
+                  )}
+                </For>
+                <Show when={!filteredThemes().length}>
+                  <div class="px-2.5 py-3 text-center text-xs text-ink/55">No themes match.</div>
+                </Show>
+              </div>
             </div>
-          </Show>
-          <Show when={preset() === 'Custom'}>
-            <p class="mt-1.5 text-[11px] text-ink/55">Custom — edited from a preset.</p>
           </Show>
         </div>
 
-        {/* Token groups (collapsible) */}
-        <div class="min-h-0 flex-1 overflow-auto py-1">
+        {/* Mode + actions */}
+        <div class="flex items-center gap-1.5">
+          <div class="inline-flex overflow-hidden rounded-md border border-line text-xs">
+            <button type="button" class="px-2.5 py-1 transition-colors" classList={{ 'bg-ink text-bg': mode() ==='light', 'text-ink-2': mode() !== 'light' }} onClick={() => setMode('light')}>Light</button>
+            <button type="button" class="px-2.5 py-1 transition-colors" classList={{ 'bg-ink text-bg': mode() ==='dark', 'text-ink-2': mode() !== 'dark' }} onClick={() => setMode('dark')}>Dark</button>
+          </div>
+          <button type="button" onClick={() => setImporting((v) => !v)} class="flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-xs text-ink-2 transition-colors hover:bg-ink/5"><IconImport class="h-3.5 w-3.5" /><span class="hidden sm:inline">Import</span></button>
+          <button type="button" onClick={reset} class="flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-xs text-ink-2 transition-colors hover:bg-ink/5"><IconReset class="h-3.5 w-3.5" /><span class="hidden sm:inline">Reset</span></button>
+          <button type="button" onClick={copyCss} class="flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-xs font-medium transition-colors hover:bg-ink/5">{copied() ? <IconCheck class="h-3.5 w-3.5" /> : <IconCopy class="h-3.5 w-3.5" />}{copied() ? 'Copied' : 'Copy CSS'}</button>
+        </div>
+      </div>
+
+      <Show when={importing()}>
+        <div class="border-b border-line p-3">
+          <textarea
+            value={importText()}
+            onInput={(e) => setImportText(e.currentTarget.value)}
+            placeholder={':root {\n  --kc-color-primary: #7c3aed;\n}\n.dark {\n  --kc-color-primary: #a78bfa;\n}'}
+            class="h-24 w-full resize-none rounded-md border border-line bg-surface p-2 font-mono text-xs text-ink"
+          />
+          <Show when={importError()}><p class="mt-1 text-xs text-red-500">{importError()}</p></Show>
+          <button type="button" onClick={applyImport} class="mt-2 rounded-md bg-ink px-3 py-1.5 text-xs font-semibold text-bg transition-opacity hover:opacity-90">Apply pasted tokens</button>
+        </div>
+      </Show>
+
+      {/* Body: inspector · canvas */}
+      <div class="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {/* Inspector — collapsible token groups + radius */}
+        <div class="flex w-full shrink-0 flex-col overflow-auto border-b border-line lg:w-[330px] lg:border-b-0 lg:border-r">
           <For each={GROUPS}>
             {(group) => (
               <div class="border-b border-line/60 last:border-0">
@@ -476,15 +475,14 @@ export default function ThemeStudio() {
           <div class="px-3 py-3">
             <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shape</div>
             <label class="flex items-center gap-2.5 text-sm">
-              <input type="range" min="0" max="1.4" step="0.05" value={radius()} onInput={(e) => setRadius(parseFloat(e.currentTarget.value))} class="flex-1" aria-label="Corner radius" />
+              <input type="range" min="0" max="1.4" step="0.05" value={radius()} onInput={(e) => setRadius(parseFloat(e.currentTarget.value))} class="flex-1" style={{ 'accent-color': 'var(--kc-ink-3)' }} aria-label="Corner radius" />
               <span class="w-14 text-right text-xs tabular-nums text-ink-2">{radius()}rem</span>
             </label>
           </div>
         </div>
-      </div>
 
-      {/* Canvas */}
-      <div ref={canvasEl} classList={{ dark: mode() === 'dark' }} class="relative min-w-0 flex-1 overflow-auto p-4">
+        {/* Canvas */}
+        <div ref={canvasEl} classList={{ dark: mode() === 'dark' }} class="relative min-w-0 flex-1 overflow-auto p-4">
         <Show when={!ready()}>
           <div class="absolute inset-0 grid place-items-center text-sm text-ink/55">Loading preview…</div>
         </Show>
@@ -521,6 +519,7 @@ export default function ThemeStudio() {
               <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-red)' }} />
             </span>
           </div>
+        </div>
         </div>
       </div>
     </div>
