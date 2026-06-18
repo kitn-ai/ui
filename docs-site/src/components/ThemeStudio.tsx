@@ -20,6 +20,7 @@ import IconImport from '~icons/lucide/clipboard-paste';
 import IconReset from '~icons/lucide/rotate-ccw';
 import IconChevron from '~icons/lucide/chevron-right';
 import IconCode from '~icons/lucide/code';
+import IconSave from '~icons/lucide/bookmark';
 import IconClose from '~icons/lucide/x';
 import { THEME_PRESETS, SHADCN_TO_KC } from './theme-presets';
 import { sampleFor } from '../lib/sample-data';
@@ -321,6 +322,10 @@ export default function ThemeStudio() {
   const [copied, setCopied] = createSignal(false);
   const [codeOpen, setCodeOpen] = createSignal(false);
   const [importOpen, setImportOpen] = createSignal(false);
+  const [saveOpen, setSaveOpen] = createSignal(false);
+  const [saveName, setSaveName] = createSignal('');
+  const [saveError, setSaveError] = createSignal('');
+  const [confirmDelete, setConfirmDelete] = createSignal<string | null>(null); // saved-theme name pending delete
   const [importText, setImportText] = createSignal('');
   const [importError, setImportError] = createSignal('');
   const [themeOpen, setThemeOpen] = createSignal(false);
@@ -405,12 +410,18 @@ export default function ThemeStudio() {
 
   const reset = () => loadTheme('Default');
 
-  const saveCurrent = () => {
-    const name = (typeof prompt === 'function' ? prompt('Name this theme:', preset() === 'Custom' ? '' : preset()) : '')?.trim();
-    if (!name) return;
+  const openSave = () => {
+    setSaveName(preset() === 'Custom' || saved().some((s) => s.name === preset()) ? (preset() === 'Custom' ? '' : preset()) : '');
+    setSaveError('');
+    setSaveOpen(true);
+  };
+  const commitSave = () => {
+    const name = saveName().trim();
+    if (!name) { setSaveError('Give the theme a name.'); return; }
     const p: SavedPreset = { name, light: light(), dark: dark(), radius: radius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor() };
     persistSaved([...saved().filter((x) => x.name !== name), p]);
     setPreset(name);
+    setSaveOpen(false);
   };
   const deleteSaved = (name: string) => persistSaved(saved().filter((x) => x.name !== name));
 
@@ -481,7 +492,9 @@ export default function ThemeStudio() {
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
-      if (codeOpen()) setCodeOpen(false);
+      if (confirmDelete()) setConfirmDelete(null);
+      else if (saveOpen()) setSaveOpen(false);
+      else if (codeOpen()) setCodeOpen(false);
       else if (importOpen()) setImportOpen(false);
       else if (themeOpen()) setThemeOpen(false);
     };
@@ -551,14 +564,13 @@ export default function ThemeStudio() {
           </button>
           <Show when={themeOpen()}>
             <div class="absolute left-0 top-full z-50 mt-1 w-[300px] max-w-[80vw] overflow-hidden rounded-lg border border-line bg-surface shadow-xl">
-              <div class="flex items-center gap-2 border-b border-line p-2">
+              <div class="border-b border-line p-2">
                 <input
                   value={themeSearch()}
                   onInput={(e) => setThemeSearch(e.currentTarget.value)}
                   placeholder="Search themes…"
-                  class="min-w-0 flex-1 rounded-md border border-line bg-surface px-2 py-1 text-sm text-ink"
+                  class="w-full rounded-md border border-line bg-surface px-2 py-1 text-sm text-ink"
                 />
-                <button type="button" onClick={saveCurrent} title="Save the current theme" class="shrink-0 rounded-md border border-line px-2 py-1 text-xs text-ink-2 transition-colors hover:bg-ink/5">Save</button>
               </div>
               <div class="max-h-[60vh] overflow-auto">
                 <Show when={saved().filter((s) => s.name.toLowerCase().includes(themeSearch().toLowerCase())).length}>
@@ -572,7 +584,7 @@ export default function ThemeStudio() {
                           </span>
                           <span class="truncate">{s.name}</span>
                         </button>
-                        <button type="button" onClick={() => deleteSaved(s.name)} aria-label={`Delete ${s.name}`} class="shrink-0 rounded p-0.5 text-ink-3 opacity-0 transition-opacity hover:text-ink group-hover:opacity-100"><IconClose class="size-3.5" /></button>
+                        <button type="button" onClick={() => setConfirmDelete(s.name)} aria-label={`Delete ${s.name}`} class="shrink-0 rounded p-0.5 text-ink-3 transition-colors hover:bg-ink/10 hover:text-ink"><IconClose class="size-3.5" /></button>
                       </div>
                     )}
                   </For>
@@ -609,6 +621,7 @@ export default function ThemeStudio() {
           </div>
           <button type="button" onClick={() => setImportOpen(true)} class="flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-xs text-ink-2 transition-colors hover:bg-ink/5"><IconImport class="h-3.5 w-3.5" /><span class="hidden sm:inline">Import</span></button>
           <button type="button" onClick={reset} class="flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-xs text-ink-2 transition-colors hover:bg-ink/5"><IconReset class="h-3.5 w-3.5" /><span class="hidden sm:inline">Reset</span></button>
+          <button type="button" onClick={openSave} class="flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-xs text-ink-2 transition-colors hover:bg-ink/5"><IconSave class="h-3.5 w-3.5" /><span class="hidden sm:inline">Save</span></button>
           <button type="button" onClick={() => setCodeOpen(true)} class="flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:bg-ink/5"><IconCode class="h-3.5 w-3.5" />Code</button>
         </div>
       </div>
@@ -821,6 +834,43 @@ export default function ThemeStudio() {
             <button type="button" onClick={applyImport} class="rounded-md bg-ink px-3 py-1.5 text-xs font-semibold text-bg transition-opacity hover:opacity-90">Apply</button>
           </div>
         </Modal>
+      </Show>
+
+      <Show when={saveOpen()}>
+        <Modal title="Save theme" onClose={() => setSaveOpen(false)}>
+          <label class="flex flex-col gap-1">
+            <span class="text-sm font-medium text-ink">Theme name</span>
+            <input
+              autofocus
+              value={saveName()}
+              onInput={(e) => { setSaveName(e.currentTarget.value); setSaveError(''); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') commitSave(); }}
+              placeholder="e.g. Acme brand"
+              class="w-full rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm text-ink"
+            />
+          </label>
+          <Show when={saveName().trim() && saved().some((s) => s.name === saveName().trim())}>
+            <p class="mt-1.5 text-xs text-ink-3">A saved theme named “{saveName().trim()}” will be overwritten.</p>
+          </Show>
+          <Show when={saveError()}><p class="mt-1.5 text-xs text-red-500">{saveError()}</p></Show>
+          <p class="mt-2 text-xs text-ink-3">Stored in your browser (localStorage), so it sticks around on this device.</p>
+          <div class="mt-4 flex justify-end gap-2">
+            <button type="button" onClick={() => setSaveOpen(false)} class="rounded-md border border-line px-3 py-1.5 text-xs text-ink-2 transition-colors hover:bg-ink/5">Cancel</button>
+            <button type="button" onClick={commitSave} class="rounded-md bg-ink px-3 py-1.5 text-xs font-semibold text-bg transition-opacity hover:opacity-90">Save theme</button>
+          </div>
+        </Modal>
+      </Show>
+
+      <Show when={confirmDelete()}>
+        {(name) => (
+          <Modal title="Delete theme" onClose={() => setConfirmDelete(null)}>
+            <p class="text-sm text-ink-2">Delete the saved theme <strong class="text-ink">“{name()}”</strong>? This can't be undone.</p>
+            <div class="mt-4 flex justify-end gap-2">
+              <button type="button" onClick={() => setConfirmDelete(null)} class="rounded-md border border-line px-3 py-1.5 text-xs text-ink-2 transition-colors hover:bg-ink/5">Cancel</button>
+              <button type="button" onClick={() => { deleteSaved(name()); setConfirmDelete(null); }} class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90">Delete</button>
+            </div>
+          </Modal>
+        )}
       </Show>
     </div>
   );
