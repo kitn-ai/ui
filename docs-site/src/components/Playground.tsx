@@ -32,10 +32,11 @@ const BOOLEAN_GROUPS: Record<string, { label: string; props: string[] }[]> = {
 function Toggle(props: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
     <button type="button" role="switch" aria-checked={props.checked} onClick={() => props.onChange(!props.checked)}
-      class="inline-flex cursor-pointer appearance-none items-center gap-2 border-0 bg-transparent text-sm text-ink-2">
+      class="group inline-flex cursor-pointer appearance-none items-center gap-2 border-0 bg-transparent text-sm transition-colors"
+      classList={{ 'text-ink': props.checked, 'text-ink-2 hover:text-ink': !props.checked }}>
       <span class="relative inline-flex h-[18px] w-8 shrink-0 items-center rounded-full transition-colors duration-150"
-        classList={{ 'bg-brand': props.checked, 'bg-ink-3/40': !props.checked }}>
-        <span class="inline-block size-3.5 rounded-full bg-white transition-transform duration-150"
+        classList={{ 'bg-brand': props.checked, 'bg-ink-3/40 group-hover:bg-ink-3/55': !props.checked }}>
+        <span class="inline-block size-3.5 rounded-full bg-white shadow-sm transition-transform duration-150"
           classList={{ 'translate-x-[15px]': props.checked, 'translate-x-0.5': !props.checked }} />
       </span>
       {props.label}
@@ -182,16 +183,18 @@ export default function Playground(props: { tag: string }) {
               </div>
             }
           >
-            <div class="flex w-full flex-col gap-2 py-2.5">
+            <div class="grid w-full gap-2.5 py-3 sm:grid-cols-2">
               <For each={boolGroups!}>
                 {(g) => (
-                  <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                  <div class="@container rounded-lg bg-surface-2/60 px-3.5 py-3">
                     <Show when={g.label}>
-                      <span class="w-16 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-ink-3">{g.label}</span>
+                      <span class="mb-2.5 block text-[11px] font-semibold uppercase tracking-wider text-ink-3">{g.label}</span>
                     </Show>
-                    <For each={g.items}>
-                      {(c) => <Toggle checked={Boolean(state()[c.prop])} onChange={(v) => set(c.prop, v)} label={humanize(c.prop)} />}
-                    </For>
+                    <div class="grid grid-cols-1 gap-x-5 gap-y-2.5 @[18rem]:grid-cols-2">
+                      <For each={g.items}>
+                        {(c) => <Toggle checked={Boolean(state()[c.prop])} onChange={(v) => set(c.prop, v)} label={humanize(c.prop)} />}
+                      </For>
+                    </div>
                   </div>
                 )}
               </For>
