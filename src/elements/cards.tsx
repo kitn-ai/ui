@@ -73,7 +73,11 @@ defineWebComponent<Props>(
       element.addEventListener(CARD_EVENT_NAME, handler as EventListener);
       onCleanup(() => element.removeEventListener(CARD_EVENT_NAME, handler as EventListener));
     });
-    const theme = () => (element.getAttribute('theme') ?? 'auto');
+    // Read the facade's REACTIVE `theme` prop, not element.getAttribute (which is
+    // not a tracked dependency) — otherwise a theme change on <kc-cards> after the
+    // children first render never propagates, leaving each child card stuck on its
+    // initial 'auto' (which follows the OS, so cards looked "always dark").
+    const theme = () => ((props as { theme?: string }).theme ?? 'auto');
     const tags = () => mergeCardTags(props.types);
     return (
       <div class="flex flex-col gap-3">
