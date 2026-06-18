@@ -311,7 +311,13 @@ export default function ThemeStudio() {
   const [tracking, setTracking] = createSignal(0); // em
   const [shadowColor, setShadowColor] = createSignal('#000000');
   const [preset, setPreset] = createSignal('Default');
+  // Custom presets the user saves (persisted to localStorage).
+  type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; fontBase: string; fontCode: string; tracking: number; shadow: string };
+  const PRESET_KEY = 'kc-theme-studio-presets';
+  const [saved, setSaved] = createSignal<SavedPreset[]>([]);
+  const persistSaved = (list: SavedPreset[]) => { setSaved(list); try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch { /* storage blocked */ } };
   const [canvasTab, setCanvasTab] = createSignal<'chat' | 'cards' | 'components'>('chat');
+  const [inspectorTab, setInspectorTab] = createSignal<'colors' | 'typography' | 'other'>('colors');
   const [copied, setCopied] = createSignal(false);
   const [codeOpen, setCodeOpen] = createSignal(false);
   const [importOpen, setImportOpen] = createSignal(false);
@@ -359,6 +365,15 @@ export default function ThemeStudio() {
   };
 
   const loadTheme = (name: string) => {
+    // A user-saved preset stores full palettes + extras — apply directly.
+    const s = saved().find((x) => x.name === name);
+    if (s) {
+      setLight(s.light); setDark(s.dark); setRadius(s.radius);
+      setFontBase(s.fontBase); setFontCode(s.fontCode); setTracking(s.tracking); setShadowColor(s.shadow);
+      ensureFont(s.fontBase); ensureFont(s.fontCode);
+      setPreset(name);
+      return;
+    }
     const l = seedPalette('light');
     const d = seedPalette('dark');
     const t = THEME_PRESETS.find((x) => x.name === name);
@@ -389,6 +404,22 @@ export default function ThemeStudio() {
   };
 
   const reset = () => loadTheme('Default');
+
+  const saveCurrent = () => {
+    const name = (typeof prompt === 'function' ? prompt('Name this theme:', preset() === 'Custom' ? '' : preset()) : '')?.trim();
+    if (!name) return;
+    const p: SavedPreset = { name, light: light(), dark: dark(), radius: radius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor() };
+    persistSaved([...saved().filter((x) => x.name !== name), p]);
+    setPreset(name);
+  };
+  const deleteSaved = (name: string) => persistSaved(saved().filter((x) => x.name !== name));
+
+  /** Swatch dots for a row — handles saved presets (full palette) + built-ins. */
+  const dotsFor = (name: string): string[] => {
+    const s = saved().find((x) => x.name === name);
+    if (s) return ['--kc-color-primary', '--kc-color-accent', '--kc-color-secondary', '--kc-color-background', '--kc-color-foreground'].map((k) => s.light[k] || '#888888');
+    return themeDots(name);
+  };
 
   const copyCss = async () => {
     try {
@@ -443,6 +474,7 @@ export default function ThemeStudio() {
   };
 
   onMount(async () => {
+    try { setSaved(JSON.parse(localStorage.getItem(PRESET_KEY) || '[]')); } catch { /* ignore */ }
     loadTheme('Default');
     const onDocDown = (e: PointerEvent) => {
       if (themeOpen() && themeMenu && !themeMenu.contains(e.target as Node)) setThemeOpen(false);
@@ -512,22 +544,40 @@ export default function ThemeStudio() {
             class="flex w-[260px] max-w-[60vw] items-center gap-2 rounded-md border border-line px-2.5 py-1.5 text-sm text-ink transition-colors hover:bg-ink/5"
           >
             <span class="flex items-center gap-0.5">
-              <For each={themeDots(preset())}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
+              <For each={dotsFor(preset())}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
             </span>
             <span class="truncate font-medium">{preset()}</span>
             <IconChevron class="ml-auto h-3.5 w-3.5 shrink-0 text-ink-3 transition-transform" classList={{ 'rotate-90': themeOpen() }} />
           </button>
           <Show when={themeOpen()}>
             <div class="absolute left-0 top-full z-50 mt-1 w-[300px] max-w-[80vw] overflow-hidden rounded-lg border border-line bg-surface shadow-xl">
-              <div class="border-b border-line p-2">
+              <div class="flex items-center gap-2 border-b border-line p-2">
                 <input
                   value={themeSearch()}
                   onInput={(e) => setThemeSearch(e.currentTarget.value)}
                   placeholder="Search themes…"
-                  class="w-full rounded-md border border-line bg-surface px-2 py-1 text-sm text-ink"
+                  class="min-w-0 flex-1 rounded-md border border-line bg-surface px-2 py-1 text-sm text-ink"
                 />
+                <button type="button" onClick={saveCurrent} title="Save the current theme" class="shrink-0 rounded-md border border-line px-2 py-1 text-xs text-ink-2 transition-colors hover:bg-ink/5">Save</button>
               </div>
               <div class="max-h-[60vh] overflow-auto">
+                <Show when={saved().filter((s) => s.name.toLowerCase().includes(themeSearch().toLowerCase())).length}>
+                  <div class="px-2.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-ink/45">Your themes</div>
+                  <For each={saved().filter((s) => s.name.toLowerCase().includes(themeSearch().toLowerCase()))}>
+                    {(s) => (
+                      <div class="group flex w-full items-center gap-2 px-2.5 py-1.5 text-sm transition-colors hover:bg-ink/5" classList={{ 'bg-ink/[0.07] font-semibold text-ink': preset() === s.name, 'text-ink-2': preset() !== s.name }}>
+                        <button type="button" onClick={() => { loadTheme(s.name); setThemeOpen(false); setThemeSearch(''); }} class="flex min-w-0 flex-1 items-center gap-2 text-left">
+                          <span class="flex items-center gap-0.5">
+                            <For each={dotsFor(s.name)}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
+                          </span>
+                          <span class="truncate">{s.name}</span>
+                        </button>
+                        <button type="button" onClick={() => deleteSaved(s.name)} aria-label={`Delete ${s.name}`} class="shrink-0 rounded p-0.5 text-ink-3 opacity-0 transition-opacity hover:text-ink group-hover:opacity-100"><IconClose class="size-3.5" /></button>
+                      </div>
+                    )}
+                  </For>
+                  <div class="mx-2.5 my-1 border-t border-line/60" />
+                </Show>
                 <For each={filteredThemes()}>
                   {(name) => (
                     <button
@@ -537,13 +587,13 @@ export default function ThemeStudio() {
                       classList={{ 'bg-ink/[0.07] font-semibold text-ink': preset() === name, 'text-ink-2': preset() !== name }}
                     >
                       <span class="flex items-center gap-0.5">
-                        <For each={themeDots(name)}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
+                        <For each={dotsFor(name)}>{(c) => <span class="size-2.5 rounded-full ring-1 ring-black/10" style={{ background: c }} />}</For>
                       </span>
                       <span class="truncate">{name}</span>
                     </button>
                   )}
                 </For>
-                <Show when={!filteredThemes().length}>
+                <Show when={!filteredThemes().length && !saved().filter((s) => s.name.toLowerCase().includes(themeSearch().toLowerCase())).length}>
                   <div class="px-2.5 py-3 text-center text-xs text-ink/55">No themes match.</div>
                 </Show>
               </div>
@@ -565,8 +615,17 @@ export default function ThemeStudio() {
 
       {/* Body: inspector · canvas */}
       <div class="flex min-h-0 flex-1 flex-col lg:flex-row">
-        {/* Inspector — collapsible token groups + radius */}
+        {/* Inspector — Colors / Typography / Other tabs */}
         <div class="flex w-full shrink-0 flex-col overflow-auto border-b border-line lg:w-[330px] lg:border-b-0 lg:border-r">
+          <div class="sticky top-0 z-10 flex items-center gap-1 border-b border-line bg-surface px-3 py-2">
+            <For each={[['colors', 'Colors'], ['typography', 'Typography'], ['other', 'Other']] as const}>
+              {([id, label]) => (
+                <button type="button" onClick={() => setInspectorTab(id)} class="rounded-md px-2.5 py-1 text-sm transition-colors" classList={{ 'bg-ink/[0.07] font-semibold text-ink': inspectorTab() === id, 'text-ink-3 hover:text-ink': inspectorTab() !== id }}>{label}</button>
+              )}
+            </For>
+          </div>
+
+          <Show when={inspectorTab() === 'colors'}>
           <For each={GROUPS}>
             {(group) => (
               <div class="border-b border-line/60 last:border-0">
@@ -608,19 +667,11 @@ export default function ThemeStudio() {
               </div>
             )}
           </For>
+          </Show>
 
-          {/* Radius */}
+          {/* Typography tab */}
+          <Show when={inspectorTab() === 'typography'}>
           <div class="px-3 py-3">
-            <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shape</div>
-            <label class="flex items-center gap-2.5 text-sm">
-              <input type="range" min="0" max="1.4" step="0.05" value={radius()} onInput={(e) => setRadius(parseFloat(e.currentTarget.value))} class="flex-1" style={{ 'accent-color': 'var(--kc-ink-3)' }} aria-label="Corner radius" />
-              <span class="w-14 text-right text-xs tabular-nums text-ink-2">{radius()}rem</span>
-            </label>
-          </div>
-
-          {/* Typography */}
-          <div class="border-t border-line/60 px-3 py-3">
-            <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Typography</div>
             <label class="mb-2.5 flex flex-col gap-1">
               <span class="text-sm font-medium text-ink">Body font</span>
               <select
@@ -653,8 +704,17 @@ export default function ThemeStudio() {
               <span class="w-14 text-right text-xs tabular-nums text-ink-2">{tracking().toFixed(3)}em</span>
             </label>
           </div>
+          </Show>
 
-          {/* Shadow */}
+          {/* Other tab — shape + shadow */}
+          <Show when={inspectorTab() === 'other'}>
+          <div class="px-3 py-3">
+            <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shape</div>
+            <label class="flex items-center gap-2.5 text-sm">
+              <input type="range" min="0" max="1.4" step="0.05" value={radius()} onInput={(e) => { setRadius(parseFloat(e.currentTarget.value)); setPreset('Custom'); }} class="flex-1" style={{ 'accent-color': 'var(--kc-ink-3)' }} aria-label="Corner radius" />
+              <span class="w-14 text-right text-xs tabular-nums text-ink-2">{radius()}rem</span>
+            </label>
+          </div>
           <div class="border-t border-line/60 px-3 py-3">
             <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shadow</div>
             <label class="flex items-center gap-2.5">
@@ -665,6 +725,7 @@ export default function ThemeStudio() {
               </span>
             </label>
           </div>
+          </Show>
         </div>
 
         {/* Canvas */}
