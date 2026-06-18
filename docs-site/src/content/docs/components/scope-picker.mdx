@@ -1,0 +1,98 @@
+---
+title: Scope Picker
+description: A compact dropdown that lets users filter a chat or search by author or tag, firing a single event with the chosen scope.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-scope-picker</p>
+
+<p class="kc-lede">A lightweight filter dropdown for narrowing a conversation or search to a specific author or tag — drop it in a chat header and listen for one event.</p>
+
+<Facts items={['Shadow DOM', '1 event', 'Authors + tags sections', '2 array properties', 'Pairs with any header control']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-scope-picker" />
+
+<Aside type="tip" title="When to use">
+Use `<kc-scope-picker>` when your interface has multiple authors or content tags and users need to narrow a view. It fits naturally alongside `<kc-model-switcher>` in a chat header or above a conversation list. In SolidJS, compose `ChatScopePicker` directly for full reactivity.
+</Aside>
+
+## Usage
+
+Set `availableAuthors` and `availableTags` in JavaScript (arrays can't be HTML attributes) and listen for `kc-scope-change`:
+
+```html
+<kc-scope-picker id="scope"></kc-scope-picker>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const el = document.getElementById('scope');
+
+  el.availableAuthors = ['Alex Chen', 'Jordan Lee'];
+  el.availableTags    = ['design', 'engineering'];
+
+  el.addEventListener('kc-scope-change', (e) => {
+    const { filters } = e.detail;
+    console.log(filters ?? 'all');
+  });
+</script>
+```
+
+- **`current-label`** — HTML attribute controlling the trigger button text (default `'All Content'`). Update it after each `kc-scope-change` to reflect the active filter.
+- **`kc-scope-change`** — `detail.filters` is `undefined` when "All Content" is selected, or `{ authors?: string[], tags?: string[] }` for a specific filter.
+- Passing an empty array for either property hides that section entirely.
+
+## Examples
+
+### Authors and Tags
+
+Both sections populated — the dropdown shows an **Authors** group and a **Tags** group below "All Content".
+
+<Example client:visible tag="kc-scope-picker" />
+
+### Authors Only
+
+Non-empty `availableAuthors`, empty `availableTags` — renders only the Authors section.
+
+<Example client:visible tag="kc-scope-picker" data="authorsOnly" />
+
+### Tags Only
+
+Non-empty `availableTags`, empty `availableAuthors` — renders only the Tags section.
+
+<Example client:visible tag="kc-scope-picker" data="tagsOnly" />
+
+### Minimal (No Filters)
+
+Both arrays empty — the dropdown shows only "All Content". Useful while options are loading asynchronously.
+
+<Example client:visible tag="kc-scope-picker" data="minimal" />
+
+### Custom Trigger Label
+
+Set `current-label` to reflect an already-active scope. Your app owns this state and updates the attribute on each `kc-scope-change`.
+
+<Example client:visible tag="kc-scope-picker" config={{ currentLabel: 'Jordan Lee' }} data="customLabel" />
+
+## Props
+
+<PropTable tag="kc-scope-picker" />
+
+## Events
+
+<EventTable tag="kc-scope-picker" />
+
+## Composed from
+
+<ComposedFrom tag="kc-scope-picker" />
+
+<NeedAHand />

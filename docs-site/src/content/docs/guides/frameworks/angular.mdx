@@ -1,0 +1,226 @@
+---
+title: Angular
+description: Use kc-* web components in Angular with CUSTOM_ELEMENTS_SCHEMA, property bindings, and kc-event outputs — no wrappers needed.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Angular binds to DOM properties natively with `[prop]="value"` and listens to CustomEvents with `(kc-event)="handler($event)"`. The `kc-*` web components slot into Angular templates directly — no wrapper library, no adapter.
+
+## Install
+
+```bash
+npm install @kitn.ai/chat
+```
+
+## Register the elements
+
+Import the element bundle once as a side-effect in `main.ts`, **before** `bootstrapApplication`. This registers every `kc-*` web component globally.
+
+```ts
+// main.ts
+import '@kitn.ai/chat/elements';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
+import { appConfig } from './app/app.config';
+
+bootstrapApplication(AppComponent, appConfig);
+```
+
+Then add **`CUSTOM_ELEMENTS_SCHEMA`** to every standalone component whose template uses `kc-*` tags. Without it, the Angular compiler rejects the unknown element names at build time.
+
+```ts
+// app.component.ts
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './app.component.html',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+})
+export class AppComponent {}
+```
+
+<Aside type="tip" title="No CSS import needed">
+Each element styles itself inside Shadow DOM. Import `@kitn.ai/chat/theme.css` only if you want to override design tokens.
+</Aside>
+
+## Quick start — the all-in-one shell
+
+`<kc-chat>` is **transport-agnostic**: pass a `messages` array, handle `(kc-submit)`, and stream the reply back into state. The component owns the UI; you own the request.
+
+```ts
+// app.component.ts
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+
+type Message = { id: string; role: 'user' | 'assistant'; content: string };
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './app.component.html',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+})
+export class AppComponent {
+  messages: Message[] = [
+    { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+  ];
+
+  async onSubmit(e: Event) {
+    const { value } = (e as CustomEvent<{ value: string }>).detail;
+    // Reassign a new array so Angular change detection picks it up.
+    const history: Message[] = [
+      ...this.messages,
+      { id: crypto.randomUUID(), role: 'user', content: value },
+    ];
+    this.messages = history;
+
+    const aid = crypto.randomUUID();
+    this.messages = [...history, { id: aid, role: 'assistant', content: '' }];
+
+    let answer = '';
+    for await (const token of streamFromYourAPI(history)) {
+      answer += token;
+      this.messages = this.messages.map((m) =>
+        m.id === aid ? { ...m, content: answer } : m
+      );
+    }
+  }
+}
+```
+
+```html
+<!-- app.component.html -->
+<!-- kc-chat fills its container — use flex so it grows with flex:1
+     rather than a hard-coded height. -->
+<div style="display: flex; flex-direction: column; height: 100dvh">
+  <kc-chat
+    [messages]="messages"
+    (kc-submit)="onSubmit($event)"
+    style="flex: 1; min-height: 0"
+  ></kc-chat>
+</div>
+```
+
+## Compose individual elements
+
+`<kc-chat>` is one option. You can assemble your own layout from individual elements. This example pairs a `<kc-conversations>` sidebar with a `<kc-chat>` thread:
+
+```ts
+// workspace.component.ts
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+
+@Component({
+  selector: 'app-workspace',
+  standalone: true,
+  templateUrl: './workspace.component.html',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+})
+export class WorkspaceComponent {
+  conversations = myConversations;
+  activeId = this.conversations[0]?.id;
+  messages = loadMessages(this.activeId);
+
+  onConversationSelect(e: Event) {
+    this.activeId = (e as CustomEvent<{ id: string }>).detail.id;
+    this.messages = loadMessages(this.activeId);
+  }
+
+  onSubmit(e: Event) {
+    const { value } = (e as CustomEvent<{ value: string }>).detail;
+    sendMessage(value);
+  }
+}
+```
+
+```html
+<!-- workspace.component.html -->
+<div style="display: flex; height: 100dvh">
+  <kc-conversations
+    [conversations]="conversations"
+    [activeId]="activeId"
+    (kc-conversation-select)="onConversationSelect($event)"
+    (kc-new-chat)="startNewConversation()"
+    style="width: 300px; flex-shrink: 0"
+  ></kc-conversations>
+
+  <kc-chat
+    [messages]="messages"
+    (kc-submit)="onSubmit($event)"
+    style="flex: 1; min-width: 0"
+  ></kc-chat>
+</div>
+```
+
+### Resizable panels
+
+Wrap panels in `<kc-resizable>` with one `<kc-resizable-item>` each to add a draggable divider. Each item takes a `size` (px or `%`) and optional `min`/`max`. Listen for `(kc-change)` to persist the layout.
+
+```html
+<div style="display: flex; flex-direction: column; height: 100dvh">
+  <kc-resizable
+    orientation="horizontal"
+    (kc-change)="onResize($event)"
+    style="flex: 1; min-height: 0"
+  >
+    <kc-resizable-item size="25%" min="200px">
+      <kc-conversations
+        [conversations]="conversations"
+        [activeId]="activeId"
+        (kc-conversation-select)="onConversationSelect($event)"
+      ></kc-conversations>
+    </kc-resizable-item>
+    <kc-resizable-item>
+      <kc-chat
+        [messages]="messages"
+        (kc-submit)="onSubmit($event)"
+      ></kc-chat>
+    </kc-resizable-item>
+  </kc-resizable>
+</div>
+```
+
+```ts
+onResize(e: Event) {
+  const { sizes } = (e as CustomEvent<{ sizes: number[] }>).detail;
+  // persist to localStorage, a service, etc.
+  localStorage.setItem('panel-sizes', JSON.stringify(sizes));
+}
+```
+
+## Props and events
+
+**Rich data in as properties; interactions out as events.** Angular's `[prop]="…"` binding writes to the element's DOM property directly, so arrays and objects pass through unstringified — no `.prop` modifier needed.
+
+`(kc-event)="handler($event)"` listens for a DOM `CustomEvent`. The payload is on `$event.detail`:
+
+| Element | Property binding | Event | `$event.detail` |
+|---|---|---|---|
+| `kc-chat` | `[messages]="messages"` | `(kc-submit)` | `{ value: string }` |
+| `kc-conversations` | `[conversations]="conversations"` | `(kc-conversation-select)` | `{ id: string }` |
+| `kc-conversations` | `[groups]="groups"` | `(kc-new-chat)` | — |
+| `kc-conversations` | — | `(kc-toggle-sidebar)` | — |
+| `kc-resizable` | `orientation="horizontal"` | `(kc-change)` | `{ sizes: number[] }` |
+| `kc-resizable-item` | `size="25%"` `min="200px"` | — | — |
+
+<Aside type="note" title="Scalars vs. rich values">
+Scalar attributes like `orientation="horizontal"` or `theme="dark"` can be plain HTML attributes (no brackets). Use `[prop]="…"` only for non-string values — arrays, objects, and Angular expressions.
+</Aside>
+
+## Standalone display elements
+
+You can drop individual display elements anywhere in your UI without adopting a full chat shell. `<kc-markdown>`, `<kc-code-block>`, `<kc-artifact>`, `<kc-reasoning>`, and `<kc-tool>` all render rich AI content as standalone elements:
+
+```html
+<kc-markdown [content]="assistantReply"></kc-markdown>
+<kc-reasoning [text]="thinkingText" (kc-open-change)="onReasoningToggle($event)"></kc-reasoning>
+<kc-artifact [files]="files" (kc-file-select)="onFileSelect($event)"></kc-artifact>
+```
+
+Each fills its container and is controlled entirely through `[prop]` bindings and `(event)` listeners — no Shadow DOM piercing, no CSS manipulation.
+
+## Next steps
+
+- [Installation](/chat/guides/installation/) — package exports and theme tokens
+- [Components](/chat/components/attachments/) — full prop and event reference for every `kc-*` element

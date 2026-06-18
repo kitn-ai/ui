@@ -25,6 +25,8 @@ const DEFAULT_LANGUAGES: Record<string, Loader> = {
   html: () => import('@shikijs/langs/html'),
   css: () => import('@shikijs/langs/css'),
   json: () => import('@shikijs/langs/json'),
+  vue: () => import('@shikijs/langs/vue'),
+  svelte: () => import('@shikijs/langs/svelte'),
 };
 
 const DEFAULT_THEMES: Record<string, Loader> = {

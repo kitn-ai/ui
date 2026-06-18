@@ -141,14 +141,17 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `loading` | `loading` | `undefined | false | true` | `false` | When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). |
 | `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property. |
 | `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. |
+| `persistSuggestions` | `persist-suggestions` | `undefined | false | true` | `false` | Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `chatTitle` | `chat-title` | `undefined | string` | — | Optional header title shown on the left of the header. |
-| `models` | — | `ModelOption[] | undefined` | — | Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. |
+| `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently selected model id (pairs with `models`). |
 | `context` | — | `ContextData | undefined` | — | Optional context-window token usage. When set, a Context token meter is shown in the header. |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
+| `headerStart` | `header-start` | `undefined | false | true` | — | Whether the host has `slot="header-start"` content (left of the title) — set by the `<kc-chat>` facade so a custom control forces the header open. |
+| `headerEnd` | `header-end` | `undefined | false | true` | — | Whether the host has `slot="header-end"` content (right of the controls). |
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the input toolbar; fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the input toolbar; fires a `voice` event. |
 | `slashCommands` | — | `SlashCommandItem[] | undefined` | — | Slash commands — when set, typing `/` in the input opens the command palette and fires `kc-slash-select`. Set as a JS property. |
@@ -202,7 +205,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` |  |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` |  |
 | `chatTitle` | `chat-title` | `undefined | string` | — |  |
-| `models` | — | `ModelOption[] | undefined` | — |  |
+| `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — |  |
 | `currentModel` | `current-model` | `undefined | string` | — |  |
 | `context` | — | `ContextData | undefined` | — |  |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` |  |
@@ -214,7 +217,8 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `sidebarWidth` | `sidebar-width` | `undefined | number` | `22` | Sidebar default width as a percent of the workspace (default 22). |
 | `sidebarMinWidth` | `sidebar-min-width` | `undefined | number` | `200` | Sidebar min width in px (default 200). |
 | `sidebarMaxWidth` | `sidebar-max-width` | `undefined | number` | `420` | Sidebar max width in px (default 420). |
-| `sidebarCollapsed` | `sidebar-collapsed` | `undefined | false | true` | `false` | Initial collapsed state of the sidebar (default false). |
+| `sidebarCollapsed` | `sidebar-collapsed` | `undefined | false | true` | — | Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it). |
+| `defaultSidebarCollapsed` | `default-sidebar-collapsed` | `undefined | false | true` | — | Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. |
 
 #### Events
 
@@ -547,7 +551,7 @@ Renders a list of file/document attachments in grid, inline, or list layouts.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `models` | — | `{ id: string; name: string; provider?: undefined | string }[]` | `[]` | The selectable models. Set as a JS property (array). |
+| `models` | — | `{ id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | `[]` | The selectable models. Set as a JS property (array). |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently-selected model id. Defaults to the first model. |
 
 #### Events

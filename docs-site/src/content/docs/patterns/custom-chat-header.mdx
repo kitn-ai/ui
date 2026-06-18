@@ -1,0 +1,61 @@
+---
+title: Custom chat header
+description: Inject a sidebar toggle, a grouped model menu, and a settings popover into the kc-chat header with header-start / header-end slots.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import ChatHeaderDemo from '../../../components/ChatHeaderDemo.tsx';
+
+<p class="kc-lede">The `<kc-chat>` header has two slots — `header-start` (left of the title) and `header-end` (right of the controls) — so you can build a full ChatGPT-style header from kit pieces: a sidebar toggle and a grouped model menu on the left, a settings popover with toggles on the right. Toggle the sidebar, switch models, open settings.</p>
+
+<ChatHeaderDemo client:only="solid" />
+
+<Aside type="note" title="kc-chat vs kc-workspace">
+`<kc-chat>` is the **conversation** — thread, composer, header. It has no sidebar of its own, so here the rail and its toggle are wired by the demo (full control over the layout). If you want a **managed, collapsible conversation sidebar** without wiring it yourself, reach for [`<kc-workspace>`](/chat/components/workspace/) instead — it owns the sidebar (and its collapse is controllable). Use `kc-chat` + header slots when you want to build the shell yourself; use `kc-workspace` when you don't.
+</Aside>
+
+## How it works
+
+Project your own controls into the header by giving light-DOM children a `header-start` or `header-end` slot. The header opens for them even without a title:
+
+```html
+<kc-chat id="chat">
+  <!-- left of the title -->
+  <div slot="header-start">
+    <button id="toggle" aria-label="Toggle sidebar">Menu</button>
+    <kc-model-switcher id="models"></kc-model-switcher>
+  </div>
+
+  <!-- right of the built-in controls -->
+  <div slot="header-end">
+    <kc-popover placement="bottom-end">
+      <button slot="trigger" aria-label="Settings">Settings</button>
+      <div>
+        <label>Temporary chat <kc-switch label="Temporary chat"></kc-switch></label>
+      </div>
+    </kc-popover>
+  </div>
+</kc-chat>
+```
+
+The slotted controls are ordinary elements — wire them however you like. Here the toggle shows/hides a conversations rail, and the model menu is a `<kc-model-switcher>`.
+
+### Grouped, described models
+
+`<kc-model-switcher>` takes a `description` per model (shown as the row subtitle) and a `group` that collects models under a collapsible section — the "Legacy models" pattern:
+
+```js
+document.getElementById('models').models = [
+  { id: 'gpt-5.5',  name: 'GPT-5.5', description: 'Flagship model' },
+  { id: 'gpt-4o',   name: 'GPT-4o',  group: 'Legacy models' },
+  { id: 'gpt-4.1',  name: 'GPT-4.1', group: 'Legacy models' },
+];
+```
+
+Or declare them as `<kc-model>` children: `<kc-model id="gpt-4o" group="Legacy models">GPT-4o</kc-model>`.
+
+## Next steps
+
+- **[Button and popover menu](/chat/patterns/popover-menu/)** — the `kc-popover` primitive on its own.
+- **[`kc-model-switcher` reference](/chat/components/model-switcher/)** — models, groups, and the `kc-model-change` event.
+- **[Compose your own shell](/chat/patterns/compose-your-own/)** — when you need more than the header customised.

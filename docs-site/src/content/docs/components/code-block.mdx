@@ -1,0 +1,87 @@
+---
+title: Code Block
+description: Syntax-highlighted code with a copy button — one element, every language, light and dark.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-code-block</p>
+
+<p class="kc-lede">Drop in a syntax-highlighted snippet with a built-in copy button — set one property, pick a language, and Shiki handles the rest.</p>
+
+<Facts items={['Shadow DOM', 'Shiki highlighting', '100+ languages', 'Built-in copy button', 'Light / dark themes']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-code-block" />
+
+<Aside type="tip" title="When to use">
+Use `<kc-code-block>` for highlighted snippets outside SolidJS — message bubbles, tutorial cards, documentation panes. In SolidJS, compose `CodeBlock` and `CodeBlockCode` directly for finer control. The element is `display: block` and fills its container.
+</Aside>
+
+## Usage
+
+Set `code` in JavaScript (multiline strings don't survive HTML attributes) and `language` as an attribute:
+
+```html
+<kc-code-block id="cb" language="ts"></kc-code-block>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const cb = document.getElementById('cb');
+  cb.code = `export function greet(name: string) {
+  return \`Hello, \${name}!\`;
+}`;
+</script>
+```
+
+- **`code`** — assign it in JavaScript; multiline strings won't survive HTML attribute serialization.
+- **`language`** defaults to `tsx`. Pass any [Shiki grammar name](https://shiki.style/languages): `ts`, `python`, `bash`, `json`, `html`.
+- **`code-theme`** defaults to `github-dark-dimmed`. Any [Shiki theme](https://shiki.style/themes) works.
+- **`code-highlight="false"`** skips Shiki entirely — useful for raw log output.
+
+## Examples
+
+### TypeScript
+
+<Example client:visible tag="kc-code-block" data="typescript" />
+
+### JavaScript
+
+<Example client:visible tag="kc-code-block" data="javascript" />
+
+### Python
+
+<Example client:visible tag="kc-code-block" data="python" />
+
+### Shell / Bash
+
+<Example client:visible tag="kc-code-block" data="bash" />
+
+### Compact Text Size
+
+`prose-size="xs"` tightens the font for dense snippets or embedded cards.
+
+<Example client:visible tag="kc-code-block" config={{ proseSize: 'xs' }} data="typescript" />
+
+### Highlighting Disabled
+
+`code-highlight="false"` renders plain monospace — no Shiki, no colours. Good for terminal output or log lines.
+
+<Example client:visible tag="kc-code-block" config={{ codeHighlight: false }} data="plaintext" />
+
+## Props
+
+<PropTable tag="kc-code-block" />
+
+## Composed from
+
+<ComposedFrom tag="kc-code-block" />
+
+<NeedAHand />

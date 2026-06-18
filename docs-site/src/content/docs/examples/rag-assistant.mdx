@@ -1,0 +1,79 @@
+---
+title: RAG assistant
+description: A docs assistant that answers questions and cites the sources it used — numbered inline citations powered by kc-chat and kc-sources.
+---
+
+import RagAssistantDemo from '../../../components/RagAssistantDemo.tsx';
+
+<p class="kc-lede">A knowledge-base assistant that grounds every answer in retrieved documents. The reply body uses `[1]`, `[2]`, `[3]` markers; `<kc-sources numbered>` renders the matching citation strip below. Ask something to see a new streamed answer with citations.</p>
+
+<RagAssistantDemo
+  client:only="solid"
+  chatTitle="Docs assistant"
+  placeholder="Ask about the docs…"
+  suggestions={["How does WebAssembly improve performance?", "What is Shadow DOM isolation?", "When should I use kc-sources?"]}
+/>
+
+## How it works
+
+`<kc-chat>` handles the Q&A thread. `<kc-sources>` is a **separate element** placed below it — pass the citation list as a property and set `numbered` to auto-label each chip `[1]`, `[2]`, `[3]` to match the markers in the reply text.
+
+```html
+<kc-chat id="chat" chat-title="Docs assistant"></kc-chat>
+<kc-sources id="srcs" numbered show-favicon></kc-sources>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+  const srcs  = document.getElementById('srcs');
+
+  chat.messages = [];
+
+  chat.addEventListener('kc-submit', async (e) => {
+    const prompt = e.detail.value;
+    const aId = crypto.randomUUID();
+
+    // hide the previous citation strip while the new answer streams in
+    srcs.sources = [];
+
+    chat.messages = [
+      ...chat.messages,
+      { id: crypto.randomUUID(), role: 'user', content: prompt },
+      { id: aId, role: 'assistant', content: '' },
+    ];
+    chat.loading = true;
+
+    // stream tokens from your RAG backend
+    const { reply, sources } = await fetchRagAnswer(prompt);
+    for await (const token of reply) {
+      chat.messages = chat.messages.map((m) =>
+        m.id === aId ? { ...m, content: m.content + token } : m,
+      );
+    }
+
+    // reveal citations once streaming finishes
+    srcs.sources = sources; // [{ href, title, description }, …]
+    chat.loading = false;
+  });
+</script>
+```
+
+**`sources` shape** — each item in the array:
+
+| field | type | notes |
+|---|---|---|
+| `href` | `string` | The URL the chip links to |
+| `title` | `string?` | Hover-card headline |
+| `description` | `string?` | Hover-card body text |
+| `label` | `string?` | Trigger label (omit when `numbered` is set) |
+| `showFavicon` | `boolean?` | Per-item favicon override |
+
+`numbered` auto-labels chips `[1]`, `[2]`, … from the merged list order, so inline markers in the reply body align without any extra logic.
+
+## Next steps
+
+- **[`kc-sources` reference](/chat/components/sources/)** — `numbered`, `showFavicon`, and the declarative `<kc-source>` children path.
+- **[`kc-source` reference](/chat/components/source/)** — single citation chips and their hover-card props (`headline`, `description`).
+- **[Streaming recipe](/chat/guides/recipes/streaming/)** — parsing SSE from your RAG backend and driving the token loop.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the baseline streaming loop this example builds on.

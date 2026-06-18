@@ -1,0 +1,81 @@
+---
+title: Image
+description: Renders a base64 or byte-array image with a skeleton placeholder while it resolves — no hosted URL required.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-image</p>
+
+<p class="kc-lede">Display a model-generated or in-memory image directly from a base64 string or raw byte array — no CDN upload, no hosted URL needed.</p>
+
+<Facts items={['Shadow DOM', 'Base64 or Uint8Array input', 'Skeleton while resolving', 'SVG / PNG / JPEG / any MIME type', 'Alt text for accessibility']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-image" />
+
+<Aside type="tip" title="When to use">
+Use `<kc-image>` when you receive raw image data from a model or API response and need to display it inline — inside a message bubble, a card body, or an artifact preview — without uploading first. The element is `display: inline-block` and fills its container width; constrain width on the parent as needed.
+</Aside>
+
+## Usage
+
+Assign either `base64` (paired with `media-type`) or `bytes` as a property:
+
+```html
+<kc-image id="img" media-type="image/png" alt="A generated chart"></kc-image>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const img = document.getElementById('img');
+
+  // base64 string:
+  img.base64 = '<...base64 encoded image data...>';
+
+  // or raw bytes:
+  // img.bytes = new Uint8Array([...]);
+</script>
+```
+
+- **`base64`** — scalar attribute or property; pair with `media-type` so the browser decodes correctly.
+- **`bytes`** — assign it in JavaScript (`Uint8Array`); `media-type` is recommended but not required when the format is detectable.
+- **`media-type`** defaults to `image/png`. Override for SVG (`image/svg+xml`), JPEG, or any other MIME type.
+- **`alt`** defaults to an empty string — always provide meaningful alt text.
+
+## Examples
+
+### Purple Star
+
+A base64-encoded SVG with explicit `media-type` and descriptive alt text.
+
+<Example client:visible tag="kc-image" />
+
+### Teal Circle
+
+A different base64 SVG — swap `base64` and `media-type` for each image you display.
+
+<Example client:visible tag="kc-image" data="circle" />
+
+### With Descriptive Alt Text
+
+Pairs the image with a specific `alt` string so screen readers announce it correctly.
+
+<Example client:visible tag="kc-image" data="checkmark" />
+
+## Props
+
+<PropTable tag="kc-image" />
+
+## Composed from
+
+<ComposedFrom tag="kc-image" />
+
+<NeedAHand />

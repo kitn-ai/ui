@@ -18,7 +18,10 @@
         "optional": false,
         "scalar": false,
         "description": "Files for the Code tab tree + each file's preview `url`. Set as a JS property (array).",
+        "typeName": "FileTreeFile[]",
+        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
         "default": "[]",
+        "typeImport": "FileTreeFile",
         "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
       },
       {
@@ -192,7 +195,10 @@
         "optional": false,
         "scalar": false,
         "description": "The attachments to render. Set as a JS property (array).",
+        "typeName": "AttachmentData[]",
+        "typeShape": "{ id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]",
         "default": "[]",
+        "typeImport": "AttachmentData",
         "displayType": "AttachmentData[]"
       },
       {
@@ -397,6 +403,8 @@
         "optional": false,
         "scalar": false,
         "description": "The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1).",
+        "typeName": "Step[]",
+        "typeShape": "{ label: string; content?: undefined | string }[]",
         "default": "[]",
         "displayType": "{ label: string; content?: undefined | string }[]"
       }
@@ -442,6 +450,8 @@
         "optional": false,
         "scalar": false,
         "description": "The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`).",
+        "typeName": "ChatMessage[]",
+        "typeShape": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]",
         "default": "[]",
         "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]"
       },
@@ -489,6 +499,15 @@
         "displayType": "undefined | \"submit\" | \"fill\""
       },
       {
+        "name": "persistSuggestions",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
         "name": "proseSize",
         "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
         "optional": true,
@@ -525,11 +544,11 @@
       },
       {
         "name": "models",
-        "type": "undefined | { id: string; name: string; provider?: undefined | string }[]",
+        "type": "undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
         "optional": true,
         "scalar": false,
         "description": "Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection.",
-        "displayType": "ModelOption[] | undefined"
+        "displayType": "undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]"
       },
       {
         "name": "currentModel",
@@ -554,6 +573,22 @@
         "scalar": true,
         "description": "Show the scroll-to-bottom button inside the scroll area. Default true.",
         "default": "true",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "headerStart",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether the host has `slot=\"header-start\"` content (left of the title) — set by the `<kc-chat>` facade so a custom control forces the header open.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "headerEnd",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether the host has `slot=\"header-end\"` content (right of the controls).",
         "displayType": "undefined | false | true"
       },
       {
@@ -1020,7 +1055,10 @@
         "optional": false,
         "scalar": false,
         "description": "Pre-bucketed conversation groups (e.g. \"Today\", \"Yesterday\"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property.",
+        "typeName": "ConversationGroup[]",
+        "typeShape": "{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]",
         "default": "[]",
+        "typeImport": "ConversationGroup",
         "displayType": "ConversationGroup[]"
       },
       {
@@ -1029,7 +1067,10 @@
         "optional": false,
         "scalar": false,
         "description": "A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property.",
+        "typeName": "ConversationSummary[]",
+        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
         "default": "[]",
+        "typeImport": "ConversationSummary",
         "displayType": "ConversationSummary[]"
       },
       {
@@ -1267,7 +1308,10 @@
         "optional": false,
         "scalar": false,
         "description": "The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`).",
+        "typeName": "FileTreeFile[]",
+        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
         "default": "[]",
+        "typeImport": "FileTreeFile",
         "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
       },
       {
@@ -1760,12 +1804,15 @@
     "props": [
       {
         "name": "models",
-        "type": "{ id: string; name: string; provider?: undefined | string }[]",
+        "type": "{ id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
         "optional": false,
         "scalar": false,
         "description": "The selectable models. Set as a JS property (array).",
+        "typeName": "ModelOption[]",
+        "typeShape": "{ id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
         "default": "[]",
-        "displayType": "{ id: string; name: string; provider?: undefined | string }[]"
+        "typeImport": "ModelOption",
+        "displayType": "{ id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]"
       },
       {
         "name": "currentModel",
@@ -1789,6 +1836,55 @@
         "name": "ModelSwitcher",
         "group": "Components",
         "storyId": "solid-advanced-elements-modelswitcher--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kc-popover",
+    "className": "KcPopoverElement",
+    "displayName": "Popover",
+    "props": [
+      {
+        "name": "placement",
+        "type": "undefined | \"top\" | \"right\" | \"bottom\" | \"left\" | \"top-start\" | \"top-end\" | \"right-start\" | \"right-end\" | \"bottom-start\" | \"bottom-end\" | \"left-start\" | \"left-end\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Floating placement relative to the trigger (floating-ui placement).",
+        "default": "'bottom-start'",
+        "displayType": "undefined | \"top\" | \"right\" | \"bottom\" | \"left\" | \"top-start\" | \"top-end\" | \"right-start\" | \"right-end\" | \"bottom-start\" | \"bottom-end\" | \"left-start\" | \"left-end\""
+      },
+      {
+        "name": "gutter",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Gap in px between the trigger and the panel.",
+        "default": "6",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour.",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kc-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The popover wants to open or close (click, Escape, or outside-click).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Popover",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-popover--docs"
       }
     ],
     "tokens": []
@@ -2369,6 +2465,8 @@
         "optional": false,
         "scalar": false,
         "description": "The active skills to badge. Set as a JS property.",
+        "typeName": "Skill[]",
+        "typeShape": "{ id: string; name: string }[]",
         "default": "[]",
         "displayType": "{ id: string; name: string }[]"
       }
@@ -2469,6 +2567,8 @@
         "optional": false,
         "scalar": false,
         "description": "The sources to render. Set as a JS property.",
+        "typeName": "SourceItem[]",
+        "typeShape": "{ href: string; title?: undefined | string; description?: undefined | string; label?: undefined | string; showFavicon?: undefined | false | true }[]",
         "default": "[]",
         "displayType": "SourceItem[]"
       },
@@ -2578,6 +2678,53 @@
         "name": "PromptSuggestion",
         "group": "Components",
         "storyId": "solid-advanced-elements-promptsuggestion--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kc-switch",
+    "className": "KcSwitchElement",
+    "displayName": "Switch",
+    "props": [
+      {
+        "name": "checked",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial checked state. Bare attribute (`<kc-switch checked>`) turns it on.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable interaction.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Accessible label.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kc-change",
+        "detail": "{ checked: false | true }",
+        "description": "The toggle changed.",
+        "displayDetail": "{ checked: false | true }"
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Switch",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-switch--docs"
       }
     ],
     "tokens": []
@@ -2827,7 +2974,10 @@
         "optional": false,
         "scalar": false,
         "description": "Pre-bucketed conversation groups for the sidebar. Set as a JS property.",
+        "typeName": "ConversationGroup[]",
+        "typeShape": "{ id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]",
         "default": "[]",
+        "typeImport": "ConversationGroup",
         "displayType": "ConversationGroup[]"
       },
       {
@@ -2836,7 +2986,10 @@
         "optional": false,
         "scalar": false,
         "description": "Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property.",
+        "typeName": "ConversationSummary[]",
+        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
         "default": "[]",
+        "typeImport": "ConversationSummary",
         "displayType": "ConversationSummary[]"
       },
       {
@@ -2853,6 +3006,8 @@
         "optional": false,
         "scalar": false,
         "description": "The active conversation's message thread, newest last. Set as a JS property.",
+        "typeName": "ChatMessage[]",
+        "typeShape": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]",
         "default": "[]",
         "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]"
       },
@@ -2936,11 +3091,11 @@
       },
       {
         "name": "models",
-        "type": "undefined | { id: string; name: string; provider?: undefined | string }[]",
+        "type": "undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
         "optional": true,
         "scalar": false,
         "description": "",
-        "displayType": "ModelOption[] | undefined"
+        "displayType": "undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]"
       },
       {
         "name": "currentModel",
@@ -3042,8 +3197,15 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Initial collapsed state of the sidebar (default false).",
-        "default": "false",
+        "description": "Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultSidebarCollapsed",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML.",
         "displayType": "undefined | false | true"
       }
     ],

@@ -144,6 +144,11 @@ function ResizablePanel(props: ResizablePanelProps) {
     };
     setBound(local.minSize, 'data-min-size', 'data-min-size-pct');
     setBound(local.maxSize, 'data-max-size', 'data-max-size-pct');
+    // Reflect the DEFAULT size too, so a double-click on an adjacent handle can
+    // restore this panel to it after a drag has rewritten its inline flex-basis.
+    // A panel with no defaultSize records nothing → the handle resets it to the
+    // flexible `flex:1` state instead.
+    setBound(local.defaultSize, 'data-default-size', 'data-default-size-pct');
     return out;
   };
 
@@ -304,6 +309,48 @@ function ResizableHandle(props: ResizableHandleProps) {
     nextEl = null;
   };
 
+  /**
+   * Restore one adjacent panel to its DEFAULT size. Reads the panel's reflected
+   * `data-default-size` (px) / `data-default-size-pct` (percent); if neither is
+   * present the panel had no explicit default → return it to the flexible
+   * `flex: 1 1 0%` state (clear inline basis, grow:1) so it reclaims free space.
+   */
+  function resetPanelToDefault(el: HTMLElement) {
+    const px = el.dataset.defaultSize;
+    const pct = el.dataset.defaultSizePct;
+    if (px !== undefined && px !== '') {
+      el.style.flexBasis = `${px}px`;
+      el.style.flexGrow = '0';
+      el.style.flexShrink = '0';
+    } else if (pct !== undefined && pct !== '') {
+      el.style.flexBasis = `${pct}%`;
+      el.style.flexGrow = '0';
+      el.style.flexShrink = '0';
+    } else {
+      // No declared default → flexible panel: clear the dragged basis and grow.
+      el.style.flexBasis = '';
+      el.style.flexGrow = '1';
+      el.style.flexShrink = '1';
+    }
+  }
+
+  /**
+   * Double-clicking the divider restores BOTH adjacent panels to their default
+   * sizes — a fast "snap back" after a drag. No-op on a static (locked) handle.
+   */
+  const handleDblClick = (e: MouseEvent) => {
+    if (isStatic()) return;
+    const handle = e.currentTarget as HTMLElement;
+    const prev = handle.previousElementSibling as HTMLElement | null;
+    const next = handle.nextElementSibling as HTMLElement | null;
+    if (!prev || !next) return;
+    e.preventDefault();
+    resetPanelToDefault(prev);
+    resetPanelToDefault(next);
+    // Re-emit so consumers (and the element facade) observe the new sizes.
+    local.onPanelResize?.(0);
+  };
+
   // --- Keyboard resize ---
   const aria = createSignal(50);
   const [valueNow, setValueNow] = aria;
@@ -378,6 +425,7 @@ function ResizableHandle(props: ResizableHandleProps) {
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
+      onDblClick={handleDblClick}
       onKeyDown={handleKeyDown}
       role="separator"
       tabIndex={isStatic() ? undefined : 0}

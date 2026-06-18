@@ -1,0 +1,86 @@
+---
+title: Loader
+description: A dozen animated busy indicators in a single web component — pick a style with one attribute.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-loader</p>
+
+<p class="kc-lede">An animated busy indicator that fits anywhere — buttons, toolbars, empty panels, or standalone skeletons — with twelve visual styles from a single `variant` attribute.</p>
+
+<Facts items={['Shadow DOM', '12 variants', '3 sizes', 'Text label support']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-loader" />
+
+<Aside type="tip" title="When to use">
+Use `<kc-loader>` for a "working" indicator outside the chat thread — inside a send button, a toolbar corner, or as a panel placeholder. In SolidJS, use the `Loader` primitive directly for finer composition control.
+</Aside>
+
+## Usage
+
+All props are plain HTML attributes — no binding layer required:
+
+```html
+<kc-loader variant="dots" size="md"></kc-loader>
+```
+
+- **`variant`** — `circular` for generic waits, `wave`/`bars` for audio or processing, `text-shimmer` for an AI "thinking" state.
+- **`size`** — `sm` inside a button, `lg` as a panel placeholder.
+- **`text`** — required for text-based variants (`text-blink`, `text-shimmer`, `loading-dots`); e.g. `text="Thinking…"`.
+
+## Examples
+
+### Default Spinner
+
+The out-of-the-box circular spinner — no attributes needed.
+
+<Example client:visible tag="kc-loader" config={{ variant: 'circular', size: 'md' }} />
+
+### Dots
+
+Three-dot pulse — works well inside buttons or inline next to text.
+
+<Example client:visible tag="kc-loader" config={{ variant: 'dots', size: 'md' }} />
+
+### Wave
+
+Rhythmic wave — great for audio processing or streaming output.
+
+<Example client:visible tag="kc-loader" config={{ variant: 'wave', size: 'md' }} />
+
+### Text Shimmer
+
+Animates a label with a shimmer sweep — ideal for AI "Thinking…" states.
+
+<Example client:visible tag="kc-loader" config={{ variant: 'text-shimmer', size: 'md', text: 'Thinking…' }} />
+
+### Sizes
+
+<Example client:visible tag="kc-loader" config={{ variant: 'dots', size: 'sm' }} />
+
+<Example client:visible tag="kc-loader" config={{ variant: 'dots', size: 'lg' }} />
+
+### Terminal
+
+Retro blinking cursor — a good touch for developer tools or code-generation states.
+
+<Example client:visible tag="kc-loader" config={{ variant: 'terminal', size: 'md' }} />
+
+## Props
+
+<PropTable tag="kc-loader" />
+
+## Composed from
+
+<ComposedFrom tag="kc-loader" />
+
+<NeedAHand />

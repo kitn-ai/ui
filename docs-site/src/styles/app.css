@@ -1,0 +1,97 @@
+/* Tailwind v4 + Starlight, correctly layered so Tailwind utilities can override
+   Starlight chrome without its preflight clobbering Starlight's own styles.
+   Then our design-system tokens, then the @theme that turns those tokens into
+   Tailwind color utilities (bg-surface, text-ink, text-brand, …). */
+@layer base, starlight, theme, components, utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import '@astrojs/starlight-tailwind';
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@import './tokens.css';
+
+/* Design-system colors → Tailwind utilities. `inline` emits var() refs so they
+   track the active theme at runtime. Components use ONLY these. */
+@theme inline {
+  --color-bg: var(--kc-bg);
+  --color-surface: var(--kc-surface);
+  --color-surface-2: var(--kc-surface-2);
+  --color-line: var(--kc-line);
+  --color-ink: var(--kc-ink);
+  --color-ink-2: var(--kc-ink-2);
+  --color-ink-3: var(--kc-ink-3);
+  --color-brand: var(--kc-brand);
+  --color-link: var(--kc-link);
+
+  --font-sans: 'Lato', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* Topic switching: on desktop the custom header nav (Docs · Components · Examples)
+   is the switcher, so hide the plugin's in-sidebar topic list there (no redundant
+   topic title in the sidebar). Keep it on mobile, where the header nav collapses. */
+@media (min-width: 50rem) {
+  .starlight-sidebar-topics { display: none; }
+}
+
+/* The theme editor is a full-screen tool: header + editor only. The marker
+   `.kc-fullscreen` is server-rendered (the editor island is client:only), so the
+   chrome is hidden with no hydration flash. */
+/* Full width + reclaim the space the (hidden) sidebar reserved on the left. */
+:root:has(.kc-fullscreen) { --sl-content-width: 100%; --sl-content-inline-start: 0rem; --sl-sidebar-width: 0rem; }
+body:has(.kc-fullscreen) #starlight__sidebar,
+body:has(.kc-fullscreen) .pagination-links,
+body:has(.kc-fullscreen) footer,
+body:has(.kc-fullscreen) .content-panel:has(h1) { display: none; }
+/* The page itself never scrolls — the editor's own panes scroll internally. */
+html:has(.kc-fullscreen), body:has(.kc-fullscreen) { overflow: hidden; }
+/* Zero the content padding/border + any reserved sidebar inset so the editor
+   fills the whole pane edge-to-edge. */
+body:has(.kc-fullscreen) .content-panel { padding: 0; border: 0; }
+body:has(.kc-fullscreen) .sl-markdown-content { margin: 0; }
+body:has(.kc-fullscreen) .main-frame,
+body:has(.kc-fullscreen) .main-pane { padding-inline-start: 0; padding-block-end: 0; overflow: hidden; }
+/* The editor fills exactly the viewport below the header, full-bleed. */
+body:has(.kc-fullscreen) .theme-studio-root {
+  margin: 0;
+  border-radius: 0;
+  border-inline: 0;
+  border-top: 0;
+  height: calc(100dvh - var(--sl-nav-height));
+  min-height: 0;
+}
+
+/* Ask AI dock. The panel itself is portaled to <body> and fixed to the right.
+   Width of the dock: */
+:root { --kc-dock-w: 380px; }
+
+/* On wide viewports there's room to SHARE the space: push the whole app left by
+   the dock width so the docs stay fully visible (no dimming backdrop). Below the
+   threshold there isn't room, so the dock overlays with a backdrop instead.
+   `transform` makes `.page` the containing block for its fixed header/sidebar,
+   so they shift with the content rather than spanning under the panel. */
+.page { transition: margin-inline-end 220ms ease-out; }
+@media (min-width: 80rem) {
+  html.kc-askai-open .page {
+    transform: translateX(0);
+    margin-inline-end: var(--kc-dock-w);
+  }
+  html.kc-askai-open .kc-askai-backdrop { opacity: 0 !important; pointer-events: none; }
+  /* Sharing space: the panel is a docked sibling with a left border, so the
+     drop shadow is wrong here — keep it only for the overlay (narrow) mode. */
+  html.kc-askai-open .kc-askai-panel { box-shadow: none; }
+}
+
+/* Sidebar links: small, uniform text. Starlight's `.large` class (top-level leaf
+   links AND the group-label span inside <summary>) carries the larger size +
+   font-weight 600 — override it on the class itself so size/weight actually
+   change. Normal weight by default; bold only when selected, and a group label
+   bolds only when its section contains the current page. */
+#starlight__sidebar a,
+#starlight__sidebar summary,
+#starlight__sidebar .large { font-size: var(--sl-text-sm); }
+#starlight__sidebar .large { font-weight: 400; }
+#starlight__sidebar a.large[aria-current='page'] { font-weight: 600; }
+#starlight__sidebar details:has(a[aria-current='page']) > summary .large { font-weight: 600; }

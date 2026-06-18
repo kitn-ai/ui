@@ -83,6 +83,32 @@ export const MultipleModels: Story = {
 />`),
 };
 
+/**
+ * Rich rows + a collapsible group. `description` renders as the row subtitle
+ * (preferred over `provider`), and models sharing a `group` collect under a
+ * collapsible section — the ChatGPT-style "Legacy models" pattern.
+ */
+export const GroupedAndDescribed: Story = {
+  args: {
+    models: [
+      { id: 'gpt-5.5', name: 'GPT-5.5', description: 'Flagship model' },
+      { id: 'gpt-5.5-mini', name: 'GPT-5.5 mini', description: 'Faster, lighter' },
+      { id: 'gpt-4o', name: 'GPT-4o', group: 'Legacy models' },
+      { id: 'gpt-4.1', name: 'GPT-4.1', group: 'Legacy models' },
+    ],
+    currentModelId: 'gpt-5.5',
+  },
+  ...src(`<ModelSwitcher
+  models={[
+    { id: 'gpt-5.5', name: 'GPT-5.5', description: 'Flagship model' },
+    { id: 'gpt-4o', name: 'GPT-4o', group: 'Legacy models' },
+    { id: 'gpt-4.1', name: 'GPT-4.1', group: 'Legacy models' },
+  ]}
+  currentModelId={modelId()}
+  onModelChange={setModelId}
+/>`),
+};
+
 /** A single model — the switcher renders nothing (needs 2+ models). */
 export const SingleModel: Story = {
   args: {

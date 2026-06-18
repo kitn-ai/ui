@@ -1,0 +1,71 @@
+---
+title: Skills
+description: A compact badge strip that shows which skills or tools were active for a message.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-skills</p>
+
+<p class="kc-lede">A horizontal strip of skill badges — set a JS array or compose declarative `<kc-skill>` children to annotate a message with the tools it used.</p>
+
+<Facts items={['Shadow DOM', 'Property or declarative children', 'Badges wrap automatically', '2 composition paths']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-skills" />
+
+<Aside type="tip" title="When to use">
+Place `<kc-skills>` beneath an assistant message row to annotate which tools were active. Use the `skills` property when skill data comes from app state; use declarative `<kc-skill>` children for server-rendered HTML with no JS wiring.
+</Aside>
+
+## Usage
+
+Assign the `skills` property after the element upgrades — arrays can't be HTML attributes:
+
+```html
+<kc-skills id="skills"></kc-skills>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  document.getElementById('skills').skills = [
+    { id: 'web-search', name: 'Web Search' },
+    { id: 'code',       name: 'Code' },
+  ];
+</script>
+```
+
+- **Declarative path** — nest `<kc-skill id="…">Label</kc-skill>` children directly; useful for server-rendered HTML with no JS wiring.
+- **Mixed** — when both are provided, prop items render first and declarative children are appended after.
+- **SolidJS** — import `MessageSkills` from `@kitn.ai/chat` and pass a `skills` prop instead.
+
+## Examples
+
+### Two Skills
+
+<Example client:visible tag="kc-skills" data="twoSkills" />
+
+### Multiple Skills
+
+Badges wrap horizontally when they overflow — no extra layout work needed.
+
+<Example client:visible tag="kc-skills" data="richSkills" />
+
+### Declarative Composition
+
+<Example client:visible tag="kc-skills" />
+
+## Props
+
+<PropTable tag="kc-skills" />
+
+## Composed from
+
+<ComposedFrom tag="kc-skills" />
+
+<NeedAHand />

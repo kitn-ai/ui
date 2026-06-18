@@ -1,0 +1,72 @@
+---
+title: Text Shimmer
+description: An animated gradient sweep across a label — the lightest way to signal a quiet in-progress state inline.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-text-shimmer</p>
+
+<p class="kc-lede">A gradient that sweeps across a word or short phrase — the quietest way to signal "working…" without a spinner stealing the scene.</p>
+
+<Facts items={['Shadow DOM', 'Inline span', 'Tunable speed', 'Tunable spread', 'All scalar attributes']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-text-shimmer" />
+
+<Aside type="tip" title="When to use">
+Place `<kc-text-shimmer>` inline in a status row, toolbar label, or above a streaming area. It renders as an inline `span`, so it flows naturally beside text or icons. Swap it for `<kc-thinking-bar>` when you also need a stop affordance.
+</Aside>
+
+## Usage
+
+```html
+<kc-text-shimmer text="Thinking…" duration="3" spread="20"></kc-text-shimmer>
+```
+
+All props are **scalar attributes** — set them in HTML or via `setAttribute`. No JavaScript, no events.
+
+- **`duration`** — seconds per sweep (default `4`; lower is faster).
+- **`spread`** — gradient width as a percentage (default `20`; 5–45; wider looks softer).
+- **`as`** — swap the inner element from `span` to any block tag (e.g. `"p"`) when layout demands it.
+
+## Examples
+
+### Default
+
+<Example client:visible tag="kc-text-shimmer" config={{ text: 'Thinking…' }} />
+
+### Fast Sweep with Wide Spread
+
+Lower `duration` to `2` and raise `spread` to `35` for a softer, quicker sweep — useful for longer phrases.
+
+<Example client:visible tag="kc-text-shimmer" config={{ text: 'Generating response…', duration: '2', spread: '35' }} />
+
+### Narrow, Slow Sweep
+
+`spread` of `8` with default duration creates a crisp, focused highlight — stays subtle beside dense UI.
+
+<Example client:visible tag="kc-text-shimmer" config={{ text: 'Analysing…', spread: '8' }} />
+
+### Rendered as a Paragraph
+
+`as="p"` wraps the shimmer in a block element — handy when the label needs to sit on its own line above streaming output.
+
+<Example client:visible tag="kc-text-shimmer" config={{ text: 'Summarising your document…', as: 'p' }} />
+
+## Props
+
+<PropTable tag="kc-text-shimmer" />
+
+## Composed from
+
+<ComposedFrom tag="kc-text-shimmer" />
+
+<NeedAHand />

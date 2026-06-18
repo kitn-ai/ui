@@ -14,6 +14,8 @@ declare module 'solid-js' {
       'kc-model': JSX.HTMLAttributes<HTMLElement> & {
         id?: string;
         provider?: string;
+        description?: string;
+        group?: string;
       };
     }
   }
@@ -153,4 +155,44 @@ export const DeclarativeModels: Story = {
       source: { code: DECLARATIVE_HTML_SNIPPET, language: 'html' },
     },
   },
+};
+
+const GROUPED_HTML_SNIPPET = `<kc-model-switcher id="ms">
+  <kc-model id="gpt-5.5" description="Flagship model">GPT-5.5</kc-model>
+  <kc-model id="gpt-4o" group="Legacy models">GPT-4o</kc-model>
+  <kc-model id="gpt-4.1" group="Legacy models">GPT-4.1</kc-model>
+</kc-model-switcher>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  document.getElementById('ms').addEventListener('kc-model-change', (e) => {
+    console.log('selected model:', e.detail.modelId);
+  });
+</script>`;
+
+/**
+ * Rich rows + a collapsible group via `<kc-model>` attributes: `description`
+ * renders as the row subtitle, and children sharing a `group` collect under a
+ * collapsible section — the ChatGPT-style "Legacy models" pattern.
+ */
+export const GroupedModels: Story = {
+  name: 'Grouped & Described (kc-model)',
+  render: () => {
+    let el: HTMLElement | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.addEventListener('kc-model-change', (e) =>
+        console.log('kc-model-change', (e as CustomEvent<{ modelId: string }>).detail.modelId),
+      );
+    });
+    return (
+      <kc-model-switcher ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '40px' }}>
+        <kc-model id="gpt-5.5" description="Flagship model">GPT-5.5</kc-model>
+        <kc-model id="gpt-5.5-mini" description="Faster, lighter">GPT-5.5 mini</kc-model>
+        <kc-model id="gpt-4o" group="Legacy models">GPT-4o</kc-model>
+        <kc-model id="gpt-4.1" group="Legacy models">GPT-4.1</kc-model>
+      </kc-model-switcher>
+    );
+  },
+  parameters: { docs: { source: { code: GROUPED_HTML_SNIPPET, language: 'html' } } },
 };

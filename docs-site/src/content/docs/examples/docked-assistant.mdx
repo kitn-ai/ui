@@ -1,0 +1,71 @@
+---
+title: Docked assistant
+description: Dock a support assistant as a persistent, full-height side panel on your app — always visible beside the page, isolated by Shadow DOM.
+---
+
+import DockedAssistantDemo from '../../../components/DockedAssistantDemo.tsx';
+
+<p class="kc-lede">Pin a help assistant to the side of your app as a permanent, full-height column — always open, no launcher to find. The panel sits beside the scrolling page; because `<kc-chat>` lives in its own Shadow DOM, the host's CSS stays out and the panel's styles stay in. Scroll the host below, toggle its light/dark, and ask about billing.</p>
+
+<DockedAssistantDemo client:only="solid" chatTitle="Support" suggestions={["How do I change my plan?", "Add a teammate to my workspace", "Where are my invoices?"]} messages={[
+  { id: 'd0', role: 'assistant', content: "Hi — I'm your support assistant. I'm docked here while you work, so ask anytime. What can I help with?" },
+]} />
+
+## When to dock instead of float
+
+A docked panel keeps the assistant in view the whole session — well suited to dashboards, admin consoles, and support tools where users return to it constantly. A floating launcher (the [Support widget](/chat/examples/support-widget/)) stays out of the way until summoned, which fits marketing pages and content sites where chat is occasional.
+
+| | Docked panel | Floating widget |
+| --- | --- | --- |
+| Visibility | Always open | Toggled by a button |
+| Layout cost | Reserves a column | Overlays the page |
+| Best for | Apps, dashboards, consoles | Sites, docs, landing pages |
+
+## How it works
+
+Give the page a flex (or grid) row: the app content takes the remaining width and scrolls on its own, and a fixed-width `<kc-chat>` fills a full-height column on the right.
+
+```html
+<div class="layout">
+  <main id="content"><!-- your app --></main>
+  <aside id="dock">
+    <kc-chat id="assistant" chat-title="Support" prose-size="sm"></kc-chat>
+  </aside>
+</div>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const chat = document.getElementById('assistant');
+
+  chat.suggestions = ['How do I change my plan?', 'Where are my invoices?'];
+  chat.addEventListener('kc-submit', (e) => {
+    const text = e.detail.value;
+    /* stream your reply back into chat.messages (see Drop-in chat) */
+  });
+</script>
+```
+
+```css
+.layout  { display: flex; height: 100vh; }
+#content { flex: 1; min-width: 0; overflow-y: auto; }
+#dock    { width: 360px; flex-shrink: 0; height: 100%; border-left: 1px solid rgb(0 0 0 / 0.1); }
+#dock kc-chat { display: block; height: 100%; }
+```
+
+The panel reads `100%` of its column, so it stays full-height as the content beside it scrolls independently.
+
+## Match the host theme
+
+Drive the panel's `theme` attribute from your app's own theme state — set it on mount and update it whenever the user toggles light/dark, so the dock always matches the page around it.
+
+```js
+const setTheme = (mode) => chat.setAttribute('theme', mode); // 'light' | 'dark'
+themeToggle.addEventListener('click', () => setTheme(isDark() ? 'dark' : 'light'));
+```
+
+## Next steps
+
+- **[Support widget](/chat/examples/support-widget/)** — the floating-launcher counterpart for sites that don't dock.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop this panel uses on `kc-submit`.
+- **[Theming](/chat/guides/theming/)** — match the panel to your brand.
+- **[`kc-chat` reference](/chat/components/chat/)** — `suggestions`, `proseSize`, `slashCommands`, and more.

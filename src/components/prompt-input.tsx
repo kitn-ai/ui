@@ -64,7 +64,7 @@ function PromptInput(props: PromptInputProps) {
         setValue: local.onValueChange ?? handleChange,
         maxHeight: local.maxHeight ?? 240,
         onSubmit: local.onSubmit,
-        disabled: local.disabled,
+        get disabled() { return local.disabled; },
         get textareaRef() { return textareaRef; },
         setTextareaRef: (el) => { textareaRef = el; },
       }}
@@ -146,7 +146,8 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
   function handleKeyDown(e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      ctx.onSubmit?.();
+      // A disabled composer is non-interactive: Enter must not submit.
+      if (!ctx.disabled) ctx.onSubmit?.();
     }
     if (typeof local.onKeyDown === 'function') {
       (local.onKeyDown as (e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) => void)(e);

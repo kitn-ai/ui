@@ -1,0 +1,198 @@
+---
+title: Frameworks
+description: The kc-* web components run in any framework — React adds a typed adapter, SolidJS adds native components.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+The `kc-*` web components drop into React, Vue, Angular, Svelte, or plain HTML with a single import — no per-framework package, no wrappers. React adds a typed adapter; in a Solid app you can import the native components directly.
+
+## Pick an entry point
+
+| Entry | Use it for |
+|---|---|
+| `@kitn.ai/chat/elements` | Any framework — registers every `kc-*` element |
+| `@kitn.ai/chat/react` | React — typed wrappers with camelCase props and event handlers |
+| `@kitn.ai/chat` | SolidJS — native Solid components for full compositional control |
+
+## Any framework: the web components
+
+Import `@kitn.ai/chat/elements` once for its side effect. It registers every `kc-*` element; after that they work like built-in HTML.
+
+```ts
+import '@kitn.ai/chat/elements';
+```
+
+Then use them in your templates:
+
+<Tabs>
+  <TabItem label="HTML">
+    ```html
+    <kc-chat style="display:block; height:100%;"></kc-chat>
+
+    <script type="module">
+      import '@kitn.ai/chat/elements';
+
+      const chat = document.querySelector('kc-chat');
+      chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
+      chat.addEventListener('kc-submit', (e) => console.log(e.detail));
+    </script>
+    ```
+  </TabItem>
+  <TabItem label="Vue">
+    ```vue
+    <script setup>
+    import '@kitn.ai/chat/elements';
+    const messages = ref([{ id: '1', role: 'assistant', content: 'Hello!' }]);
+    </script>
+
+    <template>
+      <kc-chat
+        :messages.prop="messages"
+        @kc-submit="onSubmit"
+      />
+    </template>
+    ```
+  </TabItem>
+  <TabItem label="Svelte">
+    ```svelte
+    <script>
+    import '@kitn.ai/chat/elements';
+    let messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
+    </script>
+
+    <kc-chat
+      {messages}
+      on:kc-submit={onSubmit}
+    ></kc-chat>
+    ```
+  </TabItem>
+  <TabItem label="Angular">
+    ```ts
+    // app.module.ts
+    import '@kitn.ai/chat/elements';
+    ```
+
+    ```html
+    <!-- template -->
+    <kc-chat
+      [messages]="messages"
+      (kc-submit)="onSubmit($event)"
+    ></kc-chat>
+    ```
+  </TabItem>
+</Tabs>
+
+## Properties vs. attributes
+
+The one thing to get right: Arrays and objects must be set in JavaScript, not as HTML attributes — an attribute is always a string, so writing `messages` or `models` as an attribute silently does nothing.
+
+```js
+const chat = document.querySelector('kc-chat');
+
+// Right: set the array in JavaScript.
+chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
+
+// Wrong: an attribute is a string, so the element never gets the array.
+// <kc-chat messages="[...]"></kc-chat>
+```
+
+Scalars — `placeholder`, `loading`, `theme`, `prose-size` — work fine as attributes. Each framework's binding picks the right path for you: Vue uses `:prop.prop`, Angular uses `[prop]`, Svelte binds objects directly.
+
+## Events
+
+Every `kc-*` element dispatches `CustomEvent`s with a `detail` payload, named with a `kc-` prefix (`kc-submit`, `kc-model-change`, `kc-remove`, …).
+
+```js
+chat.addEventListener('kc-submit', (e) => {
+  const { value } = e.detail;
+  // send value to your model API
+});
+```
+
+The events don't bubble — listen on the element itself.
+
+## React adapter
+
+`@kitn.ai/chat/react` exports a typed component for every element. Props take arrays and objects directly (no `.prop` modifier), and events arrive as camelCase handler props that receive the `CustomEvent`.
+
+```tsx
+import { Chat } from '@kitn.ai/chat/react';
+
+export function MyChatApp() {
+  return (
+    <Chat
+      messages={messages}
+      onSubmit={(e) => console.log(e.detail.value)}
+      onModelChange={(e) => console.log(e.detail)}
+    />
+  );
+}
+```
+
+<Aside type="tip" title="TypeScript">
+The React adapter ships full types for every prop and event, including the `ChatMessage` shape for `messages` and the `detail` type on each event.
+</Aside>
+
+## SolidJS native components
+
+Writing Solid? Skip the element wrapper and compose the kit's native components from `@kitn.ai/chat`. They tree-shake to exactly what you import and mix freely with your own primitives.
+
+```tsx
+import { createSignal } from 'solid-js';
+import {
+  ChatConfig,
+  ChatContainer,
+  ChatContainerContent,
+  Message,
+  MessageContent,
+  PromptInput,
+  PromptInputTextarea,
+  PromptInputActions,
+} from '@kitn.ai/chat';
+import '@kitn.ai/chat/theme.css';
+
+export function App() {
+  const [input, setInput] = createSignal('');
+
+  return (
+    <ChatConfig>
+      <ChatContainer style={{ height: '100dvh' }}>
+        <ChatContainerContent>
+          <Message>
+            <MessageContent markdown>Hello! How can I help?</MessageContent>
+          </Message>
+        </ChatContainerContent>
+      </ChatContainer>
+      <PromptInput
+        value={input()}
+        onValueChange={setInput}
+        onSubmit={() => {
+          handleSubmit(input());
+          setInput('');
+        }}
+      >
+        <PromptInputTextarea placeholder="Ask anything…" />
+        <PromptInputActions />
+      </PromptInput>
+    </ChatConfig>
+  );
+}
+```
+
+Solid usage also needs `solid-js` as a peer dependency:
+
+```bash
+npm install solid-js
+```
+
+## Per-framework guides
+
+Full setup, binding patterns, and examples for each environment:
+
+- [HTML](/chat/guides/frameworks/html/)
+- [React](/chat/guides/frameworks/react/)
+- [Vue](/chat/guides/frameworks/vue/)
+- [Svelte](/chat/guides/frameworks/svelte/)
+- [Angular](/chat/guides/frameworks/angular/)
+- [SolidJS](/chat/guides/frameworks/solid/)

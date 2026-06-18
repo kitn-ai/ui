@@ -1,0 +1,237 @@
+/* ============================================================================
+   kitn docs — DESIGN SYSTEM (single source of truth)
+   ----------------------------------------------------------------------------
+   Semantic tokens (--kc-*) defined once, per theme. They drive BOTH:
+     1. Tailwind utilities  — via @theme in app.css (bg-surface, text-ink,
+        text-brand, border-line, …). Components use ONLY these.
+     2. Starlight chrome     — via the --sl-* mapping at the bottom.
+   Change a value here → it changes everywhere. Don't hardcode colors anywhere else.
+
+   Palette source: kitn.ai (Lato, magenta hsl(326 84% 53%), neutral near-black).
+   ========================================================================== */
+
+/* ---- dark (default) ---- */
+:root,
+:root[data-theme='dark'] {
+  --kc-primary: 326 84% 53%;                     /* kitn magenta (hsl parts) */
+  --kc-brand: hsl(var(--kc-primary));            /* fills: buttons, scrollbar, active bar */
+  --kc-brand-hover: hsl(326 84% 47%);
+  --kc-accent-soft: hsl(var(--kc-primary) / 0.16);
+
+  /* Neutrals aligned to the kit's DEFAULT DARK theme (warm charcoal family) so a
+     docs page and an embedded kc-* component share the same grays.
+     Source of truth: src/elements/compiled.css `.dark{}` block. */
+  --kc-bg: #171716;                                /* content + header — kit --color-background */
+  --kc-sidebar: #121211;                           /* distinct sidebar nav bg — kit --color-sidebar */
+  --kc-surface: #201f1d;                           /* cards, preview — kit --color-card */
+  --kc-surface-2: #1a1917;                         /* console body, nested — between bg & card */
+  --kc-line: #2d2c2a;                              /* component borders — kit --color-border */
+  --kc-divider: #232220;                           /* subtle chrome divider — between bg & border */
+  --kc-pressed: rgb(0 0 0 / 0.32);                 /* selected/pressed segmented-control fill */
+
+  --kc-ink: #fafafa;                               /* strongest text — kit --color-foreground */
+  --kc-ink-2: #c9c7c2;                             /* body — warm, between foreground & muted */
+  --kc-ink-3: #a7a5a0;                             /* labels / dim — kit --color-muted-foreground */
+  --kc-link: hsl(326 95% 72%);                     /* magenta link text, bright on dark */
+  --kc-info: #60a5fa;                               /* complementary blue (kitn gradient) */
+  --kc-info-soft: color-mix(in oklab, #3b82f6 15%, transparent);
+
+  /* callout/info (Starlight Aside): the blue used on the Artifact page — single
+     source so every note/tip callout matches. */
+  --kc-callout-info: var(--kc-info);
+  --kc-callout-info-bg: var(--kc-info-soft);
+  --kc-callout-info-border: var(--kc-info);
+}
+
+/* ---- light ---- */
+:root[data-theme='light'] {
+  --kc-accent-soft: hsl(var(--kc-primary) / 0.10);
+  --kc-bg: #ffffff;
+  --kc-sidebar: #f6f6f7;
+  --kc-surface: #f9f9fb;
+  --kc-surface-2: #f3f3f6;
+  --kc-line: #e6e6e9;
+  --kc-divider: #e8e8ea;
+  --kc-pressed: rgb(0 0 0 / 0.07);                 /* selected/pressed segmented-control fill */
+  --kc-ink: hsl(220 12% 12%);
+  --kc-ink-2: hsl(220 7% 32%);
+  --kc-ink-3: hsl(220 5% 46%);
+  --kc-link: hsl(326 72% 40%);                     /* darker magenta → AA on white */
+  --kc-info: #2563eb;                               /* complementary blue, AA on white */
+  --kc-info-soft: color-mix(in oklab, #3b82f6 10%, transparent);
+
+  /* callout/info — same named tokens, light values (track per-theme --kc-info). */
+  --kc-callout-info: var(--kc-info);
+  --kc-callout-info-bg: var(--kc-info-soft);
+  --kc-callout-info-border: var(--kc-info);
+}
+
+/* ---- map Starlight chrome to the same tokens ----
+   Listed for every theme selector so specificity matches Starlight's own
+   :root[data-theme='…'] rules (otherwise its defaults win in light mode). */
+:root,
+:root[data-theme='light'],
+:root[data-theme='dark'] {
+  --sl-font: 'Lato', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --sl-color-bg: var(--kc-bg);
+  --sl-color-bg-sidebar: var(--kc-sidebar);        /* distinct sidebar */
+  --sl-color-bg-nav: var(--kc-bg);                 /* header same as content */
+  --sl-color-hairline: var(--kc-sidebar);          /* header divider = sidebar bg color */
+  --sl-color-hairline-shade: var(--kc-sidebar);
+  --sl-color-hairline-light: var(--kc-sidebar);
+
+  --sl-color-white: var(--kc-ink);
+  --sl-color-gray-1: var(--kc-ink);
+  --sl-color-gray-2: var(--kc-ink-2);
+  --sl-color-gray-3: var(--kc-ink-3);
+  --sl-color-text: var(--kc-ink-2);
+  --sl-color-text-accent: var(--kc-link);
+  --sl-color-accent: var(--kc-brand);
+  --sl-color-accent-low: var(--kc-accent-soft);   /* soft magenta tint for asides */
+  --sl-color-accent-high: var(--kc-ink);
+  --sl-color-asides-text-accent: var(--kc-link);
+
+  --sl-content-width: 56rem;                       /* wider — props table breathes */
+  --sl-content-pad-x: 4rem;                        /* generous left/right breathing room */
+}
+
+/* ============================================================================
+   Global skin (kept minimal — components do their own layout via Tailwind).
+   ========================================================================== */
+
+/* magenta thin scrollbar + selection (matches kitn.ai) */
+* { scrollbar-width: thin; scrollbar-color: var(--kc-brand) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background-color: var(--kc-brand); border-radius: 4px; }
+*::-webkit-scrollbar-thumb:hover { background-color: var(--kc-brand-hover); }
+::selection { background: var(--kc-brand); color: #fff; }
+
+/* header is fully overridden (Header.astro) — just size the search box */
+.kc-search { width: min(14rem, 38vw); }
+.header { border-bottom-width: 2px !important; }   /* thicker divider (was 1px) */
+
+/* clean, borderless panes: no vertical dividers between sidebar / content / TOC */
+.sidebar-pane { border-inline-end: 0 !important; }
+.right-sidebar { border-inline-start: 0 !important; }
+.main-pane { border-inline-start: 0 !important; }
+
+/* type: Lato, normal weight, sized down a touch; no divider under the header */
+.content-panel { border-top: 0 !important; }
+h1#_top, .sl-markdown-content h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.01em; }
+.sl-markdown-content h2 { font-size: 1.4rem; font-weight: 700; margin-top: 2.4rem; }
+.sl-markdown-content h3 { font-size: 1.1rem; font-weight: 700; }
+
+/* content-header: component name under the title, smaller */
+.kc-tag-sub { font: 600 1.15rem/1.2 var(--sl-font-mono); color: var(--kc-link); margin: 0.25rem 0 0; }
+.kc-lede { font-size: 1.12rem; line-height: 1.55; color: var(--kc-ink-2); margin: 0.9rem 0 0; }
+
+/* heading anchor — the clean way: the "#" is now a CHILD of the heading
+   (rehype behavior:'append'), so the heading is a flex row [text · #]. The "#"
+   inherits the heading font size; reveal on hover. Starlight's own sibling
+   anchor is hidden. */
+.sl-markdown-content .sl-anchor-link { display: none !important; }   /* hide Starlight's */
+.sl-markdown-content :is(h1, h2, h3, h4) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.sl-markdown-content .kc-anchor {
+  font-weight: 700;
+  color: var(--kc-ink-3);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+.sl-markdown-content .kc-anchor::after { content: '#'; }   /* visible glyph (not in heading text → TOC stays clean) */
+.sl-markdown-content :is(h1, h2, h3, h4):hover .kc-anchor,
+.sl-markdown-content .kc-anchor:focus-visible { opacity: 1; }
+.sl-markdown-content .kc-anchor:hover { color: var(--kc-link); }
+
+/* inline code in prose — soft magenta chip */
+.sl-markdown-content :not(pre) > code {
+  background: var(--kc-accent-soft); color: var(--kc-link);
+  border: none; border-radius: 5px; padding: 0.12em 0.4em; font-size: 0.86em;
+}
+
+/* left nav: active = magenta text + a magenta bar on the left tree-line */
+.sidebar-content a[aria-current='page'] {
+  background: transparent !important;
+  color: var(--kc-ink) !important;   /* white (dark) / dark (light), not pink */
+  font-weight: 600 !important;
+  position: relative;
+}
+.sidebar-content a[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: -1.25rem;     /* sit on the nested-list tree line */
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--kc-brand);
+  border-radius: 2px;
+}
+
+/* on-this-page: breathing room + readable sizes */
+.right-sidebar-panel { padding-top: 2rem; }
+#starlight__on-this-page { font-size: 0.8rem; font-weight: 700; color: var(--kc-ink-3); margin-bottom: 0.85rem; }
+.right-sidebar a { font-size: 0.95rem; }
+.right-sidebar a[aria-current='true'] { color: var(--kc-ink); font-weight: 600; }   /* white/dark, not pink */
+
+/* bottom pager: no shadow, compact, magenta hover border */
+.pagination-links a { box-shadow: none !important; border-color: var(--kc-line) !important; transition: border-color 0.15s; font-size: 0.72rem; }
+.pagination-links a:hover { border-color: var(--kc-brand) !important; }
+.pagination-links a span:last-child { font-size: 0.92rem; }   /* page title, smaller */
+.pagination-links svg { width: 0.9rem; height: 0.9rem; }
+
+/* code blocks: darker neutral bg in dark mode (vibrant Tokyo Night tokens on top) */
+[data-theme='dark'] .expressive-code {
+  --ec-codeBg: #141417;
+  --ec-frm-edBg: #141417;
+  --ec-frm-trmBg: #141417;
+}
+
+/* Usage code tabs → PILLS (selected = solid magenta), no underline/overline clash */
+.sl-markdown-content [role='tablist'] {
+  border-bottom: 0 !important;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+.sl-markdown-content [role='tablist'] a[role='tab'] {
+  border: 1px solid var(--kc-line) !important;
+  box-shadow: none !important;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--kc-ink-3);
+  margin-bottom: 0;
+}
+.sl-markdown-content [role='tablist'] a[role='tab'][aria-selected='true'] {
+  background: var(--kc-brand);
+  border-color: var(--kc-brand) !important;
+  color: #fff;
+  box-shadow: none !important;
+}
+
+/* info callouts (note + "tip"/When-to-use): Starlight defaults note→brand-accent
+   tint (magenta) and tip→purple, which clashes page-to-page. Standardize BOTH to
+   the Artifact-page blue, driven by one named token (--kc-callout-info*). */
+.starlight-aside--note,
+.starlight-aside--tip {
+  background-color: var(--kc-callout-info-bg) !important;
+  border-color: var(--kc-callout-info-border) !important;
+}
+.starlight-aside--note .starlight-aside__title,
+.starlight-aside--tip .starlight-aside__title { color: var(--kc-callout-info) !important; }
+.starlight-aside--note a,
+.starlight-aside--tip a { color: var(--kc-callout-info) !important; }
+
+/* brand logo (white artwork): show as-is on dark, invert to black on light */
+:root[data-theme='light'] .kc-logo-img { filter: invert(1); }
+
+/* theme toggle icon swap (sun shows in dark, moon in light) */
+.kc-theme-toggle .kc-sun { display: none; }
+:root[data-theme='dark'] .kc-theme-toggle .kc-sun { display: inline; }
+:root[data-theme='dark'] .kc-theme-toggle .kc-moon { display: none; }

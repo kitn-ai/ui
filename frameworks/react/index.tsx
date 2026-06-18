@@ -133,6 +133,8 @@ export interface ChatProps extends WebComponentProps {
   suggestions?: string[];
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: "submit" | "fill";
+  /** Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. */
+  persistSuggestions?: boolean;
   /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
@@ -142,13 +144,17 @@ export interface ChatProps extends WebComponentProps {
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;
   /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. */
-  models?: { id: string; name: string; provider?: string }[];
+  models?: { id: string; name: string; provider?: string; description?: string; group?: string }[];
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
   /** Optional context-window token usage. When set, a Context token meter is shown in the header. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; estimatedCost?: number };
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
+  /** Whether the host has `slot="header-start"` content (left of the title) — set by the `<kc-chat>` facade so a custom control forces the header open. */
+  headerStart?: boolean;
+  /** Whether the host has `slot="header-end"` content (right of the controls). */
+  headerEnd?: boolean;
   /** Show a Search (Globe) button in the input toolbar; fires a `search` event. */
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
@@ -181,7 +187,7 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = createWebComponent<ChatProps>(
   'kc-chat',
-  ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact","actionsReveal"],
+  ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","search","voice","slashCommands","slashActiveIds","slashCompact","actionsReveal"],
   { onMessageAction: 'kc-message-action', onModelChange: 'kc-model-change', onSearch: 'kc-search', onSlashSelect: 'kc-slash-select', onSubmit: 'kc-submit', onSuggestionClick: 'kc-suggestion-click', onValueChange: 'kc-value-change', onVoice: 'kc-voice' },
 );
 
@@ -500,7 +506,7 @@ export const Message = createWebComponent<MessageProps>(
 
 export interface ModelSwitcherProps extends WebComponentProps {
   /** The selectable models. Set as a JS property (array). */
-  models: { id: string; name: string; provider?: undefined | string }[];
+  models: { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[];
   /** The currently-selected model id. Defaults to the first model. */
   currentModel?: string;
   /** A model was selected. */
@@ -511,6 +517,23 @@ export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
   'kc-model-switcher',
   ["theme","models","currentModel"],
   { onModelChange: 'kc-model-change' },
+);
+
+export interface PopoverProps extends WebComponentProps {
+  /** Floating placement relative to the trigger (floating-ui placement). */
+  placement?: "top" | "right" | "bottom" | "left" | "top-start" | "top-end" | "right-start" | "right-end" | "bottom-start" | "bottom-end" | "left-start" | "left-end";
+  /** Gap in px between the trigger and the panel. */
+  gutter?: number;
+  /** Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour. */
+  open?: boolean;
+  /** The popover wants to open or close (click, Escape, or outside-click). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export const Popover = createWebComponent<PopoverProps>(
+  'kc-popover',
+  ["theme","placement","gutter","open"],
+  { onOpenChange: 'kc-open-change' },
 );
 
 export interface PromptInputProps extends WebComponentProps {
@@ -759,6 +782,23 @@ export const Suggestions = createWebComponent<SuggestionsProps>(
   { onSelect: 'kc-select' },
 );
 
+export interface SwitchProps extends WebComponentProps {
+  /** Initial checked state. Bare attribute (`<kc-switch checked>`) turns it on. */
+  checked?: boolean;
+  /** Disable interaction. */
+  disabled?: boolean;
+  /** Accessible label. */
+  label?: string;
+  /** The toggle changed. */
+  onChange?: (event: CustomEvent<{ checked: boolean }>) => void;
+}
+
+export const Switch = createWebComponent<SwitchProps>(
+  'kc-switch',
+  ["theme","checked","disabled","label"],
+  { onChange: 'kc-change' },
+);
+
 export interface TasksProps extends WebComponentProps {
   /** The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/chat` for the full shape. */
   data?: Record<string, unknown>;
@@ -858,7 +898,7 @@ export interface WorkspaceProps extends WebComponentProps {
   codeTheme?: string;
   codeHighlight?: boolean;
   chatTitle?: string;
-  models?: { id: string; name: string; provider?: string }[];
+  models?: { id: string; name: string; provider?: string; description?: string; group?: string }[];
   currentModel?: string;
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; estimatedCost?: number };
   scrollButton?: boolean;
@@ -873,8 +913,10 @@ export interface WorkspaceProps extends WebComponentProps {
   sidebarMinWidth?: number;
   /** Sidebar max width in px (default 420). */
   sidebarMaxWidth?: number;
-  /** Initial collapsed state of the sidebar (default false). */
+  /** Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it). */
   sidebarCollapsed?: boolean;
+  /** Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
+  defaultSidebarCollapsed?: boolean;
   /** A conversation was selected in the sidebar. */
   onConversationSelect?: (event: CustomEvent<{ id: string }>) => void;
   /** An action button on a message was clicked. */
@@ -901,6 +943,6 @@ export interface WorkspaceProps extends WebComponentProps {
 
 export const Workspace = createWebComponent<WorkspaceProps>(
   'kc-workspace',
-  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed"],
+  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed"],
   { onConversationSelect: 'kc-conversation-select', onMessageAction: 'kc-message-action', onModelChange: 'kc-model-change', onNewChat: 'kc-new-chat', onSearch: 'kc-search', onSidebarToggle: 'kc-sidebar-toggle', onSlashSelect: 'kc-slash-select', onSubmit: 'kc-submit', onSuggestionClick: 'kc-suggestion-click', onValueChange: 'kc-value-change', onVoice: 'kc-voice' },
 );

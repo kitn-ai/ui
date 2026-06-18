@@ -1,0 +1,13 @@
+---
+title: Theme editor
+description: A live editor for every kitn-chat color and radius token — edit light and dark independently, preview real components, then copy or paste the CSS.
+tableOfContents: false
+---
+
+import ThemeStudio from '../../../components/ThemeStudio.tsx';
+
+{/* Server-rendered marker: drives the full-screen CSS in app.css (body:has(.kc-fullscreen))
+    so the sidebar, title block, and footer nav are gone with no hydration flash. */}
+<div class="kc-fullscreen" hidden></div>
+
+<ThemeStudio client:only="solid" />

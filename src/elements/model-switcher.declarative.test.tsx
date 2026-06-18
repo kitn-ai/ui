@@ -60,7 +60,18 @@ describe('parseKcModelElement', () => {
 
   it('produces the full ModelOption shape', () => {
     const item = parseKcModelElement(makeNode('GPT-4o', 'gpt-4o', 'OpenAI'));
-    expect(item).toEqual<ModelOption>({ id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI' });
+    expect(item).toEqual<ModelOption>({ id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI', description: undefined, group: undefined });
+  });
+
+  it('maps the description and group attributes', () => {
+    const el = document.createElement('kc-model');
+    el.textContent = 'GPT-4o';
+    el.setAttribute('id', 'gpt-4o');
+    el.setAttribute('description', 'Flagship model');
+    el.setAttribute('group', 'Legacy models');
+    const item = parseKcModelElement(el);
+    expect(item.description).toBe('Flagship model');
+    expect(item.group).toBe('Legacy models');
   });
 });
 

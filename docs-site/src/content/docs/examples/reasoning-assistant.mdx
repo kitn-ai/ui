@@ -1,0 +1,74 @@
+---
+title: Reasoning assistant
+description: A multi-turn engineering assistant that shows its step-by-step reasoning in a collapsible block before every answer — the "thinking" UX, powered by kc-chat.
+---
+
+import ReasoningAssistantDemo from '../../../components/ReasoningAssistantDemo.tsx';
+
+<p class="kc-lede">An assistant that works a problem out loud. Each assistant turn opens with a collapsible reasoning block — the model’s working — followed by a concise answer. Here it debugs a real p99 latency regression across a few follow-up turns. Expand any "Thought for…" block to read the reasoning, then ask your own follow-up.</p>
+
+<ReasoningAssistantDemo
+  client:only="solid"
+  chatTitle="Senior engineer assistant"
+  placeholder="Ask a follow-up…"
+  suggestions={["Should I cache the promo lookup or fix the N+1 first?", "How do I confirm it's not the database?"]}
+/>
+
+## How it works
+
+Reasoning lives on the message, not in a separate element. Each `ChatMessage` can carry a `reasoning` object alongside its `content`; `<kc-chat>` renders it as a collapsible block above the answer. The `label` is the trigger text (defaults to `Reasoning`) and `text` is rendered as markdown.
+
+```html
+<kc-chat id="chat" chat-title="Senior engineer assistant"></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+  chat.messages = [];
+
+  chat.addEventListener('kc-submit', async (e) => {
+    const prompt = e.detail.value;
+    const aId = crypto.randomUUID();
+
+    chat.messages = [
+      ...chat.messages,
+      { id: crypto.randomUUID(), role: 'user', content: prompt },
+      { id: aId, role: 'assistant', content: '' },
+    ];
+    chat.loading = true; // shows the thinking indicator
+
+    // stream the final answer token-by-token
+    const { reply, reasoning } = await askAssistant(prompt);
+    for await (const token of reply) {
+      chat.messages = chat.messages.map((m) =>
+        m.id === aId ? { ...m, content: m.content + token } : m,
+      );
+    }
+
+    // attach the reasoning once the answer is complete
+    chat.messages = chat.messages.map((m) =>
+      m.id === aId
+        ? { ...m, reasoning, actions: ['copy', 'like', 'dislike'] }
+        : m,
+    );
+    chat.loading = false;
+  });
+</script>
+```
+
+**`reasoning` shape** — set on any assistant message:
+
+| field | type | notes |
+|---|---|---|
+| `text` | `string` | The reasoning body, rendered as markdown |
+| `label` | `string?` | Trigger text — defaults to `Reasoning` (e.g. `Thought for 4s`) |
+
+Attaching `reasoning` only after the answer finishes keeps the thinking indicator clean while tokens stream, then reveals the working in one step. The block stays collapsed by default, so readers who want the answer see it first and can open the reasoning on demand.
+
+## Next steps
+
+- **[Agentic assistant](/chat/examples/agentic-assistant/)** — the same reasoning block paired with live tool calls per turn.
+- **[`kc-chat` reference](/chat/components/chat/)** — the full `messages` schema, `loading`, and the `kc-submit` event.
+- **[Streaming recipe](/chat/guides/recipes/streaming/)** — driving the token loop from a real backend.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the baseline streaming loop this example builds on.

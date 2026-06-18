@@ -58,21 +58,57 @@ export function createTsHelpers(program, checker, { importable = new Set() } = {
     return checker.typeToString(type, decl, ts.TypeFormatFlags.NoTruncation);
   }
 
+  // The authored, NAMED form of an object/array-of-object type (e.g. `Step[]`,
+  // `AttachmentData[]`) — so docs can show the named type and reveal its shape
+  // on demand, instead of an anonymous expanded literal. Returns null for
+  // primitives, unions, and anonymous object literals (no useful name).
+  const namedTypeName = (type) => {
+    let t = type;
+    let suffix = '';
+    if (checker.isArrayType(t)) { t = checker.getTypeArguments(t)[0]; suffix = '[]'; }
+    if (!t || t.isUnion?.()) return null;
+    const sym = t.aliasSymbol || t.getSymbol();
+    const name = sym?.getName();
+    if (!name || name === '__type' || isLibSym(sym)) return null;
+    if (!(t.flags & ts.TypeFlags.Object) || !t.getProperties().length) return null;
+    return name + suffix;
+  };
+
+  // Force-expand a named object/array-of-object type to its `{ prop: type; … }`
+  // shape (for the docs "click to see the shape" dialog), even when renderType
+  // would otherwise print the bare name.
+  const expandShape = (type) => {
+    let t = type;
+    let suffix = '';
+    if (checker.isArrayType(t)) { t = checker.getTypeArguments(t)[0]; suffix = '[]'; }
+    if (t && t.flags & ts.TypeFlags.Object && !t.isUnion?.() && t.getProperties().length) {
+      const props = t.getProperties().map((s) => {
+        const pt = checker.getTypeOfSymbolAtLocation(s, s.valueDeclaration ?? s.declarations?.[0]);
+        const opt = s.flags & ts.SymbolFlags.Optional ? '?' : '';
+        return `${s.name}${opt}: ${renderType(pt, s.valueDeclaration)}`;
+      });
+      return `{ ${props.join('; ')} }${suffix}`;
+    }
+    return renderType(type);
+  };
+
   // Map one property symbol to the canonical member record. `filter` (optional)
   // is applied to the symbol BEFORE mapping so callers can drop inherited
   // members (e.g. the DOM/JSX attribute flood on components that extend
-  // JSX.HTMLAttributes). Returns exactly { name, type, optional, scalar,
-  // description } — keep this shape stable; element-meta.json is serialized
-  // straight from it.
+  // JSX.HTMLAttributes). Returns { name, type, optional, scalar, description }
+  // (+ `typeName` for named object/array types) — element-meta.json is
+  // serialized straight from it.
   const memberInfo = (sym, fallbackDecl) => {
     const decl = sym.valueDeclaration ?? sym.declarations?.[0] ?? fallbackDecl;
     const t = checker.getTypeOfSymbolAtLocation(sym, decl);
+    const typeName = namedTypeName(t);
     return {
       name: sym.name,
       type: renderType(t, decl),
       optional: !!(sym.flags & ts.SymbolFlags.Optional),
       scalar: isScalar(t),
       description: jsdocOf(sym),
+      ...(typeName ? { typeName, typeShape: expandShape(t) } : {}),
     };
   };
 

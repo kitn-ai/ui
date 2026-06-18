@@ -108,6 +108,8 @@ export interface KcChatElement extends HTMLElement {
   suggestions?: string[];
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: "submit" | "fill";
+  /** Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. */
+  persistSuggestions?: boolean;
   /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
@@ -117,13 +119,17 @@ export interface KcChatElement extends HTMLElement {
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;
   /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. */
-  models?: { id: string; name: string; provider?: string }[];
+  models?: { id: string; name: string; provider?: string; description?: string; group?: string }[];
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
   /** Optional context-window token usage. When set, a Context token meter is shown in the header. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; estimatedCost?: number };
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
+  /** Whether the host has `slot="header-start"` content (left of the title) — set by the `<kc-chat>` facade so a custom control forces the header open. */
+  headerStart?: boolean;
+  /** Whether the host has `slot="header-end"` content (right of the controls). */
+  headerEnd?: boolean;
   /** Show a Search (Globe) button in the input toolbar; fires a `search` event. */
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
@@ -365,9 +371,20 @@ export interface KcModelSwitcherElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** The selectable models. Set as a JS property (array). */
-  models: { id: string; name: string; provider?: undefined | string }[];
+  models: { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[];
   /** The currently-selected model id. Defaults to the first model. */
   currentModel?: string;
+}
+
+export interface KcPopoverElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Floating placement relative to the trigger (floating-ui placement). */
+  placement?: "top" | "right" | "bottom" | "left" | "top-start" | "top-end" | "right-start" | "right-end" | "bottom-start" | "bottom-end" | "left-start" | "left-end";
+  /** Gap in px between the trigger and the panel. */
+  gutter?: number;
+  /** Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour. */
+  open?: boolean;
 }
 
 export interface KcPromptInputElement extends HTMLElement {
@@ -536,6 +553,17 @@ export interface KcSuggestionsElement extends HTMLElement {
   highlight?: string;
 }
 
+export interface KcSwitchElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Initial checked state. Bare attribute (`<kc-switch checked>`) turns it on. */
+  checked?: boolean;
+  /** Disable interaction. */
+  disabled?: boolean;
+  /** Accessible label. */
+  label?: string;
+}
+
 export interface KcTasksElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -611,7 +639,7 @@ export interface KcWorkspaceElement extends HTMLElement {
   codeTheme?: string;
   codeHighlight?: boolean;
   chatTitle?: string;
-  models?: { id: string; name: string; provider?: string }[];
+  models?: { id: string; name: string; provider?: string; description?: string; group?: string }[];
   currentModel?: string;
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; estimatedCost?: number };
   scrollButton?: boolean;
@@ -626,8 +654,10 @@ export interface KcWorkspaceElement extends HTMLElement {
   sidebarMinWidth?: number;
   /** Sidebar max width in px (default 420). */
   sidebarMaxWidth?: number;
-  /** Initial collapsed state of the sidebar (default false). */
+  /** Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it). */
   sidebarCollapsed?: boolean;
+  /** Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
+  defaultSidebarCollapsed?: boolean;
 }
 
 declare global {
@@ -656,6 +686,7 @@ declare global {
     'kc-markdown': KcMarkdownElement;
     'kc-message': KcMessageElement;
     'kc-model-switcher': KcModelSwitcherElement;
+    'kc-popover': KcPopoverElement;
     'kc-prompt-input': KcPromptInputElement;
     'kc-reasoning': KcReasoningElement;
     'kc-remote': KcRemoteElement;
@@ -668,6 +699,7 @@ declare global {
     'kc-source': KcSourceElement;
     'kc-sources': KcSourcesElement;
     'kc-suggestions': KcSuggestionsElement;
+    'kc-switch': KcSwitchElement;
     'kc-tasks': KcTasksElement;
     'kc-text-shimmer': KcTextShimmerElement;
     'kc-thinking-bar': KcThinkingBarElement;

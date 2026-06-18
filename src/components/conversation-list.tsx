@@ -83,7 +83,7 @@ function GroupSection(props: { name: string; count: number; conversations: Conve
   const [open, setOpen] = createSignal(true);
   return (
     <Collapsible open={open()} onOpenChange={setOpen}>
-      <CollapsibleTrigger class="flex items-center gap-1.5 w-full px-1.5 py-1 rounded-md bg-muted text-[13px] text-foreground/80 font-medium hover:bg-muted/70 transition-colors cursor-pointer mt-1.5">
+      <CollapsibleTrigger class="flex items-center gap-1.5 w-full px-1.5 py-1 rounded-md text-[13px] text-muted-foreground font-medium hover:bg-muted/30 transition-colors cursor-pointer mt-1.5">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           class={cn('transition-transform', !open() && '-rotate-90')}><polyline points="6 9 12 15 18 9"/></svg>
         <span>{props.name}</span>

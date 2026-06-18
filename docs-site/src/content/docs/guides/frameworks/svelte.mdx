@@ -1,0 +1,135 @@
+---
+title: Svelte
+description: Use kc-* web components in Svelte with property binding for arrays and objects, and on:kc-event listeners for CustomEvents.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`kc-*` web components work in Svelte without wrappers or special directives. The Svelte compiler sets DOM **properties** directly when you pass non-primitive values, and `on:eventname` wires up CustomEvents — no boilerplate required.
+
+## Install
+
+```bash
+npm install @kitn.ai/chat
+```
+
+Register every `kc-*` element once, near your app entry point:
+
+```js
+// src/main.js  or inside a <script> block in your root component
+import '@kitn.ai/chat/elements';
+```
+
+One import covers your entire app. No CSS import is needed — each element is styled inside its own Shadow DOM. Add `@kitn.ai/chat/theme.css` only if you want to override design tokens (see [Theming](/chat/guides/theming/)).
+
+## Pass data and handle events
+
+The rule for every `kc-*` element: **rich data in as properties, interactions out as events.**
+
+Svelte maps cleanly to this pattern:
+
+| What | Svelte syntax | Notes |
+|---|---|---|
+| String attribute | `prop="value"` | Standard HTML attribute |
+| Array or object | `{prop}` shorthand | Svelte assigns as a DOM property — never stringified |
+| Listen for an event | `on:kc-eventname={handler}` | `handler(e)` — data is on `e.detail` |
+
+<Aside type="tip" title="Why {prop} works">
+Svelte detects non-primitive values and assigns them as DOM properties rather than HTML attributes. This means `{messages}` always delivers a live JS array to the element — you never need `bind:this` just to set a property.
+</Aside>
+
+## Example — streaming chat
+
+`<kc-chat>` is transport-agnostic: you own the API call, the element owns the UI. Pass a `messages` array and handle `kc-submit` to stream replies back into state.
+
+```svelte
+<script>
+  import '@kitn.ai/chat/elements';
+
+  let messages = [
+    { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+  ];
+
+  async function handleSubmit(e) {
+    const userText = e.detail.value;
+    const history = [
+      ...messages,
+      { id: crypto.randomUUID(), role: 'user', content: userText },
+    ];
+    messages = history;
+
+    const assistantId = crypto.randomUUID();
+    messages = [...history, { id: assistantId, role: 'assistant', content: '' }];
+
+    let reply = '';
+    for await (const token of streamFromYourAPI(history)) {
+      reply += token;
+      // Reassign the array so Svelte detects the update.
+      messages = messages.map((m) =>
+        m.id === assistantId ? { ...m, content: reply } : m
+      );
+    }
+  }
+</script>
+
+<div style="display: flex; flex-direction: column; height: 100dvh;">
+  <kc-chat
+    {messages}
+    suggestions={['Summarize the chat', 'Start fresh']}
+    on:kc-submit={handleSubmit}
+    style="flex: 1; min-height: 0;"
+  />
+</div>
+```
+
+`kc-chat` is `display: block` and fills its container. Wrap it in a flex column and give it `flex: 1` rather than a hard-coded height so it adapts to the viewport.
+
+## Add a conversation sidebar
+
+Compose `<kc-conversations>` alongside `<kc-chat>` for a multi-thread layout. Each element takes its data as properties and emits its own events.
+
+```svelte
+<script>
+  import '@kitn.ai/chat/elements';
+
+  let conversations = loadConversations();
+  let activeId = conversations[0]?.id;
+  let messages = loadMessages(activeId);
+
+  function selectConversation(e) {
+    activeId = e.detail.id;
+    messages = loadMessages(activeId);
+  }
+</script>
+
+<div style="display: flex; height: 100dvh;">
+  <kc-conversations
+    {conversations}
+    {activeId}
+    on:kc-conversation-select={selectConversation}
+    on:kc-new-chat={() => startNewConversation()}
+    style="width: 300px; flex-shrink: 0;"
+  />
+
+  <kc-chat
+    {messages}
+    on:kc-submit={(e) => sendMessage(e.detail.value)}
+    style="flex: 1; min-width: 0;"
+  />
+</div>
+```
+
+## Key events reference
+
+| Element | Event | `e.detail` |
+|---|---|---|
+| `kc-chat` | `kc-submit` | `{ value: string }` |
+| `kc-chat` | `kc-value-change` | `{ value: string }` |
+| `kc-chat` | `kc-model-change` | `{ model: string }` |
+| `kc-conversations` | `kc-conversation-select` | `{ id: string }` |
+| `kc-conversations` | `kc-new-chat` | `{}` |
+| `kc-conversations` | `kc-toggle-sidebar` | `{}` |
+| `kc-attachments` | `kc-remove` | `{ id: string }` |
+| `kc-resizable` | `kc-change` | `{ sizes: number[] }` |
+
+Every element's full prop and event list is on its component page in the [Components](/chat/components/attachments/) reference.

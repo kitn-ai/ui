@@ -1,0 +1,89 @@
+---
+title: Context
+description: A compact token-usage meter with a hover-card breakdown — drop it into any chat header to keep users aware of how much context window remains.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-context</p>
+
+<p class="kc-lede">A compact token-usage meter with a hover-card breakdown — shows used vs. available context at a glance, with input, output, reasoning, and cache line items revealed on hover.</p>
+
+<Facts items={['Shadow DOM', '1 event', 'Configurable thresholds', 'Hover-card breakdown', 'Estimated cost display']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-context" />
+
+<Aside type="tip" title="When to use">
+Place `<kc-context>` in a chat header or toolbar alongside a model switcher. The meter is `inline-block` and compact — it fits next to other controls without its own row. Wire `kc-threshold-change` to act when usage reaches `'warn'` or `'danger'` (e.g. prompt the user to start a new conversation).
+</Aside>
+
+## Usage
+
+Set `context` in JavaScript with a usage object:
+
+```js
+import '@kitn.ai/chat/elements';
+
+const el = document.querySelector('kc-context');
+el.context = {
+  usedTokens: 48200,
+  maxTokens: 200000,
+  inputTokens: 31000,
+  outputTokens: 17200,
+  reasoningTokens: 4200, // optional — shown when present
+  cacheTokens: 8000,     // optional — shown when present
+  estimatedCost: 0.42,   // optional — shown in the footer
+};
+```
+
+- **`context`** — the element renders nothing until data arrives, so it's safe to place unconditionally in the header.
+- **`warnThreshold` / `dangerThreshold`** are fractional (0–1) number properties, defaulting to `0.7` and `0.9`. Assign directly: `el.warnThreshold = 0.5`.
+
+## Examples
+
+### Default
+
+Meter at ~24% usage with a full breakdown. Hover to reveal the popover.
+
+<Example client:visible tag="kc-context" />
+
+### Warning Threshold
+
+At 75% the meter turns yellow — above the default `warnThreshold` of 0.7.
+
+<Example client:visible tag="kc-context" data="warn" />
+
+### Danger Threshold
+
+At 92% the meter turns red — above the default `dangerThreshold` of 0.9.
+
+<Example client:visible tag="kc-context" data="danger" />
+
+### Custom Thresholds
+
+`warnThreshold: 0.5`, `dangerThreshold: 0.75` — the meter warns earlier.
+
+<Example client:visible tag="kc-context" data="customThresholds" />
+
+## Props
+
+<PropTable tag="kc-context" />
+
+## Events
+
+<EventTable tag="kc-context" />
+
+## Composed from
+
+<ComposedFrom tag="kc-context" />
+
+<NeedAHand />

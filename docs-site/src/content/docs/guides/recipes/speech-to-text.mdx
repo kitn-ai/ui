@@ -1,0 +1,239 @@
+---
+title: Speech to Text
+description: Add mic-based voice input to any chat UI using kc-voice-input — wire your transcription backend in one function property.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+`<kc-voice-input>` is a mic button that records audio and hands the `Blob` to your transcription backend. Wire it in, supply an async transcriber, and the transcribed text fires back as a `kc-transcription` event.
+
+## How it works
+
+The element exposes two output channels:
+
+- **`kc-audio-captured`** — fires immediately when the user stops recording, with the raw `Blob`. Use this if you handle transcription yourself and don't set `transcribe`.
+- **`kc-transcription`** — fires after your `transcribe` function resolves, with `detail.text`. Use this to insert the transcribed text into your input.
+
+`transcribe` is a function, so you assign it in JavaScript — a function can't be an HTML attribute.
+
+## Basic setup
+
+Register the web components once, then wire the element:
+
+```html
+<kc-voice-input id="voice"></kc-voice-input>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const voice = document.getElementById('voice');
+
+  voice.transcribe = async (blob) => {
+    const form = new FormData();
+    form.append('audio', blob, 'recording.webm');
+
+    const res = await fetch('/api/transcribe', { method: 'POST', body: form });
+    const { text } = await res.json();
+    return text;
+  };
+
+  voice.addEventListener('kc-transcription', (e) => {
+    document.getElementById('prompt').value = e.detail.text;
+  });
+</script>
+```
+
+<Aside type="tip" title="Keep API keys server-side">
+Your `/api/transcribe` endpoint should call the transcription provider (e.g. OpenAI Whisper, Deepgram) and return the text. Never send a provider key to the browser.
+</Aside>
+
+## Composing with kc-chat
+
+`kc-chat` has a built-in `voice` attribute that renders a mic button in the toolbar and fires a `kc-voice` event when clicked. Use that event to open `<kc-voice-input>` or trigger recording programmatically.
+
+Alternatively, place `<kc-voice-input>` beside the chat element and push the transcribed text into the chat's value:
+
+```html
+<div style="display: flex; flex-direction: column; height: 100dvh;">
+  <kc-chat id="chat" style="flex: 1;"></kc-chat>
+  <kc-voice-input id="voice" style="margin: 8px;"></kc-voice-input>
+</div>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+  const voice = document.getElementById('voice');
+
+  voice.transcribe = async (blob) => {
+    const form = new FormData();
+    form.append('audio', blob, 'recording.webm');
+    const res = await fetch('/api/transcribe', { method: 'POST', body: form });
+    const { text } = await res.json();
+    return text;
+  };
+
+  // Inject the transcription into the chat input
+  voice.addEventListener('kc-transcription', (e) => {
+    chat.value = e.detail.text;
+  });
+</script>
+```
+
+## Framework usage
+
+<Tabs>
+<TabItem label="React">
+```tsx
+import { VoiceInput } from '@kitn.ai/chat/react';
+
+export function VoiceButton({ onTranscription }: { onTranscription: (text: string) => void }) {
+  return (
+    <VoiceInput
+      transcribe={async (blob) => {
+        const form = new FormData();
+        form.append('audio', blob, 'recording.webm');
+        const res = await fetch('/api/transcribe', { method: 'POST', body: form });
+        const { text } = await res.json();
+        return text;
+      }}
+      onTranscription={(e) => onTranscription(e.detail.text)}
+    />
+  );
+}
+```
+</TabItem>
+<TabItem label="Vue">
+```vue
+<template>
+  <kc-voice-input
+    ref="voiceRef"
+    @kc-transcription="onTranscription"
+  />
+</template>
+
+<script setup>
+import '@kitn.ai/chat/elements';
+import { onMounted, ref } from 'vue';
+
+const voiceRef = ref(null);
+const emit = defineEmits(['transcription']);
+
+onMounted(() => {
+  voiceRef.value.transcribe = async (blob) => {
+    const form = new FormData();
+    form.append('audio', blob, 'recording.webm');
+    const res = await fetch('/api/transcribe', { method: 'POST', body: form });
+    const { text } = await res.json();
+    return text;
+  };
+});
+
+const onTranscription = (e) => emit('transcription', e.detail.text);
+</script>
+```
+</TabItem>
+<TabItem label="Svelte">
+```svelte
+<script>
+  import '@kitn.ai/chat/elements';
+
+  let voiceEl;
+
+  function onMount(el) {
+    voiceEl = el;
+    el.transcribe = async (blob) => {
+      const form = new FormData();
+      form.append('audio', blob, 'recording.webm');
+      const res = await fetch('/api/transcribe', { method: 'POST', body: form });
+      const { text } = await res.json();
+      return text;
+    };
+  }
+
+  function onTranscription(e) {
+    console.log(e.detail.text);
+  }
+</script>
+
+<kc-voice-input
+  use:onMount
+  on:kc-transcription={onTranscription}
+></kc-voice-input>
+```
+</TabItem>
+<TabItem label="SolidJS">
+```tsx
+import { onMount } from 'solid-js';
+import { VoiceInput } from '@kitn.ai/chat';
+
+export function VoiceButton(props: { onTranscription: (text: string) => void }) {
+  return (
+    <VoiceInput
+      onTranscribe={async (blob) => {
+        const form = new FormData();
+        form.append('audio', blob, 'recording.webm');
+        const res = await fetch('/api/transcribe', { method: 'POST', body: form });
+        const { text } = await res.json();
+        return text;
+      }}
+      onTranscription={(text) => props.onTranscription(text)}
+    />
+  );
+}
+```
+</TabItem>
+</Tabs>
+
+## Handling the raw audio yourself
+
+If you want full control — for example, to stream audio, show a waveform, or batch multiple recordings — listen to `kc-audio-captured` instead of setting `transcribe`. The element fires it with the raw `Blob` as soon as the user stops recording:
+
+```js
+voice.addEventListener('kc-audio-captured', async (e) => {
+  const { blob } = e.detail; // audio/webm;codecs=opus
+
+  // Send to your pipeline, update UI, etc.
+  await uploadAudio(blob);
+});
+```
+
+<Aside type="note" title="Audio format">
+The recorder produces `audio/webm;codecs=opus` on all browsers that support the MediaRecorder API. Verify your backend transcription service accepts this format, or re-encode server-side if needed.
+</Aside>
+
+## Disabled state
+
+Set the `disabled` attribute to make the mic button non-interactive — for example, while the assistant is generating a reply:
+
+```html
+<kc-voice-input id="voice" disabled></kc-voice-input>
+```
+
+```js
+// Toggle based on loading state
+chat.addEventListener('kc-submit', () => { voice.disabled = true; });
+// Re-enable after the reply is complete
+function onReplyDone() { voice.disabled = false; }
+```
+
+## API reference
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `transcribe` | `(audio: Blob) => Promise<string>` | — | Async transcriber, assigned in JavaScript. When set, the resolved text fires `kc-transcription`. |
+| `disabled` | `boolean` | `false` | Disables the mic button. |
+
+### Events
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `kc-audio-captured` | `{ blob: Blob }` | Raw audio captured as soon as recording stops — fires before transcription. |
+| `kc-transcription` | `{ text: string }` | Transcription resolved. Only fires when `transcribe` is set. |
+
+## What's next
+
+- [Installation](/chat/guides/installation/) — register the elements and add the theme.
+- [Text to Speech](/chat/guides/recipes/text-to-speech/) — the reverse direction: stream synthesized audio from the assistant.

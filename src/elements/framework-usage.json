@@ -308,6 +308,18 @@
     }
   },
   {
+    "tag": "kc-popover",
+    "displayName": "Popover",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-popover></kc-popover>\n<script type=\"module\">\n  const el = document.querySelector('kc-popover');\n  el.addEventListener('kc-open-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Popover } from '@kitn.ai/chat/react';\n\n<Popover\n  onOpenChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-popover\n  @kc-open-change=\"onOpenChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-popover\n  on:kc-open-change={onOpenChange}\n></kc-popover>",
+      "angular": "<kc-popover\n  (kc-open-change)=\"onOpenChange($event)\"\n></kc-popover>"
+    }
+  },
+  {
     "tag": "kc-prompt-input",
     "displayName": "PromptInput",
     "hasSolid": true,
@@ -458,6 +470,18 @@
       "vue": "<kc-suggestions\n  :suggestions.prop=\"suggestions\"\n  @kc-select=\"onSelect\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-suggestions\n  {suggestions}\n  on:kc-select={onSelect}\n></kc-suggestions>",
       "angular": "<kc-suggestions\n  [suggestions]=\"suggestions\"\n  (kc-select)=\"onSelect($event)\"\n></kc-suggestions>"
+    }
+  },
+  {
+    "tag": "kc-switch",
+    "displayName": "Switch",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js\"></script>\n\n<kc-switch></kc-switch>\n<script type=\"module\">\n  const el = document.querySelector('kc-switch');\n  el.addEventListener('kc-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Switch } from '@kitn.ai/chat/react';\n\n<Switch\n  onChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kc-switch\n  @kc-change=\"onChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n<kc-switch\n  on:kc-change={onChange}\n></kc-switch>",
+      "angular": "<kc-switch\n  (kc-change)=\"onChange($event)\"\n></kc-switch>"
     }
   },
   {

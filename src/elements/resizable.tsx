@@ -28,6 +28,8 @@ export const KC_MAXIMIZE_STATE = 'kc-maximize-state' as const;
 interface ItemInfo {
   el: HTMLElement;
   size?: string;
+  /** Original configured size, captured once and stable across drags (for dblclick-reset). */
+  defaultSize?: string;
   min?: string;
   max?: string;
   locked: boolean;
@@ -89,17 +91,28 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
       );
     }
     const capped = all.slice(0, MAX_ITEMS);
-    const parsed: ItemInfo[] = capped.map((el) => ({
-      el,
-      size: el.getAttribute('size') ?? undefined,
-      min: el.getAttribute('min') ?? undefined,
-      max: el.getAttribute('max') ?? undefined,
-      locked: el.hasAttribute('locked') && el.getAttribute('locked') !== 'false',
-      // Honour both the `hidden` boolean attribute and the IDL property — Solid
-      // (and direct `el.hidden = true`) set the property, which doesn't reflect
-      // to the attribute on a custom element.
-      hidden: el.hidden || (el.hasAttribute('hidden') && el.getAttribute('hidden') !== 'false'),
-    }));
+    const parsed: ItemInfo[] = capped.map((el) => {
+      // Capture the ORIGINAL configured size ONCE per item, before any drag (or
+      // `persistSizes`) overwrites the live `size` attribute. Stashed on a non-
+      // observed data-* attr so dblclick-reset always snaps to the true default,
+      // not to wherever the user last dragged. Empty string = no explicit default.
+      if (!el.hasAttribute('data-kc-default-size')) {
+        el.setAttribute('data-kc-default-size', el.getAttribute('size') ?? '');
+      }
+      const defaultSize = el.getAttribute('data-kc-default-size') || undefined;
+      return {
+        el,
+        size: el.getAttribute('size') ?? undefined,
+        defaultSize,
+        min: el.getAttribute('min') ?? undefined,
+        max: el.getAttribute('max') ?? undefined,
+        locked: el.hasAttribute('locked') && el.getAttribute('locked') !== 'false',
+        // Honour both the `hidden` boolean attribute and the IDL property — Solid
+        // (and direct `el.hidden = true`) set the property, which doesn't reflect
+        // to the attribute on a custom element.
+        hidden: el.hidden || (el.hasAttribute('hidden') && el.getAttribute('hidden') !== 'false'),
+      };
+    });
 
     // Assign each visible item to its panel slot by visible order; clear the
     // rest so hidden/extra items don't leak into a slot.
@@ -114,7 +127,35 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     }
     for (const el of all.slice(MAX_ITEMS)) el.removeAttribute('slot');
 
+    // BUG FIX (U10b): the MutationObserver fires for ANY subtree change, including
+    // a slotted child re-rendering its CONTENT (e.g. a new chat message). If we
+    // unconditionally `setItems(parsed)`, the <For> re-keys and each panel's
+    // flex-basis is re-derived from the item's `size` ATTRIBUTE — wiping out any
+    // size the user dragged (which lives only as inline flex-basis on the panel
+    // div, set by ResizableHandle.settleToPercent). The composite <kc-workspace>
+    // never hits this because it renders Solid panels directly with no re-read.
+    //
+    // So: only commit a new items() array when the panel LAYOUT actually changed —
+    // i.e. an item was added/removed, or a config attribute (size/min/max/locked/
+    // hidden) changed. A pure content mutation is structurally identical and is
+    // skipped, leaving the dragged inline basis intact.
+    if (!itemsChanged(items(), parsed)) return;
     setItems(parsed);
+  }
+
+  /** True when the parsed item list differs structurally (identity, order, or any
+   *  layout-affecting config attribute) from the current one. Content-only
+   *  mutations leave every field equal → returns false → no re-render. */
+  function itemsChanged(prev: ItemInfo[], next: ItemInfo[]): boolean {
+    if (prev.length !== next.length) return true;
+    for (let i = 0; i < prev.length; i++) {
+      const a = prev[i];
+      const b = next[i];
+      if (a.el !== b.el) return true;
+      if (a.size !== b.size || a.min !== b.min || a.max !== b.max) return true;
+      if (a.locked !== b.locked || a.hidden !== b.hidden) return true;
+    }
+    return false;
   }
 
   const visible = () => items().filter((i) => !i.hidden);
@@ -134,6 +175,34 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
 
   function emitChange() {
     dispatch('kc-change', { sizes: currentSizes() });
+  }
+
+  /** Guard: while writing `size` attributes back from a live layout, the
+   *  MutationObserver must NOT treat our own writes as an external structural
+   *  change (which would re-render and could fight the in-flight drag). */
+  let persistingSizes = false;
+
+  /**
+   * BUG FIX (U10b) — durability: a drag/keyboard resize writes inline flex-basis
+   * onto the panel divs only; the item `size` ATTRIBUTE (the source of truth that
+   * `readItems` re-derives basis from) is left at its initial value. Persist the
+   * live percent back to each visible item's `size` attribute so the dragged
+   * layout survives ANY later re-read (including a genuine add/remove relayout),
+   * not just content-only mutations. Guarded so it doesn't trip the observer.
+   */
+  function persistSizes() {
+    const vis = visible();
+    const live = currentSizes();
+    if (vis.length !== live.length) return;
+    persistingSizes = true;
+    vis.forEach((info, i) => {
+      const pct = live[i];
+      if (Number.isFinite(pct) && pct > 0) info.el.setAttribute('size', `${pct}%`);
+    });
+    // Hold the guard across the MutationObserver microtask (it fires AFTER this
+    // synchronous code), then clear it — otherwise the observer sees the flag
+    // already false and re-reads our own writes. Same pattern as applyingMaximize.
+    queueMicrotask(() => { persistingSizes = false; });
   }
 
   // --- Task 2: maximize/restore core ---
@@ -277,6 +346,11 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
     element.addEventListener('keydown', onKeydown, true);
 
     const mo = new MutationObserver(() => {
+      // Skip our OWN per-drag size writes (persistSizes). Re-reading here would
+      // setItems() → re-render the <For>, replacing the ResizableHandle mid-drag
+      // and dropping its pointer capture — the drag stalls after the first move.
+      // (The flag is held across this observer microtask; see persistSizes.)
+      if (persistingSizes) return;
       readItems();
       const stash = maximized();
       if (stash) {
@@ -291,7 +365,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
           return;
         }
       }
-      if (applyingMaximize) return;              // our own writes — skip auto-emit
+      if (applyingMaximize) return; // our own maximize writes — skip the emit
       queueMicrotask(emitChange);
     });
     mo.observe(element, {
@@ -357,6 +431,7 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
         {(info, i) => {
           const min = boundAttrs(info.min);
           const max = boundAttrs(info.max);
+          const def = boundAttrs(info.defaultSize);
           const basis = normalizeSize(info.size);
           const prev = () => visible()[i() - 1];
           const isStatic = () => !!(info.locked || prev()?.locked);
@@ -367,7 +442,12 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
                   withHandle
                   orientation={orientation()}
                   static={isStatic()}
-                  onPanelResize={() => queueMicrotask(emitChange)}
+                  onPanelResize={() => {
+                    // Persist the dragged/dblclick-reset layout back to the item
+                    // `size` attributes so it survives later re-reads, then emit.
+                    persistSizes();
+                    queueMicrotask(emitChange);
+                  }}
                 />
               </Show>
               <div
@@ -377,6 +457,10 @@ defineWebComponent<GroupProps, GroupEvents>('kc-resizable', {
                 data-min-size-pct={min.pctAttr}
                 data-max-size={max.pxAttr}
                 data-max-size-pct={max.pctAttr}
+                // Reflect the configured default size so a dblclick on the
+                // adjacent <ResizableHandle> can snap this panel back to it.
+                data-default-size={def.pxAttr}
+                data-default-size-pct={def.pctAttr}
                 style={{
                   // The panel is a flex item of the root: `flex-basis` sizes its
                   // MAIN axis (width when horizontal, height when vertical) and the

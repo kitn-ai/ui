@@ -129,6 +129,9 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             </Attachments>
           </div>
         </Show>
+        {/* Consumer-injected controls rendered before the input area. Native
+            slot; inert outside a shadow root, projected by the custom element. */}
+        <slot name="leading" />
         <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" />
         <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
           <div class="flex items-center gap-2">
@@ -206,6 +209,9 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
               }}
             </For>
           </div>
+          {/* Consumer-injected controls rendered after the input area, beside
+              the send button. Native slot; projected by the custom element. */}
+          <slot name="trailing" />
           <Show
             when={showStop()}
             fallback={

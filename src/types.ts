@@ -6,6 +6,12 @@ export interface ModelOption {
   id: string;
   name: string;
   provider?: string;
+  /** A short subtitle shown under the name (e.g. "Flagship model"). Takes
+   *  precedence over `provider` for the row subtitle when both are set. */
+  description?: string;
+  /** Optional group name. Models sharing a `group` are collected under a
+   *  collapsible section (e.g. "Legacy models"); ungrouped models list first. */
+  group?: string;
 }
 
 export interface SearchFilters {

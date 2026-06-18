@@ -1,0 +1,106 @@
+---
+title: Chat
+description: A full-featured chat UI — thread, prompt composer, and optional header — packaged as a single Shadow DOM web component that drops into any framework.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-chat</p>
+
+<p class="kc-lede">A full-featured chat UI — thread, composer, and optional header — packaged as a single Shadow DOM web component for any framework.</p>
+
+<Facts items={['Shadow DOM', '8 events', 'Markdown + syntax highlighting', 'Model switcher', 'Slash-command palette', 'Starter suggestions']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-chat" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-chat>` when you need a **drop-in chat panel in a non-Solid codebase** — React, Vue, a plain HTML page, or an iframe. It isolates all styles in Shadow DOM and bundles its own SolidJS runtime. Give the element an explicit height (e.g. `height: 100vh`) — it fills its block, scroll and all. Add custom header controls through its [header slots](/chat/patterns/custom-chat-header/). Need a built-in **conversation sidebar and history** too? Use [`<kc-workspace>`](/chat/components/workspace/). For fine-grained control in SolidJS, compose `ChatThread`, `Message`, and `PromptInput` directly.
+</Aside>
+
+## Usage
+
+Set rich data (arrays, objects) in JavaScript; scalar props work as attributes or properties:
+
+```html
+<kc-chat id="chat" style="display:block; height:100vh;"></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const chat = document.getElementById('chat');
+
+  chat.messages = [
+    { id: '1', role: 'user', content: 'How do I center a div?' },
+    { id: '2', role: 'assistant', content: 'Use `display: grid; place-items: center;`',
+      actions: ['copy', 'like', 'dislike'] },
+  ];
+
+  chat.addEventListener('kc-submit', (e) => {
+    console.log('user sent:', e.detail.value, 'attachments:', e.detail.attachments);
+  });
+  chat.addEventListener('kc-message-action', (e) => {
+    console.log(e.detail.messageId, e.detail.action);
+  });
+</script>
+```
+
+- **`messages`** — each entry: `id`, `role` (`'user' | 'assistant'`), `content` (markdown for assistant), plus optional `actions`, `attachments`, `reasoning`, `tools`, and `avatar`.
+- **`loading`** — flip to `true` while awaiting a reply; the input disables and a typing indicator appears.
+- **Model switcher** — set `models` (`{ id, name, provider? }[]`) and `currentModel`; listen for `kc-model-change`.
+- **Context meter** — set `context` (`{ usedTokens, maxTokens, … }`) to show a token-usage gauge in the header.
+
+## Examples
+
+### Basic Thread
+
+<Example client:visible tag="kc-chat" />
+
+### Loading State
+
+<Example client:visible tag="kc-chat" config={{ loading: true }} data="loading" />
+
+### Starter Suggestions
+
+`suggestions` — clickable prompts above an empty thread; `suggestion-mode="fill"` populates the input instead of submitting.
+
+<Example client:visible tag="kc-chat" data="withSuggestions" />
+
+### Model Switcher and Header
+
+`models` + `chat-title` activates the header bar with a model-switcher dropdown.
+
+<Example client:visible tag="kc-chat" config={{ chatTitle: 'Research Assistant' }} data="withModels" />
+
+### Context Token Meter
+
+Add `context` to show a live token-usage gauge — yellow near the warning threshold, red near danger.
+
+<Example client:visible tag="kc-chat" config={{ chatTitle: 'Research Assistant' }} data="withContext" />
+
+### Slash Commands
+
+`slashCommands` opens a palette on `/`; `slash-compact` uses single-line rows for dense layouts.
+
+<Example client:visible tag="kc-chat" data="withSlash" />
+
+## Props
+
+<PropTable tag="kc-chat" />
+
+## Events
+
+<EventTable tag="kc-chat" />
+
+## Composed from
+
+<ComposedFrom tag="kc-chat" />
+
+<NeedAHand />

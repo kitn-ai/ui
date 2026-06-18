@@ -1,0 +1,107 @@
+---
+title: Conversations
+description: A sidebar conversation list with grouping, active highlighting, and a "New chat" button — the building block for any chat history panel.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-conversations</p>
+
+<p class="kc-lede">A self-contained sidebar that renders a grouped, scrollable conversation list with a "New chat" button and collapse toggle — drop it into any framework and wire up three events.</p>
+
+<Facts items={['Shadow DOM', '3 events', 'Auto-bucketing by recency', 'Pre-bucketed groups', 'Declarative child elements']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-conversations" />
+
+<Aside type="tip" title="When to use">
+Use `<kc-conversations>` for a conversation switcher outside SolidJS — React, Vue, Svelte, or plain HTML. Shadow DOM keeps styles isolated in both directions. In SolidJS with fine-grained layout needs, compose the `ConversationList` primitive directly.
+</Aside>
+
+## Usage
+
+Set the data in JavaScript (it's arrays and objects) and listen for CustomEvents:
+
+```html
+<kc-conversations id="sidebar" style="display:block; width:300px; height:100vh;"></kc-conversations>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const el = document.getElementById('sidebar');
+
+  el.conversations = [
+    {
+      id: 'c-1', title: 'Web component architecture',
+      scope: { type: 'collection' }, messageCount: 12,
+      lastMessageAt: '2026-06-16T10:00:00.000Z',
+      updatedAt: '2026-06-16T10:00:00.000Z',
+    },
+  ];
+  el.activeId = 'c-1';
+
+  el.addEventListener('kc-conversation-select', (e) => {
+    el.activeId = e.detail.id; // keep the active highlight in sync
+  });
+  el.addEventListener('kc-new-chat', () => console.log('new chat'));
+  el.addEventListener('kc-toggle-sidebar', () => console.log('toggled'));
+</script>
+```
+
+**Two data approaches:**
+
+- **In JavaScript** — `el.conversations` (flat list, auto-bucketed by recency) or `el.groups` (pre-bucketed; supply when you own the section headers). When `groups` is set it takes precedence.
+- **Declarative children** — nest `<kc-conversation>` tags directly; each carries its `id` as an attribute and title as text content. The element reads them on mount and watches via MutationObserver — works in plain HTML, SSR, or any framework that sets innerHTML.
+
+## Examples
+
+### Default List
+
+A flat `conversations` array — the element auto-buckets by recency.
+
+<Example client:visible tag="kc-conversations" />
+
+### Active Conversation Highlighted
+
+`activeId` highlights the matching row and scrolls it into view.
+
+<Example client:visible tag="kc-conversations" config={{ activeId: 'c-1' }} data="withActive" />
+
+### Pre-bucketed Groups
+
+Supply `groups` to own the section headers; ungrouped items fall to an "Other" bucket.
+
+<Example client:visible tag="kc-conversations" config={{ activeId: 'c-1' }} data="withGroups" />
+
+### Empty State
+
+An empty `conversations` array renders the built-in empty state.
+
+<Example client:visible tag="kc-conversations" data="empty" />
+
+### Declarative Children
+
+Nested `<kc-conversation>` elements — no JavaScript wiring needed.
+
+<Example client:visible tag="kc-conversations" data="declarative" />
+
+## Props
+
+<PropTable tag="kc-conversations" />
+
+## Events
+
+<EventTable tag="kc-conversations" />
+
+## Composed from
+
+<ComposedFrom tag="kc-conversations" />
+
+<NeedAHand />

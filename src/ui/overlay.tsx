@@ -3,7 +3,7 @@ import {
 } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import {
-  computePosition, autoUpdate, offset, flip, shift, arrow, type Placement,
+  computePosition, autoUpdate, offset, flip, shift, arrow, hide, type Placement,
 } from '@floating-ui/dom';
 
 /**
@@ -91,15 +91,21 @@ export function usePosition(
     { x: 0, y: 0, placement: options.placement ?? 'bottom' },
   );
   const [arrowPos, setArrowPos] = createSignal<{ x?: number; y?: number }>({});
+  // True when the trigger has scrolled out of view (clipped by an ancestor or the
+  // viewport). Callers should hide the floating node so it doesn't stick to the
+  // edge — Floating UI's `hide` middleware. autoUpdate keeps this live on scroll.
+  const [hidden, setHidden] = createSignal(false);
 
   createEffect(() => {
     const ref = reference();
     const float = floating();
     if (!ref || !float) return;
     const update = () => {
+      // `hide()` is read last so it reflects the final, shifted/flipped position.
       const middleware = [offset(options.gutter ?? 8), flip(), shift({ padding: 8 })];
       const aEl = options.arrowEl?.();
       if (aEl) middleware.push(arrow({ element: aEl }));
+      middleware.push(hide());
       computePosition(ref, float, {
         placement: options.placement ?? 'bottom',
         strategy: 'fixed',
@@ -107,13 +113,14 @@ export function usePosition(
       }).then(({ x, y, placement, middlewareData }) => {
         setPos({ x, y, placement });
         if (middlewareData.arrow) setArrowPos({ x: middlewareData.arrow.x, y: middlewareData.arrow.y });
+        setHidden(!!middlewareData.hide?.referenceHidden);
       });
     };
     const cleanup = autoUpdate(ref, float, update);
     onCleanup(cleanup);
   });
 
-  return { pos, arrowPos };
+  return { pos, arrowPos, hidden };
 }
 
 export type DismissReason = 'escape' | 'outside';

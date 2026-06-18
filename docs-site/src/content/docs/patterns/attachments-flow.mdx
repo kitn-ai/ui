@@ -1,0 +1,126 @@
+---
+title: Attachments flow
+description: Attach files from the composer's paperclip, send them with the prompt, and render them on the user's message — the complete attachment round-trip.
+---
+
+import { InlineAttachDemo, DropZoneAttachDemo } from '../../../components/AttachmentsFlowDemo.tsx';
+
+<p class="kc-lede">`<kc-prompt-input>` ships with an attach button. Click the paperclip, pick a file, send — `kc-submit` delivers `{ value, attachments }` together, and the user's `<kc-message>` renders the files inline. You own the upload logic; kitn-chat handles the staging and display.</p>
+
+<InlineAttachDemo client:only="solid" />
+
+The paperclip, the removable chips, and the staged-file state are all built in. You don't wire an upload component for the common case — you just read `kc-submit`.
+
+## How it works
+
+**1 — Read the payload from `kc-submit`**
+
+The composer stages files internally as the user picks them. On submit, `kc-submit` carries the staged list alongside the text — always an array, even when empty:
+
+```js
+import '@kitn.ai/chat/elements';
+
+const prompt = document.getElementById('prompt');
+
+prompt.addEventListener('kc-submit', async (e) => {
+  const { value, attachments } = e.detail;
+  // attachments: AttachmentData[] — always an array, never undefined
+
+  const aId = crypto.randomUUID();
+  chat.messages = [
+    ...chat.messages,
+    {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: value,
+      attachments, // pass straight through → shown inline on the message
+    },
+    { id: aId, role: 'assistant', content: '' },
+  ];
+  chat.loading = true;
+
+  // Forward value + attachments to your model API, then stream the reply.
+  for await (const token of streamFromModel({ value, attachments })) {
+    chat.messages = chat.messages.map((m) =>
+      m.id === aId ? { ...m, content: m.content + token } : m,
+    );
+  }
+  chat.loading = false;
+});
+```
+
+`<kc-chat>` carries the same composer and fires the same `kc-submit` — the paperclip works there with zero extra setup too.
+
+**2 — Render attachments on the user message**
+
+Pass `attachments` in the `ChatMessage` object. `<kc-chat>` and `<kc-message>` render them inline beneath the message text — the same display the [`<kc-attachments>`](/chat/components/attachments/) element uses — with no extra wiring:
+
+```js
+// The message shape — attachments is optional; omit it for text-only turns.
+const userMsg = {
+  id: crypto.randomUUID(),
+  role: 'user',
+  content: value,
+  attachments: [
+    { id: 'a1', type: 'file', filename: 'design-spec.pdf', mediaType: 'application/pdf' },
+    { id: 'a2', type: 'file', filename: 'screenshot.png',  mediaType: 'image/png' },
+  ],
+};
+```
+
+**`AttachmentData` shape:**
+
+| Field | Required | Notes |
+|---|---|---|
+| `id` | Yes | Stable identifier — used for removals via the chip's remove button |
+| `type` | Yes | `'file'` or `'source-document'` |
+| `filename` | No | Shown as the chip label |
+| `mediaType` | No | MIME type — drives the icon (image / video / audio / document) |
+| `url` | No | Object URL or CDN URL — enables image previews in the hover card |
+| `title` | No | Display name for `source-document` attachments |
+
+## Pre-populating staged files
+
+Assign `prompt.attachments` in JavaScript after mount to seed the composer before the user types — for files already linked to this conversation, say. The element manages its own staged list from there: the user can add more with the paperclip, remove chips, and `kc-submit` always delivers the current state:
+
+```js
+prompt.attachments = [
+  { id: 'ctx-1', type: 'file', filename: 'brief.pdf', mediaType: 'application/pdf' },
+];
+```
+
+## Optional: a dedicated drop zone
+
+When you want a large drop target for a whole page or panel — not just the composer's paperclip — add a standalone `<kc-file-upload>` and feed its files into the composer. The round-trip from `kc-submit` onward is identical; you're only changing how files get staged.
+
+<DropZoneAttachDemo client:only="solid" />
+
+`<kc-file-upload>` fires `kc-files-added` when the user picks or drops files. Convert each `File` to an `AttachmentData` and append it to `prompt.attachments`:
+
+```js
+const upload = document.getElementById('upload');
+const prompt = document.getElementById('prompt');
+
+upload.addEventListener('kc-files-added', (e) => {
+  const current = prompt.attachments ?? [];
+  const added = e.detail.files.map((f) => ({
+    id: crypto.randomUUID(),
+    type: 'file',
+    filename: f.name,
+    mediaType: f.type || undefined,
+    // create an object URL if you want an image preview in the hover card
+    url: f.type.startsWith('image/') ? URL.createObjectURL(f) : undefined,
+  }));
+  prompt.attachments = [...current, ...added];
+});
+```
+
+The drop zone and the paperclip stack: files from either path land in the same staged list and ride along on the next `kc-submit`.
+
+## Next steps
+
+- **[`kc-prompt-input` reference](/chat/components/prompt-input/)** — `attachments` property, the built-in paperclip, `kc-submit` detail, `loading`, `stoppable`.
+- **[`kc-attachments` reference](/chat/components/attachments/)** — standalone display of `AttachmentData[]` with `variant`, `hoverCard`, and `removable`.
+- **[`kc-file-upload` reference](/chat/components/file-upload/)** — `accept`, `multiple`, `kc-files-added`.
+- **[`kc-message` reference](/chat/components/message/)** — full `ChatMessage` shape including `attachments`.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the complete `kc-submit` streaming loop with `<kc-chat>`.

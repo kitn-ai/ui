@@ -52,7 +52,7 @@ export function Tooltip(props: TooltipProps) {
             role="tooltip"
             data-expanded={presence.state() === 'open' ? '' : undefined}
             data-closed={presence.state() === 'closed' ? '' : undefined}
-            style={{ position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px`, 'pointer-events': 'none' }}
+            style={{ position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px`, 'pointer-events': 'none', visibility: position.hidden() ? 'hidden' : 'visible' }}
             class={cn(
               'z-50 rounded-md bg-foreground px-2.5 py-1 text-xs text-background shadow-md',
               'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',

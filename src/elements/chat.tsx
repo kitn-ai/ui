@@ -1,3 +1,4 @@
+import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
 import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage } from '../components/chat-thread';
 import type { AttachmentData } from '../components/attachments';
@@ -30,16 +31,33 @@ interface Events {
 
 defineWebComponent<Props, Events>('kc-chat', {
   messages: [], value: undefined, placeholder: 'Send a message...', loading: false,
-  suggestions: undefined, suggestionMode: 'submit', proseSize: 'sm',
+  suggestions: undefined, suggestionMode: 'submit', persistSuggestions: false, proseSize: 'sm',
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
   search: false, voice: false, slashCommands: undefined, slashActiveIds: undefined, slashCompact: false,
   actionsReveal: 'always',
-}, (props, { dispatch, flag }) => (
+}, (props, { dispatch, flag, element }) => {
+  // Detect consumer-projected header controls so the header opens for them even
+  // without a title/models/context. Mirrors the <kc-model> light-DOM read pattern.
+  const [hasHeaderStart, setHasHeaderStart] = createSignal(false);
+  const [hasHeaderEnd, setHasHeaderEnd] = createSignal(false);
+  onMount(() => {
+    const read = () => {
+      setHasHeaderStart(!!element.querySelector(':scope > [slot="header-start"]'));
+      setHasHeaderEnd(!!element.querySelector(':scope > [slot="header-end"]'));
+    };
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true });
+    onCleanup(() => observer.disconnect());
+  });
+
+  return (
   <ChatThread
     messages={props.messages} value={props.value as string | undefined} placeholder={props.placeholder as string}
     loading={flag('loading')} suggestions={props.suggestions as string[] | undefined}
-    suggestionMode={props.suggestionMode as 'submit' | 'fill'} proseSize={props.proseSize as ProseSize}
+    suggestionMode={props.suggestionMode as 'submit' | 'fill'} persistSuggestions={flag('persistSuggestions')}
+    proseSize={props.proseSize as ProseSize}
     codeTheme={props.codeTheme as string} codeHighlight={flag('codeHighlight')}
     chatTitle={props.chatTitle as string | undefined} models={props.models as ModelOption[] | undefined}
     currentModel={props.currentModel as string | undefined} context={props.context as ChatThreadContextUsage | undefined}
@@ -55,5 +73,8 @@ defineWebComponent<Props, Events>('kc-chat', {
     onSearch={() => dispatch('kc-search', {})}
     onVoice={() => dispatch('kc-voice', {})}
     onSlashSelect={(command) => dispatch('kc-slash-select', { command })}
+    headerStart={hasHeaderStart()}
+    headerEnd={hasHeaderEnd()}
   />
-));
+  );
+});

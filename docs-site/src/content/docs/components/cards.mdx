@@ -1,0 +1,88 @@
+---
+title: Cards
+description: A dispatcher that renders a stream of generative-UI card envelopes — confirm, choice, tasks, link previews, and more — routing user actions through an optional policy.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-cards</p>
+
+<p class="kc-lede">Drop in `<kc-cards>` to render a live stream of AI-generated card envelopes — confirmations, task lists, choice pickers, link previews, and custom types — while a single `policy` object routes every user action back to your app.</p>
+
+<Facts items={['Shadow DOM', 'Property-driven API', 'Built-in card types', 'Extensible type registry', 'CardFallback for unknown types']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-cards" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-cards>` whenever your AI response includes structured interactions — a deployment confirmation, a multi-step plan, a list of options. Pass server envelopes into `el.cards`, wire `el.policy` to handle results, and the element takes care of rendering, routing, and resolved (read-only) states.
+</Aside>
+
+## Usage
+
+Set all three in JavaScript — they're arrays and objects, so none work as HTML attributes:
+
+```html
+<kc-cards id="cards"></kc-cards>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const el = document.getElementById('cards');
+
+  el.cards = [
+    { type: 'confirm', id: 'deploy', title: 'Deploy to production?',
+      data: { body: 'Apply 3 migrations?', tone: 'warning',
+              actions: [{ id: 'go', label: 'Deploy', style: 'primary', default: true },
+                        { id: 'no', label: 'Cancel' }] } },
+  ];
+
+  el.policy = {
+    onAction: (cardId, action, payload) => console.log('action', cardId, action, payload),
+    onSubmit: (cardId, data) => console.log('submit', cardId, data),
+    onOpen:   (url, target) => window.open(url, target === 'tab' ? '_blank' : '_self'),
+    onError:  (cardId, message) => console.warn('card error', cardId, message),
+  };
+</script>
+```
+
+- **`cards`** — array of `CardEnvelope` objects: `{ type, id, data, title?, resolution? }`. The `type` string selects which built-in child element renders the envelope.
+- **`policy`** — `{ onAction, onSubmit, onOpen, onDismiss, … }`. Provide only the handlers your app needs; the rest are silently ignored. Swap it after mount — it is read at event time.
+- **`types`** — `{ 'my-type': 'my-card-element' }` merges over the built-in registry; override a built-in by reusing its key.
+- **Resolved cards** — set `resolution` on an envelope (`{ kind: 'action', action, payload? }` or `{ kind: 'submit', data }`) to render it in its read-only state after the user has acted.
+
+## Examples
+
+### Mixed Card Stream
+
+<Example client:visible tag="kc-cards" />
+
+### Single Confirm Card
+
+<Example client:visible tag="kc-cards" data="confirm" />
+
+### Resolved Card
+
+Pass `resolution` on an envelope to lock it in its read-only view — useful when rehydrating conversation history.
+
+<Example client:visible tag="kc-cards" data="resolved" />
+
+### Unknown Type Fallback
+
+<Example client:visible tag="kc-cards" data="unknownType" />
+
+## Props
+
+<PropTable tag="kc-cards" />
+
+## Composed from
+
+<ComposedFrom tag="kc-cards" />
+
+<NeedAHand />

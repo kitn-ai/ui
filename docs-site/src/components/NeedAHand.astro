@@ -1,0 +1,16 @@
+---
+import { Icon } from 'astro-icon/components';
+const repo = 'https://github.com/kitn-ai/chat';
+const btn =
+  'inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-sm font-medium text-ink-2 no-underline transition-colors hover:border-brand hover:text-ink';
+---
+<hr class="not-content my-10 border-0 border-t border-line" />
+<div class="not-content flex flex-wrap items-center gap-3">
+  <span class="mr-1 text-sm text-ink-3">Need a hand?</span>
+  <a class={btn} href={`${repo}/issues/new`} target="_blank" rel="noopener">
+    <Icon name="lucide:bug" class="size-4" /> Report a bug
+  </a>
+  <a class={btn} href={`${repo}/discussions`} target="_blank" rel="noopener">
+    <Icon name="lucide:life-buoy" class="size-4" /> Ask for help
+  </a>
+</div>

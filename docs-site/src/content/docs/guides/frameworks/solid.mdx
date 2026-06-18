@@ -1,0 +1,233 @@
+---
+title: Solid
+description: Use kitn-chat's native SolidJS components from @kitn.ai/chat for full compositional control, or drop in the kc-* web components for a batteries-included shell.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Solid apps get an extra path the other frameworks don't: the components are authored in SolidJS, so you can import them straight into your JSX instead of going through the `kc-*` web components. Both paths ship in the package and mix freely:
+
+- **Native SolidJS components** (`@kitn.ai/chat`) — import `ChatContainer`, `Message`, `PromptInput`, and the rest directly into your JSX. Full compositional control, tree-shaken alongside your own code. Reach for this in a Solid app.
+- **`kc-*` web components** (`@kitn.ai/chat/elements`) — the drop-in shells when you want batteries included or need to share UI across frameworks.
+
+## Install
+
+```bash
+npm install @kitn.ai/chat
+```
+
+`solid-js` is a peer dependency — install it if you haven't already:
+
+```bash
+npm install solid-js
+```
+
+Import the design tokens once near your app entry:
+
+```ts
+import '@kitn.ai/chat/theme.css';
+```
+
+<Aside type="tip" title="Ships as source">
+The `@kitn.ai/chat` entry point (`"."`) exports raw TSX. Your bundler compiles and tree-shakes it alongside your own Solid code — you only pay for what you import.
+</Aside>
+
+## Native components
+
+Compose directly in JSX. Size the layout with flex — `ChatContainer` fills its box, so give it a flex parent rather than a hard-coded viewport height.
+
+```tsx
+import { createSignal, For } from 'solid-js';
+import {
+  ChatConfig,
+  ChatContainer,
+  ChatContainerContent,
+  Message,
+  MessageContent,
+  PromptInput,
+  PromptInputTextarea,
+  PromptInputActions,
+} from '@kitn.ai/chat';
+import '@kitn.ai/chat/theme.css';
+
+type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
+
+export function Chat() {
+  const [messages, setMessages] = createSignal<ChatMessage[]>([
+    { id: '1', role: 'assistant', content: 'How can I help?' },
+  ]);
+
+  const handleSubmit = async () => {
+    const userMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: input(),
+    };
+    const history = [...messages(), userMsg];
+    setMessages(history);
+    setInput('');
+
+    const aid = crypto.randomUUID();
+    setMessages([...history, { id: aid, role: 'assistant', content: '' }]);
+
+    let answer = '';
+    for await (const token of streamFromYourAPI(history)) {
+      answer += token;
+      setMessages((prev) =>
+        prev.map((m) => (m.id === aid ? { ...m, content: answer } : m)),
+      );
+    }
+  };
+
+  const [input, setInput] = createSignal('');
+
+  return (
+    <div class="flex flex-col h-full">
+      <ChatConfig proseSize="sm">
+        <ChatContainer class="h-full">
+          <ChatContainerContent class="space-y-4 p-4">
+            <For each={messages()}>
+              {(msg) => (
+                <Message>
+                  <MessageContent markdown>{msg.content}</MessageContent>
+                </Message>
+              )}
+            </For>
+          </ChatContainerContent>
+        </ChatContainer>
+        <PromptInput value={input()} onValueChange={setInput} onSubmit={handleSubmit}>
+          <PromptInputTextarea placeholder="Ask anything..." />
+          <PromptInputActions />
+        </PromptInput>
+      </ChatConfig>
+    </div>
+  );
+}
+```
+
+`ChatContainer` is **transport-agnostic** — it owns the conversation UI, you own the request. Render your message list inside `ChatContainerContent` and stream the assistant reply into your signal in `onSubmit`.
+
+## Compose a split layout
+
+The same building blocks compose into any layout. Use `Resizable` with `ResizablePanel` to add a draggable divider between panes — handles are inserted automatically between visible panels.
+
+```tsx
+import { createSignal } from 'solid-js';
+import { Resizable, ResizablePanel, ConversationList, ChatContainer, ChatContainerContent, PromptInput, PromptInputTextarea } from '@kitn.ai/chat';
+
+function Workspace() {
+  const [activeId, setActiveId] = createSignal<string | undefined>(undefined);
+
+  return (
+    <div class="flex flex-col h-full">
+      <Resizable orientation="horizontal" onChange={(sizes) => persist(sizes)}>
+        <ResizablePanel defaultSize="25%" minSize="200px">
+          <ConversationList
+            conversations={conversations()}
+            activeId={activeId()}
+            onSelect={(id) => setActiveId(id)}
+            onNewChat={() => startNewConversation()}
+          />
+        </ResizablePanel>
+        <ResizablePanel>
+          <ChatContainer class="h-full">
+            <ChatContainerContent class="p-4">
+              {/* message list */}
+            </ChatContainerContent>
+          </ChatContainer>
+          <PromptInput onSubmit={handleSubmit}>
+            <PromptInputTextarea placeholder="Ask anything..." />
+          </PromptInput>
+        </ResizablePanel>
+      </Resizable>
+    </div>
+  );
+}
+```
+
+`ResizablePanel` accepts `defaultSize` (px or `%`) plus optional `minSize` / `maxSize`. `onChange` receives an array of percent sizes — persist it to restore the layout on reload.
+
+## Standalone feature components
+
+Every feature component works standalone — drop them into any part of your UI without adopting a full chat shell.
+
+```tsx
+import {
+  Markdown, Reasoning, ReasoningTrigger, ReasoningContent, Tool, Artifact,
+} from '@kitn.ai/chat';
+
+<Markdown content={assistantReply} />
+<Reasoning isStreaming={isStreaming}>
+  <ReasoningTrigger>View reasoning</ReasoningTrigger>
+  <ReasoningContent markdown>{thinkingText}</ReasoningContent>
+</Reasoning>
+<Tool toolPart={toolCall} defaultOpen />
+<Artifact files={artifactFiles} />
+```
+
+## Using the web component shell
+
+When you want a complete chat in one tag, register the `kc-*` elements and use `<kc-chat>`. In Solid, pass rich data with `prop:` (forces a DOM property assignment, not a stringified attribute) and listen for CustomEvents with Solid's `on:` namespace.
+
+```tsx
+import '@kitn.ai/chat/elements';
+import { createSignal } from 'solid-js';
+
+type Message = { id: string; role: 'user' | 'assistant'; content: string };
+
+function Shell() {
+  const [messages, setMessages] = createSignal<Message[]>([
+    { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+  ]);
+
+  const handleSubmit = (e: CustomEvent<{ value: string }>) => {
+    const userMsg: Message = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: e.detail.value,
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    // …call your model, then append the assistant reply
+  };
+
+  return (
+    <div style={{ display: 'flex', 'flex-direction': 'column', height: '100dvh' }}>
+      <kc-chat
+        prop:messages={messages()}
+        on:kc-submit={handleSubmit}
+        style={{ flex: 1, 'min-height': 0 }}
+      />
+    </div>
+  );
+}
+```
+
+<Aside type="tip" title="prop: vs attribute">
+Without `prop:`, Solid serializes objects to strings — breaking array props. Use `prop:messages` (not `messages`) for any prop that takes an array or object.
+</Aside>
+
+## Key exports from `@kitn.ai/chat`
+
+| Category | Exports |
+|---|---|
+| **Config** | `ChatConfig`, `useChatConfig` |
+| **Chat layout** | `ChatContainer`, `ChatContainerContent`, `ChatContainerScrollAnchor` |
+| **Messages** | `Message`, `MessageAvatar`, `MessageContent`, `MessageActions`, `MessageCopyButton` |
+| **Prompt** | `PromptInput`, `PromptInputTextarea`, `PromptInputActions`, `PromptInputAction` |
+| **Content** | `Markdown`, `CodeBlock`, `Reasoning`, `Tool`, `Artifact` |
+| **Sidebar** | `ConversationList`, `ConversationItem` |
+| **Layout** | `Resizable`, `ResizablePanel` |
+| **Primitives** | `useTextStream`, `useStickToBottom`, `useAutoResize`, `useVoiceRecorder` |
+
+## Which path to choose
+
+| | Native components (`@kitn.ai/chat`) | Web components (`@kitn.ai/chat/elements`) |
+|---|---|---|
+| **Recommended for** | Solid apps | Any framework, or sharing UI across frameworks |
+| **Bundle** | Tree-shaken with your own code | Pre-built, self-contained |
+| **Composition** | Full JSX control | Single element, attribute-driven |
+| **Signals** | Native `createSignal` | `prop:` + `on:` bindings |
+
+Mix freely: native components on one screen, a `<kc-chat>` shell on another.
+
+See [Installation](/chat/guides/installation/) for bundler configuration and CDN options.

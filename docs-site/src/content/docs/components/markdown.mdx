@@ -1,0 +1,88 @@
+---
+title: Markdown
+description: Renders a markdown string — with fenced-code syntax highlighting via Shiki — as a standalone web component that works in any framework or plain HTML.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-markdown</p>
+
+<p class="kc-lede">Turn a raw markdown string into rendered prose — headings, bold, italic, lists, blockquotes, and syntax-highlighted code fences — in any framework or plain HTML.</p>
+
+<Facts items={['Shadow DOM', 'Shiki highlighting', '4 prose sizes', 'GFM support', 'Highlight on/off']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-markdown" />
+
+<Aside type="tip" title="When to use">
+Use `<kc-markdown>` to render model output, formatted prose, or documentation outside a SolidJS tree — message bubbles, doc viewers, help panels. In SolidJS, import the `Markdown` primitive directly. The element is `display: block` and fills its container; constrain width on the parent as needed.
+</Aside>
+
+## Usage
+
+Set `content` in JavaScript with your markdown string:
+
+```html
+<kc-markdown id="md"></kc-markdown>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const md = document.getElementById('md');
+  md.content = '### Hello\nRenders **bold**, _italic_, and `code`.';
+</script>
+```
+
+- **`content`** — assign it in JavaScript; HTML attributes don't support multiline strings cleanly.
+- **`prose-size`** — scales body text: `xs`, `sm` (default), `base`, `lg`. Use `sm` in message bubbles, `base`/`lg` for doc pages.
+- **`code-theme`** — defaults to `github-dark-dimmed`; any [Shiki theme](https://shiki.style/themes) works.
+- **`code-highlight="false"`** — skips Shiki entirely, rendering code fences as plain monospace.
+
+## Examples
+
+### Default
+
+Headings, bold, italic, a list, a blockquote, and a syntax-highlighted TypeScript fence.
+
+<Example client:visible tag="kc-markdown" />
+
+### Rich Content
+
+Ordered lists, unordered lists, blockquotes, and a fenced code block together — representative of typical model output.
+
+<Example client:visible tag="kc-markdown" data="rich" />
+
+### Compact Text Size
+
+`prose-size="xs"` for dense contexts — cards, sidebar panels, or tooltips.
+
+<Example client:visible tag="kc-markdown" config={{ proseSize: 'xs' }} data="short" />
+
+### Large Prose
+
+`prose-size="lg"` for standalone reading contexts — documentation pages or help articles.
+
+<Example client:visible tag="kc-markdown" config={{ proseSize: 'lg' }} />
+
+### Highlighting Disabled
+
+`code-highlight="false"` renders code fences as plain monospace — no Shiki loads, ideal for raw terminal output or log lines.
+
+<Example client:visible tag="kc-markdown" config={{ codeHighlight: false }} data="plain" />
+
+## Props
+
+<PropTable tag="kc-markdown" />
+
+## Composed from
+
+<ComposedFrom tag="kc-markdown" />
+
+<NeedAHand />

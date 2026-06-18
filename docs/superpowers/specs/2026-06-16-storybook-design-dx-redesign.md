@@ -60,7 +60,7 @@ neutral product tokens**. The two never fight.
 | Token group | Light | Dark |
 |---|---|---|
 | bg / surface / raised | `#f4f2ec` / `#fbfaf6` / `#fff` | `#121110` / `#1a1917` / `#201f1c` |
-| ink / muted / faint | `#1b1a17` / `#5f5a4f` / `#8a8377` | `#f1efe9` / `#908b80` / `#6f6a60` |
+| ink / muted / faint | `#1b1a17` / `#5f5a4f` / `#6e685e` | `#f1efe9` / `#908b80` / `#8b857a` |
 | accent / accent-2 | `#6d28d9` / `#8b5cf6` | `#a78bfa` / `#c4b5fd` |
 | good / warn (callouts) | `#15803d` / `#b45309` | `#4ade80` / `#fbbf24` |
 
@@ -68,6 +68,11 @@ neutral product tokens**. The two never fight.
   numerals) — same as the showcase, loaded via `managerHead`/`previewHead`.
 - **Motifs:** dot-grid atmosphere (masked), numbered section headers (`01`), mono
   component-name tag chips with a square accent bullet, pill controls, 12–16px radii.
+- **Contrast is gated.** Every text token clears WCAG AA (verified): light body 9.4:1,
+  muted 6.1:1, the faintest label tier `--faint` 4.9:1; dark equivalents 4.8–11:1. The
+  initial `--faint` (`#8a8377` light / `#6f6a60` dark) failed at 3.3:1 and was darkened
+  — small mono labels are normal-size text and need 4.5, not the 3.0 UI threshold. axe
+  stays at `test: 'error'`, so any regression fails CI.
 
 **Reusable doc primitives** (built once, used on every page — all shown in the mock):
 hero (eyebrow + title + lede + tag chip + "at a glance" facts), `callout` (`tip` /

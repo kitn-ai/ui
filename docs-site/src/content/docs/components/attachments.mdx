@@ -1,0 +1,77 @@
+---
+title: Attachments
+description: Render file attachments as tiles, chips, or rows — one element, presentation chosen by attribute.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-attachments</p>
+
+<p class="kc-lede">Render a set of file attachments — one element, three presentations chosen by a single attribute. Tiles for a gallery, chips for inline, rows for a list.</p>
+
+<Facts items={['Shadow DOM', '3 variants', 'Hover-card preview', 'Removable items']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-attachments" />
+
+<Aside type="tip" title="When to use">
+Show files a user attached (or the assistant produced) **anywhere in a chat** — the composer, a message body, a sources rail. Set `variant` to fit the space: `grid` for a gallery, `inline` for a compact chip row, `list` for a detailed column.
+</Aside>
+
+## Usage
+
+Set `items` in JavaScript (arrays can't be HTML attributes); choose the presentation with the `variant`, `hover-card`, and `removable` attributes; listen for `kc-remove`.
+
+## Examples
+
+### Grid
+
+`variant="grid"` — square image tiles for a gallery.
+
+<Example client:visible tag="kc-attachments" config={{ variant: 'grid' }} data="images" />
+
+### Inline
+
+`variant="inline"` — a compact icon + label chip per file, for a composer or message body.
+
+<Example client:visible tag="kc-attachments" config={{ variant: 'inline' }} />
+
+### List
+
+`variant="list"` — full-width rows with a preview thumbnail, filename and media type.
+
+<Example client:visible tag="kc-attachments" config={{ variant: 'list' }} />
+
+### Removable
+
+Add `removable` for a per-item remove button (the **×**); it fires the `kc-remove` event.
+
+<Example client:visible tag="kc-attachments" config={{ variant: 'list', removable: true }} />
+
+### Hover preview
+
+Add `hover-card` to reveal each item's details on hover — useful on `grid`, where the tile shows only the image.
+
+<Example client:visible tag="kc-attachments" config={{ variant: 'grid', hoverCard: true }} data="images" />
+
+## Props
+
+<PropTable tag="kc-attachments" />
+
+## Events
+
+<EventTable tag="kc-attachments" />
+
+## Composed from
+
+<ComposedFrom tag="kc-attachments" />
+
+<NeedAHand />

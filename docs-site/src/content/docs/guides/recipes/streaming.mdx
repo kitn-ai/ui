@@ -1,0 +1,169 @@
+---
+title: Streaming
+description: Stream assistant responses token-by-token into kc-chat or kc-response-stream using a ReadableStream, an AsyncIterable, or chunk-by-chunk mutation.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Display each token as it arrives — no buffering, no flash of finished content. kitn-chat supports two approaches: **mutate `messages` in place** (the standard pattern with `kc-chat`) or **feed an `AsyncIterable<string>`** directly to `kc-response-stream`.
+
+## Stream into kc-chat
+
+`kc-chat` streams by appending an empty assistant message, then replacing its `content` as tokens arrive. Set `loading = true` during the request so the input is disabled and the loading state shows; set it back to `false` when the stream ends.
+
+```js
+import '@kitn.ai/chat/elements';
+import '@kitn.ai/chat/theme.css';
+
+const chat = document.querySelector('kc-chat');
+
+chat.addEventListener('kc-submit', async (e) => {
+  const text = e.detail.value.trim();
+  if (!text) return;
+
+  // Append the user message
+  const history = [
+    ...chat.messages,
+    { id: crypto.randomUUID(), role: 'user', content: text },
+  ];
+  chat.messages = history;
+  chat.loading = true;
+
+  // Seed an empty assistant placeholder to stream into
+  const assistantId = crypto.randomUUID();
+  chat.messages = [
+    ...history,
+    { id: assistantId, role: 'assistant', content: '' },
+  ];
+
+  // Point at your own backend in production — never expose an API key in the browser.
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: history.map((m) => ({ role: m.role, content: m.content })),
+    }),
+  });
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let answer = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const lines = buffer.split('\n');
+    buffer = lines.pop(); // carry the incomplete line forward
+
+    for (const line of lines) {
+      const s = line.trim();
+      if (!s.startsWith('data:')) continue;
+      const payload = s.slice(5).trim();
+      if (payload === '[DONE]') continue;
+      try {
+        const delta = JSON.parse(payload).choices?.[0]?.delta?.content;
+        if (!delta) continue;
+        answer += delta;
+        // Replace the assistant placeholder with the growing answer
+        chat.messages = chat.messages.map((m) =>
+          m.id === assistantId ? { ...m, content: answer } : m
+        );
+      } catch {
+        // Ignore non-JSON keep-alive lines
+      }
+    }
+  }
+
+  chat.loading = false;
+});
+```
+
+<Aside type="caution" title="Keep API keys server-side">
+Never send your LLM provider key to the browser. Point `fetch` at your own backend endpoint that authenticates the user and proxies the request.
+</Aside>
+
+### OpenRouter example
+
+If you are proxying an [OpenRouter](https://openrouter.ai) request on your server, the body sent upstream looks like this:
+
+```json
+{
+  "model": "anthropic/claude-sonnet-4",
+  "stream": true,
+  "messages": [{ "role": "user", "content": "Hello" }]
+}
+```
+
+The SSE response follows the OpenAI streaming format (`data: {...}` lines, terminated with `data: [DONE]`) — the reader loop above handles it as-is.
+
+## Stream with kc-response-stream
+
+`kc-response-stream` is a lower-level web component for streaming plain text or markdown outside a full chat thread. Pass either a complete string (renders with the reveal animation) or an **`AsyncIterable<string>`** (streams tokens live).
+
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| `text` | `string \| AsyncIterable<string>` | `''` | Assign it in JavaScript — an async iterable can't be an HTML attribute. |
+| `mode` | `'typewriter' \| 'fade'` | `'typewriter'` | Reveal animation. |
+| `speed` | `number` | `20` | Characters/segments per tick. |
+| `as` | `string` | — | Element tag to render into. |
+
+**Event:** `kc-complete` — fires when streaming finishes.
+
+### Feeding an AsyncIterable
+
+```js
+import '@kitn.ai/chat/elements';
+
+const el = document.querySelector('kc-response-stream');
+
+async function* tokenStream(res) {
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const lines = buffer.split('\n');
+    buffer = lines.pop();
+
+    for (const line of lines) {
+      const s = line.trim();
+      if (!s.startsWith('data:')) continue;
+      const payload = s.slice(5).trim();
+      if (payload === '[DONE]') continue;
+      try {
+        const delta = JSON.parse(payload).choices?.[0]?.delta?.content;
+        if (delta) yield delta;
+      } catch { /* skip keep-alives */ }
+    }
+  }
+}
+
+const res = await fetch('/api/chat', { method: 'POST', body: '...' });
+el.text = tokenStream(res); // pass the AsyncIterable directly
+```
+
+### Passing a finished string
+
+Assigning a complete string runs the reveal animation without a live connection — useful for replaying or previewing a cached response.
+
+```js
+el.text = 'The assistant response rendered with the typewriter effect.';
+```
+
+## Choosing an approach
+
+| Scenario | Use |
+|----------|-----|
+| Full chat UI with history | `kc-chat` + mutate `messages` |
+| Isolated response widget | `kc-response-stream` |
+| Replay a saved response | `kc-response-stream` with a string |
+| Render finished markdown | `kc-markdown` with a `content` string |
+
+`kc-markdown` accepts only a static `content` string and renders it immediately — use it when the full text is available, not for live streaming.

@@ -1,0 +1,13 @@
+---
+// Header right: GitHub + an "Ask AI" pill that opens the docked assistant panel
+// (kitn's own <kc-prompt-input>, disabled until the assistant goes live).
+import { Icon } from 'astro-icon/components';
+import AskAiDock from '../AskAiDock.tsx';
+---
+<div class="flex items-center gap-3">
+  <a href="https://github.com/kitn-ai/chat" target="_blank" rel="noopener" aria-label="GitHub"
+     class="flex items-center text-ink-2 transition-colors hover:text-ink">
+    <Icon name="lucide:github" class="size-[18px]" />
+  </a>
+  <AskAiDock client:load />
+</div>

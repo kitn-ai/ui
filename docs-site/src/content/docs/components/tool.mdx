@@ -1,0 +1,81 @@
+---
+title: Tool
+description: A collapsible input/output inspector for a single agent tool call — shows the call type, state badge, and the full input and output when expanded.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-tool</p>
+
+<p class="kc-lede">A collapsible panel for a single agent tool call — colour-coded state badge, expandable input/output inspector. Drop one after each tool invocation to give users transparency into what the agent did.</p>
+
+<Facts items={['Shadow DOM', '4 states', 'Collapsible inspector', 'Colour-coded badge', 'Property-driven API']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-tool" />
+
+<Aside type="tip" title="When to use">
+Place `<kc-tool>` inside an assistant message row — one element per tool call, below the text content. In SolidJS, compose the `Tool` primitive from `@kitn.ai/chat` directly; for every other framework, use this web component.
+</Aside>
+
+## Usage
+
+Set the call via the `tool` property — it's an object, so assign it in JavaScript.
+
+```html
+<kc-tool id="tool" open></kc-tool>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  document.getElementById('tool').tool = {
+    type: 'database_query',
+    state: 'output-available',
+    input: { table: 'users', limit: 10 },
+    output: { rows: 10, ms: 42 },
+  };
+</script>
+```
+
+- **`state`** drives the badge colour: `input-streaming` (blue) → `input-available` (amber) → `output-available` (green) / `output-error` (red).
+- **`open`** is a boolean attribute; set it to start the panel expanded.
+- The element renders nothing until `tool` is set and emits no events.
+
+## Examples
+
+### Completed Call
+
+<Example client:visible tag="kc-tool" config={{ open: true }} />
+
+### Running Call
+
+Amber badge — input sent, awaiting response.
+
+<Example client:visible tag="kc-tool" data="running" />
+
+### Error State
+
+<Example client:visible tag="kc-tool" data="error" />
+
+### Input Streaming
+
+Blue badge while the agent assembles arguments.
+
+<Example client:visible tag="kc-tool" data="streaming" />
+
+## Props
+
+<PropTable tag="kc-tool" />
+
+## Composed from
+
+<ComposedFrom tag="kc-tool" />
+
+<NeedAHand />

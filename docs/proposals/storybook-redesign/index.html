@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kitn · Storybook redesign proposal — mock</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- set theme before paint to avoid the very flash this proposal fixes -->
+  <script>try{var t=localStorage.getItem('kitn-mock-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}</script>
+</head>
+<body>
+  <div class="app">
+
+    <!-- ───────────────── left rail: branded manager sidebar mock ───────────────── -->
+    <aside class="rail">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span><span class="name">kitn</span><span class="ver">@kitn.ai/chat · 0.12</span></span>
+      </div>
+
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        Search docs
+        <span class="kbd">⌘K</span>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-group">
+          <div class="label">Docs</div>
+          <ul>
+            <li><a href="#"><span class="dot"></span>Introduction</a></li>
+            <li><a href="#"><span class="dot"></span>Installation</a></li>
+            <li><a href="#"><span class="dot"></span>Getting Started</a></li>
+            <li><a href="#"><span class="dot"></span>Frameworks</a></li>
+            <li><a href="#"><span class="dot"></span>Accessibility</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <div class="label">Components</div>
+          <ul>
+            <li><a href="#"><span class="dot"></span>Chat <small>kc-chat</small></a></li>
+            <li><a href="#"><span class="dot"></span>Message <small>kc-message</small></a></li>
+            <li><a class="active" href="#"><span class="dot"></span>Artifact <small>kc-artifact</small></a></li>
+            <li><a href="#"><span class="dot"></span>Prompt Input <small>kc-prompt-input</small></a></li>
+            <li><a href="#"><span class="dot"></span>Sources <small>kc-sources</small></a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <div class="label">Patterns</div>
+          <ul>
+            <li><a href="#"><span class="dot"></span>Streaming</a></li>
+            <li><a href="#"><span class="dot"></span>Empty State</a></li>
+            <li><a href="#"><span class="dot"></span>Message Actions</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <div class="rail-foot">compose in HTML,<br>React, Vue, Svelte<br>or SolidJS.</div>
+    </aside>
+
+    <!-- ───────────────── main column ───────────────── -->
+    <div class="main">
+      <!-- preview tab bar (Demo · Docs · Code) -->
+      <div class="topbar">
+        <button class="tab"><span class="demo-dot"></span>Demo</button>
+        <button class="tab active">Docs</button>
+        <button class="tab">Code</button>
+        <button class="tab">API</button>
+        <span class="spacer"></span>
+        <button class="theme-btn" id="theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          <span id="theme-label">Theme</span>
+        </button>
+      </div>
+
+      <div class="canvas">
+        <article class="doc">
+
+          <!-- ── HERO: replaces the dense opening paragraph from image #3 ── -->
+          <header class="hero">
+            <span class="eyebrow">Web Component</span>
+            <h1 class="title">Artifact</h1>
+            <p class="lede">A framed, switchable viewer for AI-generated artifacts — the “canvas” pattern from Claude Artifacts, ChatGPT Canvas, v0 and bolt.</p>
+            <span class="tagchip">kc-artifact</span>
+            <div class="facts">
+              <span class="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>Shadow DOM</span>
+              <span class="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 8 20 0"/></svg>Sandboxed iframe</span>
+              <span class="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7"/></svg>Preview · Code toggle</span>
+            </div>
+          </header>
+
+          <!-- API pointer as a styled callout, not a blockquote of prose -->
+          <div class="callout tip">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <div class="ct"><strong>Full API reference</strong> — every property, event, default and token is on the <a class="api-link" href="#">API tab ↗</a>.</div>
+          </div>
+
+          <!-- ── DEMO right inside docs ── -->
+          <h2 id="s-demo"><span class="num">01</span> See it</h2>
+          <div class="stage">
+            <span class="badge">live</span>
+            <div class="artifact">
+              <div class="head">
+                <span class="seg"><button class="on">Preview</button><button>Code</button></span>
+                <span class="nav">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                </span>
+                <span class="url" style="margin-left:.5rem">starboard/index.html</span>
+              </div>
+              <div class="body">⌗ your hosted artifact renders here</div>
+            </div>
+          </div>
+
+          <!-- ── WHEN TO USE: scannable callout, not buried in paragraph 2 ── -->
+          <h2 id="s-when"><span class="num">02</span> When to use</h2>
+          <div class="callout use">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+            <div class="ct">Show an AI-generated artifact — a web page, doc, image or PDF your backend hosts — <strong>beside the conversation</strong>, typically inside a <code class="inline">kc-resizable</code> panel. The component <strong>frames</strong> content; your backend serves it, so relative links, back/forward, reload and multi-format work natively.</div>
+          </div>
+
+          <!-- ── HOW TO USE: numbered steps, not a 90-word sentence ── -->
+          <h2 id="s-how"><span class="num">03</span> How to use</h2>
+          <ol class="steps">
+            <li><div class="body"><strong>Register once.</strong> <code class="inline">import '@kitn.ai/chat/elements'</code> anywhere before the element mounts.</div></li>
+            <li><div class="body"><strong>Point it at your artifact.</strong> Set <code class="inline">src</code> to the hosted URL.</div></li>
+            <li><div class="body"><strong>Feed the Code tab.</strong> Set the <code class="inline">files</code> property — a JS array of <code class="inline">{ path, url?, code?, language?, type? }</code>.</div></li>
+            <li><div class="body"><strong>Listen.</strong> <code class="inline">kc-navigate</code>, <code class="inline">kc-tab-change</code> and <code class="inline">kc-file-select</code> tell you what the user did.</div></li>
+          </ol>
+
+          <div class="code">
+            <div class="bar"><span class="lang">html</span><button class="copy">Copy</button></div>
+<pre><span class="c">&lt;!-- register, then drive via properties --&gt;</span>
+&lt;<span class="t">kc-artifact</span> <span class="f">id</span>=<span class="s">"art"</span> <span class="f">src</span>=<span class="s">"/artifacts/site/index.html"</span>&gt;&lt;/<span class="t">kc-artifact</span>&gt;
+
+&lt;<span class="t">script</span> <span class="f">type</span>=<span class="s">"module"</span>&gt;
+  <span class="k">import</span> <span class="s">'@kitn.ai/chat/elements'</span>;
+  <span class="k">const</span> art = document.<span class="f">getElementById</span>(<span class="s">'art'</span>);
+  art.files = [{ path: <span class="s">'index.html'</span>, language: <span class="s">'html'</span> }];
+  art.<span class="f">addEventListener</span>(<span class="s">'kc-navigate'</span>, (e) =&gt; console.<span class="f">log</span>(e.detail.url));
+&lt;/<span class="t">script</span>&gt;</pre>
+          </div>
+
+          <div class="callout warn">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+            <div class="ct"><strong>Sandbox is locked down by default</strong> — <code class="inline">allow-scripts allow-forms</code>, <strong>not</strong> <code class="inline">allow-same-origin</code>. Widen it via the <code class="inline">sandbox</code> attribute only if you trust the artifact.</div>
+          </div>
+
+          <!-- ── PROPS AT A GLANCE ── -->
+          <h2 id="s-props"><span class="num">04</span> Props at a glance</h2>
+          <table class="proptable">
+            <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><span class="name">src</span></td><td><span class="type">string</span></td><td><span class="def">—</span></td><td class="desc">URL of the hosted artifact to frame.</td></tr>
+              <tr><td><span class="name">files</span></td><td><span class="type">ArtifactFile[]</span></td><td><span class="def">[]</span></td><td class="desc">File tree for the Code tab.</td></tr>
+              <tr><td><span class="name">tab</span></td><td><span class="type">preview · code</span></td><td><span class="def">preview</span></td><td class="desc">Which view is active.</td></tr>
+              <tr><td><span class="name">sandbox</span></td><td><span class="type">string</span></td><td><span class="def">allow-scripts allow-forms</span></td><td class="desc">iframe sandbox tokens.</td></tr>
+              <tr><td><span class="name">expandable</span></td><td><span class="type">boolean</span></td><td><span class="def">false</span></td><td class="desc">Show the expand/maximize control.</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:.86rem;color:var(--muted)">The full generated table (every prop + token) still lives on the <a href="#">API tab</a> — this is the “you’ll reach for these five” summary.</p>
+
+          <!-- ── EVENTS ── -->
+          <h2 id="s-events"><span class="num">05</span> Events</h2>
+          <div class="events">
+            <div class="event"><span class="nm">kc-navigate</span><span class="arrow">→</span><span class="detail">{ url }</span><span class="desc">the framed page navigated</span></div>
+            <div class="event"><span class="nm">kc-tab-change</span><span class="arrow">→</span><span class="detail">{ tab }</span><span class="desc">Preview ⇄ Code toggled</span></div>
+            <div class="event"><span class="nm">kc-file-select</span><span class="arrow">→</span><span class="detail">{ path }</span><span class="desc">a file was picked in the tree</span></div>
+          </div>
+
+          <!-- ── design-system strip (proof the primitives are reusable) ── -->
+          <section class="systemstrip">
+            <h2 id="s-system"><span class="num">✳</span> The kit behind these pages</h2>
+            <p>Every block above is a small, reusable doc primitive — hero, callout (tip / use / warn), numbered steps, prop table, event list, terminal code block. Authored once, used on every component page. Palette &amp; type below.</p>
+            <div class="swatches">
+              <div class="swatch"><div class="chip" style="background:var(--bg)"></div><span class="nm">bg</span></div>
+              <div class="swatch"><div class="chip" style="background:var(--surface)"></div><span class="nm">surface</span></div>
+              <div class="swatch"><div class="chip" style="background:var(--accent)"></div><span class="nm">accent</span></div>
+              <div class="swatch"><div class="chip" style="background:var(--accent-2)"></div><span class="nm">accent-2</span></div>
+              <div class="swatch"><div class="chip" style="background:var(--ink)"></div><span class="nm">ink</span></div>
+              <div class="swatch"><div class="chip" style="background:var(--muted)"></div><span class="nm">muted</span></div>
+              <div class="swatch"><div class="chip" style="background:var(--good)"></div><span class="nm">good</span></div>
+              <div class="swatch"><div class="chip" style="background:var(--warn)"></div><span class="nm">warn</span></div>
+            </div>
+            <p style="font-family:var(--font-mono);font-size:.8rem;color:var(--muted)">Bricolage Grotesque · display + body &nbsp;|&nbsp; JetBrains Mono · code, labels, numerals</p>
+          </section>
+
+        </article>
+
+        <!-- ── on-this-page rail ── -->
+        <nav class="onthis" aria-label="On this page">
+          <div class="label">On this page</div>
+          <ul>
+            <li><a href="#s-demo" class="active">See it</a></li>
+            <li><a href="#s-when">When to use</a></li>
+            <li><a href="#s-how">How to use</a></li>
+            <li><a href="#s-props">Props at a glance</a></li>
+            <li><a href="#s-events">Events</a></li>
+            <li><a href="#s-system">The kit behind these pages</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <div class="mock-flag">PROPOSAL MOCK — <b>not</b> wired into Storybook yet</div>
+
+  <script>
+    // theme toggle (persisted)
+    const root = document.documentElement;
+    const label = document.getElementById('theme-label');
+    const sync = () => { label.textContent = root.classList.contains('dark') ? 'Dark' : 'Light'; };
+    sync();
+    document.getElementById('theme').addEventListener('click', () => {
+      root.classList.toggle('dark');
+      try { localStorage.setItem('kitn-mock-theme', root.classList.contains('dark') ? 'dark' : 'light'); } catch (e) {}
+      sync();
+    });
+    // on-this-page scrollspy
+    const links = [...document.querySelectorAll('.onthis a')];
+    const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { links.forEach(l => l.classList.remove('active')); map.get(e.target.id)?.classList.add('active'); } });
+    }, { rootMargin: '-72px 0px -65% 0px' });
+    document.querySelectorAll('.doc h2[id]').forEach(h => obs.observe(h));
+  </script>
+</body>
+</html>

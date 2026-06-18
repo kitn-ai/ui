@@ -1,0 +1,47 @@
+---
+// Full header override — total control of layout (Starlight's default fought
+// every CSS attempt to right-align the search). Left: logo + nav. Right:
+// search + GitHub + Ask AI + theme toggle. Mobile menu toggle on small screens.
+import Search from '@astrojs/starlight/components/Search.astro';
+import MobileMenuToggle from '@astrojs/starlight/components/MobileMenuToggle.astro';
+import SocialIcons from './SocialIcons.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { Icon } from 'astro-icon/components';
+
+// BASE_URL is '/chat' (no trailing slash) in the production build but '/chat/'
+// in dev — normalise so asset/nav URLs are always '/chat/…'.
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
+const logo = href('kitn-logo.png');
+const nav = [
+  { label: 'Docs', to: 'guides/introduction' },
+  { label: 'Components', to: 'components/artifact' },
+  { label: 'Patterns', to: 'patterns/compose-your-own' },
+  { label: 'Examples', to: 'examples/drop-in-chat' },
+];
+---
+<div class="flex h-full w-full items-center gap-4">
+  <a href={base} class="flex shrink-0 items-center gap-2 no-underline">
+    <img src={logo} alt="" width="26" height="24" class="kc-logo-img h-6 w-[26px] shrink-0" />
+    <span class="text-xl font-black tracking-tight text-ink">kitn</span>
+    <span class="text-xl font-light text-ink-3" aria-hidden="true">|</span>
+    <span class="text-xl font-medium text-ink-2">Chat</span>
+  </a>
+  <nav class="ml-5 hidden items-center gap-5 md:flex" aria-label="Primary">
+    {nav.map((n) => (
+      <a href={href(n.to)} class="text-sm font-semibold text-ink-2 no-underline transition-colors hover:text-ink">{n.label}</a>
+    ))}
+    {/* Theme editor is its own thing — set off with a divider + palette icon. */}
+    <span class="text-ink-3" aria-hidden="true">|</span>
+    <a href={href('theme/editor')} class="flex items-center gap-1.5 text-sm font-semibold text-ink-2 no-underline transition-colors hover:text-ink">
+      <Icon name="lucide:palette" class="size-4 shrink-0" />
+      <span>Theme</span>
+    </a>
+  </nav>
+
+  <div class="ml-auto flex items-center gap-3">
+    <div class="kc-search"><Search /></div>
+    <div class="hidden items-center gap-3 md:flex"><SocialIcons /><ThemeToggle /></div>
+    <div class="md:hidden"><MobileMenuToggle /></div>
+  </div>
+</div>

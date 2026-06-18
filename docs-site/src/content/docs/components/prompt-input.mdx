@@ -1,0 +1,100 @@
+---
+title: Prompt Input
+description: A self-contained chat composer with auto-resizing text input, a send button, starter suggestions, and an extensible toolbar — ready to drop into any framework or plain HTML.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-prompt-input</p>
+
+<p class="kc-lede">A Shadow DOM chat composer — auto-resizing textarea, send button, suggestion chips, attachments, and an extensible toolbar. Drop it into any framework without style conflicts.</p>
+
+<Facts items={['Shadow DOM', '8 events', 'Uncontrolled by default', 'Starter suggestions', 'Slash-command palette', 'Custom toolbar buttons', 'Pre-seeded attachments']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-prompt-input" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-prompt-input>` whenever you need a chat composer outside of SolidJS — React, Vue, Svelte, Angular, or plain HTML. It manages its own input state uncontrolled by default; listen for `kc-submit` to receive the typed text and any staged attachments. Pin it to the bottom of a chat surface at full width for the canonical layout.
+</Aside>
+
+## Usage
+
+Register elements once, then wire up JS properties and DOM events:
+
+```html
+<kc-prompt-input id="input" style="display:block; width:100%;"></kc-prompt-input>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const input = document.getElementById('input');
+
+  input.suggestions = ['Summarize this thread', 'Draft a reply'];
+  input.slashCommands = [
+    { id: 'summarize', label: '/summarize', description: 'Summarize', category: 'Actions' },
+  ];
+
+  input.addEventListener('kc-submit', (e) => console.log('send:', e.detail.value, e.detail.attachments));
+  input.addEventListener('kc-value-change', (e) => console.log('typing:', e.detail.value));
+</script>
+```
+
+- **Array props** — `suggestions`, `slashCommands`, `slashActiveIds`, and `attachments` are arrays, so set them in JavaScript rather than as HTML attributes.
+- **Scalar flags** — `placeholder`, `disabled`, `loading`, `search`, `voice`, `stoppable`, `slashCompact`, and `suggestionMode` work as plain attributes or properties.
+- **Loading + stoppable** — set `loading` while a response streams; add `stoppable` to swap the send button for a Stop button that fires `kc-stop`.
+- **Custom toolbar buttons** — place `<kc-action id icon tooltip>` children inside the element; clicks fire `kc-toolbar-action` with `detail.action`.
+
+## Examples
+
+### Default
+
+Out-of-the-box composer with starter suggestions. Type and press Enter (or click a chip) to fire `kc-submit`.
+
+<Example client:visible tag="kc-prompt-input" data="withSuggestions" />
+
+### With Voice and Search
+
+`search` and `voice` flags add Globe and Mic buttons to the toolbar, firing `kc-search` and `kc-voice` respectively.
+
+<Example client:visible tag="kc-prompt-input" config={{ search: true, voice: true }} data="withSuggestions" />
+
+### Slash-Command Palette
+
+Set `slashCommands` to enable the palette. Typing `/` opens it; selecting an entry fires `kc-slash-select`. Use `slashActiveIds` to highlight active commands.
+
+<Example client:visible tag="kc-prompt-input" data="withSlashCommands" />
+
+### Pre-Seeded Attachments
+
+Set `attachments` to pre-populate staged files. The element manages attachment state — the paperclip adds more, each chip has a remove button.
+
+<Example client:visible tag="kc-prompt-input" data="withAttachments" />
+
+### Loading State
+
+`loading` blocks submit while a response streams. `stoppable` swaps send for a Stop button that fires `kc-stop`.
+
+<Example client:visible tag="kc-prompt-input" config={{ loading: true, stoppable: true }} data="withSuggestions" />
+
+### Disabled
+
+`disabled` makes the composer entirely non-interactive — useful for read-only or locked states.
+
+<Example client:visible tag="kc-prompt-input" config={{ disabled: true }} data="withSuggestions" />
+
+## Props
+
+<PropTable tag="kc-prompt-input" />
+
+## Events
+
+<EventTable tag="kc-prompt-input" />
+
+<NeedAHand />

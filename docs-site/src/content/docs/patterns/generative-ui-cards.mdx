@@ -1,0 +1,156 @@
+---
+title: Generative UI cards
+description: Let the assistant interrupt with interactive cards — confirm, choose, or fill a form — wired back to the host through a typed CardPolicy.
+---
+
+import { ConfirmCardDemo, ChoiceCardDemo, FormCardDemo } from '../../../components/CardsDemo.tsx';
+
+<p class="kc-lede">Instead of waiting for the user to type a follow-up, the assistant streams a card directly into the conversation. The user answers it in one click; your `CardPolicy` receives the result.</p>
+
+## How it works
+
+Feed `<kc-cards>` an array of **`CardEnvelope`** objects and a **`CardPolicy`**. Each envelope has a `type` (`confirm`, `choice`, `form`), a stable `id`, a `title`, and `data` that conforms to that type's schema. When the user interacts, the matching `CardPolicy` callback fires — no event listeners needed.
+
+```js
+import '@kitn.ai/chat/elements';
+
+const cards = document.getElementById('cards');
+
+// Assign the envelope stream in JavaScript — arrays can't be HTML attributes.
+cards.cards = [/* CardEnvelope objects, one per card type — see below */];
+
+// Wire a CardPolicy — one callback per interaction verb.
+cards.policy = {
+  onAction:  (cardId, action, payload) => console.log('action', cardId, action, payload),
+  onSubmit:  (cardId, data)            => console.log('submit', cardId, data),
+  onDismiss: (cardId)                  => console.log('dismiss', cardId),
+  onError:   (cardId, message)         => console.error('error', cardId, message),
+};
+```
+
+**`CardEnvelope` shape** — all card types share the same wrapper:
+
+| field | type | notes |
+|---|---|---|
+| `type` | `string` | Built-ins: `confirm`, `choice`, `form`, `tasks`, `link`. Extend via `types` prop. |
+| `id` | `string` | Stable across re-renders; passed back in every policy callback. |
+| `title` | `string` | Rendered as the card heading. |
+| `data` | `unknown` | Shape depends on `type` — see each card below. |
+| `resolution` | `CardResolution` | Set to re-hydrate the read-only state (e.g. on history load). |
+
+**`CardPolicy` callbacks** — only supply the ones you need:
+
+| callback | when it fires |
+|---|---|
+| `onAction(cardId, action, payload?)` | A `confirm` button or `choice` option was submitted |
+| `onSubmit(cardId, data)` | A `form` was submitted; `data` is the validated values object |
+| `onDismiss(cardId)` | The user dismissed a dismissible card |
+| `onError(cardId, message)` | The card definition was invalid, or the card failed to render |
+
+Each card type below is live — interact with it and watch its policy events land in the **Console** beneath the preview.
+
+## `kc-confirm` — ask for a decision
+
+A `confirm` card poses a question and offers one or more actions. Tapping an action fires `onAction(cardId, action)`, where `action` is the button's `id`.
+
+<ConfirmCardDemo client:only="solid" />
+
+```ts
+{
+  body?: string;
+  tone?: 'default' | 'warning' | 'danger';
+  actions: Array<{
+    id: string;
+    label: string;
+    style?: 'primary' | 'default' | 'destructive';
+    payload?: unknown;   // echoed back in onAction's third arg
+    default?: boolean;   // auto-focused when autofocus is set
+  }>;
+  dismissible?: boolean;
+}
+```
+
+## `kc-choice` — pick from options
+
+A `choice` card presents a list of options; the user selects one and submits. The chosen option's `id` arrives via `onAction(cardId, optionId)`.
+
+<ChoiceCardDemo client:only="solid" />
+
+```ts
+{
+  prompt?: string;
+  options: Array<{
+    id: string;
+    label: string;
+    description?: string;
+    meta?: string;          // trailing label (price, badge…)
+    recommended?: boolean;  // renders a "Recommended" pill
+    disabled?: boolean;
+    payload?: unknown;      // echoed back in onAction
+  }>;
+  allowOther?: boolean | { label?: string; placeholder?: string };
+  submitLabel?: string;     // defaults to 'Submit'
+}
+```
+
+## `kc-form` — collect structured input
+
+A `form` card renders a JSON Schema subset as fields, validates on submit, and delivers the values object through `onSubmit(cardId, data)`. Use `x-kc-*` hints to pick widgets and control layout.
+
+<FormCardDemo client:only="solid" />
+
+```ts
+{
+  type: 'object';
+  description?: string;
+  required?: string[];
+  'x-kc-submitLabel'?: string;
+  'x-kc-order'?: string[];       // explicit field order
+  properties: Record<string, {
+    type: 'string' | 'number' | 'boolean' | 'array';
+    title?: string;
+    enum?: unknown[];
+    'x-kc-widget'?: 'textarea' | 'select' | 'radio' | 'slider' | 'rating' | 'switch' | 'checkbox';
+    'x-kc-placeholder'?: string;
+  }>;
+}
+```
+
+## Streaming cards in as the agent decides
+
+Append envelopes to the array as the agent generates them — `<kc-cards>` renders whatever is in the array at that moment:
+
+```js
+// Start with nothing; add cards as the model emits them.
+cards.cards = [];
+
+for await (const event of streamFromYourAgent()) {
+  if (event.type === 'card') {
+    cards.cards = [...cards.cards, event.envelope];
+  }
+}
+```
+
+## Re-hydrating resolved cards
+
+Pass `resolution` on the envelope to render the read-only (already-answered) state without re-emitting policy events:
+
+```js
+cards.cards = [
+  {
+    type: 'confirm',
+    id: 'confirm-deploy',
+    title: 'Deploy to production?',
+    data: { /* … */ },
+    resolution: { kind: 'action', action: 'deploy', at: '2026-06-17T09:12:00Z' },
+  },
+];
+```
+
+## Next steps
+
+- **[`kc-cards` reference](/chat/components/cards/)** — `types` map for custom card tags, all props.
+- **[`kc-confirm` reference](/chat/components/confirm/)** — `autofocus`, `tone`, full action shapes.
+- **[`kc-choice` reference](/chat/components/choice/)** — `allowOther`, media options.
+- **[`kc-form` reference](/chat/components/form/)** — full JSON Schema subset + every `x-kc-*` hint.
+- **[Drop-in chat](/chat/examples/drop-in-chat/)** — wire cards into a streaming conversation with `<kc-chat>`.

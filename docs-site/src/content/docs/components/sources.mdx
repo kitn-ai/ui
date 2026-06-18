@@ -1,0 +1,70 @@
+---
+title: Sources
+description: A wrapping row of citation chips — one element, any number of links, with optional favicons and hover-card previews.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-sources</p>
+
+<p class="kc-lede">A wrapping row of citation chips that renders the sources behind an assistant answer — each chip shows the domain (or a custom label), an optional favicon, and a hover-card with the title and description.</p>
+
+<Facts items={['Shadow DOM', 'No events', 'Optional favicons', 'Numbered or domain labels', 'Declarative children']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-sources" />
+
+<Aside type="tip" title="When to use">
+Place `<kc-sources>` directly below an assistant message when the reply cites external references. Use `numbered` when the answer body uses `[1]`, `[2]`, … citation markers. Use the `sources` property for dynamic or streamed lists; use declarative `<kc-source>` children for static or server-rendered markup.
+</Aside>
+
+## Usage
+
+Assign the `sources` property — an array can't be an HTML attribute:
+
+```html
+<kc-sources id="srcs" show-favicon></kc-sources>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  document.getElementById('srcs').sources = [
+    { href: 'https://kitn.dev', title: 'kitn — the kit', description: 'Composable chat UI.' },
+    { href: 'https://solidjs.com', title: 'SolidJS', description: 'A reactive UI library.' },
+  ];
+</script>
+```
+
+- Each item accepts `href` (required), `title`, `description`, `label`, and `showFavicon`.
+- **`show-favicon`** enables favicons globally; a per-item `showFavicon: false` overrides for that chip.
+- **`numbered`** replaces domain labels with `[1]`, `[2]`, … — useful when the response body uses in-line citation markers.
+- **Declarative path** — write `<kc-source>` elements as light-DOM children of `<kc-sources>`. Prop sources render first; declarative children are appended after.
+
+## Examples
+
+### Default with Favicons
+
+<Example client:visible tag="kc-sources" config={{ showFavicon: true }} />
+
+### Domain Labels Only
+
+<Example client:visible tag="kc-sources" data="noFavicon" />
+
+### Numbered Citations
+
+<Example client:visible tag="kc-sources" config={{ numbered: true }} data="numbered" />
+
+## Props
+
+<PropTable tag="kc-sources" />
+
+## Composed from
+
+<ComposedFrom tag="kc-sources" />
+
+<NeedAHand />

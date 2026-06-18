@@ -46,6 +46,10 @@ export interface ChatThreadProps {
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately
    *  as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: 'submit' | 'fill';
+  /** Keep suggestions visible after the conversation starts. By default
+   *  suggestions are conversation starters and hide once `messages` is
+   *  non-empty; set this to keep them always shown. Default false. */
+  persistSuggestions?: boolean;
   /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`).
    *  Defaults to `'sm'`. */
   proseSize?: ProseSize;
@@ -67,6 +71,11 @@ export interface ChatThreadProps {
   context?: ChatThreadContextUsage;
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
+  /** Whether the host has `slot="header-start"` content (left of the title) —
+   *  set by the `<kc-chat>` facade so a custom control forces the header open. */
+  headerStart?: boolean;
+  /** Whether the host has `slot="header-end"` content (right of the controls). */
+  headerEnd?: boolean;
   /** Show a Search (Globe) button in the input toolbar; fires a `search` event. */
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
@@ -104,7 +113,11 @@ export function ChatThread(props: ChatThreadProps) {
     if ((props.suggestionMode ?? 'submit') === 'fill') { handleChange(v); props.onSuggestionClick?.(v); }
     else { props.onSubmit?.({ value: v, attachments: attachments() }); setAttachments([]); }
   };
-  const showHeader = () => !!(props.chatTitle || props.models || props.context);
+  const showHeader = () => !!(props.chatTitle || props.models || props.context || props.headerStart || props.headerEnd);
+  // Suggestions are conversation starters: show only on an empty thread unless
+  // the host opts into persisting them.
+  const visibleSuggestions = () =>
+    props.persistSuggestions || props.messages.length === 0 ? props.suggestions : undefined;
   const showScrollButton = () => props.scrollButton !== false;
 
   return (
@@ -112,7 +125,15 @@ export function ChatThread(props: ChatThreadProps) {
       <div class={`flex h-full flex-col bg-background ${props.class ?? ''}`}>
         <Show when={showHeader()}>
           <header class="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
-            <div class="text-sm font-semibold text-foreground">{props.chatTitle}</div>
+            <div class="flex items-center gap-2">
+              {/* Consumer-injected leading controls (sidebar-toggle, compose, a
+                  popover title-button). Projects light-DOM `slot="header-start"`
+                  children of <kc-chat>; inert outside a shadow root. */}
+              <slot name="header-start" />
+              <Show when={props.chatTitle}>
+                <div class="text-sm font-semibold text-foreground">{props.chatTitle}</div>
+              </Show>
+            </div>
             <div class="flex items-center gap-2">
               <Show when={props.models}>
                 <ModelSwitcher
@@ -135,6 +156,9 @@ export function ChatThread(props: ChatThreadProps) {
                   </ContextContent>
                 </Context>
               </Show>
+              {/* Consumer-injected trailing controls (share, settings, …).
+                  Projects light-DOM `slot="header-end"` children of <kc-chat>. */}
+              <slot name="header-end" />
             </div>
           </header>
         </Show>
@@ -209,7 +233,7 @@ export function ChatThread(props: ChatThreadProps) {
           <div class="mx-auto max-w-3xl">
             <DefaultPromptInput
               value={current()} placeholder={props.placeholder} loading={props.loading === true}
-              suggestions={props.suggestions} attachments={attachments()}
+              suggestions={visibleSuggestions()} attachments={attachments()}
               search={props.search === true} voice={props.voice === true}
               slashCommands={props.slashCommands} slashActiveIds={props.slashActiveIds} slashCompact={props.slashCompact === true}
               onValueChange={handleChange} onSubmit={handleSubmit} onSuggestionClick={handleSuggestionClick}

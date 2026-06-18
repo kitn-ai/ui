@@ -1,0 +1,90 @@
+---
+title: Card
+description: Themed card chrome — heading, description, media, body, actions footer, and a shared inline error state.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-card</p>
+
+<p class="kc-lede">The shared card chrome all generative-UI cards build on — a themed Shadow DOM surface with heading, description, media, body, and actions slots.</p>
+
+<Facts items={['Shadow DOM', 'Chrome only — no events', '4 scalar attributes', 'Media + actions slots', 'Shared error state']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-card" />
+
+<Aside type="tip" title="When to use">
+Use `<kc-card>` around **passive content** — a summary block, a generated report preview, any output that needs no user interaction. All typed cards (`<kc-confirm>`, `<kc-form>`, `<kc-choice>`, etc.) compose from it.
+</Aside>
+
+## Usage
+
+All four props are scalar attributes — set them as HTML attributes or DOM properties:
+
+```html
+<kc-card heading="Workspace summary" description="Generated just now.">
+  <p>Your repository has 3 open pull requests and 12 passing checks.</p>
+</kc-card>
+```
+
+- **Default slot** — card body; any passive content.
+- `slot="media"` — full-width region above the heading; drop in an `<img>` or block element.
+- `slot="actions"` — footer for read-only metadata or status labels (not interactive controls).
+- **`error-message`** — replaces the body and actions with the shared inline error UI; remove the attribute to restore the normal view.
+
+## Examples
+
+### Content Surface
+
+<Example client:visible tag="kc-card" config={{ heading: 'Workspace summary', description: 'Generated just now.' }} />
+
+### With Media Slot
+
+```html
+<kc-card heading="Quarterly report" description="Generated just now.">
+  <img slot="media" src="/preview.png" alt="Report preview" />
+  <p>Your Q2 numbers are ready to review.</p>
+</kc-card>
+```
+
+<Example client:visible tag="kc-card" config={{ heading: 'Quarterly report', description: 'Generated just now.' }} data="withMedia" />
+
+### With Actions Slot
+
+`slot="actions"` — passive metadata such as timestamps or file sizes in the card footer.
+
+<Example client:visible tag="kc-card" config={{ heading: 'Q2 Financial summary', description: '4 charts generated.' }} data="withActions" />
+
+### Heading Only
+
+<Example client:visible tag="kc-card" config={{ heading: 'Quarterly report' }} />
+
+### Inline Error State
+
+Set `error-message` to render the shared inline error treatment — body and actions are replaced.
+
+<Example client:visible tag="kc-card" config={{ heading: 'Share your feedback', errorMessage: "This card couldn't be displayed." }} />
+
+### Dense
+
+`dense` tightens spacing — useful in a tight list or feed of multiple cards.
+
+<Example client:visible tag="kc-card" config={{ heading: 'Pull request #142', description: 'Opened 2 hours ago by @alex', dense: true }} />
+
+## Props
+
+<PropTable tag="kc-card" />
+
+## Composed from
+
+<ComposedFrom tag="kc-card" />
+
+<NeedAHand />

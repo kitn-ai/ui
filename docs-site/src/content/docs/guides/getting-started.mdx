@@ -1,0 +1,231 @@
+---
+title: Getting Started
+description: Install @kitn.ai/chat, register the web components, and render a working chat UI in a few lines.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Drop `<kc-chat>` into a page, wire two things, and you have a live chat UI. This guide goes from install to an element that handles real submissions.
+
+## Install
+
+```bash
+npm install @kitn.ai/chat
+```
+
+That's it for web components — SolidJS ships inside the bundle. (You only add `solid-js` separately if you import the native Solid components; see the [SolidJS guide](/chat/guides/frameworks/solid/).)
+
+## Register the elements
+
+One import registers every `kc-*` element in the browser's custom element registry. Run it once — at the top of your entry file, or in a `<script type="module">`:
+
+```js
+import '@kitn.ai/chat/elements';
+```
+
+<Aside type="tip" title="No bundler? Use the CDN">
+Load the bundle straight from a CDN — no install, no build step:
+
+```html
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+</script>
+```
+
+Pin an exact version in production (e.g. `@kitn.ai/chat@0.13.0/dist/...`). The package is pre-1.0, so a minor release can break things.
+</Aside>
+
+## Your first chat
+
+You'll lean on two patterns over and over: set rich data on a JavaScript property, and listen for the element's `CustomEvent`s. Here they are in plain HTML.
+
+```html
+<kc-chat id="chat" style="display:block; height:100dvh;"></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+
+  const chat = document.getElementById('chat');
+
+  // Seed the thread. Arrays can't be attributes, so this goes in JavaScript.
+  chat.messages = [
+    { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+  ];
+
+  // kc-submit fires when the user sends.
+  chat.addEventListener('kc-submit', (e) => {
+    const userMessage = { id: crypto.randomUUID(), role: 'user', content: e.detail.value };
+    chat.messages = [...chat.messages, userMessage];
+    // Call your model here, then append an assistant message.
+  });
+</script>
+```
+
+From that example:
+
+- `messages` is a property. Assign a **new array** to trigger a re-render — mutating in place won't.
+- `kc-submit` carries the input on `e.detail.value`, and any staged files on `e.detail.attachments`.
+- Give the element an explicit height. It fills its block, scrolling and all.
+
+## Stream a reply
+
+`<kc-chat>` is transport-agnostic — it renders whatever you hand it. To stream, push an empty assistant message, then swap it for a fresh object on each chunk.
+
+```js
+chat.addEventListener('kc-submit', async (e) => {
+  const userText = e.detail.value.trim();
+  if (!userText) return;
+
+  // 1. Show the user's message and an empty assistant placeholder.
+  const assistantId = crypto.randomUUID();
+  chat.messages = [
+    ...chat.messages,
+    { id: crypto.randomUUID(), role: 'user', content: userText },
+    { id: assistantId, role: 'assistant', content: '' },
+  ];
+  chat.loading = true;
+
+  // 2. Stream from your endpoint (or a proxy to your model provider).
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: userText }),
+  });
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let answer = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    answer += decoder.decode(value, { stream: true });
+
+    // Replace with a new object each chunk — mutation in place won't re-render.
+    chat.messages = chat.messages.map((m) =>
+      m.id === assistantId ? { ...m, content: answer } : m
+    );
+  }
+
+  chat.loading = false;
+});
+```
+
+## In your framework
+
+The element behaves the same everywhere. Only the binding syntax differs.
+
+<Tabs>
+<TabItem label="HTML">
+```html
+<kc-chat id="chat" style="display:block; height:100dvh;"></kc-chat>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const chat = document.getElementById('chat');
+  chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
+  chat.addEventListener('kc-submit', (e) => console.log(e.detail.value));
+</script>
+```
+</TabItem>
+<TabItem label="React">
+```tsx
+import { Chat } from '@kitn.ai/chat/react';
+
+export function App() {
+  const messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
+  return (
+    <Chat
+      messages={messages}
+      style={{ display: 'block', height: '100dvh' }}
+      onSubmit={(e) => console.log(e.detail.value)}
+    />
+  );
+}
+```
+</TabItem>
+<TabItem label="Vue">
+```vue
+<template>
+  <kc-chat
+    :messages.prop="messages"
+    style="display:block; height:100dvh;"
+    @kc-submit="onSubmit"
+  />
+</template>
+
+<script setup>
+import '@kitn.ai/chat/elements';
+const messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
+const onSubmit = (e) => console.log(e.detail.value);
+</script>
+```
+</TabItem>
+<TabItem label="Svelte">
+```svelte
+<script>
+  import '@kitn.ai/chat/elements';
+  const messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
+</script>
+
+<kc-chat
+  {messages}
+  style="display:block; height:100dvh;"
+  on:kc-submit={(e) => console.log(e.detail.value)}
+></kc-chat>
+```
+</TabItem>
+<TabItem label="Angular">
+```html
+<kc-chat
+  [messages]="messages"
+  style="display:block; height:100dvh;"
+  (kc-submit)="onSubmit($event)"
+></kc-chat>
+```
+</TabItem>
+<TabItem label="SolidJS">
+```tsx
+// Solid apps can compose the native components instead of the element.
+import { createSignal } from 'solid-js';
+import '@kitn.ai/chat/theme.css';
+import { ChatConfig, ChatContainer, ChatContainerContent, Message, MessageContent, PromptInput, PromptInputTextarea, PromptInputActions } from '@kitn.ai/chat';
+
+function App() {
+  const [input, setInput] = createSignal('');
+
+  return (
+    <ChatConfig>
+      <ChatContainer style={{ height: '100dvh' }}>
+        <ChatContainerContent>
+          <Message>
+            <MessageContent markdown>Hello! How can I help?</MessageContent>
+          </Message>
+        </ChatContainerContent>
+      </ChatContainer>
+      <PromptInput
+        value={input()}
+        onValueChange={setInput}
+        onSubmit={() => {
+          console.log(input());
+          setInput('');
+        }}
+      >
+        <PromptInputTextarea placeholder="Ask anything…" />
+        <PromptInputActions />
+      </PromptInput>
+    </ChatConfig>
+  );
+}
+```
+</TabItem>
+</Tabs>
+
+<Aside type="note" title="The one rule that trips people up">
+Arrays and objects — `messages`, `models`, `context`, `attachments` — must be set in JavaScript, never as HTML attributes (an attribute is always a string). Scalars like `placeholder`, `loading`, and `theme` are fine as attributes. Each framework's property binding handles this for you; the gotcha only bites raw HTML.
+</Aside>
+
+## What's next
+
+- **[Frameworks](/chat/guides/frameworks/overview/)** — idiomatic wiring for React, Vue, Angular, Svelte, and SolidJS.
+- **[Components](/chat/components/chat/)** — full props, events, and examples for `kc-chat` and every other element.

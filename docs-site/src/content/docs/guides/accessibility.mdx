@@ -1,0 +1,113 @@
+---
+title: Accessibility
+description: kitn-chat targets WCAG 2.1 Level AA — axe-core clean, keyboard-navigable, and safe for screen readers through Shadow DOM.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Every `kc-*` web component ships with zero axe-core violations, full keyboard operability, and ARIA semantics verified by a CI audit script. This page covers what the kit guarantees and what you need to maintain as an integrator.
+
+## Standard targeted
+
+The kit targets **WCAG 2.1 Level AA**. That means:
+
+- **4.5:1** contrast ratio for body text.
+- **3:1** for large text and UI components (borders, icons, focus rings).
+- All interactive controls reachable and operable without a mouse.
+
+The kit ships with a CI audit (`scripts/audit-a11y.mjs`, powered by **axe-core**) that runs in both light and dark themes. No certification is implied — automated tools can't certify that — but the audit is a condition of every release.
+
+## Shadow DOM and screen readers
+
+`kc-*` web components render inside **Shadow DOM**. Modern screen readers pierce Shadow DOM correctly — accessible names, roles, and live regions propagate without any special workaround in your host page. No extra configuration is required.
+
+## ARIA roles and live regions
+
+- The **message list** carries `role="log"` and `aria-live="polite"`. Streaming tokens are announced without interrupting the reader.
+- The **prompt textarea** uses its `placeholder` as an accessible name fallback when no explicit label is associated.
+- The **conversation sidebar** is wrapped in a `<nav>` landmark.
+- Every **icon-only button** (send, attach, mic, search, copy, like, dislike, regenerate, close) carries an `aria-label` using plain language: "Send message", "Attach file", "Copy message", and so on.
+
+## Keyboard navigation
+
+Every interactive control is reachable by keyboard. **Tab** moves through all focusable controls in DOM order. Focus rings are always visible via `:focus-visible` — they are not hidden on `:focus`.
+
+### Dropdowns and select menus
+
+Applies to `kc-model-switcher`, `kc-scope-picker`, and any similar trigger-menu pairs.
+
+| Key | Action |
+|---|---|
+| Enter / Space / ↓ | Open the menu |
+| ↑ / ↓ | Move between items |
+| Home / End | Jump to first / last item |
+| Letter key | Jump to first item starting with that letter (typeahead) |
+| Enter / Space | Select the focused item |
+| Esc | Close without selecting; focus returns to the trigger |
+| Tab | Close and move focus past the trigger |
+
+Focus always returns to the trigger after the menu closes — whether by Esc, selection, or a click outside.
+
+### Collapsible panels
+
+Applies to reasoning blocks, tool-call panels, and any other expandable section.
+
+| Key | Action |
+|---|---|
+| Enter / Space | Toggle expanded / collapsed |
+| Tab | Move into the expanded content |
+| Esc | Collapse (when focused inside) |
+
+### Slash command palette
+
+Typing `/` in the prompt input opens the command palette.
+
+| Key | Action |
+|---|---|
+| ↑ / ↓ | Navigate items |
+| Home / End | Jump to first / last item |
+| Enter / Tab | Select the focused command — inserts `/label ` into the input with the caret at the end |
+| Esc | Close the palette; focus stays in the input |
+
+### Conversation list
+
+| Key | Action |
+|---|---|
+| ↑ / ↓ | Move between conversations |
+| Enter | Select the focused conversation |
+| Tab | Move through per-item action buttons |
+
+## Tooltips and hover cards
+
+Tooltips and hover cards (on sources, context meter, attachment previews) conform to **WCAG 2.1 SC 1.4.13 — Content on Hover or Focus**:
+
+- They appear on both **hover and keyboard focus**.
+- Moving the pointer onto the tooltip content keeps it visible — it does not vanish when the pointer leaves the trigger.
+- **Esc** dismisses the tooltip without moving focus.
+
+## Color contrast and theming
+
+The default light and dark palettes both pass AA contrast requirements. The `theme` attribute on every element (`light | dark | auto`) controls which token set loads.
+
+`auto`, the default, follows the OS `prefers-color-scheme` media query, so users who enable dark mode at the OS level get it automatically.
+
+<Aside type="caution" title="Custom tokens need manual verification">
+If you override `--color-*` tokens, contrast checking is your responsibility. The kit's CI audit covers only its own token values.
+</Aside>
+
+## Audit tooling
+
+Two layers of automated verification run in CI:
+
+- **axe-core** (`scripts/audit-a11y.mjs`) — rule checks in both light and dark themes. Zero violations at build time.
+- **Keyboard tab-order audit** (`scripts/audit-a11y.mjs`) — verifies focus order, conversation-list control reachability, and model-switcher trigger operability via keyboard.
+
+## What integrators must do
+
+Five things the kit cannot enforce for you:
+
+1. **Do not suppress focus rings.** The kit renders `:focus-visible` rings. Do not apply `outline: none` to `*` or to the web component host in your page CSS.
+2. **Verify contrast after token overrides.** Use a tool like the [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/) after changing any `--color-*` value.
+3. **Write meaningful conversation titles.** The conversation list announces the `title` field to screen readers. "React integration help" is more useful than "Chat 1".
+4. **Set a meaningful `placeholder`.** The textarea `placeholder` doubles as an accessible name when no label is associated.
+5. **Use `theme="auto"`.** Forcing `theme="light"` on a user who prefers dark mode creates contrast mismatches between the kit and your host page. The default `auto` avoids this.

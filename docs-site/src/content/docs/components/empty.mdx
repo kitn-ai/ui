@@ -1,0 +1,71 @@
+---
+title: Empty
+description: A centred empty-state block — icon, title, description, and actions — for when a list or thread has nothing to show yet.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-empty</p>
+
+<p class="kc-lede">A centred empty-state block with a media slot, a title, a description, and a content slot for actions — keeps layouts grounded instead of leaving users with a blank screen.</p>
+
+<Facts items={['Shadow DOM', '2 props', 'Media slot', 'Actions slot', 'Works in any framework']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-empty" />
+
+<Aside type="tip" title="When to use">
+Place `<kc-empty>` where content would normally appear — a conversation list, search results panel, file explorer — whenever that area is empty. Give the element or its parent an explicit height so vertical centering renders correctly. Project a contextual icon into `slot="media"` and a CTA into the default slot.
+</Aside>
+
+## Usage
+
+```html
+<kc-empty
+  empty-title="No conversations yet"
+  description="Start a new chat to see it appear here."
+>
+  <svg slot="media" width="28" height="28" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+  <button>New chat</button>
+</kc-empty>
+```
+
+- **`empty-title`** — use this attribute, not `title` (which is a reserved HTML attribute).
+- **Slots** live in the light DOM — style them with your page CSS, not shadow styles.
+- **Height** — the element uses flexbox to vertically centre content; its parent needs an explicit height (e.g. `height: 100%` or `flex: 1`).
+
+## Examples
+
+### Conversation List Placeholder
+
+<Example client:visible tag="kc-empty" config={{ emptyTitle: 'No conversations yet', description: 'Start a new chat to see it appear here.' }} />
+
+### Search with No Results
+
+<Example client:visible tag="kc-empty" config={{ emptyTitle: 'No results found', description: 'Try a different search term or clear your filters.' }} />
+
+### Title Only
+
+Omitting the description gives a minimal, uncluttered treatment.
+
+<Example client:visible tag="kc-empty" config={{ emptyTitle: 'Nothing here yet' }} />
+
+## Props
+
+<PropTable tag="kc-empty" />
+
+## Composed from
+
+<ComposedFrom tag="kc-empty" />
+
+<NeedAHand />

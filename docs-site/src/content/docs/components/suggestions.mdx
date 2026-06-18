@@ -1,0 +1,91 @@
+---
+title: Suggestions
+description: Clickable prompt chips that offer users a quick way to start or continue a conversation — no typing required.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-suggestions</p>
+
+<p class="kc-lede">A row (or full-width list) of clickable prompt chips — drop it above an input in the welcome state or below the last assistant message as follow-up shortcuts.</p>
+
+<Facts items={['Shadow DOM', '3 chip styles', 'Block layout mode', 'Substring highlight', '1 event']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-suggestions" />
+
+<Aside type="tip" title="When to use">
+Place `<kc-suggestions>` above the prompt input when the thread is empty to show users what the assistant can do. It also works below the last assistant reply as follow-up chips. Use `block` to stack full-width rows in narrow layouts, and `highlight` for a filtered autocomplete list.
+</Aside>
+
+## Usage
+
+Assign the `suggestions` property and listen for `kc-select`:
+
+```html
+<kc-suggestions id="suggs" variant="outline"></kc-suggestions>
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const suggs = document.getElementById('suggs');
+  suggs.suggestions = ['Explain the architecture', 'Show me a code example'];
+  suggs.addEventListener('kc-select', (e) => console.log(e.detail.value));
+</script>
+```
+
+For the declarative path, use `<kc-suggestion>` children — `value` sets the emitted value, text content is the label. Prop items render first; declarative children are appended after.
+
+## Examples
+
+### Default (Outline Pills)
+
+<Example client:visible tag="kc-suggestions" config={{ variant: 'outline' }} />
+
+### Ghost Variant
+
+`variant="ghost"` — no border, subtle hover. Good when chips should blend into the surrounding UI.
+
+<Example client:visible tag="kc-suggestions" config={{ variant: 'ghost' }} />
+
+### Block Layout
+
+`block` stacks suggestions as full-width rows — useful in sidebars or constrained panels.
+
+<Example client:visible tag="kc-suggestions" config={{ variant: 'outline', block: true }} />
+
+### With Highlighted Search
+
+`highlight` emphasises the matching substring in every chip — ideal for autocomplete or search-suggestion lists.
+
+<Example client:visible tag="kc-suggestions" config={{ highlight: 'Solid' }} data="search" />
+
+### Small Chips
+
+<Example client:visible tag="kc-suggestions" config={{ variant: 'outline', size: 'sm' }} />
+
+### Label and Value Differ
+
+Pass `{ label, value }` objects when the displayed text and the emitted value should differ.
+
+<Example client:visible tag="kc-suggestions" config={{ variant: 'outline' }} data="labeled" />
+
+## Props
+
+<PropTable tag="kc-suggestions" />
+
+## Events
+
+<EventTable tag="kc-suggestions" />
+
+## Composed from
+
+<ComposedFrom tag="kc-suggestions" />
+
+<NeedAHand />

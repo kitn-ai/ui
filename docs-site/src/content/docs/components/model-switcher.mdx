@@ -1,0 +1,99 @@
+---
+title: Model Switcher
+description: A compact dropdown for picking the active AI model — drop it in any chat header and listen for one event.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kc-tag-sub">kc-model-switcher</p>
+
+<p class="kc-lede">A compact dropdown trigger that lets users swap the active AI model mid-conversation — set a list of models, handle one event, done.</p>
+
+<Facts items={['Shadow DOM', '1 event', '2 props', 'Property API or declarative children', 'Only renders with 2+ models']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kc-model-switcher" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kc-model-switcher>` when building your own chat header and you want the model picker as a standalone piece. It sits naturally beside a context meter or title. The element stays invisible until at least two models are provided, so you can always pass the full list and let the component decide whether to show.
+</Aside>
+
+## Usage
+
+Set `models` in JavaScript (arrays can't be HTML attributes) and reflect the selection back on `kc-model-change`:
+
+```html
+<kc-model-switcher id="ms"></kc-model-switcher>
+
+<script type="module">
+  import '@kitn.ai/chat/elements';
+  const ms = document.getElementById('ms');
+
+  ms.models = [
+    { id: 'claude-opus', name: 'Claude Opus', provider: 'Anthropic' },
+    { id: 'claude-sonnet', name: 'Claude Sonnet', provider: 'Anthropic' },
+  ];
+  ms.currentModel = 'claude-opus';
+
+  ms.addEventListener('kc-model-change', (e) => {
+    ms.currentModel = e.detail.modelId;
+  });
+</script>
+```
+
+- **`models`** — an array, so assign it as a property. Each item: `{ id: string; name: string; provider?: string }`.
+- **`currentModel`** — the selected model's `id`. Omit it to default to the first item in the list.
+- **Reflect the selection** — set `el.currentModel = e.detail.modelId` after each `kc-model-change` so the trigger label updates.
+
+**Declarative child API** — compose `<kc-model>` children instead of setting the `models` property:
+
+```html
+<kc-model-switcher>
+  <kc-model id="gpt-4o" provider="OpenAI">GPT-4o</kc-model>
+  <kc-model id="claude-sonnet" provider="Anthropic">Claude Sonnet</kc-model>
+</kc-model-switcher>
+```
+
+Each `<kc-model>` carries `id` (required), `provider` (optional), and a text label. When you mix both approaches, property items render first.
+
+## Examples
+
+### Default
+
+Three Claude models loaded via the `models` property.
+
+<Example client:visible tag="kc-model-switcher" />
+
+### Preselected Model
+
+`current-model="claude-sonnet"` starts with a specific model active rather than the first item.
+
+<Example client:visible tag="kc-model-switcher" config={{ currentModel: 'claude-sonnet' }} data="preselected" />
+
+### Multiple Providers
+
+Models from different providers — the dropdown groups them by the `provider` field.
+
+<Example client:visible tag="kc-model-switcher" data="multiProvider" />
+
+## Props
+
+<PropTable tag="kc-model-switcher" />
+
+## Events
+
+<EventTable tag="kc-model-switcher" />
+
+## Composed from
+
+<ComposedFrom tag="kc-model-switcher" />
+
+<NeedAHand />

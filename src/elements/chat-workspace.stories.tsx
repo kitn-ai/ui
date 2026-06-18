@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { onMount } from 'solid-js';
+import { onMount, createSignal } from 'solid-js';
 import './register'; // side effect: registers all kitn custom elements including <kc-workspace>
 import type { ConversationGroup, ConversationSummary, ModelOption } from '../types';
 import type { ChatMessage } from './chat-types';
@@ -78,6 +78,7 @@ type WorkspaceEl = HTMLElement & {
   sidebarMinWidth?: number;
   sidebarMaxWidth?: number;
   sidebarCollapsed?: boolean;
+  defaultSidebarCollapsed?: boolean;
   value?: string;
 };
 
@@ -100,7 +101,7 @@ function WorkspaceElement(props: { args?: Record<string, unknown> }) {
         const scalarNames = [
           'placeholder', 'loading', 'suggestionMode', 'proseSize', 'codeTheme',
           'codeHighlight', 'scrollButton', 'search', 'voice', 'slashCompact',
-          'sidebarWidth', 'sidebarMinWidth', 'sidebarMaxWidth', 'sidebarCollapsed', 'value',
+          'sidebarWidth', 'sidebarMinWidth', 'sidebarMaxWidth', 'defaultSidebarCollapsed', 'value',
         ];
         for (const name of scalarNames) {
           if (name in args) (el as unknown as Record<string, unknown>)[name] = args[name];
@@ -223,7 +224,6 @@ export const Default: Story = {
     search: false,
     voice: false,
     slashCompact: false,
-    sidebarCollapsed: false,
   },
   render: (args: Record<string, unknown>) => <WorkspaceElement args={args} />,
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
@@ -234,5 +234,55 @@ export const InSolidJS: Story = {
   name: 'In SolidJS',
   render: () => <WorkspaceElement />,
   parameters: { docs: { source: { code: SOLID_SNIPPET, language: 'tsx' } } },
+};
+
+const CONTROLLED_SNIPPET = `const ws = document.getElementById('workspace');
+let collapsed = false;
+ws.sidebarCollapsed = collapsed;            // app owns the state
+
+// react to the in-component toggle AND drive it from your own UI
+ws.addEventListener('kc-sidebar-toggle', (e) => {
+  collapsed = e.detail.collapsed;
+  ws.sidebarCollapsed = collapsed;          // persist / restore as you like
+});
+document.getElementById('toggle').onclick = () => {
+  collapsed = !collapsed;
+  ws.sidebarCollapsed = collapsed;          // collapse from outside the header
+};`;
+
+/**
+ * Controlled collapse: the app owns `sidebarCollapsed`, drives it as a property,
+ * and updates it from `kc-sidebar-toggle`. An external button collapses the
+ * sidebar from outside the workspace — only possible because the state is
+ * controlled (uncontrolled mode keeps collapse internal to the element).
+ */
+export const ControlledSidebar: Story = {
+  name: 'Controlled sidebar',
+  render: () => {
+    let el: WorkspaceEl | undefined;
+    const [collapsed, setCollapsed] = createSignal(false);
+    const drive = (next: boolean) => { setCollapsed(next); if (el) el.sidebarCollapsed = next; };
+    onMount(() => {
+      if (!el) return;
+      el.groups = sampleGroups;
+      el.conversations = sampleConversations;
+      el.activeId = '1';
+      el.messages = sampleMessages;
+      el.models = sampleModels;
+      el.currentModel = 'claude-4';
+      el.chatTitle = 'Web component architecture';
+      el.sidebarCollapsed = collapsed();
+      el.addEventListener('kc-sidebar-toggle', (e) => drive((e as CustomEvent<{ collapsed: boolean }>).detail.collapsed));
+    });
+    return (
+      <div style={{ height: '720px', width: '100%', display: 'flex', 'flex-direction': 'column', gap: '8px' }}>
+        <button type="button" onClick={() => drive(!collapsed())} style={{ 'align-self': 'flex-start', padding: '6px 12px', 'border-radius': '8px', border: '1px solid var(--color-border)', cursor: 'pointer' }}>
+          {collapsed() ? 'Expand' : 'Collapse'} sidebar (from the app)
+        </button>
+        <kc-workspace ref={(e) => (el = e as WorkspaceEl)} style={{ display: 'block', flex: '1', 'min-height': '0' }} />
+      </div>
+    );
+  },
+  parameters: { docs: { source: { code: CONTROLLED_SNIPPET, language: 'js' } } },
 };
 
