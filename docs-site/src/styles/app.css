@@ -40,6 +40,24 @@
    (TOC is off on that page) instead of the default reading measure. */
 :root:has(.theme-studio-root) { --sl-content-width: 88rem; }
 
+/* Ask AI dock. The panel itself is portaled to <body> and fixed to the right.
+   Width of the dock: */
+:root { --kc-dock-w: 380px; }
+
+/* On wide viewports there's room to SHARE the space: push the whole app left by
+   the dock width so the docs stay fully visible (no dimming backdrop). Below the
+   threshold there isn't room, so the dock overlays with a backdrop instead.
+   `transform` makes `.page` the containing block for its fixed header/sidebar,
+   so they shift with the content rather than spanning under the panel. */
+.page { transition: margin-inline-end 220ms ease-out; }
+@media (min-width: 80rem) {
+  html.kc-askai-open .page {
+    transform: translateX(0);
+    margin-inline-end: var(--kc-dock-w);
+  }
+  html.kc-askai-open .kc-askai-backdrop { opacity: 0 !important; pointer-events: none; }
+}
+
 /* Sidebar links: small, uniform text. Starlight's `.large` class (top-level leaf
    links AND the group-label span inside <summary>) carries the larger size +
    font-weight 600 — override it on the class itself so size/weight actually
