@@ -143,6 +143,62 @@ function themeDots(name: string): string[] {
   return [t.light.primary, t.light.accent, t.light.secondary, t.light.background, t.light.foreground].map(toHex);
 }
 
+/** Curated font choices for the Typography section. value = the full CSS stack
+ *  (empty = the kit default). Google-hosted families load on demand for preview. */
+const BODY_FONTS: { label: string; value: string }[] = [
+  { label: 'System default', value: '' },
+  { label: 'Inter', value: 'Inter, sans-serif' },
+  { label: 'Geist', value: 'Geist, sans-serif' },
+  { label: 'Roboto', value: 'Roboto, sans-serif' },
+  { label: 'Open Sans', value: '"Open Sans", sans-serif' },
+  { label: 'Lato', value: 'Lato, sans-serif' },
+  { label: 'Poppins', value: 'Poppins, sans-serif' },
+  { label: 'Montserrat', value: 'Montserrat, sans-serif' },
+  { label: 'Nunito', value: 'Nunito, sans-serif' },
+  { label: 'Work Sans', value: '"Work Sans", sans-serif' },
+  { label: 'Space Grotesk', value: '"Space Grotesk", sans-serif' },
+  { label: 'DM Sans', value: '"DM Sans", sans-serif' },
+  { label: 'Merriweather (serif)', value: 'Merriweather, serif' },
+  { label: 'Lora (serif)', value: 'Lora, serif' },
+  { label: 'Playfair Display (serif)', value: '"Playfair Display", serif' },
+  { label: 'Libre Baskerville (serif)', value: '"Libre Baskerville", serif' },
+  { label: 'Source Serif 4 (serif)', value: '"Source Serif 4", serif' },
+  { label: 'Architects Daughter (hand)', value: '"Architects Daughter", cursive' },
+];
+const CODE_FONTS: { label: string; value: string }[] = [
+  { label: 'System mono', value: '' },
+  { label: 'JetBrains Mono', value: '"JetBrains Mono", monospace' },
+  { label: 'Fira Code', value: '"Fira Code", monospace' },
+  { label: 'IBM Plex Mono', value: '"IBM Plex Mono", monospace' },
+  { label: 'Source Code Pro', value: '"Source Code Pro", monospace' },
+  { label: 'Space Mono', value: '"Space Mono", monospace' },
+  { label: 'Geist Mono', value: '"Geist Mono", monospace' },
+];
+
+/** Load a font family from Google Fonts on demand so the preview shows the real
+ *  typeface (the kit token only SELECTS the family — production embeds it itself). */
+function ensureFont(stack: string) {
+  if (!stack) return;
+  const first = stack.split(',')[0].trim().replace(/["']/g, '');
+  if (!first || /^(ui-|system-ui|-apple|sans-serif|serif|monospace|cursive|Arial|Helvetica|Georgia|Times|Menlo|Consolas|Courier|Monaco)/i.test(first)) return;
+  const id = 'kc-gf-' + first.replace(/\s+/g, '-').toLowerCase();
+  if (typeof document === 'undefined' || document.getElementById(id)) return;
+  const link = document.createElement('link');
+  link.id = id;
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(first)}:wght@400;500;600;700&display=swap`;
+  document.head.appendChild(link);
+}
+
+/** Match a font stack to a curated option value by first-family name (so a theme's
+ *  full stack selects the right dropdown entry); '' if none match. */
+function matchFont(stack: string | undefined, list: { value: string }[]): string {
+  if (!stack) return '';
+  const first = stack.split(',')[0].trim().replace(/["']/g, '').toLowerCase();
+  const hit = list.find((o) => o.value.split(',')[0].trim().replace(/["']/g, '').toLowerCase() === first);
+  return hit ? hit.value : '';
+}
+
 const CONFIRM_DATA = {
   body: 'This applies 2 pending migrations and restarts 3 services. Estimated downtime: ~30 s.',
   tone: 'danger',
@@ -179,11 +235,21 @@ const REPLY =
 let uid = 0;
 const nextId = () => `s${++uid}`;
 
-/** Build paste-ready CSS: full light set on :root, dark set on .dark. */
-function buildCss(light: Palette, dark: Palette, radius: number): string {
+interface ThemeExtras { radius: number; fontBase: string; fontCode: string; tracking: number; shadow: string }
+
+/** Build paste-ready CSS: full light set on :root (+ radius/font/tracking/shadow),
+ *  dark set on .dark. */
+function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
+  const rootExtra = [
+    `  --kc-radius: ${x.radius}rem;`,
+    x.fontBase ? `  --kc-font-base: ${x.fontBase};` : '',
+    x.fontCode ? `  --kc-font-code: ${x.fontCode};` : '',
+    x.tracking ? `  --kc-tracking: ${x.tracking}em;` : '',
+    x.shadow ? `  --kc-shadow-color: ${x.shadow};` : '',
+  ].filter(Boolean).join('\n');
   const body = (p: Palette, extra = ''): string =>
     [...ALL_TOKENS.map((t) => `  ${t.token}: ${p[t.token]};`), extra].filter(Boolean).join('\n');
-  return `:root {\n${body(light, `  --kc-radius: ${radius}rem;`)}\n}\n\n.dark {\n${body(dark)}\n}`;
+  return `:root {\n${body(light, rootExtra)}\n}\n\n.dark {\n${body(dark)}\n}`;
 }
 
 /** Tolerant parse of pasted CSS: pull --kc-* declarations from the :root block
@@ -216,6 +282,10 @@ export default function ThemeStudio() {
   const [light, setLight] = createSignal<Palette>({});
   const [dark, setDark] = createSignal<Palette>({});
   const [radius, setRadius] = createSignal(DEFAULT_RADIUS);
+  const [fontBase, setFontBase] = createSignal('');
+  const [fontCode, setFontCode] = createSignal('');
+  const [tracking, setTracking] = createSignal(0); // em
+  const [shadowColor, setShadowColor] = createSignal('#000000');
   const [preset, setPreset] = createSignal('Default');
   const [copied, setCopied] = createSignal(false);
   const [codeOpen, setCodeOpen] = createSignal(false);
@@ -233,6 +303,7 @@ export default function ThemeStudio() {
   const toggleGroup = (name: string) => setOpenGroups((o) => ({ ...o, [name]: !o[name] }));
 
   const active = () => (mode() === 'light' ? light() : dark());
+  const extras = (): ThemeExtras => ({ radius: radius(), fontBase: fontBase(), fontCode: fontCode(), tracking: tracking(), shadow: shadowColor() });
 
   // Apply the active palette + radius onto the canvas wrapper. Custom properties
   // inherit through every kc-* shadow root inside, so the whole canvas reskins.
@@ -242,6 +313,14 @@ export default function ThemeStudio() {
     for (const t of ALL_TOKENS) canvasEl.style.setProperty(t.token, p[t.token]);
     canvasEl.style.setProperty('--kc-radius', `${radius()}rem`);
     canvasEl.style.background = p['--kc-color-background'];
+    // Typography + shadow tokens.
+    const setOrClear = (name: string, val: string) => val ? canvasEl!.style.setProperty(name, val) : canvasEl!.style.removeProperty(name);
+    setOrClear('--kc-font-base', fontBase());
+    setOrClear('--kc-font-code', fontCode());
+    canvasEl.style.setProperty('--kc-tracking', `${tracking()}em`);
+    canvasEl.style.setProperty('--kc-shadow-color', shadowColor());
+    ensureFont(fontBase());
+    ensureFont(fontCode());
     // Keep each preview host on the studio's mode (independent of the page theme).
     chatHost?.setAttribute('theme', mode());
     confirmHost?.setAttribute('theme', mode());
@@ -268,8 +347,16 @@ export default function ThemeStudio() {
       if (t.light.ring) l['--kc-color-code-foreground'] = toHex(t.light.ring);
       if (t.dark.ring) d['--kc-color-code-foreground'] = toHex(t.dark.ring);
       setRadius(t.radius);
+      setFontBase(matchFont(t.fontBase, BODY_FONTS) || t.fontBase || '');
+      setFontCode(matchFont(t.fontCode, CODE_FONTS) || t.fontCode || '');
+      setTracking(t.tracking ? (parseFloat(t.tracking) || 0) : 0);
+      setShadowColor(t.shadow ? toHex(t.shadow) : '#000000');
     } else {
       setRadius(DEFAULT_RADIUS);
+      setFontBase('');
+      setFontCode('');
+      setTracking(0);
+      setShadowColor('#000000');
     }
     setLight(l);
     setDark(d);
@@ -280,7 +367,7 @@ export default function ThemeStudio() {
 
   const copyCss = async () => {
     try {
-      await navigator.clipboard.writeText(buildCss(light(), dark(), radius()));
+      await navigator.clipboard.writeText(buildCss(light(), dark(), extras()));
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -499,6 +586,54 @@ export default function ThemeStudio() {
               <span class="w-14 text-right text-xs tabular-nums text-ink-2">{radius()}rem</span>
             </label>
           </div>
+
+          {/* Typography */}
+          <div class="border-t border-line/60 px-3 py-3">
+            <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Typography</div>
+            <label class="mb-2.5 flex flex-col gap-1">
+              <span class="text-sm font-medium text-ink">Body font</span>
+              <select
+                value={fontBase()}
+                onChange={(e) => { setFontBase(e.currentTarget.value); ensureFont(e.currentTarget.value); setPreset('Custom'); }}
+                class="rounded-md border border-line bg-surface px-2 py-1.5 text-sm text-ink"
+              >
+                <For each={BODY_FONTS}>{(f) => <option value={f.value}>{f.label}</option>}</For>
+                <Show when={fontBase() && !BODY_FONTS.some((f) => f.value === fontBase())}>
+                  <option value={fontBase()}>{fontBase().split(',')[0].replace(/["']/g, '')} (theme)</option>
+                </Show>
+              </select>
+            </label>
+            <label class="mb-2.5 flex flex-col gap-1">
+              <span class="text-sm font-medium text-ink">Code font</span>
+              <select
+                value={fontCode()}
+                onChange={(e) => { setFontCode(e.currentTarget.value); ensureFont(e.currentTarget.value); setPreset('Custom'); }}
+                class="rounded-md border border-line bg-surface px-2 py-1.5 text-sm text-ink"
+              >
+                <For each={CODE_FONTS}>{(f) => <option value={f.value}>{f.label}</option>}</For>
+                <Show when={fontCode() && !CODE_FONTS.some((f) => f.value === fontCode())}>
+                  <option value={fontCode()}>{fontCode().split(',')[0].replace(/["']/g, '')} (theme)</option>
+                </Show>
+              </select>
+            </label>
+            <label class="flex items-center gap-2.5 text-sm">
+              <span class="w-16 shrink-0 text-ink">Tracking</span>
+              <input type="range" min="-0.05" max="0.2" step="0.005" value={tracking()} onInput={(e) => { setTracking(parseFloat(e.currentTarget.value)); setPreset('Custom'); }} class="flex-1" style={{ 'accent-color': 'var(--kc-ink-3)' }} aria-label="Letter spacing" />
+              <span class="w-14 text-right text-xs tabular-nums text-ink-2">{tracking().toFixed(3)}em</span>
+            </label>
+          </div>
+
+          {/* Shadow */}
+          <div class="border-t border-line/60 px-3 py-3">
+            <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-2">Shadow</div>
+            <label class="flex items-center gap-2.5">
+              <input type="color" value={shadowColor()} onInput={(e) => { setShadowColor(e.currentTarget.value); setPreset('Custom'); }} class={swatch} aria-label="Shadow color" />
+              <span class="flex min-w-0 flex-col leading-tight">
+                <span class="truncate text-sm font-medium text-ink">Shadow color</span>
+                <span class="truncate text-xs text-ink/55">Elevation tint — cards, popovers</span>
+              </span>
+            </label>
+          </div>
         </div>
 
         {/* Canvas */}
@@ -548,7 +683,7 @@ export default function ThemeStudio() {
           <p class="mb-3 text-xs text-ink-2">Drop this on <code class="rounded bg-ink/5 px-1">:root</code> to rebrand every <code class="rounded bg-ink/5 px-1">kc-*</code> element; the <code class="rounded bg-ink/5 px-1">.dark</code> block holds the dark overrides.</p>
           <div class="relative">
             <button type="button" onClick={copyCss} class="absolute right-2 top-2 flex items-center gap-1.5 rounded-md border border-line bg-surface px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:bg-ink/5">{copied() ? <IconCheck class="h-3.5 w-3.5" /> : <IconCopy class="h-3.5 w-3.5" />}{copied() ? 'Copied' : 'Copy'}</button>
-            <pre class="max-h-[62vh] overflow-auto rounded-lg border border-line bg-surface-2 p-3 pr-20 font-mono text-xs leading-relaxed text-ink"><code>{buildCss(light(), dark(), radius())}</code></pre>
+            <pre class="max-h-[62vh] overflow-auto rounded-lg border border-line bg-surface-2 p-3 pr-20 font-mono text-xs leading-relaxed text-ink"><code>{buildCss(light(), dark(), extras())}</code></pre>
           </div>
         </Modal>
       </Show>
