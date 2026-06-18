@@ -50,8 +50,10 @@ export default function AskAiDock() {
   const closeDock = () => {
     setEntered(false);
     document.documentElement.classList.remove('kc-askai-open');
-    closeTimer = window.setTimeout(() => setOpen(false), 220);
-    triggerBtn?.focus(); // return focus to the trigger
+    closeTimer = window.setTimeout(() => {
+      setOpen(false);
+      triggerBtn?.focus(); // return focus once the trigger is visible again
+    }, 220);
   };
 
   onMount(() => {
@@ -76,6 +78,7 @@ export default function AskAiDock() {
         aria-haspopup="dialog"
         aria-expanded={open()}
         class="inline-flex h-8 cursor-pointer appearance-none items-center justify-center gap-1.5 rounded-full border-0 bg-brand px-3.5 text-sm font-bold text-white transition-[filter] hover:brightness-110"
+        style={{ display: open() ? 'none' : undefined }}
       >
         <IconSparkles class="size-4 shrink-0" />
         <span class="leading-none">Ask AI</span>
