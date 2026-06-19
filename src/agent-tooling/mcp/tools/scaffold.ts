@@ -140,22 +140,36 @@ function renderHtml(archetype: Archetype, p: PlacementStyle, emptyHint: string):
   ].join('\n');
 }
 
-/** JSX usage for react/next: messages bound as a prop, onKai-submit handler. */
+/** Convert a kebab-case custom-element tag to its PascalCase React wrapper name. */
+function toPascalCase(tag: string): string {
+  // e.g. "kai-chat" → "Chat", "kai-sources" → "Sources"
+  return tag
+    .replace(/^kai-/, '')
+    .split('-')
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join('');
+}
+
+/** JSX usage for react/next: uses the official @kitn.ai/ui/react wrappers. */
 function renderJsx(archetype: Archetype, p: PlacementStyle, emptyHint: string): string {
+  // Collect all PascalCase wrapper names for this archetype's components.
+  const wrapperNames = archetype.components.map(toPascalCase);
+  const importList = wrapperNames.join(', ');
+
   const companions = archetype.components
     .filter((t) => t !== 'kai-chat')
-    .map((t) => `      <${t} />`)
+    .map((t) => `      <${toPascalCase(t)} />`)
     .join('\n');
 
   return [
-    `import { useRef, useState } from 'react';`,
-    `import '@kitn.ai/ui/elements';`,
+    `import { useState } from 'react';`,
+    `import { ${importList} } from '@kitn.ai/ui/react';`,
     `import '@kitn.ai/ui/theme.css';`,
     ``,
     `// ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint}`,
     `export default function Chat() {`,
-    `  const ref = useRef(null);`,
     `  const [messages, setMessages] = useState([]);`,
+    `  const [loading, setLoading] = useState(false);`,
     ``,
     `  async function onSubmit(e) {`,
     `    const value = e.detail.value.trim();`,
@@ -163,6 +177,7 @@ function renderJsx(archetype: Archetype, p: PlacementStyle, emptyHint: string): 
     `    const history = [...messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
     `    const assistantId = crypto.randomUUID();`,
     `    setMessages([...history, { id: assistantId, role: 'assistant', content: '' }]);`,
+    `    setLoading(true);`,
     `    const res = await fetch('/api/chat', {`,
     `      method: 'POST',`,
     `      headers: { 'Content-Type': 'application/json' },`,
@@ -191,12 +206,12 @@ function renderJsx(archetype: Archetype, p: PlacementStyle, emptyHint: string): 
     `        } catch { /* skip keep-alives */ }`,
     `      }`,
     `    }`,
+    `    setLoading(false);`,
     `  }`,
     ``,
-    `  // messages is set in JavaScript as a property; React forwards it via the ref-bound element.`,
     `  return (`,
     `    <div style={{ ${jsxStyle(p.style)} }}>`,
-    `      <kai-chat ref={ref} messages={messages} onKai-submit={onSubmit}></kai-chat>`,
+    `      <Chat messages={messages} loading={loading} onSubmit={onSubmit} />`,
     companions,
     `    </div>`,
     `  );`,
@@ -206,25 +221,18 @@ function renderJsx(archetype: Archetype, p: PlacementStyle, emptyHint: string): 
     .join('\n');
 }
 
-/** Vue/Svelte share a minimal pattern: bind messages as a property, listen for kai-submit. */
-function renderVueSvelte(
-  framework: string,
-  archetype: Archetype,
-  p: PlacementStyle,
-  emptyHint: string,
-): string {
-  const bind = framework === 'svelte' ? 'bind: .messages' : ':messages';
-  const listen = framework === 'svelte' ? 'on:kai-submit' : '@kai-submit';
+/** Vue: bind messages as a property, listen for kai-submit with @. */
+function renderVue(archetype: Archetype, p: PlacementStyle, emptyHint: string): string {
   const companions = archetype.components
     .filter((t) => t !== 'kai-chat')
     .map((t) => `    <${t} />`)
     .join('\n');
 
   return [
-    `<!-- ${framework} — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
+    `<!-- vue — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
     `<!-- import '@kitn.ai/ui/elements' and '@kitn.ai/ui/theme.css' once at app entry. -->`,
     `<div style="${p.style}">`,
-    `  <kai-chat ${bind}="messages" ${listen}="onSubmit"></kai-chat>`,
+    `  <kai-chat :messages="messages" @kai-submit="onSubmit"></kai-chat>`,
     companions,
     `</div>`,
     ``,
@@ -235,6 +243,70 @@ function renderVueSvelte(
     `  messages is a property (objects can't be attributes); reassign it to re-render.`,
     `-->`,
   ].join('\n');
+}
+
+/** Svelte: use bind:this to set array/object properties reactively; on:kai-submit for the event. */
+function renderSvelte(archetype: Archetype, p: PlacementStyle, emptyHint: string): string {
+  const companionLines = archetype.components
+    .filter((t) => t !== 'kai-chat')
+    .map((t) => `  <${t}></${t}>`)
+    .join('\n');
+
+  return [
+    `<!-- svelte — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
+    `<!-- import '@kitn.ai/ui/elements' and '@kitn.ai/ui/theme.css' once at app entry. -->`,
+    `<script>`,
+    `  let chatEl;`,
+    `  let messages = [];`,
+    `  let loading = false;`,
+    `  $: if (chatEl) chatEl.messages = messages;`,
+    ``,
+    `  async function onSubmit(e) {`,
+    `    const value = e.detail.value.trim();`,
+    `    if (!value) return;`,
+    `    const history = [...messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+    `    const assistantId = crypto.randomUUID();`,
+    `    messages = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
+    `    loading = true;`,
+    `    const res = await fetch('/api/chat', {`,
+    `      method: 'POST',`,
+    `      headers: { 'Content-Type': 'application/json' },`,
+    `      body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),`,
+    `    });`,
+    `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
+    `    const reader = res.body.getReader();`,
+    `    const decoder = new TextDecoder();`,
+    `    let buffer = '', answer = '';`,
+    `    while (true) {`,
+    `      const { value: chunk, done } = await reader.read();`,
+    `      if (done) break;`,
+    `      buffer += decoder.decode(chunk, { stream: true });`,
+    `      const lines = buffer.split('\\n');`,
+    `      buffer = lines.pop();`,
+    `      for (const line of lines) {`,
+    `        const s = line.trim();`,
+    `        if (!s.startsWith('data:')) continue;`,
+    `        const payload = s.slice(5).trim();`,
+    `        if (payload === '[DONE]') continue;`,
+    `        try {`,
+    `          const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+    `          if (!delta) continue;`,
+    `          answer += delta;`,
+    `          messages = messages.map((m) => (m.id === assistantId ? { ...m, content: answer } : m));`,
+    `        } catch { /* skip keep-alives */ }`,
+    `      }`,
+    `    }`,
+    `    loading = false;`,
+    `  }`,
+    `</script>`,
+    ``,
+    `<div style="${p.style}">`,
+    `  <kai-chat bind:this={chatEl} {loading} on:kai-submit={onSubmit}></kai-chat>`,
+    companionLines,
+    `</div>`,
+  ]
+    .filter((l, i, arr) => !(l === '' && arr[i - 1] === '' && i === arr.length - 1))
+    .join('\n');
 }
 
 /** Translate an inline CSS string into JSX style-object entries. */
@@ -263,8 +335,9 @@ function renderFrontend(
     case 'next':
       return renderJsx(archetype, p, emptyHint);
     case 'vue':
+      return renderVue(archetype, p, emptyHint);
     case 'svelte':
-      return renderVueSvelte(framework, archetype, p, emptyHint);
+      return renderSvelte(archetype, p, emptyHint);
     case 'html':
     default:
       // html, and any backend-only framework (fastapi/express/worker) gets the

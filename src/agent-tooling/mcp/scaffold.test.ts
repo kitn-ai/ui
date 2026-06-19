@@ -18,7 +18,8 @@ describe('scaffold', () => {
       framework: 'next',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    expect(text).toMatch(/<kai-chat/);
+    // React branch now uses the @kitn.ai/ui/react wrapper (<Chat />) — no raw kai-chat tag.
+    expect(text).toMatch(/<Chat\b|<kai-chat/);
     expect(text).toMatch(/openrouter\.ai\/api\/v1\/chat\/completions/);
     expect(text).toMatch(/Streaming recipe/);
   });
@@ -87,5 +88,52 @@ describe('scaffold', () => {
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/from fastapi|uvicorn|run_stream/);
+  });
+
+  // ── Bug-fix regression tests ─────────────────────────────────────────────
+
+  it('react scaffold uses the @kitn.ai/ui/react wrapper and correct onSubmit prop', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must import from the official React wrapper package
+    expect(text).toContain('@kitn.ai/ui/react');
+    // Must wire the event via the wrapper's onSubmit prop
+    expect(text).toContain('onSubmit');
+    // Must NOT use the invalid JSX hyphenated event attribute
+    expect(text).not.toContain('onKai-submit');
+  });
+
+  it('next scaffold uses the @kitn.ai/ui/react wrapper and correct onSubmit prop', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'next',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('@kitn.ai/ui/react');
+    expect(text).toContain('onSubmit');
+    expect(text).not.toContain('onKai-submit');
+  });
+
+  it('svelte scaffold uses correct on:kai-submit syntax and bind:this property pattern', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'docked-widget',
+      framework: 'svelte',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must use the correct Svelte custom-event listener syntax
+    expect(text).toContain('on:kai-submit');
+    // Must use bind:this to get the element reference (the correct Svelte pattern)
+    expect(text).toContain('bind:this');
+    // Must NOT use the malformed bind: .messages attribute pattern
+    expect(text).not.toContain('bind: .messages');
   });
 });
