@@ -22,7 +22,8 @@ const text = (out: Awaited<ReturnType<typeof scaffold.handler>>) =>
 const KAI_CHAT = /<Chat\b|<kai-chat/;
 
 // Each integration's signature — the endpoint, import, or name that proves the
-// generated route is the right one (not a generic stub).
+// generated route is the right one (not a generic stub). mock has no backend, so
+// its signature is the local-preview marker emitted instead of a route.
 const SIGNATURE: Record<string, RegExp> = {
   openrouter: /openrouter\.ai\/api\/v1\/chat\/completions/,
   'vercel-ai-sdk': /ai-sdk|streamText|@ai-sdk|toDataStream/i,
@@ -32,12 +33,14 @@ const SIGNATURE: Record<string, RegExp> = {
   mastra: /mastra/i,
   pi: /\bpi\b/i,
   'pydantic-ai': /pydantic|fastapi/i,
+  mock: /No backend or API key needed|stream locally/i,
 };
 
 describe('scaffold — integration matrix', () => {
   it('scaffolds a drop-in chat for every integration without throwing', async () => {
     for (const i of integrations) {
-      const framework = i.language === 'python' ? 'fastapi' : 'next';
+      // mock is a front-end-only preview; the rest get their language's server framework.
+      const framework = i.id === 'mock' ? 'react' : i.language === 'python' ? 'fastapi' : 'next';
       const out = await scaffold.handler({
         useCase: 'drop-in-chat',
         integration: i.id,
@@ -55,6 +58,20 @@ describe('scaffold — integration matrix', () => {
       // non-trivial output
       expect(t.length, `${i.id}: output too short`).toBeGreaterThan(100);
     }
+  });
+
+  it('mock scaffolds a kai element with no backend fetch (zero-config preview)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'side',
+      framework: 'react',
+    });
+    const t = text(out);
+    expect(t).toMatch(KAI_CHAT);
+    // no backend call — the reply streams client-side
+    expect(t).not.toContain("fetch('/api");
+    expect(t).toMatch(/No backend or API key needed|stream locally/i);
   });
 });
 

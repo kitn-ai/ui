@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const Category = z.enum(['provider', 'gateway', 'framework', 'harness']);
+export const Category = z.enum(['provider', 'gateway', 'framework', 'harness', 'mock']);
 export const Language = z.enum(['ts', 'python']);
 export const StreamFormat = z.enum(['openai-sse', 'ai-sdk', 'native']);
 export const Framework = z.enum(['html', 'react', 'next', 'vue', 'svelte', 'fastapi', 'express', 'worker']);

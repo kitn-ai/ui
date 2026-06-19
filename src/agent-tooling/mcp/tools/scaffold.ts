@@ -36,107 +36,238 @@ const text = (s: string) => ({
 interface PlacementStyle {
   /** container style for an HTML/web-components wrapper */
   style: string;
+  /** the chat element's own style — it must FILL the container */
+  chatFill: string;
   /** one-line human description of the layout */
   note: string;
+  /** optional extra comment lines describing an alternative layout form */
+  altNote?: string;
 }
+
+// The chat element must fill its container. In a `display: flex; flex-direction:
+// column` shell it's a flex child (`flex: 1; min-height: 0`); in a plain block
+// container it fills via `height: 100%`.
+const FLEX_FILL = 'flex: 1; min-height: 0;';
+const BLOCK_FILL = 'height: 100%; width: 100%;';
 
 function placementStyle(placement: string): PlacementStyle {
   switch (placement) {
     case 'full-page':
       return {
         style: 'height: 100dvh; width: 100%; display: flex; flex-direction: column;',
+        chatFill: FLEX_FILL,
         note: 'fills the viewport (100dvh)',
       };
     case 'inline':
       return {
-        style: 'width: 100%; max-width: 720px; height: 540px; margin: 0 auto;',
-        note: 'in-flow block (sized, not fixed)',
+        style: 'width: 100%; max-width: 720px; height: 540px; margin: 0 auto; display: flex; flex-direction: column;',
+        chatFill: FLEX_FILL,
+        note: 'in-flow block (sized by parent, not fixed)',
       };
     case 'side':
-    case 'docked-widget':
-    default:
+      // A full-height side panel docked to the trailing (right) edge — overlays
+      // content. messages/loading/suggestions are real kai-chat props.
       return {
         style:
-          'position: fixed; bottom: 1.5rem; right: 1.5rem; width: 380px; height: 600px; max-height: calc(100dvh - 3rem); z-index: 1000;',
-        note: 'fixed, docked bottom-right widget',
+          'position: fixed; top: 0; inset-inline-end: 0; height: 100dvh; width: 380px; ' +
+          'border-inline-start: 1px solid var(--kai-color-border); display: flex; flex-direction: column; z-index: 1000;',
+        chatFill: FLEX_FILL,
+        note: 'full-height side panel, docked to the trailing edge (100dvh)',
+        altNote:
+          'In-flow alternative (push content instead of overlay): drop `position`/`z-index` and ' +
+          'make this a `flex: 0 0 380px` column inside a `display: flex` row at `height: 100dvh`.',
+      };
+    case 'docked-widget':
+    default:
+      // The bottom-right floating bubble — rounded, elevated, fixed size.
+      return {
+        style:
+          'position: fixed; bottom: 1.5rem; inset-inline-end: 1.5rem; width: 380px; height: 600px; ' +
+          'max-height: calc(100dvh - 3rem); border-radius: 16px; overflow: hidden; ' +
+          'box-shadow: 0 12px 32px var(--kai-shadow-color, rgba(0,0,0,0.18)); display: flex; flex-direction: column; z-index: 1000;',
+        chatFill: FLEX_FILL,
+        note: 'fixed, floating bottom-right widget',
       };
   }
 }
 
+// ── suggestions + mock streaming ───────────────────────────────────────────────
+
+/** Default starter prompts so the suggestions feature always shows. */
+const DEFAULT_SUGGESTIONS = ["What's new?", 'How can you help?'];
+
+/** A canned assistant reply the mock integration streams back token-by-token. */
+const MOCK_REPLY =
+  "Hi! I'm a local preview — no backend or API key needed. Swap `integration` for a real provider (openrouter, ollama, …) and I'll talk to a real model.";
+
+/** Render a string[] as a JS array literal (JSON-quoted — keeps apostrophes readable). */
+function jsArray(items: string[]): string {
+  return '[' + items.map((s) => JSON.stringify(s)).join(', ') + ']';
+}
+
+/**
+ * The shared client-side mock stream body, parameterised by how each framework
+ * commits a messages update. Two operations keep the contract correct:
+ *   - `commitInitial(expr)` appends the user + empty-assistant pair.
+ *   - `commitMap(mapBody)` replaces messages with `prev.map((m) => mapBody)` —
+ *     each framework supplies how `prev` resolves (the React functional updater,
+ *     or the live local variable for html/vue/svelte) so the streamed content is
+ *     applied to the LATEST array, never a stale snapshot.
+ * Each commit produces a NEW array (and a new object for the streamed message)
+ * so kai-chat re-renders per chunk.
+ *
+ * Indented with `pad` so it drops cleanly into each framework's onSubmit.
+ */
+function mockStreamBody(opts: {
+  pad: string;
+  /** read the current messages array (for building `history`) */
+  read: string;
+  /** commit the initial user + empty-assistant pair */
+  commitInitial: (expr: string) => string;
+  /** commit a `prev.map(...)` update; `mapBody` is the body of `.map((m) => …)` */
+  commitMap: (mapBody: string) => string;
+  /** set loading true/false */
+  setLoading: (v: 'true' | 'false') => string;
+}): string {
+  const { pad, read, commitInitial, commitMap, setLoading } = opts;
+  const mapBody = `(m.id === assistantId ? { ...m, content: answer } : m)`;
+  return [
+    `${pad}const value = e.detail.value.trim();`,
+    `${pad}if (!value) return;`,
+    `${pad}const history = [...${read}, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+    `${pad}const assistantId = crypto.randomUUID();`,
+    `${pad}${commitInitial(`[...history, { id: assistantId, role: 'assistant', content: '' }]`)}`,
+    `${pad}${setLoading('true')}`,
+    `${pad}// No backend: stream a canned reply client-side, one token at a time.`,
+    `${pad}const reply = ${JSON.stringify(MOCK_REPLY)};`,
+    `${pad}const tokens = reply.split(/(\\s+)/);`,
+    `${pad}let answer = '';`,
+    `${pad}for (const tok of tokens) {`,
+    `${pad}  await new Promise((r) => setTimeout(r, 24));`,
+    `${pad}  answer += tok;`,
+    `${pad}  // new array + object reference per chunk so kai-chat re-renders`,
+    `${pad}  ${commitMap(mapBody)}`,
+    `${pad}}`,
+    `${pad}${setLoading('false')}`,
+  ].join('\n');
+}
+
 // ── front-end rendering ───────────────────────────────────────────────────────
 
+interface RenderCtx {
+  p: PlacementStyle;
+  emptyHint: string;
+  suggestions: string[];
+  /** mock = stream the reply client-side (no fetch, no backend, no key) */
+  isMock: boolean;
+}
+
 /** The kai-* tags for the archetype, in order, as opening/closing markup. */
-function componentTags(archetype: Archetype): string {
+function componentTags(archetype: Archetype, chatFill: string): string {
   // kai-chat is the interactive root; companion components sit alongside it.
+  // It FILLS its container — see chatFill (flex child / block).
   const hasCompanions = archetype.components.some((t) => t !== 'kai-chat');
   return [
     ...archetype.components.map((tag) =>
       tag === 'kai-chat'
-        ? `  <${tag} id="chat"></${tag}>`
+        ? `  <${tag} id="chat" suggestion-mode="submit" style="${chatFill}"></${tag}>`
         : `  <${tag}></${tag}>`,
     ),
     ...(hasCompanions ? [`  <!-- wire data props — see the component_reference MCP tool -->`] : []),
   ].join('\n');
 }
 
-const HTML_WIRING = `  <script type="module">
-    import '@kitn.ai/ui/elements';
-    import '@kitn.ai/ui/theme.css';
+/** The HTML <script> wiring — mock streams client-side; everything else fetches /api/chat. */
+function htmlWiring(ctx: RenderCtx): string {
+  const head = [
+    `  <script type="module">`,
+    `    import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `    import '@kitn.ai/ui/theme.css';`,
+    ``,
+    `    const chat = document.getElementById('chat');`,
+    `    // suggestions is a JS PROPERTY (arrays can't be HTML attributes)`,
+    `    chat.suggestions = ${jsArray(ctx.suggestions)};`,
+    `    chat.suggestionMode = 'submit';`,
+    ``,
+  ];
 
-    const chat = document.getElementById('chat');
-
-    chat.addEventListener('kai-submit', async (e) => {
-      const value = e.detail.value.trim();
-      if (!value) return;
-
-      // messages is a JS PROPERTY (objects can't be HTML attributes)
-      const history = [...chat.messages, { id: crypto.randomUUID(), role: 'user', content: value }];
-      const assistantId = crypto.randomUUID();
-      chat.messages = [...history, { id: assistantId, role: 'assistant', content: '' }];
-      chat.loading = true;
-
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),
-      });
-
-      // Read the OpenAI-format SSE and stream it into the assistant message.
-      // This loop is the Streaming recipe — copy its exact body if you need keep-alive handling.
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '', answer = '';
-      while (true) {
-        const { value: chunk, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(chunk, { stream: true });
-        const lines = buffer.split('\\n');
-        buffer = lines.pop();
-        for (const line of lines) {
-          const s = line.trim();
-          if (!s.startsWith('data:')) continue;
-          const payload = s.slice(5).trim();
-          if (payload === '[DONE]') continue;
-          try {
-            const delta = JSON.parse(payload).choices?.[0]?.delta?.content;
-            if (!delta) continue;
-            answer += delta;
-            chat.messages = chat.messages.map((m) => (m.id === assistantId ? { ...m, content: answer } : m));
-          } catch { /* skip keep-alive lines */ }
-        }
-      }
-      chat.loading = false;
+  if (ctx.isMock) {
+    const body = mockStreamBody({
+      pad: '      ',
+      read: 'chat.messages',
+      commitInitial: (expr) => `chat.messages = ${expr};`,
+      // chat.messages is live (no React snapshot) — map over it directly
+      commitMap: (mapBody) => `chat.messages = chat.messages.map((m) => ${mapBody});`,
+      setLoading: (v) => `chat.loading = ${v};`,
     });
-  </script>`;
+    return [
+      ...head,
+      `    // No backend: stream a canned reply client-side (no fetch, no API key).`,
+      `    chat.addEventListener('kai-submit', async (e) => {`,
+      body,
+      `    });`,
+      `  </script>`,
+    ].join('\n');
+  }
 
-function renderHtml(archetype: Archetype, p: PlacementStyle, emptyHint: string): string {
+  return [
+    ...head,
+    `    chat.addEventListener('kai-submit', async (e) => {`,
+    `      const value = e.detail.value.trim();`,
+    `      if (!value) return;`,
+    ``,
+    `      // messages is a JS PROPERTY (objects can't be HTML attributes)`,
+    `      const history = [...chat.messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+    `      const assistantId = crypto.randomUUID();`,
+    `      chat.messages = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
+    `      chat.loading = true;`,
+    ``,
+    `      const res = await fetch('/api/chat', {`,
+    `        method: 'POST',`,
+    `        headers: { 'Content-Type': 'application/json' },`,
+    `        body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),`,
+    `      });`,
+    ``,
+    `      // Read the OpenAI-format SSE and stream it into the assistant message.`,
+    `      // This loop is the Streaming recipe — copy its exact body if you need keep-alive handling.`,
+    `      const reader = res.body.getReader();`,
+    `      const decoder = new TextDecoder();`,
+    `      let buffer = '', answer = '';`,
+    `      while (true) {`,
+    `        const { value: chunk, done } = await reader.read();`,
+    `        if (done) break;`,
+    `        buffer += decoder.decode(chunk, { stream: true });`,
+    `        const lines = buffer.split('\\n');`,
+    `        buffer = lines.pop();`,
+    `        for (const line of lines) {`,
+    `          const s = line.trim();`,
+    `          if (!s.startsWith('data:')) continue;`,
+    `          const payload = s.slice(5).trim();`,
+    `          if (payload === '[DONE]') continue;`,
+    `          try {`,
+    `            const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+    `            if (!delta) continue;`,
+    `            answer += delta;`,
+    `            chat.messages = chat.messages.map((m) => (m.id === assistantId ? { ...m, content: answer } : m));`,
+    `          } catch { /* skip keep-alive lines */ }`,
+    `        }`,
+    `      }`,
+    `      chat.loading = false;`,
+    `    });`,
+    `  </script>`,
+  ].join('\n');
+}
+
+function renderHtml(archetype: Archetype, ctx: RenderCtx): string {
+  const { p, emptyHint } = ctx;
   return [
     `<!-- ${archetype.title} — ${p.note} -->`,
+    ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
     `<div style="${p.style}">`,
-    componentTags(archetype),
+    componentTags(archetype, p.chatFill),
     `</div>`,
     ``,
-    HTML_WIRING,
+    htmlWiring(ctx),
     ``,
     `  <!-- empty-state hint: ${emptyHint} -->`,
   ].join('\n');
@@ -153,7 +284,8 @@ function toPascalCase(tag: string): string {
 }
 
 /** JSX usage for react/next: uses the official @kitn.ai/ui/react wrappers. */
-function renderJsx(archetype: Archetype, p: PlacementStyle, emptyHint: string): string {
+function renderJsx(archetype: Archetype, ctx: RenderCtx): string {
+  const { p, emptyHint, suggestions, isMock } = ctx;
   // Collect all PascalCase wrapper names for this archetype's components.
   const wrapperNames = archetype.components.map(toPascalCase);
   const importList = wrapperNames.join(', ');
@@ -164,57 +296,83 @@ function renderJsx(archetype: Archetype, p: PlacementStyle, emptyHint: string): 
     ...companionTags.map((t) => `      <${toPascalCase(t)} />`),
   ].join('\n');
 
+  // onSubmit body: mock streams a canned reply client-side; otherwise fetch /api/chat.
+  const onSubmitBody = isMock
+    ? mockStreamBody({
+        pad: '    ',
+        read: 'messages',
+        commitInitial: (expr) => `setMessages(${expr});`,
+        // functional updater so each token maps over the LATEST array, not the snapshot
+        commitMap: (mapBody) => `setMessages((prev) => prev.map((m) => ${mapBody}));`,
+        setLoading: (v) => `setLoading(${v});`,
+      })
+    : [
+        `    const value = e.detail.value.trim();`,
+        `    if (!value) return;`,
+        `    const history = [...messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+        `    const assistantId = crypto.randomUUID();`,
+        `    setMessages([...history, { id: assistantId, role: 'assistant', content: '' }]);`,
+        `    setLoading(true);`,
+        `    const res = await fetch('/api/chat', {`,
+        `      method: 'POST',`,
+        `      headers: { 'Content-Type': 'application/json' },`,
+        `      body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),`,
+        `    });`,
+        `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
+        `    const reader = res.body.getReader();`,
+        `    const decoder = new TextDecoder();`,
+        `    let buffer = '', answer = '';`,
+        `    while (true) {`,
+        `      const { value: chunk, done } = await reader.read();`,
+        `      if (done) break;`,
+        `      buffer += decoder.decode(chunk, { stream: true });`,
+        `      const lines = buffer.split('\\n');`,
+        `      buffer = lines.pop();`,
+        `      for (const line of lines) {`,
+        `        const s = line.trim();`,
+        `        if (!s.startsWith('data:')) continue;`,
+        `        const payload = s.slice(5).trim();`,
+        `        if (payload === '[DONE]') continue;`,
+        `        try {`,
+        `          const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+        `          if (!delta) continue;`,
+        `          answer += delta;`,
+        `          setMessages((ms) => ms.map((m) => (m.id === assistantId ? { ...m, content: answer } : m)));`,
+        `        } catch { /* skip keep-alives */ }`,
+        `      }`,
+        `    }`,
+        `    setLoading(false);`,
+      ].join('\n');
+
   return [
+    // (1) REQUIRED: registers <kai-*> — the react wrappers do NOT auto-register.
+    // Must come BEFORE importing the wrappers, or <kai-chat> renders empty.
+    `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
     `import { useState } from 'react';`,
     `import { ${importList} } from '@kitn.ai/ui/react';`,
     `import '@kitn.ai/ui/theme.css';`,
     ``,
     `// ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint}`,
+    ...(p.altNote ? [`// ${p.altNote}`] : []),
     `export default function App() {`,
     `  const [messages, setMessages] = useState([]);`,
     `  const [loading, setLoading] = useState(false);`,
+    `  const suggestions = ${jsArray(suggestions)};`,
     ``,
     `  async function onSubmit(e) {`,
-    `    const value = e.detail.value.trim();`,
-    `    if (!value) return;`,
-    `    const history = [...messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
-    `    const assistantId = crypto.randomUUID();`,
-    `    setMessages([...history, { id: assistantId, role: 'assistant', content: '' }]);`,
-    `    setLoading(true);`,
-    `    const res = await fetch('/api/chat', {`,
-    `      method: 'POST',`,
-    `      headers: { 'Content-Type': 'application/json' },`,
-    `      body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),`,
-    `    });`,
-    `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
-    `    const reader = res.body.getReader();`,
-    `    const decoder = new TextDecoder();`,
-    `    let buffer = '', answer = '';`,
-    `    while (true) {`,
-    `      const { value: chunk, done } = await reader.read();`,
-    `      if (done) break;`,
-    `      buffer += decoder.decode(chunk, { stream: true });`,
-    `      const lines = buffer.split('\\n');`,
-    `      buffer = lines.pop();`,
-    `      for (const line of lines) {`,
-    `        const s = line.trim();`,
-    `        if (!s.startsWith('data:')) continue;`,
-    `        const payload = s.slice(5).trim();`,
-    `        if (payload === '[DONE]') continue;`,
-    `        try {`,
-    `          const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
-    `          if (!delta) continue;`,
-    `          answer += delta;`,
-    `          setMessages((ms) => ms.map((m) => (m.id === assistantId ? { ...m, content: answer } : m)));`,
-    `        } catch { /* skip keep-alives */ }`,
-    `      }`,
-    `    }`,
-    `    setLoading(false);`,
+    onSubmitBody,
     `  }`,
     ``,
     `  return (`,
     `    <div style={{ ${jsxStyle(p.style)} }}>`,
-    `      <Chat messages={messages} loading={loading} onSubmit={onSubmit} />`,
+    `      <Chat`,
+    `        messages={messages}`,
+    `        loading={loading}`,
+    `        suggestions={suggestions}`,
+    `        suggestionMode="submit"`,
+    `        onSubmit={onSubmit}`,
+    `        style={{ ${jsxStyle(p.chatFill)} }}`,
+    `      />`,
     companions,
     `    </div>`,
     `  );`,
@@ -224,89 +382,146 @@ function renderJsx(archetype: Archetype, p: PlacementStyle, emptyHint: string): 
     .join('\n');
 }
 
-/** Vue: bind messages as a property, listen for kai-submit with @. */
-function renderVue(archetype: Archetype, p: PlacementStyle, emptyHint: string): string {
+/** Vue: bind messages/suggestions as properties, listen for kai-submit with @. */
+function renderVue(archetype: Archetype, ctx: RenderCtx): string {
+  const { p, emptyHint, suggestions, isMock } = ctx;
   const companionTags = archetype.components.filter((t) => t !== 'kai-chat');
   const companions = [
     ...(companionTags.length > 0 ? [`    <!-- wire data props — see the component_reference MCP tool -->`] : []),
     ...companionTags.map((t) => `    <${t} />`),
   ].join('\n');
 
+  const onSubmitBody = isMock
+    ? mockStreamBody({
+        pad: '    ',
+        read: 'messages.value',
+        commitInitial: (expr) => `messages.value = ${expr};`,
+        // messages.value is live — map over it directly
+        commitMap: (mapBody) => `messages.value = messages.value.map((m) => ${mapBody});`,
+        setLoading: (v) => `loading.value = ${v};`,
+      })
+    : [
+        `    const value = e.detail.value.trim();`,
+        `    if (!value) return;`,
+        `    const history = [...messages.value, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+        `    const assistantId = crypto.randomUUID();`,
+        `    messages.value = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
+        `    loading.value = true;`,
+        `    // POST { messages } to /api/chat, then stream the OpenAI-format SSE into the`,
+        `    // assistant message (reassign messages.value per chunk) — see the Streaming recipe.`,
+      ].join('\n');
+
   return [
     `<!-- vue — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
-    `<!-- import '@kitn.ai/ui/elements' and '@kitn.ai/ui/theme.css' once at app entry. -->`,
-    `<div style="${p.style}">`,
-    `  <kai-chat :messages="messages" @kai-submit="onSubmit"></kai-chat>`,
-    companions,
-    `</div>`,
+    ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
+    `<script setup>`,
+    `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `import '@kitn.ai/ui/theme.css';`,
+    `import { ref } from 'vue';`,
     ``,
-    `<!--`,
-    `  onSubmit(e): append { role:'user', content:e.detail.value } to messages,`,
-    `  push an empty { role:'assistant', content:'' }, POST { messages } to /api/chat,`,
-    `  then stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
-    `  messages is a property (objects can't be attributes); reassign it to re-render.`,
-    `-->`,
-  ].join('\n');
+    `const messages = ref([]);`,
+    `const loading = ref(false);`,
+    `const suggestions = ${jsArray(suggestions)};`,
+    ``,
+    `async function onSubmit(e) {`,
+    onSubmitBody,
+    `}`,
+    `</script>`,
+    ``,
+    `<template>`,
+    `  <div style="${p.style}">`,
+    `    <kai-chat`,
+    `      :messages="messages"`,
+    `      :loading="loading"`,
+    `      :suggestions="suggestions"`,
+    `      suggestionMode="submit"`,
+    `      style="${p.chatFill}"`,
+    `      @kai-submit="onSubmit"`,
+    `    ></kai-chat>`,
+    companions,
+    `  </div>`,
+    `</template>`,
+  ]
+    .filter((l) => l !== '')
+    .join('\n');
 }
 
 /** Svelte: use bind:this to set array/object properties reactively; on:kai-submit for the event. */
-function renderSvelte(archetype: Archetype, p: PlacementStyle, emptyHint: string): string {
+function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
+  const { p, emptyHint, suggestions, isMock } = ctx;
   const companionTags = archetype.components.filter((t) => t !== 'kai-chat');
   const companionLines = [
     ...(companionTags.length > 0 ? [`  <!-- wire data props — see the component_reference MCP tool -->`] : []),
     ...companionTags.map((t) => `  <${t}></${t}>`),
   ].join('\n');
 
+  const onSubmitBody = isMock
+    ? mockStreamBody({
+        pad: '    ',
+        read: 'messages',
+        commitInitial: (expr) => `messages = ${expr};`,
+        // `messages` is a live local — reassign to map over the latest array
+        commitMap: (mapBody) => `messages = messages.map((m) => ${mapBody});`,
+        setLoading: (v) => `loading = ${v};`,
+      })
+    : [
+        `    const value = e.detail.value.trim();`,
+        `    if (!value) return;`,
+        `    const history = [...messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+        `    const assistantId = crypto.randomUUID();`,
+        `    messages = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
+        `    loading = true;`,
+        `    const res = await fetch('/api/chat', {`,
+        `      method: 'POST',`,
+        `      headers: { 'Content-Type': 'application/json' },`,
+        `      body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),`,
+        `    });`,
+        `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
+        `    const reader = res.body.getReader();`,
+        `    const decoder = new TextDecoder();`,
+        `    let buffer = '', answer = '';`,
+        `    while (true) {`,
+        `      const { value: chunk, done } = await reader.read();`,
+        `      if (done) break;`,
+        `      buffer += decoder.decode(chunk, { stream: true });`,
+        `      const lines = buffer.split('\\n');`,
+        `      buffer = lines.pop();`,
+        `      for (const line of lines) {`,
+        `        const s = line.trim();`,
+        `        if (!s.startsWith('data:')) continue;`,
+        `        const payload = s.slice(5).trim();`,
+        `        if (payload === '[DONE]') continue;`,
+        `        try {`,
+        `          const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+        `          if (!delta) continue;`,
+        `          answer += delta;`,
+        `          messages = messages.map((m) => (m.id === assistantId ? { ...m, content: answer } : m));`,
+        `        } catch { /* skip keep-alives */ }`,
+        `      }`,
+        `    }`,
+        `    loading = false;`,
+      ].join('\n');
+
   return [
     `<!-- svelte — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
-    `<!-- import '@kitn.ai/ui/elements' and '@kitn.ai/ui/theme.css' once at app entry. -->`,
+    ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
     `<script>`,
+    `  import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `  import '@kitn.ai/ui/theme.css';`,
     `  let chatEl;`,
     `  let messages = [];`,
     `  let loading = false;`,
-    `  $: if (chatEl) { chatEl.messages = messages; chatEl.loading = loading; }`,
+    `  const suggestions = ${jsArray(suggestions)};`,
+    `  // suggestions/messages are JS PROPERTIES (arrays/objects can't be attributes)`,
+    `  $: if (chatEl) { chatEl.messages = messages; chatEl.loading = loading; chatEl.suggestions = suggestions; }`,
     ``,
     `  async function onSubmit(e) {`,
-    `    const value = e.detail.value.trim();`,
-    `    if (!value) return;`,
-    `    const history = [...messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
-    `    const assistantId = crypto.randomUUID();`,
-    `    messages = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
-    `    loading = true;`,
-    `    const res = await fetch('/api/chat', {`,
-    `      method: 'POST',`,
-    `      headers: { 'Content-Type': 'application/json' },`,
-    `      body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),`,
-    `    });`,
-    `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
-    `    const reader = res.body.getReader();`,
-    `    const decoder = new TextDecoder();`,
-    `    let buffer = '', answer = '';`,
-    `    while (true) {`,
-    `      const { value: chunk, done } = await reader.read();`,
-    `      if (done) break;`,
-    `      buffer += decoder.decode(chunk, { stream: true });`,
-    `      const lines = buffer.split('\\n');`,
-    `      buffer = lines.pop();`,
-    `      for (const line of lines) {`,
-    `        const s = line.trim();`,
-    `        if (!s.startsWith('data:')) continue;`,
-    `        const payload = s.slice(5).trim();`,
-    `        if (payload === '[DONE]') continue;`,
-    `        try {`,
-    `          const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
-    `          if (!delta) continue;`,
-    `          answer += delta;`,
-    `          messages = messages.map((m) => (m.id === assistantId ? { ...m, content: answer } : m));`,
-    `        } catch { /* skip keep-alives */ }`,
-    `      }`,
-    `    }`,
-    `    loading = false;`,
+    onSubmitBody,
     `  }`,
     `</script>`,
     ``,
     `<div style="${p.style}">`,
-    `  <kai-chat bind:this={chatEl} on:kai-submit={onSubmit}></kai-chat>`,
+    `  <kai-chat bind:this={chatEl} suggestion-mode="submit" style="${p.chatFill}" on:kai-submit={onSubmit}></kai-chat>`,
     companionLines,
     `</div>`,
   ]
@@ -333,21 +548,23 @@ function renderFrontend(
   archetype: Archetype,
   placement: string,
   emptyHint: string,
+  suggestions: string[],
+  isMock: boolean,
 ): string {
-  const p = placementStyle(placement);
+  const ctx: RenderCtx = { p: placementStyle(placement), emptyHint, suggestions, isMock };
   switch (framework) {
     case 'react':
     case 'next':
-      return renderJsx(archetype, p, emptyHint);
+      return renderJsx(archetype, ctx);
     case 'vue':
-      return renderVue(archetype, p, emptyHint);
+      return renderVue(archetype, ctx);
     case 'svelte':
-      return renderSvelte(archetype, p, emptyHint);
+      return renderSvelte(archetype, ctx);
     case 'html':
     default:
       // html, and any backend-only framework (fastapi/express/worker) gets the
       // framework-agnostic web-components surface.
-      return renderHtml(archetype, p, emptyHint);
+      return renderHtml(archetype, ctx);
   }
 }
 
@@ -401,13 +618,21 @@ function chooseRoute(integration: Integration, framework: string): RouteChoice |
 
 // ── compose ───────────────────────────────────────────────────────────────────
 
-function compose(archetype: Archetype, integration: Integration, placement: string, framework: string, audience?: string): string {
+function compose(
+  archetype: Archetype,
+  integration: Integration,
+  placement: string,
+  framework: string,
+  suggestions: string[],
+  audience?: string,
+): string {
   const audienceHint = audience
     ? `tuned for ${audience} — keep the empty state and tone audience-appropriate`
     : 'add an empty-state prompt that fits your product';
 
-  const frontend = renderFrontend(framework, archetype, placement, audienceHint);
-  const route = chooseRoute(integration, framework);
+  const isMock = integration.id === 'mock';
+  const frontend = renderFrontend(framework, archetype, placement, audienceHint, suggestions, isMock);
+  const route = isMock ? undefined : chooseRoute(integration, framework);
 
   const header = [
     `# AI/UI scaffold — ${archetype.title} × ${integration.title}`,
@@ -422,13 +647,32 @@ function compose(archetype: Archetype, integration: Integration, placement: stri
   ].join('\n');
 
   const block2Parts: string[] = [`=== (2) BACKEND ROUTE ===`, ``];
-  if (route) {
+  if (isMock) {
+    // The mock integration has no backend — the front-end streams locally.
+    block2Parts.push(
+      `# No backend or API key needed — replies stream locally for preview (see the`,
+      `# front-end onSubmit above). Swap \`integration\` for a real provider (openrouter,`,
+      `# ollama, vercel-ai-sdk, …) when ready, and this block becomes its route handler.`,
+    );
+  } else if (route) {
     if (!route.exact) {
       block2Parts.push(
         `# Note: ${integration.title} has no template for "${framework}". Emitting its native`,
         `# ${route.runtime} route instead (matches the integration's ${integration.language} language).`,
-        ``,
       );
+      // Honest warning: a Next.js/server route will NOT run inside a Vite SPA.
+      if (framework === 'react') {
+        block2Parts.push(
+          `#`,
+          `# WARNING: this is a Next.js route handler — it will NOT run in a Vite SPA`,
+          `# (a Vite \`react\` app has no /api routes). To make the front-end above work, either:`,
+          `#   • use Next.js (framework: "next"), or`,
+          `#   • add a Vite dev-server middleware/proxy to a server, or`,
+          `#   • run a separate server (framework: "express" | "worker"), or`,
+          `#   • use integration: "mock" for a zero-config local stream (no backend, no key).`,
+        );
+      }
+      block2Parts.push(``);
     } else {
       block2Parts.push(`# Runtime: ${route.runtime}`, ``);
     }
@@ -488,8 +732,8 @@ export const scaffold: Tool = {
   name: 'scaffold',
   description:
     'Scaffold a working AI/UI chat surface from four axes: useCase (archetype) × integration × placement × framework. ' +
-    'Emits a copy-pasteable front-end (kai-* components wired with messages + kai-submit), the backend route for the chosen ' +
-    'framework, and a run note with env vars.',
+    'Emits a copy-pasteable front-end (kai-* components wired with messages + kai-submit + starter suggestions), the backend ' +
+    'route for the chosen framework, and a run note with env vars. Use integration: "mock" for a zero-config local preview.',
   inputSchema: z.object({
     // useCase + integration are dynamic catalog ids — kept as strings and
     // validated against the registry in the handler (the handler is called
@@ -511,6 +755,13 @@ export const scaffold: Tool = {
     framework: Framework.describe(
       'Target front-end/back-end framework: html | react | next | vue | svelte | fastapi | express | worker.',
     ),
+    suggestions: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'Optional starter prompts shown above the input when the thread is empty (real kai-chat prop). ' +
+          'Defaults to a generic pair if omitted so the feature always shows.',
+      ),
     audience: z
       .string()
       .optional()
@@ -522,6 +773,11 @@ export const scaffold: Tool = {
     const placement = String(args.placement ?? '');
     const framework = String(args.framework ?? 'html');
     const audience = args.audience ? String(args.audience) : undefined;
+    // Default the suggestions so the feature always shows; honour a passed array.
+    const suggestions =
+      Array.isArray(args.suggestions) && args.suggestions.length > 0
+        ? args.suggestions.map(String)
+        : DEFAULT_SUGGESTIONS;
 
     // Validate against the registry BEFORE composing — graceful, self-correcting text.
     const archetype = getArchetype(useCase);
@@ -533,6 +789,6 @@ export const scaffold: Tool = {
     // Fall back to the archetype's default placement only if none was provided.
     const effectivePlacement = placement || archetype.defaultPlacement;
 
-    return text(compose(archetype, integration, effectivePlacement, framework, audience));
+    return text(compose(archetype, integration, effectivePlacement, framework, suggestions, audience));
   },
 };

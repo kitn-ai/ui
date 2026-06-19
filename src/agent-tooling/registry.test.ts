@@ -6,18 +6,32 @@ import { IntegrationSchema, ArchetypeSchema } from './types';
 
 it('has the launch integrations', () => {
   const ids = integrations.map((i) => i.id);
-  for (const id of ['openrouter', 'vercel-ai-sdk', 'langgraph', 'cloudflare', 'ollama', 'mastra', 'pi', 'pydantic-ai'])
+  for (const id of ['openrouter', 'vercel-ai-sdk', 'langgraph', 'cloudflare', 'ollama', 'mastra', 'pi', 'pydantic-ai', 'mock'])
     expect(ids).toContain(id);
 });
 
-it('has exactly 8 integrations', () => {
-  expect(integrations).toHaveLength(8);
+it('has exactly 9 integrations (8 real + mock)', () => {
+  expect(integrations).toHaveLength(9);
 });
 
-it('every integration validates and has at least one route template', () => {
+it('includes the zero-config mock integration', () => {
+  const m = getIntegration('mock');
+  expect(m).toBeDefined();
+  expect(m?.category).toBe('mock');
+  expect(m?.envVars).toEqual([]);
+  // mock ships no backend route — the front-end streams locally
+  expect(Object.keys(m!.routeTemplates).length).toBe(0);
+});
+
+it('every integration validates against IntegrationSchema', () => {
   for (const i of integrations) {
     expect(IntegrationSchema.safeParse(i).success).toBe(true);
-    expect(Object.keys(i.routeTemplates).length).toBeGreaterThan(0);
+  }
+});
+
+it('every real (non-mock) integration ships at least one route template', () => {
+  for (const i of integrations.filter((i) => i.id !== 'mock')) {
+    expect(Object.keys(i.routeTemplates).length, `${i.id}: no route template`).toBeGreaterThan(0);
   }
 });
 

@@ -7,6 +7,7 @@ import ollama from './integrations/ollama';
 import mastra from './integrations/mastra';
 import pi from './integrations/pi';
 import pydanticAi from './integrations/pydantic-ai';
+import mock from './integrations/mock';
 import { archetypes as _archetypes } from './archetypes';
 
 export const integrations: Integration[] = [
@@ -18,6 +19,7 @@ export const integrations: Integration[] = [
   mastra,
   pi,
   pydanticAi,
+  mock,
 ];
 
 export const archetypes: Archetype[] = _archetypes;
