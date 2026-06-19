@@ -16,8 +16,8 @@ import { Icon } from 'astro-icon/components';
     const cur = () => document.documentElement.dataset.theme
       || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     document.querySelectorAll('.kai-theme-toggle').forEach((btn) => {
-      if (btn.dataset.kcBound) return;
-      btn.dataset.kcBound = '1';
+      if (btn.dataset.kaiBound) return;
+      btn.dataset.kaiBound = '1';
       btn.addEventListener('click', () => {
         const next = cur() === 'dark' ? 'light' : 'dark';
         document.documentElement.dataset.theme = next;

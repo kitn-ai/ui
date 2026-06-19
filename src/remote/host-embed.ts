@@ -133,7 +133,7 @@ export function mountRemoteCard(options: MountRemoteCardOptions): RemoteCardHand
     // Replace the iframe with an inline accessible fallback + a Retry button.
     const fallback = document.createElement('div');
     fallback.setAttribute('role', 'alert');
-    fallback.dataset.kcRemoteFallback = '';
+    fallback.dataset.kaiRemoteFallback = '';
     const msg = document.createElement('p');
     msg.textContent = message;
     fallback.appendChild(msg);
