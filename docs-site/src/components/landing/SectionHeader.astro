@@ -6,6 +6,6 @@ interface Props { icon: string; label: string; }
 const { icon, label } = Astro.props;
 ---
 <div class="mb-6 flex items-center border-b border-line pb-3 text-ink-2">
-  <Icon name={icon} class="mr-2 size-5 text-brand" />
+  <Icon name={icon} class="mr-2 size-5" />
   <span class="text-base font-semibold">{label}</span>
 </div>

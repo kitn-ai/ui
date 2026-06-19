@@ -47,14 +47,17 @@ export default function AnimatedLogo(raw: AnimatedLogoProps) {
     }
 
     if (props.trackCursor) {
-      const onMove = (e: MouseEvent) => {
-        if (!containerRef) return;
+      // Remember the last cursor position so we can also re-evaluate the look on
+      // scroll — the container moves under a stationary cursor as the page scrolls.
+      let lastX = 0, lastY = 0, hasPos = false;
+      const update = () => {
+        if (!containerRef || !hasPos) return;
         const rect = containerRef.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
         const dx = rect.width / 4;
         const dy = rect.height / 4;
-        const x = e.clientX, y = e.clientY;
+        const x = lastX, y = lastY;
         if (x < cx - dx && y < cy - dy) setInternalLook('top-left');
         else if (x > cx + dx && y < cy - dy) setInternalLook('top-right');
         else if (x < cx - dx && y > cy + dy) setInternalLook('bottom-left');
@@ -65,8 +68,13 @@ export default function AnimatedLogo(raw: AnimatedLogoProps) {
         else if (y > cy + dy) setInternalLook('down');
         else setInternalLook('center');
       };
+      const onMove = (e: MouseEvent) => { lastX = e.clientX; lastY = e.clientY; hasPos = true; update(); };
       window.addEventListener('mousemove', onMove);
-      onCleanup(() => window.removeEventListener('mousemove', onMove));
+      window.addEventListener('scroll', update, { passive: true });
+      onCleanup(() => {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('scroll', update);
+      });
     }
   });
 

@@ -80,7 +80,7 @@ export default function HeroChat() {
     if (!host) return;
     customElements.upgrade(host);
     host.messages = SEED;
-    (host as any).chatTitle = 'Support copilot';
+    (host as any).chatTitle = 'Support Agent';
     (host as any).placeholder = 'Ask a follow-up…';
     (host as any).suggestions = ['Show me a trace', 'Draft the fix', 'What’s the rollback?'];
     (host as any).models = [

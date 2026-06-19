@@ -1,54 +1,123 @@
 ---
-// Quickstart — install → register → use, in three short steps. Flat code cards.
+// Quickstart — CDN (the easiest path) or npm, then register + use. Flat code cards.
 import { Icon } from 'astro-icon/components';
 import SectionHeader from './SectionHeader.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
 
-const steps = [
+const cdnSteps = [
+  { n: '01', title: 'Add the script', lang: 'html', code: '<script type="module"\n  src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js"\n></script>' },
+  { n: '02', title: 'Drop one in', lang: 'html', code: '<kai-chat></kai-chat>' },
+];
+const npmSteps = [
   { n: '01', title: 'Install', lang: 'bash', code: 'npm i @kitn.ai/ui' },
   { n: '02', title: 'Register the elements', lang: 'js', code: "import '@kitn.ai/ui/elements';" },
   { n: '03', title: 'Drop one in', lang: 'html', code: '<kai-chat></kai-chat>' },
 ];
+const paths = [
+  { id: 'cdn', label: 'CDN — no build', steps: cdnSteps },
+  { id: 'npm', label: 'npm', steps: npmSteps },
+];
+
+const frameworks = [
+  { name: 'React', icon: 'logos:react', to: 'guides/frameworks/react' },
+  { name: 'Vue', icon: 'logos:vue', to: 'guides/frameworks/vue' },
+  { name: 'Svelte', icon: 'logos:svelte-icon', to: 'guides/frameworks/svelte' },
+  { name: 'Angular', icon: 'logos:angular-icon', to: 'guides/frameworks/angular' },
+  { name: 'Solid', icon: 'logos:solidjs-icon', to: 'guides/frameworks/solid' },
+  { name: 'HTML', icon: 'logos:html-5', to: 'guides/frameworks/html' },
+];
 ---
 
-<section class="mx-auto max-w-[80rem] px-6 py-20 sm:py-24">
+<section class="mx-auto max-w-[80rem] px-6 py-20 sm:py-24" data-quickstart>
   <SectionHeader icon="lucide:terminal" label="Quickstart" />
   <div class="max-w-2xl">
     <h2 class="text-balance text-3xl font-medium leading-[1.08] tracking-[-0.02em] text-ink md:text-4xl lg:text-5xl">
-      Up and running in <span class="text-brand">three lines</span>.
+      Up and running — <span class="text-brand">no build step</span>.
     </h2>
     <p class="mt-4 text-lg leading-relaxed text-ink-2">
-      No build step, no wrapper, no config. Register the custom elements once,
-      then use them anywhere in your markup — and set <code class="kai-inline">messages</code>
-      in JavaScript to wire up your model.
+      The fastest path is a single <code class="kai-inline">&lt;script&gt;</code> tag from a CDN — paste it
+      in and the custom elements register themselves. Prefer a bundler? Install from npm.
+      Either way, set <code class="kai-inline">messages</code> in JavaScript to wire up your model.
     </p>
   </div>
 
-  <ol class="mt-12 grid gap-4 md:grid-cols-3">
-    {steps.map((s) => (
-      <li class="flex flex-col rounded-2xl border border-line bg-surface p-6">
-        <div class="flex items-center gap-3">
-          <span class="font-mono text-sm font-bold text-brand">{s.n}</span>
-          <h3 class="text-base font-bold text-ink">{s.title}</h3>
-        </div>
-        <pre class="kai-code mt-4 overflow-x-auto rounded-lg border border-line bg-surface-2 p-4"><code class={`language-${s.lang}`}>{s.code}</code></pre>
-      </li>
+  <!-- Install-method toggle -->
+  <div class="mt-9 flex flex-wrap gap-2" role="tablist" aria-label="Install method">
+    {paths.map((p, i) => (
+      <button
+        type="button"
+        role="tab"
+        data-qs-tab={p.id}
+        aria-selected={i === 0 ? 'true' : 'false'}
+        class="qs-tab inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-semibold text-ink-2 transition-colors"
+      >
+        {p.label}
+      </button>
     ))}
-  </ol>
+  </div>
 
-  <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-2">
-    <a href={href('guides/getting-started')} class="inline-flex items-center gap-1.5 font-bold text-brand no-underline hover:underline">
+  <!-- Step panels -->
+  {paths.map((p, i) => (
+    <ol
+      data-qs-panel={p.id}
+      hidden={i !== 0}
+      class={p.steps.length === 2 ? 'mt-6 grid gap-4 md:grid-cols-2' : 'mt-6 grid gap-4 md:grid-cols-3'}
+    >
+      {p.steps.map((s) => (
+        <li class="flex flex-col rounded-2xl border border-line bg-surface p-6">
+          <div class="flex items-center gap-3">
+            <span class="font-mono text-sm font-bold text-brand">{s.n}</span>
+            <h3 class="text-base font-bold text-ink">{s.title}</h3>
+          </div>
+          <pre class="kai-code mt-4 overflow-x-auto rounded-lg border border-line bg-surface-2 p-4"><code class={`language-${s.lang}`}>{s.code}</code></pre>
+        </li>
+      ))}
+    </ol>
+  ))}
+
+  <!-- Framework chips + full guide -->
+  <div class="mt-10 flex flex-col gap-4">
+    <span class="text-sm font-semibold text-ink-3">Using a framework? Drop-in setup for:</span>
+    <ul class="flex flex-wrap gap-3">
+      {frameworks.map((f) => (
+        <li>
+          <a href={href(f.to)} class="qs-fw inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink-2 no-underline transition-colors hover:border-brand hover:text-ink">
+            <Icon name={f.icon} class="size-5 shrink-0" />
+            {f.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a href={href('guides/getting-started')} class="mt-1 inline-flex items-center gap-1.5 font-bold text-brand no-underline hover:underline">
       Read the full guide
       <Icon name="lucide:arrow-right" class="size-4" />
     </a>
-    <span class="text-ink-3">Using a framework? Setup for <a href={href('guides/frameworks/react')} class="font-semibold text-ink-2 underline-offset-2 hover:underline">React</a>, <a href={href('guides/frameworks/vue')} class="font-semibold text-ink-2 underline-offset-2 hover:underline">Vue</a>, <a href={href('guides/frameworks/svelte')} class="font-semibold text-ink-2 underline-offset-2 hover:underline">Svelte</a>, <a href={href('guides/frameworks/angular')} class="font-semibold text-ink-2 underline-offset-2 hover:underline">Angular</a> &amp; <a href={href('guides/frameworks/solid')} class="font-semibold text-ink-2 underline-offset-2 hover:underline">Solid</a>.</span>
   </div>
 </section>
 
 <style>
+  .qs-tab[aria-selected='true'] { background: var(--kai-brand); border-color: var(--kai-brand); color: #fff; }
+  .qs-tab:not([aria-selected='true']):hover { border-color: var(--kai-ink-3); color: var(--kai-ink); }
   .kai-code { font-family: var(--sl-font-mono, monospace); font-size: 0.9rem; line-height: 1.5; }
   .kai-code code { color: var(--kai-ink); white-space: pre; }
   .kai-inline { font-family: var(--sl-font-mono, monospace); font-size: 0.88em; color: var(--kai-link); }
+  /* Brand logos grayscale at rest, color on hover — quiet until you look. */
+  .qs-fw :global(svg) { filter: grayscale(0.5); transition: filter 0.2s ease; }
+  .qs-fw:hover :global(svg) { filter: grayscale(0); }
 </style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-quickstart]').forEach((root) => {
+    const tabs = root.querySelectorAll<HTMLButtonElement>('[data-qs-tab]');
+    const panels = root.querySelectorAll<HTMLElement>('[data-qs-panel]');
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const id = tab.dataset.qsTab;
+        tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+        panels.forEach((p) => { p.hidden = p.dataset.qsPanel !== id; });
+      });
+    });
+  });
+</script>

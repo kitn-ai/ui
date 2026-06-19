@@ -12,23 +12,25 @@ const shot = `${base}/landing/theme-editor.png`;
 <section class="band-dark">
   <div class="mx-auto max-w-[80rem] px-6 py-16 lg:py-24">
     <SectionHeader icon="lucide:palette" label="Make it yours" />
-    <div class="grid items-center gap-12 lg:grid-cols-[1fr_1.25fr]">
-    <div>
-      <h2 class="text-balance text-3xl font-medium leading-[1.08] tracking-[-0.02em] text-ink md:text-4xl lg:text-5xl">
+    <div class="mb-12 grid items-end gap-8 lg:grid-cols-2">
+      <h2 class="text-balance text-3xl font-medium leading-[1.05] tracking-[-0.02em] text-ink md:text-4xl lg:text-5xl">
         Match your brand — <span class="text-brand">without forking</span> anything.
       </h2>
-      <p class="mt-5 text-lg leading-relaxed text-ink-2">
-        Every color, font, radius, and shadow is a CSS custom property. Override a
-        handful of <code class="kai-inline">--kai-*</code> tokens and the whole UI
-        reskins, light and dark. Or design it live: 40+ presets, font and shape
-        controls, and export-ready CSS you can paste straight into your app.
-      </p>
-      <a href={href('theme/editor')} class="mt-7 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-white no-underline transition-colors hover:bg-[var(--kai-brand-hover)]">
-        <Icon name="lucide:palette" class="size-4" />
-        Open the theme editor
-      </a>
+      <div class="self-center">
+        <p class="text-lg leading-relaxed text-ink-2">
+          Every color, font, radius, and shadow is a CSS custom property. Override a
+          handful of <code class="kai-inline">--kai-*</code> tokens and the whole UI
+          reskins, light and dark. Or design it live: 40+ presets, font and shape
+          controls, and export-ready CSS you can paste straight into your app.
+        </p>
+        <a href={href('theme/editor')} class="mt-6 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-white no-underline transition-colors hover:bg-[var(--kai-brand-hover)]">
+          <Icon name="lucide:palette" class="size-4" />
+          Open the theme editor
+        </a>
+      </div>
     </div>
 
+    <!-- Full-width framed screenshot — the editor UI is detailed, so give it room. -->
     <div class="te-frame overflow-hidden rounded-xl border border-line bg-surface-2">
       <div class="flex items-center gap-2 border-b border-line bg-surface px-3.5 py-2.5">
         <span class="size-3 rounded-full bg-[#ff5f57]"></span>
@@ -36,7 +38,6 @@ const shot = `${base}/landing/theme-editor.png`;
         <span class="size-3 rounded-full bg-[#28c840]"></span>
       </div>
       <img src={shot} alt="The AI/UI theme editor" loading="lazy" class="block w-full" />
-    </div>
     </div>
   </div>
 </section>

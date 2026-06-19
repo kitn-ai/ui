@@ -3,7 +3,7 @@
 import { createSignal } from 'solid-js';
 import AnimatedLogo from './AnimatedLogo';
 
-const EXPRESSIONS = ['happy', 'neutral', 'surprised', 'sad', 'angry'] as const;
+const EXPRESSIONS = ['neutral', 'happy', 'surprised', 'sad', 'angry'] as const;
 
 export default function MeetKitn(props: { size?: number }) {
   const size = props.size ?? 176;
