@@ -5,8 +5,9 @@
 
 // Re-exports for `import { … } from '@kitn.ai/ui/elements'`.
 export type { ChatMessage, ChatMessageAction } from './chat-types';
-export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';
+export declare function configureCodeHighlighting(options: CodeHighlightingOptions): void;
+export declare function isCodeHighlightingEnabled(): boolean;
 
 export interface KaiArtifactElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
