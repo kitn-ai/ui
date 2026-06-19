@@ -121,6 +121,31 @@ describe('scaffold', () => {
     expect(text).not.toContain('onKai-submit');
   });
 
+  it('react scaffold page component is named App, not Chat (no import/export collision)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Page component must be App — not Chat — to avoid shadowing the imported Chat wrapper
+    expect(text).toContain('export default function App(');
+    expect(text).not.toMatch(/function Chat\(/);
+  });
+
+  it('next scaffold page component is named App, not Chat (no import/export collision)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'next',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('export default function App(');
+    expect(text).not.toMatch(/function Chat\(/);
+  });
+
   it('svelte scaffold uses correct on:kai-submit syntax and bind:this property pattern', async () => {
     const out = await scaffold.handler({
       useCase: 'drop-in-chat',

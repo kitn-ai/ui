@@ -167,7 +167,7 @@ function renderJsx(archetype: Archetype, p: PlacementStyle, emptyHint: string): 
     `import '@kitn.ai/ui/theme.css';`,
     ``,
     `// ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint}`,
-    `export default function Chat() {`,
+    `export default function App() {`,
     `  const [messages, setMessages] = useState([]);`,
     `  const [loading, setLoading] = useState(false);`,
     ``,
