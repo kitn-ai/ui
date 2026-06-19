@@ -17,7 +17,7 @@ describe('scaffold', () => {
       placement: 'full-page',
       framework: 'next',
     });
-    const text = out.content[0].text;
+    const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/<kai-chat/);
     expect(text).toMatch(/openrouter\.ai\/api\/v1\/chat\/completions/);
     expect(text).toMatch(/Streaming recipe/);
@@ -30,7 +30,7 @@ describe('scaffold', () => {
       placement: 'docked-widget',
       framework: 'fastapi',
     });
-    const text = out.content[0].text;
+    const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/from fastapi|uvicorn|run_stream/);
   });
 
@@ -41,7 +41,7 @@ describe('scaffold', () => {
       placement: 'side',
       framework: 'html',
     });
-    const text = out.content[0].text;
+    const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/unknown integration|valid integrations/i);
   });
 
@@ -54,7 +54,7 @@ describe('scaffold', () => {
       placement: 'full-page',
       framework: 'next',
     });
-    const text = out.content[0].text;
+    const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/unknown use ?case|valid use ?cases|valid archetypes/i);
     // names a real archetype id so the harness can self-correct
     expect(text).toMatch(/drop-in-chat/);
@@ -67,7 +67,7 @@ describe('scaffold', () => {
       placement: 'docked-widget',
       framework: 'html',
     });
-    const text = out.content[0].text;
+    const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/<kai-chat/);
     // a docked widget is a fixed, sized box (not the full-page `height: 100dvh`)
     expect(text).toMatch(/position:\s*fixed/);
@@ -85,7 +85,7 @@ describe('scaffold', () => {
       placement: 'inline',
       framework: 'next',
     });
-    const text = out.content[0].text;
+    const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/from fastapi|uvicorn|run_stream/);
   });
 });

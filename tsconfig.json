@@ -16,5 +16,5 @@
     "baseUrl": "."
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist", "frameworks"]
+  "exclude": ["node_modules", "dist", "frameworks", "src/agent-tooling/mcp"]
 }
