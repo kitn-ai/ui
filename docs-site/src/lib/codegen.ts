@@ -1,7 +1,7 @@
 // Generic, data-driven multi-framework code generator.
 //
 // One source of truth — the kit's generated element-meta.json — drives the
-// snippet for every framework, for every kc-* element. The interactive
+// snippet for every framework, for every kai-* element. The interactive
 // playground feeds the live control state in; focused examples feed a fixed
 // config. This replaces the hand-authored per-element `*-code.ts` files so the
 // docs scale to ~40 elements without drift.
@@ -9,7 +9,7 @@
 // Conventions match the kit's own framework-usage.json:
 //   - scalar props      → attributes (HTML/Vue/Svelte/Angular) / props (React/Solid)
 //   - non-scalar props  → JS properties (`el.items = …`, `:items.prop`, `[items]`)
-//   - events            → addEventListener / onX / @kc-x / on:kc-x / (kc-x)
+//   - events            → addEventListener / onX / @kai-x / on:kai-x / (kai-x)
 
 export const FRAMEWORKS = ['HTML', 'React', 'Vue', 'Svelte', 'Angular', 'Solid'] as const;
 export type Framework = (typeof FRAMEWORKS)[number];
@@ -115,7 +115,7 @@ function resolve(meta: ElementMeta, state: State): Resolved {
 }
 
 const handlerName = (evt: string) =>
-  'on' + evt.replace(/^kc-/, '').split('-').map((s) => s[0].toUpperCase() + s.slice(1)).join('');
+  'on' + evt.replace(/^kai-/, '').split('-').map((s) => s[0].toUpperCase() + s.slice(1)).join('');
 
 // ---------------------------------------------------------------------------
 // Per-framework renderers
@@ -132,7 +132,7 @@ function htmlCode(meta: ElementMeta, r: Resolved): string {
   const falseBools = r.attrs.filter(falseBool);
   const open = `<${meta.tag}${attrs.length ? ' ' + attrs.join(' ') : ''}></${meta.tag}>`;
   const lines = [
-    `<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js"></script>`,
+    `<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js"></script>`,
     '',
     open,
   ];
@@ -168,7 +168,7 @@ function vueCode(meta: ElementMeta, r: Resolved): string {
   const tag = parts.length
     ? `<${meta.tag}\n${parts.map((p) => indent + p).join('\n')}\n></${meta.tag}>`
     : `<${meta.tag}></${meta.tag}>`;
-  return `<script setup>\nimport '@kitn.ai/chat/elements';\n</script>\n\n<template>\n  ${tag.replace(/\n/g, '\n  ')}\n</template>`;
+  return `<script setup>\nimport '@kitn.ai/ui/elements';\n</script>\n\n<template>\n  ${tag.replace(/\n/g, '\n  ')}\n</template>`;
 }
 
 function svelteCode(meta: ElementMeta, r: Resolved): string {
@@ -180,7 +180,7 @@ function svelteCode(meta: ElementMeta, r: Resolved): string {
   const tag = parts.length
     ? `<${meta.tag}\n${parts.map((p) => indent + p).join('\n')}\n></${meta.tag}>`
     : `<${meta.tag}></${meta.tag}>`;
-  return `<script>\n  import '@kitn.ai/chat/elements';\n</script>\n\n${tag}`;
+  return `<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n${tag}`;
 }
 
 function angularCode(meta: ElementMeta, r: Resolved): string {
@@ -201,11 +201,11 @@ export function generateSnippets(meta: ElementMeta, state: State = {}): Record<F
   const Name = meta.displayName.replace(/\s/g, '');
   return {
     HTML: htmlCode(meta, r),
-    React: jsxCode(meta, r, `import { ${Name} } from '@kitn.ai/chat/react';`),
+    React: jsxCode(meta, r, `import { ${Name} } from '@kitn.ai/ui/react';`),
     Vue: vueCode(meta, r),
     Svelte: svelteCode(meta, r),
     Angular: angularCode(meta, r),
-    Solid: jsxCode(meta, r, `import { ${Name} } from '@kitn.ai/chat';`),
+    Solid: jsxCode(meta, r, `import { ${Name} } from '@kitn.ai/ui';`),
   };
 }
 
@@ -216,17 +216,17 @@ export type ControlKind =
   | { prop: string; kind: 'string'; default?: string };
 
 // Controlled-value bindings: scalar props that, when set, switch an element into
-// controlled mode and disable its own click-to-toggle UI (e.g. kc-popover `open`,
-// kc-workspace `sidebarCollapsed`). Exposing them as casual Playground toggles
+// controlled mode and disable its own click-to-toggle UI (e.g. kai-popover `open`,
+// kai-workspace `sidebarCollapsed`). Exposing them as casual Playground toggles
 // makes the live demo look broken, so drive those via the element's own trigger.
 const CONTROLLED_BINDING_PROPS = new Set(['open', 'sidebarCollapsed']);
 
-// Per-element controls to hide. kc-artifact: `tab` is redundant with its own
+// Per-element controls to hide. kai-artifact: `tab` is redundant with its own
 // in-component Preview|Code toggle; `sandbox` is set by the sample (the demo opts
 // into allow-same-origin so its iframe can load its own styles) and a freeform
 // string control would both clutter the bar and override that.
 const CONTROL_EXCLUDE: Record<string, Set<string>> = {
-  'kc-artifact': new Set(['tab', 'sandbox']),
+  'kai-artifact': new Set(['tab', 'sandbox']),
 };
 
 export function controlsFor(meta: ElementMeta): ControlKind[] {

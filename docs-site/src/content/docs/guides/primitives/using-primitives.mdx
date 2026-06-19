@@ -1,20 +1,20 @@
 ---
 title: Working with the components directly
-description: Import kitn-chat's headless primitives, UI primitives, and feature components straight from @kitn.ai/chat for full compositional control in a Solid app.
+description: Import kitn-chat's headless primitives, UI primitives, and feature components straight from @kitn.ai/ui for full compositional control in a Solid app.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-The `kc-*` elements are the fast path. When you want full control over markup and layout — and you're in a Solid app — skip the wrapper and import the underlying pieces from `@kitn.ai/chat`. You compose them in JSX, and your bundler tree-shakes away whatever you don't use.
+The `kai-*` elements are the fast path. When you want full control over markup and layout — and you're in a Solid app — skip the wrapper and import the underlying pieces from `@kitn.ai/ui`. You compose them in JSX, and your bundler tree-shakes away whatever you don't use.
 
-This page is the catalog, organized by the [four layers](/chat/guides/primitives/architecture/). For a full streaming chat built this way, see the [Solid guide](/chat/guides/frameworks/solid/).
+This page is the catalog, organized by the [four layers](/guides/primitives/architecture/). For a full streaming chat built this way, see the [Solid guide](/guides/frameworks/solid/).
 
 ```bash
-npm install @kitn.ai/chat solid-js
+npm install @kitn.ai/ui solid-js
 ```
 
 ```ts
-import '@kitn.ai/chat/theme.css'; // design tokens, once near your entry
+import '@kitn.ai/ui/theme.css'; // design tokens, once near your entry
 ```
 
 <Aside type="tip" title="Ships as source">
@@ -23,7 +23,7 @@ The `.` entry exports raw TSX. Your bundler compiles and tree-shakes it alongsid
 
 ## Headless primitives
 
-Behavior with no markup — the logic you'd otherwise rewrite per app. These are the layer the `kc-*` elements don't expose, so importing them directly is the main reason to drop down here.
+Behavior with no markup — the logic you'd otherwise rewrite per app. These are the layer the `kai-*` elements don't expose, so importing them directly is the main reason to drop down here.
 
 ```tsx
 import {
@@ -31,7 +31,7 @@ import {
   useStickToBottom,
   useAutoResize,
   useVoiceRecorder,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 ```
 
 - `useTextStream` — drive token-by-token streaming into your own UI.
@@ -46,15 +46,15 @@ import {
 The kit's own accessible building blocks. Useful on their own, well outside a chat.
 
 ```tsx
-import { Button, Switch, Avatar, Badge, Separator } from '@kitn.ai/chat';
-import { Tooltip, HoverCard, Dropdown } from '@kitn.ai/chat';
-import { Resizable, ResizablePanel, ScrollArea } from '@kitn.ai/chat';
+import { Button, Switch, Avatar, Badge, Separator } from '@kitn.ai/ui';
+import { Tooltip, HoverCard, Dropdown } from '@kitn.ai/ui';
+import { Resizable, ResizablePanel, ScrollArea } from '@kitn.ai/ui';
 
 <Switch label="Temporary chat" onChange={(on) => setTemporary(on)} />
 <Button variant="ghost" size="icon" aria-label="Add"><PlusIcon /></Button> {/* your icon */}
 ```
 
-`Resizable` + `ResizablePanel` build a draggable split — handles drop in automatically between visible panels. See the [Solid guide](/chat/guides/frameworks/solid/) for a full sidebar-plus-chat layout.
+`Resizable` + `ResizablePanel` build a draggable split — handles drop in automatically between visible panels. See the [Solid guide](/guides/frameworks/solid/) for a full sidebar-plus-chat layout.
 
 ## Feature components
 
@@ -69,7 +69,7 @@ import {
   PromptInput,
   PromptInputTextarea,
   PromptInputActions,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 ```
 
 Each one also works standalone — render just the part you need:
@@ -77,7 +77,7 @@ Each one also works standalone — render just the part you need:
 ```tsx
 import {
   Markdown, Reasoning, ReasoningTrigger, ReasoningContent, Tool, Artifact,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 
 <Markdown content={assistantReply} />
 <Reasoning isStreaming={isStreaming}>
@@ -94,13 +94,13 @@ import {
 
 ## Mix the two
 
-Native components and `kc-*` elements ship in the same package and coexist. Compose primitives where you want control, and drop a `<kc-chat>` shell where you want batteries included — even on different screens of the same app.
+Native components and `kai-*` elements ship in the same package and coexist. Compose primitives where you want control, and drop a `<kai-chat>` shell where you want batteries included — even on different screens of the same app.
 
 <Aside type="note" title="In Solid, pass rich data with prop:">
-When you do use a `kc-*` element inside Solid, bind arrays and objects with `prop:` (`prop:messages={messages()}`) so Solid sets a DOM property instead of stringifying it, and listen with the `on:` namespace (`on:kc-submit`).
+When you do use a `kai-*` element inside Solid, bind arrays and objects with `prop:` (`prop:messages={messages()}`) so Solid sets a DOM property instead of stringifying it, and listen with the `on:` namespace (`on:kai-submit`).
 </Aside>
 
 ## Next
 
-- [Run the kit locally](/chat/guides/primitives/development/) — the build and Storybook dev loop.
-- [Create or modify a component](/chat/guides/primitives/extending/) — add your own primitive and element.
+- [Run the kit locally](/guides/primitives/development/) — the build and Storybook dev loop.
+- [Create or modify a component](/guides/primitives/extending/) — add your own primitive and element.

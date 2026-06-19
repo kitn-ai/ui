@@ -10,10 +10,10 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-tool>` — a collapsible tool-call panel (input/output inspection with a
+ * `<kai-tool>` — a collapsible tool-call panel (input/output inspection with a
  * state badge). Data via the `tool` property; `open` flag starts it expanded.
  */
-defineWebComponent<Props>('kc-tool', {
+defineWebComponent<Props>('kai-tool', {
   tool: undefined,
   open: false,
 }, (props, { flag }) => (

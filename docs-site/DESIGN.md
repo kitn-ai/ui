@@ -9,13 +9,13 @@ Semantic tokens, defined once per theme (`[data-theme='dark'|'light']`).
 
 | Token | Role |
 |---|---|
-| `--kc-brand` | kitn magenta `hsl(326 84% 53%)` — fills: buttons, scrollbar, active bar, tab underline |
-| `--kc-accent-soft` | translucent magenta — active nav bg, inline-code chip |
-| `--kc-link` | magenta link **text** (darkened in light for AA, brightened in dark) |
-| `--kc-bg` | page background — neutral near-black (dark) / white (light) |
-| `--kc-surface` / `--kc-surface-2` | cards, preview, console |
-| `--kc-line` | hairlines / borders |
-| `--kc-ink` / `--kc-ink-2` / `--kc-ink-3` | text: strong / body / labels-dim |
+| `--kai-brand` | kitn magenta `hsl(326 84% 53%)` — fills: buttons, scrollbar, active bar, tab underline |
+| `--kai-accent-soft` | translucent magenta — active nav bg, inline-code chip |
+| `--kai-link` | magenta link **text** (darkened in light for AA, brightened in dark) |
+| `--kai-bg` | page background — neutral near-black (dark) / white (light) |
+| `--kai-surface` / `--kai-surface-2` | cards, preview, console |
+| `--kai-line` | hairlines / borders |
+| `--kai-ink` / `--kai-ink-2` / `--kai-ink-3` | text: strong / body / labels-dim |
 
 Type: **Lato** (`--sl-font`), **JetBrains Mono** for code only (`--sl-font-mono`).
 
@@ -37,7 +37,7 @@ All layout is Tailwind flex/grid + the token utilities above. No bespoke CSS in 
 | `overrides/ThemeToggle.astro` | sun/moon toggle (replaces Starlight's dropdown) |
 | `Facts.astro` | "at a glance" pill row |
 | `PropTable.astro` | props + events table, from `element-meta.json` (no drift) |
-| `AttachmentsDemo.tsx` | live `<kc-attachments>` Solid island: tabs · preview · console |
+| `AttachmentsDemo.tsx` | live `<kai-attachments>` Solid island: tabs · preview · console |
 
 ## Rules
 

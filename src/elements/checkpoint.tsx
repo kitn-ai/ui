@@ -13,17 +13,17 @@ interface Props extends Record<string, unknown> {
   size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
 }
 
-/** Events fired by `<kc-checkpoint>`. */
+/** Events fired by `<kai-checkpoint>`. */
 interface Events {
   /** The checkpoint was clicked. */
-  'kc-select': void;
+  'kai-select': void;
 }
 
 /**
- * `<kc-checkpoint>` — a bookmark/checkpoint button (optional tooltip + label).
+ * `<kai-checkpoint>` — a bookmark/checkpoint button (optional tooltip + label).
  * Emits `select`.
  */
-defineWebComponent<Props, Events>('kc-checkpoint', {
+defineWebComponent<Props, Events>('kai-checkpoint', {
   label: undefined,
   tooltip: undefined,
   variant: 'ghost',
@@ -38,7 +38,7 @@ defineWebComponent<Props, Events>('kc-checkpoint', {
       aria-label={props.label ? undefined : (props.tooltip ?? 'Checkpoint')}
       variant={props.variant}
       size={props.size}
-      onClick={() => dispatch('kc-select')}
+      onClick={() => dispatch('kai-select')}
     >
       <CheckpointIcon />
       <Show when={props.label}><span class="ml-1.5">{props.label}</span></Show>

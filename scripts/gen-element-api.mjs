@@ -31,7 +31,7 @@ const program = ts.createProgram([...facadeFiles, resolve(root, 'src/index.ts')]
 const checker = program.getTypeChecker();
 
 // Type names re-exported from the public entry (src/index.ts) are importable —
-// consumers can `import type { AttachmentData } from '@kitn.ai/chat'`.
+// consumers can `import type { AttachmentData } from '@kitn.ai/ui'`.
 const entrySf = program.getSourceFile(resolve(root, 'src/index.ts'));
 const entrySym = entrySf && checker.getSymbolAtLocation(entrySf);
 const exportedTypeNames = new Set(entrySym ? checker.getExportsOfModule(entrySym).map((s) => s.name) : []);
@@ -105,9 +105,9 @@ const composedImports = (sourceFile) => {
 // The few elements with element-specific tokens; everything else is themed by
 // the global token set (see the Theming → Token Reference story).
 const COMPONENT_TOKENS = {
-  'kc-tool': ['--color-tool-blue', '--color-tool-amber', '--color-tool-green', '--color-tool-red'],
-  'kc-code-block': ['--color-code-foreground'],
-  'kc-conversations': ['--color-sidebar', '--color-scrollbar-thumb'],
+  'kai-tool': ['--color-tool-blue', '--color-tool-amber', '--color-tool-green', '--color-tool-red'],
+  'kai-code-block': ['--color-code-foreground'],
+  'kai-conversations': ['--color-sidebar', '--color-scrollbar-thumb'],
 };
 
 // collect dispatch('name') literals per source file

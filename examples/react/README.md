@@ -1,13 +1,13 @@
-# kc-chat — React example
+# kai-chat — React example
 
-This example shows how to use the `@kitn.ai/chat` web components inside a
+This example shows how to use the `@kitn.ai/ui` web components inside a
 **React + Vite + TypeScript** application.
 
 ## What it demonstrates
 
 - **Registering custom elements** — a single side-effect import
-  (`import '@kitn.ai/chat/elements'`) registers `<kc-chat>`,
-  `<kc-conversations>`, and `<kc-prompt-input>` globally.
+  (`import '@kitn.ai/ui/elements'`) registers `<kai-chat>`,
+  `<kai-conversations>`, and `<kai-prompt-input>` globally.
 
 - **Setting properties via `ref` + `useEffect`** — React only sets *attributes*
   on custom elements. Objects like `messages` and `conversations` must be
@@ -24,7 +24,7 @@ This example shows how to use the `@kitn.ai/chat` web components inside a
   }, [messages, loading]);
 
   // In JSX:
-  <kc-chat ref={chatRef} />
+  <kai-chat ref={chatRef} />
   ```
 
 - **Listening for custom events** — `submit`, `messageaction`, `select`,
@@ -37,8 +37,8 @@ This example shows how to use the `@kitn.ai/chat` web components inside a
     const el = chatRef.current;
     if (!el) return;
     const onSubmit = (e: Event) => { /* handle (e as CustomEvent).detail */ };
-    el.addEventListener('kc-submit', onSubmit);
-    return () => el.removeEventListener('kc-submit', onSubmit);
+    el.addEventListener('kai-submit', onSubmit);
+    return () => el.removeEventListener('kai-submit', onSubmit);
   }, [activeId, allMessages]);
   ```
 

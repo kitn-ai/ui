@@ -8,7 +8,7 @@
  * live in ./renderers so the static Storybook docs can reuse them verbatim):
  *
  *   1. form  — interactive / data-collecting card.
- *              Mounts <kc-form>, forwards submit to the host via CardHost.emit.
+ *              Mounts <kai-form>, forwards submit to the host via CardHost.emit.
  *              Round-trip: host → render → user fills → submit → host receives data.
  *
  *   2. info  — display-rich / self-contained card.
@@ -17,7 +17,7 @@
  *              back to the host — proves the zero-round-trip pattern.
  *
  * Production providers:
- *   - Import from '@kitn.ai/chat/provider' (the published bundle) instead of the
+ *   - Import from '@kitn.ai/ui/provider' (the published bundle) instead of the
  *     src/ paths below.
  *   - Register only the card types relevant to their domain.
  *   - Harden the CSP (see index.html comments).

@@ -11,7 +11,7 @@ const focused: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!-- Outer shell: full-height flex column, rounded card for demo; in
@@ -24,47 +24,47 @@ const focused: StoryUsage = {
   </header>
 
   <!-- Scrollable message area -->
-  <kc-chat-container id="thread" class="relative flex-1 overflow-y-auto">
+  <kai-chat-container id="thread" class="relative flex-1 overflow-y-auto">
     <div class="space-y-6 px-5 py-6">
 
       <!-- User message: right-aligned pill bubble -->
-      <kc-message class="mx-auto flex w-full max-w-2xl flex-col items-end">
-        <kc-message-content
+      <kai-message class="mx-auto flex w-full max-w-2xl flex-col items-end">
+        <kai-message-content
           class="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5"
-        >Why is SolidJS reactivity fast?</kc-message-content>
-      </kc-message>
+        >Why is SolidJS reactivity fast?</kai-message-content>
+      </kai-message>
 
       <!-- Assistant message: left-aligned, markdown prose + hover actions -->
-      <kc-message class="mx-auto flex w-full max-w-2xl flex-col items-start">
+      <kai-message class="mx-auto flex w-full max-w-2xl flex-col items-start">
         <div class="group flex w-full flex-col">
-          <kc-message-content markdown class="bg-transparent p-0 text-foreground">
+          <kai-message-content markdown class="bg-transparent p-0 text-foreground">
             Signals are fine-grained — only the DOM nodes that read a signal update.
-          </kc-message-content>
-          <kc-message-actions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity group-hover:opacity-100">
+          </kai-message-content>
+          <kai-message-actions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity group-hover:opacity-100">
             <button aria-label="Copy message"><!-- icon --></button>
             <button aria-label="Good response"><!-- icon --></button>
-          </kc-message-actions>
+          </kai-message-actions>
         </div>
-      </kc-message>
+      </kai-message>
 
     </div>
-  </kc-chat-container>
+  </kai-chat-container>
 
   <!-- Composer: same max-width as messages, pinned to bottom -->
   <div class="shrink-0 px-5 pb-5">
     <div class="mx-auto max-w-2xl">
-      <kc-prompt-input id="composer">
-        <kc-prompt-input-textarea placeholder="Reply…"></kc-prompt-input-textarea>
-        <kc-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
+      <kai-prompt-input id="composer">
+        <kai-prompt-input-textarea placeholder="Reply…"></kai-prompt-input-textarea>
+        <kai-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
           <button aria-label="Send message"><!-- icon --></button>
-        </kc-prompt-input-actions>
-      </kc-prompt-input>
+        </kai-prompt-input-actions>
+      </kai-prompt-input>
     </div>
   </div>
 </div>
 
 <script type="module">
-  document.getElementById('composer').addEventListener('kc-submit', (e) => {
+  document.getElementById('composer').addEventListener('kai-submit', (e) => {
     console.log('send', e.detail.value);
   });
 </script>`,
@@ -75,7 +75,7 @@ import {
   Message, MessageContent, MessageActions,
   PromptInput, PromptInputTextarea, PromptInputActions,
   Button,
-} from '@kitn.ai/chat/react';
+} from '@kitn.ai/ui/react';
 
 /**
  * Centered Conversation — full-window single reading column.
@@ -141,7 +141,7 @@ export function CenteredConversation() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 const input = ref('');
@@ -166,51 +166,51 @@ function onSubmit(e) {
     </header>
 
     <!-- Scrollable thread -->
-    <kc-chat-container class="relative flex-1 overflow-y-auto">
+    <kai-chat-container class="relative flex-1 overflow-y-auto">
       <div class="space-y-6 px-5 py-6">
 
         <!-- User message — right-aligned bubble -->
-        <kc-message class="mx-auto flex w-full max-w-2xl flex-col items-end">
-          <kc-message-content class="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5">
+        <kai-message class="mx-auto flex w-full max-w-2xl flex-col items-end">
+          <kai-message-content class="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5">
             Why is SolidJS reactivity fast?
-          </kc-message-content>
-        </kc-message>
+          </kai-message-content>
+        </kai-message>
 
         <!-- Assistant message — left-aligned, markdown, hover actions -->
-        <kc-message class="mx-auto flex w-full max-w-2xl flex-col items-start">
+        <kai-message class="mx-auto flex w-full max-w-2xl flex-col items-start">
           <div class="group flex w-full flex-col">
-            <kc-message-content markdown class="bg-transparent p-0 text-foreground">
+            <kai-message-content markdown class="bg-transparent p-0 text-foreground">
               Signals are fine-grained — only the DOM nodes that read a signal update.
-            </kc-message-content>
-            <kc-message-actions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity group-hover:opacity-100">
+            </kai-message-content>
+            <kai-message-actions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity group-hover:opacity-100">
               <button aria-label="Copy"><!-- icon --></button>
-            </kc-message-actions>
+            </kai-message-actions>
           </div>
-        </kc-message>
+        </kai-message>
 
       </div>
-    </kc-chat-container>
+    </kai-chat-container>
 
     <!-- Composer — same max-width as messages -->
     <div class="shrink-0 px-5 pb-5">
       <div class="mx-auto max-w-2xl">
-        <kc-prompt-input
+        <kai-prompt-input
           :value="input"
-          @kc-value-change="input = $event.detail.value"
-          @kc-submit="onSubmit"
+          @kai-value-change="input = $event.detail.value"
+          @kai-submit="onSubmit"
         >
-          <kc-prompt-input-textarea placeholder="Reply…"></kc-prompt-input-textarea>
-          <kc-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
+          <kai-prompt-input-textarea placeholder="Reply…"></kai-prompt-input-textarea>
+          <kai-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
             <button :disabled="!input.trim()" aria-label="Send"><!-- icon --></button>
-          </kc-prompt-input-actions>
-        </kc-prompt-input>
+          </kai-prompt-input-actions>
+        </kai-prompt-input>
       </div>
     </div>
   </div>
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   let input = '';
 </script>
 
@@ -227,49 +227,49 @@ function onSubmit(e) {
   </header>
 
   <!-- Scrollable thread -->
-  <kc-chat-container class="relative flex-1 overflow-y-auto">
+  <kai-chat-container class="relative flex-1 overflow-y-auto">
     <div class="space-y-6 px-5 py-6">
 
       <!-- User message — right-aligned bubble -->
-      <kc-message class="mx-auto flex w-full max-w-2xl flex-col items-end">
-        <kc-message-content class="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5">
+      <kai-message class="mx-auto flex w-full max-w-2xl flex-col items-end">
+        <kai-message-content class="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5">
           Why is SolidJS reactivity fast?
-        </kc-message-content>
-      </kc-message>
+        </kai-message-content>
+      </kai-message>
 
       <!-- Assistant message — left-aligned, markdown, hover actions -->
-      <kc-message class="mx-auto flex w-full max-w-2xl flex-col items-start">
+      <kai-message class="mx-auto flex w-full max-w-2xl flex-col items-start">
         <div class="group flex w-full flex-col">
-          <kc-message-content markdown class="bg-transparent p-0 text-foreground">
+          <kai-message-content markdown class="bg-transparent p-0 text-foreground">
             Signals are fine-grained — only the DOM nodes that read a signal update.
-          </kc-message-content>
-          <kc-message-actions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity group-hover:opacity-100">
+          </kai-message-content>
+          <kai-message-actions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity group-hover:opacity-100">
             <button aria-label="Copy"><!-- icon --></button>
-          </kc-message-actions>
+          </kai-message-actions>
         </div>
-      </kc-message>
+      </kai-message>
 
     </div>
-  </kc-chat-container>
+  </kai-chat-container>
 
   <!-- Composer — same max-width as messages -->
   <div class="shrink-0 px-5 pb-5">
     <div class="mx-auto max-w-2xl">
-      <kc-prompt-input
+      <kai-prompt-input
         value={input}
-        on:kc-value-change={(e) => (input = e.detail.value)}
-        on:kc-submit={() => (input = '')}
+        on:kai-value-change={(e) => (input = e.detail.value)}
+        on:kai-submit={() => (input = '')}
       >
-        <kc-prompt-input-textarea placeholder="Reply…"></kc-prompt-input-textarea>
-        <kc-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
+        <kai-prompt-input-textarea placeholder="Reply…"></kai-prompt-input-textarea>
+        <kai-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
           <button disabled={!input.trim()} aria-label="Send"><!-- icon --></button>
-        </kc-prompt-input-actions>
-      </kc-prompt-input>
+        </kai-prompt-input-actions>
+      </kai-prompt-input>
     </div>
   </div>
 </div>`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -293,44 +293,44 @@ import { FormsModule } from '@angular/forms';
       </header>
 
       <!-- Scrollable thread -->
-      <kc-chat-container class="relative flex-1 overflow-y-auto">
+      <kai-chat-container class="relative flex-1 overflow-y-auto">
         <div class="space-y-6 px-5 py-6">
 
           <!-- User message — right-aligned bubble -->
-          <kc-message class="mx-auto flex w-full max-w-2xl flex-col items-end">
-            <kc-message-content class="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5">
+          <kai-message class="mx-auto flex w-full max-w-2xl flex-col items-end">
+            <kai-message-content class="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5">
               Why is SolidJS reactivity fast?
-            </kc-message-content>
-          </kc-message>
+            </kai-message-content>
+          </kai-message>
 
           <!-- Assistant message — left-aligned, markdown, hover actions -->
-          <kc-message class="mx-auto flex w-full max-w-2xl flex-col items-start">
+          <kai-message class="mx-auto flex w-full max-w-2xl flex-col items-start">
             <div class="group flex w-full flex-col">
-              <kc-message-content markdown class="bg-transparent p-0 text-foreground">
+              <kai-message-content markdown class="bg-transparent p-0 text-foreground">
                 Signals are fine-grained — only the DOM nodes that read a signal update.
-              </kc-message-content>
-              <kc-message-actions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity group-hover:opacity-100">
+              </kai-message-content>
+              <kai-message-actions class="-ml-2.5 flex gap-0 opacity-0 transition-opacity group-hover:opacity-100">
                 <button aria-label="Copy"><!-- icon --></button>
-              </kc-message-actions>
+              </kai-message-actions>
             </div>
-          </kc-message>
+          </kai-message>
 
         </div>
-      </kc-chat-container>
+      </kai-chat-container>
 
       <!-- Composer — same max-width as messages -->
       <div class="shrink-0 px-5 pb-5">
         <div class="mx-auto max-w-2xl">
-          <kc-prompt-input
+          <kai-prompt-input
             [value]="input"
-            (kc-value-change)="input = $event.detail.value"
-            (kc-submit)="input = ''"
+            (kai-value-change)="input = $event.detail.value"
+            (kai-submit)="input = ''"
           >
-            <kc-prompt-input-textarea placeholder="Reply…"></kc-prompt-input-textarea>
-            <kc-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
+            <kai-prompt-input-textarea placeholder="Reply…"></kai-prompt-input-textarea>
+            <kai-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
               <button [disabled]="!input.trim()" aria-label="Send"><!-- icon --></button>
-            </kc-prompt-input-actions>
-          </kc-prompt-input>
+            </kai-prompt-input-actions>
+          </kai-prompt-input>
         </div>
       </div>
     </div>
@@ -346,8 +346,8 @@ import {
   Message, MessageContent, MessageActions,
   PromptInput, PromptInputTextarea, PromptInputActions,
   ModelSwitcher, Button,
-} from '@kitn.ai/chat';
-import type { ModelOption } from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
+import type { ModelOption } from '@kitn.ai/ui';
 import { Copy, ThumbsUp, ArrowUp } from 'lucide-solid';
 
 const models: ModelOption[] = [

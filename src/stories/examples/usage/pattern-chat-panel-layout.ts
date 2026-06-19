@@ -10,7 +10,7 @@ const chatGptStyle: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!--
@@ -26,47 +26,47 @@ const chatGptStyle: StoryUsage = {
   </div>
 
   <!-- Scrollable thread -->
-  <kc-chat-container class="min-w-0 flex-1 space-y-4 px-4 py-3">
+  <kai-chat-container class="min-w-0 flex-1 space-y-4 px-4 py-3">
 
     <!-- Assistant message — avatar + transparent prose -->
-    <kc-message>
-      <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
+    <kai-message>
+      <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
       <div class="flex min-w-0 w-full flex-col">
-        <kc-message-content markdown class="bg-transparent p-0 pt-1.5">
+        <kai-message-content markdown class="bg-transparent p-0 pt-1.5">
           Hi there! How can I help?
-        </kc-message-content>
-        <kc-message-actions>
+        </kai-message-content>
+        <kai-message-actions>
           <button aria-label="Copy"><!-- icon --></button>
-        </kc-message-actions>
+        </kai-message-actions>
       </div>
-    </kc-message>
+    </kai-message>
 
     <!-- User message — right-aligned pill -->
-    <kc-message class="group flex-col items-end">
-      <kc-message-content class="bg-muted text-primary mr-1 max-w-[85%] rounded-xl px-4 py-2">
+    <kai-message class="group flex-col items-end">
+      <kai-message-content class="bg-muted text-primary mr-1 max-w-[85%] rounded-xl px-4 py-2">
         What is this about?
-      </kc-message-content>
-      <kc-message-actions class="opacity-0 transition-opacity group-hover:opacity-100">
+      </kai-message-content>
+      <kai-message-actions class="opacity-0 transition-opacity group-hover:opacity-100">
         <button aria-label="Copy"><!-- icon --></button>
-      </kc-message-actions>
-    </kc-message>
+      </kai-message-actions>
+    </kai-message>
 
-  </kc-chat-container>
+  </kai-chat-container>
 
   <!-- Composer footer -->
   <div class="flex-shrink-0 px-3 pb-3 pt-1">
-    <kc-prompt-input id="composer">
-      <kc-prompt-input-textarea placeholder="Ask about this page…"></kc-prompt-input-textarea>
-      <kc-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
+    <kai-prompt-input id="composer">
+      <kai-prompt-input-textarea placeholder="Ask about this page…"></kai-prompt-input-textarea>
+      <kai-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
         <button aria-label="Send"><!-- icon --></button>
-      </kc-prompt-input-actions>
-    </kc-prompt-input>
+      </kai-prompt-input-actions>
+    </kai-prompt-input>
   </div>
 
 </div>
 
 <script type="module">
-  document.getElementById('composer').addEventListener('kc-submit', (e) => {
+  document.getElementById('composer').addEventListener('kai-submit', (e) => {
     console.log('send', e.detail.value);
   });
 </script>`,
@@ -77,7 +77,7 @@ import {
   Message, MessageAvatar, MessageContent, MessageActions,
   PromptInput, PromptInputTextarea, PromptInputActions,
   Button,
-} from '@kitn.ai/chat/react';
+} from '@kitn.ai/ui/react';
 
 /**
  * Chat Panel Layout — compact vertical panel for embedding inside a page.
@@ -141,7 +141,7 @@ export function ChatPanel() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 const input = ref('');
@@ -167,52 +167,52 @@ function onSubmit(e) {
     </div>
 
     <!-- Scrollable thread -->
-    <kc-chat-container class="min-w-0 flex-1 space-y-4 px-4 py-3">
+    <kai-chat-container class="min-w-0 flex-1 space-y-4 px-4 py-3">
 
       <!-- Assistant message — avatar + transparent prose -->
-      <kc-message>
-        <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
+      <kai-message>
+        <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
         <div class="flex min-w-0 w-full flex-col">
-          <kc-message-content markdown class="bg-transparent p-0 pt-1.5">
+          <kai-message-content markdown class="bg-transparent p-0 pt-1.5">
             Hi there! How can I help?
-          </kc-message-content>
-          <kc-message-actions>
+          </kai-message-content>
+          <kai-message-actions>
             <button aria-label="Copy"><!-- icon --></button>
-          </kc-message-actions>
+          </kai-message-actions>
         </div>
-      </kc-message>
+      </kai-message>
 
       <!-- User message — right-aligned pill -->
-      <kc-message class="group flex-col items-end">
-        <kc-message-content class="bg-muted text-primary mr-1 max-w-[85%] rounded-xl px-4 py-2">
+      <kai-message class="group flex-col items-end">
+        <kai-message-content class="bg-muted text-primary mr-1 max-w-[85%] rounded-xl px-4 py-2">
           What is this about?
-        </kc-message-content>
-        <kc-message-actions class="opacity-0 transition-opacity group-hover:opacity-100">
+        </kai-message-content>
+        <kai-message-actions class="opacity-0 transition-opacity group-hover:opacity-100">
           <button aria-label="Copy"><!-- icon --></button>
-        </kc-message-actions>
-      </kc-message>
+        </kai-message-actions>
+      </kai-message>
 
-    </kc-chat-container>
+    </kai-chat-container>
 
     <!-- Composer footer -->
     <div class="flex-shrink-0 px-3 pb-3 pt-1">
-      <kc-prompt-input
+      <kai-prompt-input
         :value="input"
-        @kc-value-change="input = $event.detail.value"
-        @kc-submit="onSubmit"
+        @kai-value-change="input = $event.detail.value"
+        @kai-submit="onSubmit"
       >
-        <kc-prompt-input-textarea placeholder="Ask about this page…"></kc-prompt-input-textarea>
-        <kc-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
+        <kai-prompt-input-textarea placeholder="Ask about this page…"></kai-prompt-input-textarea>
+        <kai-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
           <button :disabled="!input.trim()" aria-label="Send"><!-- icon --></button>
-        </kc-prompt-input-actions>
-      </kc-prompt-input>
+        </kai-prompt-input-actions>
+      </kai-prompt-input>
     </div>
 
   </div>
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   let input = '';
 </script>
 
@@ -230,50 +230,50 @@ function onSubmit(e) {
   </div>
 
   <!-- Scrollable thread -->
-  <kc-chat-container class="min-w-0 flex-1 space-y-4 px-4 py-3">
+  <kai-chat-container class="min-w-0 flex-1 space-y-4 px-4 py-3">
 
     <!-- Assistant message — avatar + transparent prose -->
-    <kc-message>
-      <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
+    <kai-message>
+      <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
       <div class="flex min-w-0 w-full flex-col">
-        <kc-message-content markdown class="bg-transparent p-0 pt-1.5">
+        <kai-message-content markdown class="bg-transparent p-0 pt-1.5">
           Hi there! How can I help?
-        </kc-message-content>
-        <kc-message-actions>
+        </kai-message-content>
+        <kai-message-actions>
           <button aria-label="Copy"><!-- icon --></button>
-        </kc-message-actions>
+        </kai-message-actions>
       </div>
-    </kc-message>
+    </kai-message>
 
     <!-- User message — right-aligned pill -->
-    <kc-message class="group flex-col items-end">
-      <kc-message-content class="bg-muted text-primary mr-1 max-w-[85%] rounded-xl px-4 py-2">
+    <kai-message class="group flex-col items-end">
+      <kai-message-content class="bg-muted text-primary mr-1 max-w-[85%] rounded-xl px-4 py-2">
         What is this about?
-      </kc-message-content>
-      <kc-message-actions class="opacity-0 transition-opacity group-hover:opacity-100">
+      </kai-message-content>
+      <kai-message-actions class="opacity-0 transition-opacity group-hover:opacity-100">
         <button aria-label="Copy"><!-- icon --></button>
-      </kc-message-actions>
-    </kc-message>
+      </kai-message-actions>
+    </kai-message>
 
-  </kc-chat-container>
+  </kai-chat-container>
 
   <!-- Composer footer -->
   <div class="flex-shrink-0 px-3 pb-3 pt-1">
-    <kc-prompt-input
+    <kai-prompt-input
       value={input}
-      on:kc-value-change={(e) => (input = e.detail.value)}
-      on:kc-submit={() => (input = '')}
+      on:kai-value-change={(e) => (input = e.detail.value)}
+      on:kai-submit={() => (input = '')}
     >
-      <kc-prompt-input-textarea placeholder="Ask about this page…"></kc-prompt-input-textarea>
-      <kc-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
+      <kai-prompt-input-textarea placeholder="Ask about this page…"></kai-prompt-input-textarea>
+      <kai-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
         <button disabled={!input.trim()} aria-label="Send"><!-- icon --></button>
-      </kc-prompt-input-actions>
-    </kc-prompt-input>
+      </kai-prompt-input-actions>
+    </kai-prompt-input>
   </div>
 
 </div>`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -297,45 +297,45 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
       </div>
 
       <!-- Scrollable thread -->
-      <kc-chat-container class="min-w-0 flex-1 space-y-4 px-4 py-3">
+      <kai-chat-container class="min-w-0 flex-1 space-y-4 px-4 py-3">
 
         <!-- Assistant message — avatar + transparent prose -->
-        <kc-message>
-          <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
+        <kai-message>
+          <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
           <div class="flex min-w-0 w-full flex-col">
-            <kc-message-content markdown class="bg-transparent p-0 pt-1.5">
+            <kai-message-content markdown class="bg-transparent p-0 pt-1.5">
               Hi there! How can I help?
-            </kc-message-content>
-            <kc-message-actions>
+            </kai-message-content>
+            <kai-message-actions>
               <button aria-label="Copy"><!-- icon --></button>
-            </kc-message-actions>
+            </kai-message-actions>
           </div>
-        </kc-message>
+        </kai-message>
 
         <!-- User message — right-aligned pill -->
-        <kc-message class="group flex-col items-end">
-          <kc-message-content class="bg-muted text-primary mr-1 max-w-[85%] rounded-xl px-4 py-2">
+        <kai-message class="group flex-col items-end">
+          <kai-message-content class="bg-muted text-primary mr-1 max-w-[85%] rounded-xl px-4 py-2">
             What is this about?
-          </kc-message-content>
-          <kc-message-actions class="opacity-0 transition-opacity group-hover:opacity-100">
+          </kai-message-content>
+          <kai-message-actions class="opacity-0 transition-opacity group-hover:opacity-100">
             <button aria-label="Copy"><!-- icon --></button>
-          </kc-message-actions>
-        </kc-message>
+          </kai-message-actions>
+        </kai-message>
 
-      </kc-chat-container>
+      </kai-chat-container>
 
       <!-- Composer footer -->
       <div class="flex-shrink-0 px-3 pb-3 pt-1">
-        <kc-prompt-input
+        <kai-prompt-input
           [value]="input"
-          (kc-value-change)="input = $event.detail.value"
-          (kc-submit)="input = ''"
+          (kai-value-change)="input = $event.detail.value"
+          (kai-submit)="input = ''"
         >
-          <kc-prompt-input-textarea placeholder="Ask about this page…"></kc-prompt-input-textarea>
-          <kc-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
+          <kai-prompt-input-textarea placeholder="Ask about this page…"></kai-prompt-input-textarea>
+          <kai-prompt-input-actions class="mt-2 flex w-full items-center justify-end gap-2 px-3 pb-3">
             <button [disabled]="!input.trim()" aria-label="Send"><!-- icon --></button>
-          </kc-prompt-input-actions>
-        </kc-prompt-input>
+          </kai-prompt-input-actions>
+        </kai-prompt-input>
       </div>
 
     </div>
@@ -351,7 +351,7 @@ import {
   Message, MessageAvatar, MessageContent, MessageActions,
   PromptInput, PromptInputTextarea, PromptInputActions,
   ScrollButton, Button,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 import { Copy, ArrowUp } from 'lucide-solid';
 
 /**

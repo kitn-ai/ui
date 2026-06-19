@@ -9,7 +9,7 @@
  * Demonstrates BOTH canonical card interaction patterns:
  *
  *   1. form  — interactive / data-collecting card.
- *              Mounts <kc-form>, forwards submit to the host via CardHost.emit.
+ *              Mounts <kai-form>, forwards submit to the host via CardHost.emit.
  *              Round-trip: host → render → user fills → submit → host receives data.
  *
  *   2. info  — display-rich / self-contained card.
@@ -20,19 +20,19 @@
 
 import type { RemoteCardRenderer } from '../../src/remote/provider';
 
-// Register the <kc-form> custom element (side-effect import).
+// Register the <kai-form> custom element (side-effect import).
 import '../../src/elements/form';
 
 // ── Renderer 1: form — interactive, data-collecting ───────────────────────────
 //
-// Pattern: mount <kc-form>, set its .data from the envelope, listen for the
-// bubbling `kc-card` CustomEvent for kind='submit', forward to host.
+// Pattern: mount <kai-form>, set its .data from the envelope, listen for the
+// bubbling `kai-card` CustomEvent for kind='submit', forward to host.
 // The host can use the submitted data to advance the conversation.
 export const formRenderer: RemoteCardRenderer = {
   type: 'form',
 
   mount(root, envelope, host) {
-    const form = document.createElement('kc-form') as HTMLElement & {
+    const form = document.createElement('kai-form') as HTMLElement & {
       data: unknown;
       cardId: string;
       heading: string;
@@ -51,9 +51,9 @@ export const formRenderer: RemoteCardRenderer = {
     // this card (dispose+remount), so this runs again with the new theme.
     form.setAttribute('theme', host.context().theme?.mode === 'dark' ? 'dark' : 'light');
 
-    // The <kc-form> element emits a bubbling CustomEvent named 'kc-card' when the
+    // The <kai-form> element emits a bubbling CustomEvent named 'kai-card' when the
     // user submits the form. The event detail is a CardEvent { kind, cardId, data }.
-    function onKcCard(e: Event) {
+    function onKaiCard(e: Event) {
       const ev = e as CustomEvent<{ kind: string; cardId: string; data?: unknown }>;
       const detail = ev.detail;
       if (!detail || detail.kind !== 'submit') return;
@@ -61,12 +61,12 @@ export const formRenderer: RemoteCardRenderer = {
       host.emit({ kind: 'submit', cardId: envelope.id, data: detail.data });
     }
 
-    root.addEventListener('kc-card', onKcCard);
+    root.addEventListener('kai-card', onKaiCard);
     root.appendChild(form);
 
     // Return a disposer — called by the bridge before rendering a new card.
     return () => {
-      root.removeEventListener('kc-card', onKcCard);
+      root.removeEventListener('kai-card', onKaiCard);
       form.remove();
     };
   },

@@ -69,7 +69,7 @@ export function normalizeTasks(tasks: unknown): { tasks: TasksTask[]; error?: st
     if (typeof task.label !== 'string' || task.label.length === 0) continue;
     if (seen.has(task.id)) {
       // eslint-disable-next-line no-console
-      console.warn(`[kc-tasks] duplicate task id "${task.id}" ignored`);
+      console.warn(`[kai-tasks] duplicate task id "${task.id}" ignored`);
       continue;
     }
     seen.add(task.id);
@@ -155,9 +155,9 @@ export interface TasksCardProps {
   /** The envelope title rendered in the card chrome. */
   heading?: string;
   /** Optional explicit CardHost (otherwise read from a CardProvider, otherwise the
-   *  bubbling `kc-card` CustomEvent off `hostElement`). */
+   *  bubbling `kai-card` CustomEvent off `hostElement`). */
   host?: CardHost;
-  /** The custom-element host node, for the bubbling `kc-card` fallback emit. */
+  /** The custom-element host node, for the bubbling `kai-card` fallback emit. */
   hostElement?: HTMLElement;
   class?: string;
   /** When set, render the chromed read-only summary instead of the interactive controls. */
@@ -174,7 +174,7 @@ const DEFAULT_DATA: TasksCardData = { tasks: [] };
  * input order. Emits `ready` on mount and `error` for an unusable definition.
  */
 export function TasksCard(props: TasksCardProps): JSX.Element {
-  const merged = mergeProps({ cardId: 'kc-tasks' }, props);
+  const merged = mergeProps({ cardId: 'kai-tasks' }, props);
   const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution']);
 
   const ctxHost = useCardHost();
@@ -255,8 +255,8 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
   createEffect(() => {
     const el = local.hostElement;
     if (!el) return;
-    if (res.isResolved()) el.setAttribute('data-kc-resolved', 'submitted');
-    else el.removeAttribute('data-kc-resolved');
+    if (res.isResolved()) el.setAttribute('data-kai-resolved', 'submitted');
+    else el.removeAttribute('data-kai-resolved');
   });
 
   const resolvedSummary = createMemo(() => {
@@ -269,8 +269,8 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
     return { count: chosen.length, total: all.length, labels: chosen };
   });
 
-  const reasonId = `kc-tl-reason-${uid}`;
-  const countId = `kc-tl-count-${uid}`;
+  const reasonId = `kai-tl-reason-${uid}`;
+  const countId = `kai-tl-count-${uid}`;
 
   return (
     <Show when={valid()} fallback={<Card heading={local.heading} errorMessage={errorMessage()} />}>
@@ -338,7 +338,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                       >
                         <input
                           type="checkbox"
-                          class="kc-checkbox"
+                          class="kai-checkbox"
                           checked={masterState() === 'checked'}
                           aria-checked={indeterminate() ? 'mixed' : masterState() === 'checked'}
                           ref={(el) => {
@@ -359,7 +359,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                     const checked = () => selected().has(task.id);
                     const blocked = () =>
                       task.disabled || (!checked() && isMaxReached(data(), count()));
-                    const descId = `kc-tl-desc-${uid}-${task.id}`;
+                    const descId = `kai-tl-desc-${uid}-${task.id}`;
                     return (
                       <label
                         class={cn(
@@ -375,7 +375,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                       >
                         <input
                           type="checkbox"
-                          class="kc-checkbox mt-0.5"
+                          class="kai-checkbox mt-0.5"
                           checked={checked()}
                           disabled={blocked()}
                           aria-disabled={blocked() ? 'true' : undefined}

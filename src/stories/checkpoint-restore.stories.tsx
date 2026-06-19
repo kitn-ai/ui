@@ -16,13 +16,13 @@ const meta: Meta = {
     docs: {
       description: {
         component: [
-          'Mark named restore points in a conversation. `<kc-checkpoint>` (or the SolidJS `Checkpoint` primitive) renders a bookmark button that fires `kc-select` (no detail payload) when clicked.',
+          'Mark named restore points in a conversation. `<kai-checkpoint>` (or the SolidJS `Checkpoint` primitive) renders a bookmark button that fires `kai-select` (no detail payload) when clicked.',
           '',
-          '**"Restoring" is your responsibility — the element just emits an event.** When `kc-select` fires, slice your message array back to the messages that existed at that checkpoint. The element has no internal state management.',
+          '**"Restoring" is your responsibility — the element just emits an event.** When `kai-select` fires, slice your message array back to the messages that existed at that checkpoint. The element has no internal state management.',
           '',
           '**Where checkpoints come from:** create a checkpoint entry in your message list after each AI response you want to mark as a save point. The `label` / `tooltip` props are plain strings passed to the element.',
           '',
-          '**`<kc-checkpoint>` WC props:** `label` (optional visible text), `tooltip` (hover text), `variant` (`ghost` | `default` | `outline`, default `ghost`), `size` (`sm` | `md` | `lg` | `icon` | `icon-sm`, default `sm`). The icon is always the built-in `CheckpointIcon` — there is no `icon` prop on the WC (planned gap in the capability-gaps spec).',
+          '**`<kai-checkpoint>` WC props:** `label` (optional visible text), `tooltip` (hover text), `variant` (`ghost` | `default` | `outline`, default `ghost`), `size` (`sm` | `md` | `lg` | `icon` | `icon-sm`, default `sm`). The icon is always the built-in `CheckpointIcon` — there is no `icon` prop on the WC (planned gap in the capability-gaps spec).',
           '',
           '**Custom icon in the trigger:** compose the SolidJS `Checkpoint` + `CheckpointIcon` + `CheckpointTrigger` primitives. The demo places a `<RotateCcw>` icon inside `CheckpointTrigger` — that works because `CheckpointTrigger` accepts arbitrary children.',
         ].join('\n'),
@@ -42,9 +42,9 @@ export const Default: Story = {
         story: [
           'Three-exchange API design session with two checkpoints. Clicking a checkpoint updates the header label — in a real app you would also slice your message array back to the messages that existed at that point.',
           '',
-          '**`kc-select` carries no detail payload** — you identify which checkpoint was clicked by which handler you wired up, not from the event itself. Confirmed in `src/elements/checkpoint.tsx`.',
+          '**`kai-select` carries no detail payload** — you identify which checkpoint was clicked by which handler you wired up, not from the event itself. Confirmed in `src/elements/checkpoint.tsx`.',
           '',
-          '**The `<RotateCcw>` icon in the trigger is a SolidJS-only touch** — the `<kc-checkpoint>` WC always uses the built-in `CheckpointIcon` (no `icon` prop). Compose `CheckpointTrigger` with custom children only when using the SolidJS primitives.',
+          '**The `<RotateCcw>` icon in the trigger is a SolidJS-only touch** — the `<kai-checkpoint>` WC always uses the built-in `CheckpointIcon` (no `icon` prop). Compose `CheckpointTrigger` with custom children only when using the SolidJS primitives.',
         ].join('\n'),
       },
     },

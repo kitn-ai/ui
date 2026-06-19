@@ -1,7 +1,7 @@
-/** Reasoning assistant demo — mounts a single <kc-chat> seeded with a
+/** Reasoning assistant demo — mounts a single <kai-chat> seeded with a
  *  multi-turn debugging dialogue. Every assistant turn carries a `reasoning`
  *  object (collapsible "thought" block) plus the final `content`. On
- *  kc-submit the reply streams word-by-word, then a short reasoning block is
+ *  kai-submit the reply streams word-by-word, then a short reasoning block is
  *  attached once streaming finishes. Arrays are set as JS PROPERTIES on the
  *  host (never attributes); messages are reassigned to a new array each tick. */
 import { createSignal, onMount, onCleanup } from 'solid-js';
@@ -137,7 +137,7 @@ export default function ReasoningAssistantDemo(props: Props) {
     if (props.chatTitle) (host as any).chatTitle = props.chatTitle;
     if (props.placeholder) (host as any).placeholder = props.placeholder;
     host.setAttribute('theme', theme());
-    host.addEventListener('kc-submit', onSubmit);
+    host.addEventListener('kai-submit', onSubmit);
 
     setReady(true);
 
@@ -148,7 +148,7 @@ export default function ReasoningAssistantDemo(props: Props) {
 
     onCleanup(() => {
       clearTimeout(timer);
-      host?.removeEventListener('kc-submit', onSubmit);
+      host?.removeEventListener('kai-submit', onSubmit);
       obs.disconnect();
     });
   });
@@ -159,7 +159,7 @@ export default function ReasoningAssistantDemo(props: Props) {
       style={{ height: props.height ?? '640px', display: 'flex', 'flex-direction': 'column' }}
     >
       {/* @ts-expect-error custom element */}
-      <kc-chat
+      <kai-chat
         ref={(el: HTMLElement) => (host = el as any)}
         style={{ display: 'block', flex: '1', 'min-height': '0' }}
       />

@@ -4,22 +4,22 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Solid
 
-The kit is **authored in SolidJS** — the `<kc-*>` web components are compiled from these very
+The kit is **authored in SolidJS** — the `<kai-*>` web components are compiled from these very
 components. So Solid devs get the richest path of any framework, with **two ways to build** that
 you can freely mix:
 
-1. **Native SolidJS components** (`@kitn.ai/chat`) — `ChatContainer`, `Message`, `PromptInput`, and
+1. **Native SolidJS components** (`@kitn.ai/ui`) — `ChatContainer`, `Message`, `PromptInput`, and
    the rest, composed in your own JSX. Full compositional control and the smallest output for a
    Solid app. **This is the recommended Solid path.**
-2. The same framework-agnostic **`<kc-*>` web components** (`@kitn.ai/chat/elements`) — the
-   drop-in shells (`<kc-chat>`, …) when you just want batteries included.
+2. The same framework-agnostic **`<kai-*>` web components** (`@kitn.ai/ui/elements`) — the
+   drop-in shells (`<kai-chat>`, …) when you just want batteries included.
 
 Both work in the same app; reach for whichever fits the surface you're building.
 
 ## Install & setup
 
 ```bash
-npm i @kitn.ai/chat
+npm i @kitn.ai/ui
 ```
 
 `solid-js` is a peer dependency — install it if you haven't already:
@@ -31,10 +31,10 @@ npm i solid-js
 Import the design tokens **once**, near your app entry:
 
 ```ts
-import '@kitn.ai/chat/theme.css';
+import '@kitn.ai/ui/theme.css';
 ```
 
-The `@kitn.ai/chat` entry ships as **source** (TSX), so your bundler compiles and tree-shakes it
+The `@kitn.ai/ui` entry ships as **source** (TSX), so your bundler compiles and tree-shakes it
 alongside your own Solid code — you only pay for what you import.
 
 ## Quick start — native components
@@ -48,8 +48,8 @@ import {
   ChatConfig, ChatContainer, ChatContainerContent,
   Message, MessageContent,
   PromptInput, PromptInputTextarea, PromptInputActions,
-} from '@kitn.ai/chat';
-import '@kitn.ai/chat/theme.css';
+} from '@kitn.ai/ui';
+import '@kitn.ai/ui/theme.css';
 import { createSignal } from 'solid-js';
 
 function Chat() {
@@ -96,7 +96,7 @@ per pane (handles are auto-inserted between visible panels). Each panel takes `d
 persist the layout.
 
 ```tsx
-import { Resizable, ResizablePanel } from '@kitn.ai/chat';
+import { Resizable, ResizablePanel } from '@kitn.ai/ui';
 
 function Workspace() {
   return (
@@ -120,12 +120,12 @@ function Workspace() {
 
 ### Prefer the drop-in shell? Use the web component
 
-When you just want a whole chat in one tag, register the `<kc-*>` elements and use `<kc-chat>`.
+When you just want a whole chat in one tag, register the `<kai-*>` elements and use `<kai-chat>`.
 Solid sets rich data as DOM **properties** on custom elements (so arrays/objects pass through
 without stringifying), and you listen for CustomEvents with Solid's `on:` namespace:
 
 ```tsx
-import '@kitn.ai/chat/elements'; // registers the <kc-*> elements once
+import '@kitn.ai/ui/elements'; // registers the <kai-*> elements once
 import { createSignal } from 'solid-js';
 
 function Shell() {
@@ -143,10 +143,10 @@ function Shell() {
 
   return (
     <div class="flex flex-col h-full">
-      <kc-chat
+      <kai-chat
         // `prop:` forces a property assignment (not an attribute) for rich data.
         prop:messages={messages()}
-        on:kc-submit={onSubmit}
+        on:kai-submit={onSubmit}
         style={{ flex: 1, 'min-height': 0 }}
       />
     </div>
@@ -154,7 +154,7 @@ function Shell() {
 }
 ```
 
-For a resizable web-component layout, use `<kc-resizable>` the same way (set properties, listen
+For a resizable web-component layout, use `<kai-resizable>` the same way (set properties, listen
 with `on:`) — though in a Solid app the native `Resizable` above gives you tighter control.
 
 > **See it all assembled:** **[Examples → Full Chat App](?path=/story/examples-full-chat-app--default)**
@@ -163,11 +163,11 @@ with `on:`) — though in a Solid app the native `Resizable` above gives you tig
 
 ## When to use which
 
-- **Native components** (`@kitn.ai/chat`) — full compositional control and the **smallest output**
+- **Native components** (`@kitn.ai/ui`) — full compositional control and the **smallest output**
   for a Solid app, since they compile and tree-shake with your own code. The recommended path when
   you're building in Solid.
-- **Web components** (`@kitn.ai/chat/elements`) — the **fastest drop-in** and fully
-  framework-agnostic. Reach for `<kc-chat>` (or any `<kc-*>` shell) when you want batteries included
+- **Web components** (`@kitn.ai/ui/elements`) — the **fastest drop-in** and fully
+  framework-agnostic. Reach for `<kai-chat>` (or any `<kai-*>` shell) when you want batteries included
   or you're sharing UI across frameworks.
 
-Mix freely: a native composed thread on one screen, a drop-in `<kc-chat>` on another.
+Mix freely: a native composed thread on one screen, a drop-in `<kai-chat>` on another.

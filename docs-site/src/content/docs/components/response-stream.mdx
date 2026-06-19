@@ -12,15 +12,15 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-response-stream</p>
+<p class="kai-tag-sub">kai-response-stream</p>
 
-<p class="kc-lede">Animates text into view — character by character or segment by segment — for live-streamed assistant replies, accepting a plain string or an `AsyncIterable<string>`.</p>
+<p class="kai-lede">Animates text into view — character by character or segment by segment — for live-streamed assistant replies, accepting a plain string or an `AsyncIterable<string>`.</p>
 
-<Facts items={['Shadow DOM', '2 animation modes', 'Accepts AsyncIterable', 'Tunable speed', 'Fires kc-complete']} />
+<Facts items={['Shadow DOM', '2 animation modes', 'Accepts AsyncIterable', 'Tunable speed', 'Fires kai-complete']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-response-stream" />
+<Playground client:only="solid" tag="kai-response-stream" />
 
 <Aside type="tip" title="When to use">
 `typewriter` (default) suits most chat UIs; `fade` works better for longer document-style answers. In SolidJS, use the `ResponseStream` primitive directly for finer control.
@@ -31,13 +31,13 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 Set `text` in JavaScript (async iterables can't be serialized to an HTML attribute). Tune `mode` and `speed` as plain attributes.
 
 ```html
-<kc-response-stream id="stream" mode="typewriter" speed="20"></kc-response-stream>
+<kai-response-stream id="stream" mode="typewriter" speed="20"></kai-response-stream>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const el = document.getElementById('stream');
   el.text = "Hello, this reveals one character at a time…";
-  el.addEventListener('kc-complete', () => console.log('done'));
+  el.addEventListener('kai-complete', () => console.log('done'));
 </script>
 ```
 
@@ -50,30 +50,30 @@ Set `text` in JavaScript (async iterables can't be serialized to an HTML attribu
 
 ### Typewriter Mode
 
-<Example client:visible tag="kc-response-stream" config={{ mode: 'typewriter', speed: '20' }} />
+<Example client:visible tag="kai-response-stream" config={{ mode: 'typewriter', speed: '20' }} />
 
 ### Fade Mode
 
 `mode="fade"` fades the response in segment by segment — softer for longer, document-style answers.
 
-<Example client:visible tag="kc-response-stream" config={{ mode: 'fade' }} data="fade" />
+<Example client:visible tag="kai-response-stream" config={{ mode: 'fade' }} data="fade" />
 
 ### Realistic Assistant Reply
 
 A longer message showing multi-sentence pacing. Lower `speed` for a deliberate reveal; higher to get users to the answer faster.
 
-<Example client:visible tag="kc-response-stream" config={{ mode: 'typewriter', speed: '30' }} data="assistantReply" />
+<Example client:visible tag="kai-response-stream" config={{ mode: 'typewriter', speed: '30' }} data="assistantReply" />
 
 ## Props
 
-<PropTable tag="kc-response-stream" />
+<PropTable tag="kai-response-stream" />
 
 ## Events
 
-<EventTable tag="kc-response-stream" />
+<EventTable tag="kai-response-stream" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-response-stream" />
+<ComposedFrom tag="kai-response-stream" />
 
 <NeedAHand />

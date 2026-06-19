@@ -12,18 +12,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-file-tree</p>
+<p class="kai-tag-sub">kai-file-tree</p>
 
-<p class="kc-lede">Pass a flat array of paths and get a collapsible, keyboard-navigable file explorer — folders are derived from the slashes automatically, no tree to build by hand.</p>
+<p class="kai-lede">Pass a flat array of paths and get a collapsible, keyboard-navigable file explorer — folders are derived from the slashes automatically, no tree to build by hand.</p>
 
 <Facts items={['Shadow DOM', 'ARIA tree / treeitem', '1 event', 'Derived folder structure', 'Fills its container']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-file-tree" />
+<Playground client:only="solid" tag="kai-file-tree" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-file-tree>` for a sidebar-style file explorer — inside `<kc-artifact>`'s Code tab, a `<kc-resizable>` panel, or any file-picker surface. It fills its container, so give the parent an explicit height (e.g. `height: 320px`).
+Reach for `<kai-file-tree>` for a sidebar-style file explorer — inside `<kai-artifact>`'s Code tab, a `<kai-resizable>` panel, or any file-picker surface. It fills its container, so give the parent an explicit height (e.g. `height: 320px`).
 </Aside>
 
 ## Usage
@@ -31,10 +31,10 @@ Reach for `<kc-file-tree>` for a sidebar-style file explorer — inside `<kc-art
 Set `files` in JavaScript (it's an array, so it can't be an attribute):
 
 ```html
-<kc-file-tree style="display:block;height:320px"></kc-file-tree>
+<kai-file-tree style="display:block;height:320px"></kai-file-tree>
 <script type="module">
-  import '@kitn.ai/chat/elements';
-  const tree = document.querySelector('kc-file-tree');
+  import '@kitn.ai/ui/elements';
+  const tree = document.querySelector('kai-file-tree');
   tree.files = [
     { path: 'index.html', type: 'html' },
     { path: 'src/app.ts', type: 'other' },
@@ -42,12 +42,12 @@ Set `files` in JavaScript (it's an array, so it can't be an attribute):
     { path: 'assets/logo.svg', type: 'image' },
   ];
   tree.setAttribute('active-file', 'src/app.ts');
-  tree.addEventListener('kc-select', (e) => console.log('selected', e.detail.path));
+  tree.addEventListener('kai-select', (e) => console.log('selected', e.detail.path));
 </script>
 ```
 
 - **Folders are derived** — any `/` in a path creates intermediate folder nodes; no explicit folder entries needed.
-- **`active-file`** — plain attribute; update it in response to `kc-select` to keep selection in sync.
+- **`active-file`** — plain attribute; update it in response to `kai-select` to keep selection in sync.
 - **`defaultExpanded`** — assign it in JavaScript (`el.defaultExpanded = ['src']`). Omit to start all folders open; pass an array to restrict which start expanded.
 - **Keyboard** — proper ARIA `tree`: arrow keys move focus, Enter/Space selects or toggles, Home/End jump to first/last row.
 
@@ -57,36 +57,36 @@ Set `files` in JavaScript (it's an array, so it can't be an attribute):
 
 A mixed project with HTML, TypeScript, CSS, images, and a PDF. `src/app.ts` starts highlighted via `active-file`.
 
-<Example client:visible tag="kc-file-tree" />
+<Example client:visible tag="kai-file-tree" />
 
 ### Deeply Nested Layout
 
 Multiple levels of nesting across `src/components`, `src/hooks`, and `docs`.
 
-<Example client:visible tag="kc-file-tree" data="nested" />
+<Example client:visible tag="kai-file-tree" data="nested" />
 
 ### Mixed File Types
 
 A design system asset bundle covering SVG images, PDFs, HTML preview, JSON tokens, and CSS.
 
-<Example client:visible tag="kc-file-tree" data="mixedTypes" />
+<Example client:visible tag="kai-file-tree" data="mixedTypes" />
 
 ### Controlled Expansion
 
 Only `src` starts open — `tests`, `src/routes`, and `src/middleware` start collapsed.
 
-<Example client:visible tag="kc-file-tree" data="collapsed" />
+<Example client:visible tag="kai-file-tree" data="collapsed" />
 
 ## Props
 
-<PropTable tag="kc-file-tree" />
+<PropTable tag="kai-file-tree" />
 
 ## Events
 
-<EventTable tag="kc-file-tree" />
+<EventTable tag="kai-file-tree" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-file-tree" />
+<ComposedFrom tag="kai-file-tree" />
 
 <NeedAHand />

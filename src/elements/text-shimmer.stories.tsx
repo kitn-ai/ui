@@ -7,7 +7,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-text-shimmer': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-text-shimmer': JSX.HTMLAttributes<HTMLElement> & {
         text?: string;
         duration?: number;
         spread?: number;
@@ -17,24 +17,24 @@ declare module 'solid-js' {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-text-shimmer text="Thinking…" duration="3" spread="20"></kc-text-shimmer>
+<kai-text-shimmer text="Thinking…" duration="3" spread="20"></kai-text-shimmer>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 </script>`;
 
 const meta = {
   title: 'Components/TextShimmer',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-text-shimmer'),
+  argTypes: argTypesFor('kai-text-shimmer'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kc-text-shimmer', [
-          '`<kc-text-shimmer>` is the framework-agnostic **web component** for animated shimmering text — a gradient sweep across a label, isolated in **Shadow DOM**.',
+      description: specDescription('kai-text-shimmer', [
+          '`<kai-text-shimmer>` is the framework-agnostic **web component** for animated shimmering text — a gradient sweep across a label, isolated in **Shadow DOM**.',
           '**When to use:** signalling a quiet, in-progress state ("Thinking…", "Generating…") inline. In SolidJS, use the `TextShimmer` primitive.',
           '**Placement:** inline within a status row, toolbar label, or above a streaming content area — it renders as an inline `span` so it flows naturally alongside other text or icons.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `text` attribute, and tune `duration` (seconds) and `spread` (gradient width, 5–45).",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the `text` attribute, and tune `duration` (seconds) and `spread` (gradient width, 5–45).",
           'See the **Code** tab for HTML usage.',
         ]),
     },
@@ -48,7 +48,7 @@ type Story = StoryObj;
 export const Default: Story = {
   render: () => (
     <div style={{ padding: '24px', 'font-size': '18px' }}>
-      <kc-text-shimmer text="Thinking…" />
+      <kai-text-shimmer text="Thinking…" />
     </div>
   ),
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
@@ -58,7 +58,7 @@ export const Default: Story = {
 export const Tuned: Story = {
   render: () => (
     <div style={{ padding: '24px', 'font-size': '18px' }}>
-      <kc-text-shimmer text="Generating response…" duration={2} spread={35} />
+      <kai-text-shimmer text="Generating response…" duration={2} spread={35} />
     </div>
   ),
 };

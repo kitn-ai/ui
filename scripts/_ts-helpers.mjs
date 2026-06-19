@@ -9,10 +9,10 @@
 import ts from 'typescript';
 
 // Friendly element name shared by the React/Solid wrappers, story titles, and the
-// API tab. KcArtifactElement -> Artifact. All element tags start `kc-`, so the
-// className always starts `Kc`.
+// API tab. KaiArtifactElement -> Artifact. All element tags start `kai-`, so the
+// className always starts `Kai`.
 export const displayNameFromClass = (className) =>
-  className.replace(/^Kc/, '').replace(/Element$/, '');
+  className.replace(/^Kai/, '').replace(/Element$/, '');
 
 export function createTsHelpers(program, checker, { importable = new Set() } = {}) {
   const isScalar = (t) => {

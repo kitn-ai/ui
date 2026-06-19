@@ -12,29 +12,29 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-message</p>
+<p class="kai-tag-sub">kai-message</p>
 
-<p class="kc-lede">One element, one object — render a complete message row with markdown, reasoning, tool calls, attachments, and action buttons. The keystone of any custom message list.</p>
+<p class="kai-lede">One element, one object — render a complete message row with markdown, reasoning, tool calls, attachments, and action buttons. The keystone of any custom message list.</p>
 
 <Facts items={['Shadow DOM', '1 event', 'User + assistant roles', 'Avatar support', 'Custom actions']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-message" />
+<Playground client:only="solid" tag="kai-message" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-message>` when building your own thread — a custom layout, a non-Solid app, or anywhere you iterate the message list yourself. For a full chat surface in one tag, use `<kc-chat>`. In SolidJS, compose the `Message`, `MessageContent`, and `MessageActionBar` primitives directly for finer control.
+Reach for `<kai-message>` when building your own thread — a custom layout, a non-Solid app, or anywhere you iterate the message list yourself. For a full chat surface in one tag, use `<kai-chat>`. In SolidJS, compose the `Message`, `MessageContent`, and `MessageActionBar` primitives directly for finer control.
 </Aside>
 
 ## Usage
 
-Set `message` in JavaScript (objects can't be HTML attributes) and listen for `kc-message-action`:
+Set `message` in JavaScript (objects can't be HTML attributes) and listen for `kai-message-action`:
 
 ```html
-<kc-message id="msg" style="display:block;"></kc-message>
+<kai-message id="msg" style="display:block;"></kai-message>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const msg = document.getElementById('msg');
 
   msg.message = {
@@ -45,7 +45,7 @@ Set `message` in JavaScript (objects can't be HTML attributes) and listen for `k
     actions: ['copy', 'like', 'dislike', 'regenerate'],
   };
 
-  msg.addEventListener('kc-message-action', (e) => {
+  msg.addEventListener('kai-message-action', (e) => {
     console.log(e.detail.action, e.detail.messageId);
   });
 </script>
@@ -53,7 +53,7 @@ Set `message` in JavaScript (objects can't be HTML attributes) and listen for `k
 
 - **`message`** takes the whole object. For simple cases, use the `role` + `content` attributes instead.
 - **Markdown** is on by default for `role="assistant"`, off for `role="user"`. Override with the `markdown` boolean.
-- **`actions`** accepts built-in names (`'copy'`, `'like'`, `'dislike'`, `'regenerate'`, `'edit'`) and/or `{ id, label, icon?, tooltip? }` descriptors. Alternatively, place `<kc-action>` children in the light DOM.
+- **`actions`** accepts built-in names (`'copy'`, `'like'`, `'dislike'`, `'regenerate'`, `'edit'`) and/or `{ id, label, icon?, tooltip? }` descriptors. Alternatively, place `<kai-action>` children in the light DOM.
 - **`actionsReveal`** — `'always'` (default) keeps the action bar visible; `'hover'` hides it until the row is hovered.
 
 ## Examples
@@ -62,36 +62,36 @@ Set `message` in JavaScript (objects can't be HTML attributes) and listen for `k
 
 A full assistant turn: markdown with a fenced code block, a reasoning block, a tool call, an attachment, and built-in actions.
 
-<Example client:visible tag="kc-message" data="assistant" />
+<Example client:visible tag="kai-message" data="assistant" />
 
 ### User Message
 
 A plain user turn with no actions. Markdown is off by default for `role="user"`.
 
-<Example client:visible tag="kc-message" config={{ role: "user" }} data="user" />
+<Example client:visible tag="kai-message" config={{ role: "user" }} data="user" />
 
 ### Avatar and Custom Action
 
 An avatar pulled from `message.avatar`, plus a custom `Share` action alongside built-in `copy` and `like`.
 
-<Example client:visible tag="kc-message" data="avatarAndCustomAction" />
+<Example client:visible tag="kai-message" data="avatarAndCustomAction" />
 
 ### Actions Reveal on Hover
 
 `actions-reveal="hover"` hides the action bar until the row is hovered — cleaner in dense threads.
 
-<Example client:visible tag="kc-message" config={{ actionsReveal: "hover" }} data="actionsRevealHover" />
+<Example client:visible tag="kai-message" config={{ actionsReveal: "hover" }} data="actionsRevealHover" />
 
 ## Props
 
-<PropTable tag="kc-message" />
+<PropTable tag="kai-message" />
 
 ## Events
 
-<EventTable tag="kc-message" />
+<EventTable tag="kai-message" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-message" />
+<ComposedFrom tag="kai-message" />
 
 <NeedAHand />

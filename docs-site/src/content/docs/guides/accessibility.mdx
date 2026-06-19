@@ -5,7 +5,7 @@ description: kitn-chat targets WCAG 2.1 Level AA — axe-core clean, keyboard-na
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Every `kc-*` web component ships with zero axe-core violations, full keyboard operability, and ARIA semantics verified by a CI audit script. This page covers what the kit guarantees and what you need to maintain as an integrator.
+Every `kai-*` web component ships with zero axe-core violations, full keyboard operability, and ARIA semantics verified by a CI audit script. This page covers what the kit guarantees and what you need to maintain as an integrator.
 
 ## Standard targeted
 
@@ -19,7 +19,7 @@ The kit ships with a CI audit (`scripts/audit-a11y.mjs`, powered by **axe-core**
 
 ## Shadow DOM and screen readers
 
-`kc-*` web components render inside **Shadow DOM**. Modern screen readers pierce Shadow DOM correctly — accessible names, roles, and live regions propagate without any special workaround in your host page. No extra configuration is required.
+`kai-*` web components render inside **Shadow DOM**. Modern screen readers pierce Shadow DOM correctly — accessible names, roles, and live regions propagate without any special workaround in your host page. No extra configuration is required.
 
 ## ARIA roles and live regions
 
@@ -34,7 +34,7 @@ Every interactive control is reachable by keyboard. **Tab** moves through all fo
 
 ### Dropdowns and select menus
 
-Applies to `kc-model-switcher`, `kc-scope-picker`, and any similar trigger-menu pairs.
+Applies to `kai-model-switcher`, `kai-scope-picker`, and any similar trigger-menu pairs.
 
 | Key | Action |
 |---|---|

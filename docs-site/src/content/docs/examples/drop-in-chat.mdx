@@ -1,23 +1,23 @@
 ---
 title: Drop-in chat
-description: A complete, streaming chat app from a single <kc-chat> element — the 90% path.
+description: A complete, streaming chat app from a single <kai-chat> element — the 90% path.
 ---
 
 import ChatDemo from '../../../components/ChatDemo.tsx';
 
-<p class="kc-lede">One element gives you the whole experience: a message thread with markdown, reasoning, and tool calls, a composer, and optional header chrome. You bring the model; `<kc-chat>` renders the UI. The thread starts empty with a few starter suggestions — click one to begin, and the reply streams in.</p>
+<p class="kai-lede">One element gives you the whole experience: a message thread with markdown, reasoning, and tool calls, a composer, and optional header chrome. You bring the model; `<kai-chat>` renders the UI. The thread starts empty with a few starter suggestions — click one to begin, and the reply streams in.</p>
 
 <ChatDemo client:only="solid" chatTitle="Assistant" placeholder="Ask anything…" suggestions={["What makes kitn-chat different from rolling my own?", "Show me a streaming example"]} messages={[]} />
 
 ## Wire it up
 
-Start with an empty thread and a few `suggestions`. The chips render in the empty state and disappear once the conversation has a message, so they read as conversation starters. Assign both in JavaScript (arrays can't be HTML attributes), then handle `kc-submit`: append the user's turn, add an empty assistant message, and grow its `content` as tokens arrive.
+Start with an empty thread and a few `suggestions`. The chips render in the empty state and disappear once the conversation has a message, so they read as conversation starters. Assign both in JavaScript (arrays can't be HTML attributes), then handle `kai-submit`: append the user's turn, add an empty assistant message, and grow its `content` as tokens arrive.
 
 ```html
-<kc-chat id="chat" chat-title="Assistant" placeholder="Ask anything…"></kc-chat>
+<kai-chat id="chat" chat-title="Assistant" placeholder="Ask anything…"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const chat = document.getElementById('chat');
   chat.messages = [];
   chat.suggestions = [
@@ -25,7 +25,7 @@ Start with an empty thread and a few `suggestions`. The chips render in the empt
     'Show me a streaming example',
   ];
 
-  chat.addEventListener('kc-submit', async (e) => {
+  chat.addEventListener('kai-submit', async (e) => {
     const prompt = e.detail.value;
     const aId = crypto.randomUUID();
     // append the user turn + an empty assistant message
@@ -51,7 +51,7 @@ The key move is reassigning `chat.messages` to a **new array** on each token —
 
 ## Next steps
 
-- **[Installation](/chat/guides/installation/)** and your **[framework](/chat/guides/frameworks/overview/)** — register and use `<kc-chat>` anywhere.
-- **[Streaming recipe](/chat/guides/recipes/streaming/)** — parsing SSE and driving the loop from a real backend.
-- **[`kc-chat` reference](/chat/components/chat/)** — every prop and event (model switcher, context meter, suggestions, slash commands, voice).
-- **[Compose your own shell](/chat/patterns/compose-your-own/)** — when you need more control than one element gives.
+- **[Installation](/guides/installation/)** and your **[framework](/guides/frameworks/overview/)** — register and use `<kai-chat>` anywhere.
+- **[Streaming recipe](/guides/recipes/streaming/)** — parsing SSE and driving the loop from a real backend.
+- **[`kai-chat` reference](/components/chat/)** — every prop and event (model switcher, context meter, suggestions, slash commands, voice).
+- **[Compose your own shell](/patterns/compose-your-own/)** — when you need more control than one element gives.

@@ -12,7 +12,7 @@ Make your chat speak. Call a `speak()` function when a reply finishes streaming 
 The [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) is built into every modern browser. Call `speak(answer)` right before you set `chat.loading = false`:
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 function speak(text) {
   if (!('speechSynthesis' in window)) return;
@@ -24,7 +24,7 @@ function speak(text) {
 
 const chat = document.getElementById('chat');
 
-chat.addEventListener('kc-submit', async (e) => {
+chat.addEventListener('kai-submit', async (e) => {
   const userText = e.detail.value.trim();
   if (!userText) return;
 
@@ -134,5 +134,5 @@ async function speakCloud(text) {
 
 ## Related
 
-- [Getting Started](/chat/guides/getting-started/) — streaming replies with `kc-chat`
-- [`kc-chat` component reference](/chat/components/chat/) — all props and events, including `loading`
+- [Getting Started](/guides/getting-started/) — streaming replies with `kai-chat`
+- [`kai-chat` component reference](/components/chat/) — all props and events, including `loading`

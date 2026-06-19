@@ -1,11 +1,11 @@
 ---
 title: Skills & slash commands
-description: An assistant whose capabilities are exposed as slash commands and skill badges — typing / opens a command palette that drives a tailored reply, powered by kc-chat and kc-skills.
+description: An assistant whose capabilities are exposed as slash commands and skill badges — typing / opens a command palette that drives a tailored reply, powered by kai-chat and kai-skills.
 ---
 
 import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
 
-<p class="kc-lede">An assistant that surfaces its capabilities as slash commands. Type <code>/</code> in the composer to open the palette, pick a command like <code>/summarize</code> or <code>/code-review</code>, and send it to get a reply tailored to that capability. The badges above the thread show the same skills as <code>&lt;kc-skills&gt;</code>.</p>
+<p class="kai-lede">An assistant that surfaces its capabilities as slash commands. Type <code>/</code> in the composer to open the palette, pick a command like <code>/summarize</code> or <code>/code-review</code>, and send it to get a reply tailored to that capability. The badges above the thread show the same skills as <code>&lt;kai-skills&gt;</code>.</p>
 
 <SkillsAssistantDemo
   client:only="solid"
@@ -15,14 +15,14 @@ import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
 
 ## How it works
 
-`<kc-chat>` owns the thread and the composer. Pass a `slashCommands` array as a property — typing `/` opens the palette, and choosing a command sets the composer to its `label` (for example `/summarize `) ready to send. The chat fires `kc-slash-select` the moment a command is chosen, and `kc-submit` when the message is sent. `<kc-skills>` renders the same capabilities as badges from a separate `skills` property.
+`<kai-chat>` owns the thread and the composer. Pass a `slashCommands` array as a property — typing `/` opens the palette, and choosing a command sets the composer to its `label` (for example `/summarize `) ready to send. The chat fires `kai-slash-select` the moment a command is chosen, and `kai-submit` when the message is sent. `<kai-skills>` renders the same capabilities as badges from a separate `skills` property.
 
 ```html
-<kc-skills id="skills"></kc-skills>
-<kc-chat id="chat" chat-title="Workspace assistant"></kc-chat>
+<kai-skills id="skills"></kai-skills>
+<kai-chat id="chat" chat-title="Workspace assistant"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const chat = document.getElementById('chat');
   const skills = document.getElementById('skills');
@@ -44,12 +44,12 @@ import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
   ];
 
   // Highlight the chosen command as active in the palette.
-  chat.addEventListener('kc-slash-select', (e) => {
+  chat.addEventListener('kai-slash-select', (e) => {
     chat.slashActiveIds = [e.detail.command.id];
   });
 
   // Route the submitted prompt by its leading /command token.
-  chat.addEventListener('kc-submit', async (e) => {
+  chat.addEventListener('kai-submit', async (e) => {
     const prompt = e.detail.value;
     const command = prompt.trim().match(/^\/(\S+)/)?.[1];
     const aId = crypto.randomUUID();
@@ -77,16 +77,16 @@ import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
 
 | field | type | notes |
 |---|---|---|
-| `id` | `string` | Stable identifier; carried on `kc-slash-select` |
+| `id` | `string` | Stable identifier; carried on `kai-slash-select` |
 | `label` | `string` | Palette label and what fills the composer (for example `/summarize`) |
 | `description` | `string?` | Secondary text shown beside the label |
 | `category` | `string?` | Groups commands under a heading in the palette |
 
-`slashActiveIds` highlights commands as active in the palette, and `slashCompact` switches to a single-line layout. Set `slashCommands` on `<kc-prompt-input>` directly when you compose the composer yourself instead of using the full `<kc-chat>`.
+`slashActiveIds` highlights commands as active in the palette, and `slashCompact` switches to a single-line layout. Set `slashCommands` on `<kai-prompt-input>` directly when you compose the composer yourself instead of using the full `<kai-chat>`.
 
 ## Next steps
 
-- **[`kc-chat` reference](/chat/components/chat/)** — the `slashCommands`, `slashActiveIds`, and `slashCompact` props plus the `kc-slash-select` and `kc-submit` events.
-- **[`kc-skills` reference](/chat/components/skills/)** — the `skills` property and the declarative `<kc-skill>` children path.
-- **[Streaming recipe](/chat/guides/recipes/streaming/)** — parsing SSE from your backend and driving the token loop.
-- **[Agentic assistant](/chat/examples/agentic-assistant/)** — tools and multi-step reasoning rendered inline in the thread.
+- **[`kai-chat` reference](/components/chat/)** — the `slashCommands`, `slashActiveIds`, and `slashCompact` props plus the `kai-slash-select` and `kai-submit` events.
+- **[`kai-skills` reference](/components/skills/)** — the `skills` property and the declarative `<kai-skill>` children path.
+- **[Streaming recipe](/guides/recipes/streaming/)** — parsing SSE from your backend and driving the token loop.
+- **[Agentic assistant](/examples/agentic-assistant/)** — tools and multi-step reasoning rendered inline in the thread.

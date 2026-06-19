@@ -6,9 +6,9 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-// CDN URL for the self-contained element bundle (registers all kc-* custom elements).
+// CDN URL for the self-contained element bundle (registers all kai-* custom elements).
 // Source of truth: Installation.mdx § "Via CDN" and README.md § "Or load from a CDN".
-const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 
 // Some elements have a displayName that doesn't match the Solid export name.
 // Map element displayName → actual Solid export name for those cases.
@@ -18,20 +18,20 @@ const SOLID_NAME_ALIASES = {
   ScopePicker: 'ChatScopePicker',
   Skills: 'MessageSkills',
   Sources: 'SourceList',
-  // 'Suggestions' intentionally omitted — the kc-suggestions element composes
+  // 'Suggestions' intentionally omitted — the kai-suggestions element composes
   // individual PromptSuggestion chips; there is no single Solid wrapper component
   // that mirrors the element's array-of-suggestions API.
 };
 
-// Event names are lower-kebab, kc-prefixed (e.g. `kc-message-action`). React/Solid handler
-// props strip the `kc-` prefix and PascalCase on hyphens → `onMessageAction`.
-const onName = (ev) => 'on' + ev.replace(/^kc-/, '').split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+// Event names are lower-kebab, kai-prefixed (e.g. `kai-message-action`). React/Solid handler
+// props strip the `kai-` prefix and PascalCase on hyphens → `onMessageAction`.
+const onName = (ev) => 'on' + ev.replace(/^kai-/, '').split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('');
 const required = (el) => el.props.filter((p) => !p.optional);
 
 /** Wraps binding lines into a multi-line tag block.
  *  open  — e.g. '<Artifact'
  *  lines — array of binding strings (without leading spaces)
- *  close — e.g. '/>' or '></kc-artifact>'
+ *  close — e.g. '/>' or '></kai-artifact>'
  */
 function wrapTag(open, lines, close) {
   if (lines.length === 0) return null; // caller handles compact form
@@ -64,7 +64,7 @@ function svelteSnippet(el) {
     ...required(el).map((p) => `{${p.name}}`),
     ...el.events.map((e) => `on:${e.name}={${onName(e.name)}}`),
   ];
-  const scriptBlock = `<script>\n  import '@kitn.ai/chat/elements';\n</script>`;
+  const scriptBlock = `<script>\n  import '@kitn.ai/ui/elements';\n</script>`;
   const tag = wrapTag(`<${el.tag}`, lines, `></${el.tag}>`) ?? `<${el.tag}></${el.tag}>`;
   return `${scriptBlock}\n\n${tag}`;
 }
@@ -95,12 +95,12 @@ function jsxSnippet(el, pkg, componentName) {
 export function buildSnippets(el, hasSolid, solidName) {
   const snippets = {
     html: htmlSnippet(el),
-    react: jsxSnippet(el, '@kitn.ai/chat/react'),
+    react: jsxSnippet(el, '@kitn.ai/ui/react'),
     vue: vueSnippet(el),
     svelte: svelteSnippet(el),
     angular: angularSnippet(el),
   };
-  if (hasSolid) snippets.solid = jsxSnippet(el, '@kitn.ai/chat', solidName);
+  if (hasSolid) snippets.solid = jsxSnippet(el, '@kitn.ai/ui', solidName);
   return snippets;
 }
 

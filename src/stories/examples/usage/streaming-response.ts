@@ -7,23 +7,23 @@ const STREAM =
 /** Typewriter Streaming — reveal the reply character by character. */
 const typewriter: StoryUsage = {
   intro:
-    'Reveal an assistant reply character by character. Set the `text` property to a string (or an `AsyncIterable<string>` assigned as a JS property — async iterables cannot be HTML attributes) with `mode="typewriter"` and handle `kc-complete` to unlock the input once all characters are displayed. **Cancel gotcha:** there is no built-in `stop()` — abort your own fetch with an `AbortController` and then clear your streaming state. **Replay gotcha:** passing the same string value again does not re-run the animation; unmount and remount the element instead.',
+    'Reveal an assistant reply character by character. Set the `text` property to a string (or an `AsyncIterable<string>` assigned as a JS property — async iterables cannot be HTML attributes) with `mode="typewriter"` and handle `kai-complete` to unlock the input once all characters are displayed. **Cancel gotcha:** there is no built-in `stop()` — abort your own fetch with an `AbortController` and then clear your streaming state. **Replay gotcha:** passing the same string value again does not re-run the animation; unmount and remount the element instead.',
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
-<kc-response-stream id="stream" mode="typewriter" speed="40"></kc-response-stream>
+<kai-response-stream id="stream" mode="typewriter" speed="40"></kai-response-stream>
 
 <script type="module">
   const stream = document.getElementById('stream');
   // A plain string is fine as a property; an AsyncIterable<string> MUST be a property.
   stream.text = '${STREAM}';
-  stream.addEventListener('kc-complete', () => console.log('done streaming'));
+  stream.addEventListener('kai-complete', () => console.log('done streaming'));
 </script>`,
 
-    react: `import { ResponseStream } from '@kitn.ai/chat/react';
+    react: `import { ResponseStream } from '@kitn.ai/ui/react';
 
 export function StreamedReply() {
   return (
@@ -37,7 +37,7 @@ export function StreamedReply() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 // A string can be a plain attr; an AsyncIterable must be bound as a property.
 const text = '${STREAM}';
@@ -48,16 +48,16 @@ function onComplete() {
 </script>
 
 <template>
-  <kc-response-stream
+  <kai-response-stream
     :text.prop="text"
     mode="typewriter"
     :speed="40"
-    @kc-complete="onComplete"
+    @kai-complete="onComplete"
   />
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let el;
   const text = '${STREAM}';
@@ -68,14 +68,14 @@ function onComplete() {
   }
 </script>
 
-<kc-response-stream
+<kai-response-stream
   bind:this={el}
   mode="typewriter"
   speed="40"
-  on:kc-complete={onComplete}
+  on:kai-complete={onComplete}
 />`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -84,12 +84,12 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
-    <kc-response-stream
+    <kai-response-stream
       [text]="text"
       mode="typewriter"
       [speed]="40"
-      (kc-complete)="onComplete()"
-    ></kc-response-stream>
+      (kai-complete)="onComplete()"
+    ></kai-response-stream>
   \`,
 })
 export class StreamComponent {
@@ -100,7 +100,7 @@ export class StreamComponent {
 }`,
 
     solid: `import { createSignal, Show } from 'solid-js';
-import { Message, MessageAvatar, ResponseStream } from '@kitn.ai/chat';
+import { Message, MessageAvatar, ResponseStream } from '@kitn.ai/ui';
 
 export function StreamedReply() {
   const [streaming, setStreaming] = createSignal(true);
@@ -126,23 +126,23 @@ export function StreamedReply() {
 
 /**
  * Waiting for First Token — the "thinking" state before any token arrives.
- * This story does NOT stream: there's nothing for kc-response-stream to do yet,
+ * This story does NOT stream: there's nothing for kai-response-stream to do yet,
  * so the snippets show the loading primitives that precede a stream.
  */
 const waiting: StoryUsage = {
   intro:
-    'Show a placeholder **before the first token arrives** — `<kc-response-stream>` is not involved yet (there is nothing to stream). Use `<kc-loader variant="dots">` for the thinking spinner and `<kc-text-shimmer>` for the shimmering label. Once the first chunk arrives, swap them out for `<kc-response-stream>`. Use `<kc-loader variant="typing">` in the input bar to signal that tokens are now *flowing* — `dots` means waiting, `typing` means actively generating.',
+    'Show a placeholder **before the first token arrives** — `<kai-response-stream>` is not involved yet (there is nothing to stream). Use `<kai-loader variant="dots">` for the thinking spinner and `<kai-text-shimmer>` for the shimmering label. Once the first chunk arrives, swap them out for `<kai-response-stream>`. Use `<kai-loader variant="typing">` in the input bar to signal that tokens are now *flowing* — `dots` means waiting, `typing` means actively generating.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <div style="display:flex;align-items:center;gap:0.75rem">
-  <kc-loader variant="dots" size="sm"></kc-loader>
-  <kc-text-shimmer>Thinking...</kc-text-shimmer>
+  <kai-loader variant="dots" size="sm"></kai-loader>
+  <kai-text-shimmer>Thinking...</kai-text-shimmer>
 </div>`,
 
-    react: `import { Loader, TextShimmer } from '@kitn.ai/chat/react';
+    react: `import { Loader, TextShimmer } from '@kitn.ai/ui/react';
 
 <div className="flex items-center gap-3">
   <Loader variant="dots" size="sm" />
@@ -150,23 +150,23 @@ const waiting: StoryUsage = {
 </div>`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 </script>
 
 <template>
   <div style="display:flex;align-items:center;gap:0.75rem">
-    <kc-loader variant="dots" size="sm" />
-    <kc-text-shimmer>Thinking...</kc-text-shimmer>
+    <kai-loader variant="dots" size="sm" />
+    <kai-text-shimmer>Thinking...</kai-text-shimmer>
   </div>
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 </script>
 
 <div style="display:flex;align-items:center;gap:0.75rem">
-  <kc-loader variant="dots" size="sm" />
-  <kc-text-shimmer>Thinking...</kc-text-shimmer>
+  <kai-loader variant="dots" size="sm" />
+  <kai-text-shimmer>Thinking...</kai-text-shimmer>
 </div>`,
 
     angular: `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -177,14 +177,14 @@ import '@kitn.ai/chat/elements';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
     <div style="display:flex;align-items:center;gap:0.75rem">
-      <kc-loader variant="dots" size="sm"></kc-loader>
-      <kc-text-shimmer>Thinking...</kc-text-shimmer>
+      <kai-loader variant="dots" size="sm"></kai-loader>
+      <kai-text-shimmer>Thinking...</kai-text-shimmer>
     </div>
   \`,
 })
 export class WaitingComponent {}`,
 
-    solid: `import { Message, MessageAvatar, Loader, TextShimmer } from '@kitn.ai/chat';
+    solid: `import { Message, MessageAvatar, Loader, TextShimmer } from '@kitn.ai/ui';
 
 export function Thinking() {
   return (
@@ -203,21 +203,21 @@ export function Thinking() {
 /** Fade-in Streaming — words fade in instead of appearing char by char. */
 const fade: StoryUsage = {
   intro:
-    'Reveal the reply word-by-word with staggered CSS fade-ins instead of a typewriter. Set `mode="fade"` on `<kc-response-stream>` and tune `speed` to control the stagger cadence. **Important:** when `text` is a plain string, `kc-complete` / `onComplete` is **never fired** in fade mode — all segments are delivered immediately and CSS handles the reveal with no detectable endpoint. If you need a completion callback in fade mode, pass an `AsyncIterable<string>` as a property instead (the callback fires after the iterator is exhausted).',
+    'Reveal the reply word-by-word with staggered CSS fade-ins instead of a typewriter. Set `mode="fade"` on `<kai-response-stream>` and tune `speed` to control the stagger cadence. **Important:** when `text` is a plain string, `kai-complete` / `onComplete` is **never fired** in fade mode — all segments are delivered immediately and CSS handles the reveal with no detectable endpoint. If you need a completion callback in fade mode, pass an `AsyncIterable<string>` as a property instead (the callback fires after the iterator is exhausted).',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
-<kc-response-stream id="stream" mode="fade" speed="30"></kc-response-stream>
+<kai-response-stream id="stream" mode="fade" speed="30"></kai-response-stream>
 
 <script type="module">
   const stream = document.getElementById('stream');
   stream.text = '${STREAM}';
-  stream.addEventListener('kc-complete', () => console.log('done streaming'));
+  stream.addEventListener('kai-complete', () => console.log('done streaming'));
 </script>`,
 
-    react: `import { ResponseStream } from '@kitn.ai/chat/react';
+    react: `import { ResponseStream } from '@kitn.ai/ui/react';
 
 <ResponseStream
   text="${STREAM}"
@@ -227,31 +227,31 @@ const fade: StoryUsage = {
 />`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 const text = '${STREAM}';
 </script>
 
 <template>
-  <kc-response-stream
+  <kai-response-stream
     :text.prop="text"
     mode="fade"
     :speed="30"
-    @kc-complete="() => console.log('done streaming')"
+    @kai-complete="() => console.log('done streaming')"
   />
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   let el;
   const text = '${STREAM}';
   $: if (el) el.text = text;
 </script>
 
-<kc-response-stream
+<kai-response-stream
   bind:this={el}
   mode="fade"
   speed="30"
-  on:kc-complete={() => console.log('done streaming')}
+  on:kai-complete={() => console.log('done streaming')}
 />`,
 
     angular: `import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -261,12 +261,12 @@ const text = '${STREAM}';
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
-    <kc-response-stream
+    <kai-response-stream
       [text]="text"
       mode="fade"
       [speed]="30"
-      (kc-complete)="log()"
-    ></kc-response-stream>
+      (kai-complete)="log()"
+    ></kai-response-stream>
   \`,
 })
 export class StreamComponent {
@@ -275,7 +275,7 @@ export class StreamComponent {
 }`,
 
     solid: `import { createSignal, Show } from 'solid-js';
-import { Message, MessageAvatar, ResponseStream } from '@kitn.ai/chat';
+import { Message, MessageAvatar, ResponseStream } from '@kitn.ai/ui';
 
 export function FadeReply() {
   const [streaming, setStreaming] = createSignal(true);
@@ -302,21 +302,21 @@ export function FadeReply() {
 /** Full Streaming Lifecycle — idle → waiting → streaming → complete in one interactive story. */
 const fullLifecycle: StoryUsage = {
   intro:
-    'All three phases in one interactive story: **waiting** (dots loader + shimmer before first token), **streaming** (typewriter reveal with a stop button), and **complete** (action bar appears; input unlocks). This is the pattern to follow in production. **Phase ownership:** `ResponseStream` / `kc-response-stream` knows nothing about waiting or cancellation — your app owns a `phase` signal and drives the UI from it. **No built-in cancel:** to stop mid-stream, call `abortController.abort()` on your own fetch and then reset your phase state; the element will stop receiving characters but does not reset its display.',
+    'All three phases in one interactive story: **waiting** (dots loader + shimmer before first token), **streaming** (typewriter reveal with a stop button), and **complete** (action bar appears; input unlocks). This is the pattern to follow in production. **Phase ownership:** `ResponseStream` / `kai-response-stream` knows nothing about waiting or cancellation — your app owns a `phase` signal and drives the UI from it. **No built-in cancel:** to stop mid-stream, call `abortController.abort()` on your own fetch and then reset your phase state; the element will stop receiving characters but does not reset its display.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!-- Phase 1: Waiting -->
 <div id="waiting" style="display:flex;align-items:center;gap:0.75rem">
-  <kc-loader variant="dots" size="sm"></kc-loader>
-  <kc-text-shimmer>Thinking...</kc-text-shimmer>
+  <kai-loader variant="dots" size="sm"></kai-loader>
+  <kai-text-shimmer>Thinking...</kai-text-shimmer>
 </div>
 
 <!-- Phase 2+3: Streaming → Complete (hidden initially) -->
 <div id="reply" hidden>
-  <kc-response-stream id="stream" mode="typewriter" speed="35"></kc-response-stream>
+  <kai-response-stream id="stream" mode="typewriter" speed="35"></kai-response-stream>
   <!-- Action bar, shown after complete -->
   <div id="actions" hidden>
     <button id="copy-btn">Copy</button>
@@ -335,7 +335,7 @@ const fullLifecycle: StoryUsage = {
     const stream = document.getElementById('stream');
     // Pass a plain string; or assign an AsyncIterable<string> as a property.
     stream.text = '${STREAM}';
-    stream.addEventListener('kc-complete', () => {
+    stream.addEventListener('kai-complete', () => {
       document.getElementById('actions').hidden = false;
     });
   }, 1200);
@@ -347,7 +347,7 @@ const fullLifecycle: StoryUsage = {
 </script>`,
 
     react: `import { useState, useEffect, useRef } from 'react';
-import { ResponseStream, Loader, TextShimmer } from '@kitn.ai/chat/react';
+import { ResponseStream, Loader, TextShimmer } from '@kitn.ai/ui/react';
 
 type Phase = 'idle' | 'waiting' | 'streaming' | 'complete';
 
@@ -396,7 +396,7 @@ export function StreamingChat() {
 
     vue: `<script setup>
 import { ref } from 'vue';
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 const REPLY = '${STREAM}';
 const phase = ref('idle'); // 'idle' | 'waiting' | 'streaming' | 'complete'
@@ -422,16 +422,16 @@ function onComplete() { phase.value = 'complete'; }
 <template>
   <div>
     <div v-if="phase === 'waiting'" style="display:flex;align-items:center;gap:0.75rem">
-      <kc-loader variant="dots" size="sm" />
-      <kc-text-shimmer>Thinking...</kc-text-shimmer>
+      <kai-loader variant="dots" size="sm" />
+      <kai-text-shimmer>Thinking...</kai-text-shimmer>
     </div>
 
-    <kc-response-stream
+    <kai-response-stream
       v-if="mounted"
       :text.prop="REPLY"
       mode="typewriter"
       :speed="35"
-      @kc-complete="onComplete"
+      @kai-complete="onComplete"
     />
 
     <div v-if="phase === 'complete'">✓ Action bar here</div>
@@ -443,7 +443,7 @@ function onComplete() { phase.value = 'complete'; }
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const REPLY = '${STREAM}';
   let phase = 'idle'; // 'idle' | 'waiting' | 'streaming' | 'complete'
@@ -471,17 +471,17 @@ function onComplete() { phase.value = 'complete'; }
 
 {#if phase === 'waiting'}
   <div style="display:flex;align-items:center;gap:0.75rem">
-    <kc-loader variant="dots" size="sm" />
-    <kc-text-shimmer>Thinking...</kc-text-shimmer>
+    <kai-loader variant="dots" size="sm" />
+    <kai-text-shimmer>Thinking...</kai-text-shimmer>
   </div>
 {/if}
 
 {#if mounted}
-  <kc-response-stream
+  <kai-response-stream
     bind:this={el}
     mode="typewriter"
     speed="35"
-    on:kc-complete={onComplete}
+    on:kai-complete={onComplete}
   />
 {/if}
 
@@ -501,17 +501,17 @@ type Phase = 'idle' | 'waiting' | 'streaming' | 'complete';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
     <div *ngIf="phase() === 'waiting'" style="display:flex;align-items:center;gap:0.75rem">
-      <kc-loader variant="dots" size="sm"></kc-loader>
-      <kc-text-shimmer>Thinking...</kc-text-shimmer>
+      <kai-loader variant="dots" size="sm"></kai-loader>
+      <kai-text-shimmer>Thinking...</kai-text-shimmer>
     </div>
 
-    <kc-response-stream
+    <kai-response-stream
       *ngIf="mounted()"
       [text]="reply"
       mode="typewriter"
       [speed]="35"
-      (kc-complete)="onComplete()">
-    </kc-response-stream>
+      (kai-complete)="onComplete()">
+    </kai-response-stream>
 
     <div *ngIf="phase() === 'complete'">✓ Action bar here</div>
 
@@ -553,7 +553,7 @@ import {
   Message, MessageAvatar, MessageContent, MessageActions,
   PromptInput, PromptInputTextarea, PromptInputActions,
   ResponseStream, Loader, TextShimmer, Button,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 import { Square, ArrowUp, Copy, RefreshCw } from 'lucide-solid';
 
 type Phase = 'idle' | 'waiting' | 'streaming' | 'complete';

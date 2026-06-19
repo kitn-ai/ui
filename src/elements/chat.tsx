@@ -12,24 +12,24 @@ type Props = Omit<ChatThreadProps,
 
 interface Events {
   /** User submitted a message. */
-  'kc-submit': { value: string; attachments: AttachmentData[] };
+  'kai-submit': { value: string; attachments: AttachmentData[] };
   /** Fired on every input change. */
-  'kc-value-change': { value: string };
+  'kai-value-change': { value: string };
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
-  'kc-suggestion-click': { value: string };
+  'kai-suggestion-click': { value: string };
   /** An action button on a message was clicked. `action` is the built-in name or custom id. */
-  'kc-message-action': { messageId: string; action: string };
+  'kai-message-action': { messageId: string; action: string };
   /** The header model switcher changed. */
-  'kc-model-change': { modelId: string };
+  'kai-model-change': { modelId: string };
   /** A slash command was chosen from the palette. */
-  'kc-slash-select': { command: SlashCommandItem };
+  'kai-slash-select': { command: SlashCommandItem };
   /** The Search button was clicked. */
-  'kc-search': Record<string, never>;
+  'kai-search': Record<string, never>;
   /** The Mic / voice button was clicked. */
-  'kc-voice': Record<string, never>;
+  'kai-voice': Record<string, never>;
 }
 
-defineWebComponent<Props, Events>('kc-chat', {
+defineWebComponent<Props, Events>('kai-chat', {
   messages: [], value: undefined, placeholder: 'Send a message...', loading: false,
   suggestions: undefined, suggestionMode: 'submit', persistSuggestions: false, proseSize: 'sm',
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
@@ -38,7 +38,7 @@ defineWebComponent<Props, Events>('kc-chat', {
   actionsReveal: 'always',
 }, (props, { dispatch, flag, element }) => {
   // Detect consumer-projected header controls so the header opens for them even
-  // without a title/models/context. Mirrors the <kc-model> light-DOM read pattern.
+  // without a title/models/context. Mirrors the <kai-model> light-DOM read pattern.
   const [hasHeaderStart, setHasHeaderStart] = createSignal(false);
   const [hasHeaderEnd, setHasHeaderEnd] = createSignal(false);
   onMount(() => {
@@ -65,14 +65,14 @@ defineWebComponent<Props, Events>('kc-chat', {
     slashCommands={props.slashCommands as SlashCommandItem[] | undefined}
     slashActiveIds={props.slashActiveIds as string[] | undefined} slashCompact={flag('slashCompact')}
     actionsReveal={props.actionsReveal as 'always' | 'hover'}
-    onValueChange={(value) => dispatch('kc-value-change', { value })}
-    onSubmit={(detail) => dispatch('kc-submit', detail)}
-    onSuggestionClick={(value) => dispatch('kc-suggestion-click', { value })}
-    onModelChange={(modelId) => dispatch('kc-model-change', { modelId })}
-    onMessageAction={(detail) => dispatch('kc-message-action', detail)}
-    onSearch={() => dispatch('kc-search', {})}
-    onVoice={() => dispatch('kc-voice', {})}
-    onSlashSelect={(command) => dispatch('kc-slash-select', { command })}
+    onValueChange={(value) => dispatch('kai-value-change', { value })}
+    onSubmit={(detail) => dispatch('kai-submit', detail)}
+    onSuggestionClick={(value) => dispatch('kai-suggestion-click', { value })}
+    onModelChange={(modelId) => dispatch('kai-model-change', { modelId })}
+    onMessageAction={(detail) => dispatch('kai-message-action', detail)}
+    onSearch={() => dispatch('kai-search', {})}
+    onVoice={() => dispatch('kai-voice', {})}
+    onSlashSelect={(command) => dispatch('kai-slash-select', { command })}
     headerStart={hasHeaderStart()}
     headerEnd={hasHeaderEnd()}
   />

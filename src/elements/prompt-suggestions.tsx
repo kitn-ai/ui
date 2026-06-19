@@ -19,16 +19,16 @@ interface Props extends Record<string, unknown> {
   highlight?: string;
 }
 
-/** Events fired by `<kc-suggestions>`. */
+/** Events fired by `<kai-suggestions>`. */
 interface Events {
   /** A suggestion was clicked. */
-  'kc-select': { value: string };
+  'kai-select': { value: string };
 }
 
 const labelOf = (s: Item) => (typeof s === 'string' ? s : s.label);
 const valueOf = (s: Item) => (typeof s === 'string' ? s : s.value ?? s.label);
 
-/** Parse a single `<kc-suggestion>` node into an `Item` descriptor. */
+/** Parse a single `<kai-suggestion>` node into an `Item` descriptor. */
 export function parseSuggestionNode(n: Element): Item {
   const text = n.textContent?.trim() ?? '';
   const value = n.getAttribute('value') ?? text;
@@ -36,33 +36,33 @@ export function parseSuggestionNode(n: Element): Item {
 }
 
 /**
- * `<kc-suggestions>` — a row/list of suggestion chips. Data via the
+ * `<kai-suggestions>` — a row/list of suggestion chips. Data via the
  * `suggestions` property; `variant`/`block`/`highlight` attributes; emits
  * `select`.
  *
- * Alternatively, declare chips as `<kc-suggestion>` child elements
+ * Alternatively, declare chips as `<kai-suggestion>` child elements
  * (light-DOM data carriers — hidden by the Shadow DOM):
  *
  * ```html
- * <kc-suggestions>
- *   <kc-suggestion value="vue">Use Vue</kc-suggestion>
- *   <kc-suggestion value="react">Use React</kc-suggestion>
- * </kc-suggestions>
+ * <kai-suggestions>
+ *   <kai-suggestion value="vue">Use Vue</kai-suggestion>
+ *   <kai-suggestion value="react">Use React</kai-suggestion>
+ * </kai-suggestions>
  * ```
  */
-defineWebComponent<Props, Events>('kc-suggestions', {
+defineWebComponent<Props, Events>('kai-suggestions', {
   suggestions: [],
   variant: 'outline',
   size: undefined,
   block: false,
   highlight: undefined,
 }, (props, { dispatch, flag, element }) => {
-  // Read declarative <kc-suggestion> children from light DOM.
+  // Read declarative <kai-suggestion> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
   const [slottedSuggestions, setSlottedSuggestions] = createSignal<Item[]>([]);
   onMount(() => {
     const read = () => {
-      const nodes = [...element.querySelectorAll('kc-suggestion')];
+      const nodes = [...element.querySelectorAll('kai-suggestion')];
       setSlottedSuggestions(nodes.map(parseSuggestionNode));
     };
     read();
@@ -83,7 +83,7 @@ defineWebComponent<Props, Events>('kc-suggestions', {
             size={props.size}
             block={flag('block')}
             highlight={props.highlight}
-            onClick={() => dispatch('kc-select', { value: valueOf(s) })}
+            onClick={() => dispatch('kai-select', { value: valueOf(s) })}
           >
             {labelOf(s)}
           </PromptSuggestion>

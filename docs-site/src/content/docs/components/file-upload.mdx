@@ -12,18 +12,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-file-upload</p>
+<p class="kai-tag-sub">kai-file-upload</p>
 
-<p class="kc-lede">A click-or-drag dropzone that fires one event with the selected files — constrain it to a file type, limit to a single pick, or lock it entirely with a single attribute.</p>
+<p class="kai-lede">A click-or-drag dropzone that fires one event with the selected files — constrain it to a file type, limit to a single pick, or lock it entirely with a single attribute.</p>
 
 <Facts items={['Shadow DOM', '1 event', 'Click or drag-and-drop', 'Filterable by file type', 'Customisable label']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-file-upload" />
+<Playground client:only="solid" tag="kai-file-upload" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-file-upload>` for a standalone dropzone — above a prompt input, in a dedicated upload panel, or anywhere you need a zero-dependency drag-and-drop target. In SolidJS, compose the `FileUpload` and `FileUploadTrigger` primitives directly for finer control. The element is `display: block` and fills its container width; set a `max-width` on the parent to constrain the dropzone.
+Reach for `<kai-file-upload>` for a standalone dropzone — above a prompt input, in a dedicated upload panel, or anywhere you need a zero-dependency drag-and-drop target. In SolidJS, compose the `FileUpload` and `FileUploadTrigger` primitives directly for finer control. The element is `display: block` and fills its container width; set a `max-width` on the parent to constrain the dropzone.
 </Aside>
 
 ## Usage
@@ -31,54 +31,54 @@ Reach for `<kc-file-upload>` for a standalone dropzone — above a prompt input,
 All four props are plain HTML attributes — nothing to set in JavaScript:
 
 ```html
-<kc-file-upload accept="image/*" label="Drop an image to upload"></kc-file-upload>
+<kai-file-upload accept="image/*" label="Drop an image to upload"></kai-file-upload>
 <script type="module">
-  import '@kitn.ai/chat/elements';
-  document.querySelector('kc-file-upload')
-    .addEventListener('kc-files-added', (e) => console.log(e.detail.files));
+  import '@kitn.ai/ui/elements';
+  document.querySelector('kai-file-upload')
+    .addEventListener('kai-files-added', (e) => console.log(e.detail.files));
 </script>
 ```
 
 - **`accept`** — standard [`accept` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept) (e.g. `image/*`, `.pdf,.docx`). Omit to allow any file type.
 - **`multiple`** — boolean, defaults to `true`. Set `multiple="false"` to restrict to a single file.
-- **`kc-files-added`** — fires with `detail.files` as a native `File[]`; pass straight to `FormData` or your upload function.
+- **`kai-files-added`** — fires with `detail.files` as a native `File[]`; pass straight to `FormData` or your upload function.
 
 ## Examples
 
 ### Default
 
-Accepts any file type; click or drag to trigger `kc-files-added`.
+Accepts any file type; click or drag to trigger `kai-files-added`.
 
-<Example client:visible tag="kc-file-upload" />
+<Example client:visible tag="kai-file-upload" />
 
 ### Images Only
 
 `accept="image/*"` and `multiple={false}` — useful for avatar or cover-photo uploads.
 
-<Example client:visible tag="kc-file-upload" config={{ accept: 'image/*', multiple: false, label: 'Click or drop an image' }} />
+<Example client:visible tag="kai-file-upload" config={{ accept: 'image/*', multiple: false, label: 'Click or drop an image' }} />
 
 ### Custom Label
 
 Override the default copy with `label` when context makes it too generic.
 
-<Example client:visible tag="kc-file-upload" config={{ label: 'Drop your PDF or DOCX here to import' }} />
+<Example client:visible tag="kai-file-upload" config={{ label: 'Drop your PDF or DOCX here to import' }} />
 
 ### Disabled
 
 Lock the dropzone while an upload is in progress or the user lacks permissions.
 
-<Example client:visible tag="kc-file-upload" config={{ disabled: true, label: 'Uploads are disabled' }} />
+<Example client:visible tag="kai-file-upload" config={{ disabled: true, label: 'Uploads are disabled' }} />
 
 ## Props
 
-<PropTable tag="kc-file-upload" />
+<PropTable tag="kai-file-upload" />
 
 ## Events
 
-<EventTable tag="kc-file-upload" />
+<EventTable tag="kai-file-upload" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-file-upload" />
+<ComposedFrom tag="kai-file-upload" />
 
 <NeedAHand />

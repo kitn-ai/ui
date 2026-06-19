@@ -17,8 +17,8 @@ import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
-} from "@kitn.ai/chat";
-import type { ConversationGroup, ConversationSummary } from "@kitn.ai/chat";
+} from "@kitn.ai/ui";
+import type { ConversationGroup, ConversationSummary } from "@kitn.ai/ui";
 import { ArrowUp, Copy, Plus, RefreshCw, ThumbsDown, ThumbsUp } from "lucide-solid";
 
 // ─── Static seed data ────────────────────────────────────────────────────────
@@ -245,7 +245,7 @@ export default function App() {
                   SolidJS signals vs React hooks
                 </span>
                 <span class="text-xs text-muted-foreground">
-                  @kitn.ai/chat primitives · SolidJS + Vite
+                  @kitn.ai/ui primitives · SolidJS + Vite
                 </span>
               </header>
 

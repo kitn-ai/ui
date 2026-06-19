@@ -10,7 +10,7 @@ const supportAssistant: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <!--
@@ -38,51 +38,51 @@ const supportAssistant: StoryUsage = {
 
     <!-- Scrollable thread -->
     <div class="relative flex-1 overflow-y-auto">
-      <kc-chat-container class="h-full">
+      <kai-chat-container class="h-full">
         <div class="space-y-3 px-3 py-3">
 
           <!-- Assistant greeting -->
-          <kc-message>
-            <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
-            <kc-message-content markdown class="bg-transparent p-0 pt-1">
+          <kai-message>
+            <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
+            <kai-message-content markdown class="bg-transparent p-0 pt-1">
               Hi! 👋 How can I help you today?
-            </kc-message-content>
-          </kc-message>
+            </kai-message-content>
+          </kai-message>
 
           <!-- User message -->
-          <kc-message class="flex-col items-end">
-            <kc-message-content class="bg-muted text-primary max-w-[85%] rounded-xl px-3.5 py-2">
+          <kai-message class="flex-col items-end">
+            <kai-message-content class="bg-muted text-primary max-w-[85%] rounded-xl px-3.5 py-2">
               How do I reset my password?
-            </kc-message-content>
-          </kc-message>
+            </kai-message-content>
+          </kai-message>
 
           <!-- Assistant reply -->
-          <kc-message>
-            <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
-            <kc-message-content markdown class="bg-transparent p-0 pt-1">
+          <kai-message>
+            <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
+            <kai-message-content markdown class="bg-transparent p-0 pt-1">
               Head to **Settings → Security** and click **Reset password**.
-            </kc-message-content>
-          </kc-message>
+            </kai-message-content>
+          </kai-message>
 
         </div>
-      </kc-chat-container>
+      </kai-chat-container>
     </div>
 
     <!-- Composer -->
     <div class="flex-shrink-0 px-3 pb-3">
-      <kc-prompt-input id="widget-composer">
-        <kc-prompt-input-textarea placeholder="Message support…"></kc-prompt-input-textarea>
-        <kc-prompt-input-actions class="mt-1.5 flex w-full items-center justify-end gap-2 px-2.5 pb-2.5">
+      <kai-prompt-input id="widget-composer">
+        <kai-prompt-input-textarea placeholder="Message support…"></kai-prompt-input-textarea>
+        <kai-prompt-input-actions class="mt-1.5 flex w-full items-center justify-end gap-2 px-2.5 pb-2.5">
           <button aria-label="Send"><!-- icon --></button>
-        </kc-prompt-input-actions>
-      </kc-prompt-input>
+        </kai-prompt-input-actions>
+      </kai-prompt-input>
     </div>
   </div>
 
 </div>
 
 <script type="module">
-  document.getElementById('widget-composer').addEventListener('kc-submit', (e) => {
+  document.getElementById('widget-composer').addEventListener('kai-submit', (e) => {
     console.log('send', e.detail.value);
   });
 </script>`,
@@ -93,7 +93,7 @@ import {
   Message, MessageAvatar, MessageContent,
   PromptInput, PromptInputTextarea, PromptInputActions,
   Button,
-} from '@kitn.ai/chat/react';
+} from '@kitn.ai/ui/react';
 
 /**
  * Docked Widget — a compact chat bubble docked to the bottom-right of the page.
@@ -167,7 +167,7 @@ export function DockedWidget() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 const input = ref('');
@@ -199,48 +199,48 @@ function onSubmit(e) {
 
     <!-- Scrollable thread -->
     <div class="relative flex-1 overflow-y-auto">
-      <kc-chat-container class="h-full">
+      <kai-chat-container class="h-full">
         <div class="space-y-3 px-3 py-3">
-          <kc-message>
-            <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
-            <kc-message-content markdown class="bg-transparent p-0 pt-1">
+          <kai-message>
+            <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
+            <kai-message-content markdown class="bg-transparent p-0 pt-1">
               Hi! 👋 How can I help you today?
-            </kc-message-content>
-          </kc-message>
-          <kc-message class="flex-col items-end">
-            <kc-message-content class="bg-muted text-primary max-w-[85%] rounded-xl px-3.5 py-2">
+            </kai-message-content>
+          </kai-message>
+          <kai-message class="flex-col items-end">
+            <kai-message-content class="bg-muted text-primary max-w-[85%] rounded-xl px-3.5 py-2">
               How do I reset my password?
-            </kc-message-content>
-          </kc-message>
-          <kc-message>
-            <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
-            <kc-message-content markdown class="bg-transparent p-0 pt-1">
+            </kai-message-content>
+          </kai-message>
+          <kai-message>
+            <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
+            <kai-message-content markdown class="bg-transparent p-0 pt-1">
               Head to **Settings → Security** and click **Reset password**.
-            </kc-message-content>
-          </kc-message>
+            </kai-message-content>
+          </kai-message>
         </div>
-      </kc-chat-container>
+      </kai-chat-container>
     </div>
 
     <!-- Composer -->
     <div class="flex-shrink-0 px-3 pb-3">
-      <kc-prompt-input
+      <kai-prompt-input
         :value="input"
-        @kc-value-change="input = $event.detail.value"
-        @kc-submit="onSubmit"
+        @kai-value-change="input = $event.detail.value"
+        @kai-submit="onSubmit"
       >
-        <kc-prompt-input-textarea placeholder="Message support…"></kc-prompt-input-textarea>
-        <kc-prompt-input-actions class="mt-1.5 flex w-full items-center justify-end gap-2 px-2.5 pb-2.5">
+        <kai-prompt-input-textarea placeholder="Message support…"></kai-prompt-input-textarea>
+        <kai-prompt-input-actions class="mt-1.5 flex w-full items-center justify-end gap-2 px-2.5 pb-2.5">
           <button :disabled="!input.trim()" aria-label="Send"><!-- icon --></button>
-        </kc-prompt-input-actions>
-      </kc-prompt-input>
+        </kai-prompt-input-actions>
+      </kai-prompt-input>
     </div>
 
   </div>
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   let input = '';
   let open = true;
 </script>
@@ -264,47 +264,47 @@ function onSubmit(e) {
 
   <!-- Scrollable thread -->
   <div class="relative flex-1 overflow-y-auto">
-    <kc-chat-container class="h-full">
+    <kai-chat-container class="h-full">
       <div class="space-y-3 px-3 py-3">
-        <kc-message>
-          <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
-          <kc-message-content markdown class="bg-transparent p-0 pt-1">
+        <kai-message>
+          <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
+          <kai-message-content markdown class="bg-transparent p-0 pt-1">
             Hi! 👋 How can I help you today?
-          </kc-message-content>
-        </kc-message>
-        <kc-message class="flex-col items-end">
-          <kc-message-content class="bg-muted text-primary max-w-[85%] rounded-xl px-3.5 py-2">
+          </kai-message-content>
+        </kai-message>
+        <kai-message class="flex-col items-end">
+          <kai-message-content class="bg-muted text-primary max-w-[85%] rounded-xl px-3.5 py-2">
             How do I reset my password?
-          </kc-message-content>
-        </kc-message>
-        <kc-message>
-          <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
-          <kc-message-content markdown class="bg-transparent p-0 pt-1">
+          </kai-message-content>
+        </kai-message>
+        <kai-message>
+          <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
+          <kai-message-content markdown class="bg-transparent p-0 pt-1">
             Head to **Settings → Security** and click **Reset password**.
-          </kc-message-content>
-        </kc-message>
+          </kai-message-content>
+        </kai-message>
       </div>
-    </kc-chat-container>
+    </kai-chat-container>
   </div>
 
   <!-- Composer -->
   <div class="flex-shrink-0 px-3 pb-3">
-    <kc-prompt-input
+    <kai-prompt-input
       value={input}
-      on:kc-value-change={(e) => (input = e.detail.value)}
-      on:kc-submit={() => (input = '')}
+      on:kai-value-change={(e) => (input = e.detail.value)}
+      on:kai-submit={() => (input = '')}
     >
-      <kc-prompt-input-textarea placeholder="Message support…"></kc-prompt-input-textarea>
-      <kc-prompt-input-actions class="mt-1.5 flex w-full items-center justify-end gap-2 px-2.5 pb-2.5">
+      <kai-prompt-input-textarea placeholder="Message support…"></kai-prompt-input-textarea>
+      <kai-prompt-input-actions class="mt-1.5 flex w-full items-center justify-end gap-2 px-2.5 pb-2.5">
         <button disabled={!input.trim()} aria-label="Send"><!-- icon --></button>
-      </kc-prompt-input-actions>
-    </kc-prompt-input>
+      </kai-prompt-input-actions>
+    </kai-prompt-input>
   </div>
 
 </div>
 {/if}`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { NgIf } from '@angular/common';
@@ -335,41 +335,41 @@ import { NgIf } from '@angular/common';
 
       <!-- Scrollable thread -->
       <div class="relative flex-1 overflow-y-auto">
-        <kc-chat-container class="h-full">
+        <kai-chat-container class="h-full">
           <div class="space-y-3 px-3 py-3">
-            <kc-message>
-              <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
-              <kc-message-content markdown class="bg-transparent p-0 pt-1">
+            <kai-message>
+              <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
+              <kai-message-content markdown class="bg-transparent p-0 pt-1">
                 Hi! How can I help you today?
-              </kc-message-content>
-            </kc-message>
-            <kc-message class="flex-col items-end">
-              <kc-message-content class="bg-muted text-primary max-w-[85%] rounded-xl px-3.5 py-2">
+              </kai-message-content>
+            </kai-message>
+            <kai-message class="flex-col items-end">
+              <kai-message-content class="bg-muted text-primary max-w-[85%] rounded-xl px-3.5 py-2">
                 How do I reset my password?
-              </kc-message-content>
-            </kc-message>
-            <kc-message>
-              <kc-message-avatar src="" alt="AI" fallback="AI"></kc-message-avatar>
-              <kc-message-content markdown class="bg-transparent p-0 pt-1">
+              </kai-message-content>
+            </kai-message>
+            <kai-message>
+              <kai-message-avatar src="" alt="AI" fallback="AI"></kai-message-avatar>
+              <kai-message-content markdown class="bg-transparent p-0 pt-1">
                 Head to **Settings → Security** and click **Reset password**.
-              </kc-message-content>
-            </kc-message>
+              </kai-message-content>
+            </kai-message>
           </div>
-        </kc-chat-container>
+        </kai-chat-container>
       </div>
 
       <!-- Composer -->
       <div class="flex-shrink-0 px-3 pb-3">
-        <kc-prompt-input
+        <kai-prompt-input
           [value]="input"
-          (kc-value-change)="input = $event.detail.value"
-          (kc-submit)="input = ''"
+          (kai-value-change)="input = $event.detail.value"
+          (kai-submit)="input = ''"
         >
-          <kc-prompt-input-textarea placeholder="Message support…"></kc-prompt-input-textarea>
-          <kc-prompt-input-actions class="mt-1.5 flex w-full items-center justify-end gap-2 px-2.5 pb-2.5">
+          <kai-prompt-input-textarea placeholder="Message support…"></kai-prompt-input-textarea>
+          <kai-prompt-input-actions class="mt-1.5 flex w-full items-center justify-end gap-2 px-2.5 pb-2.5">
             <button [disabled]="!input.trim()" aria-label="Send"><!-- icon --></button>
-          </kc-prompt-input-actions>
-        </kc-prompt-input>
+          </kai-prompt-input-actions>
+        </kai-prompt-input>
       </div>
 
     </div>
@@ -386,7 +386,7 @@ import {
   Message, MessageAvatar, MessageContent,
   PromptInput, PromptInputTextarea, PromptInputActions,
   Button,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 import { ArrowUp, X } from 'lucide-solid';
 
 /**

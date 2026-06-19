@@ -10,14 +10,14 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-suggestions': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-suggestions': JSX.HTMLAttributes<HTMLElement> & {
         variant?: string;
         size?: string;
         block?: boolean | string;
         highlight?: string;
       };
-      /** Light-DOM data carrier for declarative suggestion chips inside `<kc-suggestions>`. */
-      'kc-suggestion': JSX.HTMLAttributes<HTMLElement> & {
+      /** Light-DOM data carrier for declarative suggestion chips inside `<kai-suggestions>`. */
+      'kai-suggestion': JSX.HTMLAttributes<HTMLElement> & {
         value?: string;
       };
     }
@@ -30,19 +30,19 @@ const suggestions: Item[] = [
   "What's deferred?",
 ];
 
-/** Render `<kc-suggestions>` with `suggestions` set as a property. */
+/** Render `<kai-suggestions>` with `suggestions` set as a property. */
 function SuggestionsElement(props: { suggestions: Item[]; variant?: string; size?: string; block?: boolean; highlight?: string }) {
   let el: (HTMLElement & { suggestions?: Item[] }) | undefined;
   onMount(() => {
     if (!el) return;
     el.suggestions = props.suggestions;
-    el.addEventListener('kc-select', (e) => {
+    el.addEventListener('kai-select', (e) => {
       const ev = e as CustomEvent<{ value: string }>;
-      console.log('kc-select', ev.detail.value);
+      console.log('kai-select', ev.detail.value);
     });
   });
   return (
-    <kc-suggestions
+    <kai-suggestions
       ref={(e) => (el = e as HTMLElement)}
       variant={props.variant}
       size={props.size}
@@ -54,28 +54,28 @@ function SuggestionsElement(props: { suggestions: Item[]; variant?: string; size
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-suggestions id="suggs" variant="outline"></kc-suggestions>
+<kai-suggestions id="suggs" variant="outline"></kai-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const suggs = document.getElementById('suggs');
   suggs.suggestions = ['Explain the architecture', 'Show me a code example'];
-  suggs.addEventListener('kc-select', (e) => console.log(e.detail.value));
+  suggs.addEventListener('kai-select', (e) => console.log(e.detail.value));
 </script>`;
 
 const meta = {
   title: 'Components/Suggestions',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-suggestions'),
+  argTypes: argTypesFor('kai-suggestions'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kc-suggestions', [
-          '`<kc-suggestions>` is the framework-agnostic **web component** for a row (or list) of clickable suggestion chips — starter prompts or follow-ups — isolated in **Shadow DOM**.',
+      description: specDescription('kai-suggestions', [
+          '`<kai-suggestions>` is the framework-agnostic **web component** for a row (or list) of clickable suggestion chips — starter prompts or follow-ups — isolated in **Shadow DOM**.',
           '**When to use:** offering the user quick prompts to click instead of type, usually above an input. In SolidJS, use the `PromptSuggestion` primitive.',
           '**Placement:** above the prompt input in the empty/welcome state, or below the last assistant message as follow-up chips; it is a `block` element and takes the full width of its container.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the `suggestions` **property** (strings, or `{ label, value }` when the displayed text differs from the emitted value), choose a `variant` and `size` (`sm` | `md` | `lg`; pills default to `lg`), optionally add the `block` flag for full-width rows or a `highlight` substring to emphasize, and listen for the `kc-select` **CustomEvent**.",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the `suggestions` **property** (strings, or `{ label, value }` when the displayed text differs from the emitted value), choose a `variant` and `size` (`sm` | `md` | `lg`; pills default to `lg`), optionally add the `block` flag for full-width rows or a `highlight` substring to emphasize, and listen for the `kai-select` **CustomEvent**.",
           'See the **Code** tab for HTML usage.',
         ]),
     },
@@ -117,10 +117,10 @@ export const WithHighlightedSearch: Story = {
   parameters: {
     docs: {
       source: {
-        code: `<kc-suggestions id="suggs" highlight="Solid"></kc-suggestions>
+        code: `<kai-suggestions id="suggs" highlight="Solid"></kai-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const suggs = document.getElementById('suggs');
   suggs.suggestions = [
     'How does SolidJS handle reactivity?',
@@ -152,9 +152,9 @@ export const Sizes: Story = {
     docs: {
       source: {
         code: `<!-- default pill -->
-<kc-suggestions variant="outline"></kc-suggestions>
+<kai-suggestions variant="outline"></kai-suggestions>
 <!-- smaller pill -->
-<kc-suggestions variant="outline" size="sm"></kc-suggestions>`,
+<kai-suggestions variant="outline" size="sm"></kai-suggestions>`,
         language: 'html',
       },
     },
@@ -162,47 +162,47 @@ export const Sizes: Story = {
 };
 
 const DECLARATIVE_HTML_SNIPPET = `<!-- Works in any framework or plain HTML — no JS property assignment needed -->
-<kc-suggestions id="suggs" variant="outline">
-  <kc-suggestion value="explain">Explain the architecture</kc-suggestion>
-  <kc-suggestion value="example">Show me a code example</kc-suggestion>
-  <kc-suggestion value="deferred">What's deferred?</kc-suggestion>
-</kc-suggestions>
+<kai-suggestions id="suggs" variant="outline">
+  <kai-suggestion value="explain">Explain the architecture</kai-suggestion>
+  <kai-suggestion value="example">Show me a code example</kai-suggestion>
+  <kai-suggestion value="deferred">What's deferred?</kai-suggestion>
+</kai-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
-  document.getElementById('suggs').addEventListener('kc-select', (e) => {
-    console.log('kc-select', e.detail.value);
+  document.getElementById('suggs').addEventListener('kai-select', (e) => {
+    console.log('kai-select', e.detail.value);
   });
 </script>`;
 
 /**
- * Declare each suggestion as a `<kc-suggestion>` child element — no `suggestions`
+ * Declare each suggestion as a `<kai-suggestion>` child element — no `suggestions`
  * property or JS array wiring needed. The `value` attribute sets the emitted
  * value; `textContent` is the displayed label. Children are light-DOM data
  * carriers hidden by the Shadow DOM — pure data, no visible output of their own.
  * Mix with the `suggestions` prop: prop items render first, declarative children after.
  */
 export const DeclarativeSuggestions: Story = {
-  name: 'Declarative Suggestions (kc-suggestion)',
+  name: 'Declarative Suggestions (kai-suggestion)',
   render: () => {
     let el: HTMLElement | undefined;
     onMount(() => {
       if (!el) return;
-      el.addEventListener('kc-select', (e) =>
-        console.log('kc-select', (e as CustomEvent<{ value: string }>).detail.value),
+      el.addEventListener('kai-select', (e) =>
+        console.log('kai-select', (e as CustomEvent<{ value: string }>).detail.value),
       );
     });
     return (
-      <kc-suggestions
+      <kai-suggestions
         ref={(e) => (el = e as HTMLElement)}
         variant="outline"
         style={{ display: 'block', padding: '24px', 'max-width': '560px' }}
       >
-        <kc-suggestion value="explain">Explain the architecture</kc-suggestion>
-        <kc-suggestion value="example">Show me a code example</kc-suggestion>
-        <kc-suggestion value="deferred">What's deferred?</kc-suggestion>
-      </kc-suggestions>
+        <kai-suggestion value="explain">Explain the architecture</kai-suggestion>
+        <kai-suggestion value="example">Show me a code example</kai-suggestion>
+        <kai-suggestion value="deferred">What's deferred?</kai-suggestion>
+      </kai-suggestions>
     );
   },
   parameters: {

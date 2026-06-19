@@ -19,7 +19,7 @@ interface Props {
 }
 
 const DEFAULT_REPLY =
-  "Happy to help! This widget is a `<kc-chat>` embedded in the corner of a host page. Its Shadow DOM keeps the host's styles out and its own styles in — so it looks right on any site. Try scrolling the page behind it.";
+  "Happy to help! This widget is a `<kai-chat>` embedded in the corner of a host page. Its Shadow DOM keeps the host's styles out and its own styles in — so it looks right on any site. Try scrolling the page behind it.";
 
 let uid = 0;
 const nid = () => `w${++uid}`;
@@ -60,9 +60,9 @@ export default function MockSite(props: Props) {
       if (props.chatTitle) (host as any).chatTitle = props.chatTitle;
       (host as any).proseSize = 'sm';
       host.setAttribute('theme', dark() ? 'dark' : 'light');
-      host.addEventListener('kc-submit', onSubmit);
+      host.addEventListener('kai-submit', onSubmit);
     }
-    onCleanup(() => { clearTimeout(timer); host?.removeEventListener('kc-submit', onSubmit); });
+    onCleanup(() => { clearTimeout(timer); host?.removeEventListener('kai-submit', onSubmit); });
   });
 
   // re-theme the embedded chat when the mock site toggles
@@ -116,15 +116,15 @@ export default function MockSite(props: Props) {
 
       {/* embedded chat window (bottom-right) */}
       <Show when={open()}>
-        <div style={{ position: 'absolute', right: '1.25rem', bottom: '5rem', width: 'min(380px, calc(100% - 2.5rem))', height: '460px', 'border-radius': '14px', overflow: 'hidden', border: '1px solid var(--kc-line)', 'box-shadow': '0 12px 40px rgba(0,0,0,0.35)', 'z-index': 3 }}>
+        <div style={{ position: 'absolute', right: '1.25rem', bottom: '5rem', width: 'min(380px, calc(100% - 2.5rem))', height: '460px', 'border-radius': '14px', overflow: 'hidden', border: '1px solid var(--kai-line)', 'box-shadow': '0 12px 40px rgba(0,0,0,0.35)', 'z-index': 3 }}>
           {/* @ts-expect-error custom element */}
-          <kc-chat ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', height: '100%' }} />
+          <kai-chat ref={(el: HTMLElement) => (host = el as any)} style={{ display: 'block', height: '100%' }} />
         </div>
       </Show>
 
       {/* FAB */}
       <button type="button" onClick={() => setOpen(!open())} aria-label={open() ? 'Close chat' : 'Open chat'}
-        style={{ position: 'absolute', right: '1.25rem', bottom: '1.25rem', width: '3.25rem', height: '3.25rem', 'border-radius': '999px', border: 'none', background: 'var(--kc-brand)', color: '#fff', cursor: 'pointer', 'box-shadow': '0 8px 24px rgba(214,32,127,0.4)', 'font-size': '1.4rem', 'z-index': 4, display: 'inline-flex', 'align-items': 'center', 'justify-content': 'center' }}>
+        style={{ position: 'absolute', right: '1.25rem', bottom: '1.25rem', width: '3.25rem', height: '3.25rem', 'border-radius': '999px', border: 'none', background: 'var(--kai-brand)', color: '#fff', cursor: 'pointer', 'box-shadow': '0 8px 24px rgba(214,32,127,0.4)', 'font-size': '1.4rem', 'z-index': 4, display: 'inline-flex', 'align-items': 'center', 'justify-content': 'center' }}>
         {open() ? <IconX style={{ width: '1.4rem', height: '1.4rem' }} /> : <IconMessageCircle style={{ width: '1.4rem', height: '1.4rem' }} />}
       </button>
     </div>

@@ -5,7 +5,7 @@ description: Machine-readable reference files that let coding agents wire up kit
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-`@kitn.ai/chat` ships two auto-generated machine-readable files that follow the [llmstxt.org](https://llmstxt.org) convention. Point your coding agent at them and it will get prop names, event names, and the property-vs-attribute rule right — without hallucinating.
+`@kitn.ai/ui` ships two auto-generated machine-readable files that follow the [llmstxt.org](https://llmstxt.org) convention. Point your coding agent at them and it will get prop names, event names, and the property-vs-attribute rule right — without hallucinating.
 
 ## The files
 
@@ -18,17 +18,17 @@ Both files are generated from `dist/custom-elements.json` by `scripts/gen-llms.m
 
 ### Where they live
 
-After `npm install @kitn.ai/chat`, both files are in the package:
+After `npm install @kitn.ai/ui`, both files are in the package:
 
 ```
-node_modules/@kitn.ai/chat/llms.txt
-node_modules/@kitn.ai/chat/llms-full.txt
+node_modules/@kitn.ai/ui/llms.txt
+node_modules/@kitn.ai/ui/llms-full.txt
 ```
 
 They are also published at:
 
-- **https://kitn-ai.github.io/chat/llms.txt**
-- **https://kitn-ai.github.io/chat/llms-full.txt**
+- **https://ui.kitn.ai/llms.txt**
+- **https://ui.kitn.ai/llms-full.txt**
 
 <Aside type="tip" title="Which file to use">
 For a one-off prompt, paste `llms.txt` (~4 KB). For a project where the agent revisits these components repeatedly, reference the installed path so it always reads the version that matches the installed package.
@@ -38,11 +38,11 @@ For a one-off prompt, paste `llms.txt` (~4 KB). For a project where the agent re
 
 | Tool | What to do |
 |---|---|
-| **Claude Code** | Add `@node_modules/@kitn.ai/chat/llms.txt` to `CLAUDE.md`, or run `read node_modules/@kitn.ai/chat/llms-full.txt` in the session |
+| **Claude Code** | Add `@node_modules/@kitn.ai/ui/llms.txt` to `CLAUDE.md`, or run `read node_modules/@kitn.ai/ui/llms-full.txt` in the session |
 | **GitHub Copilot** | Add the path to `.github/copilot-instructions.md`; workspace indexing picks it up |
 | **Cursor** | Reference the file in `.cursorrules` |
-| **Codex / ChatGPT** | Paste `https://kitn-ai.github.io/chat/llms.txt` into the prompt, or fetch it with a browsing tool |
-| **Any agent** | `npm install @kitn.ai/chat` — file is at `node_modules/@kitn.ai/chat/llms.txt` |
+| **Codex / ChatGPT** | Paste `https://ui.kitn.ai/llms.txt` into the prompt, or fetch it with a browsing tool |
+| **Any agent** | `npm install @kitn.ai/ui` — file is at `node_modules/@kitn.ai/ui/llms.txt` |
 
 ## What agents most commonly get wrong
 
@@ -54,28 +54,28 @@ An HTML attribute is always a string. Passing `messages`, `models`, `context`, `
 
 ```js
 // Works — set the property in JavaScript
-const chat = document.querySelector('kc-chat');
+const chat = document.querySelector('kai-chat');
 chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
 ```
 
 ```html
 <!-- Fails — an array can't be an HTML attribute -->
-<kc-chat messages="[...]"></kc-chat>
+<kai-chat messages="[...]"></kai-chat>
 ```
 
 Only scalar props — `placeholder`, `loading`, `theme` — work as attributes.
 
-### 2 — Events are non-bubbling `kc-*` CustomEvents
+### 2 — Events are non-bubbling `kai-*` CustomEvents
 
 Listen directly on the element, not on a parent:
 
 ```js
-chat.addEventListener('kc-submit', (e) => {
+chat.addEventListener('kai-submit', (e) => {
   console.log(e.detail.value); // the text the user typed
 });
 ```
 
-Common events: `kc-submit`, `kc-feedback`, `kc-model-change`, `kc-new-chat`, `kc-select`.
+Common events: `kai-submit`, `kai-feedback`, `kai-model-change`, `kai-new-chat`, `kai-select`.
 
 ### 3 — Streaming requires a new array and a new object on every chunk
 
@@ -96,12 +96,12 @@ The same rule applies to every array/object property: always assign a new refere
 ## Runbook: wire a streaming chat in 15 lines
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
-const chat = document.querySelector('kc-chat');
+const chat = document.querySelector('kai-chat');
 chat.messages = [];
 
-chat.addEventListener('kc-submit', async (e) => {
+chat.addEventListener('kai-submit', async (e) => {
   const userText = e.detail.value;
 
   // Append user message — new array
@@ -133,12 +133,12 @@ chat.addEventListener('kc-submit', async (e) => {
 The raw machine-readable spec — every property, event, attribute, and type — is published at:
 
 ```
-https://unpkg.com/@kitn.ai/chat/dist/custom-elements.json
+https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 ```
 
 This is the source from which `llms.txt` and `llms-full.txt` are generated. IDE plugins that consume the [Custom Elements Manifest](https://custom-elements-manifest.open-wc.org/) format can read it directly.
 
 ## Related
 
-- [Installation](/chat/guides/installation/) — install the package and register the web components
-- [Getting Started](/chat/guides/getting-started/) — first steps with `<kc-chat>`
+- [Installation](/guides/installation/) — install the package and register the web components
+- [Getting Started](/guides/getting-started/) — first steps with `<kai-chat>`

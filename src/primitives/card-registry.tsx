@@ -1,9 +1,9 @@
 // src/primitives/card-registry.tsx
 // One source of truth mapping a CardEnvelope.type to a renderer, for both layers:
 //   - CardComponentMap drives the Solid <CardRenderer>.
-//   - CardTagMap drives the <kc-cards> web component (child kc-* elements).
+//   - CardTagMap drives the <kai-cards> web component (child kai-* elements).
 // Built-ins cover the 5 contract card types; consumers extend/override via a `types`
-// prop (merged OVER the built-ins). kc-card (bare shell) is intentionally NOT a target.
+// prop (merged OVER the built-ins). kai-card (bare shell) is intentionally NOT a target.
 import type { Component } from 'solid-js';
 import type { CardEnvelope, CardHost } from './card-contract';
 import { Form } from '../components/form';
@@ -19,16 +19,16 @@ import { Embed } from '../components/embed';
 export type CardComponent = Component<{ envelope: CardEnvelope; host?: CardHost }>;
 export type CardComponentMap = Record<string, CardComponent>;
 
-/** Web-component layer: envelope type → kc-* tag name. */
+/** Web-component layer: envelope type → kai-* tag name. */
 export type CardTagMap = Record<string, string>;
 
 export const BUILTIN_CARD_TAGS: CardTagMap = {
-  form: 'kc-form',
-  confirm: 'kc-confirm',
-  'tasks': 'kc-tasks',
-  choice: 'kc-choice',
-  link: 'kc-link-preview',
-  embed: 'kc-embed',
+  form: 'kai-form',
+  confirm: 'kai-confirm',
+  'tasks': 'kai-tasks',
+  choice: 'kai-choice',
+  link: 'kai-link-preview',
+  embed: 'kai-embed',
 };
 
 export const BUILTIN_CARD_COMPONENTS: CardComponentMap = {

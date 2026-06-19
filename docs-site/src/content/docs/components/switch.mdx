@@ -12,37 +12,37 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-switch</p>
+<p class="kai-tag-sub">kai-switch</p>
 
-<p class="kc-lede">A toggle switch for a setting that applies the moment it flips — "Temporary chat", notifications, a feature flag. It manages its own on/off state and reports changes with a single event.</p>
+<p class="kai-lede">A toggle switch for a setting that applies the moment it flips — "Temporary chat", notifications, a feature flag. It manages its own on/off state and reports changes with a single event.</p>
 
 <Facts items={['Shadow DOM', '1 event', 'role="switch"', 'Keyboard operable', 'Self-managing']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-switch" />
+<Playground client:only="solid" tag="kai-switch" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-switch>` for an immediate on/off setting in a header menu, a settings row, or a preference panel. For a labelled choice submitted with a form, prefer a checkbox. In SolidJS, the `Switch` primitive does the same without the web-component wrapper.
+Use `<kai-switch>` for an immediate on/off setting in a header menu, a settings row, or a preference panel. For a labelled choice submitted with a form, prefer a checkbox. In SolidJS, the `Switch` primitive does the same without the web-component wrapper.
 </Aside>
 
 ## Usage
 
-Set the initial state with the `checked` attribute and read changes from `kc-change`:
+Set the initial state with the `checked` attribute and read changes from `kai-change`:
 
 ```html
-<kc-switch checked label="Temporary chat"></kc-switch>
+<kai-switch checked label="Temporary chat"></kai-switch>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
-  document.querySelector('kc-switch')
-    .addEventListener('kc-change', (e) => console.log('checked:', e.detail.checked));
+  document.querySelector('kai-switch')
+    .addEventListener('kai-change', (e) => console.log('checked:', e.detail.checked));
 </script>
 ```
 
-- **Self-managing** — the switch toggles on click or Space/Enter and tracks its own state; you only listen for `kc-change`.
-- **`checked`** — a bare attribute (`<kc-switch checked>`) starts it on.
+- **Self-managing** — the switch toggles on click or Space/Enter and tracks its own state; you only listen for `kai-change`.
+- **`checked`** — a bare attribute (`<kai-switch checked>`) starts it on.
 - **`label`** — sets the accessible name (`aria-label`); the switch is visual-only, so always provide one.
 - **`disabled`** — blocks interaction and dims the control.
 
@@ -52,24 +52,24 @@ Set the initial state with the `checked` attribute and read changes from `kc-cha
 
 Starts on via the `checked` attribute.
 
-<Example client:visible tag="kc-switch" config={{ checked: true, label: 'Notifications' }} />
+<Example client:visible tag="kai-switch" config={{ checked: true, label: 'Notifications' }} />
 
 ### Disabled
 
 Non-interactive and dimmed.
 
-<Example client:visible tag="kc-switch" config={{ disabled: true, label: 'Sync' }} />
+<Example client:visible tag="kai-switch" config={{ disabled: true, label: 'Sync' }} />
 
 ## Props
 
-<PropTable tag="kc-switch" />
+<PropTable tag="kai-switch" />
 
 ## Events
 
-<EventTable tag="kc-switch" />
+<EventTable tag="kai-switch" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-switch" />
+<ComposedFrom tag="kai-switch" />
 
 <NeedAHand />

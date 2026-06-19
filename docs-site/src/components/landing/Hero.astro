@@ -1,0 +1,111 @@
+---
+// Landing hero — AI-forward headline, CTAs, install one-liner, and a live
+// <kai-chat> island. Full-bleed; magenta/charcoal grid + gradient background.
+import { Icon } from 'astro-icon/components';
+import HeroChat from './HeroChat.tsx';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
+---
+
+<section class="hero-bg relative isolate overflow-hidden">
+  <div class="relative z-[1] mx-auto grid max-w-[80rem] items-center gap-12 px-6 py-16 sm:py-20 lg:grid-cols-[1.04fr_0.96fr] lg:gap-12 lg:py-28">
+    <!-- Copy -->
+    <div class="hero-copy min-w-0 max-w-2xl">
+      <p class="hero-rise text-xs font-extrabold uppercase tracking-[0.2em] text-ink-3" style="--d:0ms">
+        Framework-agnostic web components
+      </p>
+
+      <h1 class="hero-rise mt-7 text-balance text-4xl font-black leading-[1.04] tracking-[-0.02em] text-ink sm:text-5xl lg:text-[3.6rem]" style="--d:60ms">
+        Build <span class="whitespace-nowrap">AI-native</span> apps that run <span class="text-brand">anywhere</span>.
+      </h1>
+
+      <p class="hero-rise mt-6 max-w-xl text-lg leading-relaxed text-ink-2" style="--d:120ms">
+        The web UI layer for AI agents. Bring your model, SDK, or your own agent
+        loop — drop in framework-agnostic components for streaming, tool calls,
+        reasoning, and artifacts, in any app.
+      </p>
+
+      <div class="hero-rise mt-8 flex flex-wrap items-center gap-3" style="--d:180ms">
+        <a href={href('guides/getting-started')} class="group inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-white no-underline transition-colors hover:bg-[var(--kai-brand-hover)]">
+          Get started
+          <Icon name="lucide:arrow-right" class="size-4 transition-transform group-hover:translate-x-0.5" />
+        </a>
+        <a href={href('components/artifact')} class="inline-flex items-center gap-2 rounded-full border border-line bg-surface/50 px-5 py-3 text-sm font-semibold text-ink no-underline backdrop-blur transition-colors hover:border-[var(--kai-brand)]">
+          Browse components
+        </a>
+      </div>
+
+      <!-- Install one-liner -->
+      <div class="hero-rise mt-6 flex max-w-sm items-center gap-3 rounded-xl border border-line bg-surface/60 px-4 py-2.5 font-mono text-sm backdrop-blur" style="--d:240ms">
+        <span class="select-none text-brand">$</span>
+        <code class="min-w-0 flex-1 truncate text-ink">npm i @kitn.ai/ui</code>
+        <button type="button" data-copy="npm i @kitn.ai/ui" aria-label="Copy install command" class="kai-copy flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-ink-3 transition-colors hover:bg-ink/5 hover:text-ink">
+          <Icon name="lucide:copy" class="kai-copy-i size-4" />
+          <Icon name="lucide:check" class="kai-check-i size-4 text-brand" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Live chat -->
+    <div class="hero-chat-wrap hero-rise relative min-w-0 h-[28rem] sm:h-[32rem] lg:h-[35rem]" style="--d:340ms">
+      <div class="chat-frame relative h-full">
+        <HeroChat client:load />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Atmospheric background: magenta + blue radial glows, faint masked grid. */
+  .hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: -20% -10% auto -10%;
+    height: 120%;
+    background:
+      radial-gradient(46% 48% at 16% 6%, color-mix(in oklab, var(--kai-brand) 24%, transparent) 0%, transparent 66%),
+      radial-gradient(40% 44% at 90% 18%, color-mix(in oklab, var(--kai-info) 18%, transparent) 0%, transparent 68%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(color-mix(in oklab, var(--kai-line) 60%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--kai-line) 60%, transparent) 1px, transparent 1px);
+    background-size: 42px 42px;
+    -webkit-mask-image: radial-gradient(120% 85% at 50% 0%, #000 28%, transparent 78%);
+    mask-image: radial-gradient(120% 85% at 50% 0%, #000 28%, transparent 78%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.55;
+  }
+
+  /* A real elevation drop-shadow on the demo frame (no glow). */
+  .chat-frame { box-shadow: 0 36px 90px -44px rgb(0 0 0 / 0.7); border-radius: 1rem; }
+
+  /* Copy button icon swap. */
+  .kai-copy .kai-check-i { display: none; }
+  .kai-copy.copied .kai-copy-i { display: none; }
+  .kai-copy.copied .kai-check-i { display: inline; }
+
+  /* One orchestrated load-in: staggered rise. */
+  .hero-rise { opacity: 0; transform: translateY(14px); animation: heroRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: var(--d, 0ms); }
+  @keyframes heroRise { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .hero-rise { animation: none; opacity: 1; transform: none; } }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.kai-copy[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy || '');
+        btn.classList.add('copied');
+        setTimeout(() => btn.classList.remove('copied'), 1500);
+      } catch { /* clipboard blocked */ }
+    });
+  });
+</script>

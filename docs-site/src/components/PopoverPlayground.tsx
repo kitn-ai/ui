@@ -1,11 +1,11 @@
-/** Bespoke placement picker for the <kc-popover> page. Unlike the generic
+/** Bespoke placement picker for the <kai-popover> page. Unlike the generic
  *  Playground's pill/select controls, placement is spatial — so the trigger sits
  *  in the center and the 12 placements are buttons arranged around it (the
  *  Floating UI docs pattern). Click one and the always-open popover jumps there,
  *  so you see exactly what each placement does. The popover is remounted per
  *  placement (its position is read at mount), and kept open to showcase it.
  *
- *  NB: no CSS `transform` on any ancestor of <kc-popover> — a transformed
+ *  NB: no CSS `transform` on any ancestor of <kai-popover> — a transformed
  *  ancestor becomes the containing block for the panel's `position: fixed`, which
  *  would break Floating UI's viewport-relative positioning. */
 import { createSignal, onMount, onCleanup, For, Show } from 'solid-js';
@@ -74,7 +74,7 @@ export default function PopoverPlayground() {
         <For each={[placement()]}>
           {(p) => (
             // @ts-expect-error custom element
-            <kc-popover ref={init} placement={p}>
+            <kai-popover ref={init} placement={p}>
               <button slot="trigger" type="button" class="inline-flex items-center gap-1 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-sm font-semibold text-ink">
                 GPT-5.5
                 <IconChevron style={{ width: '0.9rem', height: '0.9rem', opacity: 0.55 }} />
@@ -90,7 +90,7 @@ export default function PopoverPlayground() {
                 <button type="button" class="flex w-full items-center rounded-md px-2 py-1.5 text-left hover:bg-line/60">Settings…</button>
               </div>
               {/* @ts-expect-error custom element */}
-            </kc-popover>
+            </kai-popover>
           )}
         </For>
         </Show>

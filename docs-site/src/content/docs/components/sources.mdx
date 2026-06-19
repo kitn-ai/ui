@@ -11,18 +11,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-sources</p>
+<p class="kai-tag-sub">kai-sources</p>
 
-<p class="kc-lede">A wrapping row of citation chips that renders the sources behind an assistant answer — each chip shows the domain (or a custom label), an optional favicon, and a hover-card with the title and description.</p>
+<p class="kai-lede">A wrapping row of citation chips that renders the sources behind an assistant answer — each chip shows the domain (or a custom label), an optional favicon, and a hover-card with the title and description.</p>
 
 <Facts items={['Shadow DOM', 'No events', 'Optional favicons', 'Numbered or domain labels', 'Declarative children']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-sources" />
+<Playground client:only="solid" tag="kai-sources" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-sources>` directly below an assistant message when the reply cites external references. Use `numbered` when the answer body uses `[1]`, `[2]`, … citation markers. Use the `sources` property for dynamic or streamed lists; use declarative `<kc-source>` children for static or server-rendered markup.
+Place `<kai-sources>` directly below an assistant message when the reply cites external references. Use `numbered` when the answer body uses `[1]`, `[2]`, … citation markers. Use the `sources` property for dynamic or streamed lists; use declarative `<kai-source>` children for static or server-rendered markup.
 </Aside>
 
 ## Usage
@@ -30,9 +30,9 @@ Place `<kc-sources>` directly below an assistant message when the reply cites ex
 Assign the `sources` property — an array can't be an HTML attribute:
 
 ```html
-<kc-sources id="srcs" show-favicon></kc-sources>
+<kai-sources id="srcs" show-favicon></kai-sources>
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   document.getElementById('srcs').sources = [
     { href: 'https://kitn.dev', title: 'kitn — the kit', description: 'Composable chat UI.' },
     { href: 'https://solidjs.com', title: 'SolidJS', description: 'A reactive UI library.' },
@@ -43,28 +43,28 @@ Assign the `sources` property — an array can't be an HTML attribute:
 - Each item accepts `href` (required), `title`, `description`, `label`, and `showFavicon`.
 - **`show-favicon`** enables favicons globally; a per-item `showFavicon: false` overrides for that chip.
 - **`numbered`** replaces domain labels with `[1]`, `[2]`, … — useful when the response body uses in-line citation markers.
-- **Declarative path** — write `<kc-source>` elements as light-DOM children of `<kc-sources>`. Prop sources render first; declarative children are appended after.
+- **Declarative path** — write `<kai-source>` elements as light-DOM children of `<kai-sources>`. Prop sources render first; declarative children are appended after.
 
 ## Examples
 
 ### Default with Favicons
 
-<Example client:visible tag="kc-sources" config={{ showFavicon: true }} />
+<Example client:visible tag="kai-sources" config={{ showFavicon: true }} />
 
 ### Domain Labels Only
 
-<Example client:visible tag="kc-sources" data="noFavicon" />
+<Example client:visible tag="kai-sources" data="noFavicon" />
 
 ### Numbered Citations
 
-<Example client:visible tag="kc-sources" config={{ numbered: true }} data="numbered" />
+<Example client:visible tag="kai-sources" config={{ numbered: true }} data="numbered" />
 
 ## Props
 
-<PropTable tag="kc-sources" />
+<PropTable tag="kai-sources" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-sources" />
+<ComposedFrom tag="kai-sources" />
 
 <NeedAHand />

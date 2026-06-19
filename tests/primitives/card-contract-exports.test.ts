@@ -13,7 +13,7 @@ import {
 
 test('contract foundation is exported from the public barrel', () => {
   expect(CARD_CONTRACT_VERSION).toBe('1');
-  expect(CARD_EVENT_NAME).toBe('kc-card');
+  expect(CARD_EVENT_NAME).toBe('kai-card');
   expect(typeof CardProvider).toBe('function');
   expect(typeof useCardHost).toBe('function');
   expect(typeof emitCardEvent).toBe('function');

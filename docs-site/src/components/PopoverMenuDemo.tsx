@@ -1,7 +1,7 @@
-/** Proves the new <kc-popover> primitive by rebuilding the ChatGPT-style header
+/** Proves the new <kai-popover> primitive by rebuilding the ChatGPT-style header
  *  menu: a trigger button opens a popover card holding arbitrary content — a
  *  flagship model row, an expandable "Legacy models" group, and a "Temporary
- *  chat" toggle. All slotted as light DOM; kc-popover frames + positions it. */
+ *  chat" toggle. All slotted as light DOM; kai-popover frames + positions it. */
 import { createSignal, onMount, onCleanup, Show, For } from 'solid-js';
 import { loadKit } from './example/kit';
 import IconChevron from '~icons/lucide/chevron-down';
@@ -33,7 +33,7 @@ export default function PopoverMenuDemo() {
   return (
     <div class="not-content my-5 flex min-h-[360px] items-start justify-center rounded-xl border border-line bg-surface p-6">
       {/* @ts-expect-error custom element */}
-      <kc-popover ref={(el: HTMLElement) => (popEl = el)} placement="bottom-start">
+      <kai-popover ref={(el: HTMLElement) => (popEl = el)} placement="bottom-start">
         <button
           slot="trigger"
           type="button"
@@ -80,13 +80,13 @@ export default function PopoverMenuDemo() {
               aria-label="Temporary chat"
               onClick={() => setTemporary(!temporary())}
               class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors"
-              style={{ background: temporary() ? 'var(--kc-brand, #d6207f)' : 'var(--color-line, #d4d4d8)' }}
+              style={{ background: temporary() ? 'var(--kai-brand, #d6207f)' : 'var(--color-line, #d4d4d8)' }}
             >
               <span class="inline-block h-4 w-4 rounded-full bg-white transition-transform" style={{ transform: temporary() ? 'translateX(1.125rem)' : 'translateX(0.125rem)' }} />
             </button>
           </div>
         </div>
-      </kc-popover>
+      </kai-popover>
     </div>
   );
 }

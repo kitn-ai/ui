@@ -1,7 +1,7 @@
 import type { ExampleUsage, StoryUsage } from './types';
 
 /**
- * Build the web-component snippets. `<kc-context>` takes a single `context`
+ * Build the web-component snippets. `<kai-context>` takes a single `context`
  * object PROPERTY (`usedTokens`, `maxTokens`, plus optional input/output/
  * reasoning/cache token counts + `estimatedCost`) and renders the trigger,
  * popover, and breakdown for you.
@@ -11,7 +11,7 @@ import type { ExampleUsage, StoryUsage } from './types';
  *   - `dangerThreshold` (default 0.9)  — fraction above which the bar turns red
  *
  * When the computed severity level changes (`ok` → `warn` → `danger` or back),
- * `<kc-context>` fires a **`kc-threshold-change`** CustomEvent with
+ * `<kai-context>` fires a **`kai-threshold-change`** CustomEvent with
  * `detail.level` set to `'ok'`, `'warn'`, or `'danger'`.
  *
  * Token counts come from the API response `usage` field after each turn:
@@ -23,10 +23,10 @@ import type { ExampleUsage, StoryUsage } from './types';
  */
 const htmlSnippet = (obj: string) => `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
-<kc-context id="ctx"></kc-context>
+<kai-context id="ctx"></kai-context>
 
 <script type="module">
   const ctx = document.getElementById('ctx');
@@ -34,7 +34,7 @@ const htmlSnippet = (obj: string) => `<!-- Register the elements once (CDN or bu
   ctx.context = ${obj};
 </script>`;
 
-const reactSnippet = (obj: string) => `import { Context } from '@kitn.ai/chat/react';
+const reactSnippet = (obj: string) => `import { Context } from '@kitn.ai/ui/react';
 
 export function UsageIndicator() {
   return (
@@ -43,18 +43,18 @@ export function UsageIndicator() {
 }`;
 
 const vueSnippet = (obj: string) => `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 const context = ${obj};
 </script>
 
 <template>
   <!-- .prop binds the object as a property (attributes only take strings). -->
-  <kc-context :context.prop="context" />
+  <kai-context :context.prop="context" />
 </template>`;
 
 const svelteSnippet = (obj: string) => `<script>
-  import '@kitn.ai/chat/elements'; // register once
+  import '@kitn.ai/ui/elements'; // register once
 
   let el;
   const context = ${obj};
@@ -63,9 +63,9 @@ const svelteSnippet = (obj: string) => `<script>
   $: if (el) el.context = context;
 </script>
 
-<kc-context bind:this={el} />`;
+<kai-context bind:this={el} />`;
 
-const angularSnippet = (obj: string) => `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+const angularSnippet = (obj: string) => `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component/module.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -74,7 +74,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
-    <kc-context [context]="context"></kc-context>
+    <kai-context [context]="context"></kai-context>
   \`,
 })
 export class UsageComponent {
@@ -89,7 +89,7 @@ export class UsageComponent {
  */
 const lowUsage: StoryUsage = {
   intro:
-    "Show how much of the model's context window is used. Pass a `context` object with `usedTokens` / `maxTokens` (plus optional `inputTokens` / `outputTokens` / `estimatedCost`) to `<kc-context>` as a JS **property** — the trigger colour shifts green → yellow → red as usage climbs. Override the thresholds with `warnThreshold` (default `0.7`) and `dangerThreshold` (default `0.9`) numeric properties. Listen for `kc-threshold-change` to react when severity shifts. (The live demo composes the SolidJS `Context` primitives.)",
+    "Show how much of the model's context window is used. Pass a `context` object with `usedTokens` / `maxTokens` (plus optional `inputTokens` / `outputTokens` / `estimatedCost`) to `<kai-context>` as a JS **property** — the trigger colour shifts green → yellow → red as usage climbs. Override the thresholds with `warnThreshold` (default `0.7`) and `dangerThreshold` (default `0.9`) numeric properties. Listen for `kai-threshold-change` to react when severity shifts. (The live demo composes the SolidJS `Context` primitives.)",
   snippets: {
     html: htmlSnippet(`{
     usedTokens: 4200,
@@ -130,7 +130,7 @@ const lowUsage: StoryUsage = {
   Context, ContextTrigger, ContextContent,
   ContextContentHeader, ContextContentBody, ContextContentFooter,
   ContextInputUsage, ContextOutputUsage,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 
 export function UsageIndicator() {
   return (
@@ -205,7 +205,7 @@ const mediumUsage: StoryUsage = {
   Context, ContextTrigger, ContextContent,
   ContextContentHeader, ContextContentBody, ContextContentFooter,
   ContextInputUsage, ContextOutputUsage, ContextReasoningUsage,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 
 export function UsageIndicator() {
   return (
@@ -281,7 +281,7 @@ const highUsage: StoryUsage = {
   Context, ContextTrigger, ContextContent,
   ContextContentHeader, ContextContentBody, ContextContentFooter,
   ContextInputUsage, ContextOutputUsage, ContextReasoningUsage,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 
 export function UsageIndicator() {
   return (
@@ -316,7 +316,7 @@ export function UsageIndicator() {
  */
 const withCache: StoryUsage = {
   intro:
-    "Show the full breakdown including cache-hit tokens. Add `cacheTokens` to the `context` object (sourced from `usage.cache_read_input_tokens` in the API response) and `<kc-context>` includes it in the popover breakdown. (The live demo composes the SolidJS `Context` primitives, adding a `ContextCacheUsage` row.)",
+    "Show the full breakdown including cache-hit tokens. Add `cacheTokens` to the `context` object (sourced from `usage.cache_read_input_tokens` in the API response) and `<kai-context>` includes it in the popover breakdown. (The live demo composes the SolidJS `Context` primitives, adding a `ContextCacheUsage` row.)",
   snippets: {
     html: htmlSnippet(`{
     usedTokens: 82000,
@@ -367,7 +367,7 @@ const withCache: StoryUsage = {
   Context, ContextTrigger, ContextContent,
   ContextContentHeader, ContextContentBody, ContextContentFooter,
   ContextInputUsage, ContextOutputUsage, ContextReasoningUsage, ContextCacheUsage,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 
 export function UsageIndicator() {
   return (
@@ -393,22 +393,22 @@ export function UsageIndicator() {
 };
 
 /**
- * In a Header Bar — `<kc-context>` sitting next to a model switcher in an app
- * header. The header chrome and `<kc-model-switcher>` are siblings; the usage
+ * In a Header Bar — `<kai-context>` sitting next to a model switcher in an app
+ * header. The header chrome and `<kai-model-switcher>` are siblings; the usage
  * indicator itself is the same `context` object as the other stories.
  */
 const inHeaderBar: StoryUsage = {
   intro:
-    "Drop the usage indicator into your app header next to the model switcher. `<kc-context>` is just an inline element — lay it out with your own header markup. The `<kc-model-switcher>` beside it takes a `models` array property and fires `modelchange`. (The live demo composes the SolidJS `Context` + `ModelSwitcher` primitives.)",
+    "Drop the usage indicator into your app header next to the model switcher. `<kai-context>` is just an inline element — lay it out with your own header markup. The `<kai-model-switcher>` beside it takes a `models` array property and fires `modelchange`. (The live demo composes the SolidJS `Context` + `ModelSwitcher` primitives.)",
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
 <header style="display:flex;align-items:center;gap:0.5rem">
-  <kc-model-switcher id="models"></kc-model-switcher>
-  <kc-context id="ctx"></kc-context>
+  <kai-model-switcher id="models"></kai-model-switcher>
+  <kai-context id="ctx"></kai-context>
 </header>
 
 <script type="module">
@@ -428,9 +428,9 @@ const inHeaderBar: StoryUsage = {
     { id: 'claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic' },
   ];
   models.currentModel = 'claude-4';
-  models.addEventListener('kc-model-change', (e) => console.log(e.detail));
+  models.addEventListener('kai-model-change', (e) => console.log(e.detail));
 </script>`,
-    react: `import { Context, ModelSwitcher } from '@kitn.ai/chat/react';
+    react: `import { Context, ModelSwitcher } from '@kitn.ai/ui/react';
 
 export function ChatHeader() {
   const models = [
@@ -453,7 +453,7 @@ export function ChatHeader() {
   );
 }`,
     vue: `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 const context = {
   usedTokens: 67000,
@@ -470,12 +470,12 @@ const models = [
 
 <template>
   <header style="display:flex;align-items:center;gap:0.5rem">
-    <kc-model-switcher :models.prop="models" current-model="claude-4" @kc-model-change="(e) => console.log(e.detail)" />
-    <kc-context :context.prop="context" />
+    <kai-model-switcher :models.prop="models" current-model="claude-4" @kai-model-change="(e) => console.log(e.detail)" />
+    <kai-context :context.prop="context" />
   </header>
 </template>`,
     svelte: `<script>
-  import '@kitn.ai/chat/elements'; // register once
+  import '@kitn.ai/ui/elements'; // register once
 
   let ctxEl, modelsEl;
   const context = {
@@ -495,10 +495,10 @@ const models = [
 </script>
 
 <header style="display:flex;align-items:center;gap:0.5rem">
-  <kc-model-switcher bind:this={modelsEl} current-model="claude-4" on:kc-model-change={(e) => console.log(e.detail)} />
-  <kc-context bind:this={ctxEl} />
+  <kai-model-switcher bind:this={modelsEl} current-model="claude-4" on:kai-model-change={(e) => console.log(e.detail)} />
+  <kai-context bind:this={ctxEl} />
 </header>`,
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component/module.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -508,8 +508,8 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
     <header style="display:flex;align-items:center;gap:0.5rem">
-      <kc-model-switcher [models]="models" current-model="claude-4" (kc-model-change)="onModelChange($event)"></kc-model-switcher>
-      <kc-context [context]="context"></kc-context>
+      <kai-model-switcher [models]="models" current-model="claude-4" (kai-model-change)="onModelChange($event)"></kai-model-switcher>
+      <kai-context [context]="context"></kai-context>
     </header>
   \`,
 })
@@ -533,8 +533,8 @@ import {
   ContextContentHeader, ContextContentBody, ContextContentFooter,
   ContextInputUsage, ContextOutputUsage,
   ModelSwitcher,
-} from '@kitn.ai/chat';
-import type { ModelOption } from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
+import type { ModelOption } from '@kitn.ai/ui';
 
 export function ChatHeader() {
   const [modelId, setModelId] = createSignal('claude-4');
@@ -567,7 +567,7 @@ export function ChatHeader() {
 
 /**
  * Example: Context & Token Usage — show how much of the model's context window
- * is consumed by the conversation. `<kc-context>` takes a single `context`
+ * is consumed by the conversation. `<kai-context>` takes a single `context`
  * object property (`usedTokens`, `maxTokens`, plus optional input/output/
  * reasoning/cache token counts + `estimatedCost`); it renders the trigger,
  * popover, and breakdown and has no events. SolidJS composes the `Context`

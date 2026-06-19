@@ -13,10 +13,10 @@ Seven collection elements in the kit accept two input paths — **data** (a JS p
 Set the element's array property from JavaScript. The parent re-renders reactively whenever the reference changes.
 
 ```html
-<kc-suggestions id="s"></kc-suggestions>
+<kai-suggestions id="s"></kai-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   document.getElementById('s').suggestions = [
     { label: 'Summarise this', value: 'summarise' },
@@ -27,16 +27,16 @@ Set the element's array property from JavaScript. The parent re-renders reactive
 
 ### Composition — declarative child elements
 
-Place `<kc-*>` child elements directly in markup. They live in the light DOM but are invisible — the parent's Shadow DOM has no `<slot>` for them, so it reads them via `querySelectorAll` and a `MutationObserver` instead. No JavaScript required.
+Place `<kai-*>` child elements directly in markup. They live in the light DOM but are invisible — the parent's Shadow DOM has no `<slot>` for them, so it reads them via `querySelectorAll` and a `MutationObserver` instead. No JavaScript required.
 
 ```html
-<kc-suggestions>
-  <kc-suggestion value="summarise">Summarise this</kc-suggestion>
-  <kc-suggestion value="translate">Translate to French</kc-suggestion>
-</kc-suggestions>
+<kai-suggestions>
+  <kai-suggestion value="summarise">Summarise this</kai-suggestion>
+  <kai-suggestion value="translate">Translate to French</kai-suggestion>
+</kai-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 </script>
 ```
 
@@ -63,9 +63,9 @@ When both are provided, **property items render first** and child elements are a
 
 Each row below is verified against the element's source in `src/elements/`.
 
-### `<kc-action>`
+### `<kai-action>`
 
-**Parents:** `<kc-message>` (action bar → `kc-message-action`) and `<kc-prompt-input>` (custom toolbar buttons → `kc-toolbar-action`)
+**Parents:** `<kai-message>` (action bar → `kai-message-action`) and `<kai-prompt-input>` (custom toolbar buttons → `kai-toolbar-action`)
 
 | Attribute | Maps to | Notes |
 |-----------|---------|-------|
@@ -75,40 +75,40 @@ Each row below is verified against the element's source in `src/elements/`.
 | `tooltip` | `CustomAction.tooltip` | Optional tooltip string |
 | *(text content)* | `CustomAction.label` | Falls back to the `label` attribute, then `id` |
 
-**Event fired by parent:** `kc-message-action` → `{ messageId: string, action: string }`
+**Event fired by parent:** `kai-message-action` → `{ messageId: string, action: string }`
 
 ```html
-<kc-message>
-  <kc-action id="copy" icon="copy" tooltip="Copy to clipboard">Copy</kc-action>
-  <kc-action id="retry" icon="refresh">Retry</kc-action>
-</kc-message>
+<kai-message>
+  <kai-action id="copy" icon="copy" tooltip="Copy to clipboard">Copy</kai-action>
+  <kai-action id="retry" icon="refresh">Retry</kai-action>
+</kai-message>
 ```
 
 ---
 
-### `<kc-suggestion>`
+### `<kai-suggestion>`
 
-**Parent:** `<kc-suggestions>`
+**Parent:** `<kai-suggestions>`
 
 | Attribute | Maps to | Notes |
 |-----------|---------|-------|
 | `value` | `Item.value` | Falls back to text content when absent |
 | *(text content)* | `Item.label` | The chip label |
 
-**Event fired by parent:** `kc-select` → `{ value: string }`
+**Event fired by parent:** `kai-select` → `{ value: string }`
 
 ```html
-<kc-suggestions>
-  <kc-suggestion value="summarise">Summarise this</kc-suggestion>
-  <kc-suggestion value="translate">Translate to French</kc-suggestion>
-</kc-suggestions>
+<kai-suggestions>
+  <kai-suggestion value="summarise">Summarise this</kai-suggestion>
+  <kai-suggestion value="translate">Translate to French</kai-suggestion>
+</kai-suggestions>
 ```
 
 ---
 
-### `<kc-source>`
+### `<kai-source>`
 
-**Parent:** `<kc-sources>`
+**Parent:** `<kai-sources>`
 
 | Attribute | Maps to | Notes |
 |-----------|---------|-------|
@@ -117,29 +117,29 @@ Each row below is verified against the element's source in `src/elements/`.
 | `headline` | `SourceItem.title` | Hover-card headline. Named `headline` (not `title`) because `title` is a reserved HTML global attribute |
 | `description` | `SourceItem.description` | Hover-card body text |
 | `show-favicon` | `SourceItem.showFavicon` | Boolean — bare attribute or `show-favicon="true"` |
-| *(text content)* | *(not read by `kc-sources`)* | Text content on a child `<kc-source>` is not mapped by the parent; use `label`/`headline`/`description` attributes instead |
+| *(text content)* | *(not read by `kai-sources`)* | Text content on a child `<kai-source>` is not mapped by the parent; use `label`/`headline`/`description` attributes instead |
 
 **No interaction event** — sources open their `href` as links.
 
 ```html
-<kc-sources>
-  <kc-source
+<kai-sources>
+  <kai-source
     href="https://example.com/page"
     label="Example"
     headline="Example Domain"
     description="An illustrative domain used in documentation."
     show-favicon
-  ></kc-source>
-</kc-sources>
+  ></kai-source>
+</kai-sources>
 ```
 
-> **Note:** `<kc-source>` also works as a **standalone** element — its own `href`, `label`, `headline`, `description`, and `show-favicon` props drive a single citation chip with a hover-card. The child-element role above is its use *inside* `<kc-sources>`.
+> **Note:** `<kai-source>` also works as a **standalone** element — its own `href`, `label`, `headline`, `description`, and `show-favicon` props drive a single citation chip with a hover-card. The child-element role above is its use *inside* `<kai-sources>`.
 
 ---
 
-### `<kc-conversation>`
+### `<kai-conversation>`
 
-**Parent:** `<kc-conversations>`
+**Parent:** `<kai-conversations>`
 
 | Attribute | Maps to | Notes |
 |-----------|---------|-------|
@@ -149,20 +149,20 @@ Each row below is verified against the element's source in `src/elements/`.
 
 Required fields not expressible as HTML attributes (`scope`, `messageCount`, `lastMessageAt`, `updatedAt`) receive safe defaults so the list item is fully functional with just `id` and text.
 
-**Events fired by parent:** `kc-conversation-select` → `{ id: string }`, `kc-new-chat` → `{}`, `kc-toggle-sidebar` → `{}`
+**Events fired by parent:** `kai-conversation-select` → `{ id: string }`, `kai-new-chat` → `{}`, `kai-toggle-sidebar` → `{}`
 
 ```html
-<kc-conversations>
-  <kc-conversation id="conv-1" group-id="today">Morning standup recap</kc-conversation>
-  <kc-conversation id="conv-2" group-id="yesterday">API design review</kc-conversation>
-</kc-conversations>
+<kai-conversations>
+  <kai-conversation id="conv-1" group-id="today">Morning standup recap</kai-conversation>
+  <kai-conversation id="conv-2" group-id="yesterday">API design review</kai-conversation>
+</kai-conversations>
 ```
 
 ---
 
-### `<kc-step>`
+### `<kai-step>`
 
-**Parent:** `<kc-chain-of-thought>`
+**Parent:** `<kai-chain-of-thought>`
 
 | Attribute | Maps to | Notes |
 |-----------|---------|-------|
@@ -172,42 +172,42 @@ Required fields not expressible as HTML attributes (`scope`, `messageCount`, `la
 **No interaction event** — steps expand/collapse internally.
 
 ```html
-<kc-chain-of-thought>
-  <kc-step label="Understand the request">The user wants a concise summary.</kc-step>
-  <kc-step label="Draft a response">Condense the key points into three sentences.</kc-step>
-  <kc-step label="Review"></kc-step>
-</kc-chain-of-thought>
+<kai-chain-of-thought>
+  <kai-step label="Understand the request">The user wants a concise summary.</kai-step>
+  <kai-step label="Draft a response">Condense the key points into three sentences.</kai-step>
+  <kai-step label="Review"></kai-step>
+</kai-chain-of-thought>
 ```
 
 ---
 
-### `<kc-model>`
+### `<kai-model>`
 
-**Parent:** `<kc-model-switcher>`
+**Parent:** `<kai-model-switcher>`
 
 | Attribute | Maps to | Notes |
 |-----------|---------|-------|
-| `id` | `ModelOption.id` | Required — the model identifier passed in `kc-model-change` |
+| `id` | `ModelOption.id` | Required — the model identifier passed in `kai-model-change` |
 | `provider` | `ModelOption.provider` | Optional provider name shown in the switcher UI |
 | *(text content)* | `ModelOption.name` | Human-readable model name |
 
-**Event fired by parent:** `kc-model-change` → `{ modelId: string }`
+**Event fired by parent:** `kai-model-change` → `{ modelId: string }`
 
 The switcher only renders when more than one model is provided.
 
 ```html
-<kc-model-switcher>
-  <kc-model id="gpt-4o" provider="OpenAI">GPT-4o</kc-model>
-  <kc-model id="gpt-4o-mini" provider="OpenAI">GPT-4o mini</kc-model>
-  <kc-model id="claude-3-7-sonnet" provider="Anthropic">Claude 3.7 Sonnet</kc-model>
-</kc-model-switcher>
+<kai-model-switcher>
+  <kai-model id="gpt-4o" provider="OpenAI">GPT-4o</kai-model>
+  <kai-model id="gpt-4o-mini" provider="OpenAI">GPT-4o mini</kai-model>
+  <kai-model id="claude-3-7-sonnet" provider="Anthropic">Claude 3.7 Sonnet</kai-model>
+</kai-model-switcher>
 ```
 
 ---
 
-### `<kc-skill>`
+### `<kai-skill>`
 
-**Parent:** `<kc-skills>`
+**Parent:** `<kai-skills>`
 
 | Attribute | Maps to | Notes |
 |-----------|---------|-------|
@@ -217,10 +217,10 @@ The switcher only renders when more than one model is provided.
 **No interaction event** — skills badges are display-only.
 
 ```html
-<kc-skills>
-  <kc-skill id="web-search">Web Search</kc-skill>
-  <kc-skill id="code">Code</kc-skill>
-</kc-skills>
+<kai-skills>
+  <kai-skill id="web-search">Web Search</kai-skill>
+  <kai-skill id="code">Code</kai-skill>
+</kai-skills>
 ```
 
 ---
@@ -232,10 +232,10 @@ The same set of suggestions rendered both ways — identical output, different a
 **Data path:**
 
 ```html
-<kc-suggestions id="s1"></kc-suggestions>
+<kai-suggestions id="s1"></kai-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   document.getElementById('s1').suggestions = [
     { label: 'Explain quantum computing', value: 'explain-quantum' },
     { label: 'Write a haiku', value: 'haiku' },
@@ -247,23 +247,23 @@ The same set of suggestions rendered both ways — identical output, different a
 **Composition path:**
 
 ```html
-<kc-suggestions>
-  <kc-suggestion value="explain-quantum">Explain quantum computing</kc-suggestion>
-  <kc-suggestion value="haiku">Write a haiku</kc-suggestion>
-  <kc-suggestion value="summarise">Summarise in bullet points</kc-suggestion>
-</kc-suggestions>
+<kai-suggestions>
+  <kai-suggestion value="explain-quantum">Explain quantum computing</kai-suggestion>
+  <kai-suggestion value="haiku">Write a haiku</kai-suggestion>
+  <kai-suggestion value="summarise">Summarise in bullet points</kai-suggestion>
+</kai-suggestions>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 </script>
 ```
 
-Both fire `kc-select` with the same `value` string. The only difference is where the data lives — in application state or in the HTML.
+Both fire `kai-select` with the same `value` string. The only difference is where the data lives — in application state or in the HTML.
 
 ---
 
 ## Customisation
 
-Child elements are **attribute- and text-driven data carriers**. Their visual appearance is entirely controlled by the parent element's props and the kit's design tokens (`--kc-*`, `--color-*`). There is no CSS to pierce through Shadow DOM boundaries and no per-child styling surface — reach for the parent's documented attributes and tokens instead.
+Child elements are **attribute- and text-driven data carriers**. Their visual appearance is entirely controlled by the parent element's props and the kit's design tokens (`--kai-*`, `--color-*`). There is no CSS to pierce through Shadow DOM boundaries and no per-child styling surface — reach for the parent's documented attributes and tokens instead.
 
 See **[Theming](?path=/docs/theming-overview--docs)** for the full token reference.

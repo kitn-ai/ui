@@ -1,7 +1,7 @@
 // Sync the docs site to the LIVE kit build — not a committed snapshot.
 //
 // Copies, from the repo root:
-//   dist/*.js                       → public/kitn/      (the kc-* element bundle
+//   dist/*.js                       → public/kitn/      (the kai-* element bundle
 //                                      + its hashed Shiki language/theme chunks,
 //                                      loaded at runtime by example/kit.ts)
 //   src/elements/element-meta.json  → src/data/         (props/events/composedFrom

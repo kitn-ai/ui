@@ -1,49 +1,49 @@
 ---
 title: Introduction
-description: kitn-chat is a set of Shadow-DOM web components for building AI chat interfaces in any framework.
+description: AI/UI is a set of Shadow-DOM web components for building AI chat and agent interfaces in any framework.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-**kitn-chat** (`@kitn.ai/chat`) is a set of web components for AI chat UIs — message threads, prompt input, streaming responses, markdown and code rendering, reasoning and tool-call panels, attachments, a conversation sidebar, and more. Around 50 elements, all named `kc-*`, all droppable into the app you already have.
+**AI/UI** (`@kitn.ai/ui`) is a set of web components for AI chat and agent UIs — message threads, prompt input, streaming responses, markdown and code rendering, reasoning and tool-call panels, attachments, a conversation sidebar, and more. Around 50 elements, all named `kai-*`, all droppable into the app you already have.
 
 ## What you're working with
 
-The `kc-*` elements are real custom elements. You register them once, then use `<kc-chat>` (and the rest) like any built-in HTML tag — in React, Vue, Svelte, Angular, or a plain `.html` file. There's no per-framework package to install and no wrapper to learn.
+The `kai-*` elements are real custom elements. You register them once, then use `<kai-chat>` (and the rest) like any built-in HTML tag — in React, Vue, Svelte, Angular, or a plain `.html` file. There's no per-framework package to install and no wrapper to learn.
 
 Each element renders inside its own **Shadow DOM**. Your page's CSS can't leak in and break the kit; the kit's styles can't leak out and break your page. You get a clean, isolated component you can drop anywhere.
 
 Register everything with one import:
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
 Then it's just HTML:
 
 ```html
-<kc-chat style="display: block; height: 100vh;"></kc-chat>
+<kai-chat style="display: block; height: 100vh;"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
-  const chat = document.querySelector('kc-chat');
+  const chat = document.querySelector('kai-chat');
 
   // Arrays can't be HTML attributes, so set messages in JavaScript.
   chat.messages = [
     { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
   ];
 
-  chat.addEventListener('kc-submit', (e) => {
+  chat.addEventListener('kai-submit', (e) => {
     console.log('user sent:', e.detail.value);
   });
 </script>
 ```
 
-Two things carry across every element: rich data (`messages`, `models`, `context`, `items`) goes on a JavaScript property, and the element talks back through `CustomEvent`s named `kc-*`. Scalars like `placeholder`, `loading`, and `theme` work as plain attributes.
+Two things carry across every element: rich data (`messages`, `models`, `context`, `items`) goes on a JavaScript property, and the element talks back through `CustomEvent`s named `kai-*`. Scalars like `placeholder`, `loading`, and `theme` work as plain attributes.
 
 <Aside type="note" title="Built with SolidJS — but you don't have to care">
-The elements are authored in SolidJS, which is why they're small and fast. That's an implementation detail: nothing about using `<kc-chat>` requires knowing Solid. If you do write Solid, you can import the underlying components directly for deeper composition — see [Working with primitives](/chat/guides/primitives/architecture/).
+The elements are authored in SolidJS, which is why they're small and fast. That's an implementation detail: nothing about using `<kai-chat>` requires knowing Solid. If you do write Solid, you can import the underlying components directly for deeper composition — see [Working with primitives](/guides/primitives/architecture/).
 </Aside>
 
 ## Use it in your framework
@@ -53,7 +53,7 @@ Same element everywhere. Only the syntax for passing a property and binding an e
 <Tabs>
 <TabItem label="React">
 ```tsx
-import { Chat } from '@kitn.ai/chat/react';
+import { Chat } from '@kitn.ai/ui/react';
 
 <Chat
   messages={messages}
@@ -63,69 +63,69 @@ import { Chat } from '@kitn.ai/chat/react';
 </TabItem>
 <TabItem label="Vue">
 ```html
-<kc-chat
+<kai-chat
   :messages.prop="messages"
-  @kc-submit="handleSubmit"
+  @kai-submit="handleSubmit"
 />
 ```
 </TabItem>
 <TabItem label="Angular">
 ```html
-<kc-chat
+<kai-chat
   [messages]="messages"
-  (kc-submit)="handleSubmit($event)"
-></kc-chat>
+  (kai-submit)="handleSubmit($event)"
+></kai-chat>
 ```
 </TabItem>
 <TabItem label="Svelte">
 ```html
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 </script>
 
-<kc-chat
+<kai-chat
   {messages}
-  on:kc-submit={handleSubmit}
-></kc-chat>
+  on:kai-submit={handleSubmit}
+></kai-chat>
 ```
 </TabItem>
 <TabItem label="HTML">
 ```html
 <script type="module">
-  import '@kitn.ai/chat/elements';
-  const chat = document.querySelector('kc-chat');
+  import '@kitn.ai/ui/elements';
+  const chat = document.querySelector('kai-chat');
   chat.messages = messages;
-  chat.addEventListener('kc-submit', handleSubmit);
+  chat.addEventListener('kai-submit', handleSubmit);
 </script>
-<kc-chat></kc-chat>
+<kai-chat></kai-chat>
 ```
 </TabItem>
 </Tabs>
 
-React is the one framework that gets a thin extra layer: `@kitn.ai/chat/react` ships typed wrappers that turn events into `onEventName` props, so you skip the `.prop` and `addEventListener` ceremony. Everywhere else, you use the elements straight.
+React is the one framework that gets a thin extra layer: `@kitn.ai/ui/react` ships typed wrappers that turn events into `onEventName` props, so you skip the `.prop` and `addEventListener` ceremony. Everywhere else, you use the elements straight.
 
 ## What's in the box
 
-About 50 elements, from a full `<kc-chat>` down to single building blocks like a markdown renderer or a tool-call panel. Reach for the high-level ones to ship fast, the small ones to compose your own layout.
+About 50 elements, from a full `<kai-chat>` down to single building blocks like a markdown renderer or a tool-call panel. Reach for the high-level ones to ship fast, the small ones to compose your own layout.
 
 | Component | What it does |
 |---|---|
-| `kc-chat` | Full chat panel — messages plus prompt input in one element |
-| `kc-workspace` | Chat plus a conversation sidebar |
-| `kc-message` | A single message row with actions |
-| `kc-prompt-input` | Composer with voice, slash commands, and a toolbar |
-| `kc-markdown` | Markdown renderer with optional syntax highlighting |
-| `kc-reasoning` | Expandable reasoning / chain-of-thought panel |
-| `kc-tool` | Tool-call display (name, input, output) |
-| `kc-attachments` | File attachment tiles, chips, or rows |
-| `kc-conversations` | Conversation sidebar with grouping |
-| `kc-artifact` | Multi-file artifact viewer with tabs and maximize |
+| `kai-chat` | Full chat panel — messages plus prompt input in one element |
+| `kai-workspace` | Chat plus a conversation sidebar |
+| `kai-message` | A single message row with actions |
+| `kai-prompt-input` | Composer with voice, slash commands, and a toolbar |
+| `kai-markdown` | Markdown renderer with optional syntax highlighting |
+| `kai-reasoning` | Expandable reasoning / chain-of-thought panel |
+| `kai-tool` | Tool-call display (name, input, output) |
+| `kai-attachments` | File attachment tiles, chips, or rows |
+| `kai-conversations` | Conversation sidebar with grouping |
+| `kai-artifact` | Multi-file artifact viewer with tabs and maximize |
 
 ## Bundle size
 
-A markdown-only `<kc-chat>` is one ~110 KB gzip file. Syntax highlighting (Shiki) loads on demand, per language, with no WASM — and never loads at all if you don't render code blocks.
+A markdown-only `<kai-chat>` is one ~110 KB gzip file. Syntax highlighting (Shiki) loads on demand, per language, with no WASM — and never loads at all if you don't render code blocks.
 
 ## Next
 
-- [Installation](/chat/guides/installation/) — add the package and register the elements
-- [Getting started](/chat/guides/getting-started/) — a working chat in a few lines
+- [Installation](/guides/installation/) — add the package and register the elements
+- [Getting started](/guides/getting-started/) — a working chat in a few lines

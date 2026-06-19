@@ -1,0 +1,36 @@
+---
+// Framework logo strip — proves "runs anywhere" at a glance. Grayscale brand
+// marks, color on hover. Subtle band (theme-aware surface tone).
+import { Icon } from 'astro-icon/components';
+
+const frameworks = [
+  { name: 'React', icon: 'logos:react' },
+  { name: 'Vue', icon: 'logos:vue' },
+  { name: 'Svelte', icon: 'logos:svelte-icon' },
+  { name: 'Angular', icon: 'logos:angular-icon' },
+  { name: 'Solid', icon: 'logos:solidjs-icon' },
+  { name: 'HTML', icon: 'logos:html-5' },
+];
+---
+
+<section class="border-y border-line bg-surface/40">
+  <div class="mx-auto max-w-[80rem] px-6 py-10">
+    <p class="text-center text-xs font-extrabold uppercase tracking-[0.2em] text-ink-3">
+      One component model — every framework
+    </p>
+    <ul class="mt-7 flex flex-wrap items-center justify-center gap-x-10 gap-y-6 sm:gap-x-14">
+      {frameworks.map((f) => (
+        <li class="fw-logo flex items-center gap-2.5 text-ink-2">
+          <Icon name={f.icon} class="size-7 shrink-0" />
+          <span class="text-base font-semibold">{f.name}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* Grayscale at rest, full color + ink on hover — quiet until you look. */
+  .fw-logo { filter: grayscale(1); opacity: 0.62; transition: filter 0.2s ease, opacity 0.2s ease; }
+  .fw-logo:hover { filter: grayscale(0); opacity: 1; }
+</style>

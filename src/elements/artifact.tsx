@@ -39,24 +39,24 @@ interface Props extends Record<string, unknown> {
 
 interface Events extends Record<string, unknown> {
   /** Fired when the preview navigates. `detail.url` = the new location. */
-  'kc-navigate': { url: string };
+  'kai-navigate': { url: string };
   /** Fired when the Preview|Code tab changes. `detail.tab`. */
-  'kc-tab-change': { tab: ArtifactTab };
+  'kai-tab-change': { tab: ArtifactTab };
   /** Fired when a file is selected. `detail.path`. */
-  'kc-file-select': { path: string };
+  'kai-file-select': { path: string };
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
-  'kc-maximize-change': { maximized: boolean };
+  'kai-maximize-change': { maximized: boolean };
 }
 
 /**
- * `<kc-artifact>` — a framed, switchable generated-artifact viewer: a sandboxed
+ * `<kai-artifact>` — a framed, switchable generated-artifact viewer: a sandboxed
  * preview iframe with a functional nav toolbar (back · forward · reload · home +
  * editable path field) and a Preview|Code toggle; the Code tab shows a file tree
- * (`<kc-file-tree>`) + the active file's source via `<kc-code-block>`. The
- * component self-navigates the iframe and emits `kc-navigate` / `kc-tab-change` /
- * `kc-file-select`. Designed to FILL its container (e.g. a `<kc-resizable>` panel).
+ * (`<kai-file-tree>`) + the active file's source via `<kai-code-block>`. The
+ * component self-navigates the iframe and emits `kai-navigate` / `kai-tab-change` /
+ * `kai-file-select`. Designed to FILL its container (e.g. a `<kai-resizable>` panel).
  */
-defineWebComponent<Props, Events>('kc-artifact', {
+defineWebComponent<Props, Events>('kai-artifact', {
   src: undefined,
   files: [],
   tab: 'preview',
@@ -80,17 +80,17 @@ defineWebComponent<Props, Events>('kc-artifact', {
     setMaximized(next);
     // 1) The PROTOCOL intent — raw, bubbling + composed (NOT via dispatch()).
     element.dispatchEvent(
-      new CustomEvent('kc-maximize-intent', { detail: { requested: next }, bubbles: true, composed: true }),
+      new CustomEvent('kai-maximize-intent', { detail: { requested: next }, bubbles: true, composed: true }),
     );
     // 2) The PUBLIC observable event (non-bubbling, on the host).
-    dispatch('kc-maximize-change', { maximized: next });
+    dispatch('kai-maximize-change', { maximized: next });
   };
 
   // Authoritative reconcile: the resizable tells us the effective state.
   onMount(() => {
     const onState = (e: Event) => setMaximized((e as CustomEvent<{ maximized: boolean }>).detail.maximized);
-    element.addEventListener('kc-maximize-state', onState);
-    onCleanup(() => element.removeEventListener('kc-maximize-state', onState));
+    element.addEventListener('kai-maximize-state', onState);
+    onCleanup(() => element.removeEventListener('kai-maximize-state', onState));
   });
 
   return (
@@ -127,9 +127,9 @@ defineWebComponent<Props, Events>('kc-artifact', {
           standalone={flag('standalone')}
           readonlyPath={flag('readonlyPath')}
           onMaximizeChange={onMaximizeChange}
-          onNavigate={(url) => dispatch('kc-navigate', { url })}
-          onTabChange={(tab) => dispatch('kc-tab-change', { tab })}
-          onFileSelect={(path) => dispatch('kc-file-select', { path })}
+          onNavigate={(url) => dispatch('kai-navigate', { url })}
+          onTabChange={(tab) => dispatch('kai-tab-change', { tab })}
+          onFileSelect={(path) => dispatch('kai-file-select', { path })}
         />
       </div>
     </>

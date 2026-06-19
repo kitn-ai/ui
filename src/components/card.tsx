@@ -27,7 +27,7 @@ export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
  * actions footer, and one consistent inline **error** state (the contract's
  * "never a broken/partial card" rule). It is intentionally chrome-only: it reads
  * no `CardContext` and emits no `CardEvent` — the cards that compose it (e.g.
- * `kc-form`) own the contract interaction.
+ * `kai-form`) own the contract interaction.
  */
 export function Card(props: CardProps): JSX.Element {
   const merged = mergeProps({ dense: false }, props);
@@ -44,14 +44,14 @@ export function Card(props: CardProps): JSX.Element {
   ]);
 
   const autoId = createUniqueId();
-  const headingId = () => local.headingId ?? `kc-card-heading-${autoId}`;
+  const headingId = () => local.headingId ?? `kai-card-heading-${autoId}`;
   const hasError = () => local.errorMessage !== undefined && local.errorMessage !== '';
   const hasHeader = () => Boolean(local.heading) || Boolean(local.description);
 
   return (
     <div
       class={cn(
-        'flex flex-col rounded-xl border border-border bg-card text-card-foreground kc-elevation-sm',
+        'flex flex-col rounded-xl border border-border bg-card text-card-foreground kai-elevation-sm',
         local.dense ? 'gap-2.5 p-3.5' : 'gap-4 p-5',
         local.class,
       )}

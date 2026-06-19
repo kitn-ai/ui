@@ -1,6 +1,6 @@
 /** A Props-table type cell. Simple types render inline; a complex object type
  *  collapses to a clickable chip that opens a dialog with the full type,
- *  pretty-printed + syntax-highlighted as TypeScript (dogfooding kc-code-block). */
+ *  pretty-printed + syntax-highlighted as TypeScript (dogfooding kai-code-block). */
 import { createSignal, createEffect, onMount, onCleanup, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import IconClose from '~icons/lucide/x';
@@ -90,11 +90,11 @@ export default function TypeCell(props: { type: string; name: string; label?: st
               </div>
               <div class="max-h-[70vh] overflow-auto p-2">
                 {/* @ts-expect-error custom element */}
-                <kc-code-block ref={setCodeEl} style={{ display: 'block' }} />
+                <kai-code-block ref={setCodeEl} style={{ display: 'block' }} />
               </div>
               <Show when={props.import}>
                 <div class="border-t border-line px-4 py-2.5 font-mono text-xs text-ink-3">
-                  {`import type { ${props.import} } from '@kitn.ai/chat'`}
+                  {`import type { ${props.import} } from '@kitn.ai/ui'`}
                 </div>
               </Show>
             </div>

@@ -1,5 +1,5 @@
 /**
- * kc-chat Angular example — using web components natively.
+ * kai-chat Angular example — using web components natively.
  *
  * Angular can bind to custom-element DOM properties with [prop]="value" and
  * listen to CustomEvents with (eventname)="handler($event)".  No wrappers or
@@ -9,10 +9,10 @@
  *   - [groups], [conversations], [activeId], [messages], [models], [currentModel]
  *     set DOM *properties* (not attributes) — essential for passing objects/arrays
  *     to Shadow-DOM web components.
- *   - (kc-conversation-select), (kc-submit), (kc-model-change), (kc-sidebar-toggle) listen to the
+ *   - (kai-conversation-select), (kai-submit), (kai-model-change), (kai-sidebar-toggle) listen to the
  *     kit's CustomEvents; `($event as CustomEvent).detail` carries the payload.
- *   - CUSTOM_ELEMENTS_SCHEMA tells Angular to allow unknown `kc-*` element tags.
- *   - `@kitn.ai/chat/elements` is imported once (main.ts side-effect) to register
+ *   - CUSTOM_ELEMENTS_SCHEMA tells Angular to allow unknown `kai-*` element tags.
+ *   - `@kitn.ai/ui/elements` is imported once (main.ts side-effect) to register
  *     the custom elements globally.
  */
 
@@ -78,7 +78,7 @@ const MOON_SVG =
 @Component({
   selector: 'app-root',
   standalone: true,
-  // CUSTOM_ELEMENTS_SCHEMA is required so Angular accepts the kc-* tags
+  // CUSTOM_ELEMENTS_SCHEMA is required so Angular accepts the kai-* tags
   // without treating them as unknown Angular components.
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './app.component.html',
@@ -144,10 +144,10 @@ export class AppComponent {
     this.theme.set(wasDark ? 'light' : 'dark');
   }
 
-  // ── kc-workspace event handlers ────────────────────────────────────
+  // ── kai-workspace event handlers ────────────────────────────────────
 
   /**
-   * `(kc-submit)` — fired when the user sends a message.
+   * `(kai-submit)` — fired when the user sends a message.
    * Angular binds CustomEvents by lowercase event name on the element.
    * `$event` is the raw CustomEvent; `.detail` carries the payload.
    */
@@ -190,7 +190,7 @@ export class AppComponent {
   }
 
   /**
-   * `(kc-message-action)` — copy, like, dislike, regenerate actions on messages.
+   * `(kai-message-action)` — copy, like, dislike, regenerate actions on messages.
    */
   async onMessageAction(event: Event): Promise<void> {
     const { messageId, action } = ((event as CustomEvent).detail ?? {}) as {
@@ -242,7 +242,7 @@ export class AppComponent {
   }
 
   /**
-   * `(kc-model-change)` — user switched the active model.
+   * `(kai-model-change)` — user switched the active model.
    */
   onModelChange(event: Event): void {
     const { modelId } = ((event as CustomEvent).detail ?? {}) as { modelId: string };
@@ -253,7 +253,7 @@ export class AppComponent {
   }
 
   /**
-   * `(kc-conversation-select)` — user clicked a conversation in the sidebar.
+   * `(kai-conversation-select)` — user clicked a conversation in the sidebar.
    */
   onConversationSelect(event: Event): void {
     const { id } = ((event as CustomEvent).detail ?? {}) as { id: string };
@@ -262,7 +262,7 @@ export class AppComponent {
   }
 
   /**
-   * `(kc-new-chat)` — user clicked "New chat" in the sidebar.
+   * `(kai-new-chat)` — user clicked "New chat" in the sidebar.
    */
   onNewChat(): void {
     const id = 'c-' + generateId();
@@ -284,13 +284,13 @@ export class AppComponent {
   }
 
   /**
-   * `(kc-sidebar-toggle)` — hamburger / toggle from within the workspace.
+   * `(kai-sidebar-toggle)` — hamburger / toggle from within the workspace.
    */
   onSidebarToggle(): void {
     document.body.classList.toggle('sidebar-open');
   }
 
-  // ── Standalone kc-prompt-input handler ──────────────────────────────────
+  // ── Standalone kai-prompt-input handler ──────────────────────────────────
 
   onStandaloneSubmit(event: Event): void {
     const { value } = ((event as CustomEvent).detail ?? {}) as { value?: string };

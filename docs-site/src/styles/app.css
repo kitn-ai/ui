@@ -15,15 +15,15 @@
 /* Design-system colors → Tailwind utilities. `inline` emits var() refs so they
    track the active theme at runtime. Components use ONLY these. */
 @theme inline {
-  --color-bg: var(--kc-bg);
-  --color-surface: var(--kc-surface);
-  --color-surface-2: var(--kc-surface-2);
-  --color-line: var(--kc-line);
-  --color-ink: var(--kc-ink);
-  --color-ink-2: var(--kc-ink-2);
-  --color-ink-3: var(--kc-ink-3);
-  --color-brand: var(--kc-brand);
-  --color-link: var(--kc-link);
+  --color-bg: var(--kai-bg);
+  --color-surface: var(--kai-surface);
+  --color-surface-2: var(--kai-surface-2);
+  --color-line: var(--kai-line);
+  --color-ink: var(--kai-ink);
+  --color-ink-2: var(--kai-ink-2);
+  --color-ink-3: var(--kai-ink-3);
+  --color-brand: var(--kai-brand);
+  --color-link: var(--kai-link);
 
   --font-sans: 'Lato', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -37,24 +37,24 @@
 }
 
 /* The theme editor is a full-screen tool: header + editor only. The marker
-   `.kc-fullscreen` is server-rendered (the editor island is client:only), so the
+   `.kai-fullscreen` is server-rendered (the editor island is client:only), so the
    chrome is hidden with no hydration flash. */
 /* Full width + reclaim the space the (hidden) sidebar reserved on the left. */
-:root:has(.kc-fullscreen) { --sl-content-width: 100%; --sl-content-inline-start: 0rem; --sl-sidebar-width: 0rem; }
-body:has(.kc-fullscreen) #starlight__sidebar,
-body:has(.kc-fullscreen) .pagination-links,
-body:has(.kc-fullscreen) footer,
-body:has(.kc-fullscreen) .content-panel:has(h1) { display: none; }
+:root:has(.kai-fullscreen) { --sl-content-width: 100%; --sl-content-inline-start: 0rem; --sl-sidebar-width: 0rem; }
+body:has(.kai-fullscreen) #starlight__sidebar,
+body:has(.kai-fullscreen) .pagination-links,
+body:has(.kai-fullscreen) footer,
+body:has(.kai-fullscreen) .content-panel:has(h1) { display: none; }
 /* The page itself never scrolls — the editor's own panes scroll internally. */
-html:has(.kc-fullscreen), body:has(.kc-fullscreen) { overflow: hidden; }
+html:has(.kai-fullscreen), body:has(.kai-fullscreen) { overflow: hidden; }
 /* Zero the content padding/border + any reserved sidebar inset so the editor
    fills the whole pane edge-to-edge. */
-body:has(.kc-fullscreen) .content-panel { padding: 0; border: 0; }
-body:has(.kc-fullscreen) .sl-markdown-content { margin: 0; }
-body:has(.kc-fullscreen) .main-frame,
-body:has(.kc-fullscreen) .main-pane { padding-inline-start: 0; padding-block-end: 0; overflow: hidden; }
+body:has(.kai-fullscreen) .content-panel { padding: 0; border: 0; }
+body:has(.kai-fullscreen) .sl-markdown-content { margin: 0; }
+body:has(.kai-fullscreen) .main-frame,
+body:has(.kai-fullscreen) .main-pane { padding-inline-start: 0; padding-block-end: 0; overflow: hidden; }
 /* The editor fills exactly the viewport below the header, full-bleed. */
-body:has(.kc-fullscreen) .theme-studio-root {
+body:has(.kai-fullscreen) .theme-studio-root {
   margin: 0;
   border-radius: 0;
   border-inline: 0;
@@ -63,9 +63,63 @@ body:has(.kc-fullscreen) .theme-studio-root {
   min-height: 0;
 }
 
+/* Landing page: full-bleed marketing sections inside the splash shell. The
+   `.landing-page` marker (server-rendered in index.mdx) widens the content
+   column to the viewport and zeroes its padding so each section controls its
+   own background + inner max-width. Header + footer stay. */
+:root:has(.landing-page) { --sl-content-width: 100%; --sl-content-pad-x: 0rem; }
+body:has(.landing-page) .content-panel { padding: 0; border: 0; }
+body:has(.landing-page) .sl-markdown-content { margin: 0; }
+body:has(.landing-page) .main-pane { overflow: clip; }
+/* The hero supplies the page's <h1>; hide Starlight's auto title heading. */
+body:has(.landing-page) h1#_top { display: none; }
+/* Splash renders an empty <footer> band below the content — drop it so the
+   closing CTA is the true bottom of the page. */
+body:has(.landing-page) .main-frame footer { display: none; }
+
+/* Install-chip copy button: hide the check until copied, then swap. Global so
+   EVERY chip works (Astro scopes a component's <style>, so the hero's rule
+   didn't reach the CTA's chip — its check showed permanently). */
+body:has(.landing-page) .kai-copy .kai-check-i { display: none; }
+body:has(.landing-page) .kai-copy.copied .kai-copy-i { display: none; }
+body:has(.landing-page) .kai-copy.copied .kai-check-i { display: inline; }
+/* Starlight makes markdown headings `display:flex` (for the hover anchor); on the
+   landing that turns headline words into non-wrapping flex items. Reset to block
+   so marketing headings wrap normally. */
+body:has(.landing-page) .sl-markdown-content :is(h1, h2, h3, h4) { display: block; gap: 0; margin: 0; }
+
+/* Marketing bands. The dramatic dark bands are FIXED (theme-independent): they
+   locally remap the --kai-* tokens to dark values, so every Tailwind token utility
+   (text-ink, bg-surface, border-line, …) resolves dark INSIDE the band — giving
+   the black/white section rhythm even in light theme. --kai-brand is untouched. */
+/* The global inline-code chip (soft magenta) shouldn't apply on the marketing
+   page — it tinted the install command pink. Neutralize; sections style code
+   intentionally. */
+body:has(.landing-page) .sl-markdown-content :not(pre) > code {
+  background: transparent;
+  color: inherit;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+.landing-page .band-dark {
+  --kai-bg: #0d0d0c;
+  --kai-surface: #181715;
+  --kai-surface-2: #121110;
+  --kai-line: #2b2a27;
+  --kai-divider: #211f1d;
+  --kai-ink: #fafafa;
+  --kai-ink-2: #c9c7c2;
+  --kai-ink-3: #97948d;
+  background: var(--kai-bg);
+  color: var(--kai-ink-2);
+}
+
 /* Ask AI dock. The panel itself is portaled to <body> and fixed to the right.
    Width of the dock: */
-:root { --kc-dock-w: 380px; }
+:root { --kai-dock-w: 380px; }
 
 /* On wide viewports there's room to SHARE the space: push the whole app left by
    the dock width so the docs stay fully visible (no dimming backdrop). Below the
@@ -74,14 +128,14 @@ body:has(.kc-fullscreen) .theme-studio-root {
    so they shift with the content rather than spanning under the panel. */
 .page { transition: margin-inline-end 220ms ease-out; }
 @media (min-width: 80rem) {
-  html.kc-askai-open .page {
+  html.kai-askc-open .page {
     transform: translateX(0);
-    margin-inline-end: var(--kc-dock-w);
+    margin-inline-end: var(--kai-dock-w);
   }
-  html.kc-askai-open .kc-askai-backdrop { opacity: 0 !important; pointer-events: none; }
+  html.kai-askc-open .kai-askc-backdrop { opacity: 0 !important; pointer-events: none; }
   /* Sharing space: the panel is a docked sibling with a left border, so the
      drop shadow is wrong here — keep it only for the overlay (narrow) mode. */
-  html.kc-askai-open .kc-askai-panel { box-shadow: none; }
+  html.kai-askc-open .kai-askc-panel { box-shadow: none; }
 }
 
 /* Sidebar links: small, uniform text. Starlight's `.large` class (top-level leaf

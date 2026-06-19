@@ -64,7 +64,7 @@ export const TypewriterStream: Story = {
         story: [
           'Feed `textStream` a plain string and `ResponseStream` will reveal it character by character at `speed` chars/tick. When the last character is displayed, `onComplete` fires — use it to unlock the input and show the action bar.',
           '**Gotcha — string vs AsyncIterable:** a plain string is pre-buffered and the typewriter timer drives the reveal locally. An `AsyncIterable<string>` must be assigned as a JS *property* (not an HTML attribute); the primitive consumes chunks as they arrive and the same timer reveals them. Both paths fire `onComplete` identically.',
-          '**Gotcha — no built-in cancel:** there is no `abort()` or `stop()` method on `ResponseStream` or `kc-response-stream`. To cancel mid-stream, abort your fetch/stream with an `AbortController`, then clear your own streaming state (`setIsStreaming(false)`). The element will stop receiving new characters but will not reset its display automatically.',
+          '**Gotcha — no built-in cancel:** there is no `abort()` or `stop()` method on `ResponseStream` or `kai-response-stream`. To cancel mid-stream, abort your fetch/stream with an `AbortController`, then clear your own streaming state (`setIsStreaming(false)`). The element will stop receiving new characters but will not reset its display automatically.',
           '**Gotcha — replay requires remount:** because `startStreaming` is triggered by the `textStream` prop changing, passing the *same* string value again will not re-run the animation. Unmount the component (toggle a `Show`) and remount it on the next tick to replay.',
         ].join('\n\n'),
       },
@@ -208,7 +208,7 @@ export const FadeStream: Story = {
       description: {
         story: [
           'Set `mode="fade"` and words appear by fading in with staggered `animation-delay` instead of a character-by-character typewriter. Tune `speed` to control stagger cadence (higher = faster).',
-          '**Gotcha — `onComplete` never fires for string + fade:** when you pass a plain string with `mode="fade"`, the primitive delivers all segments immediately and CSS handles the reveal. There is no timer or promise to detect "all animations finished", so `onComplete` / `kc-complete` is never called. This is a known limitation — if you need a completion callback in fade mode, pass an `AsyncIterable<string>` instead (the callback fires after the iterator is exhausted).',
+          '**Gotcha — `onComplete` never fires for string + fade:** when you pass a plain string with `mode="fade"`, the primitive delivers all segments immediately and CSS handles the reveal. There is no timer or promise to detect "all animations finished", so `onComplete` / `kai-complete` is never called. This is a known limitation — if you need a completion callback in fade mode, pass an `AsyncIterable<string>` instead (the callback fires after the iterator is exhausted).',
           '**Replay:** to re-run the fade animation on the same text, unmount the component (`Show` toggle) and remount it on the next tick — see the "Start Fade Stream" button logic.',
         ].join('\n\n'),
       },

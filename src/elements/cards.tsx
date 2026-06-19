@@ -1,8 +1,8 @@
 // src/elements/cards.tsx
-// <kc-cards> — the web-component list dispatcher. Renders one child kc-* element per
+// <kai-cards> — the web-component list dispatcher. Renders one child kai-* element per
 // envelope (by type→tag), propagates its theme, and routes children's bubbling
-// `kc-card` events through an optional `policy`. The raw events keep bubbling past
-// <kc-cards> (composed) so document-level listeners still work. Unknown types render
+// `kai-card` events through an optional `policy`. The raw events keep bubbling past
+// <kai-cards> (composed) so document-level listeners still work. Unknown types render
 // the Solid CardFallback inline and emit a contract `error`.
 import { For, Show, createEffect, onCleanup, onMount, type JSX } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
@@ -11,7 +11,7 @@ import type { CardEnvelope, CardEvent, CardPolicy } from '../primitives/card-con
 import { CARD_EVENT_NAME, emitCardEvent, routeCardEvent } from '../primitives/card-routing';
 import { mergeCardTags } from '../primitives/card-registry';
 import { CardFallback } from '../components/card-fallback';
-// Register the built-in child card elements so that importing <kc-cards> is self-contained.
+// Register the built-in child card elements so that importing <kai-cards> is self-contained.
 import './form';
 import './confirm-card';
 import './tasks';
@@ -30,7 +30,7 @@ interface Props extends Record<string, unknown> {
   policy?: CardPolicy;
 }
 
-/** A single resolved child: a known kc-* tag (props set imperatively) or the fallback. */
+/** A single resolved child: a known kai-* tag (props set imperatively) or the fallback. */
 function CardSlot(props: { envelope: CardEnvelope; tag?: string; theme: string; emit: (e: CardEvent) => void }): JSX.Element {
   let ref: HTMLElement | undefined;
   // Set object/string props as DOM properties on the custom element (reactive).
@@ -60,10 +60,10 @@ function CardSlot(props: { envelope: CardEnvelope; tag?: string; theme: string; 
 }
 
 defineWebComponent<Props>(
-  'kc-cards',
+  'kai-cards',
   { cards: undefined, types: undefined, policy: undefined },
   (props, { element }) => {
-    // Route children's bubbling kc-card events through the policy. Attached to the host
+    // Route children's bubbling kai-card events through the policy. Attached to the host
     // element so composed events from each child's shadow root are caught as they bubble.
     // The handler reads `props.policy` at EVENT time (not mount time) so setting
     // `el.policy` after the element is in the DOM — the standard host pattern — works.
@@ -74,7 +74,7 @@ defineWebComponent<Props>(
       onCleanup(() => element.removeEventListener(CARD_EVENT_NAME, handler as EventListener));
     });
     // Read the facade's REACTIVE `theme` prop, not element.getAttribute (which is
-    // not a tracked dependency) — otherwise a theme change on <kc-cards> after the
+    // not a tracked dependency) — otherwise a theme change on <kai-cards> after the
     // children first render never propagates, leaving each child card stuck on its
     // initial 'auto' (which follows the OS, so cards looked "always dark").
     const theme = () => ((props as { theme?: string }).theme ?? 'auto');

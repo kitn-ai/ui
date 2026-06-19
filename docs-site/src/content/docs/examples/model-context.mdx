@@ -1,11 +1,11 @@
 ---
 title: Models & context
-description: A chat app that switches between models and watches a live context-window meter fill as the conversation grows — both driven by kc-chat's built-in header controls.
+description: A chat app that switches between models and watches a live context-window meter fill as the conversation grows — both driven by kai-chat's built-in header controls.
 ---
 
 import ModelContextDemo from '../../../components/ModelContextDemo.tsx';
 
-<p class="kc-lede">A chat that lets the user pick the active model and see how much of its context window the conversation has consumed. The model switcher and the token meter both live in <code>&lt;kc-chat&gt;</code>'s header. Switch models to rescale the window; send a message to watch the meter fill as the reply streams.</p>
+<p class="kai-lede">A chat that lets the user pick the active model and see how much of its context window the conversation has consumed. The model switcher and the token meter both live in <code>&lt;kai-chat&gt;</code>'s header. Switch models to rescale the window; send a message to watch the meter fill as the reply streams.</p>
 
 <ModelContextDemo
   client:only="solid"
@@ -16,13 +16,13 @@ import ModelContextDemo from '../../../components/ModelContextDemo.tsx';
 
 ## How it works
 
-`<kc-chat>` renders both header controls for you. Set `models` and `currentModel` to get the switcher dropdown, set `context` to get the token meter, and listen for `kc-model-change` to react to a selection. No separate elements to mount.
+`<kai-chat>` renders both header controls for you. Set `models` and `currentModel` to get the switcher dropdown, set `context` to get the token meter, and listen for `kai-model-change` to react to a selection. No separate elements to mount.
 
 ```html
-<kc-chat id="chat" chat-title="Board prep"></kc-chat>
+<kai-chat id="chat" chat-title="Board prep"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const chat = document.getElementById('chat');
 
@@ -57,13 +57,13 @@ import ModelContextDemo from '../../../components/ModelContextDemo.tsx';
   pushContext();
 
   // Selecting a model swaps the active label and rescales the window.
-  chat.addEventListener('kc-model-change', (e) => {
+  chat.addEventListener('kai-model-change', (e) => {
     modelId = e.detail.modelId;
     chat.currentModel = modelId;
     pushContext();
   });
 
-  chat.addEventListener('kc-submit', async (e) => {
+  chat.addEventListener('kai-submit', async (e) => {
     const aId = crypto.randomUUID();
     chat.messages = [
       ...chat.messages,
@@ -100,7 +100,7 @@ The switcher only renders when you provide more than one model. The meter turns 
 
 ## Next steps
 
-- **[`kc-chat` reference](/chat/components/chat/)** — every header prop, including `models`, `currentModel`, and `context`.
-- **[`kc-model-switcher` reference](/chat/components/model-switcher/)** — the standalone switcher with a `models` property or declarative `<kc-model>` children.
-- **[`kc-context` reference](/chat/components/context/)** — the standalone meter, configurable `warnThreshold` / `dangerThreshold`, and the `kc-threshold-change` event.
-- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the baseline streaming loop this example extends.
+- **[`kai-chat` reference](/components/chat/)** — every header prop, including `models`, `currentModel`, and `context`.
+- **[`kai-model-switcher` reference](/components/model-switcher/)** — the standalone switcher with a `models` property or declarative `<kai-model>` children.
+- **[`kai-context` reference](/components/context/)** — the standalone meter, configurable `warnThreshold` / `dangerThreshold`, and the `kai-threshold-change` event.
+- **[Drop-in chat](/examples/drop-in-chat/)** — the baseline streaming loop this example extends.

@@ -1,47 +1,47 @@
 ---
 title: Custom theme
-description: Reskin <kc-chat> into a bold, distinctive brand — magenta accent, cyan focus glow, deep-noir surfaces — using only inherited --kc-* tokens, in both light and dark.
+description: Reskin <kai-chat> into a bold, distinctive brand — magenta accent, cyan focus glow, deep-noir surfaces — using only inherited --kai-* tokens, in both light and dark.
 ---
 
 import CustomThemeShowcaseDemo from '../../../components/CustomThemeShowcaseDemo.tsx';
 
-<p class="kc-lede">This is the **same `<kc-chat>`** that powers every other example, reskinned into "Aurora" — a neon-on-noir identity with a magenta accent, a cyan focus ring, and sharp corners. Nothing pierces the Shadow DOM: a map of inherited `--kc-*` custom properties on the host does all of it. Toggle the site's theme to watch a second, matched palette take over.</p>
+<p class="kai-lede">This is the **same `<kai-chat>`** that powers every other example, reskinned into "Aurora" — a neon-on-noir identity with a magenta accent, a cyan focus ring, and sharp corners. Nothing pierces the Shadow DOM: a map of inherited `--kai-*` custom properties on the host does all of it. Toggle the site's theme to watch a second, matched palette take over.</p>
 
 <CustomThemeShowcaseDemo client:only="solid" />
 
 ## How it works
 
-The `--kc-color-*` and `--kc-radius` tokens are **inherited** CSS custom properties. Set them on the `<kc-chat>` element (or any ancestor) and they propagate into the Shadow DOM through `var()` fallbacks — no stylesheet import, no internal classes touched.
+The `--kai-color-*` and `--kai-radius` tokens are **inherited** CSS custom properties. Set them on the `<kai-chat>` element (or any ancestor) and they propagate into the Shadow DOM through `var()` fallbacks — no stylesheet import, no internal classes touched.
 
 A bold look comes from overriding more than the accent. Aurora moves every surface, the focus ring, the inline-code tint, and the corner radius together so the result reads as a deliberate design, not a recolored default:
 
 ```html
-<kc-chat id="chat" chat-title="Aurora"></kc-chat>
+<kai-chat id="chat" chat-title="Aurora"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const chat = document.getElementById('chat');
 
   // Scope the whole Aurora map to this element only.
   const aurora = {
-    '--kc-color-background': 'hsl(252 40% 6%)',   // deep-noir surface
-    '--kc-color-card':       'hsl(250 36% 10%)',   // message bubbles / panels
-    '--kc-color-foreground': 'hsl(250 30% 96%)',
-    '--kc-color-primary':    'hsl(322 90% 58%)',   // magenta accent
-    '--kc-color-primary-foreground': 'hsl(250 40% 7%)',
-    '--kc-color-ring':       'hsl(186 95% 56%)',   // cyan focus glow
-    '--kc-color-border':     'hsl(250 30% 20%)',
-    '--kc-color-code-foreground': 'hsl(186 90% 66%)', // cyan inline code
-    '--kc-radius':           '0.25rem',            // sharp corners
+    '--kai-color-background': 'hsl(252 40% 6%)',   // deep-noir surface
+    '--kai-color-card':       'hsl(250 36% 10%)',   // message bubbles / panels
+    '--kai-color-foreground': 'hsl(250 30% 96%)',
+    '--kai-color-primary':    'hsl(322 90% 58%)',   // magenta accent
+    '--kai-color-primary-foreground': 'hsl(250 40% 7%)',
+    '--kai-color-ring':       'hsl(186 95% 56%)',   // cyan focus glow
+    '--kai-color-border':     'hsl(250 30% 20%)',
+    '--kai-color-code-foreground': 'hsl(186 90% 66%)', // cyan inline code
+    '--kai-radius':           '0.25rem',            // sharp corners
   };
   for (const [token, value] of Object.entries(aurora)) {
     chat.style.setProperty(token, value);
   }
 
-  // Wire messages + kc-submit as usual.
+  // Wire messages + kai-submit as usual.
   chat.messages = [];
-  chat.addEventListener('kc-submit', (e) => { /* stream reply */ });
+  chat.addEventListener('kai-submit', (e) => { /* stream reply */ });
 </script>
 ```
 
@@ -53,21 +53,21 @@ A single token value applies in whichever mode the page is in, so a theme that's
 
 ```css
 /* dark — neon on near-black indigo */
-.dark kc-chat {
-  --kc-color-background: hsl(252 40% 6%);
-  --kc-color-card:       hsl(250 36% 10%);
-  --kc-color-primary:    hsl(322 90% 58%);
-  --kc-color-ring:       hsl(186 95% 56%);
-  --kc-color-code-foreground: hsl(186 90% 66%);
+.dark kai-chat {
+  --kai-color-background: hsl(252 40% 6%);
+  --kai-color-card:       hsl(250 36% 10%);
+  --kai-color-primary:    hsl(322 90% 58%);
+  --kai-color-ring:       hsl(186 95% 56%);
+  --kai-color-code-foreground: hsl(186 90% 66%);
 }
 
 /* light — same identity, inverted onto a cool studio white */
-kc-chat {
-  --kc-color-background: hsl(240 40% 98%);
-  --kc-color-card:       hsl(0 0% 100%);
-  --kc-color-primary:    hsl(322 82% 46%);   /* darker → AA on light */
-  --kc-color-ring:       hsl(192 90% 38%);   /* darker → visible on light */
-  --kc-color-code-foreground: hsl(192 90% 32%);
+kai-chat {
+  --kai-color-background: hsl(240 40% 98%);
+  --kai-color-card:       hsl(0 0% 100%);
+  --kai-color-primary:    hsl(322 82% 46%);   /* darker → AA on light */
+  --kai-color-ring:       hsl(192 90% 38%);   /* darker → visible on light */
+  --kai-color-code-foreground: hsl(192 90% 32%);
 }
 ```
 
@@ -75,6 +75,6 @@ The demo above sets these from JavaScript, re-applying the matching map whenever
 
 ## Next steps
 
-- **[Theming guide](/chat/guides/theming/)** — the full token reference, the `--kc-color-*` alias system, scoped subtree theming, and dark-mode setup.
-- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop that backs any `<kc-chat>` instance.
-- **[`kc-chat` reference](/chat/components/chat/)** — `proseSize`, `codeTheme`, and `codeHighlight` for non-color appearance control.
+- **[Theming guide](/guides/theming/)** — the full token reference, the `--kai-color-*` alias system, scoped subtree theming, and dark-mode setup.
+- **[Drop-in chat](/examples/drop-in-chat/)** — the streaming loop that backs any `<kai-chat>` instance.
+- **[`kai-chat` reference](/components/chat/)** — `proseSize`, `codeTheme`, and `codeHighlight` for non-color appearance control.

@@ -1,7 +1,7 @@
 /** Empty / first-run state demo. Showcases a *composed* empty state:
- *  a <kc-empty> block (icon + headline + subtext) with <kc-suggestions>
+ *  a <kai-empty> block (icon + headline + subtext) with <kai-suggestions>
  *  rendered INSIDE it (the default slot). Clicking a chip swaps the empty
- *  block for a live <kc-chat> and streams a canned assistant reply — the
+ *  block for a live <kai-chat> and streams a canned assistant reply — the
  *  same streaming loop as the other Patterns/Examples islands. */
 import { createSignal, onMount, onCleanup, Show } from 'solid-js';
 import { loadKit } from './example/kit';
@@ -23,13 +23,13 @@ const SUGGESTIONS = [
 
 const REPLIES: Record<string, string> = {
   'How do I add kitn-chat to a React app?':
-    'Install the package, then import the React adapter:\n\n```bash\nnpm i @kitn.ai/chat\n```\n\n```tsx\nimport { Chat } from \'@kitn.ai/chat/react\';\n\nexport default function App() {\n  return <Chat messages={messages} onSubmit={send} />;\n}\n```\n\nThe adapter wraps the same `kc-*` web components, so every prop and event maps straight through.',
+    'Install the package, then import the React adapter:\n\n```bash\nnpm i @kitn.ai/ui\n```\n\n```tsx\nimport { Chat } from \'@kitn.ai/ui/react\';\n\nexport default function App() {\n  return <Chat messages={messages} onSubmit={send} />;\n}\n```\n\nThe adapter wraps the same `kai-*` web components, so every prop and event maps straight through.',
   'Theme the components to match my brand':
-    'Every component reads from design tokens, so one block of CSS custom properties restyles the whole kit:\n\n```css\n:root {\n  --color-brand: oklch(0.62 0.21 13);\n  --color-surface: oklch(0.99 0 0);\n  --radius: 0.75rem;\n}\n```\n\nNo shadow-piercing and no per-component overrides — set the tokens once and every `kc-*` element follows.',
+    'Every component reads from design tokens, so one block of CSS custom properties restyles the whole kit:\n\n```css\n:root {\n  --color-brand: oklch(0.62 0.21 13);\n  --color-surface: oklch(0.99 0 0);\n  --radius: 0.75rem;\n}\n```\n\nNo shadow-piercing and no per-component overrides — set the tokens once and every `kai-*` element follows.',
   'Stream tokens from my own backend':
-    'Listen for `kc-submit`, append a placeholder assistant message, then patch its `content` as chunks arrive:\n\n```js\nchat.addEventListener(\'kc-submit\', async (e) => {\n  const id = crypto.randomUUID();\n  chat.messages = [...chat.messages, { id, role: \'assistant\', content: \'\' }];\n  for await (const token of stream(e.detail.value)) {\n    chat.messages = chat.messages.map((m) =>\n      m.id === id ? { ...m, content: m.content + token } : m,\n    );\n  }\n});\n```\n\nReassigning the `messages` array is what triggers the re-render — mutate-and-reassign, never mutate in place.',
+    'Listen for `kai-submit`, append a placeholder assistant message, then patch its `content` as chunks arrive:\n\n```js\nchat.addEventListener(\'kai-submit\', async (e) => {\n  const id = crypto.randomUUID();\n  chat.messages = [...chat.messages, { id, role: \'assistant\', content: \'\' }];\n  for await (const token of stream(e.detail.value)) {\n    chat.messages = chat.messages.map((m) =>\n      m.id === id ? { ...m, content: m.content + token } : m,\n    );\n  }\n});\n```\n\nReassigning the `messages` array is what triggers the re-render — mutate-and-reassign, never mutate in place.',
   'Render tool calls and citations':
-    'Messages carry structured fields beyond `content`. Set `reasoning` for chain-of-thought, `tools` for tool invocations, and pair `<kc-chat>` with `<kc-sources>` for numbered citations:\n\n```js\nmsg.tools = [{ name: \'search\', state: \'done\', result: \'…\' }];\nsources.numbered = true;\nsources.sources = [{ href, title }];\n```\n\nEach renders in its own collapsible, theme-aware block — no extra wiring.',
+    'Messages carry structured fields beyond `content`. Set `reasoning` for chain-of-thought, `tools` for tool invocations, and pair `<kai-chat>` with `<kai-sources>` for numbered citations:\n\n```js\nmsg.tools = [{ name: \'search\', state: \'done\', result: \'…\' }];\nsources.numbered = true;\nsources.sources = [{ href, title }];\n```\n\nEach renders in its own collapsible, theme-aware block — no extra wiring.',
 };
 
 const DEFAULT_REPLY =
@@ -76,7 +76,7 @@ export default function EmptyStateDemo() {
   const start = (prompt: string) => {
     if (!prompt || started()) return;
     setStarted(true);
-    // Wait for <kc-chat> to mount, then seed + stream.
+    // Wait for <kai-chat> to mount, then seed + stream.
     queueMicrotask(() => {
       if (!host) return;
       customElements.upgrade(host);
@@ -102,8 +102,8 @@ export default function EmptyStateDemo() {
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     onCleanup(() => {
       clearTimeout(timer);
-      suggestionsEl?.removeEventListener('kc-select', onSuggestionSelect);
-      host?.removeEventListener('kc-submit', onChatSubmit);
+      suggestionsEl?.removeEventListener('kai-select', onSuggestionSelect);
+      host?.removeEventListener('kai-submit', onChatSubmit);
       obs.disconnect();
     });
   });
@@ -115,7 +115,7 @@ export default function EmptyStateDemo() {
         fallback={
           <div style={{ height: '100%', display: 'flex', 'align-items': 'center', 'justify-content': 'center', padding: '24px' }}>
             {/* @ts-expect-error custom element */}
-            <kc-empty
+            <kai-empty
               empty-title="Hi, I'm your assistant"
               description="Ask me anything about kitn-chat — or pick a starter below to begin."
               style={{ display: 'block', width: '100%', 'max-width': '34rem' }}
@@ -124,23 +124,23 @@ export default function EmptyStateDemo() {
               {/* Suggestions live in the empty block's default slot (EmptyContent),
                   so the chips are part of the first-run composition itself. */}
               {/* @ts-expect-error custom element */}
-              <kc-suggestions
+              <kai-suggestions
                 ref={(el: HTMLElement) => {
                   suggestionsEl = el as any;
-                  el.addEventListener('kc-select', onSuggestionSelect);
+                  el.addEventListener('kai-select', onSuggestionSelect);
                 }}
                 variant="outline"
                 style={{ display: 'block', 'margin-top': '0.5rem' }}
               />
-            </kc-empty>
+            </kai-empty>
           </div>
         }
       >
         {/* @ts-expect-error custom element */}
-        <kc-chat
+        <kai-chat
           ref={(el: HTMLElement) => {
             host = el as any;
-            el.addEventListener('kc-submit', onChatSubmit);
+            el.addEventListener('kai-submit', onChatSubmit);
           }}
           chat-title="Assistant"
           placeholder="Ask a follow-up…"

@@ -8,33 +8,33 @@ import PropTable from '../../../components/PropTable.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-remote</p>
+<p class="kai-tag-sub">kai-remote</p>
 
-<p class="kc-lede">Mount a card from an external provider in a sandboxed cross-origin iframe — it speaks the same <code>CardEnvelope</code> / <code>CardEvent</code> contract as every built-in card, so your routing policy and event listeners work without change.</p>
+<p class="kai-lede">Mount a card from an external provider in a sandboxed cross-origin iframe — it speaks the same <code>CardEnvelope</code> / <code>CardEvent</code> contract as every built-in card, so your routing policy and event listeners work without change.</p>
 
 <Facts items={['Shadow DOM', 'Cross-origin iframe', 'Auto-sizes from card height', 'Theme + locale push', 'Origin-validated mount']} />
 
 <Aside type="caution" title="Needs a running provider">
-`<kc-remote>` is a **cross-origin transport** — it frames a card served from a different origin and bridges its events back. There's no live preview here (no second origin to host the provider). Run `npm run storybook` for the full live demo, or see the reference provider in `examples/remote-provider/`.
+`<kai-remote>` is a **cross-origin transport** — it frames a card served from a different origin and bridges its events back. There's no live preview here (no second origin to host the provider). Run `npm run storybook` for the full live demo, or see the reference provider in `examples/remote-provider/`.
 </Aside>
 
 ## When to use
 
-Reach for `<kc-remote>` when a card needs to run code you cannot (or choose not to) bundle into the host app — a third-party widget, a sandboxed partner form, or an internal micro-frontend with its own release cycle. The element handles the iframe lifecycle, height negotiation, theme push, and event routing; your app only supplies a `CardEnvelope` and listens for `kc-card` events.
+Reach for `<kai-remote>` when a card needs to run code you cannot (or choose not to) bundle into the host app — a third-party widget, a sandboxed partner form, or an internal micro-frontend with its own release cycle. The element handles the iframe lifecycle, height negotiation, theme push, and event routing; your app only supplies a `CardEnvelope` and listens for `kai-card` events.
 
 ## Usage
 
 Point the element at your provider and hand it the envelope:
 
 ```html
-<kc-remote
+<kai-remote
   provider-origin="https://cards.provider.example"
   src="https://cards.provider.example/card"
-></kc-remote>
+></kai-remote>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
-  const el = document.querySelector('kc-remote');
+  import '@kitn.ai/ui/elements';
+  const el = document.querySelector('kai-remote');
 
   el.envelope = {
     type: 'form',
@@ -43,7 +43,7 @@ Point the element at your provider and hand it the envelope:
     data: { /* … your card data … */ },
   };
 
-  el.addEventListener('kc-card', (e) => {
+  el.addEventListener('kai-card', (e) => {
     if (e.detail.kind === 'submit') console.log('submitted', e.detail.data);
     if (e.detail.kind === 'action') console.log('action', e.detail.action);
   });
@@ -53,10 +53,10 @@ Point the element at your provider and hand it the envelope:
 - **`src`** — URL of the card page inside the provider. Plain HTML attribute.
 - **`provider-origin`** — exact HTTPS origin of the provider (e.g. `https://cards.provider.example`). `http://localhost:PORT` and `http://127.0.0.1:PORT` are accepted for local dev. Wildcards and comma-lists are rejected immediately with an inline error.
 - **`envelope`** — the `CardEnvelope` object. Assign it as a property (`el.envelope = { type, id, data, … }`), not an HTML attribute.
-- **`policy`** — an optional `CardPolicy` for programmatic event routing (same shape `<kc-cards>` uses), also set as a property. Omit it and all events still surface as bubbling `kc-card` CustomEvents.
+- **`policy`** — an optional `CardPolicy` for programmatic event routing (same shape `<kai-cards>` uses), also set as a property. Omit it and all events still surface as bubbling `kai-card` CustomEvents.
 
 ## Props
 
-<PropTable tag="kc-remote" />
+<PropTable tag="kai-remote" />
 
 <NeedAHand />

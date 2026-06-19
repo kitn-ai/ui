@@ -1,5 +1,5 @@
 // tests/elements/form-element.test.tsx
-// Contract integration: the bubbling `kc-card` CustomEvent reaches a document
+// Contract integration: the bubbling `kai-card` CustomEvent reaches a document
 // listener (the requirement defineWebComponent's default dispatch does NOT meet).
 import '../../src/elements/form';
 import { CARD_EVENT_NAME } from '../../src/primitives/card-routing';
@@ -16,25 +16,25 @@ function listen(): { events: CardEvent[]; off: () => void } {
 }
 
 afterEach(() => {
-  document.querySelectorAll('kc-form').forEach((e) => e.remove());
+  document.querySelectorAll('kai-form').forEach((e) => e.remove());
 });
 
 const FEEDBACK: FormDefinition = {
   type: 'object',
   required: ['rating'],
-  'x-kc-order': ['rating', 'comments', 'plan', 'contactOk'],
-  'x-kc-submitLabel': 'Send feedback',
-  'x-kc-actions': [{ id: 'skip', label: 'Skip', variant: 'ghost' }],
+  'x-kai-order': ['rating', 'comments', 'plan', 'contactOk'],
+  'x-kai-submitLabel': 'Send feedback',
+  'x-kai-actions': [{ id: 'skip', label: 'Skip', variant: 'ghost' }],
   properties: {
-    rating: { type: 'integer', title: 'Overall rating', minimum: 1, maximum: 5, 'x-kc-widget': 'rating' },
-    comments: { type: 'string', title: 'Comments', maxLength: 500, 'x-kc-widget': 'textarea' },
+    rating: { type: 'integer', title: 'Overall rating', minimum: 1, maximum: 5, 'x-kai-widget': 'rating' },
+    comments: { type: 'string', title: 'Comments', maxLength: 500, 'x-kai-widget': 'textarea' },
     plan: { type: 'string', title: 'Your plan', enum: ['free', 'pro', 'team'], default: 'free' },
     contactOk: { type: 'boolean', title: 'OK to contact me', default: false },
   },
 };
 
 async function mount(data: FormDefinition, cardId = 'card-feedback-7f3') {
-  const el = document.createElement('kc-form') as HTMLElement & { data: FormDefinition };
+  const el = document.createElement('kai-form') as HTMLElement & { data: FormDefinition };
   el.setAttribute('card-id', cardId);
   el.data = data;
   document.body.appendChild(el);
@@ -42,11 +42,11 @@ async function mount(data: FormDefinition, cardId = 'card-feedback-7f3') {
   return el;
 }
 
-test('kc-form registers', () => {
-  expect(customElements.get('kc-form')).toBeTruthy();
+test('kai-form registers', () => {
+  expect(customElements.get('kai-form')).toBeTruthy();
 });
 
-test('mount emits a bubbling `ready` kc-card event reaching the document', async () => {
+test('mount emits a bubbling `ready` kai-card event reaching the document', async () => {
   const { events, off } = listen();
   await mount(FEEDBACK);
   expect(events.some((e) => e.kind === 'ready' && e.cardId === 'card-feedback-7f3')).toBe(true);
@@ -120,7 +120,7 @@ test('secondary action button emits `action` with its id', async () => {
 
 test('dismissible form emits `dismiss`', async () => {
   const { events, off } = listen();
-  const el = await mount({ ...FEEDBACK, 'x-kc-dismissible': true });
+  const el = await mount({ ...FEEDBACK, 'x-kai-dismissible': true });
   const dismiss = Array.from(el.shadowRoot!.querySelectorAll<HTMLButtonElement>('button')).find(
     (b) => b.textContent?.trim() === 'Dismiss',
   )!;

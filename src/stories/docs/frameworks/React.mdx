@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # React
 
-The kit ships auto-generated, **typed React wrappers** under `@kitn.ai/chat/react`. They hide the
+The kit ships auto-generated, **typed React wrappers** under `@kitn.ai/ui/react`. They hide the
 custom-element plumbing — rich data goes in as React props (set as DOM **properties**, never
 stringified) and CustomEvents come out as `on<Event>` handlers — so you write idiomatic JSX
 without touching refs.
@@ -20,28 +20,28 @@ Both are shown below.
 ## Install & setup
 
 ```bash
-npm i @kitn.ai/chat
+npm i @kitn.ai/ui
 ```
 
 Register the custom elements once (a side-effect import), then use the typed wrappers anywhere:
 
 ```tsx
-// Once, near your app entry — registers the <kc-*> elements globally.
-import '@kitn.ai/chat/elements';
+// Once, near your app entry — registers the <kai-*> elements globally.
+import '@kitn.ai/ui/elements';
 
 // Then import the wrappers you need (tree-shaken).
-import { Chat, Conversations, Markdown } from '@kitn.ai/chat/react';
+import { Chat, Conversations, Markdown } from '@kitn.ai/ui/react';
 ```
 
-- **`@kitn.ai/chat/react`** — the typed wrappers (recommended). Component names are the PascalCase
-  of the tag: `kc-chat → Chat`, `kc-prompt-input → PromptInput`.
-- **`@kitn.ai/chat/elements`** — the raw custom elements, if you'd rather wire refs yourself
+- **`@kitn.ai/ui/react`** — the typed wrappers (recommended). Component names are the PascalCase
+  of the tag: `kai-chat → Chat`, `kai-prompt-input → PromptInput`.
+- **`@kitn.ai/ui/elements`** — the raw custom elements, if you'd rather wire refs yourself
   (see [Without the wrappers](#without-the-wrappers-raw-custom-element)).
 - No CSS to import: each element is styled inside its own Shadow DOM. Only pull in
-  `@kitn.ai/chat/theme.css` if you want to override design tokens (see **Theming**).
+  `@kitn.ai/ui/theme.css` if you want to override design tokens (see **Theming**).
 
-> One name collides with a browser global: `kc-image → Image`. Alias it if you import it:
-> `import { Image as KcImage } from '@kitn.ai/chat/react'`.
+> One name collides with a browser global: `kai-image → Image`. Alias it if you import it:
+> `import { Image as KaiImage } from '@kitn.ai/ui/react'`.
 
 ## Quick start — the all-in-one shell
 
@@ -49,8 +49,8 @@ import { Chat, Conversations, Markdown } from '@kitn.ai/chat/react';
 stream your model's reply back into state. You own the request; the component owns the UI.
 
 ```tsx
-import '@kitn.ai/chat/elements';
-import { Chat } from '@kitn.ai/chat/react';
+import '@kitn.ai/ui/elements';
+import { Chat } from '@kitn.ai/ui/react';
 import { useState } from 'react';
 
 type Message = { id: string; role: 'user' | 'assistant'; content: string };
@@ -97,8 +97,8 @@ your own layout. Here's a multi-conversation shell — a `<Conversations>` sideb
 `<Chat>` thread:
 
 ```tsx
-import '@kitn.ai/chat/elements';
-import { Chat, Conversations } from '@kitn.ai/chat/react';
+import '@kitn.ai/ui/elements';
+import { Chat, Conversations } from '@kitn.ai/ui/react';
 import { useState } from 'react';
 
 export function Workspace() {
@@ -139,7 +139,7 @@ takes a `size` (px or `%`) plus optional `min`/`max`; listen for `onChange` (`de
 persist the layout.
 
 ```tsx
-import { Chat, Conversations, Resizable, ResizableItem } from '@kitn.ai/chat/react';
+import { Chat, Conversations, Resizable, ResizableItem } from '@kitn.ai/ui/react';
 
 <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
   <Resizable orientation="horizontal" style={{ flex: 1, minHeight: 0 }}>
@@ -170,17 +170,17 @@ The rule for all elements: **rich data goes in as properties, interactions come 
 The wrappers do this for you — pass arrays/objects as props and they're assigned as live DOM
 properties (not stringified), while CustomEvents surface as `on<Event>` handlers.
 
-Event props are `on` + the event name with the `kc-` prefix stripped and each
+Event props are `on` + the event name with the `kai-` prefix stripped and each
 hyphen-segment PascalCased:
 
 | DOM event | React prop |
 |---|---|
-| `kc-submit` | `onSubmit` |
-| `kc-value-change` | `onValueChange` |
-| `kc-message-action` | `onMessageAction` |
-| `kc-model-change` | `onModelChange` |
-| `kc-conversation-select` | `onConversationSelect` |
-| `kc-suggestion-click` | `onSuggestionClick` |
+| `kai-submit` | `onSubmit` |
+| `kai-value-change` | `onValueChange` |
+| `kai-message-action` | `onMessageAction` |
+| `kai-model-change` | `onModelChange` |
+| `kai-conversation-select` | `onConversationSelect` |
+| `kai-suggestion-click` | `onSuggestionClick` |
 
 All **40+ elements** have a typed wrapper:
 
@@ -188,8 +188,8 @@ All **40+ elements** have a typed wrapper:
 import {
   Chat, Conversations, PromptInput, Message, Markdown, CodeBlock,
   Reasoning, Tool, Context, ModelSwitcher, Attachments, Loader,
-  // …every kc-* element
-} from '@kitn.ai/chat/react';
+  // …every kai-* element
+} from '@kitn.ai/ui/react';
 ```
 
 ## Without the wrappers (raw custom element)
@@ -199,7 +199,7 @@ object props and wire events:
 
 ```tsx
 import { useEffect, useRef, useState } from 'react';
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 export function RawChat() {
   const ref = useRef<HTMLElement>(null);
@@ -218,10 +218,10 @@ export function RawChat() {
       const { value } = (e as CustomEvent<{ value: string }>).detail;
       setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: 'user', content: value }]);
     };
-    el.addEventListener('kc-submit', onSubmit);
-    return () => el.removeEventListener('kc-submit', onSubmit);
+    el.addEventListener('kai-submit', onSubmit);
+    return () => el.removeEventListener('kai-submit', onSubmit);
   }, []);
 
-  return <kc-chat ref={ref} style={{ display: 'block', height: '100vh' }} />;
+  return <kai-chat ref={ref} style={{ display: 'block', height: '100vh' }} />;
 }
 ```

@@ -1,11 +1,11 @@
 ---
 title: Theming
-description: Override CSS custom properties to rebrand every kc-* component — colors, radii, typography, and dark mode — without touching component code.
+description: Override CSS custom properties to rebrand every kai-* component — colors, radii, typography, and dark mode — without touching component code.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Override `--color-*` design tokens on `:root` to rebrand every `kc-*` web component at once. Because inherited CSS pierces the Shadow DOM boundary, a single CSS rule propagates into all components automatically.
+Override `--color-*` design tokens on `:root` to rebrand every `kai-*` web component at once. Because inherited CSS pierces the Shadow DOM boundary, a single CSS rule propagates into all components automatically.
 
 ## How tokens work
 
@@ -32,13 +32,13 @@ Border radii are controlled by `--radius` (default `0.6rem`); `--radius-sm`, `--
 The kit injects its own scoped CSS into each component's Shadow DOM automatically — no import required to get started. Import `theme.css` only to override tokens:
 
 ```js
-import '@kitn.ai/chat/theme.css';
+import '@kitn.ai/ui/theme.css';
 ```
 
 Or via CDN:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/theme.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/theme.css">
 ```
 
 ## Override tokens
@@ -103,15 +103,15 @@ document.documentElement.classList.toggle('dark', mq.matches);
 ```
 </Aside>
 
-## Namespaced overrides (`--kc-color-*`)
+## Namespaced overrides (`--kai-color-*`)
 
-Every `--color-*` token resolves through a **`--kc-color-*` alias** before falling back to its default. Override the `--kc-color-*` form to rebrand without importing or redefining the entire `theme.css` token set:
+Every `--color-*` token resolves through a **`--kai-color-*` alias** before falling back to its default. Override the `--kai-color-*` form to rebrand without importing or redefining the entire `theme.css` token set:
 
 ```css
 :root {
-  --kc-color-primary: hsl(271 91% 65%);
-  --kc-color-primary-foreground: hsl(0 0% 100%);
-  --kc-radius: 0.375rem;
+  --kai-color-primary: hsl(271 91% 65%);
+  --kai-color-primary-foreground: hsl(0 0% 100%);
+  --kai-radius: 0.375rem;
 }
 ```
 
@@ -123,14 +123,14 @@ The kit exposes four namespaced typography tokens. Override them to adjust the s
 
 | Token | Default | Applies to |
 |---|---|---|
-| `--kc-text-caption` | `0.6875rem` | Micro labels, badges, sub-counts |
-| `--kc-text-meta` | `0.75rem` | Controls, toggles, captions |
-| `--kc-text-body` | `0.875rem` | Primary reading text |
-| `--kc-text-title` | `1rem` | Emphasis, headers |
+| `--kai-text-caption` | `0.6875rem` | Micro labels, badges, sub-counts |
+| `--kai-text-meta` | `0.75rem` | Controls, toggles, captions |
+| `--kai-text-body` | `0.875rem` | Primary reading text |
+| `--kai-text-title` | `1rem` | Emphasis, headers |
 
 ```css
 :root {
-  --kc-text-body: 0.9375rem;   /* bump reading text to 15px */
+  --kai-text-body: 0.9375rem;   /* bump reading text to 15px */
 }
 ```
 
@@ -138,7 +138,7 @@ Message and markdown reading size scales separately via the `proseSize` prop —
 
 ## Appearance settings
 
-Non-color appearance is controlled by `kc-chat` attributes (and the matching `ChatConfig` props in the SolidJS layer):
+Non-color appearance is controlled by `kai-chat` attributes (and the matching `ChatConfig` props in the SolidJS layer):
 
 | Setting | Values | Purpose |
 |---|---|---|
@@ -149,12 +149,12 @@ Non-color appearance is controlled by `kc-chat` attributes (and the matching `Ch
 <Tabs>
 <TabItem label="Web component">
 ```html
-<kc-chat prose-size="base" code-theme="github-dark-dimmed"></kc-chat>
+<kai-chat prose-size="base" code-theme="github-dark-dimmed"></kai-chat>
 ```
 </TabItem>
 <TabItem label="SolidJS">
 ```tsx
-import { ChatConfig } from '@kitn.ai/chat';
+import { ChatConfig } from '@kitn.ai/ui';
 
 <ChatConfig proseSize="base" codeTheme="github-dark-dimmed">
   {/* your components */}
@@ -165,4 +165,4 @@ import { ChatConfig } from '@kitn.ai/chat';
 
 ## Token reference
 
-The full list of overridable tokens lives in `theme.css` (shipped at `@kitn.ai/chat/theme.css`). For a browser-ready version with `:root` and `.dark` blocks pre-separated, use `@kitn.ai/chat/theme.tokens.css` — it is auto-generated from `theme.css` and never drifts.
+The full list of overridable tokens lives in `theme.css` (shipped at `@kitn.ai/ui/theme.css`). For a browser-ready version with `:root` and `.dark` blocks pre-separated, use `@kitn.ai/ui/theme.tokens.css` — it is auto-generated from `theme.css` and never drifts.

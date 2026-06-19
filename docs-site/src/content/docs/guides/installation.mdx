@@ -1,38 +1,38 @@
 ---
 title: Installation
-description: Install @kitn.ai/chat and register its web components in React, Vue, Angular, Svelte, or plain HTML.
+description: Install @kitn.ai/ui and register its web components in React, Vue, Angular, Svelte, or plain HTML.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Add `@kitn.ai/chat`, register the `kc-*` elements once, and use them in any framework. SolidJS is bundled in, so the host app needs nothing else.
+Add `@kitn.ai/ui`, register the `kai-*` elements once, and use them in any framework. SolidJS is bundled in, so the host app needs nothing else.
 
 ## Install the package
 
 <Tabs>
 <TabItem label="npm">
 ```sh
-npm install @kitn.ai/chat
+npm install @kitn.ai/ui
 ```
 </TabItem>
 <TabItem label="pnpm">
 ```sh
-pnpm add @kitn.ai/chat
+pnpm add @kitn.ai/ui
 ```
 </TabItem>
 <TabItem label="yarn">
 ```sh
-yarn add @kitn.ai/chat
+yarn add @kitn.ai/ui
 ```
 </TabItem>
 </Tabs>
 
 ## Register the elements
 
-Import the bundle once for its side effect. This registers every `kc-*` element globally — put it near your app's entry point:
+Import the bundle once for its side effect. This registers every `kai-*` element globally — put it near your app's entry point:
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
 The bundle is ESM-only and works with any modern bundler (`vite`, `webpack`, `esbuild`) or directly in a `<script type="module">`. SolidJS is bundled in, so there is no extra peer dependency.
@@ -40,19 +40,19 @@ The bundle is ESM-only and works with any modern bundler (`vite`, `webpack`, `es
 Once registered, the elements behave like any other HTML tag:
 
 ```html
-<kc-chat style="display: block; height: 100vh;"></kc-chat>
+<kai-chat style="display: block; height: 100vh;"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
-  const chat = document.querySelector('kc-chat');
+  const chat = document.querySelector('kai-chat');
 
   // Arrays can't be attributes, so set messages in JavaScript.
   chat.messages = [
     { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
   ];
 
-  chat.addEventListener('kc-submit', (e) => {
+  chat.addEventListener('kai-submit', (e) => {
     console.log('user sent:', e.detail.value);
   });
 </script>
@@ -67,7 +67,7 @@ Once registered, the elements behave like any other HTML tag:
 Each element injects its own CSS into its Shadow DOM, so the components look right with zero stylesheets. Import `theme.css` only when you want to **override the design tokens**:
 
 ```js
-import '@kitn.ai/chat/theme.css';
+import '@kitn.ai/ui/theme.css';
 ```
 
 Set the `--color-*` tokens on `:root` to rebrand:
@@ -80,24 +80,24 @@ Set the `--color-*` tokens on `:root` to rebrand:
 }
 ```
 
-Inherited CSS custom properties cross the Shadow DOM boundary, so these overrides reach every `kc-*` element automatically.
+Inherited CSS custom properties cross the Shadow DOM boundary, so these overrides reach every `kai-*` element automatically.
 
 ## Via CDN (no build step)
 
 Load the bundle as a self-contained ES module — no install, no bundler:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/chat/theme.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/theme.css">
 
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
-<kc-chat style="display: block; height: 100vh;"></kc-chat>
+<kai-chat style="display: block; height: 100vh;"></kai-chat>
 ```
 
 <Aside type="tip" title="Pin versions in production">
-An unpinned CDN URL tracks the latest release — fine for prototyping, risky for production. The package is pre-1.0, so a minor release can break things. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/chat@0.13.0/dist/kitn-chat.es.js`.
+An unpinned CDN URL tracks the latest release — fine for prototyping, risky for production. The package is pre-1.0, so a minor release can break things. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.13.0/dist/kitn-chat.es.js`.
 </Aside>
 
 ## SolidJS projects
@@ -108,7 +108,7 @@ Writing Solid? You can skip the web components and import the native components 
 npm install solid-js
 ```
 
-Then import from the root entry (`@kitn.ai/chat`), which ships as source and tree-shakes to what you use:
+Then import from the root entry (`@kitn.ai/ui`), which ships as source and tree-shakes to what you use:
 
 ```tsx
 import {
@@ -119,20 +119,20 @@ import {
   PromptInput,
   PromptInputTextarea,
   PromptInputActions,
-} from '@kitn.ai/chat';
-import '@kitn.ai/chat/theme.css';
+} from '@kitn.ai/ui';
+import '@kitn.ai/ui/theme.css';
 ```
 
 ## Entry points
 
 | Import path | What it provides |
 |---|---|
-| `@kitn.ai/chat/elements` | The web components — registers every `kc-*` element; use in any framework |
-| `@kitn.ai/chat/react` | Generated React wrappers with typed props |
-| `@kitn.ai/chat` | Native SolidJS components — tree-shaken source; Solid projects only |
-| `@kitn.ai/chat/theme.css` | Design tokens (`--color-*`) for overriding the theme |
-| `@kitn.ai/chat/provider` | Remote provider bundle for embedding the kit across origins |
+| `@kitn.ai/ui/elements` | The web components — registers every `kai-*` element; use in any framework |
+| `@kitn.ai/ui/react` | Generated React wrappers with typed props |
+| `@kitn.ai/ui` | Native SolidJS components — tree-shaken source; Solid projects only |
+| `@kitn.ai/ui/theme.css` | Design tokens (`--color-*`) for overriding the theme |
+| `@kitn.ai/ui/provider` | Remote provider bundle for embedding the kit across origins |
 
 ## Next steps
 
-With the elements registered, head to the [framework guide](/chat/guides/frameworks/overview/) for your stack, or render your first chat in [Getting started](/chat/guides/getting-started/).
+With the elements registered, head to the [framework guide](/guides/frameworks/overview/) for your stack, or render your first chat in [Getting started](/guides/getting-started/).

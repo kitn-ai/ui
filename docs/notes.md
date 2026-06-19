@@ -28,7 +28,7 @@ Website - Storybook | Examples | Editor | Other?
 [X] Vitest - Unit tests? Storybook Integration
 
 [ ] Voice Output / Speak
-[ ] Code Examples not really displaying properly
+[X] Code Examples not really displaying properly
 [X] kc-> rename to just regular names, so instead of kc-artifact, the story name should just be Artifact and the doc should have the title
 Artifact
 kc-artifact

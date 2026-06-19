@@ -83,7 +83,7 @@ export function normalizeOptions(options: unknown): {
     if (typeof opt.label !== 'string' || opt.label.length === 0) continue;
     if (seen.has(opt.id)) {
       // eslint-disable-next-line no-console
-      console.warn(`[kc-choice] duplicate option id "${opt.id}" ignored`);
+      console.warn(`[kai-choice] duplicate option id "${opt.id}" ignored`);
       continue;
     }
     seen.add(opt.id);
@@ -157,9 +157,9 @@ export interface ChoiceCardProps {
   /** The envelope title rendered in the card chrome. */
   heading?: string;
   /** Optional explicit CardHost (otherwise read from a CardProvider, otherwise the
-   *  bubbling `kc-card` CustomEvent off `hostElement`). */
+   *  bubbling `kai-card` CustomEvent off `hostElement`). */
   host?: CardHost;
-  /** The custom-element host node, for the bubbling `kc-card` fallback emit. */
+  /** The custom-element host node, for the bubbling `kai-card` fallback emit. */
   hostElement?: HTMLElement;
   class?: string;
   /** When set, render the chromed read-only view instead of the interactive radiogroup. */
@@ -179,7 +179,7 @@ export interface ChoiceCardProps {
  * error state).
  */
 export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
-  const merged = mergeProps({ cardId: 'kc-choice' }, props);
+  const merged = mergeProps({ cardId: 'kai-choice' }, props);
   const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution']);
 
   const ctxHost = useCardHost();
@@ -256,8 +256,8 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
     const el = local.hostElement;
     if (!el) return;
     const id = resolvedId();
-    if (id !== undefined) el.setAttribute('data-kc-resolved', id);
-    else el.removeAttribute('data-kc-resolved');
+    if (id !== undefined) el.setAttribute('data-kai-resolved', id);
+    else el.removeAttribute('data-kai-resolved');
   });
 
   const isOther = (opt: ChoiceOption): boolean => opt.id === OTHER_ACTION;
@@ -342,8 +342,8 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
   };
 
   const groupLabel = (): string => local.heading ?? local.data?.prompt ?? 'Choose an option';
-  const promptId = `kc-choice-prompt-${uid}`;
-  const otherInputId = `kc-choice-other-${uid}`;
+  const promptId = `kai-choice-prompt-${uid}`;
+  const otherInputId = `kai-choice-other-${uid}`;
 
   return (
     <Show when={valid()} fallback={<Card heading={local.heading} errorMessage={errorMessage()} />}>
@@ -378,7 +378,7 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
                     const checked = () => selectedId() === opt.id;
                     const tabStop = () =>
                       !opt.disabled && index() === focusIndex() && !res.isResolved();
-                    const descId = `kc-choice-desc-${uid}-${opt.id}`;
+                    const descId = `kai-choice-desc-${uid}-${opt.id}`;
                     const hasDesc = () => Boolean(opt.description);
                     return (
                       <ListRow

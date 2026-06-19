@@ -21,12 +21,12 @@ interface Props extends Record<string, unknown> {
   steps: Step[];
 }
 
-/** Parse a single light-DOM `<kc-step>` element into a `Step` descriptor.
+/** Parse a single light-DOM `<kai-step>` element into a `Step` descriptor.
  *  Attribute mapping:
  *   - `label`       → Step.label   (the always-visible heading)
  *   - textContent   → Step.content (optional expandable detail)
  */
-export function parseKcStepElement(n: Element): Step {
+export function parseKaiStepElement(n: Element): Step {
   return {
     label: n.getAttribute('label') ?? '',
     content: n.textContent?.trim() || undefined,
@@ -34,35 +34,35 @@ export function parseKcStepElement(n: Element): Step {
 }
 
 /**
- * `<kc-chain-of-thought>` — step-by-step reasoning with connectors and
+ * `<kai-chain-of-thought>` — step-by-step reasoning with connectors and
  * per-step collapsible detail.
  *
  * **Route 1 — JS property:** set the `steps` property to an array of
  * `{ label, content? }` objects.
  *
- * **Route 2 — declarative children:** compose `<kc-step>` child elements in
+ * **Route 2 — declarative children:** compose `<kai-step>` child elements in
  * light DOM (hidden by the Shadow DOM — pure data carriers). The `label`
  * attribute becomes the step heading; `textContent` becomes the expandable
  * detail. Children are merged after any prop steps.
  *
  * ```html
- * <kc-chain-of-thought>
- *   <kc-step label="Understand the request">The user wants composable web components.</kc-step>
- *   <kc-step label="Design the API">Route 1: variant + flags; rich data via properties.</kc-step>
- *   <kc-step label="Build & verify"></kc-step>
- * </kc-chain-of-thought>
+ * <kai-chain-of-thought>
+ *   <kai-step label="Understand the request">The user wants composable web components.</kai-step>
+ *   <kai-step label="Design the API">Route 1: variant + flags; rich data via properties.</kai-step>
+ *   <kai-step label="Build & verify"></kai-step>
+ * </kai-chain-of-thought>
  * ```
  */
-defineWebComponent<Props>('kc-chain-of-thought', {
+defineWebComponent<Props>('kai-chain-of-thought', {
   steps: [],
 }, (props, { element }) => {
-  // Read declarative <kc-step> children from light DOM.
+  // Read declarative <kai-step> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
   const [slottedSteps, setSlottedSteps] = createSignal<Step[]>([]);
   onMount(() => {
     const read = () => {
-      const nodes = [...element.querySelectorAll('kc-step')];
-      setSlottedSteps(nodes.map(parseKcStepElement));
+      const nodes = [...element.querySelectorAll('kai-step')];
+      setSlottedSteps(nodes.map(parseKaiStepElement));
     };
     read();
     const observer = new MutationObserver(read);

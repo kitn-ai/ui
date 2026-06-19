@@ -11,30 +11,30 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-confirm</p>
+<p class="kai-tag-sub">kai-confirm</p>
 
-<p class="kc-lede">A structured approval card that pairs a body message with labelled action buttons — use it when the model needs an explicit go-ahead before a consequential operation runs.</p>
+<p class="kai-lede">A structured approval card that pairs a body message with labelled action buttons — use it when the model needs an explicit go-ahead before a consequential operation runs.</p>
 
-<Facts items={['Shadow DOM', 'Single kc-card event', 'Resolves on action (no double-fire)', '3 action styles', 'Optional dismiss affordance']} />
+<Facts items={['Shadow DOM', 'Single kai-card event', 'Resolves on action (no double-fire)', '3 action styles', 'Optional dismiss affordance']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-confirm" />
+<Playground client:only="solid" tag="kai-confirm" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-confirm>` when the model proposes an action the user must explicitly approve — deploying, deleting, sending. `tone: 'warning'` signals caution; `tone: 'danger'` signals destructive intent via colour **and** icon. For equally-weighted choices that aren't approval-gated, use `<kc-choice>` instead.
+Use `<kai-confirm>` when the model proposes an action the user must explicitly approve — deploying, deleting, sending. `tone: 'warning'` signals caution; `tone: 'danger'` signals destructive intent via colour **and** icon. For equally-weighted choices that aren't approval-gated, use `<kai-choice>` instead.
 </Aside>
 
 ## Usage
 
-Set `data` in JavaScript (it's an object) and listen for the `kc-card` CustomEvent:
+Set `data` in JavaScript (it's an object) and listen for the `kai-card` CustomEvent:
 
 ```html
-<kc-confirm heading="Run database migration?"></kc-confirm>
+<kai-confirm heading="Run database migration?"></kai-confirm>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
-  const el = document.querySelector('kc-confirm');
+  import '@kitn.ai/ui/elements';
+  const el = document.querySelector('kai-confirm');
 
   el.data = {
     body: 'This will apply 3 pending migrations to production. This cannot be undone.',
@@ -45,14 +45,14 @@ Set `data` in JavaScript (it's an object) and listen for the `kc-card` CustomEve
     ],
   };
 
-  el.addEventListener('kc-card', (e) => {
+  el.addEventListener('kai-card', (e) => {
     const ev = e.detail; // { kind: 'action', cardId, action, payload? }
     if (ev.kind === 'action') console.log('chose', ev.action);
   });
 </script>
 ```
 
-- **`data`** — shape: `ConfirmCardData` from `@kitn.ai/chat`. Malformed payloads render an inline error.
+- **`data`** — shape: `ConfirmCardData` from `@kitn.ai/ui`. Malformed payloads render an inline error.
 - **Action styles** — `'primary' | 'default' | 'destructive'`. Mark one `default: true` to make it the keyboard default; combine with `autofocus` to focus it on mount.
 - **Restore resolved state** via `el.resolution = { kind: 'action', action: 'approve' }` — useful when replaying past conversations.
 
@@ -62,44 +62,44 @@ Set `data` in JavaScript (it's an object) and listen for the `kc-card` CustomEve
 
 The canonical two-action pattern: `warning` tone, primary confirm, plain cancel.
 
-<Example client:visible tag="kc-confirm" config={{ heading: 'Run database migration?' }} />
+<Example client:visible tag="kai-confirm" config={{ heading: 'Run database migration?' }} />
 
 ### Destructive Action
 
 `tone: 'danger'` with `style: 'destructive'` — colour and icon both signal severity.
 
-<Example client:visible tag="kc-confirm" config={{ heading: 'Delete files?' }} data="destructive" />
+<Example client:visible tag="kai-confirm" config={{ heading: 'Delete files?' }} data="destructive" />
 
 ### Choice Set
 
 More than two actions work naturally — each becomes a button.
 
-<Example client:visible tag="kc-confirm" data="choiceSet" />
+<Example client:visible tag="kai-confirm" data="choiceSet" />
 
 ### Dismissible
 
 `dismissible: true` adds a close (×) affordance that fires `{ kind: 'dismiss', cardId }` — the card stays in the DOM.
 
-<Example client:visible tag="kc-confirm" config={{ heading: 'Send email?' }} data="dismissible" />
+<Example client:visible tag="kai-confirm" config={{ heading: 'Send email?' }} data="dismissible" />
 
 ### Resolved (Read-only)
 
 Set the `resolution` property to render the chromed read-only view for a replayed conversation.
 
-<Example client:visible tag="kc-confirm" config={{ heading: 'Run database migration?' }} data="resolved" />
+<Example client:visible tag="kai-confirm" config={{ heading: 'Run database migration?' }} data="resolved" />
 
 ### Error State
 
 An empty `actions` array renders the inline error view and fires `{ kind: 'error', cardId, message }`.
 
-<Example client:visible tag="kc-confirm" data="errorState" />
+<Example client:visible tag="kai-confirm" data="errorState" />
 
 ## Props
 
-<PropTable tag="kc-confirm" />
+<PropTable tag="kai-confirm" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-confirm" />
+<ComposedFrom tag="kai-confirm" />
 
 <NeedAHand />

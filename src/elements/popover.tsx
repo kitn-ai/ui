@@ -12,14 +12,14 @@ interface Props extends Record<string, unknown> {
   open?: boolean;
 }
 
-/** Events fired by `<kc-popover>`. */
+/** Events fired by `<kai-popover>`. */
 interface Events {
   /** The popover wants to open or close (click, Escape, or outside-click). */
-  'kc-open-change': { open: boolean };
+  'kai-open-change': { open: boolean };
 }
 
 /**
- * `<kc-popover>` — a button-and-popover primitive: a trigger that toggles a
+ * `<kai-popover>` — a button-and-popover primitive: a trigger that toggles a
  * floating panel of arbitrary content. The panel is a `role="dialog"` region
  * (not a menu), so it can hold model rows, toggle switches, nested groups, or
  * any markup — the building block for ChatGPT-style header menus and similar
@@ -27,21 +27,21 @@ interface Events {
  *
  * **How to use** — slot a trigger and the panel content:
  * ```html
- * <kc-popover placement="bottom-start">
+ * <kai-popover placement="bottom-start">
  *   <button slot="trigger">ChatGPT ⌄</button>
  *   <div>
  *     <p><strong>GPT-5.5</strong> — Flagship model</p>
  *     <button>Legacy models</button>
  *   </div>
- * </kc-popover>
+ * </kai-popover>
  * ```
  *
  * The default slot is the panel; the `trigger` slot is the control. Clicking the
  * trigger toggles the panel; Escape or an outside click closes it (clicks inside
- * the panel do not). It fires `kc-open-change` with `{ open }` on every change,
+ * the panel do not). It fires `kai-open-change` with `{ open }` on every change,
  * and accepts an `open` JS property for controlled use.
  */
-defineWebComponent<Props, Events>('kc-popover', {
+defineWebComponent<Props, Events>('kai-popover', {
   placement: 'bottom-start',
   gutter: 6,
   open: undefined,
@@ -52,7 +52,7 @@ defineWebComponent<Props, Events>('kc-popover', {
     gutter={props.gutter}
     open={props.open}
     boundary={() => element}
-    onOpenChange={(open) => dispatch('kc-open-change', { open })}
+    onOpenChange={(open) => dispatch('kai-open-change', { open })}
   >
     <slot />
   </Popover>

@@ -1,5 +1,5 @@
-/** RAG assistant demo — mounts <kc-chat> for the Q&A thread and a
- *  <kc-sources> strip below the last assistant message to show numbered
+/** RAG assistant demo — mounts <kai-chat> for the Q&A thread and a
+ *  <kai-sources> strip below the last assistant message to show numbered
  *  inline citations. Sources are a separate element from the chat; they
  *  are set as a JS property after kit load. */
 import { createSignal, onMount, onCleanup } from 'solid-js';
@@ -139,7 +139,7 @@ export default function RagAssistantDemo(props: Props) {
     if (props.chatTitle) (host as any).chatTitle = props.chatTitle;
     if (props.placeholder) (host as any).placeholder = props.placeholder;
     host.setAttribute('theme', theme());
-    host.addEventListener('kc-submit', onSubmit);
+    host.addEventListener('kai-submit', onSubmit);
 
     if (sourcesEl) {
       customElements.upgrade(sourcesEl);
@@ -155,7 +155,7 @@ export default function RagAssistantDemo(props: Props) {
 
     onCleanup(() => {
       clearTimeout(timer);
-      host?.removeEventListener('kc-submit', onSubmit);
+      host?.removeEventListener('kai-submit', onSubmit);
       obs.disconnect();
     });
   });
@@ -166,7 +166,7 @@ export default function RagAssistantDemo(props: Props) {
       style={{ height: props.height ?? '600px', display: 'flex', 'flex-direction': 'column' }}
     >
       {/* @ts-expect-error custom element */}
-      <kc-chat
+      <kai-chat
         ref={(el: HTMLElement) => (host = el as any)}
         style={{ display: 'block', flex: '1', 'min-height': '0' }}
       />
@@ -178,7 +178,7 @@ export default function RagAssistantDemo(props: Props) {
         }}
       >
         {/* @ts-expect-error custom element */}
-        <kc-sources ref={(el: HTMLElement) => (sourcesEl = el as any)} />
+        <kai-sources ref={(el: HTMLElement) => (sourcesEl = el as any)} />
       </div>
     </div>
   );

@@ -1,16 +1,16 @@
 ---
 title: Vue
-description: Use kc-* web components in Vue 3 templates with property binding and custom event listeners.
+description: Use kai-* web components in Vue 3 templates with property binding and custom event listeners.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Drop `kc-*` web components directly into Vue 3 templates. Bind arrays and objects with the **`.prop` modifier**; listen with **`@kc-event`**. No adapter needed.
+Drop `kai-*` web components directly into Vue 3 templates. Bind arrays and objects with the **`.prop` modifier**; listen with **`@kai-event`**. No adapter needed.
 
 ## Install
 
 ```bash
-npm install @kitn.ai/chat
+npm install @kitn.ai/ui
 ```
 
 ## Register elements
@@ -19,7 +19,7 @@ Import the element bundle **once**, before `createApp().mount()`. Vue stamps tag
 
 ```ts
 // src/main.ts
-import '@kitn.ai/chat/elements'; // must come before createApp
+import '@kitn.ai/ui/elements'; // must come before createApp
 import { createApp } from 'vue';
 import App from './App.vue';
 
@@ -28,7 +28,7 @@ createApp(App).mount('#app');
 
 ## Configure Vite
 
-Tell Vue's template compiler that `kc-*` tags are native web components, not Vue components. Without this, you'll see "Unknown custom element" warnings and `.prop` bindings may misbehave.
+Tell Vue's template compiler that `kai-*` tags are native web components, not Vue components. Without this, you'll see "Unknown custom element" warnings and `.prop` bindings may misbehave.
 
 ```ts
 // vite.config.ts
@@ -40,7 +40,7 @@ export default defineConfig({
     vue({
       template: {
         compilerOptions: {
-          isCustomElement: (tag) => tag.startsWith('kc-'),
+          isCustomElement: (tag) => tag.startsWith('kai-'),
         },
       },
     }),
@@ -50,11 +50,11 @@ export default defineConfig({
 
 ## TypeScript support
 
-Add this reference once to give Volar and the template compiler full type coverage for every `kc-*` element's attributes, properties, and events:
+Add this reference once to give Volar and the template compiler full type coverage for every `kai-*` element's attributes, properties, and events:
 
 ```ts
 // env.d.ts
-/// <reference types="@kitn.ai/chat/elements" />
+/// <reference types="@kitn.ai/ui/elements" />
 ```
 
 ## Binding rules
@@ -65,17 +65,17 @@ The rule for every element: **rich data (arrays, objects) goes in as DOM propert
 |---|---|---|
 | Array or object | `:prop.prop="value"` | `:messages.prop="messages"` |
 | String / boolean / number | `:attr="value"` or `attr="literal"` | `:active-id="activeId"` |
-| Event | `@kc-event-name="handler"` | `@kc-submit="onSubmit"` |
+| Event | `@kai-event-name="handler"` | `@kai-submit="onSubmit"` |
 
 The `.prop` modifier forces Vue to set the value as a live DOM property rather than serialising it to an HTML attribute string. Always use it for arrays and objects.
 
 ## A working chat
 
-`<kc-chat>` is transport-agnostic: give it a `messages` array, handle `@kc-submit`, and stream your model's reply back into state. The element owns the UI; you own the request.
+`<kai-chat>` is transport-agnostic: give it a `messages` array, handle `@kai-submit`, and stream your model's reply back into state. The element owns the UI; you own the request.
 
 ```vue
 <script setup lang="ts">
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 type Message = { id: string; role: 'user' | 'assistant'; content: string };
@@ -104,27 +104,27 @@ const onSubmit = async (e: CustomEvent<{ value: string }>) => {
 
 <template>
   <div style="display: flex; flex-direction: column; height: 100dvh;">
-    <kc-chat
+    <kai-chat
       :messages.prop="messages"
       :suggestions.prop="['Summarize this chat', 'Start fresh']"
       style="flex: 1; min-height: 0;"
-      @kc-submit="onSubmit"
+      @kai-submit="onSubmit"
     />
   </div>
 </template>
 ```
 
 <Aside type="tip" title="Layout tip">
-The elements fill their container. Give the parent `display: flex; flex-direction: column` and set `flex: 1; min-height: 0` on `<kc-chat>` rather than hard-coding a height — this keeps the input pinned to the bottom at any viewport size.
+The elements fill their container. Give the parent `display: flex; flex-direction: column` and set `flex: 1; min-height: 0` on `<kai-chat>` rather than hard-coding a height — this keeps the input pinned to the bottom at any viewport size.
 </Aside>
 
 ## Compose your own layout
 
-`<kc-chat>` is one option, not the only one. Every element composes independently. Here's a sidebar + thread layout:
+`<kai-chat>` is one option, not the only one. Every element composes independently. Here's a sidebar + thread layout:
 
 ```vue
 <script setup lang="ts">
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { ref } from 'vue';
 
 const conversations = ref([
@@ -152,30 +152,30 @@ const onSubmit = (e: CustomEvent<{ value: string }>) => {
 
 <template>
   <div style="display: flex; height: 100dvh;">
-    <kc-conversations
+    <kai-conversations
       :conversations.prop="conversations"
       :active-id="activeId"
       style="width: 280px; flex-shrink: 0;"
-      @kc-conversation-select="onSelect"
-      @kc-new-chat="startNewConversation"
+      @kai-conversation-select="onSelect"
+      @kai-new-chat="startNewConversation"
     />
-    <kc-chat
+    <kai-chat
       :messages.prop="messages"
       style="flex: 1; min-width: 0;"
-      @kc-submit="onSubmit"
+      @kai-submit="onSubmit"
     />
   </div>
 </template>
 ```
 
-You can also drop standalone display elements — `<kc-markdown>`, `<kc-code-block>`, `<kc-artifact>`, `<kc-reasoning>` — anywhere in your own UI to render rich AI content without adopting the full chat shell.
+You can also drop standalone display elements — `<kai-markdown>`, `<kai-code-block>`, `<kai-artifact>`, `<kai-reasoning>` — anywhere in your own UI to render rich AI content without adopting the full chat shell.
 
 ## Theming
 
-Each element is styled inside its own Shadow DOM. No CSS import is required for the elements themselves. Pull in `@kitn.ai/chat/theme.css` only when you want to override design tokens:
+Each element is styled inside its own Shadow DOM. No CSS import is required for the elements themselves. Pull in `@kitn.ai/ui/theme.css` only when you want to override design tokens:
 
 ```ts
-import '@kitn.ai/chat/theme.css';
+import '@kitn.ai/ui/theme.css';
 ```
 
-See the [Theming guide](/chat/guides/theming/) for available tokens.
+See the [Theming guide](/guides/theming/) for available tokens.

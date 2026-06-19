@@ -31,19 +31,19 @@ interface Props extends Record<string, unknown> {
   avatarFallback?: string;
 }
 
-/** Events fired by `<kc-message>`. */
+/** Events fired by `<kai-message>`. */
 interface Events {
   /** An action button was clicked. `action` is the built-in name or custom id. */
-  'kc-message-action': { messageId: string; action: string };
+  'kai-message-action': { messageId: string; action: string };
 }
 
 /**
- * `<kc-message>` — a single message row: markdown/plain content, reasoning,
+ * `<kai-message>` — a single message row: markdown/plain content, reasoning,
  * tool calls, attachments, and action buttons, rendered from one `message`
- * object (the same shape `<kc-chat>` uses per message). The keystone of the
- * "compose your own message list" pattern. Emits `kc-message-action`.
+ * object (the same shape `<kai-chat>` uses per message). The keystone of the
+ * "compose your own message list" pattern. Emits `kai-message-action`.
  */
-defineWebComponent<Props, Events>('kc-message', {
+defineWebComponent<Props, Events>('kai-message', {
   message: undefined,
   role: 'assistant',
   content: undefined,
@@ -59,12 +59,12 @@ defineWebComponent<Props, Events>('kc-message', {
   const msg = (): ChatMessage =>
     props.message ?? { id: 'message', role: props.role ?? 'assistant', content: props.content ?? '' };
 
-  // Read declarative <kc-action> children from light DOM.
+  // Read declarative <kai-action> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
   const [slottedActions, setSlottedActions] = createSignal<import('../elements/chat-types').CustomAction[]>([]);
   onMount(() => {
     const read = () => {
-      const nodes = [...element.querySelectorAll('kc-action')];
+      const nodes = [...element.querySelectorAll('kai-action')];
       setSlottedActions(nodes.map(n => ({
         id: n.id || n.getAttribute('action') || '',
         label: n.textContent?.trim() || n.getAttribute('label') || n.id || '',
@@ -124,7 +124,7 @@ defineWebComponent<Props, Events>('kc-message', {
         <MessageActionBar
           actions={[...(msg().actions ?? []), ...slottedActions()]}
           reveal={reveal()}
-          onAction={(action) => dispatch('kc-message-action', { messageId: msg().id, action })}
+          onAction={(action) => dispatch('kai-message-action', { messageId: msg().id, action })}
         />
       </Show>
     </>

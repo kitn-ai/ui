@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-artifact': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-artifact': JSX.HTMLAttributes<HTMLElement> & {
         src?: string;
         tab?: string;
         'active-file'?: string;
@@ -111,15 +111,15 @@ function Frame(props: { children: JSX.Element; height?: string }) {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-artifact
+<kai-artifact
   src="https://your-backend.example/artifacts/abc/index.html"
   style="display:block;height:520px"
-></kc-artifact>
+></kai-artifact>
 
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/ui/elements'; // registers the custom elements
 
-  const el = document.querySelector('kc-artifact');
+  const el = document.querySelector('kai-artifact');
   // \`files\` is a JS property (array): tree labels (folders from \`/\`), a preview
   // \`url\` per file, and \`code\` for the Code tab.
   el.files = [
@@ -128,23 +128,23 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
     { path: 'assets/logo.svg', url: '…/logo.svg', type: 'image' },
   ];
 
-  el.addEventListener('kc-navigate', (e) => console.log('navigate', e.detail.url));
-  el.addEventListener('kc-tab-change', (e) => console.log('tab', e.detail.tab));
-  el.addEventListener('kc-file-select', (e) => console.log('file', e.detail.path));
+  el.addEventListener('kai-navigate', (e) => console.log('navigate', e.detail.url));
+  el.addEventListener('kai-tab-change', (e) => console.log('tab', e.detail.tab));
+  el.addEventListener('kai-file-select', (e) => console.log('file', e.detail.path));
 </script>`;
 
 const meta = {
   title: 'Components/Artifact',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-artifact'),
+  argTypes: argTypesFor('kai-artifact'),
   parameters: {
     layout: 'padded',
     docs: {
-      description: specDescription('kc-artifact', [
-        '`<kc-artifact>` is the framework-agnostic **web component** for a framed, switchable **generated-artifact viewer** — the "canvas / artifacts" pattern (Claude Artifacts, ChatGPT Canvas, V0, bolt). It frames a consumer-served URL in a **sandboxed `<iframe>`** with a functional nav toolbar, and a **Preview | Code** toggle whose Code tab shows a file tree (`<kc-file-tree>`) + the active file source (`<kc-code-block>`). Isolated in **Shadow DOM**.',
-        "**When to use:** to show an AI-generated artifact (a web page, doc, image, or PDF your backend hosts) beside the conversation — typically inside a `<kc-resizable>` panel. The component **frames** content; your backend serves it, so relative links, back/forward, reload and multi-format work natively.",
-        "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set `src` to the hosted URL, and set the `files` **property** (a JS array of `{ path, url?, code?, language?, type? }`) for the Code tab tree. The iframe `sandbox` defaults to `allow-scripts allow-forms` (**not** `allow-same-origin`); widen it via the `sandbox` attribute only if you trust the artifact. Listen for **`kc-navigate`** (`detail.url`), **`kc-tab-change`** (`detail.tab`), and **`kc-file-select`** (`detail.path`).",
-        '**Anatomy:** **nav toolbar** (back · forward · reload · home buttons + editable address field + Preview|Code toggle; each affordance individually hideable via `no-*` flags; omitted entirely when all are hidden) → **preview body** (either a sandboxed `<iframe>` for web/image/PDF content, or the **code view**: `<kc-file-tree>` sidebar + `<kc-code-block>` main pane, side by side).',
+      description: specDescription('kai-artifact', [
+        '`<kai-artifact>` is the framework-agnostic **web component** for a framed, switchable **generated-artifact viewer** — the "canvas / artifacts" pattern (Claude Artifacts, ChatGPT Canvas, V0, bolt). It frames a consumer-served URL in a **sandboxed `<iframe>`** with a functional nav toolbar, and a **Preview | Code** toggle whose Code tab shows a file tree (`<kai-file-tree>`) + the active file source (`<kai-code-block>`). Isolated in **Shadow DOM**.',
+        "**When to use:** to show an AI-generated artifact (a web page, doc, image, or PDF your backend hosts) beside the conversation — typically inside a `<kai-resizable>` panel. The component **frames** content; your backend serves it, so relative links, back/forward, reload and multi-format work natively.",
+        "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set `src` to the hosted URL, and set the `files` **property** (a JS array of `{ path, url?, code?, language?, type? }`) for the Code tab tree. The iframe `sandbox` defaults to `allow-scripts allow-forms` (**not** `allow-same-origin`); widen it via the `sandbox` attribute only if you trust the artifact. Listen for **`kai-navigate`** (`detail.url`), **`kai-tab-change`** (`detail.tab`), and **`kai-file-select`** (`detail.path`).",
+        '**Anatomy:** **nav toolbar** (back · forward · reload · home buttons + editable address field + Preview|Code toggle; each affordance individually hideable via `no-*` flags; omitted entirely when all are hidden) → **preview body** (either a sandboxed `<iframe>` for web/image/PDF content, or the **code view**: `<kai-file-tree>` sidebar + `<kai-code-block>` main pane, side by side).',
         '**Placement:** the preview/canvas panel of a compose-your-own-chat shell — e.g. `list | chat | artifact`. It **fills** its container, so give the parent (or the element) a height.',
         'See the **Code** tab for HTML usage.',
       ]),
@@ -165,7 +165,7 @@ export const Playground: Story = {
     });
     return (
       <Frame>
-        <kc-artifact
+        <kai-artifact
           ref={(e) => (el = e as HTMLElement & { files?: ArtifactFile[] })}
           src={args.src ?? `${BASE}/index.html`}
           tab={args.tab ?? 'preview'}
@@ -188,7 +188,7 @@ export const CodeTab: Story = {
     });
     return (
       <Frame>
-        <kc-artifact
+        <kai-artifact
           ref={(e) => (el = e as HTMLElement & { files?: ArtifactFile[] })}
           src={`${BASE}/index.html`}
           tab="code"
@@ -210,7 +210,7 @@ export const ImagePreview: Story = {
     });
     return (
       <Frame>
-        <kc-artifact
+        <kai-artifact
           ref={(e) => (el = e as HTMLElement & { files?: ArtifactFile[] })}
           src={`${BASE}/assets/logo.svg`}
           iframe-title="Logo image"
@@ -230,7 +230,7 @@ export const PdfPreview: Story = {
     });
     return (
       <Frame>
-        <kc-artifact
+        <kai-artifact
           ref={(e) => (el = e as HTMLElement & { files?: ArtifactFile[] })}
           src={`${BASE}/assets/report.pdf`}
           iframe-title="Report PDF"
@@ -246,7 +246,7 @@ export const PdfFallback: Story = {
   name: 'PDF (fallback card)',
   render: () => (
     <Frame>
-      <kc-artifact
+      <kai-artifact
         src={`${BASE}/assets/does-not-exist.pdf`}
         iframe-title="Missing PDF"
       />
@@ -263,20 +263,20 @@ export const WithEvents: Story = {
     onMount(() => {
       if (!el) return;
       el.files = FILES;
-      el.addEventListener('kc-navigate', (e) =>
+      el.addEventListener('kai-navigate', (e) =>
         setLog((l) => [`navigate → ${(e as CustomEvent).detail.url}`, ...l].slice(0, 6)),
       );
-      el.addEventListener('kc-tab-change', (e) =>
-        setLog((l) => [`kc-tab-change → ${(e as CustomEvent).detail.tab}`, ...l].slice(0, 6)),
+      el.addEventListener('kai-tab-change', (e) =>
+        setLog((l) => [`kai-tab-change → ${(e as CustomEvent).detail.tab}`, ...l].slice(0, 6)),
       );
-      el.addEventListener('kc-file-select', (e) =>
-        setLog((l) => [`kc-file-select → ${(e as CustomEvent).detail.path}`, ...l].slice(0, 6)),
+      el.addEventListener('kai-file-select', (e) =>
+        setLog((l) => [`kai-file-select → ${(e as CustomEvent).detail.path}`, ...l].slice(0, 6)),
       );
     });
     return (
       <div style={{ display: 'flex', 'flex-direction': 'column', gap: '8px' }}>
         <Frame height="420px">
-          <kc-artifact
+          <kai-artifact
             ref={(e) => (el = e as HTMLElement & { files?: ArtifactFile[] })}
             src={`${BASE}/index.html`}
             iframe-title="Starboard artifact preview"
@@ -304,25 +304,25 @@ export const WithEvents: Story = {
 const CONFIGURABLE_TOOLBAR_SNIPPET = `<!-- All toolbar affordances are individually opt-in/out via attributes. -->
 
 <!-- The five default-shown items each have a "no-*" flag to hide them: -->
-<kc-artifact
+<kai-artifact
   src="…"
   no-nav
   no-reload
   no-home
-></kc-artifact>
+></kai-artifact>
 
 <!-- Two new buttons are OPT-IN (hidden by default): -->
-<kc-artifact
+<kai-artifact
   src="…"
   expandable
   open-in-tab
-></kc-artifact>
+></kai-artifact>
 
 <!-- Standalone chrome: rounded corners + border (default is square/borderless in-panel): -->
-<kc-artifact src="…" standalone></kc-artifact>
+<kai-artifact src="…" standalone></kai-artifact>
 
 <!-- Read-only path: visible, nav-tracking, non-editable: -->
-<kc-artifact src="…" readonly-path></kc-artifact>`;
+<kai-artifact src="…" readonly-path></kai-artifact>`;
 
 /**
  * Every toolbar affordance is individually configurable.
@@ -355,7 +355,7 @@ export const ConfigurableToolbar: Story = {
     onMount(() => { if (el) el.files = FILES; });
     return (
       <Frame>
-        <kc-artifact
+        <kai-artifact
           ref={(e) => (el = e as HTMLElement & { files?: ArtifactFile[] })}
           src={`${BASE}/index.html`}
           iframe-title="Starboard artifact preview"
@@ -398,14 +398,14 @@ export const ConfigurableToolbar: Story = {
 };
 
 const MINIMAL_SNIPPET = `<!-- Minimal: only the preview iframe, no toolbar at all. -->
-<kc-artifact
+<kai-artifact
   src="…"
   no-nav
   no-reload
   no-home
   no-path-field
   no-tabs
-></kc-artifact>`;
+></kai-artifact>`;
 
 /**
  * All five default-shown toolbar affordances suppressed — the toolbar bar
@@ -416,7 +416,7 @@ export const MinimalPreview: Story = {
   name: 'Minimal (preview-only)',
   render: () => (
     <Frame>
-      <kc-artifact
+      <kai-artifact
         src={`${BASE}/index.html`}
         iframe-title="Starboard artifact preview"
         no-nav
@@ -432,10 +432,10 @@ export const MinimalPreview: Story = {
 
 const OPEN_IN_TAB_SNIPPET = `<!-- open-in-tab: adds a button that opens the current URL in a new tab.
      The button is disabled while the src is blank. -->
-<kc-artifact
+<kai-artifact
   src="https://your-backend.example/artifacts/abc/index.html"
   open-in-tab
-></kc-artifact>`;
+></kai-artifact>`;
 
 /**
  * The **open-in-tab** button (opt-in via `open-in-tab`) opens the current
@@ -451,7 +451,7 @@ export const OpenInTab: Story = {
     onMount(() => { if (el) el.files = FILES; });
     return (
       <Frame>
-        <kc-artifact
+        <kai-artifact
           ref={(e) => (el = e as HTMLElement & { files?: ArtifactFile[] })}
           src={`${BASE}/index.html`}
           iframe-title="Starboard artifact preview"
@@ -466,17 +466,17 @@ export const OpenInTab: Story = {
 const STANDALONE_SNIPPET = `<!-- standalone: adds rounded corners + a border (like a card).
      Suppresses the expand button even when expandable is set.
      Use for an artifact rendered outside any panel layout. -->
-<kc-artifact
+<kai-artifact
   src="…"
   standalone
   style="display:block;height:520px"
-></kc-artifact>`;
+></kai-artifact>`;
 
 /**
  * `standalone` adds rounded corners and a border — the "card" chrome for an
  * artifact rendered outside any panel layout (e.g. as a modal or inline tile).
  * In the default in-panel mode the element is square and borderless so it fits
- * flush inside a `<kc-resizable>` panel without double-borders.
+ * flush inside a `<kai-resizable>` panel without double-borders.
  *
  * `standalone` also suppresses the expand button (there is no enclosing resizable
  * to maximize into) regardless of `expandable`.
@@ -491,7 +491,7 @@ export const StandaloneChrome: Story = {
     onMount(() => { if (el) el.files = FILES; });
     return (
       <div style={{ padding: '16px', 'max-width': '900px' }}>
-        <kc-artifact
+        <kai-artifact
           ref={(e) => (el = e as HTMLElement & { files?: ArtifactFile[] })}
           src={`${BASE}/index.html`}
           iframe-title="Starboard artifact preview"

@@ -1,11 +1,11 @@
 /**
- * Unit tests for the declarative `<kc-skill>` light-DOM API of `<kc-skills>`.
+ * Unit tests for the declarative `<kai-skill>` light-DOM API of `<kai-skills>`.
  *
  * Strategy: the `defineWebComponent` call registers a real Shadow-DOM custom
  * element which requires a full browser environment (Constructable Stylesheets,
  * shadow roots, etc.) and is therefore not suitable for jsdom unit tests.
  * Instead we:
- *   1. Test the exported `parseKcSkillElement` helper in isolation — it has no
+ *   1. Test the exported `parseKaiSkillElement` helper in isolation — it has no
  *      DOM dependencies beyond `Element`, which jsdom provides perfectly.
  *   2. Test that the merged list of prop + slotted items renders badge spans
  *      correctly via `MessageSkills` directly, mirroring the pattern used in
@@ -15,45 +15,45 @@ import { describe, it, expect, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
 import { For } from 'solid-js';
-import { parseKcSkillElement } from './message-skills';
+import { parseKaiSkillElement } from './message-skills';
 import { MessageSkills } from '../components/message-skills';
 
 afterEach(cleanup);
 
 // ---------------------------------------------------------------------------
-// parseKcSkillElement — pure helper
+// parseKaiSkillElement — pure helper
 // ---------------------------------------------------------------------------
 
-describe('parseKcSkillElement', () => {
+describe('parseKaiSkillElement', () => {
   function makeNode(textContent: string, id?: string): Element {
-    const el = document.createElement('kc-skill');
+    const el = document.createElement('kai-skill');
     el.textContent = textContent;
     if (id !== undefined) el.setAttribute('id', id);
     return el;
   }
 
   it('uses textContent as name', () => {
-    const item = parseKcSkillElement(makeNode('Web Search'));
+    const item = parseKaiSkillElement(makeNode('Web Search'));
     expect(item).toMatchObject({ name: 'Web Search' });
   });
 
   it('uses id attribute as id when present', () => {
-    const item = parseKcSkillElement(makeNode('Web Search', 'web-search'));
+    const item = parseKaiSkillElement(makeNode('Web Search', 'web-search'));
     expect(item).toMatchObject({ id: 'web-search', name: 'Web Search' });
   });
 
   it('falls back to textContent as id when id attribute is absent', () => {
-    const item = parseKcSkillElement(makeNode('Web Search'));
+    const item = parseKaiSkillElement(makeNode('Web Search'));
     expect(item).toMatchObject({ id: 'Web Search', name: 'Web Search' });
   });
 
   it('trims leading/trailing whitespace from textContent', () => {
-    const item = parseKcSkillElement(makeNode('  Code Interpreter  '));
+    const item = parseKaiSkillElement(makeNode('  Code Interpreter  '));
     expect(item).toMatchObject({ name: 'Code Interpreter' });
   });
 
   it('handles empty textContent with an id attribute', () => {
-    const item = parseKcSkillElement(makeNode('', 'code'));
+    const item = parseKaiSkillElement(makeNode('', 'code'));
     expect(item).toMatchObject({ id: 'code', name: '' });
   });
 });
@@ -92,12 +92,12 @@ describe('MessageSkills rendering with merged skills', () => {
     expect(getAllByText(/Prop Skill|Slotted Skill/)).toHaveLength(2);
   });
 
-  it('parseKcSkillElement produces items that render correctly', () => {
-    const el = document.createElement('kc-skill');
+  it('parseKaiSkillElement produces items that render correctly', () => {
+    const el = document.createElement('kai-skill');
     el.textContent = 'Memory';
     el.setAttribute('id', 'memory');
 
-    const parsed = parseKcSkillElement(el);
+    const parsed = parseKaiSkillElement(el);
     const { getByText } = render(() => <MessageSkills skills={[parsed]} />);
     expect(getByText('Memory')).toBeInTheDocument();
   });

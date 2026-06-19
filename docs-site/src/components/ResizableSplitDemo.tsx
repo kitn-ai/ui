@@ -1,8 +1,8 @@
 /** Live demo for the "Resizable split layout" pattern page.
- *  Mounts a <kc-resizable> with two <kc-resizable-item> children:
- *  a <kc-conversations> sidebar and a <kc-chat> main pane.
+ *  Mounts a <kai-resizable> with two <kai-resizable-item> children:
+ *  a <kai-conversations> sidebar and a <kai-chat> main pane.
  *  A segmented toggle swaps the sidebar to the left or right by
- *  re-ordering the two <kc-resizable-item> elements in the DOM. */
+ *  re-ordering the two <kai-resizable-item> elements in the DOM. */
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { loadKit } from './example/kit';
 
@@ -52,7 +52,7 @@ const GROUPS = [
   { id: 'yesterday', name: 'Yesterday', sortOrder: 1, createdAt: '2026-06-16T00:00:00.000Z' },
 ];
 
-// ChatMessage seed (verified against element-meta.json kc-chat.messages shape)
+// ChatMessage seed (verified against element-meta.json kai-chat.messages shape)
 type ChatMsg = { id: string; role: 'user' | 'assistant'; content: string; actions?: string[] };
 const SEED_MESSAGES: ChatMsg[] = [
   { id: 'm1', role: 'user', content: 'How does the resizable layout work?' },
@@ -60,13 +60,13 @@ const SEED_MESSAGES: ChatMsg[] = [
     id: 'm2',
     role: 'assistant',
     content:
-      'Wrap `<kc-resizable-item>` children inside `<kc-resizable>`. Set `size`, `min`, and `max` on each item — a draggable divider appears automatically between them. Use the toggle above to swap the sidebar to either side.',
+      'Wrap `<kai-resizable-item>` children inside `<kai-resizable>`. Set `size`, `min`, and `max` on each item — a draggable divider appears automatically between them. Use the toggle above to swap the sidebar to either side.',
     actions: ['copy', 'like', 'dislike'],
   },
 ];
 
 const REPLY =
-  'Drag the divider to redistribute space, or use the Left / Right toggle to move the sidebar. `<kc-resizable>` fires a `kc-change` event with updated sizes (in percent) whenever a drag ends.';
+  'Drag the divider to redistribute space, or use the Left / Right toggle to move the sidebar. `<kai-resizable>` fires a `kai-change` event with updated sizes (in percent) whenever a drag ends.';
 
 let uid = 0;
 const nextId = () => `r${++uid}`;
@@ -76,10 +76,10 @@ export default function ResizableSplitDemo() {
 
   // Container refs — the resizable root and two item wrappers
   let resizableRef: HTMLElement | undefined;
-  let sidebarItemRef: HTMLElement | undefined; // the kc-resizable-item holding kc-conversations
-  let chatItemRef: HTMLElement | undefined;    // the kc-resizable-item holding kc-chat
+  let sidebarItemRef: HTMLElement | undefined; // the kai-resizable-item holding kai-conversations
+  let chatItemRef: HTMLElement | undefined;    // the kai-resizable-item holding kai-chat
 
-  // The actual kc-* elements created imperatively in onMount
+  // The actual kai-* elements created imperatively in onMount
   let convEl: HTMLElement | undefined;
   let chatEl: (HTMLElement & { messages?: ChatMsg[]; [k: string]: unknown }) | undefined;
 
@@ -123,8 +123,8 @@ export default function ResizableSplitDemo() {
   onMount(async () => {
     await loadKit();
 
-    // --- Build kc-conversations ---
-    convEl = document.createElement('kc-conversations') as HTMLElement;
+    // --- Build kai-conversations ---
+    convEl = document.createElement('kai-conversations') as HTMLElement;
     convEl.style.cssText = 'display:block;height:100%;width:100%';
     convEl.setAttribute('theme', theme());
     customElements.upgrade(convEl);
@@ -133,15 +133,15 @@ export default function ResizableSplitDemo() {
     (convEl as any).activeId = 'c1';
     if (sidebarItemRef) sidebarItemRef.appendChild(convEl);
 
-    // --- Build kc-chat ---
-    chatEl = document.createElement('kc-chat') as (HTMLElement & { messages?: ChatMsg[]; [k: string]: unknown });
+    // --- Build kai-chat ---
+    chatEl = document.createElement('kai-chat') as (HTMLElement & { messages?: ChatMsg[]; [k: string]: unknown });
     chatEl.style.cssText = 'display:block;height:100%;width:100%';
     chatEl.setAttribute('theme', theme());
     (chatEl as any).placeholder = 'Ask about this layout…';
     (chatEl as any).chatTitle = 'Web component architecture';
     customElements.upgrade(chatEl);
     chatEl.messages = SEED_MESSAGES;
-    chatEl.addEventListener('kc-submit', onSubmit);
+    chatEl.addEventListener('kai-submit', onSubmit);
     if (chatItemRef) chatItemRef.appendChild(chatEl);
 
     // Upgrade the resizable root so it reads its children
@@ -153,12 +153,12 @@ export default function ResizableSplitDemo() {
 
     onCleanup(() => {
       clearTimeout(timer);
-      chatEl?.removeEventListener('kc-submit', onSubmit);
+      chatEl?.removeEventListener('kai-submit', onSubmit);
       obs.disconnect();
     });
   });
 
-  /** Swap the two kc-resizable-item children when the side toggle changes. */
+  /** Swap the two kai-resizable-item children when the side toggle changes. */
   const handleSideChange = (next: 'left' | 'right') => {
     if (next === side()) return;
     setSide(next);
@@ -208,23 +208,23 @@ export default function ResizableSplitDemo() {
         style={{ height: '520px' }}
       >
         {/* @ts-expect-error custom element */}
-        <kc-resizable
+        <kai-resizable
           ref={(el: HTMLElement) => (resizableRef = el)}
           orientation="horizontal"
           style={{ display: 'block', height: '100%' }}
         >
-          {/* sidebar item — kc-conversations appended imperatively in onMount */}
+          {/* sidebar item — kai-conversations appended imperatively in onMount */}
           {/* @ts-expect-error custom element */}
-          <kc-resizable-item
+          <kai-resizable-item
             ref={(el: HTMLElement) => (sidebarItemRef = el)}
             size="25%"
             min="180px"
             max="340px"
           />
-          {/* chat item — kc-chat appended imperatively in onMount */}
+          {/* chat item — kai-chat appended imperatively in onMount */}
           {/* @ts-expect-error custom element */}
-          <kc-resizable-item ref={(el: HTMLElement) => (chatItemRef = el)} />
-        </kc-resizable>
+          <kai-resizable-item ref={(el: HTMLElement) => (chatItemRef = el)} />
+        </kai-resizable>
       </div>
     </div>
   );

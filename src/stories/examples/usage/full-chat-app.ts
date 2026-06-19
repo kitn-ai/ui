@@ -39,7 +39,7 @@ const CONTEXT = `{ usedTokens: 12400, maxTokens: 200000, inputTokens: 8200, outp
 const SUGGESTIONS = `['How does SolidJS handle context?', 'Show me a store example']`;
 
 /**
- * Default — the entire chat experience in one element. `<kc-chat>` renders the
+ * Default — the entire chat experience in one element. `<kai-chat>` renders the
  * message thread (markdown, reasoning, tool calls, per-message action bars), a
  * header with the `models` switcher + `context` token meter, the `suggestions`
  * chips, and the prompt input. The demo's resizable sidebar + conversation list
@@ -47,20 +47,20 @@ const SUGGESTIONS = `['How does SolidJS handle context?', 'Show me a store examp
  */
 const fullChat: StoryUsage = {
   intro:
-    'Drop in the whole chat experience with one element. `<kc-chat>` renders the thread (markdown, reasoning, tool calls, action bars), an optional header model switcher + `context` token meter, `suggestions` chips, and the prompt input — set `messages` as a property and handle `submit` / `messageaction` / `modelchange`. The resizable conversation sidebar in the demo is separate chrome `<kc-chat>` does not include. (The live demo composes the SolidJS `ChatContainer`, `Message`, `PromptInput`, and `ConversationList` primitives directly.)',
+    'Drop in the whole chat experience with one element. `<kai-chat>` renders the thread (markdown, reasoning, tool calls, action bars), an optional header model switcher + `context` token meter, `suggestions` chips, and the prompt input — set `messages` as a property and handle `submit` / `messageaction` / `modelchange`. The resizable conversation sidebar in the demo is separate chrome `<kai-chat>` does not include. (The live demo composes the SolidJS `ChatContainer`, `Message`, `PromptInput`, and `ConversationList` primitives directly.)',
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/chat/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
 </script>
 
-<kc-chat
+<kai-chat
   id="chat"
   chat-title="SolidJS reactivity vs React hooks"
   current-model="claude-4"
   prose-size="base"
   placeholder="Ask anything..."
-></kc-chat>
+></kai-chat>
 
 <script type="module">
   const chat = document.getElementById('chat');
@@ -71,18 +71,18 @@ const fullChat: StoryUsage = {
   chat.context = ${CONTEXT};
   chat.suggestions = ${SUGGESTIONS};
 
-  chat.addEventListener('kc-submit', (e) => {
+  chat.addEventListener('kai-submit', (e) => {
     const { value, attachments } = e.detail; // append the user message / call your backend
     console.log('send', value, attachments);
   });
-  chat.addEventListener('kc-message-action', (e) => {
+  chat.addEventListener('kai-message-action', (e) => {
     const { messageId, action } = e.detail; // 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit'
     console.log(messageId, action);
   });
-  chat.addEventListener('kc-model-change', (e) => console.log(e.detail.modelId));
+  chat.addEventListener('kai-model-change', (e) => console.log(e.detail.modelId));
 </script>`,
 
-    react: `import { Chat } from '@kitn.ai/chat/react';
+    react: `import { Chat } from '@kitn.ai/ui/react';
 
 export function ChatApp() {
   return (
@@ -103,7 +103,7 @@ export function ChatApp() {
 }`,
 
     vue: `<script setup>
-import '@kitn.ai/chat/elements'; // register once (e.g. in main.ts)
+import '@kitn.ai/ui/elements'; // register once (e.g. in main.ts)
 
 // Object/array props use the .prop modifier in the template.
 const messages = ${MESSAGES};
@@ -116,7 +116,7 @@ function onAction(e) { console.log(e.detail.messageId, e.detail.action); }
 </script>
 
 <template>
-  <kc-chat
+  <kai-chat
     chat-title="SolidJS reactivity vs React hooks"
     prose-size="base"
     placeholder="Ask anything..."
@@ -125,14 +125,14 @@ function onAction(e) { console.log(e.detail.messageId, e.detail.action); }
     :models.prop="models"
     :context.prop="context"
     :suggestions.prop="suggestions"
-    @kc-submit="onSubmit"
-    @kc-message-action="onAction"
-    @kc-model-change="(e) => console.log(e.detail.modelId)"
+    @kai-submit="onSubmit"
+    @kai-message-action="onAction"
+    @kai-model-change="(e) => console.log(e.detail.modelId)"
   />
 </template>`,
 
     svelte: `<script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let el;
   // Object/array props are set as properties via bind:this.
@@ -151,18 +151,18 @@ function onAction(e) { console.log(e.detail.messageId, e.detail.action); }
   function onAction(e) { console.log(e.detail.messageId, e.detail.action); }
 </script>
 
-<kc-chat
+<kai-chat
   bind:this={el}
   chat-title="SolidJS reactivity vs React hooks"
   prose-size="base"
   placeholder="Ask anything..."
   current-model="claude-4"
-  on:kc-submit={onSubmit}
-  on:kc-message-action={onAction}
-  on:kc-model-change={(e) => console.log(e.detail.modelId)}
+  on:kai-submit={onSubmit}
+  on:kai-message-action={onAction}
+  on:kai-model-change={(e) => console.log(e.detail.modelId)}
 />`,
 
-    angular: `// main.ts: import '@kitn.ai/chat/elements' before bootstrapApplication,
+    angular: `// main.ts: import '@kitn.ai/ui/elements' before bootstrapApplication,
 // and add CUSTOM_ELEMENTS_SCHEMA to the component.
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -171,7 +171,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: \`
-    <kc-chat
+    <kai-chat
       chat-title="SolidJS reactivity vs React hooks"
       prose-size="base"
       placeholder="Ask anything..."
@@ -180,10 +180,10 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
       [models]="models"
       [context]="context"
       [suggestions]="suggestions"
-      (kc-submit)="onSubmit($event)"
-      (kc-message-action)="onAction($event)"
-      (kc-model-change)="onModel($event)"
-    ></kc-chat>
+      (kai-submit)="onSubmit($event)"
+      (kai-message-action)="onAction($event)"
+      (kai-model-change)="onModel($event)"
+    ></kai-chat>
   \`,
 })
 export class ChatComponent {
@@ -206,7 +206,7 @@ import {
   Message, MessageContent, MessageActions,
   PromptInput, PromptInputTextarea, PromptInputActions,
   ConversationList, ModelSwitcher, PromptSuggestion, ScrollButton, Button,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 import { Copy, ThumbsUp, ThumbsDown, RefreshCw, ArrowUp } from 'lucide-solid';
 
 export function ChatApp() {
@@ -262,7 +262,7 @@ export function ChatApp() {
 
 /**
  * Example: Full Chat App — the complete experience. As an embedder you reach for
- * the single `<kc-chat>` element; the live demo composes the granular SolidJS
+ * the single `<kai-chat>` element; the live demo composes the granular SolidJS
  * primitives for full control. Per-story: the Usage tab shows the snippet for the
  * story you're on; the example-level fields below are the fallback.
  */

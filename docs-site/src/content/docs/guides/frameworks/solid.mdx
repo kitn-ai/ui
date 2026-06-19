@@ -1,19 +1,19 @@
 ---
 title: Solid
-description: Use kitn-chat's native SolidJS components from @kitn.ai/chat for full compositional control, or drop in the kc-* web components for a batteries-included shell.
+description: Use kitn-chat's native SolidJS components from @kitn.ai/ui for full compositional control, or drop in the kai-* web components for a batteries-included shell.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Solid apps get an extra path the other frameworks don't: the components are authored in SolidJS, so you can import them straight into your JSX instead of going through the `kc-*` web components. Both paths ship in the package and mix freely:
+Solid apps get an extra path the other frameworks don't: the components are authored in SolidJS, so you can import them straight into your JSX instead of going through the `kai-*` web components. Both paths ship in the package and mix freely:
 
-- **Native SolidJS components** (`@kitn.ai/chat`) — import `ChatContainer`, `Message`, `PromptInput`, and the rest directly into your JSX. Full compositional control, tree-shaken alongside your own code. Reach for this in a Solid app.
-- **`kc-*` web components** (`@kitn.ai/chat/elements`) — the drop-in shells when you want batteries included or need to share UI across frameworks.
+- **Native SolidJS components** (`@kitn.ai/ui`) — import `ChatContainer`, `Message`, `PromptInput`, and the rest directly into your JSX. Full compositional control, tree-shaken alongside your own code. Reach for this in a Solid app.
+- **`kai-*` web components** (`@kitn.ai/ui/elements`) — the drop-in shells when you want batteries included or need to share UI across frameworks.
 
 ## Install
 
 ```bash
-npm install @kitn.ai/chat
+npm install @kitn.ai/ui
 ```
 
 `solid-js` is a peer dependency — install it if you haven't already:
@@ -25,11 +25,11 @@ npm install solid-js
 Import the design tokens once near your app entry:
 
 ```ts
-import '@kitn.ai/chat/theme.css';
+import '@kitn.ai/ui/theme.css';
 ```
 
 <Aside type="tip" title="Ships as source">
-The `@kitn.ai/chat` entry point (`"."`) exports raw TSX. Your bundler compiles and tree-shakes it alongside your own Solid code — you only pay for what you import.
+The `@kitn.ai/ui` entry point (`"."`) exports raw TSX. Your bundler compiles and tree-shakes it alongside your own Solid code — you only pay for what you import.
 </Aside>
 
 ## Native components
@@ -47,8 +47,8 @@ import {
   PromptInput,
   PromptInputTextarea,
   PromptInputActions,
-} from '@kitn.ai/chat';
-import '@kitn.ai/chat/theme.css';
+} from '@kitn.ai/ui';
+import '@kitn.ai/ui/theme.css';
 
 type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };
 
@@ -113,7 +113,7 @@ The same building blocks compose into any layout. Use `Resizable` with `Resizabl
 
 ```tsx
 import { createSignal } from 'solid-js';
-import { Resizable, ResizablePanel, ConversationList, ChatContainer, ChatContainerContent, PromptInput, PromptInputTextarea } from '@kitn.ai/chat';
+import { Resizable, ResizablePanel, ConversationList, ChatContainer, ChatContainerContent, PromptInput, PromptInputTextarea } from '@kitn.ai/ui';
 
 function Workspace() {
   const [activeId, setActiveId] = createSignal<string | undefined>(undefined);
@@ -154,7 +154,7 @@ Every feature component works standalone — drop them into any part of your UI 
 ```tsx
 import {
   Markdown, Reasoning, ReasoningTrigger, ReasoningContent, Tool, Artifact,
-} from '@kitn.ai/chat';
+} from '@kitn.ai/ui';
 
 <Markdown content={assistantReply} />
 <Reasoning isStreaming={isStreaming}>
@@ -167,10 +167,10 @@ import {
 
 ## Using the web component shell
 
-When you want a complete chat in one tag, register the `kc-*` elements and use `<kc-chat>`. In Solid, pass rich data with `prop:` (forces a DOM property assignment, not a stringified attribute) and listen for CustomEvents with Solid's `on:` namespace.
+When you want a complete chat in one tag, register the `kai-*` elements and use `<kai-chat>`. In Solid, pass rich data with `prop:` (forces a DOM property assignment, not a stringified attribute) and listen for CustomEvents with Solid's `on:` namespace.
 
 ```tsx
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 import { createSignal } from 'solid-js';
 
 type Message = { id: string; role: 'user' | 'assistant'; content: string };
@@ -192,9 +192,9 @@ function Shell() {
 
   return (
     <div style={{ display: 'flex', 'flex-direction': 'column', height: '100dvh' }}>
-      <kc-chat
+      <kai-chat
         prop:messages={messages()}
-        on:kc-submit={handleSubmit}
+        on:kai-submit={handleSubmit}
         style={{ flex: 1, 'min-height': 0 }}
       />
     </div>
@@ -206,7 +206,7 @@ function Shell() {
 Without `prop:`, Solid serializes objects to strings — breaking array props. Use `prop:messages` (not `messages`) for any prop that takes an array or object.
 </Aside>
 
-## Key exports from `@kitn.ai/chat`
+## Key exports from `@kitn.ai/ui`
 
 | Category | Exports |
 |---|---|
@@ -221,13 +221,13 @@ Without `prop:`, Solid serializes objects to strings — breaking array props. U
 
 ## Which path to choose
 
-| | Native components (`@kitn.ai/chat`) | Web components (`@kitn.ai/chat/elements`) |
+| | Native components (`@kitn.ai/ui`) | Web components (`@kitn.ai/ui/elements`) |
 |---|---|---|
 | **Recommended for** | Solid apps | Any framework, or sharing UI across frameworks |
 | **Bundle** | Tree-shaken with your own code | Pre-built, self-contained |
 | **Composition** | Full JSX control | Single element, attribute-driven |
 | **Signals** | Native `createSignal` | `prop:` + `on:` bindings |
 
-Mix freely: native components on one screen, a `<kc-chat>` shell on another.
+Mix freely: native components on one screen, a `<kai-chat>` shell on another.
 
-See [Installation](/chat/guides/installation/) for bundler configuration and CDN options.
+See [Installation](/guides/installation/) for bundler configuration and CDN options.

@@ -1,5 +1,5 @@
 /**
- * Proves the generated `@kitn.ai/chat/react` wrappers behave like native React
+ * Proves the generated `@kitn.ai/ui/react` wrappers behave like native React
  * components: array/object props reach the element as LIVE DOM properties (not
  * stringified attributes), `on<Event>` handlers fire on the element's
  * CustomEvents, boolean props toggle features, and prop updates re-assign.
@@ -10,7 +10,7 @@
  */
 import { render, cleanup } from '@testing-library/react';
 import { afterEach, expect, test, vi } from 'vitest';
-import { Conversations, PromptInput, Chat } from '@kitn.ai/chat/react';
+import { Conversations, PromptInput, Chat } from '@kitn.ai/ui/react';
 
 afterEach(cleanup);
 
@@ -36,7 +36,7 @@ test('array/object prop reaches the element as a live property (not a string)', 
   const { container } = render(
     <Conversations conversations={conversations} groups={groups} />,
   );
-  const el = container.querySelector('kc-conversations') as unknown as AnyEl;
+  const el = container.querySelector('kai-conversations') as unknown as AnyEl;
   expect(el).toBeTruthy();
 
   // The SAME array instance is on the element — not stringified to an attribute.
@@ -54,7 +54,7 @@ test('array/object prop reaches the element as a live property (not a string)', 
 test('on<Event> handler fires with the CustomEvent detail', async () => {
   const onSubmit = vi.fn();
   const { container } = render(<PromptInput onSubmit={onSubmit} placeholder="Ask..." />);
-  const el = container.querySelector('kc-prompt-input') as unknown as AnyEl;
+  const el = container.querySelector('kai-prompt-input') as unknown as AnyEl;
   await flush();
 
   const textarea = el.shadowRoot!.querySelector('textarea')!;
@@ -69,7 +69,7 @@ test('on<Event> handler fires with the CustomEvent detail', async () => {
 
 test('boolean prop toggles a feature (loading disables send)', async () => {
   const { container } = render(<PromptInput loading />);
-  const el = container.querySelector('kc-prompt-input') as unknown as AnyEl;
+  const el = container.querySelector('kai-prompt-input') as unknown as AnyEl;
   await flush();
 
   // Boolean reached the element as a real boolean property.
@@ -97,7 +97,7 @@ test('updating a prop re-assigns the element property and re-renders', async () 
   const { container, rerender } = render(
     <Conversations conversations={first} groups={groups} />,
   );
-  const el = container.querySelector('kc-conversations') as unknown as AnyEl;
+  const el = container.querySelector('kai-conversations') as unknown as AnyEl;
   await flush();
   expect(el.conversations).toBe(first);
   expect(el.shadowRoot?.textContent).toContain('First chat');
@@ -115,7 +115,7 @@ test('object prop (messages) on Chat reaches the element unstringified', async (
     { id: 'm2', role: 'assistant' as const, content: 'Hello!' },
   ];
   const { container } = render(<Chat messages={messages} theme="light" />);
-  const el = container.querySelector('kc-chat') as unknown as AnyEl;
+  const el = container.querySelector('kai-chat') as unknown as AnyEl;
   await flush();
 
   expect(el.messages).toBe(messages);

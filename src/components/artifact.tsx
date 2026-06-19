@@ -108,9 +108,9 @@ export function isPdfUrl(url: string, files: ArtifactFile[]): boolean {
 /**
  * `Artifact` — a framed, switchable generated-artifact viewer. A functional nav
  * toolbar (back · forward · reload · home + editable path field + Preview|Code
- * toggle) over a sandboxed `<iframe>` (Preview) or a file-tree + `<kc-code-block>`
- * (Code). The component self-navigates the iframe and emits `kc-navigate` /
- * `kc-tab-change` / `kc-file-select` so a consumer can observe/sync.
+ * toggle) over a sandboxed `<iframe>` (Preview) or a file-tree + `<kai-code-block>`
+ * (Code). The component self-navigates the iframe and emits `kai-navigate` /
+ * `kai-tab-change` / `kai-file-select` so a consumer can observe/sync.
  */
 export function Artifact(props: ArtifactProps): JSX.Element {
   const merged = mergeProps(
@@ -309,7 +309,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
   const submitPath = (e: Event) => {
     e.preventDefault();
     const input = (e.currentTarget as HTMLFormElement).elements.namedItem(
-      'kc-artifact-path',
+      'kai-artifact-path',
     ) as HTMLInputElement | null;
     if (local.readonlyPath) {
       // Submit is a no-op while read-only; keep the field reflecting currentUrl.
@@ -460,12 +460,12 @@ function ArtifactToolbar(props: ToolbarProps): JSX.Element {
       </Show>
       <Show when={props.showPathField()}>
         <form class="min-w-0 flex-1" onSubmit={(e) => props.onSubmitPath(e)}>
-          <label class="sr-only" for="kc-artifact-path">
+          <label class="sr-only" for="kai-artifact-path">
             Address
           </label>
           <input
-            id="kc-artifact-path"
-            name="kc-artifact-path"
+            id="kai-artifact-path"
+            name="kai-artifact-path"
             type="text"
             spellcheck={false}
             autocomplete="off"

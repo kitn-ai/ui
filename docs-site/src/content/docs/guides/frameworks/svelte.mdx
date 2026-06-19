@@ -1,30 +1,30 @@
 ---
 title: Svelte
-description: Use kc-* web components in Svelte with property binding for arrays and objects, and on:kc-event listeners for CustomEvents.
+description: Use kai-* web components in Svelte with property binding for arrays and objects, and on:kai-event listeners for CustomEvents.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-`kc-*` web components work in Svelte without wrappers or special directives. The Svelte compiler sets DOM **properties** directly when you pass non-primitive values, and `on:eventname` wires up CustomEvents — no boilerplate required.
+`kai-*` web components work in Svelte without wrappers or special directives. The Svelte compiler sets DOM **properties** directly when you pass non-primitive values, and `on:eventname` wires up CustomEvents — no boilerplate required.
 
 ## Install
 
 ```bash
-npm install @kitn.ai/chat
+npm install @kitn.ai/ui
 ```
 
-Register every `kc-*` element once, near your app entry point:
+Register every `kai-*` element once, near your app entry point:
 
 ```js
 // src/main.js  or inside a <script> block in your root component
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
-One import covers your entire app. No CSS import is needed — each element is styled inside its own Shadow DOM. Add `@kitn.ai/chat/theme.css` only if you want to override design tokens (see [Theming](/chat/guides/theming/)).
+One import covers your entire app. No CSS import is needed — each element is styled inside its own Shadow DOM. Add `@kitn.ai/ui/theme.css` only if you want to override design tokens (see [Theming](/guides/theming/)).
 
 ## Pass data and handle events
 
-The rule for every `kc-*` element: **rich data in as properties, interactions out as events.**
+The rule for every `kai-*` element: **rich data in as properties, interactions out as events.**
 
 Svelte maps cleanly to this pattern:
 
@@ -32,7 +32,7 @@ Svelte maps cleanly to this pattern:
 |---|---|---|
 | String attribute | `prop="value"` | Standard HTML attribute |
 | Array or object | `{prop}` shorthand | Svelte assigns as a DOM property — never stringified |
-| Listen for an event | `on:kc-eventname={handler}` | `handler(e)` — data is on `e.detail` |
+| Listen for an event | `on:kai-eventname={handler}` | `handler(e)` — data is on `e.detail` |
 
 <Aside type="tip" title="Why {prop} works">
 Svelte detects non-primitive values and assigns them as DOM properties rather than HTML attributes. This means `{messages}` always delivers a live JS array to the element — you never need `bind:this` just to set a property.
@@ -40,11 +40,11 @@ Svelte detects non-primitive values and assigns them as DOM properties rather th
 
 ## Example — streaming chat
 
-`<kc-chat>` is transport-agnostic: you own the API call, the element owns the UI. Pass a `messages` array and handle `kc-submit` to stream replies back into state.
+`<kai-chat>` is transport-agnostic: you own the API call, the element owns the UI. Pass a `messages` array and handle `kai-submit` to stream replies back into state.
 
 ```svelte
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let messages = [
     { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
@@ -73,24 +73,24 @@ Svelte detects non-primitive values and assigns them as DOM properties rather th
 </script>
 
 <div style="display: flex; flex-direction: column; height: 100dvh;">
-  <kc-chat
+  <kai-chat
     {messages}
     suggestions={['Summarize the chat', 'Start fresh']}
-    on:kc-submit={handleSubmit}
+    on:kai-submit={handleSubmit}
     style="flex: 1; min-height: 0;"
   />
 </div>
 ```
 
-`kc-chat` is `display: block` and fills its container. Wrap it in a flex column and give it `flex: 1` rather than a hard-coded height so it adapts to the viewport.
+`kai-chat` is `display: block` and fills its container. Wrap it in a flex column and give it `flex: 1` rather than a hard-coded height so it adapts to the viewport.
 
 ## Add a conversation sidebar
 
-Compose `<kc-conversations>` alongside `<kc-chat>` for a multi-thread layout. Each element takes its data as properties and emits its own events.
+Compose `<kai-conversations>` alongside `<kai-chat>` for a multi-thread layout. Each element takes its data as properties and emits its own events.
 
 ```svelte
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let conversations = loadConversations();
   let activeId = conversations[0]?.id;
@@ -103,17 +103,17 @@ Compose `<kc-conversations>` alongside `<kc-chat>` for a multi-thread layout. Ea
 </script>
 
 <div style="display: flex; height: 100dvh;">
-  <kc-conversations
+  <kai-conversations
     {conversations}
     {activeId}
-    on:kc-conversation-select={selectConversation}
-    on:kc-new-chat={() => startNewConversation()}
+    on:kai-conversation-select={selectConversation}
+    on:kai-new-chat={() => startNewConversation()}
     style="width: 300px; flex-shrink: 0;"
   />
 
-  <kc-chat
+  <kai-chat
     {messages}
-    on:kc-submit={(e) => sendMessage(e.detail.value)}
+    on:kai-submit={(e) => sendMessage(e.detail.value)}
     style="flex: 1; min-width: 0;"
   />
 </div>
@@ -123,13 +123,13 @@ Compose `<kc-conversations>` alongside `<kc-chat>` for a multi-thread layout. Ea
 
 | Element | Event | `e.detail` |
 |---|---|---|
-| `kc-chat` | `kc-submit` | `{ value: string }` |
-| `kc-chat` | `kc-value-change` | `{ value: string }` |
-| `kc-chat` | `kc-model-change` | `{ model: string }` |
-| `kc-conversations` | `kc-conversation-select` | `{ id: string }` |
-| `kc-conversations` | `kc-new-chat` | `{}` |
-| `kc-conversations` | `kc-toggle-sidebar` | `{}` |
-| `kc-attachments` | `kc-remove` | `{ id: string }` |
-| `kc-resizable` | `kc-change` | `{ sizes: number[] }` |
+| `kai-chat` | `kai-submit` | `{ value: string }` |
+| `kai-chat` | `kai-value-change` | `{ value: string }` |
+| `kai-chat` | `kai-model-change` | `{ model: string }` |
+| `kai-conversations` | `kai-conversation-select` | `{ id: string }` |
+| `kai-conversations` | `kai-new-chat` | `{}` |
+| `kai-conversations` | `kai-toggle-sidebar` | `{}` |
+| `kai-attachments` | `kai-remove` | `{ id: string }` |
+| `kai-resizable` | `kai-change` | `{ sizes: number[] }` |
 
-Every element's full prop and event list is on its component page in the [Components](/chat/components/attachments/) reference.
+Every element's full prop and event list is on its component page in the [Components](/components/attachments/) reference.

@@ -5,7 +5,7 @@ description: An assistant that reasons before answering and shows each tool call
 
 import ChatDemo from '../../../components/ChatDemo.tsx';
 
-<p class="kc-lede">Agents do more than generate text — they think, call tools, and sometimes fail. `<kc-chat>` surfaces all of it: a collapsible reasoning block before the answer and a live tool-call panel per invocation, each showing its lifecycle state and full input/output.</p>
+<p class="kai-lede">Agents do more than generate text — they think, call tools, and sometimes fail. `<kai-chat>` surfaces all of it: a collapsible reasoning block before the answer and a live tool-call panel per invocation, each showing its lifecycle state and full input/output.</p>
 
 <ChatDemo client:only="solid" chatTitle="Research agent" placeholder="Ask the agent…" suggestions={["What are the top AI papers this week?", "Compare GPT-4o and Claude 4 on coding tasks"]} messages={[
   { id: 'u1', role: 'user', content: 'What is the current price of NVDA and how does it compare to its 52-week high?' },
@@ -39,10 +39,10 @@ import ChatDemo from '../../../components/ChatDemo.tsx';
 
 ## How it works
 
-Each assistant message in `messages` carries optional `reasoning` and `tools` fields. `<kc-chat>` renders them automatically — no extra elements needed.
+Each assistant message in `messages` carries optional `reasoning` and `tools` fields. `<kai-chat>` renders them automatically — no extra elements needed.
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 const chat = document.getElementById('chat');
 
@@ -97,12 +97,12 @@ Build the live streaming experience by patching the tool's `state` field as your
 reasoning?: { text: string; label?: string }
 ```
 
-`label` sets the collapsed trigger text (e.g. `"Thought for 6 seconds"`). The `text` renders as markdown inside the collapsible panel. Use the standalone `<kc-reasoning>` element when you need it outside a chat thread.
+`label` sets the collapsed trigger text (e.g. `"Thought for 6 seconds"`). The `text` renders as markdown inside the collapsible panel. Use the standalone `<kai-reasoning>` element when you need it outside a chat thread.
 
 ## Next steps
 
-- **[`kc-chat` reference](/chat/components/chat/)** — full prop and event list.
-- **[`kc-tool` reference](/chat/components/tool/)** — standalone tool-call panel (use outside a thread).
-- **[`kc-reasoning` reference](/chat/components/reasoning/)** — standalone reasoning block.
-- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop that drives content + tool updates.
-- **[Workspace app](/chat/examples/workspace/)** — add conversation history and a sidebar.
+- **[`kai-chat` reference](/components/chat/)** — full prop and event list.
+- **[`kai-tool` reference](/components/tool/)** — standalone tool-call panel (use outside a thread).
+- **[`kai-reasoning` reference](/components/reasoning/)** — standalone reasoning block.
+- **[Drop-in chat](/examples/drop-in-chat/)** — the streaming loop that drives content + tool updates.
+- **[Workspace app](/examples/workspace/)** — add conversation history and a sidebar.

@@ -12,18 +12,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-checkpoint</p>
+<p class="kai-tag-sub">kai-checkpoint</p>
 
-<p class="kc-lede">A compact bookmark button that marks a restore point in a conversation thread.</p>
+<p class="kai-lede">A compact bookmark button that marks a restore point in a conversation thread.</p>
 
 <Facts items={['Shadow DOM', '1 event', '3 variants', '5 sizes', 'Icon-only or labeled']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-checkpoint" />
+<Playground client:only="solid" tag="kai-checkpoint" />
 
 <Aside type="tip" title="When to use">
-Place `<kc-checkpoint>` in a message action bar or chat toolbar wherever users may want to save and jump back to a point. Use the `ghost` variant (default) to keep it unobtrusive; switch to `outline` or `default` for more visual emphasis. For icon-only buttons, always set `tooltip` so the intent is clear to screen readers and mouse users.
+Place `<kai-checkpoint>` in a message action bar or chat toolbar wherever users may want to save and jump back to a point. Use the `ghost` variant (default) to keep it unobtrusive; switch to `outline` or `default` for more visual emphasis. For icon-only buttons, always set `tooltip` so the intent is clear to screen readers and mouse users.
 </Aside>
 
 ## Usage
@@ -31,12 +31,12 @@ Place `<kc-checkpoint>` in a message action bar or chat toolbar wherever users m
 All props are scalar attributes — no JavaScript needed:
 
 ```html
-<kc-checkpoint label="Restore" tooltip="Restore this checkpoint" variant="outline" size="sm"></kc-checkpoint>
+<kai-checkpoint label="Restore" tooltip="Restore this checkpoint" variant="outline" size="sm"></kai-checkpoint>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
-  document.querySelector('kc-checkpoint')
-    .addEventListener('kc-select', () => console.log('restore checkpoint'));
+  import '@kitn.ai/ui/elements';
+  document.querySelector('kai-checkpoint')
+    .addEventListener('kai-select', () => console.log('restore checkpoint'));
 </script>
 ```
 
@@ -47,34 +47,34 @@ All props are scalar attributes — no JavaScript needed:
 
 ### Labeled
 
-<Example client:visible tag="kc-checkpoint" config={{ label: 'Restore', variant: 'outline' }} />
+<Example client:visible tag="kai-checkpoint" config={{ label: 'Restore', variant: 'outline' }} />
 
 ### Icon Only
 
 `icon-sm` size with a tooltip — for tight action bars.
 
-<Example client:visible tag="kc-checkpoint" config={{ size: 'icon-sm', tooltip: 'Restore this checkpoint' }} />
+<Example client:visible tag="kai-checkpoint" config={{ size: 'icon-sm', tooltip: 'Restore this checkpoint' }} />
 
 ### Ghost Variant (Default)
 
-<Example client:visible tag="kc-checkpoint" config={{ variant: 'ghost', tooltip: 'Save checkpoint', label: 'Save' }} />
+<Example client:visible tag="kai-checkpoint" config={{ variant: 'ghost', tooltip: 'Save checkpoint', label: 'Save' }} />
 
 ### Default Variant
 
 The filled `default` variant raises the button off the surface — useful when the checkpoint is the primary affordance in its container.
 
-<Example client:visible tag="kc-checkpoint" config={{ variant: 'default', label: 'Checkpoint', size: 'md' }} />
+<Example client:visible tag="kai-checkpoint" config={{ variant: 'default', label: 'Checkpoint', size: 'md' }} />
 
 ## Props
 
-<PropTable tag="kc-checkpoint" />
+<PropTable tag="kai-checkpoint" />
 
 ## Events
 
-<EventTable tag="kc-checkpoint" />
+<EventTable tag="kai-checkpoint" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-checkpoint" />
+<ComposedFrom tag="kai-checkpoint" />
 
 <NeedAHand />

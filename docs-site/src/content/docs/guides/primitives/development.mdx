@@ -10,7 +10,7 @@ Work from source when you want to change a component, add one, or just read the 
 ## Set up
 
 ```bash
-git clone https://github.com/kitn-ai/chat.git
+git clone https://github.com/kitn-ai/ui.git
 cd chat
 npm install
 ```
@@ -23,11 +23,11 @@ Every primitive, component, and element has stories. Storybook is where you buil
 npm run storybook   # http://localhost:6006
 ```
 
-Stories live next to their source as `*.stories.tsx`, in three places that mirror the [layers](/chat/guides/primitives/architecture/):
+Stories live next to their source as `*.stories.tsx`, in three places that mirror the [layers](/guides/primitives/architecture/):
 
 - `src/ui/*.stories.tsx` — UI primitives (`Button`, `Switch`, `Resizable`).
 - `src/components/*.stories.tsx` — feature components (`Message`, `Artifact`).
-- `src/elements/*.stories.tsx` — the `kc-*` web components.
+- `src/elements/*.stories.tsx` — the `kai-*` web components.
 
 Editing a story or its source hot-reloads the open story. That's the tightest loop for visual work.
 
@@ -44,7 +44,7 @@ npm run typecheck   # tsc across the main + React configs
 There's also an accessibility-gated Storybook project (`npm run test:storybook`) that runs axe against the stories.
 
 <Aside type="caution" title="Test the component, not the element">
-The custom-element facade isn't testable under jsdom — it needs a real browser. So unit-test the underlying Solid component (e.g. `Switch`), not `<kc-switch>`. Element-level behavior that needs a browser is covered by Playwright instead.
+The custom-element facade isn't testable under jsdom — it needs a real browser. So unit-test the underlying Solid component (e.g. `Switch`), not `<kai-switch>`. Element-level behavior that needs a browser is covered by Playwright instead.
 </Aside>
 
 ## Build
@@ -66,4 +66,4 @@ These files drive this docs site's reference tables and playgrounds, the React a
 
 ## Next
 
-- [Create or modify a component](/chat/guides/primitives/extending/) — add a primitive, give it a story, and expose it as a `kc-*` element.
+- [Create or modify a component](/guides/primitives/extending/) — add a primitive, give it a story, and expose it as a `kai-*` element.

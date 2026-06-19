@@ -5,29 +5,29 @@ description: A two-pane layout where a conversations list and a chat pane sit si
 
 import ResizableSplitDemo from '../../../components/ResizableSplitDemo.tsx';
 
-<p class="kc-lede">Put a sidebar conversation list next to a chat pane and let the user resize both. Drag the divider to redistribute space, or flip the sidebar to the opposite side with the toggle above the demo.</p>
+<p class="kai-lede">Put a sidebar conversation list next to a chat pane and let the user resize both. Drag the divider to redistribute space, or flip the sidebar to the opposite side with the toggle above the demo.</p>
 
 <ResizableSplitDemo client:only="solid" />
 
 ## How it works
 
-`<kc-resizable>` lays out its `<kc-resizable-item>` children along a horizontal (or vertical) axis and inserts a draggable divider between each pair. Set `size`, `min`, and `max` on each item to constrain the sidebar; the main pane flexes to fill the rest.
+`<kai-resizable>` lays out its `<kai-resizable-item>` children along a horizontal (or vertical) axis and inserts a draggable divider between each pair. Set `size`, `min`, and `max` on each item to constrain the sidebar; the main pane flexes to fill the rest.
 
 ```html
-<kc-resizable orientation="horizontal" style="display:block;height:100%">
+<kai-resizable orientation="horizontal" style="display:block;height:100%">
   <!-- sidebar -->
-  <kc-resizable-item size="25%" min="180px" max="340px">
-    <kc-conversations id="conv"></kc-conversations>
-  </kc-resizable-item>
+  <kai-resizable-item size="25%" min="180px" max="340px">
+    <kai-conversations id="conv"></kai-conversations>
+  </kai-resizable-item>
 
   <!-- main chat -->
-  <kc-resizable-item>
-    <kc-chat id="chat"></kc-chat>
-  </kc-resizable-item>
-</kc-resizable>
+  <kai-resizable-item>
+    <kai-chat id="chat"></kai-chat>
+  </kai-resizable-item>
+</kai-resizable>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const conv = document.getElementById('conv');
   const chat = document.getElementById('chat');
@@ -45,12 +45,12 @@ import ResizableSplitDemo from '../../../components/ResizableSplitDemo.tsx';
 
   chat.messages = [];
 
-  conv.addEventListener('kc-conversation-select', (e) => {
+  conv.addEventListener('kai-conversation-select', (e) => {
     // load the selected conversation's messages into chat
     console.log('selected', e.detail.id);
   });
 
-  chat.addEventListener('kc-submit', async (e) => {
+  chat.addEventListener('kai-submit', async (e) => {
     const prompt = e.detail.value;
     const aId = crypto.randomUUID();
     chat.messages = [
@@ -70,13 +70,13 @@ import ResizableSplitDemo from '../../../components/ResizableSplitDemo.tsx';
 </script>
 ```
 
-To put the sidebar on the right, reverse the child order — put `<kc-resizable-item>` (chat) first, then `<kc-resizable-item>` (conversations).
+To put the sidebar on the right, reverse the child order — put `<kai-resizable-item>` (chat) first, then `<kai-resizable-item>` (conversations).
 
-`<kc-resizable>` fires `kc-change` with `{ sizes: number[] }` (percent) on each drag-end so you can persist or react to the panel sizes.
+`<kai-resizable>` fires `kai-change` with `{ sizes: number[] }` (percent) on each drag-end so you can persist or react to the panel sizes.
 
 ## Next steps
 
-- **[`kc-conversations` reference](/chat/components/conversations/)** — `groups`, `conversations`, `activeId`, and the `kc-conversation-select` event.
-- **[`kc-chat` reference](/chat/components/chat/)** — the full thread + input element, including models, context meter, and slash commands.
-- **[Drop-in chat](/chat/examples/drop-in-chat/)** — the streaming loop that drives the chat pane.
-- **[Workspace app](/chat/examples/workspace/)** — the same sidebar + thread composed into a complete app.
+- **[`kai-conversations` reference](/components/conversations/)** — `groups`, `conversations`, `activeId`, and the `kai-conversation-select` event.
+- **[`kai-chat` reference](/components/chat/)** — the full thread + input element, including models, context meter, and slash commands.
+- **[Drop-in chat](/examples/drop-in-chat/)** — the streaming loop that drives the chat pane.
+- **[Workspace app](/examples/workspace/)** — the same sidebar + thread composed into a complete app.

@@ -33,7 +33,7 @@ export interface ChatThreadProps {
    *  property (`el.messages = [...]`). */
   messages: ChatMessage[];
   /** Controlled value of the input. When set, the host owns the input text and
-   *  must update it on `kc-value-change`; leave unset for uncontrolled behavior. */
+   *  must update it on `kai-value-change`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
@@ -62,7 +62,7 @@ export interface ChatThreadProps {
   /** Optional header title shown on the left of the header. */
   chatTitle?: string;
   /** Optional model list. When set (>1 model) a ModelSwitcher is shown in the
-   *  header and a `kc-model-change` event fires on selection. */
+   *  header and a `kai-model-change` event fires on selection. */
   models?: ModelOption[];
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
@@ -72,7 +72,7 @@ export interface ChatThreadProps {
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
   /** Whether the host has `slot="header-start"` content (left of the title) —
-   *  set by the `<kc-chat>` facade so a custom control forces the header open. */
+   *  set by the `<kai-chat>` facade so a custom control forces the header open. */
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
@@ -81,7 +81,7 @@ export interface ChatThreadProps {
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
   voice?: boolean;
   /** Slash commands — when set, typing `/` in the input opens the command
-   *  palette and fires `kc-slash-select`. Set as a JS property. */
+   *  palette and fires `kai-slash-select`. Set as a JS property. */
   slashCommands?: SlashCommandItem[];
   /** Command ids to highlight as active in the palette. */
   slashActiveIds?: string[];
@@ -128,7 +128,7 @@ export function ChatThread(props: ChatThreadProps) {
             <div class="flex items-center gap-2">
               {/* Consumer-injected leading controls (sidebar-toggle, compose, a
                   popover title-button). Projects light-DOM `slot="header-start"`
-                  children of <kc-chat>; inert outside a shadow root. */}
+                  children of <kai-chat>; inert outside a shadow root. */}
               <slot name="header-start" />
               <Show when={props.chatTitle}>
                 <div class="text-sm font-semibold text-foreground">{props.chatTitle}</div>
@@ -157,7 +157,7 @@ export function ChatThread(props: ChatThreadProps) {
                 </Context>
               </Show>
               {/* Consumer-injected trailing controls (share, settings, …).
-                  Projects light-DOM `slot="header-end"` children of <kc-chat>. */}
+                  Projects light-DOM `slot="header-end"` children of <kai-chat>. */}
               <slot name="header-end" />
             </div>
           </header>

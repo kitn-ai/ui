@@ -8,8 +8,8 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-sources': JSX.HTMLAttributes<HTMLElement>;
-      'kc-source': JSX.HTMLAttributes<HTMLElement> & { href?: string; label?: string; headline?: string; description?: string; 'show-favicon'?: boolean | '' };
+      'kai-sources': JSX.HTMLAttributes<HTMLElement>;
+      'kai-source': JSX.HTMLAttributes<HTMLElement> & { href?: string; label?: string; headline?: string; description?: string; 'show-favicon'?: boolean | '' };
     }
   }
 }
@@ -27,22 +27,22 @@ const sampleSources: SourceItem[] = [
   { href: 'https://solidjs.com', title: 'SolidJS', description: 'A reactive UI library.', showFavicon: true },
 ];
 
-/** Render the actual `<kc-sources>` custom element with a `sources` property. */
+/** Render the actual `<kai-sources>` custom element with a `sources` property. */
 function SourceListElement() {
   let el: (HTMLElement & { sources?: SourceItem[] }) | undefined;
   onMount(() => {
     if (el) el.sources = sampleSources;
   });
   return (
-    <kc-sources ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
+    <kai-sources ref={(e) => (el = e as HTMLElement)} style={{ display: 'block', padding: '16px', 'max-width': '720px' }} />
   );
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-sources id="srcs" show-favicon></kc-sources>
+<kai-sources id="srcs" show-favicon></kai-sources>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
   const srcs = document.getElementById('srcs');
   srcs.sources = [
@@ -54,16 +54,16 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 const meta = {
   title: 'Components/Sources',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-sources'),
+  argTypes: argTypesFor('kai-sources'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kc-sources', [
-          '`<kc-sources>` is the framework-agnostic **web component** for a wrapped row of citation links (each with its own hover-card preview), isolated in **Shadow DOM**.',
-          '**When to use:** showing the sources behind an assistant answer in a non-Solid app. For a single citation, use `<kc-source>`; in SolidJS, compose `SourceList` + `Source`.',
+      description: specDescription('kai-sources', [
+          '`<kai-sources>` is the framework-agnostic **web component** for a wrapped row of citation links (each with its own hover-card preview), isolated in **Shadow DOM**.',
+          '**When to use:** showing the sources behind an assistant answer in a non-Solid app. For a single citation, use `<kai-source>`; in SolidJS, compose `SourceList` + `Source`.',
           '**Placement:** below an assistant message, above the prompt input — rendered as a wrapping row of citation chips that spans the full message column width.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set the data via the `sources` **property** (each item: `href`, `title`, `description`, `label`, `showFavicon`), and set `show-favicon` to enable favicons for all items (a per-item `showFavicon` overrides it).",
-          '**Anatomy:** a wrapping flex row of **citation chips** — each chip is a `<kc-source>` (or a `sources`-property item): a **trigger button** (domain label or `numbered` index, optional favicon) + a **hover-card** (headline + description, shown on hover/focus). Declarative `<kc-source href="…" headline="…">` children are invisible data carriers merged after the `sources` property list.',
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set the data via the `sources` **property** (each item: `href`, `title`, `description`, `label`, `showFavicon`), and set `show-favicon` to enable favicons for all items (a per-item `showFavicon` overrides it).",
+          '**Anatomy:** a wrapping flex row of **citation chips** — each chip is a `<kai-source>` (or a `sources`-property item): a **trigger button** (domain label or `numbered` index, optional favicon) + a **hover-card** (headline + description, shown on hover/focus). Declarative `<kai-source href="…" headline="…">` children are invisible data carriers merged after the `sources` property list.',
           'See the **Code** tab for HTML usage.',
         ]),
     },
@@ -80,31 +80,31 @@ export const Default: Story = {
 };
 
 const DECLARATIVE_HTML_SNIPPET = `<!-- Works in any framework or plain HTML — no JS wiring needed -->
-<kc-sources show-favicon>
-  <kc-source
+<kai-sources show-favicon>
+  <kai-source
     href="https://kitn.dev"
     label="kitn"
     headline="kitn — the kit"
     description="Composable SolidJS + web-component chat UI."
     show-favicon
-  ></kc-source>
-  <kc-source
+  ></kai-source>
+  <kai-source
     href="https://solidjs.com"
     headline="SolidJS"
     description="A reactive UI library."
     show-favicon
-  ></kc-source>
-</kc-sources>
+  ></kai-source>
+</kai-sources>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 </script>`;
 
-/** Declarative sources — `<kc-source>` light-DOM children instead of a `sources`
+/** Declarative sources — `<kai-source>` light-DOM children instead of a `sources`
  *  property. Each child carries `href`, `label`, `headline`, `description`, and the
  *  `show-favicon` flag as HTML attributes. Great for plain HTML with no JS wiring. */
 export const DeclarativeSources: Story = {
-  name: 'Declarative Sources (kc-source)',
+  name: 'Declarative Sources (kai-source)',
   render: () => {
     let el: HTMLElement | undefined;
     onMount(() => {
@@ -112,24 +112,24 @@ export const DeclarativeSources: Story = {
       el.setAttribute('show-favicon', '');
     });
     return (
-      <kc-sources
+      <kai-sources
         ref={(e) => (el = e as HTMLElement)}
         style={{ display: 'block', padding: '16px', 'max-width': '720px' }}
       >
-        <kc-source
+        <kai-source
           href="https://kitn.dev"
           label="kitn"
           headline="kitn — the kit"
           description="Composable SolidJS + web-component chat UI."
           show-favicon
-        ></kc-source>
-        <kc-source
+        ></kai-source>
+        <kai-source
           href="https://solidjs.com"
           headline="SolidJS"
           description="A reactive UI library."
           show-favicon
-        ></kc-source>
-      </kc-sources>
+        ></kai-source>
+      </kai-sources>
     );
   },
   parameters: {

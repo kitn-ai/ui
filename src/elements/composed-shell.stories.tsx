@@ -12,8 +12,8 @@ import type { ArtifactFile } from '../components/artifact';
 
 /**
  * Examples / Composed chat shell — THE headline. A real chat assembled from leaf
- * `kc-*` components inside a `<kc-resizable>` layout, wired with sample data +
- * event handlers in the story script. Paired with the `<kc-chat>` drop-in so the
+ * `kai-*` components inside a `<kai-resizable>` layout, wired with sample data +
+ * event handlers in the story script. Paired with the `<kai-chat>` drop-in so the
  * "batteries-included vs compose-your-own — when do I use which?" contrast is
  * explicit. Both stories are source-visible (Show code).
  */
@@ -72,8 +72,8 @@ const meta = {
         component: [
           '# Build your own chat',
           'Two ways to ship a chat, side by side:',
-          '- **Compose your own** (`Composed shell`) — a `<kc-resizable>` laying out `<kc-conversations>` │ a chat column (`<kc-message>` list + `<kc-context>` meter + `<kc-prompt-input>` + `<kc-suggestions>`) │ `<kc-artifact>`. You own the data flow and event wiring; you control every panel. **Reach for this when the flagship doesn\'t fit** — custom layout, an inspector/canvas panel, bespoke header.',
-          '- **Batteries-included** (`Drop-in <kc-chat>`) — the whole chat surface in one tag. Set `messages`, listen for `submit`. **Reach for this for the 90% path** — a working chat in minutes.',
+          '- **Compose your own** (`Composed shell`) — a `<kai-resizable>` laying out `<kai-conversations>` │ a chat column (`<kai-message>` list + `<kai-context>` meter + `<kai-prompt-input>` + `<kai-suggestions>`) │ `<kai-artifact>`. You own the data flow and event wiring; you control every panel. **Reach for this when the flagship doesn\'t fit** — custom layout, an inspector/canvas panel, bespoke header.',
+          '- **Batteries-included** (`Drop-in <kai-chat>`) — the whole chat surface in one tag. Set `messages`, listen for `submit`. **Reach for this for the 90% path** — a working chat in minutes.',
           'Same leaf components underneath; the flagship just pre-wires them. See **Examples / Choosing components** for the full decision guide.',
           'Both stories are source-visible — open **Show code** to read the exact composition + wiring.',
         ].join('\n\n'),
@@ -88,30 +88,30 @@ type Story = StoryObj;
 // ── B1 · Composed shell ──────────────────────────────────────────────────────
 
 const SHELL_SNIPPET = `<!-- Compose-your-own chat: a resizable shell built from leaf components -->
-<kc-resizable orientation="horizontal" style="display:block;height:560px">
+<kai-resizable orientation="horizontal" style="display:block;height:560px">
   <!-- start: conversation list -->
-  <kc-resizable-item size="22%" min="180px" max="40%">
-    <kc-conversations id="list" style="display:block;height:100%"></kc-conversations>
-  </kc-resizable-item>
+  <kai-resizable-item size="22%" min="180px" max="40%">
+    <kai-conversations id="list" style="display:block;height:100%"></kai-conversations>
+  </kai-resizable-item>
 
   <!-- main: the chat column (scrolling messages + meter + composer) -->
-  <kc-resizable-item>
+  <kai-resizable-item>
     <div class="chat-col">
-      <div class="messages" id="messages"></div>     <!-- <kc-message> per turn -->
-      <kc-context id="ctx"></kc-context>
-      <kc-suggestions id="suggs"></kc-suggestions>
-      <kc-prompt-input id="input" search voice></kc-prompt-input>
+      <div class="messages" id="messages"></div>     <!-- <kai-message> per turn -->
+      <kai-context id="ctx"></kai-context>
+      <kai-suggestions id="suggs"></kai-suggestions>
+      <kai-prompt-input id="input" search voice></kai-prompt-input>
     </div>
-  </kc-resizable-item>
+  </kai-resizable-item>
 
   <!-- end: artifact/preview panel (toggle with the 'hidden' attribute) -->
-  <kc-resizable-item size="32%" min="240px">
-    <kc-artifact id="artifact" style="display:block;height:100%"></kc-artifact>
-  </kc-resizable-item>
-</kc-resizable>
+  <kai-resizable-item size="32%" min="240px">
+    <kai-artifact id="artifact" style="display:block;height:100%"></kai-artifact>
+  </kai-resizable-item>
+</kai-resizable>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   // — data in via properties —
   const list = document.getElementById('list');
@@ -137,7 +137,7 @@ const SHELL_SNIPPET = `<!-- Compose-your-own chat: a resizable shell built from 
   const render = () => {
     messages.innerHTML = '';
     for (const m of thread) {
-      const el = document.createElement('kc-message');
+      const el = document.createElement('kai-message');
       el.message = m;
       messages.append(el);
     }
@@ -145,9 +145,9 @@ const SHELL_SNIPPET = `<!-- Compose-your-own chat: a resizable shell built from 
   render();
 
   // — interactions out via events —
-  list.addEventListener('kc-select', (e) => (list.activeId = e.detail.id));
-  suggs.addEventListener('kc-select', (e) => (input.value = e.detail.value));
-  input.addEventListener('kc-submit', (e) => {
+  list.addEventListener('kai-select', (e) => (list.activeId = e.detail.id));
+  suggs.addEventListener('kai-select', (e) => (input.value = e.detail.value));
+  input.addEventListener('kai-submit', (e) => {
     thread = [...thread, { id: Date.now() + '', role: 'user', content: e.detail.value }];
     render();
     // …call your backend, append the assistant reply, re-render…
@@ -163,13 +163,13 @@ export const ComposedShell: Story = {
 
     onMount(() => {
       setProps(list, { conversations, activeId: 'c1' });
-      list.addEventListener('kc-select', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
+      list.addEventListener('kai-select', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
       setProps(ctx, { context });
       setProps(suggs, { suggestions: ['Summarize this thread', 'What changed in v0.3?', 'Show me the layout code'] });
-      suggs.addEventListener('kc-select', (e) => ((input as AnyEl).value = (e as CustomEvent).detail.value));
+      suggs.addEventListener('kai-select', (e) => ((input as AnyEl).value = (e as CustomEvent).detail.value));
       setProps(input, { slashCommands });
       setAttrs(input, { search: true, voice: true, placeholder: 'Message the assistant…' });
-      input.addEventListener('kc-submit', (e) => {
+      input.addEventListener('kai-submit', (e) => {
         const value = (e as unknown as CustomEvent).detail.value as string;
         if (!value) return;
         setMessages((m) => [...m, { id: Date.now() + '', role: 'user', content: value }]);
@@ -185,7 +185,7 @@ export const ComposedShell: Story = {
       setAttrs(artifact, { 'iframe-title': 'Artifact preview' });
     });
 
-    // Keep each <kc-message>'s `message` property in sync as the thread grows.
+    // Keep each <kai-message>'s `message` property in sync as the thread grows.
     const syncMessages = () => {
       const list = messages();
       list.forEach((m, i) => {
@@ -195,12 +195,12 @@ export const ComposedShell: Story = {
 
     return (
       <Frame>
-        <kc-resizable orientation="horizontal">
-          <kc-resizable-item size="22%" min="180px" max="40%">
-            <kc-conversations ref={(e) => (list = e)} style={{ display: 'block', height: '100%' }} />
-          </kc-resizable-item>
+        <kai-resizable orientation="horizontal">
+          <kai-resizable-item size="22%" min="180px" max="40%">
+            <kai-conversations ref={(e) => (list = e)} style={{ display: 'block', height: '100%' }} />
+          </kai-resizable-item>
 
-          <kc-resizable-item>
+          <kai-resizable-item>
             <div style={{ height: '100%', display: 'flex', 'flex-direction': 'column', 'min-height': '0' }}>
               <div
                 style={{
@@ -215,7 +215,7 @@ export const ComposedShell: Story = {
               >
                 <For each={messages()}>
                   {(m, i) => (
-                    <kc-message
+                    <kai-message
                       ref={(e) => {
                         msgRefs[i()] = e;
                         (e as AnyEl).message = m;
@@ -234,31 +234,31 @@ export const ComposedShell: Story = {
                   gap: '8px',
                 }}
               >
-                <kc-context ref={(e) => (ctx = e)} />
-                <kc-suggestions ref={(e) => (suggs = e)} />
-                <kc-prompt-input ref={(e) => (input = e)} />
+                <kai-context ref={(e) => (ctx = e)} />
+                <kai-suggestions ref={(e) => (suggs = e)} />
+                <kai-prompt-input ref={(e) => (input = e)} />
               </div>
             </div>
-          </kc-resizable-item>
+          </kai-resizable-item>
 
-          <kc-resizable-item size="32%" min="240px">
-            <kc-artifact ref={(e) => (artifact = e)} style={{ display: 'block', height: '100%' }} />
-          </kc-resizable-item>
-        </kc-resizable>
+          <kai-resizable-item size="32%" min="240px">
+            <kai-artifact ref={(e) => (artifact = e)} style={{ display: 'block', height: '100%' }} />
+          </kai-resizable-item>
+        </kai-resizable>
       </Frame>
     );
   },
   parameters: { docs: { source: { code: SHELL_SNIPPET, language: 'html' } } },
 };
 
-// ── B2 · Drop-in <kc-chat> ───────────────────────────────────────────────────
+// ── B2 · Drop-in <kai-chat> ───────────────────────────────────────────────────
 
 const DROPIN_SNIPPET = `<!-- Batteries-included: the whole chat surface in one tag -->
-<kc-chat id="chat" chat-title="Assistant" search voice
-  style="display:block;height:560px"></kc-chat>
+<kai-chat id="chat" chat-title="Assistant" search voice
+  style="display:block;height:560px"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const chat = document.getElementById('chat');
   chat.models = [{ id: 'opus', name: 'Claude Opus', provider: 'Anthropic' }];
@@ -266,20 +266,20 @@ const DROPIN_SNIPPET = `<!-- Batteries-included: the whole chat surface in one t
   chat.context = { usedTokens: 48200, maxTokens: 200000 };
   chat.suggestions = ['Summarize this thread', 'What changed in v0.3?'];
   chat.messages = [
-    { id: '1', role: 'assistant', content: "Hi! I'm the drop-in <kc-chat>. Ask me anything.",
+    { id: '1', role: 'assistant', content: "Hi! I'm the drop-in <kai-chat>. Ask me anything.",
       actions: ['copy', 'like', 'dislike'] },
   ];
 
-  chat.addEventListener('kc-submit', (e) => {
+  chat.addEventListener('kai-submit', (e) => {
     chat.messages = [...chat.messages, { id: Date.now() + '', role: 'user', content: e.detail.value }];
     chat.loading = true;
     // …call your backend, then append the reply and clear loading…
   });
-  chat.addEventListener('kc-model-change', (e) => (chat.currentModel = e.detail.modelId));
+  chat.addEventListener('kai-model-change', (e) => (chat.currentModel = e.detail.modelId));
 </script>`;
 
 export const DropInChat: Story = {
-  name: 'Drop-in <kc-chat>',
+  name: 'Drop-in <kai-chat>',
   render: () => {
     let chat!: HTMLElement;
     onMount(() => {
@@ -289,11 +289,11 @@ export const DropInChat: Story = {
         context,
         suggestions: ['Summarize this thread', 'What changed in v0.3?'],
         messages: [
-          { id: '1', role: 'assistant', content: "Hi! I'm the **drop-in** `<kc-chat>`. Ask me anything.", actions: ['copy', 'like', 'dislike'] },
+          { id: '1', role: 'assistant', content: "Hi! I'm the **drop-in** `<kai-chat>`. Ask me anything.", actions: ['copy', 'like', 'dislike'] },
         ],
       });
       setAttrs(chat, { 'chat-title': 'Assistant', search: true, voice: true });
-      chat.addEventListener('kc-submit', (e) => {
+      chat.addEventListener('kai-submit', (e) => {
         const value = (e as unknown as CustomEvent).detail.value as string;
         const cur = (chat as AnyEl).messages as unknown[];
         (chat as AnyEl).messages = [...cur, { id: Date.now() + '', role: 'user', content: value }];
@@ -304,11 +304,11 @@ export const DropInChat: Story = {
           (chat as AnyEl).loading = false;
         }, 600);
       });
-      chat.addEventListener('kc-model-change', (e) => ((chat as AnyEl).currentModel = (e as CustomEvent).detail.modelId));
+      chat.addEventListener('kai-model-change', (e) => ((chat as AnyEl).currentModel = (e as CustomEvent).detail.modelId));
     });
     return (
       <Frame>
-        <kc-chat ref={(e) => (chat = e)} style={{ display: 'block', height: '100%' }} />
+        <kai-chat ref={(e) => (chat = e)} style={{ display: 'block', height: '100%' }} />
       </Frame>
     );
   },

@@ -1,5 +1,5 @@
 // src/primitives/embed-providers.ts
-// Pure provider resolution for <kc-embed>: map an EmbedCardData → an embeddable
+// Pure provider resolution for <kai-embed>: map an EmbedCardData → an embeddable
 // player URL + poster + iframe sandbox/allow. Covers youtube (privacy-enhanced
 // youtube-nocookie), vimeo (dnt=1), and generic (https-only, ORIGIN-ALLOWLISTED).
 // No network, no DOM. See docs/superpowers/specs/2026-06-13-kc-link-embed-cards-design.md.
@@ -48,7 +48,7 @@ export interface ResolvedEmbed {
 // DIFFERENT origin than the host — same-origin policy still isolates the host page from
 // the provider. allow-popups(-to-escape-sandbox) lets "watch on YouTube" work. The
 // `allow` attribute (not sandbox) governs autoplay/fullscreen/encrypted-media.
-// Contrast <kc-artifact> (allow-scripts allow-forms, NO allow-same-origin) which frames
+// Contrast <kai-artifact> (allow-scripts allow-forms, NO allow-same-origin) which frames
 // arbitrary consumer HTML and so trusts nothing.
 const PLAYER_SANDBOX =
   'allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox';

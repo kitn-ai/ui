@@ -13,10 +13,10 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-loader>` — an animated loader. `variant` selects the style (circular,
+ * `<kai-loader>` — an animated loader. `variant` selects the style (circular,
  * dots, wave, text-shimmer, …); `size` and `text` are attributes.
  */
-defineWebComponent<Props>('kc-loader', {
+defineWebComponent<Props>('kai-loader', {
   variant: 'circular',
   size: 'md',
   text: undefined,

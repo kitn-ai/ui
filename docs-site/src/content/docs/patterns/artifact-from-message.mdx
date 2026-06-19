@@ -1,13 +1,13 @@
 ---
 title: Open an artifact from a message
-description: Reveal a kc-artifact canvas on demand from an assistant message — the v0 / Lovable / Replit model, where your backend serves the generated output and the canvas frames it live.
+description: Reveal a kai-artifact canvas on demand from an assistant message — the v0 / Lovable / Replit model, where your backend serves the generated output and the canvas frames it live.
 ---
 
 import ArtifactRevealDemo from '../../../components/ArtifactRevealDemo.tsx';
 
-<p class="kc-lede">When the assistant generates a runnable result — a web page, an app, a component — your backend serves it at a URL and `<kc-artifact>` frames it live. You don't have to show it the moment it's ready: keep the conversation full-width, reference the generated file in the message, and let the reader open the preview when they want it. This is the v0 / Lovable / Replit model — generate, serve, then frame the running result in a side panel on demand.</p>
+<p class="kai-lede">When the assistant generates a runnable result — a web page, an app, a component — your backend serves it at a URL and `<kai-artifact>` frames it live. You don't have to show it the moment it's ready: keep the conversation full-width, reference the generated file in the message, and let the reader open the preview when they want it. This is the v0 / Lovable / Replit model — generate, serve, then frame the running result in a side panel on demand.</p>
 
-<p>`<kc-artifact>` frames a URL your backend serves (a preview sandbox, a dev server, object storage) — it doesn't render files inline. Wire the reveal action to point the canvas at that URL.</p>
+<p>`<kai-artifact>` frames a URL your backend serves (a preview sandbox, a dev server, object storage) — it doesn't render files inline. Wire the reveal action to point the canvas at that URL.</p>
 
 <ArtifactRevealDemo client:only="solid" />
 
@@ -35,12 +35,12 @@ chat.messages = [
 ];
 ```
 
-`kc-chat` fires `kc-message-action` with `{ messageId, action }` when the button is clicked. Match your action `id` and reveal the artifact:
+`kai-chat` fires `kai-message-action` with `{ messageId, action }` when the button is clicked. Match your action `id` and reveal the artifact:
 
 ```js
 const artifact = document.getElementById('artifact');
 
-chat.addEventListener('kc-message-action', (e) => {
+chat.addEventListener('kai-message-action', (e) => {
   if (e.detail.action !== 'open-preview') return;
   artifact.files = projectFiles;       // source for the Code tab
   artifact.src = '/artifacts/starboard/index.html'; // your hosted preview
@@ -48,30 +48,30 @@ chat.addEventListener('kc-message-action', (e) => {
 });
 ```
 
-Lay the chat and the canvas side by side with `<kc-resizable>`, and keep the artifact panel hidden until it's needed. Toggling the panel's `<kc-resizable-item hidden>` lets the chat flex to full width when it's closed:
+Lay the chat and the canvas side by side with `<kai-resizable>`, and keep the artifact panel hidden until it's needed. Toggling the panel's `<kai-resizable-item hidden>` lets the chat flex to full width when it's closed:
 
 ```html
-<kc-resizable orientation="horizontal" style="display:block;height:100%">
-  <kc-resizable-item>
-    <kc-chat id="chat"></kc-chat>
-  </kc-resizable-item>
+<kai-resizable orientation="horizontal" style="display:block;height:100%">
+  <kai-resizable-item>
+    <kai-chat id="chat"></kai-chat>
+  </kai-resizable-item>
 
   <!-- starts hidden; revealed by the open-preview action -->
-  <kc-resizable-item id="panel" size="54%" min="360px" hidden>
-    <kc-artifact id="artifact" iframe-title="Preview"></kc-artifact>
-  </kc-resizable-item>
-</kc-resizable>
+  <kai-resizable-item id="panel" size="54%" min="360px" hidden>
+    <kai-artifact id="artifact" iframe-title="Preview"></kai-artifact>
+  </kai-resizable-item>
+</kai-resizable>
 ```
 
 Add a close control in the panel that flips `hidden` back on, and the conversation returns to full width — the artifact's state is preserved for the next open.
 
 ## Why an action, not a clickable chip
 
-Attachment chips render the file in the message, but `kc-chat` doesn't emit a click event for them — they're a visual reference. The clickable trigger is the action button, which fires `kc-message-action`. Pairing the two gives you the familiar artifact card: the file is named in the message, and a clear control opens it.
+Attachment chips render the file in the message, but `kai-chat` doesn't emit a click event for them — they're a visual reference. The clickable trigger is the action button, which fires `kai-message-action`. Pairing the two gives you the familiar artifact card: the file is named in the message, and a clear control opens it.
 
 ## Next steps
 
-- **[Artifacts canvas](/chat/examples/artifacts-canvas/)** — the always-on version: a file tree and canvas docked beside the chat.
-- **[`kc-artifact` reference](/chat/components/artifact/)** — the Preview/Code toggle, sandbox flags, and navigation toolbar.
-- **[`kc-message` reference](/chat/components/message/)** — custom actions, attachments, and the `kc-message-action` event.
-- **[Resizable split](/chat/patterns/resizable-split/)** — sizing and dragging the two panes.
+- **[Artifacts canvas](/examples/artifacts-canvas/)** — the always-on version: a file tree and canvas docked beside the chat.
+- **[`kai-artifact` reference](/components/artifact/)** — the Preview/Code toggle, sandbox flags, and navigation toolbar.
+- **[`kai-message` reference](/components/message/)** — custom actions, attachments, and the `kai-message-action` event.
+- **[Resizable split](/patterns/resizable-split/)** — sizing and dragging the two panes.

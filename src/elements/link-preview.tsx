@@ -11,15 +11,15 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-link-preview>` — a themed, accessible rich link / Open-Graph preview card. It
+ * `<kai-link-preview>` — a themed, accessible rich link / Open-Graph preview card. It
  * renders from the supplied `data` (it never fetches; an app may register a
  * `configureLinkPreview` fetcher for the bare-`{ url }` path). Activating the card
- * dispatches the bubbling, composed **`kc-card`** CustomEvent with the contract
+ * dispatches the bubbling, composed **`kai-card`** CustomEvent with the contract
  * `open` verb (`{ kind:'open', url, target:'tab' }`) so a host-level listener
  * routes it through CardPolicy. Set `data` as a JS property; `card-id` via attribute.
  */
 defineWebComponent<Props>(
-  'kc-link-preview',
+  'kai-link-preview',
   {
     cardId: undefined,
     data: undefined,

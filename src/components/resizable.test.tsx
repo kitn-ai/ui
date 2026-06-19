@@ -7,7 +7,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resi
 // in this tree the resizable UI primitives live in `src/ui/resizable.tsx` and the
 // custom element in `src/elements/resizable.tsx`. This test (kept at the requested
 // `src/components/` path) exercises both the UI primitive (`ResizableHandle`
-// dblclick-reset + default-size reflection) and the element (`<kc-resizable>`
+// dblclick-reset + default-size reflection) and the element (`<kai-resizable>`
 // size-preservation across content-only re-renders).
 
 // jsdom doesn't implement layout: getBoundingClientRect returns all-zeros, so the
@@ -114,7 +114,7 @@ describe('ResizableHandle dblclick resets adjacent panels to defaults', () => {
   });
 });
 
-describe('<kc-resizable> size preservation across content-only re-renders', () => {
+describe('<kai-resizable> size preservation across content-only re-renders', () => {
   beforeAll(async () => {
     // Importing registers the custom element. jsdom supports customElements.
     await import('../elements/resizable');
@@ -133,12 +133,12 @@ describe('<kc-resizable> size preservation across content-only re-renders', () =
 
   it('does not clobber a dragged panel flex-basis when an item child re-renders content', async () => {
     const host = mount(`
-      <kc-resizable orientation="horizontal" style="height:300px;width:600px">
-        <kc-resizable-item size="30%"><p id="content">hi</p></kc-resizable-item>
-        <kc-resizable-item><p>right</p></kc-resizable-item>
-      </kc-resizable>
+      <kai-resizable orientation="horizontal" style="height:300px;width:600px">
+        <kai-resizable-item size="30%"><p id="content">hi</p></kai-resizable-item>
+        <kai-resizable-item><p>right</p></kai-resizable-item>
+      </kai-resizable>
     `);
-    const el = host.querySelector('kc-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
+    const el = host.querySelector('kai-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
     // Let solid-element upgrade + onMount run.
     await Promise.resolve();
     await new Promise((r) => setTimeout(r, 0));
@@ -164,12 +164,12 @@ describe('<kc-resizable> size preservation across content-only re-renders', () =
 
   it('reflects each item default size onto its panel for handle dblclick-reset', async () => {
     const host = mount(`
-      <kc-resizable orientation="horizontal" style="height:300px;width:600px">
-        <kc-resizable-item size="30%"><p>a</p></kc-resizable-item>
-        <kc-resizable-item><p>b</p></kc-resizable-item>
-      </kc-resizable>
+      <kai-resizable orientation="horizontal" style="height:300px;width:600px">
+        <kai-resizable-item size="30%"><p>a</p></kai-resizable-item>
+        <kai-resizable-item><p>b</p></kai-resizable-item>
+      </kai-resizable>
     `);
-    const el = host.querySelector('kc-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
+    const el = host.querySelector('kai-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
     await Promise.resolve();
     await new Promise((r) => setTimeout(r, 0));
 
@@ -181,17 +181,17 @@ describe('<kc-resizable> size preservation across content-only re-renders', () =
 
   it('keeps the ORIGINAL default for dblclick-reset even after sizes are persisted', async () => {
     const host = mount(`
-      <kc-resizable orientation="horizontal" style="height:300px;width:600px">
-        <kc-resizable-item size="30%"><p>a</p></kc-resizable-item>
-        <kc-resizable-item size="70%"><p>b</p></kc-resizable-item>
-      </kc-resizable>
+      <kai-resizable orientation="horizontal" style="height:300px;width:600px">
+        <kai-resizable-item size="30%"><p>a</p></kai-resizable-item>
+        <kai-resizable-item size="70%"><p>b</p></kai-resizable-item>
+      </kai-resizable>
     `);
-    const el = host.querySelector('kc-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
+    const el = host.querySelector('kai-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
     await Promise.resolve();
     await new Promise((r) => setTimeout(r, 0));
 
     // Simulate persistence overwriting the live `size` attribute after a drag.
-    const item = host.querySelector('kc-resizable-item') as HTMLElement;
+    const item = host.querySelector('kai-resizable-item') as HTMLElement;
     item.setAttribute('size', '55%');
     await Promise.resolve();
     await new Promise((r) => setTimeout(r, 0));
@@ -203,18 +203,18 @@ describe('<kc-resizable> size preservation across content-only re-renders', () =
 
   it('still re-initializes when an item is actually added', async () => {
     const host = mount(`
-      <kc-resizable orientation="horizontal" style="height:300px;width:600px">
-        <kc-resizable-item size="30%"><p>a</p></kc-resizable-item>
-        <kc-resizable-item><p>b</p></kc-resizable-item>
-      </kc-resizable>
+      <kai-resizable orientation="horizontal" style="height:300px;width:600px">
+        <kai-resizable-item size="30%"><p>a</p></kai-resizable-item>
+        <kai-resizable-item><p>b</p></kai-resizable-item>
+      </kai-resizable>
     `);
-    const el = host.querySelector('kc-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
+    const el = host.querySelector('kai-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
     await Promise.resolve();
     await new Promise((r) => setTimeout(r, 0));
 
     expect(el.shadowRoot.querySelectorAll('[data-panel]').length).toBe(2);
 
-    const item = document.createElement('kc-resizable-item');
+    const item = document.createElement('kai-resizable-item');
     item.innerHTML = '<p>c</p>';
     el.appendChild(item);
 

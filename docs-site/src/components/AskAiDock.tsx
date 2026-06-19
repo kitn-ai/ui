@@ -1,9 +1,9 @@
 /** Header "Ask AI" control + the docked assistant panel it opens.
  *
  *  The assistant isn't wired to a backend yet, so the panel is an honest
- *  preview: an "in development" empty state above a DISABLED <kc-prompt-input>
+ *  preview: an "in development" empty state above a DISABLED <kai-prompt-input>
  *  (the kit's `disabled` prop, dogfooded). The kit bundle is loaded lazily on
- *  first open, so guide pages that don't otherwise mount a kc-* element don't
+ *  first open, so guide pages that don't otherwise mount a kai-* element don't
  *  pay for it up front. Chrome uses the docs design tokens, so it tracks the
  *  site's light/dark automatically. */
 import { createSignal, onMount, onCleanup, Show } from 'solid-js';
@@ -32,7 +32,7 @@ export default function AskAiDock() {
     setOpen(true);
     // Wide viewports: push the page over to share the space (see app.css).
     // Narrow: the class is inert (media query opts out) and the panel overlays.
-    document.documentElement.classList.add('kc-askai-open');
+    document.documentElement.classList.add('kai-askc-open');
     requestAnimationFrame(() => setEntered(true));
     if (!kitReady()) {
       await loadKit();
@@ -49,7 +49,7 @@ export default function AskAiDock() {
 
   const closeDock = () => {
     setEntered(false);
-    document.documentElement.classList.remove('kc-askai-open');
+    document.documentElement.classList.remove('kai-askc-open');
     closeTimer = window.setTimeout(() => {
       setOpen(false);
       triggerBtn?.focus(); // return focus once the trigger is visible again
@@ -65,7 +65,7 @@ export default function AskAiDock() {
     onCleanup(() => {
       document.removeEventListener('keydown', onKey);
       themeObserver?.disconnect();
-      document.documentElement.classList.remove('kc-askai-open');
+      document.documentElement.classList.remove('kai-askc-open');
     });
   });
 
@@ -90,7 +90,7 @@ export default function AskAiDock() {
             shares space (push mode) so the docs stay fully readable. */}
         <div
           onClick={closeDock}
-          class="kc-askai-backdrop fixed inset-0 z-[200] bg-black/30 transition-opacity duration-200"
+          class="kai-askc-backdrop fixed inset-0 z-[200] bg-black/30 transition-opacity duration-200"
           classList={{ 'opacity-100': entered(), 'opacity-0': !entered() }}
           aria-hidden="true"
         />
@@ -98,7 +98,7 @@ export default function AskAiDock() {
         <div
           role="dialog"
           aria-label="Ask AI"
-          class="kc-askai-panel fixed inset-y-0 right-0 z-[201] flex w-[var(--kc-dock-w)] max-w-[calc(100vw-2rem)] flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-200 ease-out"
+          class="kai-askc-panel fixed inset-y-0 right-0 z-[201] flex w-[var(--kai-dock-w)] max-w-[calc(100vw-2rem)] flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-200 ease-out"
           classList={{ 'translate-x-0': entered(), 'translate-x-full': !entered() }}
         >
           {/* Header */}
@@ -130,11 +130,11 @@ export default function AskAiDock() {
             </p>
           </div>
 
-          {/* Disabled composer — the kit's own kc-prompt-input in its disabled state */}
+          {/* Disabled composer — the kit's own kai-prompt-input in its disabled state */}
           <div class="border-t border-line p-3">
             <Show when={kitReady()} fallback={<div class="h-12 animate-pulse rounded-lg bg-ink/5" />}>
               {/* @ts-expect-error custom element */}
-              <kc-prompt-input
+              <kai-prompt-input
                 ref={(el: HTMLElement) => (promptInput = el)}
                 disabled
                 placeholder="Ask about kitn-chat… (coming soon)"

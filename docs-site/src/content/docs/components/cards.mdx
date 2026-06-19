@@ -11,18 +11,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-cards</p>
+<p class="kai-tag-sub">kai-cards</p>
 
-<p class="kc-lede">Drop in `<kc-cards>` to render a live stream of AI-generated card envelopes — confirmations, task lists, choice pickers, link previews, and custom types — while a single `policy` object routes every user action back to your app.</p>
+<p class="kai-lede">Drop in `<kai-cards>` to render a live stream of AI-generated card envelopes — confirmations, task lists, choice pickers, link previews, and custom types — while a single `policy` object routes every user action back to your app.</p>
 
 <Facts items={['Shadow DOM', 'Property-driven API', 'Built-in card types', 'Extensible type registry', 'CardFallback for unknown types']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-cards" />
+<Playground client:only="solid" tag="kai-cards" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-cards>` whenever your AI response includes structured interactions — a deployment confirmation, a multi-step plan, a list of options. Pass server envelopes into `el.cards`, wire `el.policy` to handle results, and the element takes care of rendering, routing, and resolved (read-only) states.
+Reach for `<kai-cards>` whenever your AI response includes structured interactions — a deployment confirmation, a multi-step plan, a list of options. Pass server envelopes into `el.cards`, wire `el.policy` to handle results, and the element takes care of rendering, routing, and resolved (read-only) states.
 </Aside>
 
 ## Usage
@@ -30,10 +30,10 @@ Reach for `<kc-cards>` whenever your AI response includes structured interaction
 Set all three in JavaScript — they're arrays and objects, so none work as HTML attributes:
 
 ```html
-<kc-cards id="cards"></kc-cards>
+<kai-cards id="cards"></kai-cards>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const el = document.getElementById('cards');
 
   el.cards = [
@@ -61,28 +61,28 @@ Set all three in JavaScript — they're arrays and objects, so none work as HTML
 
 ### Mixed Card Stream
 
-<Example client:visible tag="kc-cards" />
+<Example client:visible tag="kai-cards" />
 
 ### Single Confirm Card
 
-<Example client:visible tag="kc-cards" data="confirm" />
+<Example client:visible tag="kai-cards" data="confirm" />
 
 ### Resolved Card
 
 Pass `resolution` on an envelope to lock it in its read-only view — useful when rehydrating conversation history.
 
-<Example client:visible tag="kc-cards" data="resolved" />
+<Example client:visible tag="kai-cards" data="resolved" />
 
 ### Unknown Type Fallback
 
-<Example client:visible tag="kc-cards" data="unknownType" />
+<Example client:visible tag="kai-cards" data="unknownType" />
 
 ## Props
 
-<PropTable tag="kc-cards" />
+<PropTable tag="kai-cards" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-cards" />
+<ComposedFrom tag="kai-cards" />
 
 <NeedAHand />

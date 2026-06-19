@@ -1,13 +1,13 @@
 // src/elements/cards.stories.tsx
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, onMount } from 'solid-js';
-import './register'; // registers all kc-* incl. kc-cards
+import './register'; // registers all kai-* incl. kai-cards
 import type { CardEnvelope, CardEvent } from '../primitives/card-contract';
 
 declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
-    interface IntrinsicElements { 'kc-cards': JSX.HTMLAttributes<HTMLElement>; }
+    interface IntrinsicElements { 'kai-cards': JSX.HTMLAttributes<HTMLElement>; }
   }
 }
 
@@ -25,7 +25,7 @@ const CARDS: CardEnvelope[] = [
   { type: 'link', id: 'doc', data: { url: 'https://kitn.dev', title: 'kitn.dev', description: 'Generative UI cards', domain: 'kitn.dev' } },
 ];
 
-/** A host renders a stream of envelopes via <kc-cards> and handles events via `.policy`. */
+/** A host renders a stream of envelopes via <kai-cards> and handles events via `.policy`. */
 function Demo() {
   let el: HTMLElement | undefined;
   const [log, setLog] = createSignal<string[]>([]);
@@ -41,7 +41,7 @@ function Demo() {
   });
   return (
     <div style={{ display: 'grid', 'grid-template-columns': '1fr 18rem', gap: '1rem', padding: '1rem' }}>
-      <kc-cards ref={(e) => (el = e as HTMLElement)} />
+      <kai-cards ref={(e) => (el = e as HTMLElement)} />
       <pre style={{ 'font-size': '12px', background: '#f4f4f5', padding: '8px', 'border-radius': '6px', 'min-height': '6rem' }}>
         {log().join('\n') || 'events appear here…'}
       </pre>
@@ -50,7 +50,7 @@ function Demo() {
 }
 
 const meta = {
-  title: 'Generative UI/SDK/kc-cards',
+  title: 'Generative UI/SDK/kai-cards',
   parameters: { layout: 'fullscreen' },
 } satisfies Meta;
 export default meta;

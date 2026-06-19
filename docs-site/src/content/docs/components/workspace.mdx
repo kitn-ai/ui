@@ -12,18 +12,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-workspace</p>
+<p class="kai-tag-sub">kai-workspace</p>
 
-<p class="kc-lede">The entire chat application shell as one tag — collapsible drag-resizable sidebar, conversation list, and full message thread, isolated in Shadow DOM and droppable into any framework.</p>
+<p class="kai-lede">The entire chat application shell as one tag — collapsible drag-resizable sidebar, conversation list, and full message thread, isolated in Shadow DOM and droppable into any framework.</p>
 
 <Facts items={['Shadow DOM', '11 events', 'Drag-resizable sidebar', 'Collapsible sidebar', '26 props']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-workspace" />
+<Playground client:only="solid" tag="kai-workspace" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-workspace>` when you need the whole app shell — **conversation sidebar, history, and collapse** included — dropped in as one tag. If you only need the conversation surface (thread, composer, header), use [`<kc-chat>`](/chat/components/chat/) and add your own controls through its header slots ([Custom chat header](/chat/patterns/custom-chat-header/)). In SolidJS, compose `ConversationList` and `ChatThread` directly for the finest control.
+Reach for `<kai-workspace>` when you need the whole app shell — **conversation sidebar, history, and collapse** included — dropped in as one tag. If you only need the conversation surface (thread, composer, header), use [`<kai-chat>`](/components/chat/) and add your own controls through its header slots ([Custom chat header](/patterns/custom-chat-header/)). In SolidJS, compose `ConversationList` and `ChatThread` directly for the finest control.
 </Aside>
 
 ## Usage
@@ -31,10 +31,10 @@ Reach for `<kc-workspace>` when you need the whole app shell — **conversation 
 Set data in JavaScript and listen for **CustomEvents** on the element:
 
 ```html
-<kc-workspace id="workspace" style="display:block; height:100vh;"></kc-workspace>
+<kai-workspace id="workspace" style="display:block; height:100vh;"></kai-workspace>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const ws = document.getElementById('workspace');
 
@@ -50,67 +50,67 @@ Set data in JavaScript and listen for **CustomEvents** on the element:
   ];
   ws.messages = [
     { id: 'm1', role: 'user', content: 'How do I drop the whole chat app in with one tag?' },
-    { id: 'm2', role: 'assistant', content: 'Use <kc-workspace> and set the three core properties.' },
+    { id: 'm2', role: 'assistant', content: 'Use <kai-workspace> and set the three core properties.' },
   ];
   ws.models = [{ id: 'claude-4-opus', name: 'Claude 4 Opus', provider: 'Anthropic' }];
   ws.activeId = '1';
 
-  ws.addEventListener('kc-conversation-select', (e) => console.log('selected:', e.detail.id));
-  ws.addEventListener('kc-submit', (e) => console.log('user sent:', e.detail.value));
-  ws.addEventListener('kc-sidebar-toggle', (e) => console.log('collapsed:', e.detail.collapsed));
+  ws.addEventListener('kai-conversation-select', (e) => console.log('selected:', e.detail.id));
+  ws.addEventListener('kai-submit', (e) => console.log('user sent:', e.detail.value));
+  ws.addEventListener('kai-sidebar-toggle', (e) => console.log('collapsed:', e.detail.collapsed));
 </script>
 ```
 
 - **Properties vs attributes** — `groups`, `conversations`, `messages`, `models`, `suggestions`, `slashCommands`, `slashActiveIds`, and `context` are arrays and objects, so set them in JavaScript. Scalar props (`placeholder`, `loading`, sidebar dimensions, etc.) work as attributes or properties.
-- **Sidebar** — drag-resizable and collapsible. Constrain with `sidebarWidth` (percent, default `22`), `sidebarMinWidth`, and `sidebarMaxWidth`. Collapse is **uncontrolled by default** — the element manages it and fires `kc-sidebar-toggle`. Start collapsed with the `default-sidebar-collapsed` attribute, or **control** it by setting the `sidebarCollapsed` property and updating it from `kc-sidebar-toggle` (lets you persist the choice or collapse from outside the header).
+- **Sidebar** — drag-resizable and collapsible. Constrain with `sidebarWidth` (percent, default `22`), `sidebarMinWidth`, and `sidebarMaxWidth`. Collapse is **uncontrolled by default** — the element manages it and fires `kai-sidebar-toggle`. Start collapsed with the `default-sidebar-collapsed` attribute, or **control** it by setting the `sidebarCollapsed` property and updating it from `kai-sidebar-toggle` (lets you persist the choice or collapse from outside the header).
 - **Conversation grouping** — pass a flat `conversations` array and the element auto-buckets by recency, or supply a `groups` array with `groupId` on each conversation for custom grouping.
 
 ## Examples
 
 ### Default
 
-<Example client:visible tag="kc-workspace" />
+<Example client:visible tag="kai-workspace" />
 
 ### Loading State
 
 Set `loading` while an assistant reply is streaming.
 
-<Example client:visible tag="kc-workspace" config={{ loading: true }} data="loading" />
+<Example client:visible tag="kai-workspace" config={{ loading: true }} data="loading" />
 
 ### Model Switcher
 
-Set the `models` property to surface a model picker; listen for `kc-model-change` to update your store.
+Set the `models` property to surface a model picker; listen for `kai-model-change` to update your store.
 
-<Example client:visible tag="kc-workspace" data="withModels" />
+<Example client:visible tag="kai-workspace" data="withModels" />
 
 ### Starter Suggestions
 
-Set `suggestions` to show prompt chips on an empty thread. `suggestion-mode="submit"` fires `kc-submit`; `"fill"` populates the input and fires `kc-suggestion-click`.
+Set `suggestions` to show prompt chips on an empty thread. `suggestion-mode="submit"` fires `kai-submit`; `"fill"` populates the input and fires `kai-suggestion-click`.
 
-<Example client:visible tag="kc-workspace" data="withSuggestions" />
+<Example client:visible tag="kai-workspace" data="withSuggestions" />
 
 ### Slash Commands
 
-Set `slashCommands` to enable the `/` command palette; handle `kc-slash-select` to receive `{ command }`.
+Set `slashCommands` to enable the `/` command palette; handle `kai-slash-select` to receive `{ command }`.
 
-<Example client:visible tag="kc-workspace" data="withSlash" />
+<Example client:visible tag="kai-workspace" data="withSlash" />
 
 ### Sidebar Starts Collapsed
 
-A floating reveal button appears at the top-left; `kc-sidebar-toggle` fires on every change.
+A floating reveal button appears at the top-left; `kai-sidebar-toggle` fires on every change.
 
-<Example client:visible tag="kc-workspace" config={{ sidebarCollapsed: true }} data="sidebarCollapsed" />
+<Example client:visible tag="kai-workspace" config={{ sidebarCollapsed: true }} data="sidebarCollapsed" />
 
 ## Props
 
-<PropTable tag="kc-workspace" />
+<PropTable tag="kai-workspace" />
 
 ## Events
 
-<EventTable tag="kc-workspace" />
+<EventTable tag="kai-workspace" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-workspace" />
+<ComposedFrom tag="kai-workspace" />
 
 <NeedAHand />

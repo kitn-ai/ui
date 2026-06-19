@@ -12,18 +12,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-scroll-button</p>
+<p class="kai-tag-sub">kai-scroll-button</p>
 
-<p class="kc-lede">A floating chevron button that watches a scrollable container and appears when the user scrolls up — click to snap back to the bottom. Drop it beside any chat thread, log pane, or activity feed.</p>
+<p class="kai-lede">A floating chevron button that watches a scrollable container and appears when the user scrolls up — click to snap back to the bottom. Drop it beside any chat thread, log pane, or activity feed.</p>
 
 <Facts items={['Shadow DOM', '1 event', '3 button variants', 'Auto-hides at bottom', 'Works via id or ancestor walk']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-scroll-button" />
+<Playground client:only="solid" tag="kai-scroll-button" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-scroll-button>` with any long scrollable list outside SolidJS — a chat thread, a log pane, an activity feed. Position it as an `absolute` or `fixed` overlay in the bottom-right of the scroll area. In SolidJS, the `ScrollButton` primitive inside a `ChatContainerRoot` does the same job without the web component wrapper.
+Use `<kai-scroll-button>` with any long scrollable list outside SolidJS — a chat thread, a log pane, an activity feed. Position it as an `absolute` or `fixed` overlay in the bottom-right of the scroll area. In SolidJS, the `ScrollButton` primitive inside a `ChatContainerRoot` does the same job without the web component wrapper.
 </Aside>
 
 ## Usage
@@ -35,16 +35,16 @@ Point the button at its scroll container with the `for` attribute:
   <!-- list content -->
 </div>
 
-<kc-scroll-button for="my-feed"></kc-scroll-button>
+<kai-scroll-button for="my-feed"></kai-scroll-button>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 </script>
 ```
 
 - **`for`** — the `id` of the scrollable container (mirrors `<label for="...">`). Omit to walk up the composed tree to the nearest scrollable ancestor.
 - **Visibility** — hidden when the container is within 50 px of the bottom; animated (translate + scale + opacity) otherwise. Uses a passive `scroll` listener — no polling.
-- **`kc-scroll`** — fires (no detail) each time the button is clicked and `scrollToBottom()` completes. Use it to pause auto-scroll logic.
+- **`kai-scroll`** — fires (no detail) each time the button is clicked and `scrollToBottom()` completes. Use it to pause auto-scroll logic.
 
 ## Examples
 
@@ -52,36 +52,36 @@ Point the button at its scroll container with the `for` attribute:
 
 The button wired via `for` — scroll the list up to reveal it, click to jump back.
 
-<Example client:visible tag="kc-scroll-button" />
+<Example client:visible tag="kai-scroll-button" />
 
 ### Ghost Variant
 
 `variant="ghost"` removes the border and background — sits unobtrusively over light content.
 
-<Example client:visible tag="kc-scroll-button" config={{ variant: 'ghost' }} />
+<Example client:visible tag="kai-scroll-button" config={{ variant: 'ghost' }} />
 
 ### Solid (Default) Variant
 
 `variant="default"` uses the filled button style — highest contrast for dark or image backgrounds.
 
-<Example client:visible tag="kc-scroll-button" config={{ variant: 'default' }} />
+<Example client:visible tag="kai-scroll-button" config={{ variant: 'default' }} />
 
 ### Smaller Icon Size
 
 `size="icon-sm"` produces a tighter button — fits compact panels or narrow scroll areas.
 
-<Example client:visible tag="kc-scroll-button" config={{ size: 'icon-sm' }} />
+<Example client:visible tag="kai-scroll-button" config={{ size: 'icon-sm' }} />
 
 ## Props
 
-<PropTable tag="kc-scroll-button" />
+<PropTable tag="kai-scroll-button" />
 
 ## Events
 
-<EventTable tag="kc-scroll-button" />
+<EventTable tag="kai-scroll-button" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-scroll-button" />
+<ComposedFrom tag="kai-scroll-button" />
 
 <NeedAHand />

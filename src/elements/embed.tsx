@@ -11,16 +11,16 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-embed>` — a privacy-first **lazy media embed** (YouTube / Vimeo / allowlisted
+ * `<kai-embed>` — a privacy-first **lazy media embed** (YouTube / Vimeo / allowlisted
  * generic player). Initial render is a poster + play button: NO provider iframe, JS,
  * or cookies until the user clicks play (YouTube via `youtube-nocookie`, Vimeo with
  * `dnt=1`). A persistent "Open on {provider}" affordance dispatches the contract
- * `open` verb via the bubbling `kc-card` event. `generic` URLs are rejected unless
+ * `open` verb via the bubbling `kai-card` event. `generic` URLs are rejected unless
  * their origin was allowlisted with `configureEmbedAllowlist`. Set `data` as a JS
  * property; `card-id` via attribute.
  */
 defineWebComponent<Props>(
-  'kc-embed',
+  'kai-embed',
   {
     cardId: undefined,
     data: undefined,

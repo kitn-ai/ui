@@ -12,18 +12,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-artifact</p>
+<p class="kai-tag-sub">kai-artifact</p>
 
-<p class="kc-lede">Show an AI-generated deliverable beside the conversation — a web page, doc, image, or PDF — in a sandboxed iframe with a nav toolbar and a switchable Code view.</p>
+<p class="kai-lede">Show an AI-generated deliverable beside the conversation — a web page, doc, image, or PDF — in a sandboxed iframe with a nav toolbar and a switchable Code view.</p>
 
 <Facts items={['Shadow DOM', 'Sandboxed iframe', 'Preview + Code tabs', 'Configurable toolbar', '4 events']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-artifact" />
+<Playground client:only="solid" tag="kai-artifact" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-artifact>` when a response produces something runnable or viewable you want to show alongside the chat. Pair it with [`<kc-resizable>`](/chat/components/resizable/) for a draggable split-pane shell. It fills its container — give the parent a height.
+Reach for `<kai-artifact>` when a response produces something runnable or viewable you want to show alongside the chat. Pair it with [`<kai-resizable>`](/components/resizable/) for a draggable split-pane shell. It fills its container — give the parent a height.
 </Aside>
 
 ## Usage
@@ -31,15 +31,15 @@ Reach for `<kc-artifact>` when a response produces something runnable or viewabl
 Point `src` at your hosted artifact and set `files` in JavaScript (it's an array, so it can't be an HTML attribute) for the Code tab.
 
 ```html
-<kc-artifact src="https://your.app/artifacts/abc/index.html" style="display:block;height:520px"></kc-artifact>
+<kai-artifact src="https://your.app/artifacts/abc/index.html" style="display:block;height:520px"></kai-artifact>
 <script type="module">
-  import '@kitn.ai/chat/elements';
-  const el = document.querySelector('kc-artifact');
+  import '@kitn.ai/ui/elements';
+  const el = document.querySelector('kai-artifact');
   el.files = [
     { path: 'index.html', url: '…/index.html', type: 'html', code: '<!DOCTYPE …>' },
     { path: 'styles.css', url: '…/styles.css', type: 'other', language: 'css', code: '…' },
   ];
-  el.addEventListener('kc-navigate', (e) => console.log(e.detail.url));
+  el.addEventListener('kai-navigate', (e) => console.log(e.detail.url));
 </script>
 ```
 
@@ -51,40 +51,40 @@ Point `src` at your hosted artifact and set `files` in JavaScript (it's an array
 
 ### Code view
 
-<Example client:visible tag="kc-artifact" config={{ tab: 'code', activeFile: 'app.js' }} />
+<Example client:visible tag="kai-artifact" config={{ tab: 'code', activeFile: 'app.js' }} />
 
 ### Preview only
 
 Hide the whole toolbar for a chrome-free embedded tile.
 
-<Example client:visible tag="kc-artifact" config={{ noNav: true, noReload: true, noHome: true, noPathField: true, noTabs: true }} />
+<Example client:visible tag="kai-artifact" config={{ noNav: true, noReload: true, noHome: true, noPathField: true, noTabs: true }} />
 
 ### Open in new tab
 
-<Example client:visible tag="kc-artifact" config={{ openInTab: true }} />
+<Example client:visible tag="kai-artifact" config={{ openInTab: true }} />
 
 ### Standalone
 
 Rounded, bordered chrome for an artifact rendered outside a panel — a modal or inline tile.
 
-<Example client:visible tag="kc-artifact" config={{ standalone: true, readonlyPath: true }} />
+<Example client:visible tag="kai-artifact" config={{ standalone: true, readonlyPath: true }} />
 
 ### Expandable
 
-An expand-to-fill button that fires `kc-maximize-change`, plus the open-in-tab control.
+An expand-to-fill button that fires `kai-maximize-change`, plus the open-in-tab control.
 
-<Example client:visible tag="kc-artifact" config={{ expandable: true, openInTab: true }} />
+<Example client:visible tag="kai-artifact" config={{ expandable: true, openInTab: true }} />
 
 ## Props
 
-<PropTable tag="kc-artifact" />
+<PropTable tag="kai-artifact" />
 
 ## Events
 
-<EventTable tag="kc-artifact" />
+<EventTable tag="kai-artifact" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-artifact" />
+<ComposedFrom tag="kai-artifact" />
 
 <NeedAHand />

@@ -8,11 +8,11 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-scroll-button': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-scroll-button': JSX.HTMLAttributes<HTMLElement> & {
         for?: string;
         variant?: string;
         size?: string;
-        'on:kc-scroll'?: (e: CustomEvent) => void;
+        'on:kai-scroll'?: (e: CustomEvent) => void;
       };
     }
   }
@@ -24,27 +24,27 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </div>
 
 <!-- Button targets the scroll container by id -->
-<kc-scroll-button for="my-chat"></kc-scroll-button>
+<kai-scroll-button for="my-chat"></kai-scroll-button>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
-  const btn = document.querySelector('kc-scroll-button');
-  btn.addEventListener('kc-scroll', () => console.log('scrolled to bottom'));
+  const btn = document.querySelector('kai-scroll-button');
+  btn.addEventListener('kai-scroll', () => console.log('scrolled to bottom'));
 </script>`;
 
 const meta = {
   title: 'Components/ScrollButton',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-scroll-button'),
+  argTypes: argTypesFor('kai-scroll-button'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kc-scroll-button', [
-        '`<kc-scroll-button>` is the framework-agnostic **web component** for a floating "scroll to bottom" button — visible when the target container is scrolled up, hidden when already at the bottom. Isolated in **Shadow DOM**.',
+      description: specDescription('kai-scroll-button', [
+        '`<kai-scroll-button>` is the framework-agnostic **web component** for a floating "scroll to bottom" button — visible when the target container is scrolled up, hidden when already at the bottom. Isolated in **Shadow DOM**.',
         '**When to use:** placing a scroll-to-bottom affordance next to any long scrollable list or chat thread outside SolidJS. In SolidJS, use the `ScrollButton` primitive inside a `ChatContainerRoot`.',
         '**Wiring the scroll target:** set the `for` attribute to the `id` of the scrollable container (mirrors the `<label for="...">` convention). When `for` is omitted the element walks upward to the nearest scrollable ancestor — useful when it is nested inside the container.',
-        '**Emitted events:** `kc-scroll` (no detail) fires each time the button is clicked and `scrollToBottom()` is called.',
+        '**Emitted events:** `kai-scroll` (no detail) fires each time the button is clicked and `scrollToBottom()` is called.',
         'See the **Code** tab for HTML usage.',
       ]),
     },
@@ -99,9 +99,9 @@ export const Default: Story = {
           }}
         >
           <div style={{ 'pointer-events': 'auto' }}>
-            <kc-scroll-button
+            <kai-scroll-button
               for="scroll-demo"
-              on:kc-scroll={() => console.log('kc-scroll fired')}
+              on:kai-scroll={() => console.log('kai-scroll fired')}
             />
           </div>
         </div>
@@ -149,7 +149,7 @@ export const AncestorWalk: Story = {
               'justify-content': 'center',
             }}
           >
-            <kc-scroll-button />
+            <kai-scroll-button />
           </div>
         </div>
       </div>
@@ -192,7 +192,7 @@ export const Variants: Story = {
                 <div style={{ padding: '4px 8px', 'font-size': '13px' }}>{r}</div>
               ))}
             </div>
-            <kc-scroll-button for={`variant-demo-${variant}`} variant={variant} />
+            <kai-scroll-button for={`variant-demo-${variant}`} variant={variant} />
             <code style={{ 'font-size': '11px', opacity: 0.6 }}>{variant}</code>
           </div>
         ))}

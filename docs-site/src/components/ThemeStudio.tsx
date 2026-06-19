@@ -1,9 +1,9 @@
-/** Theme studio — a full theme editor for the kit's public `--kc-*` tokens.
+/** Theme studio — a full theme editor for the kit's public `--kai-*` tokens.
  *
  *  How it works: every kit color is a CSS custom property the consumer can
- *  override. The studio writes the active palette as inline `--kc-color-*` /
- *  `--kc-radius` properties on a single canvas wrapper; custom properties
- *  inherit through the Shadow DOM, so every `kc-*` element inside the canvas
+ *  override. The studio writes the active palette as inline `--kai-color-*` /
+ *  `--kai-radius` properties on a single canvas wrapper; custom properties
+ *  inherit through the Shadow DOM, so every `kai-*` element inside the canvas
  *  reskins at once — the exact mechanism you'd ship in a stylesheet.
  *
  *  Light and dark are edited independently (each canvas host runs at the studio's
@@ -22,10 +22,10 @@ import IconChevron from '~icons/lucide/chevron-right';
 import IconCode from '~icons/lucide/code';
 import IconSave from '~icons/lucide/bookmark';
 import IconClose from '~icons/lucide/x';
-import { THEME_PRESETS, SHADCN_TO_KC } from './theme-presets';
+import { THEME_PRESETS, SHADCN_TO_KAI } from './theme-presets';
 import { sampleFor } from '../lib/sample-data';
 
-/** Mount a kc-* element into `container`, seeded from the docs sample-data registry
+/** Mount a kai-* element into `container`, seeded from the docs sample-data registry
  *  (the same verified data the component pages use) so the showroom shows real,
  *  correct components reskinned by the active theme. */
 function mountSample(container: HTMLElement, tag: string, mode: string): HTMLElement {
@@ -46,25 +46,25 @@ function mountSample(container: HTMLElement, tag: string, mode: string): HTMLEle
 /** Showroom items: real kit elements seeded from sample data, grouped by tab. */
 type Slot = { tag: string; label: string; note?: string; h?: string };
 const CARD_SLOTS: Slot[] = [
-  { tag: 'kc-confirm', label: 'Confirm', note: 'Approve / decline — primary + secondary' },
-  { tag: 'kc-choice', label: 'Choice', note: 'Pick one — accent marks the pick' },
-  { tag: 'kc-tasks', label: 'Tasks', note: 'Selectable plan — checkboxes + confirm' },
-  { tag: 'kc-form', label: 'Form', note: 'Inputs, selects, submit' },
-  { tag: 'kc-link-preview', label: 'Link preview', note: 'Surface + muted text' },
+  { tag: 'kai-confirm', label: 'Confirm', note: 'Approve / decline — primary + secondary' },
+  { tag: 'kai-choice', label: 'Choice', note: 'Pick one — accent marks the pick' },
+  { tag: 'kai-tasks', label: 'Tasks', note: 'Selectable plan — checkboxes + confirm' },
+  { tag: 'kai-form', label: 'Form', note: 'Inputs, selects, submit' },
+  { tag: 'kai-link-preview', label: 'Link preview', note: 'Surface + muted text' },
 ];
 const COMPONENT_SLOTS: Slot[] = [
-  { tag: 'kc-model-switcher', label: 'Model switcher' },
-  { tag: 'kc-context', label: 'Context meter' },
-  { tag: 'kc-tool', label: 'Tool call', note: 'Tool hues' },
-  { tag: 'kc-reasoning', label: 'Reasoning' },
-  { tag: 'kc-chain-of-thought', label: 'Chain of thought' },
-  { tag: 'kc-code-block', label: 'Code block', note: 'Code font + accent' },
-  { tag: 'kc-loader', label: 'Loader', note: 'Primary' },
-  { tag: 'kc-feedback-bar', label: 'Feedback bar' },
-  { tag: 'kc-prompt-input', label: 'Composer', note: 'Base font + input' },
-  { tag: 'kc-conversations', label: 'Conversations', h: '15rem' },
-  { tag: 'kc-file-tree', label: 'File tree', h: '15rem' },
-  { tag: 'kc-attachments', label: 'Attachments' },
+  { tag: 'kai-model-switcher', label: 'Model switcher' },
+  { tag: 'kai-context', label: 'Context meter' },
+  { tag: 'kai-tool', label: 'Tool call', note: 'Tool hues' },
+  { tag: 'kai-reasoning', label: 'Reasoning' },
+  { tag: 'kai-chain-of-thought', label: 'Chain of thought' },
+  { tag: 'kai-code-block', label: 'Code block', note: 'Code font + accent' },
+  { tag: 'kai-loader', label: 'Loader', note: 'Primary' },
+  { tag: 'kai-feedback-bar', label: 'Feedback bar' },
+  { tag: 'kai-prompt-input', label: 'Composer', note: 'Base font + input' },
+  { tag: 'kai-conversations', label: 'Conversations', h: '15rem' },
+  { tag: 'kai-file-tree', label: 'File tree', h: '15rem' },
+  { tag: 'kai-attachments', label: 'Attachments' },
 ];
 
 /** Shared modal: centered panel + backdrop, portaled to <body> so the editor's
@@ -88,7 +88,7 @@ function Modal(props: { title: string; onClose: () => void; wide?: boolean; chil
 
 type Palette = Record<string, string>;
 
-/** One editable token: full `--kc-*` name, label, hint, and light/dark defaults
+/** One editable token: full `--kai-*` name, label, hint, and light/dark defaults
  *  (verbatim from theme.css). Grouped for the inspector. */
 type TokenDef = { token: string; label: string; hint: string; light: string; dark: string };
 type Group = { name: string; tokens: TokenDef[] };
@@ -97,64 +97,64 @@ const GROUPS: Group[] = [
   {
     name: 'Surfaces',
     tokens: [
-      { token: '--kc-color-background', label: 'Background', hint: 'App / chat surface', light: 'hsl(0 0% 100%)', dark: 'hsl(50 2% 9%)' },
-      { token: '--kc-color-foreground', label: 'Foreground', hint: 'Default text', light: 'hsl(240 10% 3.9%)', dark: 'hsl(0 0% 98%)' },
-      { token: '--kc-color-card', label: 'Card', hint: 'Bubbles, panels, cards', light: 'hsl(0 0% 100%)', dark: 'hsl(45 4% 12%)' },
-      { token: '--kc-color-card-foreground', label: 'Card text', hint: 'Text on cards', light: 'hsl(240 10% 3.9%)', dark: 'hsl(0 0% 98%)' },
-      { token: '--kc-color-popover', label: 'Popover', hint: 'Menus & popovers', light: 'hsl(0 0% 100%)', dark: 'hsl(45 4% 12%)' },
-      { token: '--kc-color-popover-foreground', label: 'Popover text', hint: 'Text in popovers', light: 'hsl(240 10% 3.9%)', dark: 'hsl(0 0% 98%)' },
-      { token: '--kc-color-sidebar', label: 'Sidebar', hint: 'Conversation sidebar', light: 'hsl(0 0% 100%)', dark: 'hsl(50 2% 7%)' },
+      { token: '--kai-color-background', label: 'Background', hint: 'App / chat surface', light: 'hsl(0 0% 100%)', dark: 'hsl(50 2% 9%)' },
+      { token: '--kai-color-foreground', label: 'Foreground', hint: 'Default text', light: 'hsl(240 10% 3.9%)', dark: 'hsl(0 0% 98%)' },
+      { token: '--kai-color-card', label: 'Card', hint: 'Bubbles, panels, cards', light: 'hsl(0 0% 100%)', dark: 'hsl(45 4% 12%)' },
+      { token: '--kai-color-card-foreground', label: 'Card text', hint: 'Text on cards', light: 'hsl(240 10% 3.9%)', dark: 'hsl(0 0% 98%)' },
+      { token: '--kai-color-popover', label: 'Popover', hint: 'Menus & popovers', light: 'hsl(0 0% 100%)', dark: 'hsl(45 4% 12%)' },
+      { token: '--kai-color-popover-foreground', label: 'Popover text', hint: 'Text in popovers', light: 'hsl(240 10% 3.9%)', dark: 'hsl(0 0% 98%)' },
+      { token: '--kai-color-sidebar', label: 'Sidebar', hint: 'Conversation sidebar', light: 'hsl(0 0% 100%)', dark: 'hsl(50 2% 7%)' },
     ],
   },
   {
     name: 'Brand & actions',
     tokens: [
-      { token: '--kc-color-primary', label: 'Primary', hint: 'Buttons, accents, send', light: 'hsl(240 5.9% 10%)', dark: 'hsl(0 0% 98%)' },
-      { token: '--kc-color-primary-foreground', label: 'On primary', hint: 'Text on primary', light: 'hsl(0 0% 98%)', dark: 'hsl(45 4% 11%)' },
-      { token: '--kc-color-ring', label: 'Focus ring', hint: 'Keyboard-focus outline', light: 'hsl(217 91% 53%)', dark: 'hsl(217 91% 68%)' },
-      { token: '--kc-color-accent', label: 'Accent', hint: 'Hover / accent surface', light: 'hsl(240 4.8% 95.9%)', dark: 'hsl(45 4% 17%)' },
-      { token: '--kc-color-accent-foreground', label: 'On accent', hint: 'Text on accent', light: 'hsl(240 5.9% 10%)', dark: 'hsl(0 0% 98%)' },
-      { token: '--kc-color-secondary', label: 'Secondary', hint: 'Secondary surface', light: 'hsl(240 4.8% 95.9%)', dark: 'hsl(45 4% 17%)' },
-      { token: '--kc-color-secondary-foreground', label: 'On secondary', hint: 'Text on secondary', light: 'hsl(240 5.9% 10%)', dark: 'hsl(0 0% 98%)' },
+      { token: '--kai-color-primary', label: 'Primary', hint: 'Buttons, accents, send', light: 'hsl(240 5.9% 10%)', dark: 'hsl(0 0% 98%)' },
+      { token: '--kai-color-primary-foreground', label: 'On primary', hint: 'Text on primary', light: 'hsl(0 0% 98%)', dark: 'hsl(45 4% 11%)' },
+      { token: '--kai-color-ring', label: 'Focus ring', hint: 'Keyboard-focus outline', light: 'hsl(217 91% 53%)', dark: 'hsl(217 91% 68%)' },
+      { token: '--kai-color-accent', label: 'Accent', hint: 'Hover / accent surface', light: 'hsl(240 4.8% 95.9%)', dark: 'hsl(45 4% 17%)' },
+      { token: '--kai-color-accent-foreground', label: 'On accent', hint: 'Text on accent', light: 'hsl(240 5.9% 10%)', dark: 'hsl(0 0% 98%)' },
+      { token: '--kai-color-secondary', label: 'Secondary', hint: 'Secondary surface', light: 'hsl(240 4.8% 95.9%)', dark: 'hsl(45 4% 17%)' },
+      { token: '--kai-color-secondary-foreground', label: 'On secondary', hint: 'Text on secondary', light: 'hsl(240 5.9% 10%)', dark: 'hsl(0 0% 98%)' },
     ],
   },
   {
     name: 'Muted text',
     tokens: [
-      { token: '--kc-color-muted', label: 'Muted', hint: 'Subtle fills', light: 'hsl(240 4.8% 95.9%)', dark: 'hsl(45 4% 17%)' },
-      { token: '--kc-color-muted-foreground', label: 'Muted text', hint: 'Secondary text', light: 'hsl(240 3.8% 43%)', dark: 'hsl(45 4% 64%)' },
+      { token: '--kai-color-muted', label: 'Muted', hint: 'Subtle fills', light: 'hsl(240 4.8% 95.9%)', dark: 'hsl(45 4% 17%)' },
+      { token: '--kai-color-muted-foreground', label: 'Muted text', hint: 'Secondary text', light: 'hsl(240 3.8% 43%)', dark: 'hsl(45 4% 64%)' },
     ],
   },
   {
     name: 'Inputs & borders',
     tokens: [
-      { token: '--kc-color-border', label: 'Border', hint: 'Dividers & outlines', light: 'hsl(240 5.9% 90%)', dark: 'hsl(45 4% 17%)' },
-      { token: '--kc-color-input', label: 'Input', hint: 'Input field background', light: 'hsl(240 5.9% 90%)', dark: 'hsl(45 4% 17%)' },
+      { token: '--kai-color-border', label: 'Border', hint: 'Dividers & outlines', light: 'hsl(240 5.9% 90%)', dark: 'hsl(45 4% 17%)' },
+      { token: '--kai-color-input', label: 'Input', hint: 'Input field background', light: 'hsl(240 5.9% 90%)', dark: 'hsl(45 4% 17%)' },
     ],
   },
   {
     name: 'Status & code',
     tokens: [
-      { token: '--kc-color-destructive', label: 'Destructive', hint: 'Danger / delete', light: 'hsl(0 72% 45%)', dark: 'hsl(0 62.8% 30.6%)' },
-      { token: '--kc-color-destructive-foreground', label: 'On destructive', hint: 'Text on danger', light: 'hsl(0 0% 98%)', dark: 'hsl(0 0% 98%)' },
-      { token: '--kc-color-code-foreground', label: 'Code', hint: 'Inline code accent', light: 'hsl(224.3 76.3% 48%)', dark: 'hsl(213 94% 78%)' },
-      { token: '--kc-color-tool-blue', label: 'Tool blue', hint: 'Tool / status chip', light: 'hsl(217 91% 38%)', dark: 'hsl(217 91% 70%)' },
-      { token: '--kc-color-tool-amber', label: 'Tool amber', hint: 'Tool / status chip', light: 'hsl(38 92% 28%)', dark: 'hsl(38 92% 50%)' },
-      { token: '--kc-color-tool-green', label: 'Tool green', hint: 'Tool / status chip', light: 'hsl(142 71% 26%)', dark: 'hsl(142 71% 45%)' },
-      { token: '--kc-color-tool-red', label: 'Tool red', hint: 'Tool / status chip', light: 'hsl(0 72% 42%)', dark: 'hsl(0 84% 70%)' },
+      { token: '--kai-color-destructive', label: 'Destructive', hint: 'Danger / delete', light: 'hsl(0 72% 45%)', dark: 'hsl(0 62.8% 30.6%)' },
+      { token: '--kai-color-destructive-foreground', label: 'On destructive', hint: 'Text on danger', light: 'hsl(0 0% 98%)', dark: 'hsl(0 0% 98%)' },
+      { token: '--kai-color-code-foreground', label: 'Code', hint: 'Inline code accent', light: 'hsl(224.3 76.3% 48%)', dark: 'hsl(213 94% 78%)' },
+      { token: '--kai-color-tool-blue', label: 'Tool blue', hint: 'Tool / status chip', light: 'hsl(217 91% 38%)', dark: 'hsl(217 91% 70%)' },
+      { token: '--kai-color-tool-amber', label: 'Tool amber', hint: 'Tool / status chip', light: 'hsl(38 92% 28%)', dark: 'hsl(38 92% 50%)' },
+      { token: '--kai-color-tool-green', label: 'Tool green', hint: 'Tool / status chip', light: 'hsl(142 71% 26%)', dark: 'hsl(142 71% 45%)' },
+      { token: '--kai-color-tool-red', label: 'Tool red', hint: 'Tool / status chip', light: 'hsl(0 72% 42%)', dark: 'hsl(0 84% 70%)' },
     ],
   },
   {
     name: 'Scrollbar',
     tokens: [
-      { token: '--kc-color-scrollbar-thumb', label: 'Scrollbar', hint: 'Scrollbar thumb', light: 'hsl(240 5% 80%)', dark: 'hsl(45 3% 30%)' },
-      { token: '--kc-color-scrollbar-thumb-hover', label: 'Scrollbar hover', hint: 'Thumb on hover', light: 'hsl(240 4% 64%)', dark: 'hsl(45 3% 42%)' },
+      { token: '--kai-color-scrollbar-thumb', label: 'Scrollbar', hint: 'Scrollbar thumb', light: 'hsl(240 5% 80%)', dark: 'hsl(45 3% 30%)' },
+      { token: '--kai-color-scrollbar-thumb-hover', label: 'Scrollbar hover', hint: 'Thumb on hover', light: 'hsl(240 4% 64%)', dark: 'hsl(45 3% 42%)' },
     ],
   },
 ];
 
 const ALL_TOKENS = GROUPS.flatMap((g) => g.tokens);
-const DEFAULT_RADIUS = 0.6; // rem — kit default --kc-radius
+const DEFAULT_RADIUS = 0.6; // rem — kit default --kai-radius
 
 /** Resolve any CSS color (hex, hsl, oklch, named…) to #rrggbb for a native color
  *  input. Uses a canvas so CSS Color 4 formats like oklch convert to real sRGB
@@ -281,7 +281,7 @@ function ensureFont(stack: string) {
   if (!stack) return;
   const first = stack.split(',')[0].trim().replace(/["']/g, '');
   if (!first || /^(ui-|system-ui|-apple|sans-serif|serif|monospace|cursive|Arial|Helvetica|Georgia|Times|Menlo|Consolas|Courier|Monaco)/i.test(first)) return;
-  const id = 'kc-gf-' + first.replace(/\s+/g, '-').toLowerCase();
+  const id = 'kai-gf-' + first.replace(/\s+/g, '-').toLowerCase();
   if (typeof document === 'undefined' || document.getElementById(id)) return;
   const link = document.createElement('link');
   link.id = id;
@@ -305,13 +305,13 @@ const SEED_MESSAGES = [
     id: 'm2',
     role: 'assistant',
     content:
-      'Every color is a `--kc-color-*` token, so a handful of overrides reskins the whole UI. Set `--kc-color-primary` for your accent and `--kc-color-ring` for the focus outline, then drag the radius. Watch it all reskin live.',
+      'Every color is a `--kai-color-*` token, so a handful of overrides reskins the whole UI. Set `--kai-color-primary` for your accent and `--kai-color-ring` for the focus outline, then drag the radius. Watch it all reskin live.',
     actions: ['copy', 'like'],
   },
 ];
 
 const REPLY =
-  'Drop these tokens on `:root` to rebrand every `kc-*` element, or scope them to one wrapper to theme a single section. Same block, light and dark — `:root` for light, `.dark` for the dark overrides.';
+  'Drop these tokens on `:root` to rebrand every `kai-*` element, or scope them to one wrapper to theme a single section. Same block, light and dark — `:root` for light, `.dark` for the dark overrides.';
 
 let uid = 0;
 const nextId = () => `s${++uid}`;
@@ -322,31 +322,31 @@ interface ThemeExtras { radius: number; fontBase: string; fontCode: string; trac
  *  dark set on .dark. */
 function buildCss(light: Palette, dark: Palette, x: ThemeExtras): string {
   const rootExtra = [
-    `  --kc-radius: ${x.radius}rem;`,
-    x.fontBase ? `  --kc-font-base: ${x.fontBase};` : '',
-    x.fontCode ? `  --kc-font-code: ${x.fontCode};` : '',
-    x.tracking ? `  --kc-tracking: ${x.tracking}em;` : '',
-    x.shadow ? `  --kc-shadow-color: ${x.shadow};` : '',
+    `  --kai-radius: ${x.radius}rem;`,
+    x.fontBase ? `  --kai-font-base: ${x.fontBase};` : '',
+    x.fontCode ? `  --kai-font-code: ${x.fontCode};` : '',
+    x.tracking ? `  --kai-tracking: ${x.tracking}em;` : '',
+    x.shadow ? `  --kai-shadow-color: ${x.shadow};` : '',
   ].filter(Boolean).join('\n');
   const body = (p: Palette, extra = ''): string =>
     [...ALL_TOKENS.map((t) => `  ${t.token}: ${p[t.token]};`), extra].filter(Boolean).join('\n');
   return `:root {\n${body(light, rootExtra)}\n}\n\n.dark {\n${body(dark)}\n}`;
 }
 
-/** Tolerant parse of pasted CSS: pull --kc-* declarations from the :root block
+/** Tolerant parse of pasted CSS: pull --kai-* declarations from the :root block
  *  (light) and the .dark block (dark). Unknown tokens are ignored. */
 function parseCss(css: string): { light: Palette; dark: Palette; radius?: number } | null {
   const grab = (selector: string): Palette => {
     const re = new RegExp(`${selector}\\s*\\{([^}]*)\\}`);
     const block = css.match(re)?.[1] ?? '';
     const out: Palette = {};
-    for (const m of block.matchAll(/(--kc-color-[a-z-]+)\s*:\s*([^;]+);/g)) out[m[1]] = m[2].trim();
+    for (const m of block.matchAll(/(--kai-color-[a-z-]+)\s*:\s*([^;]+);/g)) out[m[1]] = m[2].trim();
     return out;
   };
   const light = grab(':root');
   const dark = grab('\\.dark');
   if (!Object.keys(light).length && !Object.keys(dark).length) return null;
-  const radiusMatch = css.match(/--kc-radius\s*:\s*([\d.]+)rem/);
+  const radiusMatch = css.match(/--kai-radius\s*:\s*([\d.]+)rem/);
   return { light, dark, radius: radiusMatch ? parseFloat(radiusMatch[1]) : undefined };
 }
 
@@ -372,7 +372,7 @@ export default function ThemeStudio() {
   const [preset, setPreset] = createSignal('Default');
   // Custom presets the user saves (persisted to localStorage).
   type SavedPreset = { name: string; light: Palette; dark: Palette; radius: number; fontBase: string; fontCode: string; tracking: number; shadow: string };
-  const PRESET_KEY = 'kc-theme-studio-presets';
+  const PRESET_KEY = 'kai-theme-studio-presets';
   const [saved, setSaved] = createSignal<SavedPreset[]>([]);
   const persistSaved = (list: SavedPreset[]) => { setSaved(list); try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch { /* storage blocked */ } };
   const [canvasTab, setCanvasTab] = createSignal<'chat' | 'cards' | 'components'>('chat');
@@ -405,25 +405,25 @@ export default function ThemeStudio() {
   const hslActive = () => !isIdentity(hsl());
 
   // Apply the active palette + radius onto the canvas wrapper. Custom properties
-  // inherit through every kc-* shadow root inside, so the whole canvas reskins.
+  // inherit through every kai-* shadow root inside, so the whole canvas reskins.
   createEffect(() => {
     if (!canvasEl || !Object.keys(active()).length) return;
     const p = effActive();
     for (const t of ALL_TOKENS) canvasEl.style.setProperty(t.token, p[t.token]);
-    canvasEl.style.setProperty('--kc-radius', `${radius()}rem`);
-    canvasEl.style.background = p['--kc-color-background'];
+    canvasEl.style.setProperty('--kai-radius', `${radius()}rem`);
+    canvasEl.style.background = p['--kai-color-background'];
     // Typography + shadow tokens.
     const setOrClear = (name: string, val: string) => val ? canvasEl!.style.setProperty(name, val) : canvasEl!.style.removeProperty(name);
-    setOrClear('--kc-font-base', fontBase());
-    setOrClear('--kc-font-code', fontCode());
-    canvasEl.style.setProperty('--kc-tracking', `${tracking()}em`);
-    canvasEl.style.setProperty('--kc-shadow-color', shadowColor());
+    setOrClear('--kai-font-base', fontBase());
+    setOrClear('--kai-font-code', fontCode());
+    canvasEl.style.setProperty('--kai-tracking', `${tracking()}em`);
+    canvasEl.style.setProperty('--kai-shadow-color', shadowColor());
     ensureFont(fontBase());
     ensureFont(fontCode());
-    // Keep every kc-* in the canvas on the studio's mode (independent of the page
+    // Keep every kai-* in the canvas on the studio's mode (independent of the page
     // theme) — covers the chat plus all showroom elements, however many.
     canvasEl.querySelectorAll('*').forEach((el) => {
-      if (el.tagName.toLowerCase().startsWith('kc-')) el.setAttribute('theme', mode());
+      if (el.tagName.toLowerCase().startsWith('kai-')) el.setAttribute('theme', mode());
     });
   });
 
@@ -447,14 +447,14 @@ export default function ThemeStudio() {
     const d = seedPalette('dark');
     const t = THEME_PRESETS.find((x) => x.name === name);
     if (t) {
-      for (const [k, tok] of Object.entries(SHADCN_TO_KC)) {
+      for (const [k, tok] of Object.entries(SHADCN_TO_KAI)) {
         if (t.light[k]) l[tok] = toHex(t.light[k]);
         if (t.dark[k]) d[tok] = toHex(t.dark[k]);
       }
       // The kit has a code-foreground token tweakcn doesn't — derive it from the
       // theme's ring so inline code stays on-brand.
-      if (t.light.ring) l['--kc-color-code-foreground'] = toHex(t.light.ring);
-      if (t.dark.ring) d['--kc-color-code-foreground'] = toHex(t.dark.ring);
+      if (t.light.ring) l['--kai-color-code-foreground'] = toHex(t.light.ring);
+      if (t.dark.ring) d['--kai-color-code-foreground'] = toHex(t.dark.ring);
       setRadius(t.radius);
       setFontBase(matchFont(t.fontBase, BODY_FONTS) || t.fontBase || '');
       setFontCode(matchFont(t.fontCode, CODE_FONTS) || t.fontCode || '');
@@ -492,7 +492,7 @@ export default function ThemeStudio() {
   /** Swatch dots for a row — handles saved presets (full palette) + built-ins. */
   const dotsFor = (name: string): string[] => {
     const s = saved().find((x) => x.name === name);
-    if (s) return ['--kc-color-primary', '--kc-color-accent', '--kc-color-secondary', '--kc-color-background', '--kc-color-foreground'].map((k) => s.light[k] || '#888888');
+    if (s) return ['--kai-color-primary', '--kai-color-accent', '--kai-color-secondary', '--kai-color-background', '--kai-color-foreground'].map((k) => s.light[k] || '#888888');
     return themeDots(name);
   };
 
@@ -509,7 +509,7 @@ export default function ThemeStudio() {
   const applyImport = () => {
     const parsed = parseCss(importText());
     if (!parsed) {
-      setImportError('No --kc-color-* tokens found. Paste a :root / .dark block.');
+      setImportError('No --kai-color-* tokens found. Paste a :root / .dark block.');
       return;
     }
     setLight((v) => ({ ...v, ...parsed.light }));
@@ -581,7 +581,7 @@ export default function ThemeStudio() {
       ];
       chatHost.currentModel = 'sonnet';
       chatHost.context = { usedTokens: 18500, maxTokens: 200000 };
-      chatHost.addEventListener('kc-submit', onSubmit);
+      chatHost.addEventListener('kai-submit', onSubmit);
     }
     // Mount the showroom (cards + components) from verified sample data.
     for (const s of slots) {
@@ -590,7 +590,7 @@ export default function ThemeStudio() {
     setReady(true);
     onCleanup(() => {
       clearTimeout(streamTimer);
-      chatHost?.removeEventListener('kc-submit', onSubmit);
+      chatHost?.removeEventListener('kai-submit', onSubmit);
     });
   });
 
@@ -606,7 +606,7 @@ export default function ThemeStudio() {
         <input
           type="range" min={props.min} max={props.max} step={props.step} value={props.value}
           onInput={(e) => props.onInput(parseFloat(e.currentTarget.value))}
-          class="min-w-0 flex-1" style={{ 'accent-color': 'var(--kc-ink-3)' }} aria-label={props.label}
+          class="min-w-0 flex-1" style={{ 'accent-color': 'var(--kai-ink-3)' }} aria-label={props.label}
         />
         <input
           type="number" min={props.min} max={props.max} step={props.step} value={props.value}
@@ -625,10 +625,10 @@ export default function ThemeStudio() {
 
   /** One showroom item: a labeled, bordered slot the element mounts into. */
   const ShowSlot = (props: { s: Slot }) => (
-    <div class="flex flex-col gap-1.5 rounded-xl border p-3" style={{ 'border-color': 'var(--kc-color-border)' }}>
+    <div class="flex flex-col gap-1.5 rounded-xl border p-3" style={{ 'border-color': 'var(--kai-color-border)' }}>
       <div class="flex items-baseline justify-between gap-2">
-        <span class="text-xs font-semibold" style={{ color: 'var(--kc-color-foreground)' }}>{props.s.label}</span>
-        <Show when={props.s.note}><span class="text-[11px]" style={{ color: 'var(--kc-color-muted-foreground)' }}>{props.s.note}</span></Show>
+        <span class="text-xs font-semibold" style={{ color: 'var(--kai-color-foreground)' }}>{props.s.label}</span>
+        <Show when={props.s.note}><span class="text-[11px]" style={{ color: 'var(--kai-color-muted-foreground)' }}>{props.s.note}</span></Show>
       </div>
       <div ref={(el) => registerSlot(el, props.s.tag)} style={props.s.h ? { height: props.s.h, overflow: 'auto' } : undefined} />
     </div>
@@ -850,7 +850,7 @@ export default function ThemeStudio() {
 
           {/* Tab bar — themed, sticky. Each tab demonstrates a different slice of
               the tokens so a developer can see where they apply. */}
-          <div class="sticky top-0 z-10 flex items-center gap-1 border-b px-4 py-2" style={{ 'border-color': 'var(--kc-color-border)', background: 'var(--kc-color-background)' }}>
+          <div class="sticky top-0 z-10 flex items-center gap-1 border-b px-4 py-2" style={{ 'border-color': 'var(--kai-color-border)', background: 'var(--kai-color-background)' }}>
             <For each={[['chat', 'Chat'], ['cards', 'Cards'], ['components', 'Components']] as const}>
               {([id, label]) => (
                 <button
@@ -858,8 +858,8 @@ export default function ThemeStudio() {
                   onClick={() => setCanvasTab(id)}
                   class="rounded-md px-3 py-1 text-sm transition-colors"
                   style={canvasTab() === id
-                    ? { background: 'color-mix(in oklab, var(--kc-color-foreground) 9%, transparent)', color: 'var(--kc-color-foreground)', 'font-weight': '600' }
-                    : { color: 'var(--kc-color-muted-foreground)' }}
+                    ? { background: 'color-mix(in oklab, var(--kai-color-foreground) 9%, transparent)', color: 'var(--kai-color-foreground)', 'font-weight': '600' }
+                    : { color: 'var(--kai-color-muted-foreground)' }}
                 >
                   {label}
                 </button>
@@ -870,16 +870,16 @@ export default function ThemeStudio() {
           <div class="mx-auto max-w-4xl p-4">
             {/* Chat — a full working example */}
             <div classList={{ hidden: canvasTab() !== 'chat' }}>
-              <p class="mb-2 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>A full chat — messages, model switcher, context meter, suggestions, the composer, and the base font.</p>
-              <div class="h-[460px] overflow-hidden rounded-xl border" style={{ 'border-color': 'var(--kc-color-border)' }}>
+              <p class="mb-2 text-xs" style={{ color: 'var(--kai-color-muted-foreground)' }}>A full chat — messages, model switcher, context meter, suggestions, the composer, and the base font.</p>
+              <div class="h-[460px] overflow-hidden rounded-xl border" style={{ 'border-color': 'var(--kai-color-border)' }}>
                 {/* @ts-expect-error custom element */}
-                <kc-chat ref={(el: HTMLElement) => (chatHost = el as never)} style={{ display: 'block', height: '100%' }} />
+                <kai-chat ref={(el: HTMLElement) => (chatHost = el as never)} style={{ display: 'block', height: '100%' }} />
               </div>
             </div>
 
             {/* Cards — generative-UI surfaces, from real sample data */}
             <div classList={{ hidden: canvasTab() !== 'cards' }}>
-              <p class="mb-3 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>Generative-UI cards — surfaces + elevation, primary / secondary / destructive buttons, accents, and inputs.</p>
+              <p class="mb-3 text-xs" style={{ color: 'var(--kai-color-muted-foreground)' }}>Generative-UI cards — surfaces + elevation, primary / secondary / destructive buttons, accents, and inputs.</p>
               <div class="grid gap-4 lg:grid-cols-2">
                 <For each={CARD_SLOTS}>{(s) => <ShowSlot s={s} />}</For>
               </div>
@@ -887,22 +887,22 @@ export default function ThemeStudio() {
 
             {/* Components — a cross-section of the kit portfolio */}
             <div classList={{ hidden: canvasTab() !== 'components' }} class="flex flex-col gap-4">
-              <p class="text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>A cross-section of the kit — see your colors, fonts, and shadow across the components you'll actually ship.</p>
+              <p class="text-xs" style={{ color: 'var(--kai-color-muted-foreground)' }}>A cross-section of the kit — see your colors, fonts, and shadow across the components you'll actually ship.</p>
               <div class="grid gap-3 sm:grid-cols-2">
                 <For each={COMPONENT_SLOTS}>{(s) => <ShowSlot s={s} />}</For>
               </div>
               {/* Coverage strip — tokens not surfaced at rest, reading the live vars */}
-              <div class="flex flex-wrap items-center gap-2 rounded-xl border p-3" style={{ 'border-color': 'var(--kc-color-border)', color: 'var(--kc-color-foreground)' }}>
-                <span class="mr-1 text-xs" style={{ color: 'var(--kc-color-muted-foreground)' }}>Also themed:</span>
-                <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-destructive)', color: 'var(--kc-color-destructive-foreground)' }}>Destructive</span>
-                <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-secondary)', color: 'var(--kc-color-secondary-foreground)' }}>Secondary</span>
-                <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kc-color-popover)', color: 'var(--kc-color-popover-foreground)', border: '1px solid var(--kc-color-border)' }}>Popover</span>
-                <code class="rounded px-1.5 py-0.5 text-xs" style={{ color: 'var(--kc-color-code-foreground)', background: 'color-mix(in oklab, var(--kc-color-code-foreground) 15%, transparent)' }}>inline code</code>
+              <div class="flex flex-wrap items-center gap-2 rounded-xl border p-3" style={{ 'border-color': 'var(--kai-color-border)', color: 'var(--kai-color-foreground)' }}>
+                <span class="mr-1 text-xs" style={{ color: 'var(--kai-color-muted-foreground)' }}>Also themed:</span>
+                <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kai-color-destructive)', color: 'var(--kai-color-destructive-foreground)' }}>Destructive</span>
+                <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kai-color-secondary)', color: 'var(--kai-color-secondary-foreground)' }}>Secondary</span>
+                <span class="rounded-md px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--kai-color-popover)', color: 'var(--kai-color-popover-foreground)', border: '1px solid var(--kai-color-border)' }}>Popover</span>
+                <code class="rounded px-1.5 py-0.5 text-xs" style={{ color: 'var(--kai-color-code-foreground)', background: 'color-mix(in oklab, var(--kai-color-code-foreground) 15%, transparent)' }}>inline code</code>
                 <span class="ml-1 flex items-center gap-1">
-                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-blue)' }} />
-                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-amber)' }} />
-                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-green)' }} />
-                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kc-color-tool-red)' }} />
+                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kai-color-tool-blue)' }} />
+                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kai-color-tool-amber)' }} />
+                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kai-color-tool-green)' }} />
+                  <span class="h-3.5 w-3.5 rounded-full" style={{ background: 'var(--kai-color-tool-red)' }} />
                 </span>
               </div>
             </div>
@@ -912,7 +912,7 @@ export default function ThemeStudio() {
 
       <Show when={codeOpen()}>
         <Modal title="Theme CSS" wide onClose={() => setCodeOpen(false)}>
-          <p class="mb-3 text-xs text-ink-2">Drop this on <code class="rounded bg-ink/5 px-1">:root</code> to rebrand every <code class="rounded bg-ink/5 px-1">kc-*</code> element; the <code class="rounded bg-ink/5 px-1">.dark</code> block holds the dark overrides.</p>
+          <p class="mb-3 text-xs text-ink-2">Drop this on <code class="rounded bg-ink/5 px-1">:root</code> to rebrand every <code class="rounded bg-ink/5 px-1">kai-*</code> element; the <code class="rounded bg-ink/5 px-1">.dark</code> block holds the dark overrides.</p>
           <div class="relative">
             <button type="button" onClick={copyCss} class="absolute right-2 top-2 flex items-center gap-1.5 rounded-md border border-line bg-surface px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:bg-ink/5">{copied() ? <IconCheck class="h-3.5 w-3.5" /> : <IconCopy class="h-3.5 w-3.5" />}{copied() ? 'Copied' : 'Copy'}</button>
             <pre class="max-h-[62vh] overflow-auto rounded-lg border border-line bg-surface-2 p-3 pr-20 font-mono text-xs leading-relaxed text-ink"><code>{buildCss(effLight(), effDark(), extras())}</code></pre>
@@ -922,11 +922,11 @@ export default function ThemeStudio() {
 
       <Show when={importOpen()}>
         <Modal title="Import theme" onClose={() => { setImportOpen(false); setImportError(''); }}>
-          <p class="mb-2 text-xs text-ink-2">Paste a <code class="rounded bg-ink/5 px-1">:root</code> / <code class="rounded bg-ink/5 px-1">.dark</code> block of <code class="rounded bg-ink/5 px-1">--kc-color-*</code> tokens.</p>
+          <p class="mb-2 text-xs text-ink-2">Paste a <code class="rounded bg-ink/5 px-1">:root</code> / <code class="rounded bg-ink/5 px-1">.dark</code> block of <code class="rounded bg-ink/5 px-1">--kai-color-*</code> tokens.</p>
           <textarea
             value={importText()}
             onInput={(e) => setImportText(e.currentTarget.value)}
-            placeholder={':root {\n  --kc-color-primary: #7c3aed;\n}\n.dark {\n  --kc-color-primary: #a78bfa;\n}'}
+            placeholder={':root {\n  --kai-color-primary: #7c3aed;\n}\n.dark {\n  --kai-color-primary: #a78bfa;\n}'}
             class="h-48 w-full resize-none rounded-md border border-line bg-surface p-2 font-mono text-xs text-ink"
           />
           <Show when={importError()}><p class="mt-1 text-xs text-red-500">{importError()}</p></Show>

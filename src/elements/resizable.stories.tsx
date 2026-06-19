@@ -11,11 +11,11 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-resizable': JSX.HTMLAttributes<HTMLElement> & { orientation?: string };
-      'kc-resizable-item': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-resizable': JSX.HTMLAttributes<HTMLElement> & { orientation?: string };
+      'kai-resizable-item': JSX.HTMLAttributes<HTMLElement> & {
         size?: string; min?: string; max?: string; locked?: boolean | string; hidden?: boolean | string;
       };
-      // `kc-artifact` JSX type is augmented (with the full attr set) in
+      // `kai-artifact` JSX type is augmented (with the full attr set) in
       // artifact.stories.tsx — declaring it again here with a different shape
       // would trip TS2717 (module-augmentation merges must match). Reuse that one.
     }
@@ -71,30 +71,30 @@ function Frame(props: { children: JSX.Element; tall?: boolean }) {
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-resizable orientation="horizontal" style="display:block;height:400px">
-  <kc-resizable-item size="25%" min="160px"> ...list... </kc-resizable-item>
-  <kc-resizable-item> ...chat... </kc-resizable-item>
-  <kc-resizable-item size="30%"> ...preview... </kc-resizable-item>
-</kc-resizable>
+<kai-resizable orientation="horizontal" style="display:block;height:400px">
+  <kai-resizable-item size="25%" min="160px"> ...list... </kai-resizable-item>
+  <kai-resizable-item> ...chat... </kai-resizable-item>
+  <kai-resizable-item size="30%"> ...preview... </kai-resizable-item>
+</kai-resizable>
 
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers the custom elements
-  document.querySelector('kc-resizable')
-    .addEventListener('kc-change', (e) => console.log(e.detail.sizes));
+  import '@kitn.ai/ui/elements'; // registers the custom elements
+  document.querySelector('kai-resizable')
+    .addEventListener('kai-change', (e) => console.log(e.detail.sizes));
 </script>`;
 
 const meta = {
   title: 'Components/Resizable',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-resizable'),
+  argTypes: argTypesFor('kai-resizable'),
   parameters: {
     layout: 'padded',
     docs: {
-      description: specDescription('kc-resizable', [
-        '`<kc-resizable>` is the framework-agnostic **web component** for a composable, resizable multi-panel layout (up to **3** `<kc-resizable-item>` panels) with **auto-inserted draggable dividers** — isolated in **Shadow DOM**.',
+      description: specDescription('kai-resizable', [
+        '`<kai-resizable>` is the framework-agnostic **web component** for a composable, resizable multi-panel layout (up to **3** `<kai-resizable-item>` panels) with **auto-inserted draggable dividers** — isolated in **Shadow DOM**.',
         '**When to use:** to compose an app shell out of slotted regions without hand-wiring panels and handles — e.g. `list | chat | preview`. In SolidJS, use the `Resizable` convenience (UI/Resizable) directly.',
-        "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set `orientation` (`horizontal` row / `vertical` column), and put a `<kc-resizable-item>` per panel. Each item carries `size` (px or %, e.g. `\"280px\"` or `\"25%\"`), `min`/`max`, `locked` (fixed size + non-draggable neighbour), and `hidden` (drops the panel + its divider). Listen for the **`change`** event (`detail.sizes`, percent).",
-        '**Anatomy:** one or more **`<kc-resizable-item>`** light children (each a config-carrier: `size`, `min`, `max`, `locked`, `hidden` attributes; renders its slotted content) with auto-inserted **draggable divider handles** between each visible, unlocked pair. A panel is omitted from layout when `hidden`; its adjacent divider is dropped. Nesting `<kc-resizable>` inside an item allows more than 3 panels.',
+        "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set `orientation` (`horizontal` row / `vertical` column), and put a `<kai-resizable-item>` per panel. Each item carries `size` (px or %, e.g. `\"280px\"` or `\"25%\"`), `min`/`max`, `locked` (fixed size + non-draggable neighbour), and `hidden` (drops the panel + its divider). Listen for the **`change`** event (`detail.sizes`, percent).",
+        '**Anatomy:** one or more **`<kai-resizable-item>`** light children (each a config-carrier: `size`, `min`, `max`, `locked`, `hidden` attributes; renders its slotted content) with auto-inserted **draggable divider handles** between each visible, unlocked pair. A panel is omitted from layout when `hidden`; its adjacent divider is dropped. Nesting `<kai-resizable>` inside an item allows more than 3 panels.',
         '**Placement:** the layout spine for compose-your-own-chat shells — sidebar + conversation, conversation + inspector, or a three-up list/chat/preview.',
         'See the **Code** tab for HTML usage.',
       ]),
@@ -110,10 +110,10 @@ type Story = StoryObj;
 export const Playground: Story = {
   render: (args: { orientation?: string }) => (
     <Frame>
-      <kc-resizable orientation={args.orientation ?? 'horizontal'}>
-        <kc-resizable-item size="25%" min="120px"><Pane label="List" /></kc-resizable-item>
-        <kc-resizable-item><Pane label="Chat" tone="plain" /></kc-resizable-item>
-      </kc-resizable>
+      <kai-resizable orientation={args.orientation ?? 'horizontal'}>
+        <kai-resizable-item size="25%" min="120px"><Pane label="List" /></kai-resizable-item>
+        <kai-resizable-item><Pane label="Chat" tone="plain" /></kai-resizable-item>
+      </kai-resizable>
     </Frame>
   ),
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
@@ -124,10 +124,10 @@ export const ListChat: Story = {
   name: 'Sidebar + chat',
   render: () => (
     <Frame>
-      <kc-resizable orientation="horizontal">
-        <kc-resizable-item size="28%" min="140px" max="50%"><Pane label="List" /></kc-resizable-item>
-        <kc-resizable-item><Pane label="Chat" tone="plain" /></kc-resizable-item>
-      </kc-resizable>
+      <kai-resizable orientation="horizontal">
+        <kai-resizable-item size="28%" min="140px" max="50%"><Pane label="List" /></kai-resizable-item>
+        <kai-resizable-item><Pane label="Chat" tone="plain" /></kai-resizable-item>
+      </kai-resizable>
     </Frame>
   ),
 };
@@ -137,11 +137,11 @@ export const ListChatPreview: Story = {
   name: 'List + chat + preview',
   render: () => (
     <Frame>
-      <kc-resizable orientation="horizontal">
-        <kc-resizable-item size="22%" min="120px"><Pane label="List" /></kc-resizable-item>
-        <kc-resizable-item><Pane label="Chat" tone="plain" /></kc-resizable-item>
-        <kc-resizable-item size="30%" min="160px"><Pane label="Preview" /></kc-resizable-item>
-      </kc-resizable>
+      <kai-resizable orientation="horizontal">
+        <kai-resizable-item size="22%" min="120px"><Pane label="List" /></kai-resizable-item>
+        <kai-resizable-item><Pane label="Chat" tone="plain" /></kai-resizable-item>
+        <kai-resizable-item size="30%" min="160px"><Pane label="Preview" /></kai-resizable-item>
+      </kai-resizable>
     </Frame>
   ),
 };
@@ -151,10 +151,10 @@ export const LockedSidebar: Story = {
   name: 'Locked sidebar',
   render: () => (
     <Frame>
-      <kc-resizable orientation="horizontal">
-        <kc-resizable-item size="240px" locked><Pane label="Locked sidebar (240px)" /></kc-resizable-item>
-        <kc-resizable-item><Pane label="Chat" tone="plain" /></kc-resizable-item>
-      </kc-resizable>
+      <kai-resizable orientation="horizontal">
+        <kai-resizable-item size="240px" locked><Pane label="Locked sidebar (240px)" /></kai-resizable-item>
+        <kai-resizable-item><Pane label="Chat" tone="plain" /></kai-resizable-item>
+      </kai-resizable>
     </Frame>
   ),
 };
@@ -164,10 +164,10 @@ export const Vertical: Story = {
   name: 'Vertical split',
   render: () => (
     <Frame tall>
-      <kc-resizable orientation="vertical">
-        <kc-resizable-item size="40%" min="80px"><Pane label="Top" /></kc-resizable-item>
-        <kc-resizable-item><Pane label="Bottom" tone="plain" /></kc-resizable-item>
-      </kc-resizable>
+      <kai-resizable orientation="vertical">
+        <kai-resizable-item size="40%" min="80px"><Pane label="Top" /></kai-resizable-item>
+        <kai-resizable-item><Pane label="Bottom" tone="plain" /></kai-resizable-item>
+      </kai-resizable>
     </Frame>
   ),
 };
@@ -205,11 +205,11 @@ export const HiddenToggle: Story = {
           {showPreview() ? 'Hide preview' : 'Show preview'}
         </button>
         <Frame>
-          <kc-resizable orientation="horizontal">
-            <kc-resizable-item size="24%" min="120px"><Pane label="List" /></kc-resizable-item>
-            <kc-resizable-item><Pane label="Chat" tone="plain" /></kc-resizable-item>
-            <kc-resizable-item ref={(e) => (previewItem = e as HTMLElement)} size="30%"><Pane label="Preview" /></kc-resizable-item>
-          </kc-resizable>
+          <kai-resizable orientation="horizontal">
+            <kai-resizable-item size="24%" min="120px"><Pane label="List" /></kai-resizable-item>
+            <kai-resizable-item><Pane label="Chat" tone="plain" /></kai-resizable-item>
+            <kai-resizable-item ref={(e) => (previewItem = e as HTMLElement)} size="30%"><Pane label="Preview" /></kai-resizable-item>
+          </kai-resizable>
         </Frame>
       </div>
     );
@@ -217,40 +217,40 @@ export const HiddenToggle: Story = {
 };
 
 const EXPAND_TO_FILL_SNIPPET = `<!-- The artifact's "Expand" button (opt-in: expandable) fires a bubbling
-     kc-maximize-intent event. The nearest enclosing <kc-resizable> catches it
+     kai-maximize-intent event. The nearest enclosing <kai-resizable> catches it
      automatically and hides siblings so the preview panel fills the container.
      No wiring needed between the two elements — the protocol is zero-config. -->
 
-<kc-resizable orientation="horizontal" style="display:block;height:480px">
-  <kc-resizable-item size="20%" min="120px"> …list… </kc-resizable-item>
-  <kc-resizable-item> …chat… </kc-resizable-item>
-  <kc-resizable-item size="35%" min="200px">
+<kai-resizable orientation="horizontal" style="display:block;height:480px">
+  <kai-resizable-item size="20%" min="120px"> …list… </kai-resizable-item>
+  <kai-resizable-item> …chat… </kai-resizable-item>
+  <kai-resizable-item size="35%" min="200px">
     <!-- expandable opt-in: adds the Expand/Collapse button -->
-    <kc-artifact
+    <kai-artifact
       src="…/index.html"
       expandable
-    ></kc-artifact>
-  </kc-resizable-item>
-</kc-resizable>
+    ></kai-artifact>
+  </kai-resizable-item>
+</kai-resizable>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   // Optional: observe the layout events.
-  document.querySelector('kc-resizable')
-    .addEventListener('kc-change', (e) => console.log('change', e.detail.sizes));
-  document.querySelector('kc-resizable')
-    .addEventListener('kc-maximize-change', (e) => console.log('maximizechange', e.detail));
-  document.querySelector('kc-artifact')
-    .addEventListener('kc-maximize-change', (e) => console.log('artifact maximizechange', e.detail));
+  document.querySelector('kai-resizable')
+    .addEventListener('kai-change', (e) => console.log('change', e.detail.sizes));
+  document.querySelector('kai-resizable')
+    .addEventListener('kai-maximize-change', (e) => console.log('maximizechange', e.detail));
+  document.querySelector('kai-artifact')
+    .addEventListener('kai-maximize-change', (e) => console.log('artifact maximizechange', e.detail));
 </script>
 
 <!-- Cross-element protocol (hand-authored; not generated):
-  • kc-maximize-intent  — CustomEvent, bubbles:true, composed:true
-      Fired by <kc-artifact> when the Expand/Collapse button is clicked.
+  • kai-maximize-intent  — CustomEvent, bubbles:true, composed:true
+      Fired by <kai-artifact> when the Expand/Collapse button is clicked.
       detail: { requested: boolean }  (true = maximize, false = restore)
-  • kc-maximize-state   — CustomEvent, bubbles:false, composed:true
-      Dispatched by <kc-resizable> back DOWN onto the maximized <kc-resizable-item>
+  • kai-maximize-state   — CustomEvent, bubbles:false, composed:true
+      Dispatched by <kai-resizable> back DOWN onto the maximized <kai-resizable-item>
       (on maximize) or the group host + the formerly-maximized item (on restore)
       so the artifact can reconcile its button label.
       detail: { maximized: boolean }
@@ -260,16 +260,16 @@ const EXPAND_TO_FILL_SNIPPET = `<!-- The artifact's "Expand" button (opt-in: exp
 /**
  * **Expand to fill** — the headline integration: the artifact's expand button
  * fills the preview panel to the full container width. No wiring between the
- * two elements is needed — clicking **Expand** fires a `kc-maximize-intent` event
- * that bubbles up to the nearest enclosing `<kc-resizable>`, which hides siblings
+ * two elements is needed — clicking **Expand** fires a `kai-maximize-intent` event
+ * that bubbles up to the nearest enclosing `<kai-resizable>`, which hides siblings
  * and lets the preview panel fill. **Collapse** (or **Escape**) restores the
  * original layout.
  *
  * **Cross-element protocol (hand-authored docs):**
- * - `kc-maximize-intent` — `bubbles:true, composed:true`; fired by `<kc-artifact>`
+ * - `kai-maximize-intent` — `bubbles:true, composed:true`; fired by `<kai-artifact>`
  *   when Expand/Collapse is toggled. `detail: { requested: boolean }`.
- * - `kc-maximize-state` — `bubbles:false, composed:true`; dispatched by
- *   `<kc-resizable>` back down to the affected `<kc-resizable-item>` so the
+ * - `kai-maximize-state` — `bubbles:false, composed:true`; dispatched by
+ *   `<kai-resizable>` back down to the affected `<kai-resizable-item>` so the
  *   artifact can reconcile its button. `detail: { maximized: boolean }`.
  *
  * These protocol events are NOT in the generated `web-components.md`
@@ -284,16 +284,16 @@ export const ExpandToFill: Story = {
     onMount(() => {
       if (artifactEl) artifactEl.files = ARTIFACT_FILES;
       if (resizableEl) {
-        resizableEl.addEventListener('kc-change', (e: Event) =>
+        resizableEl.addEventListener('kai-change', (e: Event) =>
           setLog((l) => [`change → ${JSON.stringify((e as CustomEvent).detail.sizes)}`, ...l].slice(0, 6)),
         );
-        resizableEl.addEventListener('kc-maximize-change', (e: Event) =>
-          setLog((l) => [`kc-maximize-change → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
+        resizableEl.addEventListener('kai-maximize-change', (e: Event) =>
+          setLog((l) => [`kai-maximize-change → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
         );
       }
       if (artifactEl) {
-        artifactEl.addEventListener('kc-maximize-change', (e: Event) =>
-          setLog((l) => [`artifact kc-maximize-change → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
+        artifactEl.addEventListener('kai-maximize-change', (e: Event) =>
+          setLog((l) => [`artifact kai-maximize-change → ${JSON.stringify((e as CustomEvent).detail)}`, ...l].slice(0, 6)),
         );
       }
     });
@@ -309,25 +309,25 @@ export const ExpandToFill: Story = {
             overflow: 'hidden',
           }}
         >
-          <kc-resizable
+          <kai-resizable
             ref={(e) => (resizableEl = e as HTMLElement)}
             orientation="horizontal"
           >
-            <kc-resizable-item size="20%" min="120px">
+            <kai-resizable-item size="20%" min="120px">
               <Pane label="List" />
-            </kc-resizable-item>
-            <kc-resizable-item min="140px">
+            </kai-resizable-item>
+            <kai-resizable-item min="140px">
               <Pane label="Chat" tone="plain" />
-            </kc-resizable-item>
-            <kc-resizable-item size="35%" min="200px">
-              <kc-artifact
+            </kai-resizable-item>
+            <kai-resizable-item size="35%" min="200px">
+              <kai-artifact
                 ref={(e) => (artifactEl = e as HTMLElement & { files?: ArtifactFile[] })}
                 src={`${BASE}/index.html`}
                 iframe-title="Starboard artifact preview"
                 expandable
               />
-            </kc-resizable-item>
-          </kc-resizable>
+            </kai-resizable-item>
+          </kai-resizable>
         </div>
         <pre
           style={{
@@ -352,8 +352,8 @@ export const ExpandToFill: Story = {
 const SOLID_PARITY_SNIPPET = `// SolidJS — Artifact inside Resizable with maximizedIndex/onMaximizeChange.
 // No web components needed; works in a pure-Solid app.
 import { createSignal } from 'solid-js';
-import { Artifact } from '@kitn.ai/chat/components';
-import { Resizable, ResizablePanel } from '@kitn.ai/chat/ui';
+import { Artifact } from '@kitn.ai/ui/components';
+import { Resizable, ResizablePanel } from '@kitn.ai/ui/ui';
 
 function App() {
   const [maximizedIndex, setMaximizedIndex] = createSignal<number | null>(null);

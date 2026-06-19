@@ -47,7 +47,7 @@ export interface DefaultPromptInputProps {
   stoppable?: boolean;
   /** Called when the user clicks the Stop button. */
   onStop?: () => void;
-  /** Custom toolbar action buttons declared as `<kc-action>` light-DOM children. */
+  /** Custom toolbar action buttons declared as `<kai-action>` light-DOM children. */
   toolbarActions?: CustomAction[];
   /** Called when a custom toolbar action button is clicked, with the action id. */
   onAction?: (id: string) => void;

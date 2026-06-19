@@ -85,7 +85,7 @@
 /* ── Responsive sidebar overlay ──────────────────────────────────────────── */
 
 @media (max-width: 720px) {
-  kc-conversations {
+  kai-conversations {
     position: fixed !important;
     inset: 49px auto 0 0;
     height: calc(100vh - 49px);
@@ -95,7 +95,7 @@
     transition: transform 0.2s ease;
   }
 
-  body.sidebar-open kc-conversations {
+  body.sidebar-open kai-conversations {
     transform: translateX(0);
     box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
   }

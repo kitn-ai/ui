@@ -3,10 +3,10 @@ import '../../src/elements/cards';
 import type { CardEnvelope } from '../../src/primitives/card-contract';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
-afterEach(() => { document.querySelectorAll('kc-cards').forEach((e) => e.remove()); });
+afterEach(() => { document.querySelectorAll('kai-cards').forEach((e) => e.remove()); });
 
-test('<kc-cards> renders a re-hydrated confirm card read-only', async () => {
-  const el = document.createElement('kc-cards') as HTMLElement & { cards: CardEnvelope[] };
+test('<kai-cards> renders a re-hydrated confirm card read-only', async () => {
+  const el = document.createElement('kai-cards') as HTMLElement & { cards: CardEnvelope[] };
   el.cards = [
     {
       type: 'confirm',
@@ -18,16 +18,16 @@ test('<kc-cards> renders a re-hydrated confirm card read-only', async () => {
   ];
   document.body.appendChild(el);
   await flush();
-  // Navigate through kc-cards shadow root → kc-confirm → kc-confirm shadow root
-  const confirmEl = el.shadowRoot!.querySelector('kc-confirm')!;
+  // Navigate through kai-cards shadow root → kai-confirm → kai-confirm shadow root
+  const confirmEl = el.shadowRoot!.querySelector('kai-confirm')!;
   const confirmRoot = confirmEl.shadowRoot!;
   expect(confirmRoot.textContent).toContain('Delete');
   const buttons = confirmRoot.querySelectorAll('button');
   expect(Array.from(buttons).some((b) => b.textContent?.trim() === 'Cancel')).toBe(false);
 });
 
-test('<kc-cards> renders a re-hydrated tasks card read-only', async () => {
-  const el = document.createElement('kc-cards') as HTMLElement & { cards: CardEnvelope[] };
+test('<kai-cards> renders a re-hydrated tasks card read-only', async () => {
+  const el = document.createElement('kai-cards') as HTMLElement & { cards: CardEnvelope[] };
   el.cards = [
     {
       type: 'tasks',
@@ -39,8 +39,8 @@ test('<kc-cards> renders a re-hydrated tasks card read-only', async () => {
   ];
   document.body.appendChild(el);
   await flush();
-  // Navigate through kc-cards shadow root → kc-tasks → kc-tasks shadow root
-  const tasksEl = el.shadowRoot!.querySelector('kc-tasks')!;
+  // Navigate through kai-cards shadow root → kai-tasks → kai-tasks shadow root
+  const tasksEl = el.shadowRoot!.querySelector('kai-tasks')!;
   const tasksRoot = tasksEl.shadowRoot!;
   // The resolved summary renders "Selected N of M" in a <span> inside a <p>
   const summaryText = Array.from(tasksRoot.querySelectorAll('span'))

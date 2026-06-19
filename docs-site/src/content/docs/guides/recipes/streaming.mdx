@@ -1,23 +1,23 @@
 ---
 title: Streaming
-description: Stream assistant responses token-by-token into kc-chat or kc-response-stream using a ReadableStream, an AsyncIterable, or chunk-by-chunk mutation.
+description: Stream assistant responses token-by-token into kai-chat or kai-response-stream using a ReadableStream, an AsyncIterable, or chunk-by-chunk mutation.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Display each token as it arrives — no buffering, no flash of finished content. kitn-chat supports two approaches: **mutate `messages` in place** (the standard pattern with `kc-chat`) or **feed an `AsyncIterable<string>`** directly to `kc-response-stream`.
+Display each token as it arrives — no buffering, no flash of finished content. kitn-chat supports two approaches: **mutate `messages` in place** (the standard pattern with `kai-chat`) or **feed an `AsyncIterable<string>`** directly to `kai-response-stream`.
 
-## Stream into kc-chat
+## Stream into kai-chat
 
-`kc-chat` streams by appending an empty assistant message, then replacing its `content` as tokens arrive. Set `loading = true` during the request so the input is disabled and the loading state shows; set it back to `false` when the stream ends.
+`kai-chat` streams by appending an empty assistant message, then replacing its `content` as tokens arrive. Set `loading = true` during the request so the input is disabled and the loading state shows; set it back to `false` when the stream ends.
 
 ```js
-import '@kitn.ai/chat/elements';
-import '@kitn.ai/chat/theme.css';
+import '@kitn.ai/ui/elements';
+import '@kitn.ai/ui/theme.css';
 
-const chat = document.querySelector('kc-chat');
+const chat = document.querySelector('kai-chat');
 
-chat.addEventListener('kc-submit', async (e) => {
+chat.addEventListener('kai-submit', async (e) => {
   const text = e.detail.value.trim();
   if (!text) return;
 
@@ -99,9 +99,9 @@ If you are proxying an [OpenRouter](https://openrouter.ai) request on your serve
 
 The SSE response follows the OpenAI streaming format (`data: {...}` lines, terminated with `data: [DONE]`) — the reader loop above handles it as-is.
 
-## Stream with kc-response-stream
+## Stream with kai-response-stream
 
-`kc-response-stream` is a lower-level web component for streaming plain text or markdown outside a full chat thread. Pass either a complete string (renders with the reveal animation) or an **`AsyncIterable<string>`** (streams tokens live).
+`kai-response-stream` is a lower-level web component for streaming plain text or markdown outside a full chat thread. Pass either a complete string (renders with the reveal animation) or an **`AsyncIterable<string>`** (streams tokens live).
 
 | Prop | Type | Default | Notes |
 |------|------|---------|-------|
@@ -110,14 +110,14 @@ The SSE response follows the OpenAI streaming format (`data: {...}` lines, termi
 | `speed` | `number` | `20` | Characters/segments per tick. |
 | `as` | `string` | — | Element tag to render into. |
 
-**Event:** `kc-complete` — fires when streaming finishes.
+**Event:** `kai-complete` — fires when streaming finishes.
 
 ### Feeding an AsyncIterable
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
-const el = document.querySelector('kc-response-stream');
+const el = document.querySelector('kai-response-stream');
 
 async function* tokenStream(res) {
   const reader = res.body.getReader();
@@ -161,9 +161,9 @@ el.text = 'The assistant response rendered with the typewriter effect.';
 
 | Scenario | Use |
 |----------|-----|
-| Full chat UI with history | `kc-chat` + mutate `messages` |
-| Isolated response widget | `kc-response-stream` |
-| Replay a saved response | `kc-response-stream` with a string |
-| Render finished markdown | `kc-markdown` with a `content` string |
+| Full chat UI with history | `kai-chat` + mutate `messages` |
+| Isolated response widget | `kai-response-stream` |
+| Replay a saved response | `kai-response-stream` with a string |
+| Render finished markdown | `kai-markdown` with a `content` string |
 
-`kc-markdown` accepts only a static `content` string and renders it immediately — use it when the full text is available, not for live streaming.
+`kai-markdown` accepts only a static `content` string and renders it immediately — use it when the full text is available, not for live streaming.

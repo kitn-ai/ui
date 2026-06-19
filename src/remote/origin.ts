@@ -6,9 +6,9 @@ export function assertOrigin(actual: string, expected: string): boolean {
  *  `allow-same-origin` can't reach host DOM, and `src` must be on the provider origin. */
 export function assertCrossOrigin(src: string, providerOrigin: string, hostOrigin: string): void {
   const srcOrigin = new URL(src).origin;
-  if (providerOrigin === hostOrigin) throw new Error('[kc-remote] providerOrigin must be cross-origin to the host');
-  if (srcOrigin === hostOrigin) throw new Error('[kc-remote] src must not be same-origin as the host');
-  if (srcOrigin !== providerOrigin) throw new Error('[kc-remote] src origin must equal providerOrigin');
+  if (providerOrigin === hostOrigin) throw new Error('[kai-remote] providerOrigin must be cross-origin to the host');
+  if (srcOrigin === hostOrigin) throw new Error('[kai-remote] src must not be same-origin as the host');
+  if (srcOrigin !== providerOrigin) throw new Error('[kai-remote] src origin must equal providerOrigin');
 }
 
 /** Field-positive log redaction (H-H/H-P): keep structural keys, redact secrets +

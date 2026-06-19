@@ -1,7 +1,7 @@
 // src/elements/remote.tsx
-// <kc-remote> — Shadow-DOM facade that mounts a sandboxed cross-origin iframe
+// <kai-remote> — Shadow-DOM facade that mounts a sandboxed cross-origin iframe
 // card via mountRemoteCard(), re-emits every CardEvent as a bubbling+composed
-// kc-card CustomEvent, and validates the provider-origin before mounting.
+// kai-card CustomEvent, and validates the provider-origin before mounting.
 import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
 import { mountRemoteCard } from '../remote/host-embed';
@@ -48,7 +48,7 @@ function isValidProviderOrigin(origin: string | undefined): boolean {
 
 /**
  * Build a CardPolicy that re-emits each routed CardEvent as a bubbling+composed
- * `kc-card` CustomEvent on `element`, AND delegates to the caller-supplied `policy`.
+ * `kai-card` CustomEvent on `element`, AND delegates to the caller-supplied `policy`.
  */
 function buildWrappedPolicy(element: HTMLElement, userPolicy: CardPolicy | undefined): CardPolicy {
   function emit(ev: CardEvent): void {
@@ -90,7 +90,7 @@ function buildWrappedPolicy(element: HTMLElement, userPolicy: CardPolicy | undef
 }
 
 /**
- * `<kc-remote>` — mounts a sandboxed cross-origin iframe card.
+ * `<kai-remote>` — mounts a sandboxed cross-origin iframe card.
  *
  * Required props:
  *   - `provider-origin` attribute: the exact HTTPS origin of the card provider
@@ -102,11 +102,11 @@ function buildWrappedPolicy(element: HTMLElement, userPolicy: CardPolicy | undef
  *   - `policy` JS property: a CardPolicy for routing card events.
  *   - `theme` attribute (inherited from defineWebComponent): 'light' | 'dark' | 'auto'.
  *
- * Every routed CardEvent is also dispatched as a bubbling+composed `kc-card`
+ * Every routed CardEvent is also dispatched as a bubbling+composed `kai-card`
  * CustomEvent off the host element.
  */
 defineWebComponent<Props>(
-  'kc-remote',
+  'kai-remote',
   {
     src: undefined,
     providerOrigin: undefined,
@@ -150,7 +150,7 @@ defineWebComponent<Props>(
       const providerOrigin = props.providerOrigin;
       if (!isValidProviderOrigin(providerOrigin)) {
         renderError(
-          `[kc-remote] Invalid provider-origin "${providerOrigin ?? ''}". ` +
+          `[kai-remote] Invalid provider-origin "${providerOrigin ?? ''}". ` +
           `Must be an absolute https: origin, or http://localhost / http://127.0.0.1 for local dev.`,
         );
         return;
@@ -158,13 +158,13 @@ defineWebComponent<Props>(
 
       const src = props.src;
       if (!src) {
-        renderError('[kc-remote] Missing required "src" attribute.');
+        renderError('[kai-remote] Missing required "src" attribute.');
         return;
       }
 
       const envelope = props.envelope as CardEnvelope | undefined;
       if (!envelope) {
-        renderError('[kc-remote] Missing required "envelope" property.');
+        renderError('[kai-remote] Missing required "envelope" property.');
         return;
       }
 
@@ -194,7 +194,7 @@ defineWebComponent<Props>(
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        renderError(`[kc-remote] Mount failed: ${message}`);
+        renderError(`[kai-remote] Mount failed: ${message}`);
         container.remove();
         return;
       }

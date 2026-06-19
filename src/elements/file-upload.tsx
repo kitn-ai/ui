@@ -13,18 +13,18 @@ interface Props extends Record<string, unknown> {
   label?: string;
 }
 
-/** Events fired by `<kc-file-upload>`. */
+/** Events fired by `<kai-file-upload>`. */
 interface Events {
   /** Files were picked or dropped. */
-  'kc-files-added': { files: File[] };
+  'kai-files-added': { files: File[] };
 }
 
 /**
- * `<kc-file-upload>` — a click/drag-drop dropzone. Emits `filesadded`. The
+ * `<kai-file-upload>` — a click/drag-drop dropzone. Emits `filesadded`. The
  * default dropzone label can be replaced with your own markup via the default
  * `<slot>` (a "Route 2" custom-content slot).
  */
-defineWebComponent<Props, Events>('kc-file-upload', {
+defineWebComponent<Props, Events>('kai-file-upload', {
   multiple: true,
   accept: undefined,
   disabled: false,
@@ -34,7 +34,7 @@ defineWebComponent<Props, Events>('kc-file-upload', {
     multiple={flag('multiple')}
     accept={props.accept}
     disabled={flag('disabled')}
-    onFilesAdded={(files) => dispatch('kc-files-added', { files })}
+    onFilesAdded={(files) => dispatch('kai-files-added', { files })}
   >
     <FileUploadTrigger class="border-border bg-muted/30 hover:bg-muted/60 text-muted-foreground flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-6 py-8 text-sm transition-colors">
       <Upload class="size-5" />

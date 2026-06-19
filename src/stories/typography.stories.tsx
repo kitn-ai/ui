@@ -35,8 +35,8 @@ function TypographyScale() {
       <p class="text-muted-foreground mb-6 text-sm">
         Defined once in <code class="text-code-foreground">theme.css</code>. Each token generates a Tailwind utility
         (<code class="text-code-foreground">text-meta</code>, …). To restyle the kit's typography globally, override the
-        namespaced <code class="text-code-foreground">--kc-text-*</code> token on <code class="text-code-foreground">:root</code> —
-        it pierces the Shadow&nbsp;DOM exactly like the <code class="text-code-foreground">--kc-color-*</code> tokens. (The bare
+        namespaced <code class="text-code-foreground">--kai-text-*</code> token on <code class="text-code-foreground">:root</code> —
+        it pierces the Shadow&nbsp;DOM exactly like the <code class="text-code-foreground">--kai-color-*</code> tokens. (The bare
         <code class="text-code-foreground"> --text-*</code> names stay internal, so a host's own tokens can't collide.)
       </p>
 
@@ -60,8 +60,8 @@ function TypographyScale() {
 
       <h3 class="mt-8 mb-2 text-sm font-semibold">Override example</h3>
       <pre class="bg-muted text-foreground overflow-auto rounded-lg p-3 font-mono text-xs">{`:root {
-  --kc-text-body: 0.9375rem;   /* bump the reading size to 15px */
-  --kc-text-meta: 0.8125rem;   /* and the control size to 13px */
+  --kai-text-body: 0.9375rem;   /* bump the reading size to 15px */
+  --kai-text-meta: 0.8125rem;   /* and the control size to 13px */
 }`}</pre>
       <p class="text-muted-foreground mt-2 text-xs">
         Reading text in messages / input / markdown additionally scales with the

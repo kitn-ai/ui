@@ -1,7 +1,7 @@
 // src/remote/provider-runtime.ts
 // The provider iframe-side bridge: handshake responder + CardHost impl + auto-height.
 // Security-critical, stateful, vanilla DOM ONLY — NO SolidJS imports (ships in the
-// SolidJS-free `@kitn.ai/chat/provider` bundle). See the iframe-transport design spec
+// SolidJS-free `@kitn.ai/ui/provider` bundle). See the iframe-transport design spec
 // (Provider iframe runtime surface + addendum H-A/H-D/H-E/H-J/H-H).
 
 import {
@@ -79,7 +79,7 @@ export function createCardBridge(options: CreateCardBridgeOptions): CardBridge {
   const themeKey = (c: CardContext | null) => JSON.stringify(c?.theme ?? null);
 
   function warnDrop(data: unknown): void {
-    try { console.warn('[kc-remote]', redactFrame(data)); } catch { /* best-effort */ }
+    try { console.warn('[kai-remote]', redactFrame(data)); } catch { /* best-effort */ }
   }
 
   function postUp(message: WireMessage): void {

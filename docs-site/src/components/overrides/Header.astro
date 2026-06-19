@@ -8,8 +8,7 @@ import SocialIcons from './SocialIcons.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import { Icon } from 'astro-icon/components';
 
-// BASE_URL is '/chat' (no trailing slash) in the production build but '/chat/'
-// in dev — normalise so asset/nav URLs are always '/chat/…'.
+// BASE_URL is '/' (root); strip any trailing slash so asset/nav URLs are always '/…'.
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
 const logo = href('kitn-logo.png');
@@ -22,10 +21,8 @@ const nav = [
 ---
 <div class="flex h-full w-full items-center gap-4">
   <a href={base} class="flex shrink-0 items-center gap-2 no-underline">
-    <img src={logo} alt="" width="26" height="24" class="kc-logo-img h-6 w-[26px] shrink-0" />
-    <span class="text-xl font-black tracking-tight text-ink">kitn</span>
-    <span class="text-xl font-light text-ink-3" aria-hidden="true">|</span>
-    <span class="text-xl font-medium text-ink-2">Chat</span>
+    <img src={logo} alt="kitn" width="26" height="24" class="kai-logo-img h-6 w-[26px] shrink-0" />
+    <span class="whitespace-nowrap text-xl font-black tracking-tight"><span class="text-ink">AI</span><span class="text-brand">/</span><span class="text-ink">UI</span></span>
   </a>
   <nav class="ml-5 hidden items-center gap-5 md:flex" aria-label="Primary">
     {nav.map((n) => (
@@ -40,7 +37,7 @@ const nav = [
   </nav>
 
   <div class="ml-auto flex items-center gap-3">
-    <div class="kc-search"><Search /></div>
+    <div class="kai-search"><Search /></div>
     <div class="hidden items-center gap-3 md:flex"><SocialIcons /><ThemeToggle /></div>
     <div class="md:hidden"><MobileMenuToggle /></div>
   </div>

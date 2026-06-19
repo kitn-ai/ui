@@ -11,18 +11,18 @@ interface Props extends Record<string, unknown> {
   currentLabel?: string;
 }
 
-/** Events fired by `<kc-scope-picker>`. */
+/** Events fired by `<kai-scope-picker>`. */
 interface Events {
   /** A scope was chosen (`undefined` filters = "All Content"). */
-  'kc-scope-change': { filters: SearchFilters | undefined };
+  'kai-scope-change': { filters: SearchFilters | undefined };
 }
 
 /**
- * `<kc-scope-picker>` — a dropdown to scope a chat by author or tag.
+ * `<kai-scope-picker>` — a dropdown to scope a chat by author or tag.
  * Options via `available-authors`/`available-tags` properties; emits
- * `kc-scope-change`.
+ * `kai-scope-change`.
  */
-defineWebComponent<Props, Events>('kc-scope-picker', {
+defineWebComponent<Props, Events>('kai-scope-picker', {
   availableAuthors: [],
   availableTags: [],
   currentLabel: 'All Content',
@@ -31,6 +31,6 @@ defineWebComponent<Props, Events>('kc-scope-picker', {
     currentLabel={props.currentLabel ?? 'All Content'}
     availableAuthors={props.availableAuthors}
     availableTags={props.availableTags}
-    onScopeChange={(filters) => dispatch('kc-scope-change', { filters })}
+    onScopeChange={(filters) => dispatch('kai-scope-change', { filters })}
   />
 ));

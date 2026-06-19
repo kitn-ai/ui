@@ -96,7 +96,7 @@ export function TextareaWidget(props: WidgetProps): JSX.Element {
 }
 
 export function NumberWidget(props: WidgetProps): JSX.Element {
-  const step = () => props.field['x-kc-step'] ?? (props.field.type === 'integer' ? 1 : undefined);
+  const step = () => props.field['x-kai-step'] ?? (props.field.type === 'integer' ? 1 : undefined);
   return (
     <input
       id={props.id}
@@ -119,7 +119,7 @@ export function NumberWidget(props: WidgetProps): JSX.Element {
 export function SliderWidget(props: WidgetProps): JSX.Element {
   const min = () => props.field.minimum ?? 0;
   const max = () => props.field.maximum ?? 100;
-  const step = () => props.field['x-kc-step'] ?? (props.field.type === 'integer' ? 1 : undefined);
+  const step = () => props.field['x-kai-step'] ?? (props.field.type === 'integer' ? 1 : undefined);
   const current = () => (props.value === undefined || props.value === null ? min() : Number(props.value));
   const fill = (): string => {
     const lo = min();
@@ -132,8 +132,8 @@ export function SliderWidget(props: WidgetProps): JSX.Element {
         id={props.id}
         data-control
         type="range"
-        class="kc-range"
-        style={{ '--kc-range-fill': fill() }}
+        class="kai-range"
+        style={{ '--kai-range-fill': fill() }}
         value={current()}
         min={min()}
         max={max()}
@@ -238,7 +238,7 @@ export function CheckboxWidget(props: WidgetProps): JSX.Element {
         id={props.id}
         data-control
         type="checkbox"
-        class="kc-checkbox"
+        class="kai-checkbox"
         checked={props.value === true}
         disabled={props.disabled}
         {...ariaProps(props)}
@@ -275,7 +275,7 @@ export function RadioGroupWidget(props: WidgetProps): JSX.Element {
             <input
               type="radio"
               name={props.id}
-              class="kc-radio"
+              class="kai-radio"
               value={String(opt)}
               checked={props.value === opt}
               disabled={props.disabled}
@@ -354,7 +354,7 @@ export function CheckboxGroupWidget(props: WidgetProps): JSX.Element {
           >
             <input
               type="checkbox"
-              class="kc-checkbox"
+              class="kai-checkbox"
               checked={selected().includes(opt)}
               disabled={props.disabled}
               onChange={() => toggle(opt)}

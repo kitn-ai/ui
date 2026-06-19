@@ -1,46 +1,46 @@
 ---
 title: Artifacts canvas beside chat
-description: A split coding-agent app — chat on the left, a file tree and live artifact canvas on the right, wired with kc-resizable, kc-file-tree, and kc-artifact.
+description: A split coding-agent app — chat on the left, a file tree and live artifact canvas on the right, wired with kai-resizable, kai-file-tree, and kai-artifact.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 import ArtifactsCanvasDemo from '../../../components/ArtifactsCanvasDemo.tsx';
 
-<p class="kc-lede">A coding-agent layout in the shape of Claude Artifacts or v0: the conversation drives the work on the left, and the right side pairs a `<kc-file-tree>` with a `<kc-artifact>` canvas. Pick a file in the tree and it loads into the canvas — HTML pages frame live in the sandboxed preview, every file opens its source on the Code tab.</p>
+<p class="kai-lede">A coding-agent layout in the shape of Claude Artifacts or v0: the conversation drives the work on the left, and the right side pairs a `<kai-file-tree>` with a `<kai-artifact>` canvas. Pick a file in the tree and it loads into the canvas — HTML pages frame live in the sandboxed preview, every file opens its source on the Code tab.</p>
 
 <ArtifactsCanvasDemo client:only="solid" />
 
 ## How it works
 
-Three elements compose the shell. `<kc-resizable>` splits chat from the canvas column; a nested vertical `<kc-resizable>` stacks the tree above the artifact. Selecting a file in `<kc-file-tree>` fires `kc-select`; the handler sets the artifact's `activeFile` (and, for files with a hosted `url`, its `src`) so the canvas follows the tree.
+Three elements compose the shell. `<kai-resizable>` splits chat from the canvas column; a nested vertical `<kai-resizable>` stacks the tree above the artifact. Selecting a file in `<kai-file-tree>` fires `kai-select`; the handler sets the artifact's `activeFile` (and, for files with a hosted `url`, its `src`) so the canvas follows the tree.
 
 ```html
-<kc-resizable orientation="horizontal" style="display:block;height:620px">
+<kai-resizable orientation="horizontal" style="display:block;height:620px">
   <!-- left: the conversation -->
-  <kc-resizable-item size="42%" min="280px">
-    <kc-chat id="chat" chat-title="Build agent"></kc-chat>
-  </kc-resizable-item>
+  <kai-resizable-item size="42%" min="280px">
+    <kai-chat id="chat" chat-title="Build agent"></kai-chat>
+  </kai-resizable-item>
 
   <!-- right: file tree above the artifact canvas -->
-  <kc-resizable-item min="320px">
-    <kc-resizable orientation="vertical" style="display:block;height:100%">
-      <kc-resizable-item size="34%" min="120px" max="60%">
-        <kc-file-tree id="tree"></kc-file-tree>
-      </kc-resizable-item>
-      <kc-resizable-item min="200px">
-        <kc-artifact
+  <kai-resizable-item min="320px">
+    <kai-resizable orientation="vertical" style="display:block;height:100%">
+      <kai-resizable-item size="34%" min="120px" max="60%">
+        <kai-file-tree id="tree"></kai-file-tree>
+      </kai-resizable-item>
+      <kai-resizable-item min="200px">
+        <kai-artifact
           id="canvas"
           iframe-title="Project preview"
           open-in-tab
           sandbox="allow-scripts allow-forms allow-same-origin"
-        ></kc-artifact>
-      </kc-resizable-item>
-    </kc-resizable>
-  </kc-resizable-item>
-</kc-resizable>
+        ></kai-artifact>
+      </kai-resizable-item>
+    </kai-resizable>
+  </kai-resizable-item>
+</kai-resizable>
 
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/ui/elements'; // registers the custom elements
 
   const tree = document.getElementById('tree');
   const canvas = document.getElementById('canvas');
@@ -62,7 +62,7 @@ Three elements compose the shell. `<kc-resizable>` splits chat from the canvas c
   canvas.src = files[0].url; // the preview frames this URL
 
   // Tree → canvas: load the picked file into the artifact.
-  tree.addEventListener('kc-select', (e) => {
+  tree.addEventListener('kai-select', (e) => {
     const file = files.find((f) => f.path === e.detail.path);
     tree.activeFile = e.detail.path;
     canvas.activeFile = e.detail.path;
@@ -72,15 +72,15 @@ Three elements compose the shell. `<kc-resizable>` splits chat from the canvas c
 </script>
 ```
 
-`<kc-artifact>` self-navigates its sandboxed iframe. The back/forward/reload/home toolbar and the address field always track navigations the canvas starts — picking a file, editing the path, home, reload. Tracking in-frame relative-link clicks (clicking "About →" inside the preview) also needs `allow-same-origin`, because the default `allow-scripts allow-forms` sandbox gives the framed document an opaque origin the component cannot read. This canvas opts in with `sandbox="allow-scripts allow-forms allow-same-origin"`, so it observes those clicks and keeps the address field and back/forward truthful. Add `allow-same-origin` only for first-party artifacts you trust — it lets the framed document reach its own origin.
+`<kai-artifact>` self-navigates its sandboxed iframe. The back/forward/reload/home toolbar and the address field always track navigations the canvas starts — picking a file, editing the path, home, reload. Tracking in-frame relative-link clicks (clicking "About →" inside the preview) also needs `allow-same-origin`, because the default `allow-scripts allow-forms` sandbox gives the framed document an opaque origin the component cannot read. This canvas opts in with `sandbox="allow-scripts allow-forms allow-same-origin"`, so it observes those clicks and keeps the address field and back/forward truthful. Add `allow-same-origin` only for first-party artifacts you trust — it lets the framed document reach its own origin.
 
 <Aside type="note">
-`<kc-artifact>` ships its own `<kc-file-tree>` inside the Code tab. The standalone tree here is the *project* explorer that drives which file the canvas frames; both stay in sync because the same handler listens for `kc-select` (tree) and `kc-file-select` (the canvas's own tree).
+`<kai-artifact>` ships its own `<kai-file-tree>` inside the Code tab. The standalone tree here is the *project* explorer that drives which file the canvas frames; both stay in sync because the same handler listens for `kai-select` (tree) and `kai-file-select` (the canvas's own tree).
 </Aside>
 
 ## Next steps
 
-- **[`kc-artifact` reference](/chat/components/artifact/)** — `src`, `files`, `activeFile`, `tab`, the `no-*` toolbar flags, and `kc-navigate` / `kc-tab-change` / `kc-file-select`.
-- **[`kc-file-tree` reference](/chat/components/file-tree/)** — the `files` shape, `active-file`, `default-expanded`, and the `kc-select` event.
-- **[`kc-resizable` reference](/chat/components/resizable/)** — `orientation`, item `size` / `min` / `max` / `locked` / `hidden`, nesting, and the maximize protocol.
-- **[Resizable split layout](/chat/patterns/resizable-split/)** — the two-pane chat shell this canvas layout builds on.
+- **[`kai-artifact` reference](/components/artifact/)** — `src`, `files`, `activeFile`, `tab`, the `no-*` toolbar flags, and `kai-navigate` / `kai-tab-change` / `kai-file-select`.
+- **[`kai-file-tree` reference](/components/file-tree/)** — the `files` shape, `active-file`, `default-expanded`, and the `kai-select` event.
+- **[`kai-resizable` reference](/components/resizable/)** — `orientation`, item `size` / `min` / `max` / `locked` / `hidden`, nesting, and the maximize protocol.
+- **[Resizable split layout](/patterns/resizable-split/)** — the two-pane chat shell this canvas layout builds on.

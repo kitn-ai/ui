@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-choice': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-choice': JSX.HTMLAttributes<HTMLElement> & {
         heading?: string;
         'card-id'?: string;
         ref?: (el: HTMLElement) => void;
@@ -24,14 +24,14 @@ function Frame(props: { children: JSX.Element }) {
   return <div style={{ 'max-width': '460px' }}>{props.children}</div>;
 }
 
-/** Mounts a <kc-choice>, sets `.data`, logs the emitted CardEvent under the render. */
+/** Mounts a <kai-choice>, sets `.data`, logs the emitted CardEvent under the render. */
 function ChoiceDemo(props: { def: ChoiceCardData; cardId: string; heading?: string }) {
   const [log, setLog] = createSignal<CardEvent[]>([]);
   let el: ChoiceEl | undefined;
   onMount(() => {
     if (!el) return;
     el.data = props.def;
-    el.addEventListener('kc-card', (e) => {
+    el.addEventListener('kai-card', (e) => {
       const detail = (e as CustomEvent<CardEvent>).detail;
       setLog((prev) => [...prev, detail]);
     });
@@ -39,7 +39,7 @@ function ChoiceDemo(props: { def: ChoiceCardData; cardId: string; heading?: stri
   return (
     <Frame>
       <div style={{ display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
-        <kc-choice ref={(e) => (el = e as ChoiceEl)} card-id={props.cardId} heading={props.heading} />
+        <kai-choice ref={(e) => (el = e as ChoiceEl)} card-id={props.cardId} heading={props.heading} />
         <pre
           style={{
             margin: 0,
@@ -120,16 +120,16 @@ const HEADING_MAP: Record<string, string | undefined> = {
 
 const HTML_SNIPPET = (def: ChoiceCardData, cardId: string) => {
   const heading = HEADING_MAP[cardId];
-  return `<kc-choice${heading ? ` heading="${heading}"` : ''}></kc-choice>
+  return `<kai-choice${heading ? ` heading="${heading}"` : ''}></kai-choice>
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers the custom elements
+  import '@kitn.ai/ui/elements'; // registers the custom elements
 
-  const el = document.querySelector('kc-choice');
+  const el = document.querySelector('kai-choice');
   // \`data\` is the CardEnvelope.data (set as a property).
   el.data = ${JSON.stringify(def, null, 2)};
 
-  // Cards bubble ONE \`kc-card\` CustomEvent carrying a typed CardEvent.
-  el.addEventListener('kc-card', (e) => {
+  // Cards bubble ONE \`kai-card\` CustomEvent carrying a typed CardEvent.
+  el.addEventListener('kai-card', (e) => {
     const ev = e.detail; // { kind:'action', cardId, action, payload? } | { kind:'ready', ... } | ...
     if (ev.kind === 'action') console.log('chose', ev.action, ev.payload);
   });
@@ -137,18 +137,18 @@ const HTML_SNIPPET = (def: ChoiceCardData, cardId: string) => {
 };
 
 const meta = {
-  title: 'Generative UI/Cards/kc-choice',
+  title: 'Generative UI/Cards/kai-choice',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-choice'),
+  argTypes: argTypesFor('kai-choice'),
   parameters: {
     layout: 'padded',
     docs: {
-      description: specDescription('kc-choice', [
-        "`<kc-choice>` is a **single-select** 'pick one of N rich options' card (set via the `data` **property**): an optional prompt + a radiogroup of list rows + a **Submit** button. Clicking a row (or Space/Enter on the focused row) **selects** it locally — nothing is emitted. Submit then emits the Card contract's **`action`** verb up a bubbling **`kc-card`** CustomEvent of `{ kind:'action', cardId, action: option.id, payload? }`, then **resolves** the card (the chosen option shown read-only) so the same pick can't double-fire. The Submit label is `submitLabel` (default 'Submit').",
+      description: specDescription('kai-choice', [
+        "`<kai-choice>` is a **single-select** 'pick one of N rich options' card (set via the `data` **property**): an optional prompt + a radiogroup of list rows + a **Submit** button. Clicking a row (or Space/Enter on the focused row) **selects** it locally — nothing is emitted. Submit then emits the Card contract's **`action`** verb up a bubbling **`kai-card`** CustomEvent of `{ kind:'action', cardId, action: option.id, payload? }`, then **resolves** the card (the chosen option shown read-only) so the same pick can't double-fire. The Submit label is `submitLabel` (default 'Submit').",
         '**Rich-but-bounded options:** every field except `id`/`label` is optional — `description`, `media` (image + `imageAlt`, or a named `icon`), `meta` (trailing price/badge), `recommended` (a pill), `disabled` (inert + skipped in keyboard nav), and an opaque `payload` echoed back. A weaker model can just omit them.',
         "**`allowOther`** (opt-in) appends a final 'Other…' row: selecting it reveals an inline text input. The single shared **Submit** stays disabled until the text is non-empty; submitting emits `{ kind:'action', action:'__other__', payload:{ text } }`.",
         '**Accessibility:** the options are a WAI-ARIA `radiogroup` (`role="radio"` + `aria-checked`) with **roving tabindex** — one tab stop in, Arrow keys move focus (skipping disabled), Enter/Space select the focused row. Disabled options are `aria-disabled` and not focusable; option images carry alt text; the Other input has a label. **0 axe violations** (light + dark).',
-        '**Events** (all frozen Card-contract verbs): `ready` on mount, `action` on Submit, `error` for a malformed definition (renders the inline `kc-card` error). It **never invents events**, and — because it carries a registry entry — `<kc-cards>` / `renderCard` dispatch it automatically.',
+        '**Events** (all frozen Card-contract verbs): `ready` on mount, `action` on Submit, `error` for a malformed definition (renders the inline `kai-card` error). It **never invents events**, and — because it carries a registry entry — `<kai-cards>` / `renderCard` dispatch it automatically.',
       ]),
     },
   },
@@ -196,17 +196,17 @@ export const Resolved: Story = {
     });
     return (
       <Frame>
-        <kc-choice ref={(e) => (el = e as ChoiceEl)} card-id="card-resolved-choice" heading="Choose a plan" />
+        <kai-choice ref={(e) => (el = e as ChoiceEl)} card-id="card-resolved-choice" heading="Choose a plan" />
       </Frame>
     );
   },
   parameters: {
     docs: {
       source: {
-        code: `<kc-choice heading="Choose a plan"></kc-choice>
+        code: `<kai-choice heading="Choose a plan"></kai-choice>
 <script type="module">
-  import '@kitn.ai/chat/elements';
-  const el = document.querySelector('kc-choice');
+  import '@kitn.ai/ui/elements';
+  const el = document.querySelector('kai-choice');
   el.data = ${JSON.stringify(RESOLVED_CHOICE, null, 2)};
   // Setting .resolution renders the chromed read-only view — no radiogroup or Submit.
   el.resolution = { kind: 'action', action: 'pro' };
@@ -223,13 +223,13 @@ export const ErrorState: Story = {
   parameters: {
     docs: {
       source: {
-        code: `<kc-choice></kc-choice>
+        code: `<kai-choice></kai-choice>
 <script type="module">
-  import '@kitn.ai/chat/elements';
-  const el = document.querySelector('kc-choice');
+  import '@kitn.ai/ui/elements';
+  const el = document.querySelector('kai-choice');
   // No options → inline error state + an \`error\` event.
   el.data = { options: [] };
-  el.addEventListener('kc-card', (e) => {
+  el.addEventListener('kai-card', (e) => {
     if (e.detail.kind === 'error') console.warn('choice error:', e.detail.message);
   });
 </script>`,

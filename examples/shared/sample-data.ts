@@ -1,5 +1,5 @@
 /**
- * Shared sample data for kc-chat examples.
+ * Shared sample data for kai-chat examples.
  *
  * Types are defined inline (matching the kit's exported types) so this file
  * has no runtime or compile-time dependency on the kit source — it works in
@@ -12,9 +12,9 @@
  *   } from '../../shared/sample-data';
  */
 
-// ── Shared types (mirror @kitn.ai/chat exported interfaces) ────────────────────
+// ── Shared types (mirror @kitn.ai/ui exported interfaces) ────────────────────
 
-/** Mirror of `ConversationGroup` from @kitn.ai/chat. */
+/** Mirror of `ConversationGroup` from @kitn.ai/ui. */
 export interface SampleGroup {
   id: string;
   name: string;
@@ -22,7 +22,7 @@ export interface SampleGroup {
   createdAt: string;
 }
 
-/** Mirror of `ConversationSummary` from @kitn.ai/chat. */
+/** Mirror of `ConversationSummary` from @kitn.ai/ui. */
 export interface SampleConversation {
   id: string;
   title: string;
@@ -33,14 +33,14 @@ export interface SampleConversation {
   updatedAt: string;
 }
 
-/** Mirror of `ModelOption` from @kitn.ai/chat. */
+/** Mirror of `ModelOption` from @kitn.ai/ui. */
 export interface SampleModel {
   id: string;
   name: string;
   provider?: string;
 }
 
-/** Mirror of `SlashCommandItem` from @kitn.ai/chat. */
+/** Mirror of `SlashCommandItem` from @kitn.ai/ui. */
 export interface SampleSlashCommand {
   id: string;
   label: string;
@@ -48,10 +48,10 @@ export interface SampleSlashCommand {
   category?: string;
 }
 
-/** Message action verbs supported by <kc-chat>. */
+/** Message action verbs supported by <kai-chat>. */
 export type MessageAction = 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit';
 
-/** Minimal chat message shape (mirrors ChatMessage from @kitn.ai/chat/elements). */
+/** Minimal chat message shape (mirrors ChatMessage from @kitn.ai/ui/elements). */
 export interface SampleMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -105,14 +105,14 @@ export const SAMPLE_MESSAGES: Record<string, SampleMessage[]> = {
     {
       id: 'm1',
       role: 'user',
-      content: 'How do I use kc-chat web components inside a React app?',
+      content: 'How do I use kai-chat web components inside a React app?',
     },
     {
       id: 'm2',
       role: 'assistant',
       actions: ['copy', 'like', 'dislike'],
       content:
-        "Just use the wrappers from `@kitn.ai/chat/react`:\n\n```tsx\nimport { Chat } from '@kitn.ai/chat/react';\n\n<Chat\n  messages={messages}\n  models={models}\n  onSubmit={(e) => console.log(e.detail)}\n  theme=\"auto\"\n/>\n```\n\nArrays/objects are passed as props and become live DOM properties; events arrive as `on<Event>` callbacks. No refs or `useEffect` needed.",
+        "Just use the wrappers from `@kitn.ai/ui/react`:\n\n```tsx\nimport { Chat } from '@kitn.ai/ui/react';\n\n<Chat\n  messages={messages}\n  models={models}\n  onSubmit={(e) => console.log(e.detail)}\n  theme=\"auto\"\n/>\n```\n\nArrays/objects are passed as props and become live DOM properties; events arrive as `on<Event>` callbacks. No refs or `useEffect` needed.",
     },
   ],
   'c-2': [

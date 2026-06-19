@@ -5,14 +5,14 @@ description: Let the assistant interrupt with interactive cards — confirm, cho
 
 import { ConfirmCardDemo, ChoiceCardDemo, FormCardDemo } from '../../../components/CardsDemo.tsx';
 
-<p class="kc-lede">Instead of waiting for the user to type a follow-up, the assistant streams a card directly into the conversation. The user answers it in one click; your `CardPolicy` receives the result.</p>
+<p class="kai-lede">Instead of waiting for the user to type a follow-up, the assistant streams a card directly into the conversation. The user answers it in one click; your `CardPolicy` receives the result.</p>
 
 ## How it works
 
-Feed `<kc-cards>` an array of **`CardEnvelope`** objects and a **`CardPolicy`**. Each envelope has a `type` (`confirm`, `choice`, `form`), a stable `id`, a `title`, and `data` that conforms to that type's schema. When the user interacts, the matching `CardPolicy` callback fires — no event listeners needed.
+Feed `<kai-cards>` an array of **`CardEnvelope`** objects and a **`CardPolicy`**. Each envelope has a `type` (`confirm`, `choice`, `form`), a stable `id`, a `title`, and `data` that conforms to that type's schema. When the user interacts, the matching `CardPolicy` callback fires — no event listeners needed.
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 
 const cards = document.getElementById('cards');
 
@@ -49,7 +49,7 @@ cards.policy = {
 
 Each card type below is live — interact with it and watch its policy events land in the **Console** beneath the preview.
 
-## `kc-confirm` — ask for a decision
+## `kai-confirm` — ask for a decision
 
 A `confirm` card poses a question and offers one or more actions. Tapping an action fires `onAction(cardId, action)`, where `action` is the button's `id`.
 
@@ -70,7 +70,7 @@ A `confirm` card poses a question and offers one or more actions. Tapping an act
 }
 ```
 
-## `kc-choice` — pick from options
+## `kai-choice` — pick from options
 
 A `choice` card presents a list of options; the user selects one and submits. The chosen option's `id` arrives via `onAction(cardId, optionId)`.
 
@@ -93,9 +93,9 @@ A `choice` card presents a list of options; the user selects one and submits. Th
 }
 ```
 
-## `kc-form` — collect structured input
+## `kai-form` — collect structured input
 
-A `form` card renders a JSON Schema subset as fields, validates on submit, and delivers the values object through `onSubmit(cardId, data)`. Use `x-kc-*` hints to pick widgets and control layout.
+A `form` card renders a JSON Schema subset as fields, validates on submit, and delivers the values object through `onSubmit(cardId, data)`. Use `x-kai-*` hints to pick widgets and control layout.
 
 <FormCardDemo client:only="solid" />
 
@@ -104,21 +104,21 @@ A `form` card renders a JSON Schema subset as fields, validates on submit, and d
   type: 'object';
   description?: string;
   required?: string[];
-  'x-kc-submitLabel'?: string;
-  'x-kc-order'?: string[];       // explicit field order
+  'x-kai-submitLabel'?: string;
+  'x-kai-order'?: string[];       // explicit field order
   properties: Record<string, {
     type: 'string' | 'number' | 'boolean' | 'array';
     title?: string;
     enum?: unknown[];
-    'x-kc-widget'?: 'textarea' | 'select' | 'radio' | 'slider' | 'rating' | 'switch' | 'checkbox';
-    'x-kc-placeholder'?: string;
+    'x-kai-widget'?: 'textarea' | 'select' | 'radio' | 'slider' | 'rating' | 'switch' | 'checkbox';
+    'x-kai-placeholder'?: string;
   }>;
 }
 ```
 
 ## Streaming cards in as the agent decides
 
-Append envelopes to the array as the agent generates them — `<kc-cards>` renders whatever is in the array at that moment:
+Append envelopes to the array as the agent generates them — `<kai-cards>` renders whatever is in the array at that moment:
 
 ```js
 // Start with nothing; add cards as the model emits them.
@@ -149,8 +149,8 @@ cards.cards = [
 
 ## Next steps
 
-- **[`kc-cards` reference](/chat/components/cards/)** — `types` map for custom card tags, all props.
-- **[`kc-confirm` reference](/chat/components/confirm/)** — `autofocus`, `tone`, full action shapes.
-- **[`kc-choice` reference](/chat/components/choice/)** — `allowOther`, media options.
-- **[`kc-form` reference](/chat/components/form/)** — full JSON Schema subset + every `x-kc-*` hint.
-- **[Drop-in chat](/chat/examples/drop-in-chat/)** — wire cards into a streaming conversation with `<kc-chat>`.
+- **[`kai-cards` reference](/components/cards/)** — `types` map for custom card tags, all props.
+- **[`kai-confirm` reference](/components/confirm/)** — `autofocus`, `tone`, full action shapes.
+- **[`kai-choice` reference](/components/choice/)** — `allowOther`, media options.
+- **[`kai-form` reference](/components/form/)** — full JSON Schema subset + every `x-kai-*` hint.
+- **[Drop-in chat](/examples/drop-in-chat/)** — wire cards into a streaming conversation with `<kai-chat>`.

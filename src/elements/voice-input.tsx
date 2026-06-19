@@ -12,30 +12,30 @@ interface Props extends Record<string, unknown> {
   disabled?: boolean;
 }
 
-/** Events fired by `<kc-voice-input>`. */
+/** Events fired by `<kai-voice-input>`. */
 interface Events {
   /** Raw audio captured (before transcription) — for hosts that prefer to
    *  handle transcription themselves instead of via the `transcribe` property. */
-  'kc-audio-captured': { blob: Blob };
+  'kai-audio-captured': { blob: Blob };
   /** Transcription completed (the `transcribe` property resolved). */
-  'kc-transcription': { text: string };
+  'kai-transcription': { text: string };
 }
 
 /**
- * `<kc-voice-input>` — a mic button that records and transcribes. The
+ * `<kai-voice-input>` — a mic button that records and transcribes. The
  * canonical **function-property** element: set `el.transcribe` to your async
- * transcriber. Also emits `kc-audio-captured` (raw blob) and `kc-transcription` (text).
+ * transcriber. Also emits `kai-audio-captured` (raw blob) and `kai-transcription` (text).
  */
-defineWebComponent<Props, Events>('kc-voice-input', {
+defineWebComponent<Props, Events>('kai-voice-input', {
   transcribe: undefined,
   disabled: false,
 }, (props, { dispatch, flag }) => (
   <VoiceInput
     disabled={flag('disabled')}
     onTranscribe={async (blob) => {
-      dispatch('kc-audio-captured', { blob });
+      dispatch('kai-audio-captured', { blob });
       return props.transcribe ? props.transcribe(blob) : '';
     }}
-    onTranscription={(text) => dispatch('kc-transcription', { text })}
+    onTranscription={(text) => dispatch('kai-transcription', { text })}
   />
 ));

@@ -1,7 +1,7 @@
 /* ============================================================================
    kitn docs — DESIGN SYSTEM (single source of truth)
    ----------------------------------------------------------------------------
-   Semantic tokens (--kc-*) defined once, per theme. They drive BOTH:
+   Semantic tokens (--kai-*) defined once, per theme. They drive BOTH:
      1. Tailwind utilities  — via @theme in app.css (bg-surface, text-ink,
         text-brand, border-line, …). Components use ONLY these.
      2. Starlight chrome     — via the --sl-* mapping at the bottom.
@@ -13,57 +13,57 @@
 /* ---- dark (default) ---- */
 :root,
 :root[data-theme='dark'] {
-  --kc-primary: 326 84% 53%;                     /* kitn magenta (hsl parts) */
-  --kc-brand: hsl(var(--kc-primary));            /* fills: buttons, scrollbar, active bar */
-  --kc-brand-hover: hsl(326 84% 47%);
-  --kc-accent-soft: hsl(var(--kc-primary) / 0.16);
+  --kai-primary: 326 84% 53%;                     /* kitn magenta (hsl parts) */
+  --kai-brand: hsl(var(--kai-primary));            /* fills: buttons, scrollbar, active bar */
+  --kai-brand-hover: hsl(326 84% 47%);
+  --kai-accent-soft: hsl(var(--kai-primary) / 0.16);
 
   /* Neutrals aligned to the kit's DEFAULT DARK theme (warm charcoal family) so a
-     docs page and an embedded kc-* component share the same grays.
+     docs page and an embedded kai-* component share the same grays.
      Source of truth: src/elements/compiled.css `.dark{}` block. */
-  --kc-bg: #171716;                                /* content + header — kit --color-background */
-  --kc-sidebar: #121211;                           /* distinct sidebar nav bg — kit --color-sidebar */
-  --kc-surface: #201f1d;                           /* cards, preview — kit --color-card */
-  --kc-surface-2: #1a1917;                         /* console body, nested — between bg & card */
-  --kc-line: #2d2c2a;                              /* component borders — kit --color-border */
-  --kc-divider: #232220;                           /* subtle chrome divider — between bg & border */
-  --kc-pressed: rgb(0 0 0 / 0.32);                 /* selected/pressed segmented-control fill */
+  --kai-bg: #171716;                                /* content + header — kit --color-background */
+  --kai-sidebar: #121211;                           /* distinct sidebar nav bg — kit --color-sidebar */
+  --kai-surface: #201f1d;                           /* cards, preview — kit --color-card */
+  --kai-surface-2: #1a1917;                         /* console body, nested — between bg & card */
+  --kai-line: #2d2c2a;                              /* component borders — kit --color-border */
+  --kai-divider: #232220;                           /* subtle chrome divider — between bg & border */
+  --kai-pressed: rgb(0 0 0 / 0.32);                 /* selected/pressed segmented-control fill */
 
-  --kc-ink: #fafafa;                               /* strongest text — kit --color-foreground */
-  --kc-ink-2: #c9c7c2;                             /* body — warm, between foreground & muted */
-  --kc-ink-3: #a7a5a0;                             /* labels / dim — kit --color-muted-foreground */
-  --kc-link: hsl(326 95% 72%);                     /* magenta link text, bright on dark */
-  --kc-info: #60a5fa;                               /* complementary blue (kitn gradient) */
-  --kc-info-soft: color-mix(in oklab, #3b82f6 15%, transparent);
+  --kai-ink: #fafafa;                               /* strongest text — kit --color-foreground */
+  --kai-ink-2: #c9c7c2;                             /* body — warm, between foreground & muted */
+  --kai-ink-3: #a7a5a0;                             /* labels / dim — kit --color-muted-foreground */
+  --kai-link: hsl(326 95% 72%);                     /* magenta link text, bright on dark */
+  --kai-info: #60a5fa;                               /* complementary blue (kitn gradient) */
+  --kai-info-soft: color-mix(in oklab, #3b82f6 15%, transparent);
 
   /* callout/info (Starlight Aside): the blue used on the Artifact page — single
      source so every note/tip callout matches. */
-  --kc-callout-info: var(--kc-info);
-  --kc-callout-info-bg: var(--kc-info-soft);
-  --kc-callout-info-border: var(--kc-info);
+  --kai-callout-info: var(--kai-info);
+  --kai-callout-info-bg: var(--kai-info-soft);
+  --kai-callout-info-border: var(--kai-info);
 }
 
 /* ---- light ---- */
 :root[data-theme='light'] {
-  --kc-accent-soft: hsl(var(--kc-primary) / 0.10);
-  --kc-bg: #ffffff;
-  --kc-sidebar: #f6f6f7;
-  --kc-surface: #f9f9fb;
-  --kc-surface-2: #f3f3f6;
-  --kc-line: #e6e6e9;
-  --kc-divider: #e8e8ea;
-  --kc-pressed: rgb(0 0 0 / 0.07);                 /* selected/pressed segmented-control fill */
-  --kc-ink: hsl(220 12% 12%);
-  --kc-ink-2: hsl(220 7% 32%);
-  --kc-ink-3: hsl(220 5% 46%);
-  --kc-link: hsl(326 72% 40%);                     /* darker magenta → AA on white */
-  --kc-info: #2563eb;                               /* complementary blue, AA on white */
-  --kc-info-soft: color-mix(in oklab, #3b82f6 10%, transparent);
+  --kai-accent-soft: hsl(var(--kai-primary) / 0.10);
+  --kai-bg: #ffffff;
+  --kai-sidebar: #f6f6f7;
+  --kai-surface: #f9f9fb;
+  --kai-surface-2: #f3f3f6;
+  --kai-line: #e6e6e9;
+  --kai-divider: #e8e8ea;
+  --kai-pressed: rgb(0 0 0 / 0.07);                 /* selected/pressed segmented-control fill */
+  --kai-ink: hsl(220 12% 12%);
+  --kai-ink-2: hsl(220 7% 32%);
+  --kai-ink-3: hsl(220 5% 46%);
+  --kai-link: hsl(326 72% 40%);                     /* darker magenta → AA on white */
+  --kai-info: #2563eb;                               /* complementary blue, AA on white */
+  --kai-info-soft: color-mix(in oklab, #3b82f6 10%, transparent);
 
-  /* callout/info — same named tokens, light values (track per-theme --kc-info). */
-  --kc-callout-info: var(--kc-info);
-  --kc-callout-info-bg: var(--kc-info-soft);
-  --kc-callout-info-border: var(--kc-info);
+  /* callout/info — same named tokens, light values (track per-theme --kai-info). */
+  --kai-callout-info: var(--kai-info);
+  --kai-callout-info-bg: var(--kai-info-soft);
+  --kai-callout-info-border: var(--kai-info);
 }
 
 /* ---- map Starlight chrome to the same tokens ----
@@ -75,23 +75,23 @@
   --sl-font: 'Lato', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --sl-color-bg: var(--kc-bg);
-  --sl-color-bg-sidebar: var(--kc-sidebar);        /* distinct sidebar */
-  --sl-color-bg-nav: var(--kc-bg);                 /* header same as content */
-  --sl-color-hairline: var(--kc-sidebar);          /* header divider = sidebar bg color */
-  --sl-color-hairline-shade: var(--kc-sidebar);
-  --sl-color-hairline-light: var(--kc-sidebar);
+  --sl-color-bg: var(--kai-bg);
+  --sl-color-bg-sidebar: var(--kai-sidebar);        /* distinct sidebar */
+  --sl-color-bg-nav: var(--kai-bg);                 /* header same as content */
+  --sl-color-hairline: var(--kai-sidebar);          /* header divider = sidebar bg color */
+  --sl-color-hairline-shade: var(--kai-sidebar);
+  --sl-color-hairline-light: var(--kai-sidebar);
 
-  --sl-color-white: var(--kc-ink);
-  --sl-color-gray-1: var(--kc-ink);
-  --sl-color-gray-2: var(--kc-ink-2);
-  --sl-color-gray-3: var(--kc-ink-3);
-  --sl-color-text: var(--kc-ink-2);
-  --sl-color-text-accent: var(--kc-link);
-  --sl-color-accent: var(--kc-brand);
-  --sl-color-accent-low: var(--kc-accent-soft);   /* soft magenta tint for asides */
-  --sl-color-accent-high: var(--kc-ink);
-  --sl-color-asides-text-accent: var(--kc-link);
+  --sl-color-white: var(--kai-ink);
+  --sl-color-gray-1: var(--kai-ink);
+  --sl-color-gray-2: var(--kai-ink-2);
+  --sl-color-gray-3: var(--kai-ink-3);
+  --sl-color-text: var(--kai-ink-2);
+  --sl-color-text-accent: var(--kai-link);
+  --sl-color-accent: var(--kai-brand);
+  --sl-color-accent-low: var(--kai-accent-soft);   /* soft magenta tint for asides */
+  --sl-color-accent-high: var(--kai-ink);
+  --sl-color-asides-text-accent: var(--kai-link);
 
   --sl-content-width: 56rem;                       /* wider — props table breathes */
   --sl-content-pad-x: 4rem;                        /* generous left/right breathing room */
@@ -102,15 +102,15 @@
    ========================================================================== */
 
 /* magenta thin scrollbar + selection (matches kitn.ai) */
-* { scrollbar-width: thin; scrollbar-color: var(--kc-brand) transparent; }
+* { scrollbar-width: thin; scrollbar-color: var(--kai-brand) transparent; }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background-color: var(--kc-brand); border-radius: 4px; }
-*::-webkit-scrollbar-thumb:hover { background-color: var(--kc-brand-hover); }
-::selection { background: var(--kc-brand); color: #fff; }
+*::-webkit-scrollbar-thumb { background-color: var(--kai-brand); border-radius: 4px; }
+*::-webkit-scrollbar-thumb:hover { background-color: var(--kai-brand-hover); }
+::selection { background: var(--kai-brand); color: #fff; }
 
 /* header is fully overridden (Header.astro) — just size the search box */
-.kc-search { width: min(14rem, 38vw); }
+.kai-search { width: min(14rem, 38vw); }
 .header { border-bottom-width: 2px !important; }   /* thicker divider (was 1px) */
 
 /* clean, borderless panes: no vertical dividers between sidebar / content / TOC */
@@ -125,8 +125,8 @@ h1#_top, .sl-markdown-content h1 { font-size: 2rem; font-weight: 700; letter-spa
 .sl-markdown-content h3 { font-size: 1.1rem; font-weight: 700; }
 
 /* content-header: component name under the title, smaller */
-.kc-tag-sub { font: 600 1.15rem/1.2 var(--sl-font-mono); color: var(--kc-link); margin: 0.25rem 0 0; }
-.kc-lede { font-size: 1.12rem; line-height: 1.55; color: var(--kc-ink-2); margin: 0.9rem 0 0; }
+.kai-tag-sub { font: 600 1.15rem/1.2 var(--sl-font-mono); color: var(--kai-link); margin: 0.25rem 0 0; }
+.kai-lede { font-size: 1.12rem; line-height: 1.55; color: var(--kai-ink-2); margin: 0.9rem 0 0; }
 
 /* heading anchor — the clean way: the "#" is now a CHILD of the heading
    (rehype behavior:'append'), so the heading is a flex row [text · #]. The "#"
@@ -138,28 +138,28 @@ h1#_top, .sl-markdown-content h1 { font-size: 2rem; font-weight: 700; letter-spa
   align-items: center;
   gap: 0.5rem;
 }
-.sl-markdown-content .kc-anchor {
+.sl-markdown-content .kai-anchor {
   font-weight: 700;
-  color: var(--kc-ink-3);
+  color: var(--kai-ink-3);
   text-decoration: none;
   opacity: 0;
   transition: opacity 0.15s, color 0.15s;
 }
-.sl-markdown-content .kc-anchor::after { content: '#'; }   /* visible glyph (not in heading text → TOC stays clean) */
-.sl-markdown-content :is(h1, h2, h3, h4):hover .kc-anchor,
-.sl-markdown-content .kc-anchor:focus-visible { opacity: 1; }
-.sl-markdown-content .kc-anchor:hover { color: var(--kc-link); }
+.sl-markdown-content .kai-anchor::after { content: '#'; }   /* visible glyph (not in heading text → TOC stays clean) */
+.sl-markdown-content :is(h1, h2, h3, h4):hover .kai-anchor,
+.sl-markdown-content .kai-anchor:focus-visible { opacity: 1; }
+.sl-markdown-content .kai-anchor:hover { color: var(--kai-link); }
 
 /* inline code in prose — soft magenta chip */
 .sl-markdown-content :not(pre) > code {
-  background: var(--kc-accent-soft); color: var(--kc-link);
+  background: var(--kai-accent-soft); color: var(--kai-link);
   border: none; border-radius: 5px; padding: 0.12em 0.4em; font-size: 0.86em;
 }
 
 /* left nav: active = magenta text + a magenta bar on the left tree-line */
 .sidebar-content a[aria-current='page'] {
   background: transparent !important;
-  color: var(--kc-ink) !important;   /* white (dark) / dark (light), not pink */
+  color: var(--kai-ink) !important;   /* white (dark) / dark (light), not pink */
   font-weight: 600 !important;
   position: relative;
 }
@@ -169,19 +169,19 @@ h1#_top, .sl-markdown-content h1 { font-size: 2rem; font-weight: 700; letter-spa
   inset-inline-start: -1.25rem;     /* sit on the nested-list tree line */
   top: 0; bottom: 0;
   width: 2px;
-  background: var(--kc-brand);
+  background: var(--kai-brand);
   border-radius: 2px;
 }
 
 /* on-this-page: breathing room + readable sizes */
 .right-sidebar-panel { padding-top: 2rem; }
-#starlight__on-this-page { font-size: 0.8rem; font-weight: 700; color: var(--kc-ink-3); margin-bottom: 0.85rem; }
+#starlight__on-this-page { font-size: 0.8rem; font-weight: 700; color: var(--kai-ink-3); margin-bottom: 0.85rem; }
 .right-sidebar a { font-size: 0.95rem; }
-.right-sidebar a[aria-current='true'] { color: var(--kc-ink); font-weight: 600; }   /* white/dark, not pink */
+.right-sidebar a[aria-current='true'] { color: var(--kai-ink); font-weight: 600; }   /* white/dark, not pink */
 
 /* bottom pager: no shadow, compact, magenta hover border */
-.pagination-links a { box-shadow: none !important; border-color: var(--kc-line) !important; transition: border-color 0.15s; font-size: 0.72rem; }
-.pagination-links a:hover { border-color: var(--kc-brand) !important; }
+.pagination-links a { box-shadow: none !important; border-color: var(--kai-line) !important; transition: border-color 0.15s; font-size: 0.72rem; }
+.pagination-links a:hover { border-color: var(--kai-brand) !important; }
 .pagination-links a span:last-child { font-size: 0.92rem; }   /* page title, smaller */
 .pagination-links svg { width: 0.9rem; height: 0.9rem; }
 
@@ -199,39 +199,39 @@ h1#_top, .sl-markdown-content h1 { font-size: 2rem; font-weight: 700; letter-spa
   margin-bottom: 0.5rem;
 }
 .sl-markdown-content [role='tablist'] a[role='tab'] {
-  border: 1px solid var(--kc-line) !important;
+  border: 1px solid var(--kai-line) !important;
   box-shadow: none !important;
   border-radius: 999px;
   padding: 0.35rem 0.85rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--kc-ink-3);
+  color: var(--kai-ink-3);
   margin-bottom: 0;
 }
 .sl-markdown-content [role='tablist'] a[role='tab'][aria-selected='true'] {
-  background: var(--kc-brand);
-  border-color: var(--kc-brand) !important;
+  background: var(--kai-brand);
+  border-color: var(--kai-brand) !important;
   color: #fff;
   box-shadow: none !important;
 }
 
 /* info callouts (note + "tip"/When-to-use): Starlight defaults note→brand-accent
    tint (magenta) and tip→purple, which clashes page-to-page. Standardize BOTH to
-   the Artifact-page blue, driven by one named token (--kc-callout-info*). */
+   the Artifact-page blue, driven by one named token (--kai-callout-info*). */
 .starlight-aside--note,
 .starlight-aside--tip {
-  background-color: var(--kc-callout-info-bg) !important;
-  border-color: var(--kc-callout-info-border) !important;
+  background-color: var(--kai-callout-info-bg) !important;
+  border-color: var(--kai-callout-info-border) !important;
 }
 .starlight-aside--note .starlight-aside__title,
-.starlight-aside--tip .starlight-aside__title { color: var(--kc-callout-info) !important; }
+.starlight-aside--tip .starlight-aside__title { color: var(--kai-callout-info) !important; }
 .starlight-aside--note a,
-.starlight-aside--tip a { color: var(--kc-callout-info) !important; }
+.starlight-aside--tip a { color: var(--kai-callout-info) !important; }
 
 /* brand logo (white artwork): show as-is on dark, invert to black on light */
-:root[data-theme='light'] .kc-logo-img { filter: invert(1); }
+:root[data-theme='light'] .kai-logo-img { filter: invert(1); }
 
 /* theme toggle icon swap (sun shows in dark, moon in light) */
-.kc-theme-toggle .kc-sun { display: none; }
-:root[data-theme='dark'] .kc-theme-toggle .kc-sun { display: inline; }
-:root[data-theme='dark'] .kc-theme-toggle .kc-moon { display: none; }
+.kai-theme-toggle .kai-sun { display: none; }
+:root[data-theme='dark'] .kai-theme-toggle .kai-sun { display: inline; }
+:root[data-theme='dark'] .kai-theme-toggle .kai-moon { display: none; }

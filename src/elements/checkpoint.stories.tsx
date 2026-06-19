@@ -8,12 +8,12 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-checkpoint': JSX.HTMLAttributes<HTMLElement>;
+      'kai-checkpoint': JSX.HTMLAttributes<HTMLElement>;
     }
   }
 }
 
-/** Render the actual `<kc-checkpoint>` custom element configured by attributes. */
+/** Render the actual `<kai-checkpoint>` custom element configured by attributes. */
 function CheckpointElement(props: { label?: string; tooltip?: string; variant?: string; size?: string }) {
   let el: HTMLElement | undefined;
   onMount(() => {
@@ -22,34 +22,34 @@ function CheckpointElement(props: { label?: string; tooltip?: string; variant?: 
     if (props.tooltip) el.setAttribute('tooltip', props.tooltip);
     if (props.variant) el.setAttribute('variant', props.variant);
     if (props.size) el.setAttribute('size', props.size);
-    el.addEventListener('kc-select', () => console.log('checkpoint selected'));
+    el.addEventListener('kai-select', () => console.log('checkpoint selected'));
   });
-  return <kc-checkpoint ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '16px' }} />;
+  return <kai-checkpoint ref={(e) => (el = e as HTMLElement)} style={{ display: 'inline-block', padding: '16px' }} />;
 }
 
 const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
-<kc-checkpoint label="Restore" tooltip="Restore this checkpoint" variant="outline" size="sm"></kc-checkpoint>
+<kai-checkpoint label="Restore" tooltip="Restore this checkpoint" variant="outline" size="sm"></kai-checkpoint>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';   // registers the custom elements
+  import '@kitn.ai/ui/elements';   // registers the custom elements
 
-  const cp = document.querySelector('kc-checkpoint');
+  const cp = document.querySelector('kai-checkpoint');
   // events are CustomEvents on the element (they do not bubble)
-  cp.addEventListener('kc-select', () => console.log('restore checkpoint'));
+  cp.addEventListener('kai-select', () => console.log('restore checkpoint'));
 </script>`;
 
 const meta = {
   title: 'Components/Checkpoint',
   tags: ['autodocs'],
-  argTypes: argTypesFor('kc-checkpoint'),
+  argTypes: argTypesFor('kai-checkpoint'),
   parameters: {
     layout: 'fullscreen',
     docs: {
-      description: specDescription('kc-checkpoint', [
-          '`<kc-checkpoint>` is the framework-agnostic **web component** for a bookmark/checkpoint button (with an optional tooltip and label), isolated in **Shadow DOM**.',
+      description: specDescription('kai-checkpoint', [
+          '`<kai-checkpoint>` is the framework-agnostic **web component** for a bookmark/checkpoint button (with an optional tooltip and label), isolated in **Shadow DOM**.',
           '**When to use:** marking a restore point in a conversation in a non-Solid app. In SolidJS, compose the `Checkpoint` primitives.',
           '**Placement:** inline inside a message row (e.g. in the action bar) or in a chat toolbar; it is a compact `inline-block` button and does not need a dedicated row.',
-          "**How to use:** register once with `import '@kitn.ai/chat/elements'`, set `label`, `tooltip`, `variant` (`ghost` | `default` | `outline`), and `size` via attributes, and listen for the `kc-select` **CustomEvent** on click.",
+          "**How to use:** register once with `import '@kitn.ai/ui/elements'`, set `label`, `tooltip`, `variant` (`ghost` | `default` | `outline`), and `size` via attributes, and listen for the `kai-select` **CustomEvent** on click.",
           'See the **Code** tab for HTML usage.',
         ]),
     },

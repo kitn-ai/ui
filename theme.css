@@ -1,4 +1,4 @@
-/* @kitn.ai/chat design system — import after `@import "tailwindcss"`.
+/* @kitn.ai/ui design system — import after `@import "tailwindcss"`.
    Defines ONLY namespaced (--color-*) tokens, component keyframes, animation
    utilities, and the .chat-markdown styles. Contains NO global base/reset rules,
    so importing it restyles nothing on its own — a host opts in via the kit's
@@ -9,51 +9,51 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-background: var(--kc-color-background, hsl(0 0% 100%));
-  --color-foreground: var(--kc-color-foreground, hsl(240 10% 3.9%));
-  --color-card: var(--kc-color-card, hsl(0 0% 100%));
-  --color-card-foreground: var(--kc-color-card-foreground, hsl(240 10% 3.9%));
-  --color-popover: var(--kc-color-popover, hsl(0 0% 100%));
-  --color-popover-foreground: var(--kc-color-popover-foreground, hsl(240 10% 3.9%));
-  --color-primary: var(--kc-color-primary, hsl(240 5.9% 10%));
-  --color-primary-foreground: var(--kc-color-primary-foreground, hsl(0 0% 98%));
-  --color-secondary: var(--kc-color-secondary, hsl(240 4.8% 95.9%));
-  --color-secondary-foreground: var(--kc-color-secondary-foreground, hsl(240 5.9% 10%));
-  --color-muted: var(--kc-color-muted, hsl(240 4.8% 95.9%));
-  --color-muted-foreground: var(--kc-color-muted-foreground, hsl(240 3.8% 43%));
-  --color-accent: var(--kc-color-accent, hsl(240 4.8% 95.9%));
-  --color-accent-foreground: var(--kc-color-accent-foreground, hsl(240 5.9% 10%));
-  --color-destructive: var(--kc-color-destructive, hsl(0 72% 45%));
-  --color-destructive-foreground: var(--kc-color-destructive-foreground, hsl(0 0% 98%));
-  --color-border: var(--kc-color-border, hsl(240 5.9% 90%));
-  --color-input: var(--kc-color-input, hsl(240 5.9% 90%));
+  --color-background: var(--kai-color-background, hsl(0 0% 100%));
+  --color-foreground: var(--kai-color-foreground, hsl(240 10% 3.9%));
+  --color-card: var(--kai-color-card, hsl(0 0% 100%));
+  --color-card-foreground: var(--kai-color-card-foreground, hsl(240 10% 3.9%));
+  --color-popover: var(--kai-color-popover, hsl(0 0% 100%));
+  --color-popover-foreground: var(--kai-color-popover-foreground, hsl(240 10% 3.9%));
+  --color-primary: var(--kai-color-primary, hsl(240 5.9% 10%));
+  --color-primary-foreground: var(--kai-color-primary-foreground, hsl(0 0% 98%));
+  --color-secondary: var(--kai-color-secondary, hsl(240 4.8% 95.9%));
+  --color-secondary-foreground: var(--kai-color-secondary-foreground, hsl(240 5.9% 10%));
+  --color-muted: var(--kai-color-muted, hsl(240 4.8% 95.9%));
+  --color-muted-foreground: var(--kai-color-muted-foreground, hsl(240 3.8% 43%));
+  --color-accent: var(--kai-color-accent, hsl(240 4.8% 95.9%));
+  --color-accent-foreground: var(--kai-color-accent-foreground, hsl(240 5.9% 10%));
+  --color-destructive: var(--kai-color-destructive, hsl(0 72% 45%));
+  --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
+  --color-border: var(--kai-color-border, hsl(240 5.9% 90%));
+  --color-input: var(--kai-color-input, hsl(240 5.9% 90%));
   /* Focus ring — a deliberate blue (not a neutral) so keyboard focus is always
      obvious and on-brand in both modes. Light uses a strong blue; dark uses a
      brighter one for contrast on dark surfaces. Both clear WCAG 2.1 non-text
-     contrast (≥3:1) against the kit's backgrounds. Override via --kc-color-ring. */
-  --color-ring: var(--kc-color-ring, hsl(217 91% 53%));
+     contrast (≥3:1) against the kit's backgrounds. Override via --kai-color-ring. */
+  --color-ring: var(--kai-color-ring, hsl(217 91% 53%));
   /* Custom scrollbars — thin, rounded, subtle; thumb strengthens on hover. A
      consistent cross-platform look (the kit styles its OWN scroll regions inside
      the shadow root; the track stays transparent so nothing is forced where no
-     scrollbar is needed). Override via --kc-color-scrollbar-thumb(-hover). */
-  --color-scrollbar-thumb: var(--kc-color-scrollbar-thumb, hsl(240 5% 80%));
-  --color-scrollbar-thumb-hover: var(--kc-color-scrollbar-thumb-hover, hsl(240 4% 64%));
-  --color-sidebar: var(--kc-color-sidebar, hsl(0 0% 100%));
+     scrollbar is needed). Override via --kai-color-scrollbar-thumb(-hover). */
+  --color-scrollbar-thumb: var(--kai-color-scrollbar-thumb, hsl(240 5% 80%));
+  --color-scrollbar-thumb-hover: var(--kai-color-scrollbar-thumb-hover, hsl(240 4% 64%));
+  --color-sidebar: var(--kai-color-sidebar, hsl(0 0% 100%));
 
   /* Inline `code` accent. Blue text on a translucent blue chip. */
-  --color-code-foreground: var(--kc-color-code-foreground, hsl(224.3 76.3% 48%));
+  --color-code-foreground: var(--kai-color-code-foreground, hsl(224.3 76.3% 48%));
 
   /* Tool/status chip hues. Each chip is hue text over a 15% translucent fill of
      the SAME hue (set in tool.tsx). The bare hue is too light to reach WCAG AA
      (4.5:1) on the faint fill in LIGHT mode, so the light values are darkened;
      dark mode keeps brighter hues for AA on the dark fill. Override via
-     --kc-color-tool-* to retheme. */
-  --color-tool-blue: var(--kc-color-tool-blue, hsl(217 91% 38%));
-  --color-tool-amber: var(--kc-color-tool-amber, hsl(38 92% 28%));
-  --color-tool-green: var(--kc-color-tool-green, hsl(142 71% 26%));
-  --color-tool-red: var(--kc-color-tool-red, hsl(0 72% 42%));
+     --kai-color-tool-* to retheme. */
+  --color-tool-blue: var(--kai-color-tool-blue, hsl(217 91% 38%));
+  --color-tool-amber: var(--kai-color-tool-amber, hsl(38 92% 28%));
+  --color-tool-green: var(--kai-color-tool-green, hsl(142 71% 26%));
+  --color-tool-red: var(--kai-color-tool-red, hsl(0 72% 42%));
 
-  --radius: var(--kc-radius, 0.6rem);
+  --radius: var(--kai-radius, 0.6rem);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -61,16 +61,16 @@
 
   /* Typography scale — semantic sizes shared by all components. Each generates a
      Tailwind utility (text-caption / text-meta / text-body / text-title). To
-     restyle the kit's typography, override the namespaced --kc-text-* token on
-     :root (e.g. `--kc-text-body: 0.9375rem`) — it pierces the Shadow DOM via the
-     var() fallback, exactly like the --kc-color-* tokens. The bare --text-*
+     restyle the kit's typography, override the namespaced --kai-text-* token on
+     :root (e.g. `--kai-text-body: 0.9375rem`) — it pierces the Shadow DOM via the
+     var() fallback, exactly like the --kai-color-* tokens. The bare --text-*
      names stay internal so a host's own --text-* can't collide. (Message/markdown/
      input reading size also scales with the `proseSize` prop; these tokens cover
      the fixed chrome & controls.) */
-  --text-caption: var(--kc-text-caption, 0.6875rem);  --text-caption--line-height: 1rem;      /* 11px — micro labels, badges, sub-counts */
-  --text-meta: var(--kc-text-meta, 0.75rem);     --text-meta--line-height: 1.1rem;       /* 12px — controls, toggles, switchers, captions */
-  --text-body: var(--kc-text-body, 0.875rem);    --text-body--line-height: 1.45rem;      /* 14px — primary reading text */
-  --text-title: var(--kc-text-title, 1rem);        --text-title--line-height: 1.5rem;      /* 16px — emphasis / headers */
+  --text-caption: var(--kai-text-caption, 0.6875rem);  --text-caption--line-height: 1rem;      /* 11px — micro labels, badges, sub-counts */
+  --text-meta: var(--kai-text-meta, 0.75rem);     --text-meta--line-height: 1.1rem;       /* 12px — controls, toggles, switchers, captions */
+  --text-body: var(--kai-text-body, 0.875rem);    --text-body--line-height: 1.45rem;      /* 14px — primary reading text */
+  --text-title: var(--kai-text-title, 1rem);        --text-title--line-height: 1.5rem;      /* 16px — emphasis / headers */
 
   @keyframes typing { 0%,100% { transform: translateY(0); opacity: .5 } 50% { transform: translateY(-2px); opacity: 1 } }
   @keyframes loading-dots { 0%,100% { opacity: 0 } 50% { opacity: 1 } }
@@ -89,35 +89,35 @@
 }
 
 .dark {
-  --color-background: var(--kc-color-background, hsl(50 2% 9%));
-  --color-foreground: var(--kc-color-foreground, hsl(0 0% 98%));
-  --color-card: var(--kc-color-card, hsl(45 4% 12%));
-  --color-card-foreground: var(--kc-color-card-foreground, hsl(0 0% 98%));
-  --color-popover: var(--kc-color-popover, hsl(45 4% 12%));
-  --color-popover-foreground: var(--kc-color-popover-foreground, hsl(0 0% 98%));
-  --color-primary: var(--kc-color-primary, hsl(0 0% 98%));
-  --color-primary-foreground: var(--kc-color-primary-foreground, hsl(45 4% 11%));
-  --color-secondary: var(--kc-color-secondary, hsl(45 4% 17%));
-  --color-secondary-foreground: var(--kc-color-secondary-foreground, hsl(0 0% 98%));
-  --color-muted: var(--kc-color-muted, hsl(45 4% 17%));
-  --color-muted-foreground: var(--kc-color-muted-foreground, hsl(45 4% 64%));
-  --color-accent: var(--kc-color-accent, hsl(45 4% 17%));
-  --color-accent-foreground: var(--kc-color-accent-foreground, hsl(0 0% 98%));
-  --color-destructive: var(--kc-color-destructive, hsl(0 62.8% 30.6%));
-  --color-destructive-foreground: var(--kc-color-destructive-foreground, hsl(0 0% 98%));
-  --color-border: var(--kc-color-border, hsl(45 4% 17%));
-  --color-input: var(--kc-color-input, hsl(45 4% 17%));
-  --color-ring: var(--kc-color-ring, hsl(217 91% 68%));
-  --color-scrollbar-thumb: var(--kc-color-scrollbar-thumb, hsl(45 3% 30%));
-  --color-scrollbar-thumb-hover: var(--kc-color-scrollbar-thumb-hover, hsl(45 3% 42%));
-  --color-sidebar: var(--kc-color-sidebar, hsl(50 2% 7%));
-  --color-code-foreground: var(--kc-color-code-foreground, hsl(213 94% 78%));
+  --color-background: var(--kai-color-background, hsl(50 2% 9%));
+  --color-foreground: var(--kai-color-foreground, hsl(0 0% 98%));
+  --color-card: var(--kai-color-card, hsl(45 4% 12%));
+  --color-card-foreground: var(--kai-color-card-foreground, hsl(0 0% 98%));
+  --color-popover: var(--kai-color-popover, hsl(45 4% 12%));
+  --color-popover-foreground: var(--kai-color-popover-foreground, hsl(0 0% 98%));
+  --color-primary: var(--kai-color-primary, hsl(0 0% 98%));
+  --color-primary-foreground: var(--kai-color-primary-foreground, hsl(45 4% 11%));
+  --color-secondary: var(--kai-color-secondary, hsl(45 4% 17%));
+  --color-secondary-foreground: var(--kai-color-secondary-foreground, hsl(0 0% 98%));
+  --color-muted: var(--kai-color-muted, hsl(45 4% 17%));
+  --color-muted-foreground: var(--kai-color-muted-foreground, hsl(45 4% 64%));
+  --color-accent: var(--kai-color-accent, hsl(45 4% 17%));
+  --color-accent-foreground: var(--kai-color-accent-foreground, hsl(0 0% 98%));
+  --color-destructive: var(--kai-color-destructive, hsl(0 62.8% 30.6%));
+  --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
+  --color-border: var(--kai-color-border, hsl(45 4% 17%));
+  --color-input: var(--kai-color-input, hsl(45 4% 17%));
+  --color-ring: var(--kai-color-ring, hsl(217 91% 68%));
+  --color-scrollbar-thumb: var(--kai-color-scrollbar-thumb, hsl(45 3% 30%));
+  --color-scrollbar-thumb-hover: var(--kai-color-scrollbar-thumb-hover, hsl(45 3% 42%));
+  --color-sidebar: var(--kai-color-sidebar, hsl(50 2% 7%));
+  --color-code-foreground: var(--kai-color-code-foreground, hsl(213 94% 78%));
 
   /* Tool/status chip hues — dark mode. Brighter hues reach AA on the dark fill. */
-  --color-tool-blue: var(--kc-color-tool-blue, hsl(217 91% 70%));
-  --color-tool-amber: var(--kc-color-tool-amber, hsl(38 92% 50%));
-  --color-tool-green: var(--kc-color-tool-green, hsl(142 71% 45%));
-  --color-tool-red: var(--kc-color-tool-red, hsl(0 84% 70%));
+  --color-tool-blue: var(--kai-color-tool-blue, hsl(217 91% 70%));
+  --color-tool-amber: var(--kai-color-tool-amber, hsl(38 92% 50%));
+  --color-tool-green: var(--kai-color-tool-green, hsl(142 71% 45%));
+  --color-tool-red: var(--kai-color-tool-red, hsl(0 84% 70%));
 }
 
 /* Self-contained markdown styling — replaces the typography plugin's `prose`.
@@ -147,7 +147,7 @@
   background: color-mix(in oklab, var(--color-code-foreground) 15%, transparent);
   color: var(--color-code-foreground);
   border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.875em;
-  font-family: var(--kc-font-code, ui-monospace, "SF Mono", Menlo, monospace);
+  font-family: var(--kai-font-code, ui-monospace, "SF Mono", Menlo, monospace);
 }
 .chat-markdown table { width: 100%; border-collapse: collapse; margin: 0 0 0.75em; font-size: 0.9em; }
 .chat-markdown th, .chat-markdown td { border: 1px solid var(--color-border); padding: 0.4em 0.6em; text-align: left; }
@@ -155,17 +155,17 @@
 
 /* Themeable elevation. The kit is mostly flat (borders), but a few surfaces lift
    off the page — popovers, dropdowns, hover cards, cards. The shadow COLOR is a
-   token (--kc-shadow-color, default near-black); set it transparent for a fully
+   token (--kai-shadow-color, default near-black); set it transparent for a fully
    flat look, or tint it to match a theme. Defined here (not as a Tailwind shadow
    utility) so the color stays overridable and works in both the web-component and
    SolidJS layers. */
-.kc-elevation {
+.kai-elevation {
   box-shadow:
-    0 4px 12px -2px color-mix(in oklab, var(--kc-shadow-color, oklch(0 0 0)) 14%, transparent),
-    0 2px 6px -2px color-mix(in oklab, var(--kc-shadow-color, oklch(0 0 0)) 10%, transparent);
+    0 4px 12px -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 14%, transparent),
+    0 2px 6px -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 10%, transparent);
 }
-.kc-elevation-sm {
-  box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--kc-shadow-color, oklch(0 0 0)) 8%, transparent);
+.kai-elevation-sm {
+  box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 8%, transparent);
 }
 
 /* Cross-platform thin scrollbar utility (Firefox + WebKit). Used by ScrollArea

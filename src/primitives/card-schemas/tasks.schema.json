@@ -11,7 +11,7 @@
       "enum": ["select"],
       "default": "select",
       "description": "v1 supports only 'select' (toggle + confirm). 'progress' (live AG-UI status) is a future enum value; restricting it now keeps the wire forward-compatible.",
-      "x-kc-mode": true
+      "x-kai-mode": true
     },
     "heading": {
       "type": "string",
@@ -29,7 +29,7 @@
             "type": "string",
             "minLength": 1,
             "description": "Stable id; the selected ids are returned in the result. Unique within `tasks`.",
-            "x-kc-unique": true
+            "x-kai-unique": true
           },
           "label": { "type": "string", "minLength": 1, "description": "Row label." },
           "description": { "type": "string", "description": "Optional secondary line under the label." },
@@ -50,7 +50,7 @@
       "type": "boolean",
       "default": false,
       "description": "Render a master select-all checkbox above the list.",
-      "x-kc-control": "select-all"
+      "x-kai-control": "select-all"
     },
     "confirmLabel": {
       "type": "string",
@@ -66,13 +66,13 @@
       "type": "integer",
       "minimum": 0,
       "description": "Optional minimum number that must be selected to confirm.",
-      "x-kc-select-min": true
+      "x-kai-select-min": true
     },
     "max": {
       "type": "integer",
       "minimum": 1,
       "description": "Optional maximum selectable; further toggles are blocked once reached.",
-      "x-kc-select-max": true
+      "x-kai-select-max": true
     }
   }
 }

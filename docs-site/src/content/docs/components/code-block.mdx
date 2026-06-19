@@ -11,18 +11,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-code-block</p>
+<p class="kai-tag-sub">kai-code-block</p>
 
-<p class="kc-lede">Drop in a syntax-highlighted snippet with a built-in copy button — set one property, pick a language, and Shiki handles the rest.</p>
+<p class="kai-lede">Drop in a syntax-highlighted snippet with a built-in copy button — set one property, pick a language, and Shiki handles the rest.</p>
 
 <Facts items={['Shadow DOM', 'Shiki highlighting', '100+ languages', 'Built-in copy button', 'Light / dark themes']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-code-block" />
+<Playground client:only="solid" tag="kai-code-block" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-code-block>` for highlighted snippets outside SolidJS — message bubbles, tutorial cards, documentation panes. In SolidJS, compose `CodeBlock` and `CodeBlockCode` directly for finer control. The element is `display: block` and fills its container.
+Use `<kai-code-block>` for highlighted snippets outside SolidJS — message bubbles, tutorial cards, documentation panes. In SolidJS, compose `CodeBlock` and `CodeBlockCode` directly for finer control. The element is `display: block` and fills its container.
 </Aside>
 
 ## Usage
@@ -30,10 +30,10 @@ Use `<kc-code-block>` for highlighted snippets outside SolidJS — message bubbl
 Set `code` in JavaScript (multiline strings don't survive HTML attributes) and `language` as an attribute:
 
 ```html
-<kc-code-block id="cb" language="ts"></kc-code-block>
+<kai-code-block id="cb" language="ts"></kai-code-block>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const cb = document.getElementById('cb');
   cb.code = `export function greet(name: string) {
   return \`Hello, \${name}!\`;
@@ -50,38 +50,38 @@ Set `code` in JavaScript (multiline strings don't survive HTML attributes) and `
 
 ### TypeScript
 
-<Example client:visible tag="kc-code-block" data="typescript" />
+<Example client:visible tag="kai-code-block" data="typescript" />
 
 ### JavaScript
 
-<Example client:visible tag="kc-code-block" data="javascript" />
+<Example client:visible tag="kai-code-block" data="javascript" />
 
 ### Python
 
-<Example client:visible tag="kc-code-block" data="python" />
+<Example client:visible tag="kai-code-block" data="python" />
 
 ### Shell / Bash
 
-<Example client:visible tag="kc-code-block" data="bash" />
+<Example client:visible tag="kai-code-block" data="bash" />
 
 ### Compact Text Size
 
 `prose-size="xs"` tightens the font for dense snippets or embedded cards.
 
-<Example client:visible tag="kc-code-block" config={{ proseSize: 'xs' }} data="typescript" />
+<Example client:visible tag="kai-code-block" config={{ proseSize: 'xs' }} data="typescript" />
 
 ### Highlighting Disabled
 
 `code-highlight="false"` renders plain monospace — no Shiki, no colours. Good for terminal output or log lines.
 
-<Example client:visible tag="kc-code-block" config={{ codeHighlight: false }} data="plaintext" />
+<Example client:visible tag="kai-code-block" config={{ codeHighlight: false }} data="plaintext" />
 
 ## Props
 
-<PropTable tag="kc-code-block" />
+<PropTable tag="kai-code-block" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-code-block" />
+<ComposedFrom tag="kai-code-block" />
 
 <NeedAHand />

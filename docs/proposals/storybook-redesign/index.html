@@ -41,11 +41,11 @@
         <div class="nav-group">
           <div class="label">Components</div>
           <ul>
-            <li><a href="#"><span class="dot"></span>Chat <small>kc-chat</small></a></li>
-            <li><a href="#"><span class="dot"></span>Message <small>kc-message</small></a></li>
-            <li><a class="active" href="#"><span class="dot"></span>Artifact <small>kc-artifact</small></a></li>
-            <li><a href="#"><span class="dot"></span>Prompt Input <small>kc-prompt-input</small></a></li>
-            <li><a href="#"><span class="dot"></span>Sources <small>kc-sources</small></a></li>
+            <li><a href="#"><span class="dot"></span>Chat <small>kai-chat</small></a></li>
+            <li><a href="#"><span class="dot"></span>Message <small>kai-message</small></a></li>
+            <li><a class="active" href="#"><span class="dot"></span>Artifact <small>kai-artifact</small></a></li>
+            <li><a href="#"><span class="dot"></span>Prompt Input <small>kai-prompt-input</small></a></li>
+            <li><a href="#"><span class="dot"></span>Sources <small>kai-sources</small></a></li>
           </ul>
         </div>
         <div class="nav-group">
@@ -84,7 +84,7 @@
             <span class="eyebrow">Web Component</span>
             <h1 class="title">Artifact</h1>
             <p class="lede">A framed, switchable viewer for AI-generated artifacts — the “canvas” pattern from Claude Artifacts, ChatGPT Canvas, v0 and bolt.</p>
-            <span class="tagchip">kc-artifact</span>
+            <span class="tagchip">kai-artifact</span>
             <div class="facts">
               <span class="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>Shadow DOM</span>
               <span class="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 8 20 0"/></svg>Sandboxed iframe</span>
@@ -120,7 +120,7 @@
           <h2 id="s-when"><span class="num">02</span> When to use</h2>
           <div class="callout use">
             <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-            <div class="ct">Show an AI-generated artifact — a web page, doc, image or PDF your backend hosts — <strong>beside the conversation</strong>, typically inside a <code class="inline">kc-resizable</code> panel. The component <strong>frames</strong> content; your backend serves it, so relative links, back/forward, reload and multi-format work natively.</div>
+            <div class="ct">Show an AI-generated artifact — a web page, doc, image or PDF your backend hosts — <strong>beside the conversation</strong>, typically inside a <code class="inline">kai-resizable</code> panel. The component <strong>frames</strong> content; your backend serves it, so relative links, back/forward, reload and multi-format work natively.</div>
           </div>
 
           <!-- ── HOW TO USE: numbered steps, not a 90-word sentence ── -->
@@ -129,19 +129,19 @@
             <li><div class="body"><strong>Register once.</strong> <code class="inline">import '@kitn.ai/chat/elements'</code> anywhere before the element mounts.</div></li>
             <li><div class="body"><strong>Point it at your artifact.</strong> Set <code class="inline">src</code> to the hosted URL.</div></li>
             <li><div class="body"><strong>Feed the Code tab.</strong> Set the <code class="inline">files</code> property — a JS array of <code class="inline">{ path, url?, code?, language?, type? }</code>.</div></li>
-            <li><div class="body"><strong>Listen.</strong> <code class="inline">kc-navigate</code>, <code class="inline">kc-tab-change</code> and <code class="inline">kc-file-select</code> tell you what the user did.</div></li>
+            <li><div class="body"><strong>Listen.</strong> <code class="inline">kai-navigate</code>, <code class="inline">kai-tab-change</code> and <code class="inline">kai-file-select</code> tell you what the user did.</div></li>
           </ol>
 
           <div class="code">
             <div class="bar"><span class="lang">html</span><button class="copy">Copy</button></div>
 <pre><span class="c">&lt;!-- register, then drive via properties --&gt;</span>
-&lt;<span class="t">kc-artifact</span> <span class="f">id</span>=<span class="s">"art"</span> <span class="f">src</span>=<span class="s">"/artifacts/site/index.html"</span>&gt;&lt;/<span class="t">kc-artifact</span>&gt;
+&lt;<span class="t">kai-artifact</span> <span class="f">id</span>=<span class="s">"art"</span> <span class="f">src</span>=<span class="s">"/artifacts/site/index.html"</span>&gt;&lt;/<span class="t">kai-artifact</span>&gt;
 
 &lt;<span class="t">script</span> <span class="f">type</span>=<span class="s">"module"</span>&gt;
   <span class="k">import</span> <span class="s">'@kitn.ai/chat/elements'</span>;
   <span class="k">const</span> art = document.<span class="f">getElementById</span>(<span class="s">'art'</span>);
   art.files = [{ path: <span class="s">'index.html'</span>, language: <span class="s">'html'</span> }];
-  art.<span class="f">addEventListener</span>(<span class="s">'kc-navigate'</span>, (e) =&gt; console.<span class="f">log</span>(e.detail.url));
+  art.<span class="f">addEventListener</span>(<span class="s">'kai-navigate'</span>, (e) =&gt; console.<span class="f">log</span>(e.detail.url));
 &lt;/<span class="t">script</span>&gt;</pre>
           </div>
 
@@ -167,9 +167,9 @@
           <!-- ── EVENTS ── -->
           <h2 id="s-events"><span class="num">05</span> Events</h2>
           <div class="events">
-            <div class="event"><span class="nm">kc-navigate</span><span class="arrow">→</span><span class="detail">{ url }</span><span class="desc">the framed page navigated</span></div>
-            <div class="event"><span class="nm">kc-tab-change</span><span class="arrow">→</span><span class="detail">{ tab }</span><span class="desc">Preview ⇄ Code toggled</span></div>
-            <div class="event"><span class="nm">kc-file-select</span><span class="arrow">→</span><span class="detail">{ path }</span><span class="desc">a file was picked in the tree</span></div>
+            <div class="event"><span class="nm">kai-navigate</span><span class="arrow">→</span><span class="detail">{ url }</span><span class="desc">the framed page navigated</span></div>
+            <div class="event"><span class="nm">kai-tab-change</span><span class="arrow">→</span><span class="detail">{ tab }</span><span class="desc">Preview ⇄ Code toggled</span></div>
+            <div class="event"><span class="nm">kai-file-select</span><span class="arrow">→</span><span class="detail">{ path }</span><span class="desc">a file was picked in the tree</span></div>
           </div>
 
           <!-- ── design-system strip (proof the primitives are reusable) ── -->

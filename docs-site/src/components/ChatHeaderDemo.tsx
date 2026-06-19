@@ -1,8 +1,8 @@
-/** Capstone proof for the header-composition kit: a <kc-chat> whose header is
+/** Capstone proof for the header-composition kit: a <kai-chat> whose header is
  *  rebuilt to mirror the ChatGPT layout using the new primitives —
- *  `slot="header-start"` holds a sidebar toggle + a grouped <kc-model-switcher>,
- *  `slot="header-end"` holds a <kc-popover> settings menu containing a
- *  <kc-switch>. A simple conversations rail makes the toggle meaningful. */
+ *  `slot="header-start"` holds a sidebar toggle + a grouped <kai-model-switcher>,
+ *  `slot="header-end"` holds a <kai-popover> settings menu containing a
+ *  <kai-switch>. A simple conversations rail makes the toggle meaningful. */
 import { createSignal, onMount, onCleanup, For, Show } from 'solid-js';
 import { loadKit } from './example/kit';
 import IconPanelLeft from '~icons/lucide/panel-left';
@@ -40,7 +40,7 @@ export default function ChatHeaderDemo() {
   const theme = () => document.documentElement.dataset.theme ?? 'light';
 
   const applyTheme = () => {
-    containerRef?.querySelectorAll('kc-chat, kc-model-switcher, kc-popover, kc-switch')
+    containerRef?.querySelectorAll('kai-chat, kai-model-switcher, kai-popover, kai-switch')
       .forEach((el) => el.setAttribute('theme', theme()));
   };
 
@@ -69,18 +69,18 @@ export default function ChatHeaderDemo() {
       customElements.upgrade(chatEl);
       chatEl.messages = SEED;
       (chatEl as any).placeholder = 'Message the assistant…';
-      chatEl.addEventListener('kc-submit', onSubmit);
+      chatEl.addEventListener('kai-submit', onSubmit);
     }
     if (msEl) {
       customElements.upgrade(msEl);
       msEl.models = MODELS;
       msEl.currentModel = 'gpt-5.5';
-      msEl.addEventListener('kc-model-change', (e) => { msEl!.currentModel = (e as CustomEvent<{ modelId: string }>).detail.modelId; });
+      msEl.addEventListener('kai-model-change', (e) => { msEl!.currentModel = (e as CustomEvent<{ modelId: string }>).detail.modelId; });
     }
     applyTheme();
     const obs = new MutationObserver(applyTheme);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    onCleanup(() => { clearTimeout(timer); chatEl?.removeEventListener('kc-submit', onSubmit); obs.disconnect(); });
+    onCleanup(() => { clearTimeout(timer); chatEl?.removeEventListener('kai-submit', onSubmit); obs.disconnect(); });
   });
 
   const railBtn = 'flex w-full items-center rounded-md px-2 py-1.5 text-left text-sm text-ink/80 hover:bg-line/60';
@@ -98,20 +98,20 @@ export default function ChatHeaderDemo() {
 
       <div class="min-w-0 flex-1">
         {/* @ts-expect-error custom element */}
-        <kc-chat ref={(el: HTMLElement) => (chatEl = el as any)} chat-title="" style={{ display: 'block', height: '100%' }}>
+        <kai-chat ref={(el: HTMLElement) => (chatEl = el as any)} chat-title="" style={{ display: 'block', height: '100%' }}>
           {/* header-start: sidebar toggle + grouped model menu */}
           <div slot="header-start" style={{ display: 'flex', 'align-items': 'center', gap: '0.25rem' }}>
             <button type="button" class={iconBtn} aria-label="Toggle sidebar" onClick={() => setRailOpen(!railOpen())}>
               <IconPanelLeft style={{ width: '1.05rem', height: '1.05rem' }} />
             </button>
             {/* @ts-expect-error custom element */}
-            <kc-model-switcher ref={(el: HTMLElement) => (msEl = el as any)} />
+            <kai-model-switcher ref={(el: HTMLElement) => (msEl = el as any)} />
           </div>
 
           {/* header-end: settings popover with a switch */}
           <div slot="header-end">
             {/* @ts-expect-error custom element */}
-            <kc-popover placement="bottom-end">
+            <kai-popover placement="bottom-end">
               <button slot="trigger" type="button" class={iconBtn} aria-label="Settings">
                 <IconSettings style={{ width: '1.05rem', height: '1.05rem' }} />
               </button>
@@ -120,19 +120,19 @@ export default function ChatHeaderDemo() {
                 <div class="flex items-center justify-between rounded-md px-2 py-2 text-sm">
                   <span>Temporary chat</span>
                   {/* @ts-expect-error custom element */}
-                  <kc-switch label="Temporary chat" />
+                  <kai-switch label="Temporary chat" />
                 </div>
                 <div class="flex items-center justify-between rounded-md px-2 py-2 text-sm">
                   <span>Show timestamps</span>
                   {/* @ts-expect-error custom element */}
-                  <kc-switch checked label="Show timestamps" />
+                  <kai-switch checked label="Show timestamps" />
                 </div>
               </div>
               {/* @ts-expect-error custom element */}
-            </kc-popover>
+            </kai-popover>
           </div>
           {/* @ts-expect-error custom element */}
-        </kc-chat>
+        </kai-chat>
       </div>
     </div>
   );

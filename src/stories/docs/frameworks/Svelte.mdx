@@ -10,8 +10,8 @@ boilerplate. No wrappers, no refs, no workarounds needed.
 
 There are **two ways to build with the kit**, and you can mix them:
 
-1. **`<kc-chat>`** — the batteries-included shell: a whole chat experience in one tag. Fastest start.
-2. **Compose the individual elements** (`<kc-conversations>`, `<kc-markdown>`, `<kc-artifact>`, …)
+1. **`<kai-chat>`** — the batteries-included shell: a whole chat experience in one tag. Fastest start.
+2. **Compose the individual elements** (`<kai-conversations>`, `<kai-markdown>`, `<kai-artifact>`, …)
    into your own layout when you want full control.
 
 Both are shown below.
@@ -19,32 +19,32 @@ Both are shown below.
 ## Install & setup
 
 ```bash
-npm i @kitn.ai/chat
+npm i @kitn.ai/ui
 ```
 
 Register the custom elements once (a side-effect import) near your app entry:
 
 ```js
 // e.g. src/main.js or src/app.svelte <script>
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
-- **`@kitn.ai/chat/elements`** — registers every `<kc-*>` element globally. One import is enough
+- **`@kitn.ai/ui/elements`** — registers every `<kai-*>` element globally. One import is enough
   for the whole app.
 - **No special config needed**: Svelte sets object and array values as DOM **properties** (not
   stringified attributes) when you use the `{prop}` shorthand or `prop={value}` syntax. Custom
   events fire as standard DOM `CustomEvent`s, so `on:eventname` just works.
 - **No CSS to import**: each element is styled inside its own Shadow DOM. Pull in
-  `@kitn.ai/chat/theme.css` only if you want to override design tokens (see **Theming**).
+  `@kitn.ai/ui/theme.css` only if you want to override design tokens (see **Theming**).
 
 ## Quick start — the all-in-one shell
 
-`<kc-chat>` is **transport-agnostic**: give it a `messages` array, handle the `submit` event, and
+`<kai-chat>` is **transport-agnostic**: give it a `messages` array, handle the `submit` event, and
 stream your model's reply back into state. You own the request; the element owns the UI.
 
 ```html
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let messages = [
     { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
@@ -72,10 +72,10 @@ stream your model's reply back into state. You own the request; the element owns
   flex and let the element grow with `flex: 1` rather than hard-coding a height.
 -->
 <div style="display: flex; flex-direction: column; height: 100dvh;">
-  <kc-chat
+  <kai-chat
     {messages}
     suggestions={['Summarize the chat', 'Start fresh']}
-    on:kc-submit={handleSubmit}
+    on:kai-submit={handleSubmit}
     style="flex: 1; min-height: 0;"
   />
 </div>
@@ -87,13 +87,13 @@ stream your model's reply back into state. You own the request; the element owns
 
 ## Go further — compose the pieces
 
-`<kc-chat>` is one option, not the only one. Every element can be used on its own, so you can
-assemble your own layout. Here's a multi-conversation shell — a `<kc-conversations>` sidebar next
-to the `<kc-chat>` thread:
+`<kai-chat>` is one option, not the only one. Every element can be used on its own, so you can
+assemble your own layout. Here's a multi-conversation shell — a `<kai-conversations>` sidebar next
+to the `<kai-chat>` thread:
 
 ```html
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   let conversations = myConversations;
   let activeId = conversations[0]?.id;
@@ -110,18 +110,18 @@ to the `<kc-chat>` thread:
   with `flex: 1`. The elements fill whatever box you give them.
 -->
 <div style="display: flex; height: 100dvh;">
-  <kc-conversations
+  <kai-conversations
     {conversations}
     {activeId}
-    on:kc-conversation-select={handleConversationSelect}
-    on:kc-new-chat={() => startNewConversation()}
-    on:kc-toggle-sidebar={() => sidebarOpen = !sidebarOpen}
+    on:kai-conversation-select={handleConversationSelect}
+    on:kai-new-chat={() => startNewConversation()}
+    on:kai-toggle-sidebar={() => sidebarOpen = !sidebarOpen}
     style="width: 300px; flex-shrink: 0;"
   />
 
-  <kc-chat
+  <kai-chat
     {messages}
-    on:kc-submit={(e) => sendMessage(e.detail.value)}
+    on:kai-submit={(e) => sendMessage(e.detail.value)}
     style="flex: 1; min-width: 0;"
   />
 </div>
@@ -129,14 +129,14 @@ to the `<kc-chat>` thread:
 
 ### Make the panels resizable
 
-Want a draggable divider between the sidebar and the thread? Wrap the panels in `<kc-resizable>`
-with one `<kc-resizable-item>` each — the handles are inserted for you (up to 3 panels). Each item
+Want a draggable divider between the sidebar and the thread? Wrap the panels in `<kai-resizable>`
+with one `<kai-resizable-item>` each — the handles are inserted for you (up to 3 panels). Each item
 takes a `size` (px or `%`) plus optional `min`/`max`; listen for the `change` event
 (`detail.sizes`) to persist the layout.
 
 ```html
 <script>
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   function handleResize(e) {
     // e.detail.sizes is an array of the current panel sizes
@@ -145,19 +145,19 @@ takes a `size` (px or `%`) plus optional `min`/`max`; listen for the `change` ev
 </script>
 
 <div style="display: flex; flex-direction: column; height: 100dvh;">
-  <kc-resizable orientation="horizontal" on:kc-change={handleResize} style="flex: 1; min-height: 0;">
-    <kc-resizable-item size="25%" min="200px">
-      <kc-conversations {conversations} {activeId} on:kc-conversation-select={handleConversationSelect} />
-    </kc-resizable-item>
-    <kc-resizable-item>
-      <kc-chat {messages} on:kc-submit={handleSubmit} />
-    </kc-resizable-item>
-  </kc-resizable>
+  <kai-resizable orientation="horizontal" on:kai-change={handleResize} style="flex: 1; min-height: 0;">
+    <kai-resizable-item size="25%" min="200px">
+      <kai-conversations {conversations} {activeId} on:kai-conversation-select={handleConversationSelect} />
+    </kai-resizable-item>
+    <kai-resizable-item>
+      <kai-chat {messages} on:kai-submit={handleSubmit} />
+    </kai-resizable-item>
+  </kai-resizable>
 </div>
 ```
 
-You can also drop **standalone display elements** anywhere in your own UI — `<kc-markdown>`,
-`<kc-code-block>`, `<kc-artifact>`, `<kc-reasoning>`, `<kc-tool>` — to render rich AI content
+You can also drop **standalone display elements** anywhere in your own UI — `<kai-markdown>`,
+`<kai-code-block>`, `<kai-artifact>`, `<kai-reasoning>`, `<kai-tool>` — to render rich AI content
 without adopting the whole chat shell. Each fills its container and is controlled via props and
 events.
 
@@ -184,11 +184,11 @@ Key events and their `detail` shapes:
 
 | Element | Event | `e.detail` |
 |---|---|---|
-| `kc-chat` | `submit` | `{ value: string }` — the user's input text |
-| `kc-conversations` | `conversationselect` | `{ id: string }` — the selected conversation id |
-| `kc-conversations` | `newchat` | `{}` |
-| `kc-conversations` | `togglesidebar` | `{}` |
-| `kc-resizable` | `change` | `{ sizes: string[] }` — current panel sizes |
+| `kai-chat` | `submit` | `{ value: string }` — the user's input text |
+| `kai-conversations` | `conversationselect` | `{ id: string }` — the selected conversation id |
+| `kai-conversations` | `newchat` | `{}` |
+| `kai-conversations` | `togglesidebar` | `{}` |
+| `kai-resizable` | `change` | `{ sizes: string[] }` — current panel sizes |
 
 No adapters, no special directives: Svelte's compiler handles property assignment on custom elements
 automatically, so `{messages}` always delivers a live JS array to the element.

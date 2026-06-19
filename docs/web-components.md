@@ -2,13 +2,13 @@
 
 ## Overview
 
-`@kitn.ai/chat` ships 27 framework-agnostic custom elements built on the SolidJS kit.
+`@kitn.ai/ui` ships 27 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
-| `<kc-chat>` | Full chat UI — message list plus prompt input |
-| `<kc-conversations>` | Sidebar conversation browser with group support |
-| `<kc-prompt-input>` | Standalone text-input area with send button |
+| `<kai-chat>` | Full chat UI — message list plus prompt input |
+| `<kai-conversations>` | Sidebar conversation browser with group support |
+| `<kai-prompt-input>` | Standalone text-input area with send button |
 | + 24 composable primitives | See the full roster below |
 
 Each element renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the element bundle — the host does not need SolidJS.
@@ -21,13 +21,13 @@ The authoritative machine-readable API is the **Custom Elements Manifest** at `d
 
 - **Controlled, not stateful.** The host owns the data. You push it in via JS **properties** (`el.messages = …`, `el.conversations = …`), the element pushes interactions out via **events**, and you update the properties in response. The element keeps no message store of its own — to stream a reply you keep reassigning `el.messages`.
 - **Data in = properties, config = attributes, data out = events.** Object/array data (messages, models, context) must be set as properties; simple config (`theme`, `prose-size`, `search`) also works as attributes.
-- **Opt-in by data/flags.** Features appear when you give them data: pass `models` → a model switcher; pass `context` → a token meter; set `search`/`voice` → those buttons. Omit them → they don't render. Re-theme with `--kc-*` tokens.
+- **Opt-in by data/flags.** Features appear when you give them data: pass `models` → a model switcher; pass `context` → a token meter; set `search`/`voice` → those buttons. Omit them → they don't render. Re-theme with `--kai-*` tokens.
 
-### What `<kc-chat>` includes vs. the primitive layer
+### What `<kai-chat>` includes vs. the primitive layer
 
-`<kc-chat>` is the **drop-in** layer. Per message it renders: Markdown + code highlighting, **reasoning** blocks, **tool-call** panels, **attachments**, and **action buttons** (copy/like/dislike/regenerate). It also offers the header (title + model switcher + context meter), a scroll-to-bottom button, suggestions, and the input toolbar.
+`<kai-chat>` is the **drop-in** layer. Per message it renders: Markdown + code highlighting, **reasoning** blocks, **tool-call** panels, **attachments**, and **action buttons** (copy/like/dislike/regenerate). It also offers the header (title + model switcher + context meter), a scroll-to-bottom button, suggestions, and the input toolbar.
 
-Some kit features are **primitive-only** — not surfaced by the web component: **ChainOfThought**, **FeedbackBar**, **ThinkingBar / TextShimmer** (animated "thinking"), **VoiceInput**, **FileUpload**, **SlashCommand**. If you need those, custom layout/placement, or anything the props don't cover, **compose the SolidJS primitives directly** (`import { … } from '@kitn.ai/chat'` — everything is exported). No forking required: tune via props/tokens, or drop to the primitive layer.
+Some kit features are **primitive-only** — not surfaced by the web component: **ChainOfThought**, **FeedbackBar**, **ThinkingBar / TextShimmer** (animated "thinking"), **VoiceInput**, **FileUpload**, **SlashCommand**. If you need those, custom layout/placement, or anything the props don't cover, **compose the SolidJS primitives directly** (`import { … } from '@kitn.ai/ui'` — everything is exported). No forking required: tune via props/tokens, or drop to the primitive layer.
 
 ---
 
@@ -52,7 +52,7 @@ The build is **ES-module only** by design. A UMD/IIFE build cannot code-split, s
 Import the ES module as a side-effect. It registers all **40+ custom elements** via `customElements.define`:
 
 ```js
-import '@kitn.ai/chat/elements';
+import '@kitn.ai/ui/elements';
 ```
 
 The `./elements` export in `package.json` resolves to `dist/kitn-chat.es.js`.
@@ -69,13 +69,13 @@ For plain HTML pages:
 
 All rich props (arrays, objects) must be set as **JavaScript properties**, not HTML attributes. Events are standard DOM `CustomEvent`s dispatched on the host element. They do **not** bubble and are **not** composed — listen directly on the element (`el.addEventListener(...)`).
 
-**Boolean attributes** behave like normal HTML: a bare attribute turns the flag on, and `="false"` (or omitting it) turns it off. All of these are equivalent — `<kc-chat loading>`, `<kc-chat loading="true">`, and `el.loading = true`; `<kc-chat loading="false">`, omitting it, and `el.loading = false` all leave it off.
+**Boolean attributes** behave like normal HTML: a bare attribute turns the flag on, and `="false"` (or omitting it) turns it off. All of these are equivalent — `<kai-chat loading>`, `<kai-chat loading="true">`, and `el.loading = true`; `<kai-chat loading="false">`, omitting it, and `el.loading = false` all leave it off.
 
 ```html
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
-  const chat = document.querySelector('kc-chat');
+  const chat = document.querySelector('kai-chat');
 
   // Set rich props as JS properties
   chat.messages = [
@@ -83,12 +83,12 @@ All rich props (arrays, objects) must be set as **JavaScript properties**, not H
   ];
 
   // Listen for events via addEventListener
-  chat.addEventListener('kc-submit', (e) => {
+  chat.addEventListener('kai-submit', (e) => {
     console.log('user sent:', e.detail.value);
   });
 </script>
 
-<kc-chat></kc-chat>
+<kai-chat></kai-chat>
 ```
 
 ### TypeScript
@@ -96,8 +96,8 @@ All rich props (arrays, objects) must be set as **JavaScript properties**, not H
 Importing the elements entry augments `HTMLElementTagNameMap`, so DOM lookups are typed (props autocompleted, wrong assignments rejected):
 
 ```ts
-import '@kitn.ai/chat/elements';
-const chat = document.querySelector('kc-chat'); // : KcChatElement | null
+import '@kitn.ai/ui/elements';
+const chat = document.querySelector('kai-chat'); // : KaiChatElement | null
 chat!.messages = [/* … */];                        // typed
 ```
 
@@ -105,10 +105,10 @@ A [Custom Elements Manifest](https://github.com/webcomponents/custom-elements-ma
 
 ### React
 
-Typed wrappers are generated for every element under `@kitn.ai/chat/react` (React is an optional peer dependency). They set rich data as DOM **properties** (so arrays/objects pass through correctly) and expose CustomEvents as `on<Event>` props:
+Typed wrappers are generated for every element under `@kitn.ai/ui/react` (React is an optional peer dependency). They set rich data as DOM **properties** (so arrays/objects pass through correctly) and expose CustomEvents as `on<Event>` props:
 
 ```tsx
-import { Chat } from '@kitn.ai/chat/react';
+import { Chat } from '@kitn.ai/ui/react';
 
 <Chat
   messages={messages}
@@ -118,7 +118,7 @@ import { Chat } from '@kitn.ai/chat/react';
 />;
 ```
 
-Component names are the bare friendly name of the element (`kc-chat` → `Chat`); event props are `on` + the event name with the `kc-` prefix stripped and each hyphen-segment PascalCased (`kc-message-action` → `onMessageAction`).
+Component names are the bare friendly name of the element (`kai-chat` → `Chat`); event props are `on` + the event name with the `kai-` prefix stripped and each hyphen-segment PascalCased (`kai-message-action` → `onMessageAction`).
 
 ---
 
@@ -128,15 +128,15 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 
 ---
 
-### `<kc-chat>` / `Chat`
+### `<kai-chat>` / `Chat`
 
-<!-- spec:kc-chat -->
+<!-- spec:kai-chat -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `messages` | — | `{ id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]` | `[]` | The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). |
-| `value` | `value` | `undefined | string` | — | Controlled value of the input. When set, the host owns the input text and must update it on `kc-value-change`; leave unset for uncontrolled behavior. |
+| `value` | `value` | `undefined | string` | — | Controlled value of the input. When set, the host owns the input text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
 | `loading` | `loading` | `undefined | false | true` | `false` | When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). |
 | `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property. |
@@ -146,15 +146,15 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `chatTitle` | `chat-title` | `undefined | string` | — | Optional header title shown on the left of the header. |
-| `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kc-model-change` event fires on selection. |
+| `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Optional model list. When set (>1 model) a ModelSwitcher is shown in the header and a `kai-model-change` event fires on selection. |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently selected model id (pairs with `models`). |
 | `context` | — | `ContextData | undefined` | — | Optional context-window token usage. When set, a Context token meter is shown in the header. |
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
-| `headerStart` | `header-start` | `undefined | false | true` | — | Whether the host has `slot="header-start"` content (left of the title) — set by the `<kc-chat>` facade so a custom control forces the header open. |
+| `headerStart` | `header-start` | `undefined | false | true` | — | Whether the host has `slot="header-start"` content (left of the title) — set by the `<kai-chat>` facade so a custom control forces the header open. |
 | `headerEnd` | `header-end` | `undefined | false | true` | — | Whether the host has `slot="header-end"` content (right of the controls). |
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the input toolbar; fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the input toolbar; fires a `voice` event. |
-| `slashCommands` | — | `SlashCommandItem[] | undefined` | — | Slash commands — when set, typing `/` in the input opens the command palette and fires `kc-slash-select`. Set as a JS property. |
+| `slashCommands` | — | `SlashCommandItem[] | undefined` | — | Slash commands — when set, typing `/` in the input opens the command palette and fires `kai-slash-select`. Set as a JS property. |
 | `slashActiveIds` | — | `undefined | string[]` | — | Command ids to highlight as active in the palette. |
 | `slashCompact` | `slash-compact` | `undefined | false | true` | `false` | Single-line palette rows. |
 | `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). |
@@ -163,14 +163,14 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-message-action` | `{ messageId: string; action: string }` | An action button on a message was clicked. `action` is the built-in name or custom id. |
-| `kc-model-change` | `{ modelId: string }` | The header model switcher changed. |
-| `kc-search` | — | The Search button was clicked. |
-| `kc-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
-| `kc-submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
-| `kc-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
-| `kc-value-change` | `{ value: string }` | Fired on every input change. |
-| `kc-voice` | — | The Mic / voice button was clicked. |
+| `kai-message-action` | `{ messageId: string; action: string }` | An action button on a message was clicked. `action` is the built-in name or custom id. |
+| `kai-model-change` | `{ modelId: string }` | The header model switcher changed. |
+| `kai-search` | — | The Search button was clicked. |
+| `kai-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
+| `kai-submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
+| `kai-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
+| `kai-value-change` | `{ value: string }` | Fired on every input change. |
+| `kai-voice` | — | The Mic / voice button was clicked. |
 
 #### Composed from
 
@@ -179,15 +179,15 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-chat -->
+<!-- /spec:kai-chat -->
 
 A complete chat interface: a scrolling message list (with Markdown rendering, reasoning blocks, tool call panels, and message action buttons) plus a prompt input area with a send button.
 
 ---
 
-### `<kc-workspace>` / `Workspace`
+### `<kai-workspace>` / `Workspace`
 
-<!-- spec:kc-workspace -->
+<!-- spec:kai-workspace -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -217,24 +217,24 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `sidebarWidth` | `sidebar-width` | `undefined | number` | `22` | Sidebar default width as a percent of the workspace (default 22). |
 | `sidebarMinWidth` | `sidebar-min-width` | `undefined | number` | `200` | Sidebar min width in px (default 200). |
 | `sidebarMaxWidth` | `sidebar-max-width` | `undefined | number` | `420` | Sidebar max width in px (default 420). |
-| `sidebarCollapsed` | `sidebar-collapsed` | `undefined | false | true` | — | Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kc-sidebar-toggle` event. Omit for uncontrolled (the element manages it). |
+| `sidebarCollapsed` | `sidebar-collapsed` | `undefined | false | true` | — | Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kai-sidebar-toggle` event. Omit for uncontrolled (the element manages it). |
 | `defaultSidebarCollapsed` | `default-sidebar-collapsed` | `undefined | false | true` | — | Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-conversation-select` | `{ id: string }` | A conversation was selected in the sidebar. |
-| `kc-message-action` | `{ messageId: string; action: string }` | An action button on a message was clicked. |
-| `kc-model-change` | `{ modelId: string }` | The header model switcher changed. |
-| `kc-new-chat` | — | The "New chat" button was clicked. |
-| `kc-search` | — | The Search button was clicked. |
-| `kc-sidebar-toggle` | `{ collapsed: false | true }` | The sidebar was collapsed or expanded. |
-| `kc-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
-| `kc-submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
-| `kc-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
-| `kc-value-change` | `{ value: string }` | Fired on every input change. |
-| `kc-voice` | — | The Mic / voice button was clicked. |
+| `kai-conversation-select` | `{ id: string }` | A conversation was selected in the sidebar. |
+| `kai-message-action` | `{ messageId: string; action: string }` | An action button on a message was clicked. |
+| `kai-model-change` | `{ modelId: string }` | The header model switcher changed. |
+| `kai-new-chat` | — | The "New chat" button was clicked. |
+| `kai-search` | — | The Search button was clicked. |
+| `kai-sidebar-toggle` | `{ collapsed: false | true }` | The sidebar was collapsed or expanded. |
+| `kai-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
+| `kai-submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
+| `kai-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
+| `kai-value-change` | `{ value: string }` | Fired on every input change. |
+| `kai-voice` | — | The Mic / voice button was clicked. |
 
 #### Composed from
 
@@ -243,7 +243,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-workspace -->
+<!-- /spec:kai-workspace -->
 
 The full app shell in one tag — a collapsible conversation-list sidebar (left), a drag-to-resize handle, and the complete chat thread (right) — all wired together. Drop in a single element and own the data; the workspace handles layout, resize, and collapse state internally.
 
@@ -251,7 +251,7 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 
 ```html
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
 
   const workspace = document.getElementById('workspace');
 
@@ -267,12 +267,12 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
     { id: 'claude-4', name: 'Claude 4 Opus', provider: 'Anthropic' },
   ];
 
-  workspace.addEventListener('kc-conversation-select', (e) => {
+  workspace.addEventListener('kai-conversation-select', (e) => {
     // load messages for e.detail.id, then reassign workspace.messages
     console.log('selected', e.detail.id);
   });
 
-  workspace.addEventListener('kc-submit', async (e) => {
+  workspace.addEventListener('kai-submit', async (e) => {
     const text = e.detail.value;
     const history = [...workspace.messages, { id: crypto.randomUUID(), role: 'user', content: text }];
     workspace.messages = history;
@@ -282,14 +282,14 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
   });
 </script>
 
-<kc-workspace id="workspace" style="display: block; height: 100vh;"></kc-workspace>
+<kai-workspace id="workspace" style="display: block; height: 100vh;"></kai-workspace>
 ```
 
 ---
 
-### `<kc-conversations>` / `Conversations`
+### `<kai-conversations>` / `Conversations`
 
-<!-- spec:kc-conversations -->
+<!-- spec:kai-conversations -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -302,9 +302,9 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-conversation-select` | `{ id: string }` | A conversation was selected. |
-| `kc-new-chat` | — | The "New chat" button was clicked. |
-| `kc-toggle-sidebar` | — | The sidebar toggle was clicked. |
+| `kai-conversation-select` | `{ id: string }` | A conversation was selected. |
+| `kai-new-chat` | — | The "New chat" button was clicked. |
+| `kai-toggle-sidebar` | — | The sidebar toggle was clicked. |
 
 #### Composed from
 
@@ -313,20 +313,20 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`). Element-specific tokens: `--color-sidebar`, `--color-scrollbar-thumb`.
-<!-- /spec:kc-conversations -->
+<!-- /spec:kai-conversations -->
 
 Sidebar panel listing conversations, optionally grouped. Emits events for navigation; does not manage its own state.
 
 ---
 
-### `<kc-prompt-input>` / `PromptInput`
+### `<kai-prompt-input>` / `PromptInput`
 
-<!-- spec:kc-prompt-input -->
+<!-- spec:kai-prompt-input -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `value` | `value` | `undefined | string` | — | Controlled value of the input. When set, the host owns the text and must update it on `kc-value-change`; leave unset for uncontrolled behavior. |
+| `value` | `value` | `undefined | string` | — | Controlled value of the input. When set, the host owns the text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the input and submit button entirely (non-interactive). |
 | `loading` | `loading` | `undefined | false | true` | `false` | Show the loading/streaming state and block submit (use while awaiting a reply). |
@@ -337,34 +337,34 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | `slashCompact` | `slash-compact` | `undefined | false | true` | `false` | Single-line palette rows. |
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
-| `stoppable` | `stoppable` | `undefined | false | true` | `false` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kc-stop`. |
+| `stoppable` | `stoppable` | `undefined | false | true` | `false` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. |
 | `attachments` | — | `AttachmentData[] | undefined` | — | Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-search` | — | The Search (Globe) toolbar button was clicked. |
-| `kc-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
-| `kc-stop` | — | The Stop button was clicked while `stoppable` and `loading` are both true. |
-| `kc-submit` | `{ value: string; attachments: AttachmentData[] }` | The user submitted the prompt (Enter or send button) with its attachments. |
-| `kc-suggestion-click` | `{ value: string }` | A suggestion was clicked while `suggestion-mode="fill"`. |
-| `kc-toolbar-action` | `{ action: string }` | A custom `<kc-action>` toolbar button was clicked. `action` is the `id` of the `<kc-action>` element that was clicked. |
-| `kc-value-change` | `{ value: string }` | The input text changed (fires on every keystroke). |
-| `kc-voice` | — | The Voice (Mic) toolbar button was clicked. |
+| `kai-search` | — | The Search (Globe) toolbar button was clicked. |
+| `kai-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
+| `kai-stop` | — | The Stop button was clicked while `stoppable` and `loading` are both true. |
+| `kai-submit` | `{ value: string; attachments: AttachmentData[] }` | The user submitted the prompt (Enter or send button) with its attachments. |
+| `kai-suggestion-click` | `{ value: string }` | A suggestion was clicked while `suggestion-mode="fill"`. |
+| `kai-toolbar-action` | `{ action: string }` | A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of the `<kai-action>` element that was clicked. |
+| `kai-value-change` | `{ value: string }` | The input text changed (fires on every keystroke). |
+| `kai-voice` | — | The Voice (Mic) toolbar button was clicked. |
 
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-prompt-input -->
+<!-- /spec:kai-prompt-input -->
 
 Standalone prompt input with a send button. Use when you want just the input area without the message list.
 
 ---
 
-### `<kc-message>` / `Message`
+### `<kai-message>` / `Message`
 
-<!-- spec:kc-message -->
+<!-- spec:kai-message -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -384,7 +384,7 @@ Standalone prompt input with a send button. Use when you want just the input are
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-message-action` | `{ messageId: string; action: string }` | An action button was clicked. `action` is the built-in name or custom id. |
+| `kai-message-action` | `{ messageId: string; action: string }` | An action button was clicked. `action` is the built-in name or custom id. |
 
 #### Composed from
 
@@ -393,15 +393,15 @@ Standalone prompt input with a send button. Use when you want just the input are
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-message -->
+<!-- /spec:kai-message -->
 
 A single message row: renders markdown/plain content, reasoning, tool calls, attachments, and action buttons from one message object.
 
 ---
 
-### `<kc-markdown>` / `Markdown`
+### `<kai-markdown>` / `Markdown`
 
-<!-- spec:kc-markdown -->
+<!-- spec:kai-markdown -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -418,7 +418,7 @@ A single message row: renders markdown/plain content, reasoning, tool calls, att
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-markdown -->
+<!-- /spec:kai-markdown -->
 
 Renders a markdown string with code highlighting.
 
@@ -426,9 +426,9 @@ No events.
 
 ---
 
-### `<kc-code-block>` / `CodeBlock`
+### `<kai-code-block>` / `CodeBlock`
 
-<!-- spec:kc-code-block -->
+<!-- spec:kai-code-block -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -446,7 +446,7 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`). Element-specific tokens: `--color-code-foreground`.
-<!-- /spec:kc-code-block -->
+<!-- /spec:kai-code-block -->
 
 A single syntax-highlighted code block with a copy button.
 
@@ -454,9 +454,9 @@ No events.
 
 ---
 
-### `<kc-reasoning>` / `Reasoning`
+### `<kai-reasoning>` / `Reasoning`
 
-<!-- spec:kc-reasoning -->
+<!-- spec:kai-reasoning -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -471,7 +471,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-open-change` | `{ open: false | true }` | Open state changed (via the trigger or streaming auto-open). |
+| `kai-open-change` | `{ open: false | true }` | Open state changed (via the trigger or streaming auto-open). |
 
 #### Composed from
 
@@ -480,15 +480,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-reasoning -->
+<!-- /spec:kai-reasoning -->
 
 Collapsible reasoning/thinking block with optional streaming auto-expand.
 
 ---
 
-### `<kc-tool>` / `Tool`
+### `<kai-tool>` / `Tool`
 
-<!-- spec:kc-tool -->
+<!-- spec:kai-tool -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -503,7 +503,7 @@ Collapsible reasoning/thinking block with optional streaming auto-expand.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`). Element-specific tokens: `--color-tool-blue`, `--color-tool-amber`, `--color-tool-green`, `--color-tool-red`.
-<!-- /spec:kc-tool -->
+<!-- /spec:kai-tool -->
 
 Tool-call panel showing a function call's type, state, input, and output.
 
@@ -511,9 +511,9 @@ No events.
 
 ---
 
-### `<kc-attachments>` / `Attachments`
+### `<kai-attachments>` / `Attachments`
 
-<!-- spec:kc-attachments -->
+<!-- spec:kai-attachments -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -521,7 +521,7 @@ No events.
 | `items` | — | `AttachmentData[]` | `[]` | The attachments to render. Set as a JS property (array). |
 | `variant` | `variant` | `undefined | "grid" | "inline" | "list"` | `'grid'` | Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. |
 | `hoverCard` | `hover-card` | `undefined | false | true` | `false` | Wrap each item in a hover card that previews its details. |
-| `removable` | `removable` | `undefined | false | true` | `false` | Show a remove button per item; clicking it fires a `kc-remove` event. |
+| `removable` | `removable` | `undefined | false | true` | `false` | Show a remove button per item; clicking it fires a `kai-remove` event. |
 | `showMediaType` | `show-media-type` | `undefined | false | true` | `false` | Also show the media type beneath the filename (non-grid variants). |
 | `emptyText` | `empty-text` | `undefined | string` | — | Text shown when `items` is empty. |
 
@@ -529,7 +529,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-remove` | `{ id: string }` | A remove button was clicked. |
+| `kai-remove` | `{ id: string }` | A remove button was clicked. |
 
 #### Composed from
 
@@ -538,15 +538,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-attachments -->
+<!-- /spec:kai-attachments -->
 
 Renders a list of file/document attachments in grid, inline, or list layouts.
 
 ---
 
-### `<kc-model-switcher>` / `ModelSwitcher`
+### `<kai-model-switcher>` / `ModelSwitcher`
 
-<!-- spec:kc-model-switcher -->
+<!-- spec:kai-model-switcher -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -558,7 +558,7 @@ Renders a list of file/document attachments in grid, inline, or list layouts.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-model-change` | `{ modelId: string }` | A model was selected. |
+| `kai-model-change` | `{ modelId: string }` | A model was selected. |
 
 #### Composed from
 
@@ -567,15 +567,15 @@ Renders a list of file/document attachments in grid, inline, or list layouts.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-model-switcher -->
+<!-- /spec:kai-model-switcher -->
 
 A dropdown that lets the user switch between available models.
 
 ---
 
-### `<kc-context>` / `Context`
+### `<kai-context>` / `Context`
 
-<!-- spec:kc-context -->
+<!-- spec:kai-context -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -588,7 +588,7 @@ A dropdown that lets the user switch between available models.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-threshold-change` | `{ level: "ok" | "warn" | "danger" }` | Fires when the computed severity level changes (ok → warn → danger or back). `detail.level` is `'ok'`, `'warn'`, or `'danger'`. |
+| `kai-threshold-change` | `{ level: "ok" | "warn" | "danger" }` | Fires when the computed severity level changes (ok → warn → danger or back). `detail.level` is `'ok'`, `'warn'`, or `'danger'`. |
 
 #### Composed from
 
@@ -597,7 +597,7 @@ A dropdown that lets the user switch between available models.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-context -->
+<!-- /spec:kai-context -->
 
 Token-usage meter showing used/max tokens and estimated cost.
 
@@ -605,9 +605,9 @@ No events.
 
 ---
 
-### `<kc-chain-of-thought>` / `ChainOfThought`
+### `<kai-chain-of-thought>` / `ChainOfThought`
 
-<!-- spec:kc-chain-of-thought -->
+<!-- spec:kai-chain-of-thought -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -621,7 +621,7 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-chain-of-thought -->
+<!-- /spec:kai-chain-of-thought -->
 
 Displays a list of reasoning steps as a collapsible chain-of-thought.
 
@@ -629,9 +629,9 @@ No events.
 
 ---
 
-### `<kc-suggestions>` / `Suggestions`
+### `<kai-suggestions>` / `Suggestions`
 
-<!-- spec:kc-suggestions -->
+<!-- spec:kai-suggestions -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -646,7 +646,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-select` | `{ value: string }` | A suggestion was clicked. |
+| `kai-select` | `{ value: string }` | A suggestion was clicked. |
 
 #### Composed from
 
@@ -655,15 +655,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-suggestions -->
+<!-- /spec:kai-suggestions -->
 
 Suggestion chips or full-width rows. Can render plain strings or `{ label, value }` pairs.
 
 ---
 
-### `<kc-source>` / `Source`
+### `<kai-source>` / `Source`
 
-<!-- spec:kc-source -->
+<!-- spec:kai-source -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -681,7 +681,7 @@ Suggestion chips or full-width rows. Can render plain strings or `{ label, value
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-source -->
+<!-- /spec:kai-source -->
 
 An inline citation link that opens a hover card with source details.
 
@@ -689,9 +689,9 @@ No events.
 
 ---
 
-### `<kc-sources>` / `Sources`
+### `<kai-sources>` / `Sources`
 
-<!-- spec:kc-sources -->
+<!-- spec:kai-sources -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -707,17 +707,17 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-sources -->
+<!-- /spec:kai-sources -->
 
-Renders a list of sources using `<kc-source>` internally.
+Renders a list of sources using `<kai-source>` internally.
 
 No events.
 
 ---
 
-### `<kc-feedback-bar>` / `FeedbackBar`
+### `<kai-feedback-bar>` / `FeedbackBar`
 
-<!-- spec:kc-feedback-bar -->
+<!-- spec:kai-feedback-bar -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -734,9 +734,9 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-close` | — | The user dismissed the banner. |
-| `kc-feedback` | `{ value: "helpful" | "not-helpful" }` | The user rated the response. `value` is `'helpful'` or `'not-helpful'`. |
-| `kc-feedback-detail` | `{ value: "helpful" | "not-helpful"; category?: undefined | string; comment?: undefined | string }` | The user submitted the optional detail form (`collect-detail`). |
+| `kai-close` | — | The user dismissed the banner. |
+| `kai-feedback` | `{ value: "helpful" | "not-helpful" }` | The user rated the response. `value` is `'helpful'` or `'not-helpful'`. |
+| `kai-feedback-detail` | `{ value: "helpful" | "not-helpful"; category?: undefined | string; comment?: undefined | string }` | The user submitted the optional detail form (`collect-detail`). |
 
 #### Composed from
 
@@ -745,15 +745,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-feedback-bar -->
+<!-- /spec:kai-feedback-bar -->
 
 A thumbs-up / thumbs-down banner (e.g. "Was this helpful?").
 
 ---
 
-### `<kc-file-upload>` / `FileUpload`
+### `<kai-file-upload>` / `FileUpload`
 
-<!-- spec:kc-file-upload -->
+<!-- spec:kai-file-upload -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -767,7 +767,7 @@ A thumbs-up / thumbs-down banner (e.g. "Was this helpful?").
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-files-added` | `{ files: File[] }` | Files were picked or dropped. |
+| `kai-files-added` | `{ files: File[] }` | Files were picked or dropped. |
 
 #### Composed from
 
@@ -776,15 +776,15 @@ A thumbs-up / thumbs-down banner (e.g. "Was this helpful?").
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-file-upload -->
+<!-- /spec:kai-file-upload -->
 
 A drag-and-drop / click-to-pick file upload dropzone.
 
 ---
 
-### `<kc-voice-input>` / `VoiceInput`
+### `<kai-voice-input>` / `VoiceInput`
 
-<!-- spec:kc-voice-input -->
+<!-- spec:kai-voice-input -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -796,8 +796,8 @@ A drag-and-drop / click-to-pick file upload dropzone.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-audio-captured` | `{ blob: Blob }` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. |
-| `kc-transcription` | `{ text: string }` | Transcription completed (the `transcribe` property resolved). |
+| `kai-audio-captured` | `{ blob: Blob }` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. |
+| `kai-transcription` | `{ text: string }` | Transcription completed (the `transcribe` property resolved). |
 
 #### Composed from
 
@@ -806,15 +806,15 @@ A drag-and-drop / click-to-pick file upload dropzone.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-voice-input -->
+<!-- /spec:kai-voice-input -->
 
 A mic button that records audio and optionally transcribes it via a host-supplied function.
 
 ---
 
-### `<kc-loader>` / `Loader`
+### `<kai-loader>` / `Loader`
 
-<!-- spec:kc-loader -->
+<!-- spec:kai-loader -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -830,7 +830,7 @@ A mic button that records audio and optionally transcribes it via a host-supplie
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-loader -->
+<!-- /spec:kai-loader -->
 
 An animated loading indicator with 12 style variants.
 
@@ -838,9 +838,9 @@ No events.
 
 ---
 
-### `<kc-thinking-bar>` / `ThinkingBar`
+### `<kai-thinking-bar>` / `ThinkingBar`
 
-<!-- spec:kc-thinking-bar -->
+<!-- spec:kai-thinking-bar -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -853,7 +853,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-stop` | — | The "stop / answer now" affordance was clicked. |
+| `kai-stop` | — | The "stop / answer now" affordance was clicked. |
 
 #### Composed from
 
@@ -862,15 +862,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-thinking-bar -->
+<!-- /spec:kai-thinking-bar -->
 
 An animated "thinking" shimmer bar with an optional stop affordance.
 
 ---
 
-### `<kc-text-shimmer>` / `TextShimmer`
+### `<kai-text-shimmer>` / `TextShimmer`
 
-<!-- spec:kc-text-shimmer -->
+<!-- spec:kai-text-shimmer -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -887,7 +887,7 @@ An animated "thinking" shimmer bar with an optional stop affordance.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-text-shimmer -->
+<!-- /spec:kai-text-shimmer -->
 
 Text with a shimmer animation — useful for "thinking" indicators.
 
@@ -895,9 +895,9 @@ No events.
 
 ---
 
-### `<kc-response-stream>` / `ResponseStream`
+### `<kai-response-stream>` / `ResponseStream`
 
-<!-- spec:kc-response-stream -->
+<!-- spec:kai-response-stream -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -911,7 +911,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-complete` | — | Streaming finished. |
+| `kai-complete` | — | Streaming finished. |
 
 #### Composed from
 
@@ -920,15 +920,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-response-stream -->
+<!-- /spec:kai-response-stream -->
 
 Renders a string or an `AsyncIterable<string>` with a reveal animation.
 
 ---
 
-### `<kc-image>` / `Image`
+### `<kai-image>` / `Image`
 
-<!-- spec:kc-image -->
+<!-- spec:kai-image -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -945,7 +945,7 @@ Renders a string or an `AsyncIterable<string>` with a reveal animation.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-image -->
+<!-- /spec:kai-image -->
 
 Renders a base64-encoded or raw-bytes image.
 
@@ -953,9 +953,9 @@ No events.
 
 ---
 
-### `<kc-checkpoint>` / `Checkpoint`
+### `<kai-checkpoint>` / `Checkpoint`
 
-<!-- spec:kc-checkpoint -->
+<!-- spec:kai-checkpoint -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -969,7 +969,7 @@ No events.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-select` | — | The checkpoint was clicked. |
+| `kai-select` | — | The checkpoint was clicked. |
 
 #### Composed from
 
@@ -978,15 +978,15 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-checkpoint -->
+<!-- /spec:kai-checkpoint -->
 
 A small button used to mark or navigate to a conversation checkpoint.
 
 ---
 
-### `<kc-scope-picker>` / `ScopePicker`
+### `<kai-scope-picker>` / `ScopePicker`
 
-<!-- spec:kc-scope-picker -->
+<!-- spec:kai-scope-picker -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -999,7 +999,7 @@ A small button used to mark or navigate to a conversation checkpoint.
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kc-scope-change` | `{ filters: SearchFilters | undefined }` | A scope was chosen (`undefined` filters = "All Content"). |
+| `kai-scope-change` | `{ filters: SearchFilters | undefined }` | A scope was chosen (`undefined` filters = "All Content"). |
 
 #### Composed from
 
@@ -1008,15 +1008,15 @@ A small button used to mark or navigate to a conversation checkpoint.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-scope-picker -->
+<!-- /spec:kai-scope-picker -->
 
 A dropdown for filtering the chat to specific authors, tags, content type, or date range.
 
 ---
 
-### `<kc-skills>` / `Skills`
+### `<kai-skills>` / `Skills`
 
-<!-- spec:kc-skills -->
+<!-- spec:kai-skills -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -1030,7 +1030,7 @@ A dropdown for filtering the chat to specific authors, tags, content type, or da
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-skills -->
+<!-- /spec:kai-skills -->
 
 Displays active skills as badges on a message.
 
@@ -1038,9 +1038,9 @@ No events.
 
 ---
 
-### `<kc-empty>` / `Empty`
+### `<kai-empty>` / `Empty`
 
-<!-- spec:kc-empty -->
+<!-- spec:kai-empty -->
 #### Properties
 
 | Property | Attribute | Type | Default | Notes |
@@ -1055,7 +1055,7 @@ No events.
 #### Theming
 
 Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kc-empty -->
+<!-- /spec:kai-empty -->
 
 Empty-state placeholder with a title and description.
 
@@ -1131,27 +1131,27 @@ Each element renders into its own Shadow DOM. This provides **full CSS isolation
 
 **The elements are self-themed.** Each element's Shadow DOM already contains the full compiled token set, so the components render correctly with **no host-side stylesheet required** — including light/dark via the `theme` attribute.
 
-To **rebrand**, override the kit's **namespaced** tokens — `--kc-color-*` (and `--kc-text-*`, `--kc-radius`) — on `:root` or a parent. The components read these via a `var(--kc-…, default)` fallback that pierces the Shadow DOM, so your overrides reach them.
+To **rebrand**, override the kit's **namespaced** tokens — `--kai-color-*` (and `--kai-text-*`, `--kai-radius`) — on `:root` or a parent. The components read these via a `var(--kai-…, default)` fallback that pierces the Shadow DOM, so your overrides reach them.
 
 ```css
 :root {
-  --kc-color-background: #0f0f0f;
-  --kc-color-primary: #7c3aed;
-  --kc-color-muted: #1e1e1e;
-  --kc-text-body: 0.9375rem;
+  --kai-color-background: #0f0f0f;
+  --kai-color-primary: #7c3aed;
+  --kai-color-muted: #1e1e1e;
+  --kai-text-body: 0.9375rem;
 }
 ```
 
 > **Two stylesheets — pick by how you consume the kit:**
-> - **Tailwind builds** (composing the SolidJS primitives): `@import "@kitn.ai/chat/theme.css"` in your CSS.
-> - **Plain HTML / CDN** (web components): `<link rel="stylesheet" href="…/@kitn.ai/chat/theme.tokens.css">` — only needed to theme your own host-page markup; the elements carry their own tokens.
+> - **Tailwind builds** (composing the SolidJS primitives): `@import "@kitn.ai/ui/theme.css"` in your CSS.
+> - **Plain HTML / CDN** (web components): `<link rel="stylesheet" href="…/@kitn.ai/ui/theme.tokens.css">` — only needed to theme your own host-page markup; the elements carry their own tokens.
 
 ### Theme attribute
 
 Every element accepts `theme="light"`, `theme="dark"`, or `theme="auto"` (default). `auto` follows the OS `prefers-color-scheme` media query.
 
 ```html
-<kc-chat theme="dark"></kc-chat>
+<kai-chat theme="dark"></kai-chat>
 ```
 
 ---
@@ -1171,7 +1171,7 @@ A small default set loads on demand: `bash`/`sh`, `javascript`/`js`, `html`, `cs
 ### Configure or disable
 
 ```js
-import { configureCodeHighlighting } from '@kitn.ai/chat/elements';
+import { configureCodeHighlighting } from '@kitn.ai/ui/elements';
 
 configureCodeHighlighting({
   languages: {
@@ -1196,4 +1196,4 @@ Two human/agent-readable files are generated from the manifest by `scripts/gen-l
 - **`llms.txt`** (~4 KB) — orientation: install, the property-vs-attribute rule, architecture, theming, and framework wiring.
 - **`llms-full.txt`** (~54 KB) — everything in `llms.txt` plus a generated props/events table for each element, a streaming recipe, and a build-a-chat-app runbook.
 
-Both files are at the repo root, the npm package root (`node_modules/@kitn.ai/chat/llms.txt`), and https://kitn.dev/llms.txt.
+Both files are at the repo root, the npm package root (`node_modules/@kitn.ai/ui/llms.txt`), and https://kitn.dev/llms.txt.

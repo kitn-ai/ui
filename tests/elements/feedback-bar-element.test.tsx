@@ -3,21 +3,21 @@ import '../../src/elements/feedback-bar';
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 afterEach(() => {
-  document.querySelectorAll('kc-feedback-bar').forEach((e) => e.remove());
+  document.querySelectorAll('kai-feedback-bar').forEach((e) => e.remove());
 });
 
-test('kc-feedback-bar registers', () => {
-  expect(customElements.get('kc-feedback-bar')).toBeTruthy();
+test('kai-feedback-bar registers', () => {
+  expect(customElements.get('kai-feedback-bar')).toBeTruthy();
 });
 
 test('clicking thumbs-up emits feedback event with value "helpful"', async () => {
-  const el = document.createElement('kc-feedback-bar') as HTMLElement;
+  const el = document.createElement('kai-feedback-bar') as HTMLElement;
   el.setAttribute('bar-title', 'Was this helpful?');
   document.body.appendChild(el);
   await flush();
 
   let detail: { value: string } | null = null;
-  el.addEventListener('kc-feedback', (e) => (detail = (e as CustomEvent).detail));
+  el.addEventListener('kai-feedback', (e) => (detail = (e as CustomEvent).detail));
 
   const thumbsUp = el.shadowRoot!.querySelector<HTMLButtonElement>('button[aria-label="Helpful"]');
   expect(thumbsUp).not.toBeNull();
@@ -28,13 +28,13 @@ test('clicking thumbs-up emits feedback event with value "helpful"', async () =>
 });
 
 test('clicking thumbs-down emits feedback event with value "not-helpful"', async () => {
-  const el = document.createElement('kc-feedback-bar') as HTMLElement;
+  const el = document.createElement('kai-feedback-bar') as HTMLElement;
   el.setAttribute('bar-title', 'Was this helpful?');
   document.body.appendChild(el);
   await flush();
 
   let detail: { value: string } | null = null;
-  el.addEventListener('kc-feedback', (e) => (detail = (e as CustomEvent).detail));
+  el.addEventListener('kai-feedback', (e) => (detail = (e as CustomEvent).detail));
 
   const thumbsDown = el.shadowRoot!.querySelector<HTMLButtonElement>('button[aria-label="Not helpful"]');
   expect(thumbsDown).not.toBeNull();
@@ -45,12 +45,12 @@ test('clicking thumbs-down emits feedback event with value "not-helpful"', async
 });
 
 test('clicking close emits close event (unchanged)', async () => {
-  const el = document.createElement('kc-feedback-bar') as HTMLElement;
+  const el = document.createElement('kai-feedback-bar') as HTMLElement;
   document.body.appendChild(el);
   await flush();
 
   let closed = false;
-  el.addEventListener('kc-close', () => (closed = true));
+  el.addEventListener('kai-close', () => (closed = true));
 
   const closeBtn = el.shadowRoot!.querySelector<HTMLButtonElement>('button[aria-label="Close"]');
   expect(closeBtn).not.toBeNull();
@@ -60,7 +60,7 @@ test('clicking close emits close event (unchanged)', async () => {
 });
 
 test('old helpful event is no longer emitted (breaking change)', async () => {
-  const el = document.createElement('kc-feedback-bar') as HTMLElement;
+  const el = document.createElement('kai-feedback-bar') as HTMLElement;
   document.body.appendChild(el);
   await flush();
 
@@ -74,7 +74,7 @@ test('old helpful event is no longer emitted (breaking change)', async () => {
 });
 
 test('old nothelpful event is no longer emitted (breaking change)', async () => {
-  const el = document.createElement('kc-feedback-bar') as HTMLElement;
+  const el = document.createElement('kai-feedback-bar') as HTMLElement;
   document.body.appendChild(el);
   await flush();
 

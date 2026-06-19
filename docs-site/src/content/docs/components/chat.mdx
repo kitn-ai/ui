@@ -12,18 +12,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-chat</p>
+<p class="kai-tag-sub">kai-chat</p>
 
-<p class="kc-lede">A full-featured chat UI — thread, composer, and optional header — packaged as a single Shadow DOM web component for any framework.</p>
+<p class="kai-lede">A full-featured chat UI — thread, composer, and optional header — packaged as a single Shadow DOM web component for any framework.</p>
 
 <Facts items={['Shadow DOM', '8 events', 'Markdown + syntax highlighting', 'Model switcher', 'Slash-command palette', 'Starter suggestions']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-chat" />
+<Playground client:only="solid" tag="kai-chat" />
 
 <Aside type="tip" title="When to use">
-Reach for `<kc-chat>` when you need a **drop-in chat panel in a non-Solid codebase** — React, Vue, a plain HTML page, or an iframe. It isolates all styles in Shadow DOM and bundles its own SolidJS runtime. Give the element an explicit height (e.g. `height: 100vh`) — it fills its block, scroll and all. Add custom header controls through its [header slots](/chat/patterns/custom-chat-header/). Need a built-in **conversation sidebar and history** too? Use [`<kc-workspace>`](/chat/components/workspace/). For fine-grained control in SolidJS, compose `ChatThread`, `Message`, and `PromptInput` directly.
+Reach for `<kai-chat>` when you need a **drop-in chat panel in a non-Solid codebase** — React, Vue, a plain HTML page, or an iframe. It isolates all styles in Shadow DOM and bundles its own SolidJS runtime. Give the element an explicit height (e.g. `height: 100vh`) — it fills its block, scroll and all. Add custom header controls through its [header slots](/patterns/custom-chat-header/). Need a built-in **conversation sidebar and history** too? Use [`<kai-workspace>`](/components/workspace/). For fine-grained control in SolidJS, compose `ChatThread`, `Message`, and `PromptInput` directly.
 </Aside>
 
 ## Usage
@@ -31,10 +31,10 @@ Reach for `<kc-chat>` when you need a **drop-in chat panel in a non-Solid codeba
 Set rich data (arrays, objects) in JavaScript; scalar props work as attributes or properties:
 
 ```html
-<kc-chat id="chat" style="display:block; height:100vh;"></kc-chat>
+<kai-chat id="chat" style="display:block; height:100vh;"></kai-chat>
 
 <script type="module">
-  import '@kitn.ai/chat/elements';
+  import '@kitn.ai/ui/elements';
   const chat = document.getElementById('chat');
 
   chat.messages = [
@@ -43,10 +43,10 @@ Set rich data (arrays, objects) in JavaScript; scalar props work as attributes o
       actions: ['copy', 'like', 'dislike'] },
   ];
 
-  chat.addEventListener('kc-submit', (e) => {
+  chat.addEventListener('kai-submit', (e) => {
     console.log('user sent:', e.detail.value, 'attachments:', e.detail.attachments);
   });
-  chat.addEventListener('kc-message-action', (e) => {
+  chat.addEventListener('kai-message-action', (e) => {
     console.log(e.detail.messageId, e.detail.action);
   });
 </script>
@@ -54,53 +54,53 @@ Set rich data (arrays, objects) in JavaScript; scalar props work as attributes o
 
 - **`messages`** — each entry: `id`, `role` (`'user' | 'assistant'`), `content` (markdown for assistant), plus optional `actions`, `attachments`, `reasoning`, `tools`, and `avatar`.
 - **`loading`** — flip to `true` while awaiting a reply; the input disables and a typing indicator appears.
-- **Model switcher** — set `models` (`{ id, name, provider? }[]`) and `currentModel`; listen for `kc-model-change`.
+- **Model switcher** — set `models` (`{ id, name, provider? }[]`) and `currentModel`; listen for `kai-model-change`.
 - **Context meter** — set `context` (`{ usedTokens, maxTokens, … }`) to show a token-usage gauge in the header.
 
 ## Examples
 
 ### Basic Thread
 
-<Example client:visible tag="kc-chat" />
+<Example client:visible tag="kai-chat" />
 
 ### Loading State
 
-<Example client:visible tag="kc-chat" config={{ loading: true }} data="loading" />
+<Example client:visible tag="kai-chat" config={{ loading: true }} data="loading" />
 
 ### Starter Suggestions
 
 `suggestions` — clickable prompts above an empty thread; `suggestion-mode="fill"` populates the input instead of submitting.
 
-<Example client:visible tag="kc-chat" data="withSuggestions" />
+<Example client:visible tag="kai-chat" data="withSuggestions" />
 
 ### Model Switcher and Header
 
 `models` + `chat-title` activates the header bar with a model-switcher dropdown.
 
-<Example client:visible tag="kc-chat" config={{ chatTitle: 'Research Assistant' }} data="withModels" />
+<Example client:visible tag="kai-chat" config={{ chatTitle: 'Research Assistant' }} data="withModels" />
 
 ### Context Token Meter
 
 Add `context` to show a live token-usage gauge — yellow near the warning threshold, red near danger.
 
-<Example client:visible tag="kc-chat" config={{ chatTitle: 'Research Assistant' }} data="withContext" />
+<Example client:visible tag="kai-chat" config={{ chatTitle: 'Research Assistant' }} data="withContext" />
 
 ### Slash Commands
 
 `slashCommands` opens a palette on `/`; `slash-compact` uses single-line rows for dense layouts.
 
-<Example client:visible tag="kc-chat" data="withSlash" />
+<Example client:visible tag="kai-chat" data="withSlash" />
 
 ## Props
 
-<PropTable tag="kc-chat" />
+<PropTable tag="kai-chat" />
 
 ## Events
 
-<EventTable tag="kc-chat" />
+<EventTable tag="kai-chat" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-chat" />
+<ComposedFrom tag="kai-chat" />
 
 <NeedAHand />

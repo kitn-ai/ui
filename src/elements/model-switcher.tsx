@@ -10,14 +10,14 @@ interface Props extends Record<string, unknown> {
   currentModel?: string;
 }
 
-/** Events fired by `<kc-model-switcher>`. */
+/** Events fired by `<kai-model-switcher>`. */
 interface Events {
   /** A model was selected. */
-  'kc-model-change': { modelId: string };
+  'kai-model-change': { modelId: string };
 }
 
 /**
- * Parse a single light-DOM `<kc-model>` element into a `ModelOption` descriptor.
+ * Parse a single light-DOM `<kai-model>` element into a `ModelOption` descriptor.
  * Attribute mapping:
  *  - `id`        → ModelOption.id
  *  - textContent    → ModelOption.name
@@ -25,7 +25,7 @@ interface Events {
  *  - `description`  → ModelOption.description (optional subtitle)
  *  - `group`        → ModelOption.group (optional collapsible section)
  */
-export function parseKcModelElement(n: Element): ModelOption {
+export function parseKaiModelElement(n: Element): ModelOption {
   return {
     id: n.getAttribute('id') ?? '',
     name: n.textContent?.trim() ?? '',
@@ -36,43 +36,43 @@ export function parseKcModelElement(n: Element): ModelOption {
 }
 
 /**
- * `<kc-model-switcher>` — an event-emitting leaf element. Data in via the
- * `models` property, selection out via a `kc-model-change` event. Mirrors the
- * header switcher inside `<kc-chat>` as a standalone, composable piece.
+ * `<kai-model-switcher>` — an event-emitting leaf element. Data in via the
+ * `models` property, selection out via a `kai-model-change` event. Mirrors the
+ * header switcher inside `<kai-chat>` as a standalone, composable piece.
  *
  * Note: like the underlying primitive, this only renders when more than one
  * model is provided.
  *
  * **How to use:**
  *
- * _Property API_ — set `models` as a JS property and listen for `kc-model-change`:
+ * _Property API_ — set `models` as a JS property and listen for `kai-model-change`:
  * ```js
  * el.models = [{ id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI' }];
- * el.addEventListener('kc-model-change', (e) => console.log(e.detail.modelId));
+ * el.addEventListener('kai-model-change', (e) => console.log(e.detail.modelId));
  * ```
  *
- * _Declarative child API_ — compose `<kc-model>` light-DOM children (no JS needed):
+ * _Declarative child API_ — compose `<kai-model>` light-DOM children (no JS needed):
  * ```html
- * <kc-model-switcher>
- *   <kc-model id="gpt-4o" provider="OpenAI">GPT-4o</kc-model>
- *   <kc-model id="gpt-4o-mini" provider="OpenAI">GPT-4o mini</kc-model>
- * </kc-model-switcher>
+ * <kai-model-switcher>
+ *   <kai-model id="gpt-4o" provider="OpenAI">GPT-4o</kai-model>
+ *   <kai-model id="gpt-4o-mini" provider="OpenAI">GPT-4o mini</kai-model>
+ * </kai-model-switcher>
  * ```
- * Each `<kc-model>` child carries `id` (required), `provider` (optional), and
+ * Each `<kai-model>` child carries `id` (required), `provider` (optional), and
  * a text label as its `textContent`. Children are light-DOM data carriers hidden
  * by Shadow DOM. Prop `models` items render first; declarative children follow.
  */
-defineWebComponent<Props, Events>('kc-model-switcher', {
+defineWebComponent<Props, Events>('kai-model-switcher', {
   models: [],
   currentModel: undefined,
 }, (props, { dispatch, element }) => {
-  // Read declarative <kc-model> children from light DOM.
+  // Read declarative <kai-model> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
   const [slottedModels, setSlottedModels] = createSignal<ModelOption[]>([]);
   onMount(() => {
     const read = () => {
-      const nodes = [...element.querySelectorAll('kc-model')];
-      setSlottedModels(nodes.map(parseKcModelElement));
+      const nodes = [...element.querySelectorAll('kai-model')];
+      setSlottedModels(nodes.map(parseKaiModelElement));
     };
     read();
     const observer = new MutationObserver(read);
@@ -87,7 +87,7 @@ defineWebComponent<Props, Events>('kc-model-switcher', {
     <ModelSwitcher
       models={allModels()}
       currentModelId={props.currentModel ?? allModels()[0]?.id ?? ''}
-      onModelChange={(modelId) => dispatch('kc-model-change', { modelId })}
+      onModelChange={(modelId) => dispatch('kai-model-change', { modelId })}
     />
   );
 });

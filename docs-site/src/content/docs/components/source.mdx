@@ -11,18 +11,18 @@ import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
-<p class="kc-tag-sub">kc-source</p>
+<p class="kai-tag-sub">kai-source</p>
 
-<p class="kc-lede">A citation chip that shows a domain label and reveals a hover card with a headline and description — drop it below an assistant message to let users verify where an answer came from.</p>
+<p class="kai-lede">A citation chip that shows a domain label and reveals a hover card with a headline and description — drop it below an assistant message to let users verify where an answer came from.</p>
 
 <Facts items={['Shadow DOM', 'All props are attributes', 'Optional favicon', 'Hover-card preview', 'No events']} />
 
 ## Preview
 
-<Playground client:only="solid" tag="kc-source" />
+<Playground client:only="solid" tag="kai-source" />
 
 <Aside type="tip" title="When to use">
-Use `<kc-source>` for a **single citation chip** in isolation — inside a custom message template or a tooltip. For two or more sources, reach for `<kc-sources>` instead: it accepts a `sources` array and lays chips out in a wrapping row.
+Use `<kai-source>` for a **single citation chip** in isolation — inside a custom message template or a tooltip. For two or more sources, reach for `<kai-sources>` instead: it accepts a `sources` array and lays chips out in a wrapping row.
 </Aside>
 
 ## Usage
@@ -30,13 +30,13 @@ Use `<kc-source>` for a **single citation chip** in isolation — inside a custo
 All props are plain HTML attributes — no JavaScript needed:
 
 ```html
-<kc-source
+<kai-source
   href="https://kitn.dev"
   headline="kitn — the kit"
   description="Composable SolidJS + web-component chat UI."
   show-favicon
-></kc-source>
-<script type="module">import '@kitn.ai/chat/elements';</script>
+></kai-source>
+<script type="module">import '@kitn.ai/ui/elements';</script>
 ```
 
 - **`href` is required.** The element renders nothing without it.
@@ -48,28 +48,28 @@ All props are plain HTML attributes — no JavaScript needed:
 
 ### Basic Citation
 
-<Example client:visible tag="kc-source" config={{ href: 'https://kitn.dev', headline: 'kitn — the kit', description: 'Composable SolidJS + web-component chat UI.' }} />
+<Example client:visible tag="kai-source" config={{ href: 'https://kitn.dev', headline: 'kitn — the kit', description: 'Composable SolidJS + web-component chat UI.' }} />
 
 ### With Favicon
 
-<Example client:visible tag="kc-source" config={{ href: 'https://solidjs.com', headline: 'SolidJS', description: 'A declarative, efficient, and flexible JavaScript library for building user interfaces.', showFavicon: true }} />
+<Example client:visible tag="kai-source" config={{ href: 'https://solidjs.com', headline: 'SolidJS', description: 'A declarative, efficient, and flexible JavaScript library for building user interfaces.', showFavicon: true }} />
 
 ### Custom Label
 
 Override the domain default with `label` when you want a shorter or more recognisable name.
 
-<Example client:visible tag="kc-source" config={{ href: 'https://developer.mozilla.org/en-US/docs/Web/API/Web_components', label: 'MDN', headline: 'Web Components — MDN', description: 'A suite of technologies that let you create reusable custom elements.' }} />
+<Example client:visible tag="kai-source" config={{ href: 'https://developer.mozilla.org/en-US/docs/Web/API/Web_components', label: 'MDN', headline: 'Web Components — MDN', description: 'A suite of technologies that let you create reusable custom elements.' }} />
 
 ### Full Detail with Favicon
 
-<Example client:visible tag="kc-source" config={{ href: 'https://vitejs.dev', label: 'Vite', headline: 'Vite — Next Generation Frontend Tooling', description: 'An opinionated web build tool that serves your source files over native ES modules during development.', showFavicon: true }} />
+<Example client:visible tag="kai-source" config={{ href: 'https://vitejs.dev', label: 'Vite', headline: 'Vite — Next Generation Frontend Tooling', description: 'An opinionated web build tool that serves your source files over native ES modules during development.', showFavicon: true }} />
 
 ## Props
 
-<PropTable tag="kc-source" />
+<PropTable tag="kai-source" />
 
 ## Composed from
 
-<ComposedFrom tag="kc-source" />
+<ComposedFrom tag="kai-source" />
 
 <NeedAHand />

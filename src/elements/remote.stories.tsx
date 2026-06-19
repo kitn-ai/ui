@@ -8,7 +8,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kc-remote': JSX.HTMLAttributes<HTMLElement> & {
+      'kai-remote': JSX.HTMLAttributes<HTMLElement> & {
         src?: string;
         'provider-origin'?: string;
         ref?: (el: HTMLElement) => void;
@@ -23,7 +23,7 @@ type RemoteEl = HTMLElement & { envelope?: CardEnvelope; policy?: Record<string,
  * The live cross-origin demo only works in **local Storybook dev** (`npm run storybook`):
  * there, `.storybook/main.ts`'s Vite pipeline serves the reference provider at
  * `/remote-provider/`, and we frame it via the `127.0.0.1` alias of the SAME dev server
- * — a genuinely different origin from the `localhost` preview, so `<kc-remote>`'s
+ * — a genuinely different origin from the `localhost` preview, so `<kai-remote>`'s
  * cross-origin precondition (provider ≠ host) holds.
  *
  * A **static, single-origin deploy** (e.g. the GitHub Pages docs) cannot do this: there
@@ -54,7 +54,7 @@ const FORM_ENVELOPE: CardEnvelope = {
       email: { type: 'string', title: 'Email', format: 'email' },
       role: { type: 'string', title: 'Role', enum: ['Engineer', 'Designer', 'PM'] },
     },
-    'x-kc-submitLabel': 'Send',
+    'x-kai-submitLabel': 'Send',
   },
 };
 
@@ -97,8 +97,8 @@ function rendererFor(type: string) {
   return null;
 }
 
-/** Mounts a <kc-remote> when a live cross-origin provider is available (local dev),
- *  logs every routed CardEvent (via the bubbling kc-card). On a static/deployed
+/** Mounts a <kai-remote> when a live cross-origin provider is available (local dev),
+ *  logs every routed CardEvent (via the bubbling kai-card). On a static/deployed
  *  Storybook (no second origin) it renders the SAME provider renderer's output
  *  DIRECTLY — so the docs show the real, interactive card — with a slim honest
  *  banner explaining the production transport. */
@@ -111,7 +111,7 @@ function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigi
 
   const renderer = rendererFor(props.envelope.type);
 
-  // ── Live (local dev): cross-origin <kc-remote>, exactly as before. ──
+  // ── Live (local dev): cross-origin <kai-remote>, exactly as before. ──
   onMount(() => {
     if (!live || !el) return;
     el.envelope = props.envelope;
@@ -119,8 +119,8 @@ function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigi
       const detail = (e as CustomEvent<CardEvent>).detail;
       setLog((prev) => [...prev, detail]);
     };
-    el.addEventListener('kc-card', onCard);
-    onCleanup(() => el?.removeEventListener('kc-card', onCard));
+    el.addEventListener('kai-card', onCard);
+    onCleanup(() => el?.removeEventListener('kai-card', onCard));
   });
 
   // ── Static (deployed): render the real card content directly, reusing the
@@ -154,7 +154,7 @@ function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigi
     <div style={{ display: 'flex', gap: '16px', 'flex-wrap': 'wrap', 'align-items': 'flex-start' }}>
       <div style={{ flex: '1 1 320px', 'min-width': '300px', 'max-width': '460px' }}>
         {live ? (
-          <kc-remote ref={(e) => (el = e as RemoteEl)} provider-origin={live.origin} src={live.src} />
+          <kai-remote ref={(e) => (el = e as RemoteEl)} provider-origin={live.origin} src={live.src} />
         ) : renderer ? (
           <div style={{ display: 'flex', 'flex-direction': 'column', gap: '8px' }}>
             <div
@@ -165,7 +165,7 @@ function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigi
               role="note"
               style={{ margin: 0, 'font-size': '12px', 'line-height': '1.5', color: 'var(--color-muted-foreground, #71717a)' }}
             >
-              Rendered directly for these static docs. In production <code>&lt;kc-remote&gt;</code> delivers this over a
+              Rendered directly for these static docs. In production <code>&lt;kai-remote&gt;</code> delivers this over a
               sandboxed cross-origin iframe — run <code>npm run storybook</code> for the live transport; the cross-origin
               model is verified by the Playwright suite.
             </p>
@@ -180,7 +180,7 @@ function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigi
           >
             <strong>Live cross-origin demo runs in local Storybook</strong>
             <p style={{ margin: '8px 0 0' }}>
-              <code>&lt;kc-remote&gt;</code> delivers this card over a sandboxed{' '}
+              <code>&lt;kai-remote&gt;</code> delivers this card over a sandboxed{' '}
               <strong>cross-origin</strong> <code>&lt;iframe&gt;</code>, which needs a second
               origin and the reference provider served by the dev server. Run{' '}
               <code>npm run storybook</code> to see it live; the cross-origin transport is
@@ -203,19 +203,19 @@ function RemoteDemo(props: { envelope: CardEnvelope; src?: string; providerOrigi
   );
 }
 
-const HTML_SNIPPET = (envelope: CardEnvelope) => `<kc-remote
+const HTML_SNIPPET = (envelope: CardEnvelope) => `<kai-remote
   provider-origin="https://cards.provider.example"
   src="https://cards.provider.example/card"
-></kc-remote>
+></kai-remote>
 <script type="module">
-  import '@kitn.ai/chat/elements'; // registers <kc-remote>
+  import '@kitn.ai/ui/elements'; // registers <kai-remote>
 
-  const el = document.querySelector('kc-remote');
+  const el = document.querySelector('kai-remote');
   // The CardEnvelope is set as a JS PROPERTY (it travels down the wire unchanged).
   el.envelope = ${JSON.stringify(envelope, null, 2)};
 
-  // Every routed CardEvent is re-emitted as a bubbling kc-card CustomEvent.
-  el.addEventListener('kc-card', (e) => {
+  // Every routed CardEvent is re-emitted as a bubbling kai-card CustomEvent.
+  el.addEventListener('kai-card', (e) => {
     if (e.detail.kind === 'submit') console.log('submitted', e.detail.data);
   });
 
@@ -224,7 +224,7 @@ const HTML_SNIPPET = (envelope: CardEnvelope) => `<kc-remote
 </script>`;
 
 const meta = {
-  title: 'Generative UI/Remote/kc-remote',
+  title: 'Generative UI/Remote/kai-remote',
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
@@ -235,8 +235,8 @@ const meta = {
     docs: {
       description: {
         component:
-          "`<kc-remote>` mounts a **sandboxed cross-origin `<iframe>`** card from a card *provider* and bridges it to the host over `postMessage` — the SAME `CardEnvelope`/`CardContext`/`CardEvent` shapes as native cards, routed through the SAME `CardPolicy`. " +
-          'It pins the provider **origin + source window + a per-instance nonce + the negotiated protocol version** on every inbound frame, auto-sizes the iframe from the card’s reported height, pushes theme/locale context, and re-emits every routed event as a bubbling **`kc-card`** CustomEvent. ' +
+          "`<kai-remote>` mounts a **sandboxed cross-origin `<iframe>`** card from a card *provider* and bridges it to the host over `postMessage` — the SAME `CardEnvelope`/`CardContext`/`CardEvent` shapes as native cards, routed through the SAME `CardPolicy`. " +
+          'It pins the provider **origin + source window + a per-instance nonce + the negotiated protocol version** on every inbound frame, auto-sizes the iframe from the card’s reported height, pushes theme/locale context, and re-emits every routed event as a bubbling **`kai-card`** CustomEvent. ' +
           'These stories frame the reference provider (`examples/remote-provider/`) served by Storybook over its `127.0.0.1` alias so the precondition (provider ≠ host origin) holds; the full cross-origin **security matrix** is the standalone Playwright suite.',
       },
     },
@@ -246,7 +246,7 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-/** Happy path: the framed provider renders a `<kc-form>`; submitting it crosses the
+/** Happy path: the framed provider renders a `<kai-form>`; submitting it crosses the
  *  origin boundary and the routed `submit` is logged. The CardEnvelope is shown too. */
 export const RemoteForm: Story = {
   name: 'Remote form (happy path)',
@@ -281,7 +281,7 @@ export const SelfContained: Story = {
 };
 
 /** Failure: an invalid `provider-origin` (a wildcard) is rejected before any mount
- *  — <kc-remote> renders an inline accessible error instead of an iframe. (A bad
+ *  — <kai-remote> renders an inline accessible error instead of an iframe. (A bad
  *  `src` that loads but never handshakes shows the SDK’s inline fallback + Retry;
  *  that path is exercised end-to-end by the Playwright suite.) */
 export const Failure: Story = {
@@ -293,7 +293,7 @@ export const Failure: Story = {
     });
     return (
       <div style={{ 'max-width': '460px' }}>
-        <kc-remote ref={(e) => (el = e as RemoteEl)} provider-origin="*" src="https://cards.provider.example/card" />
+        <kai-remote ref={(e) => (el = e as RemoteEl)} provider-origin="*" src="https://cards.provider.example/card" />
       </div>
     );
   },
@@ -301,10 +301,10 @@ export const Failure: Story = {
     docs: {
       source: {
         code: `<!-- provider-origin must be a single absolute origin (https, or http://localhost for dev). -->
-<kc-remote provider-origin="*" src="https://cards.provider.example/card"></kc-remote>
+<kai-remote provider-origin="*" src="https://cards.provider.example/card"></kai-remote>
 <script type="module">
-  import '@kitn.ai/chat/elements';
-  document.querySelector('kc-remote').envelope = ${JSON.stringify(FORM_ENVELOPE, null, 2)};
+  import '@kitn.ai/ui/elements';
+  document.querySelector('kai-remote').envelope = ${JSON.stringify(FORM_ENVELOPE, null, 2)};
   // "*" is rejected → an inline accessible error renders instead of an iframe.
 </script>`,
         language: 'html',

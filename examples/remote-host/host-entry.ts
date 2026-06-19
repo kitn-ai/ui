@@ -52,9 +52,9 @@ const FORM_ENVELOPE: CardEnvelope = {
       // A boolean that, when toggled, reveals a follow-up — grows the card so the
       // auto-height path is observable from the host (iframe.clientHeight changes).
       details: { type: 'boolean', title: 'Add a note?' },
-      note: { type: 'string', title: 'Note', 'x-kc-widget': 'textarea' },
+      note: { type: 'string', title: 'Note', 'x-kai-widget': 'textarea' },
     },
-    'x-kc-submitLabel': 'Send',
+    'x-kai-submitLabel': 'Send',
   },
 };
 

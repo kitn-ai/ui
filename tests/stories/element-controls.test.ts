@@ -14,9 +14,9 @@ import { describe, it, expect } from 'vitest';
 import { argTypesFor } from '../../src/stories/docs/element-controls';
 
 describe('argTypesFor', () => {
-  describe('kc-artifact', () => {
+  describe('kai-artifact', () => {
     it('tab → select control with options [preview, code]', () => {
-      const result = argTypesFor('kc-artifact');
+      const result = argTypesFor('kai-artifact');
       expect(result['tab']).toEqual({
         control: { type: 'select' },
         options: ['preview', 'code'],
@@ -24,29 +24,29 @@ describe('argTypesFor', () => {
     });
 
     it('expandable → boolean control', () => {
-      const result = argTypesFor('kc-artifact');
+      const result = argTypesFor('kai-artifact');
       expect(result['expandable']).toEqual({ control: 'boolean' });
     });
 
     it('standalone → boolean control', () => {
-      const result = argTypesFor('kc-artifact');
+      const result = argTypesFor('kai-artifact');
       expect(result['standalone']).toEqual({ control: 'boolean' });
     });
 
     it('noNav → boolean control', () => {
-      const result = argTypesFor('kc-artifact');
+      const result = argTypesFor('kai-artifact');
       expect(result['noNav']).toEqual({ control: 'boolean' });
     });
 
     it('src → text control (optional string)', () => {
-      const result = argTypesFor('kc-artifact');
+      const result = argTypesFor('kai-artifact');
       expect(result['src']).toEqual({ control: 'text' });
     });
   });
 
-  describe('kc-message', () => {
+  describe('kai-message', () => {
     it('role → select control with options [user, assistant]', () => {
-      const result = argTypesFor('kc-message');
+      const result = argTypesFor('kai-message');
       expect(result['role']).toEqual({
         control: { type: 'select' },
         options: ['user', 'assistant'],
@@ -54,12 +54,12 @@ describe('argTypesFor', () => {
     });
 
     it('markdown → boolean control', () => {
-      const result = argTypesFor('kc-message');
+      const result = argTypesFor('kai-message');
       expect(result['markdown']).toEqual({ control: 'boolean' });
     });
 
     it('proseSize → select control', () => {
-      const result = argTypesFor('kc-message');
+      const result = argTypesFor('kai-message');
       expect(result['proseSize']).toEqual({
         control: { type: 'select' },
         options: ['xs', 'sm', 'base', 'lg'],
@@ -67,74 +67,74 @@ describe('argTypesFor', () => {
     });
 
     it('content → text control', () => {
-      const result = argTypesFor('kc-message');
+      const result = argTypesFor('kai-message');
       expect(result['content']).toEqual({ control: 'text' });
     });
   });
 
-  describe('kc-response-stream (number prop)', () => {
+  describe('kai-response-stream (number prop)', () => {
     it('speed → number control', () => {
-      const result = argTypesFor('kc-response-stream');
+      const result = argTypesFor('kai-response-stream');
       expect(result['speed']).toEqual({ control: 'number' });
     });
   });
 
   describe('unknown tag', () => {
     it('returns empty object for unknown tag', () => {
-      expect(argTypesFor('kc-nonexistent')).toEqual({});
+      expect(argTypesFor('kai-nonexistent')).toEqual({});
     });
   });
 
   // ── New: complex/function props ──────────────────────────────────────────
 
-  describe('kc-chat (complex array props → object control)', () => {
+  describe('kai-chat (complex array props → object control)', () => {
     it('messages → object control (array of message objects)', () => {
-      const result = argTypesFor('kc-chat');
+      const result = argTypesFor('kai-chat');
       expect(result['messages']).toEqual({ control: 'object' });
     });
 
     it('suggestions → object control (string[] is not a plain string)', () => {
-      const result = argTypesFor('kc-chat');
+      const result = argTypesFor('kai-chat');
       expect(result['suggestions']).toEqual({ control: 'object' });
     });
   });
 
-  describe('kc-form (Record<> prop → object control)', () => {
+  describe('kai-form (Record<> prop → object control)', () => {
     it('data → object control (Record<string, unknown>)', () => {
-      const result = argTypesFor('kc-form');
+      const result = argTypesFor('kai-form');
       expect(result['data']).toEqual({ control: 'object' });
     });
   });
 
-  describe('kc-voice-input (function prop → no control)', () => {
+  describe('kai-voice-input (function prop → no control)', () => {
     it('transcribe → control: false (function callback)', () => {
-      const result = argTypesFor('kc-voice-input');
+      const result = argTypesFor('kai-voice-input');
       expect(result['transcribe']).toEqual({ control: false });
     });
   });
 
-  describe('kc-cards (function-bearing object → no control; object[] → object control)', () => {
+  describe('kai-cards (function-bearing object → no control; object[] → object control)', () => {
     it('policy → control: false (object containing function callbacks)', () => {
-      const result = argTypesFor('kc-cards');
+      const result = argTypesFor('kai-cards');
       expect(result['policy']).toEqual({ control: false });
     });
 
     it('cards → object control (array of card objects)', () => {
-      const result = argTypesFor('kc-cards');
+      const result = argTypesFor('kai-cards');
       expect(result['cards']).toEqual({ control: 'object' });
     });
   });
 
   // ── Regression: existing scalar prop behaviour must still hold ────────────
 
-  describe('regression: kc-artifact scalar props unchanged', () => {
+  describe('regression: kai-artifact scalar props unchanged', () => {
     it('src → text control (pure string)', () => {
-      const result = argTypesFor('kc-artifact');
+      const result = argTypesFor('kai-artifact');
       expect(result['src']).toEqual({ control: 'text' });
     });
 
     it('tab → select control with options [preview, code]', () => {
-      const result = argTypesFor('kc-artifact');
+      const result = argTypesFor('kai-artifact');
       expect(result['tab']).toEqual({
         control: { type: 'select' },
         options: ['preview', 'code'],
@@ -142,14 +142,14 @@ describe('argTypesFor', () => {
     });
 
     it('expandable → boolean control', () => {
-      const result = argTypesFor('kc-artifact');
+      const result = argTypesFor('kai-artifact');
       expect(result['expandable']).toEqual({ control: 'boolean' });
     });
   });
 
-  describe('regression: kc-response-stream number prop unchanged', () => {
+  describe('regression: kai-response-stream number prop unchanged', () => {
     it('speed → number control', () => {
-      const result = argTypesFor('kc-response-stream');
+      const result = argTypesFor('kai-response-stream');
       expect(result['speed']).toEqual({ control: 'number' });
     });
   });

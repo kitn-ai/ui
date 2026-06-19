@@ -71,7 +71,7 @@ export const thread = [
     id: '2',
     role: 'assistant',
     content:
-      'Sure. A shell is just a layout (`<kc-resizable>`) wrapping leaf components:\n\n```html\n<kc-conversations></kc-conversations>\n<kc-message></kc-message>\n<kc-prompt-input></kc-prompt-input>\n```\n\nYou own the data + events; the leaves render.',
+      'Sure. A shell is just a layout (`<kai-resizable>`) wrapping leaf components:\n\n```html\n<kai-conversations></kai-conversations>\n<kai-message></kai-message>\n<kai-prompt-input></kai-prompt-input>\n```\n\nYou own the data + events; the leaves render.',
     reasoning: { text: 'Lay out list | chat | artifact, then wire submit + select.', label: 'Reasoning' },
     tools: [{ type: 'plan_layout', state: 'output-available', input: { panels: 3 }, output: { ok: true } }],
     actions: ['copy', 'like', 'dislike', 'regenerate'],

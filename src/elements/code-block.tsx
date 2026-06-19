@@ -16,10 +16,10 @@ interface Props extends Record<string, unknown> {
 }
 
 /**
- * `<kc-code-block>` — one syntax-highlighted code block (with a copy button).
+ * `<kai-code-block>` — one syntax-highlighted code block (with a copy button).
  * Code via the `code` property; `language`/`code-theme` via attributes.
  */
-defineWebComponent<Props>('kc-code-block', {
+defineWebComponent<Props>('kai-code-block', {
   code: '',
   language: undefined,
   codeTheme: 'github-dark-dimmed',

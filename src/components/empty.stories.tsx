@@ -80,7 +80,7 @@ type Story = StoryObj<typeof meta>;
 
 const IMPORT = `import {
   Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent,
-} from '@kitn.ai/chat';`;
+} from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
