@@ -42,6 +42,11 @@ describe('theme', () => {
     const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toContain('.dark');
     expect(text).toContain('--kai-color-primary');
+    // :root must NOT appear in the CSS block for mode:'dark'
+    // (the CSS block is between the first ```css and the closing ```)
+    const cssMatch = text.match(/```css\n([\s\S]*?)\n```/);
+    expect(cssMatch).not.toBeNull();
+    expect(cssMatch![1]).not.toContain(':root');
   });
 
   it('description-only call still yields a valid --kai- token block', async () => {
@@ -85,5 +90,24 @@ describe('theme', () => {
     const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toContain('--kai-color-accent');
     expect(text).toContain('--kai-color-accent-foreground');
+  });
+
+  it('dark accent-foreground is white (#ffffff) on the near-black dark accent surface', async () => {
+    // #7c3aed → dark accent surface is darken(r,g,b, 0.75) ≈ near-black
+    // contrast-correct fg for near-black is white
+    const out = await theme.handler({ brand: '#7c3aed', mode: 'both' });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Extract the .dark block from the CSS output
+    const darkBlockMatch = text.match(/\.dark\s*\{([^}]*)\}/s);
+    expect(darkBlockMatch).not.toBeNull();
+    const darkBlock = darkBlockMatch![1];
+    expect(darkBlock).toMatch(/--kai-color-accent-foreground:\s*#ffffff/i);
+  });
+
+  it('invalid brand hex emits a Note about failing to parse and the default used', async () => {
+    const out = await theme.handler({ brand: 'not-a-color' });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/Note.*could not parse|could not parse/i);
+    expect(text).toMatch(/default/i);
   });
 });

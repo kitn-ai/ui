@@ -143,6 +143,13 @@ function resolveBrand(
     if (parsed) {
       return { hex: brand.startsWith('#') ? brand : `#${brand}`, ...parsed, note: '' };
     }
+    // brand provided but unparseable — fall through with a note
+    const fallback = parseHex(DEFAULT_BRAND)!;
+    return {
+      hex: DEFAULT_BRAND,
+      ...fallback,
+      note: `Could not parse \`${brand}\` as a hex color — defaulted to **${DEFAULT_BRAND}** (indigo). Pass a valid \`#rgb\` or \`#rrggbb\` value to use your color.`,
+    };
   }
 
   // 2. Description → keyword match
@@ -211,7 +218,7 @@ function buildDarkTokenSet(r: number, g: number, b: number): TokenSet {
   const primary = darkBrand;
   const primaryFg = foreground(parsed.r, parsed.g, parsed.b);
   const accent = darkAccentSurface(r, g, b);
-  const accentFgParsed = parseHex(lighten(r, g, b, 0.7))!;
+  const accentFgParsed = parseHex(accent)!;
   return {
     primary,
     primaryFg,
@@ -283,12 +290,13 @@ export const theme: Tool = {
 
     const cssOutput = blocks.join('\n\n');
 
-    const noteSection = note ? `\n> **Assumption:** ${note}\n` : '';
+    const noteLabel = note.startsWith('Could not parse') ? 'Note' : 'Assumption';
+    const noteSection = note ? `\n> **${noteLabel}:** ${note}\n` : '';
 
     const text = `\
 ## AI/UI theme override — \`${hex}\`
 ${noteSection}
-Paste this block into your **global stylesheet** (before the \`@import\` of \`@kitn.ai/ui\` or after — order doesn't matter since \`--kai-*\` tokens are resolved at runtime via \`var()\` fallbacks):
+Paste this block into your **global stylesheet** (before the \`@import\` of \`@kitn.ai/ui\` or after — order doesn't matter since \`--kai-*\` tokens are resolved at runtime via \`var()\` fallbacks). For \`mode:'dark'\` overrides, the \`.dark\` class must be on a parent element (e.g. \`<html class="dark">\`) for them to take effect.
 
 \`\`\`css
 ${cssOutput}
