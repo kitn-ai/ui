@@ -35,6 +35,9 @@
   "unpkg": "./dist/kitn-chat.es.js",
   "jsdelivr": "./dist/kitn-chat.es.js",
   "customElements": "dist/custom-elements.json",
+  "bin": {
+    "kitn-ui-mcp": "./bin/mcp.js"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./elements": {
@@ -52,6 +55,7 @@
   "files": [
     "dist",
     "src",
+    "bin",
     "!src/**/*.stories.tsx",
     "!src/**/*.test.ts",
     "!src/**/*.test.tsx",
@@ -65,7 +69,7 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "prebuild": "npm run build:css",
-    "build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts",
+    "build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts && vite build --config vite.config.mcp.ts",
     "postbuild": "npm run build:theme && npm run build:api && npm run build:schemas",
     "build:theme": "node scripts/build-theme-tokens.mjs",
     "build:api": "node scripts/gen-element-api.mjs",
@@ -87,6 +91,7 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@shikijs/langs": "^4.2.0",
     "@shikijs/themes": "^4.2.0",
     "class-variance-authority": "^0.7.0",
