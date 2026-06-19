@@ -27,8 +27,8 @@ node_modules/@kitn.ai/ui/llms-full.txt
 
 They are also published at:
 
-- **https://kitn-ai.github.io/chat/llms.txt**
-- **https://kitn-ai.github.io/chat/llms-full.txt**
+- **https://ui.kitn.ai/llms.txt**
+- **https://ui.kitn.ai/llms-full.txt**
 
 <Aside type="tip" title="Which file to use">
 For a one-off prompt, paste `llms.txt` (~4 KB). For a project where the agent revisits these components repeatedly, reference the installed path so it always reads the version that matches the installed package.
@@ -41,7 +41,7 @@ For a one-off prompt, paste `llms.txt` (~4 KB). For a project where the agent re
 | **Claude Code** | Add `@node_modules/@kitn.ai/ui/llms.txt` to `CLAUDE.md`, or run `read node_modules/@kitn.ai/ui/llms-full.txt` in the session |
 | **GitHub Copilot** | Add the path to `.github/copilot-instructions.md`; workspace indexing picks it up |
 | **Cursor** | Reference the file in `.cursorrules` |
-| **Codex / ChatGPT** | Paste `https://kitn-ai.github.io/chat/llms.txt` into the prompt, or fetch it with a browsing tool |
+| **Codex / ChatGPT** | Paste `https://ui.kitn.ai/llms.txt` into the prompt, or fetch it with a browsing tool |
 | **Any agent** | `npm install @kitn.ai/ui` — file is at `node_modules/@kitn.ai/ui/llms.txt` |
 
 ## What agents most commonly get wrong
@@ -140,5 +140,5 @@ This is the source from which `llms.txt` and `llms-full.txt` are generated. IDE 
 
 ## Related
 
-- [Installation](/chat/guides/installation/) — install the package and register the web components
-- [Getting Started](/chat/guides/getting-started/) — first steps with `<kai-chat>`
+- [Installation](/guides/installation/) — install the package and register the web components
+- [Getting Started](/guides/getting-started/) — first steps with `<kai-chat>`

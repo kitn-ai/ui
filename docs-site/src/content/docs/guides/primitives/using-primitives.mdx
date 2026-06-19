@@ -7,7 +7,7 @@ import { Aside } from '@astrojs/starlight/components';
 
 The `kai-*` elements are the fast path. When you want full control over markup and layout — and you're in a Solid app — skip the wrapper and import the underlying pieces from `@kitn.ai/ui`. You compose them in JSX, and your bundler tree-shakes away whatever you don't use.
 
-This page is the catalog, organized by the [four layers](/chat/guides/primitives/architecture/). For a full streaming chat built this way, see the [Solid guide](/chat/guides/frameworks/solid/).
+This page is the catalog, organized by the [four layers](/guides/primitives/architecture/). For a full streaming chat built this way, see the [Solid guide](/guides/frameworks/solid/).
 
 ```bash
 npm install @kitn.ai/ui solid-js
@@ -54,7 +54,7 @@ import { Resizable, ResizablePanel, ScrollArea } from '@kitn.ai/ui';
 <Button variant="ghost" size="icon" aria-label="Add"><PlusIcon /></Button> {/* your icon */}
 ```
 
-`Resizable` + `ResizablePanel` build a draggable split — handles drop in automatically between visible panels. See the [Solid guide](/chat/guides/frameworks/solid/) for a full sidebar-plus-chat layout.
+`Resizable` + `ResizablePanel` build a draggable split — handles drop in automatically between visible panels. See the [Solid guide](/guides/frameworks/solid/) for a full sidebar-plus-chat layout.
 
 ## Feature components
 
@@ -102,5 +102,5 @@ When you do use a `kai-*` element inside Solid, bind arrays and objects with `pr
 
 ## Next
 
-- [Run the kit locally](/chat/guides/primitives/development/) — the build and Storybook dev loop.
-- [Create or modify a component](/chat/guides/primitives/extending/) — add your own primitive and element.
+- [Run the kit locally](/guides/primitives/development/) — the build and Storybook dev loop.
+- [Create or modify a component](/guides/primitives/extending/) — add your own primitive and element.

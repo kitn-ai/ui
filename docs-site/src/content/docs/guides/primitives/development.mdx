@@ -10,7 +10,7 @@ Work from source when you want to change a component, add one, or just read the 
 ## Set up
 
 ```bash
-git clone https://github.com/kitn-ai/chat.git
+git clone https://github.com/kitn-ai/ui.git
 cd chat
 npm install
 ```
@@ -23,7 +23,7 @@ Every primitive, component, and element has stories. Storybook is where you buil
 npm run storybook   # http://localhost:6006
 ```
 
-Stories live next to their source as `*.stories.tsx`, in three places that mirror the [layers](/chat/guides/primitives/architecture/):
+Stories live next to their source as `*.stories.tsx`, in three places that mirror the [layers](/guides/primitives/architecture/):
 
 - `src/ui/*.stories.tsx` — UI primitives (`Button`, `Switch`, `Resizable`).
 - `src/components/*.stories.tsx` — feature components (`Message`, `Artifact`).
@@ -66,4 +66,4 @@ These files drive this docs site's reference tables and playgrounds, the React a
 
 ## Next
 
-- [Create or modify a component](/chat/guides/primitives/extending/) — add a primitive, give it a story, and expose it as a `kai-*` element.
+- [Create or modify a component](/guides/primitives/extending/) — add a primitive, give it a story, and expose it as a `kai-*` element.

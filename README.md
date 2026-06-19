@@ -357,7 +357,7 @@ npm run dev    # dev server at http://localhost:6006
 ```
 
 The published docs are deployed to GitHub Pages:
-**https://kitn-ai.github.io/chat/**
+**https://ui.kitn.ai/**
 
 ### Framework example apps
 

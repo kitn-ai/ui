@@ -9,13 +9,13 @@ import starlightSidebarTopics from 'starlight-sidebar-topics';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 
-// PROTOTYPE — Astro Starlight evaluation for the kitn docs site.
-// `base: '/chat'` proves GitHub Pages readiness (kitn-ai.github.io/chat). The
-// dev server serves under that base too; assets are referenced with
-// import.meta.env.BASE_URL so they resolve in both dev and the static build.
+// Astro Starlight docs site for AI/UI. Served at the custom domain ui.kitn.ai
+// (see public/CNAME), so the site lives at the root — `base: '/'`. Assets are
+// still referenced with import.meta.env.BASE_URL so they resolve in dev and the
+// static build (each usage strips a trailing slash, so '/' yields '/asset').
 export default defineConfig({
-  site: 'https://kitn-ai.github.io',
-  base: '/chat',
+  site: 'https://ui.kitn.ai',
+  base: '/',
   vite: { plugins: [tailwindcss(), Icons({ compiler: 'solid' })] },
   // Render the heading anchor as a CHILD of the heading (behavior: 'append'),
   // so the heading can be a flex row [text · #] — clean gap + hover reveal,
@@ -40,9 +40,9 @@ export default defineConfig({
       title: 'AI/UI',
       favicon: '/favicon.svg',
       head: [
-        { tag: 'link', attrs: { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/chat/favicon-32.png' } },
-        { tag: 'link', attrs: { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/chat/favicon-16.png' } },
-        { tag: 'link', attrs: { rel: 'apple-touch-icon', sizes: '180x180', href: '/chat/apple-touch-icon.png' } },
+        { tag: 'link', attrs: { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png' } },
+        { tag: 'link', attrs: { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16.png' } },
+        { tag: 'link', attrs: { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' } },
       ],
       // Single entry: Tailwind (layered for Starlight) + the kitn design system.
       customCss: ['./src/styles/app.css'],

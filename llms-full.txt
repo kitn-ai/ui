@@ -101,9 +101,9 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 - Full element reference (all 44 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
-- Working examples: https://github.com/kitn-ai/chat/tree/main/examples
+- Working examples: https://github.com/kitn-ai/ui/tree/main/examples
 - Storybook: https://storybook.kitn.dev
-- Repository: https://github.com/kitn-ai/chat
+- Repository: https://github.com/kitn-ai/ui
 
 ---
 

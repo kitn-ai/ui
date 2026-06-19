@@ -22,13 +22,13 @@
     "solid-js"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/kitn-ai/chat#readme",
+  "homepage": "https://ui.kitn.ai",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kitn-ai/chat.git"
+    "url": "git+https://github.com/kitn-ai/ui.git"
   },
   "bugs": {
-    "url": "https://github.com/kitn-ai/chat/issues"
+    "url": "https://github.com/kitn-ai/ui/issues"
   },
   "main": "src/index.ts",
   "types": "src/index.ts",

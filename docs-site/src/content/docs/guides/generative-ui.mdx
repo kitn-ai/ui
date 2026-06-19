@@ -7,7 +7,7 @@ import { Aside } from '@astrojs/starlight/components';
 
 Your model doesn't have to answer in prose. It can ask the chat to render a **typed, interactive card** — a confirmation to approve, a form to fill, a plan to pick from, a link to preview — and get the user's answer back as structured data. The kit handles rendering and event routing; you decide when a card beats a sentence.
 
-This guide is the model/server side: the contract, how to get your model to emit cards, and how to feed the result back. For the rendering pattern see [Generative UI cards](/chat/patterns/generative-ui-cards/); for each card's props, the component pages ([confirm](/chat/components/confirm/), [choice](/chat/components/choice/), [form](/chat/components/form/), [tasks](/chat/components/tasks/)).
+This guide is the model/server side: the contract, how to get your model to emit cards, and how to feed the result back. For the rendering pattern see [Generative UI cards](/patterns/generative-ui-cards/); for each card's props, the component pages ([confirm](/components/confirm/), [choice](/components/choice/), [form](/components/form/), [tasks](/components/tasks/)).
 
 ## The loop
 
@@ -156,9 +156,9 @@ const types = mergeCardTags({ chart: 'my-chart-card' }); // built-ins + yours
 // el.types = types  →  <kai-cards> now renders `chart` envelopes with <my-chart-card>
 ```
 
-For **provider-owned, cross-origin** cards you don't want to bundle, render them in a sandboxed iframe with `kai-remote` — same envelope, same policy, over `postMessage`. See [remote cards](/chat/examples/remote-cards/).
+For **provider-owned, cross-origin** cards you don't want to bundle, render them in a sandboxed iframe with `kai-remote` — same envelope, same policy, over `postMessage`. See [remote cards](/examples/remote-cards/).
 
 ## Next
 
-- [Generative UI cards](/chat/patterns/generative-ui-cards/) — the rendering pattern, live.
-- [confirm](/chat/components/confirm/) · [choice](/chat/components/choice/) · [form](/chat/components/form/) · [tasks](/chat/components/tasks/) — per-card APIs.
+- [Generative UI cards](/patterns/generative-ui-cards/) — the rendering pattern, live.
+- [confirm](/components/confirm/) · [choice](/components/choice/) · [form](/components/form/) · [tasks](/components/tasks/) — per-card APIs.

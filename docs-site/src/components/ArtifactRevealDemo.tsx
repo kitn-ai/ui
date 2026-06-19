@@ -12,8 +12,8 @@ import { createSignal, createEffect, onMount, onCleanup } from 'solid-js';
 import { loadKit } from './example/kit';
 import IconClose from '~icons/lucide/x';
 
-// Same-origin fixtures served from public/artifact-demo/ — BASE_URL is '/chat'
-// in prod and '/chat/' in dev, so normalise the trailing slash.
+// Same-origin fixtures served from public/artifact-demo/ — BASE_URL is '/' (root);
+// strip any trailing slash so the URL is always '/artifact-demo/…'.
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const url = (p: string) => `${base}/artifact-demo/${p}`;
 

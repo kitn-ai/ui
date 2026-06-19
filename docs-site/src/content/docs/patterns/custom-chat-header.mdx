@@ -11,7 +11,7 @@ import ChatHeaderDemo from '../../../components/ChatHeaderDemo.tsx';
 <ChatHeaderDemo client:only="solid" />
 
 <Aside type="note" title="kai-chat vs kai-workspace">
-`<kai-chat>` is the **conversation** — thread, composer, header. It has no sidebar of its own, so here the rail and its toggle are wired by the demo (full control over the layout). If you want a **managed, collapsible conversation sidebar** without wiring it yourself, reach for [`<kai-workspace>`](/chat/components/workspace/) instead — it owns the sidebar (and its collapse is controllable). Use `kai-chat` + header slots when you want to build the shell yourself; use `kai-workspace` when you don't.
+`<kai-chat>` is the **conversation** — thread, composer, header. It has no sidebar of its own, so here the rail and its toggle are wired by the demo (full control over the layout). If you want a **managed, collapsible conversation sidebar** without wiring it yourself, reach for [`<kai-workspace>`](/components/workspace/) instead — it owns the sidebar (and its collapse is controllable). Use `kai-chat` + header slots when you want to build the shell yourself; use `kai-workspace` when you don't.
 </Aside>
 
 ## How it works
@@ -56,6 +56,6 @@ Or declare them as `<kai-model>` children: `<kai-model id="gpt-4o" group="Legacy
 
 ## Next steps
 
-- **[Button and popover menu](/chat/patterns/popover-menu/)** — the `kai-popover` primitive on its own.
-- **[`kai-model-switcher` reference](/chat/components/model-switcher/)** — models, groups, and the `kai-model-change` event.
-- **[Compose your own shell](/chat/patterns/compose-your-own/)** — when you need more than the header customised.
+- **[Button and popover menu](/patterns/popover-menu/)** — the `kai-popover` primitive on its own.
+- **[`kai-model-switcher` reference](/components/model-switcher/)** — models, groups, and the `kai-model-change` event.
+- **[Compose your own shell](/patterns/compose-your-own/)** — when you need more than the header customised.
