@@ -6,6 +6,7 @@ import cloudflare from './integrations/cloudflare';
 import ollama from './integrations/ollama';
 import mastra from './integrations/mastra';
 import pi from './integrations/pi';
+import pydanticAi from './integrations/pydantic-ai';
 import { archetypes as _archetypes } from './archetypes';
 
 export const integrations: Integration[] = [
@@ -16,6 +17,7 @@ export const integrations: Integration[] = [
   ollama,
   mastra,
   pi,
+  pydanticAi,
 ];
 
 export const archetypes: Archetype[] = _archetypes;

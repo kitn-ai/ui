@@ -1,0 +1,72 @@
+---
+title: Pydantic AI
+description: Run a Pydantic AI agent in a FastAPI route, stream its text deltas as OpenAI-format SSE, and let kai-chat render the reply — Python backend, unchanged browser side.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<p class="kai-lede">Pydantic AI is a Python agent framework. Drop it behind a FastAPI route, re-frame its text deltas as OpenAI-format SSE, and `<kai-chat>` streams the reply — no changes on the browser side.</p>
+
+## The route
+
+`agent.run_stream()` is an async context manager that streams the model's reply as it arrives. `result.stream_text(delta=True)` yields each new token as a plain string — that's the primitive you wrap into OpenAI SSE frames:
+
+```python
+# main.py
+import json
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+from pydantic_ai import Agent
+
+agent = Agent('openai:gpt-4o')
+
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware, allow_origins=['*'], allow_methods=['POST'], allow_headers=['*']
+)
+
+class Message(BaseModel):
+    role: str
+    content: str
+
+class ChatRequest(BaseModel):
+    messages: list[Message]
+
+async def openai_sse(messages: list[Message]):
+    prompt = messages[-1].content if messages else ''
+    async with agent.run_stream(prompt) as result:
+        async for delta in result.stream_text(delta=True):
+            chunk = {'choices': [{'delta': {'content': delta}}]}
+            yield f'data: {json.dumps(chunk)}\n\n'
+    yield 'data: [DONE]\n\n'
+
+@app.post('/api/chat')
+async def chat(req: ChatRequest):
+    return StreamingResponse(openai_sse(req.messages), media_type='text/event-stream')
+```
+
+Each `delta` becomes one `data:` line shaped `{"choices":[{"delta":{"content":"…"}}]}`. After the context manager exits, the route yields `data: [DONE]` and the stream closes.
+
+<Aside type="note">This route passes the last user message as a plain string prompt. To send the full conversation history, build a `messages` list and pass it to `agent.run_stream()` instead — Pydantic AI accepts the same `role`/`content` pairs.</Aside>
+
+## Install and run
+
+```bash
+pip install pydantic-ai fastapi uvicorn
+export OPENAI_API_KEY=sk-...
+uvicorn main:app --reload
+```
+
+The server binds to `http://localhost:8000` by default. Point `<kai-chat>` at `/api/chat` (or the full URL if it's on a different origin — CORS middleware is already in the route above).
+
+## The browser side
+
+The front end is the same as every other backend: `<kai-chat>` posts to `/api/chat` and reads the SSE into `messages`. That reader loop is the [Streaming recipe](/guides/recipes/streaming/) — the format coming from this Python server is identical to what any OpenAI-backed route produces.
+
+## Next steps
+
+- **[Connect any backend](/integrations/connect-any-backend/)** — the `messages` contract this route feeds.
+- **[Streaming](/guides/recipes/streaming/)** — the reader loop on the browser side.
+- **[Connect any model](/integrations/connect-any-model/)** — swap the model string (`'openai:gpt-4o'`, `'anthropic:claude-opus-4-5'`, `'google:gemini-2-flash'`) without changing the route.

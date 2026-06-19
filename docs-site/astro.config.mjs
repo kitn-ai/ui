@@ -167,6 +167,7 @@ export default defineConfig({
               { label: 'LangGraph', slug: 'integrations/langgraph' },
               { label: 'Cloudflare AI', slug: 'integrations/cloudflare-ai' },
               { label: 'Run it locally with Ollama', slug: 'integrations/ollama' },
+              { label: 'Pydantic AI', slug: 'integrations/pydantic-ai' },
               { label: 'Harnesses', slug: 'integrations/harnesses' },
             ],
           },

@@ -6,12 +6,12 @@ import { IntegrationSchema, ArchetypeSchema } from './types';
 
 it('has the launch integrations', () => {
   const ids = integrations.map((i) => i.id);
-  for (const id of ['openrouter', 'vercel-ai-sdk', 'langgraph', 'cloudflare', 'ollama', 'mastra', 'pi'])
+  for (const id of ['openrouter', 'vercel-ai-sdk', 'langgraph', 'cloudflare', 'ollama', 'mastra', 'pi', 'pydantic-ai'])
     expect(ids).toContain(id);
 });
 
-it('has exactly 7 integrations', () => {
-  expect(integrations).toHaveLength(7);
+it('has exactly 8 integrations', () => {
+  expect(integrations).toHaveLength(8);
 });
 
 it('every integration validates and has at least one route template', () => {
