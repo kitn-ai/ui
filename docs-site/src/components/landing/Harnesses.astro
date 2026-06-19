@@ -1,0 +1,58 @@
+---
+// "For harnesses" — the wedge: most agent harnesses are CLI/headless and have no
+// web UI. AI/UI is the drop-in front-end layer. Links out to harnesses (Pi,
+// OpenClaw) and invites "bring your own". Light band.
+import { Icon } from 'astro-icon/components';
+import SectionHeader from './SectionHeader.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
+
+const harnesses = [
+  { name: 'Pi', desc: 'Open-source agent harness + coding CLI', href: 'https://github.com/earendil-works/pi' },
+  { name: 'OpenClaw', desc: 'Headless coding agent (ACP)', href: 'https://github.com/openclaw' },
+];
+---
+
+<section class="mx-auto max-w-[80rem] px-6 py-16 lg:py-24">
+  <SectionHeader icon="lucide:bot" label="For harnesses" />
+  <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
+    <div>
+      <h2 class="text-balance text-3xl font-medium leading-[1.05] tracking-[-0.02em] text-ink md:text-4xl lg:text-5xl">
+        Your harness has a backend.<br class="hidden sm:block" />
+        <span class="text-brand">This is the front-end.</span>
+      </h2>
+      <p class="mt-5 text-lg leading-relaxed text-ink-2">
+        Most agent harnesses are CLI or headless — the loop, the tools, and the
+        model wiring are already done, but there's no web UI. AI/UI is that layer:
+        framework-agnostic web components you point at your harness's stream. Bring
+        your own loop; we render the chat, tool calls, reasoning, and artifacts.
+      </p>
+      <a href={href('guides/getting-started')} class="mt-6 inline-flex items-center gap-1.5 font-bold text-brand no-underline hover:underline">
+        Wire it to your agent
+        <Icon name="lucide:arrow-right" class="size-4" />
+      </a>
+    </div>
+
+    <ul class="grid gap-3 sm:grid-cols-2">
+      {harnesses.map((h) => (
+        <li>
+          <a href={h.href} target="_blank" rel="noopener" class="group flex h-full flex-col rounded-xl border border-line bg-surface p-5 no-underline transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--kai-brand)]">
+            <div class="flex items-center justify-between">
+              <Icon name="lucide:terminal" class="size-6 text-ink-2" />
+              <Icon name="lucide:arrow-up-right" class="size-4 text-ink-3 transition-colors group-hover:text-brand" />
+            </div>
+            <div class="mt-4 text-lg font-bold text-ink">{h.name}</div>
+            <div class="mt-1 text-sm leading-snug text-ink-2">{h.desc}</div>
+          </a>
+        </li>
+      ))}
+      <li class="sm:col-span-2">
+        <div class="flex items-center gap-3 rounded-xl border border-dashed border-line p-5 text-ink-2">
+          <Icon name="lucide:plus" class="size-5 shrink-0 text-ink-3" />
+          <span class="text-sm"><span class="font-bold text-ink">Bring your own.</span> Any agent loop, SDK, or model — AI/UI just needs a stream to render.</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
