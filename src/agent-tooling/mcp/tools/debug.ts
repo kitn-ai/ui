@@ -51,7 +51,7 @@ const RULES: Rule[] = [
     // Source: for-ai-agents.mdx §3; context7.json rule 4
     id: 'in-place-mutation',
     test: (t) =>
-      /don'?t\s+update|doesn'?t\s+re.?render|no\s+re.?render|push\b|mutate|in.place/.test(t),
+      /don'?t\s+update|doesn'?t\s+re.?render|no\s+re.?render|\.push\(|\bpush(?:es|ing)?\s+(?:to|into|onto)\b|mutate|in.place/.test(t),
     title: 'In-place mutation does not trigger a re-render',
     cause:
       'Mutating an existing message object or array in place (e.g. `chat.messages.push(…)` ' +
@@ -124,10 +124,13 @@ const RULES: Rule[] = [
     // Rule 5 — SSR / server component / document is not defined
     // Source: for-ai-agents.mdx (client-only import); context7.json rule 2 (property rule requires DOM)
     id: 'ssr-server-component',
-    test: (t) =>
-      /\bssr\b|server\s+component|document\s+is\s+not\s+defined|window\s+is\s+not\s+defined|hydration|next\.?js.*server|server.*next\.?js/.test(
-        t,
-      ),
+    test: (t) => {
+      // Core SSR signals — always trigger
+      if (/\bssr\b|server\s+component|document\s+is\s+not\s+defined|window\s+is\s+not\s+defined|next\.?js.*server|server.*next\.?js/.test(t)) return true;
+      // "hydration" only triggers when a web-component / kai context is also present
+      if (/hydration/.test(t) && /kai|web.?component|custom.?element|<[a-z]+-/.test(t)) return true;
+      return false;
+    },
     title: 'SSR / server-side rendering — element requires the browser DOM',
     cause:
       '`kai-*` elements are client-side web components. They require `document` and ' +

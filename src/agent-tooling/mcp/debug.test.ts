@@ -62,4 +62,40 @@ describe('debug', () => {
     const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/component_reference/i);
   });
+
+  // ── False-positive guards ────────────────────────────────────────────────
+  it('"pushing a button" does NOT trigger the in-place-mutation rule', async () => {
+    const out = await debug.handler({
+      symptom: 'pushing a button does nothing visible',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must NOT match mutation rule (no "new array" / "new reference" fix)
+    expect(text).not.toMatch(/In-place mutation|new array|new reference/i);
+  });
+
+  it('generic React hydration question does NOT trigger the SSR rule', async () => {
+    const out = await debug.handler({
+      symptom: 'React hydration mismatch error in my app',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must NOT match SSR rule (no web-component/kai context)
+    expect(text).not.toMatch(/SSR.*server-side|client.only.*registration/i);
+  });
+
+  it('"hydration" with a kai-chat context DOES trigger the SSR rule', async () => {
+    const out = await debug.handler({
+      symptom: 'hydration error when using kai-chat in Next.js',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/client.only|client-side|dynamic.import/i);
+  });
+
+  // Confirm existing test still passes after push\b tightening
+  it('"messages don\'t update when I push" still triggers mutation rule', async () => {
+    const out = await debug.handler({
+      symptom: "messages don't update when I push",
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/new array|new reference/i);
+  });
 });

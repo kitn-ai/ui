@@ -68,13 +68,15 @@ function placementStyle(placement: string): PlacementStyle {
 /** The kai-* tags for the archetype, in order, as opening/closing markup. */
 function componentTags(archetype: Archetype): string {
   // kai-chat is the interactive root; companion components sit alongside it.
-  return archetype.components
-    .map((tag) =>
+  const hasCompanions = archetype.components.some((t) => t !== 'kai-chat');
+  return [
+    ...archetype.components.map((tag) =>
       tag === 'kai-chat'
         ? `  <${tag} id="chat"></${tag}>`
         : `  <${tag}></${tag}>`,
-    )
-    .join('\n');
+    ),
+    ...(hasCompanions ? [`  <!-- wire data props — see the component_reference MCP tool -->`] : []),
+  ].join('\n');
 }
 
 const HTML_WIRING = `  <script type="module">
@@ -156,10 +158,11 @@ function renderJsx(archetype: Archetype, p: PlacementStyle, emptyHint: string): 
   const wrapperNames = archetype.components.map(toPascalCase);
   const importList = wrapperNames.join(', ');
 
-  const companions = archetype.components
-    .filter((t) => t !== 'kai-chat')
-    .map((t) => `      <${toPascalCase(t)} />`)
-    .join('\n');
+  const companionTags = archetype.components.filter((t) => t !== 'kai-chat');
+  const companions = [
+    ...(companionTags.length > 0 ? [`      {/* wire data props — see the component_reference MCP tool */}`] : []),
+    ...companionTags.map((t) => `      <${toPascalCase(t)} />`),
+  ].join('\n');
 
   return [
     `import { useState } from 'react';`,
@@ -223,10 +226,11 @@ function renderJsx(archetype: Archetype, p: PlacementStyle, emptyHint: string): 
 
 /** Vue: bind messages as a property, listen for kai-submit with @. */
 function renderVue(archetype: Archetype, p: PlacementStyle, emptyHint: string): string {
-  const companions = archetype.components
-    .filter((t) => t !== 'kai-chat')
-    .map((t) => `    <${t} />`)
-    .join('\n');
+  const companionTags = archetype.components.filter((t) => t !== 'kai-chat');
+  const companions = [
+    ...(companionTags.length > 0 ? [`    <!-- wire data props — see the component_reference MCP tool -->`] : []),
+    ...companionTags.map((t) => `    <${t} />`),
+  ].join('\n');
 
   return [
     `<!-- vue — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
@@ -247,10 +251,11 @@ function renderVue(archetype: Archetype, p: PlacementStyle, emptyHint: string): 
 
 /** Svelte: use bind:this to set array/object properties reactively; on:kai-submit for the event. */
 function renderSvelte(archetype: Archetype, p: PlacementStyle, emptyHint: string): string {
-  const companionLines = archetype.components
-    .filter((t) => t !== 'kai-chat')
-    .map((t) => `  <${t}></${t}>`)
-    .join('\n');
+  const companionTags = archetype.components.filter((t) => t !== 'kai-chat');
+  const companionLines = [
+    ...(companionTags.length > 0 ? [`  <!-- wire data props — see the component_reference MCP tool -->`] : []),
+    ...companionTags.map((t) => `  <${t}></${t}>`),
+  ].join('\n');
 
   return [
     `<!-- svelte — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
@@ -259,7 +264,7 @@ function renderSvelte(archetype: Archetype, p: PlacementStyle, emptyHint: string
     `  let chatEl;`,
     `  let messages = [];`,
     `  let loading = false;`,
-    `  $: if (chatEl) chatEl.messages = messages;`,
+    `  $: if (chatEl) { chatEl.messages = messages; chatEl.loading = loading; }`,
     ``,
     `  async function onSubmit(e) {`,
     `    const value = e.detail.value.trim();`,
@@ -301,7 +306,7 @@ function renderSvelte(archetype: Archetype, p: PlacementStyle, emptyHint: string
     `</script>`,
     ``,
     `<div style="${p.style}">`,
-    `  <kai-chat bind:this={chatEl} {loading} on:kai-submit={onSubmit}></kai-chat>`,
+    `  <kai-chat bind:this={chatEl} on:kai-submit={onSubmit}></kai-chat>`,
     companionLines,
     `</div>`,
   ]

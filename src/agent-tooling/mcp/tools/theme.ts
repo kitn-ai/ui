@@ -330,10 +330,9 @@ ${blocks[0]
 
 The theme editor lets you tweak every token interactively and copy the result:
 
-**→ [Open Theme Editor](https://kitn-ai.github.io/chat/theme/editor/)**
-(Also available at \`/chat/theme/editor/\` on the docs site)
+**→ [Open Theme Editor](https://ui.kitn.ai/theme/editor/)**
 
-For the complete token list see the [theming guide](https://kitn-ai.github.io/chat/guides/theming/) and the source \`theme.css\` in the package root.
+For the complete token list see the [theming guide](https://ui.kitn.ai/guides/theming/) and the source \`theme.css\` in the package root.
 `;
 
     return { content: [{ type: 'text', text }] };
