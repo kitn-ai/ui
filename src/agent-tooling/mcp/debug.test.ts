@@ -98,4 +98,50 @@ describe('debug', () => {
     const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/new array|new reference/i);
   });
+
+  // ── Rule 6: custom elements not registered / renders nothing ───────────────
+  it('React wrapper renders nothing / empty → elements-not-registered fix', async () => {
+    const out = await debug.handler({
+      symptom:
+        'Using the React wrapper, the kai-chat element renders nothing / appears empty. ' +
+        'How do I register the custom elements?',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/@kitn\.ai\/ui\/elements/);
+  });
+
+  it('"renders nothing" + "not registered" → elements-not-registered fix', async () => {
+    const out = await debug.handler({
+      symptom: 'kai-chat renders nothing — customElements.get returns undefined, element not registered',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/Custom elements not registered|elements-not-registered|@kitn\.ai\/ui\/elements/i);
+  });
+
+  it('generic "empty" symptom without render context does NOT fire Rule 6', async () => {
+    const out = await debug.handler({
+      symptom: 'the data array is empty after fetch',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).not.toMatch(/Custom elements not registered/i);
+  });
+
+  // ── Rule 7: tsc errors inside node_modules/@kitn.ai/ui/src ─────────────────
+  it('tsc TS2786 Show error in @kitn.ai/ui → tsc-source-pull paths/stub fix', async () => {
+    const out = await debug.handler({
+      symptom:
+        'node_modules/@kitn.ai/ui/src/ui/Chat.tsx error TS2786: Show cannot be used as a JSX component',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/paths|kitn-elements\.d\.ts|skipLibCheck/i);
+  });
+
+  // ── Rule 8: fetch('/api/chat') 404 in Vite SPA ────────────────────────────
+  it("fetch('/api/chat') 404 in Vite app → vite-api-404 mock/express/next fix", async () => {
+    const out = await debug.handler({
+      symptom: "fetch('/api/chat') returns 404 in my Vite app",
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/mock|Next\.?js|express|proxy/i);
+  });
 });

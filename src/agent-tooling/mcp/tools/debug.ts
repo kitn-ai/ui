@@ -121,6 +121,109 @@ const RULES: Rule[] = [
       '```',
   },
   {
+    // Rule 6 — custom elements not registered / renders nothing (React #1 failure)
+    // Source: field-test reports; for-ai-agents.mdx §"Import order matters"
+    id: 'elements-not-registered',
+    test: (t) => {
+      // Core render-nothing / unregistered-element signals
+      if (
+        /renders?\s+nothing|nothing\s+renders?|not\s+registered|unregistered|not\s+upgraded|unknown\s+element|customElements\.get|undefined\s+element|no\s+shadow\s+root/.test(t)
+      )
+        return true;
+      // "empty" / "blank" / "doesn't render" / "won't render" only fire when
+      // a render/element/component context is also present to avoid false positives
+      if (
+        /\b(empty|blank)\b/.test(t) &&
+        /render|element|component|kai-|<[a-z]+-|shadow/.test(t)
+      )
+        return true;
+      if (
+        /doesn'?t\s+render|won'?t\s+render/.test(t) &&
+        /kai-|element|component|custom.?element/.test(t)
+      )
+        return true;
+      return false;
+    },
+    title: 'Custom elements not registered — renders nothing / empty box',
+    cause:
+      'The `@kitn.ai/ui/react` wrappers (and bare `<kai-*>` tags) do NOT register the ' +
+      'custom elements by themselves. Without the element-registration side-effect import, ' +
+      '`<kai-chat>` / `<Chat>` is an un-upgraded unknown element — an empty box. ' +
+      '`customElements.get(\'kai-chat\') === undefined`.',
+    fix:
+      'Import the elements bundle for its side effect BEFORE your first render — ' +
+      'it must run before the component mounts.\n\n' +
+      '```tsx\n' +
+      "import '@kitn.ai/ui/elements'   // registers <kai-*> — REQUIRED, must come first\n" +
+      "import { Chat } from '@kitn.ai/ui/react'\n" +
+      "import '@kitn.ai/ui/theme.css'\n" +
+      '```\n\n' +
+      'In plain HTML: `import \'@kitn.ai/ui/elements\'` in your module script. ' +
+      'The import is a side effect — keep it even if your linter flags it as "unused".',
+  },
+  {
+    // Rule 7 — tsc errors inside node_modules/@kitn.ai/ui/src (SolidJS source pulled in)
+    // Source: field-test reports; packaging gap (tracked upstream)
+    id: 'tsc-source-pull',
+    test: (t) =>
+      /node_modules\/@kitn\.ai\/ui/.test(t) &&
+      /tsc|TS2786|cannot\s+be\s+used\s+as\s+a\s+jsx\s+component|Show\b|Portal\b|Dynamic\b|error\s+TS|type\s+error/.test(
+        t,
+      ),
+    title: 'tsc errors inside node_modules/@kitn.ai/ui/src (SolidJS source compiled under React)',
+    cause:
+      'The package currently ships TypeScript/TSX source, and a type entry value-re-exports ' +
+      'from it, so the consumer\'s `tsc` resolves and compiles the library\'s SolidJS internals ' +
+      '(`src/ui/*.tsx`) under the app\'s React JSX config — `Show`/`Portal`/`Dynamic` aren\'t ' +
+      'React components, causing TS2786 / "cannot be used as a JSX component" errors. ' +
+      '`vite`/esbuild build fine (they strip types); only `tsc` breaks. ' +
+      '`skipLibCheck` does not help (these are `.tsx` source, not `.d.ts`).',
+    fix:
+      'Redirect the type resolution for that subpath in your tsconfig ' +
+      '(Vite ignores tsconfig `paths`, so runtime is unaffected):\n\n' +
+      '```jsonc\n' +
+      '// tsconfig (app)\n' +
+      '"baseUrl": ".",\n' +
+      '"paths": { "@kitn.ai/ui/elements": ["./src/stubs/kitn-elements.d.ts"] }\n' +
+      '```\n\n' +
+      '```ts\n' +
+      '// src/stubs/kitn-elements.d.ts\n' +
+      'export {}\n' +
+      '```\n\n' +
+      '(This is a known packaging gap being tracked upstream.)',
+  },
+  {
+    // Rule 8 — fetch('/api/chat') 404 in a Vite SPA (no server-side routes)
+    // Source: field-test reports; common scaffold confusion
+    id: 'vite-api-404',
+    test: (t) => {
+      // /api/chat 404
+      if (/\/api\/chat/.test(t) && /\b404\b|not\s+found/i.test(t)) return true;
+      // Vite + missing API route / route handler / POST
+      if (/\bvite\b/.test(t) && /api\s+route|route\s+handler|\bPOST\b.*not\s+work/.test(t)) return true;
+      // Next.js route handler used in a Vite app
+      if (/next\.?js.*route|route.*next\.?js/.test(t) && /\bvite\b/.test(t)) return true;
+      return false;
+    },
+    title: 'fetch(\'/api/chat\') 404 — Vite SPA has no server-side API routes',
+    cause:
+      'A plain Vite/CRA React SPA has no server — there are no `/api` routes. ' +
+      'A scaffolded Next.js route handler (`export async function POST`) does not run there, ' +
+      'so `fetch(\'/api/chat\')` 404s.',
+    fix:
+      'Either run the backend somewhere real, or skip it entirely for local dev:\n\n' +
+      '```ts\n' +
+      '// Option A — use Next.js where route handlers are supported\n' +
+      "// app/api/chat/route.ts: export async function POST(req) { ... }\n\n" +
+      '// Option B — add a Vite dev-server middleware/proxy\n' +
+      "// vite.config.ts: server: { proxy: { '/api': 'http://localhost:3001' } }\n\n" +
+      '// Option C — run a separate Express/Hono server\n' +
+      "// framework: 'express' in your harness config\n\n" +
+      '// Option D — zero-config local dev with mock integration (no backend needed)\n' +
+      "// Use `integration: 'mock'` in the scaffold tool\n" +
+      '```',
+  },
+  {
     // Rule 5 — SSR / server component / document is not defined
     // Source: for-ai-agents.mdx (client-only import); context7.json rule 2 (property rule requires DOM)
     id: 'ssr-server-component',
