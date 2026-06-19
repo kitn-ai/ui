@@ -5,7 +5,7 @@ description: Stream assistant responses token-by-token into kai-chat or kai-resp
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Display each token as it arrives — no buffering, no flash of finished content. kitn-chat supports two approaches: **mutate `messages` in place** (the standard pattern with `kai-chat`) or **feed an `AsyncIterable<string>`** directly to `kai-response-stream`.
+Display each token as it arrives — no buffering, no flash of finished content. AI/UI supports two approaches: **mutate `messages` in place** (the standard pattern with `kai-chat`) or **feed an `AsyncIterable<string>`** directly to `kai-response-stream`.
 
 ## Stream into kai-chat
 
@@ -98,6 +98,8 @@ If you are proxying an [OpenRouter](https://openrouter.ai) request on your serve
 ```
 
 The SSE response follows the OpenAI streaming format (`data: {...}` lines, terminated with `data: [DONE]`) — the reader loop above handles it as-is.
+
+This recipe is the *mechanic*. For connecting a specific provider, gateway, agent framework, or harness — and switching models from the chat header — see [Integrations](/integrations/overview/).
 
 ## Stream with kai-response-stream
 

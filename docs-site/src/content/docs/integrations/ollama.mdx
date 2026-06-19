@@ -1,0 +1,110 @@
+---
+title: Run It Locally with Ollama
+description: Run a real model on your own machine and wire it into kai-chat — no API key, no cloud round-trip, two minutes from cold start.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<p class="kai-lede">Ollama runs an open model on your machine and speaks the same OpenAI wire format your route already does. No API key, nothing leaves the laptop. Install it, pull a model, and `<kai-chat>` streams from localhost.</p>
+
+## Install and pull a model
+
+Download Ollama from [ollama.com/download](https://ollama.com/download), then pull a model and confirm it answers:
+
+```bash
+ollama serve          # starts the server on 127.0.0.1:11434
+ollama pull llama3.2  # ~2 GB
+ollama run llama3.2   # chat in the terminal to confirm it works
+```
+
+`ollama serve` binds to `127.0.0.1:11434` by default. Everything below talks to that address.
+
+## Server proxy (recommended)
+
+Ollama exposes an OpenAI-compatible endpoint at `http://localhost:11434/v1/chat/completions`, so your existing chat route works unchanged — only the base URL moves to localhost. The API key is required by OpenAI clients but ignored by Ollama, so pass any string.
+
+```ts
+// app/api/chat/route.ts — proxy the browser to local Ollama
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const upstream = await fetch('http://localhost:11434/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'llama3.2', messages, stream: true }),
+  });
+
+  // Ollama returns OpenAI-format SSE — stream it straight to the browser.
+  return new Response(upstream.body, { headers: { 'Content-Type': 'text/event-stream' } });
+}
+```
+
+The browser side is the same reader loop you use for any backend: append the user turn and an empty assistant message, then reassign `messages` as `data:` lines arrive. See the [Streaming recipe](/guides/recipes/streaming/) for the exact loop.
+
+```html
+<kai-chat id="chat"></kai-chat>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+  const chat = document.getElementById('chat');
+
+  chat.addEventListener('kai-submit', async (e) => {
+    const history = [...chat.messages, { id: crypto.randomUUID(), role: 'user', content: e.detail.value }];
+    chat.messages = [...history, { id: crypto.randomUUID(), role: 'assistant', content: '' }];
+    await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: history }),
+    });
+    // stream the reply into the last message — see the Streaming recipe
+  });
+</script>
+```
+
+Swap the base URL back to a hosted provider later and ship — no front-end changes.
+
+## Browser-direct
+
+You can skip the server and have the browser hit Ollama itself — handy for a static demo or fully offline dev. The catch is CORS: Ollama allows `127.0.0.1` and `0.0.0.0` by default but blocks real web origins until you list them in `OLLAMA_ORIGINS`.
+
+```bash
+# macOS — set the origin, then restart the Ollama app
+launchctl setenv OLLAMA_ORIGINS "https://your-site.com"
+
+# Linux — systemctl edit ollama.service, add under [Service]:
+#   Environment="OLLAMA_ORIGINS=https://your-site.com"
+# then: systemctl daemon-reload && systemctl restart ollama
+
+# ad-hoc, for one session
+OLLAMA_ORIGINS="https://your-site.com" ollama serve
+```
+
+`OLLAMA_ORIGINS` is comma-separated and accepts a `*` wildcard. Now fetch from the page exactly as you would any OpenAI endpoint:
+
+```js
+const upstream = await fetch('http://localhost:11434/v1/chat/completions', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ model: 'llama3.2', messages: chat.messages, stream: true }),
+});
+// then read upstream.body with the Streaming recipe's loop
+```
+
+<Aside type="caution">Browser-direct only reaches the user's own machine. Ollama must be running locally and the origin must be in `OLLAMA_ORIGINS` — there's no fallback for visitors who don't run it. Use the server proxy for anything you deploy; keep browser-direct for local dev and self-hosted tools.</Aside>
+
+| What | Value | Notes |
+|---|---|---|
+| OpenAI endpoint | `http://localhost:11434/v1/chat/completions` | Drop-in for the chat route. |
+| Base URL | `http://localhost:11434/v1/` | For OpenAI-client libraries. |
+| API key | `ollama` | Required by clients, ignored by the server. |
+| Native endpoint | `POST http://localhost:11434/api/chat` | NDJSON; see [Ollama's API docs](https://github.com/ollama/ollama/blob/main/docs/api.md). |
+| CORS allowlist | `OLLAMA_ORIGINS` | Comma-separated, additive, `*` wildcard. |
+| Bind address | `OLLAMA_HOST` (default `127.0.0.1:11434`) | Where the server listens — not CORS. |
+
+<Aside type="note">`OLLAMA_HOST` controls where the server binds, not which origins are allowed. To let a browser in, set `OLLAMA_ORIGINS`; restart Ollama after any env change.</Aside>
+
+## Next steps
+
+- **[Connect any model](/integrations/connect-any-model/)** — the same route reaches OpenRouter, xAI, or a local Llama through one base URL.
+- **[Connect any backend](/integrations/connect-any-backend/)** — the `messages` contract this builds on.
+- **[Streaming](/guides/recipes/streaming/)** — the reader loop that pulls the reply into the thread.

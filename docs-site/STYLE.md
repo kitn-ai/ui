@@ -1,4 +1,4 @@
-# kitn-chat docs — writing & style guide
+# AI/UI docs — writing & style guide
 
 The single reference for anyone (human or agent) writing pages for this site.
 Read it fully before writing. **Do not copy-paste source material — rewrite it,
@@ -100,7 +100,7 @@ standard). Don't reinvent them.
 
 ## House facts & terminology
 
-- Product: **kitn-chat** (`@kitn.ai/ui`). It's a set of **web components** —
+- Product: **AI/UI** (`@kitn.ai/ui`). It's a set of **web components** —
   framework-agnostic custom elements, isolated in **Shadow DOM** — that drop into
   React, Vue, Svelte, Angular, or plain HTML.
 - **Lead with the web components; don't lead with how they're built.** They're

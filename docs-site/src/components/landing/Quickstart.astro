@@ -8,7 +8,13 @@ const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
 
 const cdnSteps = [
   { n: '01', title: 'Add the script', lang: 'html', code: '<script type="module"\n  src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js"\n></script>' },
-  { n: '02', title: 'Drop one in', lang: 'html', code: '<kai-chat></kai-chat>' },
+  { n: '02', title: 'Drop one in (give it a height)', lang: 'html', code: `<kai-chat style="display:block;height:600px"></kai-chat>
+<script>
+  // It's a custom element — needs a height; no wrapper required.
+  document.querySelector('kai-chat').messages = [
+    { role: 'assistant', content: 'Hi! Ask me anything.' },
+  ];
+<\/script>` },
 ];
 const npmSteps = [
   { n: '01', title: 'Install', lang: 'bash', code: 'npm i @kitn.ai/ui' },
@@ -20,13 +26,16 @@ const paths = [
   { id: 'npm', label: 'npm', steps: npmSteps },
 ];
 
+// Monochrome marks (simple-icons) — they inherit the chip's gray text colour, so
+// they read as "grayed out" and dodge the astro-icon viewBox bug that blanks a
+// reused gradient logo (the multicolour `logos:*` Solid mark in the top strip).
 const frameworks = [
-  { name: 'React', icon: 'logos:react', to: 'guides/frameworks/react' },
-  { name: 'Vue', icon: 'logos:vue', to: 'guides/frameworks/vue' },
-  { name: 'Svelte', icon: 'logos:svelte-icon', to: 'guides/frameworks/svelte' },
-  { name: 'Angular', icon: 'logos:angular-icon', to: 'guides/frameworks/angular' },
-  { name: 'Solid', icon: 'logos:solidjs-icon', to: 'guides/frameworks/solid' },
-  { name: 'HTML', icon: 'logos:html-5', to: 'guides/frameworks/html' },
+  { name: 'React', icon: 'simple-icons:react', to: 'guides/frameworks/react' },
+  { name: 'Vue', icon: 'simple-icons:vuedotjs', to: 'guides/frameworks/vue' },
+  { name: 'Svelte', icon: 'simple-icons:svelte', to: 'guides/frameworks/svelte' },
+  { name: 'Angular', icon: 'simple-icons:angular', to: 'guides/frameworks/angular' },
+  { name: 'Solid', icon: 'simple-icons:solid', to: 'guides/frameworks/solid' },
+  { name: 'HTML', icon: 'simple-icons:html5', to: 'guides/frameworks/html' },
 ];
 ---
 
@@ -38,7 +47,8 @@ const frameworks = [
     </h2>
     <p class="mt-4 text-lg leading-relaxed text-ink-2">
       The fastest path is a single <code class="kai-inline">&lt;script&gt;</code> tag from a CDN — paste it
-      in and the custom elements register themselves. Prefer a bundler? Install from npm.
+      in and the custom elements register themselves. It's a custom element, so give
+      <code class="kai-inline">&lt;kai-chat&gt;</code> a height — no wrapper needed. Prefer a bundler? Install from npm.
       Either way, set <code class="kai-inline">messages</code> in JavaScript to wire up your model.
     </p>
   </div>
@@ -103,9 +113,8 @@ const frameworks = [
   .kai-code { font-family: var(--sl-font-mono, monospace); font-size: 0.9rem; line-height: 1.5; }
   .kai-code code { color: var(--kai-ink); white-space: pre; }
   .kai-inline { font-family: var(--sl-font-mono, monospace); font-size: 0.88em; color: var(--kai-link); }
-  /* Brand logos grayscale at rest, color on hover — quiet until you look. */
-  .qs-fw :global(svg) { filter: grayscale(0.5); transition: filter 0.2s ease; }
-  .qs-fw:hover :global(svg) { filter: grayscale(0); }
+  /* Monochrome marks inherit the chip's text colour: muted grey at rest,
+     darkening to ink on hover (the anchor's hover:text-ink carries the icon). */
 </style>
 
 <script>

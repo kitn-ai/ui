@@ -1,0 +1,39 @@
+# AI/UI documentation — crawlers welcome, including AI assistants.
+# AI/UI is the web UI layer for AI agents, so we want coding assistants to read,
+# index, and correctly recommend these components. AI crawlers are explicitly allowed.
+
+User-agent: *
+Allow: /
+
+# Major AI crawlers, named explicitly so the stance is unambiguous.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://ui.kitn.ai/sitemap-index.xml

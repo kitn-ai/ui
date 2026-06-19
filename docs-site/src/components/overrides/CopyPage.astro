@@ -1,0 +1,123 @@
+---
+// "Copy page" split-button + dropdown — copies the page's Markdown twin, opens it
+// raw, or hands it to an AI assistant with a ready-made prompt. Mounted next to the
+// page title via the PageTitle override. Neutral chrome (no brand magenta).
+import { Icon } from 'astro-icon/components';
+
+const route = Astro.locals.starlightRoute;
+const id = route.id;
+const title = route.entry.data.title ?? '';
+const mdUrl = `/${id}.md`;
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const llmsUrl = new URL('/llms-full.txt', Astro.site).href;
+
+const mdAbs = new URL(mdUrl, Astro.site).href;
+const prompt = `I'm using AI/UI (@kitn.ai/ui) — framework-agnostic web components for AI chat and agents. Its custom elements are all prefixed \`kai-\` (e.g. \`<kai-chat>\`, \`<kai-artifact>\`).
+
+First fetch and read these, then help me use the "${title}" docs — explain concepts, give examples, or help me debug:
+- Page (Markdown): ${mdAbs}
+- Full component reference: ${llmsUrl}
+
+Use only the element names, props, and events defined there — do not infer an API from the package name. If you can't fetch the URLs, say so instead of guessing.`;
+const q = encodeURIComponent(prompt);
+
+// Brand marks come from simple-icons (monochrome, currentColor). Scira and T3 Chat
+// aren't in any icon set, so they fall back to a neutral lucide mark.
+const aiTargets = [
+  { label: 'Open in ChatGPT', href: `https://chatgpt.com/?q=${q}`, icon: 'simple-icons:openai' },
+  { label: 'Open in Claude', href: `https://claude.ai/new?q=${q}`, icon: 'simple-icons:claude' },
+  { label: 'Open in v0', href: `https://v0.app/?q=${q}`, icon: 'simple-icons:v0' },
+  { label: 'Open in Scira', href: `https://scira.ai/?q=${q}`, icon: 'lucide:sparkles' },
+  { label: 'Open in T3 Chat', href: `https://t3.chat/new?q=${q}`, icon: 'lucide:message-square' },
+];
+---
+
+<div class="kai-copypage" data-md={mdUrl}>
+  <button type="button" class="kai-cp-main" data-cp-copy>
+    <Icon name="lucide:copy" class="kai-cp-i kai-cp-copy-i size-3.5" />
+    <Icon name="lucide:check" class="kai-cp-i kai-cp-check-i size-3.5" />
+    <span class="kai-cp-label">Copy page</span>
+  </button>
+  <button type="button" class="kai-cp-caret" data-cp-toggle aria-haspopup="true" aria-expanded="false" aria-label="More copy options">
+    <Icon name="lucide:chevron-down" class="size-3.5" />
+  </button>
+
+  <div class="kai-cp-menu" data-cp-menu hidden role="menu">
+    <a href={mdUrl} target="_blank" rel="noopener" role="menuitem">
+      <Icon name="lucide:file-code" class="size-4 shrink-0" />
+      <span>View as Markdown</span>
+    </a>
+    {aiTargets.map((t) => (
+      <a href={t.href} target="_blank" rel="noopener" role="menuitem">
+        <Icon name={t.icon} class="size-4 shrink-0" />
+        <span>{t.label}</span>
+      </a>
+    ))}
+  </div>
+</div>
+
+<style>
+  .kai-copypage { position: relative; display: inline-flex; flex-shrink: 0; }
+  .kai-cp-main, .kai-cp-caret {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    border: 1px solid var(--kai-line); background: var(--kai-surface);
+    color: var(--kai-ink-2); font-size: 0.8125rem; font-weight: 600;
+    cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .kai-cp-main { border-radius: 0.5rem 0 0 0.5rem; padding: 0.4rem 0.7rem; }
+  .kai-cp-caret { border-radius: 0 0.5rem 0.5rem 0; padding: 0.4rem 0.45rem; border-left: 0; }
+  .kai-cp-main:hover, .kai-cp-caret:hover { color: var(--kai-ink); border-color: var(--kai-ink-3); }
+  .kai-cp-check-i { display: none; color: var(--kai-success, #16a34a); }
+  .kai-copypage[data-state='copied'] .kai-cp-copy-i { display: none; }
+  .kai-copypage[data-state='copied'] .kai-cp-check-i { display: inline; }
+
+  .kai-cp-menu {
+    position: absolute; top: calc(100% + 0.4rem); right: 0; z-index: 30;
+    min-width: 13rem; padding: 0.3rem; display: flex; flex-direction: column; gap: 0.1rem;
+    border: 1px solid var(--kai-line); border-radius: 0.6rem; background: var(--kai-surface);
+    box-shadow: 0 12px 32px -12px rgb(0 0 0 / 0.35);
+  }
+  .kai-cp-menu[hidden] { display: none; }
+  .kai-cp-menu a {
+    display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.55rem;
+    border-radius: 0.4rem; font-size: 0.85rem; font-weight: 500;
+    color: var(--kai-ink-2); text-decoration: none;
+  }
+  .kai-cp-menu a:hover { background: var(--kai-surface-2); color: var(--kai-ink); }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.kai-copypage').forEach((root) => {
+    const md = root.dataset.md;
+    const copyBtn = root.querySelector<HTMLButtonElement>('[data-cp-copy]');
+    const toggle = root.querySelector<HTMLButtonElement>('[data-cp-toggle]');
+    const menu = root.querySelector<HTMLElement>('[data-cp-menu]');
+    const label = root.querySelector<HTMLElement>('.kai-cp-label');
+
+    copyBtn?.addEventListener('click', async () => {
+      if (!md) return;
+      try {
+        const text = await (await fetch(md)).text();
+        await navigator.clipboard.writeText(text);
+        root.setAttribute('data-state', 'copied');
+        if (label) label.textContent = 'Copied';
+        setTimeout(() => {
+          root.removeAttribute('data-state');
+          if (label) label.textContent = 'Copy page';
+        }, 1500);
+      } catch {
+        /* clipboard blocked — no-op */
+      }
+    });
+
+    const close = () => { menu?.setAttribute('hidden', ''); toggle?.setAttribute('aria-expanded', 'false'); };
+    toggle?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = menu?.hasAttribute('hidden');
+      if (open) { menu?.removeAttribute('hidden'); toggle.setAttribute('aria-expanded', 'true'); }
+      else close();
+    });
+    document.addEventListener('click', (e) => { if (!root.contains(e.target as Node)) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  });
+</script>

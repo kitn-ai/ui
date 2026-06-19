@@ -9,7 +9,7 @@
 
 const PROSE_CONTENT = `### Getting started
 
-Welcome to **kitn-chat** — a suite of framework-agnostic web components for building AI-powered chat interfaces.
+Welcome to **AI/UI** — a suite of framework-agnostic web components for building AI-powered chat interfaces.
 
 Here is what you can do in minutes:
 

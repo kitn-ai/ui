@@ -126,7 +126,7 @@ export default function AskAiDock() {
             </div>
             <p class="text-sm font-semibold text-ink">An assistant is on the way</p>
             <p class="text-sm leading-relaxed text-ink-2">
-              We're building a chat that answers questions about kitn-chat right here — powered by the kit itself. It's not live yet, so the composer below is disabled.
+              We're building a chat that answers questions about AI/UI right here — powered by the kit itself. It's not live yet, so the composer below is disabled.
             </p>
           </div>
 
@@ -137,7 +137,7 @@ export default function AskAiDock() {
               <kai-prompt-input
                 ref={(el: HTMLElement) => (promptInput = el)}
                 disabled
-                placeholder="Ask about kitn-chat… (coming soon)"
+                placeholder="Ask about AI/UI… (coming soon)"
                 style={{ display: 'block' }}
               />
             </Show>

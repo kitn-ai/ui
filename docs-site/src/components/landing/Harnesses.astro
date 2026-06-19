@@ -10,11 +10,12 @@ const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
 
 const harnesses = [
   { name: 'Pi', desc: 'Open-source agent harness + coding CLI', href: 'https://github.com/earendil-works/pi' },
-  { name: 'OpenClaw', desc: 'Headless coding agent (ACP)', href: 'https://github.com/openclaw' },
+  { name: 'OpenClaw', desc: 'Headless coding agent (ACP)', href: 'https://github.com/openclaw/openclaw' },
 ];
 ---
 
-<section class="mx-auto max-w-[80rem] px-6 py-16 lg:py-24">
+<section class="band-mute">
+  <div class="mx-auto max-w-[80rem] px-6 py-16 lg:py-24">
   <SectionHeader icon="lucide:bot" label="For harnesses" />
   <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
     <div>
@@ -54,5 +55,6 @@ const harnesses = [
         </div>
       </li>
     </ul>
+  </div>
   </div>
 </section>

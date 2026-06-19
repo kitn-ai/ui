@@ -32,7 +32,7 @@ interface Props {
 }
 
 const DEFAULT_REPLY =
-  "Good question. The short version:\n\n- **kitn-chat** is a set of framework-agnostic web components.\n- Each one is isolated in its own Shadow DOM, so styles never leak.\n- You bring the model; the UI — streaming, markdown, tool calls — is handled.\n\nEdit a message and send again to see it stream.";
+  "Good question. The short version:\n\n- **AI/UI** is a set of framework-agnostic web components.\n- Each one is isolated in its own Shadow DOM, so styles never leak.\n- You bring the model; the UI — streaming, markdown, tool calls — is handled.\n\nEdit a message and send again to see it stream.";
 
 let uid = 0;
 const nextId = () => `m${++uid}`;
