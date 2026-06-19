@@ -36,7 +36,7 @@
   "jsdelivr": "./dist/kitn-chat.es.js",
   "customElements": "dist/custom-elements.json",
   "bin": {
-    "kitn-ui-mcp": "./bin/mcp.js"
+    "kai-mcp": "./bin/mcp.js"
   },
   "exports": {
     ".": "./src/index.ts",
