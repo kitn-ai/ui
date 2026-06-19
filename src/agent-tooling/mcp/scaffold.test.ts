@@ -333,6 +333,66 @@ describe('scaffold', () => {
     expect(text).toMatch(/setTimeout/);
   });
 
+  // ── Round-1 field-test fix regressions ──────────────────────────────────
+
+  // SCAF-1: All frameworks must emit theme.tokens.css, never bare theme.css (LIB-1 / ENOENT)
+  it('emits theme.tokens.css (not bare theme.css) across all front-end frameworks', async () => {
+    for (const framework of ['html', 'react', 'next', 'vue', 'svelte'] as const) {
+      const out = await scaffold.handler({
+        useCase: 'drop-in-chat',
+        integration: 'openrouter',
+        placement: 'full-page',
+        framework,
+      });
+      const text = (out.content as { type: string; text: string }[])[0].text;
+      // Must reference the compiled tokens file
+      expect(text, `${framework}: missing theme.tokens.css`).toContain('@kitn.ai/ui/theme.tokens.css');
+      // Must NOT import bare theme.css (it @imports tw-animate-css which is a devDep → ENOENT)
+      expect(text, `${framework}: emitted bare theme.css`).not.toMatch(
+        /import ['"]@kitn\.ai\/ui\/theme\.css['"]/,
+      );
+    }
+  });
+
+  // SCAF-2: Next.js App Router requires 'use client'; plain react (Vite) must NOT have it.
+  it("next scaffold starts with 'use client'", async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'next',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // 'use client' must be the FIRST line of the emitted front-end code (immediately after the section header)
+    const frontendStart = text.indexOf('=== (1) FRONT-END');
+    const afterHeader = text.slice(frontendStart).replace(/^=== \(1\) FRONT-END[^\n]*\n\n/, '');
+    expect(afterHeader.trimStart().startsWith("'use client'")).toBe(true);
+  });
+
+  it("react (Vite) scaffold does NOT include 'use client'", async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).not.toContain("'use client'");
+  });
+
+  // SCAF-3: Vue scaffold must mention isCustomElement so Vue consumers aren't stuck.
+  it('vue scaffold mentions isCustomElement for kai-* custom elements', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'vue',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('isCustomElement');
+    expect(text).toContain("tag.startsWith('kai-')");
+  });
+
   // Issue 4 — honest backend note when react has no matching server route.
   it('react + a no-react-template integration warns that a Vite SPA has no /api route', async () => {
     // pydantic-ai only ships a fastapi template; asking for react (Vite) must warn.

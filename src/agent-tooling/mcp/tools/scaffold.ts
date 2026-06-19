@@ -189,7 +189,7 @@ function htmlWiring(ctx: RenderCtx): string {
   const head = [
     `  <script type="module">`,
     `    import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
-    `    import '@kitn.ai/ui/theme.css';`,
+    `    import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
     ``,
     `    const chat = document.getElementById('chat');`,
     `    // suggestions is a JS PROPERTY (arrays can't be HTML attributes)`,
@@ -291,7 +291,7 @@ function toPascalCase(tag: string): string {
 }
 
 /** JSX usage for react/next: uses the official @kitn.ai/ui/react wrappers. */
-function renderJsx(archetype: Archetype, ctx: RenderCtx): string {
+function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): string {
   const { p, emptyHint, suggestions, isMock } = ctx;
   // Collect all PascalCase wrapper names for this archetype's components.
   const wrapperNames = archetype.components.map(toPascalCase);
@@ -302,6 +302,9 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx): string {
     ...(companionTags.length > 0 ? [`      {/* wire data props — see the component_reference MCP tool */}`] : []),
     ...companionTags.map((t) => `      <${toPascalCase(t)} />`),
   ].join('\n');
+
+  // SCAF-4: Inline ChatMessage type for strict-TS consumers; avoids implicit-any on useState/handler.
+  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };`;
 
   // onSubmit body: mock streams a canned reply client-side; otherwise fetch /api/chat.
   const onSubmitBody = isMock
@@ -316,9 +319,9 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx): string {
     : [
         `    const value = e.detail.value.trim();`,
         `    if (!value) return;`,
-        `    const history = [...messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+        `    const history: ChatMessage[] = [...messages, { id: crypto.randomUUID(), role: 'user' as const, content: value }];`,
         `    const assistantId = crypto.randomUUID();`,
-        `    setMessages([...history, { id: assistantId, role: 'assistant', content: '' }]);`,
+        `    setMessages([...history, { id: assistantId, role: 'assistant' as const, content: '' }]);`,
         `    setLoading(true);`,
         `    const res = await fetch('/api/chat', {`,
         `      method: 'POST',`,
@@ -326,7 +329,7 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx): string {
         `      body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),`,
         `    });`,
         `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
-        `    const reader = res.body.getReader();`,
+        `    const reader = res.body!.getReader();`,
         `    const decoder = new TextDecoder();`,
         `    let buffer = '', answer = '';`,
         `    while (true) {`,
@@ -334,7 +337,7 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx): string {
         `      if (done) break;`,
         `      buffer += decoder.decode(chunk, { stream: true });`,
         `      const lines = buffer.split('\\n');`,
-        `      buffer = lines.pop();`,
+        `      buffer = lines.pop()!;`,
         `      for (const line of lines) {`,
         `        const s = line.trim();`,
         `        if (!s.startsWith('data:')) continue;`,
@@ -351,22 +354,41 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx): string {
         `    setLoading(false);`,
       ].join('\n');
 
+  // SCAF-2: Next.js App Router requires 'use client' for components that use hooks/interactivity.
+  const useClientDirective = framework === 'next' ? [`'use client';`, ``] : [];
+
+  // SCAF-2: Next.js transpilePackages note (needed until @kitn.ai/ui ships prebuilt JS on "." + "./react").
+  const nextConfigNote =
+    framework === 'next'
+      ? [
+          `// Next.js note: if you get "unknown module type" or TS errors inside @kitn.ai/ui,`,
+          `// add transpilePackages: ['@kitn.ai/ui'] to next.config.ts (needed until the`,
+          `// package ships prebuilt JS on its "." and "./react" exports).`,
+          ``,
+        ]
+      : [];
+
   return [
+    // SCAF-2: 'use client' must be the very first line for Next.js App Router.
+    ...useClientDirective,
     // (1) REQUIRED: registers <kai-*> — the react wrappers do NOT auto-register.
     // Must come BEFORE importing the wrappers, or <kai-chat> renders empty.
     `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
     `import { useState } from 'react';`,
     `import { ${importList} } from '@kitn.ai/ui/react';`,
-    `import '@kitn.ai/ui/theme.css';`,
+    `import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
     ``,
+    ...nextConfigNote,
     `// ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint}`,
     ...(p.altNote ? [`// ${p.altNote}`] : []),
+    chatMessageType,
+    ``,
     `export default function App() {`,
-    `  const [messages, setMessages] = useState([]);`,
+    `  const [messages, setMessages] = useState<ChatMessage[]>([]);`,
     `  const [loading, setLoading] = useState(false);`,
     `  const suggestions = ${jsArray(suggestions)};`,
     ``,
-    `  async function onSubmit(e) {`,
+    `  async function onSubmit(e: CustomEvent<{ value: string }>) {`,
     onSubmitBody,
     `  }`,
     ``,
@@ -421,9 +443,13 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
   return [
     `<!-- vue — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
     ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
+    `<!-- SCAF-3: vite.config.ts — tell Vue that kai-* are custom elements (not Vue components).`,
+    `     Without this, Vue warns "Unknown custom element" and .prop bindings may misbehave.`,
+    `     import vue from '@vitejs/plugin-vue';`,
+    `     export default { plugins: [vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith('kai-') } } })] }; -->`,
     `<script setup>`,
     `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
-    `import '@kitn.ai/ui/theme.css';`,
+    `import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
     `import { ref } from 'vue';`,
     ``,
     `const messages = ref([]);`,
@@ -512,9 +538,11 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
   return [
     `<!-- svelte — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
     ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
+    `<!-- SCAF-5: This uses Svelte-4 syntax ($:, on:event). Works in Svelte 5 via legacy mode;`,
+    `     runes-mode users should adapt to $state/$effect and onkai-submit event handlers. -->`,
     `<script>`,
     `  import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
-    `  import '@kitn.ai/ui/theme.css';`,
+    `  import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
     `  let chatEl;`,
     `  let messages = [];`,
     `  let loading = false;`,
@@ -562,7 +590,7 @@ function renderFrontend(
   switch (framework) {
     case 'react':
     case 'next':
-      return renderJsx(archetype, ctx);
+      return renderJsx(archetype, ctx, framework);
     case 'vue':
       return renderVue(archetype, ctx);
     case 'svelte':
