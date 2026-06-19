@@ -255,7 +255,18 @@ describe('scaffold', () => {
       });
       const text = (out.content as { type: string; text: string }[])[0].text;
       expect(text, `${framework}: suggestion not emitted`).toContain('Unique-Suggestion-Token');
-      expect(text, `${framework}: suggestionMode not emitted`).toMatch(/suggestion-?mode/i);
+
+      if (framework === 'react' || framework === 'next') {
+        // React wrappers receive camelCase props
+        expect(text, `${framework}: suggestionMode prop not emitted`).toContain('suggestionMode');
+      } else {
+        // html / svelte / vue — must use the kebab attribute the custom element observes
+        expect(text, `${framework}: kebab suggestion-mode not emitted`).toContain('suggestion-mode');
+        // Guard: camelCase static attribute would be inert on a CE (DOM ignores case)
+        expect(text, `${framework}: dead camelCase suggestionMode= attribute present`).not.toMatch(
+          /suggestionMode=/,
+        );
+      }
     }
   });
 

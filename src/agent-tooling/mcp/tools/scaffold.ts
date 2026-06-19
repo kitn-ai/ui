@@ -78,7 +78,6 @@ function placementStyle(placement: string): PlacementStyle {
           'make this a `flex: 0 0 380px` column inside a `display: flex` row at `height: 100dvh`.',
       };
     case 'docked-widget':
-    default:
       // The bottom-right floating bubble — rounded, elevated, fixed size.
       return {
         style:
@@ -87,6 +86,14 @@ function placementStyle(placement: string): PlacementStyle {
           'box-shadow: 0 12px 32px var(--kai-shadow-color, rgba(0,0,0,0.18)); display: flex; flex-direction: column; z-index: 1000;',
         chatFill: FLEX_FILL,
         note: 'fixed, floating bottom-right widget',
+      };
+    default:
+      // Unknown placement falls back to full-page (full height) rather than the bubble,
+      // so a future Placement enum member doesn't silently render as a widget.
+      return {
+        style: 'height: 100dvh; width: 100%; display: flex; flex-direction: column;',
+        chatFill: FLEX_FILL,
+        note: 'fills the viewport (100dvh)',
       };
   }
 }
@@ -434,7 +441,7 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
     `      :messages="messages"`,
     `      :loading="loading"`,
     `      :suggestions="suggestions"`,
-    `      suggestionMode="submit"`,
+    `      suggestion-mode="submit"`,
     `      style="${p.chatFill}"`,
     `      @kai-submit="onSubmit"`,
     `    ></kai-chat>`,
