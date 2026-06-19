@@ -1,0 +1,176 @@
+/* AUTO-GENERATED from theme.css by scripts/build-theme-tokens.mjs — do not edit.
+   Browser-ready token stylesheet for <link>/CDN consumers (the kit's ELEMENTS
+   are self-themed and don't need this; it themes host-page chrome / rebrands). */
+
+:root {
+  --color-background: var(--kai-color-background, hsl(0 0% 100%));
+  --color-foreground: var(--kai-color-foreground, hsl(240 10% 3.9%));
+  --color-card: var(--kai-color-card, hsl(0 0% 100%));
+  --color-card-foreground: var(--kai-color-card-foreground, hsl(240 10% 3.9%));
+  --color-popover: var(--kai-color-popover, hsl(0 0% 100%));
+  --color-popover-foreground: var(--kai-color-popover-foreground, hsl(240 10% 3.9%));
+  --color-primary: var(--kai-color-primary, hsl(240 5.9% 10%));
+  --color-primary-foreground: var(--kai-color-primary-foreground, hsl(0 0% 98%));
+  --color-secondary: var(--kai-color-secondary, hsl(240 4.8% 95.9%));
+  --color-secondary-foreground: var(--kai-color-secondary-foreground, hsl(240 5.9% 10%));
+  --color-muted: var(--kai-color-muted, hsl(240 4.8% 95.9%));
+  --color-muted-foreground: var(--kai-color-muted-foreground, hsl(240 3.8% 43%));
+  --color-accent: var(--kai-color-accent, hsl(240 4.8% 95.9%));
+  --color-accent-foreground: var(--kai-color-accent-foreground, hsl(240 5.9% 10%));
+  --color-destructive: var(--kai-color-destructive, hsl(0 72% 45%));
+  --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
+  --color-border: var(--kai-color-border, hsl(240 5.9% 90%));
+  --color-input: var(--kai-color-input, hsl(240 5.9% 90%));
+  /* Focus ring — a deliberate blue (not a neutral) so keyboard focus is always
+     obvious and on-brand in both modes. Light uses a strong blue; dark uses a
+     brighter one for contrast on dark surfaces. Both clear WCAG 2.1 non-text
+     contrast (≥3:1) against the kit's backgrounds. Override via --kai-color-ring. */
+  --color-ring: var(--kai-color-ring, hsl(217 91% 53%));
+  /* Custom scrollbars — thin, rounded, subtle; thumb strengthens on hover. A
+     consistent cross-platform look (the kit styles its OWN scroll regions inside
+     the shadow root; the track stays transparent so nothing is forced where no
+     scrollbar is needed). Override via --kai-color-scrollbar-thumb(-hover). */
+  --color-scrollbar-thumb: var(--kai-color-scrollbar-thumb, hsl(240 5% 80%));
+  --color-scrollbar-thumb-hover: var(--kai-color-scrollbar-thumb-hover, hsl(240 4% 64%));
+  --color-sidebar: var(--kai-color-sidebar, hsl(0 0% 100%));
+  /* Inline `code` accent. Blue text on a translucent blue chip. */
+  --color-code-foreground: var(--kai-color-code-foreground, hsl(224.3 76.3% 48%));
+  /* Tool/status chip hues. Each chip is hue text over a 15% translucent fill of
+     the SAME hue (set in tool.tsx). The bare hue is too light to reach WCAG AA
+     (4.5:1) on the faint fill in LIGHT mode, so the light values are darkened;
+     dark mode keeps brighter hues for AA on the dark fill. Override via
+     --kai-color-tool-* to retheme. */
+  --color-tool-blue: var(--kai-color-tool-blue, hsl(217 91% 38%));
+  --color-tool-amber: var(--kai-color-tool-amber, hsl(38 92% 28%));
+  --color-tool-green: var(--kai-color-tool-green, hsl(142 71% 26%));
+  --color-tool-red: var(--kai-color-tool-red, hsl(0 72% 42%));
+  --radius: var(--kai-radius, 0.6rem);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  /* Typography scale — semantic sizes shared by all components. Each generates a
+     Tailwind utility (text-caption / text-meta / text-body / text-title). To
+     restyle the kit's typography, override the namespaced --kai-text-* token on
+     :root (e.g. `--kai-text-body: 0.9375rem`) — it pierces the Shadow DOM via the
+     var() fallback, exactly like the --kai-color-* tokens. The bare --text-*
+     names stay internal so a host's own --text-* can't collide. (Message/markdown/
+     input reading size also scales with the `proseSize` prop; these tokens cover
+     the fixed chrome & controls.) */
+  --text-caption: var(--kai-text-caption, 0.6875rem);  --text-caption--line-height: 1rem;      /* 11px — micro labels, badges, sub-counts */
+  --text-meta: var(--kai-text-meta, 0.75rem);     --text-meta--line-height: 1.1rem;       /* 12px — controls, toggles, switchers, captions */
+  --text-body: var(--kai-text-body, 0.875rem);    --text-body--line-height: 1.45rem;      /* 14px — primary reading text */
+  --text-title: var(--kai-text-title, 1rem);        --text-title--line-height: 1.5rem;      /* 16px — emphasis / headers */
+}
+
+@keyframes typing { 0%,100% { transform: translateY(0); opacity: .5 } 50% { transform: translateY(-2px); opacity: 1 } }
+@keyframes loading-dots { 0%,100% { opacity: 0 } 50% { opacity: 1 } }
+@keyframes wave { 0%,100% { transform: scaleY(1) } 50% { transform: scaleY(.6) } }
+@keyframes blink { 0%,100% { opacity: 1 } 50% { opacity: 0 } }
+@keyframes text-blink { 0%,100% { color: var(--color-primary) } 50% { color: var(--color-muted-foreground) } }
+@keyframes bounce-dots { 0%,100% { transform: scale(.8); opacity: .5 } 50% { transform: scale(1.2); opacity: 1 } }
+@keyframes thin-pulse { 0%,100% { transform: scale(.95); opacity: .8 } 50% { transform: scale(1.05); opacity: .4 } }
+@keyframes pulse-dot { 0%,100% { transform: scale(1); opacity: .8 } 50% { transform: scale(1.5); opacity: 1 } }
+@keyframes shimmer-text { 0% { background-position: 150% center } 100% { background-position: -150% center } }
+@keyframes wave-bars { 0%,100% { transform: scaleY(1); opacity: .5 } 50% { transform: scaleY(.6); opacity: 1 } }
+@keyframes shimmer { 0% { background-position: 200% 50% } 100% { background-position: -200% 50% } }
+@keyframes spinner-fade { 0% { opacity: 0 } 100% { opacity: 1 } }
+@keyframes collapsible-down { from { height: 0; opacity: 0 } to { height: var(--kb-collapsible-content-height); opacity: 1 } }
+@keyframes collapsible-up { from { height: var(--kb-collapsible-content-height); opacity: 1 } to { height: 0; opacity: 0 } }
+.dark {
+  --color-background: var(--kai-color-background, hsl(50 2% 9%));
+  --color-foreground: var(--kai-color-foreground, hsl(0 0% 98%));
+  --color-card: var(--kai-color-card, hsl(45 4% 12%));
+  --color-card-foreground: var(--kai-color-card-foreground, hsl(0 0% 98%));
+  --color-popover: var(--kai-color-popover, hsl(45 4% 12%));
+  --color-popover-foreground: var(--kai-color-popover-foreground, hsl(0 0% 98%));
+  --color-primary: var(--kai-color-primary, hsl(0 0% 98%));
+  --color-primary-foreground: var(--kai-color-primary-foreground, hsl(45 4% 11%));
+  --color-secondary: var(--kai-color-secondary, hsl(45 4% 17%));
+  --color-secondary-foreground: var(--kai-color-secondary-foreground, hsl(0 0% 98%));
+  --color-muted: var(--kai-color-muted, hsl(45 4% 17%));
+  --color-muted-foreground: var(--kai-color-muted-foreground, hsl(45 4% 64%));
+  --color-accent: var(--kai-color-accent, hsl(45 4% 17%));
+  --color-accent-foreground: var(--kai-color-accent-foreground, hsl(0 0% 98%));
+  --color-destructive: var(--kai-color-destructive, hsl(0 62.8% 30.6%));
+  --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
+  --color-border: var(--kai-color-border, hsl(45 4% 17%));
+  --color-input: var(--kai-color-input, hsl(45 4% 17%));
+  --color-ring: var(--kai-color-ring, hsl(217 91% 68%));
+  --color-scrollbar-thumb: var(--kai-color-scrollbar-thumb, hsl(45 3% 30%));
+  --color-scrollbar-thumb-hover: var(--kai-color-scrollbar-thumb-hover, hsl(45 3% 42%));
+  --color-sidebar: var(--kai-color-sidebar, hsl(50 2% 7%));
+  --color-code-foreground: var(--kai-color-code-foreground, hsl(213 94% 78%));
+
+  /* Tool/status chip hues — dark mode. Brighter hues reach AA on the dark fill. */
+  --color-tool-blue: var(--kai-color-tool-blue, hsl(217 91% 70%));
+  --color-tool-amber: var(--kai-color-tool-amber, hsl(38 92% 50%));
+  --color-tool-green: var(--kai-color-tool-green, hsl(142 71% 45%));
+  --color-tool-red: var(--kai-color-tool-red, hsl(0 84% 70%));
+}
+
+/* Self-contained markdown styling — replaces the typography plugin's `prose`.
+   Keyed on --color-* tokens so it themes with the rest of the kit. */
+.chat-markdown { color: var(--color-foreground); line-height: 1.6; }
+.chat-markdown > div:first-child > :first-child { margin-top: 0; }
+.chat-markdown > div:last-child > :last-child { margin-bottom: 0; }
+.chat-markdown p { margin: 0 0 0.75em; }
+.chat-markdown p:last-child { margin-bottom: 0; }
+.chat-markdown h1, .chat-markdown h2, .chat-markdown h3, .chat-markdown h4 {
+  margin: 1.2em 0 0.5em; font-weight: 600; line-height: 1.3; color: var(--color-foreground);
+}
+.chat-markdown h1 { font-size: 1.4em; } .chat-markdown h2 { font-size: 1.25em; }
+.chat-markdown h3 { font-size: 1.1em; } .chat-markdown h4 { font-size: 1em; }
+.chat-markdown ul, .chat-markdown ol { margin: 0 0 0.75em; padding-left: 1.4em; }
+.chat-markdown li { margin: 0.2em 0; }
+.chat-markdown ul { list-style: disc; } .chat-markdown ol { list-style: decimal; }
+.chat-markdown a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 2px; }
+.chat-markdown strong { font-weight: 600; color: var(--color-foreground); }
+.chat-markdown em { font-style: italic; }
+.chat-markdown blockquote {
+  margin: 0 0 0.75em; padding-left: 0.9em; border-left: 2px solid var(--color-border);
+  color: var(--color-muted-foreground);
+}
+.chat-markdown hr { margin: 1em 0; border: 0; border-top: 1px solid var(--color-border); }
+.chat-markdown code:not(pre code) {
+  background: color-mix(in oklab, var(--color-code-foreground) 15%, transparent);
+  color: var(--color-code-foreground);
+  border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.875em;
+  font-family: var(--kai-font-code, ui-monospace, "SF Mono", Menlo, monospace);
+}
+.chat-markdown table { width: 100%; border-collapse: collapse; margin: 0 0 0.75em; font-size: 0.9em; }
+.chat-markdown th, .chat-markdown td { border: 1px solid var(--color-border); padding: 0.4em 0.6em; text-align: left; }
+.chat-markdown th { font-weight: 600; background: color-mix(in oklab, var(--color-muted-foreground) 8%, transparent); }
+
+/* Themeable elevation. The kit is mostly flat (borders), but a few surfaces lift
+   off the page — popovers, dropdowns, hover cards, cards. The shadow COLOR is a
+   token (--kai-shadow-color, default near-black); set it transparent for a fully
+   flat look, or tint it to match a theme. Defined here (not as a Tailwind shadow
+   utility) so the color stays overridable and works in both the web-component and
+   SolidJS layers. */
+.kai-elevation {
+  box-shadow:
+    0 4px 12px -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 14%, transparent),
+    0 2px 6px -2px color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 10%, transparent);
+}
+.kai-elevation-sm {
+  box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--kai-shadow-color, oklch(0 0 0)) 8%, transparent);
+}
+
+/* Cross-platform thin scrollbar utility (Firefox + WebKit). Used by ScrollArea
+   and any scroll region in the SolidJS-component build (web components also get
+   this globally inside their shadow root — see src/elements/styles.css). */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-scrollbar-thumb) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--color-scrollbar-thumb);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background-color: var(--color-scrollbar-thumb-hover); }
+.scrollbar-thin::-webkit-scrollbar-corner { background: transparent; }
