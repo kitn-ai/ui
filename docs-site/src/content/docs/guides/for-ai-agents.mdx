@@ -1,20 +1,28 @@
 ---
 title: For AI Agents
-description: Machine-readable reference files that let coding agents wire up AI/UI components correctly the first time.
+description: Make your AI coding assistant fluent in AI/UI — index it in Context7 or point it at the machine-readable reference, and it wires components correctly the first time.
 ---
 
-import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
 
-`@kitn.ai/ui` ships two auto-generated machine-readable files that follow the [llmstxt.org](https://llmstxt.org) convention. Point your coding agent at them and it will get prop names, event names, and the property-vs-attribute rule right — without hallucinating.
+<p class="kai-lede">Make your coding assistant fluent in AI/UI before you build. Pick whichever channel your tools already use — and the MCP scaffolder is on the way.</p>
 
-## The files
+## Index it in Context7
 
-Both files are generated from `dist/custom-elements.json` by `scripts/gen-llms.mjs` and committed to the repo, so they are included in every published npm package and always match the installed version.
+If you use [Context7](https://context7.com) — the documentation MCP most assistants support — search for **Kitn AI/UI**. The full docs, the `kai-` element reference, and the integration guides are indexed there, so your assistant pulls the real API on demand. No install, no copy-paste.
+
+<Aside type="tip">Context7 serves the reference on demand. For a one-off prompt without Context7, paste `llms.txt` (below).</Aside>
+
+## Machine-readable files
+
+`@kitn.ai/ui` ships two auto-generated files that follow the [llmstxt.org](https://llmstxt.org) convention — prop names, event names, and the property-vs-attribute rule, so an agent gets them right without hallucinating.
 
 | File | Size | Use |
 |---|---|---|
 | `llms.txt` | ~4 KB | Orientation: install, the property rule, framework wiring, theming. Paste into a prompt. |
 | `llms-full.txt` | ~60 KB | Everything in `llms.txt` plus a generated props/events table for every element, a streaming recipe, and a build runbook. |
+
+Every docs page also has a **Markdown twin** at `<page-url>.md` (e.g. `/components/chat.md`) — clean source you can hand to any model.
 
 ### Where they live
 
@@ -30,11 +38,7 @@ They are also published at:
 - **https://ui.kitn.ai/llms.txt**
 - **https://ui.kitn.ai/llms-full.txt**
 
-<Aside type="tip" title="Which file to use">
-For a one-off prompt, paste `llms.txt` (~4 KB). For a project where the agent revisits these components repeatedly, reference the installed path so it always reads the version that matches the installed package.
-</Aside>
-
-## Point an agent at them
+### Point an agent at them
 
 | Tool | What to do |
 |---|---|

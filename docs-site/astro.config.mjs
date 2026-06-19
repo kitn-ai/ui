@@ -75,9 +75,9 @@ export default defineConfig({
               { label: 'Introduction', slug: 'guides/introduction' },
               { label: 'Installation', slug: 'guides/installation' },
               { label: 'Getting Started', slug: 'guides/getting-started' },
+              { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
               { label: 'Theming', slug: 'guides/theming' },
               { label: 'Accessibility', slug: 'guides/accessibility' },
-              { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
               { label: 'Generative UI', slug: 'guides/generative-ui' },
               {
                 label: 'Working with primitives',
