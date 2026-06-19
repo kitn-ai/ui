@@ -174,6 +174,8 @@ git commit -m "docs: move For AI Agents near the top of the Docs sidebar"
 
 ### Task 4: Register the repo with Context7 (manual) + verify
 
+> **DEFERRED (decision 2026-06-19): hold until public launch.** Don't submit to Context7 until the framework is ready for people to use. `context7.json` and the hub's Context7 section are staged on the branch; make Context7 registration part of the go-live checklist — register it *before/when* these docs deploy to real users, so the hub's "search Kitn AI/UI in Context7" line isn't live but empty.
+
 **Files:** none (external action).
 
 **Interfaces:**
