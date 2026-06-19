@@ -39,7 +39,9 @@ describe('createServer', () => {
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
 
     const result = await client.callTool({ name: 'component_reference', arguments: {} });
-    expect(result.content).toEqual([{ type: 'text', text: 'not yet implemented' }]);
+    // component_reference with no args returns the list of all kai-* elements
+    const text = (result.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/kai-chat/);
 
     await client.close();
     await server.close();
