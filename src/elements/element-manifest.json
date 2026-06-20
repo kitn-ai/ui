@@ -1,0 +1,174 @@
+{
+  "tags": {
+    "kai-conversations": "conversation-list",
+    "kai-prompt-input": "prompt-input",
+    "kai-chat": "chat",
+    "kai-workspace": "chat-workspace",
+    "kai-thinking-bar": "thinking-bar",
+    "kai-model-switcher": "model-switcher",
+    "kai-attachments": "attachments",
+    "kai-message": "message",
+    "kai-markdown": "markdown",
+    "kai-code-block": "code-block",
+    "kai-reasoning": "reasoning",
+    "kai-tool": "tool",
+    "kai-context": "context-meter",
+    "kai-feedback-bar": "feedback-bar",
+    "kai-scope-picker": "chat-scope-picker",
+    "kai-suggestions": "prompt-suggestions",
+    "kai-file-upload": "file-upload",
+    "kai-voice-input": "voice-input",
+    "kai-loader": "loader",
+    "kai-text-shimmer": "text-shimmer",
+    "kai-image": "image",
+    "kai-checkpoint": "checkpoint",
+    "kai-skills": "message-skills",
+    "kai-source": "source",
+    "kai-sources": "source",
+    "kai-response-stream": "response-stream",
+    "kai-empty": "empty",
+    "kai-chain-of-thought": "chain-of-thought",
+    "kai-resizable": "resizable",
+    "kai-resizable-item": "resizable",
+    "kai-file-tree": "file-tree",
+    "kai-artifact": "artifact",
+    "kai-scroll-button": "scroll-button",
+    "kai-popover": "popover",
+    "kai-switch": "switch",
+    "kai-card": "card",
+    "kai-form": "form",
+    "kai-link-preview": "link-preview",
+    "kai-embed": "embed",
+    "kai-confirm": "confirm-card",
+    "kai-tasks": "tasks",
+    "kai-choice": "choice",
+    "kai-cards": "cards"
+  },
+  "files": {
+    "conversation-list": [
+      "kai-conversations"
+    ],
+    "prompt-input": [
+      "kai-prompt-input"
+    ],
+    "chat": [
+      "kai-chat"
+    ],
+    "chat-workspace": [
+      "kai-workspace"
+    ],
+    "thinking-bar": [
+      "kai-thinking-bar"
+    ],
+    "model-switcher": [
+      "kai-model-switcher"
+    ],
+    "attachments": [
+      "kai-attachments"
+    ],
+    "message": [
+      "kai-message"
+    ],
+    "markdown": [
+      "kai-markdown"
+    ],
+    "code-block": [
+      "kai-code-block"
+    ],
+    "reasoning": [
+      "kai-reasoning"
+    ],
+    "tool": [
+      "kai-tool"
+    ],
+    "context-meter": [
+      "kai-context"
+    ],
+    "feedback-bar": [
+      "kai-feedback-bar"
+    ],
+    "chat-scope-picker": [
+      "kai-scope-picker"
+    ],
+    "prompt-suggestions": [
+      "kai-suggestions"
+    ],
+    "file-upload": [
+      "kai-file-upload"
+    ],
+    "voice-input": [
+      "kai-voice-input"
+    ],
+    "loader": [
+      "kai-loader"
+    ],
+    "text-shimmer": [
+      "kai-text-shimmer"
+    ],
+    "image": [
+      "kai-image"
+    ],
+    "checkpoint": [
+      "kai-checkpoint"
+    ],
+    "message-skills": [
+      "kai-skills"
+    ],
+    "source": [
+      "kai-source",
+      "kai-sources"
+    ],
+    "response-stream": [
+      "kai-response-stream"
+    ],
+    "empty": [
+      "kai-empty"
+    ],
+    "chain-of-thought": [
+      "kai-chain-of-thought"
+    ],
+    "resizable": [
+      "kai-resizable",
+      "kai-resizable-item"
+    ],
+    "file-tree": [
+      "kai-file-tree"
+    ],
+    "artifact": [
+      "kai-artifact"
+    ],
+    "scroll-button": [
+      "kai-scroll-button"
+    ],
+    "popover": [
+      "kai-popover"
+    ],
+    "switch": [
+      "kai-switch"
+    ],
+    "card": [
+      "kai-card"
+    ],
+    "form": [
+      "kai-form"
+    ],
+    "link-preview": [
+      "kai-link-preview"
+    ],
+    "embed": [
+      "kai-embed"
+    ],
+    "confirm-card": [
+      "kai-confirm"
+    ],
+    "tasks": [
+      "kai-tasks"
+    ],
+    "choice": [
+      "kai-choice"
+    ],
+    "cards": [
+      "kai-cards"
+    ]
+  }
+}
