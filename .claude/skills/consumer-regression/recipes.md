@@ -2,21 +2,31 @@
 
 Heavy reference for the `consumer-regression` skill. Exact commands, the test matrix, and the mock-backend recipes proven in the 2026-06 hardening campaign.
 
-Paths assume the repo at `/Users/home/Projects/kitn-ai/kitn-chat` and the harness at the sibling `/Users/home/Projects/kitn-ai/consumer-harness/` (outside the repo).
+## Conventions — resolve paths at runtime, NEVER hardcode
+
+The repo lives in a different place on every machine. Derive everything from the repo root:
+
+```bash
+REPO="$(git rev-parse --show-toplevel)"           # the @kitn.ai/ui library repo root (run this from anywhere inside the repo)
+HARNESS="$(dirname "$REPO")/consumer-harness"     # a sibling dir, OUTSIDE the repo (keeps the repo's git clean)
+```
+
+Every command + script below uses `$REPO` / `$HARNESS`. In Node scripts, derive them the same way (the gen script shows how). When you dispatch a `consumer-probe`, pass the resolved absolute paths in the prompt — the agent does not guess them.
 
 ---
 
 ## Setup (Phase 0)
 
 ```bash
-cd <repo>
+REPO="$(git rev-parse --show-toplevel)"; HARNESS="$(dirname "$REPO")/consumer-harness"
+cd "$REPO"
 # 1. Build + pack the LOCAL package (so unmerged fixes are testable, NOT the published npm version)
 npm run build && git checkout -- src/components/component-meta.json && npm pack    # → kitn.ai-ui-<v>.tgz
 # 2. Stable copy the probes install from (a fix's re-pack can't race a reading probe)
-mkdir -p ../consumer-harness && cp kitn.ai-ui-*.tgz ../consumer-harness/kitn-stable.tgz
+mkdir -p "$HARNESS" && cp kitn.ai-ui-*.tgz "$HARNESS/kitn-stable.tgz"
 ```
 
-After a **library** change: re-run the build + `npm pack` + refresh `kitn-stable.tgz`, then re-probe.
+After a **library** change: re-run the build + `npm pack` + refresh `$HARNESS/kitn-stable.tgz`, then re-probe.
 After a **scaffold.ts** change: rebuild ONLY the MCP bin (fast) before regenerating scaffolds:
 ```bash
 npx vite build --config vite.config.mcp.ts
@@ -24,14 +34,17 @@ npx vite build --config vite.config.mcp.ts
 
 ## Generating scaffolds from the live MCP bin
 
-The MCP is a stdio server; drive it with a tiny JSON-RPC client. One scaffold per cell:
+The MCP is a stdio server; drive it with a tiny JSON-RPC client. It resolves its own paths via git, so it's portable:
 
 ```js
-// node /tmp/gen.mjs  — writes <name>.md per cell
-import { spawn } from 'node:child_process';
+// run from anywhere inside the repo: node /tmp/gen.mjs  — writes <name>.md per cell into $HARNESS/scaffolds
+import { spawn, execSync } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
-mkdirSync('/Users/home/Projects/kitn-ai/consumer-harness/scaffolds', { recursive: true });
-const p = spawn('node', ['bin/mcp.js'], { stdio: ['pipe','pipe','pipe'] }); // run from <repo>
+import { dirname, join } from 'node:path';
+const REPO = execSync('git rev-parse --show-toplevel').toString().trim();
+const HARNESS = join(dirname(REPO), 'consumer-harness');
+mkdirSync(join(HARNESS, 'scaffolds'), { recursive: true });
+const p = spawn('node', [join(REPO, 'bin/mcp.js')], { cwd: REPO, stdio: ['pipe','pipe','pipe'] });
 let buf=''; const out=[];
 p.stdout.on('data',d=>{buf+=d;let i;while((i=buf.indexOf('\n'))>=0){const l=buf.slice(0,i);buf=buf.slice(i+1);if(l.trim()){try{out.push(JSON.parse(l))}catch{}}}});
 const s=o=>p.stdin.write(JSON.stringify(o)+'\n');
@@ -42,12 +55,12 @@ const cells=[ // [name, scaffold args]
   // …one per framework/scenario…
 ];
 cells.forEach((c,i)=>s({jsonrpc:'2.0',id:40+i,method:'tools/call',params:{name:'scaffold',arguments:c[1]}}));
-setTimeout(()=>{p.kill();cells.forEach(([n],i)=>{const t=out.find(m=>m.id===40+i)?.result?.content?.[0]?.text||'';writeFileSync(`/Users/home/Projects/kitn-ai/consumer-harness/scaffolds/${n}.md`,t);console.log(n,t.length);});process.exit(0);},3000);
+setTimeout(()=>{p.kill();cells.forEach(([n],i)=>{const t=out.find(m=>m.id===40+i)?.result?.content?.[0]?.text||'';writeFileSync(join(HARNESS,'scaffolds',`${n}.md`),t);console.log(n,t.length);});process.exit(0);},3000);
 ```
 
 The same client calls the other tools: `theme` (brand → token block), `component_reference` (the real API), `debug` (gotcha → fix).
 
-**Sanity:** the bin is `bin/mcp.js` (built by `vite.config.mcp.ts` → `dist/mcp.es.js`). If a generated `.md` comes out empty/tiny, the bin didn't run — `ls bin/mcp.js dist/mcp.es.js`, rebuild the bin, and re-run. Always eyeball one generated scaffold (it should contain a `kai-chat` / `<Chat`, the suggestions, and the backend block) before fanning out probes against it.
+**Sanity:** the bin is `$REPO/bin/mcp.js` (built by `vite.config.mcp.ts` → `$REPO/dist/mcp.es.js`). If a generated `.md` comes out empty/tiny, the bin didn't run — `ls "$REPO/bin/mcp.js" "$REPO/dist/mcp.es.js"`, rebuild the bin, re-run. Always eyeball one generated scaffold (it should contain `kai-chat` / `<Chat`, the suggestions, and the backend block) before fanning out probes against it.
 
 ## The test matrix
 
@@ -73,7 +86,7 @@ Build a cell for each combination you care about. Full matrix axes:
 | next | `npx create-next-app@latest <n> --ts --app --no-tailwind --no-eslint --no-src-dir --import-alias "@/*" --use-npm` | `npm run build` (next build) | scaffold uses `dynamic({ssr:false})` |
 | tanstack-start | the official scaffold (verify current via Context7/docs) | `npm run build` | scaffold uses `createFileRoute({ ssr:false })` |
 
-Then in each: `npm install /Users/home/Projects/kitn-ai/consumer-harness/kitn-stable.tgz` (NOT npm).
+Then in each: `npm install "$HARNESS/kitn-stable.tgz"` (NOT npm).
 
 ## Mock-backend recipes (no API keys)
 
@@ -95,15 +108,18 @@ curl -N -X POST localhost:3000/api/chat -H 'content-type: application/json' \
 
 The elements bundle must not throw when imported with no DOM:
 ```bash
-node --input-type=module -e "await import('<repo>/dist/kitn-chat.es.js'); console.log('SSR-OK')"   # no throw
+REPO="$(git rev-parse --show-toplevel)"
+node --input-type=module -e "await import('$REPO/dist/kitn-chat.es.js'); console.log('SSR-OK')"   # no throw
 ```
 For SSR frameworks (Next, TanStack Start, SvelteKit, Remix, Astro) the scaffold ALSO renders the chat client-only (`dynamic({ssr:false})` / `createFileRoute({ssr:false})`) to avoid hydration mismatch — confirm the server HTML omits `<kai-chat>`.
 
 ## Playwright (shadow DOM)
 
-Reuse the repo's browser — don't install a second one:
+Reuse the repo's browser — don't install a second one. Resolve the path from the repo root:
 ```js
-const pw = require('/Users/home/Projects/kitn-ai/kitn-chat/node_modules/playwright/index.js');
+const { execSync } = require('node:child_process');
+const REPO = execSync('git rev-parse --show-toplevel').toString().trim();
+const pw = require(REPO + '/node_modules/playwright/index.js');
 // kai-* live in shadow DOM. Check registration + render:
 await page.evaluate(() => customElements.get('kai-chat') !== undefined);  // registered
 // pierce: el.shadowRoot.querySelector(...). Playwright CSS also pierces shadow for text.

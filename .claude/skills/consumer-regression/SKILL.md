@@ -40,16 +40,17 @@ Dispatch them with the Agent tool (`subagent_type: "consumer-probe"` / `"regress
 ## Phases
 
 ### Phase 0 — Setup (controller, once)
+First resolve the **portable paths** — NEVER hardcode them (the repo lives elsewhere on every machine; see recipes.md "Conventions"):
+`REPO="$(git rev-parse --show-toplevel)"; HARNESS="$(dirname "$REPO")/consumer-harness"`
 1. Build + pack the LOCAL package so fixes are testable (NOT the published version):
-   `npm run build && git checkout -- src/components/component-meta.json && npm pack`
-   → produces `kitn.ai-ui-<v>.tgz`.
+   `cd "$REPO" && npm run build && git checkout -- src/components/component-meta.json && npm pack` → `kitn.ai-ui-<v>.tgz`.
 2. Copy it to a **stable** path the probes install from — so a re-pack during a fix can't race a reading probe:
-   `cp kitn.ai-ui-*.tgz ../consumer-harness/kitn-stable.tgz`
-3. Put the harness **outside the repo** (e.g. `../consumer-harness/`) to keep the repo's git clean.
-4. Generate the scaffolds for each cell from the live MCP bin (see recipes.md `gen-scaffolds`). **After ANY `src/agent-tooling/mcp/tools/scaffold.ts` change, rebuild the bin first** (`npx vite build --config vite.config.mcp.ts`) or you'll generate stale output.
+   `mkdir -p "$HARNESS" && cp kitn.ai-ui-*.tgz "$HARNESS/kitn-stable.tgz"`.
+3. `$HARNESS` is a **sibling of the repo, OUTSIDE it** — keeps the repo's git clean.
+4. Generate the scaffolds for each cell from the live MCP bin (recipes.md `gen-scaffolds`). **After ANY `src/agent-tooling/mcp/tools/scaffold.ts` change, rebuild the bin first** (`npx vite build --config vite.config.mcp.ts`) or you'll generate stale output.
 
 ### Phase 1 — Probe (parallel consumer-probe agents, MIXED models)
-Dispatch one `consumer-probe` per matrix cell, in a single message so they run concurrently. Deliberately spread model tiers (haiku/sonnet/opus — see Model strategy). Each returns a verdict + a report file.
+Dispatch one `consumer-probe` per matrix cell, in a single message so they run concurrently. **Pass each probe the RESOLVED absolute paths** in its prompt — the repo path (`$REPO`), the tarball (`$HARNESS/kitn-stable.tgz`), its scaffold file, and its report path. The probe never resolves these itself (its cwd is a throwaway app, not the library repo). Deliberately spread model tiers (haiku/sonnet/opus — see Model strategy). Each returns a verdict + a report file.
 
 ### Phase 2 — Triage (one regression-triage agent, opus) — REGRESSION only
 Hand it the probe report paths. It returns the deduped master fix list, grouped LIBRARY → SCAFFOLD-OUTPUT → FRAMEWORK/DOC, with the **critical path** (smallest set of fixes that flips the most cells to clean).
