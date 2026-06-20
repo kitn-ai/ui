@@ -467,7 +467,8 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): str
   const companions = companionJsxLines.join('\n');
 
   // SCAF-4: Inline ChatMessage type for strict-TS consumers; avoids implicit-any on useState/handler.
-  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string }; tools?: { type: string; state: string; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
+  // SCAF-11: state must be the library's 4-value union (not bare string); reasoning carries optional label.
+  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error'; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
 
   // SCAF-9: seed sample messages for agentic archetype so tool+reasoning render immediately.
   const sampleMessagesInit = hasEmbedded
@@ -750,7 +751,8 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
       ].join('\n');
 
   // SCAF-10: ChatMessage type for strict-TS Vue consumers — matches the React SCAF-4 type.
-  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string }; tools?: { type: string; state: string; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
+  // SCAF-11: state must be the library's 4-value union (not bare string); reasoning carries optional label.
+  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error'; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
 
   // SCAF-9: sample seeding for agentic archetype.
   const sampleSeed = hasEmbedded
@@ -907,7 +909,8 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
       ].join('\n');
 
   // SCAF-10: ChatMessage type for strict-TS Svelte consumers — matches the React SCAF-4 type.
-  const chatMessageType = `  type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string }; tools?: { type: string; state: string; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
+  // SCAF-11: state must be the library's 4-value union (not bare string); reasoning carries optional label.
+  const chatMessageType = `  type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error'; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
 
   // SCAF-9: seed sample messages for agentic archetype.
   const sampleMessagesInit = hasEmbedded

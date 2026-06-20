@@ -626,6 +626,48 @@ describe('scaffold', () => {
     expect(text).toContain('function init()');
   });
 
+  // ── SCAF-11: emitted ChatMessage type must use the library's strict state union ──
+
+  it('SCAF-11: agentic (react) ChatMessage type uses strict state union, not bare string', async () => {
+    const out = await scaffold.handler({
+      useCase: 'agentic',
+      integration: 'openrouter',
+      placement: 'side',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must include the 4-value state union — not bare `state: string`
+    expect(text).toContain("'input-streaming' | 'input-available' | 'output-available' | 'output-error'");
+    // Must NOT use the loose `state: string` form
+    expect(text).not.toMatch(/state:\s*string/);
+    // reasoning must carry the optional label field
+    expect(text).toContain('label?: string');
+  });
+
+  it('SCAF-11: agentic sample message state value is a valid union member (output-available)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'agentic',
+      integration: 'openrouter',
+      placement: 'side',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // The seeded sample data must use a union-member state value
+    expect(text).toContain("'output-available'");
+  });
+
+  it('SCAF-11: knowledge-base (react) ChatMessage type also uses strict state union', async () => {
+    const out = await scaffold.handler({
+      useCase: 'knowledge-base',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain("'input-streaming' | 'input-available' | 'output-available' | 'output-error'");
+    expect(text).not.toMatch(/state:\s*string/);
+  });
+
   it('SCAF-9: knowledge-base (react) emits <Sources> with real sample sources data', async () => {
     const out = await scaffold.handler({
       useCase: 'knowledge-base',

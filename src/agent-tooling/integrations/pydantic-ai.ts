@@ -20,7 +20,7 @@ agent = Agent('openai:gpt-4o')
 
 app = FastAPI()
 app.add_middleware(
-    CORSMiddleware, allow_origins=['*'], allow_methods=['POST'], allow_headers=['*']
+    CORSMiddleware, allow_origins=['*'], allow_methods=['*'], allow_headers=['*']
 )
 
 class Message(BaseModel):
