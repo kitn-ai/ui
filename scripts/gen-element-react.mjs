@@ -66,6 +66,8 @@ export const ${name} = createWebComponent<${propsName}>(
 // Typed React wrappers for every kitn custom element. Usage:
 //   import { Message } from '@kitn.ai/ui/react';
 //   <Message message={msg} onMessageAction={(e) => …} />
+// Self-registers all kai-* custom elements so consumers need only this one import.
+import '../../src/elements/register';
 import { createWebComponent, type WebComponentProps } from './runtime';
 ${importLines}
 
