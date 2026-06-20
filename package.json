@@ -148,12 +148,6 @@
     "vite-plugin-solid": "^2.11.0",
     "vitest": "^4.1.0"
   },
-  "sideEffects": [
-    "dist/kitn-chat.es.js",
-    "dist/react.js",
-    "theme.css",
-    "dist/theme.tokens.css"
-  ],
   "peerDependencies": {
     "react": ">=18"
   },
