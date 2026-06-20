@@ -608,13 +608,8 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): str
         `const ${name} = dynamic(() => import('@kitn.ai/ui/react').then((m) => m.${name}), { ssr: false });`,
     );
 
-    // SCAF-2: Next.js transpilePackages note.
-    const nextConfigNote = [
-      `// Next.js note: if you get "unknown module type" or TS errors inside @kitn.ai/ui,`,
-      `// add transpilePackages: ['@kitn.ai/ui'] to next.config.ts (needed until the`,
-      `// package ships prebuilt JS on its "." and "./react" exports).`,
-      ``,
-    ];
+    // SCAF-2: Next.js config note — @kitn.ai/ui ships compiled entry points; no transpilePackages needed.
+    const nextConfigNote: string[] = [];
 
     return [
       // 'use client' must be the very first line for Next.js App Router.

@@ -898,6 +898,62 @@ describe('scaffold', () => {
     expect(text).toContain('on:kai-submit');
   });
 
+  // ── INT-1: cloudflare worker route re-frames native SSE to OpenAI format ────
+
+  it('INT-1: cloudflare worker template re-frames native SSE to OpenAI-format SSE (choices/delta/content)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'cloudflare',
+      placement: 'full-page',
+      framework: 'worker',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must contain the OpenAI-format re-mapping fields
+    expect(text).toContain('choices');
+    expect(text).toContain('delta');
+    expect(text).toContain('content');
+    // Must emit a terminal [DONE] sentinel
+    expect(text).toContain('[DONE]');
+    // Must NOT be a bare passthrough (new Response(stream, ...))
+    expect(text).not.toMatch(/new Response\(stream,/);
+  });
+
+  it('INT-1: cloudflare next template still passes upstream.body straight through (OpenAI endpoint)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'cloudflare',
+      placement: 'full-page',
+      framework: 'next',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // next route uses the OpenAI-compatible endpoint — still a direct passthrough
+    expect(text).toContain('upstream.body');
+  });
+
+  // ── INT-2: Next scaffold must NOT recommend transpilePackages ────────────────
+
+  it('INT-2: next scaffold does NOT emit a transpilePackages recommendation', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'next',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).not.toContain('transpilePackages');
+  });
+
+  it('INT-2: cloudflare+next scaffold does NOT emit transpilePackages', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'cloudflare',
+      placement: 'full-page',
+      framework: 'next',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).not.toContain('transpilePackages');
+  });
+
   it('SCAF-14: workspace (html) emits kai-resizable with kai-resizable-item children and kai-artifact with src', async () => {
     const out = await scaffold.handler({
       useCase: 'workspace',
