@@ -256,18 +256,19 @@ const RULES: Rule[] = [
       '```\n\n' +
       'The file name is the element\'s source basename from `element-manifest.json` ' +
       '(e.g. `kai-chat` → `chat`, `kai-confirm` → `confirm-card`).\n\n' +
-      '**Mode 3 — autoloader (no-build / CDN pages):**\n' +
+      '**Mode 3 — autoloader (no-build / CDN pages only):**\n' +
       'Watches the DOM and dynamically imports each `kai-*` element\'s module on demand. ' +
       'A page that uses only `<kai-chat>` never downloads the other elements. ' +
-      'Client-only — not for SSR.\n\n' +
-      '```js\n' +
-      "import '@kitn.ai/ui/autoloader';\n" +
-      '// or via CDN:\n' +
-      '// <script type="module" src=".../@kitn.ai/ui/autoloader"></script>\n' +
+      'It is a CDN / static-file tool — load it from a `<script type="module">` tag. ' +
+      'It is NOT importable through a bundler: Vite/webpack relocate it and the on-demand imports 404. ' +
+      'Client-only.\n\n' +
+      '```html\n' +
+      '<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui@<version>/dist/elements/autoloader.js"></script>\n' +
       '```\n\n' +
+      'In a BUNDLED app (Vite/webpack/Next) use Mode 1 or Mode 2 instead — not the autoloader.\n\n' +
       '**SSR note:** use Mode 1 (register-all) in SSR apps — ' +
       'per-element imports and the autoloader are client-only (they call DOM APIs at module eval). ' +
-      'All three modes are side-effect imports; keep them even if your linter flags them as "unused".',
+      'Modes 1 & 2 are side-effect imports; keep them even if your linter flags them as "unused".',
   },
   {
     // Rule 5 — SSR / server component / document is not defined

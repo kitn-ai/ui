@@ -1,10 +1,17 @@
 // The kai-* autoloader (opt-in, additive — the Web Awesome model).
 //
-// Include this ONE module and it watches the DOM for undefined kai-* elements and
-// dynamically imports each element's module on demand — so a page that only uses
-// <kai-chat> never downloads the other elements. The "register everything" bundle
-// (@kitn.ai/ui/elements) stays the default; this is an alternative delivery for
-// no-build / CDN / lazy consumers.
+// Include this ONE module (via a CDN/static `<script type="module">` tag) and it
+// watches the DOM for undefined kai-* elements and dynamically imports each
+// element's module on demand — so a page that only uses <kai-chat> never downloads
+// the others. The register-all bundle (@kitn.ai/ui/elements) stays the default;
+// this is the delivery for NO-BUILD / CDN / static-served pages.
+//
+// IMPORTANT — this is a CDN / static-file pattern (it resolves sibling element
+// modules relative to its own URL). It is NOT importable through a bundler: Vite /
+// webpack relocate `import.meta.url` away from the element files and cannot analyze
+// the dynamic import, so it 404s. In a BUNDLED app use per-element imports
+// (`import '@kitn.ai/ui/elements/<el>'`) or the register-all bundle. (Advanced: host
+// dist/elements/ yourself and call setAutoloaderBasePath('<url>/') before use.)
 //
 // Tag → module is resolved through the generated manifest (filenames don't always
 // equal the tag, and some modules register more than one tag), and modules are
@@ -34,9 +41,25 @@ async function register(tag: string): Promise<void> {
     await import(/* @vite-ignore */ `${baseOverride ?? BASE}${file}.js`);
   } catch (err) {
     inFlight.delete(tag);
-    // eslint-disable-next-line no-console
-    console.error(`[kai-autoloader] failed to load ${tag}`, err);
+    warnOnce(tag, err);
   }
+}
+
+// One actionable warning per session (the failure is almost always "imported
+// through a bundler" — see the header note), instead of a silent per-tag error.
+let warned = false;
+function warnOnce(tag: string, err: unknown): void {
+  if (warned) return;
+  warned = true;
+  const msg = (err as { message?: string })?.message ?? String(err);
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[kai-autoloader] could not load "${tag}" (${msg}). The autoloader is a CDN / ` +
+      `static-file tool — load it from a <script type="module" src=".../@kitn.ai/ui/dist/elements/autoloader.js">. ` +
+      `It is NOT importable through a bundler. In a bundled app, register elements with per-element imports ` +
+      `(import '@kitn.ai/ui/elements/<el>') or the register-all bundle (import '@kitn.ai/ui/elements'). To drive ` +
+      `the autoloader from a bundler, host dist/elements/ and call setAutoloaderBasePath('<url>/') before use.`,
+  );
 }
 
 function discover(root: ParentNode | Element): void {
@@ -60,5 +83,7 @@ export function startAutoloader(root: ParentNode = document): void {
   }).observe(document.documentElement, { childList: true, subtree: true });
 }
 
-// Self-start on import (the <script type="module"> use case).
-if (typeof document !== 'undefined') startAutoloader();
+// Self-start on import (the <script type="module"> use case). Deferred to a
+// microtask so a consumer that calls setAutoloaderBasePath() right after importing
+// (the advanced bundler-from-CDN path) takes effect before the first discovery pass.
+if (typeof document !== 'undefined') queueMicrotask(() => startAutoloader());

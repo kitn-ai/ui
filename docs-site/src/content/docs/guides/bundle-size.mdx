@@ -13,7 +13,7 @@ import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 |---|---|---|
 | **Register all** | `@kitn.ai/ui/elements` | You use many elements; simplest to set up; works in SSR |
 | **Per-element** | `@kitn.ai/ui/elements/chat` | You use a handful of elements; bundler required |
-| **Autoloader** | `@kitn.ai/ui/autoloader` | No-build / CDN; dynamically-added elements; lazy-by-default |
+| **Autoloader** | `<script>` tag (CDN / static) | No-build / CDN only — *not* bundlers; dynamically-added elements; lazy-by-default |
 
 ## Register all (default)
 
@@ -57,11 +57,7 @@ Per-element imports are client-only. In SSR frameworks (Next.js, Nuxt, SvelteKit
 
 The autoloader watches the DOM and fetches each element's module on demand — only the tags present on a given page are ever downloaded.
 
-```js
-import '@kitn.ai/ui/autoloader';
-```
-
-Or via CDN with no build step at all:
+It is a **CDN / static-file** tool: load it from a `<script type="module">` tag. It is **not** importable through a bundler — Vite and webpack relocate it away from the element files and its on-demand imports 404. In a bundled app, use [per-element imports](#per-element-imports) instead.
 
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/elements/autoloader.js"></script>
@@ -82,8 +78,8 @@ On import it scans for undefined `kai-*` elements and starts a `MutationObserver
 </script>
 ```
 
-<Aside type="caution" title="Client-only">
-The autoloader uses `document` and `MutationObserver` — it's a browser API. Don't import it in a server render; guard it the same way as per-element imports.
+<Aside type="caution" title="CDN / static-file only — not for bundlers">
+The autoloader resolves element modules relative to its own URL and uses `document` + `MutationObserver`. Load it from a `<script type="module">` on a CDN or static host. Do **not** `import '@kitn.ai/ui/autoloader'` in a bundled (Vite/webpack/Next) app or a server render — the bundler relocates it and the on-demand imports 404. In a bundled app, use per-element imports or the register-all bundle.
 </Aside>
 
 <Aside type="tip" title="Pin versions in production">

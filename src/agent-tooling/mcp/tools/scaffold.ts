@@ -1542,9 +1542,9 @@ function compose(
     `    Registers only that element. A bundler reduces kai-chat alone to ~73 KB gz.`,
     `    Example: import '@kitn.ai/ui/elements/chat'  (client-only — not for SSR)`,
     ``,
-    `  Autoloader (no-build / CDN): import '@kitn.ai/ui/autoloader'`,
-    `    Watches the DOM and loads each kai-* element on demand — ideal when only`,
-    `    a subset of elements appears on the page. Client-only.`,
+    `  Autoloader (no-build / CDN ONLY): a <script type="module"> tag pointing at`,
+    `    dist/elements/autoloader.js — watches the DOM and loads each kai-* element on`,
+    `    demand. A CDN/static-file tool; NOT importable through a bundler. Client-only.`,
     ``,
     `Use the debug tool with symptom "reduce bundle size" for a full breakdown.`,
   ].join('\n');

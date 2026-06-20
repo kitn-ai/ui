@@ -1062,8 +1062,9 @@ describe('scaffold', () => {
     const text = (out.content as { type: string; text: string }[])[0].text;
     // per-element import path
     expect(text).toMatch(/@kitn\.ai\/ui\/elements\/chat/);
-    // autoloader
-    expect(text).toMatch(/@kitn\.ai\/ui\/autoloader/);
+    // autoloader — positioned as a CDN/<script> tool (dist/elements/autoloader.js), NOT a bundler import
+    expect(text).toMatch(/autoloader\.js/);
+    expect(text).toMatch(/CDN|not importable through a bundler/i);
   });
 
   it('SCAF-16: footprint note appears across every framework', async () => {
@@ -1076,7 +1077,7 @@ describe('scaffold', () => {
       });
       const text = (out.content as { type: string; text: string }[])[0].text;
       expect(text, `${framework}: missing FOOTPRINT NOTE`).toContain('=== FOOTPRINT NOTE ===');
-      expect(text, `${framework}: missing autoloader mention`).toContain('@kitn.ai/ui/autoloader');
+      expect(text, `${framework}: missing autoloader mention`).toMatch(/autoloader/);
     }
   });
 

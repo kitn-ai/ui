@@ -155,8 +155,9 @@ describe('debug', () => {
     expect(text).toMatch(/@kitn\.ai\/ui\/elements/);
     // must explain per-element imports with an example
     expect(text).toMatch(/@kitn\.ai\/ui\/elements\/chat/);
-    // must explain the autoloader
-    expect(text).toMatch(/@kitn\.ai\/ui\/autoloader/);
+    // must explain the autoloader, positioned as CDN-only (not a bundler import)
+    expect(text).toMatch(/autoloader/i);
+    expect(text).toMatch(/CDN|not importable through a bundler/i);
   });
 
   it('tree-shaking symptom → bundle-footprint rule fires', async () => {
