@@ -108,7 +108,7 @@ describe('scaffold', () => {
     expect(text).not.toContain('onKai-submit');
   });
 
-  it('next scaffold uses the @kitn.ai/ui/react wrapper and correct onSubmit prop', async () => {
+  it('next scaffold uses the @kitn.ai/ui/react wrapper (via dynamic) and correct onSubmit prop', async () => {
     const out = await scaffold.handler({
       useCase: 'drop-in-chat',
       integration: 'openrouter',
@@ -116,6 +116,7 @@ describe('scaffold', () => {
       framework: 'next',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
+    // @kitn.ai/ui/react appears inside the dynamic() call, not as a top-level import
     expect(text).toContain('@kitn.ai/ui/react');
     expect(text).toContain('onSubmit');
     expect(text).not.toContain('onKai-submit');
@@ -286,7 +287,9 @@ describe('scaffold', () => {
     expect(elementsIdx).toBeLessThan(reactIdx);
   });
 
-  it("next output imports '@kitn.ai/ui/elements' BEFORE '@kitn.ai/ui/react'", async () => {
+  // SCAF-6: next uses next/dynamic { ssr: false } — no top-level @kitn.ai/ui/elements or
+  // @kitn.ai/ui/react import (they'd run on the server and crash with "window is not defined").
+  it('next scaffold uses next/dynamic with ssr:false and has NO top-level elements/react import (SCAF-6)', async () => {
     const out = await scaffold.handler({
       useCase: 'drop-in-chat',
       integration: 'openrouter',
@@ -294,10 +297,67 @@ describe('scaffold', () => {
       framework: 'next',
     });
     const text = (out.content as { type: string; text: string }[])[0].text;
-    const elementsIdx = text.indexOf("import '@kitn.ai/ui/elements'");
-    const reactIdx = text.indexOf("from '@kitn.ai/ui/react'");
-    expect(elementsIdx).toBeGreaterThanOrEqual(0);
-    expect(elementsIdx).toBeLessThan(reactIdx);
+    // Must use next/dynamic
+    expect(text).toContain("import dynamic from 'next/dynamic'");
+    // Must set ssr: false
+    expect(text).toContain('ssr: false');
+    // @kitn.ai/ui/react must appear only inside dynamic() — not as a standalone top-level import
+    expect(text).not.toMatch(/^import\s+\{[^}]*\}\s+from\s+'@kitn\.ai\/ui\/react'/m);
+    // No top-level @kitn.ai/ui/elements (the dynamic import of /react self-registers on client)
+    expect(text).not.toMatch(/^import\s+'@kitn\.ai\/ui\/elements'/m);
+  });
+
+  // SCAF-6 (contrast): plain react (Vite) STILL uses top-level imports — unchanged.
+  it('react (Vite) scaffold still has top-level import { Chat } from @kitn.ai/ui/react (unchanged by SCAF-6)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must have a top-level named import from @kitn.ai/ui/react
+    expect(text).toMatch(/^import\s+\{[^}]*\}\s+from\s+'@kitn\.ai\/ui\/react'/m);
+    // Must NOT use next/dynamic (no SSR concern in Vite)
+    expect(text).not.toContain("import dynamic from 'next/dynamic'");
+  });
+
+  // SCAF-7: react and next mock onSubmit must emit role: 'user' as const / role: 'assistant' as const
+  // so the literal doesn't widen to `string` under strict TS.
+  it('react mock scaffold emits role as const for strict-TS message literals (SCAF-7)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain("role: 'user' as const");
+    expect(text).toContain("role: 'assistant' as const");
+  });
+
+  it('next mock scaffold emits role as const for strict-TS message literals (SCAF-7)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'next',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain("role: 'user' as const");
+    expect(text).toContain("role: 'assistant' as const");
+  });
+
+  // SCAF-7: html mock output must NOT emit `as const` (TS syntax invalid in plain JS)
+  it('html mock scaffold does NOT emit as const on role literals (plain JS, SCAF-7)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'html',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).not.toContain('as const');
   });
 
   // Issue 4 — mock integration streams client-side with zero config.

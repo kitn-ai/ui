@@ -135,15 +135,22 @@ function mockStreamBody(opts: {
   commitMap: (mapBody: string) => string;
   /** set loading true/false */
   setLoading: (v: 'true' | 'false') => string;
+  /**
+   * Emit `as const` on role literals so they narrow to 'user'|'assistant' under
+   * strict TS. Set to true for TypeScript frameworks (react/next); false for
+   * plain-JS contexts (html) where `as const` is invalid syntax.
+   */
+  strictRoles?: boolean;
 }): string {
-  const { pad, read, commitInitial, commitMap, setLoading } = opts;
+  const { pad, read, commitInitial, commitMap, setLoading, strictRoles = false } = opts;
+  const asConst = strictRoles ? ' as const' : '';
   const mapBody = `(m.id === assistantId ? { ...m, content: answer } : m)`;
   return [
     `${pad}const value = e.detail.value.trim();`,
     `${pad}if (!value) return;`,
-    `${pad}const history = [...${read}, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+    `${pad}const history = [...${read}, { id: crypto.randomUUID(), role: 'user'${asConst}, content: value }];`,
     `${pad}const assistantId = crypto.randomUUID();`,
-    `${pad}${commitInitial(`[...history, { id: assistantId, role: 'assistant', content: '' }]`)}`,
+    `${pad}${commitInitial(`[...history, { id: assistantId, role: 'assistant'${asConst}, content: '' }]`)}`,
     `${pad}${setLoading('true')}`,
     `${pad}// No backend: stream a canned reply client-side, one token at a time.`,
     `${pad}const reply = ${JSON.stringify(MOCK_REPLY)};`,
@@ -315,6 +322,7 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): str
         // functional updater so each token maps over the LATEST array, not the snapshot
         commitMap: (mapBody) => `setMessages((prev) => prev.map((m) => ${mapBody}));`,
         setLoading: (v) => `setLoading(${v});`,
+        strictRoles: true,
       })
     : [
         `    const value = e.detail.value.trim();`,
@@ -357,16 +365,69 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): str
   // SCAF-2: Next.js App Router requires 'use client' for components that use hooks/interactivity.
   const useClientDirective = framework === 'next' ? [`'use client';`, ``] : [];
 
+  // SCAF-6: For Next.js ONLY — use next/dynamic with { ssr: false } so the elements
+  // bundle (which calls delegateEvents(events, doc = window.document) at module-eval)
+  // never runs on the server during prerender → avoids "window is not defined" crash.
+  // Plain `react` (Vite) has no SSR and keeps the top-level imports unchanged.
+  if (framework === 'next') {
+    // Build dynamic() calls for every wrapper in the archetype.
+    const dynamicImports = wrapperNames.map(
+      (name) =>
+        `const ${name} = dynamic(() => import('@kitn.ai/ui/react').then((m) => m.${name}), { ssr: false });`,
+    );
+
+    // SCAF-2: Next.js transpilePackages note.
+    const nextConfigNote = [
+      `// Next.js note: if you get "unknown module type" or TS errors inside @kitn.ai/ui,`,
+      `// add transpilePackages: ['@kitn.ai/ui'] to next.config.ts (needed until the`,
+      `// package ships prebuilt JS on its "." and "./react" exports).`,
+      ``,
+    ];
+
+    return [
+      // 'use client' must be the very first line for Next.js App Router.
+      ...useClientDirective,
+      `import { useState } from 'react';`,
+      `import dynamic from 'next/dynamic';`,
+      `import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
+      `// kai-* bundle Solid's client runtime → load client-only so SSR/prerender doesn't crash`,
+      ...dynamicImports,
+      ``,
+      ...nextConfigNote,
+      `// ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint}`,
+      ...(p.altNote ? [`// ${p.altNote}`] : []),
+      chatMessageType,
+      ``,
+      `export default function App() {`,
+      `  const [messages, setMessages] = useState<ChatMessage[]>([]);`,
+      `  const [loading, setLoading] = useState(false);`,
+      `  const suggestions = ${jsArray(suggestions)};`,
+      ``,
+      `  async function onSubmit(e: CustomEvent<{ value: string }>) {`,
+      onSubmitBody,
+      `  }`,
+      ``,
+      `  return (`,
+      `    <div style={{ ${jsxStyle(p.style)} }}>`,
+      `      <Chat`,
+      `        messages={messages}`,
+      `        loading={loading}`,
+      `        suggestions={suggestions}`,
+      `        suggestionMode="submit"`,
+      `        onSubmit={onSubmit}`,
+      `        style={{ ${jsxStyle(p.chatFill)} }}`,
+      `      />`,
+      companions,
+      `    </div>`,
+      `  );`,
+      `}`,
+    ]
+      .filter((l) => l !== '')
+      .join('\n');
+  }
+
   // SCAF-2: Next.js transpilePackages note (needed until @kitn.ai/ui ships prebuilt JS on "." + "./react").
-  const nextConfigNote =
-    framework === 'next'
-      ? [
-          `// Next.js note: if you get "unknown module type" or TS errors inside @kitn.ai/ui,`,
-          `// add transpilePackages: ['@kitn.ai/ui'] to next.config.ts (needed until the`,
-          `// package ships prebuilt JS on its "." and "./react" exports).`,
-          ``,
-        ]
-      : [];
+  const nextConfigNote: string[] = [];
 
   return [
     // SCAF-2: 'use client' must be the very first line for Next.js App Router.
