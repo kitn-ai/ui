@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.15.1](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.15.0...@kitn.ai/ui-v0.15.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* exclude dev-only files (stories/tests/mdx) from the npm package ([fc1a213](https://github.com/kitn-ai/ui/commit/fc1a213b9078ad39ca82f967221200dccb8b1856))
+* **landing:** polish + harness section + serve llms.txt ([0e515eb](https://github.com/kitn-ai/ui/commit/0e515eb2935a3612f0273ad693713429adfbf188))
+* **landing:** polish the landing page + add a harness section ([31cd344](https://github.com/kitn-ai/ui/commit/31cd34409526fd2e4b37283f8460050c5c2fe2ce))
+* slim the npm tarball (exclude stories/tests/mdx) ([d67a673](https://github.com/kitn-ai/ui/commit/d67a6731e1a3b30d521c6b1c1a657406ee56fd9e))
+
 ## [0.15.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.14.1...@kitn.ai/ui-v0.15.0) (2026-06-19)
 
 
