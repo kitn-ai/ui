@@ -1,5 +1,54 @@
 # Changelog
 
+## [0.16.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.15.1...@kitn.ai/ui-v0.16.0) (2026-06-20)
+
+
+### Features
+
+* add context7.json for Context7 indexing (kai- prefix + contract rules) ([e183b00](https://github.com/kitn-ai/ui/commit/e183b002fc1709d97f096c3c4f85ba95b0f2a360))
+* add Pydantic AI integration (catalog + docs) ([f175abd](https://github.com/kitn-ai/ui/commit/f175abdc850760e4efe97b950ab27ba33f97872a))
+* **agent-tooling:** archetype entries ([76cbfc8](https://github.com/kitn-ai/ui/commit/76cbfc8131dab0c00d5e0621ba69b1d9e705e7e4))
+* **agent-tooling:** catalog types + zod schemas ([2dd806c](https://github.com/kitn-ai/ui/commit/2dd806c3abc8973a2cb841be1cdd78db1c0f4f06))
+* **agent-tooling:** registry barrel + tests ([3f622f4](https://github.com/kitn-ai/ui/commit/3f622f4c9831c0f5cc9cc8f98ccea4090d6d94aa))
+* **agent-tooling:** TS-backend integration entries ([598cd82](https://github.com/kitn-ai/ui/commit/598cd8201766d0bf295184b9ae1779c9e504041a))
+* AI/UI agent-tooling (kai MCP) + consumer-hardening + /consumer-regression harness ([78afb7c](https://github.com/kitn-ai/ui/commit/78afb7cd9e1dec889536d7f1f2a3af941f3b2332))
+* **mcp:** add tanstack-start as a scaffold framework (verified ssr:false route pattern) ([bc1a1eb](https://github.com/kitn-ai/ui/commit/bc1a1ebebbcfee131ad841281569cdab6275e80c))
+* **mcp:** component_reference tool ([96205d0](https://github.com/kitn-ai/ui/commit/96205d02f50d9144d059b540865f31cdb918dfc1))
+* **mcp:** debug rules for unregistered-elements, tsc-source-pull, vite-404 ([18877e0](https://github.com/kitn-ai/ui/commit/18877e043346bc2498f3313d38a7565823a47aac))
+* **mcp:** debug tool ([81a2648](https://github.com/kitn-ai/ui/commit/81a2648547a274fa744e9f744bb9518fcb79b1c2))
+* **mcp:** install docs + scaffold-matrix verification ([81d79de](https://github.com/kitn-ai/ui/commit/81d79deec1e842499e702af1d4fe74a43fdc7a98))
+* **mcp:** scaffold tool (archetype x integration x placement x framework) ([000523b](https://github.com/kitn-ai/ui/commit/000523b2f2a42bb59b4889c91f031860620f3c29))
+* **mcp:** server skeleton + four-tool registration ([a10eee7](https://github.com/kitn-ai/ui/commit/a10eee75ecccdca5c18762da18d62f47ef00db27))
+* **mcp:** theme tool ([00c2d28](https://github.com/kitn-ai/ui/commit/00c2d287de07929dccc6570ba38e99b6f7345782))
+
+
+### Bug Fixes
+
+* **mcp:** avoid React page/wrapper name collision in scaffold ([5601343](https://github.com/kitn-ai/ui/commit/5601343f399edba8229427395086488ddb759a56))
+* **mcp:** cloudflare worker re-frames native SSE to OpenAI format; drop stale transpilePackages note ([7f2b372](https://github.com/kitn-ai/ui/commit/7f2b37219489c8491e6283dbe206a3183be500e1))
+* **mcp:** correct dark accent-foreground contrast + invalid-hex note in theme ([eacb8f9](https://github.com/kitn-ai/ui/commit/eacb8f9fe5eb7975a34fc885928dc8d875561035))
+* **mcp:** correct theme docs URLs to ui.kitn.ai; tighten debug matching; svelte loading + scaffold polish ([3f2dbc0](https://github.com/kitn-ai/ui/commit/3f2dbc0b03afc3382f1951203474a4fe4b5c6c10))
+* **mcp:** next dynamic ssr:false import (SSR-safe) + strict-TS role literals ([0686d7d](https://github.com/kitn-ai/ui/commit/0686d7d34d80686693fb39c3e163da2611a57931))
+* **mcp:** node typecheck config + result-shape casts in tests ([0e4d536](https://github.com/kitn-ai/ui/commit/0e4d536721d8f93efd0d1cd82029cefc87205aa0))
+* **mcp:** runnable react (wrapper) + svelte front-ends in scaffold ([9537009](https://github.com/kitn-ai/ui/commit/953700920d83ae1d5d71bf185c0132ef52d3d804))
+* **mcp:** scaffold gates raw-DOM prop-setting on customElements.whenDefined (SCAF-15) ([e5f26a5](https://github.com/kitn-ai/ui/commit/e5f26a5641a007508bed8c802800702389482112))
+* **mcp:** scaffold sends model for real backends + idiomatic message-embedded tool/reasoning composition ([988c81e](https://github.com/kitn-ai/ui/commit/988c81e6df42173d7b64d34027bdf7c90ae1f35f))
+* **mcp:** scaffold side-panel placement, suggestions, elements-import, + mock integration ([cc6221e](https://github.com/kitn-ai/ui/commit/cc6221e2b9565bb61c8270e117bb9a956f7dc168))
+* **mcp:** scaffold uses theme.tokens.css, next use-client, vue isCustomElement, typed handlers ([fcecef0](https://github.com/kitn-ai/ui/commit/fcecef042459f446a01944ca6e3e5dea54551a67))
+* **mcp:** svelte mock + non-mock role literals use as const (zero-edit svelte-check) ([2f5db1a](https://github.com/kitn-ai/ui/commit/2f5db1a42f837d9adcd9a28ef9a0743a92e70194))
+* **mcp:** tighten scaffold ChatMessage type to library union; pydantic route CORS allow OPTIONS ([3946a4d](https://github.com/kitn-ai/ui/commit/3946a4d92c3726b508e3629aaa214bb2d1efcda6))
+* **mcp:** vue + svelte workspace emit resizable split (SCAF-14B) ([03d3257](https://github.com/kitn-ai/ui/commit/03d32570647a8546f37201fd805917f275912312))
+* **mcp:** vue role as-const + svelte typed element access (zero-edit svelte-check) ([057b1d5](https://github.com/kitn-ai/ui/commit/057b1d5bf089d592b778603f1f90b47154edad47))
+* **mcp:** vue suggestion-mode kebab attribute + tighten suggestions test ([d0c0b17](https://github.com/kitn-ai/ui/commit/d0c0b17df0ec1926091a8699337692c46c9e9c35))
+* **mcp:** vue/svelte typed messages + .prop binding, html DOMContentLoaded-safe wiring ([5433a94](https://github.com/kitn-ai/ui/commit/5433a94c63919c3b96b8043d0ab8a3c12bf6ea3e))
+* **mcp:** workspace archetype emits runnable resizable split (chat + artifact panes) ([3b75824](https://github.com/kitn-ai/ui/commit/3b7582423c4a4545ede05b44dbc032b0ca1406b1))
+* **pkg:** inject elements self-register via build banner (keep React wrapper source typecheck-clean; fixes 1474 react-jsx errors from walking Solid source) ([fc3b05f](https://github.com/kitn-ai/ui/commit/fc3b05fc71b452bc8fea84406999bd9308ed4e9c))
+* **pkg:** remove sideEffects field that hollowed the elements bundle (it tree-shook the registrations out of the lib's own build) ([e3bf7f9](https://github.com/kitn-ai/ui/commit/e3bf7f96989db60a3559308c2b416557df553ff8))
+* **pkg:** self-register elements from /react, SSR-safe registration, consumable theme.css, drop redundant solid-js peer ([6cc5fde](https://github.com/kitn-ai/ui/commit/6cc5fdefc834f7d33b8d1f7208bb7575ecea764a))
+* **pkg:** ship compiled . + ./react + type-only ./elements (stop shipping raw source) ([c6241fe](https://github.com/kitn-ai/ui/commit/c6241fe6be14b7a576f4390e92295072d1c9c84d))
+* **pkg:** SSR-import-safe element registration (client-only via gated dynamic import) ([d0907d5](https://github.com/kitn-ai/ui/commit/d0907d57fa178df6038198e572a7409cac3e97e8))
+* **test:** make consumer-regression harness paths portable (resolve repo via git rev-parse --show-toplevel; no hardcoded absolute paths) ([bcd1c69](https://github.com/kitn-ai/ui/commit/bcd1c69f4b7ff391e9ace997b9e0251e8451dcfb))
+
 ## [0.15.1](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.15.0...@kitn.ai/ui-v0.15.1) (2026-06-19)
 
 
