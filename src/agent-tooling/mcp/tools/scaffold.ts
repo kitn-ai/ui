@@ -1,0 +1,1627 @@
+import { z } from 'zod';
+import type { Tool } from './types';
+import { Placement, Framework } from '../../types';
+import type { Integration, Archetype } from '../../types';
+import {
+  getArchetype,
+  getIntegration,
+  listArchetypes,
+  listIntegrations,
+} from '../../registry';
+
+/**
+ * scaffold — the keystone tool. Composes a working chat surface from four axes:
+ *
+ *   useCase (archetype) × integration × placement × framework
+ *
+ * and emits three labeled blocks an AI consumer can paste straight in:
+ *   (1) Front-end  — the archetype's kai-* components, rendered for the chosen
+ *                    framework and sized for the placement, wired with the
+ *                    `messages` property + `kai-submit` per the Streaming recipe.
+ *   (2) Backend    — the integration's route template for the framework (with a
+ *                    language-aware fallback when there's no exact match).
+ *   (3) Run note   — how to run it + the env vars to set.
+ *
+ * The handler is called directly in tests (bypassing MCP's zod validation), so it
+ * validates `useCase` + `integration` against the registry itself and returns
+ * graceful, self-correcting error text when either is unknown.
+ */
+
+const text = (s: string) => ({
+  content: [{ type: 'text' as const, text: s }],
+});
+
+// ── placement sizing ──────────────────────────────────────────────────────────
+
+interface PlacementStyle {
+  /** container style for an HTML/web-components wrapper */
+  style: string;
+  /** the chat element's own style — it must FILL the container */
+  chatFill: string;
+  /** one-line human description of the layout */
+  note: string;
+  /** optional extra comment lines describing an alternative layout form */
+  altNote?: string;
+}
+
+// The chat element must fill its container. In a `display: flex; flex-direction:
+// column` shell it's a flex child (`flex: 1; min-height: 0`); in a plain block
+// container it fills via `height: 100%`.
+const FLEX_FILL = 'flex: 1; min-height: 0;';
+const BLOCK_FILL = 'height: 100%; width: 100%;';
+
+function placementStyle(placement: string): PlacementStyle {
+  switch (placement) {
+    case 'full-page':
+      return {
+        style: 'height: 100dvh; width: 100%; display: flex; flex-direction: column;',
+        chatFill: FLEX_FILL,
+        note: 'fills the viewport (100dvh)',
+      };
+    case 'inline':
+      return {
+        style: 'width: 100%; max-width: 720px; height: 540px; margin: 0 auto; display: flex; flex-direction: column;',
+        chatFill: FLEX_FILL,
+        note: 'in-flow block (sized by parent, not fixed)',
+      };
+    case 'side':
+      // A full-height side panel docked to the trailing (right) edge — overlays
+      // content. messages/loading/suggestions are real kai-chat props.
+      return {
+        style:
+          'position: fixed; top: 0; inset-inline-end: 0; height: 100dvh; width: 380px; ' +
+          'border-inline-start: 1px solid var(--kai-color-border); display: flex; flex-direction: column; z-index: 1000;',
+        chatFill: FLEX_FILL,
+        note: 'full-height side panel, docked to the trailing edge (100dvh)',
+        altNote:
+          'In-flow alternative (push content instead of overlay): drop `position`/`z-index` and ' +
+          'make this a `flex: 0 0 380px` column inside a `display: flex` row at `height: 100dvh`.',
+      };
+    case 'docked-widget':
+      // The bottom-right floating bubble — rounded, elevated, fixed size.
+      return {
+        style:
+          'position: fixed; bottom: 1.5rem; inset-inline-end: 1.5rem; width: 380px; height: 600px; ' +
+          'max-height: calc(100dvh - 3rem); border-radius: 16px; overflow: hidden; ' +
+          'box-shadow: 0 12px 32px var(--kai-shadow-color, rgba(0,0,0,0.18)); display: flex; flex-direction: column; z-index: 1000;',
+        chatFill: FLEX_FILL,
+        note: 'fixed, floating bottom-right widget',
+      };
+    default:
+      // Unknown placement falls back to full-page (full height) rather than the bubble,
+      // so a future Placement enum member doesn't silently render as a widget.
+      return {
+        style: 'height: 100dvh; width: 100%; display: flex; flex-direction: column;',
+        chatFill: FLEX_FILL,
+        note: 'fills the viewport (100dvh)',
+      };
+  }
+}
+
+// ── suggestions + mock streaming ───────────────────────────────────────────────
+
+/** Default starter prompts so the suggestions feature always shows. */
+const DEFAULT_SUGGESTIONS = ["What's new?", 'How can you help?'];
+
+/** A canned assistant reply the mock integration streams back token-by-token. */
+const MOCK_REPLY =
+  "Hi! I'm a local preview — no backend or API key needed. Swap `integration` for a real provider (openrouter, ollama, …) and I'll talk to a real model.";
+
+/** Render a string[] as a JS array literal (JSON-quoted — keeps apostrophes readable). */
+function jsArray(items: string[]): string {
+  return '[' + items.map((s) => JSON.stringify(s)).join(', ') + ']';
+}
+
+/**
+ * The shared client-side mock stream body, parameterised by how each framework
+ * commits a messages update. Two operations keep the contract correct:
+ *   - `commitInitial(expr)` appends the user + empty-assistant pair.
+ *   - `commitMap(mapBody)` replaces messages with `prev.map((m) => mapBody)` —
+ *     each framework supplies how `prev` resolves (the React functional updater,
+ *     or the live local variable for html/vue/svelte) so the streamed content is
+ *     applied to the LATEST array, never a stale snapshot.
+ * Each commit produces a NEW array (and a new object for the streamed message)
+ * so kai-chat re-renders per chunk.
+ *
+ * Indented with `pad` so it drops cleanly into each framework's onSubmit.
+ */
+function mockStreamBody(opts: {
+  pad: string;
+  /** read the current messages array (for building `history`) */
+  read: string;
+  /** commit the initial user + empty-assistant pair */
+  commitInitial: (expr: string) => string;
+  /** commit a `prev.map(...)` update; `mapBody` is the body of `.map((m) => …)` */
+  commitMap: (mapBody: string) => string;
+  /** set loading true/false */
+  setLoading: (v: 'true' | 'false') => string;
+  /**
+   * Emit `as const` on role literals so they narrow to 'user'|'assistant' under
+   * strict TS. Set to true for TypeScript frameworks (react/next); false for
+   * plain-JS contexts (html) where `as const` is invalid syntax.
+   */
+  strictRoles?: boolean;
+}): string {
+  const { pad, read, commitInitial, commitMap, setLoading, strictRoles = false } = opts;
+  const asConst = strictRoles ? ' as const' : '';
+  const mapBody = `(m.id === assistantId ? { ...m, content: answer } : m)`;
+  return [
+    `${pad}const value = e.detail.value.trim();`,
+    `${pad}if (!value) return;`,
+    `${pad}const history = [...${read}, { id: crypto.randomUUID(), role: 'user'${asConst}, content: value }];`,
+    `${pad}const assistantId = crypto.randomUUID();`,
+    `${pad}${commitInitial(`[...history, { id: assistantId, role: 'assistant'${asConst}, content: '' }]`)}`,
+    `${pad}${setLoading('true')}`,
+    `${pad}// No backend: stream a canned reply client-side, one token at a time.`,
+    `${pad}const reply = ${JSON.stringify(MOCK_REPLY)};`,
+    `${pad}const tokens = reply.split(/(\\s+)/);`,
+    `${pad}let answer = '';`,
+    `${pad}for (const tok of tokens) {`,
+    `${pad}  await new Promise((r) => setTimeout(r, 24));`,
+    `${pad}  answer += tok;`,
+    `${pad}  // new array + object reference per chunk so kai-chat re-renders`,
+    `${pad}  ${commitMap(mapBody)}`,
+    `${pad}}`,
+    `${pad}${setLoading('false')}`,
+  ].join('\n');
+}
+
+// ── SCAF-8: per-integration default model ids ─────────────────────────────────
+
+/**
+ * Return a sensible default model id for integrations whose route forwards a
+ * `model` field to the upstream provider.  The dev can change this const.
+ * Returns undefined for integrations whose route does not use a model param.
+ */
+function defaultModelFor(integration: Integration): string | undefined {
+  // Detect: any route template destructures `model` from the request body.
+  const routeSrc = Object.values(integration.routeTemplates).join('\n');
+  if (!routeSrc.includes('model')) return undefined;
+
+  const defaults: Record<string, string> = {
+    openrouter: 'openai/gpt-4o-mini',
+    ollama: 'llama3.2',
+    'vercel-ai-sdk': 'openai/gpt-4o-mini',
+    cloudflare: 'openai/gpt-4o-mini',
+  };
+  return defaults[integration.id] ?? 'openai/gpt-4o-mini';
+}
+
+// ── SCAF-9: message-embedded companion logic ──────────────────────────────────
+
+/**
+ * Tags that live INSIDE a kai-chat message object (not standalone siblings).
+ * Rendering them as bare elements is a TS error (required props missing) and
+ * non-idiomatic — the chat thread carries them on each message.
+ */
+const MESSAGE_EMBEDDED_TAGS = new Set(['kai-tool', 'kai-reasoning']);
+
+// ── SCAF-14: workspace structural/layout logic ────────────────────────────────
+
+/**
+ * Tags that participate in the workspace layout structure — kai-resizable is the
+ * container (needs kai-resizable-item children), kai-artifact is the preview pane.
+ * Neither should be emitted as a bare sibling of kai-chat — the idiomatic structure
+ * is a resizable split with chat in one pane and artifact in another.
+ */
+const WORKSPACE_STRUCTURAL_TAGS = new Set(['kai-resizable', 'kai-artifact']);
+
+/** True when the archetype is the resizable split workspace (chat + artifact). */
+function isWorkspace(archetype: Archetype): boolean {
+  return archetype.components.includes('kai-resizable') && archetype.components.includes('kai-artifact');
+}
+
+/**
+ * A sample assistant message that demonstrates embedded tool + reasoning so the
+ * agentic archetype renders correctly out of the box.
+ */
+const SAMPLE_AGENTIC_MESSAGE = {
+  id: 'sample-assistant',
+  role: 'assistant' as const,
+  content: 'Searched the web for current pricing.',
+  reasoning: { text: 'I should call the search tool to get up-to-date data.' },
+  tools: [
+    {
+      type: 'search',
+      state: 'output-available' as const,
+      input: { query: 'current pricing' },
+      output: { results: ['Result A', 'Result B'] },
+      toolCallId: 'tc_001',
+    },
+  ],
+};
+
+// ── front-end rendering ───────────────────────────────────────────────────────
+
+interface RenderCtx {
+  p: PlacementStyle;
+  emptyHint: string;
+  suggestions: string[];
+  /** mock = stream the reply client-side (no fetch, no backend, no key) */
+  isMock: boolean;
+  /** SCAF-8: non-undefined when the integration forwards a model param */
+  defaultModel?: string;
+}
+
+/** The kai-* tags for the archetype, in order, as opening/closing markup.
+ *
+ * SCAF-9: message-embedded companion types (kai-tool, kai-reasoning) are NOT
+ * emitted as standalone siblings — they live inside a kai-chat message object.
+ * Only standalone companions (kai-sources, etc.) are rendered here with sample data.
+ *
+ * SCAF-14: workspace structural types (kai-resizable, kai-artifact) are emitted
+ * as a properly composed split layout — chat in one pane, artifact in the other.
+ */
+function componentTags(archetype: Archetype, chatFill: string): string {
+  // SCAF-14: workspace is a structural/layout archetype — emit a runnable split.
+  if (isWorkspace(archetype)) {
+    return [
+      `  <!-- SCAF-14: workspace split — chat pane left, artifact preview right. -->`,
+      `  <!-- kai-resizable needs kai-resizable-item children to render panels. -->`,
+      `  <kai-resizable orientation="horizontal" style="display:block;width:100%;height:100%">`,
+      `    <kai-resizable-item size="40%" min="240px">`,
+      `      <kai-chat id="chat" suggestion-mode="submit" style="${chatFill}"></kai-chat>`,
+      `    </kai-resizable-item>`,
+      `    <kai-resizable-item min="280px">`,
+      `      <!-- Replace src with your artifact URL or set .files for multi-file preview. -->`,
+      `      <kai-artifact id="artifact" src="https://example.com" style="width:100%;height:100%"></kai-artifact>`,
+      `    </kai-resizable-item>`,
+      `  </kai-resizable>`,
+    ].join('\n');
+  }
+
+  const companionTags = archetype.components.filter(
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t) && !WORKSPACE_STRUCTURAL_TAGS.has(t),
+  );
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+  const hasStandaloneCompanions = companionTags.length > 0;
+
+  const lines: string[] = [];
+  lines.push(`  <kai-chat id="chat" suggestion-mode="submit" style="${chatFill}"></kai-chat>`);
+
+  if (hasEmbedded) {
+    lines.push(
+      `  <!-- kai-tool / kai-reasoning render INSIDE the thread, not as siblings.`,
+      `       Seed messages with { tools: [...], reasoning: { text: '...' } } — see the sample in the script below. -->`,
+    );
+  }
+
+  for (const tag of companionTags) {
+    if (tag === 'kai-sources') {
+      // kai-sources is genuinely standalone — emit with realistic sample data.
+      lines.push(
+        `  <!-- Replace sampleSources with your data. -->`,
+        `  <kai-sources id="sources"></kai-sources>`,
+      );
+    } else {
+      lines.push(`  <${tag}></${tag}>`);
+    }
+  }
+
+  if (hasStandaloneCompanions) {
+    lines.push(`  <!-- wire data props — see the component_reference MCP tool -->`);
+  }
+
+  return lines.join('\n');
+}
+
+/** The HTML <script> wiring — mock streams client-side; everything else fetches /api/chat. */
+function htmlWiring(ctx: RenderCtx, archetype: Archetype): string {
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+  const hasSources = archetype.components.includes('kai-sources');
+
+  // SCAF-9: seed the sample agentic message so tool+reasoning render immediately.
+  const seedLines = hasEmbedded
+    ? [
+        `    // SCAF-9: tool calls + reasoning render INSIDE the thread — set them on the message object.`,
+        `    // Replace this sample with real messages from your backend.`,
+        `    chat.messages = [${JSON.stringify(SAMPLE_AGENTIC_MESSAGE, null, 0)}];`,
+        ``,
+      ]
+    : [];
+
+  const sourcesSetupLines = hasSources
+    ? [
+        `    const sourcesEl = document.getElementById('sources');`,
+        `    // Replace with your real source data (set as a JS property — it's an array).`,
+        `    const sampleSources = [`,
+        `      { href: 'https://example.com/doc1', title: 'Getting started', description: 'Overview of the product.' },`,
+        `      { href: 'https://example.com/doc2', title: 'API reference', description: 'Full API documentation.' },`,
+        `    ];`,
+        `    sourcesEl.sources = sampleSources;`,
+        ``,
+      ]
+    : [];
+
+  const head = [
+    `  <script type="module">`,
+    `    import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `    import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
+    ``,
+    `    // Guard: module scripts run before the DOM is ready when inlined in <head>.`,
+    `    // DOMContentLoaded fires synchronously when already loaded; otherwise waits.`,
+    `    async function init() {`,
+    `      const chat = document.getElementById('chat');`,
+    `      // SCAF-15: kai-* register via an async dynamic import (SSR-safety), so the`,
+    `      // element may not be upgraded yet. Wait for the upgrade before setting any`,
+    `      // array/object property — values set pre-upgrade are dropped on upgrade.`,
+    `      await customElements.whenDefined('kai-chat');`,
+    `      // suggestions is a JS PROPERTY (arrays can't be HTML attributes)`,
+    `      chat.suggestions = ${jsArray(ctx.suggestions)};`,
+    `      chat.suggestionMode = 'submit';`,
+    ``,
+    ...seedLines.map((l) => (l.trim() === '' ? l : `  ${l}`)),
+    ...sourcesSetupLines.map((l) => (l.trim() === '' ? l : `  ${l}`)),
+  ];
+
+  // DOMContentLoaded footer — closes init() and wires it safely.
+  const domReadyFooter = [
+    `    }`,
+    `    if (document.readyState === 'loading') {`,
+    `      document.addEventListener('DOMContentLoaded', init);`,
+    `    } else {`,
+    `      init();`,
+    `    }`,
+  ];
+
+  if (ctx.isMock) {
+    const body = mockStreamBody({
+      pad: '        ',
+      read: 'chat.messages',
+      commitInitial: (expr) => `chat.messages = ${expr};`,
+      // chat.messages is live (no React snapshot) — map over it directly
+      commitMap: (mapBody) => `chat.messages = chat.messages.map((m) => ${mapBody});`,
+      setLoading: (v) => `chat.loading = ${v};`,
+    });
+    return [
+      ...head,
+      `      // No backend: stream a canned reply client-side (no fetch, no API key).`,
+      `      chat.addEventListener('kai-submit', async (e) => {`,
+      body,
+      `      });`,
+      ...domReadyFooter,
+      `  </script>`,
+    ].join('\n');
+  }
+
+  // SCAF-8: include model in the POST body when the integration forwards it.
+  const modelLines = ctx.defaultModel
+    ? [
+        `        // SCAF-8: change this model id to any provider/model string you want to use.`,
+        `        const model = '${ctx.defaultModel}';`,
+        ``,
+      ]
+    : [];
+  const bodyPayload = ctx.defaultModel
+    ? `{ model, messages: history.map((m) => ({ role: m.role, content: m.content })) }`
+    : `{ messages: history.map((m) => ({ role: m.role, content: m.content })) }`;
+
+  return [
+    ...head,
+    `      chat.addEventListener('kai-submit', async (e) => {`,
+    `        const value = e.detail.value.trim();`,
+    `        if (!value) return;`,
+    ``,
+    ...modelLines,
+    `        // messages is a JS PROPERTY (objects can't be HTML attributes)`,
+    `        const history = [...chat.messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+    `        const assistantId = crypto.randomUUID();`,
+    `        chat.messages = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
+    `        chat.loading = true;`,
+    ``,
+    `        const res = await fetch('/api/chat', {`,
+    `          method: 'POST',`,
+    `          headers: { 'Content-Type': 'application/json' },`,
+    `          body: JSON.stringify(${bodyPayload}),`,
+    `        });`,
+    ``,
+    `        // Read the OpenAI-format SSE and stream it into the assistant message.`,
+    `        // This loop is the Streaming recipe — copy its exact body if you need keep-alive handling.`,
+    `        const reader = res.body.getReader();`,
+    `        const decoder = new TextDecoder();`,
+    `        let buffer = '', answer = '';`,
+    `        while (true) {`,
+    `          const { value: chunk, done } = await reader.read();`,
+    `          if (done) break;`,
+    `          buffer += decoder.decode(chunk, { stream: true });`,
+    `          const lines = buffer.split('\\n');`,
+    `          buffer = lines.pop();`,
+    `          for (const line of lines) {`,
+    `            const s = line.trim();`,
+    `            if (!s.startsWith('data:')) continue;`,
+    `            const payload = s.slice(5).trim();`,
+    `            if (payload === '[DONE]') continue;`,
+    `            try {`,
+    `              const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+    `              if (!delta) continue;`,
+    `              answer += delta;`,
+    `              chat.messages = chat.messages.map((m) => (m.id === assistantId ? { ...m, content: answer } : m));`,
+    `            } catch { /* skip keep-alive lines */ }`,
+    `          }`,
+    `        }`,
+    `        chat.loading = false;`,
+    `      });`,
+    ...domReadyFooter,
+    `  </script>`,
+  ].join('\n');
+}
+
+function renderHtml(archetype: Archetype, ctx: RenderCtx): string {
+  const { p, emptyHint } = ctx;
+  return [
+    `<!-- ${archetype.title} — ${p.note} -->`,
+    ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
+    `<div style="${p.style}">`,
+    componentTags(archetype, p.chatFill),
+    `</div>`,
+    ``,
+    htmlWiring(ctx, archetype),
+    ``,
+    `  <!-- empty-state hint: ${emptyHint} -->`,
+  ].join('\n');
+}
+
+/** Convert a kebab-case custom-element tag to its PascalCase React wrapper name. */
+function toPascalCase(tag: string): string {
+  // e.g. "kai-chat" → "Chat", "kai-sources" → "Sources"
+  return tag
+    .replace(/^kai-/, '')
+    .split('-')
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join('');
+}
+
+/** JSX usage for react/next: uses the official @kitn.ai/ui/react wrappers. */
+function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): string {
+  const { p, emptyHint, suggestions, isMock, defaultModel } = ctx;
+
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+  const workspace = isWorkspace(archetype);
+
+  // SCAF-9: exclude message-embedded tags from import list.
+  // SCAF-14: workspace uses Resizable+ResizableItem+Artifact — keep them in the import list.
+  const renderableTags = archetype.components.filter((t) => !MESSAGE_EMBEDDED_TAGS.has(t));
+  // For workspace: replace 'kai-resizable' with 'kai-resizable-item' so we get ResizableItem too.
+  const importTags = workspace
+    ? [...new Set([...renderableTags.filter((t) => t !== 'kai-resizable'), 'kai-resizable', 'kai-resizable-item'])]
+    : renderableTags;
+  const wrapperNames = importTags.map(toPascalCase);
+  const importList = wrapperNames.join(', ');
+
+  // SCAF-9: standalone companion tags (not kai-chat, not message-embedded, not workspace-structural).
+  const standaloneCompanionTags = archetype.components.filter(
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t) && !WORKSPACE_STRUCTURAL_TAGS.has(t),
+  );
+
+  // Build companion JSX: only standalone companions with real props.
+  // SCAF-14: workspace gets its own structural JSX block (not companion lines).
+  const companionJsxLines: string[] = [];
+  if (hasEmbedded) {
+    companionJsxLines.push(
+      `      {/* kai-tool / kai-reasoning render inside the thread. Tool calls + reasoning`,
+      `          are set on each message object — see the sampleMessages initializer above. */}`,
+    );
+  }
+  for (const t of standaloneCompanionTags) {
+    if (t === 'kai-sources') {
+      companionJsxLines.push(
+        `      {/* Replace sampleSources with your real data. */}`,
+        `      <Sources sources={sampleSources} />`,
+      );
+    } else {
+      companionJsxLines.push(`      {/* wire data props — see the component_reference MCP tool */}`);
+      companionJsxLines.push(`      <${toPascalCase(t)} />`);
+    }
+  }
+  const companions = companionJsxLines.join('\n');
+
+  // SCAF-4: Inline ChatMessage type for strict-TS consumers; avoids implicit-any on useState/handler.
+  // SCAF-11: state must be the library's 4-value union (not bare string); reasoning carries optional label.
+  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error'; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
+
+  // SCAF-9: seed sample messages for agentic archetype so tool+reasoning render immediately.
+  const sampleMessagesInit = hasEmbedded
+    ? [
+        `  // SCAF-9: tool calls and reasoning render inside the thread — set them on the message object.`,
+        `  // Replace with real messages streamed from your backend.`,
+        `  const sampleMessages: ChatMessage[] = [${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}];`,
+        `  const [messages, setMessages] = useState<ChatMessage[]>(sampleMessages);`,
+      ].join('\n')
+    : `  const [messages, setMessages] = useState<ChatMessage[]>([]);`;
+
+  // SCAF-9: sample sources data for knowledge-base archetype.
+  const sampleSourcesInit =
+    standaloneCompanionTags.includes('kai-sources')
+      ? [
+          `  // Replace sampleSources with your real source data.`,
+          `  const sampleSources = [`,
+          `    { href: 'https://example.com/doc1', title: 'Getting started', description: 'Overview of the product.' },`,
+          `    { href: 'https://example.com/doc2', title: 'API reference', description: 'Full API documentation.' },`,
+          `  ];`,
+        ].join('\n')
+      : '';
+
+  // SCAF-8: model const for integrations that forward model to the upstream provider.
+  const modelInit = defaultModel
+    ? `  // SCAF-8: change this to any provider/model string you want to use.\n  const model = '${defaultModel}';`
+    : '';
+  const bodyPayload = defaultModel
+    ? `{ model, messages: history.map((m) => ({ role: m.role, content: m.content })) }`
+    : `{ messages: history.map((m) => ({ role: m.role, content: m.content })) }`;
+
+  // onSubmit body: mock streams a canned reply client-side; otherwise fetch /api/chat.
+  const onSubmitBody = isMock
+    ? mockStreamBody({
+        pad: '    ',
+        read: 'messages',
+        commitInitial: (expr) => `setMessages(${expr});`,
+        // functional updater so each token maps over the LATEST array, not the snapshot
+        commitMap: (mapBody) => `setMessages((prev) => prev.map((m) => ${mapBody}));`,
+        setLoading: (v) => `setLoading(${v});`,
+        strictRoles: true,
+      })
+    : [
+        `    const value = e.detail.value.trim();`,
+        `    if (!value) return;`,
+        `    const history: ChatMessage[] = [...messages, { id: crypto.randomUUID(), role: 'user' as const, content: value }];`,
+        `    const assistantId = crypto.randomUUID();`,
+        `    setMessages([...history, { id: assistantId, role: 'assistant' as const, content: '' }]);`,
+        `    setLoading(true);`,
+        `    const res = await fetch('/api/chat', {`,
+        `      method: 'POST',`,
+        `      headers: { 'Content-Type': 'application/json' },`,
+        `      body: JSON.stringify(${bodyPayload}),`,
+        `    });`,
+        `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
+        `    const reader = res.body!.getReader();`,
+        `    const decoder = new TextDecoder();`,
+        `    let buffer = '', answer = '';`,
+        `    while (true) {`,
+        `      const { value: chunk, done } = await reader.read();`,
+        `      if (done) break;`,
+        `      buffer += decoder.decode(chunk, { stream: true });`,
+        `      const lines = buffer.split('\\n');`,
+        `      buffer = lines.pop()!;`,
+        `      for (const line of lines) {`,
+        `        const s = line.trim();`,
+        `        if (!s.startsWith('data:')) continue;`,
+        `        const payload = s.slice(5).trim();`,
+        `        if (payload === '[DONE]') continue;`,
+        `        try {`,
+        `          const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+        `          if (!delta) continue;`,
+        `          answer += delta;`,
+        `          setMessages((ms) => ms.map((m) => (m.id === assistantId ? { ...m, content: answer } : m)));`,
+        `        } catch { /* skip keep-alives */ }`,
+        `      }`,
+        `    }`,
+        `    setLoading(false);`,
+      ].join('\n');
+
+  // SCAF-2: Next.js App Router requires 'use client' for components that use hooks/interactivity.
+  const useClientDirective = framework === 'next' ? [`'use client';`, ``] : [];
+
+  // SCAF-6: For Next.js ONLY — use next/dynamic with { ssr: false } so the elements
+  // bundle (which calls delegateEvents(events, doc = window.document) at module-eval)
+  // never runs on the server during prerender → avoids "window is not defined" crash.
+  // Plain `react` (Vite) has no SSR and keeps the top-level imports unchanged.
+  if (framework === 'next') {
+    // Build dynamic() calls for every renderable wrapper in the archetype.
+    const dynamicImports = wrapperNames.map(
+      (name) =>
+        `const ${name} = dynamic(() => import('@kitn.ai/ui/react').then((m) => m.${name}), { ssr: false });`,
+    );
+
+    // SCAF-2: Next.js config note — @kitn.ai/ui ships compiled entry points; no transpilePackages needed.
+    const nextConfigNote: string[] = [];
+
+    return [
+      // 'use client' must be the very first line for Next.js App Router.
+      ...useClientDirective,
+      `import { useState } from 'react';`,
+      `import dynamic from 'next/dynamic';`,
+      `import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
+      `// kai-* bundle Solid's client runtime → load client-only so SSR/prerender doesn't crash`,
+      ...dynamicImports,
+      ``,
+      ...nextConfigNote,
+      `// ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint}`,
+      ...(p.altNote ? [`// ${p.altNote}`] : []),
+      chatMessageType,
+      ``,
+      `export default function App() {`,
+      sampleMessagesInit,
+      `  const [loading, setLoading] = useState(false);`,
+      `  const suggestions = ${jsArray(suggestions)};`,
+      ...(sampleSourcesInit ? [sampleSourcesInit] : []),
+      ...(modelInit ? [modelInit] : []),
+      ``,
+      `  async function onSubmit(e: CustomEvent<{ value: string }>) {`,
+      onSubmitBody,
+      `  }`,
+      ``,
+      `  return (`,
+      `    <div style={{ ${jsxStyle(p.style)} }}>`,
+      ...(workspace
+        ? [
+            `      {/* SCAF-14: workspace split — chat pane left, artifact preview right. */}`,
+            `      {/* Resizable needs ResizableItem children to render panels. */}`,
+            `      <Resizable orientation="horizontal" style={{ display: 'block', width: '100%', height: '100%' }}>`,
+            `        <ResizableItem size="40%" min="240px">`,
+            `          <Chat`,
+            `            messages={messages}`,
+            `            loading={loading}`,
+            `            suggestions={suggestions}`,
+            `            suggestionMode="submit"`,
+            `            onSubmit={onSubmit}`,
+            `            style={{ ${jsxStyle(p.chatFill)} }}`,
+            `          />`,
+            `        </ResizableItem>`,
+            `        <ResizableItem min="280px">`,
+            `          {/* Replace src with your artifact URL or set files for multi-file preview. */}`,
+            `          <Artifact src="https://example.com" style={{ width: '100%', height: '100%' }} />`,
+            `        </ResizableItem>`,
+            `      </Resizable>`,
+          ]
+        : [
+            `      <Chat`,
+            `        messages={messages}`,
+            `        loading={loading}`,
+            `        suggestions={suggestions}`,
+            `        suggestionMode="submit"`,
+            `        onSubmit={onSubmit}`,
+            `        style={{ ${jsxStyle(p.chatFill)} }}`,
+            `      />`,
+            companions,
+          ]),
+      `    </div>`,
+      `  );`,
+      `}`,
+    ]
+      .filter((l) => l !== '')
+      .join('\n');
+  }
+
+  // SCAF-2: Next.js transpilePackages note (needed until @kitn.ai/ui ships prebuilt JS on "." + "./react").
+  const nextConfigNote: string[] = [];
+
+  return [
+    // SCAF-2: 'use client' must be the very first line for Next.js App Router.
+    ...useClientDirective,
+    // (1) REQUIRED: registers <kai-*> — the react wrappers do NOT auto-register.
+    // Must come BEFORE importing the wrappers, or <kai-chat> renders empty.
+    `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `import { useState } from 'react';`,
+    `import { ${importList} } from '@kitn.ai/ui/react';`,
+    `import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
+    ``,
+    ...nextConfigNote,
+    `// ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint}`,
+    ...(p.altNote ? [`// ${p.altNote}`] : []),
+    chatMessageType,
+    ``,
+    `export default function App() {`,
+    sampleMessagesInit,
+    `  const [loading, setLoading] = useState(false);`,
+    `  const suggestions = ${jsArray(suggestions)};`,
+    ...(sampleSourcesInit ? [sampleSourcesInit] : []),
+    ...(modelInit ? [modelInit] : []),
+    ``,
+    `  async function onSubmit(e: CustomEvent<{ value: string }>) {`,
+    onSubmitBody,
+    `  }`,
+    ``,
+    `  return (`,
+    `    <div style={{ ${jsxStyle(p.style)} }}>`,
+    ...(workspace
+      ? [
+          `      {/* SCAF-14: workspace split — chat pane left, artifact preview right. */}`,
+          `      {/* Resizable needs ResizableItem children to render panels. */}`,
+          `      <Resizable orientation="horizontal" style={{ display: 'block', width: '100%', height: '100%' }}>`,
+          `        <ResizableItem size="40%" min="240px">`,
+          `          <Chat`,
+          `            messages={messages}`,
+          `            loading={loading}`,
+          `            suggestions={suggestions}`,
+          `            suggestionMode="submit"`,
+          `            onSubmit={onSubmit}`,
+          `            style={{ ${jsxStyle(p.chatFill)} }}`,
+          `          />`,
+          `        </ResizableItem>`,
+          `        <ResizableItem min="280px">`,
+          `          {/* Replace src with your artifact URL or set files for multi-file preview. */}`,
+          `          <Artifact src="https://example.com" style={{ width: '100%', height: '100%' }} />`,
+          `        </ResizableItem>`,
+          `      </Resizable>`,
+        ]
+      : [
+          `      <Chat`,
+          `        messages={messages}`,
+          `        loading={loading}`,
+          `        suggestions={suggestions}`,
+          `        suggestionMode="submit"`,
+          `        onSubmit={onSubmit}`,
+          `        style={{ ${jsxStyle(p.chatFill)} }}`,
+          `      />`,
+          companions,
+        ]),
+    `    </div>`,
+    `  );`,
+    `}`,
+  ]
+    .filter((l) => l !== '')
+    .join('\n');
+}
+
+/** Vue: bind messages/suggestions as properties, listen for kai-submit with @. */
+function renderVue(archetype: Archetype, ctx: RenderCtx): string {
+  const { p, emptyHint, suggestions, isMock, defaultModel } = ctx;
+
+  // SCAF-9: exclude message-embedded tags from companion rendering.
+  // SCAF-14: also exclude workspace structural tags (handled by the workspace block below).
+  const workspace = isWorkspace(archetype);
+  const standaloneCompanionTags = archetype.components.filter(
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t) && !WORKSPACE_STRUCTURAL_TAGS.has(t),
+  );
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+
+  const companionLines: string[] = [];
+  if (hasEmbedded) {
+    companionLines.push(
+      `    <!-- kai-tool / kai-reasoning render INSIDE the thread — set tools/reasoning on each message object. -->`,
+    );
+  }
+  for (const t of standaloneCompanionTags) {
+    if (t === 'kai-sources') {
+      companionLines.push(`    <!-- Replace sampleSources with your real data (set as a JS property). -->`);
+      companionLines.push(`    <kai-sources ref="sourcesEl" />`);
+    } else {
+      companionLines.push(`    <!-- wire data props — see the component_reference MCP tool -->`);
+      companionLines.push(`    <${t} />`);
+    }
+  }
+  const companions = companionLines.join('\n');
+
+  // SCAF-8: include model when the integration forwards it.
+  const bodyPayload = defaultModel
+    ? `{ model, messages: history.map((m) => ({ role: m.role, content: m.content })) }`
+    : `{ messages: history.map((m) => ({ role: m.role, content: m.content })) }`;
+
+  const onSubmitBody = isMock
+    ? mockStreamBody({
+        pad: '    ',
+        read: 'messages.value',
+        commitInitial: (expr) => `messages.value = ${expr};`,
+        // messages.value is live — map over it directly
+        commitMap: (mapBody) => `messages.value = messages.value.map((m) => ${mapBody});`,
+        setLoading: (v) => `loading.value = ${v};`,
+        strictRoles: true,
+      })
+    : [
+        `    const value = e.detail.value.trim();`,
+        `    if (!value) return;`,
+        `    const history: ChatMessage[] = [...messages.value, { id: crypto.randomUUID(), role: 'user' as const, content: value }];`,
+        `    const assistantId = crypto.randomUUID();`,
+        `    messages.value = [...history, { id: assistantId, role: 'assistant' as const, content: '' }];`,
+        `    loading.value = true;`,
+        `    // POST to /api/chat, then stream the OpenAI-format SSE into the`,
+        `    // assistant message (reassign messages.value per chunk) — see the Streaming recipe.`,
+        ...(defaultModel
+          ? [
+              `    // SCAF-8: change this to any provider/model string you want to use.`,
+              `    const model = '${defaultModel}';`,
+            ]
+          : []),
+        `    const res = await fetch('/api/chat', {`,
+        `      method: 'POST',`,
+        `      headers: { 'Content-Type': 'application/json' },`,
+        `      body: JSON.stringify(${bodyPayload}),`,
+        `    });`,
+        `    // Stream the OpenAI-format SSE — see the Streaming recipe.`,
+        `    const reader = res.body.getReader();`,
+        `    const decoder = new TextDecoder();`,
+        `    let buffer = '', answer = '';`,
+        `    while (true) {`,
+        `      const { value: chunk, done } = await reader.read();`,
+        `      if (done) break;`,
+        `      buffer += decoder.decode(chunk, { stream: true });`,
+        `      const lines = buffer.split('\\n');`,
+        `      buffer = lines.pop();`,
+        `      for (const line of lines) {`,
+        `        const s = line.trim();`,
+        `        if (!s.startsWith('data:')) continue;`,
+        `        const payload = s.slice(5).trim();`,
+        `        if (payload === '[DONE]') continue;`,
+        `        try {`,
+        `          const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+        `          if (!delta) continue;`,
+        `          answer += delta;`,
+        `          messages.value = messages.value.map((m) => (m.id === assistantId ? { ...m, content: answer } : m));`,
+        `        } catch { /* skip keep-alives */ }`,
+        `      }`,
+        `    }`,
+        `    loading.value = false;`,
+      ].join('\n');
+
+  // SCAF-10: ChatMessage type for strict-TS Vue consumers — matches the React SCAF-4 type.
+  // SCAF-11: state must be the library's 4-value union (not bare string); reasoning carries optional label.
+  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error'; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
+
+  // SCAF-9: sample seeding for agentic archetype.
+  const sampleSeed = hasEmbedded
+    ? [
+        `// SCAF-9: tool calls + reasoning render inside the thread — set them on the message object.`,
+        `// Replace with real messages streamed from your backend.`,
+        `const messages = ref<ChatMessage[]>([${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}]);`,
+      ]
+    : [`const messages = ref<ChatMessage[]>([]);`];
+
+  // SCAF-9: sample sources setup.
+  const sourcesSeed = standaloneCompanionTags.includes('kai-sources')
+    ? [
+        `// Replace sampleSources with your real source data.`,
+        `const sampleSources = [`,
+        `  { href: 'https://example.com/doc1', title: 'Getting started', description: 'Overview of the product.' },`,
+        `  { href: 'https://example.com/doc2', title: 'API reference', description: 'Full API documentation.' },`,
+        `];`,
+        `onMounted(() => {`,
+        `  const el = document.querySelector('kai-sources');`,
+        `  if (el) el.sources = sampleSources;`,
+        `});`,
+      ]
+    : [];
+
+  // SCAF-15: always import onMounted — we re-apply props after the element upgrades
+  // (the .prop bindings can apply before the async element registration resolves).
+  const vueImports = `import { ref, onMounted } from 'vue';`;
+
+  // SCAF-14: workspace template block — resizable split with chat + artifact panes.
+  const workspaceTemplate = workspace
+    ? [
+        `    <!-- SCAF-14: workspace split — chat pane left, artifact preview right. -->`,
+        `    <!-- kai-resizable needs kai-resizable-item children to render panels. -->`,
+        `    <kai-resizable orientation="horizontal" style="display:block;width:100%;height:100%">`,
+        `      <kai-resizable-item size="40%" min="240px">`,
+        `        <kai-chat`,
+        `          :messages.prop="messages"`,
+        `          :loading.prop="loading"`,
+        `          :suggestions.prop="suggestions"`,
+        `          suggestion-mode="submit"`,
+        `          style="${p.chatFill}"`,
+        `          @kai-submit="onSubmit"`,
+        `        ></kai-chat>`,
+        `      </kai-resizable-item>`,
+        `      <kai-resizable-item min="280px">`,
+        `        <!-- Replace src with your artifact URL or set .files for multi-file preview. -->`,
+        `        <kai-artifact src="https://example.com" style="width:100%;height:100%"></kai-artifact>`,
+        `      </kai-resizable-item>`,
+        `    </kai-resizable>`,
+      ]
+    : [
+        `    <kai-chat`,
+        `      :messages.prop="messages"`,
+        `      :loading.prop="loading"`,
+        `      :suggestions.prop="suggestions"`,
+        `      suggestion-mode="submit"`,
+        `      style="${p.chatFill}"`,
+        `      @kai-submit="onSubmit"`,
+        `    ></kai-chat>`,
+        companions,
+      ];
+
+  return [
+    `<!-- vue — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
+    ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
+    `<!-- SCAF-3: vite.config.ts — tell Vue that kai-* are custom elements (not Vue components).`,
+    `     Without this, Vue warns "Unknown custom element" and .prop bindings may misbehave.`,
+    `     import vue from '@vitejs/plugin-vue';`,
+    `     export default { plugins: [vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith('kai-') } } })] }; -->`,
+    `<script setup lang="ts">`,
+    `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
+    vueImports,
+    ``,
+    chatMessageType,
+    ``,
+    ...sampleSeed,
+    `const loading = ref(false);`,
+    `const suggestions = ${jsArray(suggestions)};`,
+    ...sourcesSeed,
+    ``,
+    `// SCAF-15: kai-* register via an async dynamic import (SSR-safety). The .prop`,
+    `// bindings can apply before the element upgrades, which drops them — re-apply once`,
+    `// the element is defined so the initial messages/suggestions/loading stick.`,
+    `onMounted(async () => {`,
+    `  await customElements.whenDefined('kai-chat');`,
+    `  const el = document.querySelector('kai-chat');`,
+    `  if (el) Object.assign(el, { messages: messages.value, loading: loading.value, suggestions });`,
+    `});`,
+    ``,
+    `async function onSubmit(e: CustomEvent<{ value: string }>) {`,
+    onSubmitBody,
+    `}`,
+    `</script>`,
+    ``,
+    `<template>`,
+    `  <div style="${p.style}">`,
+    ...workspaceTemplate,
+    `  </div>`,
+    `</template>`,
+  ]
+    .filter((l) => l !== '')
+    .join('\n');
+}
+
+/** Svelte: use bind:this to set array/object properties reactively; on:kai-submit for the event. */
+function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
+  const { p, emptyHint, suggestions, isMock, defaultModel } = ctx;
+
+  // SCAF-9: exclude message-embedded tags from companion rendering.
+  // SCAF-14: also exclude workspace structural tags (handled by the workspace block below).
+  const workspace = isWorkspace(archetype);
+  const standaloneCompanionTags = archetype.components.filter(
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t) && !WORKSPACE_STRUCTURAL_TAGS.has(t),
+  );
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+
+  const companionLinesList: string[] = [];
+  if (hasEmbedded) {
+    companionLinesList.push(
+      `  <!-- kai-tool / kai-reasoning render INSIDE the thread — set tools/reasoning on each message object. -->`,
+    );
+  }
+  for (const t of standaloneCompanionTags) {
+    if (t === 'kai-sources') {
+      companionLinesList.push(`  <!-- Replace sampleSources with your real data. -->`);
+      companionLinesList.push(`  <kai-sources bind:this={sourcesEl}></kai-sources>`);
+    } else {
+      companionLinesList.push(`  <!-- wire data props — see the component_reference MCP tool -->`);
+      companionLinesList.push(`  <${t}></${t}>`);
+    }
+  }
+  const companionLines = companionLinesList.join('\n');
+
+  // SCAF-8: include model when the integration forwards it.
+  const bodyPayload = defaultModel
+    ? `{ model, messages: history.map((m) => ({ role: m.role, content: m.content })) }`
+    : `{ messages: history.map((m) => ({ role: m.role, content: m.content })) }`;
+
+  const onSubmitBody = isMock
+    ? mockStreamBody({
+        pad: '    ',
+        read: 'messages',
+        commitInitial: (expr) => `messages = ${expr};`,
+        // `messages` is a live local — reassign to map over the latest array
+        commitMap: (mapBody) => `messages = messages.map((m) => ${mapBody});`,
+        setLoading: (v) => `loading = ${v};`,
+        strictRoles: true,
+      })
+    : [
+        `    const value = e.detail.value.trim();`,
+        `    if (!value) return;`,
+        `    const history = [...messages, { id: crypto.randomUUID(), role: 'user' as const, content: value }];`,
+        `    const assistantId = crypto.randomUUID();`,
+        `    messages = [...history, { id: assistantId, role: 'assistant' as const, content: '' }];`,
+        `    loading = true;`,
+        ...(defaultModel
+          ? [
+              `    // SCAF-8: change this to any provider/model string you want to use.`,
+              `    const model = '${defaultModel}';`,
+            ]
+          : []),
+        `    const res = await fetch('/api/chat', {`,
+        `      method: 'POST',`,
+        `      headers: { 'Content-Type': 'application/json' },`,
+        `      body: JSON.stringify(${bodyPayload}),`,
+        `    });`,
+        `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
+        `    const reader = res.body.getReader();`,
+        `    const decoder = new TextDecoder();`,
+        `    let buffer = '', answer = '';`,
+        `    while (true) {`,
+        `      const { value: chunk, done } = await reader.read();`,
+        `      if (done) break;`,
+        `      buffer += decoder.decode(chunk, { stream: true });`,
+        `      const lines = buffer.split('\\n');`,
+        `      buffer = lines.pop();`,
+        `      for (const line of lines) {`,
+        `        const s = line.trim();`,
+        `        if (!s.startsWith('data:')) continue;`,
+        `        const payload = s.slice(5).trim();`,
+        `        if (payload === '[DONE]') continue;`,
+        `        try {`,
+        `          const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+        `          if (!delta) continue;`,
+        `          answer += delta;`,
+        `          messages = messages.map((m) => (m.id === assistantId ? { ...m, content: answer } : m));`,
+        `        } catch { /* skip keep-alives */ }`,
+        `      }`,
+        `    }`,
+        `    loading = false;`,
+      ].join('\n');
+
+  // SCAF-10: ChatMessage type for strict-TS Svelte consumers — matches the React SCAF-4 type.
+  // SCAF-11: state must be the library's 4-value union (not bare string); reasoning carries optional label.
+  const chatMessageType = `  type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error'; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
+
+  // SCAF-9: seed sample messages for agentic archetype.
+  const sampleMessagesInit = hasEmbedded
+    ? [
+        `  // SCAF-9: tool calls + reasoning render INSIDE the thread — set them on the message object.`,
+        `  // Replace with real messages streamed from your backend.`,
+        `  let messages: ChatMessage[] = [${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}];`,
+      ]
+    : [`  let messages: ChatMessage[] = [];`];
+
+  // SCAF-9: sources element ref + sample data.
+  const sourcesEl = standaloneCompanionTags.includes('kai-sources')
+    ? [`  let sourcesEl: HTMLElement | undefined;`]
+    : [];
+  const sourcesReactive = standaloneCompanionTags.includes('kai-sources')
+    ? [
+        `  // Replace sampleSources with your real source data.`,
+        `  const sampleSources = [`,
+        `    { href: 'https://example.com/doc1', title: 'Getting started', description: 'Overview of the product.' },`,
+        `    { href: 'https://example.com/doc2', title: 'API reference', description: 'Full API documentation.' },`,
+        `  ];`,
+        `  $: if (sourcesEl) { sourcesEl.sources = sampleSources; }`,
+      ]
+    : [];
+
+  // SCAF-14: workspace template block — resizable split with chat + artifact panes.
+  const workspaceMarkup = workspace
+    ? [
+        `  <!-- SCAF-14: workspace split — chat pane left, artifact preview right. -->`,
+        `  <!-- kai-resizable needs kai-resizable-item children to render panels. -->`,
+        `  <kai-resizable orientation="horizontal" style="display:block;width:100%;height:100%">`,
+        `    <kai-resizable-item size="40%" min="240px">`,
+        `      <kai-chat bind:this={chatEl} suggestion-mode="submit" style="${p.chatFill}" on:kai-submit={onSubmit}></kai-chat>`,
+        `    </kai-resizable-item>`,
+        `    <kai-resizable-item min="280px">`,
+        `      <!-- Replace src with your artifact URL or set .files for multi-file preview. -->`,
+        `      <kai-artifact src="https://example.com" style="width:100%;height:100%"></kai-artifact>`,
+        `    </kai-resizable-item>`,
+        `  </kai-resizable>`,
+      ]
+    : [
+        `  <kai-chat bind:this={chatEl} suggestion-mode="submit" style="${p.chatFill}" on:kai-submit={onSubmit}></kai-chat>`,
+        companionLines,
+      ];
+
+  return [
+    `<!-- svelte — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
+    ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
+    `<!-- SCAF-5: This uses Svelte-4 syntax ($:, on:event). Works in Svelte 5 via legacy mode;`,
+    `     runes-mode users should adapt to $state/$effect and onkai-submit event handlers. -->`,
+    `<script lang="ts">`,
+    `  import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `  import type { KaiChatElement } from '@kitn.ai/ui/elements';`,
+    `  import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
+    `  import { onMount } from 'svelte';`,
+    chatMessageType,
+    `  let chatEl: KaiChatElement | undefined;`,
+    `  // SCAF-15: kai-* register via an async dynamic import (SSR-safety). Gate the`,
+    `  // reactive property block on the upgrade so the first application isn't dropped`,
+    `  // (props set on a not-yet-upgraded element are lost on upgrade).`,
+    `  let defined = false;`,
+    `  onMount(async () => { await customElements.whenDefined('kai-chat'); defined = true; });`,
+    ...sourcesEl,
+    ...sampleMessagesInit,
+    `  let loading: boolean = false;`,
+    `  const suggestions: string[] = ${jsArray(suggestions)};`,
+    `  // suggestions/messages are JS PROPERTIES (arrays/objects can't be attributes)`,
+    `  $: if (chatEl && defined) { chatEl.messages = messages; chatEl.loading = loading; chatEl.suggestions = suggestions; }`,
+    ...sourcesReactive,
+    ``,
+    `  async function onSubmit(e: CustomEvent<{ value: string }>) {`,
+    onSubmitBody,
+    `  }`,
+    `</script>`,
+    ``,
+    `<div style="${p.style}">`,
+    ...workspaceMarkup,
+    `</div>`,
+  ]
+    .filter((l, i, arr) => !(l === '' && arr[i - 1] === '' && i === arr.length - 1))
+    .join('\n');
+}
+
+/**
+ * TanStack Start: emits a file-based route (`src/routes/chat.tsx`) that renders
+ * the Chat surface client-only via `ssr: false` on `createFileRoute`.
+ *
+ * Verified pattern: `ssr: false` prevents the Solid-based web-component runtime
+ * from running on the server — no `window is not defined` crash, no hydration
+ * mismatch. The library is SSR-import-safe (customElements.define is guarded),
+ * so the import itself is safe; only the *render* needs to be client-only.
+ *
+ * Scaffold command (official TanStack CLI, non-interactive):
+ *   npx @tanstack/cli@latest create <app-name> --framework react --no-git --package-manager npm -y
+ *
+ * After scaffolding, run `npm install @kitn.ai/ui`, then drop this file into
+ * `src/routes/chat.tsx`. Start the dev server with `npm run dev` (port 3000).
+ * Build: `npm run build`; preview: `npm run preview` (or `node dist/server/server.js`).
+ * Note: `npm start` does NOT exist in TanStack Start projects — use `npm run dev` / `npm run preview`.
+ *
+ * Backend: TanStack Start supports server-side routes via `createServerFn` in
+ * `src/server/`. For a chat API, place the route in `src/server/chat.ts` and call
+ * it from your route component. The emitted scaffold uses `fetch('/api/chat')` as a
+ * placeholder pointing at a standard route — swap for your TanStack server function
+ * or an external endpoint.
+ */
+function renderTanstackStart(archetype: Archetype, ctx: RenderCtx): string {
+  const { p, emptyHint, suggestions, isMock, defaultModel } = ctx;
+
+  // TanStack Start is React — reuse all the React composition logic:
+  // same ChatMessage type, same state/loading/suggestions, same mock stream body,
+  // same real-backend SSE streaming. The ONLY delta from plain `react` is:
+  //   1. `import { createFileRoute } from '@tanstack/react-router'` instead of no-op router import
+  //   2. `export const Route = createFileRoute('/chat')({ ssr: false, component: ChatPage })`
+  //   3. The page function is named `ChatPage` (not `App`) — no export-default clash with createFileRoute
+  //   4. No `import '@kitn.ai/ui/elements'` needed as a top-level import (same as next's dynamic approach
+  //      is not needed here — the library is SSR-import-safe, but we include elements for safety)
+
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+  const workspace = isWorkspace(archetype);
+
+  const renderableTags = archetype.components.filter((t) => !MESSAGE_EMBEDDED_TAGS.has(t));
+  const importTags = workspace
+    ? [...new Set([...renderableTags.filter((t) => t !== 'kai-resizable'), 'kai-resizable', 'kai-resizable-item'])]
+    : renderableTags;
+  const wrapperNames = importTags.map(toPascalCase);
+  const importList = wrapperNames.join(', ');
+
+  const standaloneCompanionTags = archetype.components.filter(
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t) && !WORKSPACE_STRUCTURAL_TAGS.has(t),
+  );
+
+  const companionJsxLines: string[] = [];
+  if (hasEmbedded) {
+    companionJsxLines.push(
+      `      {/* kai-tool / kai-reasoning render inside the thread. Tool calls + reasoning`,
+      `          are set on each message object — see the sampleMessages initializer above. */}`,
+    );
+  }
+  for (const t of standaloneCompanionTags) {
+    if (t === 'kai-sources') {
+      companionJsxLines.push(
+        `      {/* Replace sampleSources with your real data. */}`,
+        `      <Sources sources={sampleSources} />`,
+      );
+    } else {
+      companionJsxLines.push(`      {/* wire data props — see the component_reference MCP tool */}`);
+      companionJsxLines.push(`      <${toPascalCase(t)} />`);
+    }
+  }
+  const companions = companionJsxLines.join('\n');
+
+  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error'; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
+
+  const sampleMessagesInit = hasEmbedded
+    ? [
+        `  // SCAF-9: tool calls and reasoning render inside the thread — set them on the message object.`,
+        `  // Replace with real messages streamed from your backend.`,
+        `  const sampleMessages: ChatMessage[] = [${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}];`,
+        `  const [messages, setMessages] = useState<ChatMessage[]>(sampleMessages);`,
+      ].join('\n')
+    : `  const [messages, setMessages] = useState<ChatMessage[]>([]);`;
+
+  const sampleSourcesInit =
+    standaloneCompanionTags.includes('kai-sources')
+      ? [
+          `  // Replace sampleSources with your real source data.`,
+          `  const sampleSources = [`,
+          `    { href: 'https://example.com/doc1', title: 'Getting started', description: 'Overview of the product.' },`,
+          `    { href: 'https://example.com/doc2', title: 'API reference', description: 'Full API documentation.' },`,
+          `  ];`,
+        ].join('\n')
+      : '';
+
+  const modelInit = defaultModel
+    ? `  // SCAF-8: change this to any provider/model string you want to use.\n  const model = '${defaultModel}';`
+    : '';
+  const bodyPayload = defaultModel
+    ? `{ model, messages: history.map((m) => ({ role: m.role, content: m.content })) }`
+    : `{ messages: history.map((m) => ({ role: m.role, content: m.content })) }`;
+
+  const onSubmitBody = isMock
+    ? mockStreamBody({
+        pad: '    ',
+        read: 'messages',
+        commitInitial: (expr) => `setMessages(${expr});`,
+        commitMap: (mapBody) => `setMessages((prev) => prev.map((m) => ${mapBody}));`,
+        setLoading: (v) => `setLoading(${v});`,
+        strictRoles: true,
+      })
+    : [
+        `    const value = e.detail.value.trim();`,
+        `    if (!value) return;`,
+        `    const history: ChatMessage[] = [...messages, { id: crypto.randomUUID(), role: 'user' as const, content: value }];`,
+        `    const assistantId = crypto.randomUUID();`,
+        `    setMessages([...history, { id: assistantId, role: 'assistant' as const, content: '' }]);`,
+        `    setLoading(true);`,
+        `    const res = await fetch('/api/chat', {`,
+        `      method: 'POST',`,
+        `      headers: { 'Content-Type': 'application/json' },`,
+        `      body: JSON.stringify(${bodyPayload}),`,
+        `    });`,
+        `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
+        `    const reader = res.body!.getReader();`,
+        `    const decoder = new TextDecoder();`,
+        `    let buffer = '', answer = '';`,
+        `    while (true) {`,
+        `      const { value: chunk, done } = await reader.read();`,
+        `      if (done) break;`,
+        `      buffer += decoder.decode(chunk, { stream: true });`,
+        `      const lines = buffer.split('\\n');`,
+        `      buffer = lines.pop()!;`,
+        `      for (const line of lines) {`,
+        `        const s = line.trim();`,
+        `        if (!s.startsWith('data:')) continue;`,
+        `        const payload = s.slice(5).trim();`,
+        `        if (payload === '[DONE]') continue;`,
+        `        try {`,
+        `          const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+        `          if (!delta) continue;`,
+        `          answer += delta;`,
+        `          setMessages((ms) => ms.map((m) => (m.id === assistantId ? { ...m, content: answer } : m)));`,
+        `        } catch { /* skip keep-alives */ }`,
+        `      }`,
+        `    }`,
+        `    setLoading(false);`,
+      ].join('\n');
+
+  // File path guidance for TanStack Start (file-based routing)
+  const filePathNote = [
+    `// TanStack Start route file — save as: src/routes/chat.tsx`,
+    `// Scaffold command: npx @tanstack/cli@latest create <app-name> --framework react --no-git --package-manager npm -y`,
+    `// Then: npm install @kitn.ai/ui`,
+    `// Dev: npm run dev (port 3000)  Build: npm run build  Preview: npm run preview`,
+    `// Note: there is no 'npm start' script — use 'npm run dev' or 'npm run preview'.`,
+    `// Backend: place TanStack server functions in src/server/chat.ts (createServerFn).`,
+    ``,
+  ];
+
+  return [
+    ...filePathNote,
+    // TanStack Start uses @tanstack/react-router's createFileRoute
+    `import { createFileRoute } from '@tanstack/react-router'`,
+    `import { useState } from 'react'`,
+    // Elements registration: the library is SSR-import-safe; top-level import is safe here
+    `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `import { ${importList} } from '@kitn.ai/ui/react'`,
+    `import '@kitn.ai/ui/theme.tokens.css'  // compiled token defaults`,
+    ``,
+    `// ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint}`,
+    ...(p.altNote ? [`// ${p.altNote}`] : []),
+    chatMessageType,
+    ``,
+    `// ssr: false keeps the Solid-based web component client-only.`,
+    `// Server HTML for /chat omits <kai-chat> → no hydration mismatch.`,
+    `export const Route = createFileRoute('/chat')({`,
+    `  ssr: false,`,
+    `  component: ChatPage,`,
+    `})`,
+    ``,
+    `function ChatPage() {`,
+    sampleMessagesInit,
+    `  const [loading, setLoading] = useState(false);`,
+    `  const suggestions = ${jsArray(suggestions)};`,
+    ...(sampleSourcesInit ? [sampleSourcesInit] : []),
+    ...(modelInit ? [modelInit] : []),
+    ``,
+    `  async function onSubmit(e: CustomEvent<{ value: string }>) {`,
+    onSubmitBody,
+    `  }`,
+    ``,
+    `  return (`,
+    `    <main style={{ ${jsxStyle(p.style)} }}>`,
+    ...(workspace
+      ? [
+          `      {/* SCAF-14: workspace split — chat pane left, artifact preview right. */}`,
+          `      {/* Resizable needs ResizableItem children to render panels. */}`,
+          `      <Resizable orientation="horizontal" style={{ display: 'block', width: '100%', height: '100%' }}>`,
+          `        <ResizableItem size="40%" min="240px">`,
+          `          <Chat`,
+          `            messages={messages}`,
+          `            loading={loading}`,
+          `            suggestions={suggestions}`,
+          `            suggestionMode="submit"`,
+          `            onSubmit={onSubmit}`,
+          `            style={{ ${jsxStyle(p.chatFill)} }}`,
+          `          />`,
+          `        </ResizableItem>`,
+          `        <ResizableItem min="280px">`,
+          `          {/* Replace src with your artifact URL or set files for multi-file preview. */}`,
+          `          <Artifact src="https://example.com" style={{ width: '100%', height: '100%' }} />`,
+          `        </ResizableItem>`,
+          `      </Resizable>`,
+        ]
+      : [
+          `      <Chat`,
+          `        messages={messages}`,
+          `        loading={loading}`,
+          `        suggestions={suggestions}`,
+          `        suggestionMode="submit"`,
+          `        onSubmit={onSubmit}`,
+          `        style={{ ${jsxStyle(p.chatFill)} }}`,
+          `      />`,
+          companions,
+        ]),
+    `    </main>`,
+    `  );`,
+    `}`,
+  ]
+    .filter((l) => l !== '')
+    .join('\n');
+}
+
+/** Translate an inline CSS string into JSX style-object entries. */
+function jsxStyle(style: string): string {
+  return style
+    .split(';')
+    .map((d) => d.trim())
+    .filter(Boolean)
+    .map((d) => {
+      const [prop, ...rest] = d.split(':');
+      const camel = prop.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      return `${camel}: '${rest.join(':').trim()}'`;
+    })
+    .join(', ');
+}
+
+function renderFrontend(
+  framework: string,
+  archetype: Archetype,
+  placement: string,
+  emptyHint: string,
+  suggestions: string[],
+  isMock: boolean,
+  defaultModel?: string,
+): string {
+  const ctx: RenderCtx = { p: placementStyle(placement), emptyHint, suggestions, isMock, defaultModel };
+  switch (framework) {
+    case 'react':
+    case 'next':
+      return renderJsx(archetype, ctx, framework);
+    case 'vue':
+      return renderVue(archetype, ctx);
+    case 'svelte':
+      return renderSvelte(archetype, ctx);
+    case 'tanstack-start':
+      return renderTanstackStart(archetype, ctx);
+    case 'html':
+    default:
+      // html, and any backend-only framework (fastapi/express/worker) gets the
+      // framework-agnostic web-components surface.
+      return renderHtml(archetype, ctx);
+  }
+}
+
+// ── backend route selection (with language-aware fallback) ─────────────────────
+
+interface RouteChoice {
+  framework: string;
+  template: string;
+  runtime: string;
+  exact: boolean;
+}
+
+const RUNTIME_LABEL: Record<string, string> = {
+  next: 'Next.js route handler (Node/Edge)',
+  express: 'Express handler (Node)',
+  worker: 'Cloudflare Worker',
+  fastapi: 'FastAPI (Python)',
+  html: 'browser-direct (no server route)',
+  'tanstack-start': 'TanStack Start server function (Node)',
+};
+
+/** Prefer the language's canonical server framework when there's no exact match. */
+function preferredKeyFor(integration: Integration): string[] {
+  return integration.language === 'python'
+    ? ['fastapi']
+    : ['next', 'express', 'worker'];
+}
+
+function chooseRoute(integration: Integration, framework: string): RouteChoice | undefined {
+  const templates = integration.routeTemplates;
+
+  // 1. exact match
+  if (templates[framework]) {
+    return { framework, template: templates[framework], runtime: RUNTIME_LABEL[framework] ?? framework, exact: true };
+  }
+
+  // 2. language-canonical fallback (python → fastapi; ts → next/express/worker)
+  for (const key of preferredKeyFor(integration)) {
+    if (templates[key]) {
+      return { framework: key, template: templates[key], runtime: RUNTIME_LABEL[key] ?? key, exact: false };
+    }
+  }
+
+  // 3. anything usable that isn't a pure front-end snippet
+  for (const [key, template] of Object.entries(templates)) {
+    if (key === 'html') continue;
+    return { framework: key, template, runtime: RUNTIME_LABEL[key] ?? key, exact: false };
+  }
+
+  return undefined;
+}
+
+// ── compose ───────────────────────────────────────────────────────────────────
+
+function compose(
+  archetype: Archetype,
+  integration: Integration,
+  placement: string,
+  framework: string,
+  suggestions: string[],
+  audience?: string,
+): string {
+  const audienceHint = audience
+    ? `tuned for ${audience} — keep the empty state and tone audience-appropriate`
+    : 'add an empty-state prompt that fits your product';
+
+  const isMock = integration.id === 'mock';
+  // SCAF-8: compute the default model only for non-mock integrations that forward model.
+  const defaultModel = isMock ? undefined : defaultModelFor(integration);
+  const frontend = renderFrontend(framework, archetype, placement, audienceHint, suggestions, isMock, defaultModel);
+  const route = isMock ? undefined : chooseRoute(integration, framework);
+
+  const header = [
+    `# AI/UI scaffold — ${archetype.title} × ${integration.title}`,
+    `combo: ${archetype.id} × ${integration.id} × ${placement} × ${framework}`,
+    `stream: ${integration.streamMapping}`,
+  ].join('\n');
+
+  const block1 = [
+    `=== (1) FRONT-END (${framework}, ${placementStyle(placement).note}) ===`,
+    ``,
+    frontend,
+  ].join('\n');
+
+  const block2Parts: string[] = [`=== (2) BACKEND ROUTE ===`, ``];
+  if (isMock) {
+    // The mock integration has no backend — the front-end streams locally.
+    block2Parts.push(
+      `# No backend or API key needed — replies stream locally for preview (see the`,
+      `# front-end onSubmit above). Swap \`integration\` for a real provider (openrouter,`,
+      `# ollama, vercel-ai-sdk, …) when ready, and this block becomes its route handler.`,
+    );
+  } else if (route) {
+    if (!route.exact) {
+      block2Parts.push(
+        `# Note: ${integration.title} has no template for "${framework}". Emitting its native`,
+        `# ${route.runtime} route instead (matches the integration's ${integration.language} language).`,
+      );
+      // Honest warning: a Next.js/server route will NOT run inside a Vite SPA.
+      if (framework === 'react') {
+        block2Parts.push(
+          `#`,
+          `# WARNING: this is a Next.js route handler — it will NOT run in a Vite SPA`,
+          `# (a Vite \`react\` app has no /api routes). To make the front-end above work, either:`,
+          `#   • use Next.js (framework: "next"), or`,
+          `#   • add a Vite dev-server middleware/proxy to a server, or`,
+          `#   • run a separate server (framework: "express" | "worker"), or`,
+          `#   • use integration: "mock" for a zero-config local stream (no backend, no key).`,
+        );
+      }
+      block2Parts.push(``);
+    } else {
+      block2Parts.push(`# Runtime: ${route.runtime}`, ``);
+    }
+    block2Parts.push(route.template);
+  } else {
+    block2Parts.push(
+      `# ${integration.title} ships no usable backend route template. See its docs`,
+      `# (${integration.docsSlug}) — wire the route by hand following the streamMapping above.`,
+    );
+  }
+  const block2 = block2Parts.join('\n');
+
+  const envLines = integration.envVars.length
+    ? integration.envVars.map((v) => `  - ${v}`).join('\n')
+    : '  (none)';
+  const block3 = [
+    `=== (3) RUN NOTE ===`,
+    ``,
+    integration.runNote,
+    ``,
+    `Env vars to set:`,
+    envLines,
+  ].join('\n');
+
+  return [header, block1, block2, block3].join('\n\n');
+}
+
+// ── error text ────────────────────────────────────────────────────────────────
+
+function rejectIntegration(id: string): string {
+  const valid = listIntegrations()
+    .map((i) => `${i.id} (${i.title})`)
+    .join(', ');
+  return [
+    `Unknown integration: "${id}".`,
+    ``,
+    `Valid integrations: ${valid}.`,
+    `Pick one of those ids and call scaffold again.`,
+  ].join('\n');
+}
+
+function rejectUseCase(id: string): string {
+  const valid = listArchetypes()
+    .map((a) => `${a.id} (${a.title})`)
+    .join(', ');
+  return [
+    `Unknown useCase: "${id}".`,
+    ``,
+    `Valid useCases (archetypes): ${valid}.`,
+    `Pick one of those ids and call scaffold again.`,
+  ].join('\n');
+}
+
+// ── tool ──────────────────────────────────────────────────────────────────────
+
+export const scaffold: Tool = {
+  name: 'scaffold',
+  description:
+    'Scaffold a working AI/UI chat surface from four axes: useCase (archetype) × integration × placement × framework. ' +
+    'Emits a copy-pasteable front-end (kai-* components wired with messages + kai-submit + starter suggestions), the backend ' +
+    'route for the chosen framework, and a run note with env vars. Use integration: "mock" for a zero-config local preview.',
+  inputSchema: z.object({
+    // useCase + integration are dynamic catalog ids — kept as strings and
+    // validated against the registry in the handler (the handler is called
+    // directly in tests, bypassing this schema). Use component_reference / the
+    // catalogs to discover valid ids.
+    useCase: z
+      .string()
+      .describe(
+        'Archetype id, e.g. "drop-in-chat", "support-widget", "knowledge-base", "agentic", "workspace", "voice".',
+      ),
+    integration: z
+      .string()
+      .describe(
+        'Backend integration id, e.g. "openrouter", "vercel-ai-sdk", "langgraph", "cloudflare", "ollama", "mastra", "pi", "pydantic-ai".',
+      ),
+    placement: Placement.describe(
+      'Where the surface lives: full-page | side | docked-widget | inline.',
+    ),
+    framework: Framework.describe(
+      'Target front-end/back-end framework: html | react | next | vue | svelte | fastapi | express | worker | tanstack-start.',
+    ),
+    suggestions: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'Optional starter prompts shown above the input when the thread is empty (real kai-chat prop). ' +
+          'Defaults to a generic pair if omitted so the feature always shows.',
+      ),
+    audience: z
+      .string()
+      .optional()
+      .describe('Optional audience hint (tweaks the empty-state comment only).'),
+  }),
+  handler: async (args) => {
+    const useCase = String(args.useCase ?? '');
+    const integrationId = String(args.integration ?? '');
+    const placement = String(args.placement ?? '');
+    const framework = String(args.framework ?? 'html');
+    const audience = args.audience ? String(args.audience) : undefined;
+    // Default the suggestions so the feature always shows; honour a passed array.
+    const suggestions =
+      Array.isArray(args.suggestions) && args.suggestions.length > 0
+        ? args.suggestions.map(String)
+        : DEFAULT_SUGGESTIONS;
+
+    // Validate against the registry BEFORE composing — graceful, self-correcting text.
+    const archetype = getArchetype(useCase);
+    if (!archetype) return text(rejectUseCase(useCase));
+
+    const integration = getIntegration(integrationId);
+    if (!integration) return text(rejectIntegration(integrationId));
+
+    // Fall back to the archetype's default placement only if none was provided.
+    const effectivePlacement = placement || archetype.defaultPlacement;
+
+    return text(compose(archetype, integration, effectivePlacement, framework, suggestions, audience));
+  },
+};

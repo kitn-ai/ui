@@ -49,11 +49,25 @@ export function createWebComponent<P extends WebComponentProps>(
     // objects pass through unstringified; booleans become real boolean
     // properties so the element's `flag()` reads them. Updated props re-assign
     // because this effect runs after every render.
+    //
+    // Upgrade-race guard: if the element isn't upgraded yet (customElements.get
+    // returns undefined), writes land on a plain HTMLElement and are lost when
+    // Solid's solid-element upgrades the tag later. We call whenDefined() so
+    // props set before upgrade are re-applied once the definition arrives.
+    // With self-registration (elements/register imported at the top of
+    // react/index.tsx) this is belt-and-braces — the element is already defined
+    // before React renders — but keeps the runtime safe regardless of import order.
     useLayoutEffect(() => {
       const el = elRef.current;
       if (!el) return;
-      for (const name of propNames) {
-        if (name in p && p[name] !== undefined) (el as unknown as Record<string, unknown>)[name] = p[name];
+      const applyProps = () => {
+        for (const name of propNames) {
+          if (name in p && p[name] !== undefined) (el as unknown as Record<string, unknown>)[name] = p[name];
+        }
+      };
+      applyProps();
+      if (typeof customElements !== 'undefined' && !customElements.get(tagName)) {
+        customElements.whenDefined(tagName).then(applyProps);
       }
     });
 

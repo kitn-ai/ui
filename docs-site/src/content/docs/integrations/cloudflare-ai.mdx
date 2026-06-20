@@ -1,0 +1,104 @@
+---
+title: Cloudflare AI
+description: Use Cloudflare Workers AI as a model source for AI/UI — through its OpenAI-compatible endpoint, behind AI Gateway, or via the native env.AI binding on Workers.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<p class="kai-lede">Cloudflare runs open models like Llama behind an OpenAI-compatible endpoint. Point your `/api/chat` route at it, stream the reply back, and `<kai-chat>` never knows the difference.</p>
+
+## Workers AI from any server
+
+Workers AI speaks the OpenAI wire format, so the route is the one you'd write for any other model. Send a Bearer token, set `stream: true`, and prefix the model id with `@cf/`.
+
+```ts
+// app/api/chat/route.ts — proxy Workers AI, keep the token server-side
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const upstream = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/v1/chat/completions`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.CF_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: '@cf/meta/llama-3.1-8b-instruct',
+        messages,
+        stream: true,
+      }),
+    },
+  );
+
+  // Workers AI returns OpenAI-format SSE — pass it straight through.
+  return new Response(upstream.body, { headers: { 'Content-Type': 'text/event-stream' } });
+}
+```
+
+The browser side is unchanged: `<kai-chat>` reads the OpenAI-format SSE coming back. The reader loop lives in the [Streaming recipe](/guides/recipes/streaming/) — reference it rather than rewriting it here.
+
+| Field | Value |
+|---|---|
+| Endpoint | `https://api.cloudflare.com/client/v4/accounts/ACCOUNT_ID/ai/v1/chat/completions` |
+| Auth | `Authorization: Bearer API_TOKEN` |
+| Example model | `@cf/meta/llama-3.1-8b-instruct` |
+
+## Route through AI Gateway
+
+AI Gateway sits in front of providers and adds caching, rate limits, retries, and per-request logs without touching your route logic. Swap the base URL for the gateway's `compat` endpoint and prefix the model id with `workers-ai/`.
+
+```ts
+const upstream = await fetch(
+  `https://gateway.ai.cloudflare.com/v1/${process.env.CF_ACCOUNT_ID}/${process.env.CF_GATEWAY_ID}/compat/chat/completions`,
+  {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.CF_API_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'workers-ai/@cf/meta/llama-3.1-8b-instruct',
+      messages,
+      stream: true,
+    }),
+  },
+);
+```
+
+The gateway can front other providers too — change the model prefix to route OpenAI or Anthropic traffic through the same observability layer. See the [chat completion docs](https://developers.cloudflare.com/ai-gateway/usage/chat-completion/) for the full prefix list.
+
+<Aside type="note">The default gateway id is `default` if you haven't created a named one. Both the gateway and the upstream provider read from the same Bearer token.</Aside>
+
+## Already on Workers? Use the AI binding
+
+If your `/api/chat` route runs inside a Worker, skip HTTP entirely and call the native `env.AI` binding. Ask for `stream: true` and Workers AI returns a `text/event-stream` body you return directly.
+
+```ts
+// Worker handler — env.AI is bound in wrangler.toml
+export default {
+  async fetch(req: Request, env: Env): Promise<Response> {
+    const { messages } = await req.json();
+
+    const stream = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+      messages,
+      stream: true,
+    });
+
+    return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } });
+  },
+};
+```
+
+No account id, no token, no `fetch` — the binding handles auth.
+
+<Aside type="caution">The `env.AI` binding streams Cloudflare's own format (`data: {"response":"...token..."}`), not OpenAI's `choices[].delta.content`. To feed `<kai-chat>`'s reader, remap those chunks before returning — or, for a true drop-in, call the OpenAI-compatible endpoint above (or the AI Gateway `compat` path) from inside the Worker.</Aside>
+
+<Aside type="tip">Add the binding in `wrangler.toml` with an `[ai]` block and `binding = "AI"`, then `env.AI` is available in every request.</Aside>
+
+## Next steps
+
+- **[Connect any model](/integrations/connect-any-model/)** — the gateway pattern this fits into, plus a model switcher.
+- **[Streaming](/guides/recipes/streaming/)** — the reader loop that pulls the SSE reply into the thread.
+- **[Connect any backend](/integrations/connect-any-backend/)** — the `messages` contract every route here builds on.

@@ -1,0 +1,129 @@
+---
+title: Next.js & TanStack Start
+description: Drop AI/UI into a Next.js App Router or TanStack Start app — the chat hydrates as a client island while the page around it stays server-rendered.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<p class="kai-lede">AI/UI elements are custom elements with Shadow DOM, so they hydrate and run in the browser. In Next.js and TanStack Start that makes them client islands: the page renders on the server, and `kai-chat` comes alive where it mounts.</p>
+
+## Next.js (App Router)
+
+Register the elements in the browser, then render the tag. The cleanest path is a client component that imports `@kitn.ai/ui/elements` in an effect, so the import never runs during the server pass.
+
+```tsx
+// app/chat-island.tsx
+'use client';
+
+import { useEffect, useRef } from 'react';
+
+export default function ChatIsland() {
+  const ref = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    import('@kitn.ai/ui/elements').then(() => {
+      // element is upgraded; set array props in JS, wire kai-submit, stream the reply
+      if (ref.current) (ref.current as any).messages = [];
+    });
+  }, []);
+
+  return <kai-chat ref={ref} style={{ display: 'block', height: '600px' }} />;
+}
+```
+
+Render the island from a server page — only the island ships JS; the rest stays static:
+
+```tsx
+// app/page.tsx
+import ChatIsland from './chat-island';
+
+export default function Page() {
+  return (
+    <main>
+      <h1>Support</h1>
+      <ChatIsland />
+    </main>
+  );
+}
+```
+
+`next/dynamic` with `ssr: false` is the other common gate — but call it from a `'use client'` file, not a Server Component, or Next refuses to build.
+
+<Aside type="tip">Give the element a fixed `height` and `display: block`. The tag has no intrinsic size until it upgrades, so sizing it up front keeps the page from shifting when the island hydrates.</Aside>
+
+### The server route
+
+Keep your model key on the server. The App Router route handler exports an async `POST` that calls your provider and streams the response back:
+
+```ts
+// app/api/chat/route.ts
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const upstream = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({ model: 'gpt-4o-mini', messages, stream: true }),
+  });
+
+  return new Response(upstream.body, {
+    headers: { 'content-type': 'text/event-stream' },
+  });
+}
+```
+
+The browser reads that OpenAI-format SSE and mutates `messages` token by token — the [Streaming recipe](/guides/recipes/streaming/) is the exact reader loop, so wire your island's `fetch('/api/chat')` to it rather than rewriting it here.
+
+## TanStack Start
+
+Same idea, different gates. Wrap the chat in `ClientOnly` from `@tanstack/react-router` so it mounts only after hydration, and register the elements in an effect:
+
+```tsx
+import { ClientOnly } from '@tanstack/react-router';
+import { useEffect, useRef } from 'react';
+
+function Chat() {
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => { import('@kitn.ai/ui/elements'); }, []);
+  return <kai-chat ref={ref} style={{ display: 'block', height: '600px' }} />;
+}
+
+export function ChatRoute() {
+  return (
+    <ClientOnly fallback={<div style={{ height: 600 }} />}>
+      <Chat />
+    </ClientOnly>
+  );
+}
+```
+
+The `fallback` reserves the chat's height, so the layout holds steady through hydration. Your server route is a TanStack Start server route that streams from your provider — the same `POST` shape as above.
+
+## The React adapter
+
+Setting array props through a ref works, but `@kitn.ai/ui/react` gives you typed props and `on*` event handlers instead. Events are `kai`-prefixed custom events with their payload on `event.detail`:
+
+```tsx
+import { Chat } from '@kitn.ai/ui/react';
+
+<Chat
+  messages={messages}
+  onSubmit={(e) => setMessages((m) => [...m, { id: crypto.randomUUID(), role: 'user', content: e.detail.value }])}
+  style={{ display: 'block', height: '600px' }}
+/>;
+```
+
+The adapter still hydrates client-side, so it lives behind the same `ssr: false` / `ClientOnly` gate as the raw element.
+
+<Aside type="note">Server rendering emits your page's static shell; the chat is an island that comes alive on hydration. That split is the point — your content renders on the server, and the interactive surface mounts exactly where you place it.</Aside>
+
+The same elements run in a desktop shell. An Electron or Tauri webview loads the bundle and the `@kitn.ai/ui/elements` import upgrades the tags identically — no separate build, no different API.
+
+## Next steps
+
+- **[Connect any backend](/integrations/connect-any-backend/)** — the one contract your `/api/chat` route fills.
+- **[Streaming](/guides/recipes/streaming/)** — the reader loop that drives `messages`.
+- **[`kai-chat` reference](/components/chat/)** — every prop and event on the element.

@@ -34,6 +34,8 @@ interface Props {
   placeholder?: string;
   suggestions?: string[];
   height?: string;
+  /** Override the switcher list — e.g. to span providers. Defaults to the Anthropic set. */
+  models?: ModelOption[];
 }
 
 const MODELS: ModelOption[] = [
@@ -102,7 +104,8 @@ export default function ModelContextDemo(props: Props) {
   let timer: number | undefined;
 
   // Track usage in a closure so each turn grows from the last total.
-  let modelId = MODELS[0].id;
+  const modelList = props.models ?? MODELS;
+  let modelId = modelList[0].id;
   let usedTokens = SEED_USED;
 
   const theme = () => document.documentElement.dataset.theme || 'light';
@@ -173,7 +176,7 @@ export default function ModelContextDemo(props: Props) {
     if (!host) return;
     customElements.upgrade(host);
     host.messages = SEED_MESSAGES;
-    host.models = MODELS;
+    host.models = modelList;
     host.currentModel = modelId;
     pushContext();
     if (props.suggestions) (host as any).suggestions = props.suggestions;

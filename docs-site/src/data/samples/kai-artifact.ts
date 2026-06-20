@@ -33,7 +33,7 @@ const ABOUT_HTML = `<!DOCTYPE html>
   </head>
   <body>
     <h1>About Starboard</h1>
-    <p>Built with kitn-chat artifacts — a sandboxed preview paired with the source.</p>
+    <p>Built with AI/UI artifacts — a sandboxed preview paired with the source.</p>
     <nav><a href="index.html">← Home</a></nav>
   </body>
 </html>`;

@@ -15,14 +15,14 @@ interface ChatMessage {
 }
 
 const SUGGESTIONS = [
-  'How do I add kitn-chat to a React app?',
+  'How do I add AI/UI to a React app?',
   'Theme the components to match my brand',
   'Stream tokens from my own backend',
   'Render tool calls and citations',
 ];
 
 const REPLIES: Record<string, string> = {
-  'How do I add kitn-chat to a React app?':
+  'How do I add AI/UI to a React app?':
     'Install the package, then import the React adapter:\n\n```bash\nnpm i @kitn.ai/ui\n```\n\n```tsx\nimport { Chat } from \'@kitn.ai/ui/react\';\n\nexport default function App() {\n  return <Chat messages={messages} onSubmit={send} />;\n}\n```\n\nThe adapter wraps the same `kai-*` web components, so every prop and event maps straight through.',
   'Theme the components to match my brand':
     'Every component reads from design tokens, so one block of CSS custom properties restyles the whole kit:\n\n```css\n:root {\n  --color-brand: oklch(0.62 0.21 13);\n  --color-surface: oklch(0.99 0 0);\n  --radius: 0.75rem;\n}\n```\n\nNo shadow-piercing and no per-component overrides — set the tokens once and every `kai-*` element follows.',
@@ -33,7 +33,7 @@ const REPLIES: Record<string, string> = {
 };
 
 const DEFAULT_REPLY =
-  "Here's the short version: kitn-chat is a set of framework-agnostic web components, each isolated in its own Shadow DOM so styles never leak. You bring the model; the UI — streaming, markdown, tool calls — is handled for you.";
+  "Here's the short version: AI/UI is a set of framework-agnostic web components, each isolated in its own Shadow DOM so styles never leak. You bring the model; the UI — streaming, markdown, tool calls — is handled for you.";
 
 let uid = 0;
 const nextId = () => `e${++uid}`;
@@ -117,7 +117,7 @@ export default function EmptyStateDemo() {
             {/* @ts-expect-error custom element */}
             <kai-empty
               empty-title="Hi, I'm your assistant"
-              description="Ask me anything about kitn-chat — or pick a starter below to begin."
+              description="Ask me anything about AI/UI — or pick a starter below to begin."
               style={{ display: 'block', width: '100%', 'max-width': '34rem' }}
             >
               <IconSparkles slot="media" style={{ width: '1.5rem', height: '1.5rem' }} />

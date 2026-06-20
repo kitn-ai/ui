@@ -1,0 +1,87 @@
+---
+title: LangGraph
+description: Stream a LangGraph (JS) agent into AI/UI — token deltas from your server route as SSE, with tool calls and reasoning mapped onto the message contract.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<p class="kai-lede">LangGraph runs the agent loop — model calls, tool calls, state — and emits it all as a stream. Point a server route at that stream, pull out the assistant text, and forward it to `<kai-chat>` as SSE.</p>
+
+## Stream the graph with `streamMode: "messages"`
+
+Compile your graph, then call `graph.stream(input, { streamMode: "messages" })`. That mode yields `[messageChunk, metadata]` tuples: `messageChunk.content` is the token delta, and `metadata` tells you which node produced it. The other modes — `updates`, `values`, `custom`, `debug` — give you state, not tokens, so `messages` is the one for chat.
+
+```ts
+// POST /api/chat — stream a compiled LangGraph agent to the browser
+import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import { ChatOpenAI } from '@langchain/openai';
+import { tool } from '@langchain/core/tools';
+import { z } from 'zod';
+
+const getWeather = tool(
+  async ({ city }) => `It's 18°C and clear in ${city}.`,
+  {
+    name: 'get_weather',
+    description: 'Get the current weather for a city.',
+    schema: z.object({ city: z.string() }),
+  },
+);
+
+const agent = createReactAgent({
+  llm: new ChatOpenAI({ model: 'gpt-4o' }),
+  tools: [getWeather],
+});
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const stream = await agent.stream({ messages }, { streamMode: 'messages' });
+
+  const encoder = new TextEncoder();
+  const body = new ReadableStream({
+    async start(controller) {
+      const send = (obj: unknown) =>
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
+
+      for await (const [chunk] of stream) {
+        if (typeof chunk.content === 'string' && chunk.content) {
+          send({ choices: [{ delta: { content: chunk.content } }] });
+        }
+      }
+      controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+      controller.close();
+    },
+  });
+
+  return new Response(body, { headers: { 'Content-Type': 'text/event-stream' } });
+}
+```
+
+The browser side is the OpenAI-format SSE reader from the [Streaming recipe](/guides/recipes/streaming/) — text deltas land in the assistant message. You don't write that loop again here.
+
+<Aside type="note">`createReactAgent` is the quickest path. If you build the graph yourself with `StateGraph`, `graph.stream(input, { streamMode: "messages" })` behaves the same — every model node streams its chunks through.</Aside>
+
+## Tool calls and reasoning
+
+The loop above renders the answer. To show the agent's *work* — the tool calls and reasoning LangGraph emits — map them onto the message contract and forward extra frames a richer browser reader picks up. A `<kai-chat>` message carries a `tools[]` array, each part moving through a `state`:
+
+| LangGraph piece | Message contract field |
+|---|---|
+| `messageChunk.content` (string) | assistant `content` |
+| `chunk.tool_call_chunks[].name` / `.args` | tool part `input` (`input-streaming` → `input-available`) |
+| `ToolMessage.content` | tool part `output` (`output-available`) |
+| `additional_kwargs.reasoning_content` | `reasoning.text` |
+
+Open a tool part with `state: "input-streaming"` and a `toolCallId` when the first chunk arrives, fill `input` as the arguments stream, then set `output` and flip to `output-available` once the `ToolMessage` lands. A failed tool becomes `output-error` with `errorText`. Render the result with a [tool](/components/tool/) card and reasoning with a [reasoning](/components/reasoning/) part.
+
+<Aside type="caution">Tool-call arguments arrive as partial JSON strings — concatenate them per `toolCallId` and parse once, when the part reaches `input-available`. Don't `JSON.parse` each fragment.</Aside>
+
+## Already on the Vercel AI SDK?
+
+If your front end already speaks Vercel AI SDK message streams, skip the hand-rolled loop — there's an adapter (`@ai-sdk/langchain`) that turns a LangGraph run into AI SDK UI messages, tool calls and all. Check the [LangGraph streaming docs](https://docs.langchain.com/oss/javascript/langgraph/streaming) for the current adapter before wiring it in.
+
+## Next steps
+
+- **[Streaming](/guides/recipes/streaming/)** — the SSE reader loop this route feeds.
+- **[Connect any backend](/integrations/connect-any-backend/)** — the `messages` contract underneath.
+- **[Harnesses](/integrations/harnesses/)** — other agent loops behind the same chat surface.

@@ -30,20 +30,30 @@
   "bugs": {
     "url": "https://github.com/kitn-ai/ui/issues"
   },
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "unpkg": "./dist/kitn-chat.es.js",
   "jsdelivr": "./dist/kitn-chat.es.js",
   "customElements": "dist/custom-elements.json",
+  "bin": {
+    "kai-mcp": "./bin/mcp.js"
+  },
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
     "./elements": {
-      "types": "./src/elements/element-types.d.ts",
+      "types": "./dist/elements.d.ts",
       "default": "./dist/kitn-chat.es.js"
     },
     "./theme.css": "./theme.css",
     "./theme.tokens.css": "./dist/theme.tokens.css",
-    "./react": "./frameworks/react/index.tsx",
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "default": "./dist/react.js"
+    },
     "./provider": {
       "types": "./dist/kitn-chat-provider.d.ts",
       "default": "./dist/kitn-chat-provider.es.js"
@@ -52,6 +62,7 @@
   "files": [
     "dist",
     "src",
+    "bin",
     "!src/**/*.stories.tsx",
     "!src/**/*.test.ts",
     "!src/**/*.test.tsx",
@@ -65,7 +76,7 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "prebuild": "npm run build:css",
-    "build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts",
+    "build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts && vite build --config vite.config.react.ts && vite build --config vite.config.barrel.ts && vite build --config vite.config.mcp.ts",
     "postbuild": "npm run build:theme && npm run build:api && npm run build:schemas",
     "build:theme": "node scripts/build-theme-tokens.mjs",
     "build:api": "node scripts/gen-element-api.mjs",
@@ -74,7 +85,7 @@
     "test:react": "vitest run --config vitest.react.config.ts",
     "test:storybook": "vitest run --project=storybook",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.react.json && tsc --noEmit -p tsconfig.react.test.json",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.react.json && tsc --noEmit -p tsconfig.react.test.json && tsc --noEmit -p tsconfig.mcp.json",
     "examples": "echo 'Serving repo root on http://localhost:8000 — open http://localhost:8000/examples/composable/index.html' && python3 -m http.server 8000",
     "dev": "npm run build:css && storybook dev -p 6006",
     "storybook": "npm run build:css && storybook dev -p 6006",
@@ -87,6 +98,7 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@shikijs/langs": "^4.2.0",
     "@shikijs/themes": "^4.2.0",
     "class-variance-authority": "^0.7.0",
@@ -96,7 +108,8 @@
     "shiki": "^4.0.2",
     "solid-element": "^1.9.1",
     "solid-js": "^1.9.0",
-    "tailwind-merge": "^2.5.0"
+    "tailwind-merge": "^2.5.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
@@ -110,6 +123,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^16.3.2",
+    "@types/node": "^26.0.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.7.0",
@@ -135,8 +149,7 @@
     "vitest": "^4.1.0"
   },
   "peerDependencies": {
-    "react": ">=18",
-    "solid-js": "^1.9.0"
+    "react": ">=18"
   },
   "peerDependenciesMeta": {
     "react": {

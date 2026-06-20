@@ -41,6 +41,19 @@ if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined') 
 }
 
 const preview: Preview = {
+  // `@kitn.ai/ui/elements` (src/elements/register.ts) is now SSR-import-safe: it
+  // registers the kai-* custom elements via a gated dynamic `import()` (browser-
+  // only), so registration completes on a microtask AFTER the module imports —
+  // not synchronously. Storybook always runs in a browser, so eagerly trigger +
+  // await that registration once, before each story renders. Without this, a
+  // story can render its kai-* elements before they upgrade — which, for the
+  // ScrollButton "Ancestor Walk" story, means the element's mount-time ancestor
+  // walk (which makes the scroll region keyboard-focusable) hasn't run yet when
+  // axe checks it, failing `scrollable-region-focusable`.
+  async beforeEach() {
+    if (typeof window === 'undefined') return;
+    await import('../src/elements/register-impl');
+  },
   parameters: {
     layout: 'fullscreen',
     // Accessibility (axe) runs per-story in both the Storybook UI panel and the

@@ -1,0 +1,68 @@
+---
+title: Connect any backend
+description: The one contract behind every integration — map your model or agent's output onto kai-chat's messages and stream it in from your own server.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<p class="kai-lede">Every integration in this section — a raw provider, a gateway, an agent framework, a harness — is the same job underneath: turn your backend's output into AI/UI's `messages` and stream it in. Learn the contract once; everything else is wiring.</p>
+
+## The contract
+
+`<kai-chat>` renders a `messages` array. You own the array; the component reflects it. A message is plain data:
+
+```ts
+type Message = {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;                 // the text, streamed in token by token
+  reasoning?: { text: string; label?: string };
+  tools?: ToolCall[];              // tool calls, in order
+};
+
+type ToolCall = {
+  type: string;                    // the tool name, e.g. 'web_search'
+  state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
+  input?: Record<string, unknown>; // arguments
+  output?: Record<string, unknown>; // result, once it returns
+  toolCallId?: string;
+  errorText?: string;
+};
+```
+
+Three things stream into a message, and they map from any model:
+
+- **Text** → append to `content`.
+- **Reasoning** → set `reasoning.text`; it renders in a collapsible [reasoning](/components/reasoning/) panel.
+- **Tool calls** → push a `ToolCall` and advance its `state` as the arguments arrive (`input-streaming` → `input-available`) and the result returns (`output-available`, or `output-error`).
+
+Set `messages` in JavaScript — arrays can't be HTML attributes — and assign a **new array** on each update. That reassignment is what drives the re-render.
+
+<Aside type="tip">You never build a provider-specific format for the UI. Whatever your backend speaks — OpenAI SSE, a Vercel AI SDK stream, a harness's own events — you translate it into this one shape.</Aside>
+
+## The architecture
+
+Your model key never touches the browser. Put a thin route on your own server — call it `/api/chat` — that authenticates the user, calls the provider, and streams the result back:
+
+```
+ browser  ──fetch /api/chat──▶  your server  ──▶  provider · gateway · harness
+   ▲                                 │
+   └────────── stream ───────────────┘
+        (read tokens into messages)
+```
+
+The browser reads that stream and mutates `messages` — the [Streaming recipe](/guides/recipes/streaming/) is the exact reader loop. Your server route is the only piece that changes per backend, and that's what the rest of this section covers, one provider at a time.
+
+<Aside type="caution" title="Keep keys server-side">
+Never ship a provider API key to the browser. The `/api/chat` route exists to hold the key and authenticate the request. The one exception is a local model like Ollama, where there's no key and the "server" is the user's own machine.
+</Aside>
+
+## It runs on the client
+
+`<kai-chat>` is a web component — it hydrates and runs in the browser. That holds in a plain HTML page, a React app, or a Next.js route (where it's a client island). The component is the front end; your `/api/chat` route is the back end. Server rendering emits the tag; the chat comes alive on hydration.
+
+## Next steps
+
+- **[Harnesses](/integrations/harnesses/)** — wire AI/UI to Mastra, Pi, OpenClaw, or your own agent loop.
+- **[Streaming](/guides/recipes/streaming/)** — the reader loop that drives `messages`.
+- **[`kai-chat` reference](/components/chat/)** — every prop and event the contract exposes.

@@ -1,20 +1,124 @@
 ---
 title: For AI Agents
-description: Machine-readable reference files that let coding agents wire up kitn-chat components correctly the first time.
+description: Make your AI coding assistant fluent in AI/UI — index it in Context7, run the MCP server, or point it at the machine-readable reference, and it wires components correctly the first time.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-`@kitn.ai/ui` ships two auto-generated machine-readable files that follow the [llmstxt.org](https://llmstxt.org) convention. Point your coding agent at them and it will get prop names, event names, and the property-vs-attribute rule right — without hallucinating.
+<p class="kai-lede">Make your coding assistant fluent in AI/UI before you build. Pick whichever channel your tools already use — index it in Context7, run the MCP server, or point it at the machine-readable reference.</p>
 
-## The files
+## Index it in Context7
 
-Both files are generated from `dist/custom-elements.json` by `scripts/gen-llms.mjs` and committed to the repo, so they are included in every published npm package and always match the installed version.
+If you use [Context7](https://context7.com) — the documentation MCP most assistants support — search for **Kitn AI/UI**. The full docs, the `kai-` element reference, and the integration guides are indexed there, so your assistant pulls the real API on demand. No install, no copy-paste.
+
+<Aside type="tip">Context7 serves the reference on demand. For a one-off prompt without Context7, paste `llms.txt` (below).</Aside>
+
+## Use the AI/UI MCP server
+
+`npx @kitn.ai/ui mcp` is a stdio MCP server that gives any MCP harness four tools: **`component_reference`** (look up the real `kai-*` API), **`scaffold`** (generate a working chat wired to your backend), **`theme`** (brand it from a color or a description), and **`debug`** (catch the classic mistakes). It runs locally, holds no state, and makes no network calls.
+
+Where Context7 hands the agent the reference, the MCP server lets it *act* — generate a route, emit theme tokens, diagnose a broken snippet.
+
+Add the server to your harness:
+
+<Tabs>
+<TabItem label="Claude Code">
+
+```bash
+claude mcp add kai -- npx -y @kitn.ai/ui mcp
+```
+
+Or add it to `.mcp.json` (project scope) by hand:
+
+```json
+{
+  "mcpServers": {
+    "kai": {
+      "command": "npx",
+      "args": ["-y", "@kitn.ai/ui", "mcp"]
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem label="Codex">
+
+In `~/.codex/config.toml` (global) or `.codex/config.toml` (project):
+
+```toml
+[mcp_servers.kai]
+command = "npx"
+args = ["-y", "@kitn.ai/ui", "mcp"]
+```
+
+</TabItem>
+<TabItem label="OpenCode">
+
+In `opencode.json`:
+
+```json
+{
+  "mcp": {
+    "kai": {
+      "type": "local",
+      "command": ["npx", "-y", "@kitn.ai/ui", "mcp"],
+      "enabled": true
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem label="GitHub Copilot">
+
+In `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "kai": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@kitn.ai/ui", "mcp"]
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem label="Pi">
+
+Pi reads MCP servers from `~/.pi/agent/mcp.json`, using the same `mcpServers` shape as Claude Code:
+
+```json
+{
+  "mcpServers": {
+    "kai": {
+      "command": "npx",
+      "args": ["-y", "@kitn.ai/ui", "mcp"]
+    }
+  }
+}
+```
+
+If Pi's config has moved, check [Pi's MCP documentation](https://github.com/earendil-works/pi) for the current path and keys.
+
+</TabItem>
+</Tabs>
+
+The server reads the installed package's own `custom-elements.json` and integration catalogs, so the API it reports and the code it scaffolds always match the version you have — no drift between the docs and your `node_modules`.
+
+## Machine-readable files
+
+`@kitn.ai/ui` ships two auto-generated files that follow the [llmstxt.org](https://llmstxt.org) convention — prop names, event names, and the property-vs-attribute rule, so an agent gets them right without hallucinating.
 
 | File | Size | Use |
 |---|---|---|
 | `llms.txt` | ~4 KB | Orientation: install, the property rule, framework wiring, theming. Paste into a prompt. |
 | `llms-full.txt` | ~60 KB | Everything in `llms.txt` plus a generated props/events table for every element, a streaming recipe, and a build runbook. |
+
+Every docs page also has a **Markdown twin** at `<page-url>.md` (e.g. `/components/chat.md`) — clean source you can hand to any model.
 
 ### Where they live
 
@@ -30,11 +134,7 @@ They are also published at:
 - **https://ui.kitn.ai/llms.txt**
 - **https://ui.kitn.ai/llms-full.txt**
 
-<Aside type="tip" title="Which file to use">
-For a one-off prompt, paste `llms.txt` (~4 KB). For a project where the agent revisits these components repeatedly, reference the installed path so it always reads the version that matches the installed package.
-</Aside>
-
-## Point an agent at them
+### Point an agent at them
 
 | Tool | What to do |
 |---|---|

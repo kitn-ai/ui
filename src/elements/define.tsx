@@ -99,7 +99,13 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
   propDefaults: P,
   Facade: FacadeComponent<P, E>,
 ): void {
-  if (typeof customElements !== 'undefined' && customElements.get(tag)) return;
+  // SSR-safe: skip registration when the Custom Elements API is not available
+  // (Node.js / edge runtimes during SSR/prerender). Importing this module in a
+  // server context will silently no-op rather than throwing "customElements is
+  // not defined" or "window is not defined". The element registers on the client
+  // when the browser loads the bundle.
+  if (typeof customElements === 'undefined') return;
+  if (customElements.get(tag)) return;
 
   // Guard against prop names that collide with global reflected HTMLElement IDL
   // attributes. component-register sets `this[prop] = undefined` in the element

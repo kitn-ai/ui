@@ -60,6 +60,7 @@ export default defineConfig({
         Header: './src/components/overrides/Header.astro',
         SocialIcons: './src/components/overrides/SocialIcons.astro',
         ThemeSelect: './src/components/overrides/ThemeToggle.astro',
+        PageTitle: './src/components/overrides/PageTitle.astro',
       },
       // Topic-based sidebars: the header nav (Docs · Components · Examples)
       // switches between these, each showing only its own pages (no redundant
@@ -74,9 +75,9 @@ export default defineConfig({
               { label: 'Introduction', slug: 'guides/introduction' },
               { label: 'Installation', slug: 'guides/installation' },
               { label: 'Getting Started', slug: 'guides/getting-started' },
+              { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
               { label: 'Theming', slug: 'guides/theming' },
               { label: 'Accessibility', slug: 'guides/accessibility' },
-              { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
               { label: 'Generative UI', slug: 'guides/generative-ui' },
               {
                 label: 'Working with primitives',
@@ -97,6 +98,7 @@ export default defineConfig({
                   { label: 'Svelte', slug: 'guides/frameworks/svelte' },
                   { label: 'Angular', slug: 'guides/frameworks/angular' },
                   { label: 'Solid', slug: 'guides/frameworks/solid' },
+                  { label: 'Next.js & TanStack Start', slug: 'guides/frameworks/meta-frameworks' },
                 ],
               },
               {
@@ -151,6 +153,22 @@ export default defineConfig({
               { label: 'Voice assistant', slug: 'examples/voice-assistant' },
               { label: 'Custom theme', slug: 'examples/custom-theme' },
               { label: 'Remote cards', slug: 'examples/remote-cards' },
+            ],
+          },
+          {
+            label: 'Integrations',
+            link: '/integrations/overview/',
+            id: 'integrations',
+            items: [
+              { label: 'Overview', slug: 'integrations/overview' },
+              { label: 'Connect any backend', slug: 'integrations/connect-any-backend' },
+              { label: 'Connect any model', slug: 'integrations/connect-any-model' },
+              { label: 'Vercel AI SDK', slug: 'integrations/vercel-ai-sdk' },
+              { label: 'LangGraph', slug: 'integrations/langgraph' },
+              { label: 'Cloudflare AI', slug: 'integrations/cloudflare-ai' },
+              { label: 'Run it locally with Ollama', slug: 'integrations/ollama' },
+              { label: 'Pydantic AI', slug: 'integrations/pydantic-ai' },
+              { label: 'Harnesses', slug: 'integrations/harnesses' },
             ],
           },
           {

@@ -7,7 +7,7 @@ import ChatDemo from '../../../components/ChatDemo.tsx';
 
 <p class="kai-lede">One element gives you the whole experience: a message thread with markdown, reasoning, and tool calls, a composer, and optional header chrome. You bring the model; `<kai-chat>` renders the UI. The thread starts empty with a few starter suggestions — click one to begin, and the reply streams in.</p>
 
-<ChatDemo client:only="solid" chatTitle="Assistant" placeholder="Ask anything…" suggestions={["What makes kitn-chat different from rolling my own?", "Show me a streaming example"]} messages={[]} />
+<ChatDemo client:only="solid" chatTitle="Assistant" placeholder="Ask anything…" suggestions={["What makes AI/UI different from rolling my own?", "Show me a streaming example"]} messages={[]} />
 
 ## Wire it up
 
@@ -21,7 +21,7 @@ Start with an empty thread and a few `suggestions`. The chips render in the empt
   const chat = document.getElementById('chat');
   chat.messages = [];
   chat.suggestions = [
-    'What makes kitn-chat different from rolling my own?',
+    'What makes AI/UI different from rolling my own?',
     'Show me a streaming example',
   ];
 

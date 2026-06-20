@@ -1,0 +1,14 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Kitn AI/UI — Web UI SDK for AI Agents",
+  "description": "Framework-agnostic web components for AI chat and agents — streaming, tool calls, reasoning, generative-UI cards, and artifacts. Drop into React, Vue, Svelte, Angular, or plain HTML.",
+  "folders": ["docs-site/src/content/docs"],
+  "excludeFolders": ["docs-site/dist", "node_modules"],
+  "rules": [
+    "All custom elements are prefixed `kai-` (for example `<kai-chat>`, `<kai-artifact>`). Never use a `kitn-` element prefix; `kitn-chat` is only a bundle filename.",
+    "Array and object props (messages, models, context, suggestions, slashCommands) must be set in JavaScript, not as HTML attributes — an attribute is always a string.",
+    "Events are non-bubbling `kai-*` CustomEvents; listen directly on the element. The submit event is `kai-submit` with `event.detail.value`.",
+    "Streaming requires assigning a NEW array/object reference on every chunk; mutating a message in place does not trigger a re-render.",
+    "The full machine-readable reference is llms-full.txt; each docs page also has a Markdown twin at <page-url>.md (e.g. /components/chat.md)."
+  ]
+}

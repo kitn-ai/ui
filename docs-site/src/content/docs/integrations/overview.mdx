@@ -1,0 +1,35 @@
+---
+title: Overview
+description: Connect AI/UI to any model, drive it from any agent or harness, and run it anywhere a browser does — a web app, a website, or a desktop app.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<p class="kai-lede">AI/UI is one component set pointed in three directions: connect it to any model, drive it from any agent or harness, and drop it anywhere a browser runs. This section is the map.</p>
+
+## Any model
+
+One endpoint, every provider. [Connect any model](/integrations/connect-any-model/) shows how a gateway or a direct provider lets the same chat reach OpenAI, Anthropic, Grok, GLM, DeepSeek, Llama, or a model running on your own machine with [Ollama](/integrations/ollama/) — switchable from a dropdown in the header. The [contract](/integrations/connect-any-backend/) underneath is identical for all of them.
+
+## Any agent
+
+A bare model is the simple case. When the backend is a full agent — a loop with tools, memory, and reasoning — AI/UI renders the whole thing: tool calls, reasoning traces, generative-UI cards, artifacts. Bring it from the [Vercel AI SDK](/integrations/vercel-ai-sdk/), [LangGraph](/integrations/langgraph/), or a [harness](/integrations/harnesses/) like Mastra, Pi, or OpenClaw. The component doesn't care where the stream comes from — it only needs a stream.
+
+## Anywhere it runs
+
+Because these are standard web components, they run anywhere there's a DOM — no framework required:
+
+- **In a web app** — React, Vue, Svelte, Angular, or Solid. Import once and use the elements; see [Frameworks](/guides/frameworks/overview/).
+- **In a website** — a marketing page, a CMS, a docs site: one `<script>` tag and a `<kai-chat>` element.
+- **In a desktop app** — Electron and Tauri render a system webview, so the same elements ship inside a native window.
+- **As an embedded widget** — drop a support assistant onto any page you control.
+
+Same component every time. That's the island model: a self-contained interactive piece you place into otherwise-static or server-rendered pages, and it wakes up on its own. For the App Router and TanStack Start specifics, see [Next.js & TanStack Start](/guides/frameworks/meta-frameworks/).
+
+<Aside type="tip">The chat is a client island. The page around it can be static or server-rendered; the component comes alive in the browser. You don't server-render the chat — and you don't need to.</Aside>
+
+## Start here
+
+- **[Connect any backend](/integrations/connect-any-backend/)** — the one contract behind every integration.
+- **[Connect any model](/integrations/connect-any-model/)** — gateways, direct providers, and a live model switcher.
+- **[Harnesses](/integrations/harnesses/)** — Mastra, Pi, OpenClaw, or your own agent loop.

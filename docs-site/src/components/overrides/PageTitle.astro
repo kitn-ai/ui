@@ -1,0 +1,39 @@
+---
+// Override of Starlight's PageTitle: keeps the default <h1 id="_top"> but, on
+// normal doc pages, lays it out in a row with the "Copy page" control on the right
+// (shadcn-style). Splash pages (the marketing landing) get the bare title — no
+// Copy button, since they have no Markdown twin and aren't reference docs.
+import CopyPage from './CopyPage.astro';
+const route = Astro.locals.starlightRoute;
+const title = route.entry.data.title;
+const isSplash = route.entry.data.template === 'splash';
+---
+
+{isSplash ? (
+  <h1 id="_top">{title}</h1>
+) : (
+  <div class="kai-pagetitle-row">
+    <h1 id="_top">{title}</h1>
+    <CopyPage />
+  </div>
+)}
+
+<style>
+  @layer starlight.core {
+    .kai-pagetitle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .kai-pagetitle-row h1 {
+      margin: 0;
+      font-size: var(--sl-text-h1);
+      line-height: var(--sl-line-height-headings);
+      font-weight: 600;
+      color: var(--sl-color-white);
+    }
+  }
+</style>

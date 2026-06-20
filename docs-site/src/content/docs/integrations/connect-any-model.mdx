@@ -1,0 +1,111 @@
+---
+title: Connect any model
+description: One endpoint, every model — point AI/UI at OpenAI, Grok, GLM, DeepSeek, Llama or anything else through a gateway, with a model switcher built into the chat header.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import ModelContextDemo from '../../../components/ModelContextDemo.tsx';
+
+<p class="kai-lede">AI/UI doesn't care which model answers. Point it at OpenAI, Anthropic, Grok, GLM, DeepSeek, Llama — anything — and let people switch between them from a dropdown in the chat header. Open the model menu below and pick a different provider.</p>
+
+<ModelContextDemo
+  client:only="solid"
+  chatTitle="Any model"
+  placeholder="Ask anything…"
+  models={[
+    { id: 'gpt', name: 'GPT-4o', provider: 'OpenAI' },
+    { id: 'grok', name: 'Grok', provider: 'xAI' },
+    { id: 'glm', name: 'GLM-4.6', provider: 'Zhipu' },
+    { id: 'deepseek', name: 'DeepSeek', provider: 'DeepSeek' },
+    { id: 'gemini', name: 'Gemini Flash', provider: 'Google' },
+    { id: 'claude', name: 'Claude Sonnet', provider: 'Anthropic' },
+  ]}
+  suggestions={["Compare these models for code", "Which is cheapest to run?"]}
+/>
+
+## One endpoint, every model
+
+The switch isn't AI/UI's doing — it's the gateway's. A gateway like OpenRouter or Vercel AI Gateway puts one OpenAI-compatible endpoint in front of hundreds of models and routes by id. Change `model` from `openai/gpt-4o` to `x-ai/grok-2` and the same request lands on a different model. Your server route never changes:
+
+```ts
+// app/api/chat/route.ts — forward the user's chosen model to the gateway
+export async function POST(req: Request) {
+  const { model, messages } = await req.json();
+
+  const upstream = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ model, messages, stream: true }),
+  });
+
+  // The gateway returns OpenAI-format SSE — stream it straight back to the browser.
+  return new Response(upstream.body, { headers: { 'Content-Type': 'text/event-stream' } });
+}
+```
+
+On the front end, the switcher is built into `<kai-chat>`: set `models`, listen for `kai-model-change`, and send the current id with each request.
+
+```html
+<kai-chat id="chat"></kai-chat>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+  const chat = document.getElementById('chat');
+
+  let model = 'openai/gpt-4o';
+  chat.models = [
+    { id: 'openai/gpt-4o',          name: 'GPT-4o',   provider: 'OpenAI' },
+    { id: 'x-ai/grok-2',            name: 'Grok',     provider: 'xAI' },
+    { id: 'z-ai/glm-4.6',           name: 'GLM',      provider: 'Zhipu' },
+    { id: 'deepseek/deepseek-chat', name: 'DeepSeek', provider: 'DeepSeek' },
+  ];
+  chat.currentModel = model;
+  chat.addEventListener('kai-model-change', (e) => { model = e.detail.modelId; });
+
+  chat.addEventListener('kai-submit', async (e) => {
+    // append the user + empty assistant message, then call your route with `model`
+    await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model, messages: chat.messages }),
+    });
+    // stream the reply into messages — see the Streaming recipe
+  });
+</script>
+```
+
+<Aside type="note">Model ids move fast. Treat the ones here as examples and pull current ids from your gateway's model list — [OpenRouter](https://openrouter.ai/models) or [Vercel AI Gateway](https://vercel.com/docs/ai-gateway).</Aside>
+
+## Gateways vs direct providers
+
+There are two ways to reach a model, and both run the route above unchanged.
+
+**Gateways** put hundreds of models behind one OpenAI-compatible endpoint, with routing, fallbacks, and spend tracking. Swap the base URL and key; the code is identical.
+
+| Gateway | Base URL | Example model ids |
+|---|---|---|
+| [OpenRouter](https://openrouter.ai/models) | `https://openrouter.ai/api/v1` | `openai/gpt-4o`, `x-ai/grok-2`, `z-ai/glm-4.6` |
+| [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) | `https://ai-gateway.vercel.sh/v1` | `openai/gpt-4o`, `anthropic/claude-...` |
+| [Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/) | per-account URL | passthrough to the upstream provider |
+
+**Direct providers** skip the gateway when you only need one vendor. Most ship an OpenAI-compatible endpoint, so the same route works — only the base URL, key, and id change.
+
+| Provider | OpenAI-compatible base URL |
+|---|---|
+| OpenAI | `https://api.openai.com/v1` |
+| xAI (Grok) | `https://api.x.ai/v1` |
+| Zhipu (GLM) | `https://open.bigmodel.cn/api/paas/v4` |
+| DeepSeek | `https://api.deepseek.com` |
+| Groq | `https://api.groq.com/openai/v1` |
+| [Ollama (local)](/integrations/ollama/) | `http://localhost:11434/v1` |
+
+<Aside type="tip">"OpenAI-compatible" is the wire format, not a vendor lock. It's exactly how you reach Grok, GLM, or a local Llama through the same code — the name is just a historical accident.</Aside>
+
+## Next steps
+
+- **[Connect any backend](/integrations/connect-any-backend/)** — the `messages` contract this builds on.
+- **[Streaming](/guides/recipes/streaming/)** — the reader loop that pulls the reply into the thread.
+- **[Harnesses](/integrations/harnesses/)** — when the backend is a full agent, not just a model.

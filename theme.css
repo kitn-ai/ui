@@ -3,8 +3,10 @@
    utilities, and the .chat-markdown styles. Contains NO global base/reset rules,
    so importing it restyles nothing on its own — a host opts in via the kit's
    components + classes. Rebrand by overriding the --color-* values (optionally
-   scoped to a subtree). */
-@import "tw-animate-css";
+   scoped to a subtree).
+   NOTE: This file is Tailwind-v4 source (requires tailwindcss as a peer). For
+   bundler-based apps that don't use Tailwind, import @kitn.ai/ui/theme.tokens.css
+   instead — it is plain compiled CSS with no toolchain requirements. */
 
 @custom-variant dark (&:is(.dark *));
 

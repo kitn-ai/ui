@@ -90,7 +90,7 @@ chat.messages = chat.messages.map((m) =>
   m.id === aId
     ? {
         ...m,
-        tools: [{ ...m.tools[0], state: 'input-available', input: { query: 'kitn-chat docs' } }],
+        tools: [{ ...m.tools[0], state: 'input-available', input: { query: 'AI/UI docs' } }],
       }
     : m,
 );

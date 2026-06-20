@@ -1,55 +1,21 @@
 // Single entry that registers all kitn custom elements. Importing this file
-// (or the built bundle) defines the elements as a side effect.
-import './conversation-list';
-import './prompt-input';
-import './chat';
-import './chat-workspace';
-// Composable leaf elements (spike — see docs/handoff + examples/composable)
-import './thinking-bar';
-import './model-switcher';
-import './attachments';
-// Phase 1 — message-rendering core
-import './message';
-import './markdown';
-import './code-block';
-import './reasoning';
-import './tool';
-// Phase 2 — header / meta
-import './context-meter';
-import './feedback-bar';
-import './chat-scope-picker';
-// Phase 3 — input ecosystem
-// (NB: SlashCommand is context-bound to PromptInput — it observes the input
-//  value via usePromptInput() — so it is NOT a standalone element. It will fold
-//  into <kai-prompt-input> as a `slash-commands` property in a later pass.)
-import './prompt-suggestions';
-import './file-upload';
-import './voice-input';
-// Phase 4 — indicators & leaves
-import './loader';
-import './text-shimmer';
-import './image';
-import './checkpoint';
-import './message-skills';
-import './source';
-import './response-stream';
-import './empty';
-import './chain-of-thought';
-import './resizable';
-import './file-tree';
-import './artifact';
-import './scroll-button';
-import './popover';
-import './switch';
-// Generative-UI cards (Card Contract)
-import './card';
-import './form';
-import './link-preview';
-import './embed';
-import './confirm-card';
-import './tasks';
-import './choice';
-import './cards';
+// (or the built bundle) defines the elements as a side effect — but ONLY in a
+// browser/DOM context.
+//
+// SSR-safe: the kai-* elements bundle Solid's client runtime, which touches
+// `window` at module-eval (delegateEvents(events, doc = window.document)). With
+// no `window`, a static import would throw. So the actual component registration
+// lives in ./register-impl and is loaded behind a browser check + dynamic
+// import() — static ESM imports hoist + evaluate unconditionally, so a bare `if`
+// cannot gate them; a dynamic import() can. On the server this module is inert
+// (no DOM → no registration → no throw); in the browser it registers as before.
+//
+// Registration is async (a microtask after this module loads). Consumers that
+// need the upgraded element (e.g. the React runtime) guard with
+// customElements.whenDefined(), which resolves once the impl chunk has run.
+if (typeof window !== 'undefined' && typeof customElements !== 'undefined') {
+  void import('./register-impl');
+}
 
 export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';

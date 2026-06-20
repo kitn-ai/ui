@@ -117,6 +117,11 @@ body:has(.landing-page) .sl-markdown-content :not(pre) > code {
   color: var(--kai-ink-2);
 }
 
+/* Muted light band — alternates with the plain (white) sections so two
+   light sections never sit flush. Cards inside keep `bg-surface` (lighter),
+   so they read as floating above the band. */
+.landing-page .band-mute { background: var(--kai-surface-2); }
+
 /* Ask AI dock. The panel itself is portaled to <body> and fixed to the right.
    Width of the dock: */
 :root { --kai-dock-w: 380px; }

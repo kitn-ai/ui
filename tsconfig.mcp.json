@@ -1,0 +1,17 @@
+{
+  "comment": "Typechecks the Node MCP server under src/agent-tooling/mcp/. Separate from the browser-targeted tsconfig.json — the MCP emits HTML as strings and has no DOM dependencies.",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext"],
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "baseUrl": "."
+  },
+  "include": ["src/agent-tooling/mcp/**/*.ts"]
+}

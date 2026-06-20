@@ -39,23 +39,32 @@ kc-artifact
 Extended capabilities
 - Integrations -> Wordpress | Stores like Shopify, WooCommerce etc? | Salesforce | Other Integrations that make sense?
 
+
+
+[ ] *** The storybook where we are showing SolidJS, would those work for React too since we have wrappers for React? if So maybe we rebrand those items? ***
+
+[X] Good call — a cross-origin postMessage transport is exactly where independent eyes catch gaps before code. I'll convene a 4-lens review panel (security, protocol/correctness, architecture/integration,
+  testability/feasibility), each reviewing independently against the spec + the real code, each returning concrete gaps + a confidence score. Then I'll synthesize the consensus and an overall confidence level.
+
+[ ] Sitemap for the documentation, to make it easier to navigate and find things
+
+[ ] AI / Bots
+
 [ ] Examples besides using OpenRouter, such as 
   - Vecel AI Gateway, 
   - Integrtating with Vercel AI SDK, 
   - LangGraph/Langchain, not sure what the right on is there? 
   - Cloudflare
 
-[ ] *** The storybook where we are showing SolidJS, would those work for React too since we have wrappers for React? if So maybe we rebrand those items? ***
-
-[ ] Good call — a cross-origin postMessage transport is exactly where independent eyes catch gaps before code. I'll convene a 4-lens review panel (security, protocol/correctness, architecture/integration,
-  testability/feasibility), each reviewing independently against the spec + the real code, each returning concrete gaps + a confidence score. Then I'll synthesize the consensus and an overall confidence level.
-
+[ ] Next.js / Tanstack Start (Meta framework support?) SSR? possible?
 
 [X] --kitn tokens should be renamed to --kc to match the web components
 
 [X] 508 compliancy - we have something we are using to test that with -> axe-core
 
 [X] kc-artifact -> expand/collapse -> expands the entire view (its not a browser full-screen)
+
+[ ]   One minor note (not blocking): files: ['src', …] ships the entire src/ tree — including *.stories.tsx and *.test.ts — in the tarball. Pre-existing; worth slimming later (e.g. a .npmignore for tests/stories) but unrelated to the rename.
 
 
 Things to fix/update

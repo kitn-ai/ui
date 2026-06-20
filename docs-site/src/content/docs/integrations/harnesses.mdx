@@ -1,0 +1,102 @@
+---
+title: Harnesses
+description: Point AI/UI at an agent harness — Pi, OpenClaw, Mastra, or your own loop — and render its stream as chat, tool calls, and reasoning.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<p class="kai-lede">Your harness already has the hard parts: the agent loop, the tools, the model wiring. What it's missing is a face. AI/UI is that face — point a web component at your harness's stream and get chat, tool calls, reasoning, and artifacts.</p>
+
+## Two shapes of harness
+
+`<kai-chat>` renders a stream. Whatever your harness emits — text deltas, tool calls, reasoning — you map onto its `messages` array; the [Streaming recipe](/guides/recipes/streaming/) covers that loop. What changes from one harness to the next is how you *reach* the stream:
+
+- **It's a local stdio process** — like Pi or OpenClaw. A browser can't talk to a subprocess, so you run a small **bridge**: a server spawns the harness, reads its output, and relays each event to the browser over SSE.
+- **It already speaks HTTP/SSE** — like Mastra. Forward it from a server route with almost no glue.
+
+<Aside type="tip">A harness backend is just a source of tokens and tool calls. If you can stream it, `<kai-chat>` can render it.</Aside>
+
+## Local harnesses: the bridge
+
+Pi and OpenClaw run as terminal processes that talk over stdio. The shape is the same for both: a server route spawns the process, translates its events into SSE, and the browser loop consumes them without changes.
+
+### Pi
+
+[Pi](https://github.com/earendil-works/pi) has no network mode. You drive it in RPC mode — one JSON command per line into stdin, newline-delimited events out of stdout:
+
+```js
+import { spawn } from 'node:child_process';
+
+// POST /api/chat — bridge a Pi RPC session to the browser as SSE
+const pi = spawn('pi', ['--mode', 'rpc', '--no-session']);
+
+// Send the user's turn. Pi commands are { type, message }.
+pi.stdin.write(JSON.stringify({ type: 'prompt', message: prompt }) + '\n');
+
+let buffer = '';
+pi.stdout.on('data', (chunk) => {
+  buffer += chunk.toString();
+  const lines = buffer.split('\n');
+  buffer = lines.pop(); // hold the partial line for the next chunk
+  for (const line of lines) {
+    if (!line) continue;
+    const event = JSON.parse(line);
+    const part = event.assistantMessageEvent;
+    if (event.type === 'message_update' && part?.type === 'text_delta') {
+      res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: part.delta } }] })}\n\n`);
+    }
+  }
+});
+pi.on('close', () => { res.write('data: [DONE]\n\n'); res.end(); });
+```
+
+<Aside type="caution" title="Split on \n only">
+Pi's events are newline-delimited JSON. Don't run stdout through Node's `readline` — it also breaks on the Unicode separators U+2028 and U+2029, which turn up inside JSON payloads and corrupt frames. Split on `\n` yourself.
+</Aside>
+
+Pi streams `thinking_delta` events (map them to a [reasoning](/components/reasoning/) part) and `toolcall_*` events (map to [tool calls](/components/tool/)). It runs with your full user permissions, so sandbox it before putting it behind a public endpoint. The [RPC reference](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/rpc.md) lists every event.
+
+### OpenClaw (ACP)
+
+[OpenClaw](https://github.com/openclaw/openclaw) speaks the [Agent Client Protocol](https://agentclientprotocol.com) — Zed's JSON-RPC standard for editor-to-agent communication, the "LSP for coding agents." ACP has no shippable network transport yet, so the bridge still owns the subprocess; the SDK frames the JSON-RPC for you. Open a session with `session/new`, send the turn with `session/prompt`, then forward the `session/update` notifications:
+
+```ts
+// Server bridge: relay ACP session/update notifications as SSE
+conn.onSessionUpdate(({ update }) => {
+  if (update.sessionUpdate === 'agent_message_chunk') {
+    const text = update.content.text;
+    res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n`);
+  }
+});
+```
+
+Two ACP details worth handling: tool calls arrive as `tool_call` and mutate in place via `tool_call_update`, so key your [tool](/components/tool/) cards by id. And when the agent wants to run a gated tool it sends `session/request_permission` — surface a [`kai-confirm`](/components/confirm/) card and return the user's choice, or the agent blocks waiting.
+
+## Mastra
+
+Not every harness needs a bridge. [Mastra](https://mastra.ai) runs the agent loop itself and serves every agent over HTTP — `mastra dev` exposes `POST /api/agents/:agentId/stream` on port 4111, and the same routes ship to production. Its agents speak Vercel AI SDK v5, so your server route can pull the text stream and forward it to the browser:
+
+```ts
+// POST /api/chat — your server proxies a Mastra agent to the browser
+import { MastraClient } from '@mastra/client-js';
+
+const mastra = new MastraClient({ baseUrl: process.env.MASTRA_URL });
+
+const stream = await mastra.getAgent('supportAgent').stream({ messages });
+for await (const delta of stream.textStream) {
+  res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: delta } }] })}\n\n`);
+}
+res.write('data: [DONE]\n\n');
+```
+
+The browser side is unchanged — it's the SSE reader loop from the [Streaming recipe](/guides/recipes/streaming/). To render tool calls and reasoning too, convert the agent to a full UI message stream with [`@mastra/ai-sdk`](https://mastra.ai/reference/ai-sdk/to-ai-sdk-stream); the stream API tracks your installed Mastra version, so check [their streaming docs](https://mastra.ai/docs/agents/streaming) for the current surface.
+
+## Bring your own
+
+No harness? The contract doesn't change. Any loop that yields tokens and tool calls — your own `while` loop over a model SDK, a graph run, a queue worker — becomes a chat UI the moment you stream it into `messages`. Start from the [Streaming recipe](/guides/recipes/streaming/).
+
+## Next steps
+
+- **[Streaming](/guides/recipes/streaming/)** — the `messages` + SSE loop every bridge feeds.
+- **[`kai-chat` reference](/components/chat/)** — props and events for the chat surface.
+- **[Tool calls & reasoning](/patterns/tool-reasoning/)** — render the agentic parts your harness emits.
