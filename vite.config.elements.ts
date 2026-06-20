@@ -34,7 +34,6 @@ function libMinifyPlugin(): Plugin {
 const manifest = JSON.parse(readFileSync(resolve(__dirname, 'src/elements/element-manifest.json'), 'utf8'));
 
 const entry: Record<string, string> = {
-  index: resolve(__dirname, 'src/elements/register.ts'),
   autoloader: resolve(__dirname, 'src/elements/autoloader.ts'),
 };
 for (const file of Object.keys(manifest.files)) {
@@ -47,19 +46,15 @@ for (const file of Object.keys(manifest.files)) {
 export default defineConfig({
   plugins: [solidPlugin(), libMinifyPlugin()],
   build: {
-    // Unified elements build (runs FIRST in the chain; owns the dist clean). The
-    // register-all `index` entry emits to the historical dist/kitn-chat.es.js path
-    // (so @kitn.ai/ui/elements + every existing reference is unchanged), while the
-    // per-element + autoloader entries emit to dist/elements/ and ALL entries share
-    // dist/elements/chunks/ — one build, no dep duplication.
-    outDir: 'dist',
+    // The per-element + autoloader SPLIT build → dist/elements/ (one self-registering
+    // module per element + the autoloader, with shared chunks in dist/elements/chunks/).
+    // Runs AFTER the coarse register-all build (vite.config.ts), so emptyOutDir only
+    // clears dist/elements, never the register-all output at the dist root.
+    outDir: 'dist/elements',
     emptyOutDir: true,
     lib: { entry, formats: ['es'] },
     rollupOptions: {
-      output: {
-        entryFileNames: (c) => (c.name === 'index' ? 'kitn-chat.es.js' : `elements/${c.name}.js`),
-        chunkFileNames: 'elements/chunks/[name]-[hash].js',
-      },
+      output: { entryFileNames: '[name].js', chunkFileNames: 'chunks/[name]-[hash].js' },
     },
   },
 });
