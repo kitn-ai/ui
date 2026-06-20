@@ -864,13 +864,14 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
         // `messages` is a live local — reassign to map over the latest array
         commitMap: (mapBody) => `messages = messages.map((m) => ${mapBody});`,
         setLoading: (v) => `loading = ${v};`,
+        strictRoles: true,
       })
     : [
         `    const value = e.detail.value.trim();`,
         `    if (!value) return;`,
-        `    const history = [...messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+        `    const history = [...messages, { id: crypto.randomUUID(), role: 'user' as const, content: value }];`,
         `    const assistantId = crypto.randomUUID();`,
-        `    messages = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
+        `    messages = [...history, { id: assistantId, role: 'assistant' as const, content: '' }];`,
         `    loading = true;`,
         ...(defaultModel
           ? [
