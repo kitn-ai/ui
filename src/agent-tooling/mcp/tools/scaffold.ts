@@ -759,8 +759,10 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
   const { p, emptyHint, suggestions, isMock, defaultModel } = ctx;
 
   // SCAF-9: exclude message-embedded tags from companion rendering.
+  // SCAF-14: also exclude workspace structural tags (handled by the workspace block below).
+  const workspace = isWorkspace(archetype);
   const standaloneCompanionTags = archetype.components.filter(
-    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t),
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t) && !WORKSPACE_STRUCTURAL_TAGS.has(t),
   );
   const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
 
@@ -873,6 +875,40 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
   const needsOnMounted = sourcesSeed.length > 0;
   const vueImports = needsOnMounted ? `import { ref, onMounted } from 'vue';` : `import { ref } from 'vue';`;
 
+  // SCAF-14: workspace template block — resizable split with chat + artifact panes.
+  const workspaceTemplate = workspace
+    ? [
+        `    <!-- SCAF-14: workspace split — chat pane left, artifact preview right. -->`,
+        `    <!-- kai-resizable needs kai-resizable-item children to render panels. -->`,
+        `    <kai-resizable orientation="horizontal" style="display:block;width:100%;height:100%">`,
+        `      <kai-resizable-item size="40%" min="240px">`,
+        `        <kai-chat`,
+        `          :messages.prop="messages"`,
+        `          :loading.prop="loading"`,
+        `          :suggestions.prop="suggestions"`,
+        `          suggestion-mode="submit"`,
+        `          style="${p.chatFill}"`,
+        `          @kai-submit="onSubmit"`,
+        `        ></kai-chat>`,
+        `      </kai-resizable-item>`,
+        `      <kai-resizable-item min="280px">`,
+        `        <!-- Replace src with your artifact URL or set .files for multi-file preview. -->`,
+        `        <kai-artifact src="https://example.com" style="width:100%;height:100%"></kai-artifact>`,
+        `      </kai-resizable-item>`,
+        `    </kai-resizable>`,
+      ]
+    : [
+        `    <kai-chat`,
+        `      :messages.prop="messages"`,
+        `      :loading.prop="loading"`,
+        `      :suggestions.prop="suggestions"`,
+        `      suggestion-mode="submit"`,
+        `      style="${p.chatFill}"`,
+        `      @kai-submit="onSubmit"`,
+        `    ></kai-chat>`,
+        companions,
+      ];
+
   return [
     `<!-- vue — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
     ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
@@ -899,15 +935,7 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
     ``,
     `<template>`,
     `  <div style="${p.style}">`,
-    `    <kai-chat`,
-    `      :messages.prop="messages"`,
-    `      :loading.prop="loading"`,
-    `      :suggestions.prop="suggestions"`,
-    `      suggestion-mode="submit"`,
-    `      style="${p.chatFill}"`,
-    `      @kai-submit="onSubmit"`,
-    `    ></kai-chat>`,
-    companions,
+    ...workspaceTemplate,
     `  </div>`,
     `</template>`,
   ]
@@ -920,8 +948,10 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
   const { p, emptyHint, suggestions, isMock, defaultModel } = ctx;
 
   // SCAF-9: exclude message-embedded tags from companion rendering.
+  // SCAF-14: also exclude workspace structural tags (handled by the workspace block below).
+  const workspace = isWorkspace(archetype);
   const standaloneCompanionTags = archetype.components.filter(
-    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t),
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t) && !WORKSPACE_STRUCTURAL_TAGS.has(t),
   );
   const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
 
@@ -1029,6 +1059,26 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
       ]
     : [];
 
+  // SCAF-14: workspace template block — resizable split with chat + artifact panes.
+  const workspaceMarkup = workspace
+    ? [
+        `  <!-- SCAF-14: workspace split — chat pane left, artifact preview right. -->`,
+        `  <!-- kai-resizable needs kai-resizable-item children to render panels. -->`,
+        `  <kai-resizable orientation="horizontal" style="display:block;width:100%;height:100%">`,
+        `    <kai-resizable-item size="40%" min="240px">`,
+        `      <kai-chat bind:this={chatEl} suggestion-mode="submit" style="${p.chatFill}" on:kai-submit={onSubmit}></kai-chat>`,
+        `    </kai-resizable-item>`,
+        `    <kai-resizable-item min="280px">`,
+        `      <!-- Replace src with your artifact URL or set .files for multi-file preview. -->`,
+        `      <kai-artifact src="https://example.com" style="width:100%;height:100%"></kai-artifact>`,
+        `    </kai-resizable-item>`,
+        `  </kai-resizable>`,
+      ]
+    : [
+        `  <kai-chat bind:this={chatEl} suggestion-mode="submit" style="${p.chatFill}" on:kai-submit={onSubmit}></kai-chat>`,
+        companionLines,
+      ];
+
   return [
     `<!-- svelte — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
     ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
@@ -1054,8 +1104,7 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
     `</script>`,
     ``,
     `<div style="${p.style}">`,
-    `  <kai-chat bind:this={chatEl} suggestion-mode="submit" style="${p.chatFill}" on:kai-submit={onSubmit}></kai-chat>`,
-    companionLines,
+    ...workspaceMarkup,
     `</div>`,
   ]
     .filter((l, i, arr) => !(l === '' && arr[i - 1] === '' && i === arr.length - 1))

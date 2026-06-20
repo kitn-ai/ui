@@ -854,6 +854,50 @@ describe('scaffold', () => {
     expect(text).not.toMatch(/import ['"]@kitn\.ai\/ui\/theme\.css['"]/);
   });
 
+  it('SCAF-14B: workspace (vue) emits kai-resizable with kai-resizable-item children and kai-artifact with src', async () => {
+    const out = await scaffold.handler({
+      useCase: 'workspace',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'vue',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must emit a kai-resizable container
+    expect(text).toMatch(/<kai-resizable\b/);
+    // Must emit kai-resizable-item children (panels)
+    expect(text).toMatch(/<kai-resizable-item\b/);
+    // Must emit kai-artifact with a src attribute (not bare)
+    expect(text).toMatch(/<kai-artifact\s[^>]*src=/);
+    // Must NOT emit bare <kai-artifact />
+    expect(text).not.toMatch(/<kai-artifact\s*\/>/);
+    // Must still wire kai-chat inside the split (with Vue .prop and @kai-submit)
+    expect(text).toMatch(/<kai-chat/);
+    expect(text).toContain(':messages.prop=');
+    expect(text).toContain('@kai-submit=');
+  });
+
+  it('SCAF-14B: workspace (svelte) emits kai-resizable with kai-resizable-item children and kai-artifact with src', async () => {
+    const out = await scaffold.handler({
+      useCase: 'workspace',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'svelte',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must emit a kai-resizable container
+    expect(text).toMatch(/<kai-resizable\b/);
+    // Must emit kai-resizable-item children (panels)
+    expect(text).toMatch(/<kai-resizable-item\b/);
+    // Must emit kai-artifact with a src attribute (not bare)
+    expect(text).toMatch(/<kai-artifact\s[^>]*src=/);
+    // Must NOT emit bare <kai-artifact></kai-artifact>
+    expect(text).not.toMatch(/<kai-artifact><\/kai-artifact>/);
+    // Must still wire kai-chat inside the split (with bind:this and on:kai-submit)
+    expect(text).toMatch(/<kai-chat/);
+    expect(text).toContain('bind:this={chatEl}');
+    expect(text).toContain('on:kai-submit');
+  });
+
   it('SCAF-14: workspace (html) emits kai-resizable with kai-resizable-item children and kai-artifact with src', async () => {
     const out = await scaffold.handler({
       useCase: 'workspace',
