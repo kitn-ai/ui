@@ -973,4 +973,69 @@ describe('scaffold', () => {
     // Must still have kai-chat inside the split
     expect(text).toMatch(/<kai-chat/);
   });
+
+  // ── SCAF-15: raw-DOM frameworks must gate property-setting on element upgrade ──
+  // The elements bundle registers kai-* via an async dynamic import (SSR-safety),
+  // so the element may not be upgraded when the consumer sets array/object props.
+  // Values set on a not-yet-upgraded element are dropped on upgrade — so the
+  // raw-DOM frameworks (html/vue/svelte) must await customElements.whenDefined.
+  // The React family is unaffected (its wrappers guard with whenDefined internally).
+
+  it('SCAF-15: html output awaits customElements.whenDefined before setting props', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'html',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain("customElements.whenDefined('kai-chat')");
+    // init() must be async so it can await the upgrade
+    expect(text).toContain('async function init()');
+    // the whenDefined await must come before the suggestions property assignment
+    expect(text.indexOf("whenDefined('kai-chat')")).toBeLessThan(text.indexOf('chat.suggestions ='));
+  });
+
+  it('SCAF-15: svelte output gates the reactive prop block on the element upgrade', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'svelte',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain("customElements.whenDefined('kai-chat')");
+    expect(text).toContain("import { onMount } from 'svelte'");
+    // the reactive property block must be gated on `defined` so it re-applies post-upgrade
+    expect(text).toMatch(/\$:\s*if\s*\(chatEl\s*&&\s*defined\)/);
+  });
+
+  it('SCAF-15: vue output re-applies props in onMounted after the element upgrade', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'vue',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain("customElements.whenDefined('kai-chat')");
+    expect(text).toContain('onMounted');
+    // onMounted must be imported from vue
+    expect(text).toMatch(/import \{ ref, onMounted \} from 'vue'/);
+  });
+
+  it('SCAF-15: whenDefined gate is present across every raw-DOM framework', async () => {
+    for (const framework of ['html', 'vue', 'svelte']) {
+      const out = await scaffold.handler({
+        useCase: 'drop-in-chat',
+        integration: 'mock',
+        placement: 'full-page',
+        framework,
+      });
+      const text = (out.content as { type: string; text: string }[])[0].text;
+      expect(text, `${framework}: missing whenDefined upgrade gate`).toContain(
+        "customElements.whenDefined('kai-chat')",
+      );
+    }
+  });
 });

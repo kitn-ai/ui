@@ -340,8 +340,12 @@ function htmlWiring(ctx: RenderCtx, archetype: Archetype): string {
     ``,
     `    // Guard: module scripts run before the DOM is ready when inlined in <head>.`,
     `    // DOMContentLoaded fires synchronously when already loaded; otherwise waits.`,
-    `    function init() {`,
+    `    async function init() {`,
     `      const chat = document.getElementById('chat');`,
+    `      // SCAF-15: kai-* register via an async dynamic import (SSR-safety), so the`,
+    `      // element may not be upgraded yet. Wait for the upgrade before setting any`,
+    `      // array/object property — values set pre-upgrade are dropped on upgrade.`,
+    `      await customElements.whenDefined('kai-chat');`,
     `      // suggestions is a JS PROPERTY (arrays can't be HTML attributes)`,
     `      chat.suggestions = ${jsArray(ctx.suggestions)};`,
     `      chat.suggestionMode = 'submit';`,
@@ -867,8 +871,9 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
       ]
     : [];
 
-  const needsOnMounted = sourcesSeed.length > 0;
-  const vueImports = needsOnMounted ? `import { ref, onMounted } from 'vue';` : `import { ref } from 'vue';`;
+  // SCAF-15: always import onMounted — we re-apply props after the element upgrades
+  // (the .prop bindings can apply before the async element registration resolves).
+  const vueImports = `import { ref, onMounted } from 'vue';`;
 
   // SCAF-14: workspace template block — resizable split with chat + artifact panes.
   const workspaceTemplate = workspace
@@ -922,6 +927,15 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
     `const loading = ref(false);`,
     `const suggestions = ${jsArray(suggestions)};`,
     ...sourcesSeed,
+    ``,
+    `// SCAF-15: kai-* register via an async dynamic import (SSR-safety). The .prop`,
+    `// bindings can apply before the element upgrades, which drops them — re-apply once`,
+    `// the element is defined so the initial messages/suggestions/loading stick.`,
+    `onMounted(async () => {`,
+    `  await customElements.whenDefined('kai-chat');`,
+    `  const el = document.querySelector('kai-chat');`,
+    `  if (el) Object.assign(el, { messages: messages.value, loading: loading.value, suggestions });`,
+    `});`,
     ``,
     `async function onSubmit(e: CustomEvent<{ value: string }>) {`,
     onSubmitBody,
@@ -1083,14 +1097,20 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
     `  import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
     `  import type { KaiChatElement } from '@kitn.ai/ui/elements';`,
     `  import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
+    `  import { onMount } from 'svelte';`,
     chatMessageType,
     `  let chatEl: KaiChatElement | undefined;`,
+    `  // SCAF-15: kai-* register via an async dynamic import (SSR-safety). Gate the`,
+    `  // reactive property block on the upgrade so the first application isn't dropped`,
+    `  // (props set on a not-yet-upgraded element are lost on upgrade).`,
+    `  let defined = false;`,
+    `  onMount(async () => { await customElements.whenDefined('kai-chat'); defined = true; });`,
     ...sourcesEl,
     ...sampleMessagesInit,
     `  let loading: boolean = false;`,
     `  const suggestions: string[] = ${jsArray(suggestions)};`,
     `  // suggestions/messages are JS PROPERTIES (arrays/objects can't be attributes)`,
-    `  $: if (chatEl) { chatEl.messages = messages; chatEl.loading = loading; chatEl.suggestions = suggestions; }`,
+    `  $: if (chatEl && defined) { chatEl.messages = messages; chatEl.loading = loading; chatEl.suggestions = suggestions; }`,
     ...sourcesReactive,
     ``,
     `  async function onSubmit(e: CustomEvent<{ value: string }>) {`,
