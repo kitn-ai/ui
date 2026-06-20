@@ -17,7 +17,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const elementsDir = resolve(root, 'src/elements');
 
 // Facade files only (skip infra/helpers/stories).
-const SKIP = new Set(['define.tsx', 'register.ts', 'css.ts', 'chat-types.ts', 'default-input.tsx']);
+const SKIP = new Set(['define.tsx', 'register.ts', 'register-impl.ts', 'css.ts', 'chat-types.ts', 'default-input.tsx']);
 const facadeFiles = readdirSync(elementsDir)
   .filter((f) => (f.endsWith('.tsx') || f.endsWith('.ts')) && !f.endsWith('.stories.tsx') && !SKIP.has(f))
   .map((f) => resolve(elementsDir, f));
