@@ -76,6 +76,7 @@ export default defineConfig({
               { label: 'Installation', slug: 'guides/installation' },
               { label: 'Getting Started', slug: 'guides/getting-started' },
               { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
+              { label: 'Bundle Size', slug: 'guides/bundle-size' },
               { label: 'Theming', slug: 'guides/theming' },
               { label: 'Accessibility', slug: 'guides/accessibility' },
               { label: 'Generative UI', slug: 'guides/generative-ui' },

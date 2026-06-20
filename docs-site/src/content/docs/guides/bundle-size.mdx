@@ -1,0 +1,107 @@
+---
+title: Bundle Size
+description: Three ways to load kai-* elements — register all, import per-element, or autoload on demand — so you pay for only what a page uses.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+`@kitn.ai/ui` ships ~50 web components. You don't have to load all of them. Pick the loading strategy that matches how much of the kit you actually use.
+
+## Quick comparison
+
+| Strategy | Import | When to use |
+|---|---|---|
+| **Register all** | `@kitn.ai/ui/elements` | You use many elements; simplest to set up; works in SSR |
+| **Per-element** | `@kitn.ai/ui/elements/chat` | You use a handful of elements; bundler required |
+| **Autoloader** | `@kitn.ai/ui/autoloader` | No-build / CDN; dynamically-added elements; lazy-by-default |
+
+## Register all (default)
+
+```js
+import '@kitn.ai/ui/elements';
+```
+
+One import, every `kai-*` element registered. The browser downloads a single bundle: roughly **119 KB gzip JS + 17 KB gzip CSS**. This is the right default when you use many elements or when you want the simplest setup.
+
+It's also the SSR-safe entry point — the import is side-effect-only and doesn't touch `document` until the browser runs it, so it won't throw in a server render.
+
+## Per-element imports
+
+Import individual elements by file basename:
+
+```js
+import '@kitn.ai/ui/elements/chat';
+import '@kitn.ai/ui/elements/code-block';
+```
+
+Your bundler includes only that element's code. A page that imports only `kai-chat` lands at roughly **73 KB gzip** — a 37% reduction against the full bundle.
+
+The path matches the element's filename in `dist/elements/`, which is usually the tag name minus the `kai-` prefix:
+
+| Element | Import |
+|---|---|
+| `<kai-chat>` | `@kitn.ai/ui/elements/chat` |
+| `<kai-code-block>` | `@kitn.ai/ui/elements/code-block` |
+| `<kai-message>` | `@kitn.ai/ui/elements/message` |
+| `<kai-prompt-input>` | `@kitn.ai/ui/elements/prompt-input` |
+| `<kai-markdown>` | `@kitn.ai/ui/elements/markdown` |
+| `<kai-reasoning>` | `@kitn.ai/ui/elements/reasoning` |
+| `<kai-attachments>` | `@kitn.ai/ui/elements/attachments` |
+| `<kai-artifact>` | `@kitn.ai/ui/elements/artifact` |
+
+<Aside type="caution" title="Client-only">
+Per-element imports are client-only. In SSR frameworks (Next.js, Nuxt, SvelteKit, etc.) wrap them in a client-side boundary — a `'use client'` component in Next.js, a `onMount` in Svelte, or a `<ClientOnly>` wrapper in Nuxt.
+</Aside>
+
+## Autoloader
+
+The autoloader watches the DOM and fetches each element's module on demand — only the tags present on a given page are ever downloaded.
+
+```js
+import '@kitn.ai/ui/autoloader';
+```
+
+Or via CDN with no build step at all:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/elements/autoloader.js"></script>
+```
+
+On import it scans for undefined `kai-*` elements and starts a `MutationObserver`. Any `kai-*` element added to the DOM later — including ones injected by client-side routing — is registered the moment it appears.
+
+```html
+<!-- Only kai-chat loads. The other ~49 elements never download. -->
+<kai-chat style="display:block; height:100dvh;"></kai-chat>
+
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/elements/autoloader.js';
+
+  const chat = document.querySelector('kai-chat');
+  chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
+  chat.addEventListener('kai-submit', (e) => console.log(e.detail.value));
+</script>
+```
+
+<Aside type="caution" title="Client-only">
+The autoloader uses `document` and `MutationObserver` — it's a browser API. Don't import it in a server render; guard it the same way as per-element imports.
+</Aside>
+
+<Aside type="tip" title="Pin versions in production">
+An unversioned CDN URL tracks the latest release, which is risky on a pre-1.0 package. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.15.1/dist/elements/autoloader.js`.
+</Aside>
+
+## Code highlighting
+
+Shiki (the syntax highlighter behind `<kai-code-block>`) is always lazy — it loads per language the first time a code block with that language renders, with no WebAssembly, no upfront download. If you never render a code block, Shiki never loads.
+
+This applies to all three strategies above: the syntax highlighter never inflates your initial bundle.
+
+## SSR summary
+
+| Strategy | SSR-safe? |
+|---|---|
+| `@kitn.ai/ui/elements` | Yes — side-effect only; no `document` on import |
+| Per-element (`@kitn.ai/ui/elements/chat`) | No — use inside a client-only boundary |
+| Autoloader (`@kitn.ai/ui/autoloader`) | No — uses `document`; use inside a client-only boundary |
+
+For SSR meta-frameworks, see the [meta-frameworks guide](/guides/frameworks/meta-frameworks/) for framework-specific client boundary patterns.
