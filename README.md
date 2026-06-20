@@ -394,10 +394,18 @@ cd examples/vue && npm install && npm run dev
 
 ## Bundle size
 
-| Scenario | Loaded |
-|---|--:|
-| `<kai-chat>`, markdown only (no code blocks) | **~110 KB gzip** (~413 KB raw), one file |
-| + a code block | adds Shiki core + JS engine + that language + theme, lazily |
-| Highlighting disabled | Shiki never loads |
+Pay for what you use. Three ways to load the elements:
 
-The build is ES-module only — a UMD/IIFE build can't code-split and would inline every lazy chunk into one multi-MB file, so it's intentionally omitted.
+| How you load | What ships |
+|---|--:|
+| `import '@kitn.ai/ui/elements'` (register **all** ~50 elements) | **~119 KB gzip** JS + ~17 KB gzip CSS |
+| `import '@kitn.ai/ui/elements/chat'` (one element — bundler **tree-shakes**) | **~73 KB gzip** JS (−37%) + CSS, shared chunks only |
+| `import '@kitn.ai/ui/autoloader'` (opt-in **DOM autoloader**) | loads each element's module **on demand** as `<kai-*>` appears |
+
+The autoloader watches the DOM (initial scan + `MutationObserver`) and dynamically imports only the
+elements actually present — so a page with just `<kai-chat>` never downloads the others. It's additive:
+the register-all bundle stays the default. (Direct per-element imports and the autoloader are client-side;
+SSR apps use the register-all `@kitn.ai/ui/elements` or render client-only.)
+
+Code highlighting (Shiki) is always lazy — loaded per-language on first code block, with no WASM, and never
+at all if you don't render code. The build is ES-module only (a UMD/IIFE build can't code-split).
