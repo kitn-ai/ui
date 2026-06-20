@@ -33,18 +33,6 @@ export default defineConfig({
       entryRoot: 'frameworks/react',
     }),
   ],
-  resolve: {
-    // Map the register.ts source import to the package's own ./elements subpath.
-    // The elements bundle is pre-built (vite.config.ts → dist/kitn-chat.es.js);
-    // we can't re-compile Solid TSX in this build (no solid plugin). By aliasing
-    // to a virtual '@kitn.ai/ui/elements' package specifier (which we then mark
-    // external), the emitted react.js ships:
-    //   import '@kitn.ai/ui/elements';
-    // so any consumer bundler resolves it to dist/kitn-chat.es.js at install time.
-    alias: {
-      '../../src/elements/register': '@kitn.ai/ui/elements',
-    },
-  },
   build: {
     emptyOutDir: false,
     lib: {
@@ -53,10 +41,16 @@ export default defineConfig({
       fileName: () => 'react.js',
     },
     rollupOptions: {
-      // React is a peer dep — the consumer provides it.
-      // @kitn.ai/ui/elements (the aliased elements bundle) is also external:
-      // it's a sibling subpath of this same package, pre-built separately.
+      // React is a peer dep — the consumer provides it. @kitn.ai/ui/elements (the
+      // pre-built sibling bundle, dist/kitn-chat.es.js) is external too.
       external: ['react', 'react-dom', 'react/jsx-runtime', '@kitn.ai/ui/elements'],
+      output: {
+        // Inject the elements self-registration into the BUILT bundle ONLY. Keeping it
+        // out of the .tsx source means tsconfig.react.json doesn't walk the Solid element
+        // source under react-jsx (which produced 1474 false errors). At consumer install,
+        // `@kitn.ai/ui/elements` resolves to the pre-built dist bundle.
+        banner: "import '@kitn.ai/ui/elements';",
+      },
     },
   },
 });

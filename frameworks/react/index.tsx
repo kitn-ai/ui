@@ -2,8 +2,10 @@
 // Typed React wrappers for every kitn custom element. Usage:
 //   import { Message } from '@kitn.ai/ui/react';
 //   <Message message={msg} onMessageAction={(e) => …} />
-// Self-registers all kai-* custom elements so consumers need only this one import.
-import '../../src/elements/register';
+// The built bundle self-registers all kai-* custom elements — the elements import is
+// injected at build time (see vite.config.react.ts output.banner), so consumers need
+// only this one import. It is kept OUT of this .tsx source so the React typecheck
+// (tsconfig.react.json) does not walk the Solid element source under react-jsx.
 import { createWebComponent, type WebComponentProps } from './runtime';
 
 
