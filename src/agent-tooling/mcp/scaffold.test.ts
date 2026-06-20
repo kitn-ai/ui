@@ -713,4 +713,72 @@ describe('scaffold', () => {
     // Must NOT emit bare <Sources /> with no props
     expect(text).not.toMatch(/<Sources\s*\/>/);
   });
+
+  // ── SCAF-14: workspace archetype must emit a runnable resizable split layout ──
+
+  it('SCAF-14: workspace (react) emits Resizable with ResizableItem children and Artifact with src', async () => {
+    const out = await scaffold.handler({
+      useCase: 'workspace',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must emit a Resizable container
+    expect(text).toMatch(/<Resizable\b/);
+    // Must emit ResizableItem children (panels)
+    expect(text).toMatch(/<ResizableItem\b/);
+    // Must emit Artifact with a src prop (not bare <Artifact />)
+    expect(text).toMatch(/<Artifact\s[^/]*src=/);
+    // Must NOT emit a bare propless <Artifact />
+    expect(text).not.toMatch(/<Artifact\s*\/>/);
+    // Must still wire Chat inside the split
+    expect(text).toMatch(/<Chat\b/);
+    // Must import Resizable, ResizableItem, Artifact from @kitn.ai/ui/react
+    expect(text).toContain('Resizable');
+    expect(text).toContain('ResizableItem');
+    expect(text).toContain('Artifact');
+  });
+
+  it('SCAF-14: workspace (next) emits Resizable with ResizableItem children and Artifact with src', async () => {
+    const out = await scaffold.handler({
+      useCase: 'workspace',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'next',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must emit the structural layout
+    expect(text).toMatch(/<Resizable\b/);
+    expect(text).toMatch(/<ResizableItem\b/);
+    expect(text).toMatch(/<Artifact\s[^/]*src=/);
+    expect(text).not.toMatch(/<Artifact\s*\/>/);
+    // Must use next/dynamic with ssr: false
+    expect(text).toContain("import dynamic from 'next/dynamic'");
+    expect(text).toContain('ssr: false');
+    // Resizable, ResizableItem, Artifact must be lazy-loaded
+    expect(text).toContain("m.Resizable");
+    expect(text).toContain("m.ResizableItem");
+    expect(text).toContain("m.Artifact");
+  });
+
+  it('SCAF-14: workspace (html) emits kai-resizable with kai-resizable-item children and kai-artifact with src', async () => {
+    const out = await scaffold.handler({
+      useCase: 'workspace',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'html',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must emit a kai-resizable container
+    expect(text).toMatch(/<kai-resizable\b/);
+    // Must emit kai-resizable-item children
+    expect(text).toMatch(/<kai-resizable-item\b/);
+    // Must emit kai-artifact with a src attribute (not bare)
+    expect(text).toMatch(/<kai-artifact\s[^>]*src=/);
+    // Must NOT emit bare <kai-artifact></kai-artifact>
+    expect(text).not.toMatch(/<kai-artifact><\/kai-artifact>/);
+    // Must still have kai-chat inside the split
+    expect(text).toMatch(/<kai-chat/);
+  });
 });

@@ -196,6 +196,21 @@ function defaultModelFor(integration: Integration): string | undefined {
  */
 const MESSAGE_EMBEDDED_TAGS = new Set(['kai-tool', 'kai-reasoning']);
 
+// ── SCAF-14: workspace structural/layout logic ────────────────────────────────
+
+/**
+ * Tags that participate in the workspace layout structure — kai-resizable is the
+ * container (needs kai-resizable-item children), kai-artifact is the preview pane.
+ * Neither should be emitted as a bare sibling of kai-chat — the idiomatic structure
+ * is a resizable split with chat in one pane and artifact in another.
+ */
+const WORKSPACE_STRUCTURAL_TAGS = new Set(['kai-resizable', 'kai-artifact']);
+
+/** True when the archetype is the resizable split workspace (chat + artifact). */
+function isWorkspace(archetype: Archetype): boolean {
+  return archetype.components.includes('kai-resizable') && archetype.components.includes('kai-artifact');
+}
+
 /**
  * A sample assistant message that demonstrates embedded tool + reasoning so the
  * agentic archetype renders correctly out of the box.
@@ -233,9 +248,31 @@ interface RenderCtx {
  * SCAF-9: message-embedded companion types (kai-tool, kai-reasoning) are NOT
  * emitted as standalone siblings — they live inside a kai-chat message object.
  * Only standalone companions (kai-sources, etc.) are rendered here with sample data.
+ *
+ * SCAF-14: workspace structural types (kai-resizable, kai-artifact) are emitted
+ * as a properly composed split layout — chat in one pane, artifact in the other.
  */
 function componentTags(archetype: Archetype, chatFill: string): string {
-  const companionTags = archetype.components.filter((t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t));
+  // SCAF-14: workspace is a structural/layout archetype — emit a runnable split.
+  if (isWorkspace(archetype)) {
+    return [
+      `  <!-- SCAF-14: workspace split — chat pane left, artifact preview right. -->`,
+      `  <!-- kai-resizable needs kai-resizable-item children to render panels. -->`,
+      `  <kai-resizable orientation="horizontal" style="display:block;width:100%;height:100%">`,
+      `    <kai-resizable-item size="40%" min="240px">`,
+      `      <kai-chat id="chat" suggestion-mode="submit" style="${chatFill}"></kai-chat>`,
+      `    </kai-resizable-item>`,
+      `    <kai-resizable-item min="280px">`,
+      `      <!-- Replace src with your artifact URL or set .files for multi-file preview. -->`,
+      `      <kai-artifact id="artifact" src="https://example.com" style="width:100%;height:100%"></kai-artifact>`,
+      `    </kai-resizable-item>`,
+      `  </kai-resizable>`,
+    ].join('\n');
+  }
+
+  const companionTags = archetype.components.filter(
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t) && !WORKSPACE_STRUCTURAL_TAGS.has(t),
+  );
   const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
   const hasStandaloneCompanions = companionTags.length > 0;
 
@@ -434,18 +471,26 @@ function toPascalCase(tag: string): string {
 function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): string {
   const { p, emptyHint, suggestions, isMock, defaultModel } = ctx;
 
-  // SCAF-9: exclude message-embedded tags from import list and companion JSX.
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+  const workspace = isWorkspace(archetype);
+
+  // SCAF-9: exclude message-embedded tags from import list.
+  // SCAF-14: workspace uses Resizable+ResizableItem+Artifact — keep them in the import list.
   const renderableTags = archetype.components.filter((t) => !MESSAGE_EMBEDDED_TAGS.has(t));
-  const wrapperNames = renderableTags.map(toPascalCase);
+  // For workspace: replace 'kai-resizable' with 'kai-resizable-item' so we get ResizableItem too.
+  const importTags = workspace
+    ? [...new Set([...renderableTags.filter((t) => t !== 'kai-resizable'), 'kai-resizable', 'kai-resizable-item'])]
+    : renderableTags;
+  const wrapperNames = importTags.map(toPascalCase);
   const importList = wrapperNames.join(', ');
 
-  // SCAF-9: standalone companion tags (not kai-chat, not message-embedded).
+  // SCAF-9: standalone companion tags (not kai-chat, not message-embedded, not workspace-structural).
   const standaloneCompanionTags = archetype.components.filter(
-    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t),
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t) && !WORKSPACE_STRUCTURAL_TAGS.has(t),
   );
-  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
 
   // Build companion JSX: only standalone companions with real props.
+  // SCAF-14: workspace gets its own structural JSX block (not companion lines).
   const companionJsxLines: string[] = [];
   if (hasEmbedded) {
     companionJsxLines.push(
@@ -598,15 +643,38 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): str
       ``,
       `  return (`,
       `    <div style={{ ${jsxStyle(p.style)} }}>`,
-      `      <Chat`,
-      `        messages={messages}`,
-      `        loading={loading}`,
-      `        suggestions={suggestions}`,
-      `        suggestionMode="submit"`,
-      `        onSubmit={onSubmit}`,
-      `        style={{ ${jsxStyle(p.chatFill)} }}`,
-      `      />`,
-      companions,
+      ...(workspace
+        ? [
+            `      {/* SCAF-14: workspace split — chat pane left, artifact preview right. */}`,
+            `      {/* Resizable needs ResizableItem children to render panels. */}`,
+            `      <Resizable orientation="horizontal" style={{ display: 'block', width: '100%', height: '100%' }}>`,
+            `        <ResizableItem size="40%" min="240px">`,
+            `          <Chat`,
+            `            messages={messages}`,
+            `            loading={loading}`,
+            `            suggestions={suggestions}`,
+            `            suggestionMode="submit"`,
+            `            onSubmit={onSubmit}`,
+            `            style={{ ${jsxStyle(p.chatFill)} }}`,
+            `          />`,
+            `        </ResizableItem>`,
+            `        <ResizableItem min="280px">`,
+            `          {/* Replace src with your artifact URL or set files for multi-file preview. */}`,
+            `          <Artifact src="https://example.com" style={{ width: '100%', height: '100%' }} />`,
+            `        </ResizableItem>`,
+            `      </Resizable>`,
+          ]
+        : [
+            `      <Chat`,
+            `        messages={messages}`,
+            `        loading={loading}`,
+            `        suggestions={suggestions}`,
+            `        suggestionMode="submit"`,
+            `        onSubmit={onSubmit}`,
+            `        style={{ ${jsxStyle(p.chatFill)} }}`,
+            `      />`,
+            companions,
+          ]),
       `    </div>`,
       `  );`,
       `}`,
@@ -646,15 +714,38 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): str
     ``,
     `  return (`,
     `    <div style={{ ${jsxStyle(p.style)} }}>`,
-    `      <Chat`,
-    `        messages={messages}`,
-    `        loading={loading}`,
-    `        suggestions={suggestions}`,
-    `        suggestionMode="submit"`,
-    `        onSubmit={onSubmit}`,
-    `        style={{ ${jsxStyle(p.chatFill)} }}`,
-    `      />`,
-    companions,
+    ...(workspace
+      ? [
+          `      {/* SCAF-14: workspace split — chat pane left, artifact preview right. */}`,
+          `      {/* Resizable needs ResizableItem children to render panels. */}`,
+          `      <Resizable orientation="horizontal" style={{ display: 'block', width: '100%', height: '100%' }}>`,
+          `        <ResizableItem size="40%" min="240px">`,
+          `          <Chat`,
+          `            messages={messages}`,
+          `            loading={loading}`,
+          `            suggestions={suggestions}`,
+          `            suggestionMode="submit"`,
+          `            onSubmit={onSubmit}`,
+          `            style={{ ${jsxStyle(p.chatFill)} }}`,
+          `          />`,
+          `        </ResizableItem>`,
+          `        <ResizableItem min="280px">`,
+          `          {/* Replace src with your artifact URL or set files for multi-file preview. */}`,
+          `          <Artifact src="https://example.com" style={{ width: '100%', height: '100%' }} />`,
+          `        </ResizableItem>`,
+          `      </Resizable>`,
+        ]
+      : [
+          `      <Chat`,
+          `        messages={messages}`,
+          `        loading={loading}`,
+          `        suggestions={suggestions}`,
+          `        suggestionMode="submit"`,
+          `        onSubmit={onSubmit}`,
+          `        style={{ ${jsxStyle(p.chatFill)} }}`,
+          `      />`,
+          companions,
+        ]),
     `    </div>`,
     `  );`,
     `}`,
