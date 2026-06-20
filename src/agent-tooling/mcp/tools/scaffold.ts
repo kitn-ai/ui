@@ -1062,6 +1062,236 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
     .join('\n');
 }
 
+/**
+ * TanStack Start: emits a file-based route (`src/routes/chat.tsx`) that renders
+ * the Chat surface client-only via `ssr: false` on `createFileRoute`.
+ *
+ * Verified pattern: `ssr: false` prevents the Solid-based web-component runtime
+ * from running on the server — no `window is not defined` crash, no hydration
+ * mismatch. The library is SSR-import-safe (customElements.define is guarded),
+ * so the import itself is safe; only the *render* needs to be client-only.
+ *
+ * Scaffold command (official TanStack CLI, non-interactive):
+ *   npx @tanstack/cli@latest create <app-name> --framework react --no-git --package-manager npm -y
+ *
+ * After scaffolding, run `npm install @kitn.ai/ui`, then drop this file into
+ * `src/routes/chat.tsx`. Start the dev server with `npm run dev` (port 3000).
+ * Build: `npm run build`; preview: `npm run preview` (or `node dist/server/server.js`).
+ * Note: `npm start` does NOT exist in TanStack Start projects — use `npm run dev` / `npm run preview`.
+ *
+ * Backend: TanStack Start supports server-side routes via `createServerFn` in
+ * `src/server/`. For a chat API, place the route in `src/server/chat.ts` and call
+ * it from your route component. The emitted scaffold uses `fetch('/api/chat')` as a
+ * placeholder pointing at a standard route — swap for your TanStack server function
+ * or an external endpoint.
+ */
+function renderTanstackStart(archetype: Archetype, ctx: RenderCtx): string {
+  const { p, emptyHint, suggestions, isMock, defaultModel } = ctx;
+
+  // TanStack Start is React — reuse all the React composition logic:
+  // same ChatMessage type, same state/loading/suggestions, same mock stream body,
+  // same real-backend SSE streaming. The ONLY delta from plain `react` is:
+  //   1. `import { createFileRoute } from '@tanstack/react-router'` instead of no-op router import
+  //   2. `export const Route = createFileRoute('/chat')({ ssr: false, component: ChatPage })`
+  //   3. The page function is named `ChatPage` (not `App`) — no export-default clash with createFileRoute
+  //   4. No `import '@kitn.ai/ui/elements'` needed as a top-level import (same as next's dynamic approach
+  //      is not needed here — the library is SSR-import-safe, but we include elements for safety)
+
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+  const workspace = isWorkspace(archetype);
+
+  const renderableTags = archetype.components.filter((t) => !MESSAGE_EMBEDDED_TAGS.has(t));
+  const importTags = workspace
+    ? [...new Set([...renderableTags.filter((t) => t !== 'kai-resizable'), 'kai-resizable', 'kai-resizable-item'])]
+    : renderableTags;
+  const wrapperNames = importTags.map(toPascalCase);
+  const importList = wrapperNames.join(', ');
+
+  const standaloneCompanionTags = archetype.components.filter(
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t) && !WORKSPACE_STRUCTURAL_TAGS.has(t),
+  );
+
+  const companionJsxLines: string[] = [];
+  if (hasEmbedded) {
+    companionJsxLines.push(
+      `      {/* kai-tool / kai-reasoning render inside the thread. Tool calls + reasoning`,
+      `          are set on each message object — see the sampleMessages initializer above. */}`,
+    );
+  }
+  for (const t of standaloneCompanionTags) {
+    if (t === 'kai-sources') {
+      companionJsxLines.push(
+        `      {/* Replace sampleSources with your real data. */}`,
+        `      <Sources sources={sampleSources} />`,
+      );
+    } else {
+      companionJsxLines.push(`      {/* wire data props — see the component_reference MCP tool */}`);
+      companionJsxLines.push(`      <${toPascalCase(t)} />`);
+    }
+  }
+  const companions = companionJsxLines.join('\n');
+
+  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error'; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
+
+  const sampleMessagesInit = hasEmbedded
+    ? [
+        `  // SCAF-9: tool calls and reasoning render inside the thread — set them on the message object.`,
+        `  // Replace with real messages streamed from your backend.`,
+        `  const sampleMessages: ChatMessage[] = [${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}];`,
+        `  const [messages, setMessages] = useState<ChatMessage[]>(sampleMessages);`,
+      ].join('\n')
+    : `  const [messages, setMessages] = useState<ChatMessage[]>([]);`;
+
+  const sampleSourcesInit =
+    standaloneCompanionTags.includes('kai-sources')
+      ? [
+          `  // Replace sampleSources with your real source data.`,
+          `  const sampleSources = [`,
+          `    { href: 'https://example.com/doc1', title: 'Getting started', description: 'Overview of the product.' },`,
+          `    { href: 'https://example.com/doc2', title: 'API reference', description: 'Full API documentation.' },`,
+          `  ];`,
+        ].join('\n')
+      : '';
+
+  const modelInit = defaultModel
+    ? `  // SCAF-8: change this to any provider/model string you want to use.\n  const model = '${defaultModel}';`
+    : '';
+  const bodyPayload = defaultModel
+    ? `{ model, messages: history.map((m) => ({ role: m.role, content: m.content })) }`
+    : `{ messages: history.map((m) => ({ role: m.role, content: m.content })) }`;
+
+  const onSubmitBody = isMock
+    ? mockStreamBody({
+        pad: '    ',
+        read: 'messages',
+        commitInitial: (expr) => `setMessages(${expr});`,
+        commitMap: (mapBody) => `setMessages((prev) => prev.map((m) => ${mapBody}));`,
+        setLoading: (v) => `setLoading(${v});`,
+        strictRoles: true,
+      })
+    : [
+        `    const value = e.detail.value.trim();`,
+        `    if (!value) return;`,
+        `    const history: ChatMessage[] = [...messages, { id: crypto.randomUUID(), role: 'user' as const, content: value }];`,
+        `    const assistantId = crypto.randomUUID();`,
+        `    setMessages([...history, { id: assistantId, role: 'assistant' as const, content: '' }]);`,
+        `    setLoading(true);`,
+        `    const res = await fetch('/api/chat', {`,
+        `      method: 'POST',`,
+        `      headers: { 'Content-Type': 'application/json' },`,
+        `      body: JSON.stringify(${bodyPayload}),`,
+        `    });`,
+        `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
+        `    const reader = res.body!.getReader();`,
+        `    const decoder = new TextDecoder();`,
+        `    let buffer = '', answer = '';`,
+        `    while (true) {`,
+        `      const { value: chunk, done } = await reader.read();`,
+        `      if (done) break;`,
+        `      buffer += decoder.decode(chunk, { stream: true });`,
+        `      const lines = buffer.split('\\n');`,
+        `      buffer = lines.pop()!;`,
+        `      for (const line of lines) {`,
+        `        const s = line.trim();`,
+        `        if (!s.startsWith('data:')) continue;`,
+        `        const payload = s.slice(5).trim();`,
+        `        if (payload === '[DONE]') continue;`,
+        `        try {`,
+        `          const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+        `          if (!delta) continue;`,
+        `          answer += delta;`,
+        `          setMessages((ms) => ms.map((m) => (m.id === assistantId ? { ...m, content: answer } : m)));`,
+        `        } catch { /* skip keep-alives */ }`,
+        `      }`,
+        `    }`,
+        `    setLoading(false);`,
+      ].join('\n');
+
+  // File path guidance for TanStack Start (file-based routing)
+  const filePathNote = [
+    `// TanStack Start route file — save as: src/routes/chat.tsx`,
+    `// Scaffold command: npx @tanstack/cli@latest create <app-name> --framework react --no-git --package-manager npm -y`,
+    `// Then: npm install @kitn.ai/ui`,
+    `// Dev: npm run dev (port 3000)  Build: npm run build  Preview: npm run preview`,
+    `// Note: there is no 'npm start' script — use 'npm run dev' or 'npm run preview'.`,
+    `// Backend: place TanStack server functions in src/server/chat.ts (createServerFn).`,
+    ``,
+  ];
+
+  return [
+    ...filePathNote,
+    // TanStack Start uses @tanstack/react-router's createFileRoute
+    `import { createFileRoute } from '@tanstack/react-router'`,
+    `import { useState } from 'react'`,
+    // Elements registration: the library is SSR-import-safe; top-level import is safe here
+    `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `import { ${importList} } from '@kitn.ai/ui/react'`,
+    `import '@kitn.ai/ui/theme.tokens.css'  // compiled token defaults`,
+    ``,
+    `// ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint}`,
+    ...(p.altNote ? [`// ${p.altNote}`] : []),
+    chatMessageType,
+    ``,
+    `// ssr: false keeps the Solid-based web component client-only.`,
+    `// Server HTML for /chat omits <kai-chat> → no hydration mismatch.`,
+    `export const Route = createFileRoute('/chat')({`,
+    `  ssr: false,`,
+    `  component: ChatPage,`,
+    `})`,
+    ``,
+    `function ChatPage() {`,
+    sampleMessagesInit,
+    `  const [loading, setLoading] = useState(false);`,
+    `  const suggestions = ${jsArray(suggestions)};`,
+    ...(sampleSourcesInit ? [sampleSourcesInit] : []),
+    ...(modelInit ? [modelInit] : []),
+    ``,
+    `  async function onSubmit(e: CustomEvent<{ value: string }>) {`,
+    onSubmitBody,
+    `  }`,
+    ``,
+    `  return (`,
+    `    <main style={{ ${jsxStyle(p.style)} }}>`,
+    ...(workspace
+      ? [
+          `      {/* SCAF-14: workspace split — chat pane left, artifact preview right. */}`,
+          `      {/* Resizable needs ResizableItem children to render panels. */}`,
+          `      <Resizable orientation="horizontal" style={{ display: 'block', width: '100%', height: '100%' }}>`,
+          `        <ResizableItem size="40%" min="240px">`,
+          `          <Chat`,
+          `            messages={messages}`,
+          `            loading={loading}`,
+          `            suggestions={suggestions}`,
+          `            suggestionMode="submit"`,
+          `            onSubmit={onSubmit}`,
+          `            style={{ ${jsxStyle(p.chatFill)} }}`,
+          `          />`,
+          `        </ResizableItem>`,
+          `        <ResizableItem min="280px">`,
+          `          {/* Replace src with your artifact URL or set files for multi-file preview. */}`,
+          `          <Artifact src="https://example.com" style={{ width: '100%', height: '100%' }} />`,
+          `        </ResizableItem>`,
+          `      </Resizable>`,
+        ]
+      : [
+          `      <Chat`,
+          `        messages={messages}`,
+          `        loading={loading}`,
+          `        suggestions={suggestions}`,
+          `        suggestionMode="submit"`,
+          `        onSubmit={onSubmit}`,
+          `        style={{ ${jsxStyle(p.chatFill)} }}`,
+          `      />`,
+          companions,
+        ]),
+    `    </main>`,
+    `  );`,
+    `}`,
+  ]
+    .filter((l) => l !== '')
+    .join('\n');
+}
+
 /** Translate an inline CSS string into JSX style-object entries. */
 function jsxStyle(style: string): string {
   return style
@@ -1094,6 +1324,8 @@ function renderFrontend(
       return renderVue(archetype, ctx);
     case 'svelte':
       return renderSvelte(archetype, ctx);
+    case 'tanstack-start':
+      return renderTanstackStart(archetype, ctx);
     case 'html':
     default:
       // html, and any backend-only framework (fastapi/express/worker) gets the
@@ -1117,6 +1349,7 @@ const RUNTIME_LABEL: Record<string, string> = {
   worker: 'Cloudflare Worker',
   fastapi: 'FastAPI (Python)',
   html: 'browser-direct (no server route)',
+  'tanstack-start': 'TanStack Start server function (Node)',
 };
 
 /** Prefer the language's canonical server framework when there's no exact match. */
@@ -1289,7 +1522,7 @@ export const scaffold: Tool = {
       'Where the surface lives: full-page | side | docked-widget | inline.',
     ),
     framework: Framework.describe(
-      'Target front-end/back-end framework: html | react | next | vue | svelte | fastapi | express | worker.',
+      'Target front-end/back-end framework: html | react | next | vue | svelte | fastapi | express | worker | tanstack-start.',
     ),
     suggestions: z
       .array(z.string())

@@ -762,6 +762,98 @@ describe('scaffold', () => {
     expect(text).toContain("m.Artifact");
   });
 
+  // ── tanstack-start scaffold ───────────────────────────────────────────────
+
+  it('tanstack-start scaffold emits createFileRoute with ssr:false and the Chat wrapper', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'tanstack-start',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must use createFileRoute from @tanstack/react-router (verified working import)
+    expect(text).toContain("import { createFileRoute } from '@tanstack/react-router'");
+    // ssr: false is the key — keeps the web component off the server render
+    expect(text).toContain('ssr: false');
+    // Must use @kitn.ai/ui/react (the React wrapper, since TanStack Start is React)
+    expect(text).toContain('@kitn.ai/ui/react');
+    // Must import theme tokens
+    expect(text).toContain('@kitn.ai/ui/theme.tokens.css');
+    // Must wire suggestions
+    expect(text).toContain('suggestionMode="submit"');
+    // Must render the Chat wrapper
+    expect(text).toMatch(/<Chat\b/);
+  });
+
+  it('tanstack-start scaffold uses ChatPage (not App) to avoid import/export collision', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'tanstack-start',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Page component must be ChatPage (not App or Chat — collision risk with import)
+    expect(text).toContain('function ChatPage()');
+    // Must NOT export default function App (that's the next/react pattern)
+    expect(text).not.toContain('export default function App');
+    // Route export is via createFileRoute
+    expect(text).toContain('export const Route = createFileRoute');
+  });
+
+  it('tanstack-start scaffold emits default suggestions', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'tanstack-start',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain("What's new?");
+    expect(text).toContain('suggestions={suggestions}');
+  });
+
+  it('tanstack-start + real backend (openrouter) emits model const and suggestions', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'tanstack-start',
+      suggestions: ["What's new?", 'How can you help?'],
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // SCAF-8: model const for integrations that forward model
+    expect(text).toMatch(/const model = ['"]openai\/gpt-4o-mini['"]/);
+    // Suggestions wired
+    expect(text).toContain("What's new?");
+    expect(text).toContain('How can you help?');
+  });
+
+  it('tanstack-start mock emits role as const for strict-TS (SCAF-7)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'tanstack-start',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain("role: 'user' as const");
+    expect(text).toContain("role: 'assistant' as const");
+  });
+
+  it('tanstack-start emits theme.tokens.css (not bare theme.css)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'tanstack-start',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('@kitn.ai/ui/theme.tokens.css');
+    expect(text).not.toMatch(/import ['"]@kitn\.ai\/ui\/theme\.css['"]/);
+  });
+
   it('SCAF-14: workspace (html) emits kai-resizable with kai-resizable-item children and kai-artifact with src', async () => {
     const out = await scaffold.handler({
       useCase: 'workspace',
