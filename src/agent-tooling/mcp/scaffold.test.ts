@@ -348,6 +348,36 @@ describe('scaffold', () => {
     expect(text).toContain("role: 'assistant' as const");
   });
 
+  // SCAF-13A: vue mock scaffold must emit role as const (strict-TS union narrowing)
+  it('vue mock scaffold emits role as const for strict-TS message literals (SCAF-13A)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'vue',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain("role: 'user' as const");
+    expect(text).toContain("role: 'assistant' as const");
+  });
+
+  // SCAF-13B: svelte scaffold must type chatEl as KaiChatElement (not bare HTMLElement)
+  // so property assignment passes svelte-check without consumer edits.
+  it('svelte scaffold types chatEl as KaiChatElement (not bare HTMLElement) for svelte-check (SCAF-13B)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'svelte',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must import the typed element interface from the library
+    expect(text).toContain("import type { KaiChatElement } from '@kitn.ai/ui/elements'");
+    // Must use KaiChatElement, not bare HTMLElement, so property access is typed
+    expect(text).toContain('let chatEl: KaiChatElement | undefined');
+    expect(text).not.toContain('let chatEl: HTMLElement | undefined');
+  });
+
   // SCAF-7: html mock output must NOT emit `as const` (TS syntax invalid in plain JS)
   it('html mock scaffold does NOT emit as const on role literals (plain JS, SCAF-7)', async () => {
     const out = await scaffold.handler({

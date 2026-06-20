@@ -703,6 +703,7 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
         // messages.value is live — map over it directly
         commitMap: (mapBody) => `messages.value = messages.value.map((m) => ${mapBody});`,
         setLoading: (v) => `loading.value = ${v};`,
+        strictRoles: true,
       })
     : [
         `    const value = e.detail.value.trim();`,
@@ -943,9 +944,10 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
     `     runes-mode users should adapt to $state/$effect and onkai-submit event handlers. -->`,
     `<script lang="ts">`,
     `  import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
+    `  import type { KaiChatElement } from '@kitn.ai/ui/elements';`,
     `  import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
     chatMessageType,
-    `  let chatEl: HTMLElement | undefined;`,
+    `  let chatEl: KaiChatElement | undefined;`,
     ...sourcesEl,
     ...sampleMessagesInit,
     `  let loading: boolean = false;`,
