@@ -144,4 +144,54 @@ describe('debug', () => {
     const text = (out.content as { type: string; text: string }[])[0].text;
     expect(text).toMatch(/mock|Next\.?js|express|proxy/i);
   });
+
+  // ── Rule 9: bundle footprint / reduce bundle size ─────────────────────────
+  it('bundle size symptom → explains three load modes (register-all, per-element, autoloader)', async () => {
+    const out = await debug.handler({
+      symptom: 'How do I reduce bundle size? How much does @kitn.ai/ui add?',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // must explain register-all (default)
+    expect(text).toMatch(/@kitn\.ai\/ui\/elements/);
+    // must explain per-element imports with an example
+    expect(text).toMatch(/@kitn\.ai\/ui\/elements\/chat/);
+    // must explain the autoloader
+    expect(text).toMatch(/@kitn\.ai\/ui\/autoloader/);
+  });
+
+  it('tree-shaking symptom → bundle-footprint rule fires', async () => {
+    const out = await debug.handler({
+      symptom: 'How do I tree-shake @kitn.ai/ui to only import the elements I need?',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/per.?element|elements\/chat/i);
+  });
+
+  it('CDN / no-build autoloader symptom → bundle-footprint rule fires', async () => {
+    const out = await debug.handler({
+      symptom: 'I have a no-build CDN page. Can I avoid downloading all elements up front?',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/autoloader/i);
+  });
+
+  it('bundle-footprint rule mentions SSR constraint for per-element + autoloader', async () => {
+    const out = await debug.handler({
+      symptom: 'reduce bundle size footprint for @kitn.ai/ui',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // SSR safety note must appear
+    expect(text).toMatch(/SSR|client.only/i);
+    // register-all is flagged as the SSR-safe default
+    expect(text).toMatch(/register.all|elements['"].*registers/i);
+  });
+
+  it('generic bundle question without kai context does NOT fire bundle-footprint rule', async () => {
+    const out = await debug.handler({
+      symptom: 'My webpack bundle is too large after adding lodash',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must NOT match the bundle-footprint fix (no kai-* context)
+    expect(text).not.toMatch(/per.?element import|@kitn\.ai\/ui\/elements\/chat|autoloader/i);
+  });
 });

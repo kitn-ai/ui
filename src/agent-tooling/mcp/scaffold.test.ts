@@ -1038,4 +1038,60 @@ describe('scaffold', () => {
       );
     }
   });
+
+  // ── SCAF-16: footprint note appended to scaffold output ──────────────────
+
+  it('SCAF-16: scaffold output includes a FOOTPRINT NOTE section', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('=== FOOTPRINT NOTE ===');
+  });
+
+  it('SCAF-16: footprint note mentions per-element import and autoloader', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'html',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // per-element import path
+    expect(text).toMatch(/@kitn\.ai\/ui\/elements\/chat/);
+    // autoloader
+    expect(text).toMatch(/@kitn\.ai\/ui\/autoloader/);
+  });
+
+  it('SCAF-16: footprint note appears across every framework', async () => {
+    for (const framework of ['html', 'react', 'next', 'vue', 'svelte', 'tanstack-start'] as const) {
+      const out = await scaffold.handler({
+        useCase: 'drop-in-chat',
+        integration: 'openrouter',
+        placement: 'full-page',
+        framework,
+      });
+      const text = (out.content as { type: string; text: string }[])[0].text;
+      expect(text, `${framework}: missing FOOTPRINT NOTE`).toContain('=== FOOTPRINT NOTE ===');
+      expect(text, `${framework}: missing autoloader mention`).toContain('@kitn.ai/ui/autoloader');
+    }
+  });
+
+  it('SCAF-16: footprint note does NOT change the default elements import line in the front-end block', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // The default import must still be present in the front-end block
+    expect(text).toContain("import '@kitn.ai/ui/elements'");
+    // The per-element import must ONLY appear in the footprint note, not in the front-end block
+    const frontendBlock = text.split('=== FOOTPRINT NOTE ===')[0];
+    expect(frontendBlock).not.toContain("@kitn.ai/ui/elements/chat");
+  });
 });

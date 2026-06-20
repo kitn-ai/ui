@@ -1530,7 +1530,26 @@ function compose(
     envLines,
   ].join('\n');
 
-  return [header, block1, block2, block3].join('\n\n');
+  // SCAF-16: footprint note — inform consumers about the two opt-in load modes
+  // (per-element tree-shaking + autoloader) without changing the default import above.
+  const block4 = [
+    `=== FOOTPRINT NOTE ===`,
+    ``,
+    `The scaffold above uses \`import '@kitn.ai/ui/elements'\` (register-all, ~119 KB gz).`,
+    `This is the right default for multi-element apps and SSR. Two opt-in modes cut it further:`,
+    ``,
+    `  Per-element (bundler / tree-shaking): import '@kitn.ai/ui/elements/<file>'`,
+    `    Registers only that element. A bundler reduces kai-chat alone to ~73 KB gz.`,
+    `    Example: import '@kitn.ai/ui/elements/chat'  (client-only — not for SSR)`,
+    ``,
+    `  Autoloader (no-build / CDN): import '@kitn.ai/ui/autoloader'`,
+    `    Watches the DOM and loads each kai-* element on demand — ideal when only`,
+    `    a subset of elements appears on the page. Client-only.`,
+    ``,
+    `Use the debug tool with symptom "reduce bundle size" for a full breakdown.`,
+  ].join('\n');
+
+  return [header, block1, block2, block3, block4].join('\n\n');
 }
 
 // ── error text ────────────────────────────────────────────────────────────────
