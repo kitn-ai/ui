@@ -55,6 +55,10 @@ for (const f of jsFiles) copyFileSync(join(dist, f), join(kitnOut, f));
 // (register-impl, the highlighter, lazy Shiki chunks, …) so this MUST keep its structure.
 const elementsDir = join(dist, 'elements');
 if (existsSync(elementsDir)) cpSync(elementsDir, join(kitnOut, 'elements'), { recursive: true });
+// The compiled token defaults — so isolated surfaces (e.g. the iframe autoloader
+// demo) that don't inherit the docs site's own tokens can `<link>` them.
+const tokensCss = join(dist, 'theme.tokens.css');
+if (existsSync(tokensCss)) copyFileSync(tokensCss, join(kitnOut, 'theme.tokens.css'));
 
 // 2. Generator metas → src/data
 const dataOut = join(docsRoot, 'src/data');
