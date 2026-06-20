@@ -301,18 +301,31 @@ function htmlWiring(ctx: RenderCtx, archetype: Archetype): string {
     `    import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
     `    import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
     ``,
-    `    const chat = document.getElementById('chat');`,
-    `    // suggestions is a JS PROPERTY (arrays can't be HTML attributes)`,
-    `    chat.suggestions = ${jsArray(ctx.suggestions)};`,
-    `    chat.suggestionMode = 'submit';`,
+    `    // Guard: module scripts run before the DOM is ready when inlined in <head>.`,
+    `    // DOMContentLoaded fires synchronously when already loaded; otherwise waits.`,
+    `    function init() {`,
+    `      const chat = document.getElementById('chat');`,
+    `      // suggestions is a JS PROPERTY (arrays can't be HTML attributes)`,
+    `      chat.suggestions = ${jsArray(ctx.suggestions)};`,
+    `      chat.suggestionMode = 'submit';`,
     ``,
-    ...seedLines,
-    ...sourcesSetupLines,
+    ...seedLines.map((l) => (l.trim() === '' ? l : `  ${l}`)),
+    ...sourcesSetupLines.map((l) => (l.trim() === '' ? l : `  ${l}`)),
+  ];
+
+  // DOMContentLoaded footer — closes init() and wires it safely.
+  const domReadyFooter = [
+    `    }`,
+    `    if (document.readyState === 'loading') {`,
+    `      document.addEventListener('DOMContentLoaded', init);`,
+    `    } else {`,
+    `      init();`,
+    `    }`,
   ];
 
   if (ctx.isMock) {
     const body = mockStreamBody({
-      pad: '      ',
+      pad: '        ',
       read: 'chat.messages',
       commitInitial: (expr) => `chat.messages = ${expr};`,
       // chat.messages is live (no React snapshot) — map over it directly
@@ -321,10 +334,11 @@ function htmlWiring(ctx: RenderCtx, archetype: Archetype): string {
     });
     return [
       ...head,
-      `    // No backend: stream a canned reply client-side (no fetch, no API key).`,
-      `    chat.addEventListener('kai-submit', async (e) => {`,
+      `      // No backend: stream a canned reply client-side (no fetch, no API key).`,
+      `      chat.addEventListener('kai-submit', async (e) => {`,
       body,
-      `    });`,
+      `      });`,
+      ...domReadyFooter,
       `  </script>`,
     ].join('\n');
   }
@@ -332,8 +346,8 @@ function htmlWiring(ctx: RenderCtx, archetype: Archetype): string {
   // SCAF-8: include model in the POST body when the integration forwards it.
   const modelLines = ctx.defaultModel
     ? [
-        `      // SCAF-8: change this model id to any provider/model string you want to use.`,
-        `      const model = '${ctx.defaultModel}';`,
+        `        // SCAF-8: change this model id to any provider/model string you want to use.`,
+        `        const model = '${ctx.defaultModel}';`,
         ``,
       ]
     : [];
@@ -343,49 +357,50 @@ function htmlWiring(ctx: RenderCtx, archetype: Archetype): string {
 
   return [
     ...head,
-    `    chat.addEventListener('kai-submit', async (e) => {`,
-    `      const value = e.detail.value.trim();`,
-    `      if (!value) return;`,
+    `      chat.addEventListener('kai-submit', async (e) => {`,
+    `        const value = e.detail.value.trim();`,
+    `        if (!value) return;`,
     ``,
     ...modelLines,
-    `      // messages is a JS PROPERTY (objects can't be HTML attributes)`,
-    `      const history = [...chat.messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
-    `      const assistantId = crypto.randomUUID();`,
-    `      chat.messages = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
-    `      chat.loading = true;`,
+    `        // messages is a JS PROPERTY (objects can't be HTML attributes)`,
+    `        const history = [...chat.messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+    `        const assistantId = crypto.randomUUID();`,
+    `        chat.messages = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
+    `        chat.loading = true;`,
     ``,
-    `      const res = await fetch('/api/chat', {`,
-    `        method: 'POST',`,
-    `        headers: { 'Content-Type': 'application/json' },`,
-    `        body: JSON.stringify(${bodyPayload}),`,
-    `      });`,
+    `        const res = await fetch('/api/chat', {`,
+    `          method: 'POST',`,
+    `          headers: { 'Content-Type': 'application/json' },`,
+    `          body: JSON.stringify(${bodyPayload}),`,
+    `        });`,
     ``,
-    `      // Read the OpenAI-format SSE and stream it into the assistant message.`,
-    `      // This loop is the Streaming recipe — copy its exact body if you need keep-alive handling.`,
-    `      const reader = res.body.getReader();`,
-    `      const decoder = new TextDecoder();`,
-    `      let buffer = '', answer = '';`,
-    `      while (true) {`,
-    `        const { value: chunk, done } = await reader.read();`,
-    `        if (done) break;`,
-    `        buffer += decoder.decode(chunk, { stream: true });`,
-    `        const lines = buffer.split('\\n');`,
-    `        buffer = lines.pop();`,
-    `        for (const line of lines) {`,
-    `          const s = line.trim();`,
-    `          if (!s.startsWith('data:')) continue;`,
-    `          const payload = s.slice(5).trim();`,
-    `          if (payload === '[DONE]') continue;`,
-    `          try {`,
-    `            const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
-    `            if (!delta) continue;`,
-    `            answer += delta;`,
-    `            chat.messages = chat.messages.map((m) => (m.id === assistantId ? { ...m, content: answer } : m));`,
-    `          } catch { /* skip keep-alive lines */ }`,
+    `        // Read the OpenAI-format SSE and stream it into the assistant message.`,
+    `        // This loop is the Streaming recipe — copy its exact body if you need keep-alive handling.`,
+    `        const reader = res.body.getReader();`,
+    `        const decoder = new TextDecoder();`,
+    `        let buffer = '', answer = '';`,
+    `        while (true) {`,
+    `          const { value: chunk, done } = await reader.read();`,
+    `          if (done) break;`,
+    `          buffer += decoder.decode(chunk, { stream: true });`,
+    `          const lines = buffer.split('\\n');`,
+    `          buffer = lines.pop();`,
+    `          for (const line of lines) {`,
+    `            const s = line.trim();`,
+    `            if (!s.startsWith('data:')) continue;`,
+    `            const payload = s.slice(5).trim();`,
+    `            if (payload === '[DONE]') continue;`,
+    `            try {`,
+    `              const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+    `              if (!delta) continue;`,
+    `              answer += delta;`,
+    `              chat.messages = chat.messages.map((m) => (m.id === assistantId ? { ...m, content: answer } : m));`,
+    `            } catch { /* skip keep-alive lines */ }`,
+    `          }`,
     `        }`,
-    `      }`,
-    `      chat.loading = false;`,
-    `    });`,
+    `        chat.loading = false;`,
+    `      });`,
+    ...domReadyFooter,
     `  </script>`,
   ].join('\n');
 }
@@ -691,9 +706,9 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
     : [
         `    const value = e.detail.value.trim();`,
         `    if (!value) return;`,
-        `    const history = [...messages.value, { id: crypto.randomUUID(), role: 'user', content: value }];`,
+        `    const history: ChatMessage[] = [...messages.value, { id: crypto.randomUUID(), role: 'user' as const, content: value }];`,
         `    const assistantId = crypto.randomUUID();`,
-        `    messages.value = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
+        `    messages.value = [...history, { id: assistantId, role: 'assistant' as const, content: '' }];`,
         `    loading.value = true;`,
         `    // POST to /api/chat, then stream the OpenAI-format SSE into the`,
         `    // assistant message (reassign messages.value per chunk) — see the Streaming recipe.`,
@@ -734,14 +749,17 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
         `    loading.value = false;`,
       ].join('\n');
 
+  // SCAF-10: ChatMessage type for strict-TS Vue consumers — matches the React SCAF-4 type.
+  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string }; tools?: { type: string; state: string; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
+
   // SCAF-9: sample seeding for agentic archetype.
   const sampleSeed = hasEmbedded
     ? [
         `// SCAF-9: tool calls + reasoning render inside the thread — set them on the message object.`,
         `// Replace with real messages streamed from your backend.`,
-        `const messages = ref([${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}]);`,
+        `const messages = ref<ChatMessage[]>([${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}]);`,
       ]
-    : [`const messages = ref([]);`];
+    : [`const messages = ref<ChatMessage[]>([]);`];
 
   // SCAF-9: sample sources setup.
   const sourcesSeed = standaloneCompanionTags.includes('kai-sources')
@@ -768,17 +786,19 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
     `     Without this, Vue warns "Unknown custom element" and .prop bindings may misbehave.`,
     `     import vue from '@vitejs/plugin-vue';`,
     `     export default { plugins: [vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith('kai-') } } })] }; -->`,
-    `<script setup>`,
+    `<script setup lang="ts">`,
     `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
     `import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
     vueImports,
+    ``,
+    chatMessageType,
     ``,
     ...sampleSeed,
     `const loading = ref(false);`,
     `const suggestions = ${jsArray(suggestions)};`,
     ...sourcesSeed,
     ``,
-    `async function onSubmit(e) {`,
+    `async function onSubmit(e: CustomEvent<{ value: string }>) {`,
     onSubmitBody,
     `}`,
     `</script>`,
@@ -786,9 +806,9 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
     `<template>`,
     `  <div style="${p.style}">`,
     `    <kai-chat`,
-    `      :messages="messages"`,
-    `      :loading="loading"`,
-    `      :suggestions="suggestions"`,
+    `      :messages.prop="messages"`,
+    `      :loading.prop="loading"`,
+    `      :suggestions.prop="suggestions"`,
     `      suggestion-mode="submit"`,
     `      style="${p.chatFill}"`,
     `      @kai-submit="onSubmit"`,
@@ -886,18 +906,21 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
         `    loading = false;`,
       ].join('\n');
 
+  // SCAF-10: ChatMessage type for strict-TS Svelte consumers — matches the React SCAF-4 type.
+  const chatMessageType = `  type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string }; tools?: { type: string; state: string; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
+
   // SCAF-9: seed sample messages for agentic archetype.
   const sampleMessagesInit = hasEmbedded
     ? [
         `  // SCAF-9: tool calls + reasoning render INSIDE the thread — set them on the message object.`,
         `  // Replace with real messages streamed from your backend.`,
-        `  let messages = [${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}];`,
+        `  let messages: ChatMessage[] = [${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}];`,
       ]
-    : [`  let messages = [];`];
+    : [`  let messages: ChatMessage[] = [];`];
 
   // SCAF-9: sources element ref + sample data.
   const sourcesEl = standaloneCompanionTags.includes('kai-sources')
-    ? [`  let sourcesEl;`]
+    ? [`  let sourcesEl: HTMLElement | undefined;`]
     : [];
   const sourcesReactive = standaloneCompanionTags.includes('kai-sources')
     ? [
@@ -915,19 +938,20 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
     ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
     `<!-- SCAF-5: This uses Svelte-4 syntax ($:, on:event). Works in Svelte 5 via legacy mode;`,
     `     runes-mode users should adapt to $state/$effect and onkai-submit event handlers. -->`,
-    `<script>`,
+    `<script lang="ts">`,
     `  import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
     `  import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
-    `  let chatEl;`,
+    chatMessageType,
+    `  let chatEl: HTMLElement | undefined;`,
     ...sourcesEl,
     ...sampleMessagesInit,
-    `  let loading = false;`,
-    `  const suggestions = ${jsArray(suggestions)};`,
+    `  let loading: boolean = false;`,
+    `  const suggestions: string[] = ${jsArray(suggestions)};`,
     `  // suggestions/messages are JS PROPERTIES (arrays/objects can't be attributes)`,
     `  $: if (chatEl) { chatEl.messages = messages; chatEl.loading = loading; chatEl.suggestions = suggestions; }`,
     ...sourcesReactive,
     ``,
-    `  async function onSubmit(e) {`,
+    `  async function onSubmit(e: CustomEvent<{ value: string }>) {`,
     onSubmitBody,
     `  }`,
     `</script>`,

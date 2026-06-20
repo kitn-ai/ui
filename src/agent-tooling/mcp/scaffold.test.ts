@@ -558,6 +558,74 @@ describe('scaffold', () => {
     expect(text).toMatch(/<kai-chat/);
   });
 
+  // ── SCAF-10: Vue/Svelte typed messages + .prop binding; HTML DOMContentLoaded ──
+
+  it('SCAF-10: vue output uses .prop modifier for :messages and :suggestions', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'vue',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must bind array/object props via Vue .prop modifier so they're set as DOM properties
+    expect(text).toContain(':messages.prop=');
+    expect(text).toContain(':suggestions.prop=');
+    // Must emit a ChatMessage type for strict-TS consumers
+    expect(text).toContain('type ChatMessage');
+    // Must use lang="ts" on the script block
+    expect(text).toContain('<script setup lang="ts">');
+    // Must type the ref and onSubmit
+    expect(text).toMatch(/ref<ChatMessage\[\]>/);
+    expect(text).toContain('onSubmit(e: CustomEvent<{ value: string }>)');
+  });
+
+  it('SCAF-10: svelte output declares typed messages: ChatMessage[]', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'svelte',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must use lang="ts" on the script block
+    expect(text).toContain('<script lang="ts">');
+    // Must emit a ChatMessage type
+    expect(text).toContain('type ChatMessage');
+    // Must declare messages with explicit type
+    expect(text).toContain('let messages: ChatMessage[]');
+    // Must type the onSubmit handler
+    expect(text).toContain('onSubmit(e: CustomEvent<{ value: string }>)');
+  });
+
+  it('SCAF-10: html output wraps element access in DOMContentLoaded/readyState guard', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'html',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must use a readyState guard so element access is safe from <head>
+    expect(text).toMatch(/document\.readyState|DOMContentLoaded/);
+    // The element lookup must be inside a function, not at module top-level
+    expect(text).toContain('function init()');
+    // Must still wire the event listener
+    expect(text).toContain("addEventListener('kai-submit'");
+  });
+
+  it('SCAF-10: html real-backend output also has DOMContentLoaded guard', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'html',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/document\.readyState|DOMContentLoaded/);
+    expect(text).toContain('function init()');
+  });
+
   it('SCAF-9: knowledge-base (react) emits <Sources> with real sample sources data', async () => {
     const out = await scaffold.handler({
       useCase: 'knowledge-base',
