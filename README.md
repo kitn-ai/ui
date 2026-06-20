@@ -317,6 +317,15 @@ npm run build-storybook   # static Storybook build
 
 Storybook is the primary way to explore and develop components in isolation.
 
+### Testing the consumer experience (Claude Code)
+
+`npm test` covers the kit's internals. To test what a **consumer of the published package** experiences — building real chat apps across every framework (React, Next.js, Vue, Svelte, HTML, TanStack Start), archetype, integration, and backend, against a *local* build of the package — this repo ships a project-local [Claude Code](https://code.claude.com) skill that auto-loads when you open Claude Code anywhere in the repo (no setup):
+
+- Run **`/consumer-regression`** — modes: `smoke` (one parallel pass, report only) and `regression` (the full build → triage → fix → re-verify loop). It fans out parallel agents and varies model tiers to measure how cheap a model can drive the tooling.
+- Source + full methodology: **[`.claude/skills/consumer-regression/SKILL.md`](.claude/skills/consumer-regression/SKILL.md)** (and `recipes.md` beside it). The agents it deploys live in [`.claude/agents/`](.claude/agents/) (`consumer-probe`, `regression-triage`).
+
+This catches packaging / exports / SSR / scaffold-output bugs that the unit suite can't. See [`.claude/README.md`](.claude/README.md) for the full index of project-local Claude Code tooling.
+
 ### Project structure
 
 ```
