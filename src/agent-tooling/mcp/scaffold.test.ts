@@ -467,4 +467,110 @@ describe('scaffold', () => {
     expect(text).toMatch(/Vite SPA|no \/api/i);
     expect(text).toMatch(/mock|express|next/i);
   });
+
+  // ── SCAF-8: real-backend front-end must include `model` in POST body ──────
+
+  it('SCAF-8: openrouter (next) front-end includes model const and sends it in the fetch body', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'next',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must emit a model const the dev can change
+    expect(text).toMatch(/const model = ['"]openai\/gpt-4o-mini['"]/);
+    // Must include model in the POST body (not just { messages: ... })
+    expect(text).toMatch(/body: JSON\.stringify\(\{[^}]*model[^}]*messages/s);
+  });
+
+  it('SCAF-8: openrouter (react) front-end includes model const and sends it in the fetch body', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/const model = ['"]openai\/gpt-4o-mini['"]/);
+    expect(text).toMatch(/body: JSON\.stringify\(\{[^}]*model[^}]*messages/s);
+  });
+
+  it('SCAF-8: mock integration does NOT emit a model const (client-side only, no fetch)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // mock never fetches /api — no model const should appear
+    expect(text).not.toMatch(/const model = /);
+    expect(text).not.toContain("fetch('/api");
+  });
+
+  // ── SCAF-9: agentic archetype must not emit bare propless companion elements ─
+
+  it('SCAF-9: agentic (react) does NOT emit bare <Reasoning> or <Tool> siblings without props', async () => {
+    const out = await scaffold.handler({
+      useCase: 'agentic',
+      integration: 'openrouter',
+      placement: 'side',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must NOT have a bare propless <Reasoning /> or <Tool /> sibling
+    expect(text).not.toMatch(/<Reasoning\s*\/>/);
+    expect(text).not.toMatch(/<Tool\s*\/>/);
+    // Must NOT have a bare kai-reasoning or kai-tool element without props
+    expect(text).not.toMatch(/<kai-reasoning\s*>/);
+    expect(text).not.toMatch(/<kai-tool\s*>/);
+  });
+
+  it('SCAF-9: agentic (react) seeds a sample assistant message with tool + reasoning embedded', async () => {
+    const out = await scaffold.handler({
+      useCase: 'agentic',
+      integration: 'openrouter',
+      placement: 'side',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // Must embed tool+reasoning in the sample message — not as siblings
+    expect(text).toMatch(/tools|reasoning/i);
+    // The sample message must be seeded (not an empty array)
+    expect(text).toMatch(/sampleMessages|SCAF-9/);
+    // Must still render kai-chat (the root component)
+    expect(text).toMatch(/<Chat\b/);
+  });
+
+  it('SCAF-9: agentic (html) does NOT emit bare <kai-tool> or <kai-reasoning> siblings', async () => {
+    const out = await scaffold.handler({
+      useCase: 'agentic',
+      integration: 'openrouter',
+      placement: 'side',
+      framework: 'html',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).not.toMatch(/<kai-tool><\/kai-tool>/);
+    expect(text).not.toMatch(/<kai-reasoning><\/kai-reasoning>/);
+    // Must seed the sample message in the script
+    expect(text).toMatch(/SCAF-9|tools.*reasoning|reasoning.*tools/is);
+    expect(text).toMatch(/<kai-chat/);
+  });
+
+  it('SCAF-9: knowledge-base (react) emits <Sources> with real sample sources data', async () => {
+    const out = await scaffold.handler({
+      useCase: 'knowledge-base',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // kai-sources is standalone — must be emitted with sample data
+    expect(text).toMatch(/<Sources\s+sources=/);
+    // Must include realistic href data
+    expect(text).toMatch(/sampleSources/);
+    // Must NOT emit bare <Sources /> with no props
+    expect(text).not.toMatch(/<Sources\s*\/>/);
+  });
 });

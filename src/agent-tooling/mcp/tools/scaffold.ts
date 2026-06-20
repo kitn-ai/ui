@@ -166,6 +166,56 @@ function mockStreamBody(opts: {
   ].join('\n');
 }
 
+// ── SCAF-8: per-integration default model ids ─────────────────────────────────
+
+/**
+ * Return a sensible default model id for integrations whose route forwards a
+ * `model` field to the upstream provider.  The dev can change this const.
+ * Returns undefined for integrations whose route does not use a model param.
+ */
+function defaultModelFor(integration: Integration): string | undefined {
+  // Detect: any route template destructures `model` from the request body.
+  const routeSrc = Object.values(integration.routeTemplates).join('\n');
+  if (!routeSrc.includes('model')) return undefined;
+
+  const defaults: Record<string, string> = {
+    openrouter: 'openai/gpt-4o-mini',
+    ollama: 'llama3.2',
+    'vercel-ai-sdk': 'openai/gpt-4o-mini',
+    cloudflare: 'openai/gpt-4o-mini',
+  };
+  return defaults[integration.id] ?? 'openai/gpt-4o-mini';
+}
+
+// ── SCAF-9: message-embedded companion logic ──────────────────────────────────
+
+/**
+ * Tags that live INSIDE a kai-chat message object (not standalone siblings).
+ * Rendering them as bare elements is a TS error (required props missing) and
+ * non-idiomatic — the chat thread carries them on each message.
+ */
+const MESSAGE_EMBEDDED_TAGS = new Set(['kai-tool', 'kai-reasoning']);
+
+/**
+ * A sample assistant message that demonstrates embedded tool + reasoning so the
+ * agentic archetype renders correctly out of the box.
+ */
+const SAMPLE_AGENTIC_MESSAGE = {
+  id: 'sample-assistant',
+  role: 'assistant' as const,
+  content: 'Searched the web for current pricing.',
+  reasoning: { text: 'I should call the search tool to get up-to-date data.' },
+  tools: [
+    {
+      type: 'search',
+      state: 'output-available' as const,
+      input: { query: 'current pricing' },
+      output: { results: ['Result A', 'Result B'] },
+      toolCallId: 'tc_001',
+    },
+  ],
+};
+
 // ── front-end rendering ───────────────────────────────────────────────────────
 
 interface RenderCtx {
@@ -174,25 +224,78 @@ interface RenderCtx {
   suggestions: string[];
   /** mock = stream the reply client-side (no fetch, no backend, no key) */
   isMock: boolean;
+  /** SCAF-8: non-undefined when the integration forwards a model param */
+  defaultModel?: string;
 }
 
-/** The kai-* tags for the archetype, in order, as opening/closing markup. */
+/** The kai-* tags for the archetype, in order, as opening/closing markup.
+ *
+ * SCAF-9: message-embedded companion types (kai-tool, kai-reasoning) are NOT
+ * emitted as standalone siblings — they live inside a kai-chat message object.
+ * Only standalone companions (kai-sources, etc.) are rendered here with sample data.
+ */
 function componentTags(archetype: Archetype, chatFill: string): string {
-  // kai-chat is the interactive root; companion components sit alongside it.
-  // It FILLS its container — see chatFill (flex child / block).
-  const hasCompanions = archetype.components.some((t) => t !== 'kai-chat');
-  return [
-    ...archetype.components.map((tag) =>
-      tag === 'kai-chat'
-        ? `  <${tag} id="chat" suggestion-mode="submit" style="${chatFill}"></${tag}>`
-        : `  <${tag}></${tag}>`,
-    ),
-    ...(hasCompanions ? [`  <!-- wire data props — see the component_reference MCP tool -->`] : []),
-  ].join('\n');
+  const companionTags = archetype.components.filter((t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t));
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+  const hasStandaloneCompanions = companionTags.length > 0;
+
+  const lines: string[] = [];
+  lines.push(`  <kai-chat id="chat" suggestion-mode="submit" style="${chatFill}"></kai-chat>`);
+
+  if (hasEmbedded) {
+    lines.push(
+      `  <!-- kai-tool / kai-reasoning render INSIDE the thread, not as siblings.`,
+      `       Seed messages with { tools: [...], reasoning: { text: '...' } } — see the sample in the script below. -->`,
+    );
+  }
+
+  for (const tag of companionTags) {
+    if (tag === 'kai-sources') {
+      // kai-sources is genuinely standalone — emit with realistic sample data.
+      lines.push(
+        `  <!-- Replace sampleSources with your data. -->`,
+        `  <kai-sources id="sources"></kai-sources>`,
+      );
+    } else {
+      lines.push(`  <${tag}></${tag}>`);
+    }
+  }
+
+  if (hasStandaloneCompanions) {
+    lines.push(`  <!-- wire data props — see the component_reference MCP tool -->`);
+  }
+
+  return lines.join('\n');
 }
 
 /** The HTML <script> wiring — mock streams client-side; everything else fetches /api/chat. */
-function htmlWiring(ctx: RenderCtx): string {
+function htmlWiring(ctx: RenderCtx, archetype: Archetype): string {
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+  const hasSources = archetype.components.includes('kai-sources');
+
+  // SCAF-9: seed the sample agentic message so tool+reasoning render immediately.
+  const seedLines = hasEmbedded
+    ? [
+        `    // SCAF-9: tool calls + reasoning render INSIDE the thread — set them on the message object.`,
+        `    // Replace this sample with real messages from your backend.`,
+        `    chat.messages = [${JSON.stringify(SAMPLE_AGENTIC_MESSAGE, null, 0)}];`,
+        ``,
+      ]
+    : [];
+
+  const sourcesSetupLines = hasSources
+    ? [
+        `    const sourcesEl = document.getElementById('sources');`,
+        `    // Replace with your real source data (set as a JS property — it's an array).`,
+        `    const sampleSources = [`,
+        `      { href: 'https://example.com/doc1', title: 'Getting started', description: 'Overview of the product.' },`,
+        `      { href: 'https://example.com/doc2', title: 'API reference', description: 'Full API documentation.' },`,
+        `    ];`,
+        `    sourcesEl.sources = sampleSources;`,
+        ``,
+      ]
+    : [];
+
   const head = [
     `  <script type="module">`,
     `    import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
@@ -203,6 +306,8 @@ function htmlWiring(ctx: RenderCtx): string {
     `    chat.suggestions = ${jsArray(ctx.suggestions)};`,
     `    chat.suggestionMode = 'submit';`,
     ``,
+    ...seedLines,
+    ...sourcesSetupLines,
   ];
 
   if (ctx.isMock) {
@@ -224,12 +329,25 @@ function htmlWiring(ctx: RenderCtx): string {
     ].join('\n');
   }
 
+  // SCAF-8: include model in the POST body when the integration forwards it.
+  const modelLines = ctx.defaultModel
+    ? [
+        `      // SCAF-8: change this model id to any provider/model string you want to use.`,
+        `      const model = '${ctx.defaultModel}';`,
+        ``,
+      ]
+    : [];
+  const bodyPayload = ctx.defaultModel
+    ? `{ model, messages: history.map((m) => ({ role: m.role, content: m.content })) }`
+    : `{ messages: history.map((m) => ({ role: m.role, content: m.content })) }`;
+
   return [
     ...head,
     `    chat.addEventListener('kai-submit', async (e) => {`,
     `      const value = e.detail.value.trim();`,
     `      if (!value) return;`,
     ``,
+    ...modelLines,
     `      // messages is a JS PROPERTY (objects can't be HTML attributes)`,
     `      const history = [...chat.messages, { id: crypto.randomUUID(), role: 'user', content: value }];`,
     `      const assistantId = crypto.randomUUID();`,
@@ -239,7 +357,7 @@ function htmlWiring(ctx: RenderCtx): string {
     `      const res = await fetch('/api/chat', {`,
     `        method: 'POST',`,
     `        headers: { 'Content-Type': 'application/json' },`,
-    `        body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),`,
+    `        body: JSON.stringify(${bodyPayload}),`,
     `      });`,
     ``,
     `      // Read the OpenAI-format SSE and stream it into the assistant message.`,
@@ -281,7 +399,7 @@ function renderHtml(archetype: Archetype, ctx: RenderCtx): string {
     componentTags(archetype, p.chatFill),
     `</div>`,
     ``,
-    htmlWiring(ctx),
+    htmlWiring(ctx, archetype),
     ``,
     `  <!-- empty-state hint: ${emptyHint} -->`,
   ].join('\n');
@@ -299,19 +417,72 @@ function toPascalCase(tag: string): string {
 
 /** JSX usage for react/next: uses the official @kitn.ai/ui/react wrappers. */
 function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): string {
-  const { p, emptyHint, suggestions, isMock } = ctx;
-  // Collect all PascalCase wrapper names for this archetype's components.
-  const wrapperNames = archetype.components.map(toPascalCase);
+  const { p, emptyHint, suggestions, isMock, defaultModel } = ctx;
+
+  // SCAF-9: exclude message-embedded tags from import list and companion JSX.
+  const renderableTags = archetype.components.filter((t) => !MESSAGE_EMBEDDED_TAGS.has(t));
+  const wrapperNames = renderableTags.map(toPascalCase);
   const importList = wrapperNames.join(', ');
 
-  const companionTags = archetype.components.filter((t) => t !== 'kai-chat');
-  const companions = [
-    ...(companionTags.length > 0 ? [`      {/* wire data props — see the component_reference MCP tool */}`] : []),
-    ...companionTags.map((t) => `      <${toPascalCase(t)} />`),
-  ].join('\n');
+  // SCAF-9: standalone companion tags (not kai-chat, not message-embedded).
+  const standaloneCompanionTags = archetype.components.filter(
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t),
+  );
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+
+  // Build companion JSX: only standalone companions with real props.
+  const companionJsxLines: string[] = [];
+  if (hasEmbedded) {
+    companionJsxLines.push(
+      `      {/* kai-tool / kai-reasoning render inside the thread. Tool calls + reasoning`,
+      `          are set on each message object — see the sampleMessages initializer above. */}`,
+    );
+  }
+  for (const t of standaloneCompanionTags) {
+    if (t === 'kai-sources') {
+      companionJsxLines.push(
+        `      {/* Replace sampleSources with your real data. */}`,
+        `      <Sources sources={sampleSources} />`,
+      );
+    } else {
+      companionJsxLines.push(`      {/* wire data props — see the component_reference MCP tool */}`);
+      companionJsxLines.push(`      <${toPascalCase(t)} />`);
+    }
+  }
+  const companions = companionJsxLines.join('\n');
 
   // SCAF-4: Inline ChatMessage type for strict-TS consumers; avoids implicit-any on useState/handler.
-  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string };`;
+  const chatMessageType = `type ChatMessage = { id: string; role: 'user' | 'assistant'; content: string; reasoning?: { text: string }; tools?: { type: string; state: string; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string }[] };`;
+
+  // SCAF-9: seed sample messages for agentic archetype so tool+reasoning render immediately.
+  const sampleMessagesInit = hasEmbedded
+    ? [
+        `  // SCAF-9: tool calls and reasoning render inside the thread — set them on the message object.`,
+        `  // Replace with real messages streamed from your backend.`,
+        `  const sampleMessages: ChatMessage[] = [${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}];`,
+        `  const [messages, setMessages] = useState<ChatMessage[]>(sampleMessages);`,
+      ].join('\n')
+    : `  const [messages, setMessages] = useState<ChatMessage[]>([]);`;
+
+  // SCAF-9: sample sources data for knowledge-base archetype.
+  const sampleSourcesInit =
+    standaloneCompanionTags.includes('kai-sources')
+      ? [
+          `  // Replace sampleSources with your real source data.`,
+          `  const sampleSources = [`,
+          `    { href: 'https://example.com/doc1', title: 'Getting started', description: 'Overview of the product.' },`,
+          `    { href: 'https://example.com/doc2', title: 'API reference', description: 'Full API documentation.' },`,
+          `  ];`,
+        ].join('\n')
+      : '';
+
+  // SCAF-8: model const for integrations that forward model to the upstream provider.
+  const modelInit = defaultModel
+    ? `  // SCAF-8: change this to any provider/model string you want to use.\n  const model = '${defaultModel}';`
+    : '';
+  const bodyPayload = defaultModel
+    ? `{ model, messages: history.map((m) => ({ role: m.role, content: m.content })) }`
+    : `{ messages: history.map((m) => ({ role: m.role, content: m.content })) }`;
 
   // onSubmit body: mock streams a canned reply client-side; otherwise fetch /api/chat.
   const onSubmitBody = isMock
@@ -334,7 +505,7 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): str
         `    const res = await fetch('/api/chat', {`,
         `      method: 'POST',`,
         `      headers: { 'Content-Type': 'application/json' },`,
-        `      body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),`,
+        `      body: JSON.stringify(${bodyPayload}),`,
         `    });`,
         `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
         `    const reader = res.body!.getReader();`,
@@ -370,7 +541,7 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): str
   // never runs on the server during prerender → avoids "window is not defined" crash.
   // Plain `react` (Vite) has no SSR and keeps the top-level imports unchanged.
   if (framework === 'next') {
-    // Build dynamic() calls for every wrapper in the archetype.
+    // Build dynamic() calls for every renderable wrapper in the archetype.
     const dynamicImports = wrapperNames.map(
       (name) =>
         `const ${name} = dynamic(() => import('@kitn.ai/ui/react').then((m) => m.${name}), { ssr: false });`,
@@ -399,9 +570,11 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): str
       chatMessageType,
       ``,
       `export default function App() {`,
-      `  const [messages, setMessages] = useState<ChatMessage[]>([]);`,
+      sampleMessagesInit,
       `  const [loading, setLoading] = useState(false);`,
       `  const suggestions = ${jsArray(suggestions)};`,
+      ...(sampleSourcesInit ? [sampleSourcesInit] : []),
+      ...(modelInit ? [modelInit] : []),
       ``,
       `  async function onSubmit(e: CustomEvent<{ value: string }>) {`,
       onSubmitBody,
@@ -445,9 +618,11 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): str
     chatMessageType,
     ``,
     `export default function App() {`,
-    `  const [messages, setMessages] = useState<ChatMessage[]>([]);`,
+    sampleMessagesInit,
     `  const [loading, setLoading] = useState(false);`,
     `  const suggestions = ${jsArray(suggestions)};`,
+    ...(sampleSourcesInit ? [sampleSourcesInit] : []),
+    ...(modelInit ? [modelInit] : []),
     ``,
     `  async function onSubmit(e: CustomEvent<{ value: string }>) {`,
     onSubmitBody,
@@ -474,12 +649,35 @@ function renderJsx(archetype: Archetype, ctx: RenderCtx, framework: string): str
 
 /** Vue: bind messages/suggestions as properties, listen for kai-submit with @. */
 function renderVue(archetype: Archetype, ctx: RenderCtx): string {
-  const { p, emptyHint, suggestions, isMock } = ctx;
-  const companionTags = archetype.components.filter((t) => t !== 'kai-chat');
-  const companions = [
-    ...(companionTags.length > 0 ? [`    <!-- wire data props — see the component_reference MCP tool -->`] : []),
-    ...companionTags.map((t) => `    <${t} />`),
-  ].join('\n');
+  const { p, emptyHint, suggestions, isMock, defaultModel } = ctx;
+
+  // SCAF-9: exclude message-embedded tags from companion rendering.
+  const standaloneCompanionTags = archetype.components.filter(
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t),
+  );
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+
+  const companionLines: string[] = [];
+  if (hasEmbedded) {
+    companionLines.push(
+      `    <!-- kai-tool / kai-reasoning render INSIDE the thread — set tools/reasoning on each message object. -->`,
+    );
+  }
+  for (const t of standaloneCompanionTags) {
+    if (t === 'kai-sources') {
+      companionLines.push(`    <!-- Replace sampleSources with your real data (set as a JS property). -->`);
+      companionLines.push(`    <kai-sources ref="sourcesEl" />`);
+    } else {
+      companionLines.push(`    <!-- wire data props — see the component_reference MCP tool -->`);
+      companionLines.push(`    <${t} />`);
+    }
+  }
+  const companions = companionLines.join('\n');
+
+  // SCAF-8: include model when the integration forwards it.
+  const bodyPayload = defaultModel
+    ? `{ model, messages: history.map((m) => ({ role: m.role, content: m.content })) }`
+    : `{ messages: history.map((m) => ({ role: m.role, content: m.content })) }`;
 
   const onSubmitBody = isMock
     ? mockStreamBody({
@@ -497,9 +695,71 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
         `    const assistantId = crypto.randomUUID();`,
         `    messages.value = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
         `    loading.value = true;`,
-        `    // POST { messages } to /api/chat, then stream the OpenAI-format SSE into the`,
+        `    // POST to /api/chat, then stream the OpenAI-format SSE into the`,
         `    // assistant message (reassign messages.value per chunk) — see the Streaming recipe.`,
+        ...(defaultModel
+          ? [
+              `    // SCAF-8: change this to any provider/model string you want to use.`,
+              `    const model = '${defaultModel}';`,
+            ]
+          : []),
+        `    const res = await fetch('/api/chat', {`,
+        `      method: 'POST',`,
+        `      headers: { 'Content-Type': 'application/json' },`,
+        `      body: JSON.stringify(${bodyPayload}),`,
+        `    });`,
+        `    // Stream the OpenAI-format SSE — see the Streaming recipe.`,
+        `    const reader = res.body.getReader();`,
+        `    const decoder = new TextDecoder();`,
+        `    let buffer = '', answer = '';`,
+        `    while (true) {`,
+        `      const { value: chunk, done } = await reader.read();`,
+        `      if (done) break;`,
+        `      buffer += decoder.decode(chunk, { stream: true });`,
+        `      const lines = buffer.split('\\n');`,
+        `      buffer = lines.pop();`,
+        `      for (const line of lines) {`,
+        `        const s = line.trim();`,
+        `        if (!s.startsWith('data:')) continue;`,
+        `        const payload = s.slice(5).trim();`,
+        `        if (payload === '[DONE]') continue;`,
+        `        try {`,
+        `          const delta = JSON.parse(payload).choices?.[0]?.delta?.content;`,
+        `          if (!delta) continue;`,
+        `          answer += delta;`,
+        `          messages.value = messages.value.map((m) => (m.id === assistantId ? { ...m, content: answer } : m));`,
+        `        } catch { /* skip keep-alives */ }`,
+        `      }`,
+        `    }`,
+        `    loading.value = false;`,
       ].join('\n');
+
+  // SCAF-9: sample seeding for agentic archetype.
+  const sampleSeed = hasEmbedded
+    ? [
+        `// SCAF-9: tool calls + reasoning render inside the thread — set them on the message object.`,
+        `// Replace with real messages streamed from your backend.`,
+        `const messages = ref([${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}]);`,
+      ]
+    : [`const messages = ref([]);`];
+
+  // SCAF-9: sample sources setup.
+  const sourcesSeed = standaloneCompanionTags.includes('kai-sources')
+    ? [
+        `// Replace sampleSources with your real source data.`,
+        `const sampleSources = [`,
+        `  { href: 'https://example.com/doc1', title: 'Getting started', description: 'Overview of the product.' },`,
+        `  { href: 'https://example.com/doc2', title: 'API reference', description: 'Full API documentation.' },`,
+        `];`,
+        `onMounted(() => {`,
+        `  const el = document.querySelector('kai-sources');`,
+        `  if (el) el.sources = sampleSources;`,
+        `});`,
+      ]
+    : [];
+
+  const needsOnMounted = sourcesSeed.length > 0;
+  const vueImports = needsOnMounted ? `import { ref, onMounted } from 'vue';` : `import { ref } from 'vue';`;
 
   return [
     `<!-- vue — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
@@ -511,11 +771,12 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
     `<script setup>`,
     `import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
     `import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
-    `import { ref } from 'vue';`,
+    vueImports,
     ``,
-    `const messages = ref([]);`,
+    ...sampleSeed,
     `const loading = ref(false);`,
     `const suggestions = ${jsArray(suggestions)};`,
+    ...sourcesSeed,
     ``,
     `async function onSubmit(e) {`,
     onSubmitBody,
@@ -542,12 +803,35 @@ function renderVue(archetype: Archetype, ctx: RenderCtx): string {
 
 /** Svelte: use bind:this to set array/object properties reactively; on:kai-submit for the event. */
 function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
-  const { p, emptyHint, suggestions, isMock } = ctx;
-  const companionTags = archetype.components.filter((t) => t !== 'kai-chat');
-  const companionLines = [
-    ...(companionTags.length > 0 ? [`  <!-- wire data props — see the component_reference MCP tool -->`] : []),
-    ...companionTags.map((t) => `  <${t}></${t}>`),
-  ].join('\n');
+  const { p, emptyHint, suggestions, isMock, defaultModel } = ctx;
+
+  // SCAF-9: exclude message-embedded tags from companion rendering.
+  const standaloneCompanionTags = archetype.components.filter(
+    (t) => t !== 'kai-chat' && !MESSAGE_EMBEDDED_TAGS.has(t),
+  );
+  const hasEmbedded = archetype.components.some((t) => MESSAGE_EMBEDDED_TAGS.has(t));
+
+  const companionLinesList: string[] = [];
+  if (hasEmbedded) {
+    companionLinesList.push(
+      `  <!-- kai-tool / kai-reasoning render INSIDE the thread — set tools/reasoning on each message object. -->`,
+    );
+  }
+  for (const t of standaloneCompanionTags) {
+    if (t === 'kai-sources') {
+      companionLinesList.push(`  <!-- Replace sampleSources with your real data. -->`);
+      companionLinesList.push(`  <kai-sources bind:this={sourcesEl}></kai-sources>`);
+    } else {
+      companionLinesList.push(`  <!-- wire data props — see the component_reference MCP tool -->`);
+      companionLinesList.push(`  <${t}></${t}>`);
+    }
+  }
+  const companionLines = companionLinesList.join('\n');
+
+  // SCAF-8: include model when the integration forwards it.
+  const bodyPayload = defaultModel
+    ? `{ model, messages: history.map((m) => ({ role: m.role, content: m.content })) }`
+    : `{ messages: history.map((m) => ({ role: m.role, content: m.content })) }`;
 
   const onSubmitBody = isMock
     ? mockStreamBody({
@@ -565,10 +849,16 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
         `    const assistantId = crypto.randomUUID();`,
         `    messages = [...history, { id: assistantId, role: 'assistant', content: '' }];`,
         `    loading = true;`,
+        ...(defaultModel
+          ? [
+              `    // SCAF-8: change this to any provider/model string you want to use.`,
+              `    const model = '${defaultModel}';`,
+            ]
+          : []),
         `    const res = await fetch('/api/chat', {`,
         `      method: 'POST',`,
         `      headers: { 'Content-Type': 'application/json' },`,
-        `      body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),`,
+        `      body: JSON.stringify(${bodyPayload}),`,
         `    });`,
         `    // Stream the OpenAI-format SSE into the assistant message — see the Streaming recipe.`,
         `    const reader = res.body.getReader();`,
@@ -596,6 +886,30 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
         `    loading = false;`,
       ].join('\n');
 
+  // SCAF-9: seed sample messages for agentic archetype.
+  const sampleMessagesInit = hasEmbedded
+    ? [
+        `  // SCAF-9: tool calls + reasoning render INSIDE the thread — set them on the message object.`,
+        `  // Replace with real messages streamed from your backend.`,
+        `  let messages = [${JSON.stringify(SAMPLE_AGENTIC_MESSAGE)}];`,
+      ]
+    : [`  let messages = [];`];
+
+  // SCAF-9: sources element ref + sample data.
+  const sourcesEl = standaloneCompanionTags.includes('kai-sources')
+    ? [`  let sourcesEl;`]
+    : [];
+  const sourcesReactive = standaloneCompanionTags.includes('kai-sources')
+    ? [
+        `  // Replace sampleSources with your real source data.`,
+        `  const sampleSources = [`,
+        `    { href: 'https://example.com/doc1', title: 'Getting started', description: 'Overview of the product.' },`,
+        `    { href: 'https://example.com/doc2', title: 'API reference', description: 'Full API documentation.' },`,
+        `  ];`,
+        `  $: if (sourcesEl) { sourcesEl.sources = sampleSources; }`,
+      ]
+    : [];
+
   return [
     `<!-- svelte — ${archetype.title} — ${p.note}. empty-state hint: ${emptyHint} -->`,
     ...(p.altNote ? [`<!-- ${p.altNote} -->`] : []),
@@ -605,11 +919,13 @@ function renderSvelte(archetype: Archetype, ctx: RenderCtx): string {
     `  import '@kitn.ai/ui/elements';  // registers <kai-*> — required, must come first`,
     `  import '@kitn.ai/ui/theme.tokens.css';  // compiled token defaults; use theme.css only for Tailwind-source apps`,
     `  let chatEl;`,
-    `  let messages = [];`,
+    ...sourcesEl,
+    ...sampleMessagesInit,
     `  let loading = false;`,
     `  const suggestions = ${jsArray(suggestions)};`,
     `  // suggestions/messages are JS PROPERTIES (arrays/objects can't be attributes)`,
     `  $: if (chatEl) { chatEl.messages = messages; chatEl.loading = loading; chatEl.suggestions = suggestions; }`,
+    ...sourcesReactive,
     ``,
     `  async function onSubmit(e) {`,
     onSubmitBody,
@@ -646,8 +962,9 @@ function renderFrontend(
   emptyHint: string,
   suggestions: string[],
   isMock: boolean,
+  defaultModel?: string,
 ): string {
-  const ctx: RenderCtx = { p: placementStyle(placement), emptyHint, suggestions, isMock };
+  const ctx: RenderCtx = { p: placementStyle(placement), emptyHint, suggestions, isMock, defaultModel };
   switch (framework) {
     case 'react':
     case 'next':
@@ -727,7 +1044,9 @@ function compose(
     : 'add an empty-state prompt that fits your product';
 
   const isMock = integration.id === 'mock';
-  const frontend = renderFrontend(framework, archetype, placement, audienceHint, suggestions, isMock);
+  // SCAF-8: compute the default model only for non-mock integrations that forward model.
+  const defaultModel = isMock ? undefined : defaultModelFor(integration);
+  const frontend = renderFrontend(framework, archetype, placement, audienceHint, suggestions, isMock, defaultModel);
   const route = isMock ? undefined : chooseRoute(integration, framework);
 
   const header = [
