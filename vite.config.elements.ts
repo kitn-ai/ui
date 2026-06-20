@@ -47,11 +47,19 @@ for (const file of Object.keys(manifest.files)) {
 export default defineConfig({
   plugins: [solidPlugin(), libMinifyPlugin()],
   build: {
-    outDir: 'dist/elements',
+    // Unified elements build (runs FIRST in the chain; owns the dist clean). The
+    // register-all `index` entry emits to the historical dist/kitn-chat.es.js path
+    // (so @kitn.ai/ui/elements + every existing reference is unchanged), while the
+    // per-element + autoloader entries emit to dist/elements/ and ALL entries share
+    // dist/elements/chunks/ — one build, no dep duplication.
+    outDir: 'dist',
     emptyOutDir: true,
     lib: { entry, formats: ['es'] },
     rollupOptions: {
-      output: { entryFileNames: '[name].js', chunkFileNames: 'chunks/[name]-[hash].js' },
+      output: {
+        entryFileNames: (c) => (c.name === 'index' ? 'kitn-chat.es.js' : `elements/${c.name}.js`),
+        chunkFileNames: 'elements/chunks/[name]-[hash].js',
+      },
     },
   },
 });
