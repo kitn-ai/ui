@@ -135,7 +135,7 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `messages` | — | `{ id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]` | `[]` | The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). |
+| `messages` | — | `{ id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]` | `[]` | The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). |
 | `value` | `value` | `undefined | string` | — | Controlled value of the input. When set, the host owns the input text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
 | `loading` | `loading` | `undefined | false | true` | `false` | When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). |
@@ -163,7 +163,7 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-message-action` | `{ messageId: string; action: string }` | An action button on a message was clicked. `action` is the built-in name or custom id. |
+| `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
 | `kai-model-change` | `{ modelId: string }` | The header model switcher changed. |
 | `kai-search` | — | The Search button was clicked. |
 | `kai-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
@@ -195,7 +195,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `groups` | — | `ConversationGroup[]` | `[]` | Pre-bucketed conversation groups for the sidebar. Set as a JS property. |
 | `conversations` | — | `ConversationSummary[]` | `[]` | Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. |
 | `activeId` | `active-id` | `undefined | string` | — | Id of the open conversation, highlighted in the sidebar. |
-| `messages` | — | `{ id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[]` | `[]` | The active conversation's message thread, newest last. Set as a JS property. |
+| `messages` | — | `{ id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]` | `[]` | The active conversation's message thread, newest last. Set as a JS property. |
 | `value` | `value` | `undefined | string` | — |  |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` |  |
 | `loading` | `loading` | `undefined | false | true` | `false` |  |
@@ -225,7 +225,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-conversation-select` | `{ id: string }` | A conversation was selected in the sidebar. |
-| `kai-message-action` | `{ messageId: string; action: string }` | An action button on a message was clicked. |
+| `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button on a message was clicked. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
 | `kai-model-change` | `{ modelId: string }` | The header model switcher changed. |
 | `kai-new-chat` | — | The "New chat" button was clicked. |
 | `kai-search` | — | The Search button was clicked. |
@@ -369,7 +369,7 @@ Standalone prompt input with a send button. Use when you want just the input are
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `message` | — | `undefined | { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }` | — | The full message object. Set as a JS property. |
+| `message` | — | `undefined | { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }` | — | The full message object. Set as a JS property. |
 | `role` | `role` | `undefined | "user" | "assistant"` | `'assistant'` | Convenience for simple cases when not passing a `message` object. |
 | `content` | `content` | `undefined | string` | — | Convenience content (used when `message` is not set). |
 | `markdown` | `markdown` | `undefined | false | true` | — | Force markdown on/off. Defaults to on for assistant, off for user. |
@@ -384,11 +384,11 @@ Standalone prompt input with a send button. Use when you want just the input are
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-message-action` | `{ messageId: string; action: string }` | An action button was clicked. `action` is the built-in name or custom id. |
+| `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
 
 #### Composed from
 
-`Components/Message`, `Components/MessageAvatar`, `Components/MessageContent`, `Components/MessageActionBar`, `Components/Reasoning`, `Components/ReasoningTrigger`, `Components/ReasoningContent`, `Components/Tool`, `Components/Attachments`, `Components/Attachment`, `Components/AttachmentPreview`, `Components/AttachmentInfo`
+`Components/Message`, `Components/MessageAvatar`, `Components/MessageBody`
 
 #### Theming
 

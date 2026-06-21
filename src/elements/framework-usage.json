@@ -114,6 +114,18 @@
     }
   },
   {
+    "tag": "kai-compare",
+    "displayName": "Compare",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-compare></kai-compare>\n<script type=\"module\">\n  const el = document.querySelector('kai-compare');\n  el.addEventListener('kai-compare-select', (e) => console.log(e.detail));\n  el.addEventListener('kai-error', (e) => console.log(e.detail));\n  el.addEventListener('kai-ready', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Compare } from '@kitn.ai/ui/react';\n\n<Compare\n  onCompareSelect={(e) => console.log(e.detail)}\n  onError={(e) => console.log(e.detail)}\n  onReady={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-compare\n  @kai-compare-select=\"onCompareSelect\"\n  @kai-error=\"onError\"\n  @kai-ready=\"onReady\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-compare\n  on:kai-compare-select={onCompareSelect}\n  on:kai-error={onError}\n  on:kai-ready={onReady}\n></kai-compare>",
+      "angular": "<kai-compare\n  (kai-compare-select)=\"onCompareSelect($event)\"\n  (kai-error)=\"onError($event)\"\n  (kai-ready)=\"onReady($event)\"\n></kai-compare>"
+    }
+  },
+  {
     "tag": "kai-confirm",
     "displayName": "Confirm",
     "hasSolid": false,
@@ -520,6 +532,19 @@
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-thinking-bar\n  on:kai-stop={onStop}\n></kai-thinking-bar>",
       "angular": "<kai-thinking-bar\n  (kai-stop)=\"onStop($event)\"\n></kai-thinking-bar>",
       "solid": "import { ThinkingBar } from '@kitn.ai/ui';\n\n<ThinkingBar\n  onStop={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kai-toast-region",
+    "displayName": "ToastRegion",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-toast-region></kai-toast-region>\n<script type=\"module\">\n  const el = document.querySelector('kai-toast-region');\n  el.toasts = /* … */;\n  el.addEventListener('kai-action', (e) => console.log(e.detail));\n  el.addEventListener('kai-dismiss', (e) => console.log(e.detail));\n</script>",
+      "react": "import { ToastRegion } from '@kitn.ai/ui/react';\n\n<ToastRegion\n  toasts={toasts}\n  onAction={(e) => console.log(e.detail)}\n  onDismiss={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-toast-region\n  :toasts.prop=\"toasts\"\n  @kai-action=\"onAction\"\n  @kai-dismiss=\"onDismiss\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-toast-region\n  {toasts}\n  on:kai-action={onAction}\n  on:kai-dismiss={onDismiss}\n></kai-toast-region>",
+      "angular": "<kai-toast-region\n  [toasts]=\"toasts\"\n  (kai-action)=\"onAction($event)\"\n  (kai-dismiss)=\"onDismiss($event)\"\n></kai-toast-region>",
+      "solid": "import { ToastRegion } from '@kitn.ai/ui';\n\n<ToastRegion\n  toasts={toasts}\n  onAction={(e) => console.log(e.detail)}\n  onDismiss={(e) => console.log(e.detail)}\n/>"
     }
   },
   {

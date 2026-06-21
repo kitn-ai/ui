@@ -100,11 +100,11 @@ export const Card = createWebComponent<CardProps>(
 
 export interface CardsProps extends WebComponentProps {
   /** The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. */
-  cards?: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } }[];
+  cards?: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }[];
   /** Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. */
   types?: Record<string, string>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
-  policy?: { onSubmit?: (cardId: string, data: unknown) => void; onAction?: (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: (text: string, opts: { mode: "compose" | "send"; context?: unknown; }) => void; onOpen?: (url: string, target: "tab" | "artifact") => void; onState?: (cardId: string, patch: unknown) => void; onDismiss?: (cardId: string) => void; onError?: (cardId: string, message: string) => void; maxSendPromptMode?: "compose" | "send" };
+  policy?: { onSubmit?: (cardId: string, data: unknown) => void; onAction?: (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: (text: string, opts: { mode: "compose" | "send"; context?: unknown; }) => void; onOpen?: (url: string, target: "tab" | "artifact") => void; onState?: (cardId: string, patch: unknown) => void; onDismiss?: (cardId: string) => void; onReopen?: (cardId: string) => void; onError?: (cardId: string, message: string) => void; maxSendPromptMode?: "compose" | "send" };
 }
 
 export const Cards = createWebComponent<CardsProps>(
@@ -126,7 +126,7 @@ export const ChainOfThought = createWebComponent<ChainOfThoughtProps>(
 
 export interface ChatProps extends WebComponentProps {
   /** The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). */
-  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[];
+  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[];
   /** Controlled value of the input. When set, the host owns the input text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. */
   value?: string;
   /** Placeholder text shown in the empty input. */
@@ -171,8 +171,8 @@ export interface ChatProps extends WebComponentProps {
   slashCompact?: boolean;
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
-  /** An action button on a message was clicked. `action` is the built-in name or custom id. */
-  onMessageAction?: (event: CustomEvent<{ messageId: string; action: string }>) => void;
+  /** An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
+  onMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
   /** The header model switcher changed. */
   onModelChange?: (event: CustomEvent<{ modelId: string }>) => void;
   /** The Search button was clicked. */
@@ -248,6 +248,35 @@ export const CodeBlock = createWebComponent<CodeBlockProps>(
   'kai-code-block',
   ["theme","code","language","codeTheme","codeHighlight","proseSize"],
   {  },
+);
+
+export interface CompareProps extends WebComponentProps {
+  /** The compare definition (prompt + the two candidates). Set as a JS PROPERTY: `el.data = { prompt, candidates: [A, B], collapse? }`. Import `ResponseCompareData` from `@kitn.ai/ui` for the full shape. */
+  data?: Record<string, unknown>;
+  /** Stable id correlating every emitted event. Attribute: `compare-id`. */
+  compareId?: string;
+  /** Re-hydrate / control the user's pick. Set as a JS PROPERTY: `el.selection = { chosenId, rejectedIds }`. Renders the collapsed winner. */
+  selection?: Record<string, unknown>;
+  /** Column layout: `'auto'` (default, container-query responsive) | `'columns'` | `'stacked'`. Attribute: `layout`. */
+  layout?: "auto" | "columns" | "stacked";
+  /** Prose/text size for the rendered candidates. Attribute: `prose-size`. */
+  proseSize?: "xs" | "sm" | "base" | "lg";
+  /** Shiki theme for code blocks in the candidates. Attribute: `code-theme`. */
+  codeTheme?: string;
+  /** Whether code blocks are syntax-highlighted. Attribute: `code-highlight`. */
+  codeHighlight?: boolean;
+  /** The user committed a pick. `detail` = `{ chosenId, rejectedIds, at }`. */
+  onCompareSelect?: (event: CustomEvent<{ chosenId: string; rejectedIds: string[]; at?: undefined | number }>) => void;
+  /** The definition was unusable. */
+  onError?: (event: CustomEvent<{ compareId: string; message: string }>) => void;
+  /** Both candidates have settled and the pick is live. */
+  onReady?: (event: CustomEvent<{ compareId: string }>) => void;
+}
+
+export const Compare = createWebComponent<CompareProps>(
+  'kai-compare',
+  ["theme","data","compareId","selection","layout","proseSize","codeTheme","codeHighlight"],
+  { onCompareSelect: 'kai-compare-select', onError: 'kai-error', onReady: 'kai-ready' },
 );
 
 export interface ConfirmProps extends WebComponentProps {
@@ -479,7 +508,7 @@ export const Markdown = createWebComponent<MarkdownProps>(
 
 export interface MessageProps extends WebComponentProps {
   /** The full message object. Set as a JS property. */
-  message?: { id: string; role: "user" | "assistant"; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string }[]; attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[]; actions?: ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string } };
+  message?: { id: string; role: "user" | "assistant"; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string }[]; attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[]; actions?: ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" };
   /** Convenience for simple cases when not passing a `message` object. */
   role?: "user" | "assistant";
   /** Convenience content (used when `message` is not set). */
@@ -498,8 +527,8 @@ export interface MessageProps extends WebComponentProps {
   avatarSrc?: string;
   /** Convenience avatar fallback text (used when `message.avatar` is not set). */
   avatarFallback?: string;
-  /** An action button was clicked. `action` is the built-in name or custom id. */
-  onMessageAction?: (event: CustomEvent<{ messageId: string; action: string }>) => void;
+  /** An action button was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
+  onMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
 }
 
 export const Message = createWebComponent<MessageProps>(
@@ -854,6 +883,25 @@ export const ThinkingBar = createWebComponent<ThinkingBarProps>(
   { onStop: 'kai-stop' },
 );
 
+export interface ToastRegionProps extends WebComponentProps {
+  /** The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. */
+  toasts: { id: string; message: string; variant?: undefined | "neutral" | "success"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean }[];
+  /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
+  position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
+  /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
+  max?: number;
+  /** A toast's action button was pressed. */
+  onAction?: (event: CustomEvent<{ id: string; label: string }>) => void;
+  /** A toast left the stack. `reason` is `'timeout' | 'close' | 'action'`. */
+  onDismiss?: (event: CustomEvent<{ id: string; reason: "action" | "timeout" | "close" }>) => void;
+}
+
+export const ToastRegion = createWebComponent<ToastRegionProps>(
+  'kai-toast-region',
+  ["theme","toasts","position","max"],
+  { onAction: 'kai-action', onDismiss: 'kai-dismiss' },
+);
+
 export interface ToolProps extends WebComponentProps {
   /** The tool-call to display. Set as a JS property. */
   tool?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string };
@@ -892,7 +940,7 @@ export interface WorkspaceProps extends WebComponentProps {
   /** Id of the open conversation, highlighted in the sidebar. */
   activeId?: string;
   /** The active conversation's message thread, newest last. Set as a JS property. */
-  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string } }[];
+  messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[];
   value?: string;
   placeholder?: string;
   loading?: boolean;
@@ -923,8 +971,8 @@ export interface WorkspaceProps extends WebComponentProps {
   defaultSidebarCollapsed?: boolean;
   /** A conversation was selected in the sidebar. */
   onConversationSelect?: (event: CustomEvent<{ id: string }>) => void;
-  /** An action button on a message was clicked. */
-  onMessageAction?: (event: CustomEvent<{ messageId: string; action: string }>) => void;
+  /** An action button on a message was clicked. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
+  onMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
   /** The header model switcher changed. */
   onModelChange?: (event: CustomEvent<{ modelId: string }>) => void;
   /** The "New chat" button was clicked. */
