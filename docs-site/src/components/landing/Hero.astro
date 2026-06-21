@@ -26,6 +26,15 @@ const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
         reasoning, and artifacts, in any app.
       </p>
 
+      <!-- Open-source / license note -->
+      <p class="hero-rise mt-5 flex items-center gap-2 text-sm text-ink-3" style="--d:150ms">
+        <Icon name="lucide:scale" class="size-4 shrink-0" />
+        <span>
+          <a href="https://github.com/kitn-ai/ui" target="_blank" rel="noopener" class="font-semibold text-ink-2 underline decoration-line underline-offset-2 hover:text-brand">Open source</a>
+          and MIT licensed — yours to use, fork, and ship.
+        </span>
+      </p>
+
       <div class="hero-rise mt-8 flex flex-wrap items-center gap-3" style="--d:180ms">
         <a href={href('guides/getting-started')} class="group inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-white no-underline transition-colors hover:bg-[var(--kai-brand-hover)]">
           Get started

@@ -75,10 +75,10 @@ const frameworks = [
     <ol
       data-qs-panel={p.id}
       hidden={i !== 0}
-      class={p.steps.length === 2 ? 'mt-6 grid gap-4 md:grid-cols-2' : 'mt-6 grid gap-4 md:grid-cols-3'}
+      class={p.steps.length === 2 ? 'mt-6 grid grid-cols-1 gap-4 md:grid-cols-2' : 'mt-6 grid grid-cols-1 gap-4 md:grid-cols-3'}
     >
       {p.steps.map((s) => (
-        <li class="flex flex-col rounded-2xl border border-line bg-surface p-6">
+        <li class="flex min-w-0 flex-col rounded-2xl border border-line bg-surface p-6">
           <div class="flex items-center gap-3">
             <span class="font-mono text-sm font-bold text-brand">{s.n}</span>
             <h3 class="text-base font-bold text-ink">{s.title}</h3>
