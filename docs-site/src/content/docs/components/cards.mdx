@@ -10,6 +10,7 @@ import PropTable from '../../../components/PropTable.astro';
 import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
+import CardDismissDemo from '../../../components/CardDismissDemo.tsx';
 
 <p class="kai-tag-sub">kai-cards</p>
 
@@ -65,6 +66,8 @@ Set all three in JavaScript — they're arrays and objects, so none work as HTML
 Add `dismissible: true` to a `confirm`, `choice`, `form`, or `tasks` card's `data` to show a × on it. Dismissing a card **defers** it rather than deleting it: the card collapses to a compact, re-openable stub — *"Proposed: Deploy to production? — dismissed · Reopen"* — and `onDismiss(cardId)` fires.
 
 Defer, don't delete. A user who waves a card away may want it back; keep the option open until your app decides the card is truly done.
+
+<CardDismissDemo client:only="solid" />
 
 ```js
 cards.policy = {
