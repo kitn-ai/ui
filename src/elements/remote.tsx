@@ -81,6 +81,10 @@ function buildWrappedPolicy(element: HTMLElement, userPolicy: CardPolicy | undef
       emit({ kind: 'dismiss', cardId });
       userPolicy?.onDismiss?.(cardId);
     },
+    onReopen(cardId) {
+      emit({ kind: 'reopen', cardId });
+      userPolicy?.onReopen?.(cardId);
+    },
     onError(cardId, message) {
       emit({ kind: 'error', cardId, message });
       userPolicy?.onError?.(cardId, message);

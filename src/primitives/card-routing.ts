@@ -59,6 +59,9 @@ export function routeCardEvent(policy: CardPolicy | undefined, event: CardEvent)
     case 'dismiss':
       p.onDismiss ? p.onDismiss(event.cardId) : warnNoHandler('dismiss');
       break;
+    case 'reopen':
+      p.onReopen ? p.onReopen(event.cardId) : warnNoHandler('reopen');
+      break;
     case 'error':
       p.onError ? p.onError(event.cardId, event.message) : warnNoHandler('error');
       break;

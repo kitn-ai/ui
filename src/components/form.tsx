@@ -14,6 +14,7 @@ import { createStore, produce, unwrap } from 'solid-js/store';
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
 import { Card } from './card';
+import { DismissedStub } from './dismissed-stub';
 import {
   validateAgainstSchema,
   type JsonSchema,
@@ -437,11 +438,12 @@ export function Form(props: FormProps): JSX.Element {
     else emit({ kind: 'error', cardId: local.cardId, message: state.message });
   }));
 
-  // Surface the resolved state for host styling.
+  // Surface the resolved state for host styling. Only a `submit` resolution is the
+  // "submitted" state; a deferred `dismissed` (or `expired`) is not.
   createEffect(() => {
     const el = local.hostElement;
     if (!el) return;
-    if (res.isResolved()) el.setAttribute('data-kai-resolved', 'submitted');
+    if (res.resolution()?.kind === 'submit') el.setAttribute('data-kai-resolved', 'submitted');
     else el.removeAttribute('data-kai-resolved');
   });
 
@@ -488,6 +490,15 @@ export function Form(props: FormProps): JSX.Element {
     res.setLocal({ kind: 'submit', data: out });
   };
 
+  // Dismiss: emit `dismiss` AND optimistically flip to a `dismissed` resolution so
+  // the form collapses to its re-openable stub immediately.
+  const onDismiss = (): void => {
+    if (res.isResolved()) return;
+    emit({ kind: 'dismiss', cardId: local.cardId });
+    res.setLocal({ kind: 'dismissed' });
+  };
+  const onReopen = (): void => emit({ kind: 'reopen', cardId: local.cardId });
+
   const actions = createMemo(() => def()['x-kai-actions'] ?? []);
   const submitLabel = () => def()['x-kai-submitLabel'] ?? 'Submit';
   const dismissible = () => def()['x-kai-dismissible'] === true;
@@ -509,6 +520,12 @@ export function Form(props: FormProps): JSX.Element {
           return <Card heading={local.heading} errorMessage="The form failed to render." />;
         }}
       >
+        <Show
+          when={!res.isDeferred()}
+          fallback={
+            <DismissedStub type="form" title={local.heading ?? def().title} onReopen={onReopen} />
+          }
+        >
         <Card
           heading={local.heading ?? def().title}
           description={def().description}
@@ -522,7 +539,7 @@ export function Form(props: FormProps): JSX.Element {
                   <Button
                     type="button"
                     variant="ghost"
-                    onClick={() => emit({ kind: 'dismiss', cardId: local.cardId })}
+                    onClick={onDismiss}
                   >
                     Dismiss
                   </Button>
@@ -575,6 +592,7 @@ export function Form(props: FormProps): JSX.Element {
             </form>
           </Show>
         </Card>
+        </Show>
       </ErrorBoundary>
     </Show>
   );

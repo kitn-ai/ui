@@ -65,6 +65,11 @@
     "allowOther": {
       "description": "Optional free-text escape ('none of these / specify'). `true` appends a final 'Other…' option; an object customizes its `label`/`placeholder`. Selecting it reveals a text input; the shared Submit button then emits `{ kind:'action', action:'__other__', payload:{ text } }`.",
       "x-kai-control": "allow-other"
+    },
+    "dismissible": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show a close affordance that emits the `dismiss` verb. The card collapses to a re-openable 'dismissed' stub; the host decides via `onReopen` whether it comes back live or `expired`."
     }
   }
 }

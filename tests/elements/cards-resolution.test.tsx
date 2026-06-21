@@ -49,3 +49,45 @@ test('<kai-cards> renders a re-hydrated tasks card read-only', async () => {
   expect(summaryText).toContain('Selected 1 of 2');
   expect(tasksRoot.querySelector('input[type="checkbox"]')).toBeNull();
 });
+
+test('<kai-cards> renders a `dismissed` confirm envelope as a re-openable stub', async () => {
+  const el = document.createElement('kai-cards') as HTMLElement & { cards: CardEnvelope[] };
+  el.cards = [
+    {
+      type: 'confirm',
+      id: 'c1',
+      title: 'Delete?',
+      data: { body: 'Delete it?', dismissible: true, actions: [{ id: 'yes', label: 'Delete' }] },
+      resolution: { kind: 'dismissed' },
+    },
+  ];
+  document.body.appendChild(el);
+  await flush();
+  const confirmRoot = el.shadowRoot!.querySelector('kai-confirm')!.shadowRoot!;
+  // Stub shows the intent + dismissed text + a Reopen button; no action buttons.
+  expect(confirmRoot.textContent).toContain('dismissed');
+  expect(confirmRoot.querySelector('[role="group"]')).toBeTruthy();
+  const buttons = Array.from(confirmRoot.querySelectorAll('button'));
+  expect(buttons.some((b) => /Reopen/.test(b.textContent ?? ''))).toBe(true);
+  expect(buttons.some((b) => b.textContent?.trim() === 'Delete')).toBe(false);
+});
+
+test('<kai-cards> renders an `expired` confirm envelope as historical (no action buttons, no Reopen)', async () => {
+  const el = document.createElement('kai-cards') as HTMLElement & { cards: CardEnvelope[] };
+  el.cards = [
+    {
+      type: 'confirm',
+      id: 'c2',
+      title: 'Delete?',
+      data: { body: 'Delete it?', dismissible: true, actions: [{ id: 'yes', label: 'Delete' }] },
+      resolution: { kind: 'expired' },
+    },
+  ];
+  document.body.appendChild(el);
+  await flush();
+  const confirmRoot = el.shadowRoot!.querySelector('kai-confirm')!.shadowRoot!;
+  const buttons = Array.from(confirmRoot.querySelectorAll('button'));
+  // Terminal: no live action buttons, and NOT a re-openable stub.
+  expect(buttons.some((b) => b.textContent?.trim() === 'Delete')).toBe(false);
+  expect(buttons.some((b) => /Reopen/.test(b.textContent ?? ''))).toBe(false);
+});

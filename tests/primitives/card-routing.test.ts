@@ -51,6 +51,18 @@ test('missing handler is a no-op + warns, never throws', () => {
   expect(warn).toHaveBeenCalled();
 });
 
+test('routeCardEvent routes the reopen verb to onReopen (mirrors dismiss)', () => {
+  const onReopen = vi.fn();
+  routeCardEvent({ onReopen }, { kind: 'reopen', cardId: 'c1' });
+  expect(onReopen).toHaveBeenCalledWith('c1');
+});
+
+test('reopen with no handler warns + is a no-op, never throws', () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  expect(() => routeCardEvent({}, { kind: 'reopen', cardId: 'c1' })).not.toThrow();
+  expect(warn).toHaveBeenCalled();
+});
+
 test('listenForCardEvents routes bubbling events through policy + unsubscribes', () => {
   const onAction = vi.fn();
   const off = listenForCardEvents(document, { onAction });

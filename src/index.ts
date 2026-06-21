@@ -37,6 +37,10 @@ export { applyResolution, resolutionFromEvent } from './primitives/card-resoluti
 export { CardProvider, useCardHost } from './primitives/card-host';
 export type { CardProviderProps } from './primitives/card-host';
 export { CARD_EVENT_NAME, emitCardEvent, routeCardEvent, listenForCardEvents } from './primitives/card-routing';
+export { dismissRecovery, defaultIsReopenable } from './primitives/card-recovery';
+export type {
+  RecoveryToast, ReopenEnv, DismissRecoveryOptions,
+} from './primitives/card-recovery';
 export { validateAgainstSchema } from './primitives/card-validate';
 export type { JsonSchema, ValidationResult } from './primitives/card-validate';
 
@@ -57,6 +61,8 @@ export type { CardComponent, CardComponentMap, CardTagMap } from './primitives/c
 // Card: kai-card (base shell) + kai-form (JSON-Schema form renderer)
 export { Card } from './components/card';
 export type { CardProps } from './components/card';
+export { DismissedStub, stubIntent } from './components/dismissed-stub';
+export type { DismissedStubProps, DismissedCardType } from './components/dismissed-stub';
 export { Form, validateForm, buildResult, widgetFor, orderedKeys, coerceValue } from './components/form';
 export type {
   FormProps,
