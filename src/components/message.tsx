@@ -10,7 +10,6 @@ import { useChatConfig, textClass } from "../primitives/chat-config";
 import { Reasoning, ReasoningTrigger, ReasoningContent } from "./reasoning";
 import { Tool, type ToolPart } from "./tool";
 import { Attachments, Attachment, AttachmentPreview, AttachmentInfo, type AttachmentData } from "./attachments";
-import { createPresence } from "../ui/overlay";
 
 // --- Message ---
 
@@ -157,7 +156,8 @@ function feedbackVoteOf(a: ChatMessageAction | CustomAction): FeedbackVote | und
  * owned by the parent facade and passed in — the bar holds no internal signals,
  * so it survives the new-array-per-chunk re-renders of a streaming thread. With
  * a vote active, the chosen `like`/`dislike` button is marked `aria-pressed` +
- * filled and the other vote button animates out via `createPresence`. The
+ * filled and the other vote button collapses its width (sliding the active thumb
+ * into its place) via a 0fr↔1fr grid transition. The
  * `copy` button swaps to an emerald check while `copied`.
  */
 function MessageActionBar(props: MessageActionBarProps) {
@@ -215,24 +215,25 @@ function MessageActionBar(props: MessageActionBarProps) {
             </Show>
           );
 
-          // A vote button hides (animating out) when the OTHER vote is active.
-          // No vote active → both shown; this vote active → shown. Non-vote
-          // entries always render.
+          // When the OTHER vote is active, this vote button collapses — its WIDTH
+          // animates to zero via a 0fr↔1fr grid so the remaining thumb slides into
+          // its place, while it fades out; it slides + fades back on un-vote. (Kept
+          // mounted-but-collapsed, not unmounted, so the sibling can slide.) No
+          // vote active → both shown; non-vote entries always render.
           return (
             <Show when={vote !== undefined} fallback={rendered()}>
               {(() => {
                 const show = () => props.activeFeedback === undefined || props.activeFeedback === vote;
-                const presence = createPresence(show);
                 return (
-                  <Show when={presence.present()}>
-                    <span
-                      ref={presence.setRef}
-                      data-closed={presence.state() === 'closed' ? '' : undefined}
-                      class="inline-flex animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95"
-                    >
-                      {rendered()}
-                    </span>
-                  </Show>
+                  <span
+                    data-feedback-collapsed={show() ? undefined : ''}
+                    class={cn(
+                      'grid transition-[grid-template-columns,opacity] duration-300 ease-out',
+                      show() ? 'grid-cols-[1fr] opacity-100' : 'grid-cols-[0fr] opacity-0',
+                    )}
+                  >
+                    <span class="min-w-0 overflow-hidden">{rendered()}</span>
+                  </span>
                 );
               })()}
             </Show>

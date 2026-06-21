@@ -8,8 +8,8 @@ import type { ChatMessageAction, CustomAction, FeedbackVote } from '../elements/
 
 afterEach(cleanup);
 
-// createPresence unmounts the hidden vote button on a microtask when there is no
-// exit animation (jsdom); flush the queue before asserting it has left the DOM.
+// The non-active vote button stays MOUNTED but collapses (width→0) so the active
+// thumb can slide into its place; flush a tick where a test waits on a transition.
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
 describe('action-icons registry', () => {
@@ -127,23 +127,23 @@ describe('MessageActionBar', () => {
     expect(btn.querySelector('.text-emerald-400')).toBeTruthy();
   });
 
-  it("activeFeedback='like' → like is pressed and dislike is hidden", () => {
-    const { getByLabelText, queryByLabelText } = render(() => (
+  it("activeFeedback='like' → like is pressed and dislike collapses", () => {
+    const { getByLabelText } = render(() => (
       <MessageActionBar actions={['like', 'dislike']} activeFeedback="like" onAction={() => {}} />
     ));
     const like = getByLabelText('Like');
     expect(like).toHaveAttribute('aria-pressed', 'true');
-    // The other vote is not rendered at all when it starts hidden.
-    expect(queryByLabelText('Dislike')).toBeNull();
+    // The other vote stays mounted but collapses (width→0) so the active thumb slides in.
+    expect(getByLabelText('Dislike').closest('[data-feedback-collapsed]')).not.toBeNull();
   });
 
-  it("activeFeedback='dislike' → dislike is pressed and like is hidden (symmetric)", () => {
-    const { getByLabelText, queryByLabelText } = render(() => (
+  it("activeFeedback='dislike' → dislike is pressed and like collapses (symmetric)", () => {
+    const { getByLabelText } = render(() => (
       <MessageActionBar actions={['like', 'dislike']} activeFeedback="dislike" onAction={() => {}} />
     ));
     const dislike = getByLabelText('Dislike');
     expect(dislike).toHaveAttribute('aria-pressed', 'true');
-    expect(queryByLabelText('Like')).toBeNull();
+    expect(getByLabelText('Like').closest('[data-feedback-collapsed]')).not.toBeNull();
   });
 
   it('undefined activeFeedback → both vote buttons are shown and unpressed', () => {
@@ -154,16 +154,18 @@ describe('MessageActionBar', () => {
     expect(getByLabelText('Dislike')).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('animates the other vote out when a vote becomes active (transition)', async () => {
+  it('collapses the other vote when a vote becomes active (slide-to-fill)', async () => {
     const [vote, setVote] = createSignal<FeedbackVote | undefined>(undefined);
-    const { getByLabelText, queryByLabelText } = render(() => (
+    const { getByLabelText } = render(() => (
       <MessageActionBar actions={['like', 'dislike']} activeFeedback={vote()} onAction={() => {}} />
     ));
-    expect(queryByLabelText('Dislike')).toBeInTheDocument();
+    // both shown initially → neither collapsed
+    expect(getByLabelText('Dislike').closest('[data-feedback-collapsed]')).toBeNull();
     setVote('like');
     await tick();
     expect(getByLabelText('Like')).toHaveAttribute('aria-pressed', 'true');
-    expect(queryByLabelText('Dislike')).toBeNull();
+    // dislike stays mounted but collapses (so the active thumb slides into its place)
+    expect(getByLabelText('Dislike').closest('[data-feedback-collapsed]')).not.toBeNull();
   });
 
   it('still fires onAction with the entry id when a vote/copy button is clicked', () => {

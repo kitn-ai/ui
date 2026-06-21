@@ -98,15 +98,15 @@ describe('ChatThread action-row feedback', () => {
     fireEvent.click(getByLabelText('Like'));
     await tick();
     expect(getByLabelText('Like')).toHaveAttribute('aria-pressed', 'true');
-    expect(queryByLabelText('Dislike')).toBeNull();
+    expect(getByLabelText('Dislike').closest('[data-feedback-collapsed]')).not.toBeNull();
 
     // Simulate a stream chunk: a NEW array ref + the SAME id with longer content.
     setMessages([assistant('Hello, world — now with more tokens')]);
     await tick();
 
-    // The vote must survive the re-render: like still pressed, dislike still hidden.
+    // The vote must survive the re-render: like still pressed, dislike still collapsed.
     expect(getByLabelText('Like')).toHaveAttribute('aria-pressed', 'true');
-    expect(queryByLabelText('Dislike')).toBeNull();
+    expect(getByLabelText('Dislike').closest('[data-feedback-collapsed]')).not.toBeNull();
   });
 
   it('copies content to the clipboard, shows the check, and reverts after 2s', async () => {
@@ -147,13 +147,13 @@ describe('ChatThread action-row feedback', () => {
     expect(onMessageAction).toHaveBeenLastCalledWith({ messageId: 'a1', action: 'copy' });
   });
 
-  it('controlled m.feedback renders the vote marked (and hides the other)', () => {
+  it('controlled m.feedback renders the vote marked (and collapses the other)', () => {
     const controlled: ChatMessage = {
       id: 'a1', role: 'assistant', content: 'x', actions: ['like', 'dislike'], feedback: 'dislike',
     };
-    const { getByLabelText, queryByLabelText } = render(() => <ChatThread messages={[controlled]} />);
+    const { getByLabelText } = render(() => <ChatThread messages={[controlled]} />);
     expect(getByLabelText('Dislike')).toHaveAttribute('aria-pressed', 'true');
-    expect(queryByLabelText('Like')).toBeNull();
+    expect(getByLabelText('Like').closest('[data-feedback-collapsed]')).not.toBeNull();
   });
 
   it('toasts on copy and on a SET vote, but NOT on the un-vote', async () => {
