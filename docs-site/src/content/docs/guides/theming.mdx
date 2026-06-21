@@ -5,7 +5,11 @@ description: Override CSS custom properties to rebrand every kai-* component —
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Override `--color-*` design tokens on `:root` to rebrand every `kai-*` web component at once. Because inherited CSS pierces the Shadow DOM boundary, a single CSS rule propagates into all components automatically.
+Override design tokens on `:root` to rebrand every `kai-*` web component at once. Because inherited CSS pierces the Shadow DOM boundary, a single CSS rule propagates into all components automatically.
+
+<Aside type="tip" title="Quickest path: the namespaced --kai-color-* tokens">
+To rebrand, set the **`--kai-color-*`** tokens on `:root` — **no stylesheet import**, and the `--kai-` prefix won't collide with your app's own CSS variables. See [Namespaced overrides](#namespaced-overrides---kai-color-) below for the one-block version. The `--color-*` walkthrough that follows is the fuller, shadcn-compatible path (it needs `theme.css` imported, and those names are unprefixed).
+</Aside>
 
 ## How tokens work
 

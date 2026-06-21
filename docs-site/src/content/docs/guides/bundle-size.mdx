@@ -7,6 +7,10 @@ import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
 `@kitn.ai/ui` ships ~50 web components. You don't have to load all of them. Pick the loading strategy that matches how much of the kit you actually use.
 
+<Aside type="tip" title="You may not need this page">
+**Register all** — `import '@kitn.ai/ui/elements'` — is the default, works everywhere (including SSR), and is completely fine: one import, every element ready. This page is purely for when you want to *trim what a page downloads*. If that's not a concern, skip it — nothing here is required.
+</Aside>
+
 ## Quick comparison
 
 | Strategy | Import | When to use |
@@ -100,7 +104,7 @@ The autoloader resolves element modules relative to its own URL and uses `docume
 </Aside>
 
 <Aside type="tip" title="Pin versions in production">
-An unversioned CDN URL tracks the latest release, which is risky on a pre-1.0 package. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.15.1/dist/elements/autoloader.js`.
+An unversioned CDN URL tracks the latest release, which is risky on a pre-1.0 package. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.16.0/dist/elements/autoloader.js`.
 </Aside>
 
 ## Code highlighting
