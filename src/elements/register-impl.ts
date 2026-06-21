@@ -54,3 +54,5 @@ import './confirm-card';
 import './tasks';
 import './choice';
 import './cards';
+// Dual-response comparison (preference capture)
+import './compare';

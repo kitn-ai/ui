@@ -184,6 +184,20 @@ export {
 } from './components/chat-container';
 export { Message, MessageAvatar, MessageContent, MessageActions, MessageAction, MessageCopyButton } from './components/message';
 export type { MessageCopyButtonProps } from './components/message';
+export { ResponseCompare, useResolved } from './components/response-compare';
+export type { ResponseCompareProps, CompareLayout, ResolvedController } from './components/response-compare';
+export {
+  normalizeCandidates,
+  buildSelection,
+  isAnyStreaming,
+} from './components/response-compare';
+export type {
+  CompareCandidate,
+  ComparePair,
+  CompareCollapse,
+  ResponseCompareData,
+  CompareSelection,
+} from './components/response-compare';
 export { MessageSkills } from './components/message-skills';
 export type { Skill as MessageSkill } from './components/message-skills';
 export {
