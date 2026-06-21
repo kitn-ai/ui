@@ -36,7 +36,15 @@ import '@kitn.ai/ui/elements/code-block';
 
 Your bundler includes only that element's code. A page that imports only `kai-chat` lands at roughly **73 KB gzip** — a 37% reduction against the full bundle.
 
-The path matches the element's filename in `dist/elements/`, which is usually the tag name minus the `kai-` prefix:
+<Aside type="tip" title="kai-chat is a complete chat — one import">
+That single import is everything a chat needs. `<kai-chat>` already bundles everything it renders — messages, markdown, **code highlighting, reasoning, tool calls, attachments, the prompt input**, model switcher, scroll button. You do **not** import those separately, and there is no internal sub-part to forget.
+
+You only add another import for an **additional standalone element you place in your own markup** — e.g. a `<kai-artifact>` beside the chat. That's one import per element *you* write into the HTML.
+
+And it fails loud, not silent: if you place an element but forget its import, that element renders empty (un-upgraded) instead of breaking the rest of the page — and the `kai` MCP's `debug` / `component_reference` tools name the exact import to add. (Generative-UI **cards** — `kai-confirm`, `kai-form`, … — are also standalone elements, so add them only if your assistant renders card payloads.)
+</Aside>
+
+The import path is the element's filename in `dist/elements/` — usually the tag minus the `kai-` prefix. You only need a row below for an element you place in your markup yourself; the message / markdown / reasoning / input parts of a chat are already inside `kai-chat`:
 
 | Element | Import |
 |---|---|
