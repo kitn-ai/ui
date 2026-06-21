@@ -4,6 +4,9 @@ import type { AttachmentData } from '../components/attachments';
 /** The five built-in action buttons (each carries its own curated icon + label). */
 export type ChatMessageAction = 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit';
 
+/** A like/dislike feedback vote on an assistant message. */
+export type FeedbackVote = 'like' | 'dislike';
+
 /** A host-defined action button. `icon` is a curated registry name (see
  *  `src/ui/action-icons.ts`); unknown/absent icons render label-only. */
 export interface CustomAction {
@@ -39,4 +42,8 @@ export interface ChatMessage {
   actions?: (ChatMessageAction | CustomAction)[];
   /** Optional speaker avatar shown to the left of the message column. */
   avatar?: AvatarData;
+  /** Controlled feedback vote. When set, it wins over the facade's internal
+   *  optimistic state (`m.feedback ?? feedbackMap[m.id]`), so a host that
+   *  persists votes can re-hydrate them. */
+  feedback?: FeedbackVote;
 }

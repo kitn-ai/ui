@@ -67,8 +67,10 @@ interface Events {
   'kai-value-change': { value: string };
   /** The header model switcher changed. */
   'kai-model-change': { modelId: string };
-  /** An action button on a message was clicked. */
-  'kai-message-action': { messageId: string; action: string };
+  /** An action button on a message was clicked. `state` is present only for the
+   *  toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when
+   *  re-tapped to clear. */
+  'kai-message-action': { messageId: string; action: string; state?: 'on' | 'off' };
   /** The Search button was clicked. */
   'kai-search': Record<string, never>;
   /** The Mic / voice button was clicked. */

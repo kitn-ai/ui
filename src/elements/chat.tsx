@@ -17,8 +17,10 @@ interface Events {
   'kai-value-change': { value: string };
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
   'kai-suggestion-click': { value: string };
-  /** An action button on a message was clicked. `action` is the built-in name or custom id. */
-  'kai-message-action': { messageId: string; action: string };
+  /** An action button on a message was clicked. `action` is the built-in name or
+   *  custom id. `state` is present only for the toggleable feedback votes:
+   *  `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
+  'kai-message-action': { messageId: string; action: string; state?: 'on' | 'off' };
   /** The header model switcher changed. */
   'kai-model-change': { modelId: string };
   /** A slash command was chosen from the palette. */

@@ -1,10 +1,8 @@
-import { For, Show, createSignal, onMount, onCleanup } from 'solid-js';
+import { Show, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { ChatConfig, useChatConfig, type ProseSize } from '../primitives/chat-config';
-import { Message, MessageAvatar, MessageContent, MessageActionBar } from '../components/message';
-import { Reasoning, ReasoningTrigger, ReasoningContent } from '../components/reasoning';
-import { Tool } from '../components/tool';
-import { Attachments, Attachment, AttachmentPreview, AttachmentInfo } from '../components/attachments';
+import { Message, MessageAvatar, MessageBody } from '../components/message';
+import { createMessageFeedback } from '../primitives/message-feedback';
 import type { ChatMessage } from './chat-types';
 
 interface Props extends Record<string, unknown> {
@@ -33,8 +31,10 @@ interface Props extends Record<string, unknown> {
 
 /** Events fired by `<kai-message>`. */
 interface Events {
-  /** An action button was clicked. `action` is the built-in name or custom id. */
-  'kai-message-action': { messageId: string; action: string };
+  /** An action button was clicked. `action` is the built-in name or custom id.
+   *  `state` is present only for the toggleable feedback votes: `'on'` when a
+   *  like/dislike is set, `'off'` when re-tapped to clear. */
+  'kai-message-action': { messageId: string; action: string; state?: 'on' | 'off' };
 }
 
 /**
@@ -58,6 +58,11 @@ defineWebComponent<Props, Events>('kai-message', {
   const outer = useChatConfig();
   const msg = (): ChatMessage =>
     props.message ?? { id: 'message', role: props.role ?? 'assistant', content: props.content ?? '' };
+  // Copy + vote state lives here (above the rendered body) so it survives a
+  // re-render when the host swaps in a fresh `message` object during streaming.
+  const feedback = createMessageFeedback({
+    emit: (detail) => dispatch('kai-message-action', detail),
+  });
 
   // Read declarative <kai-action> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
@@ -89,45 +94,21 @@ defineWebComponent<Props, Events>('kai-message', {
     element.hasAttribute('markdown') || props.markdown === true || props.markdown === false;
   const useMarkdown = () => (markdownExplicit() ? flag('markdown') : !isUser());
 
+  const mergedActions = () => [...(msg().actions ?? []), ...slottedActions()];
   const body = () => (
-    <>
-      <Show when={msg().reasoning}>
-        <Reasoning class="mb-2 w-full">
-          <ReasoningTrigger>{msg().reasoning!.label ?? 'Reasoning'}</ReasoningTrigger>
-          <ReasoningContent markdown>{msg().reasoning!.text}</ReasoningContent>
-        </Reasoning>
-      </Show>
-      <For each={msg().tools ?? []}>
-        {(tp) => <Tool toolPart={tp} class="mb-2 w-full" />}
-      </For>
-      <Show when={msg().attachments?.length}>
-        <Attachments variant="inline" class={isUser() ? 'mb-2 justify-end' : 'mb-2'}>
-          <For each={msg().attachments!}>
-            {(att) => (
-              <Attachment data={att}>
-                <AttachmentPreview />
-                <AttachmentInfo />
-              </Attachment>
-            )}
-          </For>
-        </Attachments>
-      </Show>
-      <MessageContent
-        markdown={useMarkdown()}
-        class={isUser()
-          ? 'bg-muted text-primary max-w-[85%] rounded-2xl px-4 py-2'
-          : 'bg-transparent p-0'}
-      >
-        {msg().content}
-      </MessageContent>
-      <Show when={(msg().actions?.length ?? 0) > 0 || slottedActions().length > 0}>
-        <MessageActionBar
-          actions={[...(msg().actions ?? []), ...slottedActions()]}
-          reveal={reveal()}
-          onAction={(action) => dispatch('kai-message-action', { messageId: msg().id, action })}
-        />
-      </Show>
-    </>
+    <MessageBody
+      content={msg().content}
+      reasoning={msg().reasoning}
+      tools={msg().tools}
+      attachments={msg().attachments}
+      isUser={isUser()}
+      markdown={useMarkdown()}
+      actions={mergedActions()}
+      actionsReveal={reveal()}
+      activeFeedback={feedback.resolveFeedback(msg())}
+      copied={feedback.isCopied(msg().id)}
+      onAction={(action) => feedback.handleAction(msg(), action)}
+    />
   );
 
   // Row carries `group` so a hover-revealed action bar fades in on row hover.
