@@ -9,6 +9,7 @@ import EventTable from '../../../components/EventTable.astro';
 import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
+import ToastDemo from '../../../components/ToastDemo.tsx';
 
 <p class="kai-tag-sub">toast() · kai-toast-region</p>
 
@@ -60,7 +61,7 @@ toast.clear();                       // remove all
 | `id` | `string` | auto | Pass an existing `id` to **update that toast in place** instead of stacking a new one. |
 | `variant` | `'neutral' \| 'success'` | `'neutral'` | `toast.success(…)` sets this for you. |
 | `action` | `{ label, onAction }` | — | Adds a button. Return `false` from `onAction` to keep the toast open. |
-| `duration` | `number` (ms) | `2000` | Auto-dismiss delay. `0` is sticky. With an `action`, the floor is `4000` so there's time to act. |
+| `duration` | `number` (ms) | `5000` | Auto-dismiss delay. `0` is sticky. With an `action`, the floor is `7000` so there's time to act. |
 | `dismissible` | `boolean` | `true` | Whether the × close button shows. |
 
 The returned handle controls the toast after it's shown:
@@ -75,9 +76,11 @@ t.dismiss();
 
 ## Examples
 
+<ToastDemo client:only="solid" />
+
 ### Success
 
-A confirmation with the emerald check. Auto-dismisses after 2 seconds.
+A confirmation with the emerald check. Auto-dismisses after 5 seconds.
 
 ```js
 import { toast } from '@kitn.ai/ui/elements';
@@ -87,7 +90,7 @@ toast.success('Copied to clipboard');
 
 ### Undo action
 
-Add an `action` to offer a one-tap reversal. The toast stays up at least 4 seconds when it carries an action, so the user has time to react:
+Add an `action` to offer a one-tap reversal. The toast stays up at least 7 seconds when it carries an action, so the user has time to react:
 
 ```js
 import { toast } from '@kitn.ai/ui/elements';
@@ -165,12 +168,12 @@ A toast item has the same shape as a `toast()` call:
 | `message` | `string` | The text. |
 | `variant` | `'neutral' \| 'success'` | Defaults to `'neutral'`. |
 | `action` | `{ label, onAction }` | Optional action button. |
-| `duration` | `number` (ms) | `0` = sticky; defaults to `2000` (floor `4000` with an action). |
+| `duration` | `number` (ms) | `0` = sticky; defaults to `5000` (floor `7000` with an action). |
 | `dismissible` | `boolean` | Show the × button. Defaults to `true`. |
 
 ## Behavior
 
-- **Auto-dismiss** after `duration` (2s default), **paused while hovered** so it doesn't vanish mid-read.
+- **Auto-dismiss** after `duration` (5s default), **paused while hovered** so it doesn't vanish mid-read.
 - **Stack cap** at `max` (3); overflow queues and promotes as toasts leave.
 - **Announced** via `aria-live="polite"` / `role="region"` — screen readers hear new toasts without losing focus.
 - **Reduced motion** — the slide/fade is suppressed under `prefers-reduced-motion`.
