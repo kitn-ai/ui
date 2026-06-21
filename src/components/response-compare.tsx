@@ -39,7 +39,7 @@ export type {
 } from './response-compare-types';
 export { normalizeCandidates, buildSelection, isAnyStreaming } from './response-compare-types';
 
-export type CompareLayout = 'auto' | 'columns' | 'stacked';
+export type CompareLayout = 'auto' | 'columns' | 'tabs';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Resolution controller — a sibling of `useCardResolution` for `CompareSelection`,
@@ -83,8 +83,9 @@ export interface ResponseCompareProps {
   /** Re-hydrate / control the selection. Renders the collapsed winner. Set as a
    *  JS property: `el.selection = { chosenId, rejectedIds }`. */
   selection?: CompareSelection;
-  /** Column layout. `'auto'` (default) uses a container query — stacked below
-   *  ~640px, side-by-side columns above. */
+  /** Layout. `'columns'` = side-by-side; `'tabs'` = one candidate at a time with
+   *  pills to switch; `'auto'` (default) uses a CONTAINER query — columns when the
+   *  component is ≥640px wide, tabs when narrower (e.g. on a phone). */
   layout?: CompareLayout;
   class?: string;
   /** Fired when the user commits a pick. */
@@ -98,7 +99,7 @@ export interface ResponseCompareProps {
 
 /**
  * `ResponseCompare` — a dual-response comparison. Two assistant candidates for the
- * same prompt render side-by-side (or stacked), each via `MessageBody` so a
+ * same prompt render side-by-side (or as tabs), each via `MessageBody` so a
  * candidate reads exactly like an assistant message (reasoning + tools +
  * attachments + markdown). The pick is a COMMIT, not a Submit: clicking "Pick this"
  * (or Enter on the focused column) computes `{ chosenId, rejectedIds:[other], at }`,
@@ -139,10 +140,13 @@ export function ResponseCompare(props: ResponseCompareProps): JSX.Element {
   const streaming = createMemo(() => isAnyStreaming(pair()));
 
   const [focusIndex, setFocusIndex] = createSignal(0);
+  // In tabs mode (and auto when the container is narrow) only one candidate shows
+  // at a time; `active` is which. Ignored in columns mode where both render.
+  const [active, setActive] = createSignal(0);
   let groupRef: HTMLDivElement | undefined;
 
-  // Reset the roving tab stop whenever a NEW definition arrives.
-  createEffect(on(() => local.data, () => setFocusIndex(0)));
+  // Reset the roving tab stop + active tab whenever a NEW definition arrives.
+  createEffect(on(() => local.data, () => { setFocusIndex(0); setActive(0); }));
 
   // ready / error lifecycle: error on an unusable definition, ready once both
   // candidates have settled (so consumers know the pick is now live).
@@ -185,24 +189,16 @@ export function ResponseCompare(props: ResponseCompareProps): JSX.Element {
     if (res.isResolved()) return;
     const p = pair();
     if (!p) return;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    const move = (next: number) => { setFocusIndex(next); setActive(next); focusColumn(next); };
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
       e.preventDefault();
-      const next = focusIndex() === 0 ? 1 : 0;
-      setFocusIndex(next);
-      focusColumn(next);
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      const next = focusIndex() === 0 ? 1 : 0;
-      setFocusIndex(next);
-      focusColumn(next);
+      move(focusIndex() === 0 ? 1 : 0);
     } else if (e.key === 'Home') {
       e.preventDefault();
-      setFocusIndex(0);
-      focusColumn(0);
+      move(0);
     } else if (e.key === 'End') {
       e.preventDefault();
-      setFocusIndex(1);
-      focusColumn(1);
+      move(1);
     } else if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       const cand = p[focusIndex()];
@@ -210,15 +206,25 @@ export function ResponseCompare(props: ResponseCompareProps): JSX.Element {
     }
   };
 
-  // Layout classes for the columns wrapper. `auto` is a container query: stacked
-  // below ~640px, columns above (Tailwind v4 `@container` + `@[640px]:` variants).
+  // `auto` switches by CONTAINER width (Tailwind v4 `@container` + `@[640px]`
+  // variants); `@container/compare` lives on the OUTER wrapper (below) so the
+  // pill bar + columns both respond to it.
   const wrapperClass = createMemo(() => {
     const l = local.layout;
     if (l === 'columns') return 'grid grid-cols-2 gap-3';
-    if (l === 'stacked') return 'grid grid-cols-1 gap-3';
-    // auto
-    return '@container/compare grid grid-cols-1 gap-3 @[640px]/compare:grid-cols-2';
+    if (l === 'tabs') return 'grid grid-cols-1 gap-3';
+    return 'grid grid-cols-1 gap-3 @[640px]/compare:grid-cols-2'; // auto
   });
+  // The tab-pill bar shows in tabs mode, and in auto only while the container is narrow.
+  const showTabs = () => local.layout === 'tabs' || local.layout === 'auto';
+  const tabBarClass = () => (local.layout === 'auto' ? '@[640px]/compare:hidden' : '');
+  // A non-active candidate is hidden in tabs (always) and auto (only while narrow);
+  // the active one — and both in columns mode — always render.
+  const columnHiddenClass = (index: number): string => {
+    const l = local.layout;
+    if (l === 'columns' || index === active()) return '';
+    return l === 'tabs' ? 'hidden' : 'hidden @[640px]/compare:block';
+  };
 
   const promptId = `kai-compare-prompt-${uid}`;
   const groupLabel = (): string => local.data?.prompt ?? 'Compare two responses';
@@ -234,7 +240,7 @@ export function ResponseCompare(props: ResponseCompareProps): JSX.Element {
           return <Card errorMessage="The comparison failed to render." />;
         }}
       >
-        <div class={cn('flex flex-col gap-3', local.class)}>
+        <div class={cn('flex flex-col gap-3', local.layout === 'auto' && '@container/compare', local.class)}>
           <Show when={local.data?.prompt}>
             <p id={promptId} class="text-sm text-foreground">
               {local.data?.prompt}
@@ -250,6 +256,30 @@ export function ResponseCompare(props: ResponseCompareProps): JSX.Element {
               />
             }
           >
+            {/* Tab pills — switch the visible candidate in tabs / auto-narrow mode. */}
+            <Show when={showTabs()}>
+              <div role="tablist" aria-label="Switch response" class={cn('flex gap-1', tabBarClass())}>
+                <Index each={pair() ?? []}>
+                  {(candidate, index) => (
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={active() === index}
+                      class={cn(
+                        'rounded-md px-3 py-1 text-xs font-medium transition-colors',
+                        active() === index
+                          ? 'bg-muted text-foreground'
+                          : 'text-muted-foreground hover:text-foreground',
+                      )}
+                      onClick={() => { setActive(index); setFocusIndex(index); }}
+                    >
+                      {candidate().label ?? `Response ${candidate().id}`}
+                    </button>
+                  )}
+                </Index>
+              </div>
+            </Show>
+
             <div
               ref={groupRef}
               role="radiogroup"
@@ -264,6 +294,7 @@ export function ResponseCompare(props: ResponseCompareProps): JSX.Element {
                     candidate={candidate()}
                     tabStop={index === focusIndex()}
                     disabled={streaming()}
+                    hiddenClass={() => columnHiddenClass(index)}
                     onFocus={() => setFocusIndex(index)}
                     onPick={() => {
                       setFocusIndex(index);
@@ -289,6 +320,9 @@ interface ColumnProps {
   candidate: CompareCandidate;
   tabStop: boolean;
   disabled: boolean;
+  /** Extra (reactive) class controlling tabs/auto visibility — hidden when this
+   *  is the non-active candidate in tabs / auto-narrow mode. */
+  hiddenClass?: () => string;
   onFocus: () => void;
   onPick: () => void;
 }
@@ -304,7 +338,10 @@ function CompareColumn(props: ColumnProps): JSX.Element {
       data-candidate-id={props.candidate.id}
       tabindex={props.tabStop ? 0 : -1}
       onFocus={props.onFocus}
-      class="flex min-w-0 flex-col gap-3 rounded-lg border border-input bg-background/40 p-3 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+      class={cn(
+        'flex min-w-0 flex-col gap-3 rounded-lg border border-input bg-background/40 p-3 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+        props.hiddenClass?.(),
+      )}
     >
       <Show when={props.candidate.label || props.candidate.model}>
         <div class="flex items-center gap-2">

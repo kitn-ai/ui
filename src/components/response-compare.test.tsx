@@ -270,10 +270,12 @@ describe('ResponseCompare — streaming gates the pick', () => {
       <ResponseCompare data={d()} onReady={onReady} />
     ));
     // The pick buttons are aria-hidden (the radio wrapper is the a11y control),
-    // so query the DOM directly.
+    // so query the DOM directly — filter to the "Pick this" picks (the tab pills
+    // are also buttons, but they aren't streaming-gated).
     const buttons = () =>
-      Array.from(container.querySelectorAll('button')) as HTMLButtonElement[];
-    // while A streams: both buttons disabled
+      (Array.from(container.querySelectorAll('button')) as HTMLButtonElement[])
+        .filter((b) => b.textContent?.includes('Pick this'));
+    // while A streams: both pick buttons disabled
     expect(buttons().length).toBe(2);
     expect(buttons().every((b) => b.disabled)).toBe(true);
     // the streaming column shows the shimmer text
@@ -400,17 +402,21 @@ describe('ResponseCompare — layout', () => {
     expect(group.className).not.toContain('@container');
   });
 
-  it('layout="stacked" forces a single column', () => {
-    const { getByRole } = render(() => <ResponseCompare data={data()} layout="stacked" />);
+  it('layout="tabs" forces a single column + shows the tab pills', () => {
+    const { getByRole, getAllByRole } = render(() => <ResponseCompare data={data()} layout="tabs" />);
     const group = getByRole('radiogroup');
     expect(group.className).toContain('grid-cols-1');
     expect(group.className).not.toContain('@[640px]');
+    // pills to switch which candidate is shown
+    expect(getByRole('tablist')).toBeTruthy();
+    expect(getAllByRole('tab')).toHaveLength(2);
   });
 
-  it('layout="auto" (default) uses a container query', () => {
-    const { getByRole } = render(() => <ResponseCompare data={data()} />);
+  it('layout="auto" (default) switches columns↔tabs by CONTAINER width', () => {
+    const { getByRole, container } = render(() => <ResponseCompare data={data()} />);
     const group = getByRole('radiogroup');
-    expect(group.className).toContain('@container');
     expect(group.className).toContain('@[640px]/compare:grid-cols-2');
+    // @container/compare on the outer wrapper drives the pills + columns
+    expect(container.querySelector('[class*="@container/compare"]')).toBeTruthy();
   });
 });

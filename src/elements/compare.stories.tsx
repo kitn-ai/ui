@@ -62,7 +62,7 @@ const meta = {
     docs: {
       description: {
         component:
-          '`<kai-compare>` shows two candidate responses side-by-side ("which do you prefer?"). Set `data` as a JS **property** with exactly two candidates; both can stream (reassign a fresh `data` ref per chunk). Picking one collapses the split to the chosen response and emits a non-bubbling `kai-compare-select` CustomEvent with `{ chosenId, rejectedIds }` — feed that `(prompt, chosen, rejected)` pair back to your model as a preference signal. Layout auto-switches columns↔stacked by container width (override with `layout`).',
+          '`<kai-compare>` shows two candidate responses side-by-side ("which do you prefer?"). Set `data` as a JS **property** with exactly two candidates; both can stream (reassign a fresh `data` ref per chunk). Picking one collapses the split to the chosen response and emits a non-bubbling `kai-compare-select` CustomEvent with `{ chosenId, rejectedIds }` — feed that `(prompt, chosen, rejected)` pair back to your model as a preference signal. Layout auto-switches columns↔tabs by CONTAINER width — side-by-side when wide, pills to switch on narrow/mobile (override with `layout`).',
       },
     },
   },
@@ -71,9 +71,9 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-/** Auto layout (columns on wide, stacked on narrow). */
+/** Auto layout — columns when the component is wide, tabs when narrow (by CONTAINER width). */
 export const Default: Story = { name: 'Pick a response', render: () => <CompareDemo /> };
 /** Forced side-by-side columns. */
 export const Columns: Story = { render: () => <CompareDemo layout="columns" /> };
-/** Forced stacked (narrow). */
-export const Stacked: Story = { render: () => <CompareDemo layout="stacked" /> };
+/** Forced tabs — one candidate at a time with pills to switch. */
+export const Tabs: Story = { render: () => <CompareDemo layout="tabs" /> };

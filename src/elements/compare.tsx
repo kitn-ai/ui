@@ -13,8 +13,8 @@ interface Props extends Record<string, unknown> {
   /** Re-hydrate / control the user's pick. Set as a JS PROPERTY:
    *  `el.selection = { chosenId, rejectedIds }`. Renders the collapsed winner. */
   selection?: Record<string, unknown>;
-  /** Column layout: `'auto'` (default, container-query responsive) | `'columns'` |
-   *  `'stacked'`. Attribute: `layout`. */
+  /** Layout: `'auto'` (default — columns when wide, tabs when narrow, by CONTAINER
+   *  width) | `'columns'` (side-by-side) | `'tabs'` (pills to switch). Attribute: `layout`. */
   layout?: CompareLayout;
   /** Prose/text size for the rendered candidates. Attribute: `prose-size`. */
   proseSize?: ProseSize;
@@ -35,7 +35,7 @@ interface Events extends Record<string, unknown> {
 
 /**
  * `<kai-compare>` — a **dual-response comparison** (set via the `data` property):
- * two assistant candidates for the same prompt, rendered side-by-side (or stacked),
+ * two assistant candidates for the same prompt, rendered side-by-side (or as tabs),
  * each exactly like an assistant message (reasoning + tools + attachments +
  * markdown). The user **picks** the better one — a COMMIT, not a Submit — which
  * fires a non-bubbling **`kai-compare-select`** CustomEvent off the host
