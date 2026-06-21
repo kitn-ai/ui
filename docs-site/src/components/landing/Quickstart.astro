@@ -8,10 +8,12 @@ const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
 
 const cdnSteps = [
   { n: '01', title: 'Add the script', lang: 'html', code: '<script type="module"\n  src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js"\n></script>' },
-  { n: '02', title: 'Drop one in (give it a height)', lang: 'html', code: `<kai-chat style="display:block;height:600px"></kai-chat>
-<script>
+  { n: '02', title: 'Drop one in (give it a height)', lang: 'html', code: `<kai-chat id="chat" style="display:block;height:600px"></kai-chat>
+<script type="module">
   // It's a custom element — needs a height; no wrapper required.
-  document.querySelector('kai-chat').messages = [
+  // Registration is async, so wait for the element before setting properties.
+  await customElements.whenDefined('kai-chat');
+  document.getElementById('chat').messages = [
     { role: 'assistant', content: 'Hi! Ask me anything.' },
   ];
 <\/script>` },

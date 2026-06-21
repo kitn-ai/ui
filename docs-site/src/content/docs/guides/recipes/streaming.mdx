@@ -119,6 +119,8 @@ This recipe is the *mechanic*. For connecting a specific provider, gateway, agen
 ```js
 import '@kitn.ai/ui/elements';
 
+await customElements.whenDefined('kai-response-stream');
+
 const el = document.querySelector('kai-response-stream');
 
 async function* tokenStream(res) {

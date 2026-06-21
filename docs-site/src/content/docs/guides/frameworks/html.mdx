@@ -72,6 +72,8 @@ el.addEventListener('kai-submit', (e) => console.log(e.detail.value));
   <script type="module">
     import '@kitn.ai/ui/elements';
 
+    await customElements.whenDefined('kai-chat');
+
     const chat = document.getElementById('chat');
 
     // Seed an initial assistant message
@@ -133,6 +135,8 @@ el.addEventListener('kai-submit', (e) => console.log(e.detail.value));
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-conversations');
 
   const sidebar = document.getElementById('sidebar');
   const chat = document.getElementById('chat');

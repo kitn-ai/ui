@@ -24,6 +24,8 @@ import VoiceAssistantDemo from '../../../components/VoiceAssistantDemo.tsx';
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
   chat.messages = [];
 

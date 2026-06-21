@@ -34,6 +34,9 @@ Point `src` at your hosted artifact and set `files` in JavaScript (it's an array
 <kai-artifact src="https://your.app/artifacts/abc/index.html" style="display:block;height:520px"></kai-artifact>
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-artifact');
+
   const el = document.querySelector('kai-artifact');
   el.files = [
     { path: 'index.html', url: '…/index.html', type: 'html', code: '<!DOCTYPE …>' },

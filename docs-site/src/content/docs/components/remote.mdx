@@ -34,6 +34,9 @@ Point the element at your provider and hand it the envelope:
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-remote');
+
   const el = document.querySelector('kai-remote');
 
   el.envelope = {

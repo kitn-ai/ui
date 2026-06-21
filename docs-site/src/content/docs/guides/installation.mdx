@@ -45,6 +45,8 @@ Once registered, the elements behave like any other HTML tag:
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.querySelector('kai-chat');
 
   // Arrays can't be attributes, so set messages in JavaScript.

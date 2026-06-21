@@ -19,6 +19,8 @@ import WorkspaceDemo from '../../../components/WorkspaceDemo.tsx';
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-workspace');
+
   const ws = document.getElementById('ws');
 
   // Seed conversations (assign in JavaScript — arrays can't be attributes).

@@ -14,6 +14,8 @@ Feed `<kai-cards>` an array of **`CardEnvelope`** objects and a **`CardPolicy`**
 ```js
 import '@kitn.ai/ui/elements';
 
+await customElements.whenDefined('kai-cards');
+
 const cards = document.getElementById('cards');
 
 // Assign the envelope stream in JavaScript — arrays can't be HTML attributes.

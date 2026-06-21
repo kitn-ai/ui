@@ -35,6 +35,9 @@ Give the page a flex (or grid) row: the app content takes the remaining width an
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('assistant');
 
   chat.suggestions = ['How do I change my plan?', 'Where are my invoices?'];

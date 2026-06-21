@@ -34,6 +34,8 @@ Three real `kai-*` web components inside a `<kai-resizable>` layout:
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-conversations');
+
   // Assign arrays and objects in JavaScript — they can't be HTML attributes.
   const list = document.getElementById('list');
   list.conversations = [

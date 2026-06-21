@@ -35,6 +35,9 @@ Set `message` in JavaScript (objects can't be HTML attributes) and listen for `k
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-message');
+
   const msg = document.getElementById('msg');
 
   msg.message = {

@@ -45,6 +45,8 @@ You'll lean on two patterns over and over: set rich data on a JavaScript propert
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
 
   // Seed the thread. Arrays can't be attributes, so this goes in JavaScript.
@@ -122,6 +124,9 @@ The element behaves the same everywhere. Only the binding syntax differs.
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
   chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
   chat.addEventListener('kai-submit', (e) => console.log(e.detail.value));

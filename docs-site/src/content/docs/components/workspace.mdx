@@ -36,6 +36,8 @@ Set data in JavaScript and listen for **CustomEvents** on the element:
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-workspace');
+
   const ws = document.getElementById('workspace');
 
   ws.conversations = [

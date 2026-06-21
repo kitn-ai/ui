@@ -18,6 +18,9 @@ Start with an empty thread and a few `suggestions`. The chips render in the empt
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
   chat.messages = [];
   chat.suggestions = [

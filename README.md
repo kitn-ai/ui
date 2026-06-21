@@ -43,6 +43,10 @@ npm run build   # emits dist/kitn-chat.es.js
   <script type="module">
     import '@kitn.ai/ui/elements';
 
+    // Registration is async (SSR-safe) — wait for the element to be defined
+    // before setting properties, or the upgrade clobbers them.
+    await customElements.whenDefined('kai-chat');
+
     const chat = document.querySelector('kai-chat');
 
     // Rich data is set as JS properties (not HTML attributes)
@@ -50,8 +54,8 @@ npm run build   # emits dist/kitn-chat.es.js
       { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
     ];
 
-    // Events are CustomEvents dispatched on the element (they do not bubble)
-    chat.addEventListener('submit', (e) => {
+    // Events are non-bubbling kai-* CustomEvents dispatched on the element
+    chat.addEventListener('kai-submit', (e) => {
       console.log('user sent:', e.detail.value);
     });
   </script>
@@ -127,10 +131,13 @@ The components are deliberately **transport-agnostic**: `<kai-chat>` just render
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  // Registration is async (SSR-safe) — wait for the element before using it.
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
   chat.messages = [];
 
-  chat.addEventListener('submit', async (e) => {
+  chat.addEventListener('kai-submit', async (e) => {
     const text = e.detail.value.trim();
     if (!text) return;
 

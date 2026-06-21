@@ -35,6 +35,8 @@ Set `data` in JavaScript (it's an object, not an attribute):
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-link-preview');
+
   const lp = document.getElementById('lp');
   lp.cardId = 'card-link-1';
   lp.data = {

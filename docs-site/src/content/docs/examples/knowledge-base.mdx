@@ -40,6 +40,8 @@ The picker offers tags; map each tag to a knowledge base, then refresh the depen
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-scope-picker');
+
   const scope   = document.getElementById('scope');
   const threads = document.getElementById('threads');
   const chat    = document.getElementById('chat');

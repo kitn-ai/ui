@@ -35,6 +35,9 @@ Set `availableAuthors` and `availableTags` in JavaScript (arrays can't be HTML a
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-scope-picker');
+
   const el = document.getElementById('scope');
 
   el.availableAuthors = ['Alex Chen', 'Jordan Lee'];

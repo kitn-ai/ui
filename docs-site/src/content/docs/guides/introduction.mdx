@@ -27,6 +27,8 @@ Then it's just HTML:
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.querySelector('kai-chat');
 
   // Arrays can't be HTML attributes, so set messages in JavaScript.
@@ -93,6 +95,9 @@ import { Chat } from '@kitn.ai/ui/react';
 ```html
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.querySelector('kai-chat');
   chat.messages = messages;
   chat.addEventListener('kai-submit', handleSubmit);

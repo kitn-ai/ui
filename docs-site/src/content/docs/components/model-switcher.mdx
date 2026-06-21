@@ -35,6 +35,9 @@ Set `models` in JavaScript (arrays can't be HTML attributes) and reflect the sel
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-model-switcher');
+
   const ms = document.getElementById('ms');
 
   ms.models = [

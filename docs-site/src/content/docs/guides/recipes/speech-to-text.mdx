@@ -26,6 +26,8 @@ Register the web components once, then wire the element:
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-voice-input');
+
   const voice = document.getElementById('voice');
 
   voice.transcribe = async (blob) => {
@@ -61,6 +63,8 @@ Alternatively, place `<kai-voice-input>` beside the chat element and push the tr
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-voice-input');
 
   const chat = document.getElementById('chat');
   const voice = document.getElementById('voice');

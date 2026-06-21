@@ -21,6 +21,8 @@ A bold look comes from overriding more than the accent. Aurora moves every surfa
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
 
   // Scope the whole Aurora map to this element only.

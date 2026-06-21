@@ -34,6 +34,9 @@ Set `code` in JavaScript (multiline strings don't survive HTML attributes) and `
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-code-block');
+
   const cb = document.getElementById('cb');
   cb.code = `export function greet(name: string) {
   return \`Hello, \${name}!\`;
