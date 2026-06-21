@@ -312,8 +312,10 @@ export function ResponseCompare(props: ResponseCompareProps): JSX.Element {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// One candidate column — a `role="radio"` wrapping the assistant-styled body +
-// a pick control. Disabled (no emit) while either candidate streams.
+// One candidate column — a plain container with the assistant-styled body and a
+// "Pick this" button that IS the radio (the radiogroup option). Keeping the radio
+// on the button, not the wrapping div, avoids nesting interactive controls (the
+// body itself can contain interactive bits like reasoning/tool toggles).
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface ColumnProps {
@@ -332,14 +334,8 @@ function CompareColumn(props: ColumnProps): JSX.Element {
     props.candidate.label ?? props.candidate.model ?? props.candidate.id;
   return (
     <div
-      role="radio"
-      aria-checked={false}
-      aria-label={`Response ${labelText()}`}
-      data-candidate-id={props.candidate.id}
-      tabindex={props.tabStop ? 0 : -1}
-      onFocus={props.onFocus}
       class={cn(
-        'flex min-w-0 flex-col gap-3 rounded-lg border border-input bg-background/40 p-3 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+        'flex min-w-0 flex-col gap-3 rounded-lg border border-input bg-background/40 p-3',
         props.hiddenClass?.(),
       )}
     >
@@ -376,12 +372,16 @@ function CompareColumn(props: ColumnProps): JSX.Element {
 
       <Button
         type="button"
+        role="radio"
+        aria-checked={false}
+        aria-label={`Pick ${labelText()}`}
+        data-candidate-id={props.candidate.id}
         variant="outline"
         size="sm"
         class="mt-auto w-full"
         disabled={props.disabled}
-        tabindex={-1}
-        aria-hidden="true"
+        tabindex={props.tabStop ? 0 : -1}
+        onFocus={props.onFocus}
         onClick={(e) => {
           e.stopPropagation();
           props.onPick();
