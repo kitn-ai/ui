@@ -1,6 +1,12 @@
 /* Element-bundle stylesheet. Compiled to compiled.css and injected into each
    custom element's shadow root. Mirrors .storybook/styles.css but scans src/. */
 @import "tailwindcss";
+/* tw-animate-css supplies the animate-in/animate-out + slide/fade/zoom utilities
+   the kit uses for every overlay enter/exit (toast, popover, tooltip, dropdown,
+   hover-card, the message action-row hide). Without this @import those classes
+   compile to nothing and all the animations are silently dead. Compiled into
+   compiled.css at build time, so it's a build-time dep only (no consumer import). */
+@import "tw-animate-css";
 @import "../../theme.css";
 @plugin "@tailwindcss/typography";
 

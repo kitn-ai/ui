@@ -55,10 +55,11 @@ export interface ToastHandle {
   update: (patch: Partial<Omit<ToastItem, 'id'>>) => void;
 }
 
-/** Default auto-dismiss delay. */
-export const DEFAULT_TOAST_DURATION = 2000;
-/** Minimum auto-dismiss delay when the toast carries an action. */
-export const ACTION_TOAST_FLOOR = 4000;
+/** Default auto-dismiss delay. Long enough to read + reach before it leaves. */
+export const DEFAULT_TOAST_DURATION = 5000;
+/** Minimum auto-dismiss delay when the toast carries an action (e.g. Undo) — it
+ *  has to stay up long enough to actually act on. */
+export const ACTION_TOAST_FLOOR = 7000;
 
 // ── The reactive store ──────────────────────────────────────────────────────
 // Held in a never-disposed root so the signal/store graph stays live for the
