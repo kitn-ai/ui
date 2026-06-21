@@ -58,7 +58,53 @@ Set all three in JavaScript — they're arrays and objects, so none work as HTML
 - **`cards`** — array of `CardEnvelope` objects: `{ type, id, data, title?, resolution? }`. The `type` string selects which built-in child element renders the envelope.
 - **`policy`** — `{ onAction, onSubmit, onOpen, onDismiss, … }`. Provide only the handlers your app needs; the rest are silently ignored. Swap it after mount — it is read at event time.
 - **`types`** — `{ 'my-type': 'my-card-element' }` merges over the built-in registry; override a built-in by reusing its key.
-- **Resolved cards** — set `resolution` on an envelope (`{ kind: 'action', action, payload? }` or `{ kind: 'submit', data }`) to render it in its read-only state after the user has acted.
+- **Resolved cards** — set `resolution` on an envelope to render it in its read-only state after the user has acted. The kinds: terminal `{ kind: 'action', action, payload? }` and `{ kind: 'submit', data }`, the deferred `{ kind: 'dismissed' }`, and the terminal `{ kind: 'expired', reason? }`.
+
+## Dismiss and recover
+
+Add `dismissible: true` to a `confirm`, `choice`, `form`, or `tasks` card's `data` to show a × on it. Dismissing a card **defers** it rather than deleting it: the card collapses to a compact, re-openable stub — *"Proposed: Deploy to production? — dismissed · Reopen"* — and `onDismiss(cardId)` fires.
+
+Defer, don't delete. A user who waves a card away may want it back; keep the option open until your app decides the card is truly done.
+
+```js
+cards.policy = {
+  onDismiss: (cardId) => console.log('dismissed', cardId),
+  onReopen:  (cardId) => console.log('reopen requested', cardId),
+};
+```
+
+When the user taps **Reopen** on the stub, `onReopen(cardId)` fires. Your handler decides what happens — bring the card back live, or mark it `expired` if the moment has passed (the agent already proceeded, or too much time elapsed). "Already proceeded" is a fact only your app knows, so the decision is yours.
+
+### `dismissRecovery()` — the wiring, done for you
+
+`dismissRecovery()` builds the `onDismiss` / `onReopen` pair against your card store. It writes the `dismissed` resolution, offers an **Undo** toast, and applies a default reopen rule (live unless the card is terminal or stale):
+
+```js
+import { dismissRecovery, toast } from '@kitn.ai/ui';
+
+const recovery = dismissRecovery({
+  get: () => cards.cards,
+  set: (next) => { cards.cards = next; },
+  // Inject a toast adapter for the "Dismissed · Undo" affordance.
+  toast: {
+    show: ({ message, action, durationMs }) => {
+      const t = toast(message, {
+        duration: durationMs,
+        action: action && { label: action.label, onAction: action.onClick },
+      });
+      return { dismiss: t.dismiss };
+    },
+  },
+  staleAfterMs: 5 * 60_000, // a card dismissed over 5 minutes ago can't reopen
+});
+
+cards.policy = { ...recovery, onAction, onSubmit };
+```
+
+- **`onDismiss`** stamps `{ kind: 'dismissed', at }` on the card (a new array reference, so a Solid/React host re-renders) and shows the Undo toast. Undo restores whatever resolution the card had before.
+- **`onReopen`** clears the resolution (card live again) when the card is re-openable, otherwise stamps `{ kind: 'expired' }`. Override the rule with `isReopenable`, or cap it with `staleAfterMs`.
+
+The toast is **injected, never imported** — cards stay decoupled from the toast module. Pass any adapter with a `show()` method, or omit `toast` to skip the Undo affordance entirely.
 
 ## Examples
 

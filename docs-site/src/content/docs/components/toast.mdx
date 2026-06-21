@@ -1,0 +1,192 @@
+---
+title: Toast
+description: Raise a transient notification with one call — toast('Copied'). An Undo action, stacking, and sticky toasts come for free.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">toast() · kai-toast-region</p>
+
+<p class="kai-lede">Raise a transient notification from anywhere with one call — `toast('Copied to clipboard')`. The first toast lazily mounts a single viewport overlay on `document.body`; you never place an element by hand.</p>
+
+<Facts items={['Imperative API', 'Shadow DOM overlay', 'Undo actions', 'Auto-stack (max 3)', 'Pause on hover']} />
+
+## Quick start
+
+Import `toast` and call it. No element, no setup:
+
+```js
+import { toast } from '@kitn.ai/ui/elements';
+
+toast('Copied to clipboard');
+toast.success('Saved');
+```
+
+The first call creates one `<kai-toast-region>` on `document.body` and binds it to a shared store, so every later `toast()` lands in the same stack. `toast` is also exported from the package root (`@kitn.ai/ui`) if you'd rather import it alongside the SolidJS layer.
+
+<Aside type="tip" title="When to use">
+Confirm an action the user just took — copied text, saved a draft, sent feedback — without interrupting them. Reach for a toast when the message is **transient and non-blocking**. For a decision the user must make, use a [card](/components/cards/) instead.
+</Aside>
+
+## The `toast()` API
+
+`toast(message, options?)` returns a `{ id, dismiss, update }` handle. Two named helpers cover the common cases:
+
+```js
+import { toast } from '@kitn.ai/ui/elements';
+
+toast('Copied to clipboard');        // neutral
+toast.success('Profile updated');    // emerald check
+toast.dismiss(id);                   // remove one toast by id
+toast.clear();                       // remove all
+```
+
+| Call | What it does |
+|---|---|
+| `toast(message, opts?)` | Raise a neutral toast. Returns a `ToastHandle`. |
+| `toast.success(message, opts?)` | Same, with the success (check) variant. |
+| `toast.dismiss(id)` | Remove the toast with that `id`. |
+| `toast.clear()` | Remove every active toast. |
+
+**Options** — the second argument to `toast()`:
+
+| Option | Type | Default | Notes |
+|---|---|---|---|
+| `id` | `string` | auto | Pass an existing `id` to **update that toast in place** instead of stacking a new one. |
+| `variant` | `'neutral' \| 'success'` | `'neutral'` | `toast.success(…)` sets this for you. |
+| `action` | `{ label, onAction }` | — | Adds a button. Return `false` from `onAction` to keep the toast open. |
+| `duration` | `number` (ms) | `2000` | Auto-dismiss delay. `0` is sticky. With an `action`, the floor is `4000` so there's time to act. |
+| `dismissible` | `boolean` | `true` | Whether the × close button shows. |
+
+The returned handle controls the toast after it's shown:
+
+```js
+const t = toast('Uploading…', { duration: 0 }); // sticky while the work runs
+// later…
+t.update({ message: 'Uploaded', variant: 'success', duration: 2000 });
+// or
+t.dismiss();
+```
+
+## Examples
+
+### Success
+
+A confirmation with the emerald check. Auto-dismisses after 2 seconds.
+
+```js
+import { toast } from '@kitn.ai/ui/elements';
+
+toast.success('Copied to clipboard');
+```
+
+### Undo action
+
+Add an `action` to offer a one-tap reversal. The toast stays up at least 4 seconds when it carries an action, so the user has time to react:
+
+```js
+import { toast } from '@kitn.ai/ui/elements';
+
+function deleteItem(item) {
+  remove(item);
+  toast('Item deleted', {
+    action: { label: 'Undo', onAction: () => restore(item) },
+  });
+}
+```
+
+Returning `false` from `onAction` keeps the toast open — useful when the action kicks off follow-up work you want to report in the same toast.
+
+### Stacking
+
+Raise several toasts and they stack newest-on-top. The region shows up to `max` at once (3 by default); the rest queue and promote as slots free up:
+
+```js
+import { toast } from '@kitn.ai/ui/elements';
+
+toast('Connecting…');
+toast('Syncing files');
+toast.success('All set');
+```
+
+### Sticky (no auto-dismiss)
+
+Set `duration: 0` to keep a toast until you dismiss it — for ongoing work whose end you'll signal yourself. Update it in place when the work finishes:
+
+```js
+import { toast } from '@kitn.ai/ui/elements';
+
+const t = toast('Generating report…', { duration: 0 });
+
+await buildReport();
+
+t.update({ message: 'Report ready', variant: 'success', duration: 2000 });
+```
+
+## The declarative element
+
+`toast()` is the path you'll reach for. The imperative API is backed by `<kai-toast-region>` — a real `kai-*` web component with its own Shadow DOM and the shared kit stylesheet, so it's viewport-positioned and fully themed, never a bare div.
+
+You only touch the element directly to **own the toast list yourself** (e.g. driving it from your own state) or to **change where the stack anchors**. Set `toasts` in JavaScript (arrays can't be HTML attributes) and listen for `kai-dismiss` / `kai-action`:
+
+```html
+<kai-toast-region position="bottom-right" max="2"></kai-toast-region>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-toast-region');
+
+  const region = document.querySelector('kai-toast-region');
+  region.toasts = [
+    { id: 't1', message: 'Saved', variant: 'success' },
+    { id: 't2', message: 'Item deleted', action: { label: 'Undo', onAction: () => restore() } },
+  ];
+
+  region.addEventListener('kai-dismiss', (e) => console.log('left:', e.detail.id, e.detail.reason));
+  region.addEventListener('kai-action', (e) => console.log('action:', e.detail.id, e.detail.label));
+</script>
+```
+
+<Aside type="caution" title="One region">
+The imperative `toast()` and the declarative element share one store. If you mount your own `<kai-toast-region>`, place exactly one — a second region would render the same stack twice.
+</Aside>
+
+A toast item has the same shape as a `toast()` call:
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | `string` | Stable id; echoed in `kai-dismiss` / `kai-action`. |
+| `message` | `string` | The text. |
+| `variant` | `'neutral' \| 'success'` | Defaults to `'neutral'`. |
+| `action` | `{ label, onAction }` | Optional action button. |
+| `duration` | `number` (ms) | `0` = sticky; defaults to `2000` (floor `4000` with an action). |
+| `dismissible` | `boolean` | Show the × button. Defaults to `true`. |
+
+## Behavior
+
+- **Auto-dismiss** after `duration` (2s default), **paused while hovered** so it doesn't vanish mid-read.
+- **Stack cap** at `max` (3); overflow queues and promotes as toasts leave.
+- **Announced** via `aria-live="polite"` / `role="region"` — screen readers hear new toasts without losing focus.
+- **Reduced motion** — the slide/fade is suppressed under `prefers-reduced-motion`.
+
+## Props
+
+These apply to the `<kai-toast-region>` element.
+
+<PropTable tag="kai-toast-region" />
+
+## Events
+
+<EventTable tag="kai-toast-region" />
+
+## Composed from
+
+<ComposedFrom tag="kai-toast-region" />
+
+<NeedAHand />

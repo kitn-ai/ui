@@ -59,6 +59,36 @@ Set `message` in JavaScript (objects can't be HTML attributes) and listen for `k
 - **`actions`** accepts built-in names (`'copy'`, `'like'`, `'dislike'`, `'regenerate'`, `'edit'`) and/or `{ id, label, icon?, tooltip? }` descriptors. Alternatively, place `<kai-action>` children in the light DOM.
 - **`actionsReveal`** — `'always'` (default) keeps the action bar visible; `'hover'` hides it until the row is hovered.
 
+## The action row
+
+The built-in `copy`, `like`, and `dislike` actions are wired — the element handles the interaction, you just listen for `kai-message-action`.
+
+- **`copy`** writes the message content to the clipboard, flips its icon to a check for a couple of seconds, and raises a "Copied to clipboard" [toast](/components/toast/).
+- **`like` / `dislike`** mark the chosen vote active (filled, `aria-pressed`) and animate the other one out, so the row reads as a clear yes/no. Tapping the active vote again clears it and brings both back. Setting a vote raises a "Thanks for your feedback" toast; clearing it is silent.
+
+These survive streaming. The vote and copied state live above the message list, so a fresh `messages` array per chunk never wipes a user's vote.
+
+### Reading and persisting the vote
+
+`kai-message-action` carries a `state` field for the toggleable votes — `'on'` when a vote is set, `'off'` when cleared. Copy and custom actions omit it.
+
+```js
+msg.addEventListener('kai-message-action', (e) => {
+  const { messageId, action, state } = e.detail;
+  if (action === 'like' || action === 'dislike') {
+    if (state === 'on') saveVote(messageId, action);
+    else clearVote(messageId);
+  }
+});
+```
+
+To re-hydrate a persisted vote (e.g. on history load), set `feedback` on the message. A controlled `feedback` wins over the element's own optimistic state:
+
+```js
+msg.message = { id: 'm-1', role: 'assistant', content: '…',
+                actions: ['copy', 'like', 'dislike'], feedback: 'like' };
+```
+
 ## Examples
 
 ### Rich Assistant Message

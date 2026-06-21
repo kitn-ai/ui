@@ -1,0 +1,156 @@
+---
+title: Compare
+description: Show two assistant responses side by side and let the user pick the better one — a clean way to capture preference data.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-compare</p>
+
+<p class="kai-lede">"Which response do you prefer?" — render two assistant candidates for the same prompt side by side, let the user pick one, and turn that pick into a `(prompt, chosen, rejected)` preference pair.</p>
+
+<Facts items={['Shadow DOM', 'Preference capture', 'Both candidates stream', 'Keyboard radiogroup', 'Collapses to the winner']} />
+
+<Aside type="tip" title="When to use">
+Reach for `<kai-compare>` when you want to **capture which of two answers a user prefers** — A/B preference collection, RLHF-style feedback, or a "regenerate and compare" flow. The pick is a one-shot commit, not a form submit: it fires once, the card collapses to the chosen answer, and you send the preference pair to your backend.
+</Aside>
+
+## Usage
+
+Set `data` in JavaScript — it's an object with exactly two `candidates` (arrays and objects can't be HTML attributes). Listen for `kai-compare-select`:
+
+```html
+<kai-compare id="cmp"></kai-compare>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-compare');
+
+  const cmp = document.getElementById('cmp');
+
+  cmp.data = {
+    prompt: 'Explain a closure in one paragraph.',
+    candidates: [
+      { id: 'a', label: 'A', model: 'gpt-4o', content: 'A closure is a function that…' },
+      { id: 'b', label: 'B', model: 'claude', content: 'Closures let a function remember…' },
+    ],
+  };
+
+  cmp.addEventListener('kai-compare-select', (e) => {
+    const { chosenId, rejectedIds } = e.detail;
+    // Send the preference pair to your backend.
+    recordPreference({ prompt: cmp.data.prompt, chosenId, rejectedIds });
+  });
+</script>
+```
+
+- **`data`** — `{ prompt?, candidates: [A, B], collapse? }`. Each candidate is an assistant response; it renders exactly like a [message](/components/message/) body (markdown, reasoning, tool calls, attachments).
+- **`kai-compare-select`** — fires once when the user picks. `detail` is `{ chosenId, rejectedIds, at }`.
+- The pick **commits and collapses** to the chosen candidate. It's single-shot — `<kai-compare>` won't emit again for the same definition.
+
+## The candidate shape
+
+Each entry in `candidates` describes one assistant response:
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | `string` | Unique within the pair; echoed back in the selection. |
+| `content` | `string` | The response text (markdown). |
+| `reasoning` | `{ text, label? }` | Optional collapsible reasoning block. |
+| `tools` | `ToolPart[]` | Tool-call parts rendered above the content. |
+| `attachments` | `AttachmentData[]` | Inline attachment previews. |
+| `label` | `string` | Short column label (e.g. `'A'`, `'Concise'`). |
+| `model` | `string` | Model name shown as a sub-label. |
+| `streaming` | `boolean` | `true` while this candidate is still generating. |
+
+A comparison needs **exactly two** candidates with unique, non-empty `id`s. Anything else renders an inline error and fires `kai-error`.
+
+## Capturing the preference
+
+The selection is the whole point. `kai-compare-select` hands you `chosenId` and `rejectedIds` (for a pair, the other candidate's id). Pair that with the prompt and send it to wherever you collect preference data:
+
+```js
+cmp.addEventListener('kai-compare-select', (e) => {
+  const { chosenId, rejectedIds, at } = e.detail;
+  fetch('/api/preferences', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      prompt: cmp.data.prompt,
+      chosen: chosenId,
+      rejected: rejectedIds,
+      at,
+    }),
+  });
+});
+```
+
+## Streaming both candidates
+
+Both responses can stream at once. Mark a candidate `streaming: true` and its column shows a shimmer; the pick controls stay disabled until **both** settle, then `kai-ready` fires.
+
+Push a **fresh `data` reference per chunk** — assign a new object, never mutate the existing one in place, or the element won't re-render:
+
+```js
+cmp.data = {
+  prompt,
+  candidates: [
+    { id: 'a', label: 'A', content: '', streaming: true },
+    { id: 'b', label: 'B', content: '', streaming: true },
+  ],
+};
+
+for await (const { id, delta, done } of streamBoth()) {
+  cmp.data = {
+    ...cmp.data,
+    candidates: cmp.data.candidates.map((c) =>
+      c.id === id ? { ...c, content: c.content + delta, streaming: !done } : c,
+    ),
+  };
+}
+```
+
+<Aside type="caution" title="Fresh reference per chunk">
+This is the kit-wide rule for any array/object prop. Mutating `cmp.data.candidates[0].content` in place does **not** re-render — always assign a new `data` object.
+</Aside>
+
+## Re-hydrating a past pick
+
+To show a comparison the user already answered (e.g. loading a conversation), set `selection`. The card renders collapsed to the chosen candidate and emits nothing:
+
+```js
+cmp.data = { prompt, candidates: [a, b] };
+cmp.selection = { chosenId: 'a', rejectedIds: ['b'] };
+```
+
+## Layout
+
+`layout` controls the columns:
+
+| Value | Behavior |
+|---|---|
+| `'auto'` (default) | Container query — stacked below ~640px, side-by-side columns above. |
+| `'columns'` | Always two columns. |
+| `'stacked'` | Always stacked. |
+
+The two columns are a WAI-ARIA radiogroup with roving focus: Arrow keys move between A and B, Enter or Space picks the focused one.
+
+## Props
+
+<PropTable tag="kai-compare" />
+
+## Events
+
+<EventTable tag="kai-compare" />
+
+## Composed from
+
+<ComposedFrom tag="kai-compare" />
+
+<NeedAHand />

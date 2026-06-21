@@ -47,6 +47,7 @@ cards.policy = {
 | `onAction(cardId, action, payload?)` | A `confirm` button or `choice` option was submitted |
 | `onSubmit(cardId, data)` | A `form` was submitted; `data` is the validated values object |
 | `onDismiss(cardId)` | The user dismissed a dismissible card |
+| `onReopen(cardId)` | The user tapped **Reopen** on a dismissed card's stub |
 | `onError(cardId, message)` | The card definition was invalid, or the card failed to render |
 
 Each card type below is live — interact with it and watch its policy events land in the **Console** beneath the preview.
@@ -132,6 +133,38 @@ for await (const event of streamFromYourAgent()) {
   }
 }
 ```
+
+## Dismissing a card without losing it
+
+Set `dismissible: true` in a card's `data` and the user gets a × to wave it away. Dismissing **defers** the card — it collapses to a small *"Proposed: … — dismissed · Reopen"* stub instead of vanishing — and fires `onDismiss(cardId)`. Tapping **Reopen** fires `onReopen(cardId)`.
+
+Defer, don't delete: a dismissed card can come back. Your `onReopen` decides whether it returns live or has `expired` (e.g. the agent already acted on it).
+
+The `dismissRecovery()` helper wires both callbacks against your card store and adds an **Undo** toast:
+
+```js
+import { dismissRecovery, toast } from '@kitn.ai/ui';
+
+cards.policy = {
+  ...dismissRecovery({
+    get: () => cards.cards,
+    set: (next) => { cards.cards = next; },
+    toast: {
+      show: ({ message, action, durationMs }) => {
+        const t = toast(message, {
+          duration: durationMs,
+          action: action && { label: action.label, onAction: action.onClick },
+        });
+        return { dismiss: t.dismiss };
+      },
+    },
+  }),
+  onAction,
+  onSubmit,
+};
+```
+
+`onDismiss` writes `{ kind: 'dismissed' }` and shows "Dismissed · Undo" (Undo restores the prior state). `onReopen` brings the card back live, or stamps `{ kind: 'expired' }` when it's no longer reopenable — pass `isReopenable` or `staleAfterMs` to control that. See the [`kai-cards` reference](/components/cards/#dismiss-and-recover) for the full options.
 
 ## Re-hydrating resolved cards
 
