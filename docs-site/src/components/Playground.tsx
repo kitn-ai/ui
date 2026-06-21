@@ -88,10 +88,22 @@ export default function Playground(props: { tag: string }) {
 
   // The combined state used to generate code = controls + the non-default sample
   // props that the preview actually sets (so the snippet matches the preview).
-  const codeState = createMemo<State>(() => ({ ...state(), ...Object.fromEntries(Object.keys(sample).map((k) => [k, sample[k]])) }));
+  // Sentinel-valued keys (e.g. `target: '$preview'`) are preview-only — drop them.
+  const codeState = createMemo<State>(() => ({ ...state(), ...Object.fromEntries(Object.keys(sample).filter((k) => sample[k] !== '$preview').map((k) => [k, sample[k]])) }));
 
   let container: HTMLDivElement | undefined;
   const theme = () => document.documentElement.dataset.theme || 'light';
+
+  // Resolve the `$preview` sentinel in sample data to the live preview container.
+  // Lets an overlay element (e.g. kai-toast-region) anchor its stack INSIDE the
+  // preview box instead of the viewport — region `target` AND each toast's
+  // `target` must point at the same node, so resolve it everywhere it appears.
+  const resolveSentinels = (v: unknown): unknown => {
+    if (v === '$preview') return container;
+    if (Array.isArray(v)) return v.map(resolveSentinels);
+    if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, val]) => [k, resolveSentinels(val)]));
+    return v;
+  };
 
   onMount(async () => {
     await loadKit();
@@ -140,7 +152,7 @@ export default function Playground(props: { tag: string }) {
   createEffect(() => {
     const h = host();
     if (!h) return;
-    for (const [k, v] of Object.entries(sample)) if (k !== 'html' && k !== 'previewHeight') (h as any)[k] = v;
+    for (const [k, v] of Object.entries(sample)) if (k !== 'html' && k !== 'previewHeight') (h as any)[k] = resolveSentinels(v);
     for (const c of bools) (h as any)[c.prop] = Boolean(state()[c.prop]);
     for (const c of controls) if (c.kind === 'string' && state()[c.prop]) h.setAttribute(camelToKebab(c.prop), String(state()[c.prop]));
   });
