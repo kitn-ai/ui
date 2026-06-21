@@ -9,6 +9,7 @@ import EventTable from '../../../components/EventTable.astro';
 import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
+import CompareDemo from '../../../components/CompareDemo.tsx';
 
 <p class="kai-tag-sub">kai-compare</p>
 
@@ -19,6 +20,10 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 <Aside type="tip" title="When to use">
 Reach for `<kai-compare>` when you want to **capture which of two answers a user prefers** — A/B preference collection, RLHF-style feedback, or a "regenerate and compare" flow. The pick is a one-shot commit, not a form submit: it fires once, the card collapses to the chosen answer, and you send the preference pair to your backend.
 </Aside>
+
+## Try it
+
+<CompareDemo client:only="solid" />
 
 ## Usage
 
@@ -135,9 +140,9 @@ cmp.selection = { chosenId: 'a', rejectedIds: ['b'] };
 
 | Value | Behavior |
 |---|---|
-| `'auto'` (default) | Container query — stacked below ~640px, side-by-side columns above. |
+| `'auto'` (default) | Container query — tabs (pills) on narrow, side-by-side columns when wide. |
 | `'columns'` | Always two columns. |
-| `'stacked'` | Always stacked. |
+| `'tabs'` | Always tabbed — one candidate at a time with pills to switch. |
 
 The two columns are a WAI-ARIA radiogroup with roving focus: Arrow keys move between A and B, Enter or Space picks the focused one.
 
