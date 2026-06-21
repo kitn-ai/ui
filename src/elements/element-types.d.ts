@@ -195,8 +195,8 @@ export interface KaiCompareElement extends HTMLElement {
   compareId?: string;
   /** Re-hydrate / control the user's pick. Set as a JS PROPERTY: `el.selection = { chosenId, rejectedIds }`. Renders the collapsed winner. */
   selection?: Record<string, unknown>;
-  /** Column layout: `'auto'` (default, container-query responsive) | `'columns'` | `'stacked'`. Attribute: `layout`. */
-  layout?: "auto" | "columns" | "stacked";
+  /** Layout: `'auto'` (default — columns when wide, tabs when narrow, by CONTAINER width) | `'columns'` (side-by-side) | `'tabs'` (pills to switch). Attribute: `layout`. */
+  layout?: "auto" | "columns" | "tabs";
   /** Prose/text size for the rendered candidates. Attribute: `prose-size`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
   /** Shiki theme for code blocks in the candidates. Attribute: `code-theme`. */
@@ -625,11 +625,13 @@ export interface KaiToastRegionElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. */
-  toasts: { id: string; message: string; variant?: undefined | "neutral" | "success"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean }[];
+  toasts: { id: string; message: string; variant?: undefined | "neutral" | "success"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
   /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
   max?: number;
+  /** Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region. */
+  target?: HTMLElement;
 }
 
 export interface KaiToolElement extends HTMLElement {

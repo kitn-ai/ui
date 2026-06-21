@@ -916,12 +916,12 @@
       },
       {
         "name": "layout",
-        "type": "undefined | \"auto\" | \"columns\" | \"stacked\"",
+        "type": "undefined | \"auto\" | \"columns\" | \"tabs\"",
         "optional": true,
         "scalar": true,
-        "description": "Column layout: `'auto'` (default, container-query responsive) | `'columns'` | `'stacked'`. Attribute: `layout`.",
+        "description": "Layout: `'auto'` (default — columns when wide, tabs when narrow, by CONTAINER width) | `'columns'` (side-by-side) | `'tabs'` (pills to switch). Attribute: `layout`.",
         "default": "'auto'",
-        "displayType": "undefined | \"auto\" | \"columns\" | \"stacked\""
+        "displayType": "undefined | \"auto\" | \"columns\" | \"tabs\""
       },
       {
         "name": "proseSize",
@@ -2933,15 +2933,15 @@
     "props": [
       {
         "name": "toasts",
-        "type": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true }[]",
+        "type": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
         "optional": false,
         "scalar": false,
         "description": "The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update.",
         "typeName": "ToastItem[]",
-        "typeShape": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true }[]",
+        "typeShape": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
         "default": "[]",
         "typeImport": "ToastItem",
-        "displayType": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true }[]"
+        "displayType": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]"
       },
       {
         "name": "position",
@@ -2960,6 +2960,14 @@
         "description": "Max simultaneously-visible toasts; the rest queue. Defaults to `3`.",
         "default": "3",
         "displayType": "undefined | number"
+      },
+      {
+        "name": "target",
+        "type": "undefined | HTMLElement",
+        "optional": true,
+        "scalar": false,
+        "description": "Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region.",
+        "displayType": "undefined | HTMLElement"
       }
     ],
     "events": [

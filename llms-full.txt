@@ -377,7 +377,7 @@ _No events._
 | `data` | — | `undefined \| Record<string, unknown>` | The compare definition (prompt + the two candidates). Set as a JS PROPERTY: `el.data = { prompt, candidates: [A, B], collapse? }`. Import `ResponseCompareData` from `@kitn.ai/ui` for the full shape. |
 | `compareId` | `compare-id` | `undefined \| string` | Stable id correlating every emitted event. Attribute: `compare-id`. |
 | `selection` | — | `undefined \| Record<string, unknown>` | Re-hydrate / control the user's pick. Set as a JS PROPERTY: `el.selection = { chosenId, rejectedIds }`. Renders the collapsed winner. |
-| `layout` | `layout` | `undefined \| "auto" \| "columns" \| "stacked"` | Column layout: `'auto'` (default, container-query responsive) \| `'columns'` \| `'stacked'`. Attribute: `layout`. |
+| `layout` | `layout` | `undefined \| "auto" \| "columns" \| "tabs"` | Layout: `'auto'` (default — columns when wide, tabs when narrow, by CONTAINER width) \| `'columns'` (side-by-side) \| `'tabs'` (pills to switch). Attribute: `layout`. |
 | `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Prose/text size for the rendered candidates. Attribute: `prose-size`. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme for code blocks in the candidates. Attribute: `code-theme`. |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Whether code blocks are syntax-highlighted. Attribute: `code-highlight`. |
@@ -963,9 +963,10 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `toasts` | — | `{ id: string; message: string; variant?: undefined \| "neutral" \| "success"; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true }[]` | The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. |
+| `toasts` | — | `{ id: string; message: string; variant?: undefined \| "neutral" \| "success"; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true; target?: undefined \| HTMLElement }[]` | The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. |
 | `position` | `position` | `undefined \| "top-center" \| "top-right" \| "top-left" \| "bottom-center" \| "bottom-right" \| "bottom-left"` | Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … |
 | `max` | `max` | `undefined \| number` | Max simultaneously-visible toasts; the rest queue. Defaults to `3`. |
+| `target` | — | `undefined \| HTMLElement` | Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
