@@ -21,7 +21,7 @@ const cdnSteps = [
 const npmSteps = [
   { n: '01', title: 'Install', lang: 'bash', code: 'npm i @kitn.ai/ui' },
   { n: '02', title: 'Register the elements', lang: 'js', code: "import '@kitn.ai/ui/elements';" },
-  { n: '03', title: 'Drop one in', lang: 'html', code: '<kai-chat></kai-chat>' },
+  { n: '03', title: 'Drop one in (give it a height)', lang: 'html', code: '<kai-chat style="display:block;height:600px"></kai-chat>' },
 ];
 const paths = [
   { id: 'cdn', label: 'CDN — no build', steps: cdnSteps },
