@@ -11,7 +11,7 @@ It can be consumed two ways:
 
 - **~50 composable components** across three layers: headless primitives → accessible UI primitives (built in-house, WCAG 2.1 AA — no third-party UI dependency) → AI feature components.
 - **Shadow-DOM web components** — zero CSS conflicts in any host. The host's styles can't leak in; the kit's Tailwind can't leak out.
-- **Lightweight by design** — a markdown-only `<kai-chat>` is **~110 KB gzip** (one file). Syntax highlighting (Shiki) is loaded **on demand, per-language, with no WASM** — and never loads at all if you don't render code.
+- **Load it your way** — register every element in one import, cherry-pick per-element with a bundler, or drop in a CDN autoloader that loads each on demand. Syntax highlighting loads lazily, per language, only when you render code.
 - **Tailwind v4** design tokens — rebrand by overriding `--color-*` custom properties.
 
 ## Install
@@ -392,14 +392,14 @@ cd examples/vue && npm install && npm run dev
 - **[docs/web-components.md](docs/web-components.md)** — full element API: every property, event, and the `ChatMessage` schema.
 - **[llms.txt](llms.txt)** / **[llms-full.txt](llms-full.txt)** — dense machine-readable references for AI coding agents.
 
-## Bundle size
+## Loading
 
-Pay for what you use. Three ways to load the elements:
+Three ways to load the elements — register all (the simple default), cherry-pick per-element, or a CDN autoloader:
 
-| How you load | What ships |
-|---|--:|
-| `import '@kitn.ai/ui/elements'` (register **all** ~50 elements) | **~119 KB gzip** JS + ~17 KB gzip CSS |
-| `import '@kitn.ai/ui/elements/chat'` (one element — bundler **tree-shakes**) | **~73 KB gzip** JS (−37%) + CSS, shared chunks only |
+| How you load | What it does |
+|---|---|
+| `import '@kitn.ai/ui/elements'` | registers every element — the simple default |
+| `import '@kitn.ai/ui/elements/chat'` | one element, bundler tree-shakes |
 | `import '@kitn.ai/ui/autoloader'` (opt-in **DOM autoloader**) | loads each element's module **on demand** as `<kai-*>` appears |
 
 The autoloader watches the DOM (initial scan + `MutationObserver`) and dynamically imports only the

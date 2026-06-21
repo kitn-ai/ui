@@ -1,23 +1,23 @@
 ---
-title: Bundle Size
-description: Three ways to load kai-* elements — register all, import per-element, or autoload on demand — so you pay for only what a page uses.
+title: Loading the elements
+description: Three ways to load the kai-* elements — register all, import per-element, or autoload on demand. Pick the one that fits your setup.
 ---
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-`@kitn.ai/ui` ships ~50 web components. You don't have to load all of them. Pick the loading strategy that matches how much of the kit you actually use.
-
-<Aside type="tip" title="You may not need this page">
-**Register all** — `import '@kitn.ai/ui/elements'` — is the default, works everywhere (including SSR), and is completely fine: one import, every element ready. This page is purely for when you want to *trim what a page downloads*. If that's not a concern, skip it — nothing here is required.
-</Aside>
+There are three ways to get the `kai-*` elements onto a page. They render the same components — the difference is *how* their code reaches the browser. Most apps want the first one.
 
 ## Quick comparison
 
-| Strategy | Import | When to use |
+| Strategy | Import | Reach for it when |
 |---|---|---|
-| **Register all** | `@kitn.ai/ui/elements` | You use many elements; simplest to set up; works in SSR |
-| **Per-element** | `@kitn.ai/ui/elements/chat` | You use a handful of elements; bundler required |
-| **Autoloader** | `<script>` tag (CDN / static) | No-build / CDN only — *not* bundlers; dynamically-added elements; lazy-by-default |
+| **Register all** | `@kitn.ai/ui/elements` | The default. You use several elements, or you just want it to work. Works in SSR. |
+| **Per-element** | `@kitn.ai/ui/elements/chat` | You use only a couple of elements and your build tree-shakes. |
+| **Autoloader** | `<script>` (CDN / static) | No build step — a CDN or static page. Loads each element on demand. |
+
+<Aside type="tip" title="Register all is the easy default">
+`import '@kitn.ai/ui/elements'` registers every element in one import and works everywhere, including SSR. Reach for the other two only when you have a specific reason — a build that tree-shakes, or a no-build CDN page.
+</Aside>
 
 ## Register all (default)
 
@@ -25,20 +25,16 @@ import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 import '@kitn.ai/ui/elements';
 ```
 
-One import, every `kai-*` element registered. The browser downloads a single bundle: roughly **119 KB gzip JS + 17 KB gzip CSS**. This is the right default when you use many elements or when you want the simplest setup.
-
-It's also the SSR-safe entry point — the import is side-effect-only and doesn't touch `document` until the browser runs it, so it won't throw in a server render.
+One import, every `kai-*` element registered. The simplest setup, and the SSR-safe entry point — the import is side-effect-only and doesn't touch `document` until the browser runs it, so it won't throw in a server render.
 
 ## Per-element imports
 
-Import individual elements by file basename:
+Import an element by its file basename, and your bundler includes only that element's code:
 
 ```js
 import '@kitn.ai/ui/elements/chat';
 import '@kitn.ai/ui/elements/code-block';
 ```
-
-Your bundler includes only that element's code. A page that imports only `kai-chat` lands at roughly **73 KB gzip** — a 37% reduction against the full bundle.
 
 <Aside type="tip" title="kai-chat is a complete chat — one import">
 That single import is everything a chat needs. `<kai-chat>` already bundles everything it renders — messages, markdown, **code highlighting, reasoning, tool calls, attachments, the prompt input**, model switcher, scroll button. You do **not** import those separately, and there is no internal sub-part to forget.
@@ -62,12 +58,12 @@ The import path is the element's filename in `dist/elements/` — usually the ta
 | `<kai-artifact>` | `@kitn.ai/ui/elements/artifact` |
 
 <Aside type="caution" title="Client-only">
-Per-element imports are client-only. In SSR frameworks (Next.js, Nuxt, SvelteKit, etc.) wrap them in a client-side boundary — a `'use client'` component in Next.js, a `onMount` in Svelte, or a `<ClientOnly>` wrapper in Nuxt.
+Per-element imports are client-only. In SSR frameworks (Next.js, Nuxt, SvelteKit, etc.) wrap them in a client-side boundary — a `'use client'` component in Next.js, an `onMount` in Svelte, or a `<ClientOnly>` wrapper in Nuxt.
 </Aside>
 
 ## Autoloader
 
-The autoloader watches the DOM and fetches each element's module on demand — only the tags present on a given page are ever downloaded.
+The autoloader watches the DOM and registers each element on demand — only the tags present on a given page are ever loaded.
 
 It is a **CDN / static-file** tool: load it from a `<script type="module">` tag. It is **not** importable through a bundler — Vite and webpack relocate it away from the element files and its on-demand imports 404. In a bundled app, use [per-element imports](#per-element-imports) instead.
 
@@ -75,7 +71,7 @@ It is a **CDN / static-file** tool: load it from a `<script type="module">` tag.
 <script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/elements/autoloader.js"></script>
 ```
 
-Here it is running live. This iframe loads **only** the autoloader — watch the panel for the modules it actually fetches on demand, then add an element and see it load on the fly:
+Here it is running live. This iframe loads **only** the autoloader — watch the panel for the modules it fetches on demand, then add an element and see it load on the fly:
 
 <iframe
   src="/autoloader-demo.html"
@@ -87,7 +83,7 @@ Here it is running live. This iframe loads **only** the autoloader — watch the
 On import it scans for undefined `kai-*` elements and starts a `MutationObserver`. Any `kai-*` element added to the DOM later — including ones injected by client-side routing — is registered the moment it appears.
 
 ```html
-<!-- Only kai-chat loads. The other ~49 elements never download. -->
+<!-- Only kai-chat loads. The others register only if you add them. -->
 <kai-chat style="display:block; height:100dvh;"></kai-chat>
 
 <script type="module">
@@ -109,16 +105,14 @@ An unversioned CDN URL tracks the latest release, which is risky on a pre-1.0 pa
 
 ## Code highlighting
 
-Shiki (the syntax highlighter behind `<kai-code-block>`) is always lazy — it loads per language the first time a code block with that language renders, with no WebAssembly, no upfront download. If you never render a code block, Shiki never loads.
+Syntax highlighting (Shiki) loads on demand — per language, the first time a code block with that language renders, with no WebAssembly. If you never render a code block, it never loads. This holds for all three strategies above.
 
-This applies to all three strategies above: the syntax highlighter never inflates your initial bundle.
-
-## SSR summary
+## SSR notes
 
 | Strategy | SSR-safe? |
 |---|---|
 | `@kitn.ai/ui/elements` | Yes — side-effect only; no `document` on import |
 | Per-element (`@kitn.ai/ui/elements/chat`) | No — use inside a client-only boundary |
-| Autoloader (`@kitn.ai/ui/autoloader`) | No — uses `document`; use inside a client-only boundary |
+| Autoloader | No — uses `document`; CDN `<script>`, not for SSR |
 
 For SSR meta-frameworks, see the [meta-frameworks guide](/guides/frameworks/meta-frameworks/) for framework-specific client boundary patterns.

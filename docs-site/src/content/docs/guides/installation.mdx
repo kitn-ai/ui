@@ -122,8 +122,8 @@ import '@kitn.ai/ui/theme.css';
 | Import path | What it provides |
 |---|---|
 | `@kitn.ai/ui/elements` | All the web components — registers every `kai-*` element; use in any framework. The simple default. |
-| `@kitn.ai/ui/elements/<element>` | A single element, tree-shaken — for a smaller bundle. See [Bundle Size](/guides/bundle-size/). |
-| `@kitn.ai/ui/autoloader` | CDN / static auto-loader — loads each `kai-*` on demand, no build. See [Bundle Size](/guides/bundle-size/). |
+| `@kitn.ai/ui/elements/<element>` | A single element, tree-shaken. See [Loading](/guides/loading/). |
+| `@kitn.ai/ui/autoloader` | CDN / static auto-loader — loads each `kai-*` on demand, no build. See [Loading](/guides/loading/). |
 | `@kitn.ai/ui/react` | Generated React wrappers with typed props |
 | `@kitn.ai/ui` | Native SolidJS components — compiled, tree-shakeable; Solid projects only |
 | `@kitn.ai/ui/theme.css` | Design tokens for overriding the theme (or set `--kai-color-*` with no import — see [Theming](/guides/theming/)) |
@@ -131,4 +131,4 @@ import '@kitn.ai/ui/theme.css';
 
 ## Next steps
 
-With the elements registered, head to the [framework guide](/guides/frameworks/overview/) for your stack, or render your first chat in [Getting started](/guides/getting-started/). Using only a couple of elements and want a smaller bundle? See [Bundle Size](/guides/bundle-size/).
+With the elements registered, head to the [framework guide](/guides/frameworks/overview/) for your stack, or render your first chat in [Getting started](/guides/getting-started/). Want a different way to load — per-element or a CDN autoloader? See [Loading](/guides/loading/).
