@@ -104,10 +104,13 @@ export function ensureMounted(): HTMLElement | undefined {
     return existing;
   }
   const el = document.createElement('kai-toast-region') as HTMLElement;
-  // Bind the reactive store. The facade reads its `toasts` prop reactively, so
-  // updating the store re-renders the stack without re-assigning the property.
-  (el as unknown as { toasts: ToastItem[] }).toasts = toasts as ToastItem[];
+  // Append FIRST so the element upgrades, THEN bind the reactive store. Setting
+  // the property before upgrade loses it: component-register resets every prop in
+  // the constructor on upgrade (the same pre-upgrade clobber that bites <kai-chat>),
+  // so a pre-append `el.toasts = …` is wiped and the FIRST toast never renders.
+  // Post-upgrade the accessor stores the live store proxy and the facade reacts.
   document.body.appendChild(el);
+  (el as unknown as { toasts: ToastItem[] }).toasts = toasts as ToastItem[];
   setMounted(true);
   return el;
 }
