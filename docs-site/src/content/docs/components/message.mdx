@@ -11,6 +11,7 @@ import EventTable from '../../../components/EventTable.astro';
 import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
+import FeedbackDemo from '../../../components/FeedbackDemo.tsx';
 
 <p class="kai-tag-sub">kai-message</p>
 
@@ -62,6 +63,8 @@ Set `message` in JavaScript (objects can't be HTML attributes) and listen for `k
 ## The action row
 
 The built-in `copy`, `like`, and `dislike` actions are wired — the element handles the interaction, you just listen for `kai-message-action`.
+
+<FeedbackDemo client:only="solid" />
 
 - **`copy`** writes the message content to the clipboard, flips its icon to a check for a couple of seconds, and raises a "Copied to clipboard" [toast](/components/toast/).
 - **`like` / `dislike`** mark the chosen vote active (filled, `aria-pressed`) and animate the other one out, so the row reads as a clear yes/no. Tapping the active vote again clears it and brings both back. Setting a vote raises a "Thanks for your feedback" toast; clearing it is silent.
