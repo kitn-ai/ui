@@ -152,6 +152,53 @@ const POSITION_CLASSES: Record<ToastPosition, string> = {
   'bottom-left': 'bottom-4 left-4 items-start flex-col-reverse',
 };
 
+// Flex alignment + stack direction per position, for a TARGET-anchored region (the
+// stack hugs the chosen corner; bottom rows grow upward so the newest sits at the
+// anchored edge). Mirrors POSITION_CLASSES minus the viewport-edge offsets.
+const ANCHOR_FLEX: Record<ToastPosition, string> = {
+  'top-center': 'items-center',
+  'top-left': 'items-start',
+  'top-right': 'items-end',
+  'bottom-center': 'items-center flex-col-reverse',
+  'bottom-left': 'items-start flex-col-reverse',
+  'bottom-right': 'items-end flex-col-reverse',
+};
+
+/** Inset from the target's edges, in px. */
+const ANCHOR_PAD = 12;
+
+interface TargetRect { top: number; left: number; right: number; bottom: number; width: number }
+
+/**
+ * The fixed-position style pinning a target-anchored stack to the corner named by
+ * `position`, computed from the target's rect. The region is `position: fixed`, so
+ * we resolve absolute top/left + a transform that grows the stack inward from that
+ * edge. (Rect-based, like the popover's anchor math — no collision flipping needed.)
+ */
+function anchorStyle(position: ToastPosition, r: TargetRect): Record<string, string> {
+  const cx = r.left + r.width / 2;
+  const top = r.top + ANCHOR_PAD;
+  const bottom = r.bottom - ANCHOR_PAD;
+  const left = r.left + ANCHOR_PAD;
+  const right = r.right - ANCHOR_PAD;
+  const maxWidth = `${Math.max(0, r.width - ANCHOR_PAD * 2)}px`;
+  switch (position) {
+    case 'top-left':
+      return { top: `${top}px`, left: `${left}px`, transform: 'none', 'max-width': maxWidth };
+    case 'top-right':
+      return { top: `${top}px`, left: `${right}px`, transform: 'translateX(-100%)', 'max-width': maxWidth };
+    case 'bottom-center':
+      return { top: `${bottom}px`, left: `${cx}px`, transform: 'translate(-50%, -100%)', 'max-width': maxWidth };
+    case 'bottom-left':
+      return { top: `${bottom}px`, left: `${left}px`, transform: 'translateY(-100%)', 'max-width': maxWidth };
+    case 'bottom-right':
+      return { top: `${bottom}px`, left: `${right}px`, transform: 'translate(-100%, -100%)', 'max-width': maxWidth };
+    case 'top-center':
+    default:
+      return { top: `${top}px`, left: `${cx}px`, transform: 'translateX(-50%)', 'max-width': maxWidth };
+  }
+}
+
 /**
  * Renders a stack of toasts at a viewport edge. Caps the visible count at `max`
  * (newest on top); overflow waits in a queue and is promoted as visible toasts
@@ -170,15 +217,15 @@ export function ToastRegion(props: ToastRegionProps) {
   );
   const visible = createMemo(() => ordered().slice(0, max()));
 
-  // Scoped to a target → anchor the stack over its top-center, following it on
-  // scroll/resize. Otherwise it's a viewport-fixed corner/center.
-  const [anchor, setAnchor] = createSignal<{ top: number; left: number; maxW: number } | null>(null);
+  // Scoped to a target → anchor the stack to the `position` corner of the target,
+  // following it on scroll/resize. Otherwise it's a viewport-fixed corner/center.
+  const [anchor, setAnchor] = createSignal<TargetRect | null>(null);
   createEffect(() => {
     const t = props.target;
     if (!t || typeof window === 'undefined') { setAnchor(null); return; }
     const update = () => {
       const r = t.getBoundingClientRect();
-      setAnchor({ top: r.top, left: r.left + r.width / 2, maxW: r.width });
+      setAnchor({ top: r.top, left: r.left, right: r.right, bottom: r.bottom, width: r.width });
     };
     update();
     const ro = new ResizeObserver(update);
@@ -200,19 +247,10 @@ export function ToastRegion(props: ToastRegionProps) {
       class={cn(
         'pointer-events-none fixed z-[100] flex flex-col gap-2',
         anchor()
-          ? 'items-center'
+          ? ANCHOR_FLEX[position()]
           : cn('max-w-[min(28rem,calc(100vw-2rem))]', POSITION_CLASSES[position()]),
       )}
-      style={
-        anchor()
-          ? {
-              top: `${anchor()!.top + 12}px`,
-              left: `${anchor()!.left}px`,
-              transform: 'translateX(-50%)',
-              'max-width': `${Math.max(0, anchor()!.maxW - 24)}px`,
-            }
-          : undefined
-      }
+      style={anchor() ? anchorStyle(position(), anchor()!) : undefined}
     >
       <For each={visible()}>
         {(item) => (

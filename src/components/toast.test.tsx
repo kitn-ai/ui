@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup, fireEvent, waitFor } from '@solidjs/testing-library';
 import { createSignal } from 'solid-js';
-import { Toast, ToastRegion } from './toast';
+import { Toast, ToastRegion, type ToastPosition } from './toast';
 import type { ToastItem } from '../primitives/toast-store';
 
 afterEach(cleanup);
@@ -178,5 +178,56 @@ describe('ToastRegion — stacking + queue + a11y', () => {
     ));
     fireEvent.click(getByLabelText('Dismiss'));
     await waitFor(() => expect(onDismiss).toHaveBeenCalledWith('x', 'close'));
+  });
+});
+
+describe('ToastRegion — target anchoring honors position', () => {
+  // The anchor branch wires a ResizeObserver; jsdom lacks one, so stub a no-op.
+  let RealRO: typeof ResizeObserver | undefined;
+  beforeEach(() => {
+    RealRO = (globalThis as unknown as { ResizeObserver?: typeof ResizeObserver }).ResizeObserver;
+    (globalThis as unknown as { ResizeObserver: unknown }).ResizeObserver = class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    };
+  });
+  afterEach(() => {
+    (globalThis as unknown as { ResizeObserver?: typeof ResizeObserver }).ResizeObserver = RealRO;
+  });
+
+  // A fixed target rect: top 100, left 200, right 600, bottom 400, width 400.
+  const RECT = { top: 100, left: 200, right: 600, bottom: 400, width: 400, height: 300, x: 200, y: 100, toJSON() {} } as DOMRect;
+
+  function renderAnchored(position?: ToastPosition) {
+    const target = document.createElement('div');
+    target.getBoundingClientRect = () => RECT;
+    document.body.appendChild(target);
+    const { getByRole } = render(() => (
+      <ToastRegion toasts={[base({ id: 'x', message: 'X', duration: 0, target })]} target={target} position={position} />
+    ));
+    return getByRole('region') as HTMLElement;
+  }
+
+  it('anchors top-right to the target’s right edge, growing inward', async () => {
+    const region = renderAnchored('top-right');
+    await waitFor(() => expect(region.style.top).toBe('112px')); // top + 12
+    expect(region.style.left).toBe('588px'); // right - 12
+    expect(region.style.transform).toBe('translateX(-100%)');
+    expect(region.style.maxWidth).toBe('376px'); // width - 24
+  });
+
+  it('anchors bottom-center to the target’s bottom edge', async () => {
+    const region = renderAnchored('bottom-center');
+    await waitFor(() => expect(region.style.top).toBe('388px')); // bottom - 12
+    expect(region.style.left).toBe('400px'); // center x
+    expect(region.style.transform).toBe('translate(-50%, -100%)');
+  });
+
+  it('defaults to top-center over the target when no position is set', async () => {
+    const region = renderAnchored();
+    await waitFor(() => expect(region.style.top).toBe('112px'));
+    expect(region.style.left).toBe('400px'); // center x
+    expect(region.style.transform).toBe('translateX(-50%)');
   });
 });
