@@ -1552,7 +1552,112 @@ function compose(
     `Run the debug tool with "reduce bundle size" for the full breakdown and sizes.`,
   ].join('\n');
 
-  return [header, block1, block2, block3, block4].join('\n\n');
+  // SCAF-17: interaction patterns — small, copy-pasteable snippets for the
+  // toast / card-recovery / preference-capture features. Appended as a reference
+  // section so the consumer can wire confirmations, undo, and A/B preference
+  // capture without leaving the scaffold. Does not change blocks 1–4.
+  const block5 = interactionPatternsBlock();
+
+  return [header, block1, block2, block3, block4, block5].join('\n\n');
+}
+
+// ── SCAF-17: reusable interaction-pattern snippets ─────────────────────────────
+
+/**
+ * The three interaction patterns from the chat-interactions feature set, emitted
+ * as a labeled reference section the scaffolder always appends:
+ *   1. `toast()` confirmation + Undo.
+ *   2. `dismissRecovery()` card-policy wiring (with a toast adapter).
+ *   3. `kai-compare` preference capture (two streams → kai-compare-select →
+ *      recordPreference({ prompt, chosen, rejected })).
+ *
+ * Framework-agnostic (plain TS / DOM) so it drops into any of the front-end
+ * targets; the imports are valid from `@kitn.ai/ui` (and `toast` also from
+ * `@kitn.ai/ui/elements`).
+ */
+function interactionPatternsBlock(): string {
+  const toastPattern = [
+    `--- Pattern: toast() — confirmation + Undo ---`,
+    `// toast is IMPERATIVE — call it; there is no <kai-toast> to place. The first`,
+    `// call auto-mounts one <kai-toast-region> on document.body. Exported from`,
+    `// both '@kitn.ai/ui' and '@kitn.ai/ui/elements'.`,
+    `import { toast } from '@kitn.ai/ui/elements';`,
+    ``,
+    `toast('Copied to clipboard');      // neutral, auto-dismisses`,
+    `toast.success('Saved');            // emerald success variant`,
+    ``,
+    `// Undo affordance: an action floors the duration so there's time to act.`,
+    `const t = toast('Item deleted', {`,
+    `  action: { label: 'Undo', onAction: () => restoreItem() },`,
+    `});`,
+    `// t.update({ message: 'Restored', variant: 'success' });  t.dismiss();`,
+  ].join('\n');
+
+  const recoveryPattern = [
+    `--- Pattern: dismissRecovery() — card dismiss + Undo (DEFERRED, not deleted) ---`,
+    `// Dismissing a generative-UI card does NOT delete its envelope — it stamps a`,
+    `// 'dismissed' resolution and collapses to a reopenable stub. Keep dismissed`,
+    `// envelopes in your array; wire the policy with dismissRecovery().`,
+    `import { dismissRecovery } from '@kitn.ai/ui';`,
+    `import { toast } from '@kitn.ai/ui/elements';`,
+    ``,
+    `// Adapter: map dismissRecovery's toast shape onto the imperative toast().`,
+    `const toastAdapter = {`,
+    `  show: ({ message, action, durationMs }) => {`,
+    `    const h = toast(message, {`,
+    `      duration: durationMs,`,
+    `      action: action && { label: action.label, onAction: action.onClick },`,
+    `    });`,
+    `    return { dismiss: h.dismiss };`,
+    `  },`,
+    `};`,
+    ``,
+    `const { onDismiss, onReopen } = dismissRecovery({`,
+    `  get: () => cards,                 // your current envelopes`,
+    `  set: (next) => setCards(next),    // a NEW array reference (never mutate in place)`,
+    `  toast: toastAdapter,`,
+    `});`,
+    `// Hand { onDismiss, onReopen } to the CardPolicy on <kai-cards> / <kai-remote>.`,
+  ].join('\n');
+
+  const preferencePattern = [
+    `--- Pattern: kai-compare — capture an A/B preference pair ---`,
+    `// <kai-compare> shows EXACTLY two candidates for one prompt. data is a JS`,
+    `// PROPERTY; stream both columns with a fresh data ref per chunk; picking is`,
+    `// terminal and fires kai-compare-select { chosenId, rejectedIds }.`,
+    `import type { ResponseCompareData, CompareSelection } from '@kitn.ai/ui';`,
+    ``,
+    `const el = document.querySelector('kai-compare')!;`,
+    `el.data = {`,
+    `  prompt,`,
+    `  candidates: [`,
+    `    { id: 'a', content: '', streaming: true },`,
+    `    { id: 'b', content: '', streaming: true },`,
+    `  ],`,
+    `} satisfies ResponseCompareData;`,
+    ``,
+    `// Stream BOTH: replace data with a NEW object per chunk; clear streaming when`,
+    `// a candidate settles. The pick unlocks once both have settled (kai-ready).`,
+    `// el.data = { ...el.data, candidates: [{ ...a, content: aText }, { ...b, content: bText }] };`,
+    ``,
+    `el.addEventListener('kai-compare-select', (e) => {`,
+    `  const { chosenId, rejectedIds } = (e as CustomEvent<CompareSelection>).detail;`,
+    `  recordPreference({ prompt, chosen: chosenId, rejected: rejectedIds });`,
+    `});`,
+  ].join('\n');
+
+  return [
+    `=== INTERACTION PATTERNS ===`,
+    ``,
+    `Optional snippets for confirmations, card recovery, and preference capture.`,
+    `Drop in the one(s) you need; all imports resolve from @kitn.ai/ui.`,
+    ``,
+    toastPattern,
+    ``,
+    recoveryPattern,
+    ``,
+    preferencePattern,
+  ].join('\n');
 }
 
 // ── error text ────────────────────────────────────────────────────────────────

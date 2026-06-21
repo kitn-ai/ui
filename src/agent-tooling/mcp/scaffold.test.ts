@@ -1095,4 +1095,109 @@ describe('scaffold', () => {
     const frontendBlock = text.split('=== LOADING OPTIONS ===')[0];
     expect(frontendBlock).not.toContain("@kitn.ai/ui/elements/chat");
   });
+
+  // ── SCAF-17: interaction-pattern snippets (toast / dismissRecovery / kai-compare) ──
+
+  it('SCAF-17: scaffold output includes an INTERACTION PATTERNS section', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('=== INTERACTION PATTERNS ===');
+  });
+
+  it('SCAF-17: emits the toast() confirmation + Undo pattern', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'mock',
+      placement: 'full-page',
+      framework: 'html',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // imperative toast, exported from the elements bundle
+    expect(text).toMatch(/import \{ toast \} from '@kitn\.ai\/ui\/elements'/);
+    expect(text).toContain("toast('Copied to clipboard')");
+    expect(text).toContain('toast.success');
+    // an Undo action wired through onAction
+    expect(text).toMatch(/action:\s*\{\s*label:\s*'Undo'/);
+    expect(text).toContain('onAction');
+    // frames it as imperative (no element to place)
+    expect(text).toMatch(/IMPERATIVE|no <kai-toast>/i);
+  });
+
+  it('SCAF-17: emits the dismissRecovery() card-policy wiring with a toast adapter', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain("import { dismissRecovery } from '@kitn.ai/ui'");
+    // builds the onDismiss/onReopen policy half
+    expect(text).toContain('const { onDismiss, onReopen } = dismissRecovery({');
+    // a toast adapter mapping show() onto toast()
+    expect(text).toMatch(/toastAdapter|show:\s*\(\{/);
+    // get/set over the host store with a NEW array reference
+    expect(text).toMatch(/get:\s*\(\)\s*=>\s*cards/);
+    expect(text).toMatch(/set:\s*\(next\)/);
+    // explains dismissed is deferred, not deleted
+    expect(text).toMatch(/does NOT delete|reopenable stub|deferred/i);
+  });
+
+  it('SCAF-17: emits the kai-compare preference-capture wiring', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // compare types imported from the root entry
+    expect(text).toMatch(/import type \{ ResponseCompareData, CompareSelection \} from '@kitn\.ai\/ui'/);
+    // data set as a JS property with exactly two candidates
+    expect(text).toMatch(/el\.data\s*=/);
+    expect(text).toMatch(/candidates:\s*\[/);
+    // listens for the terminal select event
+    expect(text).toContain("addEventListener('kai-compare-select'");
+    // wires recordPreference({ prompt, chosen, rejected })
+    expect(text).toMatch(/recordPreference\(\{\s*prompt,\s*chosen:\s*chosenId,\s*rejected:\s*rejectedIds\s*\}\)/);
+  });
+
+  it('SCAF-17: interaction patterns appear across every front-end framework', async () => {
+    for (const framework of ['html', 'react', 'next', 'vue', 'svelte', 'tanstack-start'] as const) {
+      const out = await scaffold.handler({
+        useCase: 'drop-in-chat',
+        integration: 'openrouter',
+        placement: 'full-page',
+        framework,
+      });
+      const text = (out.content as { type: string; text: string }[])[0].text;
+      expect(text, `${framework}: missing INTERACTION PATTERNS`).toContain('=== INTERACTION PATTERNS ===');
+      expect(text, `${framework}: missing toast pattern`).toContain("import { toast } from '@kitn.ai/ui/elements'");
+      expect(text, `${framework}: missing dismissRecovery pattern`).toContain('dismissRecovery');
+      expect(text, `${framework}: missing kai-compare pattern`).toContain('kai-compare-select');
+    }
+  });
+
+  it('SCAF-17: interaction patterns are appended AFTER the loading-options block, not inside the front-end', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    const loadingIdx = text.indexOf('=== LOADING OPTIONS ===');
+    const patternsIdx = text.indexOf('=== INTERACTION PATTERNS ===');
+    expect(loadingIdx).toBeGreaterThanOrEqual(0);
+    expect(patternsIdx).toBeGreaterThan(loadingIdx);
+    // The dismissRecovery / kai-compare wiring must NOT leak into the front-end block
+    const frontendBlock = text.split('=== LOADING OPTIONS ===')[0];
+    expect(frontendBlock).not.toContain('dismissRecovery');
+    expect(frontendBlock).not.toContain('kai-compare-select');
+  });
 });
