@@ -17,6 +17,11 @@
     font-family: system-ui, -apple-system, sans-serif;
     margin: 0;
   }
+  /* Drive `color-scheme` from the storybook-dark-mode `.dark` class so the CSS
+     `light-dark()` function — used by light-DOM story chrome like the toast
+     trigger buttons — follows the Storybook light/dark toggle, not the OS. */
+  html { color-scheme: light; }
+  html.dark { color-scheme: dark; }
   /* Mirror the shipped focus ring (src/elements/styles.css) so dev/docs match
      production: one blue, token-driven :focus-visible outline on every
      focusable element. Keeps Storybook honest about what real apps render. */

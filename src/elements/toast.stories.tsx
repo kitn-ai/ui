@@ -6,15 +6,20 @@ import { toast } from '../primitives/toast-store';
 // mounts itself on document.body the first time a toast is raised. These stories
 // are trigger buttons; raise a toast and watch it slide in top-center.
 
+// `light-dark()` resolves against the wrapper's `color-scheme`, which we mirror to
+// the Storybook theme below — so these trigger buttons stay readable in dark mode
+// (a hardcoded light fill was invisible on the dark canvas).
 const BTN =
-  'padding:8px 14px;border-radius:8px;border:1px solid #d4d4d8;background:#fafafa;cursor:pointer;margin:0 8px 10px 0;font:inherit;font-size:14px';
+  'padding:8px 14px;border-radius:8px;border:1px solid light-dark(#d4d4d8,#3a3a3a);' +
+  'background:light-dark(#fafafa,#26262b);color:light-dark(#18181b,#fafafa);' +
+  'cursor:pointer;margin:0 8px 10px 0;font:inherit;font-size:14px';
 
 function ToastDemo() {
   return (
     <div style={{ padding: '28px', 'font-family': 'system-ui, sans-serif' }}>
-      <p style={{ margin: '0 0 18px', color: '#666', 'max-width': '46ch' }}>
-        Click to raise a toast. It slides in top-center and auto-dismisses (~2s; the Undo
-        one stays longer). The region mounts itself on the first call.
+      <p style={{ margin: '0 0 18px', color: 'light-dark(#666,#a1a1aa)', 'max-width': '46ch' }}>
+        Click to raise a toast. It slides in top-center and auto-dismisses (~5s; the Undo
+        one stays up to 7s). The region mounts itself on the first call.
       </p>
       <button style={BTN} onClick={() => toast('Saved your changes')}>Neutral</button>
       <button style={BTN} onClick={() => toast.success('Copied to clipboard')}>Success (check)</button>

@@ -46,7 +46,7 @@ function CompareDemo(props: { layout?: string }) {
   return (
     <div style={{ padding: '28px', 'max-width': '820px', 'font-family': 'system-ui, sans-serif' }}>
       <kai-compare ref={(e) => (el = e as CompareEl)} />
-      <p style={{ 'margin-top': '14px', color: '#666', 'font-size': '14px' }}>
+      <p style={{ 'margin-top': '14px', color: 'light-dark(#666,#a1a1aa)', 'font-size': '14px' }}>
         {picked()
           ? `Preferred ${picked()!.chosenId} · rejected ${picked()!.rejectedIds.join(', ')} → send this pair to your model.`
           : 'Pick a response…'}
