@@ -73,7 +73,7 @@ The element bundle is a self-contained ES module — load it directly from [jsDe
 <kai-chat></kai-chat>
 ```
 
-The URLs above track the **latest** release — handy for trying things out. **For production, pin an exact version** (e.g. `@kitn.ai/ui@0.4.0/dist/kitn-chat.es.js`): pinned URLs are immutable and cached far more aggressively, and — since this package is pre-1.0 — pinning shields you from breaking changes in a future minor release. SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To override design tokens, also include `theme.css`:
+The URLs above track the **latest** release — handy for trying things out. **For production, pin an exact version** (e.g. `@kitn.ai/ui@0.16.0/dist/kitn-chat.es.js`): pinned URLs are immutable and cached far more aggressively, and — since this package is pre-1.0 — pinning shields you from breaking changes in a future minor release. SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To override design tokens, also include `theme.css`:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/theme.css">
@@ -109,7 +109,7 @@ function App() {
 }
 ```
 
-The SolidJS entry (`.`) is the kit's raw source (`src/index.ts`) — your bundler compiles it, so it tree-shakes to just what you import.
+The SolidJS entry (`.`) ships compiled — your bundler tree-shakes it to just the components you import.
 
 ## Integrations
 

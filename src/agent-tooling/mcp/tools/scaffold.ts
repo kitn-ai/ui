@@ -1530,23 +1530,26 @@ function compose(
     envLines,
   ].join('\n');
 
-  // SCAF-16: footprint note — inform consumers about the two opt-in load modes
+  // SCAF-16: loading-options note — inform consumers about the two opt-in load modes
   // (per-element tree-shaking + autoloader) without changing the default import above.
+  // Leads with "the default is right" rather than a size headline; the debug tool
+  // carries the full KB breakdown for developers who ask for it.
   const block4 = [
-    `=== FOOTPRINT NOTE ===`,
+    `=== LOADING OPTIONS ===`,
     ``,
-    `The scaffold above uses \`import '@kitn.ai/ui/elements'\` (register-all, ~119 KB gz).`,
-    `This is the right default for multi-element apps and SSR. Two opt-in modes cut it further:`,
+    `The scaffold uses \`import '@kitn.ai/ui/elements'\` (register-all) — the right`,
+    `default: it registers every kai-* element and is SSR-safe, so leave it as is.`,
+    `Two opt-in modes load less if a page only ever uses a few elements:`,
     ``,
-    `  Per-element (bundler / tree-shaking): import '@kitn.ai/ui/elements/<file>'`,
-    `    Registers only that element. A bundler reduces kai-chat alone to ~73 KB gz.`,
+    `  Per-element (bundler apps): import '@kitn.ai/ui/elements/<file>'`,
+    `    Registers just that element; your bundler tree-shakes the rest away.`,
     `    Example: import '@kitn.ai/ui/elements/chat'  (client-only — not for SSR)`,
     ``,
-    `  Autoloader (no-build / CDN ONLY): a <script type="module"> tag pointing at`,
-    `    dist/elements/autoloader.js — watches the DOM and loads each kai-* element on`,
-    `    demand. A CDN/static-file tool; NOT importable through a bundler. Client-only.`,
+    `  Autoloader (no-build / CDN pages): a <script type="module"> tag pointing at`,
+    `    dist/elements/autoloader.js — loads each kai-* element on demand as it`,
+    `    appears in the DOM. A CDN/static-file tool; not importable through a bundler.`,
     ``,
-    `Use the debug tool with symptom "reduce bundle size" for a full breakdown.`,
+    `Run the debug tool with "reduce bundle size" for the full breakdown and sizes.`,
   ].join('\n');
 
   return [header, block1, block2, block3, block4].join('\n\n');
