@@ -44,6 +44,7 @@ import './artifact';
 import './scroll-button';
 import './popover';
 import './switch';
+import './toast';
 // Generative-UI cards (Card Contract)
 import './card';
 import './form';

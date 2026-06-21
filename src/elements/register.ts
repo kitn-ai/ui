@@ -20,3 +20,11 @@ if (typeof window !== 'undefined' && typeof customElements !== 'undefined') {
 export type { ChatMessage, ChatMessageAction } from './chat-types';
 export { configureCodeHighlighting, isCodeHighlightingEnabled } from '../primitives/highlighter';
 export type { CodeHighlightingOptions } from '../primitives/highlighter';
+
+// Imperative toast API — usable directly from the elements entry so consumers
+// who only import the web-components bundle still get `toast()`. The store is
+// SSR-safe (no DOM touched until the first toast is raised on the client).
+export { toast } from '../primitives/toast-store';
+export type {
+  ToastItem, ToastVariant, ToastAction, ToastOptions, ToastHandle,
+} from '../primitives/toast-store';

@@ -65,6 +65,19 @@
   }
   *::-webkit-scrollbar-thumb:hover { background-color: var(--color-scrollbar-thumb-hover); }
   *::-webkit-scrollbar-corner { background: transparent; }
+
+  /* Respect a user's reduced-motion preference: disable the tw-animate-css
+     enter/exit keyframe animations (toasts, overlays, cards) so they appear and
+     disappear instantly instead of sliding/fading. Targets the utility classes
+     tw-animate-css emits (.animate-in / .animate-out) plus any arbitrary
+     `animate-[…]` keyframe utility. */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-in,
+    .animate-out,
+    [class*="animate-["] {
+      animation: none !important;
+    }
+  }
 }
 
 @layer components {

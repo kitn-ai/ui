@@ -18,6 +18,16 @@ export type { CodeHighlightingOptions } from './primitives/highlighter';
 export { configurePdfPreview, isPdfPreviewEnabled } from './primitives/pdf-preview';
 export type { PdfPreviewOptions } from './primitives/pdf-preview';
 
+// Toasts: imperative `toast()` API + the reactive store behind <kai-toast-region>
+export { toast, ensureMounted as ensureToastRegion, getToasts } from './primitives/toast-store';
+export type {
+  ToastItem, ToastVariant, ToastAction, ToastOptions, ToastHandle, ToastFn,
+} from './primitives/toast-store';
+export { Toast, ToastRegion } from './components/toast';
+export type {
+  ToastRegionProps, ToastDismissReason, ToastPosition,
+} from './components/toast';
+
 // Card Contract (generative-UI foundation)
 export { CARD_CONTRACT_VERSION } from './primitives/card-contract';
 export type {
