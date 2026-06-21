@@ -36,6 +36,10 @@ export interface ToastItem {
   duration?: number;
   /** Whether the × close affordance is shown. Defaults to `true`. */
   dismissible?: boolean;
+  /** Container to scope this toast WITHIN — it floats anchored to that element's
+   *  bounds instead of the viewport. Omit for a global, viewport-anchored toast.
+   *  The chat targets itself by default so its copy/feedback toasts stay in-chat. */
+  target?: HTMLElement;
 }
 
 /** Options accepted by `toast()` — everything but the message. Pass `id` to
@@ -46,6 +50,9 @@ export interface ToastOptions {
   action?: ToastAction;
   duration?: number;
   dismissible?: boolean;
+  /** Scope this toast to a container's bounds (e.g. a chat) instead of the
+   *  viewport. Omit for a global, viewport-anchored toast. */
+  target?: HTMLElement;
 }
 
 /** Handle returned from `toast()` for imperative control. */
@@ -96,22 +103,24 @@ function resolveDuration(item: Pick<ToastItem, 'duration' | 'action'>): number {
  * bundle loads; setting the property before/after upgrade both work because
  * `customElement` reflects late-set properties.
  */
-export function ensureMounted(): HTMLElement | undefined {
+// One region per distinct target (the `null` key = the global / viewport region).
+// Every region binds the SAME store proxy and filters to its own target, so a
+// toast routes to the region for its `target`.
+const regions = new Map<HTMLElement | null, HTMLElement>();
+
+export function ensureMounted(target: HTMLElement | null = null): HTMLElement | undefined {
   if (typeof document === 'undefined') return undefined;
-  const existing = document.querySelector('kai-toast-region') as HTMLElement | null;
-  if (existing) {
-    (existing as unknown as { toasts: ToastItem[] }).toasts = toasts as ToastItem[];
-    setMounted(true);
-    return existing;
-  }
+  const cached = regions.get(target);
+  if (cached && cached.isConnected) return cached;
   const el = document.createElement('kai-toast-region') as HTMLElement;
-  // Append FIRST so the element upgrades, THEN bind the reactive store. Setting
-  // the property before upgrade loses it: component-register resets every prop in
-  // the constructor on upgrade (the same pre-upgrade clobber that bites <kai-chat>),
-  // so a pre-append `el.toasts = …` is wiped and the FIRST toast never renders.
-  // Post-upgrade the accessor stores the live store proxy and the facade reacts.
+  // Append FIRST so the element upgrades, THEN bind. Setting a property before
+  // upgrade loses it: component-register resets every prop in the constructor on
+  // upgrade (the same pre-upgrade clobber that bites <kai-chat>), so a pre-append
+  // `el.toasts = …` is wiped and the first toast never renders.
   document.body.appendChild(el);
   (el as unknown as { toasts: ToastItem[] }).toasts = toasts as ToastItem[];
+  if (target) (el as unknown as { target: HTMLElement }).target = target;
+  regions.set(target, el);
   setMounted(true);
   return el;
 }
@@ -147,7 +156,7 @@ function makeHandle(id: string): ToastHandle {
 
 /** Internal: raise/refresh a toast of a given variant. */
 function raise(message: string, opts: ToastOptions | undefined, variant: ToastVariant): ToastHandle {
-  ensureMounted();
+  ensureMounted(opts?.target ?? null);
   const id = opts?.id ?? nextId();
   const item: ToastItem = {
     id,
@@ -156,6 +165,7 @@ function raise(message: string, opts: ToastOptions | undefined, variant: ToastVa
     action: opts?.action,
     duration: opts?.duration,
     dismissible: opts?.dismissible,
+    target: opts?.target,
   };
   upsert(item);
   return makeHandle(id);

@@ -24,6 +24,10 @@ export interface ToastRegionProps {
   /** Max simultaneously-visible toasts; the rest queue and promote as slots
    *  free up. Defaults to `3`. */
   max?: number;
+  /** When set, this region renders only the toasts scoped to that element and
+   *  anchors over its bounds (top-center), following it on scroll/resize. Unset =
+   *  the global, viewport-anchored region. */
+  target?: HTMLElement;
   /** Fired when a toast leaves, with the reason. */
   onDismiss?: (id: string, reason: ToastDismissReason) => void;
   /** Fired when a toast's action button is pressed. */
@@ -158,10 +162,35 @@ export function ToastRegion(props: ToastRegionProps) {
   const max = () => props.max ?? 3;
   const position = () => props.position ?? 'top-center';
 
-  // Newest-first so the freshest toast sits at the top of the stack; the queue
-  // (everything past `max`) stays mounted-but-hidden until a slot frees up.
-  const ordered = createMemo(() => [...(props.toasts ?? [])].reverse());
+  // Only the toasts for THIS region's target (undefined target = the global one).
+  // Newest-first so the freshest toast sits at the top; the queue (past `max`)
+  // stays mounted-but-hidden until a slot frees up.
+  const ordered = createMemo(() =>
+    [...(props.toasts ?? []).filter((t) => (t.target ?? undefined) === props.target)].reverse(),
+  );
   const visible = createMemo(() => ordered().slice(0, max()));
+
+  // Scoped to a target → anchor the stack over its top-center, following it on
+  // scroll/resize. Otherwise it's a viewport-fixed corner/center.
+  const [anchor, setAnchor] = createSignal<{ top: number; left: number; maxW: number } | null>(null);
+  createEffect(() => {
+    const t = props.target;
+    if (!t || typeof window === 'undefined') { setAnchor(null); return; }
+    const update = () => {
+      const r = t.getBoundingClientRect();
+      setAnchor({ top: r.top, left: r.left + r.width / 2, maxW: r.width });
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(t);
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    onCleanup(() => {
+      ro.disconnect();
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    });
+  });
 
   return (
     <div
@@ -170,9 +199,20 @@ export function ToastRegion(props: ToastRegionProps) {
       aria-live="polite"
       class={cn(
         'pointer-events-none fixed z-[100] flex flex-col gap-2',
-        'max-w-[min(28rem,calc(100vw-2rem))]',
-        POSITION_CLASSES[position()],
+        anchor()
+          ? 'items-center'
+          : cn('max-w-[min(28rem,calc(100vw-2rem))]', POSITION_CLASSES[position()]),
       )}
+      style={
+        anchor()
+          ? {
+              top: `${anchor()!.top + 12}px`,
+              left: `${anchor()!.left}px`,
+              transform: 'translateX(-50%)',
+              'max-width': `${Math.max(0, anchor()!.maxW - 24)}px`,
+            }
+          : undefined
+      }
     >
       <For each={visible()}>
         {(item) => (

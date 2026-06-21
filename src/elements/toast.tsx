@@ -10,6 +10,9 @@ interface Props extends Record<string, unknown> {
   position?: ToastPosition;
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
   max?: number;
+  /** Container element to anchor this region to (JS property). Set by the store
+   *  for a scoped region; unset = the global viewport region. */
+  target?: HTMLElement;
 }
 
 interface Events {
@@ -34,6 +37,7 @@ defineWebComponent<Props, Events>('kai-toast-region', {
   toasts: [],
   position: 'top-center',
   max: 3,
+  target: undefined,
 }, (props, { dispatch }) => {
   // `max` may arrive as a string attribute (`<kai-toast-region max="2">`).
   const max = () => {
@@ -54,6 +58,7 @@ defineWebComponent<Props, Events>('kai-toast-region', {
       toasts={props.toasts ?? []}
       position={props.position}
       max={max()}
+      target={props.target as HTMLElement | undefined}
       onDismiss={(id, reason) => {
         remove(id);
         dispatch('kai-dismiss', { id, reason });

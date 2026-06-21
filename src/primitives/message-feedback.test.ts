@@ -46,7 +46,7 @@ describe('createMessageFeedback', () => {
       fb.handleAction(m, 'like');
       expect(fb.resolveFeedback(m)).toBe('like');
       expect(emit).toHaveBeenLastCalledWith({ messageId: 'm1', action: 'like', state: 'on' });
-      expect(toastSpy).toHaveBeenCalledWith('Thanks for your feedback');
+      expect(toastSpy).toHaveBeenCalledWith('Thanks for your feedback', expect.anything());
 
       // switch to the other vote (no un-vote in between)
       fb.handleAction(m, 'dislike');
@@ -85,7 +85,7 @@ describe('createMessageFeedback', () => {
       fb.handleAction(m, 'copy');
       expect(writeText).toHaveBeenCalledWith('Copy me');
       expect(fb.isCopied('m1')).toBe(true);
-      expect(toastSpy).toHaveBeenCalledWith('Copied to clipboard');
+      expect(toastSpy).toHaveBeenCalledWith('Copied to clipboard', expect.anything());
       expect(emit).toHaveBeenLastCalledWith({ messageId: 'm1', action: 'copy' });
 
       vi.advanceTimersByTime(2000);

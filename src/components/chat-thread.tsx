@@ -105,8 +105,12 @@ export function ChatThread(props: ChatThreadProps) {
   const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
   // Feedback (copy + vote) state lives ABOVE the per-message <For>, so streaming
   // re-renders (a fresh `messages` array ref per chunk) don't wipe it.
+  // The copy/feedback toasts scope to the chat (this thread's root) so they appear
+  // in-chat rather than at the page top.
+  let rootEl: HTMLElement | undefined;
   const feedback = createMessageFeedback({
     emit: (detail) => props.onMessageAction?.(detail),
+    target: () => rootEl,
   });
   const [internal, setInternal] = createSignal(props.value ?? '');
   const [attachments, setAttachments] = createSignal<AttachmentData[]>([]);
@@ -126,7 +130,7 @@ export function ChatThread(props: ChatThreadProps) {
 
   return (
     <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={props.codeHighlight !== false} portalMount={outer.portalMount()}>
-      <div class={`flex h-full flex-col bg-background ${props.class ?? ''}`}>
+      <div ref={(e) => (rootEl = e as HTMLElement)} class={`flex h-full flex-col bg-background ${props.class ?? ''}`}>
         <Show when={showHeader()}>
           <header class="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
             <div class="flex items-center gap-2">

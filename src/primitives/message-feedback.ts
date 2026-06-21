@@ -26,6 +26,9 @@ export interface MessageFeedbackOptions {
   emit: (detail: MessageActionDetail) => void;
   /** How long the copy check stays before auto-clearing. Defaults to 2000ms. */
   copiedDuration?: number;
+  /** Container the copy/feedback toasts should be scoped to (the chat, by
+   *  default) so they appear in-chat rather than at the page top. */
+  target?: () => HTMLElement | undefined;
 }
 
 export interface MessageFeedback {
@@ -95,7 +98,7 @@ export function createMessageFeedback(opts: MessageFeedbackOptions): MessageFeed
       // Clipboard may be unavailable (insecure context / jsdom); fail soft.
       try { navigator.clipboard?.writeText(m.content); } catch { /* ignore */ }
       markCopied(m.id);
-      toast('Copied to clipboard');
+      toast('Copied to clipboard', { target: opts.target?.() });
       opts.emit({ messageId: m.id, action });
       return;
     }
@@ -107,7 +110,7 @@ export function createMessageFeedback(opts: MessageFeedbackOptions): MessageFeed
         opts.emit({ messageId: m.id, action, state: 'off' });
       } else {
         setVote(m.id, action);
-        toast('Thanks for your feedback');
+        toast('Thanks for your feedback', { target: opts.target?.() });
         opts.emit({ messageId: m.id, action, state: 'on' });
       }
       return;

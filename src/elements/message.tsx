@@ -62,6 +62,7 @@ defineWebComponent<Props, Events>('kai-message', {
   // re-render when the host swaps in a fresh `message` object during streaming.
   const feedback = createMessageFeedback({
     emit: (detail) => dispatch('kai-message-action', detail),
+    target: () => element,
   });
 
   // Read declarative <kai-action> children from light DOM.

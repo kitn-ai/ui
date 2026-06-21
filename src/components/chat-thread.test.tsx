@@ -160,11 +160,11 @@ describe('ChatThread action-row feedback', () => {
     const { getByLabelText } = render(() => <ChatThread messages={[assistant('Hi')]} />);
 
     fireEvent.click(getByLabelText('Copy'));
-    expect(toastSpy).toHaveBeenCalledWith('Copied to clipboard');
+    expect(toastSpy).toHaveBeenCalledWith('Copied to clipboard', expect.anything());
 
     toastSpy.mockClear();
     fireEvent.click(getByLabelText('Like'));
-    expect(toastSpy).toHaveBeenCalledWith('Thanks for your feedback');
+    expect(toastSpy).toHaveBeenCalledWith('Thanks for your feedback', expect.anything());
     await tick();
 
     // Un-vote: no toast.
