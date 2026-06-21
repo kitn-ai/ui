@@ -33,6 +33,8 @@ Then use them in your templates:
     <script type="module">
       import '@kitn.ai/ui/elements';
 
+      await customElements.whenDefined('kai-chat');
+
       const chat = document.querySelector('kai-chat');
       chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
       chat.addEventListener('kai-submit', (e) => console.log(e.detail));

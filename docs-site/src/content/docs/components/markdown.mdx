@@ -35,6 +35,8 @@ Set `content` in JavaScript with your markdown string:
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-markdown');
+
   const md = document.getElementById('md');
   md.content = '### Hello\nRenders **bold**, _italic_, and `code`.';
 </script>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>kai autoloader — live demo</title>
+  <!-- token defaults so the isolated iframe is styled (synced by sync-kit) -->
+  <link rel="stylesheet" href="/kitn/theme.tokens.css" />
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      font: 14px/1.5 system-ui, -apple-system, sans-serif;
+      background: var(--kai-color-background, #0b0b0d);
+      color: var(--kai-color-foreground, #e8e8ea);
+    }
+    .wrap { display: grid; grid-template-columns: 1fr 260px; height: 100vh; }
+    .stage { min-width: 0; display: flex; flex-direction: column; }
+    .panel {
+      border-inline-start: 1px solid var(--kai-color-border, #29292e);
+      padding: 14px; font-size: 12px; overflow: auto;
+    }
+    .panel h3 { margin: 0 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; opacity: .55; }
+    .panel p { margin: 0 0 10px; opacity: .6; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    li { padding: 3px 0; font-family: ui-monospace, SFMono-Regular, monospace; }
+    li.el { color: var(--kai-color-primary, #d946ef); font-weight: 600; }
+    li.chunk { opacity: .5; padding-inline-start: 12px; }
+    button {
+      cursor: pointer; margin-top: 12px; width: 100%; padding: 8px;
+      border-radius: 8px; border: 1px solid var(--kai-color-border, #29292e);
+      background: transparent; color: inherit; font-size: 12px;
+    }
+    button:hover { background: var(--kai-color-muted, #1a1a1f); }
+    kai-chat { flex: 1; min-height: 0; }
+    kai-loader { display: block; padding: 18px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="stage" id="stage">
+      <kai-chat id="chat" theme="dark"></kai-chat>
+    </div>
+    <aside class="panel">
+      <h3>Modules fetched</h3>
+      <p>Only what this page actually uses — the other ~40 elements never download.</p>
+      <ul id="log"></ul>
+      <button id="add">+ add a &lt;kai-loader&gt; on the fly</button>
+    </aside>
+  </div>
+
+  <script type="module">
+    // Live log of the element modules + shared chunks the autoloader pulls.
+    const log = document.getElementById('log');
+    const seen = new Set();
+    new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) {
+        const m = e.name.match(/\/kitn\/elements\/(chunks\/)?([^/?]+\.js)/);
+        if (!m || seen.has(m[2])) continue;
+        seen.add(m[2]);
+        const li = document.createElement('li');
+        li.className = m[1] ? 'chunk' : 'el';
+        li.textContent = (m[1] ? 'chunk ' : '▸ element ') + m[2];
+        log.appendChild(li);
+      }
+    }).observe({ type: 'resource', buffered: true });
+
+    // The autoloader loads kai-chat on demand; seed it once it's defined.
+    customElements.whenDefined('kai-chat').then(() => {
+      const chat = document.getElementById('chat');
+      chat.messages = [
+        { id: '1', role: 'user', content: 'Why did this page load so little?' },
+        { id: '2', role: 'assistant', content: "The autoloader fetched only kai-chat's module — watch the panel when you add another element." },
+      ];
+      chat.placeholder = 'The other ~40 elements never downloaded';
+    });
+
+    document.getElementById('add').addEventListener('click', () => {
+      if (document.getElementById('loader')) return;
+      const el = document.createElement('kai-loader');
+      el.id = 'loader';
+      document.getElementById('stage').prepend(el); // autoloader's MutationObserver picks it up
+    });
+  </script>
+
+  <!-- The autoloader: a CDN/static <script> that watches the DOM and dynamically
+       imports each kai-* element's module on demand. NOT a bundler import. -->
+  <script type="module" src="/kitn/elements/autoloader.js"></script>
+</body>
+</html>

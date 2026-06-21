@@ -35,6 +35,9 @@ Set `text` in JavaScript (async iterables can't be serialized to an HTML attribu
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-response-stream');
+
   const el = document.getElementById('stream');
   el.text = "Hello, this reveals one character at a time…";
   el.addEventListener('kai-complete', () => console.log('done'));

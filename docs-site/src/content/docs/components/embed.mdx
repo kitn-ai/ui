@@ -33,6 +33,9 @@ Set `data` in JavaScript (it's an object, not an attribute) on the element:
 <kai-embed id="em"></kai-embed>
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-embed');
+
   const em = document.getElementById('em');
   em.data = { provider: 'youtube', id: 'dQw4w9WgXcQ', title: 'Product intro' };
 </script>

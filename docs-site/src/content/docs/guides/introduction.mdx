@@ -27,6 +27,8 @@ Then it's just HTML:
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.querySelector('kai-chat');
 
   // Arrays can't be HTML attributes, so set messages in JavaScript.
@@ -93,6 +95,9 @@ import { Chat } from '@kitn.ai/ui/react';
 ```html
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.querySelector('kai-chat');
   chat.messages = messages;
   chat.addEventListener('kai-submit', handleSubmit);
@@ -120,10 +125,6 @@ About 50 elements, from a full `<kai-chat>` down to single building blocks like 
 | `kai-attachments` | File attachment tiles, chips, or rows |
 | `kai-conversations` | Conversation sidebar with grouping |
 | `kai-artifact` | Multi-file artifact viewer with tabs and maximize |
-
-## Bundle size
-
-A markdown-only `<kai-chat>` is one ~110 KB gzip file. Syntax highlighting (Shiki) loads on demand, per language, with no WASM — and never loads at all if you don't render code blocks.
 
 ## Next
 

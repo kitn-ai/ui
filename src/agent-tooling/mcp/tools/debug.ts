@@ -224,6 +224,53 @@ const RULES: Rule[] = [
       '```',
   },
   {
+    // Rule 9 — reduce bundle size / footprint / "how much does @kitn.ai/ui add"
+    // Source: dist/elements/<file>.js per-element exports; dist/autoloader.js
+    id: 'bundle-footprint',
+    test: (t) =>
+      /bundle\s*size|footprint|tree.?shak|how\s+much.*does.*@kitn|reduce.*import|import.*only.*element|per.?element\s+import|autoload|cdn.*no.?build|no.?build.*cdn/i.test(
+        t,
+      ),
+    title: 'Reducing bundle footprint — three load modes',
+    cause:
+      'The default `import \'@kitn.ai/ui/elements\'` registers every `kai-*` element. ' +
+      'If your page uses only one or two elements, that pulls in the full ~119 KB gz bundle. ' +
+      'Two opt-in modes let you load only what you need.',
+    fix:
+      '**Mode 1 — register-all (default, SSR-safe):**\n' +
+      'Best for multi-element apps or any SSR/meta-framework. ' +
+      'Load once and every `kai-*` element is available.\n\n' +
+      '```js\n' +
+      "import '@kitn.ai/ui/elements';  // ~119 KB gz — registers everything\n" +
+      '```\n\n' +
+      '**Mode 2 — per-element import (tree-shaking, bundler apps):**\n' +
+      'Use `import \'@kitn.ai/ui/elements/<file>\'` to register only one element. ' +
+      'A bundler (Vite, webpack, Rollup) will tree-shake to just its chunks (~73 KB gz for `kai-chat` alone). ' +
+      'Client-only — do not use in SSR entry points.\n\n' +
+      '```js\n' +
+      "// Registers only <kai-chat> (~73 KB gz vs ~119 KB gz register-all)\n" +
+      "import '@kitn.ai/ui/elements/chat';\n\n" +
+      "// Other examples:\n" +
+      "import '@kitn.ai/ui/elements/code-block';  // <kai-code-block>\n" +
+      "import '@kitn.ai/ui/elements/confirm-card'; // <kai-confirm>\n" +
+      '```\n\n' +
+      'The file name is the element\'s source basename from `element-manifest.json` ' +
+      '(e.g. `kai-chat` → `chat`, `kai-confirm` → `confirm-card`).\n\n' +
+      '**Mode 3 — autoloader (no-build / CDN pages only):**\n' +
+      'Watches the DOM and dynamically imports each `kai-*` element\'s module on demand. ' +
+      'A page that uses only `<kai-chat>` never downloads the other elements. ' +
+      'It is a CDN / static-file tool — load it from a `<script type="module">` tag. ' +
+      'It is NOT importable through a bundler: Vite/webpack relocate it and the on-demand imports 404. ' +
+      'Client-only.\n\n' +
+      '```html\n' +
+      '<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui@<version>/dist/elements/autoloader.js"></script>\n' +
+      '```\n\n' +
+      'In a BUNDLED app (Vite/webpack/Next) use Mode 1 or Mode 2 instead — not the autoloader.\n\n' +
+      '**SSR note:** use Mode 1 (register-all) in SSR apps — ' +
+      'per-element imports and the autoloader are client-only (they call DOM APIs at module eval). ' +
+      'Modes 1 & 2 are side-effect imports; keep them even if your linter flags them as "unused".',
+  },
+  {
     // Rule 5 — SSR / server component / document is not defined
     // Source: for-ai-agents.mdx (client-only import); context7.json rule 2 (property rule requires DOM)
     id: 'ssr-server-component',

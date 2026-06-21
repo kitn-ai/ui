@@ -58,6 +58,8 @@ Both `tools` and `reasoning` live directly on the `ChatMessage` object you pass 
 ```js
 import '@kitn.ai/ui/elements';
 
+await customElements.whenDefined('kai-chat');
+
 const chat = document.getElementById('chat');
 const aId = crypto.randomUUID();
 const callId = crypto.randomUUID();

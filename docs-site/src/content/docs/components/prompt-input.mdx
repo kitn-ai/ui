@@ -34,6 +34,9 @@ Register elements once, then wire up JS properties and DOM events:
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-prompt-input');
+
   const input = document.getElementById('input');
 
   input.suggestions = ['Summarize this thread', 'Draft a reply'];

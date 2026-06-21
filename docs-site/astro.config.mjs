@@ -76,6 +76,7 @@ export default defineConfig({
               { label: 'Installation', slug: 'guides/installation' },
               { label: 'Getting Started', slug: 'guides/getting-started' },
               { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
+              { label: 'Loading', slug: 'guides/loading' },
               { label: 'Theming', slug: 'guides/theming' },
               { label: 'Accessibility', slug: 'guides/accessibility' },
               { label: 'Generative UI', slug: 'guides/generative-ui' },
@@ -113,10 +114,86 @@ export default defineConfig({
           },
           {
             label: 'Components',
-            link: '/components/artifact/',
+            link: '/components/chat/',
             id: 'components',
-            // Auto-listed from src/content/docs/components/*.mdx.
-            items: [{ autogenerate: { directory: 'components' } }],
+            // Grouped by role so the ~44 components read as a small set of
+            // categories instead of one long alphabetical list.
+            items: [
+              {
+                label: 'Chat & conversations',
+                items: [
+                  { slug: 'components/chat' },
+                  { slug: 'components/workspace' },
+                  { slug: 'components/conversations' },
+                  { slug: 'components/empty' },
+                ],
+              },
+              {
+                label: 'Messages & content',
+                items: [
+                  { slug: 'components/message' },
+                  { slug: 'components/markdown' },
+                  { slug: 'components/code-block' },
+                  { slug: 'components/reasoning' },
+                  { slug: 'components/chain-of-thought' },
+                  { slug: 'components/tool' },
+                  { slug: 'components/response-stream' },
+                  { slug: 'components/source' },
+                  { slug: 'components/sources' },
+                  { slug: 'components/image' },
+                  { slug: 'components/link-preview' },
+                  { slug: 'components/embed' },
+                ],
+              },
+              {
+                label: 'Generative UI',
+                items: [
+                  { slug: 'components/card' },
+                  { slug: 'components/cards' },
+                  { slug: 'components/form' },
+                  { slug: 'components/confirm' },
+                  { slug: 'components/choice' },
+                  { slug: 'components/tasks' },
+                ],
+              },
+              {
+                label: 'Input',
+                items: [
+                  { slug: 'components/prompt-input' },
+                  { slug: 'components/attachments' },
+                  { slug: 'components/file-upload' },
+                  { slug: 'components/voice-input' },
+                  { slug: 'components/suggestions' },
+                ],
+              },
+              {
+                label: 'Controls & chrome',
+                items: [
+                  { slug: 'components/model-switcher' },
+                  { slug: 'components/scope-picker' },
+                  { slug: 'components/context' },
+                  { slug: 'components/feedback-bar' },
+                  { slug: 'components/scroll-button' },
+                  { slug: 'components/switch' },
+                  { slug: 'components/checkpoint' },
+                  { slug: 'components/skills' },
+                  { slug: 'components/thinking-bar' },
+                ],
+              },
+              {
+                label: 'Layout, indicators & embedding',
+                items: [
+                  { slug: 'components/artifact' },
+                  { slug: 'components/resizable' },
+                  { slug: 'components/resizable-item' },
+                  { slug: 'components/file-tree' },
+                  { slug: 'components/popover' },
+                  { slug: 'components/loader' },
+                  { slug: 'components/text-shimmer' },
+                  { slug: 'components/remote' },
+                ],
+              },
+            ],
           },
           {
             label: 'Patterns',

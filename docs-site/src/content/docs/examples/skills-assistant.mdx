@@ -24,6 +24,8 @@ import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
   const skills = document.getElementById('skills');
 

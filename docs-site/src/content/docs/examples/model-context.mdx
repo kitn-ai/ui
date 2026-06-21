@@ -24,6 +24,8 @@ import ModelContextDemo from '../../../components/ModelContextDemo.tsx';
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
 
   // Each model has its own context window, so switching rescales the meter.

@@ -42,6 +42,8 @@ Three elements compose the shell. `<kai-resizable>` splits chat from the canvas 
 <script type="module">
   import '@kitn.ai/ui/elements'; // registers the custom elements
 
+  await customElements.whenDefined('kai-file-tree');
+
   const tree = document.getElementById('tree');
   const canvas = document.getElementById('canvas');
 

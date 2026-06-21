@@ -35,6 +35,8 @@ Assign the form definition in JavaScript — it's an object, not an HTML attribu
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-form');
+
   const form = document.querySelector('#my-form');
 
   form.data = {

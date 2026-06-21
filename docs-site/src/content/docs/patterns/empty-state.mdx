@@ -36,6 +36,8 @@ When a chip is clicked, `<kai-suggestions>` fires `kai-select` with the chosen v
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-suggestions');
+
   const shell = document.getElementById('shell');
   const starters = document.getElementById('starters');
   starters.suggestions = [
@@ -83,6 +85,8 @@ Pass an empty `messages` array and a `suggestions` property. `<kai-chat>` hides 
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-chat');
 
   const chat = document.getElementById('chat');
   chat.messages = [];

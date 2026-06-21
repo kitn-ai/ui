@@ -32,7 +32,7 @@ Load the bundle straight from a CDN — no install, no build step:
 </script>
 ```
 
-Pin an exact version in production (e.g. `@kitn.ai/ui@0.13.0/dist/...`). The package is pre-1.0, so a minor release can break things.
+Pin an exact version in production (e.g. `@kitn.ai/ui@0.16.0/dist/...`). The package is pre-1.0, so a minor release can break things.
 </Aside>
 
 ## Your first chat
@@ -44,6 +44,8 @@ You'll lean on two patterns over and over: set rich data on a JavaScript propert
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-chat');
 
   const chat = document.getElementById('chat');
 
@@ -122,6 +124,9 @@ The element behaves the same everywhere. Only the binding syntax differs.
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
   chat.messages = [{ id: '1', role: 'assistant', content: 'Hello!' }];
   chat.addEventListener('kai-submit', (e) => console.log(e.detail.value));

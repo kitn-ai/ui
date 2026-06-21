@@ -8,10 +8,12 @@ const href = (p: string) => `${base}/${p.replace(/^\//, '')}`;
 
 const cdnSteps = [
   { n: '01', title: 'Add the script', lang: 'html', code: '<script type="module"\n  src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js"\n></script>' },
-  { n: '02', title: 'Drop one in (give it a height)', lang: 'html', code: `<kai-chat style="display:block;height:600px"></kai-chat>
-<script>
+  { n: '02', title: 'Drop one in (give it a height)', lang: 'html', code: `<kai-chat id="chat" style="display:block;height:600px"></kai-chat>
+<script type="module">
   // It's a custom element — needs a height; no wrapper required.
-  document.querySelector('kai-chat').messages = [
+  // Registration is async, so wait for the element before setting properties.
+  await customElements.whenDefined('kai-chat');
+  document.getElementById('chat').messages = [
     { role: 'assistant', content: 'Hi! Ask me anything.' },
   ];
 <\/script>` },
@@ -19,7 +21,7 @@ const cdnSteps = [
 const npmSteps = [
   { n: '01', title: 'Install', lang: 'bash', code: 'npm i @kitn.ai/ui' },
   { n: '02', title: 'Register the elements', lang: 'js', code: "import '@kitn.ai/ui/elements';" },
-  { n: '03', title: 'Drop one in', lang: 'html', code: '<kai-chat></kai-chat>' },
+  { n: '03', title: 'Drop one in (give it a height)', lang: 'html', code: '<kai-chat style="display:block;height:600px"></kai-chat>' },
 ];
 const paths = [
   { id: 'cdn', label: 'CDN — no build', steps: cdnSteps },
@@ -73,10 +75,10 @@ const frameworks = [
     <ol
       data-qs-panel={p.id}
       hidden={i !== 0}
-      class={p.steps.length === 2 ? 'mt-6 grid gap-4 md:grid-cols-2' : 'mt-6 grid gap-4 md:grid-cols-3'}
+      class={p.steps.length === 2 ? 'mt-6 grid grid-cols-1 gap-4 md:grid-cols-2' : 'mt-6 grid grid-cols-1 gap-4 md:grid-cols-3'}
     >
       {p.steps.map((s) => (
-        <li class="flex flex-col rounded-2xl border border-line bg-surface p-6">
+        <li class="flex min-w-0 flex-col rounded-2xl border border-line bg-surface p-6">
           <div class="flex items-center gap-3">
             <span class="font-mono text-sm font-bold text-brand">{s.n}</span>
             <h3 class="text-base font-bold text-ink">{s.title}</h3>

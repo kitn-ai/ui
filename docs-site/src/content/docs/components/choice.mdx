@@ -34,6 +34,9 @@ Set `data` in JavaScript (it's an object) and listen for the `kai-card` CustomEv
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-choice');
+
   const el = document.getElementById('ch');
 
   el.data = {

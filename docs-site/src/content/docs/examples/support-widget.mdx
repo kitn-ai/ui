@@ -24,6 +24,9 @@ The widget is one `<kai-chat>` element positioned `fixed` in the corner, shown/h
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-chat');
+
   const fab = document.getElementById('fab');
   const panel = document.getElementById('panel');
   const chat = document.getElementById('widget');

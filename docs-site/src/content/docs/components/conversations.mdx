@@ -35,6 +35,9 @@ Set the data in JavaScript (it's arrays and objects) and listen for CustomEvents
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-conversations');
+
   const el = document.getElementById('sidebar');
 
   el.conversations = [

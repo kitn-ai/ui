@@ -198,6 +198,8 @@ The same rule applies to every array/object property: always assign a new refere
 ```js
 import '@kitn.ai/ui/elements';
 
+await customElements.whenDefined('kai-chat');
+
 const chat = document.querySelector('kai-chat');
 chat.messages = [];
 

@@ -95,6 +95,11 @@ export default function Playground(props: { tag: string }) {
 
   onMount(async () => {
     await loadKit();
+    // loadKit() only resolves that kitn-chat.es.js loaded; element registration is
+    // async (the bundle dynamic-imports its impl chunks). Wait for THIS element to be
+    // defined before setReady — otherwise the remount effect's customElements.upgrade()
+    // is a no-op and the props it sets land pre-upgrade and get dropped (empty preview).
+    await customElements.whenDefined(props.tag);
     setReady(true);
     // keep the preview themed when the site theme toggles
     new MutationObserver(() => host()?.setAttribute('theme', theme()))

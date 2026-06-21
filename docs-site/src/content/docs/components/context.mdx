@@ -33,6 +33,8 @@ Set `context` in JavaScript with a usage object:
 ```js
 import '@kitn.ai/ui/elements';
 
+await customElements.whenDefined('kai-context');
+
 const el = document.querySelector('kai-context');
 el.context = {
   usedTokens: 48200,

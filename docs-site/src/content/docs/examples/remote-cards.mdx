@@ -44,6 +44,8 @@ Register the elements and give the component its three required pieces — `prov
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-remote');
+
   const remote = document.querySelector('kai-remote');
 
   // Assign the CardEnvelope in JavaScript — objects can't be HTML attributes.
@@ -88,6 +90,8 @@ When the model streams a mix of built-in and remote cards, use `<kai-cards>` wit
 
 ```js
 import '@kitn.ai/ui/elements';
+
+await customElements.whenDefined('kai-cards');
 
 const cards = document.querySelector('kai-cards');
 

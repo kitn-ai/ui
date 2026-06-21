@@ -48,6 +48,14 @@
       "types": "./dist/elements.d.ts",
       "default": "./dist/kitn-chat.es.js"
     },
+    "./elements/*": {
+      "types": "./dist/elements/*.d.ts",
+      "default": "./dist/elements/*.js"
+    },
+    "./autoloader": {
+      "types": "./dist/elements/autoloader.d.ts",
+      "default": "./dist/elements/autoloader.js"
+    },
     "./theme.css": "./theme.css",
     "./theme.tokens.css": "./dist/theme.tokens.css",
     "./react": {
@@ -76,7 +84,8 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "prebuild": "npm run build:css",
-    "build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts && vite build --config vite.config.react.ts && vite build --config vite.config.barrel.ts && vite build --config vite.config.mcp.ts",
+    "build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts && vite build --config vite.config.react.ts && vite build --config vite.config.barrel.ts && vite build --config vite.config.mcp.ts && npm run build:elements",
+    "build:elements": "node scripts/gen-elements-manifest.mjs && vite build --config vite.config.elements.ts && node scripts/gen-element-dts.mjs",
     "postbuild": "npm run build:theme && npm run build:api && npm run build:schemas",
     "build:theme": "node scripts/build-theme-tokens.mjs",
     "build:api": "node scripts/gen-element-api.mjs",
@@ -99,20 +108,19 @@
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@shikijs/langs": "^4.2.0",
-    "@shikijs/themes": "^4.2.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "lucide-solid": "^0.400.0",
     "marked": "^18.0.0",
-    "shiki": "^4.0.2",
     "solid-element": "^1.9.1",
     "solid-js": "^1.9.0",
-    "tailwind-merge": "^2.5.0",
+    "tailwind-merge": "^3.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
+    "@shikijs/langs": "^4.2.0",
+    "@shikijs/themes": "^4.2.0",
     "@solidjs/testing-library": "^0.8.0",
     "@storybook/addon-a11y": "^10.4.2",
     "@storybook/addon-docs": "^10.3.5",
@@ -137,6 +145,7 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "remark-gfm": "^4.0.1",
+    "shiki": "^4.0.2",
     "storybook": "^10.3.5",
     "storybook-dark-mode": "^5.0.0",
     "storybook-solidjs-vite": "^10.0.12",

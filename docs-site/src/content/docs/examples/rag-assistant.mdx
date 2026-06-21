@@ -25,6 +25,8 @@ import RagAssistantDemo from '../../../components/RagAssistantDemo.tsx';
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
   const srcs  = document.getElementById('srcs');
 

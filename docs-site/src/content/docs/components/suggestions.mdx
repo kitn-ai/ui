@@ -34,6 +34,9 @@ Assign the `suggestions` property and listen for `kai-select`:
 <kai-suggestions id="suggs" variant="outline"></kai-suggestions>
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-suggestions');
+
   const suggs = document.getElementById('suggs');
   suggs.suggestions = ['Explain the architecture', 'Show me a code example'];
   suggs.addEventListener('kai-select', (e) => console.log(e.detail.value));

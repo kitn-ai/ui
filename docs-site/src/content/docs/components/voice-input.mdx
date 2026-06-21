@@ -36,6 +36,8 @@ Assign your `transcribe` function to the element and listen for `kai-transcripti
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-voice-input');
+
   const voice = document.getElementById('voice');
 
   voice.transcribe = async (blob) => {

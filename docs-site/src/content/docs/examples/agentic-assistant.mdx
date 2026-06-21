@@ -44,6 +44,8 @@ Each assistant message in `messages` carries optional `reasoning` and `tools` fi
 ```js
 import '@kitn.ai/ui/elements';
 
+await customElements.whenDefined('kai-chat');
+
 const chat = document.getElementById('chat');
 
 chat.messages = [

@@ -11,7 +11,7 @@ It can be consumed two ways:
 
 - **~50 composable components** across three layers: headless primitives → accessible UI primitives (built in-house, WCAG 2.1 AA — no third-party UI dependency) → AI feature components.
 - **Shadow-DOM web components** — zero CSS conflicts in any host. The host's styles can't leak in; the kit's Tailwind can't leak out.
-- **Lightweight by design** — a markdown-only `<kai-chat>` is **~110 KB gzip** (one file). Syntax highlighting (Shiki) is loaded **on demand, per-language, with no WASM** — and never loads at all if you don't render code.
+- **Load it your way** — register every element in one import, cherry-pick per-element with a bundler, or drop in a CDN autoloader that loads each on demand. Syntax highlighting loads lazily, per language, only when you render code.
 - **Tailwind v4** design tokens — rebrand by overriding `--color-*` custom properties.
 
 ## Install
@@ -43,6 +43,10 @@ npm run build   # emits dist/kitn-chat.es.js
   <script type="module">
     import '@kitn.ai/ui/elements';
 
+    // Registration is async (SSR-safe) — wait for the element to be defined
+    // before setting properties, or the upgrade clobbers them.
+    await customElements.whenDefined('kai-chat');
+
     const chat = document.querySelector('kai-chat');
 
     // Rich data is set as JS properties (not HTML attributes)
@@ -50,8 +54,8 @@ npm run build   # emits dist/kitn-chat.es.js
       { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
     ];
 
-    // Events are CustomEvents dispatched on the element (they do not bubble)
-    chat.addEventListener('submit', (e) => {
+    // Events are non-bubbling kai-* CustomEvents dispatched on the element
+    chat.addEventListener('kai-submit', (e) => {
       console.log('user sent:', e.detail.value);
     });
   </script>
@@ -73,7 +77,7 @@ The element bundle is a self-contained ES module — load it directly from [jsDe
 <kai-chat></kai-chat>
 ```
 
-The URLs above track the **latest** release — handy for trying things out. **For production, pin an exact version** (e.g. `@kitn.ai/ui@0.4.0/dist/kitn-chat.es.js`): pinned URLs are immutable and cached far more aggressively, and — since this package is pre-1.0 — pinning shields you from breaking changes in a future minor release. SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To override design tokens, also include `theme.css`:
+The URLs above track the **latest** release — handy for trying things out. **For production, pin an exact version** (e.g. `@kitn.ai/ui@0.16.0/dist/kitn-chat.es.js`): pinned URLs are immutable and cached far more aggressively, and — since this package is pre-1.0 — pinning shields you from breaking changes in a future minor release. SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To override design tokens, also include `theme.css`:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/theme.css">
@@ -109,7 +113,7 @@ function App() {
 }
 ```
 
-The SolidJS entry (`.`) is the kit's raw source (`src/index.ts`) — your bundler compiles it, so it tree-shakes to just what you import.
+The SolidJS entry (`.`) ships compiled — your bundler tree-shakes it to just the components you import.
 
 ## Integrations
 
@@ -127,10 +131,13 @@ The components are deliberately **transport-agnostic**: `<kai-chat>` just render
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  // Registration is async (SSR-safe) — wait for the element before using it.
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
   chat.messages = [];
 
-  chat.addEventListener('submit', async (e) => {
+  chat.addEventListener('kai-submit', async (e) => {
     const text = e.detail.value.trim();
     if (!text) return;
 
@@ -392,12 +399,20 @@ cd examples/vue && npm install && npm run dev
 - **[docs/web-components.md](docs/web-components.md)** — full element API: every property, event, and the `ChatMessage` schema.
 - **[llms.txt](llms.txt)** / **[llms-full.txt](llms-full.txt)** — dense machine-readable references for AI coding agents.
 
-## Bundle size
+## Loading
 
-| Scenario | Loaded |
-|---|--:|
-| `<kai-chat>`, markdown only (no code blocks) | **~110 KB gzip** (~413 KB raw), one file |
-| + a code block | adds Shiki core + JS engine + that language + theme, lazily |
-| Highlighting disabled | Shiki never loads |
+Three ways to load the elements — register all (the simple default), cherry-pick per-element, or a CDN autoloader:
 
-The build is ES-module only — a UMD/IIFE build can't code-split and would inline every lazy chunk into one multi-MB file, so it's intentionally omitted.
+| How you load | What it does |
+|---|---|
+| `import '@kitn.ai/ui/elements'` | registers every element — the simple default |
+| `import '@kitn.ai/ui/elements/chat'` | one element, bundler tree-shakes |
+| `import '@kitn.ai/ui/autoloader'` (opt-in **DOM autoloader**) | loads each element's module **on demand** as `<kai-*>` appears |
+
+The autoloader watches the DOM (initial scan + `MutationObserver`) and dynamically imports only the
+elements actually present — so a page with just `<kai-chat>` never downloads the others. It's additive:
+the register-all bundle stays the default. (Direct per-element imports and the autoloader are client-side;
+SSR apps use the register-all `@kitn.ai/ui/elements` or render client-only.)
+
+Code highlighting (Shiki) is always lazy — loaded per-language on first code block, with no WASM, and never
+at all if you don't render code. The build is ES-module only (a UMD/IIFE build can't code-split).

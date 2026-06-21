@@ -45,6 +45,8 @@ Once registered, the elements behave like any other HTML tag:
 <script type="module">
   import '@kitn.ai/ui/elements';
 
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.querySelector('kai-chat');
 
   // Arrays can't be attributes, so set messages in JavaScript.
@@ -64,23 +66,17 @@ Once registered, the elements behave like any other HTML tag:
 
 ## Theme it
 
-Each element injects its own CSS into its Shadow DOM, so the components look right with zero stylesheets. Import `theme.css` only when you want to **override the design tokens**:
-
-```js
-import '@kitn.ai/ui/theme.css';
-```
-
-Set the `--color-*` tokens on `:root` to rebrand:
+Each element injects its own scoped CSS into its Shadow DOM, so the components look right with zero stylesheets. To rebrand, set the namespaced **`--kai-color-*`** tokens on `:root` — no import needed, and the `--kai-` prefix keeps them from clashing with your app's own CSS variables:
 
 ```css
 :root {
-  --color-background: #0f0f0f;
-  --color-primary: #7c3aed;
-  --color-muted: #1e1e1e;
+  --kai-color-background: #0f0f0f;
+  --kai-color-primary: #7c3aed;
+  --kai-color-muted: #1e1e1e;
 }
 ```
 
-Inherited CSS custom properties cross the Shadow DOM boundary, so these overrides reach every `kai-*` element automatically.
+Inherited custom properties cross the Shadow DOM boundary, so these reach every `kai-*` element automatically. Prefer shadcn-style unprefixed `--color-*` tokens? Import `@kitn.ai/ui/theme.css` and override those instead — see [Theming](/guides/theming/) for the full token list, dark mode, and typography.
 
 ## Via CDN (no build step)
 
@@ -97,7 +93,7 @@ Load the bundle as a self-contained ES module — no install, no bundler:
 ```
 
 <Aside type="tip" title="Pin versions in production">
-An unpinned CDN URL tracks the latest release — fine for prototyping, risky for production. The package is pre-1.0, so a minor release can break things. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.13.0/dist/kitn-chat.es.js`.
+An unpinned CDN URL tracks the latest release — fine for prototyping, risky for production. The package is pre-1.0, so a minor release can break things. Pin an exact version: `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@0.16.0/dist/kitn-chat.es.js`.
 </Aside>
 
 ## SolidJS projects
@@ -108,7 +104,7 @@ Writing Solid? You can skip the web components and import the native components 
 npm install solid-js
 ```
 
-Then import from the root entry (`@kitn.ai/ui`), which ships as source and tree-shakes to what you use:
+Then import from the root entry (`@kitn.ai/ui`), which ships compiled and tree-shakes to what you use:
 
 ```tsx
 import {
@@ -127,12 +123,14 @@ import '@kitn.ai/ui/theme.css';
 
 | Import path | What it provides |
 |---|---|
-| `@kitn.ai/ui/elements` | The web components — registers every `kai-*` element; use in any framework |
+| `@kitn.ai/ui/elements` | All the web components — registers every `kai-*` element; use in any framework. The simple default. |
+| `@kitn.ai/ui/elements/<element>` | A single element, tree-shaken. See [Loading](/guides/loading/). |
+| `@kitn.ai/ui/autoloader` | CDN / static auto-loader — loads each `kai-*` on demand, no build. See [Loading](/guides/loading/). |
 | `@kitn.ai/ui/react` | Generated React wrappers with typed props |
-| `@kitn.ai/ui` | Native SolidJS components — tree-shaken source; Solid projects only |
-| `@kitn.ai/ui/theme.css` | Design tokens (`--color-*`) for overriding the theme |
+| `@kitn.ai/ui` | Native SolidJS components — compiled, tree-shakeable; Solid projects only |
+| `@kitn.ai/ui/theme.css` | Design tokens for overriding the theme (or set `--kai-color-*` with no import — see [Theming](/guides/theming/)) |
 | `@kitn.ai/ui/provider` | Remote provider bundle for embedding the kit across origins |
 
 ## Next steps
 
-With the elements registered, head to the [framework guide](/guides/frameworks/overview/) for your stack, or render your first chat in [Getting started](/guides/getting-started/).
+With the elements registered, head to the [framework guide](/guides/frameworks/overview/) for your stack, or render your first chat in [Getting started](/guides/getting-started/). Want a different way to load — per-element or a CDN autoloader? See [Loading](/guides/loading/).

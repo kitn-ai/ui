@@ -118,6 +118,9 @@ Render envelopes with `<kai-cards>` and route every interaction through a `CardP
 <kai-cards></kai-cards>
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-cards');
+
   const cards = document.querySelector('kai-cards');
 
   cards.cards = [/* envelopes from your model */];

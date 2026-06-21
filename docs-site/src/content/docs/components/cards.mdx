@@ -34,6 +34,9 @@ Set all three in JavaScript — they're arrays and objects, so none work as HTML
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-cards');
+
   const el = document.getElementById('cards');
 
   el.cards = [

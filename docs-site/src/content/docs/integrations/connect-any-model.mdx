@@ -53,6 +53,9 @@ On the front end, the switcher is built into `<kai-chat>`: set `models`, listen 
 
 <script type="module">
   import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-chat');
+
   const chat = document.getElementById('chat');
 
   let model = 'openai/gpt-4o';
