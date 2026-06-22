@@ -3,6 +3,8 @@ import {
   createSignal,
   createEffect,
   createMemo,
+  createUniqueId,
+  on,
   onMount,
   onCleanup,
   Show,
@@ -156,6 +158,7 @@ function getCaretRect(root: HTMLElement): DOMRect | null {
 export function Composer(props: ComposerProps): JSX.Element {
   let editable!: HTMLDivElement;
   let menuRef: HTMLDivElement | undefined;
+  const highlightName = `kai-composer-highlight-${createUniqueId()}`;
   const [empty, setEmpty] = createSignal(docIsEmpty(normalizeValue(props.value)));
 
   // --- Trigger menu state ---
@@ -229,7 +232,7 @@ export function Composer(props: ComposerProps): JSX.Element {
     if (!rules?.length) return;
     const text = getFullText(editable);
     const matches = findHighlightMatches(text, rules);
-    applyHighlights(editable, matches, ZWSP);
+    applyHighlights(editable, matches, ZWSP, highlightName);
   }
 
   onMount(() => {
@@ -237,6 +240,16 @@ export function Composer(props: ComposerProps): JSX.Element {
     setEmpty(docIsEmpty(parseDom(editable)));
     recomputeHighlights();
   });
+
+  // Re-render when the controlled `value` prop changes, but ONLY when the
+  // editable is NOT focused (don't stomp the caret while the user is typing).
+  createEffect(on(() => props.value, (v) => {
+    // Don't stomp the caret while the user is typing in this editable.
+    if (editable && (editable.ownerDocument.activeElement === editable || editable.getRootNode() instanceof ShadowRoot && (editable.getRootNode() as ShadowRoot).activeElement === editable)) return;
+    renderDoc(editable, normalizeValue(v));
+    setEmpty(docIsEmpty(parseDom(editable)));
+    recomputeHighlights();
+  }, { defer: true }));
 
   function updateTriggerState() {
     const defs = props.triggers;
@@ -526,7 +539,7 @@ export function Composer(props: ComposerProps): JSX.Element {
       {/* Static style for CSS Custom Highlight API decoration.
           No-op in browsers that don't support ::highlight(); the selector
           is simply unrecognized and dropped. */}
-      <style>{`::highlight(kai-composer-highlight) { background-color: rgba(var(--color-primary, 99 102 241) / 0.18); }`}</style>
+      <style>{`::highlight(${highlightName}) { background-color: rgba(var(--color-primary, 99 102 241) / 0.18); }`}</style>
       {/* Atomic entity pill styling. Self-contained (currentColor-based) so it
           renders correctly without depending on a Tailwind rebuild for the
           custom .kai-composer-pill class. */}

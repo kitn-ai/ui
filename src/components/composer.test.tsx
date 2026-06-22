@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
+import { createSignal } from 'solid-js';
 import { Composer } from './composer';
 import { createEntityEl, ZWSP } from './composer-dom';
 
@@ -44,6 +45,28 @@ describe('Composer view', () => {
     const { container } = render(() => <Composer value="go" disabled onSubmit={onSubmit} />);
     fireEvent.keyDown(editable(container), { key: 'Enter' });
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+});
+
+describe('Composer controlled value reactivity', () => {
+  it('re-renders the editable when the value signal changes (unfocused)', async () => {
+    const [value, setValue] = createSignal<string>('initial');
+    const { container } = render(() => <Composer value={value()} />);
+    const el = editable(container);
+
+    // Initial render
+    expect(el.textContent).toContain('initial');
+
+    // Update to a plain string
+    setValue('updated text');
+    // SolidJS effects run synchronously in the same microtask in the test env
+    await Promise.resolve();
+    expect(el.textContent).toContain('updated text');
+
+    // Update to a doc with entity-like text
+    setValue('new value');
+    await Promise.resolve();
+    expect(el.textContent).toContain('new value');
   });
 });
 

@@ -126,13 +126,14 @@ export function applyHighlights(
   root: HTMLElement,
   matches: HighlightMatch[],
   zwsp: string,
+  name = HIGHLIGHT_NAME,
 ): void {
   if (!supportsHighlightAPI()) return;
 
   const registry = CSS.highlights as HighlightRegistry;
 
   if (matches.length === 0) {
-    registry.delete(HIGHLIGHT_NAME);
+    registry.delete(name);
     return;
   }
 
@@ -231,10 +232,10 @@ export function applyHighlights(
   }
 
   if (ranges.length === 0) {
-    registry.delete(HIGHLIGHT_NAME);
+    registry.delete(name);
     return;
   }
 
   const hl = new Highlight(...ranges);
-  registry.set(HIGHLIGHT_NAME, hl);
+  registry.set(name, hl);
 }
