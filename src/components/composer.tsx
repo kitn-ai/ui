@@ -514,7 +514,8 @@ export function Composer(props: ComposerProps): JSX.Element {
         setSelectedIndex((i) => (i - 1 + filteredItems().length) % filteredItems().length);
         return;
       }
-      if (e.key === 'Enter') {
+      // Enter OR Tab selects the highlighted item (Tab is a common picker accept).
+      if (e.key === 'Enter' || e.key === 'Tab') {
         const items = filteredItems();
         if (items.length > 0) {
           e.preventDefault();
@@ -668,19 +669,27 @@ export function Composer(props: ComposerProps): JSX.Element {
       <style>{`
         .kai-composer-pill {
           display: inline-flex; align-items: center; gap: 0.25rem;
-          vertical-align: baseline; padding: 0.05rem 0.3rem; margin: 0 0.05rem;
+          vertical-align: baseline; height: 1.5em; padding: 0 0.35rem; margin: 0 0.05rem;
           border-radius: 0.375rem;
           background-color: color-mix(in srgb, currentColor 10%, transparent);
           font-weight: 500; white-space: nowrap; user-select: none; cursor: default;
+          box-sizing: border-box; line-height: 1;
         }
+        /* Fixed height + an icon never taller than the box → iconed and iconless
+           pills are exactly the same height (no baseline shift in the line). */
         .kai-composer-pill-icon {
-          width: 1.05em; height: 1.05em; border-radius: 9999px;
+          width: 1em; height: 1em; border-radius: 9999px;
           object-fit: cover; flex-shrink: 0;
         }
-        /* Placeholder via pseudo-element — aligns to the text origin and is exempt
-           from axe color-contrast, matching native <textarea> placeholder behavior. */
+        /* The editable is the containing block for the placeholder pseudo-element. */
+        [data-kai-composer-editable] { position: relative; }
+        /* Placeholder via pseudo-element — exempt from axe color-contrast like a
+           native <textarea> placeholder. position:absolute (with auto offsets =
+           its static text-origin spot) takes it OUT of flow, so the caret sits at
+           the START of the field instead of after the placeholder text. */
         [data-kai-composer-editable].kai-composer-empty::before {
           content: attr(data-placeholder);
+          position: absolute;
           color: var(--color-muted-foreground, #9ca3af);
           pointer-events: none;
         }

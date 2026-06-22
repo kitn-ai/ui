@@ -166,6 +166,40 @@ test.describe('kai-composer IVP', () => {
     await expect(ed).toHaveClass(/kai-composer-empty/);      // reappears once cleared (lone <br> ⇒ empty)
   });
 
+  test('Tab selects the highlighted menu item (like Enter)', async ({ page }) => {
+    await page.goto(SKILLS_STORY);
+    await expect(editable(page)).toBeVisible();
+    await editable(page).click();
+    await page.keyboard.type('/');
+    await expect(menuOptions(page).first()).toBeVisible();
+    await page.keyboard.press('Tab');
+    await expect(pills(page)).toHaveCount(1);
+    await expect(pills(page).first()).toContainText('Record & Replay');
+  });
+
+  test('after clearing, the caret returns to the START (not after the placeholder)', async ({ page }) => {
+    await page.goto(DEFAULT_STORY);
+    const ed = editable(page);
+    await expect(ed).toBeVisible();
+    await ed.click();
+    await page.keyboard.type('hi');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press('Backspace');
+    await expect(ed).toHaveClass(/kai-composer-empty/); // placeholder shown again
+    const m = await page.evaluate(() => {
+      const root = document.querySelector('kai-composer')!.shadowRoot!;
+      const el = root.querySelector('[data-kai-composer-editable]') as HTMLElement;
+      const sel = (root as unknown as { getSelection?: () => Selection }).getSelection?.() ?? document.getSelection()!;
+      const caretX = sel.getRangeAt(0).cloneRange().getBoundingClientRect().left;
+      return {
+        caretOffsetFromLeft: caretX - el.getBoundingClientRect().left,
+        beforePosition: getComputedStyle(el, '::before').position,
+      };
+    });
+    expect(m.beforePosition).toBe('absolute');         // placeholder taken out of flow
+    expect(m.caretOffsetFromLeft).toBeLessThan(24);    // caret at the start, not past the placeholder text
+  });
+
   test('undo/redo steps through pills correctly (custom doc-snapshot history)', async ({ page }) => {
     await page.goto(SKILLS_STORY);
     const ed = editable(page);
