@@ -157,13 +157,13 @@ test.describe('kai-composer IVP', () => {
     await page.goto(DEFAULT_STORY);
     const ed = editable(page);
     await expect(ed).toBeVisible();
-    const placeholder = page.getByText('Ask anything…', { exact: true });
-    await expect(placeholder).toBeVisible();        // shown while empty
+    // Placeholder is a ::before pseudo-element gated by the .kai-composer-empty class.
+    await expect(ed).toHaveClass(/kai-composer-empty/);      // shown while empty
     await ed.click();
     await page.keyboard.type('hello');
-    await expect(placeholder).toHaveCount(0);        // hidden while typing
+    await expect(ed).not.toHaveClass(/kai-composer-empty/);  // hidden while typing
     for (let i = 0; i < 5; i++) await page.keyboard.press('Backspace');
-    await expect(placeholder).toBeVisible();         // reappears once cleared (lone <br> ⇒ empty)
+    await expect(ed).toHaveClass(/kai-composer-empty/);      // reappears once cleared (lone <br> ⇒ empty)
   });
 
   test('undo/redo steps through pills correctly (custom doc-snapshot history)', async ({ page }) => {

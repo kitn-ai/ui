@@ -106,12 +106,17 @@ function SlashCommand(props: SlashCommandProps) {
     ctx.setValue(item.label + " ");
     setOpen(false);
     props.onSelect(item);
-    // Refocus the textarea and place the caret at the end.
+    // Refocus the input and place the caret at the end. The input may be a
+    // <textarea> or the contenteditable composer — only the textarea has
+    // setSelectionRange; the composer re-renders the new value via its value
+    // effect, so focus alone suffices there.
     setTimeout(() => {
       const ta = ctx.textareaRef;
       if (!ta) return;
       ta.focus();
-      ta.setSelectionRange(ta.value.length, ta.value.length);
+      if (ta instanceof HTMLTextAreaElement) {
+        ta.setSelectionRange(ta.value.length, ta.value.length);
+      }
     }, 0);
   }
 

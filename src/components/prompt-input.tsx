@@ -1,6 +1,7 @@
-import { type JSX, splitProps, createSignal, createContext, useContext, createEffect, on } from 'solid-js';
+import { type JSX, splitProps, createSignal, createContext, useContext } from 'solid-js';
 import { cn } from '../utils/cn';
 import { useChatConfig, textClass } from '../primitives/chat-config';
+import { Composer } from './composer';
 
 // --- Context ---
 
@@ -11,8 +12,8 @@ interface PromptInputContextType {
   maxHeight: number | string;
   onSubmit?: () => void;
   disabled?: boolean;
-  textareaRef: HTMLTextAreaElement | undefined;
-  setTextareaRef: (el: HTMLTextAreaElement) => void;
+  textareaRef: HTMLElement | undefined;
+  setTextareaRef: (el: HTMLElement) => void;
 }
 
 const PromptInputContext = createContext<PromptInputContextType>();
@@ -42,7 +43,7 @@ function PromptInput(props: PromptInputProps) {
   ]);
 
   const [internalValue, setInternalValue] = createSignal(local.value ?? '');
-  let textareaRef: HTMLTextAreaElement | undefined;
+  let textareaRef: HTMLElement | undefined;
 
   const handleChange = (newValue: string) => {
     setInternalValue(newValue);
@@ -70,6 +71,7 @@ function PromptInput(props: PromptInputProps) {
       }}
     >
       <div
+        data-prompt-input
         onClick={handleClick}
         class={cn(
           // The inner textarea neutralizes its own ring (focus-visible:ring-0),
@@ -96,80 +98,32 @@ export interface PromptInputTextareaProps extends JSX.TextareaHTMLAttributes<HTM
 }
 
 function PromptInputTextarea(props: PromptInputTextareaProps) {
-  const [local, rest] = splitProps(props, ['class', 'onKeyDown', 'disableAutosize']);
+  const [local] = splitProps(props, ['class', 'placeholder']);
   const ctx = usePromptInput();
   const config = useChatConfig();
 
-  function adjustHeight(el: HTMLTextAreaElement | undefined) {
-    if (!el || local.disableAutosize) return;
-    el.style.height = 'auto';
-    const maxH = ctx.maxHeight;
-    if (typeof maxH === 'number') {
-      el.style.height = `${Math.min(el.scrollHeight, maxH)}px`;
-    } else {
-      el.style.height = `min(${el.scrollHeight}px, ${maxH})`;
-    }
-  }
-
-  function handleRef(el: HTMLTextAreaElement) {
-    ctx.setTextareaRef(el);
-    adjustHeight(el);
-  }
-
-  createEffect(on(
-    () => [ctx.value(), ctx.maxHeight, local.disableAutosize],
-    () => {
-      if (ctx.textareaRef && !local.disableAutosize) {
-        adjustHeight(ctx.textareaRef);
-      }
-    }
-  ));
-
-  function handleInput(e: InputEvent & { currentTarget: HTMLTextAreaElement }) {
-    const el = e.currentTarget;
-    let value = el.value;
-    // Disallow leading whitespace — a prompt can't start with a space or blank
-    // line. Strip it (covers typing a space at the start AND pasting) and keep
-    // the caret in the right place.
-    if (/^\s/.test(value)) {
-      const stripped = value.replace(/^\s+/, '');
-      const removed = value.length - stripped.length;
-      const caret = Math.max(0, (el.selectionStart ?? 0) - removed);
-      el.value = stripped;
-      el.setSelectionRange(caret, caret);
-      value = stripped;
-    }
-    adjustHeight(el);
-    ctx.setValue(value);
-  }
-
-  function handleKeyDown(e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      // A disabled composer is non-interactive: Enter must not submit.
-      if (!ctx.disabled) ctx.onSubmit?.();
-    }
-    if (typeof local.onKeyDown === 'function') {
-      (local.onKeyDown as (e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) => void)(e);
-    }
-  }
+  // The editable mirrors the original <textarea>'s classes EXACTLY so swapping in
+  // the contenteditable composer is visually identical. The frame (PromptInput
+  // root) still owns radius/bg/padding/focus-ring; auto-grow is native to a
+  // contenteditable block (capped via max-height on the editable).
+  const editableClass = () =>
+    cn(
+      'text-foreground min-h-[44px] w-full bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 overflow-y-auto whitespace-pre-wrap break-words',
+      textClass(config.proseSize()),
+      local.class,
+    );
 
   return (
-    <textarea
-      ref={handleRef}
+    <Composer
+      bare
       value={ctx.value()}
-      onInput={handleInput}
-      onKeyDown={handleKeyDown}
-      class={cn(
-        // Typed text uses the normal foreground (light/dark), NOT the brand/accent
-        // color — the composer should read as plain text, not tinted.
-        'text-foreground min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
-        textClass(config.proseSize()),
-        local.class
-      )}
-      rows={1}
+      placeholder={local.placeholder as string | undefined}
       disabled={ctx.disabled}
-      {...rest}
+      maxHeight={ctx.maxHeight}
+      editableClass={editableClass()}
+      editableRef={(el) => ctx.setTextareaRef(el)}
+      onChange={(c) => ctx.setValue(c.text)}
+      onSubmit={() => { if (!ctx.disabled) ctx.onSubmit?.(); }}
     />
   );
 }

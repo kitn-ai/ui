@@ -62,6 +62,14 @@ export interface ComposerProps {
   submitOnEnter?: boolean;
   triggers?: TriggerDef[];
   highlights?: HighlightRule[];
+  /** Render WITHOUT the rounded frame/background/padding — just the editable +
+   *  placeholder + menu. For embedding inside another frame (e.g. PromptInput). */
+  bare?: boolean;
+  /** Override the editable element's classes (used in `bare` mode to match an
+   *  existing input's exact look). The placeholder mirrors these for alignment. */
+  editableClass?: string;
+  /** Receive the editable element (e.g. to register it for click-to-focus). */
+  editableRef?: (el: HTMLDivElement) => void;
   onChange?: (change: ComposerChange) => void;
   onSubmit?: (change: ComposerChange) => void;
   onTrigger?: (info: { char: string; query: string; rect: DOMRect }) => void;
@@ -307,8 +315,12 @@ export function Composer(props: ComposerProps): JSX.Element {
   // Re-render when the controlled `value` prop changes, but ONLY when the
   // editable is NOT focused (don't stomp the caret while the user is typing).
   createEffect(on(() => props.value, (v) => {
-    // Don't stomp the caret while the user is typing in this editable.
-    if (editable && (editable.ownerDocument.activeElement === editable || editable.getRootNode() instanceof ShadowRoot && (editable.getRootNode() as ShadowRoot).activeElement === editable)) return;
+    // Re-render only when the incoming value actually differs from what the DOM
+    // already shows. This skips the echo of our own onChange (so the caret isn't
+    // stomped while typing) while still honoring genuine external changes —
+    // including a clear-after-submit that fires while the editable is focused.
+    const incoming = serializeToText(normalizeValue(v));
+    if (incoming === serializeToText(parseDom(editable))) return;
     renderDoc(editable, normalizeValue(v));
     setEmpty(docIsEmpty(parseDom(editable)));
     recomputeHighlights();
@@ -637,14 +649,12 @@ export function Composer(props: ComposerProps): JSX.Element {
   // This is covered by updateTriggerState() in handleInput.
 
   const maxH = () => props.maxHeight ?? 240;
+  const editableCls = () =>
+    props.editableClass ??
+    'text-foreground min-h-[44px] w-full overflow-y-auto outline-none whitespace-pre-wrap break-words';
 
-  return (
-    <div
-      class={cn(
-        'kai-composer relative rounded-xl bg-muted/40 p-2',
-        props.disabled && 'cursor-not-allowed opacity-60',
-      )}
-    >
+  const inner = (
+    <>
       {/* Static style for CSS Custom Highlight API decoration.
           No-op in browsers that don't support ::highlight(); the selector
           is simply unrecognized and dropped. */}
@@ -664,31 +674,41 @@ export function Composer(props: ComposerProps): JSX.Element {
           width: 1.05em; height: 1.05em; border-radius: 9999px;
           object-fit: cover; flex-shrink: 0;
         }
+        /* Placeholder via pseudo-element — aligns to the text origin and is exempt
+           from axe color-contrast, matching native <textarea> placeholder behavior. */
+        [data-kai-composer-editable].kai-composer-empty::before {
+          content: attr(data-placeholder);
+          color: var(--color-muted-foreground, #9ca3af);
+          pointer-events: none;
+        }
       `}</style>
-      <div
-        ref={editable}
-        data-kai-composer-editable
-        contentEditable={props.disabled ? false : ('plaintext-only' as unknown as boolean)}
-        role="textbox"
-        aria-multiline="true"
-        aria-label={props.placeholder || 'Message input'}
-        onInput={handleInput}
-        onKeyDown={handleKeyDown}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        class={cn(
-          'text-foreground min-h-[44px] w-full overflow-y-auto outline-none whitespace-pre-wrap break-words',
-        )}
-        style={{
-          'max-height':
-            typeof maxH() === 'number' ? `${maxH()}px` : String(maxH()),
-        }}
-      />
-      {empty() && props.placeholder && (
-        <div class="text-muted-foreground pointer-events-none absolute left-2 top-2 select-none">
-          {props.placeholder}
-        </div>
-      )}
+      {/* Placeholder is a `::before` pseudo-element (see the style block) — it sits
+          at the text origin automatically (respecting the editable's padding/font),
+          and, like a native <textarea> placeholder, is exempt from axe color-contrast
+          (a real text node would fail it at the muted color). */}
+      <div class="relative">
+        <div
+          ref={(el) => { editable = el; props.editableRef?.(el); }}
+          data-kai-composer-editable
+          data-placeholder={props.placeholder ?? ''}
+          contentEditable={props.disabled ? false : ('plaintext-only' as unknown as boolean)}
+          role="textbox"
+          aria-multiline="true"
+          aria-label={props.placeholder || 'Message input'}
+          onInput={handleInput}
+          onKeyDown={handleKeyDown}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          // The empty/placeholder class is folded into `class` (NOT a separate
+          // `classList`) — a reactive `class` string would otherwise clobber a
+          // classList toggle (Solid sets className wholesale on re-eval).
+          class={cn(editableCls(), empty() && props.placeholder ? 'kai-composer-empty' : '')}
+          style={{
+            'max-height':
+              typeof maxH() === 'number' ? `${maxH()}px` : String(maxH()),
+          }}
+        />
+      </div>
 
       {/* Trigger menu */}
       <Show when={present()}>
@@ -735,6 +755,20 @@ export function Composer(props: ComposerProps): JSX.Element {
           </For>
         </div>
       </Show>
+    </>
+  );
+
+  // Bare mode: no frame (the host owns radius/bg/padding). Standalone: full frame.
+  return props.bare ? (
+    inner
+  ) : (
+    <div
+      class={cn(
+        'kai-composer relative rounded-xl bg-muted/40 p-2',
+        props.disabled && 'cursor-not-allowed opacity-60',
+      )}
+    >
+      {inner}
     </div>
   );
 }

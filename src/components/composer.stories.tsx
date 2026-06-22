@@ -94,8 +94,8 @@ export const Playground: Story = {
     // The editable surface must be present.
     const editable = canvas.getByRole('textbox');
     expect(editable).toBeTruthy();
-    // The placeholder must be visible when the composer is empty.
-    expect(canvas.getByText('Ask anything…')).toBeTruthy();
+    // The placeholder (a ::before pseudo-element) is configured via data-placeholder.
+    expect((editable as HTMLElement).getAttribute('data-placeholder')).toBe('Ask anything…');
   },
 };
 
@@ -147,8 +147,8 @@ export const WithSkills: Story = {
     const canvas = within(canvasElement);
     const editable = canvas.getByRole('textbox');
     expect(editable).toBeTruthy();
-    // The placeholder is shown before any typing.
-    expect(canvas.getByText('Type / to pick a skill…')).toBeTruthy();
+    // The placeholder is configured + shown before any typing.
+    expect((editable as HTMLElement).getAttribute('data-placeholder')).toBe('Type / to pick a skill…');
   },
 };
 
@@ -186,7 +186,7 @@ export const WithMentions: Story = {
     const canvas = within(canvasElement);
     const editable = canvas.getByRole('textbox');
     expect(editable).toBeTruthy();
-    expect(canvas.getByText('Type @ to mention someone…')).toBeTruthy();
+    expect((editable as HTMLElement).getAttribute('data-placeholder')).toBe('Type @ to mention someone…');
   },
 };
 
