@@ -72,7 +72,11 @@ const RULES: Rule[] = [
       '// ❌ Does NOT trigger re-render\n' +
       'chat.messages.push(newMsg);\n' +
       'chat.messages[i].content = accumulated;\n' +
-      '```',
+      '```\n\n' +
+      'The ergonomic path: helpers in `@kitn.ai/ui/state` (`appendMessage`, `updateMessage`, `appendContent`) ' +
+      'and `createAssistantStream` handle the new-reference contract for you. ' +
+      '`useKaiChat` (React) and `createKaiChat` (Solid) own state entirely so mutation is never an option.\n\n' +
+      '// setMessages((m) => appendMessage(m, msg)) // new array, no footgun',
   },
   {
     // Rule 3 — listening for events on a parent / wrong element

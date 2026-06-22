@@ -25,6 +25,14 @@ describe('debug', () => {
     expect(text).toMatch(/new array|new reference/i);
   });
 
+  it('in-place-mutation fix mentions @kitn.ai/ui/state state helpers as the ergonomic path', async () => {
+    const out = await debug.handler({
+      symptom: "messages don't update when I mutate in place",
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('@kitn.ai/ui/state');
+  });
+
   // ── Rule 4: wrong element prefix kitn- ─────────────────────────────────
   it('kitn- prefix in snippet → kai- prefix fix', async () => {
     const out = await debug.handler({

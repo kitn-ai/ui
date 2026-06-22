@@ -1202,4 +1202,54 @@ describe('scaffold', () => {
     expect(frontendBlock).not.toContain('dismissRecovery');
     expect(frontendBlock).not.toContain('kai-compare-select');
   });
+
+  // ── SCAF-18: state/streaming helpers pattern ─────────────────────────────
+
+  it('SCAF-18: emits createAssistantStream in the state pattern', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('createAssistantStream');
+  });
+
+  it('SCAF-18: emits useKaiChat (React batteries-included hook)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'react',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('useKaiChat');
+  });
+
+  it('SCAF-18: emits createKaiChat (Solid batteries-included hook)', async () => {
+    const out = await scaffold.handler({
+      useCase: 'drop-in-chat',
+      integration: 'openrouter',
+      placement: 'full-page',
+      framework: 'html',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toContain('createKaiChat');
+  });
+
+  it('SCAF-18: state pattern appears across every front-end framework', async () => {
+    for (const framework of ['html', 'react', 'next', 'vue', 'svelte', 'tanstack-start'] as const) {
+      const out = await scaffold.handler({
+        useCase: 'drop-in-chat',
+        integration: 'openrouter',
+        placement: 'full-page',
+        framework,
+      });
+      const text = (out.content as { type: string; text: string }[])[0].text;
+      expect(text, `${framework}: missing createAssistantStream`).toContain('createAssistantStream');
+      expect(text, `${framework}: missing useKaiChat`).toContain('useKaiChat');
+      expect(text, `${framework}: missing createKaiChat`).toContain('createKaiChat');
+    }
+  });
 });
