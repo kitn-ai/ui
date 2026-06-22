@@ -1126,6 +1126,8 @@ describe('scaffold', () => {
     expect(text).toContain('onAction');
     // frames it as imperative (no element to place)
     expect(text).toMatch(/IMPERATIVE|no <kai-toast>/i);
+    // surfaces collapsed (Sonner-style) stacking via configureToasts
+    expect(text).toContain('configureToasts({ stack: \'collapsed\' })');
   });
 
   it('SCAF-17: emits the dismissRecovery() card-policy wiring with a toast adapter', async () => {

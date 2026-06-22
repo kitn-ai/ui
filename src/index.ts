@@ -19,9 +19,9 @@ export { configurePdfPreview, isPdfPreviewEnabled } from './primitives/pdf-previ
 export type { PdfPreviewOptions } from './primitives/pdf-preview';
 
 // Toasts: imperative `toast()` API + the reactive store behind <kai-toast-region>
-export { toast, ensureMounted as ensureToastRegion, getToasts } from './primitives/toast-store';
+export { toast, configureToasts, ensureMounted as ensureToastRegion, getToasts } from './primitives/toast-store';
 export type {
-  ToastItem, ToastVariant, ToastAction, ToastOptions, ToastHandle, ToastFn,
+  ToastItem, ToastVariant, ToastAction, ToastOptions, ToastHandle, ToastFn, ToastConfig,
 } from './primitives/toast-store';
 export { Toast, ToastRegion } from './components/toast';
 export type {

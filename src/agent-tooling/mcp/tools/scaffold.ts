@@ -1591,6 +1591,11 @@ function interactionPatternsBlock(): string {
     `  action: { label: 'Undo', onAction: () => restoreItem() },`,
     `});`,
     `// t.update({ message: 'Restored', variant: 'success' });  t.dismiss();`,
+    ``,
+    `// Collapsed (Sonner-style) stacking — toasts pile + expand on hover/focus.`,
+    `// Opt in once at startup, or per-region via <kai-toast-region stack="collapsed">.`,
+    `import { configureToasts } from '@kitn.ai/ui/elements';`,
+    `configureToasts({ stack: 'collapsed' });`,
   ].join('\n');
 
   const recoveryPattern = [
