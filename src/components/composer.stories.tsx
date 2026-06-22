@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn, within, expect } from 'storybook/test';
 import { Composer } from './composer';
-import type { TriggerDef } from './composer';
+import type { TriggerDef, ComposerProps } from './composer';
 import type { ComposerDoc } from '../primitives/composer-model';
 import { componentDescription } from '../stories/docs/element-controls';
 
@@ -73,15 +73,15 @@ const meta = {
     onSubmit: fn(),
     onChange: fn(),
   },
-  render: (args) => (
+  render: (args: ComposerProps) => (
     <div class="max-w-2xl">
       <Composer {...args} />
     </div>
   ),
-} satisfies Meta<typeof Composer>;
+} satisfies Meta;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj;
 
 // ---------------------------------------------------------------------------
 // Playground
@@ -89,7 +89,7 @@ type Story = StoryObj<typeof meta>;
 
 /** Args-driven — toggle disabled/loading and edit the placeholder via Controls. */
 export const Playground: Story = {
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
     // The editable surface must be present.
     const editable = canvas.getByRole('textbox');
@@ -131,12 +131,12 @@ export const WithSkills: Story = {
     onSubmit: fn(),
     onChange: fn(),
   },
-  render: (args) => (
+  render: (args: ComposerProps) => (
     <div class="max-w-2xl">
       <Composer {...args} />
     </div>
   ),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     // NOTE: full /-menu → select → backspace keyboard flow is verified by the
     // IVP (tests/e2e/composer-ivp.spec.ts), not here — userEvent can't reliably
     // drive contenteditable selection in this harness (focus races, synthetic
@@ -175,12 +175,12 @@ export const WithMentions: Story = {
     onSubmit: fn(),
     onChange: fn(),
   },
-  render: (args) => (
+  render: (args: ComposerProps) => (
     <div class="max-w-2xl">
       <Composer {...args} />
     </div>
   ),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     // NOTE: full @-menu → select keyboard flow is verified by the IVP —
     // userEvent can't reliably drive contenteditable in Storybook browser tests.
     const canvas = within(canvasElement);
@@ -216,12 +216,12 @@ export const Prefilled: Story = {
     onSubmit: fn(),
     onChange: fn(),
   },
-  render: (args) => (
+  render: (args: ComposerProps) => (
     <div class="max-w-2xl">
       <Composer {...args} />
     </div>
   ),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
     // The entity pill must render with the data-kai-entity attribute.
     const pill = canvasElement.querySelector('[data-kai-entity]');
@@ -251,12 +251,12 @@ export const Highlighted: Story = {
     onSubmit: fn(),
     onChange: fn(),
   },
-  render: (args) => (
+  render: (args: ComposerProps) => (
     <div class="max-w-2xl">
       <Composer {...args} />
     </div>
   ),
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
     const editable = canvas.getByRole('textbox');
     expect(editable).toBeTruthy();

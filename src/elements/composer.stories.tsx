@@ -112,7 +112,7 @@ export const Default: Story = {
     );
   },
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     // kai-composer renders into a Shadow Root — we must pierce it.
     const host = canvasElement.querySelector('kai-composer') as HTMLElement | null;
     expect(host).toBeTruthy();
@@ -183,7 +183,7 @@ export const Skills: Story = {
     );
   },
   parameters: { docs: { source: { code: SKILL_SNIPPET, language: 'html' } } },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     // NOTE: full /-menu → select → backspace keyboard flow is verified by the
     // IVP (tests/e2e/composer-ivp.spec.ts), not here — userEvent can't reliably
     // drive contenteditable selection in this harness (focus races, synthetic
@@ -253,7 +253,7 @@ export const Mentions: Story = {
     );
   },
   parameters: { docs: { source: { code: MENTION_SNIPPET, language: 'html' } } },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     // NOTE: @-menu keyboard flow deferred to IVP — userEvent can't reliably
     // drive contenteditable selection in this harness.
     const host = canvasElement.querySelector('kai-composer') as HTMLElement | null;
@@ -319,7 +319,7 @@ export const Prefilled: Story = {
     );
   },
   parameters: { docs: { source: { code: PREFILLED_SNIPPET, language: 'html' } } },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     // kai-composer renders into Shadow DOM — pierce the root to assert structure.
     const host = canvasElement.querySelector('kai-composer') as HTMLElement | null;
     expect(host).toBeTruthy();
@@ -377,7 +377,7 @@ export const Highlighted: Story = {
     );
   },
   parameters: { docs: { source: { code: HIGHLIGHT_SNIPPET, language: 'html' } } },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const host = canvasElement.querySelector('kai-composer') as HTMLElement | null;
     expect(host).toBeTruthy();
     const shadow = (host as HTMLElement).shadowRoot;
