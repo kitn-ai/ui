@@ -1,5 +1,6 @@
 import { For, Show } from 'solid-js';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from '../components/prompt-input';
+import type { TriggerDef, ComposerChange } from '../components/composer';
 import { PromptSuggestion } from '../components/prompt-suggestion';
 import { SlashCommand, type SlashCommandItem } from '../components/slash-command';
 import { Button } from '../ui/button';
@@ -51,6 +52,10 @@ export interface DefaultPromptInputProps {
   toolbarActions?: CustomAction[];
   /** Called when a custom toolbar action button is clicked, with the action id. */
   onAction?: (id: string) => void;
+  /** Rich entity triggers (`/` skills, `@` agents) passed to the composer. */
+  triggers?: TriggerDef[];
+  /** Structured change (doc + entities) from the composer, on every edit. */
+  onComposerChange?: (change: ComposerChange) => void;
 }
 
 function fileToAttachment(file: File): AttachmentData {
@@ -132,7 +137,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         {/* Consumer-injected controls rendered before the input area. Native
             slot; inert outside a shadow root, projected by the custom element. */}
         <slot name="leading" />
-        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" />
+        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" triggers={props.triggers} onComposerChange={props.onComposerChange} />
         <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
           <div class="flex items-center gap-2">
             <Show when={canAttach()}>

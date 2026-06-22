@@ -1,7 +1,7 @@
 import { type JSX, splitProps, createSignal, createContext, useContext } from 'solid-js';
 import { cn } from '../utils/cn';
 import { useChatConfig, textClass } from '../primitives/chat-config';
-import { Composer } from './composer';
+import { Composer, type TriggerDef, type ComposerChange } from './composer';
 
 // --- Context ---
 
@@ -95,10 +95,14 @@ function PromptInput(props: PromptInputProps) {
 
 export interface PromptInputTextareaProps extends JSX.TextareaHTMLAttributes<HTMLTextAreaElement> {
   disableAutosize?: boolean;
+  /** Rich entity triggers (`/`, `@`) forwarded to the composer. */
+  triggers?: TriggerDef[];
+  /** Structured change (doc + entities) from the composer, on every edit. */
+  onComposerChange?: (change: ComposerChange) => void;
 }
 
 function PromptInputTextarea(props: PromptInputTextareaProps) {
-  const [local] = splitProps(props, ['class', 'placeholder', 'aria-label']);
+  const [local] = splitProps(props, ['class', 'placeholder', 'aria-label', 'triggers', 'onComposerChange']);
   const ctx = usePromptInput();
   const config = useChatConfig();
 
@@ -123,10 +127,13 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
       maxHeight={ctx.maxHeight}
       editableClass={editableClass()}
       editableRef={(el) => ctx.setTextareaRef(el)}
+      triggers={local.triggers}
+      // Surface the structured change (doc/entities) BEFORE the string value, so a
+      // consumer that enriches its events has the latest doc when value-change fires.
       // A prompt can't start with whitespace — strip leading whitespace from the
-      // value (parity with the old textarea). The controlled round-trip re-renders
-      // the editable, so the stripped value is reflected in the DOM too.
-      onChange={(c) => ctx.setValue(c.text.replace(/^\s+/, ''))}
+      // string value (parity with the old textarea); the controlled round-trip
+      // re-renders the editable so the stripped value shows too.
+      onChange={(c) => { local.onComposerChange?.(c); ctx.setValue(c.text.replace(/^\s+/, '')); }}
       onSubmit={() => { if (!ctx.disabled) ctx.onSubmit?.(); }}
     />
   );

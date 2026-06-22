@@ -4,6 +4,8 @@ import { DefaultPromptInput } from './default-input';
 import type { AttachmentData } from '../components/attachments';
 import type { SlashCommandItem } from '../components/slash-command';
 import type { CustomAction } from './chat-types';
+import type { TriggerDef, ComposerChange } from '../components/composer';
+import { type ComposerDoc, type EntityRef, normalizeValue } from '../primitives/composer-model';
 
 /** Parse a single light-DOM `<kai-slash-command>` element into a SlashCommandItem.
  *  Attribute mapping:
@@ -58,14 +60,21 @@ interface Props extends Record<string, unknown> {
    *  files without an upload). Set as a JS property; the element then manages its
    *  own attachment state from there (add via the paperclip, remove per chip). */
   attachments?: AttachmentData[];
+  /** Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored
+   *  menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents
+   *  (plugins are the grouping/provenance of those items). Set as a JS property. */
+  triggers?: TriggerDef[];
 }
 
 /** Events fired by `<kai-prompt-input>`. */
 interface Events {
-  /** The user submitted the prompt (Enter or send button) with its attachments. */
-  'kai-submit': { value: string; attachments: AttachmentData[] };
-  /** The input text changed (fires on every keystroke). */
-  'kai-value-change': { value: string };
+  /** The user submitted the prompt (Enter or send button). `value` is the
+   *  flattened text (back-compat); `doc` is the structured document and
+   *  `entities` the inserted pills (skills/agents) for downstream expansion. */
+  'kai-submit': { value: string; doc: ComposerDoc; entities: EntityRef[]; attachments: AttachmentData[] };
+  /** The input changed (fires on every edit). Carries the flattened `value`
+   *  plus the structured `doc` + `entities`. */
+  'kai-value-change': { value: string; doc: ComposerDoc; entities: EntityRef[] };
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
   'kai-suggestion-click': { value: string };
   /** A slash command was chosen from the palette. */
@@ -95,6 +104,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
   voice: false,
   stoppable: false,
   attachments: undefined,
+  triggers: undefined,
 }, (props, { dispatch, flag, element }) => {
   const [internal, setInternal] = createSignal(props.value ?? '');
   // Seed staged attachments from the `attachments` property; the element manages
@@ -134,9 +144,19 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
 
   const current = () => props.value ?? internal();
 
-  const handleChange = (v: string) => { setInternal(v); dispatch('kai-value-change', { value: v }); };
+  // Latest structured change from the composer (doc + entities). Captured before
+  // the string value-change fires (the bridge calls onComposerChange first), so
+  // the dispatched events can carry the doc. Reset to a text-only doc when a value
+  // is set that didn't come from the composer (suggestion/slash insert).
+  let lastChange: ComposerChange = { doc: [], text: '', entities: [] };
+
+  const handleChange = (v: string) => {
+    setInternal(v);
+    if (v !== lastChange.text) lastChange = { doc: normalizeValue(v), text: v, entities: [] };
+    dispatch('kai-value-change', { value: v, doc: lastChange.doc, entities: lastChange.entities });
+  };
   const handleSubmit = () => {
-    dispatch('kai-submit', { value: current(), attachments: attachments() });
+    dispatch('kai-submit', { value: current(), doc: lastChange.doc, entities: lastChange.entities, attachments: attachments() });
     setAttachments([]);
   };
   const handleSuggestionClick = (v: string) => {
@@ -145,7 +165,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       dispatch('kai-suggestion-click', { value: v });
     } else {
       // Default: behave as if the user typed the suggestion and pressed submit.
-      dispatch('kai-submit', { value: v, attachments: attachments() });
+      dispatch('kai-submit', { value: v, doc: normalizeValue(v), entities: [], attachments: attachments() });
       setAttachments([]);
     }
   };
@@ -171,6 +191,8 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       search={flag('search')}
       voice={flag('voice')}
       toolbarActions={toolbarActions()}
+      triggers={props.triggers}
+      onComposerChange={(c) => { lastChange = c; }}
       onValueChange={handleChange}
       onSubmit={handleSubmit}
       onSuggestionClick={handleSuggestionClick}

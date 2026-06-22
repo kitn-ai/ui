@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
  *  Run: SHOT=baseline|after npx playwright test --config playwright.promptinput.config.ts */
 export default defineConfig({
   testDir: 'tests/e2e',
-  testMatch: /promptinput-(shot|behavior)\.spec\.ts/,
+  testMatch: /promptinput-(shot|behavior|pills)\.spec\.ts/,
   fullyParallel: false,
   retries: 0,
   reporter: 'list',

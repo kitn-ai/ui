@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers <kai-chat>, <kai-conversations>, <kai-prompt-input>
 import type { AttachmentData } from '../components/attachments';
+import type { TriggerDef } from '../components/composer';
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
@@ -41,6 +42,7 @@ interface PromptInputEl extends HTMLElement {
   search?: boolean;
   voice?: boolean;
   attachments?: AttachmentData[];
+  triggers?: TriggerDef[];
 }
 
 /** Live demo of the actual `<kai-prompt-input>` custom element (Shadow DOM and all). */
@@ -327,5 +329,57 @@ export const DeclarativeSlashCommands: Story = {
     );
   },
   parameters: { docs: { source: { code: SLASH_COMMAND_SNIPPET, language: 'html' } } },
+};
+
+// Inline data-URI icons (no asset deps). Red disc = a "record" skill; the agent
+// items go iconless to show both styles.
+const recordIcon =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><circle cx='16' cy='16' r='11' fill='%23e11d48'/></svg>";
+
+const ENTITY_TRIGGERS: TriggerDef[] = [
+  {
+    char: '/',
+    kind: 'skill',
+    items: [
+      { id: 'record-replay', label: 'Record & Replay', icon: recordIcon, promptText: 'Use the Record & Replay skill.', data: { plugin: 'devtools' } },
+      { id: 'summarize', label: 'Summarize', promptText: 'Summarize the thread.' },
+    ],
+  },
+  {
+    char: '@',
+    kind: 'agent',
+    items: [
+      { id: 'code-reviewer', label: 'Code Reviewer', promptText: 'Hand this to the Code Reviewer agent.' },
+      { id: 'researcher', label: 'Researcher' },
+    ],
+  },
+];
+
+/** Rich entity pills inside the real prompt input: `/` inserts a **skill**, `@`
+ *  inserts an **agent** (plugins are the grouping/provenance, carried in `data`).
+ *  Each pill is atomic; `kai-submit`/`kai-value-change` carry the structured
+ *  `doc` + `entities` alongside the flattened `value`. */
+export const WithEntityPills: Story = {
+  name: 'Entity Pills (/ skills, @ agents)',
+  render: () => {
+    let el: PromptInputEl | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.placeholder = 'Type / for a skill or @ for an agent…';
+      el.triggers = ENTITY_TRIGGERS;
+      el.addEventListener('kai-submit', (e) =>
+        console.log('submit:', (e as CustomEvent).detail),
+      );
+    });
+    return (
+      <div style={{ padding: '16px', width: '100%' }}>
+        <kai-prompt-input ref={(e: HTMLElement) => (el = e as PromptInputEl)} style={{ display: 'block', width: '100%' }} />
+        <p style={{ 'margin-top': '8px', 'font-size': '12px', color: 'var(--color-muted-foreground)' }}>
+          Type <code>/</code> to insert a skill or <code>@</code> to insert an agent. Backspace deletes a
+          whole pill. Open the console to see <code>kai-submit</code> with the structured <code>doc</code> + <code>entities</code>.
+        </p>
+      </div>
+    );
+  },
 };
 
