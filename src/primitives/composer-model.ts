@@ -19,7 +19,9 @@ export function normalizeValue(value: string | ComposerDoc | null | undefined): 
     if (seg.type === 'text') {
       if (!seg.text) continue;
       const last = out[out.length - 1];
-      if (last && last.type === 'text') last.text += seg.text;
+      // Replace (don't mutate) the prior segment so every object in the returned
+      // doc is freshly built and never an aliased/held reference.
+      if (last && last.type === 'text') out[out.length - 1] = { type: 'text', text: last.text + seg.text };
       else out.push({ type: 'text', text: seg.text });
     } else {
       out.push({ type: 'entity', entity: seg.entity });

@@ -31,6 +31,13 @@ describe('normalizeValue', () => {
     normalizeValue(input);
     expect(input).toEqual([{ type: 'text', text: 'x' }]);
   });
+  it('does not retro-mutate a held reference from a prior result', () => {
+    const first = normalizeValue([{ type: 'text', text: 'a' }]);
+    const held = first[0];
+    // Re-normalize a doc that re-uses `first` and appends another text segment.
+    normalizeValue([...first, { type: 'text', text: 'b' }]);
+    expect(held).toEqual({ type: 'text', text: 'a' });
+  });
 });
 
 describe('serializeToText', () => {

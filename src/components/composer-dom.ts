@@ -44,13 +44,13 @@ export function parseDom(root: HTMLElement): ComposerDoc {
   return normalizeValue(segs);
 }
 
-export function renderDoc(root: HTMLElement, doc: ComposerDoc): void {
+export function renderDoc(root: HTMLElement, doc: ComposerDoc, ownerDoc: Document = document): void {
   root.textContent = '';
   for (const seg of doc) {
-    if (seg.type === 'text') root.appendChild(document.createTextNode(seg.text));
+    if (seg.type === 'text') root.appendChild(ownerDoc.createTextNode(seg.text));
     else {
-      root.appendChild(createEntityEl(document, seg.entity));
-      root.appendChild(document.createTextNode(ZWSP));
+      root.appendChild(createEntityEl(ownerDoc, seg.entity));
+      root.appendChild(ownerDoc.createTextNode(ZWSP));
     }
   }
 }
