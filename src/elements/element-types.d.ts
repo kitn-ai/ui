@@ -630,6 +630,8 @@ export interface KaiToastRegionElement extends HTMLElement {
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
   max?: number;
+  /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. */
+  stack?: "expanded" | "collapsed";
   /** Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region. */
   target?: HTMLElement;
 }

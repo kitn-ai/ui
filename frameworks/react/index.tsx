@@ -890,6 +890,8 @@ export interface ToastRegionProps extends WebComponentProps {
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
   max?: number;
+  /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. */
+  stack?: "expanded" | "collapsed";
   /** Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region. */
   target?: HTMLElement;
   /** A toast's action button was pressed. */
@@ -900,7 +902,7 @@ export interface ToastRegionProps extends WebComponentProps {
 
 export const ToastRegion = createWebComponent<ToastRegionProps>(
   'kai-toast-region',
-  ["theme","toasts","position","max","target"],
+  ["theme","toasts","position","max","stack","target"],
   { onAction: 'kai-action', onDismiss: 'kai-dismiss' },
 );
 

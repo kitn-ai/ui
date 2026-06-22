@@ -2962,6 +2962,15 @@
         "displayType": "undefined | number"
       },
       {
+        "name": "stack",
+        "type": "undefined | \"expanded\" | \"collapsed\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack.",
+        "default": "'expanded'",
+        "displayType": "undefined | \"expanded\" | \"collapsed\""
+      },
+      {
         "name": "target",
         "type": "undefined | HTMLElement",
         "optional": true,
