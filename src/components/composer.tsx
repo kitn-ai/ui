@@ -27,6 +27,7 @@ import {
   createTextWalker,
   entityStore,
   isEntityEl,
+  kindGlyph,
 } from './composer-dom';
 import { activeTriggerFor } from '../primitives/composer-triggers';
 import { usePosition, useDismiss, createPresence } from '../ui/overlay';
@@ -698,10 +699,10 @@ export function Composer(props: ComposerProps): JSX.Element {
         }
         /* Fixed height + an icon never taller than the box → iconed and iconless
            pills are exactly the same height (no baseline shift in the line). */
-        .kai-composer-pill-icon {
-          width: 1em; height: 1em; border-radius: 9999px;
-          object-fit: cover; flex-shrink: 0;
-        }
+        .kai-composer-pill-icon { width: 1em; height: 1em; flex-shrink: 0; }
+        img.kai-composer-pill-icon { border-radius: 9999px; object-fit: cover; }
+        .kai-composer-pill-glyph { display: inline-flex; align-items: center; justify-content: center; opacity: 0.8; }
+        .kai-composer-pill-glyph svg { width: 1em; height: 1em; display: block; }
         /* The editable is the containing block for the placeholder pseudo-element. */
         [data-kai-composer-editable] { position: relative; }
         /* Placeholder via pseudo-element — exempt from axe color-contrast like a
@@ -784,8 +785,17 @@ export function Composer(props: ComposerProps): JSX.Element {
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={(e) => { e.preventDefault(); selectItem(entry.item); }}
                     >
-                      <Show when={entry.item.icon}>
-                        <img src={entry.item.icon} alt="" class="w-4 h-4 rounded shrink-0" />
+                      <Show
+                        when={entry.item.icon}
+                        fallback={
+                          <Show when={kindGlyph(entry.item.kind ?? activeTrigger()?.def.kind ?? '')}>
+                            {(glyph) => (
+                              <span class="kai-composer-pill-glyph w-4 h-4 shrink-0" aria-hidden="true" innerHTML={glyph()} />
+                            )}
+                          </Show>
+                        }
+                      >
+                        <img src={entry.item.icon} alt="" class="w-4 h-4 rounded object-cover shrink-0" />
                       </Show>
                       <span class="font-medium whitespace-nowrap shrink-0">{entry.item.label}</span>
                       <Show when={entry.item.description}>

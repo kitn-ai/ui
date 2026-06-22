@@ -29,6 +29,26 @@ export function createTextWalker(root: HTMLElement): TreeWalker {
   });
 }
 
+/**
+ * Default monochrome (currentColor) glyph per entity kind, so kinds are visually
+ * distinguishable even without an explicit `icon`: agent = bot, plugin = plug.
+ * Skills intentionally have NO default glyph (they read as plain text pills).
+ * Returns inline SVG markup (trusted — no user input), or '' for kinds without a
+ * default. An item's own `icon` always takes precedence over this.
+ */
+export function kindGlyph(kind: string): string {
+  const svg = (inner: string) =>
+    `<svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+  switch (kind) {
+    case 'agent':
+      return svg('<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4.5V8M9.5 13.5v1.5M14.5 13.5v1.5"/><circle cx="12" cy="3" r="1.2"/>');
+    case 'plugin':
+      return svg('<path d="M9 2v4M15 2v4M6 6h12v5a6 6 0 0 1-12 0zM12 17v5"/>');
+    default:
+      return ''; // skills + unknown kinds: no default glyph
+  }
+}
+
 export function createEntityEl(doc: Document, entity: EntityRef): HTMLElement {
   const el = doc.createElement('span');
   el.setAttribute(ENTITY_ATTR, '');
@@ -42,6 +62,15 @@ export function createEntityEl(doc: Document, entity: EntityRef): HTMLElement {
     img.alt = '';
     img.className = 'kai-composer-pill-icon';
     el.appendChild(img);
+  } else {
+    const glyph = kindGlyph(entity.kind);
+    if (glyph) {
+      const span = doc.createElement('span');
+      span.className = 'kai-composer-pill-icon kai-composer-pill-glyph';
+      span.setAttribute('aria-hidden', 'true');
+      span.innerHTML = glyph; // trusted SVG markup (not user input)
+      el.appendChild(span);
+    }
   }
   el.appendChild(doc.createTextNode(entity.label));
   entityStore.set(el, entity);
