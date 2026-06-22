@@ -68,18 +68,12 @@ export interface ComposerProps {
   onTriggerClose?: () => void;
   onEntityAdd?: (entity: EntityRef) => void;
   onEntityRemove?: (entity: EntityRef) => void;
-  /** The editable gained focus (mirrors DOM `focus`; not composed across the shadow). */
+  /** The editable gained focus. `focus`/`blur` are NOT composed, so they don't
+   *  escape the shadow root — this re-exposes them. (keydown/paste/focusin/focusout
+   *  are composed and already reach the host as native events; no wrapper needed.) */
   onFocus?: (e: FocusEvent) => void;
-  /** The editable lost focus (mirrors DOM `blur`). */
+  /** The editable lost focus. */
   onBlur?: (e: FocusEvent) => void;
-  /** Bubbling focus (mirrors DOM `focusin`). */
-  onFocusIn?: (e: FocusEvent) => void;
-  /** Bubbling blur (mirrors DOM `focusout`). */
-  onFocusOut?: (e: FocusEvent) => void;
-  /** A key was pressed (mirrors DOM `keydown`; fires for every key, incl. ones the composer handles). */
-  onKeydown?: (e: KeyboardEvent) => void;
-  /** Content was pasted (mirrors DOM `paste`). */
-  onPaste?: (e: ClipboardEvent) => void;
 }
 
 /**
@@ -388,9 +382,6 @@ export function Composer(props: ComposerProps): JSX.Element {
   let focused = false;
   const handleFocus = (e: FocusEvent) => { focused = true; props.onFocus?.(e); };
   const handleBlur = (e: FocusEvent) => { focused = false; props.onBlur?.(e); };
-  const handleFocusIn = (e: FocusEvent) => props.onFocusIn?.(e);
-  const handleFocusOut = (e: FocusEvent) => props.onFocusOut?.(e);
-  const handlePaste = (e: ClipboardEvent) => props.onPaste?.(e);
 
   onMount(() => {
     const onSelectionChange = () => {
@@ -482,10 +473,6 @@ export function Composer(props: ComposerProps): JSX.Element {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    // Notify the consumer of every keydown (incl. keys the composer handles below).
-    // The original event is passed so a consumer can preventDefault if desired.
-    props.onKeydown?.(e);
-
     // --- Undo / redo (we own the history; native contenteditable undo corrupts
     //     pills, so suppress it and drive our doc-snapshot stack instead) ---
     if ((e.metaKey || e.ctrlKey) && (e.key === 'z' || e.key === 'Z')) {
@@ -689,9 +676,6 @@ export function Composer(props: ComposerProps): JSX.Element {
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        on:focusin={handleFocusIn}
-        on:focusout={handleFocusOut}
-        onPaste={handlePaste}
         class={cn(
           'text-foreground min-h-[44px] w-full overflow-y-auto outline-none whitespace-pre-wrap break-words',
         )}

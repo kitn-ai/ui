@@ -197,36 +197,30 @@ test.describe('kai-composer IVP', () => {
     await expect(pills(page)).toHaveCount(1);
   });
 
-  test('emits focus/blur/keydown/focusin/focusout on the host (kai-* + native composed)', async ({ page }) => {
+  test('emits kai-focus/kai-blur on the host; native keydown reaches the host too', async ({ page }) => {
     await page.goto(SKILLS_STORY);
     await expect(editable(page)).toBeVisible();
     await page.evaluate(() => {
       const host = document.querySelector('kai-composer')!;
-      const w = window as unknown as { __ev: Record<string, unknown> };
-      w.__ev = { focus: 0, blur: 0, focusin: 0, focusout: 0, keydown: [] as string[], nativeKeydown: 0 };
-      const ev = w.__ev as { focus: number; blur: number; focusin: number; focusout: number; keydown: string[]; nativeKeydown: number };
-      host.addEventListener('kai-focus', () => { ev.focus++; });
-      host.addEventListener('kai-blur', () => { ev.blur++; });
-      host.addEventListener('kai-focusin', () => { ev.focusin++; });
-      host.addEventListener('kai-focusout', () => { ev.focusout++; });
-      host.addEventListener('kai-keydown', (e) => { ev.keydown.push((e as CustomEvent).detail.key); });
-      // Native keydown is composed → it ALSO crosses the shadow boundary to the host.
-      host.addEventListener('keydown', () => { ev.nativeKeydown++; });
+      const w = window as unknown as { __ev: { focus: number; blur: number; nativeKeydown: number } };
+      w.__ev = { focus: 0, blur: 0, nativeKeydown: 0 };
+      host.addEventListener('kai-focus', () => { w.__ev.focus++; });
+      host.addEventListener('kai-blur', () => { w.__ev.blur++; });
+      // keydown is composed → it crosses the shadow boundary to the host natively,
+      // so consumers don't need a kai-keydown wrapper.
+      host.addEventListener('keydown', () => { w.__ev.nativeKeydown++; });
     });
 
-    await editable(page).click();        // focus + focusin
-    await page.keyboard.type('x');       // keydown 'x' (no trigger char → just types)
-    await page.mouse.click(2, 2);        // click outside the composer → blur + focusout
+    await editable(page).click();        // focus
+    await page.keyboard.type('x');       // native keydown reaches the host
+    await page.mouse.click(2, 2);        // click outside → blur
 
-    const ev = await page.evaluate(() => (window as unknown as { __ev: {
-      focus: number; blur: number; focusin: number; focusout: number; keydown: string[]; nativeKeydown: number;
-    } }).__ev);
+    const ev = await page.evaluate(() => (window as unknown as {
+      __ev: { focus: number; blur: number; nativeKeydown: number };
+    }).__ev);
 
     expect(ev.focus).toBeGreaterThanOrEqual(1);
-    expect(ev.focusin).toBeGreaterThanOrEqual(1);
-    expect(ev.keydown).toContain('x');
-    expect(ev.nativeKeydown).toBeGreaterThanOrEqual(1); // proves composed native keydown reaches the host
     expect(ev.blur).toBeGreaterThanOrEqual(1);
-    expect(ev.focusout).toBeGreaterThanOrEqual(1);
+    expect(ev.nativeKeydown).toBeGreaterThanOrEqual(1); // composed native keydown reaches the host
   });
 });

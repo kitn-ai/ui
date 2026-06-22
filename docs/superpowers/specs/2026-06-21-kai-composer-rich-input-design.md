@@ -146,18 +146,13 @@ Behavior:
 'kai-entity-remove': { entity: EntityRef }        // a pill was deleted
 'kai-trigger':       { char: string; query: string; rect: DOMRect }   // menu open / query change
 'kai-trigger-close': {}
-// Textarea-parity event surface (added 2026-06-22):
 'kai-focus':         { originalEvent: FocusEvent }
 'kai-blur':          { originalEvent: FocusEvent }
-'kai-focusin':       { originalEvent: FocusEvent }
-'kai-focusout':      { originalEvent: FocusEvent }
-'kai-keydown':       { key: string; originalEvent: KeyboardEvent }     // fires for every key
-'kai-paste':         { text: string; originalEvent: ClipboardEvent }
 ```
 
 `kai-submit` and `kai-value-change` are the parity surface with `<kai-prompt-input>` (which today emits `kai-submit {value}` / `kai-value-change {value}`) — here `value` is replaced by the richer `{doc, text, entities}`. `text` is the drop-in equivalent of the old `value` for simple consumers. `kai-value-change` is the change/input equivalent (named for sibling-element consistency, not the DOM `input`).
 
-**Shadow-DOM event note:** `focus`/`blur` are NOT composed, so they don't escape the shadow root — `kai-focus`/`kai-blur` re-expose them on the host. `keydown`/`paste`/`focusin`/`focusout` ARE composed and already reach the host as native events; the `kai-*` versions give a uniform listen-on-the-host surface, and `originalEvent` retains full `preventDefault`/clipboard access. There is no `kai-change` — contenteditable has no native `change` event; use `kai-value-change`.
+**Event surface is intentionally lean (kept minimal for a prompt input).** Only `focus`/`blur` get `kai-*` wrappers because they are NOT composed and so don't escape the shadow root. `keydown`, `paste`, `focusin`, `focusout` are composed and already reach `<kai-composer>` as native events — listen for them directly (`el.addEventListener('keydown', …)`), which also keeps `preventDefault`/`clipboardData` intact. There is no `kai-change` — contenteditable has no native `change`; use `kai-value-change`. (An earlier round added `kai-keydown`/`kai-paste`/`kai-focusin`/`kai-focusout`; removed as redundant.)
 
 ## Props (the `kai-composer` element)
 
