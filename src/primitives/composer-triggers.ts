@@ -14,3 +14,22 @@ export function detectTrigger(text: string, caret: number, chars: string[]): Act
   }
   return null;
 }
+
+/**
+ * Wraps detectTrigger with a list of trigger definitions.
+ * Returns { def, query, start } when a trigger is active, else null.
+ * Accepts generic defs so it does not import from composer.tsx (no cycle).
+ */
+export function activeTriggerFor<T extends { char: string; kind: string }>(
+  text: string,
+  caret: number,
+  defs: T[],
+): { def: T; query: string; start: number } | null {
+  if (!defs.length) return null;
+  const chars = defs.map((d) => d.char);
+  const hit = detectTrigger(text, caret, chars);
+  if (!hit) return null;
+  const def = defs.find((d) => d.char === hit.char);
+  if (!def) return null;
+  return { def, query: hit.query, start: hit.start };
+}

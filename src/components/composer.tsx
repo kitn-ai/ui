@@ -1,4 +1,13 @@
-import { type JSX, createSignal, onMount } from 'solid-js';
+import {
+  type JSX,
+  createSignal,
+  createEffect,
+  createMemo,
+  onMount,
+  onCleanup,
+  Show,
+  For,
+} from 'solid-js';
 import { cn } from '../utils/cn';
 import {
   type ComposerDoc,
@@ -16,6 +25,8 @@ import {
   entityStore,
   isEntityEl,
 } from './composer-dom';
+import { activeTriggerFor } from '../primitives/composer-triggers';
+import { usePosition, useDismiss, createPresence } from '../ui/overlay';
 
 export interface TriggerItem {
   id: string;
@@ -54,9 +65,137 @@ export interface ComposerProps {
   onEntityRemove?: (entity: EntityRef) => void;
 }
 
+/** Compute the full ZWSP-stripped text of all text nodes in the editable. */
+function getFullText(root: HTMLElement): string {
+  let text = '';
+  const walker = root.ownerDocument.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode() as Text | null;
+  while (node) {
+    text += (node.textContent ?? '').split(ZWSP).join('');
+    node = walker.nextNode() as Text | null;
+  }
+  return text;
+}
+
+/**
+ * Compute the global text offset for the current caret position.
+ * Walks SHOW_TEXT nodes, strips ZWSP, sums lengths before the caret node.
+ */
+function getCaretTextOffset(root: HTMLElement): number {
+  const ownerDoc = root.ownerDocument;
+  const sel = ownerDoc.defaultView?.getSelection();
+  if (!sel || sel.rangeCount === 0) return 0;
+  const range = sel.getRangeAt(0);
+  if (!range.collapsed) return 0;
+
+  const { startContainer, startOffset } = range;
+  let offset = 0;
+  const walker = ownerDoc.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode() as Text | null;
+  while (node) {
+    if (node === startContainer) {
+      // Strip ZWSP chars that come before startOffset
+      const raw = (node.textContent ?? '').slice(0, startOffset);
+      offset += raw.split(ZWSP).join('').length;
+      return offset;
+    }
+    offset += (node.textContent ?? '').split(ZWSP).join('').length;
+    node = walker.nextNode() as Text | null;
+  }
+  return offset;
+}
+
+/**
+ * Get the client rect of the caret. Uses a collapsed range if possible.
+ * If the rect is zero-sized, inserts a temporary measuring span briefly.
+ */
+function getCaretRect(root: HTMLElement): DOMRect | null {
+  const ownerDoc = root.ownerDocument;
+  const sel = ownerDoc.defaultView?.getSelection();
+  if (!sel || sel.rangeCount === 0) return null;
+  const range = sel.getRangeAt(0).cloneRange();
+  range.collapse(true);
+
+  const rects = range.getClientRects();
+  if (rects.length > 0 && (rects[0].width > 0 || rects[0].height > 0)) {
+    return rects[0];
+  }
+
+  // Fallback: insert a measuring span, read its rect, remove it.
+  const marker = ownerDoc.createElement('span');
+  marker.textContent = '​';
+  marker.style.position = 'absolute';
+  marker.style.visibility = 'hidden';
+  range.insertNode(marker);
+  const rect = marker.getBoundingClientRect();
+  marker.remove();
+  return rect.width > 0 || rect.height > 0 ? rect : null;
+}
+
 export function Composer(props: ComposerProps): JSX.Element {
   let editable!: HTMLDivElement;
+  let menuRef: HTMLDivElement | undefined;
   const [empty, setEmpty] = createSignal(docIsEmpty(normalizeValue(props.value)));
+
+  // --- Trigger menu state ---
+  type ActiveTriggerState = {
+    def: TriggerDef;
+    query: string;
+    start: number;
+    caretRect: DOMRect;
+  };
+  const [activeTrigger, setActiveTrigger] = createSignal<ActiveTriggerState | null>(null);
+  const [selectedIndex, setSelectedIndex] = createSignal(0);
+
+  const menuOpen = createMemo(() => {
+    const t = activeTrigger();
+    return !!(t && t.def.items && t.def.items.length > 0);
+  });
+
+  const filteredItems = createMemo((): TriggerItem[] => {
+    const t = activeTrigger();
+    if (!t?.def.items) return [];
+    const q = t.query.toLowerCase();
+    return q === ''
+      ? t.def.items
+      : t.def.items.filter((item) => item.label.toLowerCase().includes(q));
+  });
+
+  // Keep selectedIndex in bounds when filteredItems changes
+  createEffect(() => {
+    const max = filteredItems().length;
+    if (selectedIndex() >= max) setSelectedIndex(Math.max(0, max - 1));
+  });
+
+  // --- Floating menu positioning ---
+  // Virtual reference element built from the live caret rect
+  const virtualRef = createMemo((): HTMLElement | undefined => {
+    const t = activeTrigger();
+    if (!t) return undefined;
+    const rect = t.caretRect;
+    return {
+      getBoundingClientRect: () => rect,
+    } as unknown as HTMLElement;
+  });
+
+  const floatingRef = createMemo(() => menuRef);
+  const { pos, hidden } = usePosition(virtualRef, floatingRef, { placement: 'bottom-start', gutter: 4 });
+  const { present, state, setRef } = createPresence(menuOpen);
+
+  useDismiss({
+    enabled: menuOpen,
+    onDismiss: () => closeTrigger(),
+    refs: () => [editable, menuRef],
+  });
+
+  function closeTrigger() {
+    if (activeTrigger()) {
+      setActiveTrigger(null);
+      props.onTriggerClose?.();
+    }
+  }
+
+  // --- Core logic ---
 
   const snapshot = (): ComposerChange => {
     const doc = parseDom(editable);
@@ -68,11 +207,67 @@ export function Composer(props: ComposerProps): JSX.Element {
     setEmpty(docIsEmpty(parseDom(editable)));
   });
 
+  function updateTriggerState() {
+    const defs = props.triggers;
+    if (!defs?.length) {
+      if (activeTrigger()) closeTrigger();
+      return;
+    }
+    const text = getFullText(editable);
+    const caret = getCaretTextOffset(editable);
+    const hit = activeTriggerFor(text, caret, defs);
+    if (hit) {
+      const rect = getCaretRect(editable);
+      if (rect) {
+        const prev = activeTrigger();
+        setActiveTrigger({ def: hit.def, query: hit.query, start: hit.start, caretRect: rect });
+        // Fire onTrigger if char/query changed or first activation
+        if (!prev || prev.def.char !== hit.def.char || prev.query !== hit.query) {
+          props.onTrigger?.({ char: hit.def.char, query: hit.query, rect });
+        }
+      }
+    } else {
+      if (activeTrigger()) closeTrigger();
+    }
+  }
+
   const handleInput = () => {
     const change = snapshot();
     setEmpty(docIsEmpty(change.doc));
     props.onChange?.(change);
+    updateTriggerState();
   };
+
+  // Also update trigger state on selectionchange (while focused)
+  let focused = false;
+  const onFocus = () => { focused = true; };
+  const onBlur = () => { focused = false; };
+
+  onMount(() => {
+    const onSelectionChange = () => {
+      if (focused) updateTriggerState();
+    };
+    document.addEventListener('selectionchange', onSelectionChange);
+    onCleanup(() => document.removeEventListener('selectionchange', onSelectionChange));
+  });
+
+  /**
+   * Select an item from the trigger menu.
+   */
+  function selectItem(item: TriggerItem) {
+    const t = activeTrigger();
+    if (!t) return;
+    const entity: EntityRef = {
+      kind: t.def.kind,
+      id: item.id,
+      label: item.label,
+      icon: item.icon,
+      promptText: item.promptText,
+      data: item.data,
+    };
+    insertEntity(entity, { replaceFrom: t.start });
+    closeTrigger();
+  }
 
   /**
    * Insert an entity at the current caret position.
@@ -138,6 +333,39 @@ export function Composer(props: ComposerProps): JSX.Element {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    // --- Trigger menu keyboard navigation (takes priority) ---
+    if (menuOpen() && filteredItems().length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex((i) => (i + 1) % filteredItems().length);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex((i) => (i - 1 + filteredItems().length) % filteredItems().length);
+        return;
+      }
+      if (e.key === 'Enter') {
+        const items = filteredItems();
+        if (items.length > 0) {
+          e.preventDefault();
+          e.stopPropagation();
+          selectItem(items[selectedIndex()]);
+          return;
+        }
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeTrigger();
+        return;
+      }
+    } else if (activeTrigger() && e.key === 'Escape') {
+      // No items shown but trigger is active (e.g. only onTrigger fired) — close on Escape
+      e.preventDefault();
+      closeTrigger();
+      return;
+    }
+
     // --- Backspace / Delete: atomically remove pill immediately before/after caret ---
     if (e.key === 'Backspace' || e.key === 'Delete') {
       const ownerDoc = editable.ownerDocument;
@@ -242,13 +470,17 @@ export function Composer(props: ComposerProps): JSX.Element {
       }
     }
 
-    // --- Enter: submit ---
+    // --- Enter: submit (only when menu is NOT open or no item is highlighted) ---
     if (e.key === 'Enter' && !e.shiftKey && props.submitOnEnter !== false) {
       e.preventDefault();
       if (props.disabled || props.loading) return;
       props.onSubmit?.(snapshot());
     }
   };
+
+  // Close trigger when space is typed (handled via input event — space moves caret
+  // past whitespace boundary, so updateTriggerState will return null anyway).
+  // This is covered by updateTriggerState() in handleInput.
 
   const maxH = () => props.maxHeight ?? 240;
 
@@ -268,6 +500,8 @@ export function Composer(props: ComposerProps): JSX.Element {
         aria-label={props.placeholder}
         onInput={handleInput}
         onKeyDown={handleKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
         class={cn(
           'text-foreground min-h-[44px] w-full overflow-y-auto outline-none whitespace-pre-wrap break-words',
         )}
@@ -281,6 +515,52 @@ export function Composer(props: ComposerProps): JSX.Element {
           {props.placeholder}
         </div>
       )}
+
+      {/* Trigger menu */}
+      <Show when={present()}>
+        <div
+          ref={(el) => { menuRef = el; setRef(el); }}
+          role="listbox"
+          aria-label="Suggestions"
+          data-state={state()}
+          class={cn(
+            'absolute z-50 min-w-[180px] max-w-[280px] rounded-lg bg-card shadow-lg overflow-hidden py-1',
+            'border border-border',
+          )}
+          style={{
+            position: 'fixed',
+            left: `${pos().x}px`,
+            top: `${pos().y}px`,
+            visibility: hidden() ? 'hidden' : 'visible',
+          }}
+        >
+          <For each={filteredItems()}>
+            {(item, index) => (
+              <button
+                role="option"
+                aria-selected={selectedIndex() === index()}
+                data-index={index()}
+                class={cn(
+                  'w-full flex items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors',
+                  selectedIndex() === index()
+                    ? 'bg-muted text-foreground'
+                    : 'text-foreground hover:bg-muted',
+                )}
+                onMouseEnter={() => setSelectedIndex(index())}
+                onClick={(e) => {
+                  e.preventDefault();
+                  selectItem(item);
+                }}
+              >
+                <Show when={item.icon}>
+                  <img src={item.icon} alt="" class="w-4 h-4 rounded shrink-0" />
+                </Show>
+                <span class="truncate">{item.label}</span>
+              </button>
+            )}
+          </For>
+        </div>
+      </Show>
     </div>
   );
 }
