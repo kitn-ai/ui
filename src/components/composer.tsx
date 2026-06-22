@@ -507,6 +507,22 @@ export function Composer(props: ComposerProps): JSX.Element {
           No-op in browsers that don't support ::highlight(); the selector
           is simply unrecognized and dropped. */}
       <style>{`::highlight(kai-composer-highlight) { background-color: rgba(var(--color-primary, 99 102 241) / 0.18); }`}</style>
+      {/* Atomic entity pill styling. Self-contained (currentColor-based) so it
+          renders correctly without depending on a Tailwind rebuild for the
+          custom .kai-composer-pill class. */}
+      <style>{`
+        .kai-composer-pill {
+          display: inline-flex; align-items: center; gap: 0.25rem;
+          vertical-align: baseline; padding: 0.05rem 0.3rem; margin: 0 0.05rem;
+          border-radius: 0.375rem;
+          background-color: color-mix(in srgb, currentColor 10%, transparent);
+          font-weight: 500; white-space: nowrap; user-select: none; cursor: default;
+        }
+        .kai-composer-pill-icon {
+          width: 1.05em; height: 1.05em; border-radius: 9999px;
+          object-fit: cover; flex-shrink: 0;
+        }
+      `}</style>
       <div
         ref={editable}
         data-kai-composer-editable
