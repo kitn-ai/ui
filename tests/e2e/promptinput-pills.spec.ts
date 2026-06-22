@@ -81,6 +81,33 @@ test('the menu excludes an already-inserted entity', async ({ page }) => {
   await expect(page.getByRole('option', { name: /Record & Replay/ })).toHaveCount(0);
 });
 
+test('adjacent pills (a / skill + an @ plugin) are the same height, vertically aligned, with a gap', async ({ page }) => {
+  await page.goto(STORY);
+  await expect(editable(page)).toBeVisible();
+  await editable(page).click();
+  await page.keyboard.type('/sum');
+  await expect(page.getByRole('option', { name: /Summarize/ })).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(pills(page)).toHaveCount(1);
+  await page.keyboard.type('@rec');
+  await expect(page.getByRole('option', { name: /Record & Replay/ })).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(pills(page)).toHaveCount(2);
+
+  await page.locator('kai-prompt-input').screenshot({ path: `${SHOTS}/adjacent-pills.png` });
+
+  const boxes = await pills(page).evaluateAll((els) =>
+    els.map((e) => {
+      const r = e.getBoundingClientRect();
+      return { left: r.left, right: r.right, height: Math.round(r.height), centerY: Math.round(r.top + r.height / 2) };
+    }),
+  );
+  expect(boxes).toHaveLength(2);
+  expect(boxes[0].height).toBe(boxes[1].height);                       // identical height
+  expect(Math.abs(boxes[0].centerY - boxes[1].centerY)).toBeLessThanOrEqual(1); // aligned centers
+  expect(boxes[1].left - boxes[0].right).toBeGreaterThan(2);           // a real gap between them
+});
+
 test('Backspace deletes a whole pill inside the prompt input', async ({ page }) => {
   await page.goto(STORY);
   await expect(editable(page)).toBeVisible();

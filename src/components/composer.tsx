@@ -688,7 +688,9 @@ export function Composer(props: ComposerProps): JSX.Element {
       <style>{`
         .kai-composer-pill {
           display: inline-flex; align-items: center; gap: 0.25rem;
-          vertical-align: baseline; height: 1.5em; padding: 0 0.35rem; margin: 0 0.05rem;
+          /* middle (not baseline): a flex pill's baseline differs with/without an
+             icon, which misaligns adjacent pills — middle aligns them consistently. */
+          vertical-align: middle; height: 1.5em; padding: 0 0.4rem; margin: 0 0.15rem;
           border-radius: 0.375rem;
           background-color: color-mix(in srgb, currentColor 10%, transparent);
           font-weight: 500; white-space: nowrap; user-select: none; cursor: default;
