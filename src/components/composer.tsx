@@ -37,6 +37,13 @@ export interface TriggerItem {
   id: string;
   label: string;
   icon?: string;
+  /** Secondary muted text shown beside the label in the menu (Codex-style). */
+  description?: string;
+  /** Section header to group this item under in the menu (e.g. 'Plugins', 'Agents'). */
+  group?: string;
+  /** Entity kind for the inserted pill; overrides the trigger's default `kind` so
+   *  one trigger can mix kinds across sections (e.g. agents + plugins under `@`). */
+  kind?: string;
   promptText?: string;
   data?: Record<string, unknown>;
 }
@@ -240,17 +247,29 @@ export function Composer(props: ComposerProps): JSX.Element {
   const filteredItems = createMemo((): TriggerItem[] => {
     const t = activeTrigger();
     if (!t?.def.items) return [];
-    // Exclude entities of this kind already present in the doc (don't offer a
-    // skill/mention the user has already added).
-    const present = new Set(
-      entitiesOf(parseDom(editable))
-        .filter((e) => e.kind === t.def.kind)
-        .map((e) => e.id),
-    );
+    // Exclude entities already present in the doc (by effective kind + id) — don't
+    // offer a skill/agent/plugin the user has already added.
+    const present = new Set(entitiesOf(parseDom(editable)).map((e) => `${e.kind}:${e.id}`));
     const q = t.query.toLowerCase();
-    return t.def.items.filter(
-      (item) => !present.has(item.id) && (q === '' || item.label.toLowerCase().includes(q)),
-    );
+    return t.def.items.filter((item) => {
+      const kind = item.kind ?? t.def.kind;
+      if (present.has(`${kind}:${item.id}`)) return false;
+      if (q === '') return true;
+      // Match label or description (Codex filters across both).
+      return item.label.toLowerCase().includes(q) || (item.description?.toLowerCase().includes(q) ?? false);
+    });
+  });
+
+  // Group the filtered items into sections by `group`, preserving first-appearance
+  // order. Each item keeps its FLAT index so selection/keyboard-nav stays simple.
+  const groupedItems = createMemo(() => {
+    const groups: { group: string | undefined; items: { item: TriggerItem; index: number }[] }[] = [];
+    filteredItems().forEach((item, index) => {
+      let g = groups.find((x) => x.group === item.group);
+      if (!g) { g = { group: item.group, items: [] }; groups.push(g); }
+      g.items.push({ item, index });
+    });
+    return groups;
   });
 
   // The built-in menu is open only when there are items left to show (after
@@ -413,7 +432,7 @@ export function Composer(props: ComposerProps): JSX.Element {
     const t = activeTrigger();
     if (!t) return;
     const entity: EntityRef = {
-      kind: t.def.kind,
+      kind: item.kind ?? t.def.kind,
       id: item.id,
       label: item.label,
       icon: item.icon,
@@ -730,7 +749,7 @@ export function Composer(props: ComposerProps): JSX.Element {
           aria-label="Suggestions"
           data-state={state()}
           class={cn(
-            'absolute z-50 min-w-[180px] max-w-[280px] rounded-lg bg-card shadow-lg overflow-hidden py-1',
+            'absolute z-50 min-w-[240px] max-w-[420px] max-h-[320px] overflow-y-auto rounded-lg bg-card shadow-lg py-1',
             'border border-border',
           )}
           style={{
@@ -740,29 +759,40 @@ export function Composer(props: ComposerProps): JSX.Element {
             visibility: hidden() ? 'hidden' : 'visible',
           }}
         >
-          <For each={filteredItems()}>
-            {(item, index) => (
-              <button
-                role="option"
-                aria-selected={selectedIndex() === index()}
-                data-index={index()}
-                class={cn(
-                  'w-full flex items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors',
-                  selectedIndex() === index()
-                    ? 'bg-muted text-foreground'
-                    : 'text-foreground hover:bg-muted',
-                )}
-                onMouseEnter={() => setSelectedIndex(index())}
-                onClick={(e) => {
-                  e.preventDefault();
-                  selectItem(item);
-                }}
-              >
-                <Show when={item.icon}>
-                  <img src={item.icon} alt="" class="w-4 h-4 rounded shrink-0" />
+          <For each={groupedItems()}>
+            {(section) => (
+              <>
+                <Show when={section.group}>
+                  <div class="px-3 pt-2 pb-1 text-xs font-medium text-muted-foreground select-none">{section.group}</div>
                 </Show>
-                <span class="truncate">{item.label}</span>
-              </button>
+                <For each={section.items}>
+                  {(entry) => (
+                    <button
+                      role="option"
+                      aria-selected={selectedIndex() === entry.index}
+                      data-index={entry.index}
+                      class={cn(
+                        'w-full flex items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors',
+                        selectedIndex() === entry.index
+                          ? 'bg-muted text-foreground'
+                          : 'text-foreground hover:bg-muted',
+                      )}
+                      onMouseEnter={() => setSelectedIndex(entry.index)}
+                      // Keep focus (and the caret) in the editable so insertion works.
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={(e) => { e.preventDefault(); selectItem(entry.item); }}
+                    >
+                      <Show when={entry.item.icon}>
+                        <img src={entry.item.icon} alt="" class="w-4 h-4 rounded shrink-0" />
+                      </Show>
+                      <span class="font-medium whitespace-nowrap shrink-0">{entry.item.label}</span>
+                      <Show when={entry.item.description}>
+                        <span class="text-muted-foreground truncate min-w-0">{entry.item.description}</span>
+                      </Show>
+                    </button>
+                  )}
+                </For>
+              </>
             )}
           </For>
         </div>

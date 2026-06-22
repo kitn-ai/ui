@@ -1,21 +1,19 @@
 import { test, expect, type Page } from '@playwright/test';
 
 /**
- * IVP: rich entity pills inside the REAL <kai-prompt-input> element.
- * `/` inserts a skill pill, `@` inserts an agent pill, and kai-submit carries
- * the structured doc + entities (kind + id) alongside the flattened value.
+ * IVP: rich entity pills inside the REAL <kai-prompt-input>, Codex-style.
+ * `@` opens a SECTIONED menu (Plugins / Agents) with per-item descriptions;
+ * filtering keeps sections; selecting inserts an atomic pill; kai-submit carries
+ * the structured doc + entities (each with its kind + id). `/` inserts skills.
  */
 const STORY = '/iframe.html?id=components-promptinput--with-entity-pills&viewMode=story';
+const SHOTS = 'tests/e2e/__screenshots__/promptinput/after';
 
 const editable = (p: Page) => p.locator('[data-kai-composer-editable]').first();
 const pills = (p: Page) => p.locator('[data-kai-entity]');
 const options = (p: Page) => p.locator('[role="option"]');
 
-test('/ inserts a skill pill, @ inserts an agent pill, submit carries the structured doc', async ({ page }) => {
-  await page.goto(STORY);
-  await expect(editable(page)).toBeVisible();
-
-  // Capture kai-submit on the host element.
+async function captureSubmit(page: Page) {
   await page.evaluate(() => {
     const host = document.querySelector('kai-prompt-input')!;
     (window as unknown as { __submit: unknown }).__submit = null;
@@ -23,48 +21,71 @@ test('/ inserts a skill pill, @ inserts an agent pill, submit carries the struct
       (window as unknown as { __submit: unknown }).__submit = (e as CustomEvent).detail;
     });
   });
+}
 
+test('@ opens a sectioned menu (Plugins/Agents) with descriptions; select inserts a pill; submit carries kinds', async ({ page }) => {
+  await page.goto(STORY);
+  await expect(editable(page)).toBeVisible();
+  await captureSubmit(page);
   await editable(page).click();
 
-  // `/` → skill menu → select "Record & Replay"
-  await page.keyboard.type('/');
+  // `@` opens the grouped menu — section headers + a per-item description.
+  await page.keyboard.type('@');
   await expect(options(page).first()).toBeVisible();
-  await expect(page.getByRole('option', { name: 'Record & Replay' })).toBeVisible();
+  await expect(page.getByText('Plugins', { exact: true })).toBeVisible();
+  await expect(page.getByText('Agents', { exact: true })).toBeVisible();
+  await expect(page.getByText("Record what I'm doing on my Mac and turn it into a Skill")).toBeVisible();
+
+  // Screenshot the open, sectioned menu (the Codex-style flow).
+  await page.screenshot({ path: `${SHOTS}/promptinput-menu-open.png` });
+
+  // Filter to "Record & Replay" (a plugin) and select it.
+  await page.keyboard.type('rec');
+  await expect(page.getByRole('option', { name: /Record & Replay/ })).toBeVisible();
   await page.keyboard.press('Enter');
   await expect(pills(page)).toHaveCount(1);
   await expect(pills(page).first()).toContainText('Record & Replay');
 
-  // Some text, then `@` → agent menu → select "Code Reviewer"
+  // Some text, then `@` again → pick an agent.
   await page.keyboard.type(' review this ');
-  await page.keyboard.type('@');
-  await expect(page.getByRole('option', { name: 'Code Reviewer' })).toBeVisible();
+  await page.keyboard.type('@code');
+  await expect(page.getByRole('option', { name: /Code Reviewer/ })).toBeVisible();
   await page.keyboard.press('Enter');
   await expect(pills(page)).toHaveCount(2);
 
-  await page.locator('kai-prompt-input').screenshot({ path: 'tests/e2e/__screenshots__/promptinput/after/with-entity-pills.png' });
+  await page.locator('kai-prompt-input').screenshot({ path: `${SHOTS}/with-entity-pills.png` });
 
-  // Submit (menu closed) → kai-submit carries doc + entities.
+  // Submit → kai-submit carries doc + entities with their distinct kinds.
   await page.keyboard.press('Enter');
   const detail = await page.evaluate(() => (window as unknown as {
     __submit: { value: string; entities: { kind: string; id: string }[]; doc: { type: string }[] } | null;
   }).__submit);
 
   expect(detail).not.toBeNull();
-  expect(detail!.entities.map((e) => `${e.kind}:${e.id}`)).toEqual(['skill:record-replay', 'agent:code-reviewer']);
-  // Flattened value uses each entity's promptText.
-  expect(detail!.value).toContain('Use the Record & Replay skill.');
-  expect(detail!.value).toContain('Hand this to the Code Reviewer agent.');
+  expect(detail!.entities.map((e) => `${e.kind}:${e.id}`)).toEqual(['plugin:record-replay', 'agent:code-reviewer']);
+  expect(detail!.value).toContain('Use the Record & Replay tool.');
   expect(detail!.value).toContain('review this');
-  // Structured doc preserves both entities as distinct nodes.
   expect(detail!.doc.filter((s) => s.type === 'entity')).toHaveLength(2);
+});
+
+test('the menu excludes an already-inserted entity', async ({ page }) => {
+  await page.goto(STORY);
+  await expect(editable(page)).toBeVisible();
+  await editable(page).click();
+  await page.keyboard.type('@rec');
+  await page.keyboard.press('Enter');
+  await expect(pills(page)).toHaveCount(1);
+  // Reopen — Record & Replay is gone; other items remain.
+  await page.keyboard.type('@');
+  await expect(page.getByRole('option', { name: /Documents/ })).toBeVisible();
+  await expect(page.getByRole('option', { name: /Record & Replay/ })).toHaveCount(0);
 });
 
 test('Backspace deletes a whole pill inside the prompt input', async ({ page }) => {
   await page.goto(STORY);
   await expect(editable(page)).toBeVisible();
   await editable(page).click();
-  await page.keyboard.type('/');
-  await expect(options(page).first()).toBeVisible();
+  await page.keyboard.type('@rec');
   await page.keyboard.press('Enter');
   await expect(pills(page)).toHaveCount(1);
   await page.keyboard.press('Backspace');

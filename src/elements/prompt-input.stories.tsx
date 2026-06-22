@@ -338,19 +338,30 @@ const recordIcon =
 
 const ENTITY_TRIGGERS: TriggerDef[] = [
   {
+    // `/` → skills (instructions you invoke).
     char: '/',
     kind: 'skill',
     items: [
-      { id: 'record-replay', label: 'Record & Replay', icon: recordIcon, promptText: 'Use the Record & Replay skill.', data: { plugin: 'devtools' } },
-      { id: 'summarize', label: 'Summarize', promptText: 'Summarize the thread.' },
+      { id: 'summarize', label: 'Summarize', description: 'Summarize the thread', promptText: 'Summarize the thread.' },
+      { id: 'explain', label: 'Explain', description: "Explain like I'm five", promptText: 'Explain this simply.' },
     ],
   },
   {
+    // `@` → a sectioned menu (Codex-style): Plugins (installed tools/capabilities)
+    // and Agents (subagents). Per-item `kind` overrides the trigger default, so
+    // both live under one `@` menu with section headers + descriptions.
     char: '@',
     kind: 'agent',
     items: [
-      { id: 'code-reviewer', label: 'Code Reviewer', promptText: 'Hand this to the Code Reviewer agent.' },
-      { id: 'researcher', label: 'Researcher' },
+      { id: 'record-replay', label: 'Record & Replay', kind: 'plugin', group: 'Plugins', icon: recordIcon,
+        description: "Record what I'm doing on my Mac and turn it into a Skill",
+        promptText: 'Use the Record & Replay tool.',
+        data: { plugin: 'record-replay', tool: 'record_and_replay' } },
+      { id: 'documents', label: 'Documents', kind: 'plugin', group: 'Plugins',
+        description: 'Create and edit document artifacts', data: { plugin: 'documents' } },
+      { id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents',
+        description: 'Reviews diffs for bugs', promptText: 'Hand this to the Code Reviewer agent.' },
+      { id: 'researcher', label: 'Researcher', group: 'Agents', description: 'Deep multi-source research' },
     ],
   },
 ];
