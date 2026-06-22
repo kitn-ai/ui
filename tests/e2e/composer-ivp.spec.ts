@@ -15,6 +15,7 @@ import { test, expect, type Page } from '@playwright/test';
 
 const SKILLS_STORY = '/iframe.html?id=elements-composer--skills&viewMode=story';
 const PREFILLED_STORY = '/iframe.html?id=elements-composer--prefilled&viewMode=story';
+const DEFAULT_STORY = '/iframe.html?id=elements-composer--default&viewMode=story';
 
 /** Locator for the editable surface inside the element's (open) shadow root.
  *  Playwright pierces open shadow roots automatically. */
@@ -123,6 +124,19 @@ test.describe('kai-composer IVP', () => {
     await page
       .locator('kai-composer')
       .screenshot({ path: 'tests/e2e/__screenshots__/composer-prefilled.png' });
+  });
+
+  test('placeholder reappears after the field is cleared (bogus <br> handled)', async ({ page }) => {
+    await page.goto(DEFAULT_STORY);
+    const ed = editable(page);
+    await expect(ed).toBeVisible();
+    const placeholder = page.getByText('Ask anything…', { exact: true });
+    await expect(placeholder).toBeVisible();        // shown while empty
+    await ed.click();
+    await page.keyboard.type('hello');
+    await expect(placeholder).toHaveCount(0);        // hidden while typing
+    for (let i = 0; i < 5; i++) await page.keyboard.press('Backspace');
+    await expect(placeholder).toBeVisible();         // reappears once cleared (lone <br> ⇒ empty)
   });
 
   test('emits focus/blur/keydown/focusin/focusout on the host (kai-* + native composed)', async ({ page }) => {

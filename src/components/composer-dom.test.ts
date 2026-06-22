@@ -33,6 +33,21 @@ describe('composer-dom', () => {
     expect(parseDom(root)).toEqual([{ type: 'text', text: 'a\nb' }]);
   });
 
+  it('parseDom treats a lone trailing <br> (cleared contenteditable) as empty', () => {
+    const root = document.createElement('div');
+    root.appendChild(document.createElement('br'));
+    expect(parseDom(root)).toEqual([]);
+  });
+
+  it('parseDom drops a trailing filler <br> but keeps a mid-content <br>', () => {
+    const root = document.createElement('div');
+    root.appendChild(document.createTextNode('a'));
+    root.appendChild(document.createElement('br')); // real newline (mid)
+    root.appendChild(document.createTextNode('b'));
+    root.appendChild(document.createElement('br')); // trailing filler
+    expect(parseDom(root)).toEqual([{ type: 'text', text: 'a\nb' }]);
+  });
+
   it('renderDoc round-trips through parseDom', () => {
     const root = document.createElement('div');
     const doc = [{ type: 'text', text: 'hi ' }, { type: 'entity', entity: skill }, { type: 'text', text: ' end' }] as const;

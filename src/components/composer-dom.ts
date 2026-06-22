@@ -30,12 +30,19 @@ export function createEntityEl(doc: Document, entity: EntityRef): HTMLElement {
 
 export function parseDom(root: HTMLElement): ComposerDoc {
   const segs: ComposerDoc = [];
-  root.childNodes.forEach((node) => {
+  const nodes = root.childNodes;
+  nodes.forEach((node, i) => {
     if (isEntityEl(node)) {
       const stored = entityStore.get(node as HTMLElement);
       const el = node as HTMLElement;
       segs.push({ type: 'entity', entity: stored ?? { kind: el.dataset.kind ?? '', id: el.dataset.id ?? '', label: el.textContent ?? '' } });
     } else if (node.nodeType === 1 && (node as HTMLElement).tagName === 'BR') {
+      // Drop the browser's trailing filler <br> — contenteditable inserts one when
+      // the field is cleared (or after a newline) to keep the line visible. Treating
+      // it as content would leave the field "non-empty" (placeholder stuck hidden)
+      // and serialize a phantom trailing "\n". A <br> BETWEEN content is a real
+      // newline and is preserved.
+      if (i === nodes.length - 1) return;
       segs.push({ type: 'text', text: '\n' });
     } else if (node.nodeType === 3) {
       segs.push({ type: 'text', text: (node.textContent ?? '').split(ZWSP).join('') });
