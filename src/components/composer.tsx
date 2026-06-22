@@ -24,6 +24,7 @@ import {
   renderDoc,
   ZWSP,
   createEntityEl,
+  createTextWalker,
   entityStore,
   isEntityEl,
 } from './composer-dom';
@@ -103,7 +104,7 @@ function getActiveSelection(node: Node): Selection | null {
 /** Compute the full ZWSP-stripped text of all text nodes in the editable. */
 function getFullText(root: HTMLElement): string {
   let text = '';
-  const walker = root.ownerDocument.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const walker = createTextWalker(root);
   let node = walker.nextNode() as Text | null;
   while (node) {
     text += (node.textContent ?? '').split(ZWSP).join('');
@@ -117,7 +118,6 @@ function getFullText(root: HTMLElement): string {
  * Walks SHOW_TEXT nodes, strips ZWSP, sums lengths before the caret node.
  */
 function getCaretTextOffset(root: HTMLElement): number {
-  const ownerDoc = root.ownerDocument;
   const sel = getActiveSelection(root);
   if (!sel || sel.rangeCount === 0) return 0;
   const range = sel.getRangeAt(0);
@@ -125,7 +125,7 @@ function getCaretTextOffset(root: HTMLElement): number {
 
   const { startContainer, startOffset } = range;
   let offset = 0;
-  const walker = ownerDoc.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const walker = createTextWalker(root);
   let node = walker.nextNode() as Text | null;
   while (node) {
     if (node === startContainer) {
@@ -183,19 +183,26 @@ export function Composer(props: ComposerProps): JSX.Element {
   const [activeTrigger, setActiveTrigger] = createSignal<ActiveTriggerState | null>(null);
   const [selectedIndex, setSelectedIndex] = createSignal(0);
 
-  const menuOpen = createMemo(() => {
-    const t = activeTrigger();
-    return !!(t && t.def.items && t.def.items.length > 0);
-  });
-
   const filteredItems = createMemo((): TriggerItem[] => {
     const t = activeTrigger();
     if (!t?.def.items) return [];
+    // Exclude entities of this kind already present in the doc (don't offer a
+    // skill/mention the user has already added).
+    const present = new Set(
+      entitiesOf(parseDom(editable))
+        .filter((e) => e.kind === t.def.kind)
+        .map((e) => e.id),
+    );
     const q = t.query.toLowerCase();
-    return q === ''
-      ? t.def.items
-      : t.def.items.filter((item) => item.label.toLowerCase().includes(q));
+    return t.def.items.filter(
+      (item) => !present.has(item.id) && (q === '' || item.label.toLowerCase().includes(q)),
+    );
   });
+
+  // The built-in menu is open only when there are items left to show (after
+  // query filtering AND excluding already-added entities). `kai-trigger` still
+  // fires regardless, so consumers driving a custom menu aren't affected.
+  const menuOpen = createMemo(() => filteredItems().length > 0);
 
   // Keep selectedIndex in bounds when filteredItems changes
   createEffect(() => {
@@ -355,7 +362,7 @@ export function Composer(props: ComposerProps): JSX.Element {
       let offset = 0;
       let targetNode: Text | null = null;
       let targetOffset = 0;
-      const walker = ownerDoc.createTreeWalker(editable, NodeFilter.SHOW_TEXT);
+      const walker = createTextWalker(editable);
       let node = walker.nextNode() as Text | null;
       while (node) {
         const content = (node.textContent ?? '').split(ZWSP).join('');

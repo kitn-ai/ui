@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ZWSP, createEntityEl, isEntityEl, parseDom, renderDoc } from './composer-dom';
+import { ZWSP, createEntityEl, createTextWalker, isEntityEl, parseDom, renderDoc } from './composer-dom';
 
 const skill = { kind: 'skill', id: 'rec', label: 'Record & Replay' };
 
@@ -31,6 +31,20 @@ describe('composer-dom', () => {
     root.appendChild(document.createElement('br'));
     root.appendChild(document.createTextNode('b'));
     expect(parseDom(root)).toEqual([{ type: 'text', text: 'a\nb' }]);
+  });
+
+  it('createTextWalker skips text inside entity pills (pill label not in the text model)', () => {
+    const root = document.createElement('div');
+    root.appendChild(document.createTextNode('hi '));
+    root.appendChild(createEntityEl(document, skill)); // contains label "Record & Replay"
+    root.appendChild(document.createTextNode(ZWSP + '/'));
+    const walker = createTextWalker(root);
+    let collected = '';
+    let n = walker.nextNode();
+    while (n) { collected += n.textContent ?? ''; n = walker.nextNode(); }
+    // The pill's "Record & Replay" label must NOT appear; only the outer text.
+    expect(collected).toBe('hi ' + ZWSP + '/');
+    expect(collected).not.toContain('Record & Replay');
   });
 
   it('parseDom treats a lone trailing <br> (cleared contenteditable) as empty', () => {

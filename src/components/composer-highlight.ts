@@ -1,4 +1,5 @@
 import type { HighlightRule } from './composer';
+import { createTextWalker } from './composer-dom';
 
 export interface HighlightMatch {
   start: number;
@@ -160,7 +161,7 @@ export function applyHighlights(
   let cursor = 0; // cumulative stripped offset
 
   const ownerDoc = root.ownerDocument;
-  const walker = ownerDoc.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const walker = createTextWalker(root); // skip text inside entity pills
   let node = walker.nextNode() as Text | null;
   while (node) {
     const raw = node.textContent ?? '';

@@ -9,6 +9,26 @@ export function isEntityEl(node: Node | null): node is HTMLElement {
   return !!node && node.nodeType === 1 && (node as HTMLElement).hasAttribute(ENTITY_ATTR);
 }
 
+/**
+ * A TreeWalker over the editable's text nodes that SKIPS text inside entity
+ * pills. Pills are atomic and contribute nothing to the text model — their inner
+ * label text must not pollute caret offsets, trigger detection, or highlight
+ * ranges. (Without this, the text seen at a caret right after a pill is the
+ * pill's label, so `/` reads as glued to the label instead of starting a token.)
+ */
+export function createTextWalker(root: HTMLElement): TreeWalker {
+  return root.ownerDocument.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      let p = node.parentElement;
+      while (p && p !== root) {
+        if (p.hasAttribute(ENTITY_ATTR)) return NodeFilter.FILTER_REJECT;
+        p = p.parentElement;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+}
+
 export function createEntityEl(doc: Document, entity: EntityRef): HTMLElement {
   const el = doc.createElement('span');
   el.setAttribute(ENTITY_ATTR, '');

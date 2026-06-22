@@ -98,6 +98,33 @@ test.describe('kai-composer IVP', () => {
     expect(detail.entities[0].id).toBe('record-replay');
   });
 
+  test('a trigger typed immediately after a pill opens the menu (no space needed)', async ({ page }) => {
+    await page.goto(SKILLS_STORY);
+    await expect(editable(page)).toBeVisible();
+    await editable(page).click();
+    await page.keyboard.type('/');
+    await expect(menuOptions(page).first()).toBeVisible();
+    await page.keyboard.press('Enter');             // insert a pill
+    await expect(pills(page)).toHaveCount(1);
+    // Immediately type '/' again — no leading space — the menu must reopen.
+    await page.keyboard.type('/');
+    await expect(menuOptions(page).first()).toBeVisible();
+  });
+
+  test('the menu excludes skills already added to the field', async ({ page }) => {
+    await page.goto(SKILLS_STORY);
+    await expect(editable(page)).toBeVisible();
+    await editable(page).click();
+    await page.keyboard.type('/');
+    await expect(page.getByRole('option', { name: 'Record & Replay' })).toBeVisible();
+    await page.keyboard.press('Enter');             // add Record & Replay
+    await expect(pills(page)).toHaveCount(1);
+    // Reopen the menu — Record & Replay must no longer be offered; Summarize still is.
+    await page.keyboard.type('/');
+    await expect(page.getByRole('option', { name: 'Summarize' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'Record & Replay' })).toHaveCount(0);
+  });
+
   test('Backspace removes the whole pill atomically', async ({ page }) => {
     await page.goto(SKILLS_STORY);
     await expect(editable(page)).toBeVisible();
