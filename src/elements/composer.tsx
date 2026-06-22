@@ -47,6 +47,9 @@ interface Props extends Record<string, unknown> {
   triggers?: TriggerDef[];
   /** Keyword highlight rules — set as a JS property. */
   highlights?: HighlightRule[];
+  /** Default icon per entity kind (kind → image URL/data-URI) for items without
+   *  their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
+  kindIcons?: Record<string, string>;
 }
 
 /** Events fired by `<kai-composer>`. */
@@ -81,6 +84,7 @@ defineWebComponent<Props, Events>('kai-composer', {
   submitOnEnter: true,
   triggers: undefined,
   highlights: undefined,
+  kindIcons: undefined,
 }, (props, { dispatch, flag }) => {
   // Internal signal for uncontrolled value; when the consumer sets `value` as a
   // JS property the controlled path takes precedence (same pattern as prompt-input).
@@ -107,6 +111,7 @@ defineWebComponent<Props, Events>('kai-composer', {
       submitOnEnter={flag('submitOnEnter')}
       triggers={props.triggers}
       highlights={props.highlights}
+      kindIcons={props.kindIcons as Record<string, string> | undefined}
       onChange={handleChange}
       onSubmit={handleSubmit}
       onEntityAdd={(entity) => dispatch('kai-entity-add', { entity })}

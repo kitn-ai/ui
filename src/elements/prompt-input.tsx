@@ -64,6 +64,9 @@ interface Props extends Record<string, unknown> {
    *  menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents
    *  (plugins are the grouping/provenance of those items). Set as a JS property. */
   triggers?: TriggerDef[];
+  /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items
+   *  without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
+  kindIcons?: Record<string, string>;
 }
 
 /** Events fired by `<kai-prompt-input>`. */
@@ -105,6 +108,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
   stoppable: false,
   attachments: undefined,
   triggers: undefined,
+  kindIcons: undefined,
 }, (props, { dispatch, flag, element }) => {
   const [internal, setInternal] = createSignal(props.value ?? '');
   // Seed staged attachments from the `attachments` property; the element manages
@@ -192,6 +196,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       voice={flag('voice')}
       toolbarActions={toolbarActions()}
       triggers={props.triggers}
+      kindIcons={props.kindIcons as Record<string, string> | undefined}
       onComposerChange={(c) => { lastChange = c; }}
       onValueChange={handleChange}
       onSubmit={handleSubmit}

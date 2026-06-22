@@ -33,6 +33,24 @@ describe('composer-dom', () => {
     expect(parseDom(root)).toEqual([{ type: 'text', text: 'a\nb' }]);
   });
 
+  it('icon resolution: item icon > kindIcons[kind] > built-in glyph > nothing', () => {
+    const agent = { kind: 'agent', id: 'a', label: 'A' };
+    // kindIcons default for the kind → <img>
+    const withKindIcon = createEntityEl(document, agent, { agent: '/bot.svg' });
+    expect(withKindIcon.querySelector('img')?.getAttribute('src')).toBe('/bot.svg');
+    // item's own icon wins over kindIcons
+    const withOwn = createEntityEl(document, { ...agent, icon: '/own.png' }, { agent: '/bot.svg' });
+    expect(withOwn.querySelector('img')?.getAttribute('src')).toBe('/own.png');
+    // no icon + no kindIcons → built-in agent glyph (svg, no img)
+    const glyph = createEntityEl(document, agent);
+    expect(glyph.querySelector('img')).toBeNull();
+    expect(glyph.querySelector('svg')).toBeTruthy();
+    // skills have no built-in glyph and no kindIcons → no icon element at all
+    const skill = createEntityEl(document, { kind: 'skill', id: 's', label: 'S' });
+    expect(skill.querySelector('img')).toBeNull();
+    expect(skill.querySelector('svg')).toBeNull();
+  });
+
   it('createTextWalker skips text inside entity pills (pill label not in the text model)', () => {
     const root = document.createElement('div');
     root.appendChild(document.createTextNode('hi '));

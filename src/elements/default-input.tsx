@@ -54,6 +54,8 @@ export interface DefaultPromptInputProps {
   onAction?: (id: string) => void;
   /** Rich entity triggers (`/` skills, `@` agents) passed to the composer. */
   triggers?: TriggerDef[];
+  /** Default icon per entity kind (kind → image src) passed to the composer. */
+  kindIcons?: Record<string, string>;
   /** Structured change (doc + entities) from the composer, on every edit. */
   onComposerChange?: (change: ComposerChange) => void;
 }
@@ -137,7 +139,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         {/* Consumer-injected controls rendered before the input area. Native
             slot; inert outside a shadow root, projected by the custom element. */}
         <slot name="leading" />
-        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" triggers={props.triggers} onComposerChange={props.onComposerChange} />
+        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
         <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
           <div class="flex items-center gap-2">
             <Show when={canAttach()}>

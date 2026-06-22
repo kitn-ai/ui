@@ -70,6 +70,10 @@ export interface ComposerProps {
   submitOnEnter?: boolean;
   triggers?: TriggerDef[];
   highlights?: HighlightRule[];
+  /** Default icon per entity kind (kind → image URL/data-URI), shown on a pill +
+   *  menu item when the item has no `icon` of its own. Overrides the built-in
+   *  glyphs (agent/plugin). Example: `{ agent: '/icons/bot.svg' }`. */
+  kindIcons?: Record<string, string>;
   /** Render WITHOUT the rounded frame/background/padding — just the editable +
    *  placeholder + menu. For embedding inside another frame (e.g. PromptInput). */
   bare?: boolean;
@@ -278,6 +282,11 @@ export function Composer(props: ComposerProps): JSX.Element {
   // fires regardless, so consumers driving a custom menu aren't affected.
   const menuOpen = createMemo(() => filteredItems().length > 0);
 
+  // Icon resolution for a menu item: its own icon → the per-kind default.
+  // (When neither, the menu renders the built-in kind glyph as a fallback.)
+  const itemKind = (item: TriggerItem) => item.kind ?? activeTrigger()?.def.kind ?? '';
+  const itemIconSrc = (item: TriggerItem) => item.icon ?? props.kindIcons?.[itemKind(item)];
+
   // Keep selectedIndex in bounds when filteredItems changes
   createEffect(() => {
     const max = filteredItems().length;
@@ -329,7 +338,7 @@ export function Composer(props: ComposerProps): JSX.Element {
   }
 
   onMount(() => {
-    renderDoc(editable, normalizeValue(props.value));
+    renderDoc(editable, normalizeValue(props.value), editable.ownerDocument, props.kindIcons);
     setEmpty(docIsEmpty(parseDom(editable)));
     recomputeHighlights();
     history.reset({ doc: parseDom(editable), caret: 0 });
@@ -344,7 +353,7 @@ export function Composer(props: ComposerProps): JSX.Element {
     // including a clear-after-submit that fires while the editable is focused.
     const incoming = serializeToText(normalizeValue(v));
     if (incoming === serializeToText(parseDom(editable))) return;
-    renderDoc(editable, normalizeValue(v));
+    renderDoc(editable, normalizeValue(v), editable.ownerDocument, props.kindIcons);
     setEmpty(docIsEmpty(parseDom(editable)));
     recomputeHighlights();
     history.reset({ doc: parseDom(editable), caret: 0 }); // external value = new baseline
@@ -402,7 +411,7 @@ export function Composer(props: ComposerProps): JSX.Element {
   // Restore a snapshot (undo/redo). Re-renders the doc (pills included) + caret,
   // syncs derived state, but does NOT push a new history entry.
   const applySnapshot = (snap: { doc: ComposerDoc; caret: number }) => {
-    renderDoc(editable, snap.doc);
+    renderDoc(editable, snap.doc, editable.ownerDocument, props.kindIcons);
     setCaretToOffset(editable, snap.caret);
     syncState(snapshot());
     lastEditAt = 0;
@@ -488,7 +497,7 @@ export function Composer(props: ComposerProps): JSX.Element {
     // Insert at the live caret (re-collapsed at the deletion point by the browser).
     const range = sel.getRangeAt(0);
     if (!range.collapsed) range.deleteContents();
-    const pill = createEntityEl(ownerDoc, entity);
+    const pill = createEntityEl(ownerDoc, entity, props.kindIcons);
     const zwspNode = ownerDoc.createTextNode(ZWSP);
     range.insertNode(zwspNode);
     range.insertNode(pill); // inserted before the zwsp → DOM order [pill][zwsp]
@@ -786,16 +795,16 @@ export function Composer(props: ComposerProps): JSX.Element {
                       onClick={(e) => { e.preventDefault(); selectItem(entry.item); }}
                     >
                       <Show
-                        when={entry.item.icon}
+                        when={itemIconSrc(entry.item)}
                         fallback={
-                          <Show when={kindGlyph(entry.item.kind ?? activeTrigger()?.def.kind ?? '')}>
+                          <Show when={kindGlyph(itemKind(entry.item))}>
                             {(glyph) => (
                               <span class="kai-composer-pill-glyph w-4 h-4 shrink-0" aria-hidden="true" innerHTML={glyph()} />
                             )}
                           </Show>
                         }
                       >
-                        <img src={entry.item.icon} alt="" class="w-4 h-4 rounded object-cover shrink-0" />
+                        {(src) => <img src={src()} alt="" class="w-4 h-4 rounded object-cover shrink-0" />}
                       </Show>
                       <span class="font-medium whitespace-nowrap shrink-0">{entry.item.label}</span>
                       <Show when={entry.item.description}>

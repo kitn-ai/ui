@@ -49,16 +49,23 @@ export function kindGlyph(kind: string): string {
   }
 }
 
-export function createEntityEl(doc: Document, entity: EntityRef): HTMLElement {
+export function createEntityEl(
+  doc: Document,
+  entity: EntityRef,
+  kindIcons?: Record<string, string>,
+): HTMLElement {
   const el = doc.createElement('span');
   el.setAttribute(ENTITY_ATTR, '');
   el.setAttribute('contenteditable', 'false');
   el.dataset.kind = entity.kind;
   el.dataset.id = entity.id;
   el.className = 'kai-composer-pill';
-  if (entity.icon) {
+  // Icon resolution: the item's own icon → the per-kind default (kindIcons) →
+  // a built-in kind glyph (agent/plugin) → nothing (skills).
+  const iconSrc = entity.icon ?? kindIcons?.[entity.kind];
+  if (iconSrc) {
     const img = doc.createElement('img');
-    img.src = entity.icon;
+    img.src = iconSrc;
     img.alt = '';
     img.className = 'kai-composer-pill-icon';
     el.appendChild(img);
@@ -100,12 +107,17 @@ export function parseDom(root: HTMLElement): ComposerDoc {
   return normalizeValue(segs);
 }
 
-export function renderDoc(root: HTMLElement, doc: ComposerDoc, ownerDoc: Document = document): void {
+export function renderDoc(
+  root: HTMLElement,
+  doc: ComposerDoc,
+  ownerDoc: Document = document,
+  kindIcons?: Record<string, string>,
+): void {
   root.textContent = '';
   for (const seg of doc) {
     if (seg.type === 'text') root.appendChild(ownerDoc.createTextNode(seg.text));
     else {
-      root.appendChild(createEntityEl(ownerDoc, seg.entity));
+      root.appendChild(createEntityEl(ownerDoc, seg.entity, kindIcons));
       root.appendChild(ownerDoc.createTextNode(ZWSP));
     }
   }

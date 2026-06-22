@@ -97,12 +97,14 @@ export interface PromptInputTextareaProps extends JSX.TextareaHTMLAttributes<HTM
   disableAutosize?: boolean;
   /** Rich entity triggers (`/`, `@`) forwarded to the composer. */
   triggers?: TriggerDef[];
+  /** Default icon per entity kind (kind → image src), forwarded to the composer. */
+  kindIcons?: Record<string, string>;
   /** Structured change (doc + entities) from the composer, on every edit. */
   onComposerChange?: (change: ComposerChange) => void;
 }
 
 function PromptInputTextarea(props: PromptInputTextareaProps) {
-  const [local] = splitProps(props, ['class', 'placeholder', 'aria-label', 'triggers', 'onComposerChange']);
+  const [local] = splitProps(props, ['class', 'placeholder', 'aria-label', 'triggers', 'kindIcons', 'onComposerChange']);
   const ctx = usePromptInput();
   const config = useChatConfig();
 
@@ -128,6 +130,7 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
       editableClass={editableClass()}
       editableRef={(el) => ctx.setTextareaRef(el)}
       triggers={local.triggers}
+      kindIcons={local.kindIcons}
       // Surface the structured change (doc/entities) BEFORE the string value, so a
       // consumer that enriches its events has the latest doc when value-change fires.
       // A prompt can't start with whitespace — strip leading whitespace from the
