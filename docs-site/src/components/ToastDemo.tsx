@@ -24,6 +24,18 @@ interface DemoToast {
 const POSITIONS: Position[] = ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right'];
 const STACKS: Stack[] = ['expanded', 'collapsed'];
 
+// Spatial placement for the position picker (Floating-UI-style): each position is
+// a button pinned to that corner/edge of a little rectangle standing in for the
+// toast area, so you pick WHERE toasts appear rather than reading a label.
+const POS_PLACE: Record<Position, string> = {
+  'top-left': 'top-1 left-1',
+  'top-center': 'top-1 left-1/2 -translate-x-1/2',
+  'top-right': 'top-1 right-1',
+  'bottom-left': 'bottom-1 left-1',
+  'bottom-center': 'bottom-1 left-1/2 -translate-x-1/2',
+  'bottom-right': 'bottom-1 right-1',
+};
+
 const SNIPPET_JS = `import { toast, configureToasts } from '@kitn.ai/ui/elements';
 
 // Opt the imperative singleton into the collapsed pile (call once at app start).
@@ -111,32 +123,49 @@ export default function ToastDemo() {
     onCleanup(() => obs.disconnect());
   });
 
-  const PILL = 'cursor-pointer appearance-none rounded-full border-0 px-3 py-1 text-sm transition-all';
+  const PILL = 'cursor-pointer appearance-none rounded-full border-0 px-3 py-1 text-sm capitalize transition-all';
   const SELECTED = 'bg-[var(--kai-pressed)] text-ink font-semibold shadow-[inset_0_1px_2px_rgb(0_0_0/0.22)]';
   const UNSELECTED = 'bg-transparent text-ink-3 font-medium hover:text-ink hover:bg-line/60';
-  const pillCls = (p: Position) => `${PILL} ${p === position() ? SELECTED : UNSELECTED}`;
   const stackCls = (s: Stack) => `${PILL} ${s === stack() ? SELECTED : UNSELECTED}`;
 
   return (
     <div class="not-content my-5 overflow-hidden rounded-xl border border-line bg-surface">
-      {/* Controls — Position + Stack */}
-      <div class="flex flex-wrap items-center gap-y-2 border-b border-line px-4 py-2.5">
-        <span class="mr-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Position</span>
-        <For each={POSITIONS}>
-          {(p) => (
-            <button type="button" role="radio" aria-checked={p === position()} class={pillCls(p)} onClick={() => choosePosition(p)}>
-              {p}
-            </button>
-          )}
-        </For>
-        <span class="ml-4 mr-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Stack</span>
-        <For each={STACKS}>
-          {(s) => (
-            <button type="button" role="radio" aria-checked={s === stack()} class={stackCls(s)} onClick={() => chooseStack(s)}>
-              {s}
-            </button>
-          )}
-        </For>
+      {/* Controls — a spatial Position picker (Floating-UI style) + the Stack tabs */}
+      <div class="flex flex-wrap items-end gap-x-8 gap-y-4 border-b border-line px-4 py-3">
+        <div>
+          <span class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink-3">Position</span>
+          <div class="relative h-[68px] w-[116px] rounded-md border border-line bg-surface-2/40" role="radiogroup" aria-label="Toast position">
+            <For each={POSITIONS}>
+              {(p) => (
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={p === position()}
+                  aria-label={p}
+                  title={p}
+                  onClick={() => choosePosition(p)}
+                  class={`absolute size-4 rounded border transition-colors ${POS_PLACE[p]}`}
+                  classList={{
+                    'border-brand bg-brand': p === position(),
+                    'border-line bg-surface hover:border-ink-3': p !== position(),
+                  }}
+                />
+              )}
+            </For>
+          </div>
+        </div>
+        <div>
+          <span class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink-3">Stack</span>
+          <div class="flex gap-1" role="radiogroup" aria-label="Stack mode">
+            <For each={STACKS}>
+              {(s) => (
+                <button type="button" role="radio" aria-checked={s === stack()} class={stackCls(s)} onClick={() => chooseStack(s)}>
+                  {s}
+                </button>
+              )}
+            </For>
+          </div>
+        </div>
       </div>
 
       {/* Preview — trigger buttons raise toasts into the box below */}
