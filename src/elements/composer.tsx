@@ -63,6 +63,22 @@ interface Events {
   'kai-trigger': { char: string; query: string; rect: DOMRect };
   /** The active trigger was dismissed (Escape, space, or outside click). */
   'kai-trigger-close': Record<string, never>;
+  /** The composer gained focus. `focus`/`blur` are NOT composed natively, so this
+   *  re-exposes them on the host. (`keydown`/`paste`/`focusin`/`focusout` are
+   *  composed and ALSO reach the host as native events — these kai-* versions give
+   *  a uniform listen-on-the-host surface; `originalEvent` retains full control.) */
+  'kai-focus': { originalEvent: FocusEvent };
+  /** The composer lost focus. */
+  'kai-blur': { originalEvent: FocusEvent };
+  /** Bubbling focus (DOM `focusin`). */
+  'kai-focusin': { originalEvent: FocusEvent };
+  /** Bubbling blur (DOM `focusout`). */
+  'kai-focusout': { originalEvent: FocusEvent };
+  /** A key was pressed. `originalEvent` is the live KeyboardEvent (call
+   *  `detail.originalEvent.preventDefault()` to suppress it). */
+  'kai-keydown': { key: string; originalEvent: KeyboardEvent };
+  /** Content was pasted. `text` is the plain-text payload; `originalEvent` is live. */
+  'kai-paste': { text: string; originalEvent: ClipboardEvent };
 }
 
 defineWebComponent<Props, Events>('kai-composer', {
@@ -106,6 +122,12 @@ defineWebComponent<Props, Events>('kai-composer', {
       onEntityRemove={(entity) => dispatch('kai-entity-remove', { entity })}
       onTrigger={(info) => dispatch('kai-trigger', info)}
       onTriggerClose={() => dispatch('kai-trigger-close', {})}
+      onFocus={(e) => dispatch('kai-focus', { originalEvent: e })}
+      onBlur={(e) => dispatch('kai-blur', { originalEvent: e })}
+      onFocusIn={(e) => dispatch('kai-focusin', { originalEvent: e })}
+      onFocusOut={(e) => dispatch('kai-focusout', { originalEvent: e })}
+      onKeydown={(e) => dispatch('kai-keydown', { key: e.key, originalEvent: e })}
+      onPaste={(e) => dispatch('kai-paste', { text: e.clipboardData?.getData('text/plain') ?? '', originalEvent: e })}
     />
   );
 });

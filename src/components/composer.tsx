@@ -66,6 +66,18 @@ export interface ComposerProps {
   onTriggerClose?: () => void;
   onEntityAdd?: (entity: EntityRef) => void;
   onEntityRemove?: (entity: EntityRef) => void;
+  /** The editable gained focus (mirrors DOM `focus`; not composed across the shadow). */
+  onFocus?: (e: FocusEvent) => void;
+  /** The editable lost focus (mirrors DOM `blur`). */
+  onBlur?: (e: FocusEvent) => void;
+  /** Bubbling focus (mirrors DOM `focusin`). */
+  onFocusIn?: (e: FocusEvent) => void;
+  /** Bubbling blur (mirrors DOM `focusout`). */
+  onFocusOut?: (e: FocusEvent) => void;
+  /** A key was pressed (mirrors DOM `keydown`; fires for every key, incl. ones the composer handles). */
+  onKeydown?: (e: KeyboardEvent) => void;
+  /** Content was pasted (mirrors DOM `paste`). */
+  onPaste?: (e: ClipboardEvent) => void;
 }
 
 /**
@@ -283,10 +295,16 @@ export function Composer(props: ComposerProps): JSX.Element {
     recomputeHighlights();
   };
 
-  // Also update trigger state on selectionchange (while focused)
+  // Also update trigger state on selectionchange (while focused). These handlers
+  // double as the consumer-facing focus/blur surface (focus/blur are NOT composed,
+  // so they don't escape the shadow root natively — we re-expose them as callbacks
+  // the element turns into kai-focus/kai-blur).
   let focused = false;
-  const onFocus = () => { focused = true; };
-  const onBlur = () => { focused = false; };
+  const handleFocus = (e: FocusEvent) => { focused = true; props.onFocus?.(e); };
+  const handleBlur = (e: FocusEvent) => { focused = false; props.onBlur?.(e); };
+  const handleFocusIn = (e: FocusEvent) => props.onFocusIn?.(e);
+  const handleFocusOut = (e: FocusEvent) => props.onFocusOut?.(e);
+  const handlePaste = (e: ClipboardEvent) => props.onPaste?.(e);
 
   onMount(() => {
     const onSelectionChange = () => {
@@ -378,6 +396,10 @@ export function Composer(props: ComposerProps): JSX.Element {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    // Notify the consumer of every keydown (incl. keys the composer handles below).
+    // The original event is passed so a consumer can preventDefault if desired.
+    props.onKeydown?.(e);
+
     // --- Trigger menu keyboard navigation (takes priority) ---
     if (menuOpen() && filteredItems().length > 0) {
       if (e.key === 'ArrowDown') {
@@ -565,8 +587,11 @@ export function Composer(props: ComposerProps): JSX.Element {
         aria-label={props.placeholder || 'Message input'}
         onInput={handleInput}
         onKeyDown={handleKeyDown}
-        onFocus={onFocus}
-        onBlur={onBlur}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        on:focusin={handleFocusIn}
+        on:focusout={handleFocusOut}
+        onPaste={handlePaste}
         class={cn(
           'text-foreground min-h-[44px] w-full overflow-y-auto outline-none whitespace-pre-wrap break-words',
         )}

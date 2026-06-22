@@ -15,6 +15,10 @@ export default defineConfig({
   fullyParallel: false,
   retries: process.env.CI ? 1 : 0,
   reporter: 'list',
+  // Storybook compiles each story on first load (Vite on-demand). The first test
+  // to hit a story can exceed the default 5s; a generous ceiling tolerates the
+  // cold compile while returning as soon as the assertion passes on warm runs.
+  expect: { timeout: 30_000 },
   use: {
     baseURL: 'http://localhost:6006',
     trace: 'off',

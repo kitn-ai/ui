@@ -89,3 +89,51 @@ describe('Composer entity pills', () => {
     expect(el.querySelector('[data-kai-entity]')).toBeNull();
   });
 });
+
+describe('Composer event surface (focus/blur/keydown/paste/focusin/focusout)', () => {
+  it('fires onFocus and onBlur', () => {
+    const onFocus = vi.fn();
+    const onBlur = vi.fn();
+    const { container } = render(() => <Composer onFocus={onFocus} onBlur={onBlur} />);
+    const el = editable(container);
+    fireEvent.focus(el);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    fireEvent.blur(el);
+    expect(onBlur).toHaveBeenCalledTimes(1);
+  });
+
+  it('fires onFocusIn and onFocusOut', () => {
+    const onFocusIn = vi.fn();
+    const onFocusOut = vi.fn();
+    const { container } = render(() => <Composer onFocusIn={onFocusIn} onFocusOut={onFocusOut} />);
+    const el = editable(container);
+    fireEvent.focusIn(el);
+    expect(onFocusIn).toHaveBeenCalledTimes(1);
+    fireEvent.focusOut(el);
+    expect(onFocusOut).toHaveBeenCalledTimes(1);
+  });
+
+  it('fires onKeydown for every key, passing the event', () => {
+    const onKeydown = vi.fn();
+    const { container } = render(() => <Composer onKeydown={onKeydown} />);
+    fireEvent.keyDown(editable(container), { key: 'a' });
+    expect(onKeydown).toHaveBeenCalledTimes(1);
+    expect(onKeydown.mock.calls[0][0].key).toBe('a');
+  });
+
+  it('fires onKeydown even for keys the composer handles (Enter)', () => {
+    const onKeydown = vi.fn();
+    const onSubmit = vi.fn();
+    const { container } = render(() => <Composer value="hi" onKeydown={onKeydown} onSubmit={onSubmit} />);
+    fireEvent.keyDown(editable(container), { key: 'Enter' });
+    expect(onKeydown).toHaveBeenCalledTimes(1);
+    expect(onSubmit).toHaveBeenCalledTimes(1); // composer still handled it
+  });
+
+  it('fires onPaste', () => {
+    const onPaste = vi.fn();
+    const { container } = render(() => <Composer onPaste={onPaste} />);
+    fireEvent.paste(editable(container));
+    expect(onPaste).toHaveBeenCalledTimes(1);
+  });
+});
