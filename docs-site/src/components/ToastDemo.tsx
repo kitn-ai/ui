@@ -80,15 +80,19 @@ export default function ToastDemo() {
 
   const theme = () => document.documentElement.dataset.theme || 'light';
 
-  // Push a NEW array onto the region; tag each toast with the box as target so the
-  // region (scoped to the box) renders them and anchors them to its corner.
-  const commit = (next: DemoToast[]) => {
+  // Single source of truth: keep the signal AND the element's `toasts` in lockstep,
+  // with STABLE item identities. A controlled <kai-toast-region> never prunes itself
+  // — kai-dismiss (below) is our cue to drop the item from BOTH, or it lingers in the
+  // element's array and a later update re-materializes it. Items carry the box as
+  // `target` from creation (the region is scoped to the box), so we never re-map +
+  // re-key survivors — re-keying a mid-dismiss toast would re-mount it and it reappears.
+  const sync = (next: DemoToast[]) => {
     setToasts(next);
-    if (region && box) region.toasts = next.map((t) => ({ ...t, target: box }));
+    if (region) region.toasts = next;
   };
-  const raise = (t: Omit<DemoToast, 'id'>) => {
+  const raise = (t: Omit<DemoToast, 'id' | 'target'>) => {
     seq += 1;
-    commit([...toasts(), { ...t, id: `d${seq}` }]);
+    sync([...toasts(), { ...t, id: `d${seq}`, target: box }]);
   };
 
   const choosePosition = (p: Position) => {
@@ -112,8 +116,9 @@ export default function ToastDemo() {
     region.addEventListener('kai-dismiss', (e: Event) => {
       const d = (e as CustomEvent).detail;
       push(`kai-dismiss  →  ${JSON.stringify(d)}`);
-      // drop it from our list so the queue promotes the next one
-      setToasts((ts) => ts.filter((t) => t.id !== d.id));
+      // drop it from BOTH the signal and the element so it's gone for good (and the
+      // queue promotes the next one) — not just hidden but lingering in region.toasts.
+      sync(toasts().filter((t) => t.id !== d.id));
     });
     region.addEventListener('kai-action', (e: Event) => {
       push(`kai-action  →  ${JSON.stringify((e as CustomEvent).detail)}`);
@@ -160,7 +165,7 @@ export default function ToastDemo() {
             class={TRIGGER}
             onClick={() => { raise({ message: 'Connecting…' }); raise({ message: 'Syncing files' }); raise({ message: 'All set', variant: 'success' }); }}
           >Stack three</button>
-          <button type="button" class={`${TRIGGER} ml-auto`} disabled={!toasts().length} onClick={() => commit([])}>Clear</button>
+          <button type="button" class={`${TRIGGER} ml-auto`} disabled={!toasts().length} onClick={() => sync([])}>Clear</button>
         </div>
 
         <div ref={box} class="relative h-[300px] overflow-hidden rounded-lg border border-line bg-surface-2/40">
