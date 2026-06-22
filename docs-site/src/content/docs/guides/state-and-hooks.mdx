@@ -39,8 +39,8 @@ import {
 // Append a user turn
 setMessages((m) => appendMessage(m, { id: crypto.randomUUID(), role: 'user', content: text }));
 
-// Patch a field on an existing message (e.g. set loading: false when done)
-setMessages((m) => updateMessage(m, id, { loading: false }));
+// Patch a field on an existing message (e.g. correct the text after an edit)
+setMessages((m) => updateMessage(m, id, { content: corrected }));
 
 // Insert-or-replace by id (useful for streaming placeholders)
 setMessages((m) => upsertMessage(m, { id, role: 'assistant', content: partial }));
@@ -83,11 +83,12 @@ The full handle:
 | `done()` | Mark the message complete |
 | `abort()` | Mark the message aborted |
 
-You can pass an optional `init` object as the second argument to seed the message with an id,
-model label, or any other fields before the stream starts:
+You can pass an optional `init` object (a `Partial<ChatMessage>`) as the second argument to
+seed the message before the stream starts — for example a stable id you generated up front so
+you can correlate it with your backend request:
 
 ```ts
-const s = createAssistantStream(setMessages, { model: 'claude-sonnet-4' });
+const s = createAssistantStream(setMessages, { id: requestId });
 ```
 
 ## React: `useKaiChat`
