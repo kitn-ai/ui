@@ -244,7 +244,13 @@ export function ToastRegion(props: ToastRegionProps) {
   const stack = () => props.stack ?? 'expanded';
   const reduced = usePrefersReducedMotion();
   const collapsed = () => stack() === 'collapsed' && !reduced();
-  const [open, setOpen] = createSignal(false); // hover/focus-expanded (collapsed mode)
+  // Expanded while the stack is hovered OR holds focus (collapsed mode). These are
+  // tracked SEPARATELY and OR'd: dismissing a toast (clicking its ×) removes the
+  // focused button → a focusout — but if the pointer is still over the stack we must
+  // stay expanded (and paused), so focusout alone must not collapse it.
+  const [hovered, setHovered] = createSignal(false);
+  const [focused, setFocused] = createSignal(false);
+  const open = () => hovered() || focused();
 
   // Tunable look (IVP). Resting peek + per-depth shrink; uniform expanded row height.
   const OFFSET = 20;       // px each deeper toast peeks past the one in front
@@ -349,10 +355,10 @@ export function ToastRegion(props: ToastRegionProps) {
         aria-live="polite"
         data-stack="collapsed"
         data-expanded={open() ? '' : undefined}
-        onPointerEnter={() => setOpen(true)}
-        onPointerLeave={() => setOpen(false)}
-        onFocusIn={() => setOpen(true)}
-        onFocusOut={() => setOpen(false)}
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={() => setHovered(false)}
+        onFocusIn={() => setFocused(true)}
+        onFocusOut={() => setFocused(false)}
         class={cn('pointer-events-none fixed z-[100]', !anchor() && POSITION_CLASSES[position()])}
         style={anchor() ? anchorStyle(position(), anchor()!) : undefined}
       >
