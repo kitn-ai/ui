@@ -27,6 +27,7 @@ import {
 } from './composer-dom';
 import { activeTriggerFor } from '../primitives/composer-triggers';
 import { usePosition, useDismiss, createPresence } from '../ui/overlay';
+import { findHighlightMatches, applyHighlights } from './composer-highlight';
 
 export interface TriggerItem {
   id: string;
@@ -202,9 +203,19 @@ export function Composer(props: ComposerProps): JSX.Element {
     return { doc, text: serializeToText(doc), entities: entitiesOf(doc) };
   };
 
+  /** Recompute and register CSS Custom Highlight ranges for keyword rules. */
+  function recomputeHighlights() {
+    const rules = props.highlights;
+    if (!rules?.length) return;
+    const text = getFullText(editable);
+    const matches = findHighlightMatches(text, rules);
+    applyHighlights(editable, matches, ZWSP);
+  }
+
   onMount(() => {
     renderDoc(editable, normalizeValue(props.value));
     setEmpty(docIsEmpty(parseDom(editable)));
+    recomputeHighlights();
   });
 
   function updateTriggerState() {
@@ -236,6 +247,7 @@ export function Composer(props: ComposerProps): JSX.Element {
     setEmpty(docIsEmpty(change.doc));
     props.onChange?.(change);
     updateTriggerState();
+    recomputeHighlights();
   };
 
   // Also update trigger state on selectionchange (while focused)
@@ -491,6 +503,10 @@ export function Composer(props: ComposerProps): JSX.Element {
         props.disabled && 'cursor-not-allowed opacity-60',
       )}
     >
+      {/* Static style for CSS Custom Highlight API decoration.
+          No-op in browsers that don't support ::highlight(); the selector
+          is simply unrecognized and dropped. */}
+      <style>{`::highlight(kai-composer-highlight) { background-color: rgba(var(--color-primary, 99 102 241) / 0.18); }`}</style>
       <div
         ref={editable}
         data-kai-composer-editable
