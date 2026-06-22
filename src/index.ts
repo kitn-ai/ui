@@ -5,6 +5,8 @@ export type { ModelOption, SearchFilters, ConversationScope, ConversationSummary
 export { cn } from './utils/cn';
 
 // Layer 1: Headless Primitives
+export { createKaiChat } from './primitives/create-kai-chat';
+export type { CreateKaiChatOptions, KaiChatStore } from './primitives/create-kai-chat';
 export { useAutoResize } from './primitives/use-auto-resize';
 export { useStickToBottom } from './primitives/use-stick-to-bottom';
 export { useTextStream } from './primitives/use-text-stream';
