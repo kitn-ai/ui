@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { onMount } from 'solid-js';
 import './register'; // side effect: registers <kai-toast-region>
-import { toast } from '../primitives/toast-store';
+import { toast, configureToasts } from '../primitives/toast-store';
 
 // `toast()` is imperative — there's no element to place. The singleton region
 // mounts itself on document.body the first time a toast is raised. These stories
@@ -67,4 +68,39 @@ type Story = StoryObj;
 export const Default: Story = {
   name: 'Imperative toast()',
   render: () => <ToastDemo />,
+};
+
+// Opt the singleton into the collapsed pile, then raise a burst so it stacks.
+function CollapsedStackDemo() {
+  onMount(() => {
+    configureToasts({ stack: 'collapsed', position: 'top-right' });
+  });
+  return (
+    <div style={{ padding: '28px', 'font-family': 'system-ui, sans-serif' }}>
+      <p style={{ margin: '0 0 18px', color: 'light-dark(#666,#a1a1aa)', 'max-width': '52ch' }}>
+        Collapsed stacking piles the toasts as layered cards in the corner — only the
+        newest is fully shown; the rest peek behind it, scaled down. Hover (or focus) the
+        pile and it fans out into the full column; move away and it collapses again. Raise
+        a few and try it. <code>prefers-reduced-motion</code> falls back to the plain column.
+      </p>
+      <button
+        style={BTN}
+        onClick={() => {
+          toast('Connecting…', { duration: 0 });
+          toast('Syncing files', { duration: 0 });
+          toast.success('Backup complete', { duration: 0 });
+          toast('All set', { duration: 0 });
+        }}
+      >
+        Raise four (sticky)
+      </button>
+      <button style={BTN} onClick={() => toast.clear()}>Clear</button>
+    </div>
+  );
+}
+
+/** Collapsed (Sonner-style) pile that expands on hover/focus. */
+export const CollapsedStack: Story = {
+  name: 'Collapsed stack (hover to expand)',
+  render: () => <CollapsedStackDemo />,
 };

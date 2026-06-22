@@ -11,6 +11,7 @@ import { FRAMEWORKS, type Framework } from '../lib/codegen';
 
 type AnyEl = HTMLElement & Record<string, unknown>;
 type Position = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+type Stack = 'expanded' | 'collapsed';
 interface DemoToast {
   id: string;
   message: string;
@@ -21,8 +22,12 @@ interface DemoToast {
 }
 
 const POSITIONS: Position[] = ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right'];
+const STACKS: Stack[] = ['expanded', 'collapsed'];
 
-const SNIPPET_JS = `import { toast } from '@kitn.ai/ui/elements';
+const SNIPPET_JS = `import { toast, configureToasts } from '@kitn.ai/ui/elements';
+
+// Opt the imperative singleton into the collapsed pile (call once at app start).
+configureToasts({ stack: 'collapsed', position: 'top-right' });
 
 toast('Saved your changes');               // neutral
 toast.success('Copied to clipboard');      // emerald check
@@ -32,7 +37,7 @@ toast('Conversation dismissed', {          // with an Undo action
 const t = toast('Generating report…', { duration: 0 }); // sticky
 t.update({ message: 'Report ready', variant: 'success', duration: 2000 });`;
 
-const SNIPPET_HTML = `<kai-toast-region position="top-right"></kai-toast-region>
+const SNIPPET_HTML = `<kai-toast-region position="top-right" stack="collapsed"></kai-toast-region>
 
 <script type="module">
   import { toast } from '@kitn.ai/ui/elements';
@@ -56,6 +61,7 @@ export default function ToastDemo() {
   let region: AnyEl | undefined;
   let box: HTMLDivElement | undefined;
   const [position, setPosition] = createSignal<Position>('top-right');
+  const [stack, setStack] = createSignal<Stack>('collapsed');
   const [toasts, setToasts] = createSignal<DemoToast[]>([]);
   const [log, setLog] = createSignal<string[]>([]);
   const push = (m: string) => setLog((l) => [...l.slice(-5), m]);
@@ -78,12 +84,18 @@ export default function ToastDemo() {
     region?.setAttribute('position', p);
   };
 
+  const chooseStack = (s: Stack) => {
+    setStack(s);
+    region?.setAttribute('stack', s);
+  };
+
   onMount(async () => {
     await loadKit();
     if (!region || !box) return;
     customElements.upgrade(region);
     region.target = box;
     region.setAttribute('position', position());
+    region.setAttribute('stack', stack());
     region.setAttribute('theme', theme());
     region.addEventListener('kai-dismiss', (e: Event) => {
       const d = (e as CustomEvent).detail;
@@ -100,20 +112,28 @@ export default function ToastDemo() {
   });
 
   const PILL = 'cursor-pointer appearance-none rounded-full border-0 px-3 py-1 text-sm transition-all';
-  const pillCls = (p: Position) =>
-    p === position()
-      ? `${PILL} bg-[var(--kai-pressed)] text-ink font-semibold shadow-[inset_0_1px_2px_rgb(0_0_0/0.22)]`
-      : `${PILL} bg-transparent text-ink-3 font-medium hover:text-ink hover:bg-line/60`;
+  const SELECTED = 'bg-[var(--kai-pressed)] text-ink font-semibold shadow-[inset_0_1px_2px_rgb(0_0_0/0.22)]';
+  const UNSELECTED = 'bg-transparent text-ink-3 font-medium hover:text-ink hover:bg-line/60';
+  const pillCls = (p: Position) => `${PILL} ${p === position() ? SELECTED : UNSELECTED}`;
+  const stackCls = (s: Stack) => `${PILL} ${s === stack() ? SELECTED : UNSELECTED}`;
 
   return (
     <div class="not-content my-5 overflow-hidden rounded-xl border border-line bg-surface">
-      {/* Controls — Position */}
+      {/* Controls — Position + Stack */}
       <div class="flex flex-wrap items-center gap-y-2 border-b border-line px-4 py-2.5">
         <span class="mr-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Position</span>
         <For each={POSITIONS}>
           {(p) => (
             <button type="button" role="radio" aria-checked={p === position()} class={pillCls(p)} onClick={() => choosePosition(p)}>
               {p}
+            </button>
+          )}
+        </For>
+        <span class="ml-4 mr-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Stack</span>
+        <For each={STACKS}>
+          {(s) => (
+            <button type="button" role="radio" aria-checked={s === stack()} class={stackCls(s)} onClick={() => chooseStack(s)}>
+              {s}
             </button>
           )}
         </For>
@@ -141,7 +161,7 @@ export default function ToastDemo() {
         <div ref={box} class="relative h-[280px] overflow-hidden rounded-lg border border-dashed border-line bg-surface-2/40">
           <Show when={!toasts().length}>
             <span class="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-ink-3">
-              Click a button — toasts appear here, anchored to the chosen position.
+              Click a button — toasts appear here. Collapsed piles them; hover to expand.
             </span>
           </Show>
           {/* @ts-expect-error custom element — viewport-fixed, anchored to this box */}
