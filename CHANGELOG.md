@@ -1,5 +1,59 @@
 # Changelog
 
+## [0.17.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.16.0...@kitn.ai/ui-v0.17.0) (2026-06-22)
+
+
+### Features
+
+* **cards:** dismiss + recovery for generative-UI cards ([9763f94](https://github.com/kitn-ai/ui/commit/9763f944c59e148bd54978d0ea6a800750e8c8c5))
+* chat interaction components — toast, action-row feedback, card dismiss/recovery, kai-compare (+ tooltip fix) ([0fd1b40](https://github.com/kitn-ai/ui/commit/0fd1b405138abd08cf4d8a10d34e35b77d79e99a))
+* **chat:** stateful message action row — copy-check, like/dislike, toasts ([f2c0f0e](https://github.com/kitn-ai/ui/commit/f2c0f0e2f3e07b626610d6a3b13e1aa75bf94191))
+* **chat:** thumb feedback slide-to-fill — collapse the other vote, slide the active in ([942c6d8](https://github.com/kitn-ai/ui/commit/942c6d8325c057215e09a56ac9cc460964ec8141))
+* **compare:** tabs layout (pills) + container-query columns↔tabs ([8cd02dd](https://github.com/kitn-ai/ui/commit/8cd02dd65743b8c266a34132220c2b8607106f5a))
+* **docs-site:** live agent-flow hero demo with an interactive generative-UI card ([5a15eab](https://github.com/kitn-ai/ui/commit/5a15eab64184fff5bda5e96d4ac4a158884c8a1d))
+* **docs-site:** live autoloader demo on the bundle-size page ([ba8d7e5](https://github.com/kitn-ai/ui/commit/ba8d7e54488d083710aacecd6b417ef30ef6c7d4))
+* **docs:** compare + toast use the shared Playground preview ([b9e6e21](https://github.com/kitn-ai/ui/commit/b9e6e213682be9ca271f1255c1ceb57dc3a437b3))
+* **docs:** live card dismiss/recovery demo (dismiss -&gt; stub -&gt; undo/reopen) ([cd91dc6](https://github.com/kitn-ai/ui/commit/cd91dc657689e13cf613a36e17498929a730542b))
+* **docs:** live compare demo (pick/stream/layout) + correct layout values ([c3fe1ce](https://github.com/kitn-ai/ui/commit/c3fe1ce234b816a791e2eb233ed5668476a79b7d))
+* **docs:** live message action-row + tooltip demo (copy, thumbs slide-to-fill) ([e204523](https://github.com/kitn-ai/ui/commit/e20452382bbb7508fbd70a6ee3f01181cb56b0e7))
+* **docs:** live toast demo + correct duration facts (5s/7s) ([36858fd](https://github.com/kitn-ai/ui/commit/36858fd7ad09aa3e445110fed5c096ce34caa98e))
+* **docs:** shared kai theme-sync helpers (getKit, syncKaiTheme, syncToastRegionTheme) ([3e8c999](https://github.com/kitn-ai/ui/commit/3e8c9999928b899c161edf4f37ff2d8ddd76193d))
+* **docs:** toast demo with trigger buttons + working position ([ffbfb27](https://github.com/kitn-ai/ui/commit/ffbfb27c559d2c8541cff75081f069878e92e140))
+* **elements:** add kai-compare — dual-response "which do you prefer?" ([a48cd80](https://github.com/kitn-ai/ui/commit/a48cd803b194edd0ecbf5f77855b1d6776d5f1a1))
+* **elements:** add kai-toast-region + imperative toast() primitive ([44afb9c](https://github.com/kitn-ai/ui/commit/44afb9c963818b480e3da8b4703e4025936ef379))
+* **elements:** footprint reduction — per-element imports + opt-in autoloader (+ Shiki devDeps, tailwind-merge v3) ([499a8d1](https://github.com/kitn-ai/ui/commit/499a8d195c84ecbd4d4d3da53faff6c0512dcdc3))
+* **elements:** per-element entry points + opt-in DOM autoloader ([6d61d6d](https://github.com/kitn-ai/ui/commit/6d61d6dc39cc47d6e351177e9087a7e839956547))
+* **elements:** scope toasts to a container — chat toasts default to the chat ([36e6445](https://github.com/kitn-ai/ui/commit/36e64453fb50e33fefef14e3d5165659b23d9cdc))
+* **elements:** type declarations for per-element imports + the autoloader ([5ad894c](https://github.com/kitn-ai/ui/commit/5ad894c3e73176df341d9f5d7999c60da9d18323))
+* **mcp:** teach debug + scaffold about per-element imports and the autoloader ([d3abc56](https://github.com/kitn-ai/ui/commit/d3abc56c45879377ac2e03107cd346489ffa5111))
+* **mcp:** teach debug + scaffold about toast, card dismiss, and kai-compare ([d1d2334](https://github.com/kitn-ai/ui/commit/d1d233442d2af8632a5dd19755067768470691f5))
+* **toast:** collapsed stacking mode (Sonner-style pile, expand on hover/focus) ([de1eb7a](https://github.com/kitn-ai/ui/commit/de1eb7a26b51749f32e2abe286f7e31ade2a18e4))
+* **toast:** configureToasts() to opt the imperative singleton into stack/position/max ([07e325e](https://github.com/kitn-ai/ui/commit/07e325e6ce3ec4fccc434847a3c92876dc6fa59d))
+* **toast:** expose stack on the kai-toast-region facade (+ regen artifacts) ([537be63](https://github.com/kitn-ai/ui/commit/537be6316d3eaee74da4fa2db1601b419367e8d4))
+* **toast:** honor `position` for a target-anchored region ([d53d06c](https://github.com/kitn-ai/ui/commit/d53d06c457ae1c8496bc988e197c172a27b8307c))
+
+
+### Bug Fixes
+
+* **api:** regenerate stale element artifacts (compare tabs layout, toast target) ([3339951](https://github.com/kitn-ai/ui/commit/333995118d4f3bfcf4dda48015d29c154f6a5582))
+* **build:** keep register-all coarse, separate from the per-element split build ([773c2bc](https://github.com/kitn-ai/ui/commit/773c2bcec51964135efdf89dabcdc6ee9ef9f081))
+* **compare:** make the pick button the radio (no nested interactive / no double label) ([0db075e](https://github.com/kitn-ai/ui/commit/0db075e78dc9078fd4791cf1c09cd6f6d18108eb))
+* **deps:** move shiki/[@shikijs](https://github.com/shikijs) to devDependencies (-17 MB consumer install) ([7944256](https://github.com/kitn-ai/ui/commit/7944256e1088bd12230cf0ce247947aa1464fcd4))
+* **deps:** upgrade tailwind-merge ^2 → ^3 (Tailwind v4 class groups) ([186302b](https://github.com/kitn-ai/ui/commit/186302b2f786f0a6525e86313888f63fdfc2d6b1))
+* **docs-site:** await element registration before setting props (timing race) ([4797dab](https://github.com/kitn-ai/ui/commit/4797dabcae8017fe25803b57a6f59d803b982ecb))
+* **docs-site:** sync-kit ships the dist/elements/ subtree (chunks moved there in the unified build) ([d0e5fd4](https://github.com/kitn-ai/ui/commit/d0e5fd404af70b56ba6a79d09cd994316e92d32b))
+* **docs:** landing hero — consistent feedback actions on the follow-up message ([0c65b8e](https://github.com/kitn-ai/ui/commit/0c65b8ea9e25d7a3f58f722bd6096c6470037e02))
+* **docs:** toast demo — remove dismissed toasts from the region, not just hide them ([139c9ed](https://github.com/kitn-ai/ui/commit/139c9ede64359770a5f533a1d06a0e0c8ee249fb))
+* **elements:** position the autoloader as CDN/static-only (consumer-regression finding) ([2d05e83](https://github.com/kitn-ai/ui/commit/2d05e83995a7b2a03ba536d790a4c9fac36506b9))
+* **elements:** render the first toast — bind store after the element upgrades ([ec4baf7](https://github.com/kitn-ai/ui/commit/ec4baf76a97afe2cc547cd8651dc63c0ac576ac3))
+* **elements:** restore kit-wide animations (import tw-animate-css) + longer toasts ([b7e4f3d](https://github.com/kitn-ai/ui/commit/b7e4f3da4826643cb70857320210e251980b3b54))
+* **storybook:** theme-aware demo chrome + document-wide theme mirror ([fdd7542](https://github.com/kitn-ai/ui/commit/fdd7542401150e5c93b5e6eca7f16b1a8299192c))
+* **toast:** collapsed stack — pause all on hover + stable hover surface (no flicker) ([fcb4438](https://github.com/kitn-ai/ui/commit/fcb4438435942eeae357f9e2100adc2a5ef2335c))
+* **toast:** export configureToasts from public entries + MCP scaffold note ([15a7ef7](https://github.com/kitn-ai/ui/commit/15a7ef7838a700ea5b4e5d58c056b061e307b8a6))
+* **toast:** keep the collapsed stack expanded when dismissing (focusout no longer collapses) ([597925e](https://github.com/kitn-ai/ui/commit/597925e6be742b171e1f73452a24b18bfd3610eb))
+* **toast:** tune collapsed-stack pile geometry ([65e5085](https://github.com/kitn-ai/ui/commit/65e5085b85c3ccb9feaa7748ce798f8958e35ce2))
+* **ui:** dismiss tooltip when its trigger is clicked ([02656da](https://github.com/kitn-ai/ui/commit/02656da19991c7df9bbb49dd137f2e6c1cfdbd93))
+
 ## [0.16.0](https://github.com/kitn-ai/ui/compare/@kitn.ai/ui-v0.15.1...@kitn.ai/ui-v0.16.0) (2026-06-20)
 
 
