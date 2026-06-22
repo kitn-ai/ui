@@ -130,41 +130,17 @@ export default function ToastDemo() {
 
   return (
     <div class="not-content my-5 overflow-hidden rounded-xl border border-line bg-surface">
-      {/* Controls — a spatial Position picker (Floating-UI style) + the Stack tabs */}
-      <div class="flex flex-wrap items-end gap-x-8 gap-y-4 border-b border-line px-4 py-3">
-        <div>
-          <span class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink-3">Position</span>
-          <div class="relative h-[68px] w-[116px] rounded-md border border-line bg-surface-2/40" role="radiogroup" aria-label="Toast position">
-            <For each={POSITIONS}>
-              {(p) => (
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={p === position()}
-                  aria-label={p}
-                  title={p}
-                  onClick={() => choosePosition(p)}
-                  class={`absolute size-4 rounded border transition-colors ${POS_PLACE[p]}`}
-                  classList={{
-                    'border-brand bg-brand': p === position(),
-                    'border-line bg-surface hover:border-ink-3': p !== position(),
-                  }}
-                />
-              )}
-            </For>
-          </div>
-        </div>
-        <div>
-          <span class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink-3">Stack</span>
-          <div class="flex gap-1" role="radiogroup" aria-label="Stack mode">
-            <For each={STACKS}>
-              {(s) => (
-                <button type="button" role="radio" aria-checked={s === stack()} class={stackCls(s)} onClick={() => chooseStack(s)}>
-                  {s}
-                </button>
-              )}
-            </For>
-          </div>
+      {/* Controls — Stack mode. Position is picked ON the canvas below (popover-style). */}
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line px-4 py-2.5">
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-ink-3">Stack</span>
+        <div class="flex gap-1" role="radiogroup" aria-label="Stack mode">
+          <For each={STACKS}>
+            {(s) => (
+              <button type="button" role="radio" aria-checked={s === stack()} class={stackCls(s)} onClick={() => chooseStack(s)}>
+                {s}
+              </button>
+            )}
+          </For>
         </div>
       </div>
 
@@ -187,15 +163,39 @@ export default function ToastDemo() {
           <button type="button" class={`${TRIGGER} ml-auto`} disabled={!toasts().length} onClick={() => commit([])}>Clear</button>
         </div>
 
-        <div ref={box} class="relative h-[280px] overflow-hidden rounded-lg border border-dashed border-line bg-surface-2/40">
+        <div ref={box} class="relative h-[300px] overflow-hidden rounded-lg border border-line bg-surface-2/40">
+          {/* Position picker — dots on the canvas edges (the popover-demo pattern):
+              click a corner and the toasts anchor there. */}
+          <div class="pointer-events-none absolute inset-0 z-10" role="radiogroup" aria-label="Toast position">
+            <For each={POSITIONS}>
+              {(p) => (
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={p === position()}
+                  aria-label={p}
+                  title={p}
+                  onClick={() => choosePosition(p)}
+                  class={`pointer-events-auto absolute size-4 rounded border transition-colors ${POS_PLACE[p]}`}
+                  classList={{
+                    'border-brand bg-brand': p === position(),
+                    'border-line bg-surface hover:border-ink-3': p !== position(),
+                  }}
+                />
+              )}
+            </For>
+          </div>
           <Show when={!toasts().length}>
-            <span class="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-ink-3">
-              Click a button — toasts appear here. Collapsed piles them; hover to expand.
+            <span class="pointer-events-none absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-ink-3">
+              Raise a toast — it lands at the highlighted corner. Collapsed piles them; hover to expand.
             </span>
           </Show>
           {/* @ts-expect-error custom element — viewport-fixed, anchored to this box */}
           <kai-toast-region ref={(el: HTMLElement) => (region = el as AnyEl)} />
         </div>
+        <p class="mt-3 text-center text-sm text-ink-3">
+          position <code class="rounded bg-surface-2 px-1.5 py-0.5 text-ink">{position()}</code> — click a corner to move the toasts
+        </p>
       </div>
 
       {/* Console */}
