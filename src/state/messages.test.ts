@@ -15,7 +15,9 @@ describe('message helpers', () => {
 
   it('upsertMessage replaces by id, else appends', () => {
     const a = [m('1', 'old')];
-    expect(upsertMessage(a, m('1', 'new'))[0].content).toBe('new');
+    const replaced = upsertMessage(a, m('1', 'new'));
+    expect(replaced).not.toBe(a);
+    expect(replaced[0].content).toBe('new');
     expect(upsertMessage(a, m('2')).map((x) => x.id)).toEqual(['1', '2']);
   });
 
@@ -29,12 +31,18 @@ describe('message helpers', () => {
   });
 
   it('updateMessage accepts an updater function', () => {
-    const out = updateMessage([m('1', 'x')], '1', (msg) => ({ ...msg, content: msg.content + 'y' }));
+    const input = m('1', 'x');
+    const out = updateMessage([input], '1', (msg) => ({ ...msg, content: msg.content + 'y' }));
     expect(out[0].content).toBe('xy');
+    expect(out[0]).not.toBe(input);
   });
 
   it('removeMessage drops by id', () => {
-    expect(removeMessage([m('1'), m('2')], '1').map((x) => x.id)).toEqual(['2']);
+    const a = [m('1'), m('2')];
+    const out = removeMessage(a, '1');
+    expect(out.map((x) => x.id)).toEqual(['2']);
+    expect(out).not.toBe(a);
+    expect(a).toHaveLength(2);
   });
 
   it('appendContent concatenates the streamed delta on the matched message', () => {
