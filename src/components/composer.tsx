@@ -66,6 +66,26 @@ export interface ComposerProps {
   onEntityRemove?: (entity: EntityRef) => void;
 }
 
+/**
+ * Shadow-DOM-aware selection. `document.getSelection()` does NOT expose a
+ * selection that lives inside an open ShadowRoot in Chromium — it retargets the
+ * range to the host — so caret math and node insertion would silently operate
+ * OUTSIDE the editable (pills land in the light DOM, the menu never closes).
+ * `ShadowRoot.getSelection()` (Chrome) returns the real in-shadow selection. Fall
+ * back to the document selection for the light DOM / jsdom (no shadow root).
+ */
+function getActiveSelection(node: Node): Selection | null {
+  const root = node.getRootNode();
+  if (
+    typeof ShadowRoot !== 'undefined' &&
+    root instanceof ShadowRoot &&
+    typeof (root as unknown as { getSelection?: () => Selection | null }).getSelection === 'function'
+  ) {
+    return (root as unknown as { getSelection: () => Selection | null }).getSelection();
+  }
+  return node.ownerDocument?.getSelection() ?? null;
+}
+
 /** Compute the full ZWSP-stripped text of all text nodes in the editable. */
 function getFullText(root: HTMLElement): string {
   let text = '';
@@ -84,7 +104,7 @@ function getFullText(root: HTMLElement): string {
  */
 function getCaretTextOffset(root: HTMLElement): number {
   const ownerDoc = root.ownerDocument;
-  const sel = ownerDoc.defaultView?.getSelection();
+  const sel = getActiveSelection(root);
   if (!sel || sel.rangeCount === 0) return 0;
   const range = sel.getRangeAt(0);
   if (!range.collapsed) return 0;
@@ -112,7 +132,7 @@ function getCaretTextOffset(root: HTMLElement): number {
  */
 function getCaretRect(root: HTMLElement): DOMRect | null {
   const ownerDoc = root.ownerDocument;
-  const sel = ownerDoc.defaultView?.getSelection();
+  const sel = getActiveSelection(root);
   if (!sel || sel.rangeCount === 0) return null;
   const range = sel.getRangeAt(0).cloneRange();
   range.collapse(true);
@@ -293,7 +313,7 @@ export function Composer(props: ComposerProps): JSX.Element {
    */
   const insertEntity = (entity: EntityRef, opts?: { replaceFrom?: number }) => {
     const ownerDoc = editable.ownerDocument;
-    const sel = ownerDoc.defaultView?.getSelection();
+    const sel = getActiveSelection(editable);
     if (!sel) return;
 
     // If replaceFrom is given, delete trigger token text before the caret.
@@ -381,7 +401,7 @@ export function Composer(props: ComposerProps): JSX.Element {
     // --- Backspace / Delete: atomically remove pill immediately before/after caret ---
     if (e.key === 'Backspace' || e.key === 'Delete') {
       const ownerDoc = editable.ownerDocument;
-      const sel = ownerDoc.defaultView?.getSelection();
+      const sel = getActiveSelection(editable);
       if (!sel || sel.rangeCount === 0) return;
 
       const range = sel.getRangeAt(0);
