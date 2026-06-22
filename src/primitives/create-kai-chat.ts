@@ -8,7 +8,9 @@ import {
 } from '../state';
 
 export interface CreateKaiChatOptions {
+  /** Seed messages, read once at creation and copied. Later changes are ignored — drive updates through the returned ops. */
   initialMessages?: ChatMessage[];
+  /** Seed suggestions, read once at creation and copied. Later changes are ignored. */
   initialSuggestions?: string[];
   onSubmit?: (detail: { value: string; attachments: AttachmentData[] }) => void | Promise<void>;
 }
@@ -32,8 +34,9 @@ export interface KaiChatStore {
 }
 
 export function createKaiChat(options: CreateKaiChatOptions = {}): KaiChatStore {
-  const [messages, setMessagesSignal] = createSignal<ChatMessage[]>(options.initialMessages ?? []);
-  const [suggestions, setSuggestions] = createSignal<string[]>(options.initialSuggestions ?? []);
+  // Copy the seed arrays so a caller mutating the array it passed in can't reach our state.
+  const [messages, setMessagesSignal] = createSignal<ChatMessage[]>([...(options.initialMessages ?? [])]);
+  const [suggestions, setSuggestions] = createSignal<string[]>([...(options.initialSuggestions ?? [])]);
   const [loading, setLoading] = createSignal(false);
 
   const setMessages: SetMessages = (updater) => setMessagesSignal((prev) => updater(prev));

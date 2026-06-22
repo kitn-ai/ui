@@ -9,7 +9,9 @@ import {
 } from '../../src/state';
 
 export interface UseKaiChatOptions {
+  /** Seed messages, read once at mount and copied. Later changes are ignored — drive updates through the returned ops. */
   initialMessages?: ChatMessage[];
+  /** Seed suggestions, read once at mount and copied. Later changes are ignored. */
   initialSuggestions?: string[];
   onSubmit?: (detail: { value: string; attachments: AttachmentData[] }) => void | Promise<void>;
 }
@@ -38,8 +40,9 @@ export interface KaiChatController {
 }
 
 export function useKaiChat(options: UseKaiChatOptions = {}): KaiChatController {
-  const [messages, setMessages] = useState<ChatMessage[]>(options.initialMessages ?? []);
-  const [suggestions, setSuggestions] = useState<string[]>(options.initialSuggestions ?? []);
+  // Copy the seed arrays so a caller mutating the array it passed in can't reach our state.
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [...(options.initialMessages ?? [])]);
+  const [suggestions, setSuggestions] = useState<string[]>(() => [...(options.initialSuggestions ?? [])]);
   const [loading, setLoading] = useState(false);
 
   // Keep onSubmit current without re-binding the listener identity.
