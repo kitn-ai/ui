@@ -231,3 +231,68 @@ describe('ToastRegion — target anchoring honors position', () => {
     expect(region.style.transform).toBe('translateX(-50%)');
   });
 });
+
+describe('ToastRegion — collapsed stacking', () => {
+  const items = (n: number) =>
+    Array.from({ length: n }, (_, i) => base({ id: `s${i}`, message: `S${i}`, duration: 0 }));
+
+  it('default (no stack prop) renders the expanded column — unchanged', () => {
+    const { getByRole } = render(() => <ToastRegion toasts={items(3)} />);
+    const region = getByRole('region');
+    expect(region.dataset.stack).toBe('expanded');
+    // expanded column = the existing flex layout, no per-pill depth wrappers
+    expect(region.querySelector('[data-depth]')).toBeNull();
+  });
+
+  it('collapsed: front pill (newest) has the highest z-index and zero depth', () => {
+    const { getByRole } = render(() => <ToastRegion toasts={items(3)} stack="collapsed" />);
+    const region = getByRole('region');
+    expect(region.dataset.stack).toBe('collapsed');
+    const depths = [...region.querySelectorAll('[data-depth]')] as HTMLElement[];
+    expect(depths.length).toBe(3);
+    // newest-first: depth 0 is the front
+    expect(depths[0].dataset.depth).toBe('0');
+    const z = (el: HTMLElement) => Number(el.style.zIndex);
+    expect(z(depths[0])).toBeGreaterThan(z(depths[1]));
+    expect(z(depths[1])).toBeGreaterThan(z(depths[2]));
+    // resting front pill is not translated/scaled
+    expect(depths[0].style.transform).toMatch(/translateY\(0px\)|scale\(1\)/);
+  });
+
+  it('collapsed: deeper pills are offset + scaled down while resting', () => {
+    const { getByRole } = render(() => <ToastRegion toasts={items(3)} stack="collapsed" />);
+    const d2 = getByRole('region').querySelectorAll('[data-depth]')[2] as HTMLElement;
+    expect(d2.style.transform).toMatch(/scale\(0\.9\)/); // 1 - 0.05*2
+    expect(d2.style.transform).toMatch(/translateY\(/);
+  });
+
+  it('expands on pointerenter and collapses on pointerleave', async () => {
+    const { getByRole } = render(() => <ToastRegion toasts={items(3)} stack="collapsed" />);
+    const region = getByRole('region');
+    expect(region.dataset.expanded).toBeUndefined();
+    fireEvent.pointerEnter(region);
+    await waitFor(() => expect(region.dataset.expanded).toBe(''));
+    fireEvent.pointerLeave(region);
+    await waitFor(() => expect(region.dataset.expanded).toBeUndefined());
+  });
+
+  it('expands on focusin (keyboard) too', async () => {
+    const { getByRole } = render(() => <ToastRegion toasts={items(3)} stack="collapsed" />);
+    const region = getByRole('region');
+    fireEvent.focusIn(region);
+    await waitFor(() => expect(region.dataset.expanded).toBe(''));
+  });
+
+  it('prefers-reduced-motion → renders the expanded column even when stack=collapsed', () => {
+    // jsdom has no window.matchMedia, so stub it (rather than spyOn, which needs
+    // the property to pre-exist) returning matches=true for the reduced-motion query.
+    const prev = window.matchMedia;
+    window.matchMedia = ((q: string) => ({
+      matches: q.includes('reduced-motion'), media: q, onchange: null,
+      addEventListener: () => {}, removeEventListener: () => {}, addListener: () => {}, removeListener: () => {}, dispatchEvent: () => false,
+    })) as unknown as typeof window.matchMedia;
+    const { getByRole } = render(() => <ToastRegion toasts={items(3)} stack="collapsed" />);
+    expect(getByRole('region').querySelector('[data-depth]')).toBeNull();
+    window.matchMedia = prev;
+  });
+});

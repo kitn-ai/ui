@@ -24,6 +24,9 @@ export interface ToastRegionProps {
   /** Max simultaneously-visible toasts; the rest queue and promote as slots
    *  free up. Defaults to `3`. */
   max?: number;
+  /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style
+   *  pile that expands on hover/focus). Attribute: stack. */
+  stack?: 'expanded' | 'collapsed';
   /** When set, this region renders only the toasts scoped to that element and
    *  anchors over its bounds (top-center), following it on scroll/resize. Unset =
    *  the global, viewport-anchored region. */
@@ -32,6 +35,20 @@ export interface ToastRegionProps {
   onDismiss?: (id: string, reason: ToastDismissReason) => void;
   /** Fired when a toast's action button is pressed. */
   onAction?: (id: string, label: string) => void;
+}
+
+/** Reactive `prefers-reduced-motion`. SSR-safe (returns false when no window). */
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = createSignal(
+    typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true,
+  );
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const on = () => setReduced(mq.matches);
+    mq.addEventListener?.('change', on);
+    onCleanup(() => mq.removeEventListener?.('change', on));
+  }
+  return reduced;
 }
 
 // ── Single toast pill ────────────────────────────────────────────────────────
@@ -209,6 +226,39 @@ export function ToastRegion(props: ToastRegionProps) {
   const max = () => props.max ?? 3;
   const position = () => props.position ?? 'top-center';
 
+  const stack = () => props.stack ?? 'expanded';
+  const reduced = usePrefersReducedMotion();
+  const collapsed = () => stack() === 'collapsed' && !reduced();
+  const [open, setOpen] = createSignal(false); // hover/focus-expanded (collapsed mode)
+
+  // Tunable look (IVP). Resting peek + per-depth shrink; uniform expanded row height.
+  const OFFSET = 14;       // px each deeper toast peeks past the one in front
+  const SCALE_STEP = 0.05; // each deeper toast is 5% smaller
+  const ROW_FALLBACK = 48; // px; used until the front pill is measured
+  const GAP = 8;           // matches gap-2 in the expanded column
+
+  const isBottom = () => position().startsWith('bottom');
+  const dir = () => (isBottom() ? -1 : 1);
+
+  // Measure ONE pill (all are single-line/uniform) to size the expanded spacing.
+  const [rowH, setRowH] = createSignal(ROW_FALLBACK);
+  const measure = (el: HTMLElement | undefined) => {
+    if (!el || typeof window === 'undefined') return;
+    const set = () => { const h = el.offsetHeight; if (h) setRowH(h); };
+    set();
+    // jsdom (and SSR) lack ResizeObserver; the fallback height is fine there.
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(set);
+    ro.observe(el);
+    onCleanup(() => ro.disconnect());
+  };
+
+  // The transform for the wrapper at depth i, given the current open/resting state.
+  const depthTransform = (i: number): string => {
+    if (open()) return `translateY(${dir() * (rowH() + GAP) * i}px) scale(1)`;
+    return `translateY(${dir() * OFFSET * i}px) scale(${1 - SCALE_STEP * i})`;
+  };
+
   // Only the toasts for THIS region's target (undefined target = the global one).
   // Newest-first so the freshest toast sits at the top; the queue (past `max`)
   // stays mounted-but-hidden until a slot frees up.
@@ -240,27 +290,71 @@ export function ToastRegion(props: ToastRegionProps) {
   });
 
   return (
-    <div
-      role="region"
-      aria-label="Notifications"
-      aria-live="polite"
-      class={cn(
-        'pointer-events-none fixed z-[100] flex flex-col gap-2',
-        anchor()
-          ? ANCHOR_FLEX[position()]
-          : cn('max-w-[min(28rem,calc(100vw-2rem))]', POSITION_CLASSES[position()]),
-      )}
-      style={anchor() ? anchorStyle(position(), anchor()!) : undefined}
+    <Show
+      when={collapsed()}
+      fallback={
+        <div
+          role="region"
+          aria-label="Notifications"
+          aria-live="polite"
+          data-stack="expanded"
+          class={cn(
+            'pointer-events-none fixed z-[100] flex flex-col gap-2',
+            anchor()
+              ? ANCHOR_FLEX[position()]
+              : cn('max-w-[min(28rem,calc(100vw-2rem))]', POSITION_CLASSES[position()]),
+          )}
+          style={anchor() ? anchorStyle(position(), anchor()!) : undefined}
+        >
+          <For each={visible()}>
+            {(item) => (
+              <Toast
+                item={item}
+                onDismiss={(reason) => props.onDismiss?.(item.id, reason)}
+                onAction={(label) => props.onAction?.(item.id, label)}
+              />
+            )}
+          </For>
+        </div>
+      }
     >
-      <For each={visible()}>
-        {(item) => (
-          <Toast
-            item={item}
-            onDismiss={(reason) => props.onDismiss?.(item.id, reason)}
-            onAction={(label) => props.onAction?.(item.id, label)}
-          />
-        )}
-      </For>
-    </div>
+      <div
+        role="region"
+        aria-label="Notifications"
+        aria-live="polite"
+        data-stack="collapsed"
+        data-expanded={open() ? '' : undefined}
+        onPointerEnter={() => setOpen(true)}
+        onPointerLeave={() => setOpen(false)}
+        onFocusIn={() => setOpen(true)}
+        onFocusOut={() => setOpen(false)}
+        class={cn('pointer-events-none fixed z-[100]', !anchor() && POSITION_CLASSES[position()])}
+        style={anchor() ? anchorStyle(position(), anchor()!) : undefined}
+      >
+        {/* Relative stage; pills are absolutely stacked from the anchored edge. */}
+        <div class="relative" style={{ 'min-width': '16rem', 'max-width': 'min(28rem, calc(100vw - 2rem))' }}>
+          <For each={visible()}>
+            {(item, i) => (
+              <div
+                data-depth={i()}
+                ref={(el) => { if (i() === 0) measure(el); }}
+                class={cn(
+                  'absolute inset-x-0 flex transition-[transform,opacity] duration-200 ease-out',
+                  isBottom() ? 'bottom-0 origin-bottom' : 'top-0 origin-top',
+                  position().endsWith('right') ? 'justify-end' : position().endsWith('left') ? 'justify-start' : 'justify-center',
+                )}
+                style={{ 'z-index': String(max() - i()), transform: depthTransform(i()) }}
+              >
+                <Toast
+                  item={item}
+                  onDismiss={(reason) => props.onDismiss?.(item.id, reason)}
+                  onAction={(label) => props.onAction?.(item.id, label)}
+                />
+              </div>
+            )}
+          </For>
+        </div>
+      </div>
+    </Show>
   );
 }
