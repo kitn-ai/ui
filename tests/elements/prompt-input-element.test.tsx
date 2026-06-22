@@ -8,22 +8,22 @@ test('emits valuechange on input and submit on Enter', async () => {
   document.body.appendChild(el);
   await Promise.resolve();
 
-  const textarea = el.shadowRoot!.querySelector('textarea')!;
-  expect(textarea.placeholder).toBe('Ask...');
+  const editable = el.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
+  expect(editable.getAttribute('data-placeholder')).toBe('Ask...');
 
   let changed: string | null = null;
   let submitted: string | null = null;
   el.addEventListener('kai-value-change', (e) => (changed = (e as CustomEvent).detail.value));
   el.addEventListener('kai-submit', (e) => (submitted = (e as CustomEvent).detail.value));
 
-  textarea.value = 'hello';
+  editable.textContent = 'hello';
   // jsdom shadow-DOM events must be `composed:true` to cross the shadow boundary
   // and reach SolidJS's document-level delegated listeners (mirrors real browser
   // behaviour where native input/keydown events are always composed).
-  textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+  editable.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
   expect(changed).toBe('hello');
 
-  textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
+  editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
   expect(submitted).toBe('hello');
 
   el.remove();
@@ -72,7 +72,11 @@ test('suggestionMode "fill": clicking a suggestion fills the input and emits sug
   suggestionChip(el, 'Bye').click();
   expect(clicked).toBe('Bye');   // fill mode emits suggestionclick
   expect(submitted).toBe(null);  // and does NOT submit
-  expect(el.shadowRoot!.querySelector('textarea')!.value).toBe('Bye'); // filled into the input
+
+  // Wait for controlled re-render to reflect filled value
+  await Promise.resolve();
+  const editable = el.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
+  expect(editable.textContent).toBe('Bye'); // filled into the input
 
   el.remove();
 });
@@ -82,20 +86,22 @@ test('disallows leading whitespace at the start of the prompt', async () => {
   document.body.appendChild(el);
   await Promise.resolve();
 
-  const textarea = el.shadowRoot!.querySelector('textarea')!;
+  const editable = el.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
   let changed: string | null = null;
   el.addEventListener('kai-value-change', (e) => (changed = (e as CustomEvent).detail.value));
 
   // Leading spaces are stripped on input.
-  textarea.value = '   hello';
-  textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
-  expect(textarea.value).toBe('hello');
+  editable.textContent = '   hello';
+  editable.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+  await Promise.resolve();
+  expect(editable.textContent).toBe('hello');
   expect(changed).toBe('hello');
 
   // A lone leading space collapses to empty (hitting space at the start does nothing).
-  textarea.value = ' ';
-  textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
-  expect(textarea.value).toBe('');
+  editable.textContent = ' ';
+  editable.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+  await Promise.resolve();
+  expect(editable.textContent).toBe('');
 
   el.remove();
 });
@@ -108,10 +114,10 @@ test('slash command: selecting (Enter) inserts the command into the input', asyn
   document.body.appendChild(el);
   await Promise.resolve();
 
-  const textarea = el.shadowRoot!.querySelector('textarea')!;
+  const editable = el.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
   // Type a slash query to open the palette
-  textarea.value = '/sum';
-  textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+  editable.textContent = '/sum';
+  editable.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
   await Promise.resolve();
   await Promise.resolve();
 
@@ -119,10 +125,10 @@ test('slash command: selecting (Enter) inserts the command into the input', asyn
   expect(el.shadowRoot!.textContent).toContain('/summarize');
 
   // Press Enter to select — should insert the command label into the input
-  textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
+  editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
   await Promise.resolve();
 
-  expect(textarea.value.trim()).toBe('/summarize');
+  expect(editable.textContent!.trim()).toBe('/summarize');
 
   el.remove();
 });
@@ -134,9 +140,9 @@ test('send button is disabled when loading even with non-empty value', async () 
   document.body.appendChild(el);
   await Promise.resolve();
 
-  const textarea = el.shadowRoot!.querySelector('textarea')!;
-  textarea.value = 'something';
-  textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+  const editable = el.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
+  editable.textContent = 'something';
+  editable.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
 
   el.loading = true;
   await Promise.resolve();
@@ -158,8 +164,8 @@ test('send button and textarea have accessible names (a11y A1)', async () => {
   const send = el.shadowRoot!.querySelector<HTMLButtonElement>('[data-testid="send"]')!;
   expect(send.getAttribute('aria-label')).toBe('Send message');
 
-  const textarea = el.shadowRoot!.querySelector('textarea')!;
-  expect(textarea.getAttribute('aria-label')).toBe('Ask anything...');
+  const editable = el.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
+  expect(editable.getAttribute('aria-label')).toBe('Ask anything...');
 
   el.remove();
 });
@@ -171,8 +177,8 @@ test('textarea always has a non-empty accessible name', async () => {
   const withDefault = document.createElement('kai-prompt-input');
   document.body.appendChild(withDefault);
   await Promise.resolve();
-  const defaultTextarea = withDefault.shadowRoot!.querySelector('textarea')!;
-  expect(defaultTextarea.getAttribute('aria-label')).toBeTruthy();
+  const defaultEditable = withDefault.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
+  expect(defaultEditable.getAttribute('aria-label')).toBeTruthy();
   withDefault.remove();
 
   const emptyPlaceholder = document.createElement('kai-prompt-input') as HTMLElement & {
@@ -181,7 +187,7 @@ test('textarea always has a non-empty accessible name', async () => {
   emptyPlaceholder.placeholder = '';
   document.body.appendChild(emptyPlaceholder);
   await Promise.resolve();
-  const emptyTextarea = emptyPlaceholder.shadowRoot!.querySelector('textarea')!;
-  expect(emptyTextarea.getAttribute('aria-label')).toBe('Message');
+  const emptyEditable = emptyPlaceholder.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
+  expect(emptyEditable.getAttribute('aria-label')).toBe('Message');
   emptyPlaceholder.remove();
 });

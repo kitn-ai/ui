@@ -98,7 +98,7 @@ export interface PromptInputTextareaProps extends JSX.TextareaHTMLAttributes<HTM
 }
 
 function PromptInputTextarea(props: PromptInputTextareaProps) {
-  const [local] = splitProps(props, ['class', 'placeholder']);
+  const [local] = splitProps(props, ['class', 'placeholder', 'aria-label']);
   const ctx = usePromptInput();
   const config = useChatConfig();
 
@@ -118,11 +118,15 @@ function PromptInputTextarea(props: PromptInputTextareaProps) {
       bare
       value={ctx.value()}
       placeholder={local.placeholder as string | undefined}
+      ariaLabel={local['aria-label'] as string | undefined}
       disabled={ctx.disabled}
       maxHeight={ctx.maxHeight}
       editableClass={editableClass()}
       editableRef={(el) => ctx.setTextareaRef(el)}
-      onChange={(c) => ctx.setValue(c.text)}
+      // A prompt can't start with whitespace — strip leading whitespace from the
+      // value (parity with the old textarea). The controlled round-trip re-renders
+      // the editable, so the stripped value is reflected in the DOM too.
+      onChange={(c) => ctx.setValue(c.text.replace(/^\s+/, ''))}
       onSubmit={() => { if (!ctx.disabled) ctx.onSubmit?.(); }}
     />
   );

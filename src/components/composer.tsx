@@ -68,6 +68,9 @@ export interface ComposerProps {
   /** Override the editable element's classes (used in `bare` mode to match an
    *  existing input's exact look). The placeholder mirrors these for alignment. */
   editableClass?: string;
+  /** Accessible name for the editable (role=textbox). Falls back to the
+   *  placeholder, then "Message input". */
+  ariaLabel?: string;
   /** Receive the editable element (e.g. to register it for click-to-focus). */
   editableRef?: (el: HTMLDivElement) => void;
   onChange?: (change: ComposerChange) => void;
@@ -694,7 +697,7 @@ export function Composer(props: ComposerProps): JSX.Element {
           contentEditable={props.disabled ? false : ('plaintext-only' as unknown as boolean)}
           role="textbox"
           aria-multiline="true"
-          aria-label={props.placeholder || 'Message input'}
+          aria-label={props.ariaLabel || props.placeholder || 'Message input'}
           onInput={handleInput}
           onKeyDown={handleKeyDown}
           onFocus={handleFocus}

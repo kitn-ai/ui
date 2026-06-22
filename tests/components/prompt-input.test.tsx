@@ -4,35 +4,37 @@ import { PromptInput, PromptInputTextarea } from '../../src/components/prompt-in
 
 describe('PromptInput', () => {
   it('renders textarea with placeholder', () => {
-    render(() => (
+    const { container } = render(() => (
       <PromptInput onSubmit={() => {}}>
         <PromptInputTextarea placeholder="Type here..." />
       </PromptInput>
     ));
-    expect(screen.getByPlaceholderText('Type here...')).toBeTruthy();
+    const editable = container.querySelector('[data-kai-composer-editable]') as HTMLElement;
+    expect(editable).toBeTruthy();
+    expect(editable.getAttribute('data-placeholder')).toBe('Type here...');
   });
 
   it('calls onSubmit when Enter is pressed without Shift', async () => {
     const onSubmit = vi.fn();
-    render(() => (
+    const { container } = render(() => (
       <PromptInput value="Hello" onSubmit={onSubmit}>
         <PromptInputTextarea placeholder="Type..." />
       </PromptInput>
     ));
-    const textarea = screen.getByPlaceholderText('Type...');
-    await fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false });
+    const editable = container.querySelector('[data-kai-composer-editable]') as HTMLElement;
+    await fireEvent.keyDown(editable, { key: 'Enter', shiftKey: false });
     expect(onSubmit).toHaveBeenCalled();
   });
 
   it('does not submit on Shift+Enter', async () => {
     const onSubmit = vi.fn();
-    render(() => (
+    const { container } = render(() => (
       <PromptInput onSubmit={onSubmit}>
         <PromptInputTextarea placeholder="Type..." />
       </PromptInput>
     ));
-    const textarea = screen.getByPlaceholderText('Type...');
-    await fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: true });
+    const editable = container.querySelector('[data-kai-composer-editable]') as HTMLElement;
+    await fireEvent.keyDown(editable, { key: 'Enter', shiftKey: true });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });
