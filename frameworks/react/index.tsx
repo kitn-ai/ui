@@ -8,7 +8,7 @@
 // (tsconfig.react.json) does not walk the Solid element source under react-jsx.
 import { createWebComponent, type WebComponentProps } from './runtime';
 export { useKaiChat } from './use-kai-chat';
-export type { UseKaiChatOptions, KaiChatController } from './use-kai-chat';
+export type { UseKaiChatOptions, KaiChatController, ChatMessage } from './use-kai-chat';
 
 
 export interface ArtifactProps extends WebComponentProps {

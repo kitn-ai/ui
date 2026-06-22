@@ -11,22 +11,12 @@ import {
   Video,
   X,
 } from 'lucide-solid';
+import type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from './attachment-types';
+export type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from './attachment-types';
 
 // ============================================================================
 // Types
 // ============================================================================
-
-export interface AttachmentData {
-  id: string;
-  type: 'file' | 'source-document';
-  filename?: string;
-  mediaType?: string;
-  url?: string;
-  title?: string;
-}
-
-export type AttachmentMediaCategory = 'image' | 'video' | 'audio' | 'document' | 'source' | 'unknown';
-export type AttachmentVariant = 'grid' | 'inline' | 'list';
 
 const mediaCategoryIcons: Record<AttachmentMediaCategory, typeof ImageIcon> = {
   audio: Music2,

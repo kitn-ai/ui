@@ -283,3 +283,6 @@ export type {
   AttachmentInfoProps, AttachmentRemoveProps, AttachmentEmptyProps,
   AttachmentHoverCardProps, AttachmentHoverCardTriggerProps, AttachmentHoverCardContentProps,
 } from './components/attachments';
+
+// Chat message types — public API for consumers who need to type their own message arrays.
+export type { ChatMessage, ChatMessageAction, CustomAction, AvatarData, FeedbackVote } from './elements/chat-types';

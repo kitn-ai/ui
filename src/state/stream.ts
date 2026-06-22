@@ -1,6 +1,6 @@
 // src/state/stream.ts
 import type { ChatMessage } from '../elements/chat-types';
-import type { ToolPart } from '../components/tool';
+import type { ToolPart } from '../components/tool-types';
 
 /** The one universal contract: a functional-updater setter (React setState shape). */
 export type SetMessages = (updater: (prev: ChatMessage[]) => ChatMessage[]) => void;

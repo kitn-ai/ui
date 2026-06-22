@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { ChatMessage } from '../../src/elements/chat-types';
-import type { AttachmentData } from '../../src/components/attachments';
+export type { ChatMessage } from '../../src/elements/chat-types';
+import type { AttachmentData } from '../../src/components/attachment-types';
 import {
   appendMessage, updateMessage, removeMessage, addSuggestion, removeSuggestion,
   createAssistantStream, onStreamSettled, type AssistantStream, type SetMessages,

@@ -3,15 +3,8 @@ import { cn } from '../utils/cn';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../ui/collapsible';
 import { Button } from '../ui/button';
 import { CheckCircle, ChevronDown, Loader2, Settings, XCircle } from 'lucide-solid';
-
-export interface ToolPart {
-  type: string;
-  state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
-  input?: Record<string, unknown>;
-  output?: Record<string, unknown>;
-  toolCallId?: string;
-  errorText?: string;
-}
+import type { ToolPart } from './tool-types';
+export type { ToolPart } from './tool-types';
 
 export interface ToolProps {
   toolPart: ToolPart;

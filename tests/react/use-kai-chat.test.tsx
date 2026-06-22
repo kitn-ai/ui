@@ -3,7 +3,7 @@
 // the prebuilt @kitn.ai/ui/elements bundle and the test renders the real <Chat>).
 import { render, renderHook, act, cleanup } from '@testing-library/react';
 import { afterEach, expect, test } from 'vitest';
-import { createElement } from 'react';
+import { createElement, type ComponentProps } from 'react';
 import { Chat, useKaiChat } from '@kitn.ai/ui/react';
 
 afterEach(cleanup);
@@ -34,7 +34,7 @@ test('bind drives a real <Chat>: messages reach the element as a live property',
   let api: ReturnType<typeof useKaiChat> | undefined;
   function Harness() {
     api = useKaiChat({ initialMessages: [{ id: '1', role: 'user', content: 'hi' }] });
-    return createElement(Chat, { ...api.bind } as Record<string, unknown>);
+    return createElement(Chat, { ...api.bind } as unknown as ComponentProps<typeof Chat>);
   }
   const { container } = render(createElement(Harness));
   await flush();
