@@ -27,3 +27,21 @@ export function normalizeValue(value: string | ComposerDoc | null | undefined): 
   }
   return out;
 }
+
+export function serializeToText(
+  doc: ComposerDoc,
+  opts?: { entity?: (e: EntityRef) => string },
+): string {
+  let out = '';
+  for (const seg of doc) {
+    if (seg.type === 'text') out += seg.text;
+    else out += opts?.entity ? opts.entity(seg.entity) : (seg.entity.promptText ?? seg.entity.label);
+  }
+  return out;
+}
+export function entitiesOf(doc: ComposerDoc): EntityRef[] {
+  return doc.filter((s): s is Extract<Segment, { type: 'entity' }> => s.type === 'entity').map((s) => s.entity);
+}
+export function docIsEmpty(doc: ComposerDoc): boolean {
+  return doc.every((s) => s.type === 'text' && s.text.length === 0);
+}
