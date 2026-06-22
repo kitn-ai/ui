@@ -335,7 +335,12 @@ export const DeclarativeSlashCommands: Story = {
 // items go iconless to show both styles.
 const recordIcon =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><circle cx='16' cy='16' r='11' fill='%23e11d48'/></svg>";
+// Simple colored app-tile icons (Codex-style) so plugins are visually distinct.
+const tile = (hex: string) =>
+  `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect width='32' height='32' rx='7' fill='%23${hex}'/></svg>`;
 
+// There is NO cap on items — the menu shows as many as you provide (and scrolls).
+// This set is intentionally large to demonstrate that.
 const ENTITY_TRIGGERS: TriggerDef[] = [
   {
     // `/` → skills (instructions you invoke).
@@ -344,6 +349,10 @@ const ENTITY_TRIGGERS: TriggerDef[] = [
     items: [
       { id: 'summarize', label: 'Summarize', description: 'Summarize the thread', promptText: 'Summarize the thread.' },
       { id: 'explain', label: 'Explain', description: "Explain like I'm five", promptText: 'Explain this simply.' },
+      { id: 'translate', label: 'Translate', description: 'Translate to English', promptText: 'Translate to English.' },
+      { id: 'rewrite', label: 'Rewrite', description: 'Rewrite for clarity', promptText: 'Rewrite this for clarity.' },
+      { id: 'brainstorm', label: 'Brainstorm', description: 'Generate ideas', promptText: 'Brainstorm ideas.' },
+      { id: 'fix-grammar', label: 'Fix grammar', description: 'Correct spelling & grammar', promptText: 'Fix the grammar.' },
     ],
   },
   {
@@ -357,11 +366,18 @@ const ENTITY_TRIGGERS: TriggerDef[] = [
         description: "Record what I'm doing on my Mac and turn it into a Skill",
         promptText: 'Use the Record & Replay tool.',
         data: { plugin: 'record-replay', tool: 'record_and_replay' } },
-      { id: 'documents', label: 'Documents', kind: 'plugin', group: 'Plugins',
+      { id: 'documents', label: 'Documents', kind: 'plugin', group: 'Plugins', icon: tile('2563eb'),
         description: 'Create and edit document artifacts', data: { plugin: 'documents' } },
+      { id: 'pdf', label: 'PDF', kind: 'plugin', group: 'Plugins', icon: tile('dc2626'),
+        description: 'Read, create, and verify PDF files', data: { plugin: 'pdf' } },
+      { id: 'spreadsheets', label: 'Spreadsheets', kind: 'plugin', group: 'Plugins', icon: tile('16a34a'),
+        description: 'Create and edit spreadsheet files', data: { plugin: 'spreadsheets' } },
+      { id: 'presentations', label: 'Presentations', kind: 'plugin', group: 'Plugins', icon: tile('ea580c'),
+        description: 'Create and edit presentations', data: { plugin: 'presentations' } },
       { id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents',
         description: 'Reviews diffs for bugs', promptText: 'Hand this to the Code Reviewer agent.' },
       { id: 'researcher', label: 'Researcher', group: 'Agents', description: 'Deep multi-source research' },
+      { id: 'planner', label: 'Planner', group: 'Agents', description: 'Breaks work into a step-by-step plan' },
     ],
   },
 ];
