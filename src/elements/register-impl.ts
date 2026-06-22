@@ -56,3 +56,5 @@ import './choice';
 import './cards';
 // Dual-response comparison (preference capture)
 import './compare';
+// Rich text composer with entity pills, trigger menus, and keyword highlighting
+import './composer';
