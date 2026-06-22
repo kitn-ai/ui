@@ -166,6 +166,37 @@ test.describe('kai-composer IVP', () => {
     await expect(placeholder).toBeVisible();         // reappears once cleared (lone <br> ⇒ empty)
   });
 
+  test('undo/redo steps through pills correctly (custom doc-snapshot history)', async ({ page }) => {
+    await page.goto(SKILLS_STORY);
+    const ed = editable(page);
+    await expect(ed).toBeVisible();
+    await ed.click();
+    await page.keyboard.type('hello ');
+    await page.keyboard.type('/');
+    await expect(menuOptions(page).first()).toBeVisible();
+    await page.keyboard.press('Enter');            // insert pill
+    await expect(pills(page)).toHaveCount(1);
+    await page.keyboard.type(' world');
+    await expect(ed).toContainText('world');
+    await expect(pills(page)).toHaveCount(1);
+
+    // Undo #1: removes " world", pill stays.
+    await page.keyboard.press('Meta+z');
+    await expect(ed).not.toContainText('world');
+    await expect(pills(page)).toHaveCount(1);
+    // Undo #2: removes the PILL (native undo left it stuck — this is the core fix).
+    await page.keyboard.press('Meta+z');
+    await expect(pills(page)).toHaveCount(0);
+
+    // Redo: the pill comes back intact (native redo corrupted ordering).
+    await page.keyboard.press('Meta+Shift+z'); // re-add pill step
+    await expect(pills(page)).toHaveCount(1);
+    await expect(pills(page).first()).toContainText('Record & Replay');
+    await page.keyboard.press('Meta+Shift+z'); // re-add " world"
+    await expect(ed).toContainText('world');
+    await expect(pills(page)).toHaveCount(1);
+  });
+
   test('emits focus/blur/keydown/focusin/focusout on the host (kai-* + native composed)', async ({ page }) => {
     await page.goto(SKILLS_STORY);
     await expect(editable(page)).toBeVisible();

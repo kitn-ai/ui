@@ -31,6 +31,7 @@ import {
 import { activeTriggerFor } from '../primitives/composer-triggers';
 import { usePosition, useDismiss, createPresence } from '../ui/overlay';
 import { findHighlightMatches, applyHighlights } from './composer-highlight';
+import { createHistory } from './composer-history';
 
 export interface TriggerItem {
   id: string;
@@ -167,11 +168,59 @@ function getCaretRect(root: HTMLElement): DOMRect | null {
   return rect.width > 0 || rect.height > 0 ? rect : null;
 }
 
+/**
+ * Place the caret at a stripped-text offset (inverse of getCaretTextOffset).
+ * Walks pill-skipping text nodes; pills are 0-width in this coordinate space, so
+ * an offset lands in the surrounding text. Best-effort: falls back to end-of-content.
+ */
+function setCaretToOffset(root: HTMLElement, offset: number): void {
+  const sel = getActiveSelection(root);
+  if (!sel) return;
+  const range = root.ownerDocument.createRange();
+  const walker = createTextWalker(root);
+  let remaining = offset;
+  let node = walker.nextNode() as Text | null;
+  let placed = false;
+  while (node) {
+    const raw = node.textContent ?? '';
+    const strippedLen = raw.split(ZWSP).join('').length;
+    if (remaining <= strippedLen) {
+      // Convert the stripped offset to a raw offset within this node.
+      let rawOffset = 0;
+      let seen = 0;
+      while (rawOffset < raw.length && seen < remaining) {
+        if (raw[rawOffset] !== ZWSP) seen++;
+        rawOffset++;
+      }
+      // Skip past any ZWSP filler so the caret sits after the pill marker.
+      while (rawOffset < raw.length && raw[rawOffset] === ZWSP) rawOffset++;
+      range.setStart(node, rawOffset);
+      placed = true;
+      break;
+    }
+    remaining -= strippedLen;
+    node = walker.nextNode() as Text | null;
+  }
+  if (!placed) {
+    range.selectNodeContents(root);
+    range.collapse(false);
+  } else {
+    range.collapse(true);
+  }
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
 export function Composer(props: ComposerProps): JSX.Element {
   let editable!: HTMLDivElement;
   let menuRef: HTMLDivElement | undefined;
   const highlightName = `kai-composer-highlight-${createUniqueId()}`;
   const [empty, setEmpty] = createSignal(docIsEmpty(normalizeValue(props.value)));
+
+  // --- Undo/redo history (we own it; native contenteditable undo corrupts pills) ---
+  const history = createHistory({ doc: normalizeValue(props.value), caret: 0 });
+  let lastEditAt = 0;
+  const COALESCE_MS = 500;
 
   // --- Trigger menu state ---
   type ActiveTriggerState = {
@@ -258,6 +307,7 @@ export function Composer(props: ComposerProps): JSX.Element {
     renderDoc(editable, normalizeValue(props.value));
     setEmpty(docIsEmpty(parseDom(editable)));
     recomputeHighlights();
+    history.reset({ doc: parseDom(editable), caret: 0 });
   });
 
   // Re-render when the controlled `value` prop changes, but ONLY when the
@@ -268,6 +318,7 @@ export function Composer(props: ComposerProps): JSX.Element {
     renderDoc(editable, normalizeValue(v));
     setEmpty(docIsEmpty(parseDom(editable)));
     recomputeHighlights();
+    history.reset({ doc: parseDom(editable), caret: 0 }); // external value = new baseline
   }, { defer: true }));
 
   function updateTriggerState() {
@@ -294,13 +345,41 @@ export function Composer(props: ComposerProps): JSX.Element {
     }
   }
 
-  const handleInput = () => {
-    const change = snapshot();
+  // Update derived state + notify the consumer (no history side effects).
+  const syncState = (change: ComposerChange) => {
     setEmpty(docIsEmpty(change.doc));
     props.onChange?.(change);
     updateTriggerState();
     recomputeHighlights();
   };
+
+  // Native input (typing / deleting): sync + record a (time-coalesced) history step.
+  const handleInput = () => {
+    const change = snapshot();
+    syncState(change);
+    const now = Date.now();
+    history.record({ doc: change.doc, caret: getCaretTextOffset(editable) }, now - lastEditAt < COALESCE_MS);
+    lastEditAt = now;
+  };
+
+  // Structural edit (pill insert/delete): sync + record a DISTINCT history step.
+  const commitChange = () => {
+    const change = snapshot();
+    syncState(change);
+    history.record({ doc: change.doc, caret: getCaretTextOffset(editable) }, false);
+    lastEditAt = 0; // next typing starts its own entry
+  };
+
+  // Restore a snapshot (undo/redo). Re-renders the doc (pills included) + caret,
+  // syncs derived state, but does NOT push a new history entry.
+  const applySnapshot = (snap: { doc: ComposerDoc; caret: number }) => {
+    renderDoc(editable, snap.doc);
+    setCaretToOffset(editable, snap.caret);
+    syncState(snapshot());
+    lastEditAt = 0;
+  };
+  const doUndo = () => { const s = history.undo(); if (s) applySnapshot(s); };
+  const doRedo = () => { const s = history.redo(); if (s) applySnapshot(s); };
 
   // Also update trigger state on selectionchange (while focused). These handlers
   // double as the consumer-facing focus/blur surface (focus/blur are NOT composed,
@@ -399,13 +478,27 @@ export function Composer(props: ComposerProps): JSX.Element {
     sel.addRange(newRange);
 
     props.onEntityAdd?.(entity);
-    handleInput();
+    commitChange();
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
     // Notify the consumer of every keydown (incl. keys the composer handles below).
     // The original event is passed so a consumer can preventDefault if desired.
     props.onKeydown?.(e);
+
+    // --- Undo / redo (we own the history; native contenteditable undo corrupts
+    //     pills, so suppress it and drive our doc-snapshot stack instead) ---
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'z' || e.key === 'Z')) {
+      e.preventDefault();
+      if (e.shiftKey) doRedo();
+      else doUndo();
+      return;
+    }
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'y' || e.key === 'Y')) { // Windows redo
+      e.preventDefault();
+      doRedo();
+      return;
+    }
 
     // --- Trigger menu keyboard navigation (takes priority) ---
     if (menuOpen() && filteredItems().length > 0) {
@@ -498,7 +591,7 @@ export function Composer(props: ComposerProps): JSX.Element {
           if (zwspAfterPill) zwspAfterPill.remove();
           pillEl.remove();
           if (entity) props.onEntityRemove?.(entity);
-          handleInput();
+          commitChange();
           return;
         }
       }
@@ -538,7 +631,7 @@ export function Composer(props: ComposerProps): JSX.Element {
           }
           pillEl.remove();
           if (entity) props.onEntityRemove?.(entity);
-          handleInput();
+          commitChange();
           return;
         }
       }
