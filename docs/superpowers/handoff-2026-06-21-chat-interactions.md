@@ -1,5 +1,8 @@
 # Handoff — chat-interaction components (2026-06-21)
 
+> ## ✅ SHIPPED + RELEASED (2026-06-22) — this doc is now historical
+> PR **#102** (feature) and **#101** (release-please) both merged to `main`; **`@kitn.ai/ui@0.17.0` published to npm** (GitHub release `@kitn.ai/ui-v0.17.0`, docs redeployed). Everything below shipped, **plus** the Session-2.5 follow-ups merged after this doc was last written: compare/toast on the shared Playground, the on-canvas spatial toast position picker, the Sonner-style collapsed `stack` mode (pause-all-on-hover + no dismiss flicker + focusout fix), the controlled-demo toast-removal bugfix, `configureToasts` exported from `.`/`./elements`, and the MCP scaffold stacking note. `feat/chat-interactions` is merged/abandoned — work on `main`. **Next:** consumer state-helpers/hooks + kai-composer rich input (specs/plans staged locally on main; see memory). The TL;DR below reflects the pre-merge state.
+
 ## TL;DR
 **PR #102 (`kitn-ai/ui`) is OPEN, ready for Rob's review/merge.** Five new chat-interaction features + a kit-wide animation fix, all built, browser-IVP'd, documented, MCP-wired, with Storybook stories. Then a **Session 2** (below) added LIVE docs demos for all 5 components + light/dark harness fixes + a toast position-in-target capability + a toast trigger-button demo + a landing fix. **Full suite green: 1364 tests, typecheck (4 passes) clean, docs build 104 pages.**
 
