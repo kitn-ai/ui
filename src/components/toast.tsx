@@ -232,7 +232,7 @@ export function ToastRegion(props: ToastRegionProps) {
   const [open, setOpen] = createSignal(false); // hover/focus-expanded (collapsed mode)
 
   // Tunable look (IVP). Resting peek + per-depth shrink; uniform expanded row height.
-  const OFFSET = 14;       // px each deeper toast peeks past the one in front
+  const OFFSET = 20;       // px each deeper toast peeks past the one in front
   const SCALE_STEP = 0.05; // each deeper toast is 5% smaller
   const ROW_FALLBACK = 48; // px; used until the front pill is measured
   const GAP = 8;           // matches gap-2 in the expanded column
