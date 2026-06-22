@@ -266,6 +266,29 @@ You can trigger either option from the streaming completion (auto-read replies) 
 
 > **Speech-to-text** (the other direction) is already built in — the kit ships a `VoiceInput` component for capturing microphone input. See Storybook (`npm run dev`).
 
+## State helpers & hooks
+
+`@kitn.ai/ui/state` ships immutable helpers (`appendMessage`, `upsertMessage`, `updateMessage`, `removeMessage`, `appendContent`) and a streaming handle (`createAssistantStream`) so you don't hand-roll array mutations. React apps get `useKaiChat` (from `@kitn.ai/ui/react`); SolidJS apps get `createKaiChat` (from `@kitn.ai/ui`). Both return a `bind` object to spread directly onto the element:
+
+```tsx
+import { Chat, useKaiChat } from '@kitn.ai/ui/react';
+import { createAssistantStream } from '@kitn.ai/ui/state';
+
+function App() {
+  const chat = useKaiChat({
+    async onSubmit({ value }) {
+      chat.append({ id: crypto.randomUUID(), role: 'user', content: value });
+      const s = chat.streamAssistant();
+      for await (const part of backend(value)) s.appendText(part);
+      s.done();
+    },
+  });
+  return <Chat {...chat.bind} />;
+}
+```
+
+Each hook instance owns its own message list — instantiate multiple times for multiple independent chats on one page. Full API: [ui.kitn.ai/guides/state-and-hooks/](https://ui.kitn.ai/guides/state-and-hooks/).
+
 ## Code highlighting (optional, on-demand)
 
 Syntax highlighting uses [Shiki](https://shiki.style) and is wired to be as light as possible:

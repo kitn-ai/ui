@@ -75,6 +75,7 @@ export default defineConfig({
               { label: 'Introduction', slug: 'guides/introduction' },
               { label: 'Installation', slug: 'guides/installation' },
               { label: 'Getting Started', slug: 'guides/getting-started' },
+              { label: 'State helpers & hooks', slug: 'guides/state-and-hooks' },
               { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
               { label: 'Loading', slug: 'guides/loading' },
               { label: 'Theming', slug: 'guides/theming' },
