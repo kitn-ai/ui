@@ -1,7 +1,7 @@
 # Design: `kai-composer` — a structured rich input (contenteditable, not an RTE)
 
 **Date:** 2026-06-21
-**Status:** Approved — building (prototype)
+**Status:** Built (prototype) — branch `worktree-kai-composer`. See "Prototype status" at the end.
 **Working name:** `<kai-composer>` (provisional; element prefix `kai-` per the repo contract)
 
 ## Summary
@@ -203,3 +203,15 @@ Built in an **isolated git worktree**. Implementation follows TDD per unit; work
 
 - **Element name:** `kai-composer` (confirmed).
 - **React wrapper:** out of scope for v1 (prototype is element/Solid only); add later.
+
+## Prototype status (built 2026-06-21)
+
+Implemented on branch `worktree-kai-composer` via TDD. Files: `src/primitives/composer-model.ts`, `composer-triggers.ts`; `src/components/composer.tsx`, `composer-dom.ts`, `composer-highlight.ts`; `src/elements/composer.tsx` (registers `kai-composer`). Plan: `docs/superpowers/plans/2026-06-21-kai-composer-rich-input.md`.
+
+**Verified:** 36 unit tests (jsdom) + 10 Storybook browser tests (Playwright + axe) + a 3-case Playwright IVP (`tests/e2e/composer-ivp.spec.ts`) that drives the real element with native keyboard. Full suite, typecheck (4 passes), and `npm run build` (47 elements) all green.
+
+**Notable find:** `document.getSelection()` retargets out of an open Shadow Root in Chromium, so the first real-browser run had pills landing in the light DOM and submit never firing — fixed by `ShadowRoot.getSelection()` (`getActiveSelection` in `composer.tsx`). Every jsdom/synthetic test passed despite this; only the IVP caught it.
+
+**Demo:** `npm run dev` → Storybook → **Elements/Composer** (`Skills`, `Mentions`, `Prefilled`, `Highlighted`) or **Solid (Advanced)/Elements/Composer**. IVP: `npm run test:composer-ivp`.
+
+**Known v1 limitations (deferred):** highlight `highlights` prop isn't reactive after mount (recomputed on input/mount only); per-rule highlight `class` not yet wired (single default highlight); declarative `<kai-trigger>` light-DOM children not read (prop-driven `triggers` only); a trigger char typed immediately adjacent to a pill (no space) isn't detected; `Composer` is one large file (~600 lines) — extract the trigger-menu + caret helpers when promoting past prototype.
