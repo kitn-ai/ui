@@ -529,7 +529,7 @@ export function Composer(props: ComposerProps): JSX.Element {
         contentEditable={props.disabled ? false : ('plaintext-only' as unknown as boolean)}
         role="textbox"
         aria-multiline="true"
-        aria-label={props.placeholder}
+        aria-label={props.placeholder || 'Message input'}
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onFocus={onFocus}
