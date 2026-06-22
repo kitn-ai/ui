@@ -116,10 +116,15 @@ export function ChatThread(props: ChatThreadProps) {
   const [attachments, setAttachments] = createSignal<AttachmentData[]>([]);
   const current = () => props.value ?? internal();
   const handleChange = (v: string) => { setInternal(v); props.onValueChange?.(v); };
-  const handleSubmit = () => { props.onSubmit?.({ value: current(), attachments: attachments() }); setAttachments([]); };
+  // After a send, reset the composer. Clear the internal draft ONLY when the value is
+  // uncontrolled (props.value === undefined) — a controlled host owns its own value and
+  // clears it itself. This lets the batteries-included hooks (useKaiChat/createKaiChat),
+  // whose `bind` does not control `value`, get a clean composer after each submit.
+  const afterSubmit = () => { setAttachments([]); if (props.value === undefined) setInternal(''); };
+  const handleSubmit = () => { props.onSubmit?.({ value: current(), attachments: attachments() }); afterSubmit(); };
   const handleSuggestionClick = (v: string) => {
     if ((props.suggestionMode ?? 'submit') === 'fill') { handleChange(v); props.onSuggestionClick?.(v); }
-    else { props.onSubmit?.({ value: v, attachments: attachments() }); setAttachments([]); }
+    else { props.onSubmit?.({ value: v, attachments: attachments() }); afterSubmit(); }
   };
   const showHeader = () => !!(props.chatTitle || props.models || props.context || props.headerStart || props.headerEnd);
   // Suggestions are conversation starters: show only on an empty thread unless

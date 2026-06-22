@@ -173,3 +173,34 @@ describe('ChatThread action-row feedback', () => {
     expect(toastSpy).not.toHaveBeenCalled();
   });
 });
+
+describe('ChatThread composer reset on submit', () => {
+  it('clears the typed draft after submit when the value is UNCONTROLLED', () => {
+    // No `value` prop → the composer owns its draft. After a send it must reset,
+    // so the batteries-included hooks (useKaiChat/createKaiChat) — whose `bind`
+    // does not control `value` — get a clean composer each turn.
+    const onSubmit = vi.fn();
+    const { getByRole } = render(() => <ChatThread messages={[]} onSubmit={onSubmit} />);
+    const ta = getByRole('textbox') as HTMLTextAreaElement;
+
+    fireEvent.input(ta, { target: { value: 'hello there' } });
+    expect(ta.value).toBe('hello there');
+
+    fireEvent.keyDown(ta, { key: 'Enter' });
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ value: 'hello there' }));
+    expect(ta.value).toBe(''); // draft cleared
+  });
+
+  it('does NOT clear a CONTROLLED value on submit (the host owns it)', () => {
+    const onSubmit = vi.fn();
+    const { getByRole } = render(() => (
+      <ChatThread messages={[]} value="locked" onSubmit={onSubmit} />
+    ));
+    const ta = getByRole('textbox') as HTMLTextAreaElement;
+    expect(ta.value).toBe('locked');
+
+    fireEvent.keyDown(ta, { key: 'Enter' });
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ value: 'locked' }));
+    expect(ta.value).toBe('locked'); // controlled — unchanged until the host clears it
+  });
+});
