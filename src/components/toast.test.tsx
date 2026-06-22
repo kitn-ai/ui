@@ -86,6 +86,19 @@ describe('Toast — auto-dismiss', () => {
     vi.advanceTimersByTime(1);             // remaining ~1000ms elapses
     await vi.waitFor(() => expect(onDismiss).toHaveBeenCalledWith('timeout'));
   });
+
+  it('holds the timer while `paused` (the whole stack is hovered) and resumes when unpaused', async () => {
+    const onDismiss = vi.fn();
+    const [paused, setPaused] = createSignal(true);
+    render(() => <Toast item={base({ duration: 2000 })} paused={paused()} onDismiss={onDismiss} />);
+    vi.advanceTimersByTime(5000);          // paused from mount → never starts
+    expect(onDismiss).not.toHaveBeenCalled();
+    setPaused(false);                      // stack un-hovered → resume from full remaining
+    vi.advanceTimersByTime(1999);
+    expect(onDismiss).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    await vi.waitFor(() => expect(onDismiss).toHaveBeenCalledWith('timeout'));
+  });
 });
 
 describe('Toast — close + action', () => {

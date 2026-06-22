@@ -1,5 +1,5 @@
 import {
-  createSignal, createEffect, onCleanup, For, Show, createMemo,
+  createSignal, createEffect, onCleanup, on, For, Show, createMemo,
 } from 'solid-js';
 import { X, Check } from 'lucide-solid';
 import { cn } from '../utils/cn';
@@ -57,12 +57,16 @@ interface ToastProps {
   item: ToastItem;
   onDismiss: (reason: ToastDismissReason) => void;
   onAction?: (label: string) => void;
+  /** Hold the auto-dismiss timer (the region sets this true while the whole stack
+   *  is hovered/expanded, so peers don't dismiss out from under the cursor). */
+  paused?: boolean;
 }
 
 /**
- * A single toast pill. Auto-dismisses after its (action-floored) duration,
- * pauses the timer while hovered, and animates in/out via `createPresence`.
- * Pure + prop-driven — the parent `ToastRegion` owns the list + queue.
+ * A single toast pill. Auto-dismisses after its (action-floored) duration, holds
+ * the timer while hovered (this pill) OR while `paused` (the whole stack is
+ * hovered), and animates in/out via `createPresence`. Pure + prop-driven — the
+ * parent `ToastRegion` owns the list + queue.
  */
 export function Toast(props: ToastProps) {
   const [open, setOpen] = createSignal(true);
@@ -89,13 +93,24 @@ export function Toast(props: ToastProps) {
     remaining -= Date.now() - startedAt;
   };
 
-  // Start the auto-dismiss timer once (duration is read from the item at mount;
-  // an in-place `update()` that changes duration re-evaluates on the next tick).
-  createEffect(() => {
-    // re-arm when the item's duration changes via update()
-    remaining = resolveDuration(props.item);
-    begin();
-  });
+  const [hovered, setHovered] = createSignal(false);
+  // Held = this pill is hovered, OR the region says the whole stack is hovered.
+  const held = (): boolean => props.paused === true || hovered();
+
+  // (Re)start the timer whenever the resolved duration changes (mount + update());
+  // resets the remaining time to full. Holds instead of running if currently held.
+  createEffect(on(() => resolveDuration(props.item), (d) => {
+    remaining = d;
+    if (held()) clear();
+    else begin();
+  }));
+  // Pause/resume on hover (this pill or the whole stack) WITHOUT resetting remaining,
+  // so the countdown continues from where it left off. Deferred — the duration
+  // effect already armed it on mount.
+  createEffect(on(held, (isHeld) => {
+    if (isHeld) pause();
+    else begin();
+  }, { defer: true }));
   onCleanup(clear);
 
   // When presence has fully exited, notify the parent so it drops the item.
@@ -119,8 +134,8 @@ export function Toast(props: ToastProps) {
         ref={presence.setRef}
         role="status"
         data-closed={presence.state() === 'closed' ? '' : undefined}
-        onPointerEnter={pause}
-        onPointerLeave={begin}
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={() => setHovered(false)}
         class={cn(
           'pointer-events-auto flex items-center gap-3 rounded-full border px-4 py-2.5 text-sm shadow-lg',
           'bg-popover text-popover-foreground border-border',
@@ -258,6 +273,16 @@ export function ToastRegion(props: ToastRegionProps) {
     if (open()) return `translateY(${dir() * (rowH() + GAP) * i}px) scale(1)`;
     return `translateY(${dir() * OFFSET * i}px) scale(${1 - SCALE_STEP * i})`;
   };
+  // The collapsed stage gets an explicit height covering the whole stack extent —
+  // resting (the pile) vs expanded (the full column) — so the region is ONE
+  // continuous hover surface. Without it the cursor falls into the gaps between
+  // expanded pills (or the spot a just-dismissed pill vacated) and the region
+  // flickers collapsed→expanded. Grows away from the anchored edge in both modes.
+  const stageHeight = (): number => {
+    const n = visible().length;
+    if (!n) return 0;
+    return open() ? n * rowH() + (n - 1) * GAP : rowH() + (n - 1) * OFFSET;
+  };
 
   // Only the toasts for THIS region's target (undefined target = the global one).
   // Newest-first so the freshest toast sits at the top; the queue (past `max`)
@@ -331,8 +356,14 @@ export function ToastRegion(props: ToastRegionProps) {
         class={cn('pointer-events-none fixed z-[100]', !anchor() && POSITION_CLASSES[position()])}
         style={anchor() ? anchorStyle(position(), anchor()!) : undefined}
       >
-        {/* Relative stage; pills are absolutely stacked from the anchored edge. */}
-        <div class="relative" style={{ 'min-width': '16rem', 'max-width': 'min(28rem, calc(100vw - 2rem))' }}>
+        {/* Relative stage with an explicit height so it's ONE continuous hover
+            surface (pointer-events-auto) — no flicker when the cursor crosses gaps
+            or a dismissed pill's vacated spot. Pills are absolutely stacked from the
+            anchored edge. */}
+        <div
+          class="pointer-events-auto relative transition-[height] duration-200 ease-out"
+          style={{ 'min-width': '16rem', 'max-width': 'min(28rem, calc(100vw - 2rem))', height: `${stageHeight()}px` }}
+        >
           <For each={visible()}>
             {(item, i) => (
               <div
@@ -347,6 +378,7 @@ export function ToastRegion(props: ToastRegionProps) {
               >
                 <Toast
                   item={item}
+                  paused={open()}
                   onDismiss={(reason) => props.onDismiss?.(item.id, reason)}
                   onAction={(label) => props.onAction?.(item.id, label)}
                 />
