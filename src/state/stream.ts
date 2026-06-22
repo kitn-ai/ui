@@ -83,7 +83,7 @@ export function onStreamSettled(inner: AssistantStream, onSettle: () => void): A
     appendReasoning(d, l) { inner.appendReasoning(d, l); return wrapper; },
     setReasoning(t, l) { inner.setReasoning(t, l); return wrapper; },
     upsertTool(t) { inner.upsertTool(t); return wrapper; },
-    updateTool(id, p) { inner.updateTool(id, p); return wrapper; },
+    updateTool(tcId, p) { inner.updateTool(tcId, p); return wrapper; },
     patch(p) { inner.patch(p); return wrapper; },
     done(final) { inner.done(final); onSettle(); },
     abort(reason) { inner.abort(reason); onSettle(); },

@@ -76,5 +76,9 @@ describe('createAssistantStream', () => {
     expect(sink.get()[0].content).toBe('xy');
     s.done();
     expect(settled).toBe(1);
+    let settledOnAbort = 0;
+    const s2 = onStreamSettled(createAssistantStream(sink.set, { id: 'a2' }), () => { settledOnAbort++; });
+    s2.appendText('x').abort('boom');
+    expect(settledOnAbort).toBe(1);
   });
 });
