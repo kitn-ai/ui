@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   toast, getToasts, ensureMounted, isToastRegionMounted,
   resolveDuration, DEFAULT_TOAST_DURATION, ACTION_TOAST_FLOOR,
+  configureToasts,
   type ToastItem,
 } from './toast-store';
 
@@ -109,5 +110,30 @@ describe('ensureMounted', () => {
     expect(document.querySelector('kai-toast-region')).toBeNull();
     toast('First');
     expect(document.querySelector('kai-toast-region')).not.toBeNull();
+  });
+});
+
+describe('configureToasts — singleton region config', () => {
+  afterEach(() => {
+    document.querySelectorAll('kai-toast-region').forEach((n) => n.remove());
+    configureToasts({ stack: 'expanded', position: 'top-center', max: 3 }); // reset
+    toast.clear();
+  });
+
+  it('applies stack/position/max to the region mounted on the next toast', () => {
+    configureToasts({ stack: 'collapsed', position: 'bottom-right', max: 2 });
+    toast('hi');
+    const region = document.querySelector('kai-toast-region')!;
+    expect(region.getAttribute('stack')).toBe('collapsed');
+    expect(region.getAttribute('position')).toBe('bottom-right');
+    expect(region.getAttribute('max')).toBe('2');
+  });
+
+  it('updates an already-mounted region when called after mount', () => {
+    toast('first'); // mounts with defaults
+    const region = document.querySelector('kai-toast-region')!;
+    expect(region.getAttribute('stack')).not.toBe('collapsed');
+    configureToasts({ stack: 'collapsed' });
+    expect(region.getAttribute('stack')).toBe('collapsed');
   });
 });

@@ -14,8 +14,38 @@
 
 import { createRoot, createSignal } from 'solid-js';
 import { createStore, produce } from 'solid-js/store';
+import type { ToastPosition } from '../components/toast';
 
 export type ToastVariant = 'neutral' | 'success';
+
+export interface ToastConfig {
+  stack?: 'expanded' | 'collapsed';
+  position?: ToastPosition;
+  max?: number;
+}
+
+// Module-level config the imperative singleton regions inherit. Defaults match
+// the element's own defaults, so an un-configured app behaves exactly as before.
+let toastConfig: ToastConfig = {};
+
+/** Apply the current config to a region element (attributes for scalars). */
+function applyConfig(el: HTMLElement): void {
+  if (toastConfig.stack) el.setAttribute('stack', toastConfig.stack);
+  if (toastConfig.position) el.setAttribute('position', toastConfig.position);
+  if (toastConfig.max !== undefined) el.setAttribute('max', String(toastConfig.max));
+}
+
+/**
+ * Configure the imperative `toast()` singleton — call once at app start.
+ * `toast.success('…')` has no element to set a prop on, so this is how you opt
+ * the auto-mounted region into collapsed stacking / a position / a max. Updates
+ * any already-mounted regions too, so call order doesn't matter.
+ */
+export function configureToasts(config: ToastConfig): void {
+  toastConfig = { ...toastConfig, ...config };
+  if (typeof document === 'undefined') return;
+  document.querySelectorAll('kai-toast-region').forEach((el) => applyConfig(el as HTMLElement));
+}
 
 /** An action button rendered inside the toast. Returning `false` from
  *  `onAction` keeps the toast open (e.g. to show a follow-up); any other
@@ -120,6 +150,7 @@ export function ensureMounted(target: HTMLElement | null = null): HTMLElement | 
   document.body.appendChild(el);
   (el as unknown as { toasts: ToastItem[] }).toasts = toasts as ToastItem[];
   if (target) (el as unknown as { target: HTMLElement }).target = target;
+  applyConfig(el); // inherit stack/position/max from configureToasts()
   regions.set(target, el);
   setMounted(true);
   return el;
