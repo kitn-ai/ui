@@ -38,18 +38,24 @@ export type CardEvent =
   | { kind: 'resize'; cardId: string; height: number }
   | { kind: 'state'; cardId: string; patch: unknown }
   | { kind: 'dismiss'; cardId: string }
+  | { kind: 'reopen'; cardId: string }
   | { kind: 'error'; cardId: string; message: string };
 
 export type CardEventKind = CardEvent['kind'];
 
 /** How a card was resolved by the user — the re-hydration channel for the chromed
- *  read-only state. Mirrors the two terminal CardEvents (minus `cardId`): the
- *  resolution is just the event that resolved the card. `at` is optional ISO-8601
- *  provenance (data only; never rendered). Additive — does not bump the contract
- *  version. */
+ *  read-only state. The terminal kinds (`action`/`submit`) mirror the two terminal
+ *  CardEvents (minus `cardId`): the resolution is just the event that resolved the
+ *  card. `dismissed` is a DEFERRED (non-terminal) state — the user set the card
+ *  aside; it can be re-opened. `expired` is terminal — a dismissed card the host
+ *  decided can no longer be re-opened (e.g. the agent proceeded, or it went stale).
+ *  `at` is optional ISO-8601 provenance (data only; never rendered). Additive —
+ *  does not bump the contract version. */
 export type CardResolution =
   | { kind: 'action'; action: string; payload?: unknown; at?: string }
-  | { kind: 'submit'; data: unknown; at?: string };
+  | { kind: 'submit'; data: unknown; at?: string }
+  | { kind: 'dismissed'; at?: string }
+  | { kind: 'expired'; reason?: string; at?: string };
 
 /** What every card is handed (via native context or the iframe bridge). */
 export interface CardHost {
@@ -65,6 +71,9 @@ export interface CardPolicy {
   onOpen?: (url: string, target: 'tab' | 'artifact') => void;
   onState?: (cardId: string, patch: unknown) => void;
   onDismiss?: (cardId: string) => void;
+  /** A dismissed card asked to be re-opened. The host decides whether it can come
+   *  back (clear the resolution → live again) or has expired (stamp `expired`). */
+  onReopen?: (cardId: string) => void;
   onError?: (cardId: string, message: string) => void;
   /** Cap on send-prompt: 'compose' (default) forbids silent sends. 'send' to allow. */
   maxSendPromptMode?: 'compose' | 'send';

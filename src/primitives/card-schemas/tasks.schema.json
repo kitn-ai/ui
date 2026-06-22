@@ -73,6 +73,11 @@
       "minimum": 1,
       "description": "Optional maximum selectable; further toggles are blocked once reached.",
       "x-kai-select-max": true
+    },
+    "dismissible": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show a close affordance that emits the `dismiss` verb. The card collapses to a re-openable 'dismissed' stub; the host decides via `onReopen` whether it comes back live or `expired`."
     }
   }
 }

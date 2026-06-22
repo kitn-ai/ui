@@ -4,10 +4,10 @@ import { cn } from '../utils/cn';
 import { useChatConfig } from '../primitives/chat-config';
 import { createPresence, usePosition, useDismiss, As } from './overlay';
 
-export interface TooltipProps { content: string; children: JSX.Element; class?: string; openDelay?: number; }
+export interface TooltipProps { content: string; children: JSX.Element; class?: string; openDelay?: number; dismissOnClick?: boolean; }
 
 export function Tooltip(props: TooltipProps) {
-  const [local] = splitProps(props, ['content', 'children', 'class', 'openDelay']);
+  const [local] = splitProps(props, ['content', 'children', 'class', 'openDelay', 'dismissOnClick']);
   const config = useChatConfig();
   const id = createUniqueId();
   const [open, setOpen] = createSignal(false);
@@ -25,6 +25,10 @@ export function Tooltip(props: TooltipProps) {
   };
   const hide = () => { clearTimeout(timer); setOpen(false); };
   const maybeHide = () => { if (!pointerInside() && !focusInside()) hide(); };
+  // Action-style tooltips should dismiss when their trigger is clicked: the pointer
+  // never "leaves", so reset the inside flags and force-close until the next genuine
+  // hover/focus. Opt out with dismissOnClick={false}.
+  const dismiss = () => { if (local.dismissOnClick === false) return; setPointerInside(false); setFocusInside(false); hide(); };
   onCleanup(() => clearTimeout(timer));
 
   const presence = createPresence(open);
@@ -39,6 +43,8 @@ export function Tooltip(props: TooltipProps) {
         aria-describedby={open() ? id : undefined}
         onPointerEnter={() => { setPointerInside(true); show(local.openDelay ?? 600); }}
         onPointerLeave={() => { setPointerInside(false); maybeHide(); }}
+        onPointerDown={dismiss}
+        onClick={dismiss}
         onFocusIn={() => { setFocusInside(true); show(); }}
         onFocusOut={(e: FocusEvent) => { const t = triggerEl(); if (t && t.contains(e.relatedTarget as Node)) return; setFocusInside(false); maybeHide(); }}
       >

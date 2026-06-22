@@ -14,11 +14,12 @@ import {
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
 import { Card } from './card';
+import { DismissedStub } from './dismissed-stub';
 import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
 import { useCardResolution } from './use-card-resolution';
 import { emitCardEvent } from '../primitives/card-routing';
 import { useCardHost } from '../primitives/card-host';
-import { Check } from 'lucide-solid';
+import { Check, X } from 'lucide-solid';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types (tasks.schema.json) — see src/primitives/card-schemas/tasks.schema.json
@@ -41,6 +42,7 @@ export interface TasksCardData {
   allowEmpty?: boolean;
   min?: number;
   max?: number;
+  dismissible?: boolean; // show a close affordance that emits `dismiss`
 }
 
 export interface TasksCardResult {
@@ -251,11 +253,21 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
     res.setLocal({ kind: 'submit', data: result });
   };
 
-  // Surface the resolved state for host styling.
+  // Dismiss: emit `dismiss` AND optimistically flip to a `dismissed` resolution so
+  // the card collapses to its re-openable stub immediately.
+  const onDismiss = (): void => {
+    if (res.isResolved()) return;
+    emit({ kind: 'dismiss', cardId: local.cardId });
+    res.setLocal({ kind: 'dismissed' });
+  };
+  const onReopen = (): void => emit({ kind: 'reopen', cardId: local.cardId });
+
+  // Surface the resolved state for host styling. Only a `submit` resolution is the
+  // "submitted" state; a deferred `dismissed` (or `expired`) is not.
   createEffect(() => {
     const el = local.hostElement;
     if (!el) return;
-    if (res.isResolved()) el.setAttribute('data-kai-resolved', 'submitted');
+    if (res.resolution()?.kind === 'submit') el.setAttribute('data-kai-resolved', 'submitted');
     else el.removeAttribute('data-kai-resolved');
   });
 
@@ -280,11 +292,28 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
           return <Card heading={local.heading} errorMessage="The card failed to render." />;
         }}
       >
+        <Show
+          when={!res.isDeferred()}
+          fallback={
+            <DismissedStub type={TASKS_CARD_TYPE} title={local.heading ?? local.data?.heading} onReopen={onReopen} />
+          }
+        >
         <Card
           heading={local.heading ?? local.data?.heading}
           actions={
             res.isResolved() ? undefined : (
               <div class="flex w-full flex-wrap items-center justify-between gap-2">
+                <Show when={local.data?.dismissible === true}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Dismiss"
+                    onClick={onDismiss}
+                  >
+                    <X size={16} aria-hidden="true" />
+                  </Button>
+                </Show>
                 <span id={countId} aria-live="polite" class="text-xs text-muted-foreground">
                   {count()} selected
                 </span>
@@ -402,6 +431,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
             </div>
           </Show>
         </Card>
+        </Show>
       </ErrorBoundary>
     </Show>
   );

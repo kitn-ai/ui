@@ -55,8 +55,25 @@ Set rich data (arrays, objects) in JavaScript; scalar props work as attributes o
 </script>
 ```
 
-- **`messages`** — each entry: `id`, `role` (`'user' | 'assistant'`), `content` (markdown for assistant), plus optional `actions`, `attachments`, `reasoning`, `tools`, and `avatar`.
+- **`messages`** — each entry: `id`, `role` (`'user' | 'assistant'`), `content` (markdown for assistant), plus optional `actions`, `attachments`, `reasoning`, `tools`, `avatar`, and `feedback`.
 - **`loading`** — flip to `true` while awaiting a reply; the input disables and a typing indicator appears.
+
+### Message actions
+
+Add `actions: ['copy', 'like', 'dislike']` to a message and the action row is wired for you. `copy` writes to the clipboard and shows a check; `like` / `dislike` mark the vote, hide the other, and toggle off on a second tap. Each raises a [toast](/components/toast/). See [Message](/components/message/#the-action-row) for the full behavior.
+
+`kai-message-action` reports votes with a `state` field — `'on'` when set, `'off'` when cleared:
+
+```js
+chat.addEventListener('kai-message-action', (e) => {
+  const { messageId, action, state } = e.detail;
+  if ((action === 'like' || action === 'dislike') && state === 'on') {
+    saveVote(messageId, action);
+  }
+});
+```
+
+Set `feedback: 'like' | 'dislike'` on a message to re-hydrate a persisted vote; it wins over the element's optimistic state.
 - **Model switcher** — set `models` (`{ id, name, provider? }[]`) and `currentModel`; listen for `kai-model-change`.
 - **Context meter** — set `context` (`{ usedTokens, maxTokens, … }`) to show a token-usage gauge in the header.
 

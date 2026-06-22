@@ -15,11 +15,12 @@ import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
 import { HoverCard } from '../ui/hover-card';
 import { Card } from './card';
+import { DismissedStub } from './dismissed-stub';
 import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
 import { useCardResolution } from './use-card-resolution';
 import { emitCardEvent } from '../primitives/card-routing';
 import { useCardHost } from '../primitives/card-host';
-import { Check } from 'lucide-solid';
+import { Check, X } from 'lucide-solid';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types (choice.schema.json) — see src/primitives/card-schemas/choice.schema.json
@@ -49,6 +50,7 @@ export interface ChoiceCardData {
   options: ChoiceOption[]; // 1..N
   allowOther?: ChoiceAllowOther; // free-text escape
   submitLabel?: string; // label for the Submit button (default 'Submit')
+  dismissible?: boolean; // show a close affordance that emits `dismiss`
 }
 
 export type ChoiceCardEnvelope = CardEnvelope<'choice', ChoiceCardData>;
@@ -310,6 +312,15 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
     });
   };
 
+  // Dismiss: emit `dismiss` AND optimistically flip to a `dismissed` resolution so
+  // the card collapses to its re-openable stub immediately.
+  const onDismiss = (): void => {
+    if (res.isResolved()) return;
+    emit({ kind: 'dismiss', cardId: local.cardId });
+    res.setLocal({ kind: 'dismissed' });
+  };
+  const onReopen = (): void => emit({ kind: 'reopen', cardId: local.cardId });
+
   const focusRadio = (index: number): void => {
     const radios = groupRef?.querySelectorAll<HTMLElement>('[role="radio"]');
     radios?.[index]?.focus();
@@ -353,6 +364,10 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
           return <Card heading={local.heading} errorMessage="The card failed to render." />;
         }}
       >
+        <Show
+          when={!res.isDeferred()}
+          fallback={<DismissedStub type={CHOICE_CARD_TYPE} title={local.heading} onReopen={onReopen} />}
+        >
         <Card heading={local.heading}>
           <div class={cn('flex flex-col gap-3', local.class)}>
             <Show when={local.data?.prompt}>
@@ -421,12 +436,26 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
                 </div>
               </Show>
 
-              <Button type="button" class="self-end" disabled={!canSubmit()} onClick={submit}>
-                {submitLabel()}
-              </Button>
+              <div class="flex w-full flex-wrap items-center justify-between gap-2">
+                <Show when={local.data?.dismissible === true}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Dismiss"
+                    onClick={onDismiss}
+                  >
+                    <X size={16} aria-hidden="true" />
+                  </Button>
+                </Show>
+                <Button type="button" class="ml-auto" disabled={!canSubmit()} onClick={submit}>
+                  {submitLabel()}
+                </Button>
+              </div>
             </Show>
           </div>
         </Card>
+        </Show>
       </ErrorBoundary>
     </Show>
   );

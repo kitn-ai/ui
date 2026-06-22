@@ -132,6 +132,7 @@ export default defineConfig({
                 label: 'Messages & content',
                 items: [
                   { slug: 'components/message' },
+                  { slug: 'components/compare' },
                   { slug: 'components/markdown' },
                   { slug: 'components/code-block' },
                   { slug: 'components/reasoning' },
@@ -173,6 +174,7 @@ export default defineConfig({
                   { slug: 'components/scope-picker' },
                   { slug: 'components/context' },
                   { slug: 'components/feedback-bar' },
+                  { slug: 'components/toast' },
                   { slug: 'components/scroll-button' },
                   { slug: 'components/switch' },
                   { slug: 'components/checkpoint' },

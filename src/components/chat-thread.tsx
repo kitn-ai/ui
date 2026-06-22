@@ -1,10 +1,9 @@
 import { createSignal, For, Show } from 'solid-js';
 import { ChatConfig, useChatConfig } from '../primitives/chat-config';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
-import { Message, MessageAvatar, MessageContent, MessageActionBar } from './message';
-import { Reasoning, ReasoningTrigger, ReasoningContent } from './reasoning';
-import { Tool } from './tool';
-import { Attachments, Attachment, AttachmentPreview, AttachmentInfo, type AttachmentData } from './attachments';
+import { Message, MessageAvatar, MessageBody } from './message';
+import { type AttachmentData } from './attachments';
+import { createMessageFeedback, type MessageActionDetail } from '../primitives/message-feedback';
 import { ModelSwitcher } from './model-switcher';
 import { ScrollButton } from './scroll-button';
 import {
@@ -95,7 +94,7 @@ export interface ChatThreadProps {
   onSubmit?: (detail: { value: string; attachments: AttachmentData[] }) => void;
   onSuggestionClick?: (value: string) => void;
   onModelChange?: (modelId: string) => void;
-  onMessageAction?: (detail: { messageId: string; action: string }) => void;
+  onMessageAction?: (detail: MessageActionDetail) => void;
   onSearch?: () => void;
   onVoice?: () => void;
   onSlashSelect?: (command: SlashCommandItem) => void;
@@ -104,6 +103,15 @@ export interface ChatThreadProps {
 export function ChatThread(props: ChatThreadProps) {
   const outer = useChatConfig();
   const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
+  // Feedback (copy + vote) state lives ABOVE the per-message <For>, so streaming
+  // re-renders (a fresh `messages` array ref per chunk) don't wipe it.
+  // The copy/feedback toasts scope to the chat (this thread's root) so they appear
+  // in-chat rather than at the page top.
+  let rootEl: HTMLElement | undefined;
+  const feedback = createMessageFeedback({
+    emit: (detail) => props.onMessageAction?.(detail),
+    target: () => rootEl,
+  });
   const [internal, setInternal] = createSignal(props.value ?? '');
   const [attachments, setAttachments] = createSignal<AttachmentData[]>([]);
   const current = () => props.value ?? internal();
@@ -122,7 +130,7 @@ export function ChatThread(props: ChatThreadProps) {
 
   return (
     <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={props.codeHighlight !== false} portalMount={outer.portalMount()}>
-      <div class={`flex h-full flex-col bg-background ${props.class ?? ''}`}>
+      <div ref={(e) => (rootEl = e as HTMLElement)} class={`flex h-full flex-col bg-background ${props.class ?? ''}`}>
         <Show when={showHeader()}>
           <header class="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
             <div class="flex items-center gap-2">
@@ -168,35 +176,19 @@ export function ChatThread(props: ChatThreadProps) {
               <For each={props.messages}>
                 {(m) => {
                   const body = (
-                    <>
-                      <Show when={m.reasoning}>
-                        <Reasoning class="mb-2 w-full">
-                          <ReasoningTrigger>{m.reasoning!.label ?? 'Reasoning'}</ReasoningTrigger>
-                          <ReasoningContent markdown>{m.reasoning!.text}</ReasoningContent>
-                        </Reasoning>
-                      </Show>
-                      <For each={m.tools ?? []}>{(tp) => <Tool toolPart={tp} class="mb-2 w-full" />}</For>
-                      <Show when={m.attachments?.length}>
-                        <Attachments variant="inline" class={m.role === 'user' ? 'mb-2 justify-end' : 'mb-2'}>
-                          <For each={m.attachments!}>
-                            {(att) => (<Attachment data={att}><AttachmentPreview /><AttachmentInfo /></Attachment>)}
-                          </For>
-                        </Attachments>
-                      </Show>
-                      <MessageContent
-                        markdown={m.role === 'assistant'}
-                        class={m.role === 'user' ? 'bg-muted text-primary max-w-[85%] rounded-2xl px-4 py-2' : 'bg-transparent p-0'}
-                      >
-                        {m.content}
-                      </MessageContent>
-                      <Show when={m.actions?.length}>
-                        <MessageActionBar
-                          actions={m.actions!}
-                          reveal={reveal()}
-                          onAction={(action) => props.onMessageAction?.({ messageId: m.id, action })}
-                        />
-                      </Show>
-                    </>
+                    <MessageBody
+                      content={m.content}
+                      reasoning={m.reasoning}
+                      tools={m.tools}
+                      attachments={m.attachments}
+                      isUser={m.role === 'user'}
+                      markdown={m.role === 'assistant'}
+                      actions={m.actions}
+                      actionsReveal={reveal()}
+                      activeFeedback={feedback.resolveFeedback(m)}
+                      copied={feedback.isCopied(m.id)}
+                      onAction={(action) => feedback.handleAction(m, action)}
+                    />
                   );
                   const rowGroup = reveal() === 'hover' ? 'group ' : '';
                   return (

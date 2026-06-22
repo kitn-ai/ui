@@ -162,8 +162,8 @@ export default function HeroChat() {
   function applyCardAction(action: string) {
     clearCard();
     const cont: ChatMessage = action === 'apply'
-      ? { id: nextId(), role: 'assistant', content: 'Opened **PR #4827** — `fix(checkout): batch cart lookups + 250 ms timeout`. CI is green; p99 is back to **190 ms** in staging.', actions: ['copy', 'like'] }
-      : { id: nextId(), role: 'assistant', content: 'Here’s the change:\n\n```diff\n- for (const item of cart) {\n-   item.detail = await db.query(itemSql, item.id);   // N+1\n- }\n+ const rows = await db.query(batchSql, cart.map((i) => i.id));\n+ hydrate(cart, rows);\n```' };
+      ? { id: nextId(), role: 'assistant', content: 'Opened **PR #4827** — `fix(checkout): batch cart lookups + 250 ms timeout`. CI is green; p99 is back to **190 ms** in staging.', actions: ['copy', 'like', 'dislike'] }
+      : { id: nextId(), role: 'assistant', content: 'Here’s the change:\n\n```diff\n- for (const item of cart) {\n-   item.detail = await db.query(itemSql, item.id);   // N+1\n- }\n+ const rows = await db.query(batchSql, cart.map((i) => i.id));\n+ hydrate(cart, rows);\n```', actions: ['copy', 'like', 'dislike'] };
     host.messages = [...(host.messages ?? []), cont];
   }
 

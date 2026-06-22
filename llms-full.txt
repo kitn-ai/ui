@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 44 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 46 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/ui'`):
-All 44 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 46 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 44 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 46 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/ui/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (44 elements, generated from custom-elements.json)
+## Element reference (46 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -253,9 +253,9 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `cards` | — | `undefined \| { type: string; id: string; data: unknown; title?: undefined \| string; resolution?: undefined \| { kind: "action"; action: string; payload?: unknown; at?: undefined \| string } \| { kind: "submit"; data: unknown; at?: undefined \| string } }[]` | The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. |
+| `cards` | — | `undefined \| { type: string; id: string; data: unknown; title?: undefined \| string; resolution?: undefined \| { kind: "action"; action: string; payload?: unknown; at?: undefined \| string } \| { kind: "submit"; data: unknown; at?: undefined \| string } \| { kind: "dismissed"; at?: undefined \| string } \| { kind: "expired"; reason?: undefined \| string; at?: undefined \| string } }[]` | The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. |
 | `types` | — | `undefined \| Record<string, string>` | Optional type→tag overrides/additions (merged over the built-ins). Property: `el.types`. Typed as a plain string map (not the `CardTagMap` alias) so the generated React wrapper inlines it instead of emitting an unresolved named type. |
-| `policy` | — | `undefined \| { onSubmit?: undefined \| (cardId: string, data: unknown) => void; onAction?: undefined \| (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined \| (text: string, opts: { mode: "compose" \| "send"; context?: unknown; }) => void; onOpen?: undefined \| (url: string, target: "tab" \| "artifact") => void; onState?: undefined \| (cardId: string, patch: unknown) => void; onDismiss?: undefined \| (cardId: string) => void; onError?: undefined \| (cardId: string, message: string) => void; maxSendPromptMode?: undefined \| "compose" \| "send" }` | Optional CardPolicy handling child events. Property: `el.policy`. |
+| `policy` | — | `undefined \| { onSubmit?: undefined \| (cardId: string, data: unknown) => void; onAction?: undefined \| (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined \| (text: string, opts: { mode: "compose" \| "send"; context?: unknown; }) => void; onOpen?: undefined \| (url: string, target: "tab" \| "artifact") => void; onState?: undefined \| (cardId: string, patch: unknown) => void; onDismiss?: undefined \| (cardId: string) => void; onReopen?: undefined \| (cardId: string) => void; onError?: undefined \| (cardId: string, message: string) => void; maxSendPromptMode?: undefined \| "compose" \| "send" }` | Optional CardPolicy handling child events. Property: `el.policy`. |
 
 _No events._
 
@@ -279,7 +279,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `messages` | — | `{ id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string; tooltip?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string } }[]` | The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). |
+| `messages` | — | `{ id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string; tooltip?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string }; feedback?: undefined \| "like" \| "dislike" }[]` | The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). |
 | `value` | `value` | `undefined \| string` | Controlled value of the input. When set, the host owns the input text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. |
 | `placeholder` | `placeholder` | `undefined \| string` | Placeholder text shown in the empty input. |
 | `loading` | `loading` | `undefined \| false \| true` | When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). |
@@ -307,7 +307,7 @@ _No events._
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `kai-message-action` | `CustomEvent<{ messageId: string; action: string }>` | An action button on a message was clicked. `action` is the built-in name or custom id. |
+| `kai-message-action` | `CustomEvent<{ messageId: string; action: string; state?: undefined \| "on" \| "off" }>` | An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
 | `kai-model-change` | `CustomEvent<{ modelId: string }>` | The header model switcher changed. |
 | `kai-search` | `CustomEvent<Record<string, never>>` | The Search button was clicked. |
 | `kai-slash-select` | `CustomEvent<{ command: { id: string; label: string; description?: undefined \| string; category?: undefined \| string } }>` | A slash command was chosen from the palette. |
@@ -365,6 +365,30 @@ _No events._
 | `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Code text sizing. |
 
 _No events._
+
+---
+
+### `kai-compare` / `Compare`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `data` | — | `undefined \| Record<string, unknown>` | The compare definition (prompt + the two candidates). Set as a JS PROPERTY: `el.data = { prompt, candidates: [A, B], collapse? }`. Import `ResponseCompareData` from `@kitn.ai/ui` for the full shape. |
+| `compareId` | `compare-id` | `undefined \| string` | Stable id correlating every emitted event. Attribute: `compare-id`. |
+| `selection` | — | `undefined \| Record<string, unknown>` | Re-hydrate / control the user's pick. Set as a JS PROPERTY: `el.selection = { chosenId, rejectedIds }`. Renders the collapsed winner. |
+| `layout` | `layout` | `undefined \| "auto" \| "columns" \| "tabs"` | Layout: `'auto'` (default — columns when wide, tabs when narrow, by CONTAINER width) \| `'columns'` (side-by-side) \| `'tabs'` (pills to switch). Attribute: `layout`. |
+| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Prose/text size for the rendered candidates. Attribute: `prose-size`. |
+| `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme for code blocks in the candidates. Attribute: `code-theme`. |
+| `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Whether code blocks are syntax-highlighted. Attribute: `code-highlight`. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-compare-select` | `CustomEvent<{ chosenId: string; rejectedIds: string[]; at?: undefined \| number }>` | The user committed a pick. `detail` = `{ chosenId, rejectedIds, at }`. |
+| `kai-error` | `CustomEvent<{ compareId: string; message: string }>` | The definition was unusable. |
+| `kai-ready` | `CustomEvent<{ compareId: string }>` | Both candidates have settled and the pick is live. |
 
 ---
 
@@ -587,7 +611,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `message` | — | `undefined \| { id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string; tooltip?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string } }` | The full message object. Set as a JS property. |
+| `message` | — | `undefined \| { id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string; tooltip?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string }; feedback?: undefined \| "like" \| "dislike" }` | The full message object. Set as a JS property. |
 | `role` | `role` | `undefined \| "user" \| "assistant"` | Convenience for simple cases when not passing a `message` object. |
 | `content` | `content` | `undefined \| string` | Convenience content (used when `message` is not set). |
 | `markdown` | `markdown` | `undefined \| false \| true` | Force markdown on/off. Defaults to on for assistant, off for user. |
@@ -602,7 +626,7 @@ _No events._
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `kai-message-action` | `CustomEvent<{ messageId: string; action: string }>` | An action button was clicked. `action` is the built-in name or custom id. |
+| `kai-message-action` | `CustomEvent<{ messageId: string; action: string; state?: undefined \| "on" \| "off" }>` | An action button was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
 
 ---
 
@@ -933,6 +957,27 @@ _No events._
 
 ---
 
+### `kai-toast-region` / `ToastRegion`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `toasts` | — | `{ id: string; message: string; variant?: undefined \| "neutral" \| "success"; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true; target?: undefined \| HTMLElement }[]` | The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. |
+| `position` | `position` | `undefined \| "top-center" \| "top-right" \| "top-left" \| "bottom-center" \| "bottom-right" \| "bottom-left"` | Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … |
+| `max` | `max` | `undefined \| number` | Max simultaneously-visible toasts; the rest queue. Defaults to `3`. |
+| `stack` | `stack` | `undefined \| "expanded" \| "collapsed"` | Stacking: 'expanded' (default, full column) \| 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. |
+| `target` | — | `undefined \| HTMLElement` | Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-action` | `CustomEvent<{ id: string; label: string }>` | A toast's action button was pressed. |
+| `kai-dismiss` | `CustomEvent<{ id: string; reason: "action" \| "timeout" \| "close" }>` | A toast left the stack. `reason` is `'timeout' \| 'close' \| 'action'`. |
+
+---
+
 ### `kai-tool` / `Tool`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -973,7 +1018,7 @@ _No events._
 | `groups` | — | `{ id: string; userId?: undefined \| string; teamId?: undefined \| string; name: string; sortOrder: number; createdAt: string }[]` | Pre-bucketed conversation groups for the sidebar. Set as a JS property. |
 | `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]` | Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. |
 | `activeId` | `active-id` | `undefined \| string` | Id of the open conversation, highlighted in the sidebar. |
-| `messages` | — | `{ id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string; tooltip?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string } }[]` | The active conversation's message thread, newest last. Set as a JS property. |
+| `messages` | — | `{ id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string; tooltip?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string }; feedback?: undefined \| "like" \| "dislike" }[]` | The active conversation's message thread, newest last. Set as a JS property. |
 | `value` | `value` | `undefined \| string` |  |
 | `placeholder` | `placeholder` | `undefined \| string` |  |
 | `loading` | `loading` | `undefined \| false \| true` |  |
@@ -1003,7 +1048,7 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-conversation-select` | `CustomEvent<{ id: string }>` | A conversation was selected in the sidebar. |
-| `kai-message-action` | `CustomEvent<{ messageId: string; action: string }>` | An action button on a message was clicked. |
+| `kai-message-action` | `CustomEvent<{ messageId: string; action: string; state?: undefined \| "on" \| "off" }>` | An action button on a message was clicked. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
 | `kai-model-change` | `CustomEvent<{ modelId: string }>` | The header model switcher changed. |
 | `kai-new-chat` | `CustomEvent<Record<string, never>>` | The "New chat" button was clicked. |
 | `kai-search` | `CustomEvent<Record<string, never>>` | The Search button was clicked. |

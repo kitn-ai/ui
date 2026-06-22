@@ -195,4 +195,100 @@ describe('debug', () => {
     // Must NOT match the bundle-footprint fix (no kai-* context)
     expect(text).not.toMatch(/per.?element import|@kitn\.ai\/ui\/elements\/chat|autoloader/i);
   });
+
+  // ── Rule 10: toast is imperative (no <kai-toast> to place) ─────────────────
+  it('placing a <kai-toast> element → toast-imperative fix (call toast(), region auto-mounts)', async () => {
+    const out = await debug.handler({
+      snippet: '<kai-toast message="Saved"></kai-toast>',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/imperative|toast\(/i);
+    // names the correct import path(s)
+    expect(text).toMatch(/@kitn\.ai\/ui\/elements|@kitn\.ai\/ui/);
+    // explains the region auto-mounts (no hand-placed element)
+    expect(text).toMatch(/auto.?mount|kai-toast-region/i);
+  });
+
+  it('"how do I show a toast" with kai context → toast-imperative fix', async () => {
+    const out = await debug.handler({
+      symptom: 'How do I show a toast notification in my kai-chat app?',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/toast\(/);
+    expect(text).toMatch(/imperative/i);
+  });
+
+  it('generic "toast" with no kai/show context does NOT fire toast-imperative rule', async () => {
+    const out = await debug.handler({
+      symptom: 'I had toast for breakfast',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).not.toMatch(/imperative call|no .*<kai-toast>/i);
+  });
+
+  // ── Rule 11: dismissed cards are deferred (reopenable stub), not deleted ────
+  it('filtering dismissed cards out → card-dismiss-deferred fix (keep them, use dismissRecovery)', async () => {
+    const out = await debug.handler({
+      symptom: 'When a card is dismissed should I filter the dismissed envelope out of my cards array?',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/deferred|reopenable stub|not deleted/i);
+    expect(text).toMatch(/dismissRecovery/);
+  });
+
+  it('"card disappears when dismissed / how to reopen" → card-dismiss-deferred fix', async () => {
+    const out = await debug.handler({
+      symptom: 'My kai-cards card just disappears when dismissed — how do I let the user reopen it?',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/dismissRecovery|reopen/i);
+  });
+
+  it('generic "dismiss a modal" without card context does NOT fire card-dismiss-deferred', async () => {
+    const out = await debug.handler({
+      symptom: 'How do I dismiss a modal dialog on escape?',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).not.toMatch(/dismissRecovery|reopenable stub/i);
+  });
+
+  // ── Rule 12: kai-compare contract ──────────────────────────────────────────
+  it('kai-compare snippet → compare-contract fix (data JS prop, stream both, terminal pick)', async () => {
+    const out = await debug.handler({
+      snippet: '<kai-compare data="[...]"></kai-compare>',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // data is a JS property
+    expect(text).toMatch(/JS PROPERTY|property/i);
+    // exactly two candidates
+    expect(text).toMatch(/two candidates|exactly two/i);
+    // the terminal select event
+    expect(text).toMatch(/kai-compare-select/);
+  });
+
+  it('"compare two responses" with preference context → compare-contract fix', async () => {
+    const out = await debug.handler({
+      symptom: 'I want to compare two candidate responses and record which one the user prefers in kai',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).toMatch(/kai-compare/);
+    expect(text).toMatch(/chosenId|rejectedIds/);
+  });
+
+  it('"fresh data ref per chunk" guidance present for streaming both compare columns', async () => {
+    const out = await debug.handler({
+      symptom: 'kai-compare candidates do not re-render while streaming',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    // streaming needs a NEW data reference per chunk (mirrors the chat rule)
+    expect(text).toMatch(/NEW .*reference|new object per chunk|fresh `data`/i);
+  });
+
+  it('generic "compare two strings" without kai context does NOT fire compare-contract', async () => {
+    const out = await debug.handler({
+      symptom: 'How do I compare two strings for equality in JavaScript?',
+    });
+    const text = (out.content as { type: string; text: string }[])[0].text;
+    expect(text).not.toMatch(/kai-compare|kai-compare-select/i);
+  });
 });

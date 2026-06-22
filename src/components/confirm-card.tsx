@@ -12,6 +12,7 @@ import {
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
 import { Card } from './card';
+import { DismissedStub } from './dismissed-stub';
 import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
 import { useCardResolution } from './use-card-resolution';
 import { emitCardEvent } from '../primitives/card-routing';
@@ -208,7 +209,15 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
     });
   };
 
-  const onDismiss = (): void => emit({ kind: 'dismiss', cardId: local.cardId });
+  // Dismiss: emit the contract `dismiss` AND optimistically flip to a `dismissed`
+  // resolution so the card collapses to its re-openable stub immediately (the host
+  // confirms/overrides via the resolution prop on the next render).
+  const onDismiss = (): void => {
+    if (res.isResolved()) return;
+    emit({ kind: 'dismiss', cardId: local.cardId });
+    res.setLocal({ kind: 'dismissed' });
+  };
+  const onReopen = (): void => emit({ kind: 'reopen', cardId: local.cardId });
 
   let bodyRef: HTMLDivElement | undefined;
 
@@ -229,6 +238,10 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
           return <Card heading={local.heading} errorMessage="The card failed to render." />;
         }}
       >
+        <Show
+          when={!res.isDeferred()}
+          fallback={<DismissedStub type={CONFIRM_CARD_TYPE} title={local.heading} onReopen={onReopen} />}
+        >
         <Card
           heading={local.heading}
           actions={
@@ -309,6 +322,7 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
             </Show>
           </div>
         </Card>
+        </Show>
       </ErrorBoundary>
     </Show>
   );

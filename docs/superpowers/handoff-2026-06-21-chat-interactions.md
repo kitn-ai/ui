@@ -1,0 +1,55 @@
+# Handoff — chat-interaction components (2026-06-21)
+
+## TL;DR
+**PR #102 (`kitn-ai/ui`) is OPEN, ready for Rob's review/merge.** Five new chat-interaction features + a kit-wide animation fix, all built, browser-IVP'd, documented, MCP-wired, with Storybook stories. Then a **Session 2** (below) added LIVE docs demos for all 5 components + light/dark harness fixes + a toast position-in-target capability + a toast trigger-button demo + a landing fix. **Full suite green: 1364 tests, typecheck (4 passes) clean, docs build 104 pages.**
+
+> **CURRENT STATE (2026-06-21, session 2):** branch `feat/chat-interactions`, tip **`7298a20`**, tree CLEAN. **22 commits ahead of `origin/feat/chat-interactions` (UNPUSHED — held for Rob's review per the review-before-push preference).** Suite **1373** green, typecheck (4) clean, docs build 104 pages. Nothing from session 2 is pushed yet. (Includes the live docs demos, harness fixes, toast position-in-target, the bespoke toast demo, the landing fix, AND the Sonner-style toast stacking — see item 1b.)
+
+### Session 2 (2026-06-21 cont.) — what got added (13 unpushed commits since `be33f73`)
+- **Live docs demos** for all 5 interaction components (the previously-open item). `docs-site/src/components/example/kit.ts` gained `getKit`/`syncKaiTheme`/`syncToastRegionTheme`. **Compare uses the generic `<Playground>`** (controls + preview + Console + Code); **message + cards have bespoke curated demos** (`FeedbackDemo`, `CardDismissDemo`) alongside their Playgrounds; **toast has a bespoke `ToastDemo`** (see below). Tooltip demoed in-context in the message demo. Fixed stale docs facts (toast 5s/7s; compare layout `tabs` not `stacked`).
+- **Storybook harness fixes** — the light/dark "discrepancies" Rob saw were HARNESS bugs (toast story hardcoded a light button fill; `preview.ts` theme mirror missed autodocs + body-mounted regions), not component CSS. Fixed in `.storybook/preview.ts` + `styles.css` + the story files.
+- **★ STALE-DIST FOOTGUN (cost a round):** the docs serve a PREBUILT kit bundle; `docs-site/scripts/sync-kit.mjs` only rebuilds when `dist/` is MISSING, so a stale `dist` made compare-tabs / toast+thumb animations / landing-tooltip-in-chat all *appear* broken though source was correct. **FIX = `npm run build` (kit) then `git checkout -- src/components/component-meta.json`, then restart docs.** (Open offer to Rob: make sync-kit rebuild on staleness.) The rebuild also committed regenerated tracked artifacts (`element-meta`, React wrappers) that were stale (compare `layout:"stacked"`, missing toast `target`).
+- **Toast `position` within a target (KIT change, `src/components/toast.tsx` + 3 tests):** a target-scoped region was hardcoded top-center; now honors all 6 positions relative to the target rect (rect-based, default top-center preserved).
+- **Toast demo = bespoke `ToastDemo.tsx`** (Playground-shell look, but TRIGGER BUTTONS raise toasts into a contained box + Position pills that now visibly move the stack + Console + Code). Drives a *declarative* `<kai-toast-region>` (not the imperative store — they don't mix with position). Removed the toast Playground sample + the `$preview` sentinel.
+- **Landing fix (`HeroChat.tsx`):** the post-card message had `['copy','like']` vs msg1's `['copy','like','dislike']` — a lone thumb has no sibling to slide-to-fill, reading as dead. Gave both follow-up branches the full set. Kit feedback was never broken (IVP-confirmed).
+
+### Original PR #102 body (session 1)
+
+## Where the work lives (read this — the dir name is misleading)
+- **Worktree:** `/Users/home/Projects/kitn-ai/kitn-chat/.claude/worktrees/unocss-research` — its folder is named `unocss-research` but it is on branch **`feat/chat-interactions`** (PR #102). Run everything here. `git branch --show-current` to confirm.
+- **Main repo dir:** `/Users/home/Projects/kitn-ai/kitn-chat` is on a STALE local `main` (e210b5c): **27 behind `origin/main`** AND **1 ahead** (an unpushed commit — the state-helpers spec). Fix with `git pull --rebase origin main` there (do NOT hard-reset; the state-helpers commit is unpushed and is the next-project plan). The "old screens" Rob saw were the docs dev server (:4321) running from this stale dir.
+- **Merging:** via REST (gh Projects-classic bug) — `gh api -X PUT repos/kitn-ai/ui/pulls/102/merge -f merge_method=merge -f sha=<head>`. Rob reviews/merges; release-please then cuts a release PR.
+
+## What's in PR #102 (16 commits, all pushed)
+Five features, SolidJS → `kai-*`, each with tests:
+1. **`kai-toast-region` + `toast()`** — imperative transient-toast primitive. `toast.success(...)`, Undo-action, stacking, pause-on-hover. **Default 5s** (7s w/ action). **`target` option** scopes a toast to a container's bounds; the chat passes its root so copy/feedback toasts appear IN the chat; target-less = viewport top-center. Singleton mounts on `document.body` as a styled `kai-*` element. Exported from `.` AND `./elements`.
+2. **Stateful message action row** — copy→check + toast; 👍/👎 mark-chosen + **slide-to-fill** (unselected collapses 0fr↔1fr, chosen slides in, reverses on un-vote) + toast. State in `message-feedback.ts` (survives streaming re-renders); optional controlled `ChatMessage.feedback`; `kai-message-action` += additive `state:'on'|'off'`. Extracted shared `MessageBody`.
+3. **Card dismiss + recovery** — `dismissed`/`expired` non-terminal `CardResolution` kinds + `reopen` event + `onReopen` + `dismissRecovery()` helper + re-openable stub (defer-not-delete). Additive (no contract-version bump). Resolves #100's design Qs.
+4. **`kai-compare`** — "which response do you prefer?": two streaming candidates → pick → collapse → emits `kai-compare-select {chosenId, rejectedIds}`. **Layout `auto`/`columns`/`tabs`**, auto switches by CONTAINER width (columns wide / pills+tabs narrow). The "Pick this" button IS the radio (a11y: no nested-interactive).
+5. **Tooltip** — dismisses on trigger click (`dismissOnClick?=true`).
+
+Plus: **kit-wide animation fix** — `styles.css` was missing `@import "tw-animate-css"`, so every `animate-in`/`slide`/`animate-out` (toast, thumb, popover, tooltip, dropdown, hover-card) compiled to nothing. One import restores them all (+0.75 KB gz, measured — keep the lib). Also `ec4baf7` fixed a first-toast upgrade-race (caught by IVP). Generated artifacts regenerated (46 elements; React wrappers `ToastRegion`/`Compare`). Docs pages (toast, compare; dismiss on cards; action-row on message/chat). MCP debug rules + scaffold interaction-patterns. Storybook stories (toast, compare, kai-cards DismissAndRecover; action-row in chat story).
+
+## Verified
+typecheck 4 passes clean · full `npm test` = **1361 passed (237 files)** · in-browser Playwright IVP of all 5 (toast slide/auto-dismiss/scoping, copy→check, 👍/👎 slide-to-fill, dismiss→stub→undo→reopen, compare pick→collapse, tabs at 480 vs 1100px) · Storybook stories drive each interaction green.
+
+## OPEN — what's next (in order)
+0. **PUSH session-2 work** — 13 unpushed commits on `feat/chat-interactions` (tip `ffbfb27`). Held for Rob's review. Once approved: `git push origin feat/chat-interactions` (updates PR #102), then review/merge.
+1. **Live docs-site demos — DONE this session** (was the open item). All 5 components now have live demos. Nothing left here.
+1b. **Sonner-style toast stacking — DONE (2026-06-21, brainstorm→spec→plan→impl-agent→IVP-agent).** Shipped: opt-in `stack='expanded'|'collapsed'` prop on `kai-toast-region` (default expanded), `configureToasts({stack,position,max})` for the imperative singleton, collapsed pile (fixed per-depth offset/scale, peek direction flips by position, `OFFSET=20`/`SCALE_STEP=0.05`) that expands on hover/focus-within, `prefers-reduced-motion`→plain column. Spec `docs/superpowers/specs/2026-06-21-toast-stacking-design.md`, plan `docs/superpowers/plans/2026-06-21-toast-stacking.md`. Implemented `src/components/toast.tsx` + `src/primitives/toast-store.ts` + `src/elements/toast.tsx` (facade `stack` + regen). Docs `ToastDemo` got a **Stack toggle** + a **spatial Position picker** (Floating-UI/popover-style 6-dot mini-screen, mirroring `PopoverPlayground.tsx`) replacing the text pills + a `CollapsedStack` Storybook story. IVP-verified both themes; `npm test` **1373**; 7 commits (`451c321`..`7298a20`).
+1c. **NEW (preventative): make `sync-kit.mjs` rebuild on a stale `dist`** (mtime vs `src/`, or always rebuild on `predev`) so the stale-dist footgun can't recur.
+2. **Rob reviews/merges PR #102** (after the push in step 0).
+3. **Minor follow-ups (in the PR body, non-blocking):** dismissed-stub label falls back to "this card" when only `data.heading` (not envelope `title`) set; re-export `dismissRecovery` from `./elements` for CDN consumers.
+4. **Parked issues:** #99 (`whenReady()` readiness helper — would retire the upgrade-race class), #100 (cards allow free-text discussion, not just forced selection). Rob prioritizes.
+5. **THEN: the state-helpers plan** — `docs/superpowers/plans/2026-06-20-state-helpers-and-hooks.md` (currently only in the unpushed local-main commit e210b5c). Rob wanted this done AFTER the chat-interaction work.
+
+## How to test (Storybook = the surface)
+```
+cd /Users/home/Projects/kitn-ai/kitn-chat/.claude/worktrees/unocss-research
+npm run dev   # Storybook :6006
+# Components/Toast · Components/Compare (Default/Columns/Tabs) ·
+# Generative UI/kai-cards → DismissAndRecover · Components/Chat (action row)
+```
+
+## Key paths
+`src/primitives/toast-store.ts` · `src/components/toast.tsx` · `src/elements/toast.tsx` · `src/primitives/message-feedback.ts` · `src/components/message.tsx` (MessageActionBar + MessageBody) · `src/primitives/card-recovery.ts` · `src/components/dismissed-stub.tsx` · `src/components/response-compare.tsx` (+`-types`) · `src/elements/compare.tsx` · `src/ui/tooltip.tsx` · `src/elements/styles.css` (the tw-animate-css import). Plan: `docs/superpowers/plans/2026-06-20-chat-interactions-plan.md`.

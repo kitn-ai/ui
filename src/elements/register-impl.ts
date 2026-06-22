@@ -44,6 +44,7 @@ import './artifact';
 import './scroll-button';
 import './popover';
 import './switch';
+import './toast';
 // Generative-UI cards (Card Contract)
 import './card';
 import './form';
@@ -53,3 +54,5 @@ import './confirm-card';
 import './tasks';
 import './choice';
 import './cards';
+// Dual-response comparison (preference capture)
+import './compare';

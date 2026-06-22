@@ -18,6 +18,16 @@ export type { CodeHighlightingOptions } from './primitives/highlighter';
 export { configurePdfPreview, isPdfPreviewEnabled } from './primitives/pdf-preview';
 export type { PdfPreviewOptions } from './primitives/pdf-preview';
 
+// Toasts: imperative `toast()` API + the reactive store behind <kai-toast-region>
+export { toast, configureToasts, ensureMounted as ensureToastRegion, getToasts } from './primitives/toast-store';
+export type {
+  ToastItem, ToastVariant, ToastAction, ToastOptions, ToastHandle, ToastFn, ToastConfig,
+} from './primitives/toast-store';
+export { Toast, ToastRegion } from './components/toast';
+export type {
+  ToastRegionProps, ToastDismissReason, ToastPosition,
+} from './components/toast';
+
 // Card Contract (generative-UI foundation)
 export { CARD_CONTRACT_VERSION } from './primitives/card-contract';
 export type {
@@ -27,6 +37,10 @@ export { applyResolution, resolutionFromEvent } from './primitives/card-resoluti
 export { CardProvider, useCardHost } from './primitives/card-host';
 export type { CardProviderProps } from './primitives/card-host';
 export { CARD_EVENT_NAME, emitCardEvent, routeCardEvent, listenForCardEvents } from './primitives/card-routing';
+export { dismissRecovery, defaultIsReopenable } from './primitives/card-recovery';
+export type {
+  RecoveryToast, ReopenEnv, DismissRecoveryOptions,
+} from './primitives/card-recovery';
 export { validateAgainstSchema } from './primitives/card-validate';
 export type { JsonSchema, ValidationResult } from './primitives/card-validate';
 
@@ -47,6 +61,8 @@ export type { CardComponent, CardComponentMap, CardTagMap } from './primitives/c
 // Card: kai-card (base shell) + kai-form (JSON-Schema form renderer)
 export { Card } from './components/card';
 export type { CardProps } from './components/card';
+export { DismissedStub, stubIntent } from './components/dismissed-stub';
+export type { DismissedStubProps, DismissedCardType } from './components/dismissed-stub';
 export { Form, validateForm, buildResult, widgetFor, orderedKeys, coerceValue } from './components/form';
 export type {
   FormProps,
@@ -168,6 +184,20 @@ export {
 } from './components/chat-container';
 export { Message, MessageAvatar, MessageContent, MessageActions, MessageAction, MessageCopyButton } from './components/message';
 export type { MessageCopyButtonProps } from './components/message';
+export { ResponseCompare, useResolved } from './components/response-compare';
+export type { ResponseCompareProps, CompareLayout, ResolvedController } from './components/response-compare';
+export {
+  normalizeCandidates,
+  buildSelection,
+  isAnyStreaming,
+} from './components/response-compare';
+export type {
+  CompareCandidate,
+  ComparePair,
+  CompareCollapse,
+  ResponseCompareData,
+  CompareSelection,
+} from './components/response-compare';
 export { MessageSkills } from './components/message-skills';
 export type { Skill as MessageSkill } from './components/message-skills';
 export {

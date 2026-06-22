@@ -35,6 +35,7 @@
     "kai-scroll-button": "scroll-button",
     "kai-popover": "popover",
     "kai-switch": "switch",
+    "kai-toast-region": "toast",
     "kai-card": "card",
     "kai-form": "form",
     "kai-link-preview": "link-preview",
@@ -42,7 +43,8 @@
     "kai-confirm": "confirm-card",
     "kai-tasks": "tasks",
     "kai-choice": "choice",
-    "kai-cards": "cards"
+    "kai-cards": "cards",
+    "kai-compare": "compare"
   },
   "files": {
     "conversation-list": [
@@ -146,6 +148,9 @@
     "switch": [
       "kai-switch"
     ],
+    "toast": [
+      "kai-toast-region"
+    ],
     "card": [
       "kai-card"
     ],
@@ -169,6 +174,9 @@
     ],
     "cards": [
       "kai-cards"
+    ],
+    "compare": [
+      "kai-compare"
     ]
   }
 }

@@ -1,12 +1,33 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
-import { render, cleanup } from '@solidjs/testing-library';
+import { createSignal } from 'solid-js';
+import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { ChatThread } from './chat-thread';
+import type { ChatMessage } from '../elements/chat-types';
+
+// Spy on the imperative toast() so we can assert when feedback raises one. The
+// feedback controller imports it from primitives/toast-store.
+const toastSpy = vi.fn();
+vi.mock('../primitives/toast-store', () => {
+  const fn = Object.assign((...args: unknown[]) => toastSpy(...args), {
+    success: (...args: unknown[]) => toastSpy(...args),
+    dismiss: vi.fn(),
+    clear: vi.fn(),
+  });
+  return { toast: fn };
+});
 
 // jsdom doesn't implement Element.scrollTo; the auto-scroll container calls it.
 if (!Element.prototype.scrollTo) (Element.prototype as unknown as { scrollTo: () => void }).scrollTo = () => {};
 
+// jsdom has no clipboard; stub a writeText spy we can assert against.
+const writeText = vi.fn();
+Object.assign(navigator, { clipboard: { writeText } });
+
 afterEach(cleanup);
+
+// createPresence unmounts the hidden vote button on a microtask in jsdom.
+const tick = () => new Promise((r) => setTimeout(r, 0));
 
 describe('ChatThread header composition', () => {
   it('hides the header with no title, models, context, or header slot', () => {
@@ -54,5 +75,101 @@ describe('ChatThread suggestions gating', () => {
     ));
     expect(getByText('What can you do?')).toBeInTheDocument();
     expect(getByText('Tell me a joke')).toBeInTheDocument();
+  });
+});
+
+describe('ChatThread action-row feedback', () => {
+  beforeEach(() => {
+    toastSpy.mockClear();
+    writeText.mockClear();
+  });
+
+  const assistant = (content: string): ChatMessage => ({
+    id: 'a1', role: 'assistant', content, actions: ['copy', 'like', 'dislike'],
+  });
+
+  it('marks the chosen vote, hides the other, and KEEPS it across a streaming re-render', async () => {
+    // Drive `messages` from a signal so we can hand the thread a brand-new array
+    // reference (as a real streaming update would).
+    const [messages, setMessages] = createSignal<ChatMessage[]>([assistant('Hello')]);
+    const { getByLabelText, queryByLabelText } = render(() => <ChatThread messages={messages()} />);
+
+    // Vote up.
+    fireEvent.click(getByLabelText('Like'));
+    await tick();
+    expect(getByLabelText('Like')).toHaveAttribute('aria-pressed', 'true');
+    expect(getByLabelText('Dislike').closest('[data-feedback-collapsed]')).not.toBeNull();
+
+    // Simulate a stream chunk: a NEW array ref + the SAME id with longer content.
+    setMessages([assistant('Hello, world — now with more tokens')]);
+    await tick();
+
+    // The vote must survive the re-render: like still pressed, dislike still collapsed.
+    expect(getByLabelText('Like')).toHaveAttribute('aria-pressed', 'true');
+    expect(getByLabelText('Dislike').closest('[data-feedback-collapsed]')).not.toBeNull();
+  });
+
+  it('copies content to the clipboard, shows the check, and reverts after 2s', async () => {
+    vi.useFakeTimers();
+    try {
+      const { getByLabelText } = render(() => <ChatThread messages={[assistant('Copy me')]} />);
+      fireEvent.click(getByLabelText('Copy'));
+      expect(writeText).toHaveBeenCalledWith('Copy me');
+      // The copy button now shows the emerald check (aria-label flips to "Copied").
+      expect(getByLabelText('Copied')).toBeInTheDocument();
+      // After the 2s window it reverts.
+      vi.advanceTimersByTime(2000);
+      expect(getByLabelText('Copy')).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('emits state:"on" on set and state:"off" on the un-vote re-tap', async () => {
+    const onMessageAction = vi.fn();
+    const { getByLabelText } = render(() => (
+      <ChatThread messages={[assistant('Hi')]} onMessageAction={onMessageAction} />
+    ));
+    fireEvent.click(getByLabelText('Like'));
+    expect(onMessageAction).toHaveBeenLastCalledWith({ messageId: 'a1', action: 'like', state: 'on' });
+    await tick();
+    // Re-tap the same vote to clear it.
+    fireEvent.click(getByLabelText('Like'));
+    expect(onMessageAction).toHaveBeenLastCalledWith({ messageId: 'a1', action: 'like', state: 'off' });
+  });
+
+  it('omits state for copy (no on/off)', () => {
+    const onMessageAction = vi.fn();
+    const { getByLabelText } = render(() => (
+      <ChatThread messages={[assistant('Hi')]} onMessageAction={onMessageAction} />
+    ));
+    fireEvent.click(getByLabelText('Copy'));
+    expect(onMessageAction).toHaveBeenLastCalledWith({ messageId: 'a1', action: 'copy' });
+  });
+
+  it('controlled m.feedback renders the vote marked (and collapses the other)', () => {
+    const controlled: ChatMessage = {
+      id: 'a1', role: 'assistant', content: 'x', actions: ['like', 'dislike'], feedback: 'dislike',
+    };
+    const { getByLabelText } = render(() => <ChatThread messages={[controlled]} />);
+    expect(getByLabelText('Dislike')).toHaveAttribute('aria-pressed', 'true');
+    expect(getByLabelText('Like').closest('[data-feedback-collapsed]')).not.toBeNull();
+  });
+
+  it('toasts on copy and on a SET vote, but NOT on the un-vote', async () => {
+    const { getByLabelText } = render(() => <ChatThread messages={[assistant('Hi')]} />);
+
+    fireEvent.click(getByLabelText('Copy'));
+    expect(toastSpy).toHaveBeenCalledWith('Copied to clipboard', expect.anything());
+
+    toastSpy.mockClear();
+    fireEvent.click(getByLabelText('Like'));
+    expect(toastSpy).toHaveBeenCalledWith('Thanks for your feedback', expect.anything());
+    await tick();
+
+    // Un-vote: no toast.
+    toastSpy.mockClear();
+    fireEvent.click(getByLabelText('Like'));
+    expect(toastSpy).not.toHaveBeenCalled();
   });
 });

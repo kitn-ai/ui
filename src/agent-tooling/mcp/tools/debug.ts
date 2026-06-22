@@ -303,6 +303,143 @@ const RULES: Rule[] = [
       "import { Chat } from '@kitn.ai/ui/react';\n" +
       '```',
   },
+  {
+    // Rule 10 — toast() is the imperative API; there is no <kai-toast> to place
+    // Source: src/primitives/toast-store.ts (the `toast` fn + auto-mounted region)
+    id: 'toast-imperative',
+    test: (t) => {
+      // Placing a toast element by hand (the region auto-mounts — you never write it).
+      if (/<kai-toast(-region)?\b/.test(t)) return true;
+      // Asking how to show / trigger a toast or notification with kai context.
+      if (
+        /\btoast(s)?\b|notification|snackbar/i.test(t) &&
+        /how.*(show|raise|trigger|fire|display)|show.*toast|raise.*toast|trigger.*toast|toast.*(not|isn'?t|won'?t).*(show|appear|render)|where.*toast|add.*toast|kai-|@kitn/i.test(t)
+      )
+        return true;
+      return false;
+    },
+    title: 'Toast is an imperative call — `toast(\'…\')`, not a `<kai-toast>` you place',
+    cause:
+      'Toasts are raised IMPERATIVELY by calling `toast(message)` — there is no ' +
+      '`<kai-toast>` element you add to your markup. The first call lazily mounts ONE ' +
+      '`<kai-toast-region>` on `document.body` (a real, kit-styled, viewport-positioned ' +
+      'element) and every later toast feeds that same region. Trying to place a toast ' +
+      'element by hand, or looking for a `messages`/`toasts` prop to push into, is the ' +
+      'wrong model.',
+    fix:
+      'Import `toast` and call it. It is exported from BOTH the root `@kitn.ai/ui` and ' +
+      'the `@kitn.ai/ui/elements` bundle, so the web-components-only consumer gets it too. ' +
+      'It is SSR-safe (no DOM is touched until the first call on the client).\n\n' +
+      '```js\n' +
+      "import { toast } from '@kitn.ai/ui/elements'; // or '@kitn.ai/ui'\n\n" +
+      "// ✅ Fire-and-forget\n" +
+      "toast('Copied to clipboard');\n" +
+      "toast.success('Saved');\n\n" +
+      "// ✅ With an Undo action + an imperative handle\n" +
+      "const t = toast('Item deleted', {\n" +
+      "  action: { label: 'Undo', onAction: () => restore() },\n" +
+      '});\n' +
+      "t.update({ message: 'Restored', variant: 'success' });\n" +
+      't.dismiss();\n' +
+      '```\n\n' +
+      'The auto-mounted `<kai-toast-region>` carries its own shadow root + kit styles — ' +
+      'do NOT add a `<kai-toast-region>` tag yourself unless you deliberately want a ' +
+      'second, declaratively-controlled region.',
+  },
+  {
+    // Rule 11 — dismissed cards are DEFERRED (reopenable stub), not deleted
+    // Source: src/primitives/card-recovery.ts (dismissRecovery) + the dismissed stub
+    id: 'card-dismiss-deferred',
+    test: (t) => {
+      const cardCtx = /\bcard(s)?\b|envelope|kai-card|kai-cards|kai-confirm|kai-choice|kai-tasks|kai-form|generative.?ui|resolution|dismissRecovery/i;
+      if (!cardCtx.test(t)) return false;
+      // dismiss / reopen / undo / disappear / filter-out signals in a card context.
+      return /dismiss|reopen|re-?open|\bundo\b|disappear|remove.*card|card.*(gone|remove|delete|vanish)|filter.*out|stub/i.test(t);
+    },
+    title: 'Dismissed cards are DEFERRED (a reopenable stub), not deleted',
+    cause:
+      'Dismissing a generative-UI card does NOT delete its envelope from history. The ' +
+      'card stamps a `{ kind: \'dismissed\' }` resolution onto its envelope and collapses ' +
+      'to a small reopenable stub ("Proposed: <title> — dismissed · Reopen"). If you ' +
+      'filter `dismissed` envelopes out of your cards array, the stub vanishes and the ' +
+      'user can never reopen it — and you lose the audit trail of what was proposed.',
+    fix:
+      'Keep dismissed envelopes in the array. Wire dismiss/reopen with `dismissRecovery()` ' +
+      '(from `@kitn.ai/ui`), which builds the `onDismiss`/`onReopen` half of a `CardPolicy` ' +
+      'over your store and can show a "Dismissed · Undo" toast via an injected adapter.\n\n' +
+      '```ts\n' +
+      "import { dismissRecovery } from '@kitn.ai/ui';\n" +
+      "import { toast } from '@kitn.ai/ui/elements';\n\n" +
+      '// Adapter: map dismissRecovery\'s toast shape onto the imperative toast().\n' +
+      'const toastAdapter = {\n' +
+      '  show: ({ message, action, durationMs }) => {\n' +
+      "    const handle = toast(message, {\n" +
+      '      duration: durationMs,\n' +
+      '      action: action && { label: action.label, onAction: action.onClick },\n' +
+      '    });\n' +
+      '    return { dismiss: handle.dismiss };\n' +
+      '  },\n' +
+      '};\n\n' +
+      'const { onDismiss, onReopen } = dismissRecovery({\n' +
+      '  get: () => cards,            // your current envelopes\n' +
+      '  set: (next) => setCards(next), // NEW array reference (never mutate in place)\n' +
+      '  toast: toastAdapter,\n' +
+      '});\n' +
+      '// Pass these on the CardPolicy you hand to <kai-cards> / <kai-remote>.\n' +
+      '```\n\n' +
+      '`onDismiss` writes `dismissed` immutably (Undo restores the prior resolution); ' +
+      '`onReopen` clears it back to live (or stamps `expired` when the host says the card ' +
+      'is no longer reopenable). Never mutate the array in place — re-render needs a new ref.',
+  },
+  {
+    // Rule 12 — kai-compare contract: two candidates, JS data prop, stream both, terminal pick
+    // Source: src/elements/compare.tsx + src/components/response-compare-types.ts
+    id: 'compare-contract',
+    test: (t) => {
+      if (/<kai-compare\b|kai-compare-select|ResponseCompareData|response.?compare/i.test(t)) return true;
+      // "compare two responses / candidates / A vs B" with a kai/UI context.
+      if (
+        /compar(e|ing|ison)|side.by.side|a\/b|two\s+(responses|candidates|answers|completions)|dual.?response/i.test(t) &&
+        /kai-|@kitn|candidate|prefer(ence)?|chosen|reject/i.test(t)
+      )
+        return true;
+      return false;
+    },
+    title: '`kai-compare` — two candidates, `data` as a JS property, terminal pick',
+    cause:
+      '`<kai-compare>` shows EXACTLY two assistant candidates for one prompt and lets the ' +
+      'user pick the better one. The `data` value is an array/object, so it must be set as ' +
+      'a JS PROPERTY (never an HTML attribute). Both candidates can stream — but, like ' +
+      '`kai-chat`, that needs a NEW `data` reference per chunk (mutating in place will not ' +
+      're-render). The pick is a COMMIT (not a Submit): it fires once and the card collapses.',
+    fix:
+      'Set `data` in JS with two candidates, stream by reassigning a fresh `data` object ' +
+      'per chunk, and listen for `kai-compare-select` directly on the element.\n\n' +
+      '```ts\n' +
+      "import { toast } from '@kitn.ai/ui/elements';\n" +
+      "import type { ResponseCompareData, CompareSelection } from '@kitn.ai/ui';\n\n" +
+      "const el = document.querySelector('kai-compare')!;\n" +
+      '// data is a JS PROPERTY — exactly two candidates, each with a unique id.\n' +
+      'el.data = {\n' +
+      "  prompt: 'Summarise the report',\n" +
+      '  candidates: [\n' +
+      "    { id: 'a', content: '', streaming: true },\n" +
+      "    { id: 'b', content: '', streaming: true },\n" +
+      '  ],\n' +
+      '} satisfies ResponseCompareData;\n\n' +
+      '// Stream BOTH columns: replace data with a NEW object per chunk.\n' +
+      "el.data = { ...el.data, candidates: [{ ...a, content: aText }, { ...b, content: bText }] };\n" +
+      '// Clear `streaming` on a candidate when it settles — the pick stays disabled\n' +
+      '// until BOTH have settled, then `kai-ready` fires.\n\n' +
+      "// Picking is terminal: emits { chosenId, rejectedIds, at } and collapses.\n" +
+      "el.addEventListener('kai-compare-select', (e) => {\n" +
+      '  const { chosenId, rejectedIds } = (e as CustomEvent<CompareSelection>).detail;\n' +
+      '  recordPreference({ prompt, chosen: chosenId, rejected: rejectedIds });\n' +
+      '});\n' +
+      '```\n\n' +
+      'A malformed definition (not two candidates, missing/duplicate ids) fires `kai-error` ' +
+      'instead. The event is non-bubbling — listen on the element, not on `document`.',
+  },
 ];
 
 function buildText(matched: Rule[]): string {

@@ -11,8 +11,12 @@ import './styles.css';
 if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined') {
   const applyElementTheme = (): void => {
     const dark = document.documentElement.classList.contains('dark');
-    const root = document.querySelector('#storybook-root') ?? document.body;
-    root.querySelectorAll('*').forEach((el) => {
+    // Walk the WHOLE document, not just #storybook-root: autodocs renders stories
+    // under .sbdocs (OUTSIDE #storybook-root), and the imperative toast() mounts a
+    // <kai-toast-region> directly on document.body. Both must track the toggle, or
+    // they fall back to theme="auto" (OS) and mismatch the page — the washed-out
+    // autodocs render and the body-level toast overlay.
+    document.querySelectorAll('*').forEach((el) => {
       if (el.tagName.toLowerCase().startsWith('kai-')) {
         el.setAttribute('theme', dark ? 'dark' : 'light');
       }
@@ -32,8 +36,9 @@ if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined') 
     attributeFilter: ['class'],
   });
   const start = (): void => {
-    const root = document.querySelector('#storybook-root') ?? document.body;
-    new MutationObserver(schedule).observe(root, { childList: true, subtree: true });
+    // Observe the whole body subtree so autodocs blocks + the lazily body-mounted
+    // toast region are picked up (not only #storybook-root's canvas).
+    new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
     schedule();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
