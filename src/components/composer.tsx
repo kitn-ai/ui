@@ -439,68 +439,64 @@ export function Composer(props: ComposerProps): JSX.Element {
       promptText: item.promptText,
       data: item.data,
     };
-    insertEntity(entity, { replaceFrom: t.start });
+    // Delete the trigger token = the char + query ("/re" → 3) before the caret.
+    insertEntity(entity, { deleteBefore: 1 + t.query.length });
     closeTrigger();
   }
 
   /**
-   * Insert an entity at the current caret position.
-   * If `opts.replaceFrom` is given (text offset), the trigger token text from
-   * that offset to the caret is deleted first.
-   * After insertion the caret is placed immediately after the new ZWSP text node.
-   * Fires `onEntityAdd` then re-runs the input/change path.
-   *
-   * Note: replaceFrom token removal is text-offset based. In Task 7 the trigger
-   * menu calls this with replaceFrom = trigger.start.
+   * Insert an entity pill at the caret.
+   * If `opts.deleteBefore` is given, that many non-ZWSP characters immediately
+   * before the caret are removed first (the trigger token). The deletion walks
+   * BACKWARD from the caret within its text run, so it can never cross an earlier
+   * pill — a global-offset delete used to eat the previous pill, capping the field
+   * at two pills. After insertion the caret sits just after the new ZWSP marker.
    */
-  const insertEntity = (entity: EntityRef, opts?: { replaceFrom?: number }) => {
+  const insertEntity = (entity: EntityRef, opts?: { deleteBefore?: number }) => {
     const ownerDoc = editable.ownerDocument;
     const sel = getActiveSelection(editable);
-    if (!sel) return;
+    if (!sel || sel.rangeCount === 0) return;
 
-    // If replaceFrom is given, delete trigger token text before the caret.
-    if (opts?.replaceFrom !== undefined) {
-      const range = sel.getRangeAt(0);
-      // Find the text node at the start of the trigger token and trim it.
-      // Walk text nodes to find the replaceFrom offset.
-      let offset = 0;
-      let targetNode: Text | null = null;
-      let targetOffset = 0;
-      const walker = createTextWalker(editable);
-      let node = walker.nextNode() as Text | null;
-      while (node) {
-        const content = (node.textContent ?? '').split(ZWSP).join('');
-        if (offset + content.length >= opts.replaceFrom) {
-          targetNode = node;
-          targetOffset = opts.replaceFrom - offset;
-          break;
+    // Delete the trigger token: walk BACK from the caret over `deleteBefore`
+    // non-ZWSP chars to find the token start, then delete start→caret. Walking
+    // back stays within the caret's text run (stops at a pill), so it never eats
+    // an earlier pill. Deleting via a range collapses the live selection cleanly.
+    const caret = sel.getRangeAt(0);
+    if (opts?.deleteBefore && caret.collapsed) {
+      let remaining = opts.deleteBefore;
+      let node: Node | null = caret.startContainer;
+      let offset = caret.startOffset;
+      while (remaining > 0 && node && node.nodeType === 3) {
+        const text = node.textContent ?? '';
+        while (offset > 0 && remaining > 0) {
+          offset--;
+          if (text[offset] !== ZWSP) remaining--;
         }
-        offset += content.length;
-        node = walker.nextNode() as Text | null;
+        if (remaining > 0) {
+          const prev: ChildNode | null = node.previousSibling;
+          if (prev && prev.nodeType === 3) { node = prev; offset = (prev.textContent ?? '').length; }
+          else break; // a pill (or nothing) precedes — stop, never delete across it
+        }
       }
-      if (targetNode) {
-        const deleteRange = ownerDoc.createRange();
-        deleteRange.setStart(targetNode, targetOffset);
-        deleteRange.setEnd(range.endContainer, range.endOffset);
-        deleteRange.deleteContents();
-      }
+      const del = ownerDoc.createRange();
+      del.setStart(node as Node, offset);
+      del.setEnd(caret.startContainer, caret.startOffset);
+      del.deleteContents();
     }
 
-    // Insert entity pill + ZWSP at the current caret.
+    // Insert at the live caret (re-collapsed at the deletion point by the browser).
+    const range = sel.getRangeAt(0);
+    if (!range.collapsed) range.deleteContents();
     const pill = createEntityEl(ownerDoc, entity);
     const zwspNode = ownerDoc.createTextNode(ZWSP);
-
-    const range = sel.rangeCount > 0 ? sel.getRangeAt(0) : ownerDoc.createRange();
-    range.deleteContents();
     range.insertNode(zwspNode);
-    range.insertNode(pill);
+    range.insertNode(pill); // inserted before the zwsp → DOM order [pill][zwsp]
 
-    // Move caret after the ZWSP node.
-    const newRange = ownerDoc.createRange();
-    newRange.setStartAfter(zwspNode);
-    newRange.collapse(true);
+    const after = ownerDoc.createRange();
+    after.setStartAfter(zwspNode);
+    after.collapse(true);
     sel.removeAllRanges();
-    sel.addRange(newRange);
+    sel.addRange(after);
 
     props.onEntityAdd?.(entity);
     commitChange();
@@ -690,7 +686,11 @@ export function Composer(props: ComposerProps): JSX.Element {
           display: inline-flex; align-items: center; gap: 0.25rem;
           /* middle (not baseline): a flex pill's baseline differs with/without an
              icon, which misaligns adjacent pills — middle aligns them consistently. */
-          vertical-align: middle; height: 1.5em; padding: 0 0.4rem; margin: 0 0.28rem;
+          vertical-align: middle; height: 1.5em; padding: 0 0.4rem;
+          /* Asymmetric margin: a roomier trailing gap (so typed text isn't flush
+             after a pill) + a smaller leading gap. Adjacent pills then sit
+             0.35+0.15 apart (tighter than a doubled symmetric margin). */
+          margin: 0 0.35rem 0 0.15rem;
           border-radius: 0.375rem;
           background-color: color-mix(in srgb, currentColor 10%, transparent);
           font-weight: 500; white-space: nowrap; user-select: none; cursor: default;

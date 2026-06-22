@@ -108,6 +108,28 @@ test('adjacent pills (a / skill + an @ plugin) are the same height, vertically a
   expect(boxes[1].left - boxes[0].right).toBeGreaterThan(2);           // a real gap between them
 });
 
+test('can add many pills — a 3rd/4th does NOT replace an earlier one (the cap bug)', async ({ page }) => {
+  await page.goto(STORY);
+  await expect(editable(page)).toBeVisible();
+  await editable(page).click();
+  for (const [q, ] of [['sum'], ['brain'], ['trans']] as const) {
+    await page.keyboard.type(`/${q}`);
+    await expect(options(page).first()).toBeVisible();
+    await page.keyboard.press('Enter');
+  }
+  await expect(pills(page)).toHaveCount(3);
+  // A 4th (an agent via @) too.
+  await page.keyboard.type('@code');
+  await expect(page.getByRole('option', { name: /Code Reviewer/ })).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(pills(page)).toHaveCount(4);
+  // None were replaced — all labels survive.
+  for (const label of ['Summarize', 'Brainstorm', 'Translate', 'Code Reviewer']) {
+    await expect(editable(page)).toContainText(label);
+  }
+  await page.locator('kai-prompt-input').screenshot({ path: `${SHOTS}/many-pills.png` });
+});
+
 test('Backspace deletes a whole pill inside the prompt input', async ({ page }) => {
   await page.goto(STORY);
   await expect(editable(page)).toBeVisible();
