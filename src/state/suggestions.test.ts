@@ -10,10 +10,17 @@ describe('suggestion helpers', () => {
   });
 
   it('addSuggestion is idempotent (no duplicates)', () => {
-    expect(addSuggestion(['x'], 'x')).toEqual(['x']);
+    const a = ['x'];
+    const out = addSuggestion(a, 'x');
+    expect(out).toEqual(['x']);
+    expect(out).not.toBe(a);   // new array even when nothing was added
   });
 
   it('removeSuggestion drops the value', () => {
-    expect(removeSuggestion(['x', 'y'], 'x')).toEqual(['y']);
+    const a = ['x', 'y'];
+    const out = removeSuggestion(a, 'x');
+    expect(out).toEqual(['y']);
+    expect(out).not.toBe(a);
+    expect(a).toEqual(['x', 'y']);  // input untouched
   });
 });
