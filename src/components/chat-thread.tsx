@@ -77,7 +77,7 @@ export interface ChatThreadProps {
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
-  // ── SPIKE: composition seams ──────────────────────────────────────────────
+  // ── Composition seams ─────────────────────────────────────────────────────
   // Each flag below is set by the `<kai-chat>` facade when matching light-DOM
   // `slot="…"` content is projected, and gates one composition seam. Two kinds:
   //   • INJECT  — additive: project YOUR markup into a region (sidebar, footer,
@@ -91,7 +91,7 @@ export interface ChatThreadProps {
   headerFull?: boolean;
   /** INJECT — left sidebar column (e.g. a conversation list / your own nav). */
   sidebar?: boolean;
-  /** REPLACE — custom empty-state, shown instead of the thread when no messages. */
+  /** REPLACE — custom zero-state rendered in the message area while the thread is empty (replaces the empty message list only; the composer and its suggestions still render). */
   empty?: boolean;
   /** REPLACE — full custom composer in place of the built-in prompt input. The
    *  projected content wires its own submit (the data-flow boundary). */
@@ -165,8 +165,8 @@ export function ChatThread(props: ChatThreadProps) {
 
   return (
     <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={props.codeHighlight !== false} portalMount={outer.portalMount()}>
-      {/* SPIKE: the root is now a ROW so a `sidebar` seam can sit beside the main
-          column. With no sidebar projected it collapses to the original column. */}
+      {/* The root is a ROW so a `sidebar` seam can sit beside the main column.
+          With no sidebar projected it collapses to the original column. */}
       <div ref={(e) => (rootEl = e as HTMLElement)} class={`flex h-full bg-background ${props.class ?? ''}`}>
         <Show when={props.sidebar}>
           <aside part="sidebar" class="flex w-64 shrink-0 flex-col overflow-hidden border-r border-border">

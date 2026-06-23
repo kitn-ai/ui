@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { CHAT_SEAMS } from '../../src/elements/seams';
 
 /**
  * IVP (Independent Visual Proof) for the SPIKE slotted-shell composition model
@@ -71,13 +72,10 @@ test.describe('kai-chat composition seams IVP', () => {
     await page.goto(STORY('drop-in'));
     await expect(page.locator('kai-chat')).toBeVisible();
     await page.waitForTimeout(700);
-    // Only count the named composition seams (sidebar, header, empty, composer,
-    // composer-actions, footer, header-start, header-end). Internal prompt-input
-    // slots (leading/trailing) are excluded — they are not seams.
-    const seamSlotNames = [
-      'sidebar', 'header-start', 'header-end', 'header',
-      'empty', 'composer', 'composer-actions', 'footer',
-    ];
+    // Only count the named composition seams. Derived from CHAT_SEAMS so the list
+    // never drifts from the registry. Internal prompt-input slots (leading/trailing)
+    // are excluded — they are not seams.
+    const seamSlotNames = CHAT_SEAMS.map((s) => s.name);
     const slotCount = await page.evaluate((names) => {
       const root = document.querySelector('kai-chat')?.shadowRoot;
       if (!root) return -1;
