@@ -107,6 +107,9 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         disabled={props.disabled}
         class="relative"
       >
+        {/* Consumer-injected banner rendered at the very top of the input card.
+            Native slot; projected by the custom element. */}
+        <slot name="notice" />
         <Show when={canAttach() && attachments().length}>
           <div class="px-3 pt-3">
             <Attachments variant="inline">
@@ -128,6 +131,10 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
         <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
           <div class="flex items-center gap-2">
+            {/* Consumer-injected leading toolbar controls (e.g. a + menu). display:contents
+                ensures an empty slot adds no stray gap; projected nodes lay out as toolbar
+                items. Native slot; projected by the custom element. */}
+            <slot name="toolbar-start" style={{ display: 'contents' }} />
             <Show when={canAttach()}>
               <input
                 ref={fileInput}

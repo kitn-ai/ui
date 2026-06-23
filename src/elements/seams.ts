@@ -33,6 +33,15 @@ export const CHAT_SEAMS: SeamDef[] = [
   { name: 'footer',           mode: 'inject',  part: true, doc: 'Row below the composer (disclaimers, token meter).' },
 ];
 
+/** Seams of `<kai-prompt-input>` (and the default composer inside `<kai-chat>`). Native
+ *  shadow slots — an empty seam renders nothing, so no facade flag-gating is required. */
+export const PROMPT_INPUT_SEAMS: SeamDef[] = [
+  { name: 'notice',        mode: 'inject', part: true, doc: 'Banner at the top of the input card (e.g. "model unavailable"). You own the copy + dismiss.' },
+  { name: 'leading',       mode: 'inject', doc: 'Controls before the textarea.' },
+  { name: 'toolbar-start', mode: 'inject', doc: 'Leading controls in the input toolbar — where a + menu goes.' },
+  { name: 'trailing',      mode: 'inject', doc: 'Trailing controls in the toolbar, before the Send button (toolbar-end).' },
+];
+
 /**
  * Which seams have projected light-DOM content — a DIRECT child of `host`
  * carrying the matching `slot` attribute. Pure and synchronous; safe in jsdom

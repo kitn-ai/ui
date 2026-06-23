@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CHAT_SEAMS, readSeams } from './seams';
+import { CHAT_SEAMS, PROMPT_INPUT_SEAMS, readSeams } from './seams';
 
 describe('CHAT_SEAMS registry', () => {
   it('lists the eight kai-chat seams, in order, with unique names', () => {
@@ -44,5 +44,21 @@ describe('readSeams', () => {
   it('ignores nested (non-direct-child) slotted descendants', () => {
     const seams = readSeams(host('<div><span slot="sidebar"></span></div>'));
     expect(seams.sidebar).toBe(false);
+  });
+});
+
+describe('PROMPT_INPUT_SEAMS registry', () => {
+  it('lists the four prompt-input seams in order', () => {
+    expect(PROMPT_INPUT_SEAMS.map((s) => s.name)).toEqual([
+      'notice', 'leading', 'toolbar-start', 'trailing',
+    ]);
+  });
+
+  it('marks all seams as inject mode', () => {
+    expect(PROMPT_INPUT_SEAMS.every((s) => s.mode === 'inject')).toBe(true);
+  });
+
+  it('every seam has a non-empty doc contract', () => {
+    expect(PROMPT_INPUT_SEAMS.every((s) => s.doc.trim().length > 0)).toBe(true);
   });
 });
