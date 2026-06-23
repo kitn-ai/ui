@@ -11,8 +11,7 @@
 //   messages        — the active thread (newest last)
 //   models          — model options for the header switcher
 //   suggestions     — starter prompts shown on an empty thread
-//   slashCommands   — command-palette entries
-//   slashActiveIds  — currently-active slash command ids
+//   triggers        — entity-pill trigger definitions (/ skills, @ agents/plugins)
 //   context         — token-usage meter in the header
 
 // ── shared conversation list ───────────────────────────────────────────────────
@@ -120,26 +119,31 @@ const SUGGESTION_LIST = [
   'Refactor this code for readability',
 ];
 
-// ── slash commands ─────────────────────────────────────────────────────────────
+// ── entity triggers (/ skills, @ agents/plugins) ──────────────────────────────
 
-const SLASH_COMMANDS = [
-  { id: 'summarise', label: 'Summarise', description: 'Summarise the current document', category: 'Document' },
-  { id: 'translate', label: 'Translate', description: 'Translate selected text', category: 'Document' },
-  { id: 'fix', label: 'Fix', description: 'Fix errors in the selected code', category: 'Code' },
-  { id: 'explain', label: 'Explain', description: 'Explain what this code does', category: 'Code' },
-  { id: 'test', label: 'Write tests', description: 'Generate unit tests for this function', category: 'Code' },
+const TRIGGERS = [
+  { char: '/', kind: 'skill', items: [
+    { id: 'summarize', label: 'Summarize', description: 'Summarize the thread', promptText: 'Summarize the thread.' },
+    { id: 'translate', label: 'Translate', description: 'Translate to English' },
+    { id: 'rewrite', label: 'Rewrite', description: 'Rewrite for clarity' },
+  ] },
+  { char: '@', kind: 'agent', items: [
+    { id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents', description: 'Reviews diffs for bugs' },
+    { id: 'researcher', label: 'Researcher', group: 'Agents', description: 'Deep multi-source research' },
+    { id: 'documents', label: 'Documents', kind: 'plugin', group: 'Plugins', description: 'Create and edit documents' },
+  ] },
 ];
 
-const SLASH_MESSAGES = [
+const TRIGGER_MESSAGES = [
   {
     id: 'm-1',
     role: 'user',
-    content: '/explain',
+    content: 'Review the checkout path',
   },
   {
     id: 'm-2',
     role: 'assistant',
-    content: 'Type `/` in the prompt below to open the command palette and pick a slash command.',
+    content: 'Type `/` for a skill or `@` for an agent or plugin — each selection drops an atomic pill into the prompt below.',
     actions: ['copy'],
   },
 ];
@@ -235,11 +239,11 @@ export default {
       activeId: 'c-2',
       chatTitle: 'Theming & design tokens',
     },
-    // Slash commands — type "/" to open the palette.
-    withSlash: {
+    // Entity pills — type "/" for a skill or "@" for an agent/plugin.
+    withTriggers: {
       conversations: CONVERSATIONS,
-      messages: SLASH_MESSAGES,
-      slashCommands: SLASH_COMMANDS,
+      messages: TRIGGER_MESSAGES,
+      triggers: TRIGGERS,
       activeId: 'c-1',
       chatTitle: 'Web component architecture',
     },

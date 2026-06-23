@@ -1,5 +1,6 @@
-import { createSignal, For, Show } from 'solid-js';
+import { createSignal, createEffect, For, Show } from 'solid-js';
 import { ChatConfig, useChatConfig } from '../primitives/chat-config';
+import { type ComposerDoc, normalizeValue, serializeToText } from '../primitives/composer-model';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
 import { Message, MessageAvatar, MessageBody } from './message';
 import { type AttachmentData } from './attachments';
@@ -11,7 +12,7 @@ import {
   ContextContentBody, ContextContentFooter, ContextInputUsage, ContextOutputUsage,
 } from './context';
 import { DefaultPromptInput } from '../elements/default-input';
-import type { SlashCommandItem } from './slash-command';
+import type { TriggerDef } from './composer';
 import type { ChatMessage } from '../elements/chat-types';
 import type { ProseSize } from '../primitives/chat-config';
 import type { ModelOption } from '../types';
@@ -31,9 +32,10 @@ export interface ChatThreadProps {
    *  content, and optional reasoning/tools/attachments/actions. Set as a JS
    *  property (`el.messages = [...]`). */
   messages: ChatMessage[];
-  /** Controlled value of the input. When set, the host owns the input text and
-   *  must update it on `kai-value-change`; leave unset for uncontrolled behavior. */
-  value?: string;
+  /** Value of the input. A **string** is controlled (the host owns the text and
+   *  updates it on `kai-value-change`). A **ComposerDoc** is a one-time seed that
+   *  pre-populates pills; the user then edits freely. Leave unset for uncontrolled. */
+  value?: string | ComposerDoc;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
   /** When true, shows the loading/streaming state and disables submit (use while
@@ -79,13 +81,12 @@ export interface ChatThreadProps {
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
   voice?: boolean;
-  /** Slash commands — when set, typing `/` in the input opens the command
-   *  palette and fires `kai-slash-select`. Set as a JS property. */
-  slashCommands?: SlashCommandItem[];
-  /** Command ids to highlight as active in the palette. */
-  slashActiveIds?: string[];
-  /** Single-line palette rows. */
-  slashCompact?: boolean;
+  /** Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored
+   *  menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a
+   *  JS property; forwarded to the input. */
+  triggers?: TriggerDef[];
+  /** Default icon per entity kind (kind → image src) for pills/menu items. */
+  kindIcons?: Record<string, string>;
   /** Whether each message's action bar is always visible (`'always'`, default)
    *  or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: 'always' | 'hover';
@@ -97,7 +98,6 @@ export interface ChatThreadProps {
   onMessageAction?: (detail: MessageActionDetail) => void;
   onSearch?: () => void;
   onVoice?: () => void;
-  onSlashSelect?: (command: SlashCommandItem) => void;
 }
 
 export function ChatThread(props: ChatThreadProps) {
@@ -112,11 +112,18 @@ export function ChatThread(props: ChatThreadProps) {
     emit: (detail) => props.onMessageAction?.(detail),
     target: () => rootEl,
   });
-  const [internal, setInternal] = createSignal(props.value ?? '');
+  const [internal, setInternal] = createSignal<string | ComposerDoc>(props.value ?? '');
   const [attachments, setAttachments] = createSignal<AttachmentData[]>([]);
-  const current = () => props.value ?? internal();
+  // A string `value` is controlled; a ComposerDoc `value` is a one-time seed that
+  // lives in `internal` so the user's (string) edits replace it without a fight.
+  const current = (): string | ComposerDoc =>
+    typeof props.value === 'string' ? props.value : internal();
+  createEffect(() => {
+    const v = props.value;
+    if (v != null && typeof v !== 'string') setInternal(v);
+  });
   const handleChange = (v: string) => { setInternal(v); props.onValueChange?.(v); };
-  const handleSubmit = () => { props.onSubmit?.({ value: current(), attachments: attachments() }); setAttachments([]); };
+  const handleSubmit = () => { props.onSubmit?.({ value: serializeToText(normalizeValue(current())), attachments: attachments() }); setAttachments([]); };
   const handleSuggestionClick = (v: string) => {
     if ((props.suggestionMode ?? 'submit') === 'fill') { handleChange(v); props.onSuggestionClick?.(v); }
     else { props.onSubmit?.({ value: v, attachments: attachments() }); setAttachments([]); }
@@ -227,11 +234,10 @@ export function ChatThread(props: ChatThreadProps) {
               value={current()} placeholder={props.placeholder} loading={props.loading === true}
               suggestions={visibleSuggestions()} attachments={attachments()}
               search={props.search === true} voice={props.voice === true}
-              slashCommands={props.slashCommands} slashActiveIds={props.slashActiveIds} slashCompact={props.slashCompact === true}
+              triggers={props.triggers} kindIcons={props.kindIcons}
               onValueChange={handleChange} onSubmit={handleSubmit} onSuggestionClick={handleSuggestionClick}
               onAttachmentsChange={setAttachments}
               onSearch={() => props.onSearch?.()} onVoice={() => props.onVoice?.()}
-              onSlashSelect={(command) => props.onSlashSelect?.(command)}
             />
           </div>
         </div>

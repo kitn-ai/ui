@@ -16,6 +16,7 @@ import { test, expect, type Page } from '@playwright/test';
 const SKILLS_STORY = '/iframe.html?id=elements-composer--skills&viewMode=story';
 const PREFILLED_STORY = '/iframe.html?id=elements-composer--prefilled&viewMode=story';
 const DEFAULT_STORY = '/iframe.html?id=elements-composer--default&viewMode=story';
+const HIGHLIGHTED_STORY = '/iframe.html?id=elements-composer--highlighted&viewMode=story';
 
 /** Locator for the editable surface inside the element's (open) shadow root.
  *  Playwright pierces open shadow roots automatically. */
@@ -65,10 +66,11 @@ test.describe('kai-composer IVP', () => {
     // Select the first item (Record & Replay) with Enter — must NOT submit.
     await page.keyboard.press('Enter');
 
-    // An atomic entity pill is now present, with the icon + label inline.
+    // An atomic entity pill is now present. Skills render as LIGHT decorated
+    // text led by their sigil (`/`), not an icon chip (per-kind decoration).
     await expect(pills(page)).toHaveCount(1);
     await expect(pills(page).first()).toContainText('Record & Replay');
-    await expect(pills(page).first().locator('img')).toBeVisible();
+    await expect(pills(page).first().locator('.kai-composer-pill-sigil')).toHaveText('/');
     expect(await readSubmits(page)).toHaveLength(0); // Enter selected, didn't submit
 
     // Continue typing — reproduces the reference image exactly.
@@ -96,6 +98,19 @@ test.describe('kai-composer IVP', () => {
     expect(detail.doc[1]).toMatchObject({ type: 'text', text: " I'm going to show y" });
     expect(detail.entities).toHaveLength(1);
     expect(detail.entities[0].id).toBe('record-replay');
+  });
+
+  test('the trigger menu is anchored at the caret, not parked at the page origin', async ({ page }) => {
+    await page.goto(SKILLS_STORY);
+    await expect(editable(page)).toBeVisible();
+    await editable(page).click();
+    await page.keyboard.type('hello /'); // caret well away from (0,0)
+    await expect(menuOptions(page).first()).toBeVisible();
+    const menu = await page.locator('[role="listbox"]').boundingBox();
+    const ed = await editable(page).boundingBox();
+    // The menu must sit BELOW the caret line, not at the top-left page origin.
+    expect(menu!.y).toBeGreaterThan(ed!.y);
+    expect(menu!.x).toBeGreaterThan(5);
   });
 
   test('a trigger typed immediately after a pill opens the menu (no space needed)', async ({ page }) => {
@@ -140,6 +155,91 @@ test.describe('kai-composer IVP', () => {
     await expect(pills(page)).toHaveCount(0);
     // The editable is empty text-wise (no stray label characters left behind).
     await expect(editable(page)).toHaveText(/^[​]*$/);
+  });
+
+  test('Arrow keys select a pill as one unit; arrow again steps past; Backspace deletes it', async ({ page }) => {
+    await page.goto(SKILLS_STORY);
+    await expect(editable(page)).toBeVisible();
+
+    await editable(page).click();
+    await page.keyboard.type('/');
+    await expect(menuOptions(page).first()).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(pills(page)).toHaveCount(1);
+
+    const selected = page.locator('[data-kai-entity][data-selected]');
+
+    // Caret sits after the pill — ArrowLeft selects the WHOLE pill as one unit.
+    await page.keyboard.press('ArrowLeft');
+    await expect(selected).toHaveCount(1);
+
+    // ArrowLeft again steps the caret PAST the pill (deselects, doesn't enter it).
+    await page.keyboard.press('ArrowLeft');
+    await expect(selected).toHaveCount(0);
+
+    // Caret is now before the pill — ArrowRight re-selects it as one unit.
+    await page.keyboard.press('ArrowRight');
+    await expect(selected).toHaveCount(1);
+
+    // Backspace on a selected pill removes the whole unit (and emits no submit).
+    await page.keyboard.press('Backspace');
+    await expect(pills(page)).toHaveCount(0);
+    await expect(selected).toHaveCount(0);
+  });
+
+  test('Backward arrow selects a pill across the zero-width filler typing leaves (regression)', async ({ page }) => {
+    // Reproduces the real flow: text + a menu-inserted pill + more text leaves
+    // empty/ZWSP filler nodes around the pill. Backward selection must skip them
+    // (forward worked; backward used to walk past the pill without selecting).
+    await page.goto(SKILLS_STORY);
+    await expect(editable(page)).toBeVisible();
+    await editable(page).click();
+    await page.keyboard.type('hello ');
+    await page.keyboard.type('/');
+    await expect(menuOptions(page).first()).toBeVisible();
+    await page.keyboard.press('Enter'); // insert the skill pill
+    await page.keyboard.type(' world');
+    await expect(pills(page)).toHaveCount(1);
+
+    const selected = page.locator('[data-kai-entity][data-selected]');
+
+    // Walk backward from the end — the pill MUST get selected before we pass it.
+    await page.keyboard.press('End');
+    let got = false;
+    for (let i = 0; i < 12; i++) {
+      await page.keyboard.press('ArrowLeft');
+      if (await selected.count()) { got = true; break; }
+    }
+    expect(got).toBe(true);
+
+    // One more ArrowLeft steps past it (deselects, caret now before the pill).
+    await page.keyboard.press('ArrowLeft');
+    await expect(selected).toHaveCount(0);
+  });
+
+  test('keyword highlights register via the CSS Custom Highlight API', async ({ page }) => {
+    await page.goto(HIGHLIGHTED_STORY);
+    await expect(editable(page)).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { CSS: { highlights?: { size: number } } }).CSS.highlights?.size ?? 0))
+      .toBeGreaterThan(0);
+  });
+
+  test('setting highlights AFTER mount still registers (reactive highlights, the docs flow)', async ({ page }) => {
+    // Reproduces how the docs <Example> wires props: the element mounts first,
+    // then `value` and `highlights` are assigned as separate properties. The
+    // deferred value-effect recomputes on `value`, so `highlights` must be
+    // reactive on its own or it never applies.
+    await page.goto(DEFAULT_STORY);
+    await expect(editable(page)).toBeVisible();
+    await page.evaluate(() => {
+      const host = document.querySelector('kai-composer') as unknown as { value: string; highlights: unknown[] };
+      host.value = 'Deploy TICKET-123 now';
+      host.highlights = ['deploy', { pattern: 'TICKET-\\d+' }];
+    });
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { CSS: { highlights?: { size: number } } }).CSS.highlights?.size ?? 0))
+      .toBeGreaterThan(0);
   });
 
   test('Prefilled doc renders a pill inline with text (reference shape)', async ({ page }) => {

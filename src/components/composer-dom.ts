@@ -30,11 +30,32 @@ export function createTextWalker(root: HTMLElement): TreeWalker {
 }
 
 /**
- * Default monochrome (currentColor) glyph per entity kind, so kinds are visually
- * distinguishable even without an explicit `icon`: agent = bot, plugin = plug.
- * Skills intentionally have NO default glyph (they read as plain text pills).
- * Returns inline SVG markup (trusted — no user input), or '' for kinds without a
- * default. An item's own `icon` always takes precedence over this.
+ * The leading sigil shown on a "light" pill, by kind: skills `/`, agents `@`.
+ * Skills and agents render as decorated inline text led by their sigil; this is
+ * what makes them read like `/my-skill` / `@my-agent` rather than a chip.
+ * Returns '' for kinds rendered as a richer CHIP (plugins, and any other/unknown
+ * kind) — those carry an icon instead of a sigil. The sigil is visual only: it
+ * never enters the text model (the entity is read from `entityStore`, and the
+ * text walker skips pill-internal nodes).
+ */
+export function kindSigil(kind: string): string {
+  switch (kind) {
+    case 'skill':
+      return '/';
+    case 'agent':
+      return '@';
+    default:
+      return '';
+  }
+}
+
+/**
+ * Default monochrome (currentColor) glyph per entity kind, for the richer CHIP
+ * kinds shown in the trigger menu / on plugin pills: plugin = plug. (Skills and
+ * agents are light sigil-text pills — see `kindSigil` — so they take no glyph on
+ * the pill, though the menu may still show one.) Returns inline SVG markup
+ * (trusted — no user input), or '' for kinds without a default. An item's own
+ * `icon` always takes precedence over this.
  */
 export function kindGlyph(kind: string): string {
   const svg = (inner: string) =>
@@ -60,23 +81,37 @@ export function createEntityEl(
   el.dataset.kind = entity.kind;
   el.dataset.id = entity.id;
   el.className = 'kai-composer-pill';
-  // Icon resolution: the item's own icon → the per-kind default (kindIcons) →
-  // a built-in kind glyph (agent/plugin) → nothing (skills).
-  const iconSrc = entity.icon ?? kindIcons?.[entity.kind];
-  if (iconSrc) {
-    const img = doc.createElement('img');
-    img.src = iconSrc;
-    img.alt = '';
-    img.className = 'kai-composer-pill-icon';
-    el.appendChild(img);
+
+  const sigil = kindSigil(entity.kind);
+  if (sigil) {
+    // Skills/agents: LIGHT pill — decorated inline text led by the sigil, no
+    // icon. (`/my-skill`, `@my-agent`.)
+    const s = doc.createElement('span');
+    s.className = 'kai-composer-pill-sigil';
+    s.setAttribute('aria-hidden', 'true');
+    s.textContent = sigil;
+    el.appendChild(s);
   } else {
-    const glyph = kindGlyph(entity.kind);
-    if (glyph) {
-      const span = doc.createElement('span');
-      span.className = 'kai-composer-pill-icon kai-composer-pill-glyph';
-      span.setAttribute('aria-hidden', 'true');
-      span.innerHTML = glyph; // trusted SVG markup (not user input)
-      el.appendChild(span);
+    // Plugins (and other composite/unknown kinds): the richer CHIP, with an
+    // icon so a bundle reads differently from a skill/agent at a glance. Icon
+    // resolution: the item's own icon → per-kind default (kindIcons) → a
+    // built-in kind glyph (plugin) → nothing.
+    const iconSrc = entity.icon ?? kindIcons?.[entity.kind];
+    if (iconSrc) {
+      const img = doc.createElement('img');
+      img.src = iconSrc;
+      img.alt = '';
+      img.className = 'kai-composer-pill-icon';
+      el.appendChild(img);
+    } else {
+      const glyph = kindGlyph(entity.kind);
+      if (glyph) {
+        const span = doc.createElement('span');
+        span.className = 'kai-composer-pill-icon kai-composer-pill-glyph';
+        span.setAttribute('aria-hidden', 'true');
+        span.innerHTML = glyph; // trusted SVG markup (not user input)
+        el.appendChild(span);
+      }
     }
   }
   el.appendChild(doc.createTextNode(entity.label));

@@ -84,12 +84,32 @@ list.addEventListener('kai-conversation-select', (e) => { list.activeId = e.deta
 list.addEventListener('kai-new-chat', () => log('newchat'));
 
 const pi = document.getElementById('pi');
-pi.slashCommands = [
-  { id: 'summarize', label: '/summarize', description: 'Summarize the conversation', category: 'Actions' },
-  { id: 'translate', label: '/translate', description: 'Translate the last message', category: 'Actions' },
-  { id: 'image', label: '/image', description: 'Generate an image', category: 'Tools' },
+// Entity-pill triggers: '/' opens skills, '@' opens agents/plugins. Picking an
+// item drops an atomic pill into the draft; the chosen entities ride along on
+// kai-value-change / kai-submit as event.detail.entities.
+pi.triggers = [
+  {
+    char: '/',
+    kind: 'skill',
+    items: [
+      { id: 'summarize', label: 'Summarize', description: 'Summarize the thread', promptText: 'Summarize the thread.' },
+      { id: 'translate', label: 'Translate', description: 'Translate to English' },
+      { id: 'rewrite', label: 'Rewrite', description: 'Rewrite for clarity' },
+    ],
+  },
+  {
+    char: '@',
+    kind: 'agent',
+    items: [
+      { id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents', description: 'Reviews diffs for bugs' },
+      { id: 'researcher', label: 'Researcher', group: 'Agents', description: 'Deep multi-source research' },
+      { id: 'documents', label: 'Documents', kind: 'plugin', group: 'Plugins', description: 'Create and edit documents' },
+    ],
+  },
 ];
-pi.addEventListener('kai-slash-select', (e) => log('slashselect', e.detail.command.id));
+pi.addEventListener('kai-value-change', (e) => {
+  if (e.detail.entities?.length) log('entities', e.detail.entities.map((en) => en.id).join(', '));
+});
 pi.addEventListener('kai-submit', (e) => { log('submit', e.detail.value); pi.value = ''; });
 
 // ── messages ──

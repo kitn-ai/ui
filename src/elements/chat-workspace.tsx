@@ -7,7 +7,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resi
 import { Button } from '../ui/button';
 import { PanelLeftOpen } from 'lucide-solid';
 import type { AttachmentData } from '../components/attachments';
-import type { SlashCommandItem } from '../components/slash-command';
+import type { TriggerDef } from '../components/composer';
 import type { ChatMessage } from './chat-types';
 import type { ProseSize } from '../primitives/chat-config';
 import type { ModelOption, ConversationGroup, ConversationSummary } from '../types';
@@ -36,9 +36,10 @@ interface Props extends Record<string, unknown> {
   scrollButton?: boolean;
   search?: boolean;
   voice?: boolean;
-  slashCommands?: SlashCommandItem[];
-  slashActiveIds?: string[];
-  slashCompact?: boolean;
+  /** Rich entity triggers (`/` skills, `@` agents/plugins) forwarded to the input. */
+  triggers?: TriggerDef[];
+  /** Default icon per entity kind (kind → image src) forwarded to the input. */
+  kindIcons?: Record<string, string>;
   /** Sidebar default width as a percent of the workspace (default 22). */
   sidebarWidth?: number;
   /** Sidebar min width in px (default 200). */
@@ -75,8 +76,6 @@ interface Events {
   'kai-search': Record<string, never>;
   /** The Mic / voice button was clicked. */
   'kai-voice': Record<string, never>;
-  /** A slash command was chosen from the palette. */
-  'kai-slash-select': { command: SlashCommandItem };
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
   'kai-suggestion-click': { value: string };
 }
@@ -87,7 +86,7 @@ defineWebComponent<Props, Events>('kai-workspace', {
   suggestions: undefined, suggestionMode: 'submit', proseSize: 'sm',
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
-  search: false, voice: false, slashCommands: undefined, slashActiveIds: undefined, slashCompact: false,
+  search: false, voice: false, triggers: undefined, kindIcons: undefined,
   sidebarWidth: 22, sidebarMinWidth: 200, sidebarMaxWidth: 420,
   sidebarCollapsed: undefined, defaultSidebarCollapsed: undefined,
 }, (props, { dispatch, flag }) => {
@@ -115,8 +114,8 @@ defineWebComponent<Props, Events>('kai-workspace', {
       chatTitle={props.chatTitle as string | undefined} models={props.models as ModelOption[] | undefined}
       currentModel={props.currentModel as string | undefined} context={props.context as ChatThreadContextUsage | undefined}
       scrollButton={props.scrollButton !== false} search={flag('search')} voice={flag('voice')}
-      slashCommands={props.slashCommands as SlashCommandItem[] | undefined}
-      slashActiveIds={props.slashActiveIds as string[] | undefined} slashCompact={flag('slashCompact')}
+      triggers={props.triggers as TriggerDef[] | undefined}
+      kindIcons={props.kindIcons as Record<string, string> | undefined}
       onValueChange={(value) => dispatch('kai-value-change', { value })}
       onSubmit={(detail) => dispatch('kai-submit', detail)}
       onSuggestionClick={(value) => dispatch('kai-suggestion-click', { value })}
@@ -124,7 +123,6 @@ defineWebComponent<Props, Events>('kai-workspace', {
       onMessageAction={(detail) => dispatch('kai-message-action', detail)}
       onSearch={() => dispatch('kai-search', {})}
       onVoice={() => dispatch('kai-voice', {})}
-      onSlashSelect={(command) => dispatch('kai-slash-select', { command })}
     />
   );
 

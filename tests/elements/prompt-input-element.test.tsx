@@ -1,4 +1,40 @@
 import '../../src/elements/prompt-input';
+import type { ComposerDoc } from '../../src/primitives/composer-model';
+
+test('value as a ComposerDoc seeds a pill; submit emits a flattened string value + the seeded entities', async () => {
+  const el = document.createElement('kai-prompt-input') as HTMLElement & {
+    value?: string | ComposerDoc;
+  };
+  const doc: ComposerDoc = [
+    { type: 'text', text: 'Review ' },
+    {
+      type: 'entity',
+      entity: { kind: 'skill', id: 'rec', label: 'Record & Replay', promptText: 'Use the Record & Replay skill.' },
+    },
+  ];
+  el.value = doc;
+  document.body.appendChild(el);
+  await Promise.resolve();
+
+  // The seeded pill renders inline (a real skill pill, by kind).
+  const pill = el.shadowRoot!.querySelector('[data-kai-entity]');
+  expect(pill).toBeTruthy();
+  expect(pill!.getAttribute('data-kind')).toBe('skill');
+
+  // Submitting WITHOUT editing emits a flattened STRING value (back-compat) and
+  // carries the seeded entities for downstream expansion.
+  let detail: { value: unknown; entities: { id: string }[] } | null = null;
+  el.addEventListener('kai-submit', (e) => (detail = (e as CustomEvent).detail));
+  const editable = el.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
+  editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
+
+  const d = detail as unknown as { value: unknown; entities: { id: string }[] };
+  expect(typeof d.value).toBe('string');
+  expect(d.value).toBe('Review Use the Record & Replay skill.');
+  expect(d.entities.map((x) => x.id)).toEqual(['rec']);
+
+  el.remove();
+});
 
 test('emits valuechange on input and submit on Enter', async () => {
   const el = document.createElement('kai-prompt-input') as HTMLElement & {
@@ -102,33 +138,6 @@ test('disallows leading whitespace at the start of the prompt', async () => {
   editable.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
   await Promise.resolve();
   expect(editable.textContent).toBe('');
-
-  el.remove();
-});
-
-test('slash command: selecting (Enter) inserts the command into the input', async () => {
-  const el = document.createElement('kai-prompt-input') as HTMLElement & {
-    slashCommands?: { id: string; label: string; description?: string }[];
-  };
-  el.slashCommands = [{ id: 'summarize', label: '/summarize', description: 'Summarize' }];
-  document.body.appendChild(el);
-  await Promise.resolve();
-
-  const editable = el.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
-  // Type a slash query to open the palette
-  editable.textContent = '/sum';
-  editable.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
-  await Promise.resolve();
-  await Promise.resolve();
-
-  // The palette should be open and showing the command
-  expect(el.shadowRoot!.textContent).toContain('/summarize');
-
-  // Press Enter to select — should insert the command label into the input
-  editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
-  await Promise.resolve();
-
-  expect(editable.textContent!.trim()).toBe('/summarize');
 
   el.remove();
 });

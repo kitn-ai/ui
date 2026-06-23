@@ -230,9 +230,30 @@ function setCaretToOffset(root: HTMLElement, offset: number): void {
 
 export function Composer(props: ComposerProps): JSX.Element {
   let editable!: HTMLDivElement;
-  let menuRef: HTMLDivElement | undefined;
+  // A SIGNAL (not a plain `let`): usePosition's floating ref must be reactive so
+  // Floating UI recomputes once the menu mounts. A non-reactive ref left the menu
+  // parked at the page origin (0,0) instead of anchored at the caret.
+  const [menuRef, setMenuRef] = createSignal<HTMLDivElement>();
   const highlightName = `kai-composer-highlight-${createUniqueId()}`;
   const [empty, setEmpty] = createSignal(docIsEmpty(normalizeValue(props.value)));
+
+  // --- Atomic pill selection (Claude Code-style: arrow onto a pill selects the
+  //     whole unit; arrow again steps the caret past it; Backspace/Delete removes
+  //     it). The selected pill carries `data-selected` for the highlight. This is
+  //     a caret/visual affordance only — it never mutates the doc. ---
+  const [selectedPill, setSelectedPill] = createSignal<HTMLElement | null>(null);
+  const selectPill = (el: HTMLElement) => {
+    const cur = selectedPill();
+    if (cur && cur !== el) cur.removeAttribute('data-selected');
+    el.setAttribute('data-selected', '');
+    setSelectedPill(el);
+  };
+  const clearPillSelection = () => {
+    const cur = selectedPill();
+    if (!cur) return;
+    cur.removeAttribute('data-selected');
+    setSelectedPill(null);
+  };
 
   // --- Undo/redo history (we own it; native contenteditable undo corrupts pills) ---
   const history = createHistory({ doc: normalizeValue(props.value), caret: 0 });
@@ -304,14 +325,13 @@ export function Composer(props: ComposerProps): JSX.Element {
     } as unknown as HTMLElement;
   });
 
-  const floatingRef = createMemo(() => menuRef);
-  const { pos, hidden } = usePosition(virtualRef, floatingRef, { placement: 'bottom-start', gutter: 4 });
+  const { pos, hidden } = usePosition(virtualRef, menuRef, { placement: 'bottom-start', gutter: 4 });
   const { present, state, setRef } = createPresence(menuOpen);
 
   useDismiss({
     enabled: menuOpen,
     onDismiss: () => closeTrigger(),
-    refs: () => [editable, menuRef],
+    refs: () => [editable, menuRef()],
   });
 
   function closeTrigger() {
@@ -328,12 +348,11 @@ export function Composer(props: ComposerProps): JSX.Element {
     return { doc, text: serializeToText(doc), entities: entitiesOf(doc) };
   };
 
-  /** Recompute and register CSS Custom Highlight ranges for keyword rules. */
+  /** Recompute and register CSS Custom Highlight ranges for keyword rules. No
+   *  rules → apply an empty set, which clears any prior registration. */
   function recomputeHighlights() {
     const rules = props.highlights;
-    if (!rules?.length) return;
-    const text = getFullText(editable);
-    const matches = findHighlightMatches(text, rules);
+    const matches = rules?.length ? findHighlightMatches(getFullText(editable), rules) : [];
     applyHighlights(editable, matches, ZWSP, highlightName);
   }
 
@@ -353,11 +372,18 @@ export function Composer(props: ComposerProps): JSX.Element {
     // including a clear-after-submit that fires while the editable is focused.
     const incoming = serializeToText(normalizeValue(v));
     if (incoming === serializeToText(parseDom(editable))) return;
+    clearPillSelection(); // selected pill node is about to be replaced
     renderDoc(editable, normalizeValue(v), editable.ownerDocument, props.kindIcons);
     setEmpty(docIsEmpty(parseDom(editable)));
     recomputeHighlights();
     history.reset({ doc: parseDom(editable), caret: 0 }); // external value = new baseline
   }, { defer: true }));
+
+  // Re-decorate when `highlights` changes on its own — e.g. a consumer (or the
+  // docs <Example>) assigns `value` then `highlights` as separate properties
+  // after mount. Without this, highlights set after the value-effect ran would
+  // never apply. `defer` skips the mount run (onMount already decorates).
+  createEffect(on(() => props.highlights, () => recomputeHighlights(), { defer: true }));
 
   function updateTriggerState() {
     const defs = props.triggers;
@@ -393,6 +419,7 @@ export function Composer(props: ComposerProps): JSX.Element {
 
   // Native input (typing / deleting): sync + record a (time-coalesced) history step.
   const handleInput = () => {
+    clearPillSelection(); // any text edit drops a stale pill highlight
     const change = snapshot();
     syncState(change);
     const now = Date.now();
@@ -411,6 +438,7 @@ export function Composer(props: ComposerProps): JSX.Element {
   // Restore a snapshot (undo/redo). Re-renders the doc (pills included) + caret,
   // syncs derived state, but does NOT push a new history entry.
   const applySnapshot = (snap: { doc: ComposerDoc; caret: number }) => {
+    clearPillSelection(); // the selected pill node is about to be replaced
     renderDoc(editable, snap.doc, editable.ownerDocument, props.kindIcons);
     setCaretToOffset(editable, snap.caret);
     syncState(snapshot());
@@ -425,7 +453,7 @@ export function Composer(props: ComposerProps): JSX.Element {
   // the element turns into kai-focus/kai-blur).
   let focused = false;
   const handleFocus = (e: FocusEvent) => { focused = true; props.onFocus?.(e); };
-  const handleBlur = (e: FocusEvent) => { focused = false; props.onBlur?.(e); };
+  const handleBlur = (e: FocusEvent) => { focused = false; clearPillSelection(); props.onBlur?.(e); };
 
   onMount(() => {
     const onSelectionChange = () => {
@@ -512,6 +540,93 @@ export function Composer(props: ComposerProps): JSX.Element {
     commitChange();
   };
 
+  // A string consisting only of ZWSP markers (an empty string counts — `[].every`
+  // is true). Used to recognize the zero-width filler that trails a pill.
+  const onlyZwsp = (s: string | null): boolean =>
+    (s ?? '').split('').every((ch) => ch === ZWSP);
+
+  // Zero-width filler between a pill and adjacent content: an empty OR ZWSP-only
+  // text node. Inserting a pill (and then typing) leaves these behind — e.g.
+  // `[pill][t""][t"<ZWSP> world"]` — so adjacency checks MUST skip them to find
+  // the pill. (This was the forward/backward asymmetry: a pill's `nextSibling` is
+  // the pill itself, but its following text node's `previousSibling` is filler.)
+  const isFiller = (n: Node | null): boolean =>
+    !!n && n.nodeType === Node.TEXT_NODE && onlyZwsp(n.textContent);
+
+  /** The entity pill immediately BEFORE a collapsed caret (skipping zero-width
+   *  filler), or null. Shared by Backspace and ArrowLeft selection. */
+  const pillBeforeCaret = (range: Range): HTMLElement | null => {
+    const { startContainer, startOffset } = range;
+    if (startContainer === editable) {
+      let i = startOffset - 1;
+      while (isFiller(editable.childNodes[i])) i--;
+      const node = editable.childNodes[i];
+      return isEntityEl(node) ? (node as HTMLElement) : null;
+    }
+    if (startContainer.nodeType === Node.TEXT_NODE) {
+      // Only treat the caret as "right after a pill" when nothing but filler
+      // precedes it within this text run.
+      if (!onlyZwsp((startContainer.textContent ?? '').slice(0, startOffset))) return null;
+      let prev = startContainer.previousSibling;
+      while (isFiller(prev)) prev = prev!.previousSibling;
+      return isEntityEl(prev) ? (prev as HTMLElement) : null;
+    }
+    return null;
+  };
+
+  /** The entity pill immediately AFTER a collapsed caret (skipping zero-width
+   *  filler), or null. Shared by Delete and ArrowRight selection. */
+  const pillAfterCaret = (range: Range): HTMLElement | null => {
+    const { startContainer, startOffset } = range;
+    if (startContainer === editable) {
+      let i = startOffset;
+      while (isFiller(editable.childNodes[i])) i++;
+      const node = editable.childNodes[i];
+      return isEntityEl(node) ? (node as HTMLElement) : null;
+    }
+    if (startContainer.nodeType === Node.TEXT_NODE) {
+      if (!onlyZwsp((startContainer.textContent ?? '').slice(startOffset))) return null;
+      let next = startContainer.nextSibling;
+      while (isFiller(next)) next = next!.nextSibling;
+      return isEntityEl(next) ? (next as HTMLElement) : null;
+    }
+    return null;
+  };
+
+  /** Remove a pill (and its trailing ZWSP marker), fire onEntityRemove, commit. */
+  const removePillEl = (pill: HTMLElement) => {
+    const entity = entityStore.get(pill);
+    const after = pill.nextSibling;
+    if (after?.nodeType === Node.TEXT_NODE && onlyZwsp(after.textContent)) after.remove();
+    pill.remove();
+    if (entity) props.onEntityRemove?.(entity);
+    commitChange();
+  };
+
+  /** Collapse the caret just before a pill. */
+  const caretBeforePill = (pill: HTMLElement) => {
+    const sel = getActiveSelection(editable);
+    if (!sel) return;
+    const r = editable.ownerDocument.createRange();
+    r.setStartBefore(pill);
+    r.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r);
+  };
+  /** Collapse the caret just after a pill (past its trailing zero-width filler,
+   *  so the next character lands outside the pill). */
+  const caretAfterPill = (pill: HTMLElement) => {
+    const sel = getActiveSelection(editable);
+    if (!sel) return;
+    let node: Node = pill;
+    while (isFiller(node.nextSibling)) node = node.nextSibling!;
+    const r = editable.ownerDocument.createRange();
+    r.setStartAfter(node);
+    r.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r);
+  };
+
   const handleKeyDown = (e: KeyboardEvent) => {
     // --- Undo / redo (we own the history; native contenteditable undo corrupts
     //     pills, so suppress it and drive our doc-snapshot stack instead) ---
@@ -561,107 +676,65 @@ export function Composer(props: ComposerProps): JSX.Element {
       return;
     }
 
+    // --- A selected pill behaves as one unit (Claude Code-style) ---
+    const selPill = selectedPill();
+    if (selPill && selPill.isConnected) {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); caretBeforePill(selPill); clearPillSelection(); return; }
+      if (e.key === 'ArrowRight') { e.preventDefault(); caretAfterPill(selPill); clearPillSelection(); return; }
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        e.preventDefault();
+        const anchor = selPill.previousSibling; // text node the caret should return to
+        clearPillSelection();
+        removePillEl(selPill);
+        const sel = getActiveSelection(editable);
+        if (sel) {
+          const r = editable.ownerDocument.createRange();
+          if (anchor && anchor.isConnected) r.setStartAfter(anchor);
+          else r.setStart(editable, 0);
+          r.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(r);
+        }
+        return;
+      }
+      if (e.key === 'Escape') { e.preventDefault(); clearPillSelection(); return; }
+      // A bare modifier keypress shouldn't drop the selection.
+      if (e.key === 'Shift' || e.key === 'Meta' || e.key === 'Control' || e.key === 'Alt') return;
+      // Any other key (typing, Enter, …): drop the highlight and let the key act
+      // from just after the pill — then fall through to the normal handlers.
+      caretAfterPill(selPill);
+      clearPillSelection();
+    }
+
+    // --- ArrowLeft/Right INTO an adjacent pill selects it as one unit ---
+    if (
+      !selectedPill() &&
+      (e.key === 'ArrowLeft' || e.key === 'ArrowRight') &&
+      !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey
+    ) {
+      const sel = getActiveSelection(editable);
+      if (sel && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        if (range.collapsed) {
+          const pill = e.key === 'ArrowLeft' ? pillBeforeCaret(range) : pillAfterCaret(range);
+          if (pill) { e.preventDefault(); selectPill(pill); return; }
+        }
+      }
+    }
+
     // --- Backspace / Delete: atomically remove pill immediately before/after caret ---
     if (e.key === 'Backspace' || e.key === 'Delete') {
-      const ownerDoc = editable.ownerDocument;
       const sel = getActiveSelection(editable);
       if (!sel || sel.rangeCount === 0) return;
 
       const range = sel.getRangeAt(0);
       if (!range.collapsed) return; // let the browser handle a selection deletion
 
-      if (e.key === 'Backspace') {
-        // Look for a pill immediately before the caret.
-        // Patterns (jsdom collapses range to editable div, not text node):
-        //   [pill][ZWSP text node] ← caret at offset 2 in editable
-        //   [pill] ← caret at offset 1 in editable
-        //   caret inside ZWSP text node after pill
-        let pillEl: HTMLElement | null = null;
-        let zwspAfterPill: Text | null = null;
-
-        const { startContainer, startOffset } = range;
-
-        if (startContainer === editable && startOffset > 0) {
-          // Caret is directly in the editable div between children.
-          const nodeBefore = editable.childNodes[startOffset - 1];
-          if (isEntityEl(nodeBefore)) {
-            // Caret directly after pill (no ZWSP between them).
-            pillEl = nodeBefore as HTMLElement;
-          } else if (
-            nodeBefore?.nodeType === Node.TEXT_NODE &&
-            (nodeBefore.textContent ?? '').split('').every((ch) => ch === ZWSP)
-          ) {
-            // Caret is after a ZWSP-only text node — that text node trails a pill.
-            const nodeBeforeThat = startOffset >= 2 ? editable.childNodes[startOffset - 2] : null;
-            if (isEntityEl(nodeBeforeThat)) {
-              pillEl = nodeBeforeThat as HTMLElement;
-              zwspAfterPill = nodeBefore as Text;
-            }
-          }
-        } else if (startContainer.nodeType === Node.TEXT_NODE) {
-          // Caret is inside a text node — check if the text so far is only ZWSP.
-          const textBefore = (startContainer.textContent ?? '').slice(0, startOffset);
-          const isOnlyZwsp = textBefore === '' || textBefore.split('').every((ch) => ch === ZWSP);
-          if (isOnlyZwsp) {
-            // Check the node immediately before this text node.
-            const prev = startContainer.previousSibling;
-            if (isEntityEl(prev)) {
-              pillEl = prev as HTMLElement;
-              zwspAfterPill = startContainer as Text;
-            }
-          }
-        }
-
-        if (pillEl) {
-          e.preventDefault();
-          const entity = entityStore.get(pillEl);
-          // Remove the pill and its trailing ZWSP text node if present.
-          if (zwspAfterPill) zwspAfterPill.remove();
-          pillEl.remove();
-          if (entity) props.onEntityRemove?.(entity);
-          commitChange();
-          return;
-        }
-      }
-
-      if (e.key === 'Delete') {
-        // Look for a pill immediately after the caret.
-        let pillEl: HTMLElement | null = null;
-
-        const { startContainer, startOffset } = range;
-
-        if (startContainer === editable) {
-          const nodeAfter = editable.childNodes[startOffset];
-          if (isEntityEl(nodeAfter)) {
-            pillEl = nodeAfter as HTMLElement;
-          }
-        } else if (startContainer.nodeType === Node.TEXT_NODE) {
-          const textAfter = (startContainer.textContent ?? '').slice(startOffset);
-          const isOnlyZwsp = textAfter.split('').every((ch) => ch === ZWSP);
-          if (isOnlyZwsp) {
-            const next = startContainer.nextSibling;
-            if (isEntityEl(next)) {
-              pillEl = next as HTMLElement;
-            }
-          }
-        }
-
-        if (pillEl) {
-          e.preventDefault();
-          const entity = entityStore.get(pillEl);
-          // Delete forward: also remove the trailing ZWSP text node after the pill.
-          const afterPill = pillEl.nextSibling;
-          if (afterPill?.nodeType === Node.TEXT_NODE) {
-            const content = afterPill.textContent ?? '';
-            if (content.split('').every((ch) => ch === ZWSP)) {
-              afterPill.remove();
-            }
-          }
-          pillEl.remove();
-          if (entity) props.onEntityRemove?.(entity);
-          commitChange();
-          return;
-        }
+      const pill = e.key === 'Backspace' ? pillBeforeCaret(range) : pillAfterCaret(range);
+      if (pill) {
+        e.preventDefault();
+        removePillEl(pill);
+        return;
       }
     }
 
@@ -687,24 +760,54 @@ export function Composer(props: ComposerProps): JSX.Element {
       {/* Static style for CSS Custom Highlight API decoration.
           No-op in browsers that don't support ::highlight(); the selector
           is simply unrecognized and dropped. */}
-      <style>{`::highlight(${highlightName}) { background-color: rgba(var(--color-primary, 99 102 241) / 0.18); }`}</style>
+      <style>{`::highlight(${highlightName}) { background-color: color-mix(in srgb, var(--color-primary, #6366f1) 22%, transparent); }`}</style>
       {/* Atomic entity pill styling. Self-contained (currentColor-based) so it
           renders correctly without depending on a Tailwind rebuild for the
           custom .kai-composer-pill class. */}
       <style>{`
         .kai-composer-pill {
-          display: inline-flex; align-items: center; gap: 0.25rem;
+          display: inline-flex; align-items: center; gap: 0.2rem;
           /* middle (not baseline): a flex pill's baseline differs with/without an
              icon, which misaligns adjacent pills — middle aligns them consistently. */
-          vertical-align: middle; height: 1.5em; padding: 0 0.4rem;
+          vertical-align: middle; height: 1.5em;
           /* Asymmetric margin: a roomier trailing gap (so typed text isn't flush
-             after a pill) + a smaller leading gap. Adjacent pills then sit
-             0.35+0.15 apart (tighter than a doubled symmetric margin). */
-          margin: 0 0.35rem 0 0.15rem;
+             after a pill) + a smaller leading gap. */
+          margin: 0 0.3rem 0 0.1rem;
           border-radius: 0.375rem;
-          background-color: color-mix(in srgb, currentColor 10%, transparent);
           font-weight: 500; white-space: nowrap; user-select: none; cursor: default;
           box-sizing: border-box; line-height: 1;
+        }
+        /* Skills + agents: LIGHT — decorated inline text led by a sigil, NOT a
+           chip. A distinct colour per kind (overridable); the sigil is dimmer
+           than the label. (A GUI affords this richer-but-light look; a CLI can't.) */
+        .kai-composer-pill[data-kind="skill"],
+        .kai-composer-pill[data-kind="agent"] {
+          padding: 0 0.1rem; background: transparent;
+          /* Read like a command, not a title — lowercase the DISPLAY only; the
+             entity label + emitted payload keep the consumer's original casing. */
+          text-transform: lowercase;
+        }
+        .kai-composer-pill[data-kind="skill"] { color: var(--kai-pill-skill, #2563eb); }
+        .kai-composer-pill[data-kind="agent"] { color: var(--kai-pill-agent, #7c3aed); }
+        /* Brighter hues on dark so they don't muddy against a dark field. The
+           consumer's --kai-pill-* override still wins (it's the var value); only
+           the FALLBACK shifts per scheme. */
+        @media (prefers-color-scheme: dark) {
+          .kai-composer-pill[data-kind="skill"] { color: var(--kai-pill-skill, #6ea8fe); }
+          .kai-composer-pill[data-kind="agent"] { color: var(--kai-pill-agent, #c4a7fc); }
+        }
+        .kai-composer-pill-sigil { opacity: 0.6; font-weight: 600; }
+        /* Plugins (and any other/unknown kind): the richer CHIP — background +
+           icon — so a composite bundle reads differently at a glance. */
+        .kai-composer-pill:not([data-kind="skill"]):not([data-kind="agent"]) {
+          padding: 0 0.4rem;
+          background-color: color-mix(in srgb, currentColor 10%, transparent);
+        }
+        /* Selected (caret arrowed onto the pill): a highlight box, like Claude
+           Code web. Tinted by the pill's own colour via currentColor. */
+        .kai-composer-pill[data-selected] {
+          background-color: color-mix(in srgb, currentColor 18%, transparent);
+          box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 30%, transparent);
         }
         /* Fixed height + an icon never taller than the box → iconed and iconless
            pills are exactly the same height (no baseline shift in the line). */
@@ -740,6 +843,7 @@ export function Composer(props: ComposerProps): JSX.Element {
           aria-label={props.ariaLabel || props.placeholder || 'Message input'}
           onInput={handleInput}
           onKeyDown={handleKeyDown}
+          onMouseDown={clearPillSelection}
           onFocus={handleFocus}
           onBlur={handleBlur}
           // The empty/placeholder class is folded into `class` (NOT a separate
@@ -756,7 +860,7 @@ export function Composer(props: ComposerProps): JSX.Element {
       {/* Trigger menu */}
       <Show when={present()}>
         <div
-          ref={(el) => { menuRef = el; setRef(el); }}
+          ref={(el) => { setMenuRef(el); setRef(el); }}
           role="listbox"
           aria-label="Suggestions"
           data-state={state()}

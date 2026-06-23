@@ -204,8 +204,6 @@ export {
   PromptInput, PromptInputTextarea, PromptInputActions, PromptInputAction,
   usePromptInput,
 } from './components/prompt-input';
-export { SlashCommand } from './components/slash-command';
-export type { SlashCommandItem, SlashCommandProps } from './components/slash-command';
 export { ResponseStream } from './components/response-stream';
 export { Markdown } from './components/markdown';
 export { CodeBlock, CodeBlockCode, CodeBlockGroup } from './components/code-block';

@@ -8,7 +8,7 @@
  * Usage (TypeScript / React / Solid):
  *   import {
  *     SAMPLE_GROUPS, SAMPLE_CONVERSATIONS, SAMPLE_MESSAGES,
- *     SAMPLE_MODELS, SAMPLE_CONTEXT, SAMPLE_SUGGESTIONS, SAMPLE_SLASH_COMMANDS,
+ *     SAMPLE_MODELS, SAMPLE_CONTEXT, SAMPLE_SUGGESTIONS, SAMPLE_TRIGGERS,
  *   } from '../../shared/sample-data';
  */
 
@@ -40,12 +40,26 @@ export interface SampleModel {
   provider?: string;
 }
 
-/** Mirror of `SlashCommandItem` from @kitn.ai/ui. */
-export interface SampleSlashCommand {
+/** Mirror of a single `TriggerItem` from @kitn.ai/ui (an entity-pill item). */
+export interface SampleTriggerItem {
   id: string;
   label: string;
   description?: string;
-  category?: string;
+  /** Optional per-item kind override (defaults to the group's `kind`). */
+  kind?: string;
+  /** Optional grouping header inside the popover. */
+  group?: string;
+  /** Text inserted into the draft when the item is a prompt-style skill. */
+  promptText?: string;
+}
+
+/** Mirror of a `TriggerGroup` from @kitn.ai/ui — one trigger char + its items. */
+export interface SampleTrigger {
+  /** The character that opens this trigger's popover (e.g. '/' or '@'). */
+  char: string;
+  /** Default kind for the group's items (e.g. 'skill', 'agent'). */
+  kind: string;
+  items: SampleTriggerItem[];
 }
 
 /** Message action verbs supported by <kai-chat>. */
@@ -162,10 +176,30 @@ export const SAMPLE_SUGGESTIONS: string[] = [
   'What is SolidJS?',
 ];
 
-// ── Slash commands ────────────────────────────────────────────────────────────
+// ── Triggers (entity pills) ─────────────────────────────────────────────────
+//
+// The `triggers` property powers in-line entity pills in the composer: typing a
+// trigger char ('/' for skills, '@' for agents/plugins) opens a popover; picking
+// an item drops an atomic pill into the draft. Set it as a JS PROPERTY on
+// <kai-prompt-input> / <kai-chat> / <kai-workspace>, never as an HTML attribute.
 
-export const SAMPLE_SLASH_COMMANDS: SampleSlashCommand[] = [
-  { id: 'summarize', label: '/summarize', description: 'Summarize the conversation', category: 'Actions' },
-  { id: 'explain',   label: '/explain',   description: 'Explain the last message',   category: 'Actions' },
-  { id: 'translate', label: '/translate', description: 'Translate to another language', category: 'Actions' },
+export const SAMPLE_TRIGGERS: SampleTrigger[] = [
+  {
+    char: '/',
+    kind: 'skill',
+    items: [
+      { id: 'summarize', label: 'Summarize', description: 'Summarize the thread', promptText: 'Summarize the thread.' },
+      { id: 'translate', label: 'Translate', description: 'Translate to English' },
+      { id: 'rewrite',   label: 'Rewrite',   description: 'Rewrite for clarity' },
+    ],
+  },
+  {
+    char: '@',
+    kind: 'agent',
+    items: [
+      { id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents',  description: 'Reviews diffs for bugs' },
+      { id: 'researcher',    label: 'Researcher',    group: 'Agents',  description: 'Deep multi-source research' },
+      { id: 'documents',     label: 'Documents',     group: 'Plugins', kind: 'plugin', description: 'Create and edit documents' },
+    ],
+  },
 ];

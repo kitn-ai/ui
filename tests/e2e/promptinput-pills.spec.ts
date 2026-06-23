@@ -140,3 +140,47 @@ test('Backspace deletes a whole pill inside the prompt input', async ({ page }) 
   await page.keyboard.press('Backspace');
   await expect(pills(page)).toHaveCount(0);
 });
+
+// --- Programmatic pre-population: value as a ComposerDoc seeds pills ---
+const PREFILLED = '/iframe.html?id=components-promptinput--prefilled&viewMode=story';
+const readSubmit = (p: Page) =>
+  p.evaluate(() => (window as unknown as { __submit: { value: unknown; entities: { id: string; kind: string }[] } | null }).__submit);
+
+test('value as a ComposerDoc seeds pills inline; submit WITHOUT editing carries the flattened value + seeded entities', async ({ page }) => {
+  await page.goto(PREFILLED);
+  await expect(editable(page)).toBeVisible();
+  await captureSubmit(page);
+
+  // All three seeded pills render inline, by kind.
+  await expect(pills(page)).toHaveCount(3);
+  await expect(page.locator('[data-kai-entity][data-kind="skill"]')).toHaveCount(1);
+  await expect(page.locator('[data-kai-entity][data-kind="agent"]')).toHaveCount(1);
+  await expect(page.locator('[data-kai-entity][data-kind="plugin"]')).toHaveCount(1);
+
+  // Submit without any edit — Send is enabled and the event carries the seed.
+  await page.locator('[data-testid="send"]').click();
+  const detail = await readSubmit(page);
+  expect(typeof detail!.value).toBe('string');
+  expect(detail!.value).toContain('Summarize the thread.'); // skill promptText, flattened
+  expect(detail!.value).toContain('Code Reviewer');         // agent label, flattened
+  expect(detail!.entities.map((e) => e.id)).toEqual(['summarize', 'code-reviewer', 'record-replay']);
+  expect(detail!.entities.map((e) => e.kind)).toEqual(['skill', 'agent', 'plugin']);
+});
+
+test('a seeded doc stays editable — typing after the pills is preserved (the seed does not fight edits)', async ({ page }) => {
+  await page.goto(PREFILLED);
+  await expect(editable(page)).toBeVisible();
+  await captureSubmit(page);
+
+  // Caret to the very end, type more text — pills must survive and the text lands.
+  await editable(page).click();
+  await page.keyboard.press('End');
+  await page.keyboard.type(' asap');
+  await expect(pills(page)).toHaveCount(3); // seed not stomped by the edit
+  await expect(editable(page)).toContainText('asap');
+
+  await page.locator('[data-testid="send"]').click();
+  const detail = await readSubmit(page);
+  expect(detail!.value).toContain('asap');                  // the edit is reflected
+  expect(detail!.entities.map((e) => e.id)).toEqual(['summarize', 'code-reviewer', 'record-replay']);
+});

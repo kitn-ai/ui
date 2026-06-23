@@ -2,12 +2,14 @@ import { type JSX, splitProps, createSignal, createContext, useContext } from 's
 import { cn } from '../utils/cn';
 import { useChatConfig, textClass } from '../primitives/chat-config';
 import { Composer, type TriggerDef, type ComposerChange } from './composer';
+import type { ComposerDoc } from '../primitives/composer-model';
 
 // --- Context ---
 
 interface PromptInputContextType {
   isLoading: boolean;
-  value: () => string;
+  // A string (controlled text) or a ComposerDoc (a seed that pre-populates pills).
+  value: () => string | ComposerDoc;
   setValue: (value: string) => void;
   maxHeight: number | string;
   onSubmit?: () => void;
@@ -28,7 +30,8 @@ function usePromptInput() {
 
 export interface PromptInputProps extends JSX.HTMLAttributes<HTMLDivElement> {
   isLoading?: boolean;
-  value?: string;
+  /** String = controlled text; ComposerDoc = a seed that pre-populates pills. */
+  value?: string | ComposerDoc;
   onValueChange?: (value: string) => void;
   maxHeight?: number | string;
   onSubmit?: () => void;
@@ -42,7 +45,7 @@ function PromptInput(props: PromptInputProps) {
     'children', 'disabled', 'class', 'onClick',
   ]);
 
-  const [internalValue, setInternalValue] = createSignal(local.value ?? '');
+  const [internalValue, setInternalValue] = createSignal<string | ComposerDoc>(local.value ?? '');
   let textareaRef: HTMLElement | undefined;
 
   const handleChange = (newValue: string) => {

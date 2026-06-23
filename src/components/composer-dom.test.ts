@@ -33,22 +33,33 @@ describe('composer-dom', () => {
     expect(parseDom(root)).toEqual([{ type: 'text', text: 'a\nb' }]);
   });
 
-  it('icon resolution: item icon > kindIcons[kind] > built-in glyph > nothing', () => {
-    const agent = { kind: 'agent', id: 'a', label: 'A' };
+  it('skills/agents render a sigil (no icon); other kinds resolve an icon: item icon > kindIcons > glyph > nothing', () => {
+    // Skills + agents are LIGHT sigil-led text — a sigil span, never an icon.
+    const skillPill = createEntityEl(document, { kind: 'skill', id: 's', label: 'S' });
+    expect(skillPill.querySelector('.kai-composer-pill-sigil')?.textContent).toBe('/');
+    expect(skillPill.querySelector('img')).toBeNull();
+    expect(skillPill.querySelector('svg')).toBeNull();
+    // kindIcons is ignored for a sigil kind (it still renders the sigil, no img).
+    const agentPill = createEntityEl(document, { kind: 'agent', id: 'a', label: 'A' }, { agent: '/bot.svg' });
+    expect(agentPill.querySelector('.kai-composer-pill-sigil')?.textContent).toBe('@');
+    expect(agentPill.querySelector('img')).toBeNull();
+
+    // Chip kinds (plugins, etc.): the icon-resolution chain still applies.
+    const plugin = { kind: 'plugin', id: 'p', label: 'P' };
     // kindIcons default for the kind → <img>
-    const withKindIcon = createEntityEl(document, agent, { agent: '/bot.svg' });
-    expect(withKindIcon.querySelector('img')?.getAttribute('src')).toBe('/bot.svg');
+    const withKindIcon = createEntityEl(document, plugin, { plugin: '/plug.svg' });
+    expect(withKindIcon.querySelector('img')?.getAttribute('src')).toBe('/plug.svg');
     // item's own icon wins over kindIcons
-    const withOwn = createEntityEl(document, { ...agent, icon: '/own.png' }, { agent: '/bot.svg' });
+    const withOwn = createEntityEl(document, { ...plugin, icon: '/own.png' }, { plugin: '/plug.svg' });
     expect(withOwn.querySelector('img')?.getAttribute('src')).toBe('/own.png');
-    // no icon + no kindIcons → built-in agent glyph (svg, no img)
-    const glyph = createEntityEl(document, agent);
+    // no icon + no kindIcons → built-in plugin glyph (svg, no img)
+    const glyph = createEntityEl(document, plugin);
     expect(glyph.querySelector('img')).toBeNull();
     expect(glyph.querySelector('svg')).toBeTruthy();
-    // skills have no built-in glyph and no kindIcons → no icon element at all
-    const skill = createEntityEl(document, { kind: 'skill', id: 's', label: 'S' });
-    expect(skill.querySelector('img')).toBeNull();
-    expect(skill.querySelector('svg')).toBeNull();
+    // an unknown chip kind with nothing → no icon element at all
+    const bare = createEntityEl(document, { kind: 'file', id: 'f', label: 'F' });
+    expect(bare.querySelector('img')).toBeNull();
+    expect(bare.querySelector('svg')).toBeNull();
   });
 
   it('createTextWalker skips text inside entity pills (pill label not in the text model)', () => {

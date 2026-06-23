@@ -13,9 +13,9 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-prompt-input</p>
 
-<p class="kai-lede">A Shadow DOM chat composer — auto-resizing textarea, send button, suggestion chips, attachments, and an extensible toolbar. Drop it into any framework without style conflicts.</p>
+<p class="kai-lede">A Shadow DOM chat composer — an auto-growing rich input, send button, suggestion chips, attachments, and an extensible toolbar. It supports inline <strong>entity pills</strong> (skills, agents, plugins) and drops into any framework without style conflicts.</p>
 
-<Facts items={['Shadow DOM', '8 events', 'Uncontrolled by default', 'Starter suggestions', 'Slash-command palette', 'Custom toolbar buttons', 'Pre-seeded attachments']} />
+<Facts items={['Shadow DOM', 'Uncontrolled by default', 'Starter suggestions', 'Entity pills (/ skills, @ agents)', 'Custom toolbar buttons', 'Pre-seeded attachments']} />
 
 ## Preview
 
@@ -40,19 +40,23 @@ Register elements once, then wire up JS properties and DOM events:
   const input = document.getElementById('input');
 
   input.suggestions = ['Summarize this thread', 'Draft a reply'];
-  input.slashCommands = [
-    { id: 'summarize', label: '/summarize', description: 'Summarize', category: 'Actions' },
+  // `/` inserts skill pills, `@` opens an agent/plugin menu.
+  input.triggers = [
+    { char: '/', kind: 'skill', items: [{ id: 'summarize', label: 'Summarize', description: 'Summarize the thread' }] },
+    { char: '@', kind: 'agent', items: [{ id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents' }] },
   ];
 
-  input.addEventListener('kai-submit', (e) => console.log('send:', e.detail.value, e.detail.attachments));
+  input.addEventListener('kai-submit', (e) => console.log('send:', e.detail.value, e.detail.entities, e.detail.attachments));
   input.addEventListener('kai-value-change', (e) => console.log('typing:', e.detail.value));
 </script>
 ```
 
-- **Array props** — `suggestions`, `slashCommands`, `slashActiveIds`, and `attachments` are arrays, so set them in JavaScript rather than as HTML attributes.
-- **Scalar flags** — `placeholder`, `disabled`, `loading`, `search`, `voice`, `stoppable`, `slashCompact`, and `suggestionMode` work as plain attributes or properties.
+- **Array / object props** — `suggestions`, `triggers`, `kindIcons`, and `attachments` are arrays/objects, so set them in JavaScript rather than as HTML attributes.
+- **Scalar flags** — `placeholder`, `disabled`, `loading`, `search`, `voice`, `stoppable`, and `suggestionMode` work as plain attributes or properties.
 - **Loading + stoppable** — set `loading` while a response streams; add `stoppable` to swap the send button for a Stop button that fires `kai-stop`.
 - **Custom toolbar buttons** — place `<kai-action id icon tooltip>` children inside the element; clicks fire `kai-toolbar-action` with `detail.action`.
+- **Entity pills** — set `triggers` to let `/` and `@` insert atomic skill/agent/plugin pills. `kai-submit` and `kai-value-change` then carry the structured `doc` + `entities` alongside the flattened `value` string. See [`<kai-composer>`](/components/composer/) for the full pill model.
+- **Pre-populate pills** — set `value` to a `ComposerDoc` (an array of text/entity segments) instead of a string to seed pills programmatically; the user edits from there.
 
 ## Examples
 
@@ -68,11 +72,17 @@ Out-of-the-box composer with starter suggestions. Type and press Enter (or click
 
 <Example client:visible tag="kai-prompt-input" config={{ search: true, voice: true }} data="withSuggestions" />
 
-### Slash-Command Palette
+### Entity Pills
 
-Set `slashCommands` to enable the palette. Typing `/` opens it; selecting an entry fires `kai-slash-select`. Use `slashActiveIds` to highlight active commands.
+Set `triggers` so `/` inserts a skill and `@` opens a sectioned menu of agents and plugins. Each selection becomes an atomic pill; Backspace deletes one whole. `kai-submit` carries the structured `doc` + `entities`.
 
-<Example client:visible tag="kai-prompt-input" data="withSlashCommands" />
+<Example client:visible tag="kai-prompt-input" data="withEntityPills" />
+
+### Pre-Populated Pills
+
+Set `value` to a **ComposerDoc** to seed pills programmatically — handy for "edit this message" or templated drafts. The pills render on mount and stay editable; submit still emits the flattened `value` plus the structured `doc` + `entities`.
+
+<Example client:visible tag="kai-prompt-input" data="prefilledDoc" />
 
 ### Pre-Seeded Attachments
 

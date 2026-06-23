@@ -338,6 +338,43 @@ export const Prefilled: Story = {
 };
 
 // ---------------------------------------------------------------------------
+// Pill kinds (decoration per kind)
+// ---------------------------------------------------------------------------
+
+/** All three pill skins in one field, seeded via a doc `value`: skills and
+ *  agents render LIGHT — decorated inline text led by their sigil (`/`, `@`) —
+ *  while a plugin renders as a richer chip (it bundles tools/skills/agents, so
+ *  it reads differently at a glance). */
+export const PillKinds: Story = {
+  name: 'Pill kinds (skill / agent / plugin)',
+  render: () => {
+    let el: ComposerEl | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.value = [
+        { type: 'text', text: 'Review ' },
+        // Capitalized labels on purpose — the pill DISPLAY lowercases them (CSS),
+        // while the entity label + emitted payload keep the original casing.
+        { type: 'entity', entity: { kind: 'skill', id: 'record-replay', label: 'Record-Replay' } },
+        { type: 'text', text: ' then ask ' },
+        { type: 'entity', entity: { kind: 'agent', id: 'code-reviewer', label: 'Code-Reviewer' } },
+        { type: 'text', text: ' to use ' },
+        { type: 'entity', entity: { kind: 'plugin', id: 'documents', label: 'Documents', icon: imgData('#2563eb', 'D') } },
+        { type: 'text', text: ' on this PR.' },
+      ];
+    });
+    return (
+      <div style={{ padding: '16px', width: '100%' }}>
+        <kai-composer
+          ref={(e: HTMLElement) => (el = e as ComposerEl)}
+          style={{ display: 'block', width: '100%' }}
+        />
+      </div>
+    );
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Highlighted
 // ---------------------------------------------------------------------------
 

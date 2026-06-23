@@ -29,7 +29,7 @@ import {
   SAMPLE_MODELS,
   SAMPLE_CONTEXT,
   SAMPLE_SUGGESTIONS,
-  SAMPLE_SLASH_COMMANDS,
+  SAMPLE_TRIGGERS,
   type SampleMessage,
   type SampleConversation,
 } from '../../shared/sample-data';
@@ -120,7 +120,7 @@ const groups = SAMPLE_GROUPS;
 const models = SAMPLE_MODELS;
 const context = SAMPLE_CONTEXT;
 const suggestions = SAMPLE_SUGGESTIONS;
-const slashCommands = SAMPLE_SLASH_COMMANDS;
+const triggers = SAMPLE_TRIGGERS;
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -339,7 +339,7 @@ function onStandaloneSubmit(event: Event): void {
           - :currentModel.prop    string               — selected model id
           - :context.prop         object               — token-usage context meter
           - :suggestions.prop     string[]             — prompt suggestions
-          - :slashCommands.prop   object[]             — slash-command items
+          - :triggers.prop        object[]             — entity-pill trigger groups
           - :loading.prop         boolean              — streaming / loading state
           - :theme.prop           'light'|'dark'|'auto'
 
@@ -360,7 +360,7 @@ function onStandaloneSubmit(event: Event): void {
         :currentModel.prop="currentModel"
         :context.prop="context"
         :suggestions.prop="suggestions"
-        :slashCommands.prop="slashCommands"
+        :triggers.prop="triggers"
         :loading.prop="loading"
         :theme.prop="theme"
         @kai-submit="onSubmit"
@@ -376,11 +376,11 @@ function onStandaloneSubmit(event: Event): void {
     <!-- Standalone <kai-prompt-input> — proves a leaf element works on its own. -->
     <div class="standalone-section" :style="{ borderTop: '1px solid ' + borderColor }">
       <div class="standalone-label">
-        Standalone &lt;kai-prompt-input&gt; (try typing <code>/</code> for slash commands):
+        Standalone &lt;kai-prompt-input&gt; (try typing <code>/</code> or <code>@</code> for entity pills):
       </div>
       <kai-prompt-input
         placeholder="Standalone prompt input…"
-        :slashCommands.prop="slashCommands"
+        :triggers.prop="triggers"
         :theme.prop="theme"
         @kai-submit="onStandaloneSubmit"
       ></kai-prompt-input>

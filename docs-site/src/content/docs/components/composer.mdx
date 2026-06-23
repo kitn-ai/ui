@@ -1,0 +1,92 @@
+---
+title: Composer
+description: A contenteditable rich input with atomic entity pills, caret-anchored trigger menus, keyword highlighting, and a structured document model — the editing primitive behind the Prompt Input.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-composer</p>
+
+<p class="kai-lede">A rich text input that behaves like a textarea but carries atomic <strong>entity pills</strong> — skills, agents, plugins — inserted from <code>/</code> and <code>@</code> menus. It emits a structured <code>{'{ doc, text, entities }'}</code> for your backend to expand, and you set its <code>value</code> as a string or a full document.</p>
+
+<Facts items={['Shadow DOM', 'Atomic entity pills', '/ and @ trigger menus', 'Keyword highlighting', 'Undo / redo', 'Structured doc model', 'Pre-populate via doc value']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-composer" />
+
+<Aside type="tip" title="Composer or Prompt Input?">
+`<kai-composer>` is the bare editing surface — no send button, suggestions, or attachments. Use it when you need the rich pill input somewhere that *isn't* a chat composer: an inline comment box, a search field with `@`-references, or a custom layout. For a drop-in chat composer with a send button, toolbar, and attachments, reach for [`<kai-prompt-input>`](/components/prompt-input/), which is built on this.
+</Aside>
+
+## Usage
+
+Register elements once, then set the trigger definitions as a JS property and listen for events:
+
+```html
+<kai-composer id="composer" style="display:block; width:100%;"></kai-composer>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-composer');
+  const composer = document.getElementById('composer');
+
+  // `/` inserts skills; `@` opens a sectioned menu of agents + plugins.
+  composer.triggers = [
+    { char: '/', kind: 'skill', items: [
+      { id: 'summarize', label: 'Summarize', description: 'Summarize the thread' },
+    ]},
+    { char: '@', kind: 'agent', items: [
+      { id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents' },
+      { id: 'documents', label: 'Documents', kind: 'plugin', group: 'Plugins' },
+    ]},
+  ];
+
+  composer.addEventListener('kai-submit', (e) => {
+    // e.detail = { doc, text, entities } — references, not resolved content.
+    console.log(e.detail.text, e.detail.entities);
+  });
+</script>
+```
+
+- **Set objects as properties** — `triggers`, `highlights`, `kindIcons`, and a document `value` are arrays/objects, so assign them in JavaScript, never as HTML attributes. Scalars (`placeholder`, `disabled`, `loading`, `maxHeight`, `submitOnEnter`) work as attributes.
+- **The document is the source of truth.** Each pill is an `EntityRef` — `{ kind, id, label, icon?, promptText?, data? }`. The composer emits *references*, never resolved content; your backend expands `/summarize` or `@code-reviewer` before the model call, exactly like Claude Code and OpenCode do client-side.
+- **`text` is a default flatten** — each entity becomes its `promptText ?? label`. Pass your own serializer if you need a different wire format.
+- **Per-kind decoration.** Skills and agents render as light, sigil-led text (`/summarize`, `@code-reviewer`); plugins render as a richer chip, since a plugin bundles tools/skills/agents. Override the colors with the `--kai-pill-skill` / `--kai-pill-agent` CSS variables.
+
+## Examples
+
+### Entity Pills
+
+Set `triggers` to enable the menus. Type `/` for a skill or `@` for an agent or plugin; each selection inserts an atomic pill you can delete whole with Backspace. Arrow onto a pill to select it as one unit.
+
+<Example client:visible tag="kai-composer" data="pills" />
+
+### Pre-Populated Pills
+
+Set `value` to a **ComposerDoc** — an array of text and entity segments — to seed pills programmatically. They render on mount and stay fully editable. `kai-submit` still emits the flattened `text` plus the structured `doc` and `entities`.
+
+<Example client:visible tag="kai-composer" data="prefilled" />
+
+### Keyword Highlighting
+
+Set `highlights` to decorate matching words via the CSS Custom Highlight API. This is decoration only — the text stays plain and editable, and highlights never enter the document model.
+
+<Example client:visible tag="kai-composer" data="highlighted" />
+
+## Props
+
+<PropTable tag="kai-composer" />
+
+## Events
+
+<EventTable tag="kai-composer" />
+
+<NeedAHand />
