@@ -44,7 +44,8 @@
     "kai-tasks": "tasks",
     "kai-choice": "choice",
     "kai-cards": "cards",
-    "kai-compare": "compare"
+    "kai-compare": "compare",
+    "kai-composer": "composer"
   },
   "files": {
     "conversation-list": [
@@ -177,6 +178,9 @@
     ],
     "compare": [
       "kai-compare"
+    ],
+    "composer": [
+      "kai-composer"
     ]
   }
 }

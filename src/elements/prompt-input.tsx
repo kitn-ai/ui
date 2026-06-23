@@ -2,29 +2,18 @@ import { createEffect, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { DefaultPromptInput } from './default-input';
 import type { AttachmentData } from '../components/attachments';
-import type { SlashCommandItem } from '../components/slash-command';
 import type { CustomAction } from './chat-types';
-
-/** Parse a single light-DOM `<kai-slash-command>` element into a SlashCommandItem.
- *  Attribute mapping:
- *   - `command`     → SlashCommandItem.id       (required; empty string fallback)
- *   - textContent   → SlashCommandItem.label    (primary); `label` attr as fallback
- *   - `description` → SlashCommandItem.description
- *   - `category`    → SlashCommandItem.category
- */
-export function parseKaiSlashCommandElement(n: Element): SlashCommandItem {
-  return {
-    id: n.getAttribute('command') ?? '',
-    label: n.textContent?.trim() || n.getAttribute('label') || n.getAttribute('command') || '',
-    description: n.getAttribute('description') ?? undefined,
-    category: n.getAttribute('category') ?? undefined,
-  };
-}
+import type { TriggerDef, ComposerChange } from '../components/composer';
+import { type ComposerDoc, type EntityRef, normalizeValue, serializeToText, entitiesOf } from '../primitives/composer-model';
 
 interface Props extends Record<string, unknown> {
-  /** Controlled value of the input. When set, the host owns the text and must
-   *  update it on `kai-value-change`; leave unset for uncontrolled behavior. */
-  value?: string;
+  /** Value of the input, as a JS property. A **string** is the controlled text
+   *  mirror (the host owns it and updates on `kai-value-change`). A **ComposerDoc**
+   *  (array of text/entity segments) is a one-time **seed** that pre-populates
+   *  pills (skills/agents/plugins); the user then edits freely. Leave unset for
+   *  uncontrolled behavior. `kai-submit`/`kai-value-change` always emit `value`
+   *  as the flattened string (back-compat) plus the structured `doc` + `entities`. */
+  value?: string | ComposerDoc;
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
   /** Disable the input and submit button entirely (non-interactive). */
@@ -38,13 +27,6 @@ interface Props extends Record<string, unknown> {
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately
    *  as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: 'submit' | 'fill';
-  /** Slash commands — when set, typing `/` opens the command palette. Set as a
-   *  JS property. */
-  slashCommands?: SlashCommandItem[];
-  /** Command ids to highlight as active. */
-  slashActiveIds?: string[];
-  /** Single-line palette rows. */
-  slashCompact?: boolean;
   /** Show a Search (Globe) button in the left toolbar; clicking it fires a
    *  `search` event. */
   search?: boolean;
@@ -58,18 +40,26 @@ interface Props extends Record<string, unknown> {
    *  files without an upload). Set as a JS property; the element then manages its
    *  own attachment state from there (add via the paperclip, remove per chip). */
   attachments?: AttachmentData[];
+  /** Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored
+   *  menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents
+   *  (plugins are the grouping/provenance of those items). Set as a JS property. */
+  triggers?: TriggerDef[];
+  /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items
+   *  without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
+  kindIcons?: Record<string, string>;
 }
 
 /** Events fired by `<kai-prompt-input>`. */
 interface Events {
-  /** The user submitted the prompt (Enter or send button) with its attachments. */
-  'kai-submit': { value: string; attachments: AttachmentData[] };
-  /** The input text changed (fires on every keystroke). */
-  'kai-value-change': { value: string };
+  /** The user submitted the prompt (Enter or send button). `value` is the
+   *  flattened text (back-compat); `doc` is the structured document and
+   *  `entities` the inserted pills (skills/agents) for downstream expansion. */
+  'kai-submit': { value: string; doc: ComposerDoc; entities: EntityRef[]; attachments: AttachmentData[] };
+  /** The input changed (fires on every edit). Carries the flattened `value`
+   *  plus the structured `doc` + `entities`. */
+  'kai-value-change': { value: string; doc: ComposerDoc; entities: EntityRef[] };
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
   'kai-suggestion-click': { value: string };
-  /** A slash command was chosen from the palette. */
-  'kai-slash-select': { command: SlashCommandItem };
   /** The Search (Globe) toolbar button was clicked. */
   'kai-search': Record<string, never>;
   /** The Voice (Mic) toolbar button was clicked. */
@@ -88,15 +78,14 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
   loading: false,
   suggestions: undefined,
   suggestionMode: 'submit',
-  slashCommands: undefined,
-  slashActiveIds: undefined,
-  slashCompact: false,
   search: false,
   voice: false,
   stoppable: false,
   attachments: undefined,
+  triggers: undefined,
+  kindIcons: undefined,
 }, (props, { dispatch, flag, element }) => {
-  const [internal, setInternal] = createSignal(props.value ?? '');
+  const [internal, setInternal] = createSignal<string | ComposerDoc>(props.value ?? '');
   // Seed staged attachments from the `attachments` property; the element manages
   // its own state from there (paperclip adds, per-chip remove deletes).
   const [attachments, setAttachments] = createSignal<AttachmentData[]>(props.attachments ?? []);
@@ -106,11 +95,10 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
     if (props.attachments) setAttachments(props.attachments);
   });
 
-  // Read declarative <kai-action> and <kai-slash-command> children from light DOM —
-  // same pattern as kai-message. Shadow DOM with no <slot> suppresses them visually;
-  // they are invisible data carriers. One MutationObserver covers both element types.
+  // Read declarative <kai-action> children from light DOM — same pattern as
+  // kai-message. Shadow DOM with no <slot> suppresses them visually; they are
+  // invisible data carriers.
   const [toolbarActions, setToolbarActions] = createSignal<CustomAction[]>([]);
-  const [slottedSlashCommands, setSlottedSlashCommands] = createSignal<SlashCommandItem[]>([]);
   onMount(() => {
     const readActions = () => {
       const nodes = [...element.querySelectorAll('kai-action')];
@@ -121,22 +109,45 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
         tooltip: n.getAttribute('tooltip') ?? undefined,
       })));
     };
-    const readSlashCommands = () => {
-      const nodes = [...element.querySelectorAll('kai-slash-command')];
-      setSlottedSlashCommands(nodes.map(parseKaiSlashCommandElement));
-    };
-    const readAll = () => { readActions(); readSlashCommands(); };
-    readAll();
-    const observer = new MutationObserver(readAll);
+    readActions();
+    const observer = new MutationObserver(readActions);
     observer.observe(element, { childList: true, attributes: true, subtree: true });
     onCleanup(() => observer.disconnect());
   });
 
-  const current = () => props.value ?? internal();
+  // A string `value` is controlled (the host owns it). A ComposerDoc `value` is a
+  // one-time seed: it lives in `internal` and the user's edits (which arrive as
+  // strings) replace it there, so the seed never fights the edits.
+  const current = (): string | ComposerDoc =>
+    typeof props.value === 'string' ? props.value : internal();
 
-  const handleChange = (v: string) => { setInternal(v); dispatch('kai-value-change', { value: v }); };
+  // Latest structured change from the composer (doc + entities). Captured before
+  // the string value-change fires (the bridge calls onComposerChange first), so
+  // the dispatched events can carry the doc. Reset to a text-only doc when a value
+  // is set that didn't come from the composer (e.g. a suggestion fill).
+  let lastChange: ComposerChange = { doc: [], text: '', entities: [] };
+
+  // Seed from a ComposerDoc `value`: push it into `internal` (so `current()`
+  // reflects the seed) and into `lastChange` (so a submit-WITHOUT-edit still
+  // carries the seeded doc + entities). Re-runs only when `value` is reassigned.
+  createEffect(() => {
+    const v = props.value;
+    if (v != null && typeof v !== 'string') {
+      const doc = normalizeValue(v);
+      setInternal(doc);
+      lastChange = { doc, text: serializeToText(doc), entities: entitiesOf(doc) };
+    }
+  });
+
+  const handleChange = (v: string) => {
+    setInternal(v);
+    if (v !== lastChange.text) lastChange = { doc: normalizeValue(v), text: v, entities: [] };
+    dispatch('kai-value-change', { value: v, doc: lastChange.doc, entities: lastChange.entities });
+  };
   const handleSubmit = () => {
-    dispatch('kai-submit', { value: current(), attachments: attachments() });
+    // `value` is always the flattened string (back-compat); a seeded doc is
+    // serialized. The structured `doc`/`entities` carry the pills.
+    dispatch('kai-submit', { value: serializeToText(normalizeValue(current())), doc: lastChange.doc, entities: lastChange.entities, attachments: attachments() });
     setAttachments([]);
   };
   const handleSuggestionClick = (v: string) => {
@@ -145,16 +156,10 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       dispatch('kai-suggestion-click', { value: v });
     } else {
       // Default: behave as if the user typed the suggestion and pressed submit.
-      dispatch('kai-submit', { value: v, attachments: attachments() });
+      dispatch('kai-submit', { value: v, doc: normalizeValue(v), entities: [], attachments: attachments() });
       setAttachments([]);
     }
   };
-
-  // Prop slash commands take precedence; slotted children are appended after.
-  const allSlashCommands = () => [
-    ...(props.slashCommands ?? []),
-    ...slottedSlashCommands(),
-  ];
 
   return (
     <DefaultPromptInput
@@ -165,12 +170,12 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       stoppable={flag('stoppable')}
       suggestions={props.suggestions}
       attachments={attachments()}
-      slashCommands={allSlashCommands().length ? allSlashCommands() : undefined}
-      slashActiveIds={props.slashActiveIds}
-      slashCompact={flag('slashCompact')}
       search={flag('search')}
       voice={flag('voice')}
       toolbarActions={toolbarActions()}
+      triggers={props.triggers}
+      kindIcons={props.kindIcons as Record<string, string> | undefined}
+      onComposerChange={(c) => { lastChange = c; }}
       onValueChange={handleChange}
       onSubmit={handleSubmit}
       onSuggestionClick={handleSuggestionClick}
@@ -178,7 +183,6 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       onSearch={() => dispatch('kai-search')}
       onVoice={() => dispatch('kai-voice')}
       onStop={() => dispatch('kai-stop')}
-      onSlashSelect={(command) => dispatch('kai-slash-select', { command })}
       onAction={(id) => dispatch('kai-toolbar-action', { action: id })}
     />
   );

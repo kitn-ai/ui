@@ -48,16 +48,17 @@ Focus always returns to the trigger element after the menu closes, whether close
 | Tab | Move into the expanded content |
 | Esc | Collapse (if focused inside) |
 
-### Slash command palette
+### Entity-pill triggers
 
-Typing `/` in the prompt input opens the command palette.
+Typing a trigger char (`/` for skills, `@` for agents/plugins) in the prompt input opens a caret-anchored menu; selecting an item inserts an atomic pill.
 
 | Key | Action |
 |---|---|
-| ↑ / ↓ | Navigate items |
-| Home / End | Jump to first / last item |
-| Enter / Tab | Select the focused command (inserts `/label ` into the input with caret at end) |
-| Esc | Close the palette; focus stays in the input |
+| ↑ / ↓ | Navigate menu items |
+| Enter / Tab | Insert the focused item as a pill |
+| Esc | Close the menu; focus stays in the input |
+| ← / → | Move onto an adjacent pill (selects it as one unit); press again to step past |
+| Backspace / Delete | Remove the whole pill when it's selected or adjacent |
 
 ### Conversation list
 

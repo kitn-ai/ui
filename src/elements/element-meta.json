@@ -458,11 +458,11 @@
       },
       {
         "name": "value",
-        "type": "undefined | string",
+        "type": "undefined | string | ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]",
         "optional": true,
-        "scalar": true,
-        "description": "Controlled value of the input. When set, the host owns the input text and must update it on `kai-value-change`; leave unset for uncontrolled behavior.",
-        "displayType": "undefined | string"
+        "scalar": false,
+        "description": "Value of the input. A **string** is controlled (the host owns the text and updates it on `kai-value-change`). A **ComposerDoc** is a one-time seed that pre-populates pills; the user then edits freely. Leave unset for uncontrolled.",
+        "displayType": "undefined | string | ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]"
       },
       {
         "name": "placeholder",
@@ -611,29 +611,20 @@
         "displayType": "undefined | false | true"
       },
       {
-        "name": "slashCommands",
-        "type": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
+        "name": "triggers",
+        "type": "undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]",
         "optional": true,
         "scalar": false,
-        "description": "Slash commands — when set, typing `/` in the input opens the command palette and fires `kai-slash-select`. Set as a JS property.",
-        "displayType": "SlashCommandItem[] | undefined"
+        "description": "Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a JS property; forwarded to the input.",
+        "displayType": "undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]"
       },
       {
-        "name": "slashActiveIds",
-        "type": "undefined | string[]",
+        "name": "kindIcons",
+        "type": "undefined | Record<string, string>",
         "optional": true,
         "scalar": false,
-        "description": "Command ids to highlight as active in the palette.",
-        "displayType": "undefined | string[]"
-      },
-      {
-        "name": "slashCompact",
-        "type": "undefined | false | true",
-        "optional": true,
-        "scalar": true,
-        "description": "Single-line palette rows.",
-        "default": "false",
-        "displayType": "undefined | false | true"
+        "description": "Default icon per entity kind (kind → image src) for pills/menu items.",
+        "displayType": "undefined | Record<string, string>"
       },
       {
         "name": "actionsReveal",
@@ -663,12 +654,6 @@
         "detail": "Record<string, never>",
         "description": "The Search button was clicked.",
         "displayDetail": "Record<string, never>"
-      },
-      {
-        "name": "kai-slash-select",
-        "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
-        "description": "A slash command was chosen from the palette.",
-        "displayDetail": "{ command: SlashCommandItem }"
       },
       {
         "name": "kai-submit",
@@ -974,6 +959,147 @@
         "name": "ResponseCompare",
         "group": "Components",
         "storyId": "solid-advanced-elements-responsecompare--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kai-composer",
+    "className": "KaiComposerElement",
+    "displayName": "Composer",
+    "props": [
+      {
+        "name": "value",
+        "type": "undefined | string | ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Controlled value — string or a full ComposerDoc (set as JS property).",
+        "displayType": "undefined | string | ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]"
+      },
+      {
+        "name": "placeholder",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Placeholder text shown when the composer is empty.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the composer entirely (non-interactive).",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "loading",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a loading/streaming state and block submit.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "maxHeight",
+        "type": "undefined | string | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Maximum height in px before the content scrolls. Default 240.",
+        "default": "240",
+        "displayType": "undefined | string | number"
+      },
+      {
+        "name": "submitOnEnter",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether pressing Enter (without Shift) submits. Default true.",
+        "default": "true",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "triggers",
+        "type": "undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Trigger definitions — set as a JS property.",
+        "displayType": "undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]"
+      },
+      {
+        "name": "highlights",
+        "type": "undefined | (string | { pattern: string; flags?: undefined | string; class?: undefined | string })[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Keyword highlight rules — set as a JS property.",
+        "displayType": "undefined | (string | { pattern: string; flags?: undefined | string; class?: undefined | string })[]"
+      },
+      {
+        "name": "kindIcons",
+        "type": "undefined | Record<string, string>",
+        "optional": true,
+        "scalar": false,
+        "description": "Default icon per entity kind (kind → image URL/data-URI) for items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property.",
+        "displayType": "undefined | Record<string, string>"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-blur",
+        "detail": "{ originalEvent: FocusEvent }",
+        "description": "The composer lost focus.",
+        "displayDetail": "{ originalEvent: FocusEvent }"
+      },
+      {
+        "name": "kai-entity-add",
+        "detail": "{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }",
+        "description": "An entity pill was inserted into the composer.",
+        "displayDetail": "{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }"
+      },
+      {
+        "name": "kai-entity-remove",
+        "detail": "{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }",
+        "description": "An entity pill was deleted from the composer.",
+        "displayDetail": "{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }"
+      },
+      {
+        "name": "kai-focus",
+        "detail": "{ originalEvent: FocusEvent }",
+        "description": "The composer gained focus. `focus`/`blur` are NOT composed natively, so they don't escape the shadow root — these re-expose them on the host. (For `keydown`/`paste`/`focusin`/`focusout`, listen NATIVELY on `<kai-composer>`: they're composed and already cross the shadow boundary.)",
+        "displayDetail": "{ originalEvent: FocusEvent }"
+      },
+      {
+        "name": "kai-submit",
+        "detail": "{ doc: ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }",
+        "description": "The user submitted the composer (Enter or programmatic submit).",
+        "displayDetail": "{ doc: ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }"
+      },
+      {
+        "name": "kai-trigger",
+        "detail": "{ char: string; query: string; rect: DOMRect }",
+        "description": "A trigger character was detected at the caret (e.g. `/` or `@`).",
+        "displayDetail": "{ char: string; query: string; rect: DOMRect }"
+      },
+      {
+        "name": "kai-trigger-close",
+        "detail": "Record<string, never>",
+        "description": "The active trigger was dismissed (Escape, space, or outside click).",
+        "displayDetail": "Record<string, never>"
+      },
+      {
+        "name": "kai-value-change",
+        "detail": "{ doc: ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }",
+        "description": "The content changed (fires on every input event).",
+        "displayDetail": "{ doc: ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }"
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Composer",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-composer--docs"
       }
     ],
     "tokens": []
@@ -1944,11 +2070,11 @@
     "props": [
       {
         "name": "value",
-        "type": "undefined | string",
+        "type": "undefined | string | ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]",
         "optional": true,
-        "scalar": true,
-        "description": "Controlled value of the input. When set, the host owns the text and must update it on `kai-value-change`; leave unset for uncontrolled behavior.",
-        "displayType": "undefined | string"
+        "scalar": false,
+        "description": "Value of the input, as a JS property. A **string** is the controlled text mirror (the host owns it and updates on `kai-value-change`). A **ComposerDoc** (array of text/entity segments) is a one-time **seed** that pre-populates pills (skills/agents/plugins); the user then edits freely. Leave unset for uncontrolled behavior. `kai-submit`/`kai-value-change` always emit `value` as the flattened string (back-compat) plus the structured `doc` + `entities`.",
+        "displayType": "undefined | string | ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]"
       },
       {
         "name": "placeholder",
@@ -1995,31 +2121,6 @@
         "displayType": "undefined | \"submit\" | \"fill\""
       },
       {
-        "name": "slashCommands",
-        "type": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
-        "optional": true,
-        "scalar": false,
-        "description": "Slash commands — when set, typing `/` opens the command palette. Set as a JS property.",
-        "displayType": "SlashCommandItem[] | undefined"
-      },
-      {
-        "name": "slashActiveIds",
-        "type": "undefined | string[]",
-        "optional": true,
-        "scalar": false,
-        "description": "Command ids to highlight as active.",
-        "displayType": "undefined | string[]"
-      },
-      {
-        "name": "slashCompact",
-        "type": "undefined | false | true",
-        "optional": true,
-        "scalar": true,
-        "description": "Single-line palette rows.",
-        "default": "false",
-        "displayType": "undefined | false | true"
-      },
-      {
         "name": "search",
         "type": "undefined | false | true",
         "optional": true,
@@ -2053,6 +2154,22 @@
         "scalar": false,
         "description": "Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip).",
         "displayType": "AttachmentData[] | undefined"
+      },
+      {
+        "name": "triggers",
+        "type": "undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins are the grouping/provenance of those items). Set as a JS property.",
+        "displayType": "undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]"
+      },
+      {
+        "name": "kindIcons",
+        "type": "undefined | Record<string, string>",
+        "optional": true,
+        "scalar": false,
+        "description": "Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property.",
+        "displayType": "undefined | Record<string, string>"
       }
     ],
     "events": [
@@ -2063,12 +2180,6 @@
         "displayDetail": "Record<string, never>"
       },
       {
-        "name": "kai-slash-select",
-        "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
-        "description": "A slash command was chosen from the palette.",
-        "displayDetail": "{ command: SlashCommandItem }"
-      },
-      {
         "name": "kai-stop",
         "detail": "Record<string, never>",
         "description": "The Stop button was clicked while `stoppable` and `loading` are both true.",
@@ -2076,9 +2187,9 @@
       },
       {
         "name": "kai-submit",
-        "detail": "{ value: string; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
-        "description": "The user submitted the prompt (Enter or send button) with its attachments.",
-        "displayDetail": "{ value: string; attachments: AttachmentData[] }"
+        "detail": "{ value: string; doc: ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
+        "description": "The user submitted the prompt (Enter or send button). `value` is the flattened text (back-compat); `doc` is the structured document and `entities` the inserted pills (skills/agents) for downstream expansion.",
+        "displayDetail": "{ value: string; doc: ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }"
       },
       {
         "name": "kai-suggestion-click",
@@ -2094,9 +2205,9 @@
       },
       {
         "name": "kai-value-change",
-        "detail": "{ value: string }",
-        "description": "The input text changed (fires on every keystroke).",
-        "displayDetail": "{ value: string }"
+        "detail": "{ value: string; doc: ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }",
+        "description": "The input changed (fires on every edit). Carries the flattened `value` plus the structured `doc` + `entities`.",
+        "displayDetail": "{ value: string; doc: ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }"
       },
       {
         "name": "kai-voice",
@@ -3266,29 +3377,20 @@
         "displayType": "undefined | false | true"
       },
       {
-        "name": "slashCommands",
-        "type": "undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]",
+        "name": "triggers",
+        "type": "undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]",
         "optional": true,
         "scalar": false,
-        "description": "",
-        "displayType": "SlashCommandItem[] | undefined"
+        "description": "Rich entity triggers (`/` skills, `@` agents/plugins) forwarded to the input.",
+        "displayType": "undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]"
       },
       {
-        "name": "slashActiveIds",
-        "type": "undefined | string[]",
+        "name": "kindIcons",
+        "type": "undefined | Record<string, string>",
         "optional": true,
         "scalar": false,
-        "description": "",
-        "displayType": "undefined | string[]"
-      },
-      {
-        "name": "slashCompact",
-        "type": "undefined | false | true",
-        "optional": true,
-        "scalar": true,
-        "description": "",
-        "default": "false",
-        "displayType": "undefined | false | true"
+        "description": "Default icon per entity kind (kind → image src) forwarded to the input.",
+        "displayType": "undefined | Record<string, string>"
       },
       {
         "name": "sidebarWidth",
@@ -3370,12 +3472,6 @@
         "detail": "{ collapsed: false | true }",
         "description": "The sidebar was collapsed or expanded.",
         "displayDetail": "{ collapsed: false | true }"
-      },
-      {
-        "name": "kai-slash-select",
-        "detail": "{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }",
-        "description": "A slash command was chosen from the palette.",
-        "displayDetail": "{ command: SlashCommandItem }"
       },
       {
         "name": "kai-submit",

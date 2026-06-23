@@ -32,10 +32,10 @@ test('renders the list + thread and emits conversationselect and submit', async 
 
   let submitted: string | null = null;
   el.addEventListener('kai-submit', (e) => (submitted = (e as CustomEvent).detail.value));
-  const textarea = el.shadowRoot!.querySelector('textarea')!;
-  textarea.value = 'q';
-  textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
-  textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
+  const editable = el.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
+  editable.textContent = 'q';
+  editable.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+  editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
   expect(submitted).toBe('q');
 
   el.remove();

@@ -5,7 +5,7 @@ import {
   conversations,
   context,
   models,
-  slashCommands,
+  entityTriggers,
   thread,
 } from '../stories/examples/sample-data';
 import type { ArtifactFile } from '../components/artifact';
@@ -125,7 +125,11 @@ const SHELL_SNIPPET = `<!-- Compose-your-own chat: a resizable shell built from 
   suggs.suggestions = ['Summarize this thread', 'What changed in v0.3?'];
 
   const input = document.getElementById('input');
-  input.slashCommands = [{ id: 'summarize', label: '/summarize', category: 'Actions' }];
+  // entity-pill triggers: / inserts a skill, @ inserts an agent
+  input.triggers = [
+    { char: '/', kind: 'skill', items: [{ id: 'summarize', label: 'Summarize', description: 'Summarize the thread' }] },
+    { char: '@', kind: 'agent', items: [{ id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents' }] },
+  ];
 
   const artifact = document.getElementById('artifact');
   artifact.src = 'https://your-backend.example/artifacts/abc/index.html';
@@ -167,7 +171,7 @@ export const ComposedShell: Story = {
       setProps(ctx, { context });
       setProps(suggs, { suggestions: ['Summarize this thread', 'What changed in v0.3?', 'Show me the layout code'] });
       suggs.addEventListener('kai-select', (e) => ((input as AnyEl).value = (e as CustomEvent).detail.value));
-      setProps(input, { slashCommands });
+      setProps(input, { triggers: entityTriggers });
       setAttrs(input, { search: true, voice: true, placeholder: 'Message the assistant…' });
       input.addEventListener('kai-submit', (e) => {
         const value = (e as unknown as CustomEvent).detail.value as string;

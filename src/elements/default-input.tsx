@@ -1,7 +1,8 @@
 import { For, Show } from 'solid-js';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from '../components/prompt-input';
+import type { TriggerDef, ComposerChange } from '../components/composer';
+import { type ComposerDoc, normalizeValue, serializeToText } from '../primitives/composer-model';
 import { PromptSuggestion } from '../components/prompt-suggestion';
-import { SlashCommand, type SlashCommandItem } from '../components/slash-command';
 import { Button } from '../ui/button';
 import { Tooltip } from '../ui/tooltip';
 import { Paperclip, Globe, Mic, Square } from 'lucide-solid';
@@ -17,7 +18,8 @@ import { actionIcon } from '../ui/action-icons';
 import type { CustomAction } from './chat-types';
 
 export interface DefaultPromptInputProps {
-  value: string;
+  /** String = controlled text mirror; ComposerDoc = a seed that pre-populates pills. */
+  value: string | ComposerDoc;
   placeholder?: string;
   disabled?: boolean;
   loading?: boolean;
@@ -29,19 +31,12 @@ export interface DefaultPromptInputProps {
   search?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; calls `onVoice`. */
   voice?: boolean;
-  /** Slash commands — when set, typing `/` opens the command palette. */
-  slashCommands?: SlashCommandItem[];
-  /** Currently-active command ids (highlighted in the palette). */
-  slashActiveIds?: string[];
-  /** Single-line palette rows. */
-  slashCompact?: boolean;
   onValueChange: (v: string) => void;
   onSubmit: () => void;
   onSuggestionClick: (v: string) => void;
   onAttachmentsChange?: (attachments: AttachmentData[]) => void;
   onSearch?: () => void;
   onVoice?: () => void;
-  onSlashSelect?: (command: SlashCommandItem) => void;
   /** When `true` and `loading` is also `true`, the send button is replaced by
    *  a Stop button that calls `onStop`. */
   stoppable?: boolean;
@@ -51,6 +46,12 @@ export interface DefaultPromptInputProps {
   toolbarActions?: CustomAction[];
   /** Called when a custom toolbar action button is clicked, with the action id. */
   onAction?: (id: string) => void;
+  /** Rich entity triggers (`/` skills, `@` agents) passed to the composer. */
+  triggers?: TriggerDef[];
+  /** Default icon per entity kind (kind → image src) passed to the composer. */
+  kindIcons?: Record<string, string>;
+  /** Structured change (doc + entities) from the composer, on every edit. */
+  onComposerChange?: (change: ComposerChange) => void;
 }
 
 function fileToAttachment(file: File): AttachmentData {
@@ -79,8 +80,11 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
   const removeAttachment = (id: string) =>
     props.onAttachmentsChange?.(attachments().filter((a) => a.id !== id));
 
+  // `value` may be a string or a seeded ComposerDoc — compute emptiness from the
+  // flattened text so a pill-only seed still enables Send.
+  const valueText = () => serializeToText(normalizeValue(props.value));
   const sendDisabled = () =>
-    props.disabled || props.loading || (!props.value.trim() && attachments().length === 0);
+    props.disabled || props.loading || (!valueText().trim() && attachments().length === 0);
 
   const showStop = () => !!props.loading && !!props.stoppable;
 
@@ -103,17 +107,6 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         disabled={props.disabled}
         class="relative"
       >
-        <Show when={props.slashCommands?.length}>
-          {/* Rendered inside PromptInput so SlashCommand's usePromptInput()
-              context (input value + textarea ref) resolves; the `relative` root
-              anchors its `absolute bottom-full` palette above the input. */}
-          <SlashCommand
-            commands={props.slashCommands!}
-            activeIds={props.slashActiveIds}
-            compact={props.slashCompact}
-            onSelect={(command) => props.onSlashSelect?.(command)}
-          />
-        </Show>
         <Show when={canAttach() && attachments().length}>
           <div class="px-3 pt-3">
             <Attachments variant="inline">
@@ -132,7 +125,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         {/* Consumer-injected controls rendered before the input area. Native
             slot; inert outside a shadow root, projected by the custom element. */}
         <slot name="leading" />
-        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" />
+        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
         <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
           <div class="flex items-center gap-2">
             <Show when={canAttach()}>

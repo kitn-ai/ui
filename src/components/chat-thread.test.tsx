@@ -175,32 +175,37 @@ describe('ChatThread action-row feedback', () => {
 });
 
 describe('ChatThread composer reset on submit', () => {
+  // The input is the contenteditable composer (not a <textarea>): the editable
+  // surface is [data-kai-composer-editable], its content is textContent, typing is
+  // textContent + an input event, and Enter submits (see composer.test.tsx).
+  const editableEl = (c: HTMLElement) => c.querySelector('[data-kai-composer-editable]') as HTMLElement;
+
   it('clears the typed draft after submit when the value is UNCONTROLLED', () => {
     // No `value` prop → the composer owns its draft. After a send it must reset,
     // so the batteries-included hooks (useKaiChat/createKaiChat) — whose `bind`
     // does not control `value` — get a clean composer each turn.
     const onSubmit = vi.fn();
-    const { getByRole } = render(() => <ChatThread messages={[]} onSubmit={onSubmit} />);
-    const ta = getByRole('textbox') as HTMLTextAreaElement;
+    const { container } = render(() => <ChatThread messages={[]} onSubmit={onSubmit} />);
+    const el = editableEl(container);
 
-    fireEvent.input(ta, { target: { value: 'hello there' } });
-    expect(ta.value).toBe('hello there');
+    el.textContent = 'hello there';
+    fireEvent.input(el);
 
-    fireEvent.keyDown(ta, { key: 'Enter' });
+    fireEvent.keyDown(el, { key: 'Enter' });
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ value: 'hello there' }));
-    expect(ta.value).toBe(''); // draft cleared
+    expect(el.textContent?.trim() ?? '').toBe(''); // draft cleared
   });
 
   it('does NOT clear a CONTROLLED value on submit (the host owns it)', () => {
     const onSubmit = vi.fn();
-    const { getByRole } = render(() => (
+    const { container } = render(() => (
       <ChatThread messages={[]} value="locked" onSubmit={onSubmit} />
     ));
-    const ta = getByRole('textbox') as HTMLTextAreaElement;
-    expect(ta.value).toBe('locked');
+    const el = editableEl(container);
+    expect(el.textContent).toContain('locked');
 
-    fireEvent.keyDown(ta, { key: 'Enter' });
+    fireEvent.keyDown(el, { key: 'Enter' });
     expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ value: 'locked' }));
-    expect(ta.value).toBe('locked'); // controlled — unchanged until the host clears it
+    expect(el.textContent).toContain('locked'); // controlled — unchanged until the host clears it
   });
 });

@@ -11,8 +11,12 @@ afterEach(cleanup);
 
 const noop = () => {};
 
+// The input is now the contenteditable composer (not a <textarea>); "disabled"
+// is reflected as contenteditable="false" on the editable surface.
+const editableEl = (c: HTMLElement) => c.querySelector('[data-kai-composer-editable]') as HTMLElement;
+
 describe('DefaultPromptInput disabled state', () => {
-  it('renders the textarea and send button as disabled', () => {
+  it('renders the editable and send button as disabled', () => {
     const { container } = render(() => (
       <DefaultPromptInput
         value="hello"
@@ -22,9 +26,8 @@ describe('DefaultPromptInput disabled state', () => {
         onSuggestionClick={noop}
       />
     ));
-    const textarea = container.querySelector('textarea');
     const send = container.querySelector('[data-testid="send"]');
-    expect(textarea).toBeDisabled();
+    expect(editableEl(container).getAttribute('contenteditable')).toBe('false');
     expect(send).toBeDisabled();
   });
 
@@ -55,12 +58,12 @@ describe('DefaultPromptInput disabled state', () => {
         onSuggestionClick={noop}
       />
     ));
-    const textarea = container.querySelector('textarea') as HTMLTextAreaElement;
-    fireEvent.keyDown(textarea, { key: 'Enter' });
+    const editable = editableEl(container);
+    fireEvent.keyDown(editable, { key: 'Enter' });
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('reactively disables/enables the textarea when `disabled` changes after mount', () => {
+  it('reactively disables/enables the editable when `disabled` changes after mount', () => {
     const [disabled, setDisabled] = createSignal(false);
     const { container } = render(() => (
       <DefaultPromptInput
@@ -71,12 +74,11 @@ describe('DefaultPromptInput disabled state', () => {
         onSuggestionClick={noop}
       />
     ));
-    const textarea = container.querySelector('textarea') as HTMLTextAreaElement;
-    expect(textarea).not.toBeDisabled();
+    expect(editableEl(container).getAttribute('contenteditable')).toBe('plaintext-only');
     setDisabled(true);
-    expect(textarea).toBeDisabled(); // fails if PromptInput context captures `disabled` statically
+    expect(editableEl(container).getAttribute('contenteditable')).toBe('false'); // fails if PromptInput context captures `disabled` statically
     setDisabled(false);
-    expect(textarea).not.toBeDisabled();
+    expect(editableEl(container).getAttribute('contenteditable')).toBe('plaintext-only');
   });
 
   it('still submits via Enter when not disabled (sanity)', () => {
@@ -89,8 +91,8 @@ describe('DefaultPromptInput disabled state', () => {
         onSuggestionClick={noop}
       />
     ));
-    const textarea = container.querySelector('textarea') as HTMLTextAreaElement;
-    fireEvent.keyDown(textarea, { key: 'Enter' });
+    const editable = editableEl(container);
+    fireEvent.keyDown(editable, { key: 'Enter' });
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 });

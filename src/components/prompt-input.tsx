@@ -1,18 +1,21 @@
-import { type JSX, splitProps, createSignal, createContext, useContext, createEffect, on } from 'solid-js';
+import { type JSX, splitProps, createSignal, createContext, useContext } from 'solid-js';
 import { cn } from '../utils/cn';
 import { useChatConfig, textClass } from '../primitives/chat-config';
+import { Composer, type TriggerDef, type ComposerChange } from './composer';
+import type { ComposerDoc } from '../primitives/composer-model';
 
 // --- Context ---
 
 interface PromptInputContextType {
   isLoading: boolean;
-  value: () => string;
+  // A string (controlled text) or a ComposerDoc (a seed that pre-populates pills).
+  value: () => string | ComposerDoc;
   setValue: (value: string) => void;
   maxHeight: number | string;
   onSubmit?: () => void;
   disabled?: boolean;
-  textareaRef: HTMLTextAreaElement | undefined;
-  setTextareaRef: (el: HTMLTextAreaElement) => void;
+  textareaRef: HTMLElement | undefined;
+  setTextareaRef: (el: HTMLElement) => void;
 }
 
 const PromptInputContext = createContext<PromptInputContextType>();
@@ -27,7 +30,8 @@ function usePromptInput() {
 
 export interface PromptInputProps extends JSX.HTMLAttributes<HTMLDivElement> {
   isLoading?: boolean;
-  value?: string;
+  /** String = controlled text; ComposerDoc = a seed that pre-populates pills. */
+  value?: string | ComposerDoc;
   onValueChange?: (value: string) => void;
   maxHeight?: number | string;
   onSubmit?: () => void;
@@ -41,8 +45,8 @@ function PromptInput(props: PromptInputProps) {
     'children', 'disabled', 'class', 'onClick',
   ]);
 
-  const [internalValue, setInternalValue] = createSignal(local.value ?? '');
-  let textareaRef: HTMLTextAreaElement | undefined;
+  const [internalValue, setInternalValue] = createSignal<string | ComposerDoc>(local.value ?? '');
+  let textareaRef: HTMLElement | undefined;
 
   const handleChange = (newValue: string) => {
     setInternalValue(newValue);
@@ -70,6 +74,7 @@ function PromptInput(props: PromptInputProps) {
       }}
     >
       <div
+        data-prompt-input
         onClick={handleClick}
         class={cn(
           // The inner textarea neutralizes its own ring (focus-visible:ring-0),
@@ -93,83 +98,49 @@ function PromptInput(props: PromptInputProps) {
 
 export interface PromptInputTextareaProps extends JSX.TextareaHTMLAttributes<HTMLTextAreaElement> {
   disableAutosize?: boolean;
+  /** Rich entity triggers (`/`, `@`) forwarded to the composer. */
+  triggers?: TriggerDef[];
+  /** Default icon per entity kind (kind → image src), forwarded to the composer. */
+  kindIcons?: Record<string, string>;
+  /** Structured change (doc + entities) from the composer, on every edit. */
+  onComposerChange?: (change: ComposerChange) => void;
 }
 
 function PromptInputTextarea(props: PromptInputTextareaProps) {
-  const [local, rest] = splitProps(props, ['class', 'onKeyDown', 'disableAutosize']);
+  const [local] = splitProps(props, ['class', 'placeholder', 'aria-label', 'triggers', 'kindIcons', 'onComposerChange']);
   const ctx = usePromptInput();
   const config = useChatConfig();
 
-  function adjustHeight(el: HTMLTextAreaElement | undefined) {
-    if (!el || local.disableAutosize) return;
-    el.style.height = 'auto';
-    const maxH = ctx.maxHeight;
-    if (typeof maxH === 'number') {
-      el.style.height = `${Math.min(el.scrollHeight, maxH)}px`;
-    } else {
-      el.style.height = `min(${el.scrollHeight}px, ${maxH})`;
-    }
-  }
-
-  function handleRef(el: HTMLTextAreaElement) {
-    ctx.setTextareaRef(el);
-    adjustHeight(el);
-  }
-
-  createEffect(on(
-    () => [ctx.value(), ctx.maxHeight, local.disableAutosize],
-    () => {
-      if (ctx.textareaRef && !local.disableAutosize) {
-        adjustHeight(ctx.textareaRef);
-      }
-    }
-  ));
-
-  function handleInput(e: InputEvent & { currentTarget: HTMLTextAreaElement }) {
-    const el = e.currentTarget;
-    let value = el.value;
-    // Disallow leading whitespace — a prompt can't start with a space or blank
-    // line. Strip it (covers typing a space at the start AND pasting) and keep
-    // the caret in the right place.
-    if (/^\s/.test(value)) {
-      const stripped = value.replace(/^\s+/, '');
-      const removed = value.length - stripped.length;
-      const caret = Math.max(0, (el.selectionStart ?? 0) - removed);
-      el.value = stripped;
-      el.setSelectionRange(caret, caret);
-      value = stripped;
-    }
-    adjustHeight(el);
-    ctx.setValue(value);
-  }
-
-  function handleKeyDown(e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      // A disabled composer is non-interactive: Enter must not submit.
-      if (!ctx.disabled) ctx.onSubmit?.();
-    }
-    if (typeof local.onKeyDown === 'function') {
-      (local.onKeyDown as (e: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) => void)(e);
-    }
-  }
+  // The editable mirrors the original <textarea>'s classes EXACTLY so swapping in
+  // the contenteditable composer is visually identical. The frame (PromptInput
+  // root) still owns radius/bg/padding/focus-ring; auto-grow is native to a
+  // contenteditable block (capped via max-height on the editable).
+  const editableClass = () =>
+    cn(
+      'text-foreground min-h-[44px] w-full bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 overflow-y-auto whitespace-pre-wrap break-words',
+      textClass(config.proseSize()),
+      local.class,
+    );
 
   return (
-    <textarea
-      ref={handleRef}
+    <Composer
+      bare
       value={ctx.value()}
-      onInput={handleInput}
-      onKeyDown={handleKeyDown}
-      class={cn(
-        // Typed text uses the normal foreground (light/dark), NOT the brand/accent
-        // color — the composer should read as plain text, not tinted.
-        'text-foreground min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
-        textClass(config.proseSize()),
-        local.class
-      )}
-      rows={1}
+      placeholder={local.placeholder as string | undefined}
+      ariaLabel={local['aria-label'] as string | undefined}
       disabled={ctx.disabled}
-      {...rest}
+      maxHeight={ctx.maxHeight}
+      editableClass={editableClass()}
+      editableRef={(el) => ctx.setTextareaRef(el)}
+      triggers={local.triggers}
+      kindIcons={local.kindIcons}
+      // Surface the structured change (doc/entities) BEFORE the string value, so a
+      // consumer that enriches its events has the latest doc when value-change fires.
+      // A prompt can't start with whitespace — strip leading whitespace from the
+      // string value (parity with the old textarea); the controlled round-trip
+      // re-renders the editable so the stripped value shows too.
+      onChange={(c) => { local.onComposerChange?.(c); ctx.setValue(c.text.replace(/^\s+/, '')); }}
+      onSubmit={() => { if (!ctx.disabled) ctx.onSubmit?.(); }}
     />
   );
 }

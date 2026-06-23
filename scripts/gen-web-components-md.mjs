@@ -36,10 +36,6 @@ const ALIAS = new Map([
     'ModelOption[] | undefined',
   ],
   [
-    'undefined | { id: string; label: string; description?: undefined | string; category?: undefined | string }[]',
-    'SlashCommandItem[] | undefined',
-  ],
-  [
     '{ id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]',
     'ConversationSummary[]',
   ],
@@ -67,10 +63,6 @@ const ALIAS = new Map([
   [
     '{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }',
     '{ value: string; attachments: AttachmentData[] }',
-  ],
-  [
-    '{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }',
-    '{ command: SlashCommandItem }',
   ],
   [
     '{ messageId: string; action: "copy" | "like" | "dislike" | "regenerate" | "edit" }',

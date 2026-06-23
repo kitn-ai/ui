@@ -39,7 +39,6 @@ type ChatEl = HTMLElement & {
   scrollButton?: boolean;
   search?: boolean;
   voice?: boolean;
-  slashCompact?: boolean;
 };
 
 /** Live demo of the actual `<kai-chat>` custom element (Shadow DOM and all). */
@@ -55,7 +54,7 @@ function ChatElement(props: { args?: Record<string, unknown> }) {
         const scalarNames = [
           'value', 'placeholder', 'loading', 'suggestionMode', 'proseSize',
           'codeTheme', 'codeHighlight', 'chatTitle', 'currentModel',
-          'scrollButton', 'search', 'voice', 'slashCompact',
+          'scrollButton', 'search', 'voice',
         ];
         for (const name of scalarNames) {
           if (name in args) (el as unknown as Record<string, unknown>)[name] = args[name];
@@ -113,7 +112,7 @@ const meta = {
           '`<kai-chat>` is the framework-agnostic **web component** version of the chat UI — a complete message thread plus prompt input, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** dropping a full chat into a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the primitives (`ChatContainer`, `Message`, `PromptInput`) instead.',
           '**How to use:** register once with `import \'@kitn.ai/ui/elements\'`, set rich data as JS **properties** (`el.messages = [...]`), and listen for **CustomEvents** (`kai-submit`, `kai-message-action`, `kai-value-change`) directly on the element.',
-          '**Anatomy:** **header** (model switcher + context-meter, shown when `models`/`context` props are set) → **message list** (scrollable thread of `<Message>` rows, each rendered per `role`; a scroll-to-bottom button appears when scrolled up) → **prompt composer** (`<PromptInput>`: textarea + toolbar with suggestions, slash-command palette, voice/search buttons, and optional attachment area).',
+          '**Anatomy:** **header** (model switcher + context-meter, shown when `models`/`context` props are set) → **message list** (scrollable thread of `<Message>` rows, each rendered per `role`; a scroll-to-bottom button appears when scrolled up) → **prompt composer** (`<PromptInput>`: textarea + toolbar with suggestions, entity-pill triggers (set `triggers` so `/` inserts a skill and `@` inserts an agent), voice/search buttons, and optional attachment area).',
           '**Placement:** as a top-level panel or full-page surface. Give it an explicit height (e.g. `height: 100vh`).',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ]),
@@ -136,7 +135,6 @@ export const Default: Story = {
     scrollButton: true,
     search: false,
     voice: false,
-    slashCompact: false,
   },
   render: (args: Record<string, unknown>) => <ChatElement args={args} />,
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },

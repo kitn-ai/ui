@@ -57,10 +57,11 @@ test('on<Event> handler fires with the CustomEvent detail', async () => {
   const el = container.querySelector('kai-prompt-input') as unknown as AnyEl;
   await flush();
 
-  const textarea = el.shadowRoot!.querySelector('textarea')!;
-  textarea.value = 'hello';
-  textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
-  textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
+  // The composer is a contenteditable surface (not a <textarea>).
+  const editable = el.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
+  editable.textContent = 'hello';
+  editable.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+  editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
 
   expect(onSubmit).toHaveBeenCalledTimes(1);
   const ev = onSubmit.mock.calls[0][0] as CustomEvent<{ value: string }>;

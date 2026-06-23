@@ -61,6 +61,38 @@ const FIX_CARD = {
 const FOLLOWUP =
   'Good instinct. The batched query collapses it to a single round-trip; the timeout just keeps one bad minute from stalling checkout while the cache warms.';
 
+// Small inline tile icon for a plugin pill (Codex-style).
+function tile(fill: string, glyph: string) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="10" fill="${fill}"/><text x="32" y="44" font-size="34" text-anchor="middle" fill="white">${glyph}</text></svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+
+// Entity-pill triggers: `/` skills, `@` agents + plugins. Wired onto the input so
+// a visitor can type `/` or `@` and drop atomic pills into the composer.
+const TRIGGERS = [
+  { char: '/', kind: 'skill', items: [
+    { id: 'trace', label: 'trace-analysis', description: 'Analyze distributed traces', promptText: 'Analyze the traces.' },
+    { id: 'summarize', label: 'summarize', description: 'Summarize the incident', promptText: 'Summarize the incident.' },
+    { id: 'rollback', label: 'rollback', description: 'Draft a rollback plan' },
+  ] },
+  { char: '@', kind: 'agent', items: [
+    { id: 'code-reviewer', label: 'code-reviewer', group: 'Agents', description: 'Reviews diffs for bugs' },
+    { id: 'on-call', label: 'on-call', group: 'Agents', description: 'Pages the on-call engineer' },
+    { id: 'datadog', label: 'Datadog', kind: 'plugin', group: 'Plugins', description: 'Query metrics & traces', icon: tile('#632ca6', 'D') },
+  ] },
+];
+
+// An opening draft (skill + agent + plugin pills) seeded into the composer to
+// show entity pills off before the conversation plays.
+const PILL_DRAFT = [
+  { type: 'text', text: 'Use ' },
+  { type: 'entity', entity: { kind: 'skill', id: 'trace', label: 'trace-analysis', promptText: 'Analyze the traces.' } },
+  { type: 'text', text: ', then ask ' },
+  { type: 'entity', entity: { kind: 'agent', id: 'code-reviewer', label: 'code-reviewer' } },
+  { type: 'text', text: ' to check it with ' },
+  { type: 'entity', entity: { kind: 'plugin', id: 'datadog', label: 'Datadog', icon: tile('#632ca6', 'D') } },
+];
+
 let uid = 0;
 const nextId = () => `h${++uid}`;
 
@@ -106,7 +138,13 @@ export default function HeroChat() {
     host.loading = false;
     host.messages = [];
 
-    await wait(450); if (!alive()) return stop();
+    // Open by showing entity pills in the composer — a skill, an agent, a plugin
+    // seeded as a draft — then clear it and play the real conversation.
+    host.value = PILL_DRAFT;
+    await wait(1700); if (!alive()) { host.value = ''; return stop(); }
+    host.value = '';
+    await wait(350); if (!alive()) return stop();
+
     const user: ChatMessage = { id: 'u1', role: 'user', content: QUESTION };
     host.messages = [user];
 
@@ -199,6 +237,7 @@ export default function HeroChat() {
 
     host.chatTitle = 'Support Agent';
     host.placeholder = 'Ask a follow-up…';
+    host.triggers = TRIGGERS; // `/` skills, `@` agents/plugins — try typing one
     host.suggestions = ['Show me the trace', 'Draft the migration', 'What’s the rollback?'];
     host.models = [
       { id: 'sonnet', name: 'Claude Sonnet', provider: 'Anthropic' },
@@ -233,7 +272,7 @@ export default function HeroChat() {
             playing = false;
             done = false;
             clearCard();
-            if (host) host.messages = [];
+            if (host) { host.messages = []; host.value = ''; }
           }
         }
       }, { threshold: [0, 0.4, 1] });

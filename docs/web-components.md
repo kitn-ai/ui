@@ -136,7 +136,7 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `messages` | — | `{ id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]` | `[]` | The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). |
-| `value` | `value` | `undefined | string` | — | Controlled value of the input. When set, the host owns the input text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. |
+| `value` | — | `undefined | string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]` | — | Value of the input. A **string** is controlled (the host owns the text and updates it on `kai-value-change`). A **ComposerDoc** is a one-time seed that pre-populates pills; the user then edits freely. Leave unset for uncontrolled. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
 | `loading` | `loading` | `undefined | false | true` | `false` | When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). |
 | `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property. |
@@ -154,9 +154,8 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `headerEnd` | `header-end` | `undefined | false | true` | — | Whether the host has `slot="header-end"` content (right of the controls). |
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the input toolbar; fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the input toolbar; fires a `voice` event. |
-| `slashCommands` | — | `SlashCommandItem[] | undefined` | — | Slash commands — when set, typing `/` in the input opens the command palette and fires `kai-slash-select`. Set as a JS property. |
-| `slashActiveIds` | — | `undefined | string[]` | — | Command ids to highlight as active in the palette. |
-| `slashCompact` | `slash-compact` | `undefined | false | true` | `false` | Single-line palette rows. |
+| `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a JS property; forwarded to the input. |
+| `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image src) for pills/menu items. |
 | `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). |
 
 #### Events
@@ -166,7 +165,6 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
 | `kai-model-change` | `{ modelId: string }` | The header model switcher changed. |
 | `kai-search` | — | The Search button was clicked. |
-| `kai-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
 | `kai-submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
 | `kai-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
 | `kai-value-change` | `{ value: string }` | Fired on every input change. |
@@ -211,9 +209,8 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` |  |
 | `search` | `search` | `undefined | false | true` | `false` |  |
 | `voice` | `voice` | `undefined | false | true` | `false` |  |
-| `slashCommands` | — | `SlashCommandItem[] | undefined` | — |  |
-| `slashActiveIds` | — | `undefined | string[]` | — |  |
-| `slashCompact` | `slash-compact` | `undefined | false | true` | `false` |  |
+| `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers (`/` skills, `@` agents/plugins) forwarded to the input. |
+| `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image src) forwarded to the input. |
 | `sidebarWidth` | `sidebar-width` | `undefined | number` | `22` | Sidebar default width as a percent of the workspace (default 22). |
 | `sidebarMinWidth` | `sidebar-min-width` | `undefined | number` | `200` | Sidebar min width in px (default 200). |
 | `sidebarMaxWidth` | `sidebar-max-width` | `undefined | number` | `420` | Sidebar max width in px (default 420). |
@@ -230,7 +227,6 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `kai-new-chat` | — | The "New chat" button was clicked. |
 | `kai-search` | — | The Search button was clicked. |
 | `kai-sidebar-toggle` | `{ collapsed: false | true }` | The sidebar was collapsed or expanded. |
-| `kai-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
 | `kai-submit` | `{ value: string; attachments: AttachmentData[] }` | User submitted a message. |
 | `kai-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
 | `kai-value-change` | `{ value: string }` | Fired on every input change. |
@@ -326,31 +322,29 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `value` | `value` | `undefined | string` | — | Controlled value of the input. When set, the host owns the text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. |
+| `value` | — | `undefined | string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]` | — | Value of the input, as a JS property. A **string** is the controlled text mirror (the host owns it and updates on `kai-value-change`). A **ComposerDoc** (array of text/entity segments) is a one-time **seed** that pre-populates pills (skills/agents/plugins); the user then edits freely. Leave unset for uncontrolled behavior. `kai-submit`/`kai-value-change` always emit `value` as the flattened string (back-compat) plus the structured `doc` + `entities`. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the input and submit button entirely (non-interactive). |
 | `loading` | `loading` | `undefined | false | true` | `false` | Show the loading/streaming state and block submit (use while awaiting a reply). |
 | `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input. Clicking one follows `suggestionMode`. Set as a JS property. |
 | `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. |
-| `slashCommands` | — | `SlashCommandItem[] | undefined` | — | Slash commands — when set, typing `/` opens the command palette. Set as a JS property. |
-| `slashActiveIds` | — | `undefined | string[]` | — | Command ids to highlight as active. |
-| `slashCompact` | `slash-compact` | `undefined | false | true` | `false` | Single-line palette rows. |
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
 | `stoppable` | `stoppable` | `undefined | false | true` | `false` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. |
 | `attachments` | — | `AttachmentData[] | undefined` | — | Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). |
+| `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins are the grouping/provenance of those items). Set as a JS property. |
+| `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-search` | — | The Search (Globe) toolbar button was clicked. |
-| `kai-slash-select` | `{ command: SlashCommandItem }` | A slash command was chosen from the palette. |
 | `kai-stop` | — | The Stop button was clicked while `stoppable` and `loading` are both true. |
-| `kai-submit` | `{ value: string; attachments: AttachmentData[] }` | The user submitted the prompt (Enter or send button) with its attachments. |
+| `kai-submit` | `{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The user submitted the prompt (Enter or send button). `value` is the flattened text (back-compat); `doc` is the structured document and `entities` the inserted pills (skills/agents) for downstream expansion. |
 | `kai-suggestion-click` | `{ value: string }` | A suggestion was clicked while `suggestion-mode="fill"`. |
 | `kai-toolbar-action` | `{ action: string }` | A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of the `<kai-action>` element that was clicked. |
-| `kai-value-change` | `{ value: string }` | The input text changed (fires on every keystroke). |
+| `kai-value-change` | `{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }` | The input changed (fires on every edit). Carries the flattened `value` plus the structured `doc` + `entities`. |
 | `kai-voice` | — | The Voice (Mic) toolbar button was clicked. |
 
 #### Theming

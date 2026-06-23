@@ -63,7 +63,7 @@ Set data in JavaScript and listen for **CustomEvents** on the element:
 </script>
 ```
 
-- **Properties vs attributes** — `groups`, `conversations`, `messages`, `models`, `suggestions`, `slashCommands`, `slashActiveIds`, and `context` are arrays and objects, so set them in JavaScript. Scalar props (`placeholder`, `loading`, sidebar dimensions, etc.) work as attributes or properties.
+- **Properties vs attributes** — `groups`, `conversations`, `messages`, `models`, `suggestions`, `triggers`, `kindIcons`, and `context` are arrays and objects, so set them in JavaScript. Scalar props (`placeholder`, `loading`, sidebar dimensions, etc.) work as attributes or properties.
 - **Sidebar** — drag-resizable and collapsible. Constrain with `sidebarWidth` (percent, default `22`), `sidebarMinWidth`, and `sidebarMaxWidth`. Collapse is **uncontrolled by default** — the element manages it and fires `kai-sidebar-toggle`. Start collapsed with the `default-sidebar-collapsed` attribute, or **control** it by setting the `sidebarCollapsed` property and updating it from `kai-sidebar-toggle` (lets you persist the choice or collapse from outside the header).
 - **Conversation grouping** — pass a flat `conversations` array and the element auto-buckets by recency, or supply a `groups` array with `groupId` on each conversation for custom grouping.
 
@@ -91,11 +91,11 @@ Set `suggestions` to show prompt chips on an empty thread. `suggestion-mode="sub
 
 <Example client:visible tag="kai-workspace" data="withSuggestions" />
 
-### Slash Commands
+### Entity Pills
 
-Set `slashCommands` to enable the `/` command palette; handle `kai-slash-select` to receive `{ command }`.
+Set `triggers` so `/` inserts a skill pill and `@` opens a sectioned menu of agents and plugins. `kai-submit` carries the structured `doc` + `entities`.
 
-<Example client:visible tag="kai-workspace" data="withSlash" />
+<Example client:visible tag="kai-workspace" data="withTriggers" />
 
 ### Sidebar Starts Collapsed
 

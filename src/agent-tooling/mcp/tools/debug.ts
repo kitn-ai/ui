@@ -27,11 +27,11 @@ const RULES: Rule[] = [
     // Source: for-ai-agents.mdx §1; context7.json rule 2
     id: 'array-as-attribute',
     test: (t) =>
-      /\b(messages|models|context|suggestions|slashCommands)\s*=\s*["']/.test(t),
+      /\b(messages|models|context|suggestions|triggers)\s*=\s*["']/.test(t),
     title: 'Array/object prop set as an HTML attribute (silent failure)',
     cause:
       'An HTML attribute is always a string. Passing `messages`, `models`, `context`, ' +
-      '`suggestions`, or `slashCommands` as an HTML attribute silently fails — ' +
+      '`suggestions`, or `triggers` as an HTML attribute silently fails — ' +
       'the element receives a stringified value it cannot parse.',
     fix:
       'Set the property in JavaScript, not as an HTML attribute. ' +

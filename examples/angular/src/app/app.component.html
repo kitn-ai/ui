@@ -48,7 +48,7 @@
         - [currentModel]    string               — selected model id
         - [context]         object               — token-usage context meter
         - [suggestions]     string[]             — prompt suggestions
-        - [slashCommands]   object[]             — slash-command items
+        - [triggers]        object[]             — entity-pill trigger groups
         - [loading]         boolean              — streaming / loading state
         - [theme]           'light'|'dark'|'auto'
 
@@ -69,7 +69,7 @@
       [currentModel]="currentModel()"
       [context]="context"
       [suggestions]="suggestions"
-      [slashCommands]="slashCommands"
+      [triggers]="triggers"
       [loading]="loading()"
       [theme]="theme()"
       (kai-submit)="onSubmit($event)"
@@ -85,11 +85,11 @@
   <!-- Standalone <kai-prompt-input> — proves a leaf element works on its own. -->
   <div class="standalone-section" [style.borderTop]="'1px solid ' + borderColor">
     <div class="standalone-label">
-      Standalone &lt;kai-prompt-input&gt; (try typing <code>/</code> for slash commands):
+      Standalone &lt;kai-prompt-input&gt; (try typing <code>/</code> or <code>@</code> for entity pills):
     </div>
     <kai-prompt-input
       placeholder="Standalone prompt input…"
-      [slashCommands]="slashCommands"
+      [triggers]="triggers"
       [theme]="theme()"
       (kai-submit)="onStandaloneSubmit($event)"
     ></kai-prompt-input>

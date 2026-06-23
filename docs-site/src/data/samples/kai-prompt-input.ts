@@ -1,6 +1,6 @@
 // Sample data for <kai-prompt-input> non-scalar props.
 //
-// `suggestions`, `slashCommands`, `slashActiveIds`, and `attachments` are
+// `suggestions`, `triggers`, and `attachments` are
 // scalar:false — they must be seeded here so the Playground and Examples
 // render meaningful content instead of an empty composer.
 //
@@ -18,15 +18,42 @@ const DEFAULT_SUGGESTIONS = [
   'Explain like I am five',
 ];
 
-const DEFAULT_SLASH_COMMANDS = [
-  { id: 'summarize', label: '/summarize', description: 'Summarize the conversation', category: 'Actions' },
-  { id: 'translate', label: '/translate', description: 'Translate the last message', category: 'Actions' },
-  { id: 'image', label: '/image', description: 'Generate an image', category: 'Tools' },
-];
-
 const SAMPLE_ATTACHMENTS = [
   { id: 'a1', type: 'file', filename: 'architecture.png', mediaType: 'image/png', url: imgData('#7c3aed', '◆') },
   { id: 'a2', type: 'file', filename: 'spec.pdf', mediaType: 'application/pdf' },
+];
+
+// Rich entity triggers: `/` → skills, `@` → agents + plugins (one sectioned menu).
+const ENTITY_TRIGGERS = [
+  {
+    char: '/',
+    kind: 'skill',
+    items: [
+      { id: 'summarize', label: 'Summarize', description: 'Summarize the thread', promptText: 'Summarize the thread.' },
+      { id: 'translate', label: 'Translate', description: 'Translate to English', promptText: 'Translate to English.' },
+      { id: 'rewrite', label: 'Rewrite', description: 'Rewrite for clarity', promptText: 'Rewrite this for clarity.' },
+    ],
+  },
+  {
+    char: '@',
+    kind: 'agent',
+    items: [
+      { id: 'documents', label: 'Documents', kind: 'plugin', group: 'Plugins', icon: imgData('#2563eb', 'D'), description: 'Create and edit documents', data: { plugin: 'documents' } },
+      { id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents', description: 'Reviews diffs for bugs', promptText: 'Hand this to the Code Reviewer agent.' },
+      { id: 'researcher', label: 'Researcher', group: 'Agents', description: 'Deep multi-source research' },
+    ],
+  },
+];
+
+// A ComposerDoc seed: text interleaved with atomic entity pills.
+const PREFILLED_DOC = [
+  { type: 'text', text: 'Review ' },
+  { type: 'entity', entity: { kind: 'skill', id: 'summarize', label: 'Summarize', promptText: 'Summarize the thread.' } },
+  { type: 'text', text: ' then ask ' },
+  { type: 'entity', entity: { kind: 'agent', id: 'code-reviewer', label: 'Code Reviewer' } },
+  { type: 'text', text: ' to use ' },
+  { type: 'entity', entity: { kind: 'plugin', id: 'documents', label: 'Documents', icon: imgData('#2563eb', 'D'), data: { plugin: 'documents' } } },
+  { type: 'text', text: '.' },
 ];
 
 export default {
@@ -39,10 +66,6 @@ export default {
     withSuggestions: {
       suggestions: DEFAULT_SUGGESTIONS,
     },
-    // Slash-command palette — set slashCommands; type "/" to open
-    withSlashCommands: {
-      slashCommands: DEFAULT_SLASH_COMMANDS,
-    },
     // Pre-populated attachments seeded via the attachments property
     withAttachments: {
       attachments: SAMPLE_ATTACHMENTS,
@@ -51,6 +74,15 @@ export default {
     // Loading / streaming state with stoppable stop button
     loading: {
       suggestions: DEFAULT_SUGGESTIONS,
+    },
+    // Entity pills — type `/` for a skill or `@` for an agent/plugin
+    withEntityPills: {
+      triggers: ENTITY_TRIGGERS,
+    },
+    // Pre-populated pills seeded via `value` as a ComposerDoc
+    prefilledDoc: {
+      triggers: ENTITY_TRIGGERS,
+      value: PREFILLED_DOC,
     },
   },
 };

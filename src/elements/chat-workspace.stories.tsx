@@ -73,7 +73,6 @@ type WorkspaceEl = HTMLElement & {
   scrollButton?: boolean;
   search?: boolean;
   voice?: boolean;
-  slashCompact?: boolean;
   sidebarWidth?: number;
   sidebarMinWidth?: number;
   sidebarMaxWidth?: number;
@@ -100,7 +99,7 @@ function WorkspaceElement(props: { args?: Record<string, unknown> }) {
       if (args) {
         const scalarNames = [
           'placeholder', 'loading', 'suggestionMode', 'proseSize', 'codeTheme',
-          'codeHighlight', 'scrollButton', 'search', 'voice', 'slashCompact',
+          'codeHighlight', 'scrollButton', 'search', 'voice',
           'sidebarWidth', 'sidebarMinWidth', 'sidebarMaxWidth', 'defaultSidebarCollapsed', 'value',
         ];
         for (const name of scalarNames) {
@@ -223,7 +222,6 @@ export const Default: Story = {
     scrollButton: true,
     search: false,
     voice: false,
-    slashCompact: false,
   },
   render: (args: Record<string, unknown>) => <WorkspaceElement args={args} />,
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },

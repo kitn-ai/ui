@@ -16,7 +16,7 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-lede">A full-featured chat UI — thread, composer, and optional header — packaged as a single Shadow DOM web component for any framework.</p>
 
-<Facts items={['Shadow DOM', '8 events', 'Markdown + syntax highlighting', 'Model switcher', 'Slash-command palette', 'Starter suggestions']} />
+<Facts items={['Shadow DOM', '8 events', 'Markdown + syntax highlighting', 'Model switcher', 'Entity pills (/ skills, @ agents)', 'Starter suggestions']} />
 
 ## Preview
 
@@ -105,11 +105,11 @@ Add `context` to show a live token-usage gauge — yellow near the warning thres
 
 <Example client:visible tag="kai-chat" config={{ chatTitle: 'Research Assistant' }} data="withContext" />
 
-### Slash Commands
+### Entity Pills
 
-`slashCommands` opens a palette on `/`; `slash-compact` uses single-line rows for dense layouts.
+Set `triggers` so `/` inserts a skill pill and `@` opens a sectioned menu of agents and plugins. `kai-submit` carries the structured `doc` + `entities` for your backend to expand.
 
-<Example client:visible tag="kai-chat" data="withSlash" />
+<Example client:visible tag="kai-chat" data="withTriggers" />
 
 ## Props
 

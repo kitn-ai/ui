@@ -9,7 +9,7 @@ import {
   models,
   assistantMessage,
   userMessage,
-  slashCommands,
+  entityTriggers,
   sources,
 } from '../stories/examples/sample-data';
 
@@ -122,7 +122,7 @@ type Story = StoryObj;
 
 const DROPIN_SNIPPET = `<!-- The drop-in layer: whole surfaces in a single tag -->
 <kai-conversations style="display:block;height:320px"></kai-conversations>
-<kai-prompt-input placeholder="Ask anything…  (try typing /)"></kai-prompt-input>
+<kai-prompt-input placeholder="Ask anything…  (try / or @)"></kai-prompt-input>
 
 <script type="module">
   import '@kitn.ai/ui/elements';
@@ -136,8 +136,14 @@ const DROPIN_SNIPPET = `<!-- The drop-in layer: whole surfaces in a single tag -
   list.addEventListener('kai-conversation-select', (e) => (list.activeId = e.detail.id));
 
   const input = document.querySelector('kai-prompt-input');
-  input.slashCommands = [
-    { id: 'summarize', label: '/summarize', description: 'Summarize', category: 'Actions' },
+  // entity-pill triggers: / inserts a skill, @ inserts an agent/plugin
+  input.triggers = [
+    { char: '/', kind: 'skill', items: [
+      { id: 'summarize', label: 'Summarize', description: 'Summarize the thread', promptText: 'Summarize the thread.' },
+    ]},
+    { char: '@', kind: 'agent', items: [
+      { id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents', description: 'Reviews diffs for bugs' },
+    ]},
   ];
   input.addEventListener('kai-submit', (e) => console.log('submit', e.detail.value));
 </script>`;
@@ -150,8 +156,8 @@ export const BatteriesIncluded: Story = {
     onMount(() => {
       props(list, { conversations, activeId: 'c1' });
       list.addEventListener('kai-conversation-select', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
-      props(input, { slashCommands });
-      attrs(input, { placeholder: 'Ask anything…  (try typing /)' });
+      props(input, { triggers: entityTriggers });
+      attrs(input, { placeholder: 'Ask anything…  (try / or @)' });
     });
     return (
       <Grid>
@@ -160,7 +166,7 @@ export const BatteriesIncluded: Story = {
             <kai-conversations ref={(e) => (list = e)} style={{ display: 'block', height: '100%' }} />
           </div>
         </Spec>
-        <Spec tag="kai-prompt-input" note='slash commands — type "/"'>
+        <Spec tag="kai-prompt-input" note='entity pills — type "/" or "@"'>
           <kai-prompt-input ref={(e) => (input = e)} />
         </Spec>
       </Grid>

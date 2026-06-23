@@ -25,10 +25,10 @@ test('renders messages and emits submit', async () => {
 
   let submitted: string | null = null;
   el.addEventListener('kai-submit', (e) => (submitted = (e as CustomEvent).detail.value));
-  const textarea = el.shadowRoot!.querySelector('textarea')!;
-  textarea.value = 'next question';
-  textarea.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
-  textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
+  const editable = el.shadowRoot!.querySelector('[data-kai-composer-editable]') as HTMLElement;
+  editable.textContent = 'next question';
+  editable.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+  editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
   expect(submitted).toBe('next question');
 
   el.remove();
