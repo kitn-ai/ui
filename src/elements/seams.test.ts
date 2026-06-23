@@ -48,10 +48,12 @@ describe('readSeams', () => {
 });
 
 describe('PROMPT_INPUT_SEAMS registry', () => {
-  it('lists the four prompt-input seams in order', () => {
+  it('lists the four prompt-input seams in order, with unique names', () => {
     expect(PROMPT_INPUT_SEAMS.map((s) => s.name)).toEqual([
       'notice', 'leading', 'toolbar-start', 'trailing',
     ]);
+    const names = PROMPT_INPUT_SEAMS.map((s) => s.name);
+    expect(new Set(names).size).toBe(names.length);
   });
 
   it('marks all seams as inject mode', () => {
