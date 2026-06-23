@@ -67,6 +67,26 @@ test.describe('kai-chat composition seams IVP', () => {
     expect(off).toBe(false);
   });
 
+  test('DROP-IN: no seams projected → no seam slots in the shadow tree', async ({ page }) => {
+    await page.goto(STORY('drop-in'));
+    await expect(page.locator('kai-chat')).toBeVisible();
+    await page.waitForTimeout(700);
+    // Only count the named composition seams (sidebar, header, empty, composer,
+    // composer-actions, footer, header-start, header-end). Internal prompt-input
+    // slots (leading/trailing) are excluded — they are not seams.
+    const seamSlotNames = [
+      'sidebar', 'header-start', 'header-end', 'header',
+      'empty', 'composer', 'composer-actions', 'footer',
+    ];
+    const slotCount = await page.evaluate((names) => {
+      const root = document.querySelector('kai-chat')?.shadowRoot;
+      if (!root) return -1;
+      return names.filter(n => root.querySelector(`slot[name="${n}"]`) !== null).length;
+    }, seamSlotNames);
+    expect(slotCount).toBe(0);
+    await page.screenshot({ path: 'spike-screens/seams-dropin.png' });
+  });
+
   test('REPLACE(header+composer): custom form stands in and drives the thread', async ({ page }) => {
     await page.goto(STORY('replace-composer'));
     await expect(page.locator('kai-chat')).toBeVisible();

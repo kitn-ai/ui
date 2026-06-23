@@ -106,3 +106,12 @@ function ReplaceDemo() {
   );
 }
 export const ReplaceComposer: Story = { render: () => <ReplaceDemo /> };
+
+// ── Drop-in baseline — NO seams projected. The shell must render exactly as it
+//    did before seams existed (regression guard). ─────────────────────────────
+function DropInDemo() {
+  let el: ChatEl | undefined;
+  onMount(() => { if (el) el.messages = thread; });
+  return <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }} />;
+}
+export const DropIn: Story = { render: () => <DropInDemo /> };

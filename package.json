@@ -108,7 +108,8 @@
     "dev:provider": "vite examples/remote-provider --port 6007 --strictPort",
     "dev:host": "vite examples/remote-host --port 6006 --strictPort",
     "test:e2e": "playwright test",
-    "test:composer-ivp": "playwright test --config playwright.composer.config.ts"
+    "test:composer-ivp": "playwright test --config playwright.composer.config.ts",
+    "test:seams-ivp": "playwright test --config playwright.seams.config.ts"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",
