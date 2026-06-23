@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
 import './register'; // side effect: registers <kai-chat>, <kai-conversations>, <kai-prompt-input>
 import type { AttachmentData } from '../components/attachments';
+import type { TriggerDef } from '../components/composer';
+import type { ComposerDoc } from '../primitives/composer-model';
 import { argTypesFor, specDescription } from '../stories/docs/element-controls';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
@@ -11,7 +13,6 @@ declare module 'solid-js' {
     interface IntrinsicElements {
       'kai-prompt-input': JSX.HTMLAttributes<HTMLElement>;
       'kai-action': JSX.HTMLAttributes<HTMLElement> & { icon?: string; tooltip?: string };
-      'kai-slash-command': JSX.HTMLAttributes<HTMLElement> & { command?: string; description?: string; category?: string };
     }
   }
 }
@@ -33,7 +34,7 @@ const sampleAttachments: AttachmentData[] = [
 ];
 
 interface PromptInputEl extends HTMLElement {
-  value?: string;
+  value?: string | ComposerDoc;
   placeholder?: string;
   disabled?: boolean;
   loading?: boolean;
@@ -41,6 +42,7 @@ interface PromptInputEl extends HTMLElement {
   search?: boolean;
   voice?: boolean;
   attachments?: AttachmentData[];
+  triggers?: TriggerDef[];
 }
 
 /** Live demo of the actual `<kai-prompt-input>` custom element (Shadow DOM and all). */
@@ -59,7 +61,7 @@ function PromptInputElement(props: { search?: boolean; voice?: boolean; attachme
     if (args) {
       const scalarNames = [
         'value', 'placeholder', 'disabled', 'loading', 'suggestionMode',
-        'slashCompact', 'search', 'voice',
+        'search', 'voice',
       ];
       for (const name of scalarNames) {
         if (name in args) (el as unknown as Record<string, unknown>)[name] = args[name];
@@ -131,7 +133,7 @@ const meta = {
           '`<kai-prompt-input>` is the framework-agnostic **web component** version of the chat composer — an auto-resizing textarea with a send button and optional suggestion chips, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a message composer to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `PromptInput` primitives instead.',
           '**How to use:** register once with `import \'@kitn.ai/ui/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`kai-submit`, `kai-value-change`, `kai-suggestion-click`, `kai-search`, `kai-voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files. **Custom toolbar buttons:** place `<kai-action id icon tooltip>` elements as children — they are invisible data carriers (Shadow DOM hides them) that the element reads and renders as extra ghost icon buttons in the left toolbar. Each click fires a `kai-toolbar-action` CustomEvent with `detail.action` equal to the action id (the same `<kai-action>` descriptor element that `<kai-message>` uses — composition symmetry).',
-          '**Slash commands (declarative):** place `<kai-slash-command command="id" description="…">Label</kai-slash-command>` elements as children — invisible data carriers merged with the `slashCommands` JS property. Typing `/` opens the palette with the combined list; selecting an item fires `kai-slash-select` with `detail.command`. Prop items appear first; declarative children are appended.',
+          '**Entity pills (triggers):** set the `triggers` JS property to a list of `{ char, kind, items }` definitions — typing the trigger char (e.g. `/` for skills, `@` for agents/plugins) opens a menu; selecting an item inserts an atomic pill. `kai-submit` / `kai-value-change` carry the structured `doc` + `entities` alongside the flattened `value` string. See the *Entity Pills* and *Prefilled* stories.',
           '**Placement:** pinned to the bottom of a chat surface, full width. Set `loading` while a response streams to show the busy state, and `disabled` to block input entirely.',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ]),
@@ -149,7 +151,6 @@ export const Default: Story = {
     disabled: false,
     loading: false,
     suggestionMode: 'submit',
-    slashCompact: false,
     search: false,
     voice: false,
   },
@@ -226,32 +227,6 @@ const CUSTOM_TOOLBAR_SNIPPET = `<kai-prompt-input id="input" voice></kai-prompt-
   input.addEventListener('kai-submit', (e) => console.log('submit:', e.detail.value));
 </script>`;
 
-const SLASH_COMMAND_SNIPPET = `<kai-prompt-input id="input" style="display:block; width:100%;"></kai-prompt-input>
-
-<script type="module">
-  import '@kitn.ai/ui/elements';
-
-  const input = document.getElementById('input');
-
-  // Inject <kai-slash-command> children — invisible data carriers read via
-  // querySelectorAll + MutationObserver, merged with any slashCommands property.
-  [
-    { command: 'summarize', description: 'Summarize the thread' },
-    { command: 'translate', description: 'Translate to English' },
-    { command: 'explain',   description: "Explain like I'm five" },
-  ].forEach(({ command, description }) => {
-    const el = document.createElement('kai-slash-command');
-    el.setAttribute('command', command);
-    el.setAttribute('description', description);
-    el.textContent = command; // becomes the label
-    input.appendChild(el);
-  });
-
-  input.addEventListener('kai-slash-select', (e) => {
-    console.log('slash selected:', e.detail.command);
-  });
-</script>`;
-
 /** Composition: place **`<kai-action>`** children inside `<kai-prompt-input>` to add
  *  custom ghost icon buttons in the toolbar. Each click fires a `kai-toolbar-action` event
  *  with `detail.action` equal to the action id — the same `<kai-action>` descriptor
@@ -289,43 +264,114 @@ export const WithCustomToolbarActions: Story = {
   parameters: { docs: { source: { code: CUSTOM_TOOLBAR_SNIPPET, language: 'html' } } },
 };
 
-/** Composition: place **`<kai-slash-command>`** children inside `<kai-prompt-input>`
- *  to declare slash commands without setting the `slashCommands` JS property.
- *  Type `/` in the input to open the palette. Each `<kai-slash-command>` child maps:
- *  `command` attr → id, textContent → label, `description` attr → description.
- *  Selection fires `kai-slash-select` with `detail.command`.
- *  Prop (`slashCommands`) and declarative children are merged — prop items first. */
-export const DeclarativeSlashCommands: Story = {
-  name: 'Declarative Slash Commands (kai-slash-command)',
+// Inline data-URI icons (no asset deps). Red disc = a "record" skill; the agent
+// items go iconless to show both styles.
+const recordIcon =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><circle cx='16' cy='16' r='11' fill='%23e11d48'/></svg>";
+// Simple colored app-tile icons (Codex-style) so plugins are visually distinct.
+const tile = (hex: string) =>
+  `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect width='32' height='32' rx='7' fill='%23${hex}'/></svg>`;
+
+// There is NO cap on items — the menu shows as many as you provide (and scrolls).
+// This set is intentionally large to demonstrate that.
+const ENTITY_TRIGGERS: TriggerDef[] = [
+  {
+    // `/` → skills (instructions you invoke).
+    char: '/',
+    kind: 'skill',
+    items: [
+      { id: 'summarize', label: 'Summarize', description: 'Summarize the thread', promptText: 'Summarize the thread.' },
+      { id: 'explain', label: 'Explain', description: "Explain like I'm five", promptText: 'Explain this simply.' },
+      { id: 'translate', label: 'Translate', description: 'Translate to English', promptText: 'Translate to English.' },
+      { id: 'rewrite', label: 'Rewrite', description: 'Rewrite for clarity', promptText: 'Rewrite this for clarity.' },
+      { id: 'brainstorm', label: 'Brainstorm', description: 'Generate ideas', promptText: 'Brainstorm ideas.' },
+      { id: 'fix-grammar', label: 'Fix grammar', description: 'Correct spelling & grammar', promptText: 'Fix the grammar.' },
+    ],
+  },
+  {
+    // `@` → a sectioned menu (Codex-style): Plugins (installed tools/capabilities)
+    // and Agents (subagents). Per-item `kind` overrides the trigger default, so
+    // both live under one `@` menu with section headers + descriptions.
+    char: '@',
+    kind: 'agent',
+    items: [
+      { id: 'record-replay', label: 'Record & Replay', kind: 'plugin', group: 'Plugins', icon: recordIcon,
+        description: "Record what I'm doing on my Mac and turn it into a Skill",
+        promptText: 'Use the Record & Replay tool.',
+        data: { plugin: 'record-replay', tool: 'record_and_replay' } },
+      { id: 'documents', label: 'Documents', kind: 'plugin', group: 'Plugins', icon: tile('2563eb'),
+        description: 'Create and edit document artifacts', data: { plugin: 'documents' } },
+      { id: 'pdf', label: 'PDF', kind: 'plugin', group: 'Plugins', icon: tile('dc2626'),
+        description: 'Read, create, and verify PDF files', data: { plugin: 'pdf' } },
+      { id: 'spreadsheets', label: 'Spreadsheets', kind: 'plugin', group: 'Plugins', icon: tile('16a34a'),
+        description: 'Create and edit spreadsheet files', data: { plugin: 'spreadsheets' } },
+      { id: 'presentations', label: 'Presentations', kind: 'plugin', group: 'Plugins', icon: tile('ea580c'),
+        description: 'Create and edit presentations', data: { plugin: 'presentations' } },
+      { id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents',
+        description: 'Reviews diffs for bugs', promptText: 'Hand this to the Code Reviewer agent.' },
+      { id: 'researcher', label: 'Researcher', group: 'Agents', description: 'Deep multi-source research' },
+      { id: 'planner', label: 'Planner', group: 'Agents', description: 'Breaks work into a step-by-step plan' },
+    ],
+  },
+];
+
+/** Rich entity pills inside the real prompt input: `/` inserts a **skill**, `@`
+ *  inserts an **agent** (plugins are the grouping/provenance, carried in `data`).
+ *  Each pill is atomic; `kai-submit`/`kai-value-change` carry the structured
+ *  `doc` + `entities` alongside the flattened `value`. */
+export const WithEntityPills: Story = {
+  name: 'Entity Pills (/ skills, @ agents)',
   render: () => {
-    let el: HTMLElement | undefined;
+    let el: PromptInputEl | undefined;
     onMount(() => {
       if (!el) return;
-      el.setAttribute('placeholder', 'Type / to open the command palette…');
-      el.addEventListener('kai-slash-select', (e: Event) => {
-        console.log('slash selected:', (e as CustomEvent<{ command: unknown }>).detail.command);
-      });
+      el.placeholder = 'Type / for a skill or @ for an agent…';
+      el.triggers = ENTITY_TRIGGERS;
+      el.addEventListener('kai-submit', (e) =>
+        console.log('submit:', (e as CustomEvent).detail),
+      );
     });
     return (
       <div style={{ padding: '16px', width: '100%' }}>
-        <kai-prompt-input
-          ref={(e: HTMLElement) => (el = e)}
-          style={{ display: 'block', width: '100%' }}
-        >
-          {/* <kai-slash-command> children are invisible data carriers — Shadow DOM hides them.
-              The element reads them via querySelectorAll + MutationObserver.
-              command attr → id, textContent → label, description attr → description. */}
-          <kai-slash-command command="summarize" description="Summarize the thread">summarize</kai-slash-command>
-          <kai-slash-command command="translate" description="Translate to English">translate</kai-slash-command>
-          <kai-slash-command command="explain" description="Explain like I'm five">explain</kai-slash-command>
-        </kai-prompt-input>
+        <kai-prompt-input ref={(e: HTMLElement) => (el = e as PromptInputEl)} style={{ display: 'block', width: '100%' }} />
         <p style={{ 'margin-top': '8px', 'font-size': '12px', color: 'var(--color-muted-foreground)' }}>
-          Type <code>/</code> in the input to open the command palette. Open the browser
-          console to see <code>kai-slash-select</code> events on selection.
+          Type <code>/</code> to insert a skill or <code>@</code> to insert an agent. Backspace deletes a
+          whole pill. Open the console to see <code>kai-submit</code> with the structured <code>doc</code> + <code>entities</code>.
         </p>
       </div>
     );
   },
-  parameters: { docs: { source: { code: SLASH_COMMAND_SNIPPET, language: 'html' } } },
+};
+
+/** Programmatic pre-population: set `value` to a **ComposerDoc** (not a string) to
+ *  seed pills — skills/agents/plugins — that the user can then edit. `kai-submit`
+ *  still emits the flattened `value` string plus the structured `doc` + `entities`. */
+export const Prefilled: Story = {
+  name: 'Prefilled (pills)',
+  render: () => {
+    let el: PromptInputEl | undefined;
+    onMount(() => {
+      if (!el) return;
+      el.triggers = ENTITY_TRIGGERS;
+      el.value = [
+        { type: 'text', text: 'Review ' },
+        { type: 'entity', entity: { kind: 'skill', id: 'summarize', label: 'Summarize', promptText: 'Summarize the thread.' } },
+        { type: 'text', text: ' then hand to ' },
+        { type: 'entity', entity: { kind: 'agent', id: 'code-reviewer', label: 'Code Reviewer' } },
+        { type: 'text', text: ' using ' },
+        { type: 'entity', entity: { kind: 'plugin', id: 'record-replay', label: 'Record & Replay', icon: recordIcon, data: { plugin: 'record-replay' } } },
+        { type: 'text', text: '.' },
+      ];
+      el.addEventListener('kai-submit', (e) => console.log('submit:', (e as CustomEvent).detail));
+    });
+    return (
+      <div style={{ padding: '16px', width: '100%' }}>
+        <kai-prompt-input ref={(e: HTMLElement) => (el = e as PromptInputEl)} style={{ display: 'block', width: '100%' }} />
+        <p style={{ 'margin-top': '8px', 'font-size': '12px', color: 'var(--color-muted-foreground)' }}>
+          Seeded via <code>value</code> as a <code>ComposerDoc</code> — the pills render on mount and stay editable.
+        </p>
+      </div>
+    );
+  },
 };
 

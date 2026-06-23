@@ -127,8 +127,8 @@ export const ChainOfThought = createWebComponent<ChainOfThoughtProps>(
 export interface ChatProps extends WebComponentProps {
   /** The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). */
   messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[];
-  /** Controlled value of the input. When set, the host owns the input text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. */
-  value?: string;
+  /** Value of the input. A **string** is controlled (the host owns the text and updates it on `kai-value-change`). A **ComposerDoc** is a one-time seed that pre-populates pills; the user then edits freely. Leave unset for uncontrolled. */
+  value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
   /** When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). */
@@ -163,12 +163,10 @@ export interface ChatProps extends WebComponentProps {
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
   voice?: boolean;
-  /** Slash commands — when set, typing `/` in the input opens the command palette and fires `kai-slash-select`. Set as a JS property. */
-  slashCommands?: { id: string; label: string; description?: string; category?: string }[];
-  /** Command ids to highlight as active in the palette. */
-  slashActiveIds?: string[];
-  /** Single-line palette rows. */
-  slashCompact?: boolean;
+  /** Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a JS property; forwarded to the input. */
+  triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
+  /** Default icon per entity kind (kind → image src) for pills/menu items. */
+  kindIcons?: Record<string, string>;
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
   /** An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
@@ -177,8 +175,6 @@ export interface ChatProps extends WebComponentProps {
   onModelChange?: (event: CustomEvent<{ modelId: string }>) => void;
   /** The Search button was clicked. */
   onSearch?: (event: CustomEvent<Record<string, never>>) => void;
-  /** A slash command was chosen from the palette. */
-  onSlashSelect?: (event: CustomEvent<{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }>) => void;
   /** User submitted a message. */
   onSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
@@ -191,8 +187,8 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = createWebComponent<ChatProps>(
   'kai-chat',
-  ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","search","voice","slashCommands","slashActiveIds","slashCompact","actionsReveal"],
-  { onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSearch: 'kai-search', onSlashSelect: 'kai-slash-select', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
+  ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","search","voice","triggers","kindIcons","actionsReveal"],
+  { onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSearch: 'kai-search', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );
 
 export interface CheckpointProps extends WebComponentProps {
@@ -277,6 +273,49 @@ export const Compare = createWebComponent<CompareProps>(
   'kai-compare',
   ["theme","data","compareId","selection","layout","proseSize","codeTheme","codeHighlight"],
   { onCompareSelect: 'kai-compare-select', onError: 'kai-error', onReady: 'kai-ready' },
+);
+
+export interface ComposerProps extends WebComponentProps {
+  /** Controlled value — string or a full ComposerDoc (set as JS property). */
+  value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
+  /** Placeholder text shown when the composer is empty. */
+  placeholder?: string;
+  /** Disable the composer entirely (non-interactive). */
+  disabled?: boolean;
+  /** Show a loading/streaming state and block submit. */
+  loading?: boolean;
+  /** Maximum height in px before the content scrolls. Default 240. */
+  maxHeight?: string | number;
+  /** Whether pressing Enter (without Shift) submits. Default true. */
+  submitOnEnter?: boolean;
+  /** Trigger definitions — set as a JS property. */
+  triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
+  /** Keyword highlight rules — set as a JS property. */
+  highlights?: (string | { pattern: string; flags?: string; class?: string })[];
+  /** Default icon per entity kind (kind → image URL/data-URI) for items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
+  kindIcons?: Record<string, string>;
+  /** The composer lost focus. */
+  onBlur?: (event: CustomEvent<{ originalEvent: FocusEvent }>) => void;
+  /** An entity pill was inserted into the composer. */
+  onEntityAdd?: (event: CustomEvent<{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }>) => void;
+  /** An entity pill was deleted from the composer. */
+  onEntityRemove?: (event: CustomEvent<{ entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } }>) => void;
+  /** The composer gained focus. `focus`/`blur` are NOT composed natively, so they don't escape the shadow root — these re-expose them on the host. (For `keydown`/`paste`/`focusin`/`focusout`, listen NATIVELY on `<kai-composer>`: they're composed and already cross the shadow boundary.) */
+  onFocus?: (event: CustomEvent<{ originalEvent: FocusEvent }>) => void;
+  /** The user submitted the composer (Enter or programmatic submit). */
+  onSubmit?: (event: CustomEvent<{ doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
+  /** A trigger character was detected at the caret (e.g. `/` or `@`). */
+  onTrigger?: (event: CustomEvent<{ char: string; query: string; rect: DOMRect }>) => void;
+  /** The active trigger was dismissed (Escape, space, or outside click). */
+  onTriggerClose?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The content changed (fires on every input event). */
+  onValueChange?: (event: CustomEvent<{ doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
+}
+
+export const Composer = createWebComponent<ComposerProps>(
+  'kai-composer',
+  ["theme","value","placeholder","disabled","loading","maxHeight","submitOnEnter","triggers","highlights","kindIcons"],
+  { onBlur: 'kai-blur', onEntityAdd: 'kai-entity-add', onEntityRemove: 'kai-entity-remove', onFocus: 'kai-focus', onSubmit: 'kai-submit', onTrigger: 'kai-trigger', onTriggerClose: 'kai-trigger-close', onValueChange: 'kai-value-change' },
 );
 
 export interface ConfirmProps extends WebComponentProps {
@@ -570,8 +609,8 @@ export const Popover = createWebComponent<PopoverProps>(
 );
 
 export interface PromptInputProps extends WebComponentProps {
-  /** Controlled value of the input. When set, the host owns the text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. */
-  value?: string;
+  /** Value of the input, as a JS property. A **string** is the controlled text mirror (the host owns it and updates on `kai-value-change`). A **ComposerDoc** (array of text/entity segments) is a one-time **seed** that pre-populates pills (skills/agents/plugins); the user then edits freely. Leave unset for uncontrolled behavior. `kai-submit`/`kai-value-change` always emit `value` as the flattened string (back-compat) plus the structured `doc` + `entities`. */
+  value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
   /** Disable the input and submit button entirely (non-interactive). */
@@ -582,12 +621,6 @@ export interface PromptInputProps extends WebComponentProps {
   suggestions?: string[];
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: "submit" | "fill";
-  /** Slash commands — when set, typing `/` opens the command palette. Set as a JS property. */
-  slashCommands?: { id: string; label: string; description?: string; category?: string }[];
-  /** Command ids to highlight as active. */
-  slashActiveIds?: string[];
-  /** Single-line palette rows. */
-  slashCompact?: boolean;
   /** Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. */
   search?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. */
@@ -596,28 +629,30 @@ export interface PromptInputProps extends WebComponentProps {
   stoppable?: boolean;
   /** Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). */
   attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
+  /** Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins are the grouping/provenance of those items). Set as a JS property. */
+  triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
+  /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
+  kindIcons?: Record<string, string>;
   /** The Search (Globe) toolbar button was clicked. */
   onSearch?: (event: CustomEvent<Record<string, never>>) => void;
-  /** A slash command was chosen from the palette. */
-  onSlashSelect?: (event: CustomEvent<{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }>) => void;
   /** The Stop button was clicked while `stoppable` and `loading` are both true. */
   onStop?: (event: CustomEvent<Record<string, never>>) => void;
-  /** The user submitted the prompt (Enter or send button) with its attachments. */
-  onSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
+  /** The user submitted the prompt (Enter or send button). `value` is the flattened text (back-compat); `doc` is the structured document and `entities` the inserted pills (skills/agents) for downstream expansion. */
+  onSubmit?: (event: CustomEvent<{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
   onSuggestionClick?: (event: CustomEvent<{ value: string }>) => void;
   /** A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of the `<kai-action>` element that was clicked. */
   onToolbarAction?: (event: CustomEvent<{ action: string }>) => void;
-  /** The input text changed (fires on every keystroke). */
-  onValueChange?: (event: CustomEvent<{ value: string }>) => void;
+  /** The input changed (fires on every edit). Carries the flattened `value` plus the structured `doc` + `entities`. */
+  onValueChange?: (event: CustomEvent<{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }>) => void;
   /** The Voice (Mic) toolbar button was clicked. */
   onVoice?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
 export const PromptInput = createWebComponent<PromptInputProps>(
   'kai-prompt-input',
-  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","slashCommands","slashActiveIds","slashCompact","search","voice","stoppable","attachments"],
-  { onSearch: 'kai-search', onSlashSelect: 'kai-slash-select', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
+  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","search","voice","stoppable","attachments","triggers","kindIcons"],
+  { onSearch: 'kai-search', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );
 
 export interface ReasoningProps extends WebComponentProps {
@@ -960,9 +995,10 @@ export interface WorkspaceProps extends WebComponentProps {
   scrollButton?: boolean;
   search?: boolean;
   voice?: boolean;
-  slashCommands?: { id: string; label: string; description?: string; category?: string }[];
-  slashActiveIds?: string[];
-  slashCompact?: boolean;
+  /** Rich entity triggers (`/` skills, `@` agents/plugins) forwarded to the input. */
+  triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
+  /** Default icon per entity kind (kind → image src) forwarded to the input. */
+  kindIcons?: Record<string, string>;
   /** Sidebar default width as a percent of the workspace (default 22). */
   sidebarWidth?: number;
   /** Sidebar min width in px (default 200). */
@@ -985,8 +1021,6 @@ export interface WorkspaceProps extends WebComponentProps {
   onSearch?: (event: CustomEvent<Record<string, never>>) => void;
   /** The sidebar was collapsed or expanded. */
   onSidebarToggle?: (event: CustomEvent<{ collapsed: boolean }>) => void;
-  /** A slash command was chosen from the palette. */
-  onSlashSelect?: (event: CustomEvent<{ command: { id: string; label: string; description?: undefined | string; category?: undefined | string } }>) => void;
   /** User submitted a message. */
   onSubmit?: (event: CustomEvent<{ value: string; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
@@ -999,6 +1033,6 @@ export interface WorkspaceProps extends WebComponentProps {
 
 export const Workspace = createWebComponent<WorkspaceProps>(
   'kai-workspace',
-  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","slashCommands","slashActiveIds","slashCompact","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed"],
-  { onConversationSelect: 'kai-conversation-select', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onSidebarToggle: 'kai-sidebar-toggle', onSlashSelect: 'kai-slash-select', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
+  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","triggers","kindIcons","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed"],
+  { onConversationSelect: 'kai-conversation-select', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onSidebarToggle: 'kai-sidebar-toggle', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );

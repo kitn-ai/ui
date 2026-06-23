@@ -48,7 +48,7 @@ npm install solid-js
 
 ## #1 rule: array/object data goes on JS PROPERTIES, not HTML attributes
 
-This is the single most common mistake. Arrays and objects (\`messages\`, \`models\`, \`context\`, \`suggestions\`, \`slashCommands\`, …) MUST be assigned as JavaScript properties on the element. They CANNOT be passed as HTML attributes — an HTML attribute is always a string and will be ignored or mis-parsed.
+This is the single most common mistake. Arrays and objects (\`messages\`, \`models\`, \`context\`, \`suggestions\`, \`triggers\`, …) MUST be assigned as JavaScript properties on the element. They CANNOT be passed as HTML attributes — an HTML attribute is always a string and will be ignored or mis-parsed.
 
 \`\`\`js
 const chat = document.querySelector('kai-chat');

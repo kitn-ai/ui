@@ -31,7 +31,7 @@ import {
   SAMPLE_MODELS,
   SAMPLE_CONTEXT,
   SAMPLE_SUGGESTIONS,
-  SAMPLE_SLASH_COMMANDS,
+  SAMPLE_TRIGGERS,
   type SampleMessage,
   type SampleConversation,
 } from '../../../shared/sample-data';
@@ -113,7 +113,7 @@ export class AppComponent {
   readonly models = SAMPLE_MODELS;
   readonly context = SAMPLE_CONTEXT;
   readonly suggestions = SAMPLE_SUGGESTIONS;
-  readonly slashCommands = SAMPLE_SLASH_COMMANDS;
+  readonly triggers = SAMPLE_TRIGGERS;
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 

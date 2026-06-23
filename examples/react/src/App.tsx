@@ -5,7 +5,7 @@
  * `@kitn.ai/ui/react` provides typed React wrappers (Chat, PromptInput,
  * Conversations, …) that make the elements feel native:
  *   - array/object props (messages, models, conversations, suggestions, context,
- *     slashCommands) are passed as React props and assigned as live DOM
+ *     triggers) are passed as React props and assigned as live DOM
  *     *properties* (NOT stringified to attributes);
  *   - boolean props (loading) reflect correctly;
  *   - events are `on<Event>` handlers (onSubmit, onModelChange, onConversationSelect, …)
@@ -30,7 +30,7 @@ import {
   SAMPLE_MODELS,
   SAMPLE_CONTEXT,
   SAMPLE_SUGGESTIONS,
-  SAMPLE_SLASH_COMMANDS,
+  SAMPLE_TRIGGERS,
   type SampleMessage,
 } from '../../shared/sample-data';
 
@@ -294,7 +294,7 @@ export default function App() {
           currentModel={currentModel}
           context={SAMPLE_CONTEXT}
           suggestions={SAMPLE_SUGGESTIONS}
-          slashCommands={SAMPLE_SLASH_COMMANDS}
+          triggers={SAMPLE_TRIGGERS}
           loading={loading}
           theme={theme}
           onSubmit={handleSubmit}
@@ -310,11 +310,11 @@ export default function App() {
         style={{ borderTop: `1px solid ${borderColor}` }}
       >
         <div className="standalone-label">
-          Standalone &lt;PromptInput&gt; (try typing <code>/</code> for slash commands):
+          Standalone &lt;PromptInput&gt; (try typing <code>/</code> or <code>@</code> for entity pills):
         </div>
         <PromptInput
           placeholder="Standalone prompt input…"
-          slashCommands={SAMPLE_SLASH_COMMANDS}
+          triggers={SAMPLE_TRIGGERS}
           theme={theme}
           onSubmit={handleStandaloneSubmit}
         />

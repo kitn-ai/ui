@@ -99,8 +99,8 @@ export interface KaiChatElement extends HTMLElement {
   theme?: 'light' | 'dark' | 'auto';
   /** The full message thread to render, newest last. Each entry carries its role, content, and optional reasoning/tools/attachments/actions. Set as a JS property (`el.messages = [...]`). */
   messages: { id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[];
-  /** Controlled value of the input. When set, the host owns the input text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. */
-  value?: string;
+  /** Value of the input. A **string** is controlled (the host owns the text and updates it on `kai-value-change`). A **ComposerDoc** is a one-time seed that pre-populates pills; the user then edits freely. Leave unset for uncontrolled. */
+  value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
   /** When true, shows the loading/streaming state and disables submit (use while awaiting the assistant's reply). */
@@ -135,12 +135,10 @@ export interface KaiChatElement extends HTMLElement {
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
   voice?: boolean;
-  /** Slash commands — when set, typing `/` in the input opens the command palette and fires `kai-slash-select`. Set as a JS property. */
-  slashCommands?: { id: string; label: string; description?: string; category?: string }[];
-  /** Command ids to highlight as active in the palette. */
-  slashActiveIds?: string[];
-  /** Single-line palette rows. */
-  slashCompact?: boolean;
+  /** Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a JS property; forwarded to the input. */
+  triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
+  /** Default icon per entity kind (kind → image src) for pills/menu items. */
+  kindIcons?: Record<string, string>;
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
 }
@@ -203,6 +201,29 @@ export interface KaiCompareElement extends HTMLElement {
   codeTheme?: string;
   /** Whether code blocks are syntax-highlighted. Attribute: `code-highlight`. */
   codeHighlight?: boolean;
+}
+
+export interface KaiComposerElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Controlled value — string or a full ComposerDoc (set as JS property). */
+  value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
+  /** Placeholder text shown when the composer is empty. */
+  placeholder?: string;
+  /** Disable the composer entirely (non-interactive). */
+  disabled?: boolean;
+  /** Show a loading/streaming state and block submit. */
+  loading?: boolean;
+  /** Maximum height in px before the content scrolls. Default 240. */
+  maxHeight?: string | number;
+  /** Whether pressing Enter (without Shift) submits. Default true. */
+  submitOnEnter?: boolean;
+  /** Trigger definitions — set as a JS property. */
+  triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
+  /** Keyword highlight rules — set as a JS property. */
+  highlights?: (string | { pattern: string; flags?: string; class?: string })[];
+  /** Default icon per entity kind (kind → image URL/data-URI) for items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
+  kindIcons?: Record<string, string>;
 }
 
 export interface KaiConfirmElement extends HTMLElement {
@@ -410,8 +431,8 @@ export interface KaiPopoverElement extends HTMLElement {
 export interface KaiPromptInputElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** Controlled value of the input. When set, the host owns the text and must update it on `kai-value-change`; leave unset for uncontrolled behavior. */
-  value?: string;
+  /** Value of the input, as a JS property. A **string** is the controlled text mirror (the host owns it and updates on `kai-value-change`). A **ComposerDoc** (array of text/entity segments) is a one-time **seed** that pre-populates pills (skills/agents/plugins); the user then edits freely. Leave unset for uncontrolled behavior. `kai-submit`/`kai-value-change` always emit `value` as the flattened string (back-compat) plus the structured `doc` + `entities`. */
+  value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
   /** Placeholder text shown in the empty input. */
   placeholder?: string;
   /** Disable the input and submit button entirely (non-interactive). */
@@ -422,12 +443,6 @@ export interface KaiPromptInputElement extends HTMLElement {
   suggestions?: string[];
   /** What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. */
   suggestionMode?: "submit" | "fill";
-  /** Slash commands — when set, typing `/` opens the command palette. Set as a JS property. */
-  slashCommands?: { id: string; label: string; description?: string; category?: string }[];
-  /** Command ids to highlight as active. */
-  slashActiveIds?: string[];
-  /** Single-line palette rows. */
-  slashCompact?: boolean;
   /** Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. */
   search?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. */
@@ -436,6 +451,10 @@ export interface KaiPromptInputElement extends HTMLElement {
   stoppable?: boolean;
   /** Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). */
   attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
+  /** Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins are the grouping/provenance of those items). Set as a JS property. */
+  triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
+  /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
+  kindIcons?: Record<string, string>;
 }
 
 export interface KaiReasoningElement extends HTMLElement {
@@ -680,9 +699,10 @@ export interface KaiWorkspaceElement extends HTMLElement {
   scrollButton?: boolean;
   search?: boolean;
   voice?: boolean;
-  slashCommands?: { id: string; label: string; description?: string; category?: string }[];
-  slashActiveIds?: string[];
-  slashCompact?: boolean;
+  /** Rich entity triggers (`/` skills, `@` agents/plugins) forwarded to the input. */
+  triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
+  /** Default icon per entity kind (kind → image src) forwarded to the input. */
+  kindIcons?: Record<string, string>;
   /** Sidebar default width as a percent of the workspace (default 22). */
   sidebarWidth?: number;
   /** Sidebar min width in px (default 200). */
@@ -707,6 +727,7 @@ declare global {
     'kai-choice': KaiChoiceElement;
     'kai-code-block': KaiCodeBlockElement;
     'kai-compare': KaiCompareElement;
+    'kai-composer': KaiComposerElement;
     'kai-confirm': KaiConfirmElement;
     'kai-context': KaiContextElement;
     'kai-conversations': KaiConversationsElement;

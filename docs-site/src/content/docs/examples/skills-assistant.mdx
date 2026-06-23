@@ -1,21 +1,21 @@
 ---
-title: Skills & slash commands
-description: An assistant whose capabilities are exposed as slash commands and skill badges — typing / opens a command palette that drives a tailored reply, powered by kai-chat and kai-skills.
+title: Skills & entity pills
+description: An assistant whose capabilities are exposed as / skill pills and skill badges — typing / opens a menu that inserts an atomic pill and drives a tailored reply, powered by kai-chat and kai-skills.
 ---
 
 import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
 
-<p class="kai-lede">An assistant that surfaces its capabilities as slash commands. Type <code>/</code> in the composer to open the palette, pick a command like <code>/summarize</code> or <code>/code-review</code>, and send it to get a reply tailored to that capability. The badges above the thread show the same skills as <code>&lt;kai-skills&gt;</code>.</p>
+<p class="kai-lede">An assistant that surfaces its capabilities as <code>/</code> skill pills. Type <code>/</code> in the composer to open the menu, pick a skill like <strong>Summarize</strong> or <strong>Code Review</strong>, and send it to get a reply tailored to that capability. The badges above the thread show the same skills as <code>&lt;kai-skills&gt;</code>.</p>
 
 <SkillsAssistantDemo
   client:only="solid"
   chatTitle="Workspace assistant"
-  placeholder="Type / for commands, or ask anything…"
+  placeholder="Type / for a skill, or ask anything…"
 />
 
 ## How it works
 
-`<kai-chat>` owns the thread and the composer. Pass a `slashCommands` array as a property — typing `/` opens the palette, and choosing a command sets the composer to its `label` (for example `/summarize `) ready to send. The chat fires `kai-slash-select` the moment a command is chosen, and `kai-submit` when the message is sent. `<kai-skills>` renders the same capabilities as badges from a separate `skills` property.
+`<kai-chat>` owns the thread and the composer. Pass a `triggers` array as a property — typing `/` opens a menu, and choosing a skill inserts an atomic **pill** into the composer. On `kai-submit` the pill is flattened into the message text (using its `promptText`), so you can route to the matching capability. `<kai-skills>` renders the same capabilities as badges from a separate `skills` property.
 
 ```html
 <kai-skills id="skills"></kai-skills>
@@ -29,12 +29,14 @@ import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
   const chat = document.getElementById('chat');
   const skills = document.getElementById('skills');
 
-  // Each command: { id, label, description?, category? }
-  chat.slashCommands = [
-    { id: 'summarize',   label: '/summarize',   description: 'Condense a thread into key points', category: 'Writing' },
-    { id: 'translate',   label: '/translate',   description: 'Translate text into another language', category: 'Writing' },
-    { id: 'code-review', label: '/code-review', description: 'Review a diff for bugs and style', category: 'Engineering' },
-    { id: 'search-docs', label: '/search-docs', description: 'Search the knowledge base', category: 'Engineering' },
+  // `/` skill triggers — each item becomes an atomic pill when chosen.
+  chat.triggers = [
+    { char: '/', kind: 'skill', items: [
+      { id: 'summarize',   label: 'Summarize',   description: 'Condense a thread into key points', promptText: 'Summarize this thread.' },
+      { id: 'translate',   label: 'Translate',   description: 'Translate text into another language', promptText: 'Translate this text.' },
+      { id: 'code-review', label: 'Code Review', description: 'Review a diff for bugs and style', promptText: 'Review this diff.' },
+      { id: 'search-docs', label: 'Search Docs', description: 'Search the knowledge base', promptText: 'Search the docs.' },
+    ] },
   ];
 
   // Skill badges: { id, name }
@@ -45,15 +47,9 @@ import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
     { id: 'search-docs', name: 'Search Docs' },
   ];
 
-  // Highlight the chosen command as active in the palette.
-  chat.addEventListener('kai-slash-select', (e) => {
-    chat.slashActiveIds = [e.detail.command.id];
-  });
-
-  // Route the submitted prompt by its leading /command token.
+  // The submitted value carries the pill's prompt text — route on it.
   chat.addEventListener('kai-submit', async (e) => {
     const prompt = e.detail.value;
-    const command = prompt.trim().match(/^\/(\S+)/)?.[1];
     const aId = crypto.randomUUID();
 
     chat.messages = [
@@ -64,7 +60,7 @@ import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
     chat.loading = true;
 
     // Dispatch to the matching capability on your backend.
-    const reply = await runCapability(command, prompt);
+    const reply = await runCapability(prompt);
     for await (const token of reply) {
       chat.messages = chat.messages.map((m) =>
         m.id === aId ? { ...m, content: m.content + token } : m,
@@ -75,20 +71,20 @@ import SkillsAssistantDemo from '../../../components/SkillsAssistantDemo.tsx';
 </script>
 ```
 
-**`slashCommands` shape** — each item in the array:
+**`triggers` shape** — each entry is `{ char, kind, items }`; each item:
 
 | field | type | notes |
 |---|---|---|
-| `id` | `string` | Stable identifier; carried on `kai-slash-select` |
-| `label` | `string` | Palette label and what fills the composer (for example `/summarize`) |
+| `id` | `string` | Stable identifier; carried on the emitted `entities` |
+| `label` | `string` | Shown in the menu and on the pill (the sigil is rendered for you) |
 | `description` | `string?` | Secondary text shown beside the label |
-| `category` | `string?` | Groups commands under a heading in the palette |
+| `promptText` | `string?` | What the pill flattens to in the submitted text (defaults to `label`) |
 
-`slashActiveIds` highlights commands as active in the palette, and `slashCompact` switches to a single-line layout. Set `slashCommands` on `<kai-prompt-input>` directly when you compose the composer yourself instead of using the full `<kai-chat>`.
+Use `kind: 'agent'` (or per-item `kind: 'plugin'`) and `char: '@'` for an agent/plugin menu. Set `triggers` on `<kai-prompt-input>` directly when you compose the input yourself instead of using the full `<kai-chat>` — there, `kai-submit` and `kai-value-change` also carry the structured `doc` + `entities`.
 
 ## Next steps
 
-- **[`kai-chat` reference](/components/chat/)** — the `slashCommands`, `slashActiveIds`, and `slashCompact` props plus the `kai-slash-select` and `kai-submit` events.
+- **[`kai-chat` reference](/components/chat/)** — the `triggers` and `kindIcons` props plus the `kai-submit` event.
+- **[`kai-composer` reference](/components/composer/)** — the full entity-pill model behind the input.
 - **[`kai-skills` reference](/components/skills/)** — the `skills` property and the declarative `<kai-skill>` children path.
 - **[Streaming recipe](/guides/recipes/streaming/)** — parsing SSE from your backend and driving the token loop.
-- **[Agentic assistant](/examples/agentic-assistant/)** — tools and multi-step reasoning rendered inline in the thread.

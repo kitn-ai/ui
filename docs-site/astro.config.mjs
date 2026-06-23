@@ -161,6 +161,7 @@ export default defineConfig({
                 label: 'Input',
                 items: [
                   { slug: 'components/prompt-input' },
+                  { slug: 'components/composer' },
                   { slug: 'components/attachments' },
                   { slug: 'components/file-upload' },
                   { slug: 'components/voice-input' },

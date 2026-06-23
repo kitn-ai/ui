@@ -34,10 +34,27 @@ export const conversations = [
   { id: 'c3', title: 'Publishing pipeline', scope: { type: 'document' }, messageCount: 8, lastMessageAt: '2026-06-09T09:00:00Z', updatedAt: '2026-06-09T09:00:00Z' },
 ];
 
-export const slashCommands = [
-  { id: 'summarize', label: '/summarize', description: 'Summarize the conversation', category: 'Actions' },
-  { id: 'translate', label: '/translate', description: 'Translate the last message', category: 'Actions' },
-  { id: 'image', label: '/image', description: 'Generate an image', category: 'Tools' },
+/** Entity-pill triggers: `/` inserts a skill, `@` inserts an agent/plugin. Set as
+ *  the `triggers` JS property on `<kai-prompt-input>` / `<kai-chat>` / `<kai-workspace>`. */
+export const entityTriggers = [
+  {
+    char: '/',
+    kind: 'skill',
+    items: [
+      { id: 'summarize', label: 'Summarize', description: 'Summarize the thread', promptText: 'Summarize the thread.' },
+      { id: 'translate', label: 'Translate', description: 'Translate to English' },
+      { id: 'rewrite', label: 'Rewrite', description: 'Rewrite for clarity' },
+    ],
+  },
+  {
+    char: '@',
+    kind: 'agent',
+    items: [
+      { id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents', description: 'Reviews diffs for bugs', promptText: 'Hand this to the Code Reviewer agent.' },
+      { id: 'researcher', label: 'Researcher', group: 'Agents', description: 'Deep multi-source research' },
+      { id: 'documents', label: 'Documents', kind: 'plugin', group: 'Plugins', description: 'Create and edit documents' },
+    ],
+  },
 ];
 
 export const sources = [

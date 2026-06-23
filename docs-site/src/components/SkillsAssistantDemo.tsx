@@ -1,17 +1,10 @@
-/** Skills & slash-commands demo — mounts <kai-chat> with a realistic
- *  `slashCommands` list and a <kai-skills> strip of the assistant's
- *  capabilities. Typing "/" in the composer opens the command palette;
- *  choosing one (kai-slash-select) drives a tailored scripted streamed reply.
- *  Commands and skills are set as JS PROPERTIES after kit load. */
+/** Skills & entity-pill triggers demo — mounts <kai-chat> with a realistic
+ *  `triggers` config (a `/` skill menu) and a <kai-skills> strip of the
+ *  assistant's capabilities. Typing "/" in the composer opens the menu; picking
+ *  a skill drops an atomic pill, and submitting drives a tailored scripted reply
+ *  (keyed off the pill's prompt text). Set as JS PROPERTIES after kit load. */
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { loadKit } from './example/kit';
-
-interface SlashCommandItem {
-  id: string;
-  label: string;
-  description?: string;
-  category?: string;
-}
 
 interface Skill {
   id: string;
@@ -31,12 +24,16 @@ interface Props {
   height?: string;
 }
 
-const COMMANDS: SlashCommandItem[] = [
-  { id: 'summarize', label: '/summarize', description: 'Condense a thread or document into key points', category: 'Writing' },
-  { id: 'translate', label: '/translate', description: 'Translate text into another language', category: 'Writing' },
-  { id: 'code-review', label: '/code-review', description: 'Review a diff for bugs and style', category: 'Engineering' },
-  { id: 'search-docs', label: '/search-docs', description: 'Search the knowledge base and cite sources', category: 'Engineering' },
+// `/` skill items. `promptText` is what the pill flattens to in the submitted
+// value — we key the scripted reply off it.
+const SKILL_ITEMS = [
+  { id: 'summarize', label: 'Summarize', description: 'Condense a thread or document into key points', promptText: 'Summarize this thread.' },
+  { id: 'translate', label: 'Translate', description: 'Translate text into another language', promptText: 'Translate this text.' },
+  { id: 'code-review', label: 'Code Review', description: 'Review a diff for bugs and style', promptText: 'Review this diff.' },
+  { id: 'search-docs', label: 'Search Docs', description: 'Search the knowledge base and cite sources', promptText: 'Search the docs.' },
 ];
+
+const TRIGGERS = [{ char: '/', kind: 'skill', items: SKILL_ITEMS }];
 
 const SKILLS: Skill[] = [
   { id: 'summarize', name: 'Summarize' },
@@ -45,8 +42,7 @@ const SKILLS: Skill[] = [
   { id: 'search-docs', name: 'Search Docs' },
 ];
 
-// Tailored replies keyed by the command id chosen from the palette. The
-// fallback covers free-form prompts that don't start with a known command.
+// Tailored replies keyed by the skill id. The fallback covers free-form prompts.
 const REPLIES: Record<string, string> = {
   summarize:
     'Here is the gist of the thread:\n\n' +
@@ -68,14 +64,14 @@ const REPLIES: Record<string, string> = {
     'Found three relevant pages in the docs:\n\n' +
     '1. **Streaming replies** — driving the token loop from an SSE response.\n' +
     '2. **Theming** — overriding brand tokens via `kai-chat` CSS variables.\n' +
-    '3. **Slash commands** — wiring `slashCommands` and the `kai-slash-select` event.\n\n' +
+    '3. **Entity pills** — wiring `triggers` so `/` and `@` insert atomic pills.\n\n' +
     'Want me to open any of these, or narrow the search?',
 };
 
 const FALLBACK_REPLY =
-  'I can help with that. I also expose a few capabilities as slash commands — ' +
-  'type `/` in the composer to pick one: **/summarize**, **/translate**, ' +
-  '**/code-review**, or **/search-docs**.';
+  'I can help with that. I also expose a few capabilities as skills — ' +
+  'type `/` in the composer to drop one in: **Summarize**, **Translate**, ' +
+  '**Code Review**, or **Search Docs**.';
 
 const SEED_MESSAGES: ChatMessage[] = [
   {
@@ -83,7 +79,8 @@ const SEED_MESSAGES: ChatMessage[] = [
     role: 'assistant',
     content:
       "I'm your workspace assistant. Type `/` to see what I can do — summarize a " +
-      'thread, translate text, review a diff, or search the docs.',
+      'thread, translate text, review a diff, or search the docs. Each pick drops ' +
+      'an atomic pill into the composer.',
     actions: ['copy'],
   },
 ];
@@ -91,11 +88,10 @@ const SEED_MESSAGES: ChatMessage[] = [
 let uid = 0;
 const nextId = () => `sa${++uid}`;
 
-/** Match the leading "/command" token in a submitted prompt to a command id. */
-function commandIdFor(text: string): string | undefined {
-  const token = text.trim().match(/^\/(\S+)/)?.[1]?.toLowerCase();
-  if (!token) return undefined;
-  return COMMANDS.find((c) => c.label.slice(1).toLowerCase() === token)?.id;
+/** Map a submitted prompt back to a skill id by matching its prompt text. */
+function skillIdFor(text: string): string | undefined {
+  const lower = text.toLowerCase();
+  return SKILL_ITEMS.find((s) => lower.includes(s.promptText.toLowerCase()) || lower.includes(s.label.toLowerCase()))?.id;
 }
 
 export default function SkillsAssistantDemo(props: Props) {
@@ -142,16 +138,8 @@ export default function SkillsAssistantDemo(props: Props) {
     ];
     (host as any).loading = true;
 
-    const id = commandIdFor(text);
+    const id = skillIdFor(text);
     streamReply(aId, (id && REPLIES[id]) || FALLBACK_REPLY);
-  };
-
-  // Surface which command the user picked from the palette (kai-slash-select).
-  // Highlight it as active in the palette via slashActiveIds.
-  const onSlashSelect = (e: Event) => {
-    const cmd = (e as CustomEvent).detail?.command as SlashCommandItem | undefined;
-    if (!cmd || !host) return;
-    (host as any).slashActiveIds = [cmd.id];
   };
 
   onMount(async () => {
@@ -160,12 +148,11 @@ export default function SkillsAssistantDemo(props: Props) {
     if (!host) return;
     customElements.upgrade(host);
     host.messages = SEED_MESSAGES;
-    (host as any).slashCommands = COMMANDS;
+    (host as any).triggers = TRIGGERS;
     if (props.chatTitle) (host as any).chatTitle = props.chatTitle;
     if (props.placeholder) (host as any).placeholder = props.placeholder;
     host.setAttribute('theme', theme());
     host.addEventListener('kai-submit', onSubmit);
-    host.addEventListener('kai-slash-select', onSlashSelect);
 
     if (skillsEl) {
       customElements.upgrade(skillsEl);
@@ -184,7 +171,6 @@ export default function SkillsAssistantDemo(props: Props) {
     onCleanup(() => {
       clearTimeout(timer);
       host?.removeEventListener('kai-submit', onSubmit);
-      host?.removeEventListener('kai-slash-select', onSlashSelect);
       obs.disconnect();
     });
   });

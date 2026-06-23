@@ -10,8 +10,7 @@
 //   suggestions     — starter prompts (shown when thread is empty)
 //   models          — model list for the header switcher
 //   context         — token-usage meter in the header
-//   slashCommands   — command-palette entries
-//   slashActiveIds  — currently-active command ids
+//   triggers        — entity-pill trigger definitions (/ skills, @ agents/plugins)
 
 // ── shared message fixture ────────────────────────────────────────────────────
 
@@ -72,26 +71,31 @@ const MODEL_MESSAGES = [
   },
 ];
 
-// ── slash commands ────────────────────────────────────────────────────────────
+// ── entity triggers (/ skills, @ agents/plugins) ──────────────────────────────
 
-const SLASH_COMMANDS = [
-  { id: 'summarise', label: 'Summarise', description: 'Summarise the current document', category: 'Document' },
-  { id: 'translate', label: 'Translate', description: 'Translate selected text to another language', category: 'Document' },
-  { id: 'fix', label: 'Fix', description: 'Fix errors in the selected code', category: 'Code' },
-  { id: 'explain', label: 'Explain', description: 'Explain what this code does', category: 'Code' },
-  { id: 'test', label: 'Write tests', description: 'Generate unit tests for this function', category: 'Code' },
+const TRIGGERS = [
+  { char: '/', kind: 'skill', items: [
+    { id: 'summarize', label: 'Summarize', description: 'Summarize the thread', promptText: 'Summarize the thread.' },
+    { id: 'translate', label: 'Translate', description: 'Translate to English' },
+    { id: 'rewrite', label: 'Rewrite', description: 'Rewrite for clarity' },
+  ] },
+  { char: '@', kind: 'agent', items: [
+    { id: 'code-reviewer', label: 'Code Reviewer', group: 'Agents', description: 'Reviews diffs for bugs' },
+    { id: 'researcher', label: 'Researcher', group: 'Agents', description: 'Deep multi-source research' },
+    { id: 'documents', label: 'Documents', kind: 'plugin', group: 'Plugins', description: 'Create and edit documents' },
+  ] },
 ];
 
-const SLASH_MESSAGES = [
+const TRIGGER_MESSAGES = [
   {
     id: '1',
     role: 'user',
-    content: '/explain',
+    content: 'Review the checkout path',
   },
   {
     id: '2',
     role: 'assistant',
-    content: 'Type `/` in the input below to open the command palette and select a slash command.',
+    content: 'Type `/` for a skill or `@` for an agent or plugin — each selection drops an atomic pill into the input below.',
     actions: ['copy'],
   },
 ];
@@ -125,9 +129,9 @@ export default {
       models: MODEL_LIST,
       currentModel: 'claude-3-5-sonnet',
     },
-    withSlash: {
-      messages: SLASH_MESSAGES,
-      slashCommands: SLASH_COMMANDS,
+    withTriggers: {
+      messages: TRIGGER_MESSAGES,
+      triggers: TRIGGERS,
     },
     withContext: {
       messages: MODEL_MESSAGES,
