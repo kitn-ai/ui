@@ -48,6 +48,25 @@ test.describe('kai-chat composition seams IVP', () => {
     await page.screenshot({ path: 'spike-screens/seams-empty.png' });
   });
 
+  test('reflects loading to a host attribute for slotted CSS', async ({ page }) => {
+    await page.goto(STORY('inject'));
+    await expect(page.locator('kai-chat')).toBeVisible();
+    await page.waitForTimeout(300);
+
+    const before = await page.evaluate(() => document.querySelector('kai-chat')!.hasAttribute('loading'));
+    expect(before).toBe(false);
+
+    await page.evaluate(() => { (document.querySelector('kai-chat') as HTMLElement & { loading: boolean }).loading = true; });
+    await page.waitForTimeout(100);
+    const on = await page.evaluate(() => document.querySelector('kai-chat')!.hasAttribute('loading'));
+    expect(on).toBe(true);
+
+    await page.evaluate(() => { (document.querySelector('kai-chat') as HTMLElement & { loading: boolean }).loading = false; });
+    await page.waitForTimeout(100);
+    const off = await page.evaluate(() => document.querySelector('kai-chat')!.hasAttribute('loading'));
+    expect(off).toBe(false);
+  });
+
   test('REPLACE(header+composer): custom form stands in and drives the thread', async ({ page }) => {
     await page.goto(STORY('replace-composer'));
     await expect(page.locator('kai-chat')).toBeVisible();

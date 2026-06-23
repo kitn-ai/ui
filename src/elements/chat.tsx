@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
 import { CHAT_SEAMS, readSeams } from './seams';
 import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage } from '../components/chat-thread';
@@ -50,6 +50,10 @@ defineWebComponent<Props, Events>('kai-chat', {
     observer.observe(element, { childList: true });
     onCleanup(() => observer.disconnect());
   });
+
+  // Reflect streaming state to a host attribute so slotted composer/notice CSS
+  // can react without reading internals (e.g. :host([loading]) ::slotted(...)).
+  createEffect(() => { element.toggleAttribute('loading', flag('loading')); });
 
   return (
   <ChatThread

@@ -77,6 +77,7 @@ function toAttr(name: string): string {
 /** Underlying flag resolution; see `WebComponentContext.flag`. */
 function resolveFlag(element: HTMLElement, value: unknown, attribute: string): boolean {
   if (value === true) return true;
+  if (value === false) return false;
   return element.hasAttribute(attribute) && element.getAttribute(attribute) !== 'false';
 }
 
