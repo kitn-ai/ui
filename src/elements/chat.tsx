@@ -1,5 +1,6 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
+import { CHAT_SEAMS, readSeams } from './seams';
 import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage } from '../components/chat-thread';
 import type { AttachmentData } from '../components/attachments';
 import type { TriggerDef } from '../components/composer';
@@ -38,22 +39,12 @@ defineWebComponent<Props, Events>('kai-chat', {
   search: false, voice: false, triggers: undefined, kindIcons: undefined,
   actionsReveal: 'always',
 }, (props, { dispatch, flag, element }) => {
-  // Detect consumer-projected seam content so each region opens only when the
-  // host actually slots something into it (an empty seam stays collapsed — no
-  // stray border or padding). Mirrors the <kai-model> light-DOM read pattern,
-  // generalized across every seam. SPIKE: drives the slotted-shell composition.
-  const SEAMS = [
-    'header-start', 'header-end', 'header',
-    'sidebar', 'empty', 'composer', 'composer-actions', 'footer',
-  ] as const;
+  // Seam detection is driven by the CHAT_SEAMS registry (single source of truth)
+  // so slot names never drift between the view, the facade, and the docs.
   const [seams, setSeams] = createSignal<Record<string, boolean>>({});
   const seam = (name: string) => seams()[name] === true;
   onMount(() => {
-    const read = () => {
-      const next: Record<string, boolean> = {};
-      for (const name of SEAMS) next[name] = !!element.querySelector(`:scope > [slot="${name}"]`);
-      setSeams(next);
-    };
+    const read = () => setSeams(readSeams(element, CHAT_SEAMS));
     read();
     const observer = new MutationObserver(read);
     observer.observe(element, { childList: true });
