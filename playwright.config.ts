@@ -23,6 +23,12 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: 'tests/e2e',
+  // This config exists ONLY for the cross-origin remote-card matrix (served by
+  // dev:host/dev:provider below). The composer / prompt-input IVPs and the
+  // *.shot specs need Storybook, so they run via their own configs
+  // (playwright.composer.config.ts, playwright.promptinput.config.ts,
+  // playwright.shot.config.ts) — keep them out of this one.
+  testMatch: /remote-element\.spec\.ts$/,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
