@@ -38,14 +38,21 @@ defineWebComponent<Props, Events>('kai-chat', {
   search: false, voice: false, triggers: undefined, kindIcons: undefined,
   actionsReveal: 'always',
 }, (props, { dispatch, flag, element }) => {
-  // Detect consumer-projected header controls so the header opens for them even
-  // without a title/models/context. Mirrors the <kai-model> light-DOM read pattern.
-  const [hasHeaderStart, setHasHeaderStart] = createSignal(false);
-  const [hasHeaderEnd, setHasHeaderEnd] = createSignal(false);
+  // Detect consumer-projected seam content so each region opens only when the
+  // host actually slots something into it (an empty seam stays collapsed — no
+  // stray border or padding). Mirrors the <kai-model> light-DOM read pattern,
+  // generalized across every seam. SPIKE: drives the slotted-shell composition.
+  const SEAMS = [
+    'header-start', 'header-end', 'header',
+    'sidebar', 'empty', 'composer', 'composer-actions', 'footer',
+  ] as const;
+  const [seams, setSeams] = createSignal<Record<string, boolean>>({});
+  const seam = (name: string) => seams()[name] === true;
   onMount(() => {
     const read = () => {
-      setHasHeaderStart(!!element.querySelector(':scope > [slot="header-start"]'));
-      setHasHeaderEnd(!!element.querySelector(':scope > [slot="header-end"]'));
+      const next: Record<string, boolean> = {};
+      for (const name of SEAMS) next[name] = !!element.querySelector(`:scope > [slot="${name}"]`);
+      setSeams(next);
     };
     read();
     const observer = new MutationObserver(read);
@@ -73,8 +80,14 @@ defineWebComponent<Props, Events>('kai-chat', {
     onMessageAction={(detail) => dispatch('kai-message-action', detail)}
     onSearch={() => dispatch('kai-search', {})}
     onVoice={() => dispatch('kai-voice', {})}
-    headerStart={hasHeaderStart()}
-    headerEnd={hasHeaderEnd()}
+    headerStart={seam('header-start')}
+    headerEnd={seam('header-end')}
+    headerFull={seam('header')}
+    sidebar={seam('sidebar')}
+    empty={seam('empty')}
+    composer={seam('composer')}
+    composerActions={seam('composer-actions')}
+    footer={seam('footer')}
   />
   );
 });
