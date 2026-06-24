@@ -36,7 +36,7 @@ export const CHAT_SLOTS: SlotDef[] = [
 /** Slots of `<kai-prompt-input>` (and the default composer inside `<kai-chat>`). Native
  *  shadow slots — an empty slot renders nothing, so no facade flag-gating is required. */
 export const PROMPT_INPUT_SLOTS: SlotDef[] = [
-  { name: 'notice',        mode: 'inject', part: true, doc: 'Banner at the top of the input card (e.g. "model unavailable"). You own the copy + dismiss.' },
+  { name: 'notice',        mode: 'inject', part: true, doc: 'Banner rendered ABOVE the input card (e.g. "model unavailable"). You own the copy + dismiss.' },
   { name: 'leading',       mode: 'inject', doc: 'Controls before the textarea.' },
   { name: 'toolbar-start', mode: 'inject', doc: 'Leading controls in the input toolbar — where a + menu goes.' },
   { name: 'trailing',      mode: 'inject', doc: 'Trailing controls in the toolbar, before the Send button (toolbar-end).' },

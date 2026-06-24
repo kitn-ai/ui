@@ -27,6 +27,10 @@ export interface DefaultPromptInputProps {
   /** Attachments staged in the input. Provide `onAttachmentsChange` to enable
    *  the attach button + removable previews. */
   attachments?: AttachmentData[];
+  /** When `false`, the built-in paperclip attach button is hidden even if
+   *  `onAttachmentsChange` is provided (e.g. when a `+` menu already covers
+   *  file-attach). Defaults to `true`. */
+  attach?: boolean;
   /** Show a Search (Globe) button in the left toolbar; calls `onSearch`. */
   search?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; calls `onVoice`. */
@@ -90,6 +94,9 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
 
   return (
     <>
+      {/* Consumer-injected banner rendered ABOVE the input card (and above
+          suggestions). Native slot; projected by the custom element. */}
+      <slot name="notice" style={{ display: 'contents' }} />
       <Show when={props.suggestions?.length}>
         <div class="mb-2 flex flex-wrap gap-2">
           <For each={props.suggestions}>
@@ -107,9 +114,6 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         disabled={props.disabled}
         class="relative"
       >
-        {/* Consumer-injected banner rendered at the very top of the input card.
-            Native slot; projected by the custom element. */}
-        <slot name="notice" />
         <Show when={canAttach() && attachments().length}>
           <div class="px-3 pt-3">
             <Attachments variant="inline">
@@ -135,7 +139,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 ensures an empty slot adds no stray gap; projected nodes lay out as toolbar
                 items. Native slot; projected by the custom element. */}
             <slot name="toolbar-start" style={{ display: 'contents' }} />
-            <Show when={canAttach()}>
+            <Show when={canAttach() && props.attach !== false}>
               <input
                 ref={fileInput}
                 type="file"

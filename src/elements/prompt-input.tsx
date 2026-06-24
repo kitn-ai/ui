@@ -36,6 +36,11 @@ interface Props extends Record<string, unknown> {
   /** When set and `loading` is true, the send button is replaced by a Stop
    *  button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
   stoppable?: boolean;
+  /** When `false`, hides the built-in paperclip attach button even though the
+   *  element otherwise supports attachments. Use this when a `+` menu in
+   *  `toolbar-start` already exposes "Add files", to avoid a duplicate control.
+   *  Defaults to `true`. */
+  attach?: boolean;
   /** Attachments to seed the input with (so a consumer can pre-populate staged
    *  files without an upload). Set as a JS property; the element then manages its
    *  own attachment state from there (add via the paperclip, remove per chip). */
@@ -81,6 +86,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
   search: false,
   voice: false,
   stoppable: false,
+  attach: true,
   attachments: undefined,
   triggers: undefined,
   kindIcons: undefined,
@@ -168,6 +174,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       disabled={flag('disabled')}
       loading={flag('loading')}
       stoppable={flag('stoppable')}
+      attach={flag('attach')}
       suggestions={props.suggestions}
       attachments={attachments()}
       search={flag('search')}

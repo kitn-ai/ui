@@ -5,6 +5,27 @@ import './register'; // side-effect: registers kai-prompt-input, kai-menu, kai-m
 import type { KaiMenuItem } from './menu';
 import type { ModelOption } from '../types';
 
+// Declare custom element tags used in this story for Solid JSX.
+declare module 'solid-js' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      'kai-prompt-input': JSX.HTMLAttributes<HTMLElement> & {
+        theme?: string;
+        placeholder?: string;
+        loading?: boolean;
+        disabled?: boolean;
+        voice?: boolean;
+        search?: boolean;
+        attach?: boolean;
+        'suggestion-mode'?: string;
+      };
+      'kai-menu': JSX.HTMLAttributes<HTMLElement> & { theme?: string };
+      'kai-model-switcher': JSX.HTMLAttributes<HTMLElement> & { theme?: string; 'current-model'?: string };
+    }
+  }
+}
+
 
 interface MenuEl extends HTMLElement {
   items?: KaiMenuItem[];
@@ -132,67 +153,68 @@ function ComposerDarkDemo() {
       'font-family': 'system-ui, -apple-system, sans-serif',
     }}>
       <div style={{ width: '100%', 'max-width': '720px', display: 'flex', 'flex-direction': 'column', gap: '20px' }}>
+        {/* Notice banner — sits ABOVE the composer card as a standalone strip */}
+        <div
+          ref={(e) => (noticeEl = e as HTMLDivElement)}
+          style={{
+            display: 'flex',
+            'align-items': 'center',
+            gap: '8px',
+            padding: '9px 14px',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            'border-radius': '10px',
+            'font-size': '12.5px',
+            color: 'rgba(255,255,255,0.78)',
+            'line-height': '1.4',
+            'margin-bottom': '8px',
+          }}
+        >
+          <span style={{ flex: '1' }}>
+            Claude Fable 5 is currently unavailable.{' '}
+            <a
+              href="#"
+              style={{
+                color: 'rgba(255,255,255,0.9)',
+                'text-decoration': 'underline',
+                'text-underline-offset': '2px',
+              }}
+              onClick={(e) => e.preventDefault()}
+            >
+              Learn more
+            </a>
+          </span>
+          <button
+            type="button"
+            aria-label="Dismiss notice"
+            onClick={dismissNotice}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '2px',
+              display: 'flex',
+              'align-items': 'center',
+              color: 'rgba(255,255,255,0.45)',
+              'border-radius': '4px',
+              transition: 'color 0.15s',
+              flex: 'none',
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.85)')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.45)')}
+          >
+            <X size={13} />
+          </button>
+        </div>
+
         {/* Composer card */}
         <kai-prompt-input
           ref={(e) => (inputEl = e as PromptInputEl)}
           theme="dark"
           placeholder="How can I help you today?"
+          attach={false}
           style={{ display: 'block', width: '100%' }}
         >
-          {/* Notice strip — subtle, dismissible */}
-          <div
-            slot="notice"
-            ref={(e) => (noticeEl = e as HTMLDivElement)}
-            style={{
-              display: 'flex',
-              'align-items': 'center',
-              gap: '8px',
-              padding: '8px 14px',
-              'border-bottom': '1px solid rgba(255,255,255,0.06)',
-              background: 'rgba(255,255,255,0.03)',
-              'border-radius': '12px 12px 0 0',
-              'font-size': '12.5px',
-              color: 'rgba(255,255,255,0.5)',
-              'line-height': '1.4',
-            }}
-          >
-            <span style={{ flex: '1' }}>
-              Claude Fable 5 is currently unavailable.{' '}
-              <a
-                href="#"
-                style={{
-                  color: 'rgba(255,255,255,0.65)',
-                  'text-decoration': 'underline',
-                  'text-underline-offset': '2px',
-                }}
-                onClick={(e) => e.preventDefault()}
-              >
-                Learn more
-              </a>
-            </span>
-            <button
-              type="button"
-              aria-label="Dismiss notice"
-              onClick={dismissNotice}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '2px',
-                display: 'flex',
-                'align-items': 'center',
-                color: 'rgba(255,255,255,0.35)',
-                'border-radius': '4px',
-                transition: 'color 0.15s',
-                flex: 'none',
-              }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.7)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.35)')}
-            >
-              <X size={13} />
-            </button>
-          </div>
-
           {/* toolbar-start: cascading + menu */}
           <kai-menu
             slot="toolbar-start"
