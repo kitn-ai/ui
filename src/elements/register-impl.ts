@@ -57,3 +57,5 @@ import './compare';
 import './composer';
 // W3 phase 2: cascading action menu from a JSON items-tree
 import './menu';
+// W4 phase 1: grouped filterable command/mention palette
+import './command';
