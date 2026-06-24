@@ -135,6 +135,26 @@ test.describe('kai-command web component IVP', () => {
     expect((selects[0] as { id: string }).id).toBe('screenrec');
   });
 
+  test('Enter after filter (no arrow nav) fires kai-select with the first FILTERED row', async ({ page }) => {
+    await page.goto(STORY);
+    const input = searchInput(page);
+    await expect(input).toBeVisible();
+    await captureSelect(page);
+
+    // Type "screenrec" — only the screenrec.py row survives the filter.
+    // This is NOT the first row in the unfiltered list, so the bug would leave
+    // activeId pointing at the old first row ('ss') which is no longer rendered.
+    await input.fill('screenrec');
+    // Wait for the list to settle to exactly 1 row.
+    await expect(commandEl(page).getByRole('option')).toHaveCount(1);
+
+    // Press Enter WITHOUT any ArrowDown/Up — must fire kai-select with 'screenrec'.
+    await page.keyboard.press('Enter');
+    const selects = await readSelects(page);
+    expect(selects).toHaveLength(1);
+    expect((selects[0] as { id: string }).id).toBe('screenrec');
+  });
+
   test('Escape clears the query', async ({ page }) => {
     await page.goto(STORY);
     const input = searchInput(page);

@@ -1,4 +1,4 @@
-import { createMemo, createSignal } from 'solid-js';
+import { createEffect, createMemo, createSignal } from 'solid-js';
 import { CommandList, type CommandGroup } from '../ui/command';
 import { defineWebComponent } from './define';
 
@@ -95,7 +95,7 @@ defineWebComponent<Props, Events>('kai-command', {
   const flatIds = createMemo<string[]>(() => filteredItems().map((item) => item.id));
 
   /** Clamp/reset activeId when the filtered list changes. */
-  createMemo(() => {
+  createEffect(() => {
     const ids = flatIds();
     const current = activeId();
     if (!current || !ids.includes(current)) {
