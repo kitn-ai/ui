@@ -4,6 +4,7 @@ import {
   DropdownSeparator, DropdownLabel, DropdownCheckboxItem,
   DropdownSub, DropdownSubTrigger, DropdownSubContent,
 } from '../ui/dropdown';
+import { renderIcon } from '../ui/icon';
 import { defineWebComponent } from './define';
 
 export interface KaiMenuItem {
@@ -40,14 +41,6 @@ interface Events {
    * - Checkbox items: `{ id, checked }` where `checked` is the NEW state.
    */
   'kai-select': { id: string; checked?: boolean };
-}
-
-/** Render an icon: URL/data-URI → <img>, otherwise a text/emoji <span>. */
-function renderIcon(icon: string) {
-  if (/^(https?:|\/|data:)/.test(icon)) {
-    return <img src={icon} class="mr-2 size-4 shrink-0" alt="" />;
-  }
-  return <span class="mr-2 flex h-4 w-4 shrink-0 items-center justify-center text-sm">{icon}</span>;
 }
 
 /**
@@ -89,7 +82,7 @@ defineWebComponent<Props, Events>('kai-menu', {
             return (
               <DropdownSub>
                 <DropdownSubTrigger>
-                  <Show when={item.icon}>{renderIcon(item.icon!)}</Show>
+                  <Show when={item.icon}>{renderIcon(item.icon, { imgClass: 'mr-2 size-4 shrink-0', spanClass: 'mr-2 flex h-4 w-4 shrink-0 items-center justify-center text-sm' })}</Show>
                   {item.label}
                 </DropdownSubTrigger>
                 <DropdownSubContent>
@@ -102,20 +95,22 @@ defineWebComponent<Props, Events>('kai-menu', {
             return (
               <DropdownCheckboxItem
                 checked={item.checked}
-                onSelect={() =>
-                  dispatch('kai-select', { id: item.id ?? '', checked: !item.checked })
-                }
+                disabled={item.disabled}
+                onSelect={() => {
+                  if (item.id) dispatch('kai-select', { id: item.id, checked: !item.checked });
+                }}
               >
-                <Show when={item.icon}>{renderIcon(item.icon!)}</Show>
+                <Show when={item.icon}>{renderIcon(item.icon, { imgClass: 'mr-2 size-4 shrink-0', spanClass: 'mr-2 flex h-4 w-4 shrink-0 items-center justify-center text-sm' })}</Show>
                 {item.label}
               </DropdownCheckboxItem>
             );
           }
           return (
             <DropdownItem
-              onSelect={() => dispatch('kai-select', { id: item.id ?? '' })}
+              disabled={item.disabled}
+              onSelect={() => { if (item.id) dispatch('kai-select', { id: item.id }); }}
             >
-              <Show when={item.icon}>{renderIcon(item.icon!)}</Show>
+              <Show when={item.icon}>{renderIcon(item.icon, { imgClass: 'mr-2 size-4 shrink-0', spanClass: 'mr-2 flex h-4 w-4 shrink-0 items-center justify-center text-sm' })}</Show>
               {item.label}
               <Show when={item.shortcut}>
                 <span class="ml-auto pl-4 text-xs tracking-widest text-muted-foreground">

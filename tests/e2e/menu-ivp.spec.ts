@@ -219,4 +219,25 @@ test.describe('kai-menu web component IVP', () => {
 
     await page.screenshot({ path: 'spike-screens/kai-menu.png' });
   });
+
+  test('disabled item has aria-disabled="true" and clicking it does NOT fire kai-select', async ({ page }) => {
+    await page.goto(KAI_MENU_STORY);
+
+    const triggerBtn = page.locator('kai-menu').getByRole('button');
+    await expect(triggerBtn).toBeVisible();
+    await captureSelect(page);
+
+    await triggerBtn.click();
+    await expect(page.locator('[role="menu"]').first()).toBeVisible();
+
+    // The "Coming soon" item is disabled.
+    const disabledItem = page.getByRole('menuitem', { name: /Coming soon/ });
+    await expect(disabledItem).toBeVisible();
+    await expect(disabledItem).toHaveAttribute('aria-disabled', 'true');
+
+    // Clicking the disabled item must NOT emit a kai-select event.
+    await disabledItem.click({ force: true });
+    const selects = await readSelects(page);
+    expect(selects).toHaveLength(0);
+  });
 });

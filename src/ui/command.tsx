@@ -1,5 +1,6 @@
 import { For, Show, type JSX } from 'solid-js';
 import { cn } from '../utils/cn';
+import { renderIcon } from './icon';
 
 export interface CommandRow {
   id: string;
@@ -18,18 +19,10 @@ export interface CommandListProps {
   activeId?: string;
   onSelect: (id: string) => void;
   emptyLabel?: string;
-}
-
-/** Render an icon: http/data-URI → <img>, otherwise an emoji/text <span>. */
-function renderIcon(icon: string): JSX.Element {
-  if (/^(https?:|\/|data:)/.test(icon)) {
-    return <img src={icon} alt="" class="size-4 shrink-0 rounded object-cover" />;
-  }
-  return (
-    <span class="flex size-4 shrink-0 items-center justify-center text-sm" aria-hidden="true">
-      {icon}
-    </span>
-  );
+  /** Accessible label for the listbox container. Defaults to 'Command palette'. */
+  ariaLabel?: string;
+  /** id applied to the listbox container, for aria-controls wiring. */
+  id?: string;
 }
 
 /**
@@ -44,7 +37,7 @@ export function CommandList(props: CommandListProps): JSX.Element {
   const hasItems = () => props.groups.some((g) => g.items.length > 0);
 
   return (
-    <div role="listbox" aria-label="Command palette">
+    <div role="listbox" aria-label={props.ariaLabel ?? 'Command palette'} id={props.id}>
       <Show
         when={hasItems()}
         fallback={
@@ -77,7 +70,7 @@ export function CommandList(props: CommandListProps): JSX.Element {
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => props.onSelect(row.id)}
                     >
-                      <Show when={row.icon}>{(icon) => renderIcon(icon())}</Show>
+                      <Show when={row.icon}>{(icon) => renderIcon(icon(), { imgClass: 'size-4 shrink-0 rounded object-cover', spanClass: 'flex size-4 shrink-0 items-center justify-center text-sm', ariaHidden: true })}</Show>
                       <span class="font-medium whitespace-nowrap shrink-0">{row.label}</span>
                       <Show when={row.description}>
                         <span class="min-w-0 truncate text-muted-foreground">{row.description}</span>

@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal } from 'solid-js';
+import { createEffect, createMemo, createSignal, createUniqueId } from 'solid-js';
 import { CommandList, type CommandGroup } from '../ui/command';
 import { defineWebComponent } from './define';
 
@@ -60,6 +60,7 @@ defineWebComponent<Props, Events>('kai-command', {
   placeholder: undefined,
   emptyLabel: undefined,
 }, (props, { dispatch }) => {
+  const listboxId = createUniqueId();
   const [query, setQuery] = createSignal('');
   const [activeId, setActiveId] = createSignal<string | undefined>(undefined);
 
@@ -146,6 +147,7 @@ defineWebComponent<Props, Events>('kai-command', {
           aria-expanded="true"
           aria-haspopup="listbox"
           aria-autocomplete="list"
+          aria-controls={listboxId}
           value={query()}
           placeholder={(props.placeholder as string | undefined) ?? 'Search…'}
           class="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none"
@@ -155,6 +157,8 @@ defineWebComponent<Props, Events>('kai-command', {
       </div>
       <div class="overflow-y-auto max-h-[320px]">
         <CommandList
+          id={listboxId}
+          ariaLabel="Results"
           groups={groupedItems()}
           activeId={activeId()}
           onSelect={select}

@@ -198,19 +198,25 @@ export function DropdownContent(props: { children: JSX.Element; class?: string }
   );
 }
 
-export function DropdownItem(props: { children: JSX.Element; class?: string; onSelect?: () => void }) {
+export function DropdownItem(props: { children: JSX.Element; class?: string; onSelect?: () => void; disabled?: boolean }) {
   const ctx = useDropdown();
-  const activate = () => { props.onSelect?.(); ctx.setOpen(false); };
+  const activate = () => {
+    if (props.disabled) return;
+    props.onSelect?.();
+    ctx.setOpen(false);
+  };
   return (
     <div
       role="menuitem"
       tabindex={-1}
+      aria-disabled={props.disabled ? 'true' : undefined}
       onClick={activate}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } }}
-      onPointerMove={(e) => (e.currentTarget as HTMLElement).focus()}
+      onPointerMove={(e) => { if (!props.disabled) (e.currentTarget as HTMLElement).focus(); }}
       class={cn(
         'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors',
         'hover:bg-muted focus:bg-muted',
+        props.disabled && 'opacity-50 pointer-events-none',
         props.class,
       )}
     >
@@ -247,19 +253,24 @@ export function DropdownLabel(props: { children: JSX.Element; class?: string }) 
  * but KEEPS THE MENU OPEN (the consumer flips `checked`); the leading Check
  * glyph's space is always reserved so labels stay aligned whether on or off.
  */
-export function DropdownCheckboxItem(props: { children: JSX.Element; class?: string; checked?: boolean; onSelect?: () => void }) {
-  const activate = () => { props.onSelect?.(); /* stay open — consumer owns `checked` */ };
+export function DropdownCheckboxItem(props: { children: JSX.Element; class?: string; checked?: boolean; onSelect?: () => void; disabled?: boolean }) {
+  const activate = () => {
+    if (props.disabled) return;
+    props.onSelect?.(); /* stay open — consumer owns `checked` */
+  };
   return (
     <div
       role="menuitemcheckbox"
       aria-checked={props.checked ? 'true' : 'false'}
       tabindex={-1}
+      aria-disabled={props.disabled ? 'true' : undefined}
       onClick={activate}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } }}
-      onPointerMove={(e) => (e.currentTarget as HTMLElement).focus()}
+      onPointerMove={(e) => { if (!props.disabled) (e.currentTarget as HTMLElement).focus(); }}
       class={cn(
         'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors',
         'hover:bg-muted focus:bg-muted',
+        props.disabled && 'opacity-50 pointer-events-none',
         props.class,
       )}
     >

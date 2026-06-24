@@ -58,6 +58,7 @@ function PlusMenuDemo() {
     },
     { separator: true },
     { id: 'web-search', label: 'Web search', icon: '🌐', checked: true },
+    { id: 'coming-soon', label: 'Coming soon', icon: '🚧', disabled: true },
   ];
 
   onMount(() => {
