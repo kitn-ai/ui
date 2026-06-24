@@ -328,7 +328,7 @@ export function DropdownSub(props: { children: JSX.Element }) {
   };
   const scheduleClose = () => {
     cancelClose();
-    closeTimer = setTimeout(() => setOpenSig(false), 120);
+    closeTimer = setTimeout(() => setOpen(false), 120);
   };
   onCleanup(cancelClose);
   return (
@@ -398,13 +398,11 @@ export function DropdownSubContent(props: { children: JSX.Element; class?: strin
   const config = useChatConfig();
   const presence = createPresence(sub.open);
   const position = usePosition(sub.trigger, sub.menu, { placement: 'right-start', gutter: 2 });
-  // Escape inside the sub closes only the sub (and returns focus); outside-pointer
-  // is handled by the PARENT's useDismiss (which closes the whole tree).
-  useDismiss({
-    enabled: sub.open,
-    onDismiss: (reason) => { if (reason === 'escape') sub.setOpen(false, { returnFocus: true }); },
-    refs: () => [sub.trigger(), sub.menu()],
-  });
+  // Escape/ArrowLeft are handled by onKeyDown below (stopPropagation keeps them
+  // local to the sub). Outside-pointer dismiss is handled by the PARENT's
+  // useDismiss (whose refs include the registered submenu surface). A separate
+  // useDismiss here would double-fire Escape because document listeners run
+  // after stopPropagation on the element, not on the document.
 
   const items = () => Array.from(sub.menu()?.querySelectorAll<HTMLElement>(ITEM_SELECTOR) ?? []);
   const focusIndex = (i: number) => {
