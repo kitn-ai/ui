@@ -1,6 +1,11 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from './dropdown';
+import { Paperclip, Github, Sparkles, Globe, Settings, Plus, FileText } from 'lucide-solid';
+import {
+  Dropdown, DropdownTrigger, DropdownContent, DropdownItem,
+  DropdownSeparator, DropdownLabel, DropdownCheckboxItem,
+  DropdownSub, DropdownSubTrigger, DropdownSubContent,
+} from './dropdown';
 import { buttonVariants } from './button';
 import { componentDescription } from '../stories/docs/element-controls';
 
@@ -56,4 +61,109 @@ export const Playground: Story = {
     <DropdownItem onSelect={() => archive()}>Archive</DropdownItem>
   </DropdownContent>
 </Dropdown>`),
+};
+
+const CASCADE_IMPORT = `import {
+  Dropdown, DropdownTrigger, DropdownContent, DropdownItem,
+  DropdownLabel, DropdownSeparator, DropdownCheckboxItem,
+  DropdownSub, DropdownSubTrigger, DropdownSubContent,
+} from '@kitn.ai/ui';`;
+
+function CascadingMenuDemo() {
+  const [webSearch, setWebSearch] = createSignal(true);
+  const [last, setLast] = createSignal<string>();
+  return (
+    <div class="space-y-3">
+      <Dropdown>
+        <DropdownTrigger
+          class={buttonVariants({ variant: 'outline', size: 'icon' })}
+          aria-label="Add"
+        >
+          <Plus class="h-4 w-4" />
+        </DropdownTrigger>
+        <DropdownContent class="min-w-[15rem]">
+          <DropdownLabel>Actions</DropdownLabel>
+          <DropdownItem onSelect={() => setLast('Add files or photos')}>
+            <Paperclip class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+            Add files or photos
+            <span class="ml-auto pl-4 text-xs tracking-widest text-muted-foreground">⌘U</span>
+          </DropdownItem>
+          <DropdownItem onSelect={() => setLast('Add from GitHub')}>
+            <Github class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+            Add from GitHub
+          </DropdownItem>
+          <DropdownSub>
+            <DropdownSubTrigger>
+              <Sparkles class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+              Skills
+            </DropdownSubTrigger>
+            <DropdownSubContent class="min-w-[12rem]">
+              <DropdownItem onSelect={() => setLast('skill-creator')}>
+                <Sparkles class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                skill-creator
+              </DropdownItem>
+              <DropdownItem onSelect={() => setLast('Manage skills')}>
+                <Settings class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                Manage skills
+              </DropdownItem>
+              <DropdownItem onSelect={() => setLast('Add skill')}>
+                <FileText class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                Add skill
+              </DropdownItem>
+            </DropdownSubContent>
+          </DropdownSub>
+          <DropdownSeparator />
+          <DropdownCheckboxItem checked={webSearch()} onSelect={() => setWebSearch((v) => !v)}>
+            <Globe class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+            Web search
+          </DropdownCheckboxItem>
+        </DropdownContent>
+      </Dropdown>
+      <p class="text-xs text-muted-foreground">
+        Last action: {last() ?? '—'} · Web search: {webSearch() ? 'on' : 'off'}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The composer's `＋` action menu: a section `DropdownLabel`, items with leading
+ * icons + a trailing keyboard-shortcut span, a `DropdownSub` ("Skills") that
+ * opens a nested menu on hover / ArrowRight, a `DropdownSeparator`, and a
+ * `DropdownCheckboxItem` ("Web search") that toggles in place without closing.
+ */
+export const CascadingMenu: Story = {
+  render: () => <CascadingMenuDemo />,
+  parameters: {
+    docs: {
+      source: {
+        language: 'tsx',
+        code: `${CASCADE_IMPORT}
+
+<Dropdown>
+  <DropdownTrigger aria-label="Add"><Plus /></DropdownTrigger>
+  <DropdownContent>
+    <DropdownLabel>Actions</DropdownLabel>
+    <DropdownItem onSelect={addFiles}>
+      <Paperclip /> Add files or photos
+      <span class="ml-auto text-xs text-muted-foreground">⌘U</span>
+    </DropdownItem>
+    <DropdownItem onSelect={addFromGitHub}><Github /> Add from GitHub</DropdownItem>
+    <DropdownSub>
+      <DropdownSubTrigger><Sparkles /> Skills</DropdownSubTrigger>
+      <DropdownSubContent>
+        <DropdownItem onSelect={() => run('skill-creator')}>skill-creator</DropdownItem>
+        <DropdownItem onSelect={manageSkills}>Manage skills</DropdownItem>
+        <DropdownItem onSelect={addSkill}>Add skill</DropdownItem>
+      </DropdownSubContent>
+    </DropdownSub>
+    <DropdownSeparator />
+    <DropdownCheckboxItem checked={webSearch()} onSelect={() => setWebSearch((v) => !v)}>
+      <Globe /> Web search
+    </DropdownCheckboxItem>
+  </DropdownContent>
+</Dropdown>`,
+      },
+    },
+  },
 };

@@ -1,8 +1,9 @@
 import {
-  createContext, useContext, createSignal, createUniqueId, Show,
+  createContext, useContext, createSignal, createUniqueId, Show, onCleanup, splitProps,
   type JSX, type Accessor,
 } from 'solid-js';
 import { Portal } from 'solid-js/web';
+import { ChevronRight, Check } from 'lucide-solid';
 import { cn } from '../utils/cn';
 import { useChatConfig } from '../primitives/chat-config';
 import { createPresence, usePosition, useDismiss, As, type AsTag } from './overlay';
@@ -17,6 +18,11 @@ interface DropdownCtx {
   trigger: Accessor<HTMLElement | undefined>;
   menu: Accessor<HTMLElement | undefined>;
   openedViaKeyboard: Accessor<boolean>;
+  /** Register a portaled submenu surface so outside-click dismissal treats it as
+   *  "inside" the menu tree (sub content lives in a sibling portal, not the menu DOM). */
+  registerSubMenu: (el: HTMLElement) => () => void;
+  /** Currently-mounted submenu surfaces, for the dismiss "inside" test. */
+  subMenus: Accessor<HTMLElement[]>;
 }
 const Ctx = createContext<DropdownCtx>();
 const useDropdown = () => {
@@ -25,11 +31,22 @@ const useDropdown = () => {
   return c;
 };
 
+// The roving-focus set: real menuitems AND checkbox items, minus disabled. A
+// DropdownSubTrigger is a menuitem too, so it participates. Labels/separators
+// are intentionally excluded. Submenu content is portaled to a SIBLING node, so
+// a parent's querySelectorAll scoped to its own menu never reaches sub items.
+const ITEM_SELECTOR = '[role="menuitem"]:not([aria-disabled="true"]), [role="menuitemcheckbox"]:not([aria-disabled="true"])';
+
 export function Dropdown(props: { children: JSX.Element }) {
   const [open, setOpenSig] = createSignal(false);
   const [viaKb, setViaKb] = createSignal(false);
   const [trigger, setTrigger] = createSignal<HTMLElement>();
   const [menu, setMenu] = createSignal<HTMLElement>();
+  const [subMenus, setSubMenus] = createSignal<HTMLElement[]>([]);
+  const registerSubMenu = (el: HTMLElement) => {
+    setSubMenus((prev) => [...prev, el]);
+    return () => setSubMenus((prev) => prev.filter((m) => m !== el));
+  };
   const setOpen = (v: boolean, opts?: { viaKeyboard?: boolean; returnFocus?: boolean }) => {
     setViaKb(!!opts?.viaKeyboard);
     setOpenSig(v);
@@ -38,9 +55,8 @@ export function Dropdown(props: { children: JSX.Element }) {
       // attempt focus now and re-assert in the menu ref's microtask so it lands
       // once the node exists. Skip disabled items (roving-focus contract).
       if (opts?.viaKeyboard) {
-        const sel = '[role="menuitem"]:not([aria-disabled="true"])';
-        queueMicrotask(() => menu()?.querySelector<HTMLElement>(sel)?.focus());
-        menu()?.querySelector<HTMLElement>(sel)?.focus();
+        queueMicrotask(() => menu()?.querySelector<HTMLElement>(ITEM_SELECTOR)?.focus());
+        menu()?.querySelector<HTMLElement>(ITEM_SELECTOR)?.focus();
       }
     } else if (opts?.returnFocus !== false) {
       // Closing via keyboard/select: return focus to the trigger. The menu
@@ -55,6 +71,7 @@ export function Dropdown(props: { children: JSX.Element }) {
     <Ctx.Provider value={{
       open, setOpen, triggerId: createUniqueId(), menuId: createUniqueId(),
       setTrigger, setMenu, trigger, menu, openedViaKeyboard: viaKb,
+      registerSubMenu, subMenus,
     }}>
       {props.children}
     </Ctx.Provider>
@@ -63,6 +80,10 @@ export function Dropdown(props: { children: JSX.Element }) {
 
 export function DropdownTrigger(props: { as?: AsTag; children?: JSX.Element; class?: string; [k: string]: any }) {
   const ctx = useDropdown();
+  // Forward extra attributes (e.g. aria-label for an icon-only trigger). The
+  // controlled wiring below (id/aria-*/onClick/onKeyDown/class/type) is applied
+  // AFTER the spread so it always wins over a caller-supplied duplicate.
+  const [, rest] = splitProps(props, ['as', 'children', 'class']);
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -72,6 +93,7 @@ export function DropdownTrigger(props: { as?: AsTag; children?: JSX.Element; cla
   return (
     <As
       as={props.as ?? 'button'}
+      {...rest}
       ref={ctx.setTrigger}
       id={ctx.triggerId}
       aria-haspopup="menu"
@@ -95,10 +117,12 @@ export function DropdownContent(props: { children: JSX.Element; class?: string }
   useDismiss({
     enabled: ctx.open,
     onDismiss: (reason) => ctx.setOpen(false, { returnFocus: reason === 'escape' }),
-    refs: () => [ctx.trigger(), ctx.menu()],
+    // Open submenus portal to a sibling node, so include them as "inside" — a
+    // click on a sub item must not be treated as an outside dismiss.
+    refs: () => [ctx.trigger(), ctx.menu(), ...ctx.subMenus()],
   });
 
-  const items = () => Array.from(ctx.menu()?.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])') ?? []);
+  const items = () => Array.from(ctx.menu()?.querySelectorAll<HTMLElement>(ITEM_SELECTOR) ?? []);
   const focusIndex = (i: number) => {
     const list = items();
     if (!list.length) return;
@@ -145,7 +169,7 @@ export function DropdownContent(props: { children: JSX.Element; class?: string }
             // synchronously; this ref-time microtask re-asserts focus once the
             // menu node exists. Skip disabled items.
             if (ctx.openedViaKeyboard()) {
-              queueMicrotask(() => el.querySelector<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')?.focus());
+              queueMicrotask(() => el.querySelector<HTMLElement>(ITEM_SELECTOR)?.focus());
             }
           }}
           id={ctx.menuId}
@@ -192,5 +216,267 @@ export function DropdownItem(props: { children: JSX.Element; class?: string; onS
     >
       {props.children}
     </div>
+  );
+}
+
+/**
+ * A thin, non-interactive divider between groups of items.
+ * a11y: `role="separator"` — exposed to AT as a group boundary; not in the
+ * roving-focus tab order (the `[role="menuitem"]` query skips it).
+ */
+export function DropdownSeparator(props: { class?: string }) {
+  return <div role="separator" class={cn('-mx-1 my-1 h-px bg-border', props.class)} />;
+}
+
+/**
+ * A non-interactive section header.
+ * a11y: a plain muted label — NOT a menuitem and NOT focusable, so roving focus
+ * skips it; it labels the items that follow visually only (`select-none`).
+ */
+export function DropdownLabel(props: { children: JSX.Element; class?: string }) {
+  return (
+    <div class={cn('select-none px-2 py-1.5 text-xs font-medium text-muted-foreground', props.class)}>
+      {props.children}
+    </div>
+  );
+}
+
+/**
+ * A togglable menu item.
+ * a11y: `role="menuitemcheckbox"` + `aria-checked`. Activating fires `onSelect`
+ * but KEEPS THE MENU OPEN (the consumer flips `checked`); the leading Check
+ * glyph's space is always reserved so labels stay aligned whether on or off.
+ */
+export function DropdownCheckboxItem(props: { children: JSX.Element; class?: string; checked?: boolean; onSelect?: () => void }) {
+  const activate = () => { props.onSelect?.(); /* stay open — consumer owns `checked` */ };
+  return (
+    <div
+      role="menuitemcheckbox"
+      aria-checked={props.checked ? 'true' : 'false'}
+      tabindex={-1}
+      onClick={activate}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } }}
+      onPointerMove={(e) => (e.currentTarget as HTMLElement).focus()}
+      class={cn(
+        'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors',
+        'hover:bg-muted focus:bg-muted',
+        props.class,
+      )}
+    >
+      <span class="mr-2 flex h-4 w-4 shrink-0 items-center justify-center">
+        <Show when={props.checked}><Check class="h-4 w-4" aria-hidden="true" /></Show>
+      </span>
+      {props.children}
+    </div>
+  );
+}
+
+// ── Submenus ────────────────────────────────────────────────────────────────
+
+interface DropdownSubCtx {
+  open: Accessor<boolean>;
+  setOpen: (v: boolean, opts?: { viaKeyboard?: boolean; returnFocus?: boolean }) => void;
+  triggerId: string;
+  menuId: string;
+  setTrigger: (el: HTMLElement) => void;
+  setMenu: (el: HTMLElement) => void;
+  trigger: Accessor<HTMLElement | undefined>;
+  menu: Accessor<HTMLElement | undefined>;
+  openedViaKeyboard: Accessor<boolean>;
+  /** clear any pending close timer (used when the pointer re-enters trigger or content) */
+  cancelClose: () => void;
+  /** schedule a deferred close, tolerating a pointer crossing the gap to the submenu */
+  scheduleClose: () => void;
+}
+const SubCtx = createContext<DropdownSubCtx>();
+const useDropdownSub = () => {
+  const c = useContext(SubCtx);
+  if (!c) throw new Error('DropdownSub parts must be used within <DropdownSub>');
+  return c;
+};
+
+/**
+ * A nested menu group. Mirrors the `Dropdown` context shape with its own open
+ * signal + trigger/content refs, plus a small close-delay so a pointer can cross
+ * the gap from the trigger to the submenu without it snapping shut.
+ *
+ * The submenu is tied to its PARENT open state: when the parent menu closes
+ * (Escape/outside-click/select), `useDismiss` on the parent unmounts the whole
+ * content tree, which tears this provider down and drops the sub with it.
+ */
+export function DropdownSub(props: { children: JSX.Element }) {
+  const [open, setOpenSig] = createSignal(false);
+  const [viaKb, setViaKb] = createSignal(false);
+  const [trigger, setTrigger] = createSignal<HTMLElement>();
+  const [menu, setMenu] = createSignal<HTMLElement>();
+  let closeTimer: ReturnType<typeof setTimeout> | undefined;
+  const cancelClose = () => { if (closeTimer) { clearTimeout(closeTimer); closeTimer = undefined; } };
+  const setOpen = (v: boolean, opts?: { viaKeyboard?: boolean; returnFocus?: boolean }) => {
+    cancelClose();
+    setViaKb(!!opts?.viaKeyboard);
+    setOpenSig(v);
+    if (v) {
+      if (opts?.viaKeyboard) {
+        queueMicrotask(() => menu()?.querySelector<HTMLElement>(ITEM_SELECTOR)?.focus());
+        menu()?.querySelector<HTMLElement>(ITEM_SELECTOR)?.focus();
+      }
+    } else if (opts?.returnFocus !== false) {
+      const el = trigger();
+      el?.focus();
+      queueMicrotask(() => el?.focus());
+    }
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer = setTimeout(() => setOpenSig(false), 120);
+  };
+  onCleanup(cancelClose);
+  return (
+    <SubCtx.Provider value={{
+      open, setOpen, triggerId: createUniqueId(), menuId: createUniqueId(),
+      setTrigger, setMenu, trigger, menu, openedViaKeyboard: viaKb,
+      cancelClose, scheduleClose,
+    }}>
+      {props.children}
+    </SubCtx.Provider>
+  );
+}
+
+/**
+ * The item that opens a submenu.
+ * a11y: `role="menuitem"` + `aria-haspopup="menu"` + `aria-expanded`, trailing
+ * ChevronRight. Opens on pointerenter, click, ArrowRight, and Enter/Space;
+ * keyboard-open also moves focus into the sub's first item. ArrowRight/Enter are
+ * swallowed so the parent menu doesn't also act on them.
+ */
+export function DropdownSubTrigger(props: { children: JSX.Element; class?: string }) {
+  const sub = useDropdownSub();
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      sub.setOpen(true, { viaKeyboard: true });
+    }
+  };
+  return (
+    <div
+      ref={sub.setTrigger}
+      id={sub.triggerId}
+      role="menuitem"
+      tabindex={-1}
+      aria-haspopup="menu"
+      aria-expanded={sub.open()}
+      aria-controls={sub.open() ? sub.menuId : undefined}
+      onClick={() => sub.setOpen(!sub.open())}
+      onKeyDown={onKeyDown}
+      onPointerEnter={() => { sub.cancelClose(); sub.setOpen(true); }}
+      onPointerLeave={() => sub.scheduleClose()}
+      onPointerMove={(e) => (e.currentTarget as HTMLElement).focus()}
+      class={cn(
+        'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors',
+        'hover:bg-muted focus:bg-muted data-[expanded]:bg-muted',
+        props.class,
+      )}
+      data-expanded={sub.open() ? '' : undefined}
+    >
+      {props.children}
+      <ChevronRight class="ml-auto h-4 w-4 shrink-0 pl-2 text-muted-foreground" aria-hidden="true" />
+    </div>
+  );
+}
+
+/**
+ * The submenu surface — same portal/positioning/roving-focus core as
+ * DropdownContent, anchored `right-start` off its trigger.
+ * a11y: ArrowLeft and Escape close the sub and RETURN FOCUS to the trigger;
+ * ArrowUp/Down/Home/End rove within; typeahead included (matches DropdownContent).
+ * Keyboard-open focuses the first item.
+ */
+export function DropdownSubContent(props: { children: JSX.Element; class?: string }) {
+  const sub = useDropdownSub();
+  const parent = useDropdown();
+  const config = useChatConfig();
+  const presence = createPresence(sub.open);
+  const position = usePosition(sub.trigger, sub.menu, { placement: 'right-start', gutter: 2 });
+  // Escape inside the sub closes only the sub (and returns focus); outside-pointer
+  // is handled by the PARENT's useDismiss (which closes the whole tree).
+  useDismiss({
+    enabled: sub.open,
+    onDismiss: (reason) => { if (reason === 'escape') sub.setOpen(false, { returnFocus: true }); },
+    refs: () => [sub.trigger(), sub.menu()],
+  });
+
+  const items = () => Array.from(sub.menu()?.querySelectorAll<HTMLElement>(ITEM_SELECTOR) ?? []);
+  const focusIndex = (i: number) => {
+    const list = items();
+    if (!list.length) return;
+    const idx = ((i % list.length) + list.length) % list.length;
+    list[idx].focus();
+  };
+  const activeItem = () => {
+    const root = sub.menu()?.getRootNode() as Document | ShadowRoot | undefined;
+    return (root?.activeElement ?? document.activeElement) as Element | null;
+  };
+  const currentIndex = () => items().findIndex((el) => el === activeItem());
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    const list = items();
+    switch (e.key) {
+      case 'ArrowDown': e.preventDefault(); focusIndex(currentIndex() + 1); break;
+      case 'ArrowUp': e.preventDefault(); focusIndex(currentIndex() - 1); break;
+      case 'Home': e.preventDefault(); focusIndex(0); break;
+      case 'End': e.preventDefault(); focusIndex(list.length - 1); break;
+      case 'ArrowLeft': e.preventDefault(); e.stopPropagation(); sub.setOpen(false, { returnFocus: true }); break;
+      case 'Escape': e.preventDefault(); e.stopPropagation(); sub.setOpen(false, { returnFocus: true }); break;
+      default:
+        if (e.key.length === 1 && /\S/.test(e.key)) {
+          const start = currentIndex() + 1;
+          const lower = e.key.toLowerCase();
+          const match = list.findIndex((el, i) => i >= start && (el.textContent ?? '').trim().toLowerCase().startsWith(lower));
+          const found = match >= 0 ? match : list.findIndex((el) => (el.textContent ?? '').trim().toLowerCase().startsWith(lower));
+          if (found >= 0) { e.preventDefault(); focusIndex(found); }
+        }
+    }
+  };
+
+  return (
+    <Show when={presence.present()}>
+      <Portal mount={config.portalMount()}>
+        <div
+          ref={(el) => {
+            sub.setMenu(el); presence.setRef(el);
+            // Tell the parent menu this surface is part of its tree (outside-click).
+            const unregister = parent.registerSubMenu(el);
+            onCleanup(unregister);
+            if (sub.openedViaKeyboard()) {
+              queueMicrotask(() => el.querySelector<HTMLElement>(ITEM_SELECTOR)?.focus());
+            }
+          }}
+          id={sub.menuId}
+          role="menu"
+          aria-labelledby={sub.triggerId}
+          tabindex={-1}
+          data-expanded={presence.state() === 'open' ? '' : undefined}
+          data-closed={presence.state() === 'closed' ? '' : undefined}
+          onKeyDown={onKeyDown}
+          // Keep the sub open while the pointer is over it (cancel a pending close
+          // scheduled by the trigger's pointerleave); re-arm the close on exit.
+          onPointerEnter={() => sub.cancelClose()}
+          onPointerLeave={() => sub.scheduleClose()}
+          style={{
+            position: 'fixed', left: `${position.pos().x}px`, top: `${position.pos().y}px`,
+            visibility: position.hidden() ? 'hidden' : 'visible',
+            'pointer-events': position.hidden() ? 'none' : undefined,
+          }}
+          class={cn(
+            'z-50 min-w-[8rem] rounded-lg bg-card p-1 kai-elevation',
+            'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
+            props.class,
+          )}
+        >
+          {props.children}
+        </div>
+      </Portal>
+    </Show>
   );
 }
