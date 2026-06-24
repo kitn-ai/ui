@@ -35,6 +35,11 @@ export interface DefaultPromptInputProps {
   search?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; calls `onVoice`. */
   voice?: boolean;
+  /** Send-button visibility. `'always'` (default) always shows it; `'auto'` shows
+   *  it only when there's text/attachments (an empty composer hides it — Enter
+   *  still submits); `'never'` hides it entirely (Enter-only). Restyle via
+   *  `::part(send)`. The Stop button (stoppable + loading) is unaffected. */
+  submit?: 'always' | 'auto' | 'never';
   onValueChange: (v: string) => void;
   onSubmit: () => void;
   onSuggestionClick: (v: string) => void;
@@ -91,6 +96,12 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
     props.disabled || props.loading || (!valueText().trim() && attachments().length === 0);
 
   const showStop = () => !!props.loading && !!props.stoppable;
+  const hasContent = () => !!valueText().trim() || attachments().length > 0;
+  // Send-button visibility: 'always' (default), 'auto' (only with content), 'never'.
+  const showSend = () => {
+    const mode = props.submit ?? 'always';
+    return mode === 'always' || (mode === 'auto' && hasContent());
+  };
 
   return (
     <>
@@ -213,37 +224,44 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
               }}
             </For>
           </div>
-          {/* Consumer-injected controls rendered after the input area, beside
-              the send button. Native slot; projected by the custom element. */}
-          <slot name="trailing" />
-          <Show
-            when={showStop()}
-            fallback={
+          {/* Right cluster — consumer trailing controls (model/effort/voice…)
+              hug the send button, right-aligned. The `trailing` slot and the send
+              button live together so justify-between pins them to the right edge
+              (left group stays left). Native slot; projected by the element. */}
+          <div class="flex items-center gap-2">
+            <slot name="trailing" />
+            <Show
+              when={showStop()}
+              fallback={
+                <Show when={showSend()}>
+                  <Button
+                    size="icon-sm"
+                    class="rounded-full"
+                    part="send"
+                    data-testid="send"
+                    aria-label="Send message"
+                    disabled={sendDisabled()}
+                    onClick={props.onSubmit}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+                    </svg>
+                  </Button>
+                </Show>
+              }
+            >
               <Button
                 size="icon-sm"
+                variant="outline"
                 class="rounded-full"
-                data-testid="send"
-                aria-label="Send message"
-                disabled={sendDisabled()}
-                onClick={props.onSubmit}
+                data-testid="stop"
+                aria-label="Stop"
+                onClick={props.onStop}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
-                </svg>
+                <Square class="size-3" />
               </Button>
-            }
-          >
-            <Button
-              size="icon-sm"
-              variant="outline"
-              class="rounded-full"
-              data-testid="stop"
-              aria-label="Stop"
-              onClick={props.onStop}
-            >
-              <Square class="size-3" />
-            </Button>
-          </Show>
+            </Show>
+          </div>
         </PromptInputActions>
       </PromptInput>
     </>

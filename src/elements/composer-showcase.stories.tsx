@@ -18,6 +18,7 @@ declare module 'solid-js' {
         voice?: boolean;
         search?: boolean;
         attach?: boolean;
+        submit?: string;
         'suggestion-mode'?: string;
       };
       'kai-menu': JSX.HTMLAttributes<HTMLElement> & { theme?: string };
@@ -167,22 +168,24 @@ function ComposerDarkDemo() {
       padding: '40px 20px',
       'font-family': 'system-ui, -apple-system, sans-serif',
     }}>
-      <div style={{ width: '100%', 'max-width': '720px', display: 'flex', 'flex-direction': 'column', gap: '20px' }}>
-        {/* Notice banner — sits ABOVE the composer card as a standalone strip */}
+      <div style={{ width: '100%', 'max-width': '720px', display: 'flex', 'flex-direction': 'column' }}>
+        {/* Notice banner — a DARKER strip the composer card sits on top of: it
+            renders above, but the card overlaps its lower edge (negative margin)
+            so the notice "underlays" the card, flush, like the reference. The
+            `notice` slot gives a dev the markup; this styling (darker + flush +
+            overlap) is theirs to control. */}
         <div
           ref={(e) => (noticeEl = e as HTMLDivElement)}
           style={{
             display: 'flex',
             'align-items': 'center',
             gap: '8px',
-            padding: '9px 14px',
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            'border-radius': '10px',
+            padding: '10px 16px 22px',
+            background: 'hsl(0 0% 9.5%)',
+            'border-radius': '16px 16px 0 0',
             'font-size': '12.5px',
-            color: 'rgba(255,255,255,0.78)',
+            color: 'rgba(255,255,255,0.6)',
             'line-height': '1.4',
-            'margin-bottom': '8px',
           }}
         >
           <span style={{ flex: '1' }}>
@@ -228,7 +231,8 @@ function ComposerDarkDemo() {
           theme="dark"
           placeholder="How can I help you today?"
           attach={false}
-          style={{ display: 'block', width: '100%' }}
+          submit="auto"
+          style={{ display: 'block', width: '100%', position: 'relative', 'margin-top': '-12px' }}
         >
           {/* toolbar-start: cascading + menu */}
           <kai-menu
@@ -370,6 +374,7 @@ function ComposerDarkDemo() {
           'flex-wrap': 'wrap',
           gap: '8px',
           'justify-content': 'center',
+          'margin-top': '20px',
         }}>
           {(['Write', 'Learn', 'Code', 'Life stuff'] as const).map((label) => {
             const icons: Record<string, string> = {

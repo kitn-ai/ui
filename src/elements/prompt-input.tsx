@@ -36,6 +36,11 @@ interface Props extends Record<string, unknown> {
   /** When set and `loading` is true, the send button is replaced by a Stop
    *  button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
   stoppable?: boolean;
+  /** Send-button visibility. `'always'` (default) always shows it; `'auto'` shows
+   *  it only when there's text/attachments (an empty composer hides it — Enter
+   *  still submits); `'never'` hides it entirely (Enter-only). Restyle via
+   *  `::part(send)`. The Stop button (`stoppable` + `loading`) is unaffected. */
+  submit?: 'always' | 'auto' | 'never';
   /** When `false`, hides the built-in paperclip attach button even though the
    *  element otherwise supports attachments. Use this when a `+` menu in
    *  `toolbar-start` already exposes "Add files", to avoid a duplicate control.
@@ -86,6 +91,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
   search: false,
   voice: false,
   stoppable: false,
+  submit: 'always',
   attach: true,
   attachments: undefined,
   triggers: undefined,
@@ -174,6 +180,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       disabled={flag('disabled')}
       loading={flag('loading')}
       stoppable={flag('stoppable')}
+      submit={props.submit as 'always' | 'auto' | 'never'}
       attach={flag('attach')}
       suggestions={props.suggestions}
       attachments={attachments()}
