@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { Plus, X } from 'lucide-solid';
 import './register'; // side effect: registers <kai-prompt-input> et al.
 
 // SPIKE: feasibility demo for the slotted-shell composition model on
@@ -24,7 +25,7 @@ export default meta;
 type Story = StoryObj;
 
 // ── 1. SLOTS — notice banner + toolbar-start + button projected in. ───────────
-export const Seams: Story = {
+export const Slots: Story = {
   render: () => (
     <kai-prompt-input style={{ display: 'block' }}>
       <div
@@ -38,18 +39,18 @@ export const Seams: Story = {
         <button
           type="button"
           aria-label="Dismiss"
-          style="border:0;background:transparent;cursor:pointer;font-size:16px;color:#92400e;line-height:1;padding:0 2px"
+          style="border:0;background:transparent;cursor:pointer;color:#92400e;line-height:1;padding:0 2px;display:flex;align-items:center"
         >
-          ✕
+          <X size={16} />
         </button>
       </div>
       <button
         slot="toolbar-start"
         type="button"
-        style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid #d4d4d8;border-radius:9999px;background:#fff;cursor:pointer;font-size:16px;flex-shrink:0"
+        style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid #d4d4d8;border-radius:9999px;background:#fff;cursor:pointer;flex-shrink:0"
         aria-label="Open menu"
       >
-        ＋
+        <Plus size={16} />
       </button>
     </kai-prompt-input>
   ),

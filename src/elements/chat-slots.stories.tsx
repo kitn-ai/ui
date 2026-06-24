@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
+import { LifeBuoy, Sparkles } from 'lucide-solid';
 import './register'; // side effect: registers <kai-chat> et al.
 import type { ChatMessage } from './chat-types';
 
@@ -66,7 +67,7 @@ function EmptyDemo() {
   return (
     <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }}>
       <div slot="empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:48px;text-align:center;font:14px system-ui;color:#3f3f46">
-        <div style="font-size:40px">🛟</div>
+        <LifeBuoy size={40} />
         <div style="font-size:18px;font-weight:600">How can we help?</div>
         <div style="max-width:32ch;color:#71717a">Ask about billing, your account, or anything else — a human is one click away.</div>
         <button type="button" style="margin-top:6px;padding:8px 14px;border-radius:9999px;border:0;background:#7c3aed;color:#fff;font:13px system-ui;cursor:pointer">Talk to a person</button>
@@ -96,7 +97,7 @@ function ReplaceDemo() {
   return (
     <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }}>
       <div slot="header" style="display:flex;align-items:center;gap:10px;padding:0 16px;height:60px;background:linear-gradient(90deg,#7c3aed,#db2777);color:#fff;font:600 15px system-ui">
-        <span style="font-size:20px">✦</span> Concierge — fully custom header
+        <Sparkles size={20} style="flex-shrink:0" /> Concierge — fully custom header
       </div>
       <form slot="composer" onSubmit={send} style="display:flex;gap:8px;padding:10px;border:2px dashed #7c3aed;border-radius:14px;background:#faf5ff">
         <input ref={(e) => (input = e as HTMLInputElement)} placeholder="Your own <form> owns submit…" style="flex:1;border:0;background:transparent;font:14px system-ui;outline:none" />

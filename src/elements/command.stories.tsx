@@ -37,15 +37,15 @@ function MentionPickerDemo() {
 
   const items: KaiCommandItem[] = [
     // Mac apps
-    { id: 'ss', label: 'Screen Studio', icon: '🎬', description: 'Computer use', group: 'Mac apps' },
-    { id: 'ssb', label: 'Screen Studio Beta', icon: '🎬', description: 'Computer use', group: 'Mac apps' },
+    { id: 'ss', label: 'Screen Studio', icon: 'monitor', description: 'Computer use', group: 'Mac apps' },
+    { id: 'ssb', label: 'Screen Studio Beta', icon: 'monitor', description: 'Computer use', group: 'Mac apps' },
     // Chats
-    { id: 'rs', label: 'Record screen', icon: '💬', description: 'Building ScreenOverlay', group: 'Chats' },
-    { id: 'bso', label: 'Building ScreenOverlay', icon: '💬', group: 'Chats' },
+    { id: 'rs', label: 'Record screen', icon: 'message-circle', description: 'Building ScreenOverlay', group: 'Chats' },
+    { id: 'bso', label: 'Building ScreenOverlay', icon: 'message-circle', group: 'Chats' },
     // Files
-    { id: 'screens', label: 'screens', icon: '📁', group: 'Files' },
-    { id: 'screen9', label: 'screen9.py', icon: '🐍', description: '/Users/rob/screen9.py', group: 'Files' },
-    { id: 'screenrec', label: 'screenrec.py', icon: '🐍', description: '/Users/rob/screenrec.py', group: 'Files' },
+    { id: 'screens', label: 'screens', icon: 'folder', group: 'Files' },
+    { id: 'screen9', label: 'screen9.py', icon: 'file-text', description: '/Users/rob/screen9.py', group: 'Files' },
+    { id: 'screenrec', label: 'screenrec.py', icon: 'file-text', description: '/Users/rob/screenrec.py', group: 'Files' },
   ];
 
   onMount(() => {

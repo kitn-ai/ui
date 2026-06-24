@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
+import { Plus } from 'lucide-solid';
 import './register'; // side effect: registers all kai-* custom elements (incl. kai-menu)
 import type { KaiMenuItem } from './menu';
 
@@ -39,26 +40,26 @@ function PlusMenuDemo() {
     {
       id: 'add-files',
       label: 'Add files or photos',
-      icon: '📎',
+      icon: 'paperclip',
       shortcut: '⌘U',
     },
     {
       id: 'add-github',
       label: 'Add from GitHub',
-      icon: '🐙',
+      icon: 'github',
     },
     {
       label: 'Skills',
-      icon: '✨',
+      icon: 'sparkles',
       items: [
-        { id: 'skill-creator', label: 'skill-creator', icon: '✨' },
-        { id: 'manage-skills', label: 'Manage skills', icon: '⚙️' },
-        { id: 'add-skill', label: 'Add skill', icon: '📄' },
+        { id: 'skill-creator', label: 'skill-creator', icon: 'sparkles' },
+        { id: 'manage-skills', label: 'Manage skills', icon: 'settings' },
+        { id: 'add-skill', label: 'Add skill', icon: 'file-text' },
       ],
     },
     { separator: true },
-    { id: 'web-search', label: 'Web search', icon: '🌐', checked: true },
-    { id: 'coming-soon', label: 'Coming soon', icon: '🚧', disabled: true },
+    { id: 'web-search', label: 'Web search', icon: 'globe', checked: true },
+    { id: 'coming-soon', label: 'Coming soon', disabled: true },
   ];
 
   onMount(() => {
@@ -81,10 +82,12 @@ function PlusMenuDemo() {
   return (
     <div style={{ padding: '48px', display: 'flex', gap: '16px', 'align-items': 'flex-start' }}>
       <kai-menu ref={(e) => (el = e as MenuEl)}>
-        <span slot="trigger" style={{ 'font-size': '18px', 'line-height': '1' }}>＋</span>
+        <span slot="trigger" style={{ display: 'flex', 'align-items': 'center', 'justify-content': 'center' }}>
+          <Plus size={18} />
+        </span>
       </kai-menu>
       <p style={{ 'font-size': '13px', color: '#71717a', 'margin-top': '2px' }}>
-        Click ＋ to open the cascading menu. Check the console for <code>kai-select</code> events.
+        Click the + icon to open the cascading menu. Check the console for <code>kai-select</code> events.
       </p>
     </div>
   );

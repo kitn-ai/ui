@@ -28,7 +28,7 @@ async function assignedCounts(page: Page, names: string[]) {
 
 test.describe('kai-prompt-input composition slots IVP', () => {
   test('Slots: notice + toolbar-start project into shadow slots', async ({ page }) => {
-    await page.goto(STORY('seams'));
+    await page.goto(STORY('slots'));
     await expect(page.locator('kai-prompt-input')).toBeVisible();
     await page.waitForTimeout(700); // solid mount + slot assignment
 

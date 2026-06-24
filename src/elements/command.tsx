@@ -12,7 +12,7 @@ export interface KaiCommandItem {
   id: string;
   /** Display name shown in the list row. */
   label: string;
-  /** Emoji/text or an image URL / data-URI for the leading icon. */
+  /** Named icon (e.g. "search"), image URL / data-URI, or plain text. */
   icon?: string;
   /** Muted supplementary text (e.g. a file path or a short description). */
   description?: string;
@@ -49,7 +49,7 @@ interface Events {
  *   import '@kitn.ai/ui/elements';
  *   const el = document.querySelector('kai-command');
  *   el.items = [
- *     { id: 'foo', label: 'Foo', icon: '🔍', group: 'Recent' },
+ *     { id: 'foo', label: 'Foo', icon: 'search', group: 'Recent' },
  *   ];
  *   el.addEventListener('kai-select', (e) => console.log(e.detail.id));
  * </script>

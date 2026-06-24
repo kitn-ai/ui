@@ -1,4 +1,5 @@
 import { For, Show } from 'solid-js';
+import { MoreHorizontal } from 'lucide-solid';
 import {
   Dropdown, DropdownTrigger, DropdownContent, DropdownItem,
   DropdownSeparator, DropdownLabel, DropdownCheckboxItem,
@@ -11,7 +12,7 @@ export interface KaiMenuItem {
   /** Emitted in `kai-select` for actionable items. */
   id?: string;
   label?: string;
-  /** Emoji/text OR an image URL / data-URI. */
+  /** Named icon (e.g. "paperclip"), image URL / data-URI, or plain text. */
   icon?: string;
   /** e.g. '⌘U' — shown right-aligned, muted. */
   shortcut?: string;
@@ -51,14 +52,14 @@ interface Events {
  *
  * ```html
  * <kai-menu>
- *   <span slot="trigger">＋</span>
+ *   <button slot="trigger" aria-label="Open menu">+</button>
  * </kai-menu>
  * <script type="module">
  *   import '@kitn.ai/ui/elements';
  *   const menu = document.querySelector('kai-menu');
  *   menu.items = [
  *     { heading: true, label: 'Actions' },
- *     { id: 'attach', label: 'Add files', icon: '📎', shortcut: '⌘U' },
+ *     { id: 'attach', label: 'Add files', icon: 'paperclip', shortcut: '⌘U' },
  *   ];
  *   menu.addEventListener('kai-select', (e) => console.log(e.detail));
  * </script>
@@ -130,7 +131,7 @@ defineWebComponent<Props, Events>('kai-menu', {
         class="inline-flex items-center justify-center rounded-md p-1.5 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label="Open menu"
       >
-        <slot name="trigger">⋯</slot>
+        <slot name="trigger"><MoreHorizontal class="size-4" /></slot>
       </DropdownTrigger>
       <DropdownContent class="min-w-[15rem]">
         {renderItems((props.items as KaiMenuItem[] | undefined) ?? [])}
