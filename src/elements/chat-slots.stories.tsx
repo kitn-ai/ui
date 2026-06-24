@@ -3,7 +3,7 @@ import { onMount } from 'solid-js';
 import './register'; // side effect: registers <kai-chat> et al.
 import type { ChatMessage } from './chat-types';
 
-// SPIKE: feasibility demo for the slotted-shell composition model. Every seam is
+// SPIKE: feasibility demo for the slotted-shell composition model. Every slot is
 // filled with PLAIN DOM (no kai-* inside the slots) and inline-styled, to prove
 // two things at once: (1) light-DOM content projects through the Solid-rendered
 // shadow slots, and (2) shadow-DOM style encapsulation does NOT reach slotted
@@ -31,7 +31,7 @@ const thread: ChatMessage[] = [
 ];
 
 const meta = {
-  title: 'Spikes/Chat Seams',
+  title: 'Spikes/Chat Slots',
   parameters: { layout: 'fullscreen' },
 } satisfies Meta;
 export default meta;
@@ -107,8 +107,8 @@ function ReplaceDemo() {
 }
 export const ReplaceComposer: Story = { render: () => <ReplaceDemo /> };
 
-// ── Drop-in baseline — NO seams projected. The shell must render exactly as it
-//    did before seams existed (regression guard). ─────────────────────────────
+// ── Drop-in baseline — NO slots projected. The shell must render exactly as it
+//    did before slots existed (regression guard). ─────────────────────────────
 function DropInDemo() {
   let el: ChatEl | undefined;
   onMount(() => { if (el) el.messages = thread; });

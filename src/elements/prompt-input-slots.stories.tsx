@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import './register'; // side effect: registers <kai-prompt-input> et al.
 
 // SPIKE: feasibility demo for the slotted-shell composition model on
-// <kai-prompt-input>. Every seam is filled with PLAIN DOM (no kai-* inside the
+// <kai-prompt-input>. Every slot is filled with PLAIN DOM (no kai-* inside the
 // slots) and inline-styled, to prove: (1) light-DOM content projects through the
 // Solid-rendered shadow slots, and (2) shadow-DOM style encapsulation does NOT
 // reach slotted content — the consumer's own markup and CSS win.
@@ -17,13 +17,13 @@ declare module 'solid-js' {
 }
 
 const meta = {
-  title: 'Spikes/Prompt Input Seams',
+  title: 'Spikes/Prompt Input Slots',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 export default meta;
 type Story = StoryObj;
 
-// ── 1. SEAMS — notice banner + toolbar-start + button projected in. ───────────
+// ── 1. SLOTS — notice banner + toolbar-start + button projected in. ───────────
 export const Seams: Story = {
   render: () => (
     <kai-prompt-input style={{ display: 'block' }}>
@@ -55,7 +55,7 @@ export const Seams: Story = {
   ),
 };
 
-// ── 2. DROP-IN — no seams projected → regression baseline (toolbar must start
+// ── 2. DROP-IN — no slots projected → regression baseline (toolbar must start
 //    cleanly at the attach button, no phantom gap). ───────────────────────────
 export const DropIn: Story = {
   render: () => (

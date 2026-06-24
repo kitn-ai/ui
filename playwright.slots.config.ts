@@ -1,17 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Standalone IVP config for the SPIKE <kai-chat> slotted-shell seams. Drives the
+ * Standalone IVP config for the SPIKE <kai-chat> slotted-shell composition slots. Drives the
  * REAL element rendered by Storybook (same-origin) in Chromium, asserting that
  * consumer light-DOM is assigned to the shadow slots and screenshotting each
  * composition pattern (inject / replace / data-flow wall).
  *
  * Self-contained: starts Storybook on :6006 (reusing an already-running one).
- * Run: `npx playwright test --config playwright.seams.config.ts`
+ * Run: `npx playwright test --config playwright.slots.config.ts`
  */
 export default defineConfig({
   testDir: 'tests/e2e',
-  testMatch: /(chat|promptinput)-seams-ivp\.spec\.ts/,
+  testMatch: /(chat|promptinput)-slots-ivp\.spec\.ts/,
   fullyParallel: false,
   retries: 0,
   reporter: 'list',

@@ -6,11 +6,11 @@ import { test, expect, type Page } from '@playwright/test';
  * and proves, in a real browser, that consumer light-DOM is actually assigned
  * to the Solid-rendered shadow slots — something jsdom unit tests cannot verify.
  *
- * Run: `npx playwright test --config playwright.seams.config.ts`
+ * Run: `npx playwright test --config playwright.slots.config.ts`
  * (Storybook must be serving on :6006.)
  */
 
-const STORY = (id: string) => `/iframe.html?id=spikes-prompt-input-seams--${id}&viewMode=story`;
+const STORY = (id: string) => `/iframe.html?id=spikes-prompt-input-slots--${id}&viewMode=story`;
 
 /** Count light-DOM elements actually assigned to each named shadow slot. */
 async function assignedCounts(page: Page, names: string[]) {
@@ -26,8 +26,8 @@ async function assignedCounts(page: Page, names: string[]) {
   }, names);
 }
 
-test.describe('kai-prompt-input composition seams IVP', () => {
-  test('Seams: notice + toolbar-start project into shadow slots', async ({ page }) => {
+test.describe('kai-prompt-input composition slots IVP', () => {
+  test('Slots: notice + toolbar-start project into shadow slots', async ({ page }) => {
     await page.goto(STORY('seams'));
     await expect(page.locator('kai-prompt-input')).toBeVisible();
     await page.waitForTimeout(700); // solid mount + slot assignment
@@ -36,10 +36,10 @@ test.describe('kai-prompt-input composition seams IVP', () => {
     expect(counts['notice'], 'notice projected').toBeGreaterThan(0);
     expect(counts['toolbar-start'], 'toolbar-start projected').toBeGreaterThan(0);
 
-    await page.screenshot({ path: 'spike-screens/promptinput-seams.png' });
+    await page.screenshot({ path: 'spike-screens/slots-promptinput.png' });
   });
 
-  test('DropIn: no seams projected → notice + toolbar-start have zero assigned elements', async ({ page }) => {
+  test('DropIn: no slots projected → notice + toolbar-start have zero assigned elements', async ({ page }) => {
     await page.goto(STORY('drop-in'));
     await expect(page.locator('kai-prompt-input')).toBeVisible();
     await page.waitForTimeout(700);
@@ -48,6 +48,6 @@ test.describe('kai-prompt-input composition seams IVP', () => {
     expect(counts['notice'], 'notice has no projection').toBe(0);
     expect(counts['toolbar-start'], 'toolbar-start has no projection').toBe(0);
 
-    await page.screenshot({ path: 'spike-screens/promptinput-seams-dropin.png' });
+    await page.screenshot({ path: 'spike-screens/slots-promptinput-dropin.png' });
   });
 });

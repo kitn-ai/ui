@@ -77,9 +77,9 @@ export interface ChatThreadProps {
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
-  // ── Composition seams ─────────────────────────────────────────────────────
+  // ── Composition slots ─────────────────────────────────────────────────────
   // Each flag below is set by the `<kai-chat>` facade when matching light-DOM
-  // `slot="…"` content is projected, and gates one composition seam. Two kinds:
+  // `slot="…"` content is projected, and gates one composition slot. Two kinds:
   //   • INJECT  — additive: project YOUR markup into a region (sidebar, footer,
   //               composer-actions, header-start/-end).
   //   • REPLACE — substitutive: your markup stands in for a whole region
@@ -165,7 +165,7 @@ export function ChatThread(props: ChatThreadProps) {
 
   return (
     <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={props.codeHighlight !== false} portalMount={outer.portalMount()}>
-      {/* The root is a ROW so a `sidebar` seam can sit beside the main column.
+      {/* The root is a ROW so a `sidebar` slot can sit beside the main column.
           With no sidebar projected it collapses to the original column. */}
       <div ref={(e) => (rootEl = e as HTMLElement)} class={`flex h-full bg-background ${props.class ?? ''}`}>
         <Show when={props.sidebar}>
@@ -174,7 +174,7 @@ export function ChatThread(props: ChatThreadProps) {
           </aside>
         </Show>
         <div class="flex h-full min-w-0 flex-1 flex-col">
-          {/* Header: a full `header` seam REPLACES the built-in bar; otherwise the
+          {/* Header: a full `header` slot REPLACES the built-in bar; otherwise the
               built-in header renders, itself carrying the header-start/header-end
               INJECT slots. */}
           <Show
@@ -226,7 +226,7 @@ export function ChatThread(props: ChatThreadProps) {
           <div class="relative flex-1 overflow-hidden">
             <ChatContainer class="h-full px-4 py-3">
               <ChatContainerContent class="mx-auto w-full max-w-3xl space-y-4">
-                {/* REPLACE — custom empty-state seam, shown only while the thread is
+                {/* REPLACE — custom empty-state slot, shown only while the thread is
                     empty. The component still owns WHEN it shows (data state); the
                     consumer owns WHAT it looks like. */}
                 <Show when={props.empty && props.messages.length === 0}>
@@ -288,7 +288,7 @@ export function ChatThread(props: ChatThreadProps) {
           </Show>
           <div class="shrink-0 px-4 pb-4">
             <div class="mx-auto max-w-3xl">
-              {/* REPLACE — a full `composer` seam stands in for the built-in input.
+              {/* REPLACE — a full `composer` slot stands in for the built-in input.
                   The slotted content owns its own submit/loading wiring. */}
               <Show
                 when={props.composer}
