@@ -144,7 +144,22 @@ function ComposerDarkDemo() {
 
   return (
     <div style={{
-      background: '#161618',
+      // Force a crisp dark palette via the kit's --kai-color-* consumer hooks.
+      // These inherit through the shadow boundary, so the composed kai-* elements
+      // render dark + readable regardless of whether Storybook engages theme="dark".
+      '--kai-color-background': 'hsl(0 0% 12%)',
+      '--kai-color-foreground': 'hsl(0 0% 96%)',
+      '--kai-color-card': 'hsl(0 0% 15%)',
+      '--kai-color-card-foreground': 'hsl(0 0% 96%)',
+      '--kai-color-popover': 'hsl(0 0% 15%)',
+      '--kai-color-popover-foreground': 'hsl(0 0% 96%)',
+      '--kai-color-muted': 'hsl(0 0% 17%)',
+      '--kai-color-muted-foreground': 'hsl(0 0% 60%)',
+      '--kai-color-accent': 'hsl(0 0% 20%)',
+      '--kai-color-accent-foreground': 'hsl(0 0% 96%)',
+      '--kai-color-border': 'hsl(0 0% 22%)',
+      '--kai-color-input': 'hsl(0 0% 22%)',
+      background: 'hsl(0 0% 8%)',
       'min-height': '100vh',
       display: 'flex',
       'align-items': 'center',
@@ -298,7 +313,7 @@ function ComposerDarkDemo() {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: 'rgba(255,255,255,0.4)',
+                color: 'rgba(255,255,255,0.55)',
                 'border-radius': '6px',
                 transition: 'background 0.15s, color 0.15s',
               }}
@@ -310,7 +325,7 @@ function ComposerDarkDemo() {
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLButtonElement;
                 el.style.background = '';
-                el.style.color = 'rgba(255,255,255,0.4)';
+                el.style.color = 'rgba(255,255,255,0.55)';
               }}
             >
               <Mic size={15} />
@@ -329,7 +344,7 @@ function ComposerDarkDemo() {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: 'rgba(255,255,255,0.4)',
+                color: 'rgba(255,255,255,0.55)',
                 'border-radius': '6px',
                 transition: 'background 0.15s, color 0.15s',
               }}
@@ -341,7 +356,7 @@ function ComposerDarkDemo() {
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLButtonElement;
                 el.style.background = '';
-                el.style.color = 'rgba(255,255,255,0.4)';
+                el.style.color = 'rgba(255,255,255,0.55)';
               }}
             >
               <AudioLines size={15} />
