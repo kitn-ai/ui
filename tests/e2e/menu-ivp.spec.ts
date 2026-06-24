@@ -102,3 +102,121 @@ test.describe('cascading-menu IVP', () => {
     await expect(menus(page)).toHaveCount(0);
   });
 });
+
+// ── kai-menu web component IVP ───────────────────────────────────────────────
+
+const KAI_MENU_STORY = '/iframe.html?id=spikes-kai-menu--plus-menu&viewMode=story';
+
+/** Install a capture for kai-select events on the <kai-menu> host element.
+ *  Mirrors the captureSubmit helper in composer-ivp.spec.ts. */
+async function captureSelect(page: Page) {
+  await page.evaluate(() => {
+    const host = document.querySelector('kai-menu');
+    (window as unknown as { __selects: unknown[] }).__selects = [];
+    host?.addEventListener('kai-select', (e) => {
+      (window as unknown as { __selects: unknown[] }).__selects.push(
+        (e as CustomEvent).detail,
+      );
+    });
+  });
+}
+
+async function readSelects(page: Page) {
+  return page.evaluate(() => (window as unknown as { __selects: unknown[] }).__selects);
+}
+
+test.describe('kai-menu web component IVP', () => {
+  test('open → menu items render correctly', async ({ page }) => {
+    await page.goto(KAI_MENU_STORY);
+
+    // The trigger button should be visible (shadow DOM is pierced by Playwright).
+    const triggerBtn = page.locator('kai-menu').getByRole('button');
+    await expect(triggerBtn).toBeVisible();
+
+    // Click the trigger to open the menu.
+    await triggerBtn.click();
+
+    // Root menu appears with the expected items.
+    const menu = page.locator('[role="menu"]').first();
+    await expect(menu).toBeVisible();
+    await expect(page.getByText('Actions', { exact: true })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /Add files or photos/ })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /Add from GitHub/ })).toBeVisible();
+    await expect(page.getByText('⌘U')).toBeVisible();
+
+    // Checkbox item starts checked.
+    const webSearch = page.getByRole('menuitemcheckbox', { name: /Web search/ });
+    await expect(webSearch).toBeVisible();
+    await expect(webSearch).toHaveAttribute('aria-checked', 'true');
+  });
+
+  test('click "Add from GitHub" emits kai-select with correct id', async ({ page }) => {
+    await page.goto(KAI_MENU_STORY);
+
+    const triggerBtn = page.locator('kai-menu').getByRole('button');
+    await expect(triggerBtn).toBeVisible();
+    await captureSelect(page);
+
+    await triggerBtn.click();
+    await expect(page.locator('[role="menu"]').first()).toBeVisible();
+
+    // Click the "Add from GitHub" item.
+    await page.getByRole('menuitem', { name: /Add from GitHub/ }).click();
+
+    // Menu closes after selection.
+    await expect(page.locator('[role="menu"]')).toHaveCount(0);
+
+    // kai-select was fired with the correct id.
+    const selects = await readSelects(page);
+    expect(selects).toHaveLength(1);
+    expect((selects[0] as { id: string }).id).toBe('add-github');
+  });
+
+  test('Skills submenu opens and shows nested items', async ({ page }) => {
+    await page.goto(KAI_MENU_STORY);
+
+    const triggerBtn = page.locator('kai-menu').getByRole('button');
+    await expect(triggerBtn).toBeVisible();
+
+    await triggerBtn.click();
+    await expect(page.locator('[role="menu"]').first()).toBeVisible();
+
+    // Hover the Skills subtrigger to open the submenu.
+    const skills = page.getByRole('menuitem', { name: /Skills/, exact: false }).filter({ hasNotText: 'skill-creator' }).first();
+    await skills.hover();
+    await expect(skills).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('[role="menu"]')).toHaveCount(2);
+
+    await expect(page.getByRole('menuitem', { name: 'skill-creator' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Manage skills' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Add skill' })).toBeVisible();
+  });
+
+  test('clicking "Web search" checkbox emits kai-select with checked: false', async ({ page }) => {
+    await page.goto(KAI_MENU_STORY);
+
+    const triggerBtn = page.locator('kai-menu').getByRole('button');
+    await expect(triggerBtn).toBeVisible();
+    await captureSelect(page);
+
+    await triggerBtn.click();
+    await expect(page.locator('[role="menu"]').first()).toBeVisible();
+
+    const webSearch = page.getByRole('menuitemcheckbox', { name: /Web search/ });
+    await expect(webSearch).toHaveAttribute('aria-checked', 'true');
+
+    // Click the checkbox — it should NOT close the menu, and the state flips.
+    await webSearch.click();
+    await expect(webSearch).toHaveAttribute('aria-checked', 'false');
+    await expect(page.locator('[role="menu"]').first()).toBeVisible(); // menu stays open
+
+    // kai-select fired with id and checked: false (the new state).
+    const selects = await readSelects(page);
+    expect(selects).toHaveLength(1);
+    const detail = selects[0] as { id: string; checked: boolean };
+    expect(detail.id).toBe('web-search');
+    expect(detail.checked).toBe(false);
+
+    await page.screenshot({ path: 'spike-screens/kai-menu.png' });
+  });
+});

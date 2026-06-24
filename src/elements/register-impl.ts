@@ -55,3 +55,5 @@ import './cards';
 import './compare';
 // Rich text composer with entity pills, trigger menus, and keyword highlighting
 import './composer';
+// W3 phase 2: cascading action menu from a JSON items-tree
+import './menu';
