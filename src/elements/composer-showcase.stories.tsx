@@ -44,9 +44,10 @@ const meta = {
   title: 'Spikes/Composer (production)',
   parameters: {
     layout: 'fullscreen',
-    // Force dark mode for this showcase — the preview.ts MutationObserver syncs
-    // all kai-* element theme attributes to match the Storybook toggle, so we
-    // use the toggle itself rather than a raw attribute to drive dark.
+    // Theme-driven: the whole showcase follows the Storybook light/dark toggle
+    // (preview.ts syncs it onto every kai-* element). We default the toggle to
+    // dark so it opens matching the reference, but it's fully theme-aware — flip
+    // the toggle for light. No per-element theme, no forced palette.
     darkMode: { current: 'dark' },
   },
 } satisfies Meta;
@@ -55,10 +56,10 @@ export default meta;
 type Story = StoryObj;
 
 // ---------------------------------------------------------------------------
-// Dark — production-quality composer showcase
+// Production-quality composer showcase — theme-driven (light/dark via the toggle)
 // ---------------------------------------------------------------------------
 
-function ComposerDarkDemo() {
+function ComposerShowcase() {
   let plusMenuEl: MenuEl | undefined;
   let effortMenuEl: MenuEl | undefined;
   let modelEl: ModelSwitcherEl | undefined;
@@ -145,22 +146,9 @@ function ComposerDarkDemo() {
 
   return (
     <div style={{
-      // Force a crisp dark palette via the kit's --kai-color-* consumer hooks.
-      // These inherit through the shadow boundary, so the composed kai-* elements
-      // render dark + readable regardless of whether Storybook engages theme="dark".
-      '--kai-color-background': 'hsl(0 0% 12%)',
-      '--kai-color-foreground': 'hsl(0 0% 96%)',
-      '--kai-color-card': 'hsl(0 0% 15%)',
-      '--kai-color-card-foreground': 'hsl(0 0% 96%)',
-      '--kai-color-popover': 'hsl(0 0% 15%)',
-      '--kai-color-popover-foreground': 'hsl(0 0% 96%)',
-      '--kai-color-muted': 'hsl(0 0% 17%)',
-      '--kai-color-muted-foreground': 'hsl(0 0% 60%)',
-      '--kai-color-accent': 'hsl(0 0% 20%)',
-      '--kai-color-accent-foreground': 'hsl(0 0% 96%)',
-      '--kai-color-border': 'hsl(0 0% 22%)',
-      '--kai-color-input': 'hsl(0 0% 22%)',
-      background: 'hsl(0 0% 8%)',
+      // Theme-following — the page surface tracks the kit's tokens, which the
+      // Storybook toggle (preview.ts) drives via light/dark. No forced palette.
+      background: 'var(--color-background)',
       'min-height': '100vh',
       display: 'flex',
       'align-items': 'center',
@@ -169,22 +157,28 @@ function ComposerDarkDemo() {
       'font-family': 'system-ui, -apple-system, sans-serif',
     }}>
       <div style={{ width: '100%', 'max-width': '720px', display: 'flex', 'flex-direction': 'column' }}>
-        {/* Notice banner — a DARKER strip the composer card sits on top of: it
-            renders above, but the card overlaps its lower edge (negative margin)
-            so the notice "underlays" the card, flush, like the reference. The
-            `notice` slot gives a dev the markup; this styling (darker + flush +
-            overlap) is theirs to control. */}
+        {/* Composer group: the banner sits BEHIND the input card (absolute,
+            z-index 0) and the card sits on top (z-index 1), so the banner peeks
+            out from underneath. It's THEME-AWARE — kit tokens, not hardcoded —
+            so it follows light/dark. The `notice` slot gives the dev the markup;
+            this behind-the-card treatment is theirs to control. */}
+        <div style={{ position: 'relative' }}>
         <div
           ref={(e) => (noticeEl = e as HTMLDivElement)}
           style={{
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            right: '0',
+            'z-index': '0',
             display: 'flex',
-            'align-items': 'center',
+            'align-items': 'flex-start',
             gap: '8px',
-            padding: '10px 16px 22px',
-            background: 'hsl(0 0% 9.5%)',
-            'border-radius': '16px 16px 0 0',
+            padding: '9px 16px 26px',
+            background: 'var(--color-muted)',
+            'border-radius': '14px 14px 0 0',
             'font-size': '12.5px',
-            color: 'rgba(255,255,255,0.6)',
+            color: 'var(--color-muted-foreground)',
             'line-height': '1.4',
           }}
         >
@@ -193,7 +187,7 @@ function ComposerDarkDemo() {
             <a
               href="#"
               style={{
-                color: 'rgba(255,255,255,0.9)',
+                color: 'var(--color-foreground)',
                 'text-decoration': 'underline',
                 'text-underline-offset': '2px',
               }}
@@ -213,13 +207,13 @@ function ComposerDarkDemo() {
               padding: '2px',
               display: 'flex',
               'align-items': 'center',
-              color: 'rgba(255,255,255,0.45)',
+              color: 'var(--color-muted-foreground)',
               'border-radius': '4px',
               transition: 'color 0.15s',
               flex: 'none',
             }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.85)')}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.45)')}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = 'var(--color-foreground)')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = 'var(--color-muted-foreground)')}
           >
             <X size={13} />
           </button>
@@ -227,18 +221,14 @@ function ComposerDarkDemo() {
 
         {/* Composer card */}
         <kai-prompt-input
-          ref={(e) => (inputEl = e as PromptInputEl)}
-          theme="dark"
-          placeholder="How can I help you today?"
+          ref={(e) => (inputEl = e as PromptInputEl)}          placeholder="How can I help you today?"
           attach={false}
           submit="auto"
-          style={{ display: 'block', width: '100%', position: 'relative', 'margin-top': '-12px' }}
+          style={{ display: 'block', width: '100%', position: 'relative', 'z-index': '1', 'margin-top': '30px' }}
         >
           {/* toolbar-start: cascading + menu */}
           <kai-menu
-            slot="toolbar-start"
-            theme="dark"
-            ref={(e) => (plusMenuEl = e as MenuEl)}
+            slot="toolbar-start"            ref={(e) => (plusMenuEl = e as MenuEl)}
           >
             <span
               slot="trigger"
@@ -282,7 +272,7 @@ function ComposerDarkDemo() {
                   padding: '3px 8px',
                   'font-size': '12.5px',
                   'font-weight': '500',
-                  color: 'rgba(255,255,255,0.65)',
+                  color: 'var(--color-muted-foreground)',
                   cursor: 'pointer',
                   'border-radius': '6px',
                   transition: 'background 0.15s, color 0.15s',
@@ -290,13 +280,13 @@ function ComposerDarkDemo() {
                 }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLSpanElement;
-                  el.style.background = 'rgba(255,255,255,0.07)';
-                  el.style.color = 'rgba(255,255,255,0.9)';
+                  el.style.background = 'var(--color-accent)';
+                  el.style.color = 'var(--color-foreground)';
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLSpanElement;
                   el.style.background = '';
-                  el.style.color = 'rgba(255,255,255,0.65)';
+                  el.style.color = 'var(--color-muted-foreground)';
                 }}
               >
                 High
@@ -317,19 +307,19 @@ function ComposerDarkDemo() {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: 'rgba(255,255,255,0.55)',
+                color: 'var(--color-muted-foreground)',
                 'border-radius': '6px',
                 transition: 'background 0.15s, color 0.15s',
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLButtonElement;
-                el.style.background = 'rgba(255,255,255,0.07)';
-                el.style.color = 'rgba(255,255,255,0.8)';
+                el.style.background = 'var(--color-accent)';
+                el.style.color = 'var(--color-foreground)';
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLButtonElement;
                 el.style.background = '';
-                el.style.color = 'rgba(255,255,255,0.55)';
+                el.style.color = 'var(--color-muted-foreground)';
               }}
             >
               <Mic size={15} />
@@ -348,25 +338,26 @@ function ComposerDarkDemo() {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: 'rgba(255,255,255,0.55)',
+                color: 'var(--color-muted-foreground)',
                 'border-radius': '6px',
                 transition: 'background 0.15s, color 0.15s',
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLButtonElement;
-                el.style.background = 'rgba(255,255,255,0.07)';
-                el.style.color = 'rgba(255,255,255,0.8)';
+                el.style.background = 'var(--color-accent)';
+                el.style.color = 'var(--color-foreground)';
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLButtonElement;
                 el.style.background = '';
-                el.style.color = 'rgba(255,255,255,0.55)';
+                el.style.color = 'var(--color-muted-foreground)';
               }}
             >
               <AudioLines size={15} />
             </button>
           </div>
         </kai-prompt-input>
+        </div>
 
         {/* Suggestion chips — rendered below the composer card, with lucide-style icons */}
         <div style={{
@@ -391,10 +382,10 @@ function ComposerDarkDemo() {
                   'align-items': 'center',
                   gap: '6px',
                   padding: '6px 14px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.09)',
+                  background: 'var(--color-muted)',
+                  border: '1px solid var(--color-border)',
                   'border-radius': '9999px',
-                  color: 'rgba(255,255,255,0.6)',
+                  color: 'var(--color-muted-foreground)',
                   'font-size': '12.5px',
                   'font-weight': '450',
                   cursor: 'pointer',
@@ -404,15 +395,15 @@ function ComposerDarkDemo() {
                 }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLButtonElement;
-                  el.style.background = 'rgba(255,255,255,0.1)';
-                  el.style.borderColor = 'rgba(255,255,255,0.18)';
-                  el.style.color = 'rgba(255,255,255,0.85)';
+                  el.style.background = 'var(--color-accent)';
+                  el.style.borderColor = 'var(--color-border)';
+                  el.style.color = 'var(--color-foreground)';
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLButtonElement;
-                  el.style.background = 'rgba(255,255,255,0.05)';
-                  el.style.borderColor = 'rgba(255,255,255,0.09)';
-                  el.style.color = 'rgba(255,255,255,0.6)';
+                  el.style.background = 'var(--color-muted)';
+                  el.style.borderColor = 'var(--color-border)';
+                  el.style.color = 'var(--color-muted-foreground)';
                 }}
                 onClick={() => console.log('[suggestion]', label)}
               >
@@ -427,4 +418,4 @@ function ComposerDarkDemo() {
   );
 }
 
-export const Dark: Story = { render: () => <ComposerDarkDemo /> };
+export const Composer: Story = { render: () => <ComposerShowcase /> };
