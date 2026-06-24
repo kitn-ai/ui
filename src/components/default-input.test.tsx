@@ -97,8 +97,8 @@ describe('DefaultPromptInput disabled state', () => {
   });
 });
 
-describe('DefaultPromptInput leading/trailing slots', () => {
-  it('renders a leading and trailing named slot', () => {
+describe('DefaultPromptInput composition slots', () => {
+  it('renders the input-top, toolbar-start and toolbar-end named slots', () => {
     const { container } = render(() => (
       <DefaultPromptInput
         value=""
@@ -107,7 +107,8 @@ describe('DefaultPromptInput leading/trailing slots', () => {
         onSuggestionClick={noop}
       />
     ));
-    expect(container.querySelector('slot[name="leading"]')).toBeTruthy();
-    expect(container.querySelector('slot[name="trailing"]')).toBeTruthy();
+    expect(container.querySelector('slot[name="input-top"]')).toBeTruthy();
+    expect(container.querySelector('slot[name="toolbar-start"]')).toBeTruthy();
+    expect(container.querySelector('slot[name="toolbar-end"]')).toBeTruthy();
   });
 });

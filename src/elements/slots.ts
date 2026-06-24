@@ -34,12 +34,41 @@ export const CHAT_SLOTS: SlotDef[] = [
 ];
 
 /** Slots of `<kai-prompt-input>` (and the default composer inside `<kai-chat>`). Native
- *  shadow slots — an empty slot renders nothing, so no facade flag-gating is required. */
+ *  shadow slots — an empty slot renders nothing, so no facade flag-gating is required.
+ *
+ *  These are ONLY positions inside the card's shadow boundary — places a consumer
+ *  cannot reach from their own DOM. Content ABOVE/BELOW the whole card is the
+ *  consumer's own light-DOM layout (a sibling element), so there is intentionally
+ *  no outer block slot here. (When the input is nested inside `<kai-chat>`'s shadow,
+ *  that surrounding hole belongs to `kai-chat` — see `composer-actions`/`footer`.) */
 export const PROMPT_INPUT_SLOTS: SlotDef[] = [
-  { name: 'notice',        mode: 'inject', part: true, doc: 'Banner rendered ABOVE the input card (e.g. "model unavailable"). You own the copy + dismiss.' },
-  { name: 'leading',       mode: 'inject', doc: 'Controls before the textarea.' },
+  { name: 'input-top',     mode: 'inject', doc: 'Inside the card, above the textarea (e.g. an inline status strip). For content above/below the whole card, use your own layout — that is light DOM you control.' },
   { name: 'toolbar-start', mode: 'inject', doc: 'Leading controls in the input toolbar — where a + menu goes.' },
-  { name: 'trailing',      mode: 'inject', doc: 'Trailing controls in the toolbar, before the Send button (toolbar-end).' },
+  { name: 'toolbar-end',   mode: 'inject', doc: 'Trailing controls in the toolbar, before the Send button.' },
+];
+
+/** A styleable `::part` the kit renders (NOT a slot — you don't project into it;
+ *  you restyle it from outside via `::part(name)`). This registry is the source
+ *  of truth so the styling surface is discoverable: docs + the `kai` MCP
+ *  component reference are generated from it, the same way slots are. The
+ *  `recipe` is a copy-pasteable example — including the "just hide it" case that
+ *  is pure CSS and therefore intentionally NOT a prop. */
+export interface PartDef {
+  /** `::part(name)` exposed for consumer styling. */
+  name: string;
+  /** One-line contract: what the part is. */
+  doc: string;
+  /** A copy-pasteable styling example for docs / the MCP reference. */
+  recipe?: string;
+}
+
+/** Styleable `::part`s of `<kai-prompt-input>`. */
+export const PROMPT_INPUT_PARTS: PartDef[] = [
+  {
+    name: 'send',
+    doc: 'The send button. Restyle from outside, or hide it entirely (Enter-only) — hiding is pure CSS, which is why there is no `submit="never"`.',
+    recipe: 'kai-prompt-input::part(send) { display: none } /* Enter-only; or restyle: background, border-radius, … */',
+  },
 ];
 
 /**

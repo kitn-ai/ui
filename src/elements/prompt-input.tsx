@@ -38,9 +38,10 @@ interface Props extends Record<string, unknown> {
   stoppable?: boolean;
   /** Send-button visibility. `'always'` (default) always shows it; `'auto'` shows
    *  it only when there's text/attachments (an empty composer hides it — Enter
-   *  still submits); `'never'` hides it entirely (Enter-only). Restyle via
-   *  `::part(send)`. The Stop button (`stoppable` + `loading`) is unaffected. */
-  submit?: 'always' | 'auto' | 'never';
+   *  still submits). To hide it entirely (Enter-only), it's pure CSS:
+   *  `::part(send){display:none}` — no prop needed. Restyle via `::part(send)`.
+   *  The Stop button (`stoppable` + `loading`) is unaffected. */
+  submit?: 'always' | 'auto';
   /** When `false`, hides the built-in paperclip attach button even though the
    *  element otherwise supports attachments. Use this when a `+` menu in
    *  `toolbar-start` already exposes "Add files", to avoid a duplicate control.
@@ -180,7 +181,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       disabled={flag('disabled')}
       loading={flag('loading')}
       stoppable={flag('stoppable')}
-      submit={props.submit as 'always' | 'auto' | 'never'}
+      submit={props.submit as 'always' | 'auto'}
       attach={flag('attach')}
       suggestions={props.suggestions}
       attachments={attachments()}

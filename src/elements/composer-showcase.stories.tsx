@@ -242,9 +242,9 @@ function ComposerShowcase() {
             </span>
           </kai-menu>
 
-          {/* trailing: model switcher + effort + mic + waveform */}
+          {/* toolbar-end: model switcher + effort + mic + waveform */}
           <div
-            slot="trailing"
+            slot="toolbar-end"
             style={{
               display: 'flex',
               'align-items': 'center',

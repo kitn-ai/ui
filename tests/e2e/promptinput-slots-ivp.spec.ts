@@ -27,26 +27,30 @@ async function assignedCounts(page: Page, names: string[]) {
 }
 
 test.describe('kai-prompt-input composition slots IVP', () => {
-  test('Slots: notice + toolbar-start project into shadow slots', async ({ page }) => {
+  const SLOT_NAMES = ['input-top', 'toolbar-start', 'toolbar-end'];
+
+  test('Slots: input-top + toolbar-start + toolbar-end project into shadow slots', async ({ page }) => {
     await page.goto(STORY('slots'));
     await expect(page.locator('kai-prompt-input')).toBeVisible();
     await page.waitForTimeout(700); // solid mount + slot assignment
 
-    const counts = await assignedCounts(page, ['notice', 'toolbar-start']);
-    expect(counts['notice'], 'notice projected').toBeGreaterThan(0);
+    const counts = await assignedCounts(page, SLOT_NAMES);
+    expect(counts['input-top'], 'input-top projected').toBeGreaterThan(0);
     expect(counts['toolbar-start'], 'toolbar-start projected').toBeGreaterThan(0);
+    expect(counts['toolbar-end'], 'toolbar-end projected').toBeGreaterThan(0);
 
     await page.screenshot({ path: 'spike-screens/slots-promptinput.png' });
   });
 
-  test('DropIn: no slots projected → notice + toolbar-start have zero assigned elements', async ({ page }) => {
+  test('DropIn: no slots projected → every shadow slot has zero assigned elements', async ({ page }) => {
     await page.goto(STORY('drop-in'));
     await expect(page.locator('kai-prompt-input')).toBeVisible();
     await page.waitForTimeout(700);
 
-    const counts = await assignedCounts(page, ['notice', 'toolbar-start']);
-    expect(counts['notice'], 'notice has no projection').toBe(0);
-    expect(counts['toolbar-start'], 'toolbar-start has no projection').toBe(0);
+    const counts = await assignedCounts(page, SLOT_NAMES);
+    for (const name of SLOT_NAMES) {
+      expect(counts[name], `${name} has no projection`).toBe(0);
+    }
 
     await page.screenshot({ path: 'spike-screens/slots-promptinput-dropin.png' });
   });

@@ -24,14 +24,15 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-// ── 1. SLOTS — notice banner + toolbar-start + button projected in. ───────────
+// ── 1. SLOTS — input-top + toolbar-start + toolbar-end projected in. The notice
+//    above the card is the consumer's OWN layout (a sibling div), NOT a slot —
+//    outer content is light DOM you already control. Only the holes you can't
+//    reach from outside (inside the card / toolbar) are slots. ─────────────────
 export const Slots: Story = {
   render: () => (
-    <kai-prompt-input style={{ display: 'block' }}>
-      <div
-        slot="notice"
-        style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:#fef3c7;border-bottom:1px solid #fcd34d;font:13px/1.4 system-ui;color:#92400e"
-      >
+    <div>
+      {/* Above the card = your own layout, not a slot. */}
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;margin-bottom:8px;font:13px/1.4 system-ui;color:#92400e">
         <span>
           Model X is unavailable.{' '}
           <a href="#" style="color:#b45309;font-weight:600">Learn more</a>
@@ -44,15 +45,31 @@ export const Slots: Story = {
           <X size={16} />
         </button>
       </div>
-      <button
-        slot="toolbar-start"
-        type="button"
-        style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid #d4d4d8;border-radius:9999px;background:#fff;cursor:pointer;flex-shrink:0"
-        aria-label="Open menu"
-      >
-        <Plus size={16} />
-      </button>
-    </kai-prompt-input>
+      <kai-prompt-input style={{ display: 'block' }}>
+        {/* input-top: inside the card, above the textarea. */}
+        <div
+          slot="input-top"
+          style="padding:6px 12px;font:12px/1.4 system-ui;color:#3f6212;background:#ecfccb;border-radius:8px;margin:8px 8px 0"
+        >
+          Projects · Acme redesign
+        </div>
+        <button
+          slot="toolbar-start"
+          type="button"
+          style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid #d4d4d8;border-radius:9999px;background:#fff;cursor:pointer;flex-shrink:0"
+          aria-label="Open menu"
+        >
+          <Plus size={16} />
+        </button>
+        {/* toolbar-end: trailing controls, before the Send button. */}
+        <span
+          slot="toolbar-end"
+          style="display:inline-flex;align-items:center;padding:0 10px;height:30px;font:12px/1 system-ui;color:#52525b"
+        >
+          Opus 4.8
+        </span>
+      </kai-prompt-input>
+    </div>
   ),
 };
 

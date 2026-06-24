@@ -37,9 +37,10 @@ export interface DefaultPromptInputProps {
   voice?: boolean;
   /** Send-button visibility. `'always'` (default) always shows it; `'auto'` shows
    *  it only when there's text/attachments (an empty composer hides it — Enter
-   *  still submits); `'never'` hides it entirely (Enter-only). Restyle via
-   *  `::part(send)`. The Stop button (stoppable + loading) is unaffected. */
-  submit?: 'always' | 'auto' | 'never';
+   *  still submits). To hide it entirely (Enter-only), it's pure CSS:
+   *  `::part(send){display:none}` — no prop needed. Restyle via `::part(send)`.
+   *  The Stop button (stoppable + loading) is unaffected. */
+  submit?: 'always' | 'auto';
   onValueChange: (v: string) => void;
   onSubmit: () => void;
   onSuggestionClick: (v: string) => void;
@@ -97,7 +98,8 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
 
   const showStop = () => !!props.loading && !!props.stoppable;
   const hasContent = () => !!valueText().trim() || attachments().length > 0;
-  // Send-button visibility: 'always' (default), 'auto' (only with content), 'never'.
+  // Send-button visibility: 'always' (default) or 'auto' (only with content).
+  // Full-hide (Enter-only) is CSS: `::part(send){display:none}`.
   const showSend = () => {
     const mode = props.submit ?? 'always';
     return mode === 'always' || (mode === 'auto' && hasContent());
@@ -105,9 +107,6 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
 
   return (
     <>
-      {/* Consumer-injected banner rendered ABOVE the input card (and above
-          suggestions). Native slot; projected by the custom element. */}
-      <slot name="notice" style={{ display: 'contents' }} />
       <Show when={props.suggestions?.length}>
         <div class="mb-2 flex flex-wrap gap-2">
           <For each={props.suggestions}>
@@ -140,9 +139,10 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             </Attachments>
           </div>
         </Show>
-        {/* Consumer-injected controls rendered before the input area. Native
-            slot; inert outside a shadow root, projected by the custom element. */}
-        <slot name="leading" />
+        {/* Consumer-injected content inside the card, above the textarea (e.g. an
+            inline status strip). A shadow-internal hole — unreachable from outside.
+            Native slot; inert outside a shadow root, projected by the custom element. */}
+        <slot name="input-top" />
         <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
         <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
           <div class="flex items-center gap-2">
@@ -225,11 +225,11 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             </For>
           </div>
           {/* Right cluster — consumer trailing controls (model/effort/voice…)
-              hug the send button, right-aligned. The `trailing` slot and the send
+              hug the send button, right-aligned. The `toolbar-end` slot and the send
               button live together so justify-between pins them to the right edge
               (left group stays left). Native slot; projected by the element. */}
           <div class="flex items-center gap-2">
-            <slot name="trailing" />
+            <slot name="toolbar-end" />
             <Show
               when={showStop()}
               fallback={
