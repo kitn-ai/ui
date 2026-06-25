@@ -42,6 +42,9 @@ import './scroll-button';
 import './popover';
 import './switch';
 import './button';
+import './avatar';
+import './badge';
+import './tooltip';
 import './toast';
 // Generative-UI cards (Card Contract)
 import './card';
