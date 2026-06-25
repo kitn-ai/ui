@@ -6,8 +6,14 @@
 
 ---
 
-## 0.0 LATEST — `::part` discoverability + a build:api P0 fix (UNCOMMITTED, on top of `c1981e9`)
-Done after the `c1981e9` snapshot below. Tree dirty; Rob reviews before commit.
+## 0.0 LATEST — `::part` discoverability, a build:api P0 fix, 4 new primitives (PUSHED on `spike/kai-chat-seams`, no PR)
+Done after the `c1981e9` snapshot below. Commits `04257ca`→`674ab7b` are **pushed to `origin/spike/kai-chat-seams`** (Rob: "push to be safe, no PR"). Element count is now **59**.
+
+**Also added — 4 more composition primitives (thin facades over existing `src/ui` primitives):**
+- `kai-separator` (divider, H/V, `::part(separator)`), `kai-scroll-area` (themed thin-scrollbar container, `::part(viewport)`), `kai-hover-card` (rich hover content via `slot="card"` — the markup-carrying sibling of `kai-tooltip`; slot-into-portal verified), and `kai-skeleton` (responsive loading placeholder; `variant` text/rect/circle + `width`/`height`/`lines`, prop-driven because classes can't cross the shadow boundary).
+- The `Skeleton` PRIMITIVE gained the variant/responsive API (backward-compatible) and is now **dogfooded** in `link-preview` + `components/image` (the latter's loading fallback was previously 0-height/invisible). All four verified rendering in light + dark via `_shot.mjs`. Doc headings authored in `web-components.md` for the 11 newer composition/interactive elements so their Slots/Parts tables inject. Decision (Rob): skeletons belong as a LOW-LEVEL responsive primitive, NOT content-shaped presets (message-skeleton etc. = the Cartesian-product trap).
+
+> ★ GOTCHA REMINDER for screenshots: adding a NEW element needs a Storybook RESTART (`lsof -ti:6006|xargs kill; npm run storybook`) before `_shot.mjs` can see it.
 
 **Shipped — `::part`/slot discoverability (queue item #2, now DONE):**
 - `slots.ts` is now the single registry the build extracts: added `ELEMENT_COMPOSITION` (tag → `{slots, parts}`) + `BUTTON_PARTS`/`BADGE_PARTS`/`ICON_PARTS` (the parts that existed only in facade code). A `slots.test.ts` **drift guard** scans every `part="…"` in `src/` and fails if one isn't registered.
