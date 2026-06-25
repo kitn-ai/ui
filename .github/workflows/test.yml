@@ -49,8 +49,16 @@ jobs:
       - name: React adapter tests
         run: npm run test:react
 
+      # The storybook browser project runs ~118 stories through a single
+      # chromium session; under CI load a renderer page occasionally dies
+      # mid-run and aborts the whole vitest runner ("Browser connection was
+      # closed" / "[birpc] rpc is closed") — a process-level crash, NOT a
+      # per-test failure, so vitest's own `retry` can't recover it. The crash is
+      # non-deterministic and a clean run passes every test, so retry the WHOLE
+      # suite as a fresh process; a real, repeatable regression still fails all
+      # attempts and goes red.
       - name: Storybook tests (a11y + interaction)
-        run: npm run test:storybook
+        run: npm run test:storybook:ci
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
