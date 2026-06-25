@@ -2,7 +2,7 @@ import { For, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { PromptSuggestion } from '../components/prompt-suggestion';
 
-type Item = string | { label: string; value?: string };
+type Item = string | { label: string; value?: string; icon?: string };
 
 interface Props extends Record<string, unknown> {
   /** The suggestions. Strings, or `{ label, value }` when the displayed text
@@ -27,12 +27,13 @@ interface Events {
 
 const labelOf = (s: Item) => (typeof s === 'string' ? s : s.label);
 const valueOf = (s: Item) => (typeof s === 'string' ? s : s.value ?? s.label);
+const iconOf = (s: Item) => (typeof s === 'string' ? undefined : s.icon);
 
 /** Parse a single `<kai-suggestion>` node into an `Item` descriptor. */
 export function parseSuggestionNode(n: Element): Item {
   const text = n.textContent?.trim() ?? '';
   const value = n.getAttribute('value') ?? text;
-  return { label: text, value };
+  return { label: text, value, icon: n.getAttribute('icon') ?? undefined };
 }
 
 /**
@@ -81,6 +82,7 @@ defineWebComponent<Props, Events>('kai-suggestions', {
           <PromptSuggestion
             variant={props.variant}
             size={props.size}
+            icon={iconOf(s)}
             block={flag('block')}
             highlight={props.highlight}
             onClick={() => dispatch('kai-select', { value: valueOf(s) })}

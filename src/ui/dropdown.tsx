@@ -250,8 +250,10 @@ export function DropdownLabel(props: { children: JSX.Element; class?: string }) 
 /**
  * A togglable menu item.
  * a11y: `role="menuitemcheckbox"` + `aria-checked`. Activating fires `onSelect`
- * but KEEPS THE MENU OPEN (the consumer flips `checked`); the leading Check
- * glyph's space is always reserved so labels stay aligned whether on or off.
+ * but KEEPS THE MENU OPEN (the consumer flips `checked`). The Check sits at the
+ * TRAILING edge (toggle-style) so the item's leading content — an icon when
+ * present — aligns with the plain items above it instead of being pushed in by a
+ * reserved leading check column.
  */
 export function DropdownCheckboxItem(props: { children: JSX.Element; class?: string; checked?: boolean; onSelect?: () => void; disabled?: boolean }) {
   const activate = () => {
@@ -274,10 +276,10 @@ export function DropdownCheckboxItem(props: { children: JSX.Element; class?: str
         props.class,
       )}
     >
-      <span class="mr-2 flex h-4 w-4 shrink-0 items-center justify-center">
+      {props.children}
+      <span class="ml-auto flex h-4 w-4 shrink-0 items-center justify-center pl-3 text-muted-foreground">
         <Show when={props.checked}><Check class="h-4 w-4" aria-hidden="true" /></Show>
       </span>
-      {props.children}
     </div>
   );
 }
@@ -391,7 +393,7 @@ export function DropdownSubTrigger(props: { children: JSX.Element; class?: strin
       data-expanded={sub.open() ? '' : undefined}
     >
       {props.children}
-      <ChevronRight class="ml-auto h-4 w-4 shrink-0 pl-2 text-muted-foreground" aria-hidden="true" />
+      <ChevronRight class="ml-auto size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
     </div>
   );
 }

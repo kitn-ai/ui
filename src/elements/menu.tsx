@@ -6,6 +6,7 @@ import {
   DropdownSub, DropdownSubTrigger, DropdownSubContent,
 } from '../ui/dropdown';
 import { renderIcon } from '../ui/icon';
+import { cn } from '../utils/cn';
 import { defineWebComponent } from './define';
 
 export interface KaiMenuItem {
@@ -33,6 +34,16 @@ interface Props extends Record<string, unknown> {
   /** Optional placement hint (unused by the underlying Dropdown which always
    *  positions bottom-start, kept for future extension). */
   placement?: string;
+  /** Built-in trigger: leading icon (a named icon like `"plus"`, an image
+   *  URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for
+   *  the common case — a slotted trigger overrides it. */
+  triggerIcon?: string;
+  /** Built-in trigger: a text label (e.g. `"High"`). */
+  triggerLabel?: string;
+  /** Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). */
+  triggerIconTrailing?: string;
+  /** Accessible name for an icon-only trigger (no visible label). */
+  label?: string;
 }
 
 interface Events {
@@ -68,6 +79,10 @@ interface Events {
 defineWebComponent<Props, Events>('kai-menu', {
   items: undefined,
   placement: undefined,
+  triggerIcon: undefined,
+  triggerLabel: undefined,
+  triggerIconTrailing: undefined,
+  label: undefined,
 }, (props, { dispatch }) => {
   function renderItems(items: KaiMenuItem[]) {
     return (
@@ -128,10 +143,22 @@ defineWebComponent<Props, Events>('kai-menu', {
   return (
     <Dropdown>
       <DropdownTrigger
-        class="inline-flex items-center justify-center rounded-md p-1.5 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        aria-label="Open menu"
+        class={cn(
+          'inline-flex items-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          props.triggerLabel
+            ? 'gap-1.5 px-2 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground'
+            : 'justify-center p-1.5 text-foreground hover:bg-muted',
+        )}
+        aria-label={props.label ?? (props.triggerLabel ? undefined : 'Open menu')}
       >
-        <slot name="trigger"><MoreHorizontal class="size-4" /></slot>
+        {/* Slotted trigger wins; otherwise build one from the trigger* props;
+            otherwise fall back to a "more" glyph. */}
+        <slot name="trigger">
+          <Show when={props.triggerIcon}>{renderIcon(props.triggerIcon, { class: 'size-4 shrink-0' })}</Show>
+          <Show when={props.triggerLabel}>{props.triggerLabel}</Show>
+          <Show when={props.triggerIconTrailing}>{renderIcon(props.triggerIconTrailing, { class: 'size-3.5 shrink-0 opacity-60' })}</Show>
+          <Show when={!props.triggerIcon && !props.triggerLabel}><MoreHorizontal class="size-4" /></Show>
+        </slot>
       </DropdownTrigger>
       <DropdownContent class="min-w-[15rem]">
         {renderItems((props.items as KaiMenuItem[] | undefined) ?? [])}

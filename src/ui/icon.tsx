@@ -2,6 +2,8 @@ import type { Component, JSX } from 'solid-js';
 import {
   Plus, Paperclip, Github, Globe, Sparkles, Settings,
   FileText, Folder, Monitor, MessageCircle, Search,
+  Mic, AudioLines, X, ChevronDown,
+  Pencil, BookOpen, Code, Smile,
 } from 'lucide-solid';
 
 type IconComponent = Component<{ class?: string }>;
@@ -20,6 +22,14 @@ const NAMED_ICONS: Record<string, IconComponent> = {
   monitor: Monitor,
   'message-circle': MessageCircle,
   search: Search,
+  mic: Mic,
+  'audio-lines': AudioLines,
+  x: X,
+  'chevron-down': ChevronDown,
+  pencil: Pencil,
+  'book-open': BookOpen,
+  code: Code,
+  smile: Smile,
 };
 
 /** Render an item icon.
