@@ -17,11 +17,24 @@ const ICON_TONE: Record<NoticeSeverity, string> = {
   success: 'text-tool-green',
 };
 
+/** The default leading icon for a notice: `null` when `icon="none"`, the named
+ *  icon when one is given, else the severity glyph. Exported so the `kai-notice`
+ *  facade can use it as the fallback inside a `slot="icon"` escape hatch. */
+export function noticeIconNode(severity: NoticeSeverity, icon?: string): JSX.Element {
+  if (icon === 'none') return null;
+  if (icon) return renderIcon(icon, { class: cn('size-4 shrink-0', ICON_TONE[severity]) });
+  const I = SEVERITY_ICON[severity];
+  return <I class={cn('size-4 shrink-0', ICON_TONE[severity])} aria-hidden="true" />;
+}
+
 export interface NoticeProps {
   severity?: NoticeSeverity;
   /** Leading icon: omit for the severity default, `"none"` to hide it, or a named
    *  icon to override. */
   icon?: string;
+  /** A custom icon node that replaces the icon region entirely (the `kai-notice`
+   *  facade passes a `slot="icon"` here, with the default icon as its fallback). */
+  iconSlot?: JSX.Element;
   /** Render a dismiss (×) button that hides the notice and calls `onDismiss`. */
   dismissible?: boolean;
   /** Called after the notice is dismissed. */
@@ -50,16 +63,8 @@ export function Notice(props: NoticeProps) {
         role={severity() === 'error' ? 'alert' : 'status'}
         class={cn('flex items-center gap-2.5 rounded-lg bg-surface px-3.5 py-2.5 text-sm', props.class)}
       >
-        <Show when={props.icon !== 'none'}>
-          <Show
-            when={props.icon}
-            fallback={(() => {
-              const I = SEVERITY_ICON[severity()];
-              return <I class={cn('size-4 shrink-0', ICON_TONE[severity()])} aria-hidden="true" />;
-            })()}
-          >
-            {renderIcon(props.icon, { class: cn('size-4 shrink-0', ICON_TONE[severity()]) })}
-          </Show>
+        <Show when={props.iconSlot} fallback={noticeIconNode(severity(), props.icon)}>
+          {props.iconSlot}
         </Show>
         <div class="flex-1 leading-snug text-muted-foreground">{props.children}</div>
         <Show when={props.action}>{props.action}</Show>

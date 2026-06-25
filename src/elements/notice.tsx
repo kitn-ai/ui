@@ -1,4 +1,4 @@
-import { Notice } from '../ui/notice';
+import { Notice, noticeIconNode } from '../ui/notice';
 import { defineWebComponent } from './define';
 
 interface Props extends Record<string, unknown> {
@@ -26,6 +26,9 @@ interface Events {
  * It owns the notice box, not its placement — you position it in your own layout
  * (above a composer, at the top of a panel, …).
  *
+ * For a custom leading icon, slot any inline SVG via `slot="icon"` (it wins over
+ * the severity/`icon` default — the same escape hatch as `kai-button`).
+ *
  * ```html
  * <kai-notice severity="warning" dismissible>
  *   Claude Fable 5 is currently unavailable.
@@ -40,7 +43,7 @@ defineWebComponent<Props, Events>('kai-notice', {
 }, (props, { dispatch, flag }) => (
   <Notice
     severity={props.severity ?? 'neutral'}
-    icon={props.icon}
+    iconSlot={<slot name="icon">{noticeIconNode(props.severity ?? 'neutral', props.icon)}</slot>}
     dismissible={flag('dismissible')}
     onDismiss={() => dispatch('kai-dismiss')}
     action={<slot name="action" />}
