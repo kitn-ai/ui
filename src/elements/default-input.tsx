@@ -144,7 +144,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             Native slot; inert outside a shadow root, projected by the custom element. */}
         <slot name="input-top" />
         <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
-        <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
+        <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-0">
           <div class="flex items-center gap-2">
             {/* Consumer-injected leading toolbar controls (e.g. a + menu). display:contents
                 ensures an empty slot adds no stray gap; projected nodes lay out as toolbar
