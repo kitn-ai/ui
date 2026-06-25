@@ -32,7 +32,7 @@ const thread: ChatMessage[] = [
 ];
 
 const meta = {
-  title: 'Spikes/Chat Slots',
+  title: 'Labs/Chat Slots',
   parameters: { layout: 'fullscreen' },
 } satisfies Meta;
 export default meta;

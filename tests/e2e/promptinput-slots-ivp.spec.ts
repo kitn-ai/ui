@@ -10,7 +10,7 @@ import { test, expect, type Page } from '@playwright/test';
  * (Storybook must be serving on :6006.)
  */
 
-const STORY = (id: string) => `/iframe.html?id=spikes-prompt-input-slots--${id}&viewMode=story`;
+const STORY = (id: string) => `/iframe.html?id=labs-prompt-input-slots--${id}&viewMode=story`;
 
 /** Count light-DOM elements actually assigned to each named shadow slot. */
 async function assignedCounts(page: Page, names: string[]) {

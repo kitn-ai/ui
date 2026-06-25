@@ -18,7 +18,7 @@ declare module 'solid-js' {
 }
 
 const meta = {
-  title: 'Spikes/Prompt Input Slots',
+  title: 'Labs/Prompt Input Slots',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 export default meta;

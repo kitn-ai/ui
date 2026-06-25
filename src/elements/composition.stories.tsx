@@ -151,7 +151,7 @@ const PROMPT_INPUT_SVG = `
 </svg>`;
 
 const meta = {
-  title: 'Spikes/How Composition Works',
+  title: 'Labs/How Composition Works',
   parameters: { layout: 'fullscreen' },
 } satisfies Meta;
 export default meta;
