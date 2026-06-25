@@ -572,6 +572,19 @@
     }
   },
   {
+    "tag": "kai-skeleton",
+    "displayName": "Skeleton",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-skeleton></kai-skeleton>",
+      "react": "import { Skeleton } from '@kitn.ai/ui/react';\n\n<Skeleton />",
+      "vue": "<kai-skeleton />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-skeleton></kai-skeleton>",
+      "angular": "<kai-skeleton></kai-skeleton>",
+      "solid": "import { Skeleton } from '@kitn.ai/ui';\n\n<Skeleton />"
+    }
+  },
+  {
     "tag": "kai-skills",
     "displayName": "Skills",
     "hasSolid": true,

@@ -50,6 +50,7 @@ import './icon';
 import './separator';
 import './scroll-area';
 import './hover-card';
+import './skeleton';
 import './toast';
 // Generative-UI cards (Card Contract)
 import './card';

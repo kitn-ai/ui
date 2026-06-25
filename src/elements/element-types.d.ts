@@ -670,6 +670,19 @@ export interface KaiSeparatorElement extends HTMLElement {
   orientation?: "horizontal" | "vertical";
 }
 
+export interface KaiSkeletonElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** `text` (one or more lines), `rect` (a block), or `circle` (round). Defaults to `text`. */
+  variant?: "text" | "rect" | "circle";
+  /** CSS width (e.g. `'12rem'`, `'60%'`). Defaults to full width (responsive); for `circle` it is the diameter. */
+  width?: string;
+  /** CSS height. Defaults per variant (a text line height; circle = width). */
+  height?: string;
+  /** `text` only: number of lines; the last is shorter. Defaults to 1. */
+  lines?: number;
+}
+
 export interface KaiSkillsElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -897,6 +910,7 @@ declare global {
     'kai-scroll-area': KaiScrollAreaElement;
     'kai-scroll-button': KaiScrollButtonElement;
     'kai-separator': KaiSeparatorElement;
+    'kai-skeleton': KaiSkeletonElement;
     'kai-skills': KaiSkillsElement;
     'kai-source': KaiSourceElement;
     'kai-sources': KaiSourcesElement;

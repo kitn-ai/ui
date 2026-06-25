@@ -1373,6 +1373,31 @@ A scroll container with a themed, thin, cross-browser scrollbar and a keyboard-r
 
 ---
 
+### `<kai-skeleton>` / `Skeleton`
+
+<!-- spec:kai-skeleton -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `variant` | `variant` | `undefined | "text" | "rect" | "circle"` | `'text'` | `text` (one or more lines), `rect` (a block), or `circle` (round). Defaults to `text`. |
+| `width` | `width` | `undefined | string` | — | CSS width (e.g. `'12rem'`, `'60%'`). Defaults to full width (responsive); for `circle` it is the diameter. |
+| `height` | `height` | `undefined | string` | — | CSS height. Defaults per variant (a text line height; circle = width). |
+| `lines` | `lines` | `undefined | number` | — | `text` only: number of lines; the last is shorter. Defaults to 1. |
+
+#### Composed from
+
+`UI/Skeleton`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-skeleton -->
+
+A pulsing loading placeholder that preserves layout while content arrives. Responsive by default (fills its container); prop-driven `variant` (text/rect/circle) + `width`/`height`/`lines`.
+
+---
+
 ### `<kai-menu>` / `Menu`
 
 <!-- spec:kai-menu -->

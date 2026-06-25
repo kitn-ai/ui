@@ -3282,6 +3282,55 @@
     ]
   },
   {
+    "tag": "kai-skeleton",
+    "className": "KaiSkeletonElement",
+    "displayName": "Skeleton",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | \"text\" | \"rect\" | \"circle\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`text` (one or more lines), `rect` (a block), or `circle` (round). Defaults to `text`.",
+        "default": "'text'",
+        "displayType": "undefined | \"text\" | \"rect\" | \"circle\""
+      },
+      {
+        "name": "width",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "CSS width (e.g. `'12rem'`, `'60%'`). Defaults to full width (responsive); for `circle` it is the diameter.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "height",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "CSS height. Defaults per variant (a text line height; circle = width).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "lines",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "`text` only: number of lines; the last is shorter. Defaults to 1.",
+        "displayType": "undefined | number"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Skeleton",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-skeleton--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kai-skills",
     "className": "KaiSkillsElement",
     "displayName": "Skills",

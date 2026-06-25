@@ -963,6 +963,23 @@ export const Separator = createWebComponent<SeparatorProps>(
   {  },
 );
 
+export interface SkeletonProps extends WebComponentProps {
+  /** `text` (one or more lines), `rect` (a block), or `circle` (round). Defaults to `text`. */
+  variant?: "text" | "rect" | "circle";
+  /** CSS width (e.g. `'12rem'`, `'60%'`). Defaults to full width (responsive); for `circle` it is the diameter. */
+  width?: string;
+  /** CSS height. Defaults per variant (a text line height; circle = width). */
+  height?: string;
+  /** `text` only: number of lines; the last is shorter. Defaults to 1. */
+  lines?: number;
+}
+
+export const Skeleton = createWebComponent<SkeletonProps>(
+  'kai-skeleton',
+  ["theme","variant","width","height","lines"],
+  {  },
+);
+
 export interface SkillsProps extends WebComponentProps {
   /** The active skills to badge. Set as a JS property. */
   skills: { id: string; name: string }[];

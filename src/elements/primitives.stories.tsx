@@ -18,6 +18,7 @@ declare module 'solid-js' {
       'kai-separator': JSX.HTMLAttributes<HTMLElement> & { orientation?: string };
       'kai-scroll-area': JSX.HTMLAttributes<HTMLElement>;
       'kai-hover-card': JSX.HTMLAttributes<HTMLElement> & { 'open-delay'?: number | string; 'close-delay'?: number | string; placement?: string };
+      'kai-skeleton': JSX.HTMLAttributes<HTMLElement> & { variant?: string; width?: string; height?: string; lines?: number | string };
     }
   }
 }
@@ -124,6 +125,30 @@ export const HoverCards: Story = {
           <p class="text-sm text-muted-foreground">Workspace · 24 members · 8 projects</p>
         </div>
       </kai-hover-card>
+    </div>
+  ),
+};
+
+/** Loading placeholders — variants, responsive width, and a composed card skeleton. */
+export const Skeletons: Story = {
+  render: () => (
+    <div class="flex flex-col gap-6 text-foreground">
+      {/* Variants: circle, rect, multi-line text. */}
+      <div class="flex items-start gap-6">
+        <kai-skeleton variant="circle" width="2.5rem" />
+        <kai-skeleton variant="rect" width="8rem" height="5rem" />
+        <div class="w-48"><kai-skeleton variant="text" lines="3" /></div>
+      </div>
+      {/* Responsive: the SAME text skeleton fills containers of different widths. */}
+      <div class="flex flex-col gap-3">
+        <div class="w-full rounded-md border border-border p-3"><kai-skeleton variant="text" lines="2" /></div>
+        <div class="w-1/2 rounded-md border border-border p-3"><kai-skeleton variant="text" lines="2" /></div>
+      </div>
+      {/* Composed: avatar + lines — how a consumer mirrors a real layout. */}
+      <div class="flex w-72 items-center gap-3 rounded-lg border border-border p-3">
+        <kai-skeleton variant="circle" width="2.5rem" />
+        <div class="flex-1"><kai-skeleton variant="text" lines="2" /></div>
+      </div>
     </div>
   ),
 };
