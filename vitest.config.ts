@@ -73,6 +73,12 @@ export default defineConfig({
       })],
       test: {
         name: 'storybook',
+        // Browser-runner CI flake mitigation: under parallel load the Vite dev
+        // server occasionally drops a dynamic module ("Failed to fetch
+        // dynamically imported module") or a chromium instance blips. These are
+        // transient — retry the story before failing the run. Scoped to this
+        // project only; the jsdom unit project stays retry-free (deterministic).
+        retry: 2,
         // NOTE: we deliberately do NOT set a custom `setupFiles` with
         // `setProjectAnnotations` here. Since Storybook 10.3, @storybook/addon-vitest
         // auto-provisions the project annotations from `.storybook/main.ts` +
