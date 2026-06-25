@@ -71,6 +71,57 @@ export const PROMPT_INPUT_PARTS: PartDef[] = [
   },
 ];
 
+/** Styleable `::part`s of `<kai-button>`. */
+export const BUTTON_PARTS: PartDef[] = [
+  {
+    name: 'button',
+    doc: 'The button element. Restyle radius, padding, colors, or weight from outside; the `variant`/`size` props set the defaults.',
+    recipe: 'kai-button::part(button) { border-radius: 9999px; font-weight: 600 }',
+  },
+];
+
+/** Styleable `::part`s of `<kai-badge>`. */
+export const BADGE_PARTS: PartDef[] = [
+  {
+    name: 'badge',
+    doc: 'The badge pill. Restyle its background, color, or shape; the `variant` prop (default/count/citation) sets the defaults.',
+    recipe: 'kai-badge::part(badge) { background: var(--color-primary); color: var(--color-primary-foreground) }',
+  },
+];
+
+/** Styleable `::part`s of `<kai-icon>`. */
+export const ICON_PARTS: PartDef[] = [
+  {
+    name: 'icon',
+    doc: 'The icon wrapper. Inherits `currentColor` and the `size` prop by default; recolor or resize it from outside.',
+    recipe: 'kai-icon::part(icon) { color: var(--color-primary) }',
+  },
+];
+
+/**
+ * Per-element composition surface — the SINGLE registry the build extracts
+ * (`scripts/gen-element-api.mjs`) into `element-meta.json`, the Custom Elements
+ * Manifest (`cssParts`/`slots`), `docs/web-components.md`, and the `kai` MCP
+ * `component_reference`. Each entry maps a `kai-*` tag to the slots it projects
+ * and the `::part`s it exposes for styling. Slots flagged `part: true` are ALSO
+ * styleable parts, so they surface in both places.
+ *
+ * Adding a `part="…"` in a facade/component without registering it here fails the
+ * `slots.test.ts` drift guard — keep this in sync with the source.
+ */
+export interface ElementComposition {
+  slots?: SlotDef[];
+  parts?: PartDef[];
+}
+
+export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
+  'kai-chat': { slots: CHAT_SLOTS },
+  'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },
+  'kai-button': { parts: BUTTON_PARTS },
+  'kai-badge': { parts: BADGE_PARTS },
+  'kai-icon': { parts: ICON_PARTS },
+};
+
 /**
  * Which slots have projected light-DOM content — a DIRECT child of `host`
  * carrying the matching `slot` attribute. Pure and synchronous; safe in jsdom

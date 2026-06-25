@@ -142,7 +142,7 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property. |
 | `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. |
 | `persistSuggestions` | `persist-suggestions` | `undefined | false | true` | `false` | Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
+| `proseSize` | `prose-size` | `undefined | "sm" | "lg" | "xs" | "base"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `chatTitle` | `chat-title` | `undefined | string` | — | Optional header title shown on the left of the header. |
@@ -152,6 +152,12 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
 | `headerStart` | `header-start` | `undefined | false | true` | — | Whether the host has `slot="header-start"` content (left of the title) — set by the `<kai-chat>` facade so a custom control forces the header open. |
 | `headerEnd` | `header-end` | `undefined | false | true` | — | Whether the host has `slot="header-end"` content (right of the controls). |
+| `headerFull` | `header-full` | `undefined | false | true` | — | REPLACE — full custom header in place of the built-in title/model/context bar. |
+| `sidebar` | `sidebar` | `undefined | false | true` | — | INJECT — left sidebar column (e.g. a conversation list / your own nav). |
+| `empty` | `empty` | `undefined | false | true` | — | REPLACE — custom zero-state rendered in the message area while the thread is empty (replaces the empty message list only; the composer and its suggestions still render). |
+| `composer` | `composer` | `undefined | false | true` | — | REPLACE — full custom composer in place of the built-in prompt input. The projected content wires its own submit (the data-flow boundary). |
+| `composerActions` | `composer-actions` | `undefined | false | true` | — | INJECT — accessory row just above the composer (e.g. extra actions). |
+| `footer` | `footer` | `undefined | false | true` | — | INJECT — footer row below the composer (disclaimers, token meter, …). |
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the input toolbar; fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the input toolbar; fires a `voice` event. |
 | `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a JS property; forwarded to the input. |
@@ -169,6 +175,31 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `kai-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
 | `kai-value-change` | `{ value: string }` | Fired on every input change. |
 | `kai-voice` | — | The Mic / voice button was clicked. |
+
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `header-start` | inject | Leading header controls, left of the title. |
+| `header-end` | inject | Trailing header controls. |
+| `header` | replace | Full custom header; replaces the built-in title/model/context bar. |
+| `sidebar` | inject | Left column (your nav / conversation list). Fixed width; use compose-your-own for resizable. |
+| `empty` | replace | Custom zero-state rendered in the message area while the thread is empty. Replaces the empty message list only — the composer and any suggestions still render. |
+| `composer` | replace | Full custom composer; you own submit + loading, drive the thread via messages. |
+| `composer-actions` | inject | Accessory row above the composer. |
+| `footer` | inject | Row below the composer (disclaimers, token meter). |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-chat::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(header)` | Full custom header; replaces the built-in title/model/context bar. |
+| `::part(sidebar)` | Left column (your nav / conversation list). Fixed width; use compose-your-own for resizable. |
+| `::part(footer)` | Row below the composer (disclaimers, token meter). |
 
 #### Composed from
 
@@ -199,7 +230,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `loading` | `loading` | `undefined | false | true` | `false` |  |
 | `suggestions` | — | `undefined | string[]` | — |  |
 | `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` |  |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` |  |
+| `proseSize` | `prose-size` | `undefined | "sm" | "lg" | "xs" | "base"` | `'sm'` |  |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` |  |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` |  |
 | `chatTitle` | `chat-title` | `undefined | string` | — |  |
@@ -331,6 +362,8 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
 | `stoppable` | `stoppable` | `undefined | false | true` | `false` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. |
+| `submit` | `submit` | `undefined | "always" | "auto"` | `'always'` | Send-button visibility. `'always'` (default) always shows it; `'auto'` shows it only when there's text/attachments (an empty composer hides it — Enter still submits). To hide it entirely (Enter-only), it's pure CSS: `::part(send){display:none}` — no prop needed. Restyle via `::part(send)`. The Stop button (`stoppable` + `loading`) is unaffected. |
+| `attach` | `attach` | `undefined | false | true` | `true` | When `false`, hides the built-in paperclip attach button even though the element otherwise supports attachments. Use this when a `+` menu in `toolbar-start` already exposes "Add files", to avoid a duplicate control. Defaults to `true`. |
 | `attachments` | — | `AttachmentData[] | undefined` | — | Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). |
 | `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins are the grouping/provenance of those items). Set as a JS property. |
 | `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. |
@@ -346,6 +379,24 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | `kai-toolbar-action` | `{ action: string }` | A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of the `<kai-action>` element that was clicked. |
 | `kai-value-change` | `{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }` | The input changed (fires on every edit). Carries the flattened `value` plus the structured `doc` + `entities`. |
 | `kai-voice` | — | The Voice (Mic) toolbar button was clicked. |
+
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `input-top` | inject | Inside the card, above the textarea (e.g. an inline status strip). For content above/below the whole card, use your own layout — that is light DOM you control. |
+| `toolbar-start` | inject | Leading controls in the input toolbar — where a + menu goes. |
+| `toolbar-end` | inject | Trailing controls in the toolbar, before the Send button. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-prompt-input::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(send)` | The send button. Restyle from outside, or hide it entirely (Enter-only) — hiding is pure CSS, which is why there is no `submit="never"`. <br>`kai-prompt-input::part(send) { display: none } /* Enter-only; or restyle: background, border-radius, … */` |
 
 #### Theming
 
@@ -367,7 +418,7 @@ Standalone prompt input with a send button. Use when you want just the input are
 | `role` | `role` | `undefined | "user" | "assistant"` | `'assistant'` | Convenience for simple cases when not passing a `message` object. |
 | `content` | `content` | `undefined | string` | — | Convenience content (used when `message` is not set). |
 | `markdown` | `markdown` | `undefined | false | true` | — | Force markdown on/off. Defaults to on for assistant, off for user. |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text/markdown sizing for the message body. |
+| `proseSize` | `prose-size` | `undefined | "sm" | "lg" | "xs" | "base"` | `'sm'` | Text/markdown sizing for the message body. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name used for fenced code blocks in the content. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting for code blocks (no Shiki loads). |
 | `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`). |
@@ -401,7 +452,7 @@ A single message row: renders markdown/plain content, reasoning, tool calls, att
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `content` | `content` | `string` | `''` | The markdown source to render. |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text/markdown sizing. |
+| `proseSize` | `prose-size` | `undefined | "sm" | "lg" | "xs" | "base"` | `'sm'` | Text/markdown sizing. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme for fenced code blocks. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting (no Shiki loads). |
 
@@ -431,7 +482,7 @@ No events.
 | `language` | `language` | `undefined | string` | — | Language grammar (e.g. `js`, `python`). Defaults to `tsx`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting (renders plain text, no Shiki). |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Code text sizing. |
+| `proseSize` | `prose-size` | `undefined | "sm" | "lg" | "xs" | "base"` | `'sm'` | Code text sizing. |
 
 #### Composed from
 
@@ -630,9 +681,9 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `suggestions` | — | `(string | { label: string; value?: undefined | string })[]` | `[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
-| `variant` | `variant` | `undefined | "ghost" | "default" | "outline"` | `'outline'` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
-| `size` | `size` | `undefined | "sm" | "lg" | "md" | "icon" | "icon-sm"` | — | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
+| `suggestions` | — | `(string | { label: string; value?: undefined | string; icon?: undefined | string })[]` | `[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
+| `variant` | `variant` | `undefined | "default" | "ghost" | "outline"` | `'outline'` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
+| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | — | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
 | `block` | `block` | `undefined | false | true` | `false` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined | string` | — | Substring to highlight within each suggestion. |
 
@@ -814,7 +865,7 @@ A mic button that records audio and optionally transcribes it via a host-supplie
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `variant` | `variant` | `LoaderVariant | undefined` | `'circular'` | The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`. |
-| `size` | `size` | `undefined | "sm" | "lg" | "md"` | `'md'` | Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. |
 | `text` | `text` | `undefined | string` | — | Label for the text-based variants. |
 
 #### Composed from
@@ -956,8 +1007,8 @@ No events.
 |----------|-----------|------|---------|-------|
 | `label` | `label` | `undefined | string` | — | Optional text beside the icon. |
 | `tooltip` | `tooltip` | `undefined | string` | — | Tooltip on hover. |
-| `variant` | `variant` | `undefined | "ghost" | "default" | "outline"` | `'ghost'` | Visual button style. |
-| `size` | `size` | `undefined | "sm" | "lg" | "md" | "icon" | "icon-sm"` | `'sm'` | Button size (use an `icon*` size for an icon-only checkpoint). |
+| `variant` | `variant` | `undefined | "default" | "ghost" | "outline"` | `'ghost'` | Visual button style. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | `'sm'` | Button size (use an `icon*` size for an icon-only checkpoint). |
 
 #### Events
 

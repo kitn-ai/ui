@@ -46,6 +46,18 @@ export interface CemCssProperty {
   default?: string;
 }
 
+export interface CemSlot {
+  name: string;
+  description?: string;
+}
+
+export interface CemCssPart {
+  name: string;
+  description?: string;
+  /** Our extension: a copy-paste styling example. */
+  recipe?: string;
+}
+
 export interface Declaration {
   tagName?: string;
   name: string;
@@ -55,6 +67,8 @@ export interface Declaration {
   attributes?: CemAttribute[];
   events?: CemEvent[];
   cssProperties?: CemCssProperty[];
+  slots?: CemSlot[];
+  cssParts?: CemCssPart[];
 }
 
 interface CemModule {

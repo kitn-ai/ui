@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 47 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 55 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/ui'`):
-All 47 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 55 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 47 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 55 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/ui/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (47 elements, generated from custom-elements.json)
+## Element reference (55 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -232,6 +232,55 @@ Every element also accepts the `theme` attribute. Array/object properties are ma
 
 ---
 
+### `kai-avatar` / `Avatar`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `src` | `src` | `undefined \| string` | Image URL/data-URI. When absent, the `fallback` initials show instead. |
+| `alt` | `alt` | `undefined \| string` | Alt text for the image. Defaults to `fallback`. |
+| `fallback` | `fallback` | `undefined \| string` | Short text shown when there's no image — usually initials (e.g. "RT", "AI"). |
+| `size` | `size` | `undefined \| "sm" \| "md" \| "lg"` | Size token: `sm` \| `md` (default) \| `lg`. |
+
+_No events._
+
+---
+
+### `kai-badge` / `Badge`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `variant` | `variant` | `undefined \| "default" \| "count" \| "citation"` | `default` (muted pill) · `count` (compact number badge) · `citation` (filled primary, for inline citation markers). Defaults to `default`. |
+
+_No events._
+
+---
+
+### `kai-button` / `Button`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `variant` | `variant` | `undefined \| "default" \| "subtle" \| "ghost" \| "outline" \| "destructive"` | Visual style. `default` (filled), `subtle` (muted text, hover tint — the toolbar icon look), `ghost` (transparent, hover fill), `outline`, or `destructive`. Defaults to `default`. |
+| `size` | `size` | `undefined \| "sm" \| "md" \| "lg" \| "icon" \| "icon-sm"` | Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`. |
+| `icon` | `icon` | `undefined \| string` | Leading icon: a named icon (e.g. `"mic"`, `"plus"`), an image URL/data-URI, or plain text. Renders before any slotted label. |
+| `iconTrailing` | `icon-trailing` | `undefined \| string` | Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). |
+| `label` | `label` | `undefined \| string` | Accessible name. REQUIRED for icon-only buttons (no visible text); ignored when you slot visible text, which already names the button. |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable the button (non-interactive, dimmed). |
+| `type` | `type` | `undefined \| "button" \| "submit" \| "reset"` | Native button `type`. Defaults to `button` (so it never submits a form). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-click` | `CustomEvent` | The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. |
+
+---
+
 ### `kai-card` / `Card`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -286,7 +335,7 @@ _No events._
 | `suggestions` | — | `undefined \| string[]` | Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property. |
 | `suggestionMode` | `suggestion-mode` | `undefined \| "submit" \| "fill"` | What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. |
 | `persistSuggestions` | `persist-suggestions` | `undefined \| false \| true` | Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. |
-| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Body/prose font scale for rendered markdown (`'xs' \| 'sm' \| 'base' \| 'lg'`). Defaults to `'sm'`. |
+| `proseSize` | `prose-size` | `undefined \| "sm" \| "lg" \| "xs" \| "base"` | Body/prose font scale for rendered markdown (`'xs' \| 'sm' \| 'base' \| 'lg'`). Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `chatTitle` | `chat-title` | `undefined \| string` | Optional header title shown on the left of the header. |
@@ -296,6 +345,12 @@ _No events._
 | `scrollButton` | `scroll-button` | `undefined \| false \| true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
 | `headerStart` | `header-start` | `undefined \| false \| true` | Whether the host has `slot="header-start"` content (left of the title) — set by the `<kai-chat>` facade so a custom control forces the header open. |
 | `headerEnd` | `header-end` | `undefined \| false \| true` | Whether the host has `slot="header-end"` content (right of the controls). |
+| `headerFull` | `header-full` | `undefined \| false \| true` | REPLACE — full custom header in place of the built-in title/model/context bar. |
+| `sidebar` | `sidebar` | `undefined \| false \| true` | INJECT — left sidebar column (e.g. a conversation list / your own nav). |
+| `empty` | `empty` | `undefined \| false \| true` | REPLACE — custom zero-state rendered in the message area while the thread is empty (replaces the empty message list only; the composer and its suggestions still render). |
+| `composer` | `composer` | `undefined \| false \| true` | REPLACE — full custom composer in place of the built-in prompt input. The projected content wires its own submit (the data-flow boundary). |
+| `composerActions` | `composer-actions` | `undefined \| false \| true` | INJECT — accessory row just above the composer (e.g. extra actions). |
+| `footer` | `footer` | `undefined \| false \| true` | INJECT — footer row below the composer (disclaimers, token meter, …). |
 | `search` | `search` | `undefined \| false \| true` | Show a Search (Globe) button in the input toolbar; fires a `search` event. |
 | `voice` | `voice` | `undefined \| false \| true` | Show a Voice (Mic) button in the input toolbar; fires a `voice` event. |
 | `triggers` | — | `undefined \| { char: string; kind: string; items?: undefined \| { id: string; label: string; icon?: undefined \| string; description?: undefined \| string; group?: undefined \| string; kind?: undefined \| string; promptText?: undefined \| string; data?: undefined \| Record<string, unknown> }[] }[]` | Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a JS property; forwarded to the input. |
@@ -324,8 +379,8 @@ _No events._
 |---|---|---|---|
 | `label` | `label` | `undefined \| string` | Optional text beside the icon. |
 | `tooltip` | `tooltip` | `undefined \| string` | Tooltip on hover. |
-| `variant` | `variant` | `undefined \| "ghost" \| "default" \| "outline"` | Visual button style. |
-| `size` | `size` | `undefined \| "sm" \| "lg" \| "md" \| "icon" \| "icon-sm"` | Button size (use an `icon*` size for an icon-only checkpoint). |
+| `variant` | `variant` | `undefined \| "default" \| "ghost" \| "outline"` | Visual button style. |
+| `size` | `size` | `undefined \| "sm" \| "md" \| "lg" \| "icon" \| "icon-sm"` | Button size (use an `icon*` size for an icon-only checkpoint). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -360,9 +415,28 @@ _No events._
 | `language` | `language` | `undefined \| string` | Language grammar (e.g. `js`, `python`). Defaults to `tsx`. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name. |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting (renders plain text, no Shiki). |
-| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Code text sizing. |
+| `proseSize` | `prose-size` | `undefined \| "sm" \| "lg" \| "xs" \| "base"` | Code text sizing. |
 
 _No events._
+
+---
+
+### `kai-command` / `Command`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `items` | — | `undefined \| { id: string; label: string; icon?: undefined \| string; description?: undefined \| string; group?: undefined \| string }[]` | Flat list of items. Set as a JS property — not an HTML attribute. |
+| `placeholder` | `placeholder` | `undefined \| string` | Placeholder text for the search input. |
+| `emptyLabel` | `empty-label` | `undefined \| string` | Label shown when no items match the current query. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-query-change` | `CustomEvent<{ value: string }>` | Fired on every keystroke in the search input. |
+| `kai-select` | `CustomEvent<{ id: string }>` | Fired when the user selects an item (click or Enter). |
 
 ---
 
@@ -376,7 +450,7 @@ _No events._
 | `compareId` | `compare-id` | `undefined \| string` | Stable id correlating every emitted event. Attribute: `compare-id`. |
 | `selection` | — | `undefined \| Record<string, unknown>` | Re-hydrate / control the user's pick. Set as a JS PROPERTY: `el.selection = { chosenId, rejectedIds }`. Renders the collapsed winner. |
 | `layout` | `layout` | `undefined \| "auto" \| "columns" \| "tabs"` | Layout: `'auto'` (default — columns when wide, tabs when narrow, by CONTAINER width) \| `'columns'` (side-by-side) \| `'tabs'` (pills to switch). Attribute: `layout`. |
-| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Prose/text size for the rendered candidates. Attribute: `prose-size`. |
+| `proseSize` | `prose-size` | `undefined \| "sm" \| "lg" \| "xs" \| "base"` | Prose/text size for the rendered candidates. Attribute: `prose-size`. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme for code blocks in the candidates. Attribute: `code-theme`. |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Whether code blocks are syntax-highlighted. Attribute: `code-highlight`. |
 
@@ -577,6 +651,19 @@ _No events._
 
 ---
 
+### `kai-icon` / `Icon`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `name` | `name` | `undefined \| string` | A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. |
+| `size` | `size` | `undefined \| "sm" \| "md" \| "lg"` | Size token: `sm` \| `md` (default) \| `lg`. |
+
+_No events._
+
+---
+
 ### `kai-image` / `Image`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -612,7 +699,7 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `variant` | `variant` | `undefined \| "circular" \| "classic" \| "pulse" \| "pulse-dot" \| "dots" \| "typing" \| "wave" \| "bars" \| "terminal" \| "text-blink" \| "text-shimmer" \| "loading-dots"` | The animation style: `'circular' \| 'classic' \| 'pulse' \| 'pulse-dot' \| 'dots' \| 'typing' \| 'wave' \| 'bars' \| 'terminal' \| 'text-blink' \| 'text-shimmer' \| 'loading-dots'`. Defaults to `'circular'`. |
-| `size` | `size` | `undefined \| "sm" \| "lg" \| "md"` | Loader size: `'sm' \| 'md' \| 'lg'`. Defaults to `'md'`. |
+| `size` | `size` | `undefined \| "sm" \| "md" \| "lg"` | Loader size: `'sm' \| 'md' \| 'lg'`. Defaults to `'md'`. |
 | `text` | `text` | `undefined \| string` | Label for the text-based variants. |
 
 _No events._
@@ -626,11 +713,32 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `content` | `content` | `string` | The markdown source to render. |
-| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Text/markdown sizing. |
+| `proseSize` | `prose-size` | `undefined \| "sm" \| "lg" \| "xs" \| "base"` | Text/markdown sizing. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme for fenced code blocks. |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting (no Shiki loads). |
 
 _No events._
+
+---
+
+### `kai-menu` / `Menu`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `items` | — | `undefined \| { id?: undefined \| string; label?: undefined \| string; icon?: undefined \| string; shortcut?: undefined \| string; checked?: undefined \| false \| true; disabled?: undefined \| false \| true; separator?: undefined \| false \| true; heading?: undefined \| false \| true; items?: undefined \| Record<string, unknown>[] }[]` | Tree of menu items. Set as a JS property — not an HTML attribute. |
+| `placement` | `placement` | `undefined \| string` | Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). |
+| `triggerIcon` | `trigger-icon` | `undefined \| string` | Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case — a slotted trigger overrides it. |
+| `triggerLabel` | `trigger-label` | `undefined \| string` | Built-in trigger: a text label (e.g. `"High"`). |
+| `triggerIconTrailing` | `trigger-icon-trailing` | `undefined \| string` | Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). |
+| `label` | `label` | `undefined \| string` | Accessible name for an icon-only trigger (no visible label). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-select` | `CustomEvent<{ id: string; checked?: undefined \| false \| true }>` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
 
 ---
 
@@ -644,7 +752,7 @@ _No events._
 | `role` | `role` | `undefined \| "user" \| "assistant"` | Convenience for simple cases when not passing a `message` object. |
 | `content` | `content` | `undefined \| string` | Convenience content (used when `message` is not set). |
 | `markdown` | `markdown` | `undefined \| false \| true` | Force markdown on/off. Defaults to on for assistant, off for user. |
-| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` | Text/markdown sizing for the message body. |
+| `proseSize` | `prose-size` | `undefined \| "sm" \| "lg" \| "xs" \| "base"` | Text/markdown sizing for the message body. |
 | `codeTheme` | `code-theme` | `undefined \| string` | Shiki theme name used for fenced code blocks in the content. |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` | Disable syntax highlighting for code blocks (no Shiki loads). |
 | `actionsReveal` | `actions-reveal` | `undefined \| "always" \| "hover"` | Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`). |
@@ -673,6 +781,24 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-model-change` | `CustomEvent<{ modelId: string }>` | A model was selected. |
+
+---
+
+### `kai-notice` / `Notice`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `severity` | `severity` | `undefined \| "neutral" \| "info" \| "warning" \| "error" \| "success"` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `icon` | `icon` | `undefined \| string` | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
+| `dismissible` | `dismissible` | `undefined \| false \| true` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-dismiss` | `CustomEvent` | The notice was dismissed via its × (it also hides itself). |
 
 ---
 
@@ -709,6 +835,8 @@ _No events._
 | `search` | `search` | `undefined \| false \| true` | Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. |
 | `voice` | `voice` | `undefined \| false \| true` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
 | `stoppable` | `stoppable` | `undefined \| false \| true` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. |
+| `submit` | `submit` | `undefined \| "always" \| "auto"` | Send-button visibility. `'always'` (default) always shows it; `'auto'` shows it only when there's text/attachments (an empty composer hides it — Enter still submits). To hide it entirely (Enter-only), it's pure CSS: `::part(send){display:none}` — no prop needed. Restyle via `::part(send)`. The Stop button (`stoppable` + `loading`) is unaffected. |
+| `attach` | `attach` | `undefined \| false \| true` | When `false`, hides the built-in paperclip attach button even though the element otherwise supports attachments. Use this when a `+` menu in `toolbar-start` already exposes "Add files", to avoid a duplicate control. Defaults to `true`. |
 | `attachments` | — | `undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]` | Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). |
 | `triggers` | — | `undefined \| { char: string; kind: string; items?: undefined \| { id: string; label: string; icon?: undefined \| string; description?: undefined \| string; group?: undefined \| string; kind?: undefined \| string; promptText?: undefined \| string; data?: undefined \| Record<string, unknown> }[] }[]` | Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins are the grouping/provenance of those items). Set as a JS property. |
 | `kindIcons` | — | `undefined \| Record<string, string>` | Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. |
@@ -845,8 +973,8 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `for` | `for` | `undefined \| string` | CSS id of the scroll container to control. When omitted the element walks up the DOM (outside its own shadow root) to find the nearest scrollable ancestor. Mirrors the `for` convention of `<label for="...">`. |
-| `variant` | `variant` | `undefined \| "ghost" \| "default" \| "outline"` | Button visual variant: `'outline' \| 'ghost' \| 'default'`. Defaults to `'outline'`. |
-| `size` | `size` | `undefined \| "sm" \| "lg" \| "md" \| "icon" \| "icon-sm"` | Button size token. Defaults to `'icon'` (square). |
+| `variant` | `variant` | `undefined \| "default" \| "ghost" \| "outline"` | Button visual variant: `'outline' \| 'ghost' \| 'default'`. Defaults to `'outline'`. |
+| `size` | `size` | `undefined \| "sm" \| "md" \| "lg" \| "icon" \| "icon-sm"` | Button size token. Defaults to `'icon'` (square). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -904,9 +1032,9 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `suggestions` | — | `(string \| { label: string; value?: undefined \| string })[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
-| `variant` | `variant` | `undefined \| "ghost" \| "default" \| "outline"` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
-| `size` | `size` | `undefined \| "sm" \| "lg" \| "md" \| "icon" \| "icon-sm"` | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
+| `suggestions` | — | `(string \| { label: string; value?: undefined \| string; icon?: undefined \| string })[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
+| `variant` | `variant` | `undefined \| "default" \| "ghost" \| "outline"` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
+| `size` | `size` | `undefined \| "sm" \| "md" \| "lg" \| "icon" \| "icon-sm"` | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
 | `block` | `block` | `undefined \| false \| true` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined \| string` | Substring to highlight within each suggestion. |
 
@@ -1018,6 +1146,19 @@ _No events._
 
 ---
 
+### `kai-tooltip` / `Tooltip`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `content` | `content` | `undefined \| string` | The hint text shown on hover/focus of the slotted trigger. |
+| `openDelay` | `open-delay` | `undefined \| number` | Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless. |
+
+_No events._
+
+---
+
 ### `kai-voice-input` / `VoiceInput`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -1051,7 +1192,7 @@ _No events._
 | `loading` | `loading` | `undefined \| false \| true` |  |
 | `suggestions` | — | `undefined \| string[]` |  |
 | `suggestionMode` | `suggestion-mode` | `undefined \| "submit" \| "fill"` |  |
-| `proseSize` | `prose-size` | `undefined \| "xs" \| "sm" \| "base" \| "lg"` |  |
+| `proseSize` | `prose-size` | `undefined \| "sm" \| "lg" \| "xs" \| "base"` |  |
 | `codeTheme` | `code-theme` | `undefined \| string` |  |
 | `codeHighlight` | `code-highlight` | `undefined \| false \| true` |  |
 | `chatTitle` | `chat-title` | `undefined \| string` |  |

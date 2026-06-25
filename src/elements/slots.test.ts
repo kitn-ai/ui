@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { CHAT_SLOTS, PROMPT_INPUT_SLOTS, PROMPT_INPUT_PARTS, readSlots } from './slots';
+import { readdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import {
+  CHAT_SLOTS,
+  PROMPT_INPUT_SLOTS,
+  PROMPT_INPUT_PARTS,
+  ELEMENT_COMPOSITION,
+  readSlots,
+} from './slots';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
 
 describe('CHAT_SLOTS registry', () => {
   it('lists the eight kai-chat slots, in order, with unique names', () => {
@@ -80,5 +91,68 @@ describe('PROMPT_INPUT_PARTS registry', () => {
     const send = PROMPT_INPUT_PARTS.find((p) => p.name === 'send');
     expect(send?.recipe).toMatch(/::part\(send\)/);
     expect(send?.recipe).toMatch(/display:\s*none/);
+  });
+});
+
+describe('ELEMENT_COMPOSITION registry (single source of truth the build extracts)', () => {
+  // Every `::part` a consumer can style is declared by writing `part="name"` in a
+  // facade/component. The registry must name each one so docs + the kai MCP can
+  // surface it; this guard fails the build if a part is added in code but not here.
+  const PART_RE = /part="([a-z][a-z0-9-]*)"/g;
+
+  function partNamesInSource(): Set<string> {
+    const found = new Set<string>();
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const p = join(dir, entry.name);
+        if (entry.isDirectory()) {
+          walk(p);
+          continue;
+        }
+        if (!entry.name.endsWith('.tsx') && !entry.name.endsWith('.ts')) continue;
+        if (/\.(test|stories)\.tsx?$/.test(entry.name)) continue;
+        for (const m of readFileSync(p, 'utf8').matchAll(PART_RE)) found.add(m[1]);
+      }
+    };
+    for (const d of ['elements', 'ui', 'components']) walk(join(HERE, '..', d));
+    return found;
+  }
+
+  function registeredPartNames(): Set<string> {
+    const out = new Set<string>();
+    for (const def of Object.values(ELEMENT_COMPOSITION)) {
+      for (const part of def.parts ?? []) out.add(part.name);
+      for (const slot of def.slots ?? []) if (slot.part) out.add(slot.name);
+    }
+    return out;
+  }
+
+  it('registers every ::part declared anywhere in the source (drift guard)', () => {
+    const inCode = partNamesInSource();
+    const registered = registeredPartNames();
+    expect(inCode.size).toBeGreaterThan(0); // sanity: the scan actually found parts
+    const missing = [...inCode].filter((name) => !registered.has(name)).sort();
+    expect(missing).toEqual([]);
+  });
+
+  it('maps each composable element to its slots/parts arrays', () => {
+    expect(Object.keys(ELEMENT_COMPOSITION).sort()).toEqual([
+      'kai-badge',
+      'kai-button',
+      'kai-chat',
+      'kai-icon',
+      'kai-prompt-input',
+    ]);
+    expect(ELEMENT_COMPOSITION['kai-chat'].slots).toBe(CHAT_SLOTS);
+    expect(ELEMENT_COMPOSITION['kai-prompt-input'].slots).toBe(PROMPT_INPUT_SLOTS);
+    expect(ELEMENT_COMPOSITION['kai-prompt-input'].parts).toBe(PROMPT_INPUT_PARTS);
+  });
+
+  it('every registered part carries a non-empty doc contract', () => {
+    for (const def of Object.values(ELEMENT_COMPOSITION)) {
+      for (const part of def.parts ?? []) {
+        expect(part.doc.trim().length).toBeGreaterThan(0);
+      }
+    }
   });
 });

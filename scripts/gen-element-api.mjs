@@ -172,6 +172,58 @@ for (const el of elements) {
   });
 }
 
+// ---- attach composition seams (slots + ::part) from the slots.ts registry ----
+// This script runs under plain node, so it can't `import` the TS registry; instead
+// read the ELEMENT_COMPOSITION literal straight from the AST (slots.ts is already
+// in the program — chat.tsx imports it). Generic literal eval covering the
+// registry's pure-data shape: string/bool/number/array/object/identifier-ref.
+{
+  const slotsSf = program.getSourceFile(resolve(elementsDir, 'slots.ts'));
+  if (slotsSf) {
+    const symbols = new Map();
+    for (const st of slotsSf.statements) {
+      if (ts.isVariableStatement(st)) {
+        for (const d of st.declarationList.declarations) {
+          if (ts.isIdentifier(d.name) && d.initializer) symbols.set(d.name.text, d.initializer);
+        }
+      }
+    }
+    const evalNode = (node) => {
+      if (!node) return undefined;
+      if (ts.isStringLiteralLike(node)) return node.text;
+      if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
+      if (node.kind === ts.SyntaxKind.FalseKeyword) return false;
+      if (ts.isNumericLiteral(node)) return Number(node.text);
+      if (ts.isArrayLiteralExpression(node)) return node.elements.map(evalNode);
+      if (ts.isObjectLiteralExpression(node)) {
+        const obj = {};
+        for (const p of node.properties) {
+          if (ts.isPropertyAssignment(p) && (ts.isIdentifier(p.name) || ts.isStringLiteralLike(p.name))) {
+            obj[p.name.text] = evalNode(p.initializer);
+          }
+        }
+        return obj;
+      }
+      if (ts.isAsExpression(node) || ts.isParenthesizedExpression(node)) return evalNode(node.expression);
+      if (ts.isIdentifier(node)) return evalNode(symbols.get(node.text));
+      return undefined;
+    };
+    const composition = evalNode(symbols.get('ELEMENT_COMPOSITION')) ?? {};
+    for (const el of elements) {
+      const comp = composition[el.tag];
+      if (!comp) continue;
+      const slots = comp.slots ?? [];
+      // Slots flagged `part: true` are ALSO styleable parts.
+      const slotParts = slots.filter((s) => s.part).map((s) => ({ name: s.name, doc: s.doc }));
+      const parts = [...(comp.parts ?? []), ...slotParts];
+      if (slots.length) el.slots = slots;
+      if (parts.length) el.parts = parts;
+    }
+  } else {
+    console.warn('⚠ slots.ts not found in program — slots/parts not emitted');
+  }
+}
+
 function tagToClass(tag) {
   return tag.split('-').map((s) => s[0].toUpperCase() + s.slice(1)).join('') + 'Element';
 }
@@ -208,6 +260,17 @@ const cem = {
         description: e.description,
       })),
       cssProperties: el.tokens.map((name) => ({ name })),
+      // Composition seams (CEM-standard `slots`/`cssParts`; `recipe` is our extension).
+      ...(el.slots ? { slots: el.slots.map((s) => ({ name: s.name, description: s.doc })) } : {}),
+      ...(el.parts
+        ? {
+            cssParts: el.parts.map((p) => ({
+              name: p.name,
+              description: p.doc,
+              ...(p.recipe ? { recipe: p.recipe } : {}),
+            })),
+          }
+        : {}),
     })),
   }],
 };

@@ -83,6 +83,59 @@ export const Attachments = createWebComponent<AttachmentsProps>(
   { onRemove: 'kai-remove' },
 );
 
+export interface AvatarProps extends WebComponentProps {
+  /** Image URL/data-URI. When absent, the `fallback` initials show instead. */
+  src?: string;
+  /** Alt text for the image. Defaults to `fallback`. */
+  alt?: string;
+  /** Short text shown when there's no image — usually initials (e.g. "RT", "AI"). */
+  fallback?: string;
+  /** Size token: `sm` | `md` (default) | `lg`. */
+  size?: "sm" | "md" | "lg";
+}
+
+export const Avatar = createWebComponent<AvatarProps>(
+  'kai-avatar',
+  ["theme","src","alt","fallback","size"],
+  {  },
+);
+
+export interface BadgeProps extends WebComponentProps {
+  /** `default` (muted pill) · `count` (compact number badge) · `citation` (filled primary, for inline citation markers). Defaults to `default`. */
+  variant?: "default" | "count" | "citation";
+}
+
+export const Badge = createWebComponent<BadgeProps>(
+  'kai-badge',
+  ["theme","variant"],
+  {  },
+);
+
+export interface ButtonProps extends WebComponentProps {
+  /** Visual style. `default` (filled), `subtle` (muted text, hover tint — the toolbar icon look), `ghost` (transparent, hover fill), `outline`, or `destructive`. Defaults to `default`. */
+  variant?: "default" | "subtle" | "ghost" | "outline" | "destructive";
+  /** Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`. */
+  size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
+  /** Leading icon: a named icon (e.g. `"mic"`, `"plus"`), an image URL/data-URI, or plain text. Renders before any slotted label. */
+  icon?: string;
+  /** Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). */
+  iconTrailing?: string;
+  /** Accessible name. REQUIRED for icon-only buttons (no visible text); ignored when you slot visible text, which already names the button. */
+  label?: string;
+  /** Disable the button (non-interactive, dimmed). */
+  disabled?: boolean;
+  /** Native button `type`. Defaults to `button` (so it never submits a form). */
+  type?: "button" | "submit" | "reset";
+  /** The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. */
+  onClick?: (event: CustomEvent) => void;
+}
+
+export const Button = createWebComponent<ButtonProps>(
+  'kai-button',
+  ["theme","variant","size","icon","iconTrailing","label","disabled","type"],
+  { onClick: 'kai-click' },
+);
+
 export interface CardProps extends WebComponentProps {
   /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
   heading?: string;
@@ -142,7 +195,7 @@ export interface ChatProps extends WebComponentProps {
   /** Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. */
   persistSuggestions?: boolean;
   /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. */
-  proseSize?: "xs" | "sm" | "base" | "lg";
+  proseSize?: "sm" | "lg" | "xs" | "base";
   /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
   codeTheme?: string;
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
@@ -161,6 +214,18 @@ export interface ChatProps extends WebComponentProps {
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
+  /** REPLACE — full custom header in place of the built-in title/model/context bar. */
+  headerFull?: boolean;
+  /** INJECT — left sidebar column (e.g. a conversation list / your own nav). */
+  sidebar?: boolean;
+  /** REPLACE — custom zero-state rendered in the message area while the thread is empty (replaces the empty message list only; the composer and its suggestions still render). */
+  empty?: boolean;
+  /** REPLACE — full custom composer in place of the built-in prompt input. The projected content wires its own submit (the data-flow boundary). */
+  composer?: boolean;
+  /** INJECT — accessory row just above the composer (e.g. extra actions). */
+  composerActions?: boolean;
+  /** INJECT — footer row below the composer (disclaimers, token meter, …). */
+  footer?: boolean;
   /** Show a Search (Globe) button in the input toolbar; fires a `search` event. */
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
@@ -189,7 +254,7 @@ export interface ChatProps extends WebComponentProps {
 
 export const Chat = createWebComponent<ChatProps>(
   'kai-chat',
-  ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","search","voice","triggers","kindIcons","actionsReveal"],
+  ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","sidebar","empty","composer","composerActions","footer","search","voice","triggers","kindIcons","actionsReveal"],
   { onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSearch: 'kai-search', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );
 
@@ -199,9 +264,9 @@ export interface CheckpointProps extends WebComponentProps {
   /** Tooltip on hover. */
   tooltip?: string;
   /** Visual button style. */
-  variant?: "ghost" | "default" | "outline";
+  variant?: "default" | "ghost" | "outline";
   /** Button size (use an `icon*` size for an icon-only checkpoint). */
-  size?: "sm" | "lg" | "md" | "icon" | "icon-sm";
+  size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
   /** The checkpoint was clicked. */
   onSelect?: (event: CustomEvent) => void;
 }
@@ -239,13 +304,32 @@ export interface CodeBlockProps extends WebComponentProps {
   /** Disable syntax highlighting (renders plain text, no Shiki). */
   codeHighlight?: boolean;
   /** Code text sizing. */
-  proseSize?: "xs" | "sm" | "base" | "lg";
+  proseSize?: "sm" | "lg" | "xs" | "base";
 }
 
 export const CodeBlock = createWebComponent<CodeBlockProps>(
   'kai-code-block',
   ["theme","code","language","codeTheme","codeHighlight","proseSize"],
   {  },
+);
+
+export interface CommandProps extends WebComponentProps {
+  /** Flat list of items. Set as a JS property — not an HTML attribute. */
+  items?: { id: string; label: string; icon?: string; description?: string; group?: string }[];
+  /** Placeholder text for the search input. */
+  placeholder?: string;
+  /** Label shown when no items match the current query. */
+  emptyLabel?: string;
+  /** Fired on every keystroke in the search input. */
+  onQueryChange?: (event: CustomEvent<{ value: string }>) => void;
+  /** Fired when the user selects an item (click or Enter). */
+  onSelect?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export const Command = createWebComponent<CommandProps>(
+  'kai-command',
+  ["theme","items","placeholder","emptyLabel"],
+  { onQueryChange: 'kai-query-change', onSelect: 'kai-select' },
 );
 
 export interface CompareProps extends WebComponentProps {
@@ -258,7 +342,7 @@ export interface CompareProps extends WebComponentProps {
   /** Layout: `'auto'` (default — columns when wide, tabs when narrow, by CONTAINER width) | `'columns'` (side-by-side) | `'tabs'` (pills to switch). Attribute: `layout`. */
   layout?: "auto" | "columns" | "tabs";
   /** Prose/text size for the rendered candidates. Attribute: `prose-size`. */
-  proseSize?: "xs" | "sm" | "base" | "lg";
+  proseSize?: "sm" | "lg" | "xs" | "base";
   /** Shiki theme for code blocks in the candidates. Attribute: `code-theme`. */
   codeTheme?: string;
   /** Whether code blocks are syntax-highlighted. Attribute: `code-highlight`. */
@@ -485,6 +569,19 @@ export const Form = createWebComponent<FormProps>(
   {  },
 );
 
+export interface IconProps extends WebComponentProps {
+  /** A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. */
+  name?: string;
+  /** Size token: `sm` | `md` (default) | `lg`. */
+  size?: "sm" | "md" | "lg";
+}
+
+export const Icon = createWebComponent<IconProps>(
+  'kai-icon',
+  ["theme","name","size"],
+  {  },
+);
+
 export interface ImageProps extends WebComponentProps {
   /** Base64-encoded image data (pair with `media-type`). */
   base64?: string;
@@ -519,7 +616,7 @@ export interface LoaderProps extends WebComponentProps {
   /** The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`. */
   variant?: "circular" | "classic" | "pulse" | "pulse-dot" | "dots" | "typing" | "wave" | "bars" | "terminal" | "text-blink" | "text-shimmer" | "loading-dots";
   /** Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. */
-  size?: "sm" | "lg" | "md";
+  size?: "sm" | "md" | "lg";
   /** Label for the text-based variants. */
   text?: string;
 }
@@ -534,7 +631,7 @@ export interface MarkdownProps extends WebComponentProps {
   /** The markdown source to render. */
   content: string;
   /** Text/markdown sizing. */
-  proseSize?: "xs" | "sm" | "base" | "lg";
+  proseSize?: "sm" | "lg" | "xs" | "base";
   /** Shiki theme for fenced code blocks. */
   codeTheme?: string;
   /** Disable syntax highlighting (no Shiki loads). */
@@ -547,6 +644,29 @@ export const Markdown = createWebComponent<MarkdownProps>(
   {  },
 );
 
+export interface MenuProps extends WebComponentProps {
+  /** Tree of menu items. Set as a JS property — not an HTML attribute. */
+  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
+  /** Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). */
+  placement?: string;
+  /** Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case — a slotted trigger overrides it. */
+  triggerIcon?: string;
+  /** Built-in trigger: a text label (e.g. `"High"`). */
+  triggerLabel?: string;
+  /** Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). */
+  triggerIconTrailing?: string;
+  /** Accessible name for an icon-only trigger (no visible label). */
+  label?: string;
+  /** Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. */
+  onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
+}
+
+export const Menu = createWebComponent<MenuProps>(
+  'kai-menu',
+  ["theme","items","placement","triggerIcon","triggerLabel","triggerIconTrailing","label"],
+  { onSelect: 'kai-select' },
+);
+
 export interface MessageProps extends WebComponentProps {
   /** The full message object. Set as a JS property. */
   message?: { id: string; role: "user" | "assistant"; content: string; reasoning?: { text: string; label?: string }; tools?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string }[]; attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[]; actions?: ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" };
@@ -557,7 +677,7 @@ export interface MessageProps extends WebComponentProps {
   /** Force markdown on/off. Defaults to on for assistant, off for user. */
   markdown?: boolean;
   /** Text/markdown sizing for the message body. */
-  proseSize?: "xs" | "sm" | "base" | "lg";
+  proseSize?: "sm" | "lg" | "xs" | "base";
   /** Shiki theme name used for fenced code blocks in the content. */
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
@@ -591,6 +711,23 @@ export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
   'kai-model-switcher',
   ["theme","models","currentModel"],
   { onModelChange: 'kai-model-change' },
+);
+
+export interface NoticeProps extends WebComponentProps {
+  /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). */
+  severity?: "neutral" | "info" | "warning" | "error" | "success";
+  /** Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. */
+  icon?: string;
+  /** Show a dismiss (×) that hides the notice and emits `kai-dismiss`. */
+  dismissible?: boolean;
+  /** The notice was dismissed via its × (it also hides itself). */
+  onDismiss?: (event: CustomEvent) => void;
+}
+
+export const Notice = createWebComponent<NoticeProps>(
+  'kai-notice',
+  ["theme","severity","icon","dismissible"],
+  { onDismiss: 'kai-dismiss' },
 );
 
 export interface PopoverProps extends WebComponentProps {
@@ -629,6 +766,10 @@ export interface PromptInputProps extends WebComponentProps {
   voice?: boolean;
   /** When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. */
   stoppable?: boolean;
+  /** Send-button visibility. `'always'` (default) always shows it; `'auto'` shows it only when there's text/attachments (an empty composer hides it — Enter still submits). To hide it entirely (Enter-only), it's pure CSS: `::part(send){display:none}` — no prop needed. Restyle via `::part(send)`. The Stop button (`stoppable` + `loading`) is unaffected. */
+  submit?: "always" | "auto";
+  /** When `false`, hides the built-in paperclip attach button even though the element otherwise supports attachments. Use this when a `+` menu in `toolbar-start` already exposes "Add files", to avoid a duplicate control. Defaults to `true`. */
+  attach?: boolean;
   /** Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). */
   attachments?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
   /** Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins are the grouping/provenance of those items). Set as a JS property. */
@@ -653,7 +794,7 @@ export interface PromptInputProps extends WebComponentProps {
 
 export const PromptInput = createWebComponent<PromptInputProps>(
   'kai-prompt-input',
-  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","search","voice","stoppable","attachments","triggers","kindIcons"],
+  ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","search","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
   { onSearch: 'kai-search', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );
 
@@ -773,9 +914,9 @@ export interface ScrollButtonProps extends WebComponentProps {
   /** CSS id of the scroll container to control. When omitted the element walks up the DOM (outside its own shadow root) to find the nearest scrollable ancestor. Mirrors the `for` convention of `<label for="...">`. */
   for?: string;
   /** Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to `'outline'`. */
-  variant?: "ghost" | "default" | "outline";
+  variant?: "default" | "ghost" | "outline";
   /** Button size token. Defaults to `'icon'` (square). */
-  size?: "sm" | "lg" | "md" | "icon" | "icon-sm";
+  size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
   /** Emitted when the user clicks the button and `scrollToBottom()` is called. Carries no detail — consumers use it to know a manual scroll occurred. */
   onScroll?: (event: CustomEvent) => void;
 }
@@ -833,11 +974,11 @@ export const Sources = createWebComponent<SourcesProps>(
 
 export interface SuggestionsProps extends WebComponentProps {
   /** The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. */
-  suggestions: (string | { label: string; value?: undefined | string })[];
+  suggestions: (string | { label: string; value?: undefined | string; icon?: undefined | string })[];
   /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
-  variant?: "ghost" | "default" | "outline";
+  variant?: "default" | "ghost" | "outline";
   /** Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). */
-  size?: "sm" | "lg" | "md" | "icon" | "icon-sm";
+  size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
   /** Substring to highlight within each suggestion. */
@@ -956,6 +1097,19 @@ export const Tool = createWebComponent<ToolProps>(
   {  },
 );
 
+export interface TooltipProps extends WebComponentProps {
+  /** The hint text shown on hover/focus of the slotted trigger. */
+  content?: string;
+  /** Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless. */
+  openDelay?: number;
+}
+
+export const Tooltip = createWebComponent<TooltipProps>(
+  'kai-tooltip',
+  ["theme","content","openDelay"],
+  {  },
+);
+
 export interface VoiceInputProps extends WebComponentProps {
   /** Transcriber the host supplies — records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event. */
   transcribe?: (audio: Blob) => Promise<string>;
@@ -987,7 +1141,7 @@ export interface WorkspaceProps extends WebComponentProps {
   loading?: boolean;
   suggestions?: string[];
   suggestionMode?: "submit" | "fill";
-  proseSize?: "xs" | "sm" | "base" | "lg";
+  proseSize?: "sm" | "lg" | "xs" | "base";
   codeTheme?: string;
   codeHighlight?: boolean;
   chatTitle?: string;

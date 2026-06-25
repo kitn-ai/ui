@@ -32,3 +32,30 @@ describe('component_reference', () => {
     expect(text).toMatch(/kai-/); // names a valid tag
   });
 });
+
+describe('component_reference — composition seams (slots + ::part)', () => {
+  const textFor = async (name: string) => {
+    const out = await reference.handler({ name });
+    return (out.content as { type: string; text: string }[])[0].text;
+  };
+
+  it('documents kai-chat composition slots (the consumer fills these)', async () => {
+    const text = await textFor('kai-chat');
+    expect(text).toMatch(/### Composition slots/);
+    expect(text).toMatch(/\bcomposer\b/);
+    expect(text).toMatch(/\bsidebar\b/);
+  });
+
+  it('documents kai-prompt-input styleable ::part with its copy-paste recipe', async () => {
+    const text = await textFor('kai-prompt-input');
+    expect(text).toMatch(/### Styleable parts/);
+    expect(text).toMatch(/::part\(send\)/);
+    expect(text).toMatch(/display:\s*none/);
+  });
+
+  it('documents the kai-button styleable ::part', async () => {
+    const text = await textFor('kai-button');
+    expect(text).toMatch(/### Styleable parts/);
+    expect(text).toMatch(/::part\(button\)/);
+  });
+});
