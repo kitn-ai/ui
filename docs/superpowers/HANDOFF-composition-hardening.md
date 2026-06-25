@@ -6,10 +6,26 @@
 
 ---
 
+## 0.0 LATEST — `::part` discoverability + a build:api P0 fix (UNCOMMITTED, on top of `c1981e9`)
+Done after the `c1981e9` snapshot below. Tree dirty; Rob reviews before commit.
+
+**Shipped — `::part`/slot discoverability (queue item #2, now DONE):**
+- `slots.ts` is now the single registry the build extracts: added `ELEMENT_COMPOSITION` (tag → `{slots, parts}`) + `BUTTON_PARTS`/`BADGE_PARTS`/`ICON_PARTS` (the parts that existed only in facade code). A `slots.test.ts` **drift guard** scans every `part="…"` in `src/` and fails if one isn't registered.
+- `gen-element-api.mjs` reads `ELEMENT_COMPOSITION` from the AST (can't `import` TS under plain node) and emits **CEM-standard `slots` + `cssParts`** (with a `recipe` extension) into `custom-elements.json`, plus `slots`/`parts` into `element-meta.json`. Slots flagged `part:true` also become parts.
+- Surfaced in: `docs/web-components.md` (Slots + Styleable-parts tables), `llms-full.txt`, and the **`kai` MCP `component_reference`** (new "Composition slots" + "Styleable parts (`::part`)" sections with the copy-paste recipe). 22 node tests green (15 slots + 7 reference).
+
+**Fixed — pre-existing P0: `build:api` was crashing (stack overflow).** `renderType` in `scripts/_ts-helpers.mjs` inlined every named type with no cycle guard, so the self-referential `KaiMenuItem.items` / `FileTreeNode.children` recursed forever. Broken since `kai-menu` landed → `element-meta.json` was **8 elements stale** (missing avatar/badge/button/command/icon/menu/notice/tooltip). Added a `seen`-set cycle guard (a self-reference truncates to `Record<string, unknown>` — self-contained, tsc-valid). `build:api` now emits **55 elements**; **typecheck 4/4 green**. The regen brought the 8 missing elements into the React wrappers / `element-types.d.ts` / docs / llms — a large but correct diff.
+
+**Test status (verified):** the only real failure my regen caused was `tests/stories/element-controls.test.ts` (proseSize) — TS union member order tracks the checker's global type-id ordering and shifted when 8 elements were added; fixed by asserting the option SET (order is cosmetic). **Pre-existing, NOT mine (don't chase):** the Storybook *vitest browser* project is flaky under full parallel load (failure count varied 46↔80 across identical runs; story files pass in isolation on clean HEAD too), and `chat-slots › Inject` has an axe a11y violation that reproduces on clean HEAD. Neither is the commit gate (§5 = `tsc` + the IVPs).
+
+**New follow-up:** `docs/web-components.md` has no authored headings for the 8 new elements, so the generator can't inject their Slots/Parts tables there (the CEM + MCP + `llms-full.txt` DO cover them). Author headings to complete the human docs.
+
+---
+
 ## 0. TL;DR — what to do next
 Nothing is half-finished. Pick from the queue in §6. The likely next pieces, in order of leverage:
 1. **Extend the `slot="icon"` escape hatch** to the other icon-bearing props (`kai-suggestions`, `kai-notice`) — kai-button already has it; same pattern.
-2. **`::part` discoverability** (issue #106-adjacent / task "#6"): wire the `PartDef` registry → element-meta → docs → the `kai` MCP, audited across all elements' parts.
+2. ~~**`::part` discoverability**~~ — **DONE** (see §0.0). Remaining sub-item: author `docs/web-components.md` headings for the 8 new elements so their Slots/Parts tables get injected.
 3. **Surface-token migration**: the ~10 remaining `bg-muted/NN` *surfaces* → `bg-surface` (only `prompt-input` is migrated).
 4. **The real graduation** (separate, not started): the audit-driven production rollout starting at `kai-conversations` (audit P1, see `docs/superpowers/specs/2026-06-23-composition-seams-audit.md`). Unblocks issue #106.
 
@@ -80,7 +96,7 @@ Primitives demo: `src/elements/primitives.stories.tsx` → `Spikes/New Primitive
 
 ## 6. Queued work (none urgent; pick by leverage)
 - Extend `slot="icon"` to `kai-suggestions` and `kai-notice` (kai-button has it).
-- **`::part` discoverability** — `PartDef` registry → `gen-element-api.mjs` emits slots+parts into `element-meta.json` → docs table (`gen-web-components-md.mjs`) + the `kai` MCP `component_reference` (`src/agent-tooling/mcp/tools/reference.ts`, which does NOT read element-meta today). Audit every `part=`/`part:true` across elements (currently: `send` on prompt-input; `sidebar`/`header`/`footer` on kai-chat via `CHAT_SLOTS.part`; `button`/`badge`/`icon` on the new elements). NOTE: element-meta does NOT yet emit slots either — do both together.
+- ~~**`::part` discoverability**~~ — **DONE** (see §0.0): `ELEMENT_COMPOSITION` registry in `slots.ts` → `gen-element-api.mjs` AST-extracts it → CEM `slots`/`cssParts` + `element-meta` slots/parts → docs tables + `llms-full.txt` + the `kai` MCP `component_reference`. Drift guard in `slots.test.ts`. Remaining: author `docs/web-components.md` headings for the 8 newly-regenerated elements (avatar/badge/button/command/icon/menu/notice/tooltip) so their Slots/Parts tables inject.
 - **Surface-token migration** — `grep -rn "bg-muted/[0-9]" src` (~96 alpha usages; the SURFACE ones — composer/artifact/form/message-bubble/conversation-list/scroll-button) → `bg-surface`/`bg-surface-strong`. LEAVE genuine scrims/tints (`bg-background/80`, `bg-black/60`, primary/destructive state washes).
 - **Production rollout** (the real graduation, not started): audit P1 = `kai-conversations`, then `kai-workspace`/`kai-message`. Unblocks issue #106 (state-helpers Phase 2 element methods).
 - Deferred minors in `.superpowers/sdd/progress.md` (gitignored, in the worktree): W4b composer→CommandList DRY; `gen-element-api` slot/part-table emission; misc a11y/cosmetic.
