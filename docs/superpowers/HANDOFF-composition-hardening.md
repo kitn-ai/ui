@@ -1,130 +1,95 @@
-# HANDOFF — Composition initiative + composer-showcase hardening
+# HANDOFF — Composition initiative (composer showcase + new composition primitives)
 
-**Date:** 2026-06-24 · **Branch:** `spike/kai-chat-seams` (worktree `…/kitn-chat-spike-kai-chat-seams`) · **Tip:** `593389a` (24 commits over base `2b2592d`) · **Tree:** clean · **Status:** PROTOTYPE/spike, NOT merged, NOT pushed.
+**Date:** 2026-06-25 · **Branch:** `spike/kai-chat-seams` (worktree `…/kitn-chat-spike-kai-chat-seams`) · **Tip:** `9670eef` · **Tree:** clean (only `_shot.mjs` untracked, intentional) · **Status:** PROTOTYPE/spike, NOT merged, NOT pushed. Rob reviews before any merge/push.
 
-> Read this top-to-bottom before doing anything. We are mid-stream on a visual-design + API-philosophy pass and there is ONE explicit unstarted task (the slot rename) plus open design decisions. The full machine-tracked history is in `.superpowers/sdd/progress.md` (gitignored, in the worktree).
+> Read top-to-bottom. This supersedes the earlier slot-rename handoff — that work (and a lot more) is DONE. The composer showcase is now fully component-driven + Tailwind, and we exposed/built 7 elements. What's left is a queue of follow-ups (§6), none urgent.
 
 ---
 
 ## 0. TL;DR — what to do next
-1. **Do the slot rename** (the user's last explicit directive, NOT yet started): `notice`→`before`, `toolbar-start`→`start`, `trailing`→`end`. Vocabulary is **decided: `start`/`end` (inline) + `before`/`after` (block)** — CSS-logical. See §6.1 for the exact files.
-2. Then resolve the open `submit` decision (§6.2) and continue hardening / the broader rename sweep.
-3. **Behavioral musts (the user was burned by these — see §7):** SHOW screenshots vs. the reference and let them judge; never declare "done/polished" without looking; drive visual work DIRECTLY in a tight edit→screenshot→look loop, not via subagents.
+Nothing is half-finished. Pick from the queue in §6. The likely next pieces, in order of leverage:
+1. **Extend the `slot="icon"` escape hatch** to the other icon-bearing props (`kai-suggestions`, `kai-notice`) — kai-button already has it; same pattern.
+2. **`::part` discoverability** (issue #106-adjacent / task "#6"): wire the `PartDef` registry → element-meta → docs → the `kai` MCP, audited across all elements' parts.
+3. **Surface-token migration**: the ~10 remaining `bg-muted/NN` *surfaces* → `bg-surface` (only `prompt-input` is migrated).
+4. **The real graduation** (separate, not started): the audit-driven production rollout starting at `kai-conversations` (audit P1, see `docs/superpowers/specs/2026-06-23-composition-seams-audit.md`). Unblocks issue #106.
+
+**Behavioral musts (Rob was burned by these — §7):** SHOW screenshots and let Rob judge; never overclaim "done"; drive visual work in a tight edit→`_shot.mjs`→Read loop; no emoji.
 
 ---
 
 ## 1. The big picture
-This is the **composition-over-configuration** initiative for `@kitn.ai/ui` (Shadow-DOM web components authored in SolidJS, consumed from any framework; elements prefixed `kai-`). It started as a design conversation (the user, Rob, owns the product) and became a real feature branch.
-
-Core thesis (Rob's): **configuration forces US to author the Cartesian product of layouts×use-cases — unbounded and not ours to know.** So we expose **slots (positions) + primitives + tokens/`::part`**, and the consumer composes. Our job shrinks to "render parts well + add parts as new AI-UX patterns emerge."
-
-The recent reference target is **Claude's composer** (a dark composer card: a "model unavailable" notice, input "How can I help you today?", a `+` cascading menu on the left, model (Opus 4.8) + effort (High) + mic + voice on the right, suggestion chips below). The user supplied screenshots of it as the quality bar.
+Composition-over-configuration for `@kitn.ai/ui` (Shadow-DOM web components authored in SolidJS, consumed from any framework; elements prefixed `kai-`). Rob's thesis: **configuration forces US to author the Cartesian product of layouts×use-cases — unbounded and not ours to know.** So we expose **slots (positions) + well-made parts + tokens/`::part`**, and the consumer composes. Our job shrinks to "render parts well + add parts as new AI-UX patterns emerge." Reference target is Claude's composer (dark card: a "model unavailable" notice, input, a `+` menu, model+effort+mic+voice, suggestion chips).
 
 ---
 
-## 2. What's DONE and committed (the W1–W5 arc + components)
-All built subagent-driven, each per-workstream reviewed, plus a cumulative opus whole-branch review (no Critical/Important). Key commits:
-- **W1** `<kai-chat>` slotted shell + typed slot registry `src/elements/slots.ts` (`CHAT_SLOTS`/`readSlots`/`SlotDef`), `loading` host-attr reflection, drop-in regression. (Originally "seams"; **renamed seam→slot** at `d98ae02` — public API always used native `<slot>`.)
-- **W2** `<kai-prompt-input>` `notice` + `toolbar-start` slots (`b0c7976`) + `PROMPT_INPUT_SLOTS`.
-- **W3** cascading-menu primitives in `src/ui/dropdown.tsx` (submenu/separator/checkbox/label, `0624570`/`937f443`) + **`kai-menu`** element (`src/elements/menu.tsx`, items-tree + `kai-select`, `bbc33bb`).
-- **W4** `CommandList` primitive (`src/ui/command.tsx`) + **`kai-command`** element (grouped filterable palette, `1e6be2c`; lazy-memo bug fixed `dafb82f`).
-- **W5** audit (`docs/superpowers/specs/2026-06-23-composition-seams-audit.md`): **47 elements**, P1 = `kai-workspace`/`kai-conversations`/`kai-message`, P2 = 8, rest P3 (leave alone). **First production target = `kai-conversations`** — this is where the REAL graduation work starts once the prototypes are settled.
-- Shared `src/ui/icon.tsx` `renderIcon` (URL→img, else lucide name via `action-icons`, else text). **No emoji anywhere** (kit convention — Rob enforced this).
-- Diagram story `Spikes/How Composition Works` (`src/elements/composition.stories.tsx`, inline SVG).
-- Design spec: `docs/superpowers/specs/2026-06-23-kai-chat-composition-seams-design.md`. Plan: `…/plans/2026-06-23-w1-kai-chat-seams-formalize.md`.
+## 2. What shipped THIS session (7 commits over `4af1ff7`)
+- **`a236ed4`** `feat(prompt-input)!`: **slot rename** — `notice` *removed* (outer content = the dev's own layout, or `kai-chat`'s `composer-actions` when nested), `leading`→`input-top`, `toolbar-start` kept, `trailing`→`toolbar-end`. **`submit` trimmed** to `'always'|'auto'` (`never` → CSS `::part(send){display:none}`). Added **`PartDef`/`PROMPT_INPUT_PARTS` registry** in `src/elements/slots.ts` (declares the `send` part + a copy-paste recipe) and a `<kai-prompt-input>` composition diagram story.
+- **`5a258e6`** `feat(theme)`: **calculated opaque surface tokens.** `--color-surface` / `--color-surface-strong` / `--color-surface-sunken` in `theme.css`, derived via `color-mix(... var(--color-muted) N%, var(--color-background))` — opaque (no bleed-through like `bg-muted/40`), theme-aware. **Declared in BOTH `@theme` (light) AND `.dark`** (a derived custom property resolves where it's *declared*, not used — light-only = wrong color in dark). `@utility bg-surface / bg-surface-strong / bg-surface-sunken`. Migrated `prompt-input.tsx` card `bg-muted/40` → `bg-surface`.
+- **`9513dd1`** `feat(elements)`: **`kai-button`** (`src/elements/button.tsx` over the `Button` primitive; `variant` incl. new `subtle`, `size`, `icon`/`icon-trailing`, `label`, `kai-click`, `::part(button)`); **`kai-menu` trigger props** (`trigger-icon`/`trigger-label`/`trigger-icon-trailing`/`label` — slotted `trigger` still wins); **`kai-suggestions` per-item icons** (`{label,icon}` + `<kai-suggestion icon>`; `PromptSuggestion` renders a leading icon); **dropdown** checkbox items → TRAILING check (so an icon'd item aligns) + submenu chevron full `size-4` (a `pl-2` was shrinking it). Icons added to `src/ui/icon.tsx`.
+- **`56ce22c`** `refactor(composer-showcase)`: banner became a **flow container** (dropped absolute/z-index/margin peek + the focus-ring overlap); all controls became kit elements; **all inline styles → Tailwind classes** (0 inline styles, 0 hand-rolled buttons); dropped hard-coded `theme="dark"`; `default-input` toolbar `pb-3`→`pb-0`.
+- **`8ab6b6d`** `feat(elements)`: **`kai-avatar`** (image + initials fallback, sm/md/lg), **`kai-badge`** (default/count/citation, `::part(badge)`), **`kai-tooltip`** (hover/focus hint wrapping a slotted trigger, portaled in shadow). Thin facades over existing `src/ui/` primitives.
+- **`65ee396`** `feat(elements)`: **`kai-notice`** (new `src/ui/notice.tsx` + facade; `severity` neutral/info/warning/error/success → colored icon via the `tool-*` hues + a11y `role` alert/status; `icon` default/`none`/custom; self-dismissing `×` → `kai-dismiss`; message + `slot="action"`); **`kai-icon`** (curated icons standalone; theme foreground; recolor via `::part(icon)`); **`kai-button` `slot="icon"`** escape hatch (any inline SVG; wins over the `icon` prop). + Notices/Icons stories.
+- **`9670eef`** `refactor(composer-showcase)`: dogfood `kai-notice` for the banner (removed the hand-rolled div + dismiss wiring; now a stacked `<kai-notice severity="warning">` above the composer — dropped the behind-the-card peek; the component owns its box, the dev owns placement).
 
-**Unblocks issue #106** (state-helpers Phase 2 "element methods, blocked on composition").
-
-IVP suites (real-browser Playwright, since jsdom can't do shadow DOM): `npm run test:slots-ivp` (7/7), `test:menu-ivp` (7/7), `test:command-ivp` (7/7), plus `playwright.promptinput.config.ts` (18/18) and the composer IVP. tsc clean (4 passes).
+**Element count: 55.** tsc clean (run `npx tsc --noEmit`). IVPs green (`npm run test:slots-ivp`, `test:menu-ivp` — 7/7 each), `tests/ui/dropdown.test.tsx` 7/7, `slots.test.ts` 12/12.
 
 ---
 
-## 3. The CURRENT focus: composer-showcase hardening
-After W1–W5, Rob pushed to **harden the two new components + build a production composer showcase** matching the Claude reference, and (crucially) to get the **API/naming/theming philosophy** right. This is where we are.
-
-**`src/elements/composer-showcase.stories.tsx`** = the production composer (story `Spikes/Composer (production)` → `Composer`). It assembles a real composer from `<kai-prompt-input>` slots: a `notice` banner, a `kai-menu` in `toolbar-start` (the `+`), `kai-model-switcher` + an effort `kai-menu` + mic + voice in `trailing`, and suggestion chips below. It is **theme-driven** (defaults dark to match the reference, toggleable to light) and **fully theme-aware** (kit `var(--color-*)` tokens, ZERO hardcoded colors).
-
-### Component-level changes already committed (these are GOOD, keep them):
-- **`default-input.tsx`** (`src/elements/`): toolbar right-aligned (clustered `trailing` + send into a right group so `justify-between` pins them right — fixed a real "controls float center" bug, `5c4bd77`); added **`submit?: 'always'|'auto'|'never'`** (gates the send button; `auto` = show only with content; `::part(send)` to restyle) and **`attach?: boolean`** (hide the built-in paperclip when a `+` menu covers it). `notice` slot renders `display:contents` (no imposed spacing).
-- **`prompt-input.tsx`** facade: wires `submit` + `attach` through.
-
-### State of the showcase visual (verified in BOTH light + dark this session):
-- Banner sits **BEHIND** the card (absolute, `z-index:0`; card `z-index:1` + `margin-top:30px`), peeking out underneath — Rob's explicit ask ("banner should show up underneath the prompt input"). Theme-aware (`var(--color-muted)` etc.).
-- Toolbar controls right-aligned; send hidden on empty (`submit="auto"`); chips theme-aware.
-- The earlier washed-out problem was **me fighting the theming** (I'd hardcoded `theme="dark"` which `preview.ts`'s MutationObserver reset to the toggle's default light, then masked it with a forced `--kai-color-*` palette). `593389a` removed all that — the kit's real theming is crisp; let the toggle drive it.
+## 3. Settled philosophy (the rules — DO NOT relitigate)
+1. **`slot` = position · `::part`/token = styling · a prop ONLY for behavior CSS can't express.** (`submit="auto"` needs JS to know there's content; "hide send" is pure CSS.) This says *trim, not add*.
+2. **A slot earns its place only where the shadow boundary blocks the consumer.** Outer content (above/below the card) is the dev's own light-DOM layout — that's why the prompt-input has no outer `notice` slot.
+3. **Layout stays the dev's (Tailwind/CSS).** REJECTED `kai-flex`/`kai-layout`: flexbox is universal, not kit-specific; a layout component just re-types flexbox with worse ergonomics + shadow friction. We own *parts*, not layout.
+4. **Expose polished primitives as elements** (the `kai-button` pattern): if a hard-to-get-right primitive (theming/a11y/hover/shadow) exists but isn't exposed, consumers hand-roll it → gap. That's why we shipped button/avatar/badge/tooltip/notice/icon.
+5. **A notice/alert IS a component** (behavior + semantic severity + a11y role) — unlike layout. Provide one; devs can still hand-roll bespoke ones (both coexist).
+6. **Icons — three tiers, not locked to any library:** `icon="mic"` prop (curated, on elements) · `<kai-icon name="mic">` (curated, standalone) · `slot="icon"` inline SVG (ANY library, inherits `currentColor`). Curated set lives in `src/ui/icon.tsx` `NAMED_ICONS` (~23); it's deliberately small (AI-UX vocabulary), not a general library — hold that line; the slot is the escape hatch.
+7. **No hardcoded colors / no `theme="dark"` in stories** — everything is `var(--color-*)` and follows the toggle.
+8. **These are PROTOTYPES** (proven, not production-polished). Production graduation (audit P1 `kai-conversations`) is a later, separate effort.
 
 ---
 
-## 4. KEY DESIGN DECISIONS / PHILOSOPHY (the heart of the recent discussion — DO NOT LOSE)
-These are the rules Rob and I converged on. They govern everything going forward.
-
-1. **Slots are named by POSITION, never by presumed content.** `notice` was wrong (it presumes a notice — that's configuration thinking). A slot is a *place* the dev fills with anything. → rename to position names.
-2. **Vocabulary (DECIDED): `start`/`end` for the inline axis (CSS-logical; Rob explicitly likes this), `before`/`after` for the block axis.** So `notice`→`before`, `toolbar-start`→`start`, `trailing`→`end`.
-3. **NO gap/layout knobs. NO layout components. NO helper classes.** Spacing is the dev's CSS + the element they place in the slot. A `gap` prop is over-involvement that fights their margins; layout primitives/utilities duplicate what every dev has AND can't cross the shadow boundary to reach slotted light-DOM anyway. We provide the *hole*; they decide spacing (flush by default — `display:contents` — they add margin for a gap, negative margin for overlap/underlay).
-4. **THE RULE:** `slot = position` · `::part`/token = styling · **a prop ONLY for behavior CSS can't express** (e.g. `submit="auto"` needs to *know there's content*; "hide the button" is just `::part(send){display:none}`). This says **trim, not add.**
-5. **Theming: rely on the kit's light/dark + the Storybook toggle.** No dark-specific stories, no forced palettes, no hardcoded colors — everything uses `var(--color-*)` so it follows the theme. (`preview.ts` syncs the toggle → `theme` attr on every `kai-*` element → the element's `.dark` shadow CSS.)
-6. **Head-start = templates, not primitives.** The showcase IS the template (a dev copies + owns it). The shadcn move, at the *template* layer (future `add` CLI) — distinct from runtime layout components.
-7. **These are PROTOTYPES.** Rob's framing: proven, not production-polished. Production graduation (audit P1, starting `kai-conversations`) is a later, separate effort.
+## 4. The composer showcase (current state)
+`src/elements/composer-showcase.stories.tsx`, story `Spikes/Composer (production)` → `Composer` (id `spikes-composer-production--composer`). Fully component-driven, Tailwind classes only:
+- `<kai-notice severity="warning">` above the composer (self-dismiss + Learn-more action slot).
+- `<kai-prompt-input>` with `<kai-menu slot="toolbar-start" trigger-icon="plus">` (the `+`) and a `slot="toolbar-end"` cluster: `<kai-model-switcher>` · `<kai-menu trigger-label="High" trigger-icon-trailing="chevron-down">` · two `<kai-button variant="subtle" size="icon-sm">` (mic/voice).
+- `<kai-suggestions>` below (per-item icons: pencil/book-open/code/smile).
+- Data (menu items, suggestions, model list) set as JS props via refs in `onMount`; events wired via `addEventListener` there.
+Primitives demo: `src/elements/primitives.stories.tsx` → `Spikes/New Primitives` → `Avatars`/`Badges`/`Tooltips`/`Notices`/`Icons`.
 
 ---
 
-## 5. The reference (Claude composer) the showcase targets
-Dark rounded composer. Top: a notice ("Claude Fable 5 is currently unavailable." + "Learn more" + ✕). Input: "How can I help you today?". Bottom toolbar: `+` hard-left; **Opus 4.8 ⌄ · High ⌄ · mic · voice** hard-right (no send button when empty). Below the card (outside): suggestion chips (Write/Learn/Code/Life stuff/Claude's choice) each with a small icon. Rob chose the notice as a **banner above/behind** the card (NOT the reference's inside-strip) — settled via an AskUserQuestion. Rob does NOT care about 4 vs 5 chips; he DOES care about **design parity + how a dev achieves/controls it**.
-
----
-
-## 6. PENDING work (NOT done)
-### 6.1 SLOT RENAME — the explicit next task (vocabulary decided: see §4.2)
-Rename across the board (mirror the earlier `d98ae02` seam→slot rename method — `git mv` where useful, then content, then IVPs):
-- **`src/elements/slots.ts`**: `PROMPT_INPUT_SLOTS` entries `notice`→`before`, `toolbar-start`→`start`, `trailing`→`end` (+ their `doc` strings). `leading` → reconsider (`input-start`? or leave). The slot ATTRIBUTE values are what change.
-- **`src/elements/default-input.tsx`**: the `<slot name="notice">`→`<slot name="before">`, `<slot name="toolbar-start">`→`<slot name="start">`, `<slot name="trailing">`→`<slot name="end">`. Update comments.
-- **`src/elements/composer-showcase.stories.tsx`**: `slot="toolbar-start"`→`slot="start"`, the `trailing` wrapper `slot="trailing"`→`slot="end"`, and the notice is in the `before` region (it's currently NOT slotted — it's rendered as the consumer's own markup above; confirm whether it should project via `slot="before"` or stay as the demo's own element. NOTE: in the showcase the notice is just a `<div>` the "dev" positions; the actual `notice`/`before` SLOT lives in `default-input.tsx`).
-- **`src/elements/prompt-input-slots.stories.tsx`** + **`tests/e2e/promptinput-slots-ivp.spec.ts`**: the `slot="…"` projections + the `STORY('spikes-prompt-input-slots--…')` ids if story export names change (the slots IVP asserts projection by slot name). Re-run `npm run test:slots-ivp` (must stay green).
-- **BROADER SWEEP (also on the table, lower priority):** `kai-chat`'s `composer-actions` → a position name; `empty` is a STATE slot (shown when no messages) → keep state-y name; structural `header`/`sidebar`/`footer`/`composer` are defensible *regions* but Rob put them on the table.
-
-### 6.2 Open decision — `submit` prop
-Under §4.4 (props only for behavior CSS can't express), reconsider: keep `submit="always|auto|never"`, OR **trim to `auto` (default) + `::part(send){display:none}` for the hide case** (since "hide" is pure CSS, only `auto` needs JS). I recommended trimming; **Rob has NOT decided.** Ask.
-
-### 6.3 Bigger picture (after the rename + decisions)
-- Finish hardening kai-menu/kai-command if anything's still off (they looked good in dark + light this session).
-- The audit-driven production rollout (P1 `kai-conversations` first) — the real graduation; not started.
-- Deferred minors (tracked in `.superpowers/sdd/progress.md`): W4b composer→CommandList DRY migration; `gen-element-api.mjs` slot-table emission; misc a11y/cosmetic.
-
----
-
-## 7. LESSONS / how to work (Rob got frustrated — heed these)
-- **Do NOT overclaim "done/polished."** At one point Rob rated the work "zero/ten" because I kept showing washed-out composers and declaring them finished. **SHOW screenshots against the reference; let Rob judge.** Only say it's good when it visibly is.
-- **Drive visual work DIRECTLY** in a tight edit→screenshot→look loop (this is what finally worked), not by delegating to subagents that produce washed-out attempts you can't see.
-- **No emoji, ever** (kit convention). Use lucide icons / `renderIcon`.
-- Be self-critical and honest about gaps. When you fix something, verify it in BOTH light and dark before claiming.
-
----
-
-## 8. Environment / how to continue
-- **Worktree:** `/Users/home/Projects/kitn-ai/kitn-chat-spike-kai-chat-seams`, branch `spike/kai-chat-seams`. (It's a sibling worktree off the main repo; `node_modules` is symlinked.)
-- **Storybook:** start with `npm run storybook` (port 6006). It may already be running from a prior session.
-- **The screenshot loop (how to verify visuals):** create `_shot.mjs` in the worktree root (it's untracked; I removed it before committing). Contents:
+## 5. Environment / how to continue
+- **Worktree:** `/Users/home/Projects/kitn-ai/kitn-chat-spike-kai-chat-seams`, branch `spike/kai-chat-seams` (sibling worktree; `node_modules` symlinked).
+- **Storybook:** `npm run storybook` (port 6006; runs `build:css` then `storybook dev`).
+- **Screenshot loop:** `_shot.mjs` in the worktree root (untracked; recreate if missing — see below). `node _shot.mjs "<iframe url>" spike-screens/x.png dark 920 740 kai-prompt-input` then **Read** the PNG. `spike-screens/` is gitignored. Add `.dark` to `<html>` for dark mode (preview.ts syncs `theme="dark"` onto kai-* elements). For other elements pass a different `selector` arg; for interactions (open a menu, hover a tooltip, click dismiss) write a one-off inline `node -e "import('playwright')…"`.
   ```js
+  // _shot.mjs — args: url out [mode=dark] [w=920] [h=700] [selector=kai-prompt-input]
   import { chromium } from 'playwright';
-  const [url, out, mode] = process.argv.slice(2);
-  const b = await chromium.launch();
-  const p = await b.newPage({ viewport: { width: 920, height: 700 }, deviceScaleFactor: 2 });
-  await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
-  await p.waitForSelector('kai-prompt-input', { timeout: 25000 }).catch(() => {});
-  if (mode !== 'light') await p.evaluate(() => document.documentElement.classList.add('dark'));
-  await p.waitForTimeout(2000);
-  await p.screenshot({ path: out });
-  await b.close();
+  const [url, out, mode='dark', w='920', h='700', sel='kai-prompt-input'] = process.argv.slice(2);
+  const b = await chromium.launch(); const p = await b.newPage({ viewport:{width:+w,height:+h}, deviceScaleFactor:2 });
+  await p.goto(url,{waitUntil:'networkidle'}).catch(()=>{}); await p.waitForSelector(sel,{timeout:25000}).catch(()=>{});
+  if (mode==='dark') await p.evaluate(()=>document.documentElement.classList.add('dark'));
+  await p.waitForTimeout(2000); await p.screenshot({path:out}); await b.close();
   ```
-  Run from the worktree: `node _shot.mjs "http://localhost:6006/iframe.html?id=spikes-composer-production--composer&viewMode=story" spike-screens/x.png dark` (or `light`), then **Read** the PNG. `spike-screens/` is gitignored. Adding `.dark` to `<html>` simulates the dark toggle (preview.ts then syncs `theme="dark"` onto the elements). `waitForSelector('kai-prompt-input')` matters — the playwright CLI screenshots before the shadow render, so use this script, not the raw CLI.
-- **Story id changed:** the showcase export is now `Composer` → id `spikes-composer-production--composer` (was `…--dark`).
-- **Ledger:** `.superpowers/sdd/progress.md` (gitignored, in the worktree) — full blow-by-blow of W1–W5 + hardening, the cumulative review, the deferred-minors list.
-- **Tests before any commit:** `npx tsc --noEmit`, the relevant `npm run test:*-ivp`. Don't commit the promptinput `__screenshots__` baselines if a test run dirties them (non-deterministic write-churn — `git checkout -- tests/e2e/__screenshots__/promptinput/`).
-- **Review-before-commit / merge:** Rob reviews before commits/merges; this branch is NOT to be merged/pushed without his say-so.
+- **⚠️ THE BIG GOTCHA — shadow CSS needs a Storybook RESTART.** `kai-*` elements inject `src/elements/compiled.css?inline` into their shadow root; `compiled.css` is built by `build:css` at Storybook startup and **Vite does NOT re-inline it on change**. So when you change a shared component's classes, add a new element, or add an `@theme` token / `@utility`, you must **kill + relaunch Storybook** (`lsof -ti:6006 | xargs kill; npm run storybook` in the background) to see it in the shadow DOM — HMR alone won't. (The Storybook *preview* CSS, `.storybook/styles.css`, DOES hot-reload, which is why page-level/light-DOM classes appear without a restart, misleadingly.) Build the new element's classes from existing utilities where possible to minimize surprises.
+- **⚠️ Events from a SolidJS parent:** consuming a `kai-*` element's events in a story uses **`addEventListener` in `onMount`** (not Solid `onClick`/`on:` — delegation doesn't cross the shadow boundary; native click bubbles composed but the delegated handler still misfired). React/Vue consumers get `onKai*` props from the generated wrappers.
+- **⚠️ Per-story JSX decls:** each story file `declare module 'solid-js'`-augments `IntrinsicElements` for the `kai-*` tags it uses. The SAME tag declared in two story files must be **structurally identical** or tsc errors (`TS2717`). Keep them in sync.
+- **Tests before commit:** `npx tsc --noEmit`; the relevant `npm run test:*-ivp`. After `build:api`, `git checkout -- src/components/component-meta.json` (churns; not used at runtime). `build:api` was NOT run this session.
+- **A faulty-test lesson:** verifying a dismiss, I checked the wrong `<div>` (the container, whose `textContent` started with the banner's) and wrongly concluded it was broken — it worked. When verifying DOM state, target the exact element (the control's `parentElement`, the shadow node), not a `find()` by text.
 
 ---
 
-## 9. Open questions to put to Rob (next session)
-1. Slot rename: proceeding with `before`/`start`/`end` (start/end he confirmed; before/after is my pick for block) — OK? And how far to sweep (just prompt-input, or also `composer-actions` etc. on `kai-chat`)?
-2. `submit`: keep `always|auto|never`, or trim to `auto` + `::part(send)` CSS-hide?
-3. Once the prototypes settle: start the production rollout at `kai-conversations` (audit P1)?
+## 6. Queued work (none urgent; pick by leverage)
+- Extend `slot="icon"` to `kai-suggestions` and `kai-notice` (kai-button has it).
+- **`::part` discoverability** — `PartDef` registry → `gen-element-api.mjs` emits slots+parts into `element-meta.json` → docs table (`gen-web-components-md.mjs`) + the `kai` MCP `component_reference` (`src/agent-tooling/mcp/tools/reference.ts`, which does NOT read element-meta today). Audit every `part=`/`part:true` across elements (currently: `send` on prompt-input; `sidebar`/`header`/`footer` on kai-chat via `CHAT_SLOTS.part`; `button`/`badge`/`icon` on the new elements). NOTE: element-meta does NOT yet emit slots either — do both together.
+- **Surface-token migration** — `grep -rn "bg-muted/[0-9]" src` (~96 alpha usages; the SURFACE ones — composer/artifact/form/message-bubble/conversation-list/scroll-button) → `bg-surface`/`bg-surface-strong`. LEAVE genuine scrims/tints (`bg-background/80`, `bg-black/60`, primary/destructive state washes).
+- **Production rollout** (the real graduation, not started): audit P1 = `kai-conversations`, then `kai-workspace`/`kai-message`. Unblocks issue #106 (state-helpers Phase 2 element methods).
+- Deferred minors in `.superpowers/sdd/progress.md` (gitignored, in the worktree): W4b composer→CommandList DRY; `gen-element-api` slot/part-table emission; misc a11y/cosmetic.
+
+---
+
+## 7. Lessons / how to work (Rob's, heed these)
+- **Do NOT overclaim "done/polished."** SHOW screenshots vs. the reference; let Rob judge. Only call it good when it visibly is.
+- **Drive visual work DIRECTLY** in a tight edit→`_shot.mjs`→Read loop. Verify in BOTH light and dark.
+- When you fix something, **verify it in the real running app**, targeting the exact element (see the faulty-test lesson, §5).
+- **No emoji, ever** (kit convention). Use lucide / `renderIcon`.
+- Lead design forks with a decisive recommendation; reserve modal questions for genuinely strategic choices. Rob is the product owner and decides surface-area additions.
