@@ -23,6 +23,20 @@
   --color-secondary-foreground: var(--kai-color-secondary-foreground, hsl(240 5.9% 10%));
   --color-muted: var(--kai-color-muted, hsl(240 4.8% 95.9%));
   --color-muted-foreground: var(--kai-color-muted-foreground, hsl(240 3.8% 43%));
+  /* Subtle SURFACE — an opaque "muted panel" for things that sit OVER content
+     (the prompt input, message bubbles, artifact/card headers, chips). CALCULATED
+     from existing tokens — `--color-muted` blended 40% onto `--color-background`
+     — so it tracks the theme (incl. dark) automatically and needs no hand-picked
+     value. SOLID (no alpha), so nothing behind it bleeds through. This replaces
+     ad-hoc `bg-muted/40` surfaces. Retint via the --kai-color-surface knob (or a
+     bare value); --color-surface-strong is the stronger step (hover/raised) and
+     --color-surface-sunken is recessed BELOW the base surface (wells, or a banner
+     that sits behind a card). Sunken is theme-specific: "darker than the card"
+     means a LOWER muted% in dark but a HIGHER one in light, so the two scopes
+     can't share a number — see the .dark block. */
+  --color-surface: var(--kai-color-surface, color-mix(in srgb, var(--color-muted) 40%, var(--color-background)));
+  --color-surface-strong: var(--kai-color-surface-strong, color-mix(in srgb, var(--color-muted) 60%, var(--color-background)));
+  --color-surface-sunken: var(--kai-color-surface-sunken, color-mix(in srgb, var(--color-muted) 85%, var(--color-background)));
   --color-accent: var(--kai-color-accent, hsl(240 4.8% 95.9%));
   --color-accent-foreground: var(--kai-color-accent-foreground, hsl(240 5.9% 10%));
   --color-destructive: var(--kai-color-destructive, hsl(0 72% 45%));
@@ -103,6 +117,13 @@
   --color-secondary-foreground: var(--kai-color-secondary-foreground, hsl(0 0% 98%));
   --color-muted: var(--kai-color-muted, hsl(45 4% 17%));
   --color-muted-foreground: var(--kai-color-muted-foreground, hsl(45 4% 64%));
+  /* Re-declared in the dark scope so the color-mix recomputes with the DARK
+     muted/background (a derived token is computed where it's declared, not where
+     it's used — see the light --color-surface for the full note). */
+  --color-surface: var(--kai-color-surface, color-mix(in srgb, var(--color-muted) 40%, var(--color-background)));
+  --color-surface-strong: var(--kai-color-surface-strong, color-mix(in srgb, var(--color-muted) 60%, var(--color-background)));
+  /* Sunken: in dark a LOWER muted% is darker (blends toward the dark background). */
+  --color-surface-sunken: var(--kai-color-surface-sunken, color-mix(in srgb, var(--color-muted) 18%, var(--color-background)));
   --color-accent: var(--kai-color-accent, hsl(45 4% 17%));
   --color-accent-foreground: var(--kai-color-accent-foreground, hsl(0 0% 98%));
   --color-destructive: var(--kai-color-destructive, hsl(0 62.8% 30.6%));
@@ -187,3 +208,18 @@
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover { background-color: var(--color-scrollbar-thumb-hover); }
 .scrollbar-thin::-webkit-scrollbar-corner { background: transparent; }
+
+/* Surface utilities — `bg-surface` / `bg-surface-strong` paint the opaque,
+   theme-derived surface tokens (see --color-surface above). Defined explicitly
+   because a color-mix-valued @theme token does NOT emit a bare `bg-` utility on
+   its own (only opacity variants). Use these for panels that sit OVER content
+   instead of `bg-muted/NN`. */
+@utility bg-surface {
+  background-color: var(--color-surface);
+}
+@utility bg-surface-strong {
+  background-color: var(--color-surface-strong);
+}
+@utility bg-surface-sunken {
+  background-color: var(--color-surface-sunken);
+}
