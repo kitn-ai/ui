@@ -931,7 +931,7 @@ export function Composer(props: ComposerProps): JSX.Element {
   ) : (
     <div
       class={cn(
-        'kai-composer relative rounded-xl bg-muted/40 p-2',
+        'kai-composer relative rounded-xl bg-surface p-2',
         props.disabled && 'cursor-not-allowed opacity-60',
       )}
     >

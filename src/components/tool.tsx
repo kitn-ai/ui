@@ -102,7 +102,7 @@ function Tool(props: ToolProps) {
   const output = () => local.toolPart.output;
 
   return (
-    <div class={cn('mt-3 overflow-hidden rounded-lg bg-muted/30', local.class)}>
+    <div class={cn('mt-3 overflow-hidden rounded-lg bg-surface', local.class)}>
       <Collapsible open={isOpen()} onOpenChange={setIsOpen}>
         <CollapsibleTrigger
           as={(triggerProps: JSX.HTMLAttributes<HTMLButtonElement>) => (
@@ -127,7 +127,7 @@ function Tool(props: ToolProps) {
             <Show when={input() && Object.keys(input()!).length > 0}>
               <div>
                 <h4 class="text-muted-foreground mb-2 text-sm font-medium">Input</h4>
-                <div class="rounded bg-muted/50 p-2 font-mono text-sm">
+                <div class="rounded bg-surface-strong p-2 font-mono text-sm">
                   <For each={Object.entries(input()!)}>
                     {([key, value]) => (
                       <div class="mb-1">
@@ -143,7 +143,7 @@ function Tool(props: ToolProps) {
             <Show when={output()}>
               <div>
                 <h4 class="text-muted-foreground mb-2 text-sm font-medium">Output</h4>
-                <div tabindex={0} class="max-h-60 overflow-auto rounded bg-muted/50 p-2 font-mono text-sm">
+                <div tabindex={0} class="max-h-60 overflow-auto rounded bg-surface-strong p-2 font-mono text-sm">
                   <pre class="whitespace-pre-wrap">{formatValue(output())}</pre>
                 </div>
               </div>

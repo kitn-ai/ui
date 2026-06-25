@@ -32,7 +32,7 @@ Done after the `c1981e9` snapshot below. Commits `04257ca`→`674ab7b` are **pus
 Nothing is half-finished. Pick from the queue in §6. The likely next pieces, in order of leverage:
 1. ~~**Extend the `slot="icon"` escape hatch**~~ — **`kai-notice` DONE** (slotted SVG overrides the severity glyph; via `noticeIconNode` + the primitive's `iconSlot`). `kai-suggestions` deliberately NOT done — its chips are data-driven (an `items` array / `<kai-suggestion icon>` data carriers rendered in shadow), so there's no single icon to slot; its `icon` field already accepts a data-URI/URL SVG as the consistent escape hatch.
 2. ~~**`::part` discoverability**~~ — **DONE** (see §0.0). Remaining sub-item: author `docs/web-components.md` headings for the 8 new elements so their Slots/Parts tables get injected.
-3. **Surface-token migration**: the ~10 remaining `bg-muted/NN` *surfaces* → `bg-surface` (only `prompt-input` is migrated).
+3. ~~**Surface-token migration**~~ — **DONE**. Migrated 11 static surfaces across tool/attachments/composer/conversation-list/artifact/form/file-upload to `bg-surface`/`-strong` (nested boxes)/`-sunken` (artifact sidebar+canvas). Left hover states, the outline-button control bg, conversation-item active, the artifact readonly-input state, and demo/story code. Verified tool light+dark (depth hierarchy reads correctly).
 4. **The real graduation** (separate, not started): the audit-driven production rollout starting at `kai-conversations` (audit P1, see `docs/superpowers/specs/2026-06-23-composition-seams-audit.md`). Unblocks issue #106.
 
 **Behavioral musts (Rob was burned by these — §7):** SHOW screenshots and let Rob judge; never overclaim "done"; drive visual work in a tight edit→`_shot.mjs`→Read loop; no emoji.
@@ -103,7 +103,7 @@ Primitives demo: `src/elements/primitives.stories.tsx` → `Spikes/New Primitive
 ## 6. Queued work (none urgent; pick by leverage)
 - ~~Extend `slot="icon"` to `kai-suggestions` and `kai-notice`~~ — **`kai-notice` DONE; `kai-suggestions` N/A** (data-driven chips; data-URI icon string is its escape hatch).
 - ~~**`::part` discoverability**~~ — **DONE** (see §0.0): `ELEMENT_COMPOSITION` registry in `slots.ts` → `gen-element-api.mjs` AST-extracts it → CEM `slots`/`cssParts` + `element-meta` slots/parts → docs tables + `llms-full.txt` + the `kai` MCP `component_reference`. Drift guard in `slots.test.ts`. Remaining: author `docs/web-components.md` headings for the 8 newly-regenerated elements (avatar/badge/button/command/icon/menu/notice/tooltip) so their Slots/Parts tables inject.
-- **Surface-token migration** — `grep -rn "bg-muted/[0-9]" src` (~96 alpha usages; the SURFACE ones — composer/artifact/form/message-bubble/conversation-list/scroll-button) → `bg-surface`/`bg-surface-strong`. LEAVE genuine scrims/tints (`bg-background/80`, `bg-black/60`, primary/destructive state washes).
+- ~~**Surface-token migration**~~ — **DONE** (11 static surfaces → `bg-surface`/`-strong`/`-sunken`; hover/state/control/demo left as-is). Remaining `bg-muted/NN` are all intentional (hover tints, outline-button bg, conversation-item active, artifact readonly input, story snippets).
 - **Production rollout** (the real graduation, not started): audit P1 = `kai-conversations`, then `kai-workspace`/`kai-message`. Unblocks issue #106 (state-helpers Phase 2 element methods).
 - Deferred minors in `.superpowers/sdd/progress.md` (gitignored, in the worktree): W4b composer→CommandList DRY; `gen-element-api` slot/part-table emission; misc a11y/cosmetic.
 

@@ -420,7 +420,7 @@ function ArtifactToolbar(props: ToolbarProps): JSX.Element {
   return (
     <div
       data-artifact-toolbar
-      class="flex shrink-0 items-center gap-1.5 border-b border-border bg-muted/40 px-2 py-1.5"
+      class="flex shrink-0 items-center gap-1.5 border-b border-border bg-surface px-2 py-1.5"
     >
       <Show when={props.showNav()}>
         <Button
@@ -595,7 +595,7 @@ interface CodeProps {
 function ArtifactCode(props: CodeProps): JSX.Element {
   return (
     <div class="absolute inset-0 flex">
-      <div class="w-56 shrink-0 overflow-auto border-r border-border bg-muted/20 py-1.5 scrollbar-thin">
+      <div class="w-56 shrink-0 overflow-auto border-r border-border bg-surface-sunken py-1.5 scrollbar-thin">
         <FileTree
           files={props.files}
           activeFile={props.activeFile()}
@@ -728,7 +728,7 @@ function ArtifactPdfPreview(props: { url: string; reloadKey: number }): JSX.Elem
         aria-label="PDF preview"
         aria-busy={state() === 'loading'}
         tabindex="0"
-        class="absolute inset-0 flex flex-col items-center gap-3 overflow-auto bg-muted/20 p-3 scrollbar-thin focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+        class="absolute inset-0 flex flex-col items-center gap-3 overflow-auto bg-surface-sunken p-3 scrollbar-thin focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
       />
       <Show when={isPdfPreviewEnabled() && state() === 'loading'}>
         <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
