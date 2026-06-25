@@ -32,15 +32,15 @@ export const Slots: Story = {
   render: () => (
     <div>
       {/* Above the card = your own layout, not a slot. */}
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;margin-bottom:8px;font:13px/1.4 system-ui;color:#92400e">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:color-mix(in srgb, var(--color-tool-amber) 14%, var(--color-background));border:1px solid color-mix(in srgb, var(--color-tool-amber) 32%, transparent);border-radius:8px;margin-bottom:8px;font:13px/1.4 system-ui;color:var(--color-foreground)">
         <span>
           Model X is unavailable.{' '}
-          <a href="#" style="color:#b45309;font-weight:600">Learn more</a>
+          <a href="#" style="color:var(--color-tool-amber);font-weight:600">Learn more</a>
         </span>
         <button
           type="button"
           aria-label="Dismiss"
-          style="border:0;background:transparent;cursor:pointer;color:#92400e;line-height:1;padding:0 2px;display:flex;align-items:center"
+          style="border:0;background:transparent;cursor:pointer;color:var(--color-muted-foreground);line-height:1;padding:0 2px;display:flex;align-items:center"
         >
           <X size={16} />
         </button>
@@ -49,14 +49,14 @@ export const Slots: Story = {
         {/* input-top: inside the card, above the textarea. */}
         <div
           slot="input-top"
-          style="padding:6px 12px;font:12px/1.4 system-ui;color:#3f6212;background:#ecfccb;border-radius:8px;margin:8px 8px 0"
+          style="padding:6px 12px;font:12px/1.4 system-ui;color:var(--color-foreground);background:color-mix(in srgb, var(--color-tool-green) 14%, var(--color-background));border-radius:8px;margin:8px 8px 0"
         >
           Projects · Acme redesign
         </div>
         <button
           slot="toolbar-start"
           type="button"
-          style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid #d4d4d8;border-radius:9999px;background:#fff;cursor:pointer;flex-shrink:0"
+          style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid var(--color-border);border-radius:9999px;background:var(--color-surface);color:var(--color-foreground);cursor:pointer;flex-shrink:0"
           aria-label="Open menu"
         >
           <Plus size={16} />
@@ -64,7 +64,7 @@ export const Slots: Story = {
         {/* toolbar-end: trailing controls, before the Send button. */}
         <span
           slot="toolbar-end"
-          style="display:inline-flex;align-items:center;padding:0 10px;height:30px;font:12px/1 system-ui;color:#52525b"
+          style="display:inline-flex;align-items:center;padding:0 10px;height:30px;font:12px/1 system-ui;color:var(--color-muted-foreground)"
         >
           Opus 4.8
         </span>

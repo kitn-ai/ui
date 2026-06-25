@@ -277,8 +277,8 @@ export function DropdownCheckboxItem(props: { children: JSX.Element; class?: str
       )}
     >
       {props.children}
-      <span class="ml-auto flex h-4 w-4 shrink-0 items-center justify-center pl-3 text-muted-foreground">
-        <Show when={props.checked}><Check class="h-4 w-4" aria-hidden="true" /></Show>
+      <span class="ml-auto flex size-4 shrink-0 items-center justify-center text-muted-foreground">
+        <Show when={props.checked}><Check class="size-4" aria-hidden="true" /></Show>
       </span>
     </div>
   );

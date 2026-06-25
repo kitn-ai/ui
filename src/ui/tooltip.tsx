@@ -14,6 +14,12 @@ export function Tooltip(props: TooltipProps) {
   const [triggerEl, setTriggerEl] = createSignal<HTMLElement>();
   const [contentEl, setContentEl] = createSignal<HTMLElement>();
   let timer: number | undefined;
+  // True for the span of a click (pointerdown → focus → click). Suppresses the
+  // focus-show so clicking a hovered trigger DISMISSES it instead of flickering
+  // hide→show→hide (pointerdown hid it, the click-induced focus re-showed it,
+  // then click hid it again). Keyboard focus has no preceding pointerdown, so it
+  // still shows the tooltip normally.
+  let pointerDown = false;
 
   const [pointerInside, setPointerInside] = createSignal(false);
   const [focusInside, setFocusInside] = createSignal(false);
@@ -43,9 +49,9 @@ export function Tooltip(props: TooltipProps) {
         aria-describedby={open() ? id : undefined}
         onPointerEnter={() => { setPointerInside(true); show(local.openDelay ?? 600); }}
         onPointerLeave={() => { setPointerInside(false); maybeHide(); }}
-        onPointerDown={dismiss}
+        onPointerDown={() => { pointerDown = true; dismiss(); window.setTimeout(() => { pointerDown = false; }, 0); }}
         onClick={dismiss}
-        onFocusIn={() => { setFocusInside(true); show(); }}
+        onFocusIn={() => { setFocusInside(true); if (!pointerDown) show(); }}
         onFocusOut={(e: FocusEvent) => { const t = triggerEl(); if (t && t.contains(e.relatedTarget as Node)) return; setFocusInside(false); maybeHide(); }}
       >
         {local.children}
