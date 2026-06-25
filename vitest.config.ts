@@ -104,10 +104,24 @@ export default defineConfig({
           instances: [{
             browser: 'chromium',
             // CI hardening: chromium crashes ("Browser connection was closed /
-            // rpc is closed") partway through the story suite when it exhausts the
-            // tiny default /dev/shm on GitHub runners. Route shared memory to /tmp
-            // and disable the sandbox. No-op locally; required on CI.
-            launchOptions: { args: ['--disable-dev-shm-usage', '--no-sandbox'] },
+            // rpc is closed") partway through the story suite when it exhausts
+            // the runner's memory / the tiny default /dev/shm on GitHub runners,
+            // and a renderer page dies — which aborts the whole runner (not a
+            // retryable per-test failure). Give the renderer more headroom and
+            // stop it from being killed under load. No-op locally; required on CI.
+            launchOptions: {
+              args: [
+                '--disable-dev-shm-usage', // route shared memory to /tmp (default /dev/shm is tiny on runners)
+                '--no-sandbox',
+                '--disable-gpu', // headless CI has no GPU; avoids the GPU process + its memory
+                '--disable-software-rasterizer',
+                '--disable-background-timer-throttling', // keep the test page fully alive when "backgrounded"
+                '--disable-backgrounding-occluded-windows',
+                '--disable-renderer-backgrounding',
+                '--disable-features=CalculateNativeWinOcclusion,BackForwardCache',
+                '--js-flags=--max-old-space-size=4096', // give V8 a bigger heap before it OOMs the renderer
+              ],
+            },
           }]
         }
       }
