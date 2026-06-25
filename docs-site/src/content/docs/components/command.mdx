@@ -1,0 +1,80 @@
+---
+title: Command
+description: A grouped, filterable command palette — type to search, arrow keys to move, Enter to pick.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-command</p>
+
+<p class="kai-lede">A grouped, filterable command palette — feed it a flat list of items and it buckets them under section headers, filters on every keystroke, and handles arrow-key navigation. The backbone of an @-mention picker or a slash-command menu.</p>
+
+<Facts items={['Shadow DOM', 'Grouped + filterable', 'Full keyboard nav', 'role: listbox']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-command" />
+
+<Aside type="tip" title="When to use">
+Reach for it when the user needs to pick one thing out of many, fast — an @-mention picker that surfaces files, chats, and people; a slash-command menu inside the composer; a quick-switcher for models or threads. It owns the search input, the grouping, and the keyboard loop. For a static action list that's already on screen, a plain [Menu](/components/menu/) is lighter; to wire this into a rich text input, pair it with the [Composer](/components/composer/).
+</Aside>
+
+## Usage
+
+Set `items` as a JS **property** — a flat array, not an attribute. Each item needs an `id` (echoed back in `kai-select`) and a `label`; add a `group` to bucket it under a section header, an `icon`, and a `description` for a muted second line. The element groups, filters, and navigates for you; listen for `kai-select` to learn which `id` was picked, and `kai-query-change` if you want to drive your own async filtering.
+
+```html
+<kai-command placeholder="Search files, chats, people…"></kai-command>
+<script type="module">
+  import '@kitn.ai/ui/elements';
+  const el = document.querySelector('kai-command');
+  // Array prop — set in JS, never as an HTML attribute.
+  el.items = [
+    { id: 'screen9', label: 'screen9.py', icon: 'file-text', description: '/Users/rob/screen9.py', group: 'Files' },
+    { id: 'rs', label: 'Record screen', icon: 'message-circle', group: 'Chats' },
+  ];
+  el.addEventListener('kai-select', (e) => console.log('picked', e.detail.id));
+  el.addEventListener('kai-query-change', (e) => console.log('query', e.detail.value));
+</script>
+```
+
+## Examples
+
+### Mention picker
+
+The classic @-mention surface — items grouped across `Mac apps`, `Chats`, and `Files`, each with an icon and a path or subtitle. Type to filter across every group at once.
+
+<Example client:visible tag="kai-command" config={{ placeholder: 'Search…' }} data="mention" />
+
+### Slash commands
+
+A command menu of actions bucketed into `Actions` and `Settings`. Drop the `description` and each row is a single tidy line.
+
+<Example client:visible tag="kai-command" config={{ placeholder: 'Type a command…' }} data="commands" />
+
+### Ungrouped
+
+Omit `group` on every item and the palette renders one flat, unsectioned list — handy for a short quick-switcher like a model picker.
+
+<Example client:visible tag="kai-command" config={{ placeholder: 'Switch model…' }} data="flat" />
+
+## Props
+
+<PropTable tag="kai-command" />
+
+## Events
+
+<EventTable tag="kai-command" />
+
+## Composed from
+
+<ComposedFrom tag="kai-command" />
+
+<NeedAHand />

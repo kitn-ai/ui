@@ -1,0 +1,93 @@
+---
+title: Notice
+description: A self-contained inline notice — severity icon, message, an optional action, and an optional dismiss.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import SlotTable from '../../../components/SlotTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-notice</p>
+
+<p class="kai-lede">A self-contained inline notice — a severity icon, your message, an optional trailing action, and an optional dismiss. It owns the box; you decide where it sits.</p>
+
+<Facts items={['Shadow DOM', '5 severities', 'Self-dismissing', 'role: alert / status']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-notice" />
+
+<Aside type="tip" title="When to use">
+Surface a short, contextual status message — a model that's temporarily unavailable above the composer, a "saved" confirmation at the top of a panel, a rate-limit warning in a settings page. It carries the severity icon and the right ARIA role for you. For transient pop-up feedback, reach for [Toast](/components/toast/) instead.
+</Aside>
+
+## Usage
+
+Put the message as light-DOM text inside the element, set `severity` to color the icon and pick the a11y role, and add `dismissible` for a × that hides the notice and fires `kai-dismiss`. The notice owns its box — position it in your own layout.
+
+```html
+<kai-notice severity="warning" dismissible>
+  Claude Fable 5 is temporarily unavailable — requests will fall back to Opus 4.8.
+  <a slot="action" href="/status">Learn more</a>
+</kai-notice>
+```
+
+## Examples
+
+### Severities
+
+`severity` drives the leading icon's color and the ARIA role — `alert` for `error`, `status` for everything else.
+
+<Example client:visible tag="kai-notice" config={{ severity: 'info' }} data="info" />
+
+<Example client:visible tag="kai-notice" config={{ severity: 'warning' }} data="warning" />
+
+<Example client:visible tag="kai-notice" config={{ severity: 'error' }} data="error" />
+
+<Example client:visible tag="kai-notice" config={{ severity: 'success' }} data="success" />
+
+### Dismissible
+
+Add `dismissible` for a × that hides the notice and emits `kai-dismiss`.
+
+<Example client:visible tag="kai-notice" config={{ severity: 'warning', dismissible: true }} data="warning" />
+
+### With an action
+
+Slot a link or button into `slot="action"` for a trailing call-to-action.
+
+<Example client:visible tag="kai-notice" config={{ severity: 'warning' }} data="withAction" />
+
+## Slots
+
+The message is the default slot; these are the named seams:
+
+<SlotTable tag="kai-notice" />
+
+```html
+<kai-notice severity="info">
+  Indexing your workspace…
+  <svg slot="icon" viewBox="0 0 24 24" width="16" height="16"><!-- your glyph --></svg>
+  <a slot="action" href="#">Cancel</a>
+</kai-notice>
+```
+
+## Props
+
+<PropTable tag="kai-notice" />
+
+## Events
+
+<EventTable tag="kai-notice" />
+
+## Composed from
+
+<ComposedFrom tag="kai-notice" />
+
+<NeedAHand />

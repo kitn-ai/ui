@@ -1,0 +1,73 @@
+---
+title: Separator
+description: A themed divider line between groups of content — horizontal or vertical, with the right separator role.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import PartTable from '../../../components/PartTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-separator</p>
+
+<p class="kai-lede">A themed divider line between groups of content — a toolbar split, menu groups, a header/sidebar boundary. It carries `role="separator"`, so it's an accessible `<hr>` you can also stand on end.</p>
+
+<Facts items={['Shadow DOM', 'Horizontal + vertical', 'role: separator', 'One ::part to restyle']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-separator" />
+
+<Aside type="tip" title="When to use">
+Reach for it to break a layout into clear groups — divide stacked sections with a horizontal rule, or split inline items (toolbar buttons, breadcrumb segments, a label and a value) with a vertical one. Prefer it over a bare CSS border when the divide is meaningful enough to announce: it picks up your theme tokens and exposes the right `role="separator"` for free.
+</Aside>
+
+## Usage
+
+Drop it between the things you're dividing. A horizontal separator is a full-width block rule; `orientation="vertical"` turns it into a rule that stretches to its row's height, so place it inside a flex or grid row.
+
+```html
+<section>Models</section>
+<kai-separator></kai-separator>
+<section>Skills</section>
+
+<div style="display: flex; align-items: center; gap: 0.5rem">
+  <span>Opus 4.8</span>
+  <kai-separator orientation="vertical"></kai-separator>
+  <span>Fable 5</span>
+</div>
+```
+
+## Examples
+
+### Horizontal
+
+The default — a full-width rule that separates stacked sections.
+
+<Example client:visible tag="kai-separator" config={{ orientation: 'horizontal' }} data="horizontal" />
+
+### Vertical
+
+`orientation="vertical"` stretches the rule to its row's height for dividing inline items. Give the row a height for it to span.
+
+<Example client:visible tag="kai-separator" config={{ orientation: 'vertical' }} data="vertical" />
+
+## Styling
+
+The line is a single `::part` — recolor it, thicken it, or inset it from your own stylesheet without piercing the shadow root.
+
+<PartTable tag="kai-separator" />
+
+## Props
+
+<PropTable tag="kai-separator" />
+
+## Composed from
+
+<ComposedFrom tag="kai-separator" />
+
+<NeedAHand />

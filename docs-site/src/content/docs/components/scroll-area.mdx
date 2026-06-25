@@ -1,0 +1,68 @@
+---
+title: Scroll area
+description: A themed, thin-scrollbar scroll container for any overflowing region.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import PartTable from '../../../components/PartTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-scroll-area</p>
+
+<p class="kai-lede">A themed, thin-scrollbar scroll container for any overflowing region. Give it a bounded height, put the content in the default slot, and it scrolls inside — with a cross-browser scrollbar that follows your theme.</p>
+
+<Facts items={['Shadow DOM', 'Light-DOM content', 'Themed thin scrollbar', 'Keyboard-reachable']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-scroll-area" />
+
+<Aside type="tip" title="When to use">
+Wrap any region that overflows its space — a long message thread, a settings panel, a changelog, a list of search results — when you want a thin, consistent scrollbar instead of the browser's default. For a full chat transcript that auto-sticks to the latest message, reach for [Conversations](/components/conversations/) instead.
+</Aside>
+
+## Usage
+
+Put the scrollable content as light-DOM children — it lands in the default slot — and give the element a bounded height in your own layout. Once the content is taller than that height, it scrolls inside, and the thin scrollbar follows the `--color-scrollbar-thumb` token. Restyle the inner padding or max-height from outside via `::part(viewport)`; the behavior stays in the component.
+
+```html
+<kai-scroll-area style="height: 16rem">
+  <p>…long content that overflows the height…</p>
+  <p>…more content…</p>
+</kai-scroll-area>
+```
+
+## Examples
+
+### A scrollable column
+
+A bounded box with a tall column of prose — the content scrolls and the thin scrollbar appears.
+
+<Example client:visible tag="kai-scroll-area" data="paragraphs" />
+
+### A scrollable list
+
+The other common case — a long list that overflows its container.
+
+<Example client:visible tag="kai-scroll-area" data="list" />
+
+## Styling
+
+Restyle the scrolling container through its part — add padding, cap the height, or tune the scrollbar via the `--color-scrollbar-thumb` token from outside the element.
+
+<PartTable tag="kai-scroll-area" />
+
+## Props
+
+<PropTable tag="kai-scroll-area" />
+
+## Composed from
+
+<ComposedFrom tag="kai-scroll-area" />
+
+<NeedAHand />

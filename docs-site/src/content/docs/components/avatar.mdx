@@ -1,0 +1,67 @@
+---
+title: Avatar
+description: An identity badge — a rounded image that falls back to initials when there's no photo.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-avatar</p>
+
+<p class="kai-lede">An identity badge for a person or an assistant — a rounded image that falls back to initials when there's no photo. It's the face next to a message or in a conversation list, not a generic icon.</p>
+
+<Facts items={['Shadow DOM', 'Image or initials', '3 sizes', 'Scalar props only']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-avatar" />
+
+<Aside type="tip" title="When to use">
+Stand in for a person or an assistant anywhere you need a small, consistent identity mark — a conversation list, a composer byline, a participant row. Give it a `src` for a photo and a `fallback` for the initials to show when the image is missing or still loading. If you're rendering a message, [Message](/components/message/) already has an `avatar` slot for this — reach for `kai-avatar` when you're laying out identity outside a thread.
+</Aside>
+
+## Usage
+
+Set `src` to an image URL or data-URI and `fallback` to a short initials string. When `src` is absent — or the image fails to load — the `fallback` initials render in its place, so the badge is never empty. `alt` describes the image for assistive tech (it defaults to `fallback`), and `size` picks one of three fixed sizes. Every prop is a plain scalar attribute; there's no slotted content.
+
+```html
+<kai-avatar src="/me.jpg" alt="Rob Taylor" fallback="RT"></kai-avatar>
+<kai-avatar fallback="AI" size="sm"></kai-avatar>
+```
+
+## Examples
+
+### Image
+
+With a `src`, the avatar shows the image cropped to a circle. Keep `fallback` set so there's something to render while the image loads or if it 404s.
+
+<Example client:visible tag="kai-avatar" config={{ size: 'md' }} data="image" />
+
+### Initials fallback
+
+Omit `src` and the `fallback` initials show instead — useful for users who haven't set a photo, or for an assistant identity.
+
+<Example client:visible tag="kai-avatar" config={{ size: 'md' }} data="initials" />
+
+### Sizes
+
+`size` is a fixed token — `sm`, `md` (default), or `lg`.
+
+<Example client:visible tag="kai-avatar" config={{ size: 'sm' }} data="initials" />
+
+<Example client:visible tag="kai-avatar" config={{ size: 'lg' }} data="image" />
+
+## Props
+
+<PropTable tag="kai-avatar" />
+
+## Composed from
+
+<ComposedFrom tag="kai-avatar" />
+
+<NeedAHand />

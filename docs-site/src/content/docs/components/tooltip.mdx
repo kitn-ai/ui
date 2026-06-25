@@ -1,0 +1,66 @@
+---
+title: Tooltip
+description: A hint that appears on hover or focus of the control you wrap — text-only, positioned for you, dismissed on Escape.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-tooltip</p>
+
+<p class="kai-lede">Wrap a control and it shows a short hint on hover or focus. You give it the trigger and the text; it handles positioning, the open delay, and dismissing on Escape or outside-click.</p>
+
+<Facts items={['Shadow DOM', 'Hover + focus', 'Self-positioning', 'Text-only hint']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-tooltip" />
+
+<Aside type="tip" title="When to use">
+Label a control whose purpose isn't obvious from its face — an icon-only button, a terse menu item, a status dot. The hint shows on hover and on keyboard focus, so it stays accessible. It carries plain text only; for rich content (a heading, a thumbnail, links) reach for [Hover Card](/components/hover-card/) instead.
+</Aside>
+
+## Usage
+
+Put the trigger in the default slot — any focusable control — and set `content` to the hint text. The tooltip positions itself next to the trigger, portals its bubble inside the shadow root so it isn't clipped, and dismisses on Escape or an outside click. Tune the hover delay with `openDelay` (focus always shows it immediately).
+
+```html
+<kai-tooltip content="Voice input">
+  <kai-button variant="subtle" size="icon" icon="mic" label="Voice input"></kai-button>
+</kai-tooltip>
+```
+
+## Examples
+
+### On an icon button
+
+The common case — an icon-only button whose meaning isn't obvious without a label.
+
+<Example client:visible tag="kai-tooltip" config={{ content: 'Attach a file' }} data="attach" />
+
+### On a labeled button
+
+Any focusable control works as the trigger, not just icon buttons.
+
+<Example client:visible tag="kai-tooltip" config={{ content: 'Regenerate the last response' }} data="button" />
+
+### A snappier delay
+
+`openDelay` sets the hover wait in milliseconds (default 600). Drop it for hints you want to surface faster.
+
+<Example client:visible tag="kai-tooltip" config={{ content: 'Voice input', openDelay: 150 }} />
+
+## Props
+
+<PropTable tag="kai-tooltip" />
+
+## Composed from
+
+<ComposedFrom tag="kai-tooltip" />
+
+<NeedAHand />

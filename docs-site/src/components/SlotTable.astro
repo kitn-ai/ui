@@ -1,0 +1,30 @@
+---
+// Composition slots for an element, from the generated element-meta.json.
+// `inject` = additive (the built-in region still renders); `replace` = your
+// markup stands in for that region. The default (unnamed) slot — the element's
+// primary content — is covered in each page's Usage, not here.
+import meta from '../data/element-meta.json';
+interface Props { tag: string }
+const { tag } = Astro.props;
+const el = (meta as any[]).find((e) => e.tag === tag);
+const slots = el?.slots ?? [];
+const th = 'text-left text-xs font-semibold uppercase tracking-wide text-ink-3 bg-surface px-4 py-2.5 border-b border-line';
+---
+{slots.length > 0 && (
+  <div class="not-content my-4 overflow-hidden rounded-xl border border-line">
+    <table class="w-full border-collapse text-sm">
+      <thead><tr><th class={th}>Slot</th><th class={th}>Mode</th><th class={th}>Purpose</th></tr></thead>
+      <tbody>
+        {slots.map((s: any) => (
+          <tr>
+            <td class="border-b border-line px-4 py-3 align-top font-mono text-sm font-semibold text-link">
+              {s.name}{s.part && <span class="ml-1 font-sans text-xs text-ink-3">· <code>::part</code></span>}
+            </td>
+            <td class="border-b border-line px-4 py-3 align-top font-mono text-sm text-ink-2">{s.mode}</td>
+            <td class="border-b border-line px-4 py-3 align-top text-sm text-ink-2">{s.doc}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}

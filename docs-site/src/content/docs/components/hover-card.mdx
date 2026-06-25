@@ -1,0 +1,89 @@
+---
+title: Hover card
+description: Reveals rich content — a user card, a link preview — when a trigger is hovered or focused.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import SlotTable from '../../../components/SlotTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-hover-card</p>
+
+<p class="kai-lede">Reveals a rich floating panel when its trigger is hovered or focused — a user card behind an avatar, a preview behind a link. The trigger is the default content; the panel goes in <code>slot="card"</code>.</p>
+
+<Facts items={['Shadow DOM', 'Hover + focus', 'Auto-flips placement', 'Hover bridge']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-hover-card" />
+
+<Aside type="tip" title="When to use">
+Reach for a hover card when the preview is *content* — an avatar that opens a profile, a mention that shows who someone is, a link that previews the page behind it. It carries markup, so it can hold its own layout, images, and links. For a plain-text hint on an icon button, use [Tooltip](/components/tooltip/) instead.
+</Aside>
+
+## Usage
+
+Put the trigger as the default light-DOM content and the panel in `slot="card"`. The card is portaled and positioned inside the shadow root, with a transparent bridge so the pointer can travel from the trigger into the card without it closing. It opens on hover and on keyboard focus.
+
+Tune the timing with `openDelay` (default `0`) and `closeDelay` (default `300` ms), and steer the panel with `placement` — it flips to stay in view regardless.
+
+```html
+<kai-hover-card placement="top">
+  <a href="#">@acme</a>
+  <div slot="card">
+    <strong>Acme Corp</strong>
+    <p>Workspace · 24 members</p>
+  </div>
+</kai-hover-card>
+```
+
+## Examples
+
+### A profile behind an avatar
+
+The default slot can be any trigger — here a `<kai-avatar>` opens a profile card.
+
+<Example client:visible tag="kai-hover-card" data="profile" />
+
+### A badge that explains itself
+
+Wrap a `<kai-badge>` to expand a short label into the full story.
+
+<Example client:visible tag="kai-hover-card" data="badge" />
+
+### A link preview
+
+Slower to open so it doesn't fire on every pass — `openDelay` waits for intent.
+
+<Example client:visible tag="kai-hover-card" config={{ openDelay: '300' }} data="link" />
+
+## Slots
+
+The trigger is the default slot; the card is the one named seam:
+
+<SlotTable tag="kai-hover-card" />
+
+```html
+<kai-hover-card>
+  <kai-avatar src="/jordan.jpg" alt="Jordan Lee"></kai-avatar>
+  <div slot="card">
+    <strong>Jordan Lee</strong>
+    <p>Staff engineer · Platform</p>
+  </div>
+</kai-hover-card>
+```
+
+## Props
+
+<PropTable tag="kai-hover-card" />
+
+## Composed from
+
+<ComposedFrom tag="kai-hover-card" />
+
+<NeedAHand />
