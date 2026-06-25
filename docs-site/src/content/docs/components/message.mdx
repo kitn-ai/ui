@@ -8,6 +8,8 @@ import Playground from '../../../components/Playground.tsx';
 import Example from '../../../components/Example.tsx';
 import PropTable from '../../../components/PropTable.astro';
 import EventTable from '../../../components/EventTable.astro';
+import SlotTable from '../../../components/SlotTable.astro';
+import PartTable from '../../../components/PartTable.astro';
 import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
@@ -117,6 +119,18 @@ An avatar pulled from `message.avatar`, plus a custom `Share` action alongside b
 `actions-reveal="hover"` hides the action bar until the row is hovered — cleaner in dense threads.
 
 <Example client:visible tag="kai-message" config={{ actionsReveal: "hover" }} data="actionsRevealHover" />
+
+## Slots
+
+Compose your own message rows: inject a per-message header or footer, or replace the avatar rail (`avatar="none"` drops it entirely). These are the keystone of a [custom message list](/patterns/compose-your-own/).
+
+<SlotTable tag="kai-message" />
+
+## Styling
+
+Restyle the row, bubble, content, or action bar from outside via `::part`.
+
+<PartTable tag="kai-message" />
 
 ## Props
 
