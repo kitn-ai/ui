@@ -15,6 +15,9 @@ declare module 'solid-js' {
       'kai-button': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; icon?: string; 'icon-trailing'?: string; label?: string; disabled?: boolean };
       'kai-notice': JSX.HTMLAttributes<HTMLElement> & { severity?: string; icon?: string; dismissible?: boolean };
       'kai-icon': JSX.HTMLAttributes<HTMLElement> & { name?: string; size?: string };
+      'kai-separator': JSX.HTMLAttributes<HTMLElement> & { orientation?: string };
+      'kai-scroll-area': JSX.HTMLAttributes<HTMLElement>;
+      'kai-hover-card': JSX.HTMLAttributes<HTMLElement> & { 'open-delay'?: number | string; 'close-delay'?: number | string; placement?: string };
     }
   }
 }
@@ -70,6 +73,57 @@ export const Notices: Story = {
       <kai-notice severity="warning">Claude Fable 5 is currently unavailable.</kai-notice>
       <kai-notice severity="error" dismissible>Your last message failed to send.</kai-notice>
       <kai-notice severity="success">Settings saved.</kai-notice>
+    </div>
+  ),
+};
+
+/** Dividers — horizontal between stacked content, vertical inside a control row. */
+export const Separators: Story = {
+  render: () => (
+    <div class="flex max-w-md flex-col gap-3 text-foreground">
+      <span>Section one</span>
+      <kai-separator />
+      <span>Section two</span>
+      <div class="flex items-center gap-3">
+        <span>Model</span>
+        <kai-separator orientation="vertical" />
+        <span>Effort</span>
+        <kai-separator orientation="vertical" />
+        <span>Voice</span>
+      </div>
+    </div>
+  ),
+};
+
+/** Scroll area — themed thin scrollbar; content scrolls inside a bounded box. */
+export const ScrollAreaStory: Story = {
+  name: 'Scroll Area',
+  render: () => (
+    <kai-scroll-area style={{ height: '12rem' }} class="block w-72 rounded-lg border border-border p-3 text-foreground">
+      <div class="flex flex-col gap-2">
+        {Array.from({ length: 20 }, (_, i) => (
+          <div class="rounded-md border border-border px-3 py-2 text-sm">Row {i + 1}</div>
+        ))}
+      </div>
+    </kai-scroll-area>
+  ),
+};
+
+/** Hover card — RICH content on hover/focus of a trigger (vs the text-only tooltip). */
+export const HoverCards: Story = {
+  render: () => (
+    <div class="flex items-center gap-2 p-16 text-foreground">
+      <span>Mentioned by</span>
+      <kai-hover-card open-delay="120">
+        <a href="#" class="font-medium text-foreground underline underline-offset-2">@acme</a>
+        <div slot="card" class="flex w-56 flex-col gap-2">
+          <div class="flex items-center gap-2">
+            <kai-avatar fallback="AC" size="sm" />
+            <strong>Acme Corp</strong>
+          </div>
+          <p class="text-sm text-muted-foreground">Workspace · 24 members · 8 projects</p>
+        </div>
+      </kai-hover-card>
     </div>
   ),
 };

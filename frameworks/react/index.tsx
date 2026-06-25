@@ -569,6 +569,21 @@ export const Form = createWebComponent<FormProps>(
   {  },
 );
 
+export interface HoverCardProps extends WebComponentProps {
+  /** Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too). */
+  openDelay?: number;
+  /** Delay (ms) before it closes after the pointer leaves. Defaults to 300. */
+  closeDelay?: number;
+  /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. */
+  placement?: string;
+}
+
+export const HoverCard = createWebComponent<HoverCardProps>(
+  'kai-hover-card',
+  ["theme","openDelay","closeDelay","placement"],
+  {  },
+);
+
 export interface IconProps extends WebComponentProps {
   /** A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. */
   name?: string;
@@ -910,6 +925,16 @@ export const ScopePicker = createWebComponent<ScopePickerProps>(
   { onScopeChange: 'kai-scope-change' },
 );
 
+export interface ScrollAreaProps extends WebComponentProps {
+
+}
+
+export const ScrollArea = createWebComponent<ScrollAreaProps>(
+  'kai-scroll-area',
+  ["theme"],
+  {  },
+);
+
 export interface ScrollButtonProps extends WebComponentProps {
   /** CSS id of the scroll container to control. When omitted the element walks up the DOM (outside its own shadow root) to find the nearest scrollable ancestor. Mirrors the `for` convention of `<label for="...">`. */
   for?: string;
@@ -925,6 +950,17 @@ export const ScrollButton = createWebComponent<ScrollButtonProps>(
   'kai-scroll-button',
   ["theme","for","variant","size"],
   { onScroll: 'kai-scroll' },
+);
+
+export interface SeparatorProps extends WebComponentProps {
+  /** `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). */
+  orientation?: "horizontal" | "vertical";
+}
+
+export const Separator = createWebComponent<SeparatorProps>(
+  'kai-separator',
+  ["theme","orientation"],
+  {  },
 );
 
 export interface SkillsProps extends WebComponentProps {

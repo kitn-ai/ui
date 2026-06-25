@@ -1108,6 +1108,335 @@ No events.
 
 ---
 
+### Composition primitives & interactive elements
+
+The polished building blocks you compose your own chrome from — themed, accessible, and Shadow-DOM-isolated. Each exposes its styleable `::part`s below (also discoverable via the `kai` MCP `component_reference`).
+
+### `<kai-button>` / `Button`
+
+<!-- spec:kai-button -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `variant` | `variant` | `undefined | "default" | "subtle" | "ghost" | "outline" | "destructive"` | `'default'` | Visual style. `default` (filled), `subtle` (muted text, hover tint — the toolbar icon look), `ghost` (transparent, hover fill), `outline`, or `destructive`. Defaults to `default`. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | `'md'` | Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`. |
+| `icon` | `icon` | `undefined | string` | — | Leading icon: a named icon (e.g. `"mic"`, `"plus"`), an image URL/data-URI, or plain text. Renders before any slotted label. |
+| `iconTrailing` | `icon-trailing` | `undefined | string` | — | Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). |
+| `label` | `label` | `undefined | string` | — | Accessible name. REQUIRED for icon-only buttons (no visible text); ignored when you slot visible text, which already names the button. |
+| `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the button (non-interactive, dimmed). |
+| `type` | `type` | `undefined | "button" | "submit" | "reset"` | `'button'` | Native button `type`. Defaults to `button` (so it never submits a form). |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-click` | — | The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-button::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(button)` | The button element. Restyle radius, padding, colors, or weight from outside; the `variant`/`size` props set the defaults. <br>`kai-button::part(button) { border-radius: 9999px; font-weight: 600 }` |
+
+#### Composed from
+
+`UI/Button`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-button -->
+
+A themed button — `variant` (incl. `subtle`), `size` (incl. icon-only), leading/trailing `icon`, and a `slot="icon"` escape hatch for any inline SVG. Restyle via `::part(button)`.
+
+---
+
+### `<kai-avatar>` / `Avatar`
+
+<!-- spec:kai-avatar -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `src` | `src` | `undefined | string` | — | Image URL/data-URI. When absent, the `fallback` initials show instead. |
+| `alt` | `alt` | `undefined | string` | — | Alt text for the image. Defaults to `fallback`. |
+| `fallback` | `fallback` | `undefined | string` | `''` | Short text shown when there's no image — usually initials (e.g. "RT", "AI"). |
+| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token: `sm` | `md` (default) | `lg`. |
+
+#### Composed from
+
+`UI/Avatar`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-avatar -->
+
+An image avatar with an automatic initials fallback, in three sizes.
+
+---
+
+### `<kai-badge>` / `Badge`
+
+<!-- spec:kai-badge -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `variant` | `variant` | `undefined | "default" | "count" | "citation"` | `'default'` | `default` (muted pill) · `count` (compact number badge) · `citation` (filled primary, for inline citation markers). Defaults to `default`. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-badge::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(badge)` | The badge pill. Restyle its background, color, or shape; the `variant` prop (default/count/citation) sets the defaults. <br>`kai-badge::part(badge) { background: var(--color-primary); color: var(--color-primary-foreground) }` |
+
+#### Composed from
+
+`UI/Badge`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-badge -->
+
+A small pill for labels, status, counts, or inline citation markers. Restyle via `::part(badge)`.
+
+---
+
+### `<kai-icon>` / `Icon`
+
+<!-- spec:kai-icon -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `name` | `name` | `undefined | string` | `''` | A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token: `sm` | `md` (default) | `lg`. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-icon::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(icon)` | The icon wrapper. Inherits `currentColor` and the `size` prop by default; recolor or resize it from outside. <br>`kai-icon::part(icon) { color: var(--color-primary) }` |
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-icon -->
+
+A curated, theme-aware icon used standalone. Recolor via `::part(icon)` or `currentColor`.
+
+---
+
+### `<kai-tooltip>` / `Tooltip`
+
+<!-- spec:kai-tooltip -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `content` | `content` | `undefined | string` | `''` | The hint text shown on hover/focus of the slotted trigger. |
+| `openDelay` | `open-delay` | `undefined | number` | — | Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless. |
+
+#### Composed from
+
+`UI/Tooltip`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-tooltip -->
+
+A text hint shown on hover/focus of a slotted trigger; positioned and portaled inside the shadow root.
+
+---
+
+### `<kai-hover-card>` / `HoverCard`
+
+<!-- spec:kai-hover-card -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `openDelay` | `open-delay` | `undefined | number` | — | Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too). |
+| `closeDelay` | `close-delay` | `undefined | number` | — | Delay (ms) before it closes after the pointer leaves. Defaults to 300. |
+| `placement` | `placement` | `undefined | string` | — | Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. |
+
+#### Composed from
+
+`UI/HoverCard`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-hover-card -->
+
+Rich content on hover/focus of a trigger — the markup-carrying sibling of `<kai-tooltip>`. Trigger as default content, card body in `slot="card"`.
+
+---
+
+### `<kai-notice>` / `Notice`
+
+<!-- spec:kai-notice -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `severity` | `severity` | `undefined | "neutral" | "info" | "warning" | "error" | "success"` | `'neutral'` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `icon` | `icon` | `undefined | string` | — | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
+| `dismissible` | `dismissible` | `undefined | false | true` | `false` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-dismiss` | — | The notice was dismissed via its × (it also hides itself). |
+
+#### Composed from
+
+`UI/Notice`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-notice -->
+
+An inline notice/alert carrying a severity icon, the right a11y role, an optional `slot="action"`, and an optional self-dismissing ×.
+
+---
+
+### `<kai-separator>` / `Separator`
+
+<!-- spec:kai-separator -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-separator::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(separator)` | The divider line. Restyle its color, thickness, or inset from outside. <br>`kai-separator::part(separator) { background: var(--color-border) }` |
+
+#### Composed from
+
+`UI/Separator`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-separator -->
+
+A themed divider between groups of content (toolbar sections, menu groups, header/sidebar splits). Restyle via `::part(separator)`.
+
+---
+
+### `<kai-scroll-area>` / `ScrollArea`
+
+<!-- spec:kai-scroll-area -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-scroll-area::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(viewport)` | The scrolling container. Add padding or a max-height from outside; the thin scrollbar follows `--color-scrollbar-thumb`. <br>`kai-scroll-area::part(viewport) { padding-right: 0.5rem }` |
+
+#### Composed from
+
+`UI/ScrollArea`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-scroll-area -->
+
+A scroll container with a themed, thin, cross-browser scrollbar and a keyboard-reachable region. Restyle via `::part(viewport)`.
+
+---
+
+### `<kai-menu>` / `Menu`
+
+<!-- spec:kai-menu -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `items` | — | `undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]` | — | Tree of menu items. Set as a JS property — not an HTML attribute. |
+| `placement` | `placement` | `undefined | string` | — | Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). |
+| `triggerIcon` | `trigger-icon` | `undefined | string` | — | Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case — a slotted trigger overrides it. |
+| `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label (e.g. `"High"`). |
+| `triggerIconTrailing` | `trigger-icon-trailing` | `undefined | string` | — | Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). |
+| `label` | `label` | `undefined | string` | — | Accessible name for an icon-only trigger (no visible label). |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-select` | `{ id: string; checked?: undefined | false | true }` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
+
+#### Composed from
+
+`UI/Dropdown`, `UI/DropdownTrigger`, `UI/DropdownContent`, `UI/DropdownItem`, `UI/DropdownSeparator`, `UI/DropdownLabel`, `UI/DropdownCheckboxItem`, `UI/DropdownSub`, `UI/DropdownSubTrigger`, `UI/DropdownSubContent`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-menu -->
+
+A cascading action menu built from a JSON items-tree (submenus, separators, checkboxes, headings), with a built-in or slotted trigger.
+
+---
+
+### `<kai-command>` / `Command`
+
+<!-- spec:kai-command -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `items` | — | `undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Flat list of items. Set as a JS property — not an HTML attribute. |
+| `placeholder` | `placeholder` | `undefined | string` | — | Placeholder text for the search input. |
+| `emptyLabel` | `empty-label` | `undefined | string` | — | Label shown when no items match the current query. |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-query-change` | `{ value: string }` | Fired on every keystroke in the search input. |
+| `kai-select` | `{ id: string }` | Fired when the user selects an item (click or Enter). |
+
+#### Composed from
+
+`UI/CommandList`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-command -->
+
+A grouped, filterable command / mention palette (the `@`-picker pattern).
+
+---
+
 ## ChatMessage schema
 
 ```ts

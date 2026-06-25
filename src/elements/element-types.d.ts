@@ -399,6 +399,17 @@ export interface KaiFormElement extends HTMLElement {
   resolution?: Record<string, unknown>;
 }
 
+export interface KaiHoverCardElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too). */
+  openDelay?: number;
+  /** Delay (ms) before it closes after the pointer leaves. Defaults to 300. */
+  closeDelay?: number;
+  /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. */
+  placement?: string;
+}
+
 export interface KaiIconElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -636,6 +647,11 @@ export interface KaiScopePickerElement extends HTMLElement {
   currentLabel?: string;
 }
 
+export interface KaiScrollAreaElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+}
+
 export interface KaiScrollButtonElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -645,6 +661,13 @@ export interface KaiScrollButtonElement extends HTMLElement {
   variant?: "default" | "ghost" | "outline";
   /** Button size token. Defaults to `'icon'` (square). */
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
+}
+
+export interface KaiSeparatorElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). */
+  orientation?: "horizontal" | "vertical";
 }
 
 export interface KaiSkillsElement extends HTMLElement {
@@ -853,6 +876,7 @@ declare global {
     'kai-file-tree': KaiFileTreeElement;
     'kai-file-upload': KaiFileUploadElement;
     'kai-form': KaiFormElement;
+    'kai-hover-card': KaiHoverCardElement;
     'kai-icon': KaiIconElement;
     'kai-image': KaiImageElement;
     'kai-link-preview': KaiLinkPreviewElement;
@@ -870,7 +894,9 @@ declare global {
     'kai-resizable-item': KaiResizableItemElement;
     'kai-response-stream': KaiResponseStreamElement;
     'kai-scope-picker': KaiScopePickerElement;
+    'kai-scroll-area': KaiScrollAreaElement;
     'kai-scroll-button': KaiScrollButtonElement;
+    'kai-separator': KaiSeparatorElement;
     'kai-skills': KaiSkillsElement;
     'kai-source': KaiSourceElement;
     'kai-sources': KaiSourcesElement;

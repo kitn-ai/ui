@@ -305,6 +305,19 @@
     }
   },
   {
+    "tag": "kai-hover-card",
+    "displayName": "HoverCard",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-hover-card></kai-hover-card>",
+      "react": "import { HoverCard } from '@kitn.ai/ui/react';\n\n<HoverCard />",
+      "vue": "<kai-hover-card />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-hover-card></kai-hover-card>",
+      "angular": "<kai-hover-card></kai-hover-card>",
+      "solid": "import { HoverCard } from '@kitn.ai/ui';\n\n<HoverCard />"
+    }
+  },
+  {
     "tag": "kai-icon",
     "displayName": "Icon",
     "hasSolid": false,
@@ -520,6 +533,19 @@
     }
   },
   {
+    "tag": "kai-scroll-area",
+    "displayName": "ScrollArea",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-scroll-area></kai-scroll-area>",
+      "react": "import { ScrollArea } from '@kitn.ai/ui/react';\n\n<ScrollArea />",
+      "vue": "<kai-scroll-area />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-scroll-area></kai-scroll-area>",
+      "angular": "<kai-scroll-area></kai-scroll-area>",
+      "solid": "import { ScrollArea } from '@kitn.ai/ui';\n\n<ScrollArea />"
+    }
+  },
+  {
     "tag": "kai-scroll-button",
     "displayName": "ScrollButton",
     "hasSolid": true,
@@ -530,6 +556,19 @@
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-scroll-button\n  on:kai-scroll={onScroll}\n></kai-scroll-button>",
       "angular": "<kai-scroll-button\n  (kai-scroll)=\"onScroll($event)\"\n></kai-scroll-button>",
       "solid": "import { ScrollButton } from '@kitn.ai/ui';\n\n<ScrollButton\n  onScroll={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kai-separator",
+    "displayName": "Separator",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-separator></kai-separator>",
+      "react": "import { Separator } from '@kitn.ai/ui/react';\n\n<Separator />",
+      "vue": "<kai-separator />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-separator></kai-separator>",
+      "angular": "<kai-separator></kai-separator>",
+      "solid": "import { Separator } from '@kitn.ai/ui';\n\n<Separator />"
     }
   },
   {

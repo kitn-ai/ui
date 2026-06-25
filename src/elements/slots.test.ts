@@ -142,6 +142,8 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-chat',
       'kai-icon',
       'kai-prompt-input',
+      'kai-scroll-area',
+      'kai-separator',
     ]);
     expect(ELEMENT_COMPOSITION['kai-chat'].slots).toBe(CHAT_SLOTS);
     expect(ELEMENT_COMPOSITION['kai-prompt-input'].slots).toBe(PROMPT_INPUT_SLOTS);

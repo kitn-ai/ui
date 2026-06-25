@@ -47,6 +47,9 @@ import './badge';
 import './tooltip';
 import './notice';
 import './icon';
+import './separator';
+import './scroll-area';
+import './hover-card';
 import './toast';
 // Generative-UI cards (Card Contract)
 import './card';

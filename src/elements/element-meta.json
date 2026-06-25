@@ -2011,6 +2011,46 @@
     "tokens": []
   },
   {
+    "tag": "kai-hover-card",
+    "className": "KaiHoverCardElement",
+    "displayName": "HoverCard",
+    "props": [
+      {
+        "name": "openDelay",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too).",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "closeDelay",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Delay (ms) before it closes after the pointer leaves. Defaults to 300.",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "placement",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "HoverCard",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-hovercard--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kai-icon",
     "className": "KaiIconElement",
     "displayName": "Icon",
@@ -3139,6 +3179,28 @@
     "tokens": []
   },
   {
+    "tag": "kai-scroll-area",
+    "className": "KaiScrollAreaElement",
+    "displayName": "ScrollArea",
+    "props": [],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "ScrollArea",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-scrollarea--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "viewport",
+        "doc": "The scrolling container. Add padding or a max-height from outside; the thin scrollbar follows `--color-scrollbar-thumb`.",
+        "recipe": "kai-scroll-area::part(viewport) { padding-right: 0.5rem }"
+      }
+    ]
+  },
+  {
     "tag": "kai-scroll-button",
     "className": "KaiScrollButtonElement",
     "displayName": "ScrollButton",
@@ -3186,6 +3248,38 @@
       }
     ],
     "tokens": []
+  },
+  {
+    "tag": "kai-separator",
+    "className": "KaiSeparatorElement",
+    "displayName": "Separator",
+    "props": [
+      {
+        "name": "orientation",
+        "type": "undefined | \"horizontal\" | \"vertical\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height).",
+        "default": "'horizontal'",
+        "displayType": "undefined | \"horizontal\" | \"vertical\""
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Separator",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-separator--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "separator",
+        "doc": "The divider line. Restyle its color, thickness, or inset from outside.",
+        "recipe": "kai-separator::part(separator) { background: var(--color-border) }"
+      }
+    ]
   },
   {
     "tag": "kai-skills",

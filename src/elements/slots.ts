@@ -98,6 +98,24 @@ export const ICON_PARTS: PartDef[] = [
   },
 ];
 
+/** Styleable `::part`s of `<kai-separator>`. */
+export const SEPARATOR_PARTS: PartDef[] = [
+  {
+    name: 'separator',
+    doc: 'The divider line. Restyle its color, thickness, or inset from outside.',
+    recipe: 'kai-separator::part(separator) { background: var(--color-border) }',
+  },
+];
+
+/** Styleable `::part`s of `<kai-scroll-area>`. */
+export const SCROLL_AREA_PARTS: PartDef[] = [
+  {
+    name: 'viewport',
+    doc: 'The scrolling container. Add padding or a max-height from outside; the thin scrollbar follows `--color-scrollbar-thumb`.',
+    recipe: 'kai-scroll-area::part(viewport) { padding-right: 0.5rem }',
+  },
+];
+
 /**
  * Per-element composition surface — the SINGLE registry the build extracts
  * (`scripts/gen-element-api.mjs`) into `element-meta.json`, the Custom Elements
@@ -120,6 +138,8 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-button': { parts: BUTTON_PARTS },
   'kai-badge': { parts: BADGE_PARTS },
   'kai-icon': { parts: ICON_PARTS },
+  'kai-separator': { parts: SEPARATOR_PARTS },
+  'kai-scroll-area': { parts: SCROLL_AREA_PARTS },
 };
 
 /**
