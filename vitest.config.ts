@@ -79,6 +79,15 @@ export default defineConfig({
         // transient — retry the story before failing the run. Scoped to this
         // project only; the jsdom unit project stays retry-free (deterministic).
         retry: 2,
+        // The deeper flake is a WHOLE-RUNNER crash, not a per-test failure: the
+        // single chromium instance gets overwhelmed running ~118 story files in
+        // parallel and the connection drops mid-suite ("[birpc] rpc is closed",
+        // "Browser connection was closed") — `retry` can't recover that. Run the
+        // story files SEQUENTIALLY so only one file's worth of render + play +
+        // axe work hits the browser at a time. Slower, but it keeps chromium
+        // under its memory/concurrency ceiling on GitHub runners. Scoped to this
+        // project; the jsdom unit project keeps its default parallelism.
+        fileParallelism: false,
         // NOTE: we deliberately do NOT set a custom `setupFiles` with
         // `setProjectAnnotations` here. Since Storybook 10.3, @storybook/addon-vitest
         // auto-provisions the project annotations from `.storybook/main.ts` +
