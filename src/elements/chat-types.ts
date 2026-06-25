@@ -1,5 +1,5 @@
-import type { ToolPart } from '../components/tool';
-import type { AttachmentData } from '../components/attachments';
+import type { ToolPart } from '../components/tool-types';
+import type { AttachmentData } from '../components/attachment-types';
 
 /** The five built-in action buttons (each carries its own curated icon + label). */
 export type ChatMessageAction = 'copy' | 'like' | 'dislike' | 'regenerate' | 'edit';

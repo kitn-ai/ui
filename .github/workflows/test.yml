@@ -7,6 +7,11 @@ on:
     branches: [main]
 
 jobs:
+  # The REQUIRED check. Everything here is deterministic: build, typecheck, the
+  # jsdom unit project, the React adapter tests, and the cross-origin e2e
+  # security matrix. The flaky storybook BROWSER project lives in its own
+  # `storybook` job below (non-required), so environmental chromium crashes no
+  # longer block merges.
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -21,31 +26,59 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Install before any test step: `npm test` runs the Storybook browser
-      # project (stories-as-tests via @storybook/addon-vitest), and
-      # `test:storybook` + `test:e2e` also need the browser. Installing here
-      # makes chromium available to every step (was previously installed too
-      # late, after the unit/storybook steps, so they failed to launch a browser).
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
       - name: Build (element bundle + provider subpath)
         run: npm run build
 
       - name: Typecheck
         run: npm run typecheck
 
+      # Run ONLY the jsdom unit project. `npm test` (= `vitest run`) would also
+      # spin up the storybook BROWSER project; that runs in its own job now.
       - name: Unit tests (jsdom)
-        run: npm test
+        run: npm test -- --project=unit
 
       - name: React adapter tests
         run: npm run test:react
 
-      - name: Storybook tests (a11y + interaction)
-        run: npm run test:storybook
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      # Small, focused, retried-internally cross-origin postMessage SECURITY
+      # matrix (remote-element.spec.ts) — proves the host↔provider handshake
+      # across two real origins, which jsdom and same-origin storybook can't.
+      - name: Cross-origin e2e matrix
+        run: npm run test:e2e
+
+  # NON-REQUIRED check. The storybook browser project runs ~118 *.stories.tsx as
+  # Playwright/chromium browser tests (smoke render + play functions + axe a11y).
+  # Under CI load a renderer page occasionally dies mid-run and aborts the whole
+  # vitest runner ("Browser connection was closed" / "[birpc] rpc is closed") —
+  # a process-level crash, not a per-test failure, so vitest's own `retry` can't
+  # recover it. It's environmental flake on standard GitHub runners (a clean run
+  # passes every test). `test:storybook:ci` already retries the whole suite as a
+  # fresh process; isolating this in its own job (and NOT adding it to branch
+  # protection's required checks) keeps the a11y/render coverage visible without
+  # blocking merges on infra flake. A real, repeatable regression still fails
+  # every retry and shows red here.
+  storybook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
-      - name: Cross-origin e2e matrix
-        run: npm run test:e2e
+      - name: Build (element bundle + provider subpath)
+        run: npm run build
+
+      - name: Storybook tests (a11y + interaction)
+        run: npm run test:storybook:ci

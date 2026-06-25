@@ -81,7 +81,7 @@ function PromptInput(props: PromptInputProps) {
           // so the FRAME owns the focus affordance: a blue ring whenever a
           // control inside it is focused. Without this the composer had no
           // visible keyboard-focus state.
-          'bg-muted/40 cursor-text rounded-xl p-2 shadow-xs',
+          'bg-surface cursor-text rounded-xl p-2 shadow-xs',
           'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0',
           local.disabled && 'cursor-not-allowed opacity-60',
           local.class

@@ -1651,10 +1651,37 @@ function interactionPatternsBlock(): string {
     `});`,
   ].join('\n');
 
+  const statePattern = [
+    `--- Pattern: State helpers + streaming (new-array contract) ---`,
+    `// Setter contract: always (prev) => next — every helper returns a new array.`,
+    `// Vanilla adapter (works with any element ref):`,
+    `// const set = (fn) => { el.messages = fn(el.messages ?? []); };`,
+    ``,
+    `// Low-level helpers from @kitn.ai/ui/state:`,
+    `// import { appendMessage, updateMessage, appendContent, createAssistantStream } from '@kitn.ai/ui/state';`,
+    ``,
+    `// Streaming loop (framework-agnostic):`,
+    `// const stream = createAssistantStream(set);`,
+    `// stream.appendText(chunk);       // text delta`,
+    `// stream.appendReasoning(chunk);  // reasoning delta`,
+    `// stream.upsertTool(toolCall);    // tool call delta`,
+    `// stream.done();                  // seal the message`,
+    ``,
+    `// One-liner for React (batteries-included):`,
+    `// import { useKaiChat } from '@kitn.ai/ui/react';`,
+    `// const chat = useKaiChat();`,
+    `// <Chat {...chat.bind} />`,
+    ``,
+    `// One-liner for Solid (batteries-included):`,
+    `// import { createKaiChat } from '@kitn.ai/ui';`,
+    `// const chat = createKaiChat();`,
+    `// <kai-chat {...chat.bind} on:kai-submit={chat.handleSubmit} />`,
+  ].join('\n');
+
   return [
     `=== INTERACTION PATTERNS ===`,
     ``,
-    `Optional snippets for confirmations, card recovery, and preference capture.`,
+    `Optional snippets for confirmations, card recovery, preference capture, and state/streaming helpers.`,
     `Drop in the one(s) you need; all imports resolve from @kitn.ai/ui.`,
     ``,
     toastPattern,
@@ -1662,6 +1689,8 @@ function interactionPatternsBlock(): string {
     recoveryPattern,
     ``,
     preferencePattern,
+    ``,
+    statePattern,
   ].join('\n');
 }
 

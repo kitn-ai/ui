@@ -180,6 +180,35 @@ function renderElement(el) {
         ].join('\n')
       : '_No events._',
   );
+
+  if (el.slots?.length) {
+    out.push('');
+    out.push(
+      [
+        '**Slots** (project your own markup via `slot="name"` on a light-DOM child):',
+        '',
+        '| Slot | Mode | Description |',
+        '|---|---|---|',
+        el.slots.map((s) => `| \`${s.name}\` | ${s.mode ?? '—'} | ${escapeCell(s.doc)} |`).join('\n'),
+      ].join('\n'),
+    );
+  }
+
+  if (el.parts?.length) {
+    out.push('');
+    out.push(
+      [
+        '**Styleable parts** (restyle from outside via `' + el.tag + '::part(name)`):',
+        '',
+        '| Part | Description |',
+        '|---|---|',
+        el.parts
+          .map((p) => `| \`::part(${p.name})\` | ${escapeCell(p.doc)}${p.recipe ? ` — \`${escapeCell(p.recipe)}\`` : ''} |`)
+          .join('\n'),
+      ].join('\n'),
+    );
+  }
+
   out.push('');
   out.push('---');
   return out.join('\n');
@@ -266,6 +295,8 @@ function fromElements(elements) {
       detail: e.detail ? `CustomEvent<${e.detail}>` : 'CustomEvent',
       description: e.description,
     })),
+    slots: el.slots,
+    parts: el.parts,
   }));
 }
 
@@ -291,6 +322,8 @@ function fromManifest(cem) {
         detail: e.type?.text ?? 'CustomEvent',
         description: e.description ?? '',
       })),
+      slots: (d.slots || []).map((s) => ({ name: s.name, doc: s.description ?? '' })),
+      parts: (d.cssParts || []).map((p) => ({ name: p.name, doc: p.description ?? '', recipe: p.recipe })),
     };
   });
 }

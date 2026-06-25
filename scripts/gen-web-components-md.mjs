@@ -109,6 +109,23 @@ function tablesFor(el) {
     out += `\n#### Events\n\n| Event | \`detail\` | Description |\n|-------|-----------|-------------|\n${evRows}\n`;
   }
 
+  if (el.slots?.length) {
+    const rows = el.slots
+      .map((s) => `| \`${s.name}\` | ${s.mode} | ${s.doc ?? ''} |`)
+      .join('\n');
+    out += `\n#### Slots\n\nProject your own markup with \`slot="name"\` on a light-DOM child.\n\n| Slot | Mode | Description |\n|------|------|-------------|\n${rows}\n`;
+  }
+
+  if (el.parts?.length) {
+    const rows = el.parts
+      .map((p) => {
+        const recipe = p.recipe ? ` <br>\`${p.recipe}\`` : '';
+        return `| \`::part(${p.name})\` | ${p.doc ?? ''}${recipe} |`;
+      })
+      .join('\n');
+    out += `\n#### Styleable parts\n\nRestyle from outside the Shadow DOM via \`${el.tag}::part(name)\`.\n\n| Part | Description |\n|------|-------------|\n${rows}\n`;
+  }
+
   if (el.composedFrom.length) {
     const items = el.composedFrom.map((c) => `\`${c.group}/${c.name}\``).join(', ');
     out += `\n#### Composed from\n\n${items}\n`;

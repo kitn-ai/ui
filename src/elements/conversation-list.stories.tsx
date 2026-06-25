@@ -191,6 +191,55 @@ export const InSolidJS: Story = {
   parameters: { docs: { source: { code: SOLID_SNIPPET, language: 'tsx' } } },
 };
 
+/** Composition slots: a custom `header` (replaces the title bar) + a `footer` row. */
+export const Composed: Story = {
+  name: 'Composed (slots)',
+  render: () => {
+    let el: ConversationListEl | undefined;
+    onMount(() => {
+      if (el) {
+        el.groups = sampleGroups;
+        el.conversations = sampleConversations;
+        el.activeId = 'c-1';
+      }
+    });
+    return (
+      <kai-conversations ref={(e) => (el = e as ConversationListEl)} style={{ display: 'block', width: '300px', height: '560px' }}>
+        <div slot="header" class="flex items-center justify-between p-3">
+          <span class="text-sm font-semibold text-foreground">Acme Chat</span>
+          <button class="rounded-md px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-muted">+ New</button>
+        </div>
+        <div slot="footer" class="flex items-center gap-2 p-3 text-sm text-muted-foreground">
+          <span class="inline-flex size-6 items-center justify-center rounded-full bg-surface-strong text-xs font-medium text-foreground">RT</span>
+          <span>Rob Taylor</span>
+        </div>
+      </kai-conversations>
+    );
+  },
+};
+
+/** The `empty` slot replaces the built-in "no conversations yet" state. */
+export const EmptyState: Story = {
+  name: 'Empty (slot)',
+  render: () => {
+    let el: ConversationListEl | undefined;
+    onMount(() => {
+      if (el) {
+        el.groups = [];
+        el.conversations = [];
+      }
+    });
+    return (
+      <kai-conversations ref={(e) => (el = e as ConversationListEl)} style={{ display: 'block', width: '300px', height: '400px' }}>
+        <div slot="empty" class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
+          <span class="text-sm font-medium text-foreground">No chats yet</span>
+          <span class="text-xs text-muted-foreground">Start a conversation to see it here.</span>
+        </div>
+      </kai-conversations>
+    );
+  },
+};
+
 const DECLARATIVE_HTML_SNIPPET = `<!-- Works in any framework or plain HTML — no JS property wiring needed -->
 <kai-conversations id="list" style="display:block; width:300px; height:560px;">
   <kai-conversation id="c-1">Q2 launch plan</kai-conversation>

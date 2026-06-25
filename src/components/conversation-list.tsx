@@ -1,4 +1,4 @@
-import { splitProps, For, Show, createSignal, createMemo } from 'solid-js';
+import { splitProps, For, Show, createSignal, createMemo, type JSX } from 'solid-js';
 import { cn } from '../utils/cn';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../ui/collapsible';
 import { Button } from '../ui/button';
@@ -14,12 +14,19 @@ export interface ConversationListProps {
   onSelect: (id: string) => void;
   onNewChat: () => void;
   onToggleSidebar?: () => void;
+  /** Replaces the built-in title bar (toggle / "Chats" / New chat). */
+  header?: JSX.Element;
+  /** A row below the list (e.g. account / settings / usage). */
+  footer?: JSX.Element;
+  /** Replaces the built-in "no conversations yet" state. */
+  empty?: JSX.Element;
   class?: string;
 }
 
 export function ConversationList(props: ConversationListProps) {
-  const [local] = splitProps(props, ['groups', 'conversations', 'activeId', 'onSelect', 'onNewChat', 'onToggleSidebar', 'class']);
+  const [local] = splitProps(props, ['groups', 'conversations', 'activeId', 'onSelect', 'onNewChat', 'onToggleSidebar', 'header', 'footer', 'empty', 'class']);
   const [searchQuery, setSearchQuery] = createSignal('');
+  const isEmpty = createMemo(() => local.conversations.length === 0);
 
   const filteredConversations = createMemo(() => {
     const q = searchQuery().toLowerCase();
@@ -41,40 +48,71 @@ export function ConversationList(props: ConversationListProps) {
 
   return (
     <div class={cn('flex flex-col h-full bg-sidebar', local.class)}>
-      <div class="flex items-center justify-between p-3 pb-2">
-        <div class="flex items-center gap-2">
-          <Button variant="ghost" size="icon-sm" aria-label="Toggle sidebar" onClick={local.onToggleSidebar}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </Button>
-          <span class="text-sm font-semibold text-foreground">Chats</span>
+      {/* header (replace): the consumer's own title bar, else the built-in one. */}
+      <Show
+        when={local.header}
+        fallback={
+          <div class="flex items-center justify-between p-3 pb-2">
+            <div class="flex items-center gap-2">
+              <Button variant="ghost" size="icon-sm" aria-label="Toggle sidebar" onClick={local.onToggleSidebar}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              </Button>
+              <span class="text-sm font-semibold text-foreground">Chats</span>
+            </div>
+            <Button variant="ghost" size="icon-sm" aria-label="New chat" onClick={local.onNewChat}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </Button>
+          </div>
+        }
+      >
+        {local.header}
+      </Show>
+      <Show when={!isEmpty()}>
+        <div class="px-3 pb-2">
+          <div class="flex items-center gap-2 rounded-md bg-surface px-2.5 py-1.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted-foreground"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" value={searchQuery()} onInput={(e) => setSearchQuery(e.currentTarget.value)} placeholder="Search chats..."
+              aria-label="Search chats"
+              class="bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-full" />
+          </div>
         </div>
-        <Button variant="ghost" size="icon-sm" aria-label="New chat" onClick={local.onNewChat}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </Button>
-      </div>
-      <div class="px-3 pb-2">
-        <div class="flex items-center gap-2 rounded-md bg-muted/40 px-2.5 py-1.5">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted-foreground"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" value={searchQuery()} onInput={(e) => setSearchQuery(e.currentTarget.value)} placeholder="Search chats..."
-            aria-label="Search chats"
-            class="bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-full" />
-        </div>
-      </div>
-      <ScrollArea class="flex-1 px-2">
-        <For each={local.groups}>
-          {(group) => {
-            const convs = createMemo(() => groupedConversations().get(group.id) ?? []);
-            return (
-              <Show when={convs().length > 0}>
-                <GroupSection name={group.name} count={convs().length} conversations={convs()} activeId={local.activeId} onSelect={local.onSelect} />
-              </Show>
-            );
-          }}
-        </For>
-        <Show when={ungrouped().length > 0}>
-          <GroupSection name="Ungrouped" count={ungrouped().length} conversations={ungrouped()} activeId={local.activeId} onSelect={local.onSelect} />
-        </Show>
-      </ScrollArea>
+      </Show>
+      {/* list, or the empty state (replace) when there are no conversations. */}
+      <Show
+        when={!isEmpty()}
+        fallback={
+          <Show
+            when={local.empty}
+            fallback={
+              <div class="flex flex-1 flex-col items-center justify-center gap-1 p-6 text-center text-sm text-muted-foreground">
+                No conversations yet
+              </div>
+            }
+          >
+            {local.empty}
+          </Show>
+        }
+      >
+        <ScrollArea class="flex-1 px-2">
+          <For each={local.groups}>
+            {(group) => {
+              const convs = createMemo(() => groupedConversations().get(group.id) ?? []);
+              return (
+                <Show when={convs().length > 0}>
+                  <GroupSection name={group.name} count={convs().length} conversations={convs()} activeId={local.activeId} onSelect={local.onSelect} />
+                </Show>
+              );
+            }}
+          </For>
+          <Show when={ungrouped().length > 0}>
+            <GroupSection name="Ungrouped" count={ungrouped().length} conversations={ungrouped()} activeId={local.activeId} onSelect={local.onSelect} />
+          </Show>
+        </ScrollArea>
+      </Show>
+      {/* footer (inject): a row below the list (account / settings / …). */}
+      <Show when={local.footer}>
+        <div class="shrink-0 border-t border-border">{local.footer}</div>
+      </Show>
     </div>
   );
 }

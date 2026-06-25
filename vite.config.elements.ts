@@ -48,10 +48,14 @@ export default defineConfig({
   build: {
     // The per-element + autoloader SPLIT build → dist/elements/ (one self-registering
     // module per element + the autoloader, with shared chunks in dist/elements/chunks/).
-    // Runs AFTER the coarse register-all build (vite.config.ts), so emptyOutDir only
-    // clears dist/elements, never the register-all output at the dist root.
+    // Runs AFTER the coarse register-all build (vite.config.ts) AND the barrel build,
+    // which emits type declarations for ALL of src/** — including dist/elements/*.d.ts
+    // (e.g. dist/elements/chat-types.d.ts, referenced by dist/index.d.ts and
+    // dist/state/*.d.ts). emptyOutDir MUST stay false so this JS-only build does not
+    // wipe those barrel-emitted declarations out from under the published type graph
+    // (dist is already cleared once at the very start by vite.config.ts).
     outDir: 'dist/elements',
-    emptyOutDir: true,
+    emptyOutDir: false,
     lib: { entry, formats: ['es'] },
     rollupOptions: {
       output: { entryFileNames: '[name].js', chunkFileNames: 'chunks/[name]-[hash].js' },

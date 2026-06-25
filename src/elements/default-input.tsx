@@ -27,10 +27,20 @@ export interface DefaultPromptInputProps {
   /** Attachments staged in the input. Provide `onAttachmentsChange` to enable
    *  the attach button + removable previews. */
   attachments?: AttachmentData[];
+  /** When `false`, the built-in paperclip attach button is hidden even if
+   *  `onAttachmentsChange` is provided (e.g. when a `+` menu already covers
+   *  file-attach). Defaults to `true`. */
+  attach?: boolean;
   /** Show a Search (Globe) button in the left toolbar; calls `onSearch`. */
   search?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; calls `onVoice`. */
   voice?: boolean;
+  /** Send-button visibility. `'always'` (default) always shows it; `'auto'` shows
+   *  it only when there's text/attachments (an empty composer hides it — Enter
+   *  still submits). To hide it entirely (Enter-only), it's pure CSS:
+   *  `::part(send){display:none}` — no prop needed. Restyle via `::part(send)`.
+   *  The Stop button (stoppable + loading) is unaffected. */
+  submit?: 'always' | 'auto';
   onValueChange: (v: string) => void;
   onSubmit: () => void;
   onSuggestionClick: (v: string) => void;
@@ -87,6 +97,13 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
     props.disabled || props.loading || (!valueText().trim() && attachments().length === 0);
 
   const showStop = () => !!props.loading && !!props.stoppable;
+  const hasContent = () => !!valueText().trim() || attachments().length > 0;
+  // Send-button visibility: 'always' (default) or 'auto' (only with content).
+  // Full-hide (Enter-only) is CSS: `::part(send){display:none}`.
+  const showSend = () => {
+    const mode = props.submit ?? 'always';
+    return mode === 'always' || (mode === 'auto' && hasContent());
+  };
 
   return (
     <>
@@ -122,13 +139,18 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             </Attachments>
           </div>
         </Show>
-        {/* Consumer-injected controls rendered before the input area. Native
-            slot; inert outside a shadow root, projected by the custom element. */}
-        <slot name="leading" />
+        {/* Consumer-injected content inside the card, above the textarea (e.g. an
+            inline status strip). A shadow-internal hole — unreachable from outside.
+            Native slot; inert outside a shadow root, projected by the custom element. */}
+        <slot name="input-top" />
         <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
-        <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-3">
+        <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-0">
           <div class="flex items-center gap-2">
-            <Show when={canAttach()}>
+            {/* Consumer-injected leading toolbar controls (e.g. a + menu). display:contents
+                ensures an empty slot adds no stray gap; projected nodes lay out as toolbar
+                items. Native slot; projected by the custom element. */}
+            <slot name="toolbar-start" style={{ display: 'contents' }} />
+            <Show when={canAttach() && props.attach !== false}>
               <input
                 ref={fileInput}
                 type="file"
@@ -202,37 +224,44 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
               }}
             </For>
           </div>
-          {/* Consumer-injected controls rendered after the input area, beside
-              the send button. Native slot; projected by the custom element. */}
-          <slot name="trailing" />
-          <Show
-            when={showStop()}
-            fallback={
+          {/* Right cluster — consumer trailing controls (model/effort/voice…)
+              hug the send button, right-aligned. The `toolbar-end` slot and the send
+              button live together so justify-between pins them to the right edge
+              (left group stays left). Native slot; projected by the element. */}
+          <div class="flex items-center gap-2">
+            <slot name="toolbar-end" />
+            <Show
+              when={showStop()}
+              fallback={
+                <Show when={showSend()}>
+                  <Button
+                    size="icon-sm"
+                    class="rounded-full"
+                    part="send"
+                    data-testid="send"
+                    aria-label="Send message"
+                    disabled={sendDisabled()}
+                    onClick={props.onSubmit}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+                    </svg>
+                  </Button>
+                </Show>
+              }
+            >
               <Button
                 size="icon-sm"
+                variant="outline"
                 class="rounded-full"
-                data-testid="send"
-                aria-label="Send message"
-                disabled={sendDisabled()}
-                onClick={props.onSubmit}
+                data-testid="stop"
+                aria-label="Stop"
+                onClick={props.onStop}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
-                </svg>
+                <Square class="size-3" />
               </Button>
-            }
-          >
-            <Button
-              size="icon-sm"
-              variant="outline"
-              class="rounded-full"
-              data-testid="stop"
-              aria-label="Stop"
-              onClick={props.onStop}
-            >
-              <Square class="size-3" />
-            </Button>
-          </Show>
+            </Show>
+          </div>
         </PromptInputActions>
       </PromptInput>
     </>

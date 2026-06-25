@@ -36,7 +36,7 @@ defineWebComponent<Props, Events>('kai-file-upload', {
     disabled={flag('disabled')}
     onFilesAdded={(files) => dispatch('kai-files-added', { files })}
   >
-    <FileUploadTrigger class="border-border bg-muted/30 hover:bg-muted/60 text-muted-foreground flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-6 py-8 text-sm transition-colors">
+    <FileUploadTrigger class="border-border bg-surface hover:bg-muted/60 text-muted-foreground flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-6 py-8 text-sm transition-colors">
       <Upload class="size-5" />
       <slot>{props.label}</slot>
     </FileUploadTrigger>

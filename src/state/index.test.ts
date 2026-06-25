@@ -1,0 +1,13 @@
+import { describe, it, expect } from 'vitest';
+import * as state from './index';
+
+describe('@kitn.ai/ui/state barrel', () => {
+  it('re-exports the full surface', () => {
+    for (const name of [
+      'appendMessage', 'upsertMessage', 'updateMessage', 'removeMessage', 'appendContent',
+      'addSuggestion', 'removeSuggestion', 'createAssistantStream', 'onStreamSettled',
+    ]) {
+      expect(typeof (state as Record<string, unknown>)[name]).toBe('function');
+    }
+  });
+});

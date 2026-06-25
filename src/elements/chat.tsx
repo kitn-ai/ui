@@ -1,5 +1,6 @@
-import { createSignal, onCleanup, onMount } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
+import { CHAT_SLOTS, readSlots } from './slots';
 import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage } from '../components/chat-thread';
 import type { AttachmentData } from '../components/attachments';
 import type { TriggerDef } from '../components/composer';
@@ -38,20 +39,21 @@ defineWebComponent<Props, Events>('kai-chat', {
   search: false, voice: false, triggers: undefined, kindIcons: undefined,
   actionsReveal: 'always',
 }, (props, { dispatch, flag, element }) => {
-  // Detect consumer-projected header controls so the header opens for them even
-  // without a title/models/context. Mirrors the <kai-model> light-DOM read pattern.
-  const [hasHeaderStart, setHasHeaderStart] = createSignal(false);
-  const [hasHeaderEnd, setHasHeaderEnd] = createSignal(false);
+  // Slot detection is driven by the CHAT_SLOTS registry (single source of truth)
+  // so slot names never drift between the view, the facade, and the docs.
+  const [slots, setSlots] = createSignal<Record<string, boolean>>({});
+  const slot = (name: string) => slots()[name] === true;
   onMount(() => {
-    const read = () => {
-      setHasHeaderStart(!!element.querySelector(':scope > [slot="header-start"]'));
-      setHasHeaderEnd(!!element.querySelector(':scope > [slot="header-end"]'));
-    };
+    const read = () => setSlots(readSlots(element, CHAT_SLOTS));
     read();
     const observer = new MutationObserver(read);
     observer.observe(element, { childList: true });
     onCleanup(() => observer.disconnect());
   });
+
+  // Reflect streaming state to a host attribute so slotted composer/notice CSS
+  // can react without reading internals (e.g. :host([loading]) ::slotted(...)).
+  createEffect(() => { element.toggleAttribute('loading', flag('loading')); });
 
   return (
   <ChatThread
@@ -73,8 +75,14 @@ defineWebComponent<Props, Events>('kai-chat', {
     onMessageAction={(detail) => dispatch('kai-message-action', detail)}
     onSearch={() => dispatch('kai-search', {})}
     onVoice={() => dispatch('kai-voice', {})}
-    headerStart={hasHeaderStart()}
-    headerEnd={hasHeaderEnd()}
+    headerStart={slot('header-start')}
+    headerEnd={slot('header-end')}
+    headerFull={slot('header')}
+    sidebar={slot('sidebar')}
+    empty={slot('empty')}
+    composer={slot('composer')}
+    composerActions={slot('composer-actions')}
+    footer={slot('footer')}
   />
   );
 });

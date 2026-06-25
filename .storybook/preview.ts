@@ -127,6 +127,7 @@ const preview: Preview = {
           [
             'Full Chat App',
             'Streaming Response',
+            'State & Hooks',
             'Conversation with Reasoning',
             'Conversation with Sources',
             'Message Actions',

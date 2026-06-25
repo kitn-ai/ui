@@ -3,15 +3,8 @@ import { cn } from '../utils/cn';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../ui/collapsible';
 import { Button } from '../ui/button';
 import { CheckCircle, ChevronDown, Loader2, Settings, XCircle } from 'lucide-solid';
-
-export interface ToolPart {
-  type: string;
-  state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
-  input?: Record<string, unknown>;
-  output?: Record<string, unknown>;
-  toolCallId?: string;
-  errorText?: string;
-}
+import type { ToolPart } from './tool-types';
+export type { ToolPart } from './tool-types';
 
 export interface ToolProps {
   toolPart: ToolPart;
@@ -109,7 +102,7 @@ function Tool(props: ToolProps) {
   const output = () => local.toolPart.output;
 
   return (
-    <div class={cn('mt-3 overflow-hidden rounded-lg bg-muted/30', local.class)}>
+    <div class={cn('mt-3 overflow-hidden rounded-lg bg-surface', local.class)}>
       <Collapsible open={isOpen()} onOpenChange={setIsOpen}>
         <CollapsibleTrigger
           as={(triggerProps: JSX.HTMLAttributes<HTMLButtonElement>) => (
@@ -134,7 +127,7 @@ function Tool(props: ToolProps) {
             <Show when={input() && Object.keys(input()!).length > 0}>
               <div>
                 <h4 class="text-muted-foreground mb-2 text-sm font-medium">Input</h4>
-                <div class="rounded bg-muted/50 p-2 font-mono text-sm">
+                <div class="rounded bg-surface-strong p-2 font-mono text-sm">
                   <For each={Object.entries(input()!)}>
                     {([key, value]) => (
                       <div class="mb-1">
@@ -150,7 +143,7 @@ function Tool(props: ToolProps) {
             <Show when={output()}>
               <div>
                 <h4 class="text-muted-foreground mb-2 text-sm font-medium">Output</h4>
-                <div tabindex={0} class="max-h-60 overflow-auto rounded bg-muted/50 p-2 font-mono text-sm">
+                <div tabindex={0} class="max-h-60 overflow-auto rounded bg-surface-strong p-2 font-mono text-sm">
                   <pre class="whitespace-pre-wrap">{formatValue(output())}</pre>
                 </div>
               </div>

@@ -1,11 +1,14 @@
 import { type JSX, Show, splitProps } from 'solid-js';
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
+import { renderIcon } from '../ui/icon';
 
 export interface PromptSuggestionProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   children: JSX.Element | string;
   variant?: 'outline' | 'ghost' | 'default';
   size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
+  /** Optional leading icon (named icon, image URL/data-URI, or text). */
+  icon?: string;
   highlight?: string;
   /** Render as a full-width, left-aligned list row (the "suggested questions"
    *  idiom) instead of a rounded pill. Wraps long text. Ignored in highlight
@@ -14,7 +17,8 @@ export interface PromptSuggestionProps extends JSX.ButtonHTMLAttributes<HTMLButt
 }
 
 function PromptSuggestion(props: PromptSuggestionProps) {
-  const [local, rest] = splitProps(props, ['children', 'variant', 'size', 'class', 'highlight', 'block']);
+  const [local, rest] = splitProps(props, ['children', 'variant', 'size', 'class', 'icon', 'highlight', 'block']);
+  const Icon = () => <Show when={local.icon}>{renderIcon(local.icon, { class: 'size-3.5 shrink-0' })}</Show>;
 
   const isHighlightMode = () => local.highlight !== undefined && local.highlight.trim() !== '';
   const content = () => typeof local.children === 'string' ? local.children : '';
@@ -32,6 +36,7 @@ function PromptSuggestion(props: PromptSuggestionProps) {
               class={cn('rounded-full', local.class)}
               {...rest}
             >
+              <Icon />
               {local.children}
             </Button>
           }

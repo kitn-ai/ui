@@ -1,5 +1,6 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
+import { readSlots, CONVERSATIONS_SLOTS } from './slots';
 import { ConversationList } from '../components/conversation-list';
 import type { ConversationGroup, ConversationSummary, ConversationScope } from '../types';
 
@@ -53,10 +54,13 @@ defineWebComponent<Props, Events>('kai-conversations', {
   // Read declarative <kai-conversation> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
   const [slottedConversations, setSlottedConversations] = createSignal<ConversationSummary[]>([]);
+  // Which composition slots (header/empty/footer) the consumer has filled.
+  const [slots, setSlots] = createSignal<Record<string, boolean>>({});
   onMount(() => {
     const read = () => {
       const nodes = [...element.querySelectorAll('kai-conversation')];
       setSlottedConversations(nodes.map(parseKaiConversationElement));
+      setSlots(readSlots(element, CONVERSATIONS_SLOTS));
     };
     read();
     const observer = new MutationObserver(read);
@@ -75,6 +79,9 @@ defineWebComponent<Props, Events>('kai-conversations', {
       onSelect={(id) => dispatch('kai-conversation-select', { id })}
       onNewChat={() => dispatch('kai-new-chat')}
       onToggleSidebar={() => dispatch('kai-toggle-sidebar')}
+      header={slots().header ? <slot name="header" /> : undefined}
+      footer={slots().footer ? <slot name="footer" /> : undefined}
+      empty={slots().empty ? <slot name="empty" /> : undefined}
     />
   );
 });

@@ -10,6 +10,7 @@ import {
   Show,
 } from 'solid-js';
 import { cn } from '../utils/cn';
+import { Skeleton } from '../ui/skeleton';
 import { Link as LinkIcon } from 'lucide-solid';
 import type { CardEvent } from '../primitives/card-contract';
 import {
@@ -153,11 +154,11 @@ export function LinkPreview(props: LinkPreviewProps): JSX.Element {
       >
         <Show when={loading()}>
           {/* Skeleton while the bare-URL fetcher resolves. */}
-          <div class="aspect-[16/9] w-full animate-pulse bg-muted" />
+          <Skeleton class="aspect-[16/9] w-full rounded-none" />
           <div class="space-y-2 p-3">
-            <div class="h-3 w-1/3 animate-pulse rounded bg-muted" />
-            <div class="h-4 w-2/3 animate-pulse rounded bg-muted" />
-            <div class="h-3 w-full animate-pulse rounded bg-muted" />
+            <Skeleton class="h-3 w-1/3" />
+            <Skeleton class="h-4 w-2/3" />
+            <Skeleton class="h-3 w-full" />
           </div>
         </Show>
         <Show when={!loading()}>

@@ -304,6 +304,178 @@
     "tokens": []
   },
   {
+    "tag": "kai-avatar",
+    "className": "KaiAvatarElement",
+    "displayName": "Avatar",
+    "props": [
+      {
+        "name": "src",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Image URL/data-URI. When absent, the `fallback` initials show instead.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "alt",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Alt text for the image. Defaults to `fallback`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "fallback",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Short text shown when there's no image — usually initials (e.g. \"RT\", \"AI\").",
+        "default": "''",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Size token: `sm` | `md` (default) | `lg`.",
+        "default": "'md'",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\""
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Avatar",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-avatar--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kai-badge",
+    "className": "KaiBadgeElement",
+    "displayName": "Badge",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | \"default\" | \"count\" | \"citation\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`default` (muted pill) · `count` (compact number badge) · `citation` (filled primary, for inline citation markers). Defaults to `default`.",
+        "default": "'default'",
+        "displayType": "undefined | \"default\" | \"count\" | \"citation\""
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Badge",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-badge--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "badge",
+        "doc": "The badge pill. Restyle its background, color, or shape; the `variant` prop (default/count/citation) sets the defaults.",
+        "recipe": "kai-badge::part(badge) { background: var(--color-primary); color: var(--color-primary-foreground) }"
+      }
+    ]
+  },
+  {
+    "tag": "kai-button",
+    "className": "KaiButtonElement",
+    "displayName": "Button",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | \"default\" | \"subtle\" | \"ghost\" | \"outline\" | \"destructive\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Visual style. `default` (filled), `subtle` (muted text, hover tint — the toolbar icon look), `ghost` (transparent, hover fill), `outline`, or `destructive`. Defaults to `default`.",
+        "default": "'default'",
+        "displayType": "undefined | \"default\" | \"subtle\" | \"ghost\" | \"outline\" | \"destructive\""
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`.",
+        "default": "'md'",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\""
+      },
+      {
+        "name": "icon",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Leading icon: a named icon (e.g. `\"mic\"`, `\"plus\"`), an image URL/data-URI, or plain text. Renders before any slotted label.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "iconTrailing",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Trailing icon, after the label (e.g. `\"chevron-down\"` for a menu affordance).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Accessible name. REQUIRED for icon-only buttons (no visible text); ignored when you slot visible text, which already names the button.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the button (non-interactive, dimmed).",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "type",
+        "type": "undefined | \"button\" | \"submit\" | \"reset\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Native button `type`. Defaults to `button` (so it never submits a form).",
+        "default": "'button'",
+        "displayType": "undefined | \"button\" | \"submit\" | \"reset\""
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-click",
+        "detail": null,
+        "description": "The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it.",
+        "displayDetail": null
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Button",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-button--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "button",
+        "doc": "The button element. Restyle radius, padding, colors, or weight from outside; the `variant`/`size` props set the defaults.",
+        "recipe": "kai-button::part(button) { border-radius: 9999px; font-weight: 600 }"
+      }
+    ]
+  },
+  {
     "tag": "kai-card",
     "className": "KaiCardElement",
     "displayName": "Card",
@@ -453,6 +625,7 @@
         "typeName": "ChatMessage[]",
         "typeShape": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]",
         "default": "[]",
+        "typeImport": "ChatMessage",
         "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]"
       },
       {
@@ -509,12 +682,12 @@
       },
       {
         "name": "proseSize",
-        "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
+        "type": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\"",
         "optional": true,
         "scalar": true,
         "description": "Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`.",
         "default": "'sm'",
-        "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
+        "displayType": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\""
       },
       {
         "name": "codeTheme",
@@ -589,6 +762,54 @@
         "optional": true,
         "scalar": true,
         "description": "Whether the host has `slot=\"header-end\"` content (right of the controls).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "headerFull",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "REPLACE — full custom header in place of the built-in title/model/context bar.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "sidebar",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "INJECT — left sidebar column (e.g. a conversation list / your own nav).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "empty",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "REPLACE — custom zero-state rendered in the message area while the thread is empty (replaces the empty message list only; the composer and its suggestions still render).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "composer",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "REPLACE — full custom composer in place of the built-in prompt input. The projected content wires its own submit (the data-flow boundary).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "composerActions",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "INJECT — accessory row just above the composer (e.g. extra actions).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "footer",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "INJECT — footer row below the composer (disclaimers, token meter, …).",
         "displayType": "undefined | false | true"
       },
       {
@@ -686,7 +907,66 @@
         "storyId": "solid-advanced-elements-chatthread--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "header-start",
+        "mode": "inject",
+        "doc": "Leading header controls, left of the title."
+      },
+      {
+        "name": "header-end",
+        "mode": "inject",
+        "doc": "Trailing header controls."
+      },
+      {
+        "name": "header",
+        "mode": "replace",
+        "part": true,
+        "doc": "Full custom header; replaces the built-in title/model/context bar."
+      },
+      {
+        "name": "sidebar",
+        "mode": "inject",
+        "part": true,
+        "doc": "Left column (your nav / conversation list). Fixed width; use compose-your-own for resizable."
+      },
+      {
+        "name": "empty",
+        "mode": "replace",
+        "doc": "Custom zero-state rendered in the message area while the thread is empty. Replaces the empty message list only — the composer and any suggestions still render."
+      },
+      {
+        "name": "composer",
+        "mode": "replace",
+        "doc": "Full custom composer; you own submit + loading, drive the thread via messages."
+      },
+      {
+        "name": "composer-actions",
+        "mode": "inject",
+        "doc": "Accessory row above the composer."
+      },
+      {
+        "name": "footer",
+        "mode": "inject",
+        "part": true,
+        "doc": "Row below the composer (disclaimers, token meter)."
+      }
+    ],
+    "parts": [
+      {
+        "name": "header",
+        "doc": "Full custom header; replaces the built-in title/model/context bar."
+      },
+      {
+        "name": "sidebar",
+        "doc": "Left column (your nav / conversation list). Fixed width; use compose-your-own for resizable."
+      },
+      {
+        "name": "footer",
+        "doc": "Row below the composer (disclaimers, token meter)."
+      }
+    ]
   },
   {
     "tag": "kai-checkpoint",
@@ -711,21 +991,21 @@
       },
       {
         "name": "variant",
-        "type": "undefined | \"ghost\" | \"default\" | \"outline\"",
+        "type": "undefined | \"default\" | \"ghost\" | \"outline\"",
         "optional": true,
         "scalar": true,
         "description": "Visual button style.",
         "default": "'ghost'",
-        "displayType": "undefined | \"ghost\" | \"default\" | \"outline\""
+        "displayType": "undefined | \"default\" | \"ghost\" | \"outline\""
       },
       {
         "name": "size",
-        "type": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\"",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
         "optional": true,
         "scalar": true,
         "description": "Button size (use an `icon*` size for an icon-only checkpoint).",
         "default": "'sm'",
-        "displayType": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\""
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\""
       }
     ],
     "events": [
@@ -845,12 +1125,12 @@
       },
       {
         "name": "proseSize",
-        "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
+        "type": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\"",
         "optional": true,
         "scalar": true,
         "description": "Code text sizing.",
         "default": "'sm'",
-        "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
+        "displayType": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\""
       }
     ],
     "events": [],
@@ -869,6 +1149,59 @@
     "tokens": [
       "--color-code-foreground"
     ]
+  },
+  {
+    "tag": "kai-command",
+    "className": "KaiCommandElement",
+    "displayName": "Command",
+    "props": [
+      {
+        "name": "items",
+        "type": "undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Flat list of items. Set as a JS property — not an HTML attribute.",
+        "displayType": "undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string }[]"
+      },
+      {
+        "name": "placeholder",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Placeholder text for the search input.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "emptyLabel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Label shown when no items match the current query.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-query-change",
+        "detail": "{ value: string }",
+        "description": "Fired on every keystroke in the search input.",
+        "displayDetail": "{ value: string }"
+      },
+      {
+        "name": "kai-select",
+        "detail": "{ id: string }",
+        "description": "Fired when the user selects an item (click or Enter).",
+        "displayDetail": "{ id: string }"
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "CommandList",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-commandlist--docs"
+      }
+    ],
+    "tokens": []
   },
   {
     "tag": "kai-compare",
@@ -910,11 +1243,11 @@
       },
       {
         "name": "proseSize",
-        "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
+        "type": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\"",
         "optional": true,
         "scalar": true,
         "description": "Prose/text size for the rendered candidates. Attribute: `prose-size`.",
-        "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
+        "displayType": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\""
       },
       {
         "name": "codeTheme",
@@ -1330,6 +1663,23 @@
     "tokens": [
       "--color-sidebar",
       "--color-scrollbar-thumb"
+    ],
+    "slots": [
+      {
+        "name": "header",
+        "mode": "replace",
+        "doc": "Full custom title bar; replaces the built-in toggle / \"Chats\" / New-chat row."
+      },
+      {
+        "name": "empty",
+        "mode": "replace",
+        "doc": "Custom zero-state shown when there are no conversations; replaces the built-in \"No conversations yet\"."
+      },
+      {
+        "name": "footer",
+        "mode": "inject",
+        "doc": "A row below the list — account, settings, or usage."
+      }
     ]
   },
   {
@@ -1678,6 +2028,81 @@
     "tokens": []
   },
   {
+    "tag": "kai-hover-card",
+    "className": "KaiHoverCardElement",
+    "displayName": "HoverCard",
+    "props": [
+      {
+        "name": "openDelay",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too).",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "closeDelay",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Delay (ms) before it closes after the pointer leaves. Defaults to 300.",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "placement",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "HoverCard",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-hovercard--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kai-icon",
+    "className": "KaiIconElement",
+    "displayName": "Icon",
+    "props": [
+      {
+        "name": "name",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "A curated icon name (e.g. `\"mic\"`, `\"globe\"`), an image URL/data-URI, or plain text.",
+        "default": "''",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Size token: `sm` | `md` (default) | `lg`.",
+        "default": "'md'",
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\""
+      }
+    ],
+    "events": [],
+    "composedFrom": [],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "icon",
+        "doc": "The icon wrapper. Inherits `currentColor` and the `size` prop by default; recolor or resize it from outside.",
+        "recipe": "kai-icon::part(icon) { color: var(--color-primary) }"
+      }
+    ]
+  },
+  {
     "tag": "kai-image",
     "className": "KaiImageElement",
     "displayName": "Image",
@@ -1774,12 +2199,12 @@
       },
       {
         "name": "size",
-        "type": "undefined | \"sm\" | \"lg\" | \"md\"",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\"",
         "optional": true,
         "scalar": true,
         "description": "Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`.",
         "default": "'md'",
-        "displayType": "undefined | \"sm\" | \"lg\" | \"md\""
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\""
       },
       {
         "name": "text",
@@ -1816,12 +2241,12 @@
       },
       {
         "name": "proseSize",
-        "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
+        "type": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\"",
         "optional": true,
         "scalar": true,
         "description": "Text/markdown sizing.",
         "default": "'sm'",
-        "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
+        "displayType": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\""
       },
       {
         "name": "codeTheme",
@@ -1848,6 +2273,122 @@
         "name": "Markdown",
         "group": "Components",
         "storyId": "solid-advanced-elements-markdown--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kai-menu",
+    "className": "KaiMenuElement",
+    "displayName": "Menu",
+    "props": [
+      {
+        "name": "items",
+        "type": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Tree of menu items. Set as a JS property — not an HTML attribute.",
+        "displayType": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]"
+      },
+      {
+        "name": "placement",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "triggerIcon",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Built-in trigger: leading icon (a named icon like `\"plus\"`, an image URL/data-URI, or text). Use this instead of slotting `slot=\"trigger\"` for the common case — a slotted trigger overrides it.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "triggerLabel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Built-in trigger: a text label (e.g. `\"High\"`).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "triggerIconTrailing",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Built-in trigger: a trailing icon (e.g. `\"chevron-down\"` for a select look).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Accessible name for an icon-only trigger (no visible label).",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-select",
+        "detail": "{ id: string; checked?: undefined | false | true }",
+        "description": "Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state.",
+        "displayDetail": "{ id: string; checked?: undefined | false | true }"
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Dropdown",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdown--docs"
+      },
+      {
+        "name": "DropdownTrigger",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdowntrigger--docs"
+      },
+      {
+        "name": "DropdownContent",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdowncontent--docs"
+      },
+      {
+        "name": "DropdownItem",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdownitem--docs"
+      },
+      {
+        "name": "DropdownSeparator",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdownseparator--docs"
+      },
+      {
+        "name": "DropdownLabel",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdownlabel--docs"
+      },
+      {
+        "name": "DropdownCheckboxItem",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdowncheckboxitem--docs"
+      },
+      {
+        "name": "DropdownSub",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdownsub--docs"
+      },
+      {
+        "name": "DropdownSubTrigger",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdownsubtrigger--docs"
+      },
+      {
+        "name": "DropdownSubContent",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdownsubcontent--docs"
       }
     ],
     "tokens": []
@@ -1892,12 +2433,12 @@
       },
       {
         "name": "proseSize",
-        "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
+        "type": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\"",
         "optional": true,
         "scalar": true,
         "description": "Text/markdown sizing for the message body.",
         "default": "'sm'",
-        "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
+        "displayType": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\""
       },
       {
         "name": "codeTheme",
@@ -2009,6 +2550,55 @@
         "name": "ModelSwitcher",
         "group": "Components",
         "storyId": "solid-advanced-elements-modelswitcher--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kai-notice",
+    "className": "KaiNoticeElement",
+    "displayName": "Notice",
+    "props": [
+      {
+        "name": "severity",
+        "type": "undefined | \"neutral\" | \"info\" | \"warning\" | \"error\" | \"success\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`).",
+        "default": "'neutral'",
+        "displayType": "undefined | \"neutral\" | \"info\" | \"warning\" | \"error\" | \"success\""
+      },
+      {
+        "name": "icon",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Leading icon: omit for the severity default, `\"none\"` to hide it, or a named icon to override.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "dismissible",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a dismiss (×) that hides the notice and emits `kai-dismiss`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-dismiss",
+        "detail": null,
+        "description": "The notice was dismissed via its × (it also hides itself).",
+        "displayDetail": null
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Notice",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-notice--docs"
       }
     ],
     "tokens": []
@@ -2147,6 +2737,24 @@
         "displayType": "undefined | false | true"
       },
       {
+        "name": "submit",
+        "type": "undefined | \"always\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Send-button visibility. `'always'` (default) always shows it; `'auto'` shows it only when there's text/attachments (an empty composer hides it — Enter still submits). To hide it entirely (Enter-only), it's pure CSS: `::part(send){display:none}` — no prop needed. Restyle via `::part(send)`. The Stop button (`stoppable` + `loading`) is unaffected.",
+        "default": "'always'",
+        "displayType": "undefined | \"always\" | \"auto\""
+      },
+      {
+        "name": "attach",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "When `false`, hides the built-in paperclip attach button even though the element otherwise supports attachments. Use this when a `+` menu in `toolbar-start` already exposes \"Add files\", to avoid a duplicate control. Defaults to `true`.",
+        "default": "true",
+        "displayType": "undefined | false | true"
+      },
+      {
         "name": "attachments",
         "type": "undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]",
         "optional": true,
@@ -2216,7 +2824,31 @@
       }
     ],
     "composedFrom": [],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "input-top",
+        "mode": "inject",
+        "doc": "Inside the card, above the textarea (e.g. an inline status strip). For content above/below the whole card, use your own layout — that is light DOM you control."
+      },
+      {
+        "name": "toolbar-start",
+        "mode": "inject",
+        "doc": "Leading controls in the input toolbar — where a + menu goes."
+      },
+      {
+        "name": "toolbar-end",
+        "mode": "inject",
+        "doc": "Trailing controls in the toolbar, before the Send button."
+      }
+    ],
+    "parts": [
+      {
+        "name": "send",
+        "doc": "The send button. Restyle from outside, or hide it entirely (Enter-only) — hiding is pure CSS, which is why there is no `submit=\"never\"`.",
+        "recipe": "kai-prompt-input::part(send) { display: none } /* Enter-only; or restyle: background, border-radius, … */"
+      }
+    ]
   },
   {
     "tag": "kai-reasoning",
@@ -2564,6 +3196,28 @@
     "tokens": []
   },
   {
+    "tag": "kai-scroll-area",
+    "className": "KaiScrollAreaElement",
+    "displayName": "ScrollArea",
+    "props": [],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "ScrollArea",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-scrollarea--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "viewport",
+        "doc": "The scrolling container. Add padding or a max-height from outside; the thin scrollbar follows `--color-scrollbar-thumb`.",
+        "recipe": "kai-scroll-area::part(viewport) { padding-right: 0.5rem }"
+      }
+    ]
+  },
+  {
     "tag": "kai-scroll-button",
     "className": "KaiScrollButtonElement",
     "displayName": "ScrollButton",
@@ -2578,21 +3232,21 @@
       },
       {
         "name": "variant",
-        "type": "undefined | \"ghost\" | \"default\" | \"outline\"",
+        "type": "undefined | \"default\" | \"ghost\" | \"outline\"",
         "optional": true,
         "scalar": true,
         "description": "Button visual variant: `'outline' | 'ghost' | 'default'`. Defaults to `'outline'`.",
         "default": "'outline'",
-        "displayType": "undefined | \"ghost\" | \"default\" | \"outline\""
+        "displayType": "undefined | \"default\" | \"ghost\" | \"outline\""
       },
       {
         "name": "size",
-        "type": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\"",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
         "optional": true,
         "scalar": true,
         "description": "Button size token. Defaults to `'icon'` (square).",
         "default": "'icon'",
-        "displayType": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\""
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\""
       }
     ],
     "events": [
@@ -2608,6 +3262,87 @@
         "name": "Button",
         "group": "UI",
         "storyId": "solid-advanced-primitives-button--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
+    "tag": "kai-separator",
+    "className": "KaiSeparatorElement",
+    "displayName": "Separator",
+    "props": [
+      {
+        "name": "orientation",
+        "type": "undefined | \"horizontal\" | \"vertical\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height).",
+        "default": "'horizontal'",
+        "displayType": "undefined | \"horizontal\" | \"vertical\""
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Separator",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-separator--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "separator",
+        "doc": "The divider line. Restyle its color, thickness, or inset from outside.",
+        "recipe": "kai-separator::part(separator) { background: var(--color-border) }"
+      }
+    ]
+  },
+  {
+    "tag": "kai-skeleton",
+    "className": "KaiSkeletonElement",
+    "displayName": "Skeleton",
+    "props": [
+      {
+        "name": "variant",
+        "type": "undefined | \"text\" | \"rect\" | \"circle\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`text` (one or more lines), `rect` (a block), or `circle` (round). Defaults to `text`.",
+        "default": "'text'",
+        "displayType": "undefined | \"text\" | \"rect\" | \"circle\""
+      },
+      {
+        "name": "width",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "CSS width (e.g. `'12rem'`, `'60%'`). Defaults to full width (responsive); for `circle` it is the diameter.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "height",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "CSS height. Defaults per variant (a text line height; circle = width).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "lines",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "`text` only: number of lines; the last is shorter. Defaults to 1.",
+        "displayType": "undefined | number"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Skeleton",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-skeleton--docs"
       }
     ],
     "tokens": []
@@ -2781,29 +3516,29 @@
     "props": [
       {
         "name": "suggestions",
-        "type": "(string | { label: string; value?: undefined | string })[]",
+        "type": "(string | { label: string; value?: undefined | string; icon?: undefined | string })[]",
         "optional": false,
         "scalar": false,
         "description": "The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property.",
         "default": "[]",
-        "displayType": "(string | { label: string; value?: undefined | string })[]"
+        "displayType": "(string | { label: string; value?: undefined | string; icon?: undefined | string })[]"
       },
       {
         "name": "variant",
-        "type": "undefined | \"ghost\" | \"default\" | \"outline\"",
+        "type": "undefined | \"default\" | \"ghost\" | \"outline\"",
         "optional": true,
         "scalar": true,
         "description": "Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled).",
         "default": "'outline'",
-        "displayType": "undefined | \"ghost\" | \"default\" | \"outline\""
+        "displayType": "undefined | \"default\" | \"ghost\" | \"outline\""
       },
       {
         "name": "size",
-        "type": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\"",
+        "type": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
         "optional": true,
         "scalar": true,
         "description": "Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`).",
-        "displayType": "undefined | \"sm\" | \"lg\" | \"md\" | \"icon\" | \"icon-sm\""
+        "displayType": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\""
       },
       {
         "name": "block",
@@ -3152,6 +3887,39 @@
     ]
   },
   {
+    "tag": "kai-tooltip",
+    "className": "KaiTooltipElement",
+    "displayName": "Tooltip",
+    "props": [
+      {
+        "name": "content",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The hint text shown on hover/focus of the slotted trigger.",
+        "default": "''",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "openDelay",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless.",
+        "displayType": "undefined | number"
+      }
+    ],
+    "events": [],
+    "composedFrom": [
+      {
+        "name": "Tooltip",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-tooltip--docs"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kai-voice-input",
     "className": "KaiVoiceInputElement",
     "displayName": "VoiceInput",
@@ -3243,6 +4011,7 @@
         "typeName": "ChatMessage[]",
         "typeShape": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]",
         "default": "[]",
+        "typeImport": "ChatMessage",
         "displayType": "{ id: string; role: \"user\" | \"assistant\"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: \"input-streaming\" | \"input-available\" | \"output-available\" | \"output-error\"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | (\"copy\" | \"like\" | \"dislike\" | \"regenerate\" | \"edit\" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | \"like\" | \"dislike\" }[]"
       },
       {
@@ -3290,12 +4059,12 @@
       },
       {
         "name": "proseSize",
-        "type": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\"",
+        "type": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\"",
         "optional": true,
         "scalar": true,
         "description": "",
         "default": "'sm'",
-        "displayType": "undefined | \"xs\" | \"sm\" | \"base\" | \"lg\""
+        "displayType": "undefined | \"sm\" | \"lg\" | \"xs\" | \"base\""
       },
       {
         "name": "codeTheme",

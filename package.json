@@ -62,6 +62,10 @@
       "types": "./dist/react/index.d.ts",
       "default": "./dist/react.js"
     },
+    "./state": {
+      "types": "./dist/state/index.d.ts",
+      "default": "./dist/state.js"
+    },
     "./provider": {
       "types": "./dist/kitn-chat-provider.d.ts",
       "default": "./dist/kitn-chat-provider.es.js"
@@ -84,7 +88,7 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "prebuild": "npm run build:css",
-    "build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts && vite build --config vite.config.react.ts && vite build --config vite.config.barrel.ts && vite build --config vite.config.mcp.ts && npm run build:elements",
+    "build": "vite build --config vite.config.ts && vite build --config vite.config.provider.ts && vite build --config vite.config.react.ts && vite build --config vite.config.barrel.ts && vite build --config vite.config.state.ts && vite build --config vite.config.mcp.ts && npm run build:elements",
     "build:elements": "node scripts/gen-elements-manifest.mjs && vite build --config vite.config.elements.ts && node scripts/gen-element-dts.mjs",
     "postbuild": "npm run build:theme && npm run build:api && npm run build:schemas",
     "build:theme": "node scripts/build-theme-tokens.mjs",
@@ -93,6 +97,7 @@
     "test": "vitest run",
     "test:react": "vitest run --config vitest.react.config.ts",
     "test:storybook": "vitest run --project=storybook",
+    "test:storybook:ci": "node scripts/run-storybook-tests.mjs",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.react.json && tsc --noEmit -p tsconfig.react.test.json && tsc --noEmit -p tsconfig.mcp.json",
     "examples": "echo 'Serving repo root on http://localhost:8000 — open http://localhost:8000/examples/composable/index.html' && python3 -m http.server 8000",
@@ -104,7 +109,10 @@
     "dev:provider": "vite examples/remote-provider --port 6007 --strictPort",
     "dev:host": "vite examples/remote-host --port 6006 --strictPort",
     "test:e2e": "playwright test",
-    "test:composer-ivp": "playwright test --config playwright.composer.config.ts"
+    "test:composer-ivp": "playwright test --config playwright.composer.config.ts",
+    "test:slots-ivp": "playwright test --config playwright.slots.config.ts",
+    "test:menu-ivp": "playwright test --config playwright.menu.config.ts",
+    "test:command-ivp": "playwright test --config playwright.command.config.ts"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.6",

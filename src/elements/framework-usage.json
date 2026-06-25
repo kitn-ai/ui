@@ -26,6 +26,45 @@
     }
   },
   {
+    "tag": "kai-avatar",
+    "displayName": "Avatar",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-avatar></kai-avatar>",
+      "react": "import { Avatar } from '@kitn.ai/ui/react';\n\n<Avatar />",
+      "vue": "<kai-avatar />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-avatar></kai-avatar>",
+      "angular": "<kai-avatar></kai-avatar>",
+      "solid": "import { Avatar } from '@kitn.ai/ui';\n\n<Avatar />"
+    }
+  },
+  {
+    "tag": "kai-badge",
+    "displayName": "Badge",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-badge></kai-badge>",
+      "react": "import { Badge } from '@kitn.ai/ui/react';\n\n<Badge />",
+      "vue": "<kai-badge />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-badge></kai-badge>",
+      "angular": "<kai-badge></kai-badge>",
+      "solid": "import { Badge } from '@kitn.ai/ui';\n\n<Badge />"
+    }
+  },
+  {
+    "tag": "kai-button",
+    "displayName": "Button",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-button></kai-button>\n<script type=\"module\">\n  const el = document.querySelector('kai-button');\n  el.addEventListener('kai-click', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Button } from '@kitn.ai/ui/react';\n\n<Button\n  onClick={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-button\n  @kai-click=\"onClick\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-button\n  on:kai-click={onClick}\n></kai-button>",
+      "angular": "<kai-button\n  (kai-click)=\"onClick($event)\"\n></kai-button>",
+      "solid": "import { Button } from '@kitn.ai/ui';\n\n<Button\n  onClick={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
     "tag": "kai-card",
     "displayName": "Card",
     "hasSolid": true,
@@ -111,6 +150,18 @@
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-code-block\n  {code}\n></kai-code-block>",
       "angular": "<kai-code-block\n  [code]=\"code\"\n></kai-code-block>",
       "solid": "import { CodeBlock } from '@kitn.ai/ui';\n\n<CodeBlock\n  code={code}\n/>"
+    }
+  },
+  {
+    "tag": "kai-command",
+    "displayName": "Command",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-command></kai-command>\n<script type=\"module\">\n  const el = document.querySelector('kai-command');\n  el.addEventListener('kai-query-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Command } from '@kitn.ai/ui/react';\n\n<Command\n  onQueryChange={(e) => console.log(e.detail)}\n  onSelect={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-command\n  @kai-query-change=\"onQueryChange\"\n  @kai-select=\"onSelect\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-command\n  on:kai-query-change={onQueryChange}\n  on:kai-select={onSelect}\n></kai-command>",
+      "angular": "<kai-command\n  (kai-query-change)=\"onQueryChange($event)\"\n  (kai-select)=\"onSelect($event)\"\n></kai-command>"
     }
   },
   {
@@ -254,6 +305,31 @@
     }
   },
   {
+    "tag": "kai-hover-card",
+    "displayName": "HoverCard",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-hover-card></kai-hover-card>",
+      "react": "import { HoverCard } from '@kitn.ai/ui/react';\n\n<HoverCard />",
+      "vue": "<kai-hover-card />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-hover-card></kai-hover-card>",
+      "angular": "<kai-hover-card></kai-hover-card>",
+      "solid": "import { HoverCard } from '@kitn.ai/ui';\n\n<HoverCard />"
+    }
+  },
+  {
+    "tag": "kai-icon",
+    "displayName": "Icon",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-icon></kai-icon>",
+      "react": "import { Icon } from '@kitn.ai/ui/react';\n\n<Icon />",
+      "vue": "<kai-icon />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-icon></kai-icon>",
+      "angular": "<kai-icon></kai-icon>"
+    }
+  },
+  {
     "tag": "kai-image",
     "displayName": "Image",
     "hasSolid": true,
@@ -306,6 +382,18 @@
     }
   },
   {
+    "tag": "kai-menu",
+    "displayName": "Menu",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-menu></kai-menu>\n<script type=\"module\">\n  const el = document.querySelector('kai-menu');\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Menu } from '@kitn.ai/ui/react';\n\n<Menu\n  onSelect={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-menu\n  @kai-select=\"onSelect\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-menu\n  on:kai-select={onSelect}\n></kai-menu>",
+      "angular": "<kai-menu\n  (kai-select)=\"onSelect($event)\"\n></kai-menu>"
+    }
+  },
+  {
     "tag": "kai-message",
     "displayName": "Message",
     "hasSolid": true,
@@ -329,6 +417,18 @@
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-model-switcher\n  {models}\n  on:kai-model-change={onModelChange}\n></kai-model-switcher>",
       "angular": "<kai-model-switcher\n  [models]=\"models\"\n  (kai-model-change)=\"onModelChange($event)\"\n></kai-model-switcher>",
       "solid": "import { ModelSwitcher } from '@kitn.ai/ui';\n\n<ModelSwitcher\n  models={models}\n  onModelChange={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kai-notice",
+    "displayName": "Notice",
+    "hasSolid": false,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-notice></kai-notice>\n<script type=\"module\">\n  const el = document.querySelector('kai-notice');\n  el.addEventListener('kai-dismiss', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Notice } from '@kitn.ai/ui/react';\n\n<Notice\n  onDismiss={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-notice\n  @kai-dismiss=\"onDismiss\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-notice\n  on:kai-dismiss={onDismiss}\n></kai-notice>",
+      "angular": "<kai-notice\n  (kai-dismiss)=\"onDismiss($event)\"\n></kai-notice>"
     }
   },
   {
@@ -433,6 +533,19 @@
     }
   },
   {
+    "tag": "kai-scroll-area",
+    "displayName": "ScrollArea",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-scroll-area></kai-scroll-area>",
+      "react": "import { ScrollArea } from '@kitn.ai/ui/react';\n\n<ScrollArea />",
+      "vue": "<kai-scroll-area />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-scroll-area></kai-scroll-area>",
+      "angular": "<kai-scroll-area></kai-scroll-area>",
+      "solid": "import { ScrollArea } from '@kitn.ai/ui';\n\n<ScrollArea />"
+    }
+  },
+  {
     "tag": "kai-scroll-button",
     "displayName": "ScrollButton",
     "hasSolid": true,
@@ -443,6 +556,32 @@
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-scroll-button\n  on:kai-scroll={onScroll}\n></kai-scroll-button>",
       "angular": "<kai-scroll-button\n  (kai-scroll)=\"onScroll($event)\"\n></kai-scroll-button>",
       "solid": "import { ScrollButton } from '@kitn.ai/ui';\n\n<ScrollButton\n  onScroll={(e) => console.log(e.detail)}\n/>"
+    }
+  },
+  {
+    "tag": "kai-separator",
+    "displayName": "Separator",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-separator></kai-separator>",
+      "react": "import { Separator } from '@kitn.ai/ui/react';\n\n<Separator />",
+      "vue": "<kai-separator />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-separator></kai-separator>",
+      "angular": "<kai-separator></kai-separator>",
+      "solid": "import { Separator } from '@kitn.ai/ui';\n\n<Separator />"
+    }
+  },
+  {
+    "tag": "kai-skeleton",
+    "displayName": "Skeleton",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-skeleton></kai-skeleton>",
+      "react": "import { Skeleton } from '@kitn.ai/ui/react';\n\n<Skeleton />",
+      "vue": "<kai-skeleton />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-skeleton></kai-skeleton>",
+      "angular": "<kai-skeleton></kai-skeleton>",
+      "solid": "import { Skeleton } from '@kitn.ai/ui';\n\n<Skeleton />"
     }
   },
   {
@@ -570,6 +709,19 @@
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-tool></kai-tool>",
       "angular": "<kai-tool></kai-tool>",
       "solid": "import { Tool } from '@kitn.ai/ui';\n\n<Tool />"
+    }
+  },
+  {
+    "tag": "kai-tooltip",
+    "displayName": "Tooltip",
+    "hasSolid": true,
+    "snippets": {
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-tooltip></kai-tooltip>",
+      "react": "import { Tooltip } from '@kitn.ai/ui/react';\n\n<Tooltip />",
+      "vue": "<kai-tooltip />",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-tooltip></kai-tooltip>",
+      "angular": "<kai-tooltip></kai-tooltip>",
+      "solid": "import { Tooltip } from '@kitn.ai/ui';\n\n<Tooltip />"
     }
   },
   {

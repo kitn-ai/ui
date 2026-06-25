@@ -9,7 +9,7 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kai-model-switcher': JSX.HTMLAttributes<HTMLElement>;
+      'kai-model-switcher': JSX.HTMLAttributes<HTMLElement> & { theme?: string; 'current-model'?: string };
       /** Light-DOM data carrier for declarative model options inside `<kai-model-switcher>`. */
       'kai-model': JSX.HTMLAttributes<HTMLElement> & {
         id?: string;

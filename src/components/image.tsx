@@ -1,5 +1,6 @@
 import { type JSX, splitProps, createSignal, createEffect, onCleanup, Show } from 'solid-js';
 import { cn } from '../utils/cn';
+import { Skeleton } from '../ui/skeleton';
 
 export interface GeneratedImageLike {
   base64?: string;
@@ -44,13 +45,10 @@ function Image(props: ImageProps) {
     <Show
       when={src()}
       fallback={
-        <div
+        <Skeleton
           aria-label={local.alt}
           role="img"
-          class={cn(
-            'h-auto max-w-full animate-pulse overflow-hidden rounded-md bg-muted',
-            local.class
-          )}
+          class={cn('h-auto max-w-full overflow-hidden', local.class)}
         />
       }
     >

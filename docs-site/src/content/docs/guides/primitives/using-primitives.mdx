@@ -41,6 +41,23 @@ import {
 
 `ChatConfig` (and its `useChatConfig` hook) sets shared options like prose size for everything rendered inside it.
 
+### State helpers & hooks
+
+Consumer-owned chat state, made ergonomic. The `@kitn.ai/ui/state` subpath ships immutable helpers and a typed streaming handle; each framework adds a batteries-included store that owns the state for you:
+
+```ts
+import { appendMessage, updateMessage, createAssistantStream } from '@kitn.ai/ui/state';
+import { createKaiChat } from '@kitn.ai/ui';          // SolidJS store
+// React: import { useKaiChat } from '@kitn.ai/ui/react';
+```
+
+- `appendMessage` / `upsertMessage` / `updateMessage` / `removeMessage` / `appendContent` — immutable `ChatMessage[]` updates (a new array reference per change, so the element re-renders).
+- `addSuggestion` / `removeSuggestion` — immutable suggestion-list updates.
+- `createAssistantStream(set)` — a fluent handle that grows one in-flight assistant message: `appendText`, `appendReasoning`, `upsertTool`/`updateTool`, `patch`, `done`, `abort`.
+- `useKaiChat` (React, from `@kitn.ai/ui/react`) and `createKaiChat` (Solid, from `@kitn.ai/ui`) — own the message list, wire submit, and return a spreadable `bind`.
+
+See the full [State helpers & hooks](/guides/state-and-hooks/) guide for the setter contract, streaming loop, and multi-chat usage.
+
 ## UI primitives
 
 The kit's own accessible building blocks. Useful on their own, well outside a chat.

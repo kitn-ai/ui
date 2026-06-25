@@ -5,6 +5,8 @@ export type { ModelOption, SearchFilters, ConversationScope, ConversationSummary
 export { cn } from './utils/cn';
 
 // Layer 1: Headless Primitives
+export { createKaiChat } from './primitives/create-kai-chat';
+export type { CreateKaiChatOptions, KaiChatStore } from './primitives/create-kai-chat';
 export { useAutoResize } from './primitives/use-auto-resize';
 export { useStickToBottom } from './primitives/use-stick-to-bottom';
 export { useTextStream } from './primitives/use-text-stream';
@@ -279,3 +281,6 @@ export type {
   AttachmentInfoProps, AttachmentRemoveProps, AttachmentEmptyProps,
   AttachmentHoverCardProps, AttachmentHoverCardTriggerProps, AttachmentHoverCardContentProps,
 } from './components/attachments';
+
+// Chat message types — public API for consumers who need to type their own message arrays.
+export type { ChatMessage, ChatMessageAction, CustomAction, AvatarData, FeedbackVote } from './elements/chat-types';

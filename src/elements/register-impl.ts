@@ -41,6 +41,16 @@ import './artifact';
 import './scroll-button';
 import './popover';
 import './switch';
+import './button';
+import './avatar';
+import './badge';
+import './tooltip';
+import './notice';
+import './icon';
+import './separator';
+import './scroll-area';
+import './hover-card';
+import './skeleton';
 import './toast';
 // Generative-UI cards (Card Contract)
 import './card';
@@ -55,3 +65,7 @@ import './cards';
 import './compare';
 // Rich text composer with entity pills, trigger menus, and keyword highlighting
 import './composer';
+// W3 phase 2: cascading action menu from a JSON items-tree
+import './menu';
+// W4 phase 1: grouped filterable command/mention palette
+import './command';

@@ -11,22 +11,12 @@ import {
   Video,
   X,
 } from 'lucide-solid';
+import type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from './attachment-types';
+export type { AttachmentData, AttachmentMediaCategory, AttachmentVariant } from './attachment-types';
 
 // ============================================================================
 // Types
 // ============================================================================
-
-export interface AttachmentData {
-  id: string;
-  type: 'file' | 'source-document';
-  filename?: string;
-  mediaType?: string;
-  url?: string;
-  title?: string;
-}
-
-export type AttachmentMediaCategory = 'image' | 'video' | 'audio' | 'document' | 'source' | 'unknown';
-export type AttachmentVariant = 'grid' | 'inline' | 'list';
 
 const mediaCategoryIcons: Record<AttachmentMediaCategory, typeof ImageIcon> = {
   audio: Music2,
@@ -159,12 +149,12 @@ function Attachment(props: AttachmentProps) {
           ctx.variant === 'grid' && 'size-24 overflow-hidden rounded-lg',
           ctx.variant === 'inline' && [
             'flex h-8 cursor-pointer select-none items-center gap-1.5',
-            'rounded-md bg-muted/50 px-1.5 text-foreground',
+            'rounded-md bg-surface-strong px-1.5 text-foreground',
             'font-medium text-sm transition-all',
             'hover:bg-muted',
           ],
           ctx.variant === 'list' && [
-            'flex w-full items-center gap-3 rounded-lg bg-muted/30 p-3 text-foreground',
+            'flex w-full items-center gap-3 rounded-lg bg-surface p-3 text-foreground',
             'hover:bg-muted/50',
           ],
           local.class,

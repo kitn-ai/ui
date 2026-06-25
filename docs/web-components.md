@@ -142,7 +142,7 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `suggestions` | — | `undefined | string[]` | — | Starter prompts shown above the input when the thread is empty. Clicking one follows `suggestionMode`. Set as a JS property. |
 | `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does: `'submit'` (default) sends it immediately as if typed and submitted; `'fill'` just places it in the input. |
 | `persistSuggestions` | `persist-suggestions` | `undefined | false | true` | `false` | Keep suggestions visible after the conversation starts. By default suggestions are conversation starters and hide once `messages` is non-empty; set this to keep them always shown. Default false. |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
+| `proseSize` | `prose-size` | `undefined | "sm" | "lg" | "xs" | "base"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `chatTitle` | `chat-title` | `undefined | string` | — | Optional header title shown on the left of the header. |
@@ -152,6 +152,12 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `scrollButton` | `scroll-button` | `undefined | false | true` | `true` | Show the scroll-to-bottom button inside the scroll area. Default true. |
 | `headerStart` | `header-start` | `undefined | false | true` | — | Whether the host has `slot="header-start"` content (left of the title) — set by the `<kai-chat>` facade so a custom control forces the header open. |
 | `headerEnd` | `header-end` | `undefined | false | true` | — | Whether the host has `slot="header-end"` content (right of the controls). |
+| `headerFull` | `header-full` | `undefined | false | true` | — | REPLACE — full custom header in place of the built-in title/model/context bar. |
+| `sidebar` | `sidebar` | `undefined | false | true` | — | INJECT — left sidebar column (e.g. a conversation list / your own nav). |
+| `empty` | `empty` | `undefined | false | true` | — | REPLACE — custom zero-state rendered in the message area while the thread is empty (replaces the empty message list only; the composer and its suggestions still render). |
+| `composer` | `composer` | `undefined | false | true` | — | REPLACE — full custom composer in place of the built-in prompt input. The projected content wires its own submit (the data-flow boundary). |
+| `composerActions` | `composer-actions` | `undefined | false | true` | — | INJECT — accessory row just above the composer (e.g. extra actions). |
+| `footer` | `footer` | `undefined | false | true` | — | INJECT — footer row below the composer (disclaimers, token meter, …). |
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the input toolbar; fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the input toolbar; fires a `voice` event. |
 | `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill (`/` skills, `@` agents/plugins). Set as a JS property; forwarded to the input. |
@@ -169,6 +175,31 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 | `kai-suggestion-click` | `{ value: string }` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
 | `kai-value-change` | `{ value: string }` | Fired on every input change. |
 | `kai-voice` | — | The Mic / voice button was clicked. |
+
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `header-start` | inject | Leading header controls, left of the title. |
+| `header-end` | inject | Trailing header controls. |
+| `header` | replace | Full custom header; replaces the built-in title/model/context bar. |
+| `sidebar` | inject | Left column (your nav / conversation list). Fixed width; use compose-your-own for resizable. |
+| `empty` | replace | Custom zero-state rendered in the message area while the thread is empty. Replaces the empty message list only — the composer and any suggestions still render. |
+| `composer` | replace | Full custom composer; you own submit + loading, drive the thread via messages. |
+| `composer-actions` | inject | Accessory row above the composer. |
+| `footer` | inject | Row below the composer (disclaimers, token meter). |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-chat::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(header)` | Full custom header; replaces the built-in title/model/context bar. |
+| `::part(sidebar)` | Left column (your nav / conversation list). Fixed width; use compose-your-own for resizable. |
+| `::part(footer)` | Row below the composer (disclaimers, token meter). |
 
 #### Composed from
 
@@ -199,7 +230,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `loading` | `loading` | `undefined | false | true` | `false` |  |
 | `suggestions` | — | `undefined | string[]` | — |  |
 | `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` |  |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` |  |
+| `proseSize` | `prose-size` | `undefined | "sm" | "lg" | "xs" | "base"` | `'sm'` |  |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` |  |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` |  |
 | `chatTitle` | `chat-title` | `undefined | string` | — |  |
@@ -302,6 +333,16 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 | `kai-new-chat` | — | The "New chat" button was clicked. |
 | `kai-toggle-sidebar` | — | The sidebar toggle was clicked. |
 
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `header` | replace | Full custom title bar; replaces the built-in toggle / "Chats" / New-chat row. |
+| `empty` | replace | Custom zero-state shown when there are no conversations; replaces the built-in "No conversations yet". |
+| `footer` | inject | A row below the list — account, settings, or usage. |
+
 #### Composed from
 
 `Components/ConversationList`
@@ -331,6 +372,8 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | `search` | `search` | `undefined | false | true` | `false` | Show a Search (Globe) button in the left toolbar; clicking it fires a `search` event. |
 | `voice` | `voice` | `undefined | false | true` | `false` | Show a Voice (Mic) button in the left toolbar; clicking it fires a `voice` event. |
 | `stoppable` | `stoppable` | `undefined | false | true` | `false` | When set and `loading` is true, the send button is replaced by a Stop button (square icon, "Stop" aria-label). Clicking it fires `kai-stop`. |
+| `submit` | `submit` | `undefined | "always" | "auto"` | `'always'` | Send-button visibility. `'always'` (default) always shows it; `'auto'` shows it only when there's text/attachments (an empty composer hides it — Enter still submits). To hide it entirely (Enter-only), it's pure CSS: `::part(send){display:none}` — no prop needed. Restyle via `::part(send)`. The Stop button (`stoppable` + `loading`) is unaffected. |
+| `attach` | `attach` | `undefined | false | true` | `true` | When `false`, hides the built-in paperclip attach button even though the element otherwise supports attachments. Use this when a `+` menu in `toolbar-start` already exposes "Add files", to avoid a duplicate control. Defaults to `true`. |
 | `attachments` | — | `AttachmentData[] | undefined` | — | Attachments to seed the input with (so a consumer can pre-populate staged files without an upload). Set as a JS property; the element then manages its own attachment state from there (add via the paperclip, remove per chip). |
 | `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers — each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. Convention: `/` → skills, `@` → agents (plugins are the grouping/provenance of those items). Set as a JS property. |
 | `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. |
@@ -346,6 +389,24 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | `kai-toolbar-action` | `{ action: string }` | A custom `<kai-action>` toolbar button was clicked. `action` is the `id` of the `<kai-action>` element that was clicked. |
 | `kai-value-change` | `{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }` | The input changed (fires on every edit). Carries the flattened `value` plus the structured `doc` + `entities`. |
 | `kai-voice` | — | The Voice (Mic) toolbar button was clicked. |
+
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `input-top` | inject | Inside the card, above the textarea (e.g. an inline status strip). For content above/below the whole card, use your own layout — that is light DOM you control. |
+| `toolbar-start` | inject | Leading controls in the input toolbar — where a + menu goes. |
+| `toolbar-end` | inject | Trailing controls in the toolbar, before the Send button. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-prompt-input::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(send)` | The send button. Restyle from outside, or hide it entirely (Enter-only) — hiding is pure CSS, which is why there is no `submit="never"`. <br>`kai-prompt-input::part(send) { display: none } /* Enter-only; or restyle: background, border-radius, … */` |
 
 #### Theming
 
@@ -367,7 +428,7 @@ Standalone prompt input with a send button. Use when you want just the input are
 | `role` | `role` | `undefined | "user" | "assistant"` | `'assistant'` | Convenience for simple cases when not passing a `message` object. |
 | `content` | `content` | `undefined | string` | — | Convenience content (used when `message` is not set). |
 | `markdown` | `markdown` | `undefined | false | true` | — | Force markdown on/off. Defaults to on for assistant, off for user. |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text/markdown sizing for the message body. |
+| `proseSize` | `prose-size` | `undefined | "sm" | "lg" | "xs" | "base"` | `'sm'` | Text/markdown sizing for the message body. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name used for fenced code blocks in the content. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting for code blocks (no Shiki loads). |
 | `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`). |
@@ -401,7 +462,7 @@ A single message row: renders markdown/plain content, reasoning, tool calls, att
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `content` | `content` | `string` | `''` | The markdown source to render. |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text/markdown sizing. |
+| `proseSize` | `prose-size` | `undefined | "sm" | "lg" | "xs" | "base"` | `'sm'` | Text/markdown sizing. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme for fenced code blocks. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting (no Shiki loads). |
 
@@ -431,7 +492,7 @@ No events.
 | `language` | `language` | `undefined | string` | — | Language grammar (e.g. `js`, `python`). Defaults to `tsx`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting (renders plain text, no Shiki). |
-| `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Code text sizing. |
+| `proseSize` | `prose-size` | `undefined | "sm" | "lg" | "xs" | "base"` | `'sm'` | Code text sizing. |
 
 #### Composed from
 
@@ -630,9 +691,9 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `suggestions` | — | `(string | { label: string; value?: undefined | string })[]` | `[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
-| `variant` | `variant` | `undefined | "ghost" | "default" | "outline"` | `'outline'` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
-| `size` | `size` | `undefined | "sm" | "lg" | "md" | "icon" | "icon-sm"` | — | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
+| `suggestions` | — | `(string | { label: string; value?: undefined | string; icon?: undefined | string })[]` | `[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
+| `variant` | `variant` | `undefined | "default" | "ghost" | "outline"` | `'outline'` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
+| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | — | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
 | `block` | `block` | `undefined | false | true` | `false` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined | string` | — | Substring to highlight within each suggestion. |
 
@@ -814,7 +875,7 @@ A mic button that records audio and optionally transcribes it via a host-supplie
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `variant` | `variant` | `LoaderVariant | undefined` | `'circular'` | The animation style: `'circular' | 'classic' | 'pulse' | 'pulse-dot' | 'dots' | 'typing' | 'wave' | 'bars' | 'terminal' | 'text-blink' | 'text-shimmer' | 'loading-dots'`. Defaults to `'circular'`. |
-| `size` | `size` | `undefined | "sm" | "lg" | "md"` | `'md'` | Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Loader size: `'sm' | 'md' | 'lg'`. Defaults to `'md'`. |
 | `text` | `text` | `undefined | string` | — | Label for the text-based variants. |
 
 #### Composed from
@@ -956,8 +1017,8 @@ No events.
 |----------|-----------|------|---------|-------|
 | `label` | `label` | `undefined | string` | — | Optional text beside the icon. |
 | `tooltip` | `tooltip` | `undefined | string` | — | Tooltip on hover. |
-| `variant` | `variant` | `undefined | "ghost" | "default" | "outline"` | `'ghost'` | Visual button style. |
-| `size` | `size` | `undefined | "sm" | "lg" | "md" | "icon" | "icon-sm"` | `'sm'` | Button size (use an `icon*` size for an icon-only checkpoint). |
+| `variant` | `variant` | `undefined | "default" | "ghost" | "outline"` | `'ghost'` | Visual button style. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | `'sm'` | Button size (use an `icon*` size for an icon-only checkpoint). |
 
 #### Events
 
@@ -1054,6 +1115,360 @@ Themed by the global design tokens (override any `--color-*`).
 Empty-state placeholder with a title and description.
 
 No events.
+
+---
+
+### Composition primitives & interactive elements
+
+The polished building blocks you compose your own chrome from — themed, accessible, and Shadow-DOM-isolated. Each exposes its styleable `::part`s below (also discoverable via the `kai` MCP `component_reference`).
+
+### `<kai-button>` / `Button`
+
+<!-- spec:kai-button -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `variant` | `variant` | `undefined | "default" | "subtle" | "ghost" | "outline" | "destructive"` | `'default'` | Visual style. `default` (filled), `subtle` (muted text, hover tint — the toolbar icon look), `ghost` (transparent, hover fill), `outline`, or `destructive`. Defaults to `default`. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | `'md'` | Size token. `icon` / `icon-sm` are square (for icon-only buttons); `sm` / `md` / `lg` size text buttons. Defaults to `md`. |
+| `icon` | `icon` | `undefined | string` | — | Leading icon: a named icon (e.g. `"mic"`, `"plus"`), an image URL/data-URI, or plain text. Renders before any slotted label. |
+| `iconTrailing` | `icon-trailing` | `undefined | string` | — | Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). |
+| `label` | `label` | `undefined | string` | — | Accessible name. REQUIRED for icon-only buttons (no visible text); ignored when you slot visible text, which already names the button. |
+| `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the button (non-interactive, dimmed). |
+| `type` | `type` | `undefined | "button" | "submit" | "reset"` | `'button'` | Native button `type`. Defaults to `button` (so it never submits a form). |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-click` | — | The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-button::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(button)` | The button element. Restyle radius, padding, colors, or weight from outside; the `variant`/`size` props set the defaults. <br>`kai-button::part(button) { border-radius: 9999px; font-weight: 600 }` |
+
+#### Composed from
+
+`UI/Button`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-button -->
+
+A themed button — `variant` (incl. `subtle`), `size` (incl. icon-only), leading/trailing `icon`, and a `slot="icon"` escape hatch for any inline SVG. Restyle via `::part(button)`.
+
+---
+
+### `<kai-avatar>` / `Avatar`
+
+<!-- spec:kai-avatar -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `src` | `src` | `undefined | string` | — | Image URL/data-URI. When absent, the `fallback` initials show instead. |
+| `alt` | `alt` | `undefined | string` | — | Alt text for the image. Defaults to `fallback`. |
+| `fallback` | `fallback` | `undefined | string` | `''` | Short text shown when there's no image — usually initials (e.g. "RT", "AI"). |
+| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token: `sm` | `md` (default) | `lg`. |
+
+#### Composed from
+
+`UI/Avatar`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-avatar -->
+
+An image avatar with an automatic initials fallback, in three sizes.
+
+---
+
+### `<kai-badge>` / `Badge`
+
+<!-- spec:kai-badge -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `variant` | `variant` | `undefined | "default" | "count" | "citation"` | `'default'` | `default` (muted pill) · `count` (compact number badge) · `citation` (filled primary, for inline citation markers). Defaults to `default`. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-badge::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(badge)` | The badge pill. Restyle its background, color, or shape; the `variant` prop (default/count/citation) sets the defaults. <br>`kai-badge::part(badge) { background: var(--color-primary); color: var(--color-primary-foreground) }` |
+
+#### Composed from
+
+`UI/Badge`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-badge -->
+
+A small pill for labels, status, counts, or inline citation markers. Restyle via `::part(badge)`.
+
+---
+
+### `<kai-icon>` / `Icon`
+
+<!-- spec:kai-icon -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `name` | `name` | `undefined | string` | `''` | A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. |
+| `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token: `sm` | `md` (default) | `lg`. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-icon::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(icon)` | The icon wrapper. Inherits `currentColor` and the `size` prop by default; recolor or resize it from outside. <br>`kai-icon::part(icon) { color: var(--color-primary) }` |
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-icon -->
+
+A curated, theme-aware icon used standalone. Recolor via `::part(icon)` or `currentColor`.
+
+---
+
+### `<kai-tooltip>` / `Tooltip`
+
+<!-- spec:kai-tooltip -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `content` | `content` | `undefined | string` | `''` | The hint text shown on hover/focus of the slotted trigger. |
+| `openDelay` | `open-delay` | `undefined | number` | — | Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless. |
+
+#### Composed from
+
+`UI/Tooltip`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-tooltip -->
+
+A text hint shown on hover/focus of a slotted trigger; positioned and portaled inside the shadow root.
+
+---
+
+### `<kai-hover-card>` / `HoverCard`
+
+<!-- spec:kai-hover-card -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `openDelay` | `open-delay` | `undefined | number` | — | Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too). |
+| `closeDelay` | `close-delay` | `undefined | number` | — | Delay (ms) before it closes after the pointer leaves. Defaults to 300. |
+| `placement` | `placement` | `undefined | string` | — | Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. |
+
+#### Composed from
+
+`UI/HoverCard`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-hover-card -->
+
+Rich content on hover/focus of a trigger — the markup-carrying sibling of `<kai-tooltip>`. Trigger as default content, card body in `slot="card"`.
+
+---
+
+### `<kai-notice>` / `Notice`
+
+<!-- spec:kai-notice -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `severity` | `severity` | `undefined | "neutral" | "info" | "warning" | "error" | "success"` | `'neutral'` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `icon` | `icon` | `undefined | string` | — | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
+| `dismissible` | `dismissible` | `undefined | false | true` | `false` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-dismiss` | — | The notice was dismissed via its × (it also hides itself). |
+
+#### Composed from
+
+`UI/Notice`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-notice -->
+
+An inline notice/alert carrying a severity icon, the right a11y role, an optional `slot="action"`, and an optional self-dismissing ×.
+
+---
+
+### `<kai-separator>` / `Separator`
+
+<!-- spec:kai-separator -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-separator::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(separator)` | The divider line. Restyle its color, thickness, or inset from outside. <br>`kai-separator::part(separator) { background: var(--color-border) }` |
+
+#### Composed from
+
+`UI/Separator`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-separator -->
+
+A themed divider between groups of content (toolbar sections, menu groups, header/sidebar splits). Restyle via `::part(separator)`.
+
+---
+
+### `<kai-scroll-area>` / `ScrollArea`
+
+<!-- spec:kai-scroll-area -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-scroll-area::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(viewport)` | The scrolling container. Add padding or a max-height from outside; the thin scrollbar follows `--color-scrollbar-thumb`. <br>`kai-scroll-area::part(viewport) { padding-right: 0.5rem }` |
+
+#### Composed from
+
+`UI/ScrollArea`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-scroll-area -->
+
+A scroll container with a themed, thin, cross-browser scrollbar and a keyboard-reachable region. Restyle via `::part(viewport)`.
+
+---
+
+### `<kai-skeleton>` / `Skeleton`
+
+<!-- spec:kai-skeleton -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `variant` | `variant` | `undefined | "text" | "rect" | "circle"` | `'text'` | `text` (one or more lines), `rect` (a block), or `circle` (round). Defaults to `text`. |
+| `width` | `width` | `undefined | string` | — | CSS width (e.g. `'12rem'`, `'60%'`). Defaults to full width (responsive); for `circle` it is the diameter. |
+| `height` | `height` | `undefined | string` | — | CSS height. Defaults per variant (a text line height; circle = width). |
+| `lines` | `lines` | `undefined | number` | — | `text` only: number of lines; the last is shorter. Defaults to 1. |
+
+#### Composed from
+
+`UI/Skeleton`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-skeleton -->
+
+A pulsing loading placeholder that preserves layout while content arrives. Responsive by default (fills its container); prop-driven `variant` (text/rect/circle) + `width`/`height`/`lines`.
+
+---
+
+### `<kai-menu>` / `Menu`
+
+<!-- spec:kai-menu -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `items` | — | `undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]` | — | Tree of menu items. Set as a JS property — not an HTML attribute. |
+| `placement` | `placement` | `undefined | string` | — | Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). |
+| `triggerIcon` | `trigger-icon` | `undefined | string` | — | Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case — a slotted trigger overrides it. |
+| `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label (e.g. `"High"`). |
+| `triggerIconTrailing` | `trigger-icon-trailing` | `undefined | string` | — | Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). |
+| `label` | `label` | `undefined | string` | — | Accessible name for an icon-only trigger (no visible label). |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-select` | `{ id: string; checked?: undefined | false | true }` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
+
+#### Composed from
+
+`UI/Dropdown`, `UI/DropdownTrigger`, `UI/DropdownContent`, `UI/DropdownItem`, `UI/DropdownSeparator`, `UI/DropdownLabel`, `UI/DropdownCheckboxItem`, `UI/DropdownSub`, `UI/DropdownSubTrigger`, `UI/DropdownSubContent`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-menu -->
+
+A cascading action menu built from a JSON items-tree (submenus, separators, checkboxes, headings), with a built-in or slotted trigger.
+
+---
+
+### `<kai-command>` / `Command`
+
+<!-- spec:kai-command -->
+#### Properties
+
+| Property | Attribute | Type | Default | Notes |
+|----------|-----------|------|---------|-------|
+| `items` | — | `undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Flat list of items. Set as a JS property — not an HTML attribute. |
+| `placeholder` | `placeholder` | `undefined | string` | — | Placeholder text for the search input. |
+| `emptyLabel` | `empty-label` | `undefined | string` | — | Label shown when no items match the current query. |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-query-change` | `{ value: string }` | Fired on every keystroke in the search input. |
+| `kai-select` | `{ id: string }` | Fired when the user selects an item (click or Enter). |
+
+#### Composed from
+
+`UI/CommandList`
+
+#### Theming
+
+Themed by the global design tokens (override any `--color-*`).
+<!-- /spec:kai-command -->
+
+A grouped, filterable command / mention palette (the `@`-picker pattern).
 
 ---
 

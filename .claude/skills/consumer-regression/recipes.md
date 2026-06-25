@@ -52,6 +52,8 @@ s({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2024-11-05',c
 s({jsonrpc:'2.0',method:'notifications/initialized',params:{}});
 const cells=[ // [name, scaffold args]
   ['react', {useCase:'drop-in-chat',integration:'mock',placement:'full-page',framework:'react',suggestions:["What's new?","Ask for help?"]}],
+  // state & hooks scenario: imports useKaiChat + createAssistantStream, streams a reply, asserts message appears
+  ['react-state-hooks', {useCase:'drop-in-chat',integration:'mock',placement:'full-page',framework:'react',suggestions:["Test state helpers"]}],
   // …one per framework/scenario…
 ];
 cells.forEach((c,i)=>s({jsonrpc:'2.0',id:40+i,method:'tools/call',params:{name:'scaffold',arguments:c[1]}}));
@@ -74,6 +76,10 @@ Build a cell for each combination you care about. Full matrix axes:
 **Core sweep** (cheapest high-signal set): `drop-in-chat × mock × full-page` across ALL 6 frameworks — runnable with no creds (mock streams client-side), so it isolates packaging/scaffold bugs. Start here.
 
 **Then expand:** one real JS backend (e.g. `next × openrouter` or `vercel-ai-sdk`), the Python backend (`html × pydantic-ai`), each non-trivial archetype (`agentic`, `knowledge-base`, `workspace`), `theme` applied, and each placement.
+
+### State & hooks scenario
+
+Exercises the `@kitn.ai/ui/state` public surface end-to-end in a real consumer app. Build a Vite React-TS SPA against `$HARNESS/kitn-stable.tgz`. The app imports `useKaiChat` from `@kitn.ai/ui/react` and `createAssistantStream` from `@kitn.ai/ui/state`, renders `<Chat {...chat.bind} />`, and on submit calls `chat.append(userMsg)` then `createAssistantStream(chat.setMessages)`, emitting three mock chunks before calling `s.done()`. Playwright asserts: (1) `<Chat>` renders in the shadow root, (2) the mock chunks appear as a single assistant message in the thread, (3) zero console errors. Probe cell name: `react-state-hooks`. Layer diagnosis surface: LIBRARY (bad exports or types from `@kitn.ai/ui/state`) · SCAFFOLD-OUTPUT (wrong import path or missing `chat.setMessages` access).
 
 ## Fresh-app scaffold commands (per framework)
 

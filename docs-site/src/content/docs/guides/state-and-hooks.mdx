@@ -1,0 +1,190 @@
+---
+title: State helpers & hooks
+description: Drive messages, suggestions, and streaming without hand-rolling immutable updates.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+The elements are controlled: you own the data, pass it in, listen for events. To make
+that ergonomic, `@kitn.ai/ui/state` ships immutable helpers and a streaming handle, and
+each framework gets a batteries-included store that owns the state for you.
+
+## The setter contract
+
+Everything drives one shape — a functional-updater setter, `(prev) => next`. React's
+`setState`, a Solid signal setter, and one line for plain HTML all satisfy it:
+
+```js
+const set = (fn) => { el.messages = fn(el.messages ?? []); };
+```
+
+The helpers and the streaming handle accept any setter that conforms to this shape, so
+they work the same way regardless of which framework is in play.
+
+## Helpers (`@kitn.ai/ui/state`)
+
+Six pure functions for common mutations. Each takes the current array and returns a new one:
+
+```ts
+import {
+  appendMessage,
+  upsertMessage,
+  updateMessage,
+  removeMessage,
+  appendContent,
+  addSuggestion,
+  removeSuggestion,
+} from '@kitn.ai/ui/state';
+
+// Append a user turn
+setMessages((m) => appendMessage(m, { id: crypto.randomUUID(), role: 'user', content: text }));
+
+// Patch a field on an existing message (e.g. correct the text after an edit)
+setMessages((m) => updateMessage(m, id, { content: corrected }));
+
+// Insert-or-replace by id (useful for streaming placeholders)
+setMessages((m) => upsertMessage(m, { id, role: 'assistant', content: partial }));
+```
+
+`ChatMessage` is exported from `@kitn.ai/ui` (and re-exported from `@kitn.ai/ui/react`) if
+you need the type:
+
+```ts
+import type { ChatMessage } from '@kitn.ai/ui';
+```
+
+## Streaming (`createAssistantStream`)
+
+`createAssistantStream` inserts an assistant placeholder and returns a handle with methods that
+grow it in place. Pass your setter; it does the rest.
+
+```ts
+import { createAssistantStream } from '@kitn.ai/ui/state';
+
+const s = createAssistantStream(setMessages);
+
+for await (const part of backend(prompt)) {
+  s.appendText(part);
+}
+
+s.done(); // marks the message finished
+```
+
+The full handle:
+
+| Method | Purpose |
+|---|---|
+| `appendText(chunk)` | Append a text delta |
+| `setText(full)` | Replace the full text (for non-streaming providers) |
+| `appendReasoning(chunk)` | Append to the reasoning field |
+| `upsertTool(tool)` | Insert or update a tool-call block |
+| `updateTool(id, patch)` | Patch fields on an existing tool call |
+| `patch(fields)` | Merge arbitrary fields onto the message |
+| `done()` | Mark the message complete |
+| `abort()` | Mark the message aborted |
+
+You can pass an optional `init` object (a `Partial<ChatMessage>`) as the second argument to
+seed the message before the stream starts — for example a stable id you generated up front so
+you can correlate it with your backend request:
+
+```ts
+const s = createAssistantStream(setMessages, { id: requestId });
+```
+
+## React: `useKaiChat`
+
+`useKaiChat` is a React hook (from `@kitn.ai/ui/react`) that owns the message list, wires the
+submit handler, and returns a `bind` object you spread directly onto `<Chat>`:
+
+```tsx
+import { Chat, useKaiChat } from '@kitn.ai/ui/react';
+
+function App() {
+  const chat = useKaiChat({
+    async onSubmit({ value }) {
+      chat.append({ id: crypto.randomUUID(), role: 'user', content: value });
+      const s = chat.streamAssistant();
+      for await (const part of backend(value)) s.appendText(part);
+      s.done();
+    },
+  });
+
+  return <Chat {...chat.bind} />;
+}
+```
+
+`chat.bind` carries `messages`, `onSubmit` (the element event handler), and any other props
+the hook manages — spread it and you're done. If you need to read or set the message list
+directly, `chat.messages` and `chat.setMessages` are also exposed.
+
+<Aside type="note" title="onSubmit vs kai-submit">
+`onSubmit` in the hook options is the application callback (your async backend call).
+The underlying element fires `kai-submit`; `useKaiChat` listens to it and calls your
+`onSubmit` for you — you never wire the event by hand.
+</Aside>
+
+## Solid: `createKaiChat`
+
+For SolidJS, `createKaiChat` (from `@kitn.ai/ui`) returns the same shape. Because the
+element is a web component in a Solid template, you spread `chat.bind` as JSX props and
+attach the submit handler separately:
+
+```tsx
+import { createKaiChat } from '@kitn.ai/ui';
+
+const chat = createKaiChat({
+  async onSubmit({ value }) {
+    chat.append({ id: crypto.randomUUID(), role: 'user', content: value });
+    const s = chat.streamAssistant();
+    for await (const part of backend(value)) s.appendText(part);
+    s.done();
+  },
+});
+
+<kai-chat {...chat.bind} on:kai-submit={chat.handleSubmit} />;
+```
+
+`chat.handleSubmit` is a stable reference to the event handler — pass it directly to the
+`on:kai-submit` prop rather than an inline arrow so Solid's event delegation can clean it up.
+
+## Multiple chats per page
+
+Each `useKaiChat` / `createKaiChat` call creates its own independent state. There is no
+global store — instantiate as many as you need and they run in isolation:
+
+```tsx
+const left = useKaiChat({ onSubmit: askLeft });
+const right = useKaiChat({ onSubmit: askRight });
+
+<Chat {...left.bind} />
+<Chat {...right.bind} />
+```
+
+## Vanilla / plain HTML
+
+Without a framework hook, wire the setter contract manually and use the helpers directly:
+
+```js
+import '@kitn.ai/ui/elements';
+import { appendMessage, createAssistantStream } from '@kitn.ai/ui/state';
+
+await customElements.whenDefined('kai-chat');
+const el = document.querySelector('kai-chat');
+
+const set = (fn) => { el.messages = fn(el.messages ?? []); };
+
+el.addEventListener('kai-submit', async (e) => {
+  const id = crypto.randomUUID();
+  set((m) => appendMessage(m, { id: crypto.randomUUID(), role: 'user', content: e.detail.value }));
+
+  const s = createAssistantStream(set);
+  for await (const part of backend(e.detail.value)) s.appendText(part);
+  s.done();
+});
+```
+
+## Next steps
+
+- **[Getting Started](/guides/getting-started/)** — install, register, and render your first `<kai-chat>`.
+- **[Streaming recipe](/guides/recipes/streaming/)** — full server-side streaming patterns.
+- **[React framework guide](/guides/frameworks/react/)** — React-specific wiring and tips.

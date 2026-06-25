@@ -77,6 +77,29 @@ export interface ChatThreadProps {
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
+  // ── Composition slots ─────────────────────────────────────────────────────
+  // Each flag below is set by the `<kai-chat>` facade when matching light-DOM
+  // `slot="…"` content is projected, and gates one composition slot. Two kinds:
+  //   • INJECT  — additive: project YOUR markup into a region (sidebar, footer,
+  //               composer-actions, header-start/-end).
+  //   • REPLACE — substitutive: your markup stands in for a whole region
+  //               (header, empty, composer). A replaced region's projected
+  //               content owns its own data/events — a slotted (light-DOM) node
+  //               can't read this component's reactive state. That boundary is
+  //               the whole reason `messages` stays a data prop, not a slot.
+  /** REPLACE — full custom header in place of the built-in title/model/context bar. */
+  headerFull?: boolean;
+  /** INJECT — left sidebar column (e.g. a conversation list / your own nav). */
+  sidebar?: boolean;
+  /** REPLACE — custom zero-state rendered in the message area while the thread is empty (replaces the empty message list only; the composer and its suggestions still render). */
+  empty?: boolean;
+  /** REPLACE — full custom composer in place of the built-in prompt input. The
+   *  projected content wires its own submit (the data-flow boundary). */
+  composer?: boolean;
+  /** INJECT — accessory row just above the composer (e.g. extra actions). */
+  composerActions?: boolean;
+  /** INJECT — footer row below the composer (disclaimers, token meter, …). */
+  footer?: boolean;
   /** Show a Search (Globe) button in the input toolbar; fires a `search` event. */
   search?: boolean;
   /** Show a Voice (Mic) button in the input toolbar; fires a `voice` event. */
@@ -123,10 +146,15 @@ export function ChatThread(props: ChatThreadProps) {
     if (v != null && typeof v !== 'string') setInternal(v);
   });
   const handleChange = (v: string) => { setInternal(v); props.onValueChange?.(v); };
-  const handleSubmit = () => { props.onSubmit?.({ value: serializeToText(normalizeValue(current())), attachments: attachments() }); setAttachments([]); };
+  // After a send, reset the composer. Clear the internal draft ONLY when the value is
+  // uncontrolled (props.value === undefined) — a controlled host owns its own value and
+  // clears it itself. This lets the batteries-included hooks (useKaiChat/createKaiChat),
+  // whose `bind` does not control `value`, get a clean composer after each submit.
+  const afterSubmit = () => { setAttachments([]); if (props.value === undefined) setInternal(''); };
+  const handleSubmit = () => { props.onSubmit?.({ value: serializeToText(normalizeValue(current())), attachments: attachments() }); afterSubmit(); };
   const handleSuggestionClick = (v: string) => {
     if ((props.suggestionMode ?? 'submit') === 'fill') { handleChange(v); props.onSuggestionClick?.(v); }
-    else { props.onSubmit?.({ value: v, attachments: attachments() }); setAttachments([]); }
+    else { props.onSubmit?.({ value: v, attachments: attachments() }); afterSubmit(); }
   };
   const showHeader = () => !!(props.chatTitle || props.models || props.context || props.headerStart || props.headerEnd);
   // Suggestions are conversation starters: show only on an empty thread unless
@@ -137,109 +165,155 @@ export function ChatThread(props: ChatThreadProps) {
 
   return (
     <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={props.codeHighlight !== false} portalMount={outer.portalMount()}>
-      <div ref={(e) => (rootEl = e as HTMLElement)} class={`flex h-full flex-col bg-background ${props.class ?? ''}`}>
-        <Show when={showHeader()}>
-          <header class="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
-            <div class="flex items-center gap-2">
-              {/* Consumer-injected leading controls (sidebar-toggle, compose, a
-                  popover title-button). Projects light-DOM `slot="header-start"`
-                  children of <kai-chat>; inert outside a shadow root. */}
-              <slot name="header-start" />
-              <Show when={props.chatTitle}>
-                <div class="text-sm font-semibold text-foreground">{props.chatTitle}</div>
-              </Show>
-            </div>
-            <div class="flex items-center gap-2">
-              <Show when={props.models}>
-                <ModelSwitcher
-                  models={props.models!}
-                  currentModelId={props.currentModel ?? props.models![0]?.id ?? ''}
-                  onModelChange={(modelId) => props.onModelChange?.(modelId)}
-                />
-              </Show>
-              <Show when={props.context}>
-                <Context
-                  usedTokens={props.context!.usedTokens} maxTokens={props.context!.maxTokens}
-                  inputTokens={props.context!.inputTokens} outputTokens={props.context!.outputTokens}
-                  estimatedCost={props.context!.estimatedCost}
-                >
-                  <ContextTrigger />
-                  <ContextContent>
-                    <ContextContentHeader />
-                    <ContextContentBody><div class="space-y-1.5"><ContextInputUsage /><ContextOutputUsage /></div></ContextContentBody>
-                    <ContextContentFooter />
-                  </ContextContent>
-                </Context>
-              </Show>
-              {/* Consumer-injected trailing controls (share, settings, …).
-                  Projects light-DOM `slot="header-end"` children of <kai-chat>. */}
-              <slot name="header-end" />
-            </div>
-          </header>
+      {/* The root is a ROW so a `sidebar` slot can sit beside the main column.
+          With no sidebar projected it collapses to the original column. */}
+      <div ref={(e) => (rootEl = e as HTMLElement)} class={`flex h-full bg-background ${props.class ?? ''}`}>
+        <Show when={props.sidebar}>
+          <aside part="sidebar" class="flex w-64 shrink-0 flex-col overflow-hidden border-r border-border">
+            <slot name="sidebar" />
+          </aside>
         </Show>
-        <div class="relative flex-1 overflow-hidden">
-          <ChatContainer class="h-full px-4 py-3">
-            <ChatContainerContent class="mx-auto w-full max-w-3xl space-y-4">
-              <For each={props.messages}>
-                {(m) => {
-                  const body = (
-                    <MessageBody
-                      content={m.content}
-                      reasoning={m.reasoning}
-                      tools={m.tools}
-                      attachments={m.attachments}
-                      isUser={m.role === 'user'}
-                      markdown={m.role === 'assistant'}
-                      actions={m.actions}
-                      actionsReveal={reveal()}
-                      activeFeedback={feedback.resolveFeedback(m)}
-                      copied={feedback.isCopied(m.id)}
-                      onAction={(action) => feedback.handleAction(m, action)}
-                    />
-                  );
-                  const rowGroup = reveal() === 'hover' ? 'group ' : '';
-                  return (
-                    <Show
-                      when={m.avatar}
-                      fallback={
-                        <Message class={`${rowGroup}${m.role === 'user' ? 'flex-col items-end' : 'flex-col items-start'}`}>
-                          {body}
-                        </Message>
-                      }
-                    >
-                      {(av) => (
-                        <Message class={rowGroup}>
-                          <MessageAvatar src={av().src ?? ''} alt={av().alt ?? ''} fallback={av().fallback} />
-                          <div class={`flex min-w-0 flex-1 flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
-                            {body}
-                          </div>
-                        </Message>
-                      )}
+        <div class="flex h-full min-w-0 flex-1 flex-col">
+          {/* Header: a full `header` slot REPLACES the built-in bar; otherwise the
+              built-in header renders, itself carrying the header-start/header-end
+              INJECT slots. */}
+          <Show
+            when={props.headerFull}
+            fallback={
+              <Show when={showHeader()}>
+                <header class="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
+                  <div class="flex items-center gap-2">
+                    {/* Consumer-injected leading controls (sidebar-toggle, compose, a
+                        popover title-button). Projects light-DOM `slot="header-start"`
+                        children of <kai-chat>; inert outside a shadow root. */}
+                    <slot name="header-start" />
+                    <Show when={props.chatTitle}>
+                      <div class="text-sm font-semibold text-foreground">{props.chatTitle}</div>
                     </Show>
-                  );
-                }}
-              </For>
-              <ChatContainerScrollAnchor />
-            </ChatContainerContent>
-            <Show when={showScrollButton()}>
-              <div class="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
-                <ScrollButton class="shadow-sm" />
-              </div>
-            </Show>
-          </ChatContainer>
-        </div>
-        <div class="shrink-0 px-4 pb-4">
-          <div class="mx-auto max-w-3xl">
-            <DefaultPromptInput
-              value={current()} placeholder={props.placeholder} loading={props.loading === true}
-              suggestions={visibleSuggestions()} attachments={attachments()}
-              search={props.search === true} voice={props.voice === true}
-              triggers={props.triggers} kindIcons={props.kindIcons}
-              onValueChange={handleChange} onSubmit={handleSubmit} onSuggestionClick={handleSuggestionClick}
-              onAttachmentsChange={setAttachments}
-              onSearch={() => props.onSearch?.()} onVoice={() => props.onVoice?.()}
-            />
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <Show when={props.models}>
+                      <ModelSwitcher
+                        models={props.models!}
+                        currentModelId={props.currentModel ?? props.models![0]?.id ?? ''}
+                        onModelChange={(modelId) => props.onModelChange?.(modelId)}
+                      />
+                    </Show>
+                    <Show when={props.context}>
+                      <Context
+                        usedTokens={props.context!.usedTokens} maxTokens={props.context!.maxTokens}
+                        inputTokens={props.context!.inputTokens} outputTokens={props.context!.outputTokens}
+                        estimatedCost={props.context!.estimatedCost}
+                      >
+                        <ContextTrigger />
+                        <ContextContent>
+                          <ContextContentHeader />
+                          <ContextContentBody><div class="space-y-1.5"><ContextInputUsage /><ContextOutputUsage /></div></ContextContentBody>
+                          <ContextContentFooter />
+                        </ContextContent>
+                      </Context>
+                    </Show>
+                    {/* Consumer-injected trailing controls (share, settings, …).
+                        Projects light-DOM `slot="header-end"` children of <kai-chat>. */}
+                    <slot name="header-end" />
+                  </div>
+                </header>
+              </Show>
+            }
+          >
+            <header part="header" class="shrink-0"><slot name="header" /></header>
+          </Show>
+          <div class="relative flex-1 overflow-hidden">
+            <ChatContainer class="h-full px-4 py-3">
+              <ChatContainerContent class="mx-auto w-full max-w-3xl space-y-4">
+                {/* REPLACE — custom empty-state slot, shown only while the thread is
+                    empty. The component still owns WHEN it shows (data state); the
+                    consumer owns WHAT it looks like. */}
+                <Show when={props.empty && props.messages.length === 0}>
+                  <slot name="empty" />
+                </Show>
+                <For each={props.messages}>
+                  {(m) => {
+                    const body = (
+                      <MessageBody
+                        content={m.content}
+                        reasoning={m.reasoning}
+                        tools={m.tools}
+                        attachments={m.attachments}
+                        isUser={m.role === 'user'}
+                        markdown={m.role === 'assistant'}
+                        actions={m.actions}
+                        actionsReveal={reveal()}
+                        activeFeedback={feedback.resolveFeedback(m)}
+                        copied={feedback.isCopied(m.id)}
+                        onAction={(action) => feedback.handleAction(m, action)}
+                      />
+                    );
+                    const rowGroup = reveal() === 'hover' ? 'group ' : '';
+                    return (
+                      <Show
+                        when={m.avatar}
+                        fallback={
+                          <Message class={`${rowGroup}${m.role === 'user' ? 'flex-col items-end' : 'flex-col items-start'}`}>
+                            {body}
+                          </Message>
+                        }
+                      >
+                        {(av) => (
+                          <Message class={rowGroup}>
+                            <MessageAvatar src={av().src ?? ''} alt={av().alt ?? ''} fallback={av().fallback} />
+                            <div class={`flex min-w-0 flex-1 flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
+                              {body}
+                            </div>
+                          </Message>
+                        )}
+                      </Show>
+                    );
+                  }}
+                </For>
+                <ChatContainerScrollAnchor />
+              </ChatContainerContent>
+              <Show when={showScrollButton()}>
+                <div class="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
+                  <ScrollButton class="shadow-sm" />
+                </div>
+              </Show>
+            </ChatContainer>
           </div>
+          {/* INJECT — accessory row above the composer (extra actions/toolbar). */}
+          <Show when={props.composerActions}>
+            <div class="shrink-0 px-4">
+              <div class="mx-auto flex max-w-3xl items-center gap-2 pb-2"><slot name="composer-actions" /></div>
+            </div>
+          </Show>
+          <div class="shrink-0 px-4 pb-4">
+            <div class="mx-auto max-w-3xl">
+              {/* REPLACE — a full `composer` slot stands in for the built-in input.
+                  The slotted content owns its own submit/loading wiring. */}
+              <Show
+                when={props.composer}
+                fallback={
+                  <DefaultPromptInput
+                    value={current()} placeholder={props.placeholder} loading={props.loading === true}
+                    suggestions={visibleSuggestions()} attachments={attachments()}
+                    search={props.search === true} voice={props.voice === true}
+                    triggers={props.triggers} kindIcons={props.kindIcons}
+                    onValueChange={handleChange} onSubmit={handleSubmit} onSuggestionClick={handleSuggestionClick}
+                    onAttachmentsChange={setAttachments}
+                    onSearch={() => props.onSearch?.()} onVoice={() => props.onVoice?.()}
+                  />
+                }
+              >
+                <slot name="composer" />
+              </Show>
+            </div>
+          </div>
+          {/* INJECT — footer row below the composer. */}
+          <Show when={props.footer}>
+            <div part="footer" class="shrink-0 px-4 pb-3">
+              <div class="mx-auto max-w-3xl text-center text-xs text-muted-foreground"><slot name="footer" /></div>
+            </div>
+          </Show>
         </div>
       </div>
     </ChatConfig>

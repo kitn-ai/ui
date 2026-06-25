@@ -173,3 +173,39 @@ describe('ChatThread action-row feedback', () => {
     expect(toastSpy).not.toHaveBeenCalled();
   });
 });
+
+describe('ChatThread composer reset on submit', () => {
+  // The input is the contenteditable composer (not a <textarea>): the editable
+  // surface is [data-kai-composer-editable], its content is textContent, typing is
+  // textContent + an input event, and Enter submits (see composer.test.tsx).
+  const editableEl = (c: HTMLElement) => c.querySelector('[data-kai-composer-editable]') as HTMLElement;
+
+  it('clears the typed draft after submit when the value is UNCONTROLLED', () => {
+    // No `value` prop → the composer owns its draft. After a send it must reset,
+    // so the batteries-included hooks (useKaiChat/createKaiChat) — whose `bind`
+    // does not control `value` — get a clean composer each turn.
+    const onSubmit = vi.fn();
+    const { container } = render(() => <ChatThread messages={[]} onSubmit={onSubmit} />);
+    const el = editableEl(container);
+
+    el.textContent = 'hello there';
+    fireEvent.input(el);
+
+    fireEvent.keyDown(el, { key: 'Enter' });
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ value: 'hello there' }));
+    expect(el.textContent?.trim() ?? '').toBe(''); // draft cleared
+  });
+
+  it('does NOT clear a CONTROLLED value on submit (the host owns it)', () => {
+    const onSubmit = vi.fn();
+    const { container } = render(() => (
+      <ChatThread messages={[]} value="locked" onSubmit={onSubmit} />
+    ));
+    const el = editableEl(container);
+    expect(el.textContent).toContain('locked');
+
+    fireEvent.keyDown(el, { key: 'Enter' });
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ value: 'locked' }));
+    expect(el.textContent).toContain('locked'); // controlled — unchanged until the host clears it
+  });
+});

@@ -678,7 +678,7 @@ function FieldRow(props: FieldRowProps): JSX.Element {
     ['fieldset', 'repeater', 'checkbox-group', 'multiselect', 'radio', 'taglist'].includes(widget());
 
   return (
-    <div class="flex flex-col gap-2 rounded-xl bg-muted/40 p-3.5" data-field={props.fieldKey}>
+    <div class="flex flex-col gap-2 rounded-xl bg-surface p-3.5" data-field={props.fieldKey}>
       <Show when={!isGrouped()}>
         <label for={id} class="text-sm font-medium text-foreground">
           {label()}

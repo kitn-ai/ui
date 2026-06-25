@@ -60,10 +60,11 @@ describe('argTypesFor', () => {
 
     it('proseSize → select control', () => {
       const result = argTypesFor('kai-message');
-      expect(result['proseSize']).toEqual({
-        control: { type: 'select' },
-        options: ['xs', 'sm', 'base', 'lg'],
-      });
+      // Union member order tracks the TS checker's global type-id ordering, which
+      // shifts when the element set changes (e.g. kai-button's `size` also defines
+      // 'sm'/'lg'). A select control's option order is cosmetic, so assert the SET.
+      expect(result['proseSize'].control).toEqual({ type: 'select' });
+      expect([...result['proseSize'].options].sort()).toEqual(['base', 'lg', 'sm', 'xs']);
     });
 
     it('content → text control', () => {

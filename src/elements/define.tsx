@@ -77,6 +77,8 @@ function toAttr(name: string): string {
 /** Underlying flag resolution; see `WebComponentContext.flag`. */
 function resolveFlag(element: HTMLElement, value: unknown, attribute: string): boolean {
   if (value === true) return true;
+  // An explicit JS false wins over a present attribute (see WebComponentContext.flag); this also prevents a feedback loop when an effect writes the attribute it reads.
+  if (value === false) return false;
   return element.hasAttribute(attribute) && element.getAttribute(attribute) !== 'false';
 }
 

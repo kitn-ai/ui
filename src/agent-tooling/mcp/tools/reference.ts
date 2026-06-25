@@ -104,6 +104,38 @@ function formatReference(tag: string): string {
     }
   }
 
+  // ── Composition slots ──────────────────────────────────────────────────────
+  const slots = el.slots ?? [];
+  if (slots.length > 0) {
+    lines.push(
+      '',
+      '### Composition slots',
+      'Project your own markup into these named regions — add a light-DOM child ' +
+        'with a `slot="…"` attribute (e.g. `<div slot="sidebar">…</div>`).',
+    );
+    for (const slot of slots) {
+      const desc = slot.description?.trim() ?? '';
+      lines.push(`- **${slot.name}**${desc ? ` — ${desc}` : ''}`);
+    }
+  }
+
+  // ── Styleable parts (::part) ───────────────────────────────────────────────
+  const parts = el.cssParts ?? [];
+  if (parts.length > 0) {
+    lines.push(
+      '',
+      '### Styleable parts (`::part`)',
+      'Restyle these from outside the Shadow DOM via `' + tag + '::part(name) { … }`.',
+    );
+    for (const part of parts) {
+      const desc = part.description?.trim() ?? '';
+      lines.push(`- **${part.name}**${desc ? ` — ${desc}` : ''}`);
+      if (part.recipe) {
+        lines.push('  ```css', `  ${part.recipe}`, '  ```');
+      }
+    }
+  }
+
   return lines.join('\n');
 }
 
