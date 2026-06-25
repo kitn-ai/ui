@@ -24,6 +24,7 @@ declare module 'solid-js' {
       'kai-model-switcher': JSX.HTMLAttributes<HTMLElement> & { theme?: string; 'current-model'?: string };
       'kai-button': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; icon?: string; 'icon-trailing'?: string; label?: string; disabled?: boolean };
       'kai-suggestions': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; block?: boolean | string; highlight?: string };
+      'kai-notice': JSX.HTMLAttributes<HTMLElement> & { severity?: string; icon?: string; dismissible?: boolean };
     }
   }
 }
@@ -69,8 +70,6 @@ function ComposerShowcase() {
   let effortMenuEl: MenuEl | undefined;
   let modelEl: ModelSwitcherEl | undefined;
   let inputEl: PromptInputEl | undefined;
-  let noticeEl: HTMLDivElement | undefined;
-  let dismissEl: HTMLElement | undefined;
   let suggestionsEl: SuggestionsEl | undefined;
 
   onMount(() => {
@@ -145,12 +144,6 @@ function ComposerShowcase() {
       });
     }
 
-    // The dismiss control is a <kai-button>; listen for its kai-click. (Web
-    // components emit non-bubbling kai-* CustomEvents — you addEventListener on
-    // the element, same as the other controls above. Framework wrappers like
-    // @kitn.ai/ui/react expose this as an `onKaiClick` prop.)
-    dismissEl?.addEventListener('kai-click', dismissNotice);
-
     // Suggestion chips — data is a JS property; each item carries an icon name.
     if (suggestionsEl) {
       suggestionsEl.suggestions = [
@@ -165,40 +158,24 @@ function ComposerShowcase() {
     }
   });
 
-  // Dismiss handler for the notice strip.
-  const dismissNotice = () => {
-    if (noticeEl) noticeEl.style.display = 'none';
-  };
-
   return (
     // Theme-following page surface — tracks the kit's tokens via the toggle.
     <div class="flex min-h-screen items-center justify-center bg-background px-5 py-10 font-sans">
-      <div class="flex w-full max-w-[720px] flex-col">
-        {/* Composer group: a plain flow CONTAINER — no absolute / z-index / margin
-            tricks. The container carries the recessed (sunken) surface; the notice
-            is simply its first child (transparent, so it shows the container's
-            color) and the prompt-input — its own opaque surface — sits below. The
-            input's focus ring is self-contained, so it can never touch the notice.
-            This is only the dev's own layout: stack two elements in a shaded box. */}
-        <div class="rounded-xl bg-surface-sunken">
-        <div
-          ref={(e) => (noticeEl = e as HTMLDivElement)}
-          class="flex items-center gap-2 px-[18px] py-[13px] text-xs leading-snug text-muted-foreground"
-        >
-          <span class="flex-1">
-            Claude Fable 5 is currently unavailable.{' '}
-            <a
-              href="#"
-              class="text-foreground underline underline-offset-2"
-              onClick={(e) => e.preventDefault()}
-            >
-              Learn more
-            </a>
-          </span>
-          <kai-button ref={(e) => (dismissEl = e as HTMLElement)} variant="subtle" size="icon-sm" icon="x" label="Dismiss notice" />
-        </div>
+      <div class="flex w-full max-w-[720px] flex-col gap-3">
+        {/* A self-dismissing kit notice, placed above the composer. The dev owns
+            the placement; the notice owns its box, icon, a11y role, and dismiss. */}
+        <kai-notice severity="warning" dismissible>
+          Claude Fable 5 is currently unavailable.
+          <a
+            slot="action"
+            href="#"
+            class="font-medium text-foreground underline underline-offset-2"
+            onClick={(e) => e.preventDefault()}
+          >
+            Learn more
+          </a>
+        </kai-notice>
 
-        {/* Composer card */}
         <kai-prompt-input
           ref={(e) => (inputEl = e as PromptInputEl)}
           placeholder="How can I help you today?"
@@ -222,11 +199,9 @@ function ComposerShowcase() {
             <kai-button variant="subtle" size="icon-sm" icon="audio-lines" label="Voice mode" />
           </div>
         </kai-prompt-input>
-        </div>
 
-        {/* Suggestion chips — the kit element; each item carries an icon. The dev
-            centers it with their own layout. */}
-        <div class="mt-5 flex justify-center">
+        {/* Suggestion chips — centered by the dev's own layout. */}
+        <div class="mt-2 flex justify-center">
           <kai-suggestions
             ref={(e) => (suggestionsEl = e as SuggestionsEl)}
             variant="outline"
