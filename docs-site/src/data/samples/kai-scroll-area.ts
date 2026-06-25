@@ -49,5 +49,25 @@ export default {
         '</ul>',
       previewHeight: '12rem',
     },
+
+    // orientation="horizontal" — a wide row that overflows sideways (chips, a
+    // gallery). The inner row is wider than the box, so it scrolls on the X axis.
+    horizontal: {
+      html:
+        '<div style="display:flex;gap:0.5rem;width:max-content;padding:0.25rem 0">' +
+        Array.from({ length: 16 }, (_, i) =>
+          `<span style="flex:0 0 auto;padding:0.4rem 0.8rem;border-radius:0.5rem;background:var(--color-muted)">Tag ${i + 1}</span>`).join('') +
+        '</div>',
+    },
+
+    // orientation="both" — content larger than the box on both axes.
+    both: {
+      html:
+        '<div style="width:48rem;display:grid;grid-template-columns:repeat(6,1fr);gap:0.5rem">' +
+        Array.from({ length: 48 }, (_, i) =>
+          `<div style="padding:1rem;border-radius:0.5rem;background:var(--color-muted);text-align:center">${i + 1}</div>`).join('') +
+        '</div>',
+      previewHeight: '12rem',
+    },
   },
 };

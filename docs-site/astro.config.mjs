@@ -200,7 +200,7 @@ export default defineConfig({
                 ],
               },
               {
-                label: 'Building blocks',
+                label: 'Foundations',
                 items: [
                   { slug: 'components/button' },
                   { slug: 'components/icon' },

@@ -20,9 +20,11 @@ const SEND_SVG =
   '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>';
 
 export default {
-  // Default playground content: a plain text label in the default slot.
+  // Default playground content: a label + a leading icon, so the icon / icon-sm
+  // sizes (icon-only) still render a glyph when you switch size in the playground.
   sample: {
-    html: 'Send',
+    html: 'Search',
+    icon: 'search',
   },
 
   named: {

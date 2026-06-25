@@ -42,19 +42,33 @@ Drop it between the things you're dividing. A horizontal separator is a full-wid
 </div>
 ```
 
-## Examples
+A separator only reads in context, so these show it between real content (rather than a bare line in an empty box).
 
 ### Horizontal
 
-The default — a full-width rule that separates stacked sections.
+The default — a full-width rule between stacked sections.
 
-<Example client:visible tag="kai-separator" config={{ orientation: 'horizontal' }} data="horizontal" />
+<div class="not-content my-4 rounded-xl border border-line bg-surface px-5 py-4">
+  <p style="margin:0;font-weight:600">Models</p>
+  <kai-separator style="margin:0.85rem 0"></kai-separator>
+  <p style="margin:0;font-weight:600">Skills</p>
+  <kai-separator style="margin:0.85rem 0"></kai-separator>
+  <p style="margin:0;font-weight:600">Plugins</p>
+</div>
 
 ### Vertical
 
-`orientation="vertical"` stretches the rule to its row's height for dividing inline items. Give the row a height for it to span.
+`orientation="vertical"` stretches the rule to its row's height — for dividing inline items. Place it in a flex or grid row with a height.
 
-<Example client:visible tag="kai-separator" config={{ orientation: 'vertical' }} data="vertical" />
+<div class="not-content my-4 rounded-xl border border-line bg-surface px-5 py-4">
+  <div style="display:flex;align-items:center;gap:0.85rem;height:1.5rem">
+    <span>Opus 4.8</span>
+    <kai-separator orientation="vertical"></kai-separator>
+    <span>Fable 5</span>
+    <kai-separator orientation="vertical"></kai-separator>
+    <span>Haiku 4.5</span>
+  </div>
+</div>
 
 ## Styling
 

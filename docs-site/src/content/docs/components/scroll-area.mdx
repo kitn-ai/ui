@@ -39,17 +39,23 @@ Put the scrollable content as light-DOM children — it lands in the default slo
 
 ## Examples
 
-### A scrollable column
+### Vertical (default)
 
-A bounded box with a tall column of prose — the content scrolls and the thin scrollbar appears.
+`orientation="vertical"` — a bounded box with a tall column; the content scrolls down and the thin scrollbar appears.
 
-<Example client:visible tag="kai-scroll-area" data="paragraphs" />
+<Example client:visible tag="kai-scroll-area" config={{ orientation: 'vertical' }} data="paragraphs" />
 
-### A scrollable list
+### Horizontal
 
-The other common case — a long list that overflows its container.
+`orientation="horizontal"` — a wide row (chips, a gallery) that scrolls sideways. The vertical axis is clamped.
 
-<Example client:visible tag="kai-scroll-area" data="list" />
+<Example client:visible tag="kai-scroll-area" config={{ orientation: 'horizontal' }} data="horizontal" />
+
+### Both axes
+
+`orientation="both"` — content larger than the box on both axes scrolls in two directions.
+
+<Example client:visible tag="kai-scroll-area" config={{ orientation: 'both' }} data="both" />
 
 ## Styling
 
