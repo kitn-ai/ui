@@ -201,6 +201,84 @@ describe('<kai-resizable> size preservation across content-only re-renders', () 
     expect(panel.dataset.defaultSizePct).toBe('30');
   });
 
+  it('collapses a panel at mount when the item carries the `collapsed` attribute', async () => {
+    const host = mount(`
+      <kai-resizable orientation="horizontal" style="height:300px;width:600px">
+        <kai-resizable-item size="28%" collapsed><p>list</p></kai-resizable-item>
+        <kai-resizable-item><p>chat</p></kai-resizable-item>
+      </kai-resizable>
+    `);
+    const el = host.querySelector('kai-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
+    await Promise.resolve();
+    await new Promise((r) => setTimeout(r, 0));
+    // The collapsed item is dropped from layout → only the chat panel renders.
+    expect(el.shadowRoot.querySelectorAll('[data-panel]').length).toBe(1);
+  });
+
+  it('collapses at mount when `collapsed` is set as a PROPERTY (the framework-JSX bug repro)', async () => {
+    // Frameworks set the IDL property (or a bare boolean that resolves to it), NOT
+    // the attribute — the exact path that left `hidden` broken. The facade must
+    // reflect the property to the attribute the parent reads so it collapses at mount.
+    const host = mount(`
+      <kai-resizable orientation="horizontal" style="height:300px;width:600px">
+        <kai-resizable-item size="28%"><p>list</p></kai-resizable-item>
+        <kai-resizable-item><p>chat</p></kai-resizable-item>
+      </kai-resizable>
+    `);
+    const item = host.querySelector('kai-resizable-item') as HTMLElement & { collapsed?: boolean };
+    item.collapsed = true; // property, set before the element fully settles
+    const el = host.querySelector('kai-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
+    await Promise.resolve();
+    await new Promise((r) => setTimeout(r, 0));
+    // The facade reflected `collapsed` → attribute; the parent dropped the panel.
+    expect(item.hasAttribute('collapsed')).toBe(true);
+    expect(el.shadowRoot.querySelectorAll('[data-panel]').length).toBe(1);
+  });
+
+  it('expands the panel when `collapsed` is cleared', async () => {
+    const host = mount(`
+      <kai-resizable orientation="horizontal" style="height:300px;width:600px">
+        <kai-resizable-item size="28%" collapsed><p>list</p></kai-resizable-item>
+        <kai-resizable-item><p>chat</p></kai-resizable-item>
+      </kai-resizable>
+    `);
+    const el = host.querySelector('kai-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
+    const item = host.querySelector('kai-resizable-item') as HTMLElement & { collapsed?: boolean };
+    await Promise.resolve();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(el.shadowRoot.querySelectorAll('[data-panel]').length).toBe(1);
+
+    item.collapsed = false; // clearing the prop re-expands and reflects the attr off
+    await Promise.resolve();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(item.hasAttribute('collapsed')).toBe(false);
+    expect(el.shadowRoot.querySelectorAll('[data-panel]').length).toBe(2);
+  });
+
+  it('leaves the imperative `hidden` attribute path working (back-compat)', async () => {
+    // The pre-existing supported path: drive the `hidden` attribute AFTER mount
+    // (e.g. the `Show / hide a panel` story). `collapsed` is the new declarative
+    // path; the facade must NOT touch `hidden`, so this keeps working unchanged.
+    const host = mount(`
+      <kai-resizable orientation="horizontal" style="height:300px;width:600px">
+        <kai-resizable-item size="28%"><p>list</p></kai-resizable-item>
+        <kai-resizable-item><p>chat</p></kai-resizable-item>
+      </kai-resizable>
+    `);
+    const el = host.querySelector('kai-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
+    const item = host.querySelector('kai-resizable-item') as HTMLElement;
+    await Promise.resolve();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(el.shadowRoot.querySelectorAll('[data-panel]').length).toBe(2);
+
+    item.setAttribute('hidden', '');
+    await Promise.resolve();
+    await new Promise((r) => setTimeout(r, 0));
+    // The `hidden` attribute still collapses; the facade owns only `collapsed`.
+    expect(el.shadowRoot.querySelectorAll('[data-panel]').length).toBe(1);
+    expect(item.hasAttribute('collapsed')).toBe(false);
+  });
+
   it('still re-initializes when an item is actually added', async () => {
     const host = mount(`
       <kai-resizable orientation="horizontal" style="height:300px;width:600px">

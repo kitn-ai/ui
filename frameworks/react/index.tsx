@@ -881,13 +881,15 @@ export interface ResizableItemProps extends WebComponentProps {
   locked?: boolean;
   /** Hide this panel; its divider is dropped and the rest reflow. */
   hidden?: boolean;
+  /** Collapse this panel — same layout effect as `hidden` (divider dropped, the rest reflow), but it WORKS as a bare boolean from framework JSX. A plain `<kai-resizable-item collapsed>` in React/Solid/Vue/Svelte collapses the panel at the first render; `hidden` does not, because a JSX boolean sets neither the `hidden` attribute nor the IDL property on a custom element, so the parent never sees it. The facade reflects `collapsed` to a `collapsed` attribute the parent reads. Prefer this over `hidden` for declarative collapse. */
+  collapsed?: boolean;
   onChange?: (event: CustomEvent<unknown>) => void;
   onMaximizeChange?: (event: CustomEvent<unknown>) => void;
 }
 
 export const ResizableItem = createWebComponent<ResizableItemProps>(
   'kai-resizable-item',
-  ["theme","size","min","max","locked","hidden"],
+  ["theme","size","min","max","locked","hidden","collapsed"],
   { onChange: 'kai-change', onMaximizeChange: 'kai-maximize-change' },
 );
 
