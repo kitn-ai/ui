@@ -50,7 +50,7 @@ function InjectDemo() {
         <a href="#" style="color:#93c5fd;text-decoration:none">▸ Q3 forecast</a>
         <a href="#" style="color:#cbd5e1;text-decoration:none">  Onboarding flow</a>
         <a href="#" style="color:#cbd5e1;text-decoration:none">  Pricing page copy</a>
-        <span style="margin-top:auto;color:#64748b;font-size:11px">plain &lt;nav&gt; — not a kai-* element</span>
+        <span style="margin-top:auto;color:#94a3b8;font-size:11px">plain &lt;nav&gt; — not a kai-* element</span>
       </nav>
       <button slot="composer-actions" type="button" style="font:13px system-ui;padding:4px 10px;border:1px solid #d4d4d8;border-radius:8px;background:#fff;cursor:pointer">+ Attach a file</button>
       <footer slot="footer">Acme may make mistakes. <a href="#">Verify important info</a>.</footer>
