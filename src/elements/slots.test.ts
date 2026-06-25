@@ -6,6 +6,8 @@ import {
   CHAT_SLOTS,
   PROMPT_INPUT_SLOTS,
   PROMPT_INPUT_PARTS,
+  MESSAGE_SLOTS,
+  MESSAGE_PARTS,
   ELEMENT_COMPOSITION,
   readSlots,
 } from './slots';
@@ -94,6 +96,43 @@ describe('PROMPT_INPUT_PARTS registry', () => {
   });
 });
 
+describe('MESSAGE_SLOTS registry', () => {
+  it('lists the three message slots in order, with unique names', () => {
+    expect(MESSAGE_SLOTS.map((s) => s.name)).toEqual([
+      'before-body', 'after-body', 'avatar',
+    ]);
+    const names = MESSAGE_SLOTS.map((s) => s.name);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('marks before-body / after-body as inject and avatar as replace', () => {
+    expect(MESSAGE_SLOTS.filter((s) => s.mode === 'inject').map((s) => s.name))
+      .toEqual(['before-body', 'after-body']);
+    expect(MESSAGE_SLOTS.filter((s) => s.mode === 'replace').map((s) => s.name))
+      .toEqual(['avatar']);
+  });
+
+  it('exposes the avatar replace slot as a styleable part', () => {
+    expect(MESSAGE_SLOTS.find((s) => s.name === 'avatar')?.part).toBe(true);
+  });
+
+  it('every slot has a non-empty doc contract', () => {
+    expect(MESSAGE_SLOTS.every((s) => s.doc.trim().length > 0)).toBe(true);
+  });
+});
+
+describe('MESSAGE_PARTS registry', () => {
+  it('declares row / bubble / content / actions, with unique names', () => {
+    const names = MESSAGE_PARTS.map((p) => p.name);
+    expect(names).toEqual(['row', 'bubble', 'content', 'actions']);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('every part has a non-empty doc contract', () => {
+    expect(MESSAGE_PARTS.every((p) => p.doc.trim().length > 0)).toBe(true);
+  });
+});
+
 describe('ELEMENT_COMPOSITION registry (single source of truth the build extracts)', () => {
   // Every `::part` a consumer can style is declared by writing `part="name"` in a
   // facade/component. The registry must name each one so docs + the kai MCP can
@@ -142,11 +181,14 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-chat',
       'kai-conversations',
       'kai-icon',
+      'kai-message',
       'kai-prompt-input',
       'kai-scroll-area',
       'kai-separator',
     ]);
     expect(ELEMENT_COMPOSITION['kai-chat'].slots).toBe(CHAT_SLOTS);
+    expect(ELEMENT_COMPOSITION['kai-message'].slots).toBe(MESSAGE_SLOTS);
+    expect(ELEMENT_COMPOSITION['kai-message'].parts).toBe(MESSAGE_PARTS);
     expect(ELEMENT_COMPOSITION['kai-prompt-input'].slots).toBe(PROMPT_INPUT_SLOTS);
     expect(ELEMENT_COMPOSITION['kai-prompt-input'].parts).toBe(PROMPT_INPUT_PARTS);
   });

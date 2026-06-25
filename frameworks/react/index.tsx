@@ -703,13 +703,15 @@ export interface MessageProps extends WebComponentProps {
   avatarSrc?: string;
   /** Convenience avatar fallback text (used when `message.avatar` is not set). */
   avatarFallback?: string;
+  /** Avatar rail mode. `'none'` omits the avatar rail entirely so the body spans the full row (predictable layout when you never show avatars). Any other value keeps the default behaviour: the built-in avatar when one resolves, or your `slot="avatar"` content when projected (which REPLACES the built-in). */
+  avatar?: string;
   /** An action button was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
   onMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
 }
 
 export const Message = createWebComponent<MessageProps>(
   'kai-message',
-  ["theme","message","role","content","markdown","proseSize","codeTheme","codeHighlight","actionsReveal","avatarSrc","avatarFallback"],
+  ["theme","message","role","content","markdown","proseSize","codeTheme","codeHighlight","actionsReveal","avatarSrc","avatarFallback","avatar"],
   { onMessageAction: 'kai-message-action' },
 );
 
