@@ -69,7 +69,11 @@ defineWebComponent<Props, Events>('kai-message', {
   // re-render when the host swaps in a fresh `message` object during streaming.
   const feedback = createMessageFeedback({
     emit: (detail) => dispatch('kai-message-action', detail),
-    target: () => element,
+    // No `target`: a STANDALONE <kai-message> must not anchor its copy/feedback
+    // toast to the individual message (that lands mid-thread in a compose-your-own
+    // list). Let them route to the global region (top of the viewport), which is
+    // where a confirmation belongs across a hand-built thread. (Inside <kai-chat>
+    // the chat owns feedback and targets ITSELF, so in-chat toasts still stay in-chat.)
   });
 
   // Read declarative <kai-action> children from light DOM.
