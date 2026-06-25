@@ -32,11 +32,19 @@ export function createTsHelpers(program, checker, { importable = new Set() } = {
   // (non-lib, non-importable) object type is inlined so the output drags no
   // imports into a consumer's compilation. Unions de-dup; arrays parenthesize
   // unions so `(A | B)[]` doesn't mis-parse.
-  function renderType(type, decl) {
-    if (type.isUnion()) return [...new Set(type.types.map((t) => renderType(t, decl)))].join(' | ');
+  //
+  // `seen` tracks the object-type ids on the CURRENT expansion path so a
+  // self-referential type (e.g. `KaiMenuItem.items?: KaiMenuItem[]`, or
+  // `FileTreeNode.children`) can't recurse forever. On re-entry we emit a
+  // self-contained, tsc-valid placeholder — the top-level shape is already fully
+  // described, and the inlined `.d.ts` cannot carry a named recursive reference.
+  // The path is copied per branch (`new Set(seen)`), so a type used by two
+  // sibling props is NOT mistaken for a cycle — only a true ancestor triggers it.
+  function renderType(type, decl, seen = new Set()) {
+    if (type.isUnion()) return [...new Set(type.types.map((t) => renderType(t, decl, seen)))].join(' | ');
     if (checker.isArrayType(type)) {
       const elem = checker.getTypeArguments(type)[0];
-      const rendered = renderType(elem, decl);
+      const rendered = renderType(elem, decl, seen);
       return elem.isUnion() ? `(${rendered})[]` : `${rendered}[]`;
     }
     const sym = type.aliasSymbol || type.getSymbol();
@@ -48,10 +56,13 @@ export function createTsHelpers(program, checker, { importable = new Set() } = {
       !isLibSym(sym) &&
       type.getProperties().length
     ) {
+      const id = type.id; // checker-assigned numeric id, stable within this parse
+      if (id != null && seen.has(id)) return 'Record<string, unknown>';
+      const next = id != null ? new Set(seen).add(id) : seen;
       const props = type.getProperties().map((s) => {
         const t = checker.getTypeOfSymbolAtLocation(s, s.valueDeclaration ?? decl);
         const opt = s.flags & ts.SymbolFlags.Optional ? '?' : '';
-        return `${s.name}${opt}: ${renderType(t, decl)}`;
+        return `${s.name}${opt}: ${renderType(t, decl, next)}`;
       });
       return `{ ${props.join('; ')} }`;
     }
