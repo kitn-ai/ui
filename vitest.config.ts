@@ -51,6 +51,7 @@ export default defineConfig({
     projects: [{
       extends: true,
       test: {
+        name: 'unit',
         environment: 'jsdom',
         globals: true,
         // React wrapper tests run under @vitejs/plugin-react via the separate

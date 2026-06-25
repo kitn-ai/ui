@@ -35,8 +35,16 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # Run ONLY the jsdom unit project here. `npm test` (= `vitest run`) would
+      # also spin up the storybook BROWSER project concurrently — running the
+      # forks-pool unit suite and a chromium instance at the same time exhausts
+      # the runner's memory and chromium's connection drops mid-suite
+      # ("[birpc] rpc is closed", "Browser connection was closed"). Scoping this
+      # step to the unit project (and giving the browser project its own
+      # isolated step below) keeps the two from competing and avoids running the
+      # ~118-story browser suite twice.
       - name: Unit tests (jsdom)
-        run: npm test
+        run: npm test -- --project=unit
 
       - name: React adapter tests
         run: npm run test:react
