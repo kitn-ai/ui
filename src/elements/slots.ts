@@ -165,6 +165,15 @@ export const SCROLL_AREA_PARTS: PartDef[] = [
   },
 ];
 
+/** Styleable `::part`s of `<kai-skeleton>`. */
+export const SKELETON_PARTS: PartDef[] = [
+  {
+    name: 'skeleton',
+    doc: 'The shimmer block(s). Recolor or change the opacity from outside; the default is a low-contrast foreground tint that reads in both light and dark.',
+    recipe: 'kai-skeleton::part(skeleton) { background: var(--color-primary); opacity: 0.15 }',
+  },
+];
+
 /** Styleable `::part`s of `<kai-message>`. (The `avatar` part is contributed by
  *  the `avatar` slot's `part: true` flag, so it is not repeated here.) */
 export const MESSAGE_PARTS: PartDef[] = [
@@ -219,6 +228,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-notice': { slots: NOTICE_SLOTS },
   'kai-hover-card': { slots: HOVER_CARD_SLOTS },
   'kai-menu': { slots: MENU_SLOTS },
+  'kai-skeleton': { parts: SKELETON_PARTS },
 };
 
 /**

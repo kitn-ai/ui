@@ -1409,7 +1409,7 @@ A themed divider between groups of content (toolbar sections, menu groups, heade
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-
+| `orientation` | `orientation` | `undefined | "horizontal" | "vertical" | "both"` | `'vertical'` | Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. |
 
 #### Styleable parts
 
@@ -1443,6 +1443,14 @@ A scroll container with a themed, thin, cross-browser scrollbar and a keyboard-r
 | `width` | `width` | `undefined | string` | — | CSS width (e.g. `'12rem'`, `'60%'`). Defaults to full width (responsive); for `circle` it is the diameter. |
 | `height` | `height` | `undefined | string` | — | CSS height. Defaults per variant (a text line height; circle = width). |
 | `lines` | `lines` | `undefined | number` | — | `text` only: number of lines; the last is shorter. Defaults to 1. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-skeleton::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(skeleton)` | The shimmer block(s). Recolor or change the opacity from outside; the default is a low-contrast foreground tint that reads in both light and dark. <br>`kai-skeleton::part(skeleton) { background: var(--color-primary); opacity: 0.15 }` |
 
 #### Composed from
 

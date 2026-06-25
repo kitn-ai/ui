@@ -58,6 +58,10 @@ defineWebComponent<Props, Events>('kai-button', {
   disabled: false,
   type: 'button',
 }, (props, { dispatch, flag }) => {
+  // `icon` / `icon-sm` are square, icon-ONLY sizes: suppress the text label and
+  // trailing icon so a stray label doesn't get cramped into the square (the
+  // `label` prop still names it for assistive tech).
+  const iconOnly = () => props.size === 'icon' || props.size === 'icon-sm';
   return (
     <Button
       part="button"
@@ -75,8 +79,10 @@ defineWebComponent<Props, Events>('kai-button', {
           {renderIcon(props.icon, { class: 'size-4 shrink-0', imgClass: 'size-4 shrink-0', spanClass: 'inline-flex size-4 shrink-0 items-center justify-center', ariaHidden: true })}
         </Show>
       </slot>
-      <slot />
-      <Show when={props.iconTrailing}>
+      <Show when={!iconOnly()}>
+        <slot />
+      </Show>
+      <Show when={props.iconTrailing && !iconOnly()}>
         {renderIcon(props.iconTrailing, { class: 'size-4 shrink-0 opacity-60', imgClass: 'size-4 shrink-0', spanClass: 'inline-flex size-4 shrink-0 items-center justify-center', ariaHidden: true })}
       </Show>
     </Button>

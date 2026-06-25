@@ -3298,7 +3298,17 @@
     "tag": "kai-scroll-area",
     "className": "KaiScrollAreaElement",
     "displayName": "ScrollArea",
-    "props": [],
+    "props": [
+      {
+        "name": "orientation",
+        "type": "undefined | \"horizontal\" | \"vertical\" | \"both\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it.",
+        "default": "'vertical'",
+        "displayType": "undefined | \"horizontal\" | \"vertical\" | \"both\""
+      }
+    ],
     "events": [],
     "composedFrom": [
       {
@@ -3444,7 +3454,14 @@
         "storyId": "solid-advanced-primitives-skeleton--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "parts": [
+      {
+        "name": "skeleton",
+        "doc": "The shimmer block(s). Recolor or change the opacity from outside; the default is a low-contrast foreground tint that reads in both light and dark.",
+        "recipe": "kai-skeleton::part(skeleton) { background: var(--color-primary); opacity: 0.15 }"
+      }
+    ]
   },
   {
     "tag": "kai-skills",

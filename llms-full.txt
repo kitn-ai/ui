@@ -1089,7 +1089,11 @@ _No events._
 
 ### `kai-scroll-area` / `ScrollArea`
 
-_No public properties._
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical" \| "both"` | Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. |
 
 _No events._
 
@@ -1149,6 +1153,12 @@ _No events._
 | `lines` | `lines` | `undefined \| number` | `text` only: number of lines; the last is shorter. Defaults to 1. |
 
 _No events._
+
+**Styleable parts** (restyle from outside via `kai-skeleton::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(skeleton)` | The shimmer block(s). Recolor or change the opacity from outside; the default is a low-contrast foreground tint that reads in both light and dark. — `kai-skeleton::part(skeleton) { background: var(--color-primary); opacity: 0.15 }` |
 
 ---
 
