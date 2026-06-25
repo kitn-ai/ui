@@ -42,9 +42,12 @@ interface Events {
  * <kai-button variant="subtle" size="icon" icon="mic" label="Voice input"></kai-button>
  * <kai-button variant="ghost" icon-trailing="chevron-down">High</kai-button>
  * <kai-button>Send</kai-button>
+ * <kai-button label="Ship"><svg slot="icon" viewBox="0 0 24 24">…</svg></kai-button>
  * ```
  *
- * Restyle via `::part(button)`. Emits `kai-click`.
+ * The `icon` prop renders a curated/URL icon; for anything else, slot your own
+ * inline SVG via `slot="icon"` (it wins over `icon`). Restyle via `::part(button)`.
+ * Emits `kai-click`.
  */
 defineWebComponent<Props, Events>('kai-button', {
   variant: 'default',
@@ -65,9 +68,13 @@ defineWebComponent<Props, Events>('kai-button', {
       aria-label={props.label}
       onClick={() => dispatch('kai-click')}
     >
-      <Show when={props.icon}>
-        {renderIcon(props.icon, { class: 'size-4 shrink-0', imgClass: 'size-4 shrink-0', spanClass: 'inline-flex size-4 shrink-0 items-center justify-center', ariaHidden: true })}
-      </Show>
+      {/* Leading icon: a slotted SVG (slot="icon") wins — drop in any icon
+          library or your own; otherwise the `icon` prop renders a curated/URL one. */}
+      <slot name="icon">
+        <Show when={props.icon}>
+          {renderIcon(props.icon, { class: 'size-4 shrink-0', imgClass: 'size-4 shrink-0', spanClass: 'inline-flex size-4 shrink-0 items-center justify-center', ariaHidden: true })}
+        </Show>
+      </slot>
       <slot />
       <Show when={props.iconTrailing}>
         {renderIcon(props.iconTrailing, { class: 'size-4 shrink-0 opacity-60', imgClass: 'size-4 shrink-0', spanClass: 'inline-flex size-4 shrink-0 items-center justify-center', ariaHidden: true })}
