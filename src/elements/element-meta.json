@@ -467,6 +467,13 @@
       }
     ],
     "tokens": [],
+    "slots": [
+      {
+        "name": "icon",
+        "mode": "replace",
+        "doc": "A custom leading icon (any inline SVG, inherits `currentColor`). Wins over the `icon` prop."
+      }
+    ],
     "parts": [
       {
         "name": "button",
@@ -2070,7 +2077,14 @@
         "storyId": "solid-advanced-primitives-hovercard--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "card",
+        "mode": "inject",
+        "doc": "The rich content shown in the floating hover card."
+      }
+    ]
   },
   {
     "tag": "kai-icon",
@@ -2396,7 +2410,14 @@
         "storyId": "solid-advanced-primitives-dropdownsubcontent--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "trigger",
+        "mode": "replace",
+        "doc": "Your own trigger element; replaces the built-in button driven by the `trigger-icon` / `trigger-label` props."
+      }
+    ]
   },
   {
     "tag": "kai-message",
@@ -2658,7 +2679,19 @@
         "storyId": "solid-advanced-primitives-notice--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "action",
+        "mode": "inject",
+        "doc": "A trailing action beside the message — a link or button."
+      },
+      {
+        "name": "icon",
+        "mode": "replace",
+        "doc": "A custom leading icon (any inline SVG, inherits `currentColor`). Overrides the severity default and the `icon` prop — the same escape hatch as `kai-button`."
+      }
+    ]
   },
   {
     "tag": "kai-popover",

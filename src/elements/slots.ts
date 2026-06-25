@@ -65,6 +65,27 @@ export const MESSAGE_SLOTS: SlotDef[] = [
   { name: 'avatar',      mode: 'replace', part: true, doc: 'Replaces the built-in avatar rail with your own node. Use `avatar="none"` to omit the rail and let the body span the full row.' },
 ];
 
+/** Slots of `<kai-notice>`. The message is the default slot; these are the named seams. */
+export const NOTICE_SLOTS: SlotDef[] = [
+  { name: 'action', mode: 'inject',  doc: 'A trailing action beside the message — a link or button.' },
+  { name: 'icon',   mode: 'replace', doc: 'A custom leading icon (any inline SVG, inherits `currentColor`). Overrides the severity default and the `icon` prop — the same escape hatch as `kai-button`.' },
+];
+
+/** Slots of `<kai-button>` (the label is the default slot). */
+export const BUTTON_SLOTS: SlotDef[] = [
+  { name: 'icon', mode: 'replace', doc: 'A custom leading icon (any inline SVG, inherits `currentColor`). Wins over the `icon` prop.' },
+];
+
+/** Slots of `<kai-hover-card>` (the trigger is the default slot). */
+export const HOVER_CARD_SLOTS: SlotDef[] = [
+  { name: 'card', mode: 'inject', doc: 'The rich content shown in the floating hover card.' },
+];
+
+/** Slots of `<kai-menu>` (the menu items come from the `items` prop). */
+export const MENU_SLOTS: SlotDef[] = [
+  { name: 'trigger', mode: 'replace', doc: 'Your own trigger element; replaces the built-in button driven by the `trigger-icon` / `trigger-label` props.' },
+];
+
 /** A styleable `::part` the kit renders (NOT a slot — you don't project into it;
  *  you restyle it from outside via `::part(name)`). This registry is the source
  *  of truth so the styling surface is discoverable: docs + the `kai` MCP
@@ -190,11 +211,14 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-conversations': { slots: CONVERSATIONS_SLOTS },
   'kai-message': { slots: MESSAGE_SLOTS, parts: MESSAGE_PARTS },
   'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },
-  'kai-button': { parts: BUTTON_PARTS },
+  'kai-button': { slots: BUTTON_SLOTS, parts: BUTTON_PARTS },
   'kai-badge': { parts: BADGE_PARTS },
   'kai-icon': { parts: ICON_PARTS },
   'kai-separator': { parts: SEPARATOR_PARTS },
   'kai-scroll-area': { parts: SCROLL_AREA_PARTS },
+  'kai-notice': { slots: NOTICE_SLOTS },
+  'kai-hover-card': { slots: HOVER_CARD_SLOTS },
+  'kai-menu': { slots: MENU_SLOTS },
 };
 
 /**

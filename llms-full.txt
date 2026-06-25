@@ -285,6 +285,12 @@ _No events._
 |---|---|---|
 | `kai-click` | `CustomEvent` | The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. |
 
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `icon` | replace | A custom leading icon (any inline SVG, inherits `currentColor`). Wins over the `icon` prop. |
+
 **Styleable parts** (restyle from outside via `kai-button::part(name)`):
 
 | Part | Description |
@@ -705,6 +711,12 @@ _No events._
 
 _No events._
 
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `card` | inject | The rich content shown in the floating hover card. |
+
 ---
 
 ### `kai-icon` / `Icon`
@@ -802,6 +814,12 @@ _No events._
 |---|---|---|
 | `kai-select` | `CustomEvent<{ id: string; checked?: undefined \| false \| true }>` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
 
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `trigger` | replace | Your own trigger element; replaces the built-in button driven by the `trigger-icon` / `trigger-label` props. |
+
 ---
 
 ### `kai-message` / `Message`
@@ -880,6 +898,13 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-dismiss` | `CustomEvent` | The notice was dismissed via its × (it also hides itself). |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `action` | inject | A trailing action beside the message — a link or button. |
+| `icon` | replace | A custom leading icon (any inline SVG, inherits `currentColor`). Overrides the severity default and the `icon` prop — the same escape hatch as `kai-button`. |
 
 ---
 

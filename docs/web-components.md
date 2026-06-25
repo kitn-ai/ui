@@ -1167,6 +1167,14 @@ The polished building blocks you compose your own chrome from — themed, access
 |-------|-----------|-------------|
 | `kai-click` | — | The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. |
 
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `icon` | replace | A custom leading icon (any inline SVG, inherits `currentColor`). Wins over the `icon` prop. |
+
 #### Styleable parts
 
 Restyle from outside the Shadow DOM via `kai-button::part(name)`.
@@ -1304,6 +1312,14 @@ A text hint shown on hover/focus of a slotted trigger; positioned and portaled i
 | `closeDelay` | `close-delay` | `undefined | number` | — | Delay (ms) before it closes after the pointer leaves. Defaults to 300. |
 | `placement` | `placement` | `undefined | string` | — | Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. |
 
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `card` | inject | The rich content shown in the floating hover card. |
+
 #### Composed from
 
 `UI/HoverCard`
@@ -1333,6 +1349,15 @@ Rich content on hover/focus of a trigger — the markup-carrying sibling of `<ka
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-dismiss` | — | The notice was dismissed via its × (it also hides itself). |
+
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `action` | inject | A trailing action beside the message — a link or button. |
+| `icon` | replace | A custom leading icon (any inline SVG, inherits `currentColor`). Overrides the severity default and the `icon` prop — the same escape hatch as `kai-button`. |
 
 #### Composed from
 
@@ -1451,6 +1476,14 @@ A pulsing loading placeholder that preserves layout while content arrives. Respo
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-select` | `{ id: string; checked?: undefined | false | true }` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
+
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `trigger` | replace | Your own trigger element; replaces the built-in button driven by the `trigger-icon` / `trigger-label` props. |
 
 #### Composed from
 
