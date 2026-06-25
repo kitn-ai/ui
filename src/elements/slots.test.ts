@@ -140,6 +140,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-badge',
       'kai-button',
       'kai-chat',
+      'kai-conversations',
       'kai-icon',
       'kai-prompt-input',
       'kai-scroll-area',

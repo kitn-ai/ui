@@ -47,6 +47,14 @@ export const PROMPT_INPUT_SLOTS: SlotDef[] = [
   { name: 'toolbar-end',   mode: 'inject', doc: 'Trailing controls in the toolbar, before the Send button.' },
 ];
 
+/** Slots of `<kai-conversations>` (also used inside `<kai-chat>`'s `sidebar`).
+ *  Names mirror `<kai-chat>`'s so the two compose with one vocabulary. */
+export const CONVERSATIONS_SLOTS: SlotDef[] = [
+  { name: 'header', mode: 'replace', doc: 'Full custom title bar; replaces the built-in toggle / "Chats" / New-chat row.' },
+  { name: 'empty',  mode: 'replace', doc: 'Custom zero-state shown when there are no conversations; replaces the built-in "No conversations yet".' },
+  { name: 'footer', mode: 'inject',  doc: 'A row below the list — account, settings, or usage.' },
+];
+
 /** A styleable `::part` the kit renders (NOT a slot — you don't project into it;
  *  you restyle it from outside via `::part(name)`). This registry is the source
  *  of truth so the styling surface is discoverable: docs + the `kai` MCP
@@ -134,6 +142,7 @@ export interface ElementComposition {
 
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-chat': { slots: CHAT_SLOTS },
+  'kai-conversations': { slots: CONVERSATIONS_SLOTS },
   'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },
   'kai-button': { parts: BUTTON_PARTS },
   'kai-badge': { parts: BADGE_PARTS },

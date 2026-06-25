@@ -333,6 +333,16 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 | `kai-new-chat` | — | The "New chat" button was clicked. |
 | `kai-toggle-sidebar` | — | The sidebar toggle was clicked. |
 
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `header` | replace | Full custom title bar; replaces the built-in toggle / "Chats" / New-chat row. |
+| `empty` | replace | Custom zero-state shown when there are no conversations; replaces the built-in "No conversations yet". |
+| `footer` | inject | A row below the list — account, settings, or usage. |
+
 #### Composed from
 
 `Components/ConversationList`

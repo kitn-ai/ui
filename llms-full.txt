@@ -257,6 +257,12 @@ _No events._
 
 _No events._
 
+**Styleable parts** (restyle from outside via `kai-badge::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(badge)` | The badge pill. Restyle its background, color, or shape; the `variant` prop (default/count/citation) sets the defaults. — `kai-badge::part(badge) { background: var(--color-primary); color: var(--color-primary-foreground) }` |
+
 ---
 
 ### `kai-button` / `Button`
@@ -278,6 +284,12 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-click` | `CustomEvent` | The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. |
+
+**Styleable parts** (restyle from outside via `kai-button::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(button)` | The button element. Restyle radius, padding, colors, or weight from outside; the `variant`/`size` props set the defaults. — `kai-button::part(button) { border-radius: 9999px; font-weight: 600 }` |
 
 ---
 
@@ -368,6 +380,27 @@ _No events._
 | `kai-suggestion-click` | `CustomEvent<{ value: string }>` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
 | `kai-value-change` | `CustomEvent<{ value: string }>` | Fired on every input change. |
 | `kai-voice` | `CustomEvent<Record<string, never>>` | The Mic / voice button was clicked. |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `header-start` | inject | Leading header controls, left of the title. |
+| `header-end` | inject | Trailing header controls. |
+| `header` | replace | Full custom header; replaces the built-in title/model/context bar. |
+| `sidebar` | inject | Left column (your nav / conversation list). Fixed width; use compose-your-own for resizable. |
+| `empty` | replace | Custom zero-state rendered in the message area while the thread is empty. Replaces the empty message list only — the composer and any suggestions still render. |
+| `composer` | replace | Full custom composer; you own submit + loading, drive the thread via messages. |
+| `composer-actions` | inject | Accessory row above the composer. |
+| `footer` | inject | Row below the composer (disclaimers, token meter). |
+
+**Styleable parts** (restyle from outside via `kai-chat::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(header)` | Full custom header; replaces the built-in title/model/context bar. |
+| `::part(sidebar)` | Left column (your nav / conversation list). Fixed width; use compose-your-own for resizable. |
+| `::part(footer)` | Row below the composer (disclaimers, token meter). |
 
 ---
 
@@ -547,6 +580,14 @@ _No events._
 | `kai-new-chat` | `CustomEvent<Record<string, never>>` | The "New chat" button was clicked. |
 | `kai-toggle-sidebar` | `CustomEvent<Record<string, never>>` | The sidebar toggle was clicked. |
 
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `header` | replace | Full custom title bar; replaces the built-in toggle / "Chats" / New-chat row. |
+| `empty` | replace | Custom zero-state shown when there are no conversations; replaces the built-in "No conversations yet". |
+| `footer` | inject | A row below the list — account, settings, or usage. |
+
 ---
 
 ### `kai-embed` / `Embed`
@@ -675,6 +716,12 @@ _No events._
 | `size` | `size` | `undefined \| "sm" \| "md" \| "lg"` | Size token: `sm` \| `md` (default) \| `lg`. |
 
 _No events._
+
+**Styleable parts** (restyle from outside via `kai-icon::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(icon)` | The icon wrapper. Inherits `currentColor` and the `size` prop by default; recolor or resize it from outside. — `kai-icon::part(icon) { color: var(--color-primary) }` |
 
 ---
 
@@ -867,6 +914,20 @@ _No events._
 | `kai-value-change` | `CustomEvent<{ value: string; doc: ({ type: "text"; text: string } \| { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined \| string; promptText?: undefined \| string; data?: undefined \| Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined \| string; promptText?: undefined \| string; data?: undefined \| Record<string, unknown> }[] }>` | The input changed (fires on every edit). Carries the flattened `value` plus the structured `doc` + `entities`. |
 | `kai-voice` | `CustomEvent<Record<string, never>>` | The Voice (Mic) toolbar button was clicked. |
 
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `input-top` | inject | Inside the card, above the textarea (e.g. an inline status strip). For content above/below the whole card, use your own layout — that is light DOM you control. |
+| `toolbar-start` | inject | Leading controls in the input toolbar — where a + menu goes. |
+| `toolbar-end` | inject | Trailing controls in the toolbar, before the Send button. |
+
+**Styleable parts** (restyle from outside via `kai-prompt-input::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(send)` | The send button. Restyle from outside, or hide it entirely (Enter-only) — hiding is pure CSS, which is why there is no `submit="never"`. — `kai-prompt-input::part(send) { display: none } /* Enter-only; or restyle: background, border-radius, … */` |
+
 ---
 
 ### `kai-reasoning` / `Reasoning`
@@ -986,6 +1047,12 @@ _No public properties._
 
 _No events._
 
+**Styleable parts** (restyle from outside via `kai-scroll-area::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(viewport)` | The scrolling container. Add padding or a max-height from outside; the thin scrollbar follows `--color-scrollbar-thumb`. — `kai-scroll-area::part(viewport) { padding-right: 0.5rem }` |
+
 ---
 
 ### `kai-scroll-button` / `ScrollButton`
@@ -1015,6 +1082,12 @@ _No events._
 | `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical"` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). |
 
 _No events._
+
+**Styleable parts** (restyle from outside via `kai-separator::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(separator)` | The divider line. Restyle its color, thickness, or inset from outside. — `kai-separator::part(separator) { background: var(--color-border) }` |
 
 ---
 

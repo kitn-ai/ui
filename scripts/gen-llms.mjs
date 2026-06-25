@@ -189,7 +189,7 @@ function renderElement(el) {
         '',
         '| Slot | Mode | Description |',
         '|---|---|---|',
-        el.slots.map((s) => `| \`${s.name}\` | ${s.mode} | ${escapeCell(s.doc)} |`).join('\n'),
+        el.slots.map((s) => `| \`${s.name}\` | ${s.mode ?? '—'} | ${escapeCell(s.doc)} |`).join('\n'),
       ].join('\n'),
     );
   }
@@ -295,6 +295,8 @@ function fromElements(elements) {
       detail: e.detail ? `CustomEvent<${e.detail}>` : 'CustomEvent',
       description: e.description,
     })),
+    slots: el.slots,
+    parts: el.parts,
   }));
 }
 
@@ -320,6 +322,8 @@ function fromManifest(cem) {
         detail: e.type?.text ?? 'CustomEvent',
         description: e.description ?? '',
       })),
+      slots: (d.slots || []).map((s) => ({ name: s.name, doc: s.description ?? '' })),
+      parts: (d.cssParts || []).map((p) => ({ name: p.name, doc: p.description ?? '', recipe: p.recipe })),
     };
   });
 }

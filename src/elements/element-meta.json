@@ -1663,6 +1663,23 @@
     "tokens": [
       "--color-sidebar",
       "--color-scrollbar-thumb"
+    ],
+    "slots": [
+      {
+        "name": "header",
+        "mode": "replace",
+        "doc": "Full custom title bar; replaces the built-in toggle / \"Chats\" / New-chat row."
+      },
+      {
+        "name": "empty",
+        "mode": "replace",
+        "doc": "Custom zero-state shown when there are no conversations; replaces the built-in \"No conversations yet\"."
+      },
+      {
+        "name": "footer",
+        "mode": "inject",
+        "doc": "A row below the list — account, settings, or usage."
+      }
     ]
   },
   {
