@@ -55,6 +55,16 @@ export const CONVERSATIONS_SLOTS: SlotDef[] = [
   { name: 'footer', mode: 'inject',  doc: 'A row below the list — account, settings, or usage.' },
 ];
 
+/** Slots of `<kai-message>` — per-message composition seams. `before-body` and
+ *  `after-body` are INJECT regions inside the message's body column; `avatar`
+ *  REPLACES the built-in avatar rail (pair it with `avatar="none"` to omit the
+ *  rail entirely). These are the keystone of compose-your-own message lists. */
+export const MESSAGE_SLOTS: SlotDef[] = [
+  { name: 'before-body', mode: 'inject',  doc: 'A per-message header at the TOP of the body, above reasoning/tools/content — a model-name label, a role + timestamp line.' },
+  { name: 'after-body',  mode: 'inject',  doc: 'A row at the BOTTOM of the body, below the action bar — a citation/sources row, a token-cost/latency line.' },
+  { name: 'avatar',      mode: 'replace', part: true, doc: 'Replaces the built-in avatar rail with your own node. Use `avatar="none"` to omit the rail and let the body span the full row.' },
+];
+
 /** A styleable `::part` the kit renders (NOT a slot — you don't project into it;
  *  you restyle it from outside via `::part(name)`). This registry is the source
  *  of truth so the styling surface is discoverable: docs + the `kai` MCP
@@ -69,6 +79,16 @@ export interface PartDef {
   /** A copy-pasteable styling example for docs / the MCP reference. */
   recipe?: string;
 }
+
+/** Styleable `::part`s of `<kai-chat>` (beyond the slot-backed `header`/`sidebar`/
+ *  `footer` parts). */
+export const CHAT_PARTS: PartDef[] = [
+  {
+    name: 'header-bar',
+    doc: 'The built-in header bar (the title / model-switcher / context row that hosts the header-start/header-end inject slots). Restyle its height, padding, or gap from outside without replacing the whole header via the `header` slot.',
+    recipe: 'kai-chat::part(header-bar) { height: 3.5rem; padding-inline: 1rem; gap: 0.5rem }',
+  },
+];
 
 /** Styleable `::part`s of `<kai-prompt-input>`. */
 export const PROMPT_INPUT_PARTS: PartDef[] = [
@@ -124,6 +144,31 @@ export const SCROLL_AREA_PARTS: PartDef[] = [
   },
 ];
 
+/** Styleable `::part`s of `<kai-message>`. (The `avatar` part is contributed by
+ *  the `avatar` slot's `part: true` flag, so it is not repeated here.) */
+export const MESSAGE_PARTS: PartDef[] = [
+  {
+    name: 'row',
+    doc: 'The message row wrapper (avatar rail + body column). Restyle its gap or alignment from outside.',
+    recipe: 'kai-message::part(row) { gap: 0.75rem }',
+  },
+  {
+    name: 'bubble',
+    doc: 'The content bubble wrapper. Restyle its background, radius, or padding; for a user message this is the rounded chat bubble.',
+    recipe: 'kai-message::part(bubble) { background: var(--color-primary); color: var(--color-primary-foreground) }',
+  },
+  {
+    name: 'content',
+    doc: 'The rendered message text/markdown region (same node as `bubble`). Target it to tune typography from outside.',
+    recipe: 'kai-message::part(content) { font-size: 0.9375rem }',
+  },
+  {
+    name: 'actions',
+    doc: 'The action-bar row (copy / like / regenerate …). Restyle its spacing or hide it entirely from outside.',
+    recipe: 'kai-message::part(actions) { gap: 0.25rem }',
+  },
+];
+
 /**
  * Per-element composition surface — the SINGLE registry the build extracts
  * (`scripts/gen-element-api.mjs`) into `element-meta.json`, the Custom Elements
@@ -141,8 +186,9 @@ export interface ElementComposition {
 }
 
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
-  'kai-chat': { slots: CHAT_SLOTS },
+  'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS },
+  'kai-message': { slots: MESSAGE_SLOTS, parts: MESSAGE_PARTS },
   'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },
   'kai-button': { parts: BUTTON_PARTS },
   'kai-badge': { parts: BADGE_PARTS },

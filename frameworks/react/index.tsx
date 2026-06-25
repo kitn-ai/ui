@@ -703,13 +703,15 @@ export interface MessageProps extends WebComponentProps {
   avatarSrc?: string;
   /** Convenience avatar fallback text (used when `message.avatar` is not set). */
   avatarFallback?: string;
+  /** Avatar rail mode. `'none'` omits the avatar rail entirely so the body spans the full row (predictable layout when you never show avatars). Any other value keeps the default behaviour: the built-in avatar when one resolves, or your `slot="avatar"` content when projected (which REPLACES the built-in). */
+  avatar?: string;
   /** An action button was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
   onMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
 }
 
 export const Message = createWebComponent<MessageProps>(
   'kai-message',
-  ["theme","message","role","content","markdown","proseSize","codeTheme","codeHighlight","actionsReveal","avatarSrc","avatarFallback"],
+  ["theme","message","role","content","markdown","proseSize","codeTheme","codeHighlight","actionsReveal","avatarSrc","avatarFallback","avatar"],
   { onMessageAction: 'kai-message-action' },
 );
 
@@ -879,13 +881,15 @@ export interface ResizableItemProps extends WebComponentProps {
   locked?: boolean;
   /** Hide this panel; its divider is dropped and the rest reflow. */
   hidden?: boolean;
+  /** Collapse this panel — same layout effect as `hidden` (divider dropped, the rest reflow), but it WORKS as a bare boolean from framework JSX. A plain `<kai-resizable-item collapsed>` in React/Solid/Vue/Svelte collapses the panel at the first render; `hidden` does not, because a JSX boolean sets neither the `hidden` attribute nor the IDL property on a custom element, so the parent never sees it. The facade reflects `collapsed` to a `collapsed` attribute the parent reads. Prefer this over `hidden` for declarative collapse. */
+  collapsed?: boolean;
   onChange?: (event: CustomEvent<unknown>) => void;
   onMaximizeChange?: (event: CustomEvent<unknown>) => void;
 }
 
 export const ResizableItem = createWebComponent<ResizableItemProps>(
   'kai-resizable-item',
-  ["theme","size","min","max","locked","hidden"],
+  ["theme","size","min","max","locked","hidden","collapsed"],
   { onChange: 'kai-change', onMaximizeChange: 'kai-maximize-change' },
 );
 

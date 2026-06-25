@@ -34,6 +34,7 @@ interface ItemInfo {
   max?: string;
   locked: boolean;
   hidden: boolean;
+  collapsed: boolean;
 }
 
 /** Max number of panels a single group lays out (nest for more). */
@@ -100,6 +101,13 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
         el.setAttribute('data-kai-default-size', el.getAttribute('size') ?? '');
       }
       const defaultSize = el.getAttribute('data-kai-default-size') || undefined;
+      // The `collapsed` boolean prop is reflected to a `collapsed` attribute by the
+      // item facade (see kai-resizable-item), so reading the attribute here works
+      // at INITIAL render from any framework — unlike the bare `hidden` boolean,
+      // whose JSX form sets neither the attribute nor the IDL property on a custom
+      // element. Treated as hidden-for-layout, independently of `hidden` so the
+      // back-compat hidden path (and maximize, which drives `hidden`) is untouched.
+      const collapsed = el.hasAttribute('collapsed') && el.getAttribute('collapsed') !== 'false';
       return {
         el,
         size: el.getAttribute('size') ?? undefined,
@@ -111,14 +119,15 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
         // (and direct `el.hidden = true`) set the property, which doesn't reflect
         // to the attribute on a custom element.
         hidden: el.hidden || (el.hasAttribute('hidden') && el.getAttribute('hidden') !== 'false'),
+        collapsed,
       };
     });
 
     // Assign each visible item to its panel slot by visible order; clear the
-    // rest so hidden/extra items don't leak into a slot.
+    // rest so hidden/extra/collapsed items don't leak into a slot.
     let visIdx = 0;
     for (const info of parsed) {
-      if (info.hidden) {
+      if (info.hidden || info.collapsed) {
         info.el.removeAttribute('slot');
       } else {
         info.el.setAttribute('slot', `p${visIdx}`);
@@ -153,12 +162,12 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
       const b = next[i];
       if (a.el !== b.el) return true;
       if (a.size !== b.size || a.min !== b.min || a.max !== b.max) return true;
-      if (a.locked !== b.locked || a.hidden !== b.hidden) return true;
+      if (a.locked !== b.locked || a.hidden !== b.hidden || a.collapsed !== b.collapsed) return true;
     }
     return false;
   }
 
-  const visible = () => items().filter((i) => !i.hidden);
+  const visible = () => items().filter((i) => !i.hidden && !i.collapsed);
 
   /** Compute current panel sizes (percent of container) from the rendered DOM. */
   function currentSizes(): number[] {
@@ -358,9 +367,11 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
         // maximized item is still present and visible.
         const maximizedEl = stash.item;
         const isConnected = maximizedEl.isConnected && element.contains(maximizedEl);
-        const isVisible = isConnected && !(maximizedEl.hidden || maximizedEl.hasAttribute('hidden'));
+        const isVisible = isConnected
+          && !(maximizedEl.hidden || maximizedEl.hasAttribute('hidden'))
+          && !(maximizedEl.hasAttribute('collapsed') && maximizedEl.getAttribute('collapsed') !== 'false');
         if (!isConnected || !isVisible) {
-          // The maximized item was removed or hidden out from under us → restore.
+          // The maximized item was removed or hidden/collapsed out from under us → restore.
           restore();
           return;
         }
@@ -375,7 +386,7 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
       // the host's own attributes.
       subtree: true,
       attributes: true,
-      attributeFilter: ['size', 'locked', 'min', 'max', 'hidden'],
+      attributeFilter: ['size', 'locked', 'min', 'max', 'hidden', 'collapsed'],
     });
     onCleanup(() => {
       mo.disconnect();
@@ -514,6 +525,16 @@ interface ItemProps extends Record<string, unknown> {
   locked?: boolean;
   /** Hide this panel; its divider is dropped and the rest reflow. */
   hidden?: boolean;
+  /**
+   * Collapse this panel — same layout effect as `hidden` (divider dropped, the
+   * rest reflow), but it WORKS as a bare boolean from framework JSX. A plain
+   * `<kai-resizable-item collapsed>` in React/Solid/Vue/Svelte collapses the panel
+   * at the first render; `hidden` does not, because a JSX boolean sets neither the
+   * `hidden` attribute nor the IDL property on a custom element, so the parent never
+   * sees it. The facade reflects `collapsed` to a `collapsed` attribute the parent
+   * reads. Prefer this over `hidden` for declarative collapse.
+   */
+  collapsed?: boolean;
 }
 
 /**
@@ -527,7 +548,20 @@ defineWebComponent<ItemProps>('kai-resizable-item', {
   max: undefined,
   locked: false,
   hidden: false,
-}, () => (
+  collapsed: false,
+}, (_props, { element, flag }) => {
+  // Reflect the reactive `collapsed` prop to the `collapsed` ATTRIBUTE the parent
+  // <kai-resizable> reads (and observes). This is what makes a bare JSX boolean
+  // collapse the panel at INITIAL render from any framework: component-register
+  // parses `<kai-resizable-item collapsed>` to `undefined` (not `true`), and a JSX
+  // boolean sets neither `hidden` nor the IDL property — so `flag('collapsed')`
+  // (which also honours the attribute) is the reliable source, and toggleAttribute
+  // mirrors it back so the parent's readItems()/MutationObserver lay it out. Same
+  // pattern as <kai-chat>'s `loading` reflection. We touch only `collapsed`, never
+  // `hidden`, so the back-compat hidden path and maximize (which drive `hidden`)
+  // are untouched.
+  createEffect(() => { element.toggleAttribute('collapsed', flag('collapsed')); });
+  return (
   <>
     {/* The item host fills the panel's single grid cell (the panel stretches it on
         both axes) and OWNS the scroll: `display:block; width/height:100%;
@@ -550,4 +584,5 @@ defineWebComponent<ItemProps>('kai-resizable-item', {
       <slot />
     </div>
   </>
-) as unknown as JSX.Element);
+  ) as unknown as JSX.Element;
+});

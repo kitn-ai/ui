@@ -2,8 +2,9 @@ import type { Component, JSX } from 'solid-js';
 import {
   Plus, Paperclip, Github, Globe, Sparkles, Settings,
   FileText, Folder, Monitor, MessageCircle, Search,
-  Mic, AudioLines, X, ChevronDown,
+  Mic, AudioLines, X, ChevronDown, ChevronLeft,
   Pencil, BookOpen, Code, Smile,
+  Share, ArrowLeft, MoreHorizontal,
 } from 'lucide-solid';
 
 type IconComponent = Component<{ class?: string }>;
@@ -30,6 +31,11 @@ const NAMED_ICONS: Record<string, IconComponent> = {
   'book-open': BookOpen,
   code: Code,
   smile: Smile,
+  // Header / chrome glyphs.
+  share: Share,
+  'arrow-left': ArrowLeft,
+  'more-horizontal': MoreHorizontal,
+  'chevron-left': ChevronLeft,
 };
 
 /** Render an item icon.
@@ -53,6 +59,16 @@ export function renderIcon(
     return <Named class={opts?.imgClass ?? opts?.class ?? 'mr-2 size-4 shrink-0'} />;
   }
   const isUrl = /^(https?:|\/|data:)/.test(icon);
+  // DEV footgun guard: a kebab/identifier-shaped string that isn't a URL and
+  // isn't a known name is almost certainly a typo'd/unregistered icon (e.g.
+  // `icon="share"` before it was added) — it would silently paint as literal
+  // text. Warn in dev only; emoji/arbitrary text passes through untouched.
+  if (import.meta.env.DEV && !isUrl && /^[a-z][a-z0-9-]*$/.test(icon)) {
+    console.warn(
+      `[kai-icon] unknown icon name "${icon}" — rendering as text. ` +
+        'Add it to NAMED_ICONS in src/ui/icon.tsx, or pass a URL / an inline SVG via slot="icon".',
+    );
+  }
   return isUrl
     ? <img src={icon} alt="" class={opts?.imgClass ?? opts?.class ?? 'size-4 shrink-0'} />
     : (

@@ -13,7 +13,7 @@ declare module 'solid-js' {
     interface IntrinsicElements {
       'kai-resizable': JSX.HTMLAttributes<HTMLElement> & { orientation?: string };
       'kai-resizable-item': JSX.HTMLAttributes<HTMLElement> & {
-        size?: string; min?: string; max?: string; locked?: boolean | string; hidden?: boolean | string;
+        size?: string; min?: string; max?: string; locked?: boolean | string; hidden?: boolean | string; collapsed?: boolean | string;
       };
       // `kai-artifact` JSX type is augmented (with the full attr set) in
       // artifact.stories.tsx — declaring it again here with a different shape

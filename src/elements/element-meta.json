@@ -955,6 +955,11 @@
     ],
     "parts": [
       {
+        "name": "header-bar",
+        "doc": "The built-in header bar (the title / model-switcher / context row that hosts the header-start/header-end inject slots). Restyle its height, padding, or gap from outside without replacing the whole header via the `header` slot.",
+        "recipe": "kai-chat::part(header-bar) { height: 3.5rem; padding-inline: 1rem; gap: 0.5rem }"
+      },
+      {
         "name": "header",
         "doc": "Full custom header; replaces the built-in title/model/context bar."
       },
@@ -2482,6 +2487,14 @@
         "scalar": true,
         "description": "Convenience avatar fallback text (used when `message.avatar` is not set).",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "avatar",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Avatar rail mode. `'none'` omits the avatar rail entirely so the body spans the full row (predictable layout when you never show avatars). Any other value keeps the default behaviour: the built-in avatar when one resolves, or your `slot=\"avatar\"` content when projected (which REPLACES the built-in).",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
@@ -2509,7 +2522,51 @@
         "storyId": "solid-advanced-elements-messagebody--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "before-body",
+        "mode": "inject",
+        "doc": "A per-message header at the TOP of the body, above reasoning/tools/content — a model-name label, a role + timestamp line."
+      },
+      {
+        "name": "after-body",
+        "mode": "inject",
+        "doc": "A row at the BOTTOM of the body, below the action bar — a citation/sources row, a token-cost/latency line."
+      },
+      {
+        "name": "avatar",
+        "mode": "replace",
+        "part": true,
+        "doc": "Replaces the built-in avatar rail with your own node. Use `avatar=\"none\"` to omit the rail and let the body span the full row."
+      }
+    ],
+    "parts": [
+      {
+        "name": "row",
+        "doc": "The message row wrapper (avatar rail + body column). Restyle its gap or alignment from outside.",
+        "recipe": "kai-message::part(row) { gap: 0.75rem }"
+      },
+      {
+        "name": "bubble",
+        "doc": "The content bubble wrapper. Restyle its background, radius, or padding; for a user message this is the rounded chat bubble.",
+        "recipe": "kai-message::part(bubble) { background: var(--color-primary); color: var(--color-primary-foreground) }"
+      },
+      {
+        "name": "content",
+        "doc": "The rendered message text/markdown region (same node as `bubble`). Target it to tune typography from outside.",
+        "recipe": "kai-message::part(content) { font-size: 0.9375rem }"
+      },
+      {
+        "name": "actions",
+        "doc": "The action-bar row (copy / like / regenerate …). Restyle its spacing or hide it entirely from outside.",
+        "recipe": "kai-message::part(actions) { gap: 0.25rem }"
+      },
+      {
+        "name": "avatar",
+        "doc": "Replaces the built-in avatar rail with your own node. Use `avatar=\"none\"` to omit the rail and let the body span the full row."
+      }
+    ]
   },
   {
     "tag": "kai-model-switcher",
@@ -3060,6 +3117,15 @@
         "optional": true,
         "scalar": true,
         "description": "Hide this panel; its divider is dropped and the rest reflow.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "collapsed",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Collapse this panel — same layout effect as `hidden` (divider dropped, the rest reflow), but it WORKS as a bare boolean from framework JSX. A plain `<kai-resizable-item collapsed>` in React/Solid/Vue/Svelte collapses the panel at the first render; `hidden` does not, because a JSX boolean sets neither the `hidden` attribute nor the IDL property on a custom element, so the parent never sees it. The facade reflects `collapsed` to a `collapsed` attribute the parent reads. Prefer this over `hidden` for declarative collapse.",
         "default": "false",
         "displayType": "undefined | false | true"
       }

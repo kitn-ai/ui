@@ -20,7 +20,7 @@ export interface MessageProps extends JSX.HTMLAttributes<HTMLDivElement> {
 function Message(props: MessageProps) {
   const [local, rest] = splitProps(props, ["children", "class"]);
   return (
-    <div class={cn("flex items-start gap-3", local.class)} {...rest}>
+    <div part="row" class={cn("flex items-start gap-3", local.class)} {...rest}>
       {local.children}
     </div>
   );
@@ -38,6 +38,7 @@ export interface MessageAvatarProps {
 function MessageAvatar(props: MessageAvatarProps) {
   return (
     <div
+      part="avatar"
       class={cn("h-8 w-8 shrink-0 overflow-hidden rounded-full", props.class)}
     >
       <Show
@@ -65,10 +66,14 @@ function MessageAvatar(props: MessageAvatarProps) {
 export interface MessageContentProps extends JSX.HTMLAttributes<HTMLDivElement> {
   children: JSX.Element | string;
   markdown?: boolean;
+  /** `::part` name(s) exposed on the content node. The body passes
+   *  `"bubble content"` so consumers can target either the rounded bubble or the
+   *  text region from outside the shadow boundary. */
+  part?: string;
 }
 
 function MessageContent(props: MessageContentProps) {
-  const [local, rest] = splitProps(props, ["children", "markdown", "class"]);
+  const [local, rest] = splitProps(props, ["children", "markdown", "class", "part"]);
   const config = useChatConfig();
   const classNames = () =>
     cn(
@@ -81,12 +86,12 @@ function MessageContent(props: MessageContentProps) {
     <Show
       when={local.markdown}
       fallback={
-        <div class={classNames()} {...rest}>
+        <div part={local.part} class={classNames()} {...rest}>
           {local.children}
         </div>
       }
     >
-      <Markdown content={local.children as string} class={classNames()} />
+      <Markdown part={local.part} content={local.children as string} class={classNames()} />
     </Show>
   );
 }
@@ -163,6 +168,7 @@ function feedbackVoteOf(a: ChatMessageAction | CustomAction): FeedbackVote | und
 function MessageActionBar(props: MessageActionBarProps) {
   return (
     <MessageActions
+      part="actions"
       class={cn(
         'mt-1 flex gap-0',
         props.reveal === 'hover' && 'opacity-0 transition-opacity group-hover:opacity-100',
@@ -273,6 +279,14 @@ export interface MessageBodyProps {
   activeFeedback?: FeedbackVote;
   /** When true, the copy button shows its "copied" check icon. */
   copied?: boolean;
+  /** INJECT slot projected at the TOP of the body — above the reasoning / tools /
+   *  content. A per-message header: a model-name label, a role + timestamp line.
+   *  In the `<kai-message>` shadow this is `<slot name="before-body" />`. */
+  beforeBody?: JSX.Element;
+  /** INJECT slot projected at the BOTTOM of the body — below the action bar. A
+   *  citation / sources row, a token-cost / latency line. In the `<kai-message>`
+   *  shadow this is `<slot name="after-body" />`. */
+  afterBody?: JSX.Element;
 }
 
 /**
@@ -286,6 +300,8 @@ export interface MessageBodyProps {
 function MessageBody(props: MessageBodyProps) {
   return (
     <>
+      {/* before-body (inject): a per-message header above everything else. */}
+      <Show when={props.beforeBody}>{props.beforeBody}</Show>
       <Show when={props.reasoning}>
         {(r) => (
           <Reasoning class="mb-2 w-full">
@@ -303,6 +319,7 @@ function MessageBody(props: MessageBodyProps) {
         </Attachments>
       </Show>
       <MessageContent
+        part="bubble content"
         markdown={props.markdown}
         class={props.isUser
           ? 'bg-muted text-primary max-w-[85%] rounded-2xl px-4 py-2'
@@ -319,6 +336,8 @@ function MessageBody(props: MessageBodyProps) {
           onAction={(id) => props.onAction?.(id)}
         />
       </Show>
+      {/* after-body (inject): a citation row / cost line below the action bar. */}
+      <Show when={props.afterBody}>{props.afterBody}</Show>
     </>
   );
 }

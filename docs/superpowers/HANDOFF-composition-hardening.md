@@ -6,8 +6,16 @@
 
 ---
 
-## 0.0 LATEST — `::part` discoverability, a build:api P0 fix, 4 new primitives (PUSHED on `spike/kai-chat-seams`, no PR)
-Done after the `c1981e9` snapshot below. Commits `04257ca`→`674ab7b` are **pushed to `origin/spike/kai-chat-seams`** (Rob: "push to be safe, no PR"). Element count is now **59**.
+## 0.0 LATEST (2026-06-25 end) — 3 PRs in flight; campaign + graduations done; bug-fix round
+**Full state is in memory `composition-seams-direction.md` (cont. 1–7) — READ THAT FIRST; it's authoritative.** Quick map:
+- **PR #107** composition initiative (primitives + ::part discoverability + surface tokens + kai-conversations graduation + build:api fix) — **MERGED to main** (`6d2c8f9`). CI Option A: storybook browser suite is an advisory non-required job (re-require after larger-runner/sharding).
+- **PR #108** `feat/composition-graduations` — kai-message slots (`before-body`/`after-body`/`avatar`) + parts, kai-resizable-item `collapsed`, minors (chat `::part(header-bar)`, icon warn+glyphs, composed-shell event-name docs fix), + a kai-message feedback-toast fix.
+- **PR #109** `fix/menu-tooltip-darkmode` (off main) — 4 bugs Rob found testing: menu checkbox-check squish (dropdown.tsx), prompt-input-slots dark mode (story → CSS vars), tooltip click-flicker (tooltip.tsx pointerDown guard), [+#4 standalone-message feedback toast is on #108].
+- **Composition-verification campaign DONE** (4 xhigh agents): thesis holds; #1 gap was kai-message per-message seams (now graduated). NEXT PHASE: merge #108/#109 → docs promotion (Lab compositions → docs examples + new-component pages) → Storybook overhaul (Spikes→Labs + SolidJS contributor docs, LAST).
+- ★Branch fragmentation: #1/#2/#3 on #109, #4 on #108 — converge on merge. ★ Orchestration lesson: Workflow `isolation:'worktree'` branches off the INVOKING repo's HEAD, not a sibling worktree — checkout the target branch in the agent.
+
+--- (historical, pre-merge) ---
+Done after the `c1981e9` snapshot below. Commits `04257ca`→`674ab7b` are **pushed to `origin/spike/kai-chat-seams`**. Element count is now **59**.
 
 **Also added — 4 more composition primitives (thin facades over existing `src/ui` primitives):**
 - `kai-separator` (divider, H/V, `::part(separator)`), `kai-scroll-area` (themed thin-scrollbar container, `::part(viewport)`), `kai-hover-card` (rich hover content via `slot="card"` — the markup-carrying sibling of `kai-tooltip`; slot-into-portal verified), and `kai-skeleton` (responsive loading placeholder; `variant` text/rect/circle + `width`/`height`/`lines`, prop-driven because classes can't cross the shadow boundary).

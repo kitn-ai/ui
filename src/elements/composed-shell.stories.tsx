@@ -149,7 +149,7 @@ const SHELL_SNIPPET = `<!-- Compose-your-own chat: a resizable shell built from 
   render();
 
   // — interactions out via events —
-  list.addEventListener('kai-select', (e) => (list.activeId = e.detail.id));
+  list.addEventListener('kai-conversation-select', (e) => (list.activeId = e.detail.id));
   suggs.addEventListener('kai-select', (e) => (input.value = e.detail.value));
   input.addEventListener('kai-submit', (e) => {
     thread = [...thread, { id: Date.now() + '', role: 'user', content: e.detail.value }];
@@ -167,7 +167,7 @@ export const ComposedShell: Story = {
 
     onMount(() => {
       setProps(list, { conversations, activeId: 'c1' });
-      list.addEventListener('kai-select', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
+      list.addEventListener('kai-conversation-select', (e) => ((list as AnyEl).activeId = (e as CustomEvent).detail.id));
       setProps(ctx, { context });
       setProps(suggs, { suggestions: ['Summarize this thread', 'What changed in v0.3?', 'Show me the layout code'] });
       suggs.addEventListener('kai-select', (e) => ((input as AnyEl).value = (e as CustomEvent).detail.value));

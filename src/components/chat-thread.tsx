@@ -181,7 +181,7 @@ export function ChatThread(props: ChatThreadProps) {
             when={props.headerFull}
             fallback={
               <Show when={showHeader()}>
-                <header class="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
+                <header part="header-bar" class="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
                   <div class="flex items-center gap-2">
                     {/* Consumer-injected leading controls (sidebar-toggle, compose, a
                         popover title-button). Projects light-DOM `slot="header-start"`
