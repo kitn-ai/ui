@@ -22,7 +22,7 @@ interface CommandEl extends HTMLElement {
 }
 
 const meta = {
-  title: 'Spikes/Kai Command',
+  title: 'Labs/Kai Command',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 export default meta;

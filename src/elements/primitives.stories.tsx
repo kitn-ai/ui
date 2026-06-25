@@ -23,7 +23,7 @@ declare module 'solid-js' {
   }
 }
 
-const meta = { title: 'Spikes/New Primitives', parameters: { layout: 'padded' } } satisfies Meta;
+const meta = { title: 'Labs/New Primitives', parameters: { layout: 'padded' } } satisfies Meta;
 export default meta;
 type Story = StoryObj;
 

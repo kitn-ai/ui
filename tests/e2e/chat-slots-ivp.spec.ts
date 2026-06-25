@@ -11,7 +11,7 @@ import { CHAT_SLOTS } from '../../src/elements/slots';
  * (Storybook must be serving on :6006.)
  */
 
-const STORY = (id: string) => `/iframe.html?id=spikes-chat-slots--${id}&viewMode=story`;
+const STORY = (id: string) => `/iframe.html?id=labs-chat-slots--${id}&viewMode=story`;
 
 /** Count light-DOM elements actually assigned to each named shadow slot. */
 async function assignedCounts(page: Page, names: string[]) {

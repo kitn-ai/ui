@@ -47,7 +47,7 @@ interface SuggestionsEl extends HTMLElement {
 }
 
 const meta = {
-  title: 'Spikes/Composer (production)',
+  title: 'Labs/Composer (production)',
   parameters: {
     layout: 'fullscreen',
     // Theme-driven: the whole showcase follows the Storybook light/dark toggle
