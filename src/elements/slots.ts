@@ -80,6 +80,16 @@ export interface PartDef {
   recipe?: string;
 }
 
+/** Styleable `::part`s of `<kai-chat>` (beyond the slot-backed `header`/`sidebar`/
+ *  `footer` parts). */
+export const CHAT_PARTS: PartDef[] = [
+  {
+    name: 'header-bar',
+    doc: 'The built-in header bar (the title / model-switcher / context row that hosts the header-start/header-end inject slots). Restyle its height, padding, or gap from outside without replacing the whole header via the `header` slot.',
+    recipe: 'kai-chat::part(header-bar) { height: 3.5rem; padding-inline: 1rem; gap: 0.5rem }',
+  },
+];
+
 /** Styleable `::part`s of `<kai-prompt-input>`. */
 export const PROMPT_INPUT_PARTS: PartDef[] = [
   {
@@ -176,7 +186,7 @@ export interface ElementComposition {
 }
 
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
-  'kai-chat': { slots: CHAT_SLOTS },
+  'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS },
   'kai-message': { slots: MESSAGE_SLOTS, parts: MESSAGE_PARTS },
   'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },

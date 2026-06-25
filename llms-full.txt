@@ -398,6 +398,7 @@ _No events._
 
 | Part | Description |
 |---|---|
+| `::part(header-bar)` | The built-in header bar (the title / model-switcher / context row that hosts the header-start/header-end inject slots). Restyle its height, padding, or gap from outside without replacing the whole header via the `header` slot. — `kai-chat::part(header-bar) { height: 3.5rem; padding-inline: 1rem; gap: 0.5rem }` |
 | `::part(header)` | Full custom header; replaces the built-in title/model/context bar. |
 | `::part(sidebar)` | Left column (your nav / conversation list). Fixed width; use compose-your-own for resizable. |
 | `::part(footer)` | Row below the composer (disclaimers, token meter). |
