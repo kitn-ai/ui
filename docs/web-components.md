@@ -434,12 +434,35 @@ Standalone prompt input with a send button. Use when you want just the input are
 | `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | `'always'` | Whether the action bar is always visible (`'always'`, default) or only revealed on hover of the message row (`'hover'`). |
 | `avatarSrc` | `avatar-src` | `undefined | string` | — | Convenience avatar image URL (used when `message.avatar` is not set). |
 | `avatarFallback` | `avatar-fallback` | `undefined | string` | — | Convenience avatar fallback text (used when `message.avatar` is not set). |
+| `avatar` | `avatar` | `undefined | string` | — | Avatar rail mode. `'none'` omits the avatar rail entirely so the body spans the full row (predictable layout when you never show avatars). Any other value keeps the default behaviour: the built-in avatar when one resolves, or your `slot="avatar"` content when projected (which REPLACES the built-in). |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
+
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `before-body` | inject | A per-message header at the TOP of the body, above reasoning/tools/content — a model-name label, a role + timestamp line. |
+| `after-body` | inject | A row at the BOTTOM of the body, below the action bar — a citation/sources row, a token-cost/latency line. |
+| `avatar` | replace | Replaces the built-in avatar rail with your own node. Use `avatar="none"` to omit the rail and let the body span the full row. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-message::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(row)` | The message row wrapper (avatar rail + body column). Restyle its gap or alignment from outside. <br>`kai-message::part(row) { gap: 0.75rem }` |
+| `::part(bubble)` | The content bubble wrapper. Restyle its background, radius, or padding; for a user message this is the rounded chat bubble. <br>`kai-message::part(bubble) { background: var(--color-primary); color: var(--color-primary-foreground) }` |
+| `::part(content)` | The rendered message text/markdown region (same node as `bubble`). Target it to tune typography from outside. <br>`kai-message::part(content) { font-size: 0.9375rem }` |
+| `::part(actions)` | The action-bar row (copy / like / regenerate …). Restyle its spacing or hide it entirely from outside. <br>`kai-message::part(actions) { gap: 0.25rem }` |
+| `::part(avatar)` | Replaces the built-in avatar rail with your own node. Use `avatar="none"` to omit the rail and let the body span the full row. |
 
 #### Composed from
 

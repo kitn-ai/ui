@@ -505,6 +505,8 @@ export interface KaiMessageElement extends HTMLElement {
   avatarSrc?: string;
   /** Convenience avatar fallback text (used when `message.avatar` is not set). */
   avatarFallback?: string;
+  /** Avatar rail mode. `'none'` omits the avatar rail entirely so the body spans the full row (predictable layout when you never show avatars). Any other value keeps the default behaviour: the built-in avatar when one resolves, or your `slot="avatar"` content when projected (which REPLACES the built-in). */
+  avatar?: string;
 }
 
 export interface KaiModelSwitcherElement extends HTMLElement {

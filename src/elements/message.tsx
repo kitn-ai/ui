@@ -1,5 +1,6 @@
 import { Show, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
+import { readSlots, MESSAGE_SLOTS } from './slots';
 import { ChatConfig, useChatConfig, type ProseSize } from '../primitives/chat-config';
 import { Message, MessageAvatar, MessageBody } from '../components/message';
 import { createMessageFeedback } from '../primitives/message-feedback';
@@ -27,6 +28,11 @@ interface Props extends Record<string, unknown> {
   avatarSrc?: string;
   /** Convenience avatar fallback text (used when `message.avatar` is not set). */
   avatarFallback?: string;
+  /** Avatar rail mode. `'none'` omits the avatar rail entirely so the body spans
+   *  the full row (predictable layout when you never show avatars). Any other
+   *  value keeps the default behaviour: the built-in avatar when one resolves, or
+   *  your `slot="avatar"` content when projected (which REPLACES the built-in). */
+  avatar?: 'none' | string;
 }
 
 /** Events fired by `<kai-message>`. */
@@ -54,6 +60,7 @@ defineWebComponent<Props, Events>('kai-message', {
   actionsReveal: 'always',
   avatarSrc: undefined,
   avatarFallback: undefined,
+  avatar: undefined,
 }, (props, { dispatch, flag, element }) => {
   const outer = useChatConfig();
   const msg = (): ChatMessage =>
@@ -68,6 +75,8 @@ defineWebComponent<Props, Events>('kai-message', {
   // Read declarative <kai-action> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
   const [slottedActions, setSlottedActions] = createSignal<import('../elements/chat-types').CustomAction[]>([]);
+  // Which composition slots (before-body / after-body / avatar) the consumer filled.
+  const [slots, setSlots] = createSignal<Record<string, boolean>>({});
   onMount(() => {
     const read = () => {
       const nodes = [...element.querySelectorAll('kai-action')];
@@ -77,6 +86,7 @@ defineWebComponent<Props, Events>('kai-message', {
         icon: n.getAttribute('icon') ?? undefined,
         tooltip: n.getAttribute('tooltip') ?? undefined,
       })));
+      setSlots(readSlots(element, MESSAGE_SLOTS));
     };
     read();
     const observer = new MutationObserver(read);
@@ -89,6 +99,12 @@ defineWebComponent<Props, Events>('kai-message', {
     (props.avatarSrc || props.avatarFallback
       ? { src: props.avatarSrc as string | undefined, fallback: props.avatarFallback as string | undefined }
       : undefined);
+  // Avatar rail state. `avatar="none"` omits the rail; a filled `slot="avatar"`
+  // REPLACES the built-in; otherwise the built-in renders when one resolves.
+  const noAvatar = () => props.avatar === 'none';
+  const hasAvatarSlot = () => !!slots()['avatar'];
+  // The rail shows when not suppressed and there's either a slot or a resolved avatar.
+  const showRail = () => !noAvatar() && (hasAvatarSlot() || !!avatar());
   const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
   // markdown: explicit prop/attribute wins; otherwise default by role.
   const markdownExplicit = () =>
@@ -109,11 +125,31 @@ defineWebComponent<Props, Events>('kai-message', {
       activeFeedback={feedback.resolveFeedback(msg())}
       copied={feedback.isCopied(msg().id)}
       onAction={(action) => feedback.handleAction(msg(), action)}
+      beforeBody={slots()['before-body'] ? <slot name="before-body" /> : undefined}
+      afterBody={slots()['after-body'] ? <slot name="after-body" /> : undefined}
     />
   );
 
   // Row carries `group` so a hover-revealed action bar fades in on row hover.
   const rowGroup = () => (reveal() === 'hover' ? 'group ' : '');
+
+  // The avatar rail: a filled `slot="avatar"` REPLACES the built-in MessageAvatar
+  // (the consumer owns that node, wrapped in `part="avatar"` so it's still
+  // styleable + consistent with the built-in part name).
+  const avatarRail = () => (
+    <Show
+      when={hasAvatarSlot()}
+      fallback={
+        <Show when={avatar()}>
+          {(av) => <MessageAvatar src={av().src ?? ''} alt={av().alt ?? ''} fallback={av().fallback} />}
+        </Show>
+      }
+    >
+      <div part="avatar" class="shrink-0">
+        <slot name="avatar" />
+      </div>
+    </Show>
+  );
 
   return (
     <ChatConfig
@@ -123,21 +159,19 @@ defineWebComponent<Props, Events>('kai-message', {
       portalMount={outer.portalMount()}
     >
       <Show
-        when={avatar()}
+        when={showRail()}
         fallback={
           <Message class={`${rowGroup()}${isUser() ? 'flex-col items-end' : 'flex-col items-start'}`}>
             {body()}
           </Message>
         }
       >
-        {(av) => (
-          <Message class={rowGroup()}>
-            <MessageAvatar src={av().src ?? ''} alt={av().alt ?? ''} fallback={av().fallback} />
-            <div class={`flex min-w-0 flex-1 flex-col ${isUser() ? 'items-end' : 'items-start'}`}>
-              {body()}
-            </div>
-          </Message>
-        )}
+        <Message class={rowGroup()}>
+          {avatarRail()}
+          <div class={`flex min-w-0 flex-1 flex-col ${isUser() ? 'items-end' : 'items-start'}`}>
+            {body()}
+          </div>
+        </Message>
       </Show>
     </ChatConfig>
   );

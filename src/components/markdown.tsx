@@ -11,6 +11,9 @@ export interface MarkdownProps {
   id?: string;
   class?: string;
   codeTheme?: string;
+  /** Optional `::part` name(s) to expose on the rendered root. Lets callers
+   *  (e.g. the message bubble) surface a styleable part through the shadow. */
+  part?: string;
 }
 
 interface ParsedBlock {
@@ -49,13 +52,13 @@ function MarkdownBlock(props: { content: string }) {
 }
 
 function Markdown(props: MarkdownProps) {
-  const [local] = splitProps(props, ['content', 'id', 'class', 'codeTheme']);
+  const [local] = splitProps(props, ['content', 'id', 'class', 'codeTheme', 'part']);
   const config = useChatConfig();
   const blockId = () => local.id ?? createUniqueId();
   const blocks = createMemo(() => parseMarkdownIntoBlocks(local.content));
 
   return (
-    <div class={cn('chat-markdown max-w-none break-words whitespace-normal [&>div:first-child>p:first-child]:mt-0 [&>div:last-child>p:last-child]:mb-0', textClass(config.proseSize()), local.class)}>
+    <div part={local.part} class={cn('chat-markdown max-w-none break-words whitespace-normal [&>div:first-child>p:first-child]:mt-0 [&>div:last-child>p:last-child]:mb-0', textClass(config.proseSize()), local.class)}>
       <For each={blocks()}>
         {(block) => (
           <Switch>
