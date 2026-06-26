@@ -41,14 +41,19 @@ function declaredTitlePrefixes(): Set<string> {
   return out;
 }
 
-/** Story id prefixes the e2e specs load (the part before `--`). */
+/** Story id prefixes the e2e specs load (the part before `--`). Catches every
+ *  reference form the specs use: `id=foo--bar`, `story('foo--bar')`,
+ *  `'foo--bar'` literals — so a deleted/retitled fixture can't slip through a
+ *  single-pattern match (the bug this guard exists to prevent). */
 function referencedPrefixes(): Map<string, string> {
   const out = new Map<string, string>(); // prefix -> first spec file that uses it
   const e2e = join(ROOT, 'tests/e2e');
+  // any `<section>-<...>--<story>` token (the universal Storybook story-id shape)
+  const ID_RE = /\b([a-z][a-z0-9-]*)--[a-z0-9-]+\b/g;
   for (const entry of readdirSync(e2e)) {
     if (!entry.endsWith('.spec.ts')) continue;
     const src = readFileSync(join(e2e, entry), 'utf8');
-    for (const m of src.matchAll(/id=([a-z0-9-]+)--[a-z0-9-]+/g)) {
+    for (const m of src.matchAll(ID_RE)) {
       if (!out.has(m[1])) out.set(m[1], entry);
     }
   }
