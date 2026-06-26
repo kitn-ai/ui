@@ -168,6 +168,7 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `kai-attachments-change` | `{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. |
 | `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
 | `kai-model-change` | `{ modelId: string }` | The header model switcher changed. |
 | `kai-search` | — | The Search button was clicked. |
@@ -383,6 +384,7 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `kai-attachments-change` | `{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The staged attachments changed — a file was added (via the paperclip) or removed (per-chip ×). Carries the full current list so a consumer can react in real time (validate, show upload progress, toggle the send button). |
 | `kai-search` | — | The Search (Globe) toolbar button was clicked. |
 | `kai-stop` | — | The Stop button was clicked while `stoppable` and `loading` are both true. |
 | `kai-submit` | `{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The user submitted the prompt (Enter or send button). `value` is the flattened text (back-compat); `doc` is the structured document and `entities` the inserted pills (skills/agents) for downstream expansion. |
@@ -609,6 +611,14 @@ No events.
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-remove` | `{ id: string }` | A remove button was clicked. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-attachments::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(preview)` | The image shown in an attachment’s hover-card preview. Bounded by default (max ~320×256, aspect preserved) so a large image never blows up the card — raise or lower the cap from outside. <br>`kai-attachments::part(preview) { max-width: 32rem; max-height: 24rem }` |
 
 #### Composed from
 

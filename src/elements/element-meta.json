@@ -301,7 +301,14 @@
         "storyId": "solid-advanced-elements-attachmentempty--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "parts": [
+      {
+        "name": "preview",
+        "doc": "The image shown in an attachment’s hover-card preview. Bounded by default (max ~320×256, aspect preserved) so a large image never blows up the card — raise or lower the cap from outside.",
+        "recipe": "kai-attachments::part(preview) { max-width: 32rem; max-height: 24rem }"
+      }
+    ]
   },
   {
     "tag": "kai-avatar",
@@ -864,6 +871,12 @@
       }
     ],
     "events": [
+      {
+        "name": "kai-attachments-change",
+        "detail": "{ attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
+        "description": "The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time.",
+        "displayDetail": "{ attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }"
+      },
       {
         "name": "kai-message-action",
         "detail": "{ messageId: string; action: string; state?: undefined | \"on\" | \"off\" }",
@@ -2870,6 +2883,12 @@
       }
     ],
     "events": [
+      {
+        "name": "kai-attachments-change",
+        "detail": "{ attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
+        "description": "The staged attachments changed — a file was added (via the paperclip) or removed (per-chip ×). Carries the full current list so a consumer can react in real time (validate, show upload progress, toggle the send button).",
+        "displayDetail": "{ attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }"
+      },
       {
         "name": "kai-search",
         "detail": "Record<string, never>",

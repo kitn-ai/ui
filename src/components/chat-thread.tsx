@@ -116,6 +116,7 @@ export interface ChatThreadProps {
   // callbacks (the facade maps these to dispatch())
   onValueChange?: (value: string) => void;
   onSubmit?: (detail: { value: string; attachments: AttachmentData[] }) => void;
+  onAttachmentsChange?: (attachments: AttachmentData[]) => void;
   onSuggestionClick?: (value: string) => void;
   onModelChange?: (modelId: string) => void;
   onMessageAction?: (detail: MessageActionDetail) => void;
@@ -299,7 +300,7 @@ export function ChatThread(props: ChatThreadProps) {
                     search={props.search === true} voice={props.voice === true}
                     triggers={props.triggers} kindIcons={props.kindIcons}
                     onValueChange={handleChange} onSubmit={handleSubmit} onSuggestionClick={handleSuggestionClick}
-                    onAttachmentsChange={setAttachments}
+                    onAttachmentsChange={(a) => { setAttachments(a); props.onAttachmentsChange?.(a); }}
                     onSearch={() => props.onSearch?.()} onVoice={() => props.onVoice?.()}
                   />
                 }

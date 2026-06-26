@@ -9,7 +9,7 @@ import type { ProseSize } from '../primitives/chat-config';
 import type { ModelOption } from '../types';
 
 type Props = Omit<ChatThreadProps,
-  'class' | 'onValueChange' | 'onSubmit' | 'onSuggestionClick' | 'onModelChange'
+  'class' | 'onValueChange' | 'onSubmit' | 'onAttachmentsChange' | 'onSuggestionClick' | 'onModelChange'
   | 'onMessageAction' | 'onSearch' | 'onVoice'> & Record<string, unknown>;
 
 interface Events {
@@ -17,6 +17,9 @@ interface Events {
   'kai-submit': { value: string; attachments: AttachmentData[] };
   /** Fired on every input change. */
   'kai-value-change': { value: string };
+  /** The staged attachments changed (file added or removed). Carries the full
+   *  current list so a consumer can react in real time. */
+  'kai-attachments-change': { attachments: AttachmentData[] };
   /** A suggestion chip was clicked (only in `suggestion-mode="fill"`). */
   'kai-suggestion-click': { value: string };
   /** An action button on a message was clicked. `action` is the built-in name or
@@ -70,6 +73,7 @@ defineWebComponent<Props, Events>('kai-chat', {
     actionsReveal={props.actionsReveal as 'always' | 'hover'}
     onValueChange={(value) => dispatch('kai-value-change', { value })}
     onSubmit={(detail) => dispatch('kai-submit', detail)}
+    onAttachmentsChange={(attachments) => dispatch('kai-attachments-change', { attachments })}
     onSuggestionClick={(value) => dispatch('kai-suggestion-click', { value })}
     onModelChange={(modelId) => dispatch('kai-model-change', { modelId })}
     onMessageAction={(detail) => dispatch('kai-message-action', detail)}

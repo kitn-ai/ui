@@ -69,6 +69,10 @@ interface Events {
   /** The input changed (fires on every edit). Carries the flattened `value`
    *  plus the structured `doc` + `entities`. */
   'kai-value-change': { value: string; doc: ComposerDoc; entities: EntityRef[] };
+  /** The staged attachments changed — a file was added (via the paperclip) or
+   *  removed (per-chip ×). Carries the full current list so a consumer can react
+   *  in real time (validate, show upload progress, toggle the send button). */
+  'kai-attachments-change': { attachments: AttachmentData[] };
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
   'kai-suggestion-click': { value: string };
   /** The Search (Globe) toolbar button was clicked. */
@@ -194,7 +198,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       onValueChange={handleChange}
       onSubmit={handleSubmit}
       onSuggestionClick={handleSuggestionClick}
-      onAttachmentsChange={setAttachments}
+      onAttachmentsChange={(a) => { setAttachments(a); dispatch('kai-attachments-change', { attachments: a }); }}
       onSearch={() => dispatch('kai-search')}
       onVoice={() => dispatch('kai-voice')}
       onStop={() => dispatch('kai-stop')}

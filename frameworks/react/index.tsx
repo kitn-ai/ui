@@ -236,6 +236,8 @@ export interface ChatProps extends WebComponentProps {
   kindIcons?: Record<string, string>;
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
+  /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
+  onAttachmentsChange?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
   onMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
   /** The header model switcher changed. */
@@ -255,7 +257,7 @@ export interface ChatProps extends WebComponentProps {
 export const Chat = createWebComponent<ChatProps>(
   'kai-chat',
   ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","sidebar","empty","composer","composerActions","footer","search","voice","triggers","kindIcons","actionsReveal"],
-  { onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSearch: 'kai-search', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
+  { onAttachmentsChange: 'kai-attachments-change', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSearch: 'kai-search', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );
 
 export interface CheckpointProps extends WebComponentProps {
@@ -793,6 +795,8 @@ export interface PromptInputProps extends WebComponentProps {
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
   kindIcons?: Record<string, string>;
+  /** The staged attachments changed — a file was added (via the paperclip) or removed (per-chip ×). Carries the full current list so a consumer can react in real time (validate, show upload progress, toggle the send button). */
+  onAttachmentsChange?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** The Search (Globe) toolbar button was clicked. */
   onSearch?: (event: CustomEvent<Record<string, never>>) => void;
   /** The Stop button was clicked while `stoppable` and `loading` are both true. */
@@ -812,7 +816,7 @@ export interface PromptInputProps extends WebComponentProps {
 export const PromptInput = createWebComponent<PromptInputProps>(
   'kai-prompt-input',
   ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","search","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
-  { onSearch: 'kai-search', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
+  { onAttachmentsChange: 'kai-attachments-change', onSearch: 'kai-search', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );
 
 export interface ReasoningProps extends WebComponentProps {
