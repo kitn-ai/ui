@@ -7,7 +7,7 @@ opening them as `file://` pages fails (browsers block ES-module loading from
 ## Run
 
 The `composable` and `vanilla`/`widget` examples load the **local build**
-(`../../dist/kitn-chat.es.js`), so serve from the **repository root**:
+(`../../dist/kai.es.js`), so serve from the **repository root**:
 
 ```bash
 npm run build      # once — produces dist/
@@ -28,7 +28,7 @@ Then open:
 ## Framework examples (their own dev servers)
 
 - **`react/`**, **`solid/`**, **`angular/`**, and **`vue/`** are Vite apps. `cd` in, `npm install`, `npm run dev`.
-  They alias `@kitn.ai/ui/elements` to the local `dist/kitn-chat.es.js`, so run
+  They alias `@kitn.ai/ui/elements` to the local `dist/kai.es.js`, so run
   `npm run build` at the repo root first, then start any example's dev server.
 
   | Directory | Framework | Kit API used |

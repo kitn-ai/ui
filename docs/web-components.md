@@ -43,7 +43,7 @@ Internally this runs `build:css` (compiles Tailwind to `src/elements/compiled.cs
 
 | File | Format | Notes |
 |------|--------|-------|
-| `dist/kitn-chat.es.js` | ES module | Main entry. ~110 KB gzip; lazy chunks for code highlighting load on demand |
+| `dist/kai.es.js` | ES module | Main entry. ~110 KB gzip; lazy chunks for code highlighting load on demand |
 
 The build is **ES-module only** by design. A UMD/IIFE build cannot code-split, so it would have to inline every lazy chunk (all the Shiki syntax-highlighting languages) into one multi-MB file. The ES build keeps those chunks lazy and is loadable directly via `<script type="module">` in every modern browser.
 
@@ -55,12 +55,12 @@ Import the ES module as a side-effect. It registers all **40+ custom elements** 
 import '@kitn.ai/ui/elements';
 ```
 
-The `./elements` export in `package.json` resolves to `dist/kitn-chat.es.js`.
+The `./elements` export in `package.json` resolves to `dist/kai.es.js`.
 
 For plain HTML pages:
 
 ```html
-<script type="module" src="./dist/kitn-chat.es.js"></script>
+<script type="module" src="./dist/kai.es.js"></script>
 ```
 
 ---
