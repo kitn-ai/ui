@@ -92,34 +92,29 @@ const preview: Preview = {
     },
     options: {
       storySort: {
-        // Sidebar order, top to bottom: the docs, the interactive Theming tools
-        // (next to the Theming doc), composed Examples/Patterns, then the
-        // framework-agnostic **Components** (the primary, copy-into-any-app
-        // API) ABOVE the **Solid (Advanced)** tier — so a reader reaches the
-        // portable elements before the Solid-only building blocks (which stay
-        // present but collapsed below).
+        // Sidebar order, top to bottom: the Getting Started guides, the SolidJS
+        // Components, the Labs composition testing ground, then the small set of
+        // Test Fixtures the e2e specs target.
         //
         // NOTE: every top-level group MUST be named explicitly here. The
         // trailing `*` is a catch-all that sorts unlisted groups to the very
-        // bottom — that's why the `Theming` stories group used to strand itself
-        // below "Components" (it was only referenced inside the nested Docs
-        // sub-order, never as a top-level entry). The nested arrays set the
-        // intra-group order (e.g. Examples lead with the full-app "wow" demo
-        // rather than sorting alphabetically).
+        // bottom — so a group only referenced inside a nested sub-order (never as
+        // a top-level entry) would strand itself below the named ones. The nested
+        // arrays set the intra-group order rather than sorting alphabetically.
         order: [
           // Storybook is the SolidJS-primitive / contributor surface (the consumer
-          // web-component docs live at ui.kitn.ai). Lead with the Contributing
-          // guides, then the SolidJS Components, the Labs composition testing
-          // ground, and the small Test Fixtures set the e2e specs target. The
-          // web-component element stories now live in the docs, not here.
-          'Contributing',
-          ['Overview', "How it's built", 'Working with the primitives', 'Create or modify a component', 'Building in the Labs', 'Run the kit locally'],
+          // web-component docs live at ui.kitn.ai). Lead with the Getting Started
+          // guides (the auto-generated Token Reference rides at the end of that
+          // group — one token doc doesn't warrant its own section), then the
+          // SolidJS Components, the Labs composition testing ground, and the small
+          // Test Fixtures set the e2e specs target. The web-component element
+          // stories now live in the docs, not here.
+          'Getting Started',
+          ['Overview', "How it's built", 'Working with the primitives', 'Create or modify a component', 'Building in the Labs', 'Run the kit locally', 'Token Reference'],
           'Components',
           ['Overview', 'Elements', 'Primitives'],
           'Labs',
           'Test Fixtures',
-          'Theming',
-          ['Token Reference'],
           '*',
         ],
       },

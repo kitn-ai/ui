@@ -47,7 +47,7 @@ interface SuggestionsEl extends HTMLElement {
 }
 
 const meta = {
-  title: 'Labs/Composer (production)',
+  title: 'Labs/Composer',
   parameters: {
     layout: 'fullscreen',
     // Theme-driven: the whole showcase follows the Storybook light/dark toggle
@@ -214,4 +214,6 @@ function ComposerShowcase() {
   );
 }
 
-export const Composer: Story = { render: () => <ComposerShowcase /> };
+// Named distinctly from the "Composer" group so Storybook does NOT single-story-
+// hoist it — keeps every Lab a consistent topic folder, not a lone leaf.
+export const ProductionComposer: Story = { render: () => <ComposerShowcase /> };

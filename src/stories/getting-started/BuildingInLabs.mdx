@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Contributing/Building in the Labs" />
+<Meta title="Getting Started/Building in the Labs" />
 
 # Building in the Labs
 
@@ -56,7 +56,7 @@ npm run storybook   # http://localhost:6006
 Verify it both ways:
 
 - **Visually** — toggle light/dark with the theme switch; a lab should read in both. Check the composition holds at narrow widths.
-- **Behaviorally** — for anything event- or interaction-driven, add a Playwright IVP (independent visual/behavioral proof) rather than trusting the eye. The `tests/e2e/*-ivp.spec.ts` suites target lab/element stories by their story id (e.g. `labs-kai-menu--plus-menu`) and assert real shadow-DOM behavior. Run them with the matching `npm run test:*-ivp` script.
+- **Behaviorally** — for anything event- or interaction-driven, add a Playwright IVP (independent visual/behavioral proof) rather than trusting the eye. The `tests/e2e/*-ivp.spec.ts` suites target lab/element stories by their story id (e.g. `labs-menu--plus-menu`) and assert real shadow-DOM behavior. Run them with the matching `npm run test:*-ivp` script.
 
 ## Graduating a lab
 

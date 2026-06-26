@@ -12,7 +12,7 @@ import { test, expect, type Page } from '@playwright/test';
  * Run: `npx playwright test --config playwright.command.config.ts`
  */
 
-const STORY = '/iframe.html?id=labs-kai-command--mention-picker&viewMode=story';
+const STORY = '/iframe.html?id=labs-command--mention-picker&viewMode=story';
 
 function commandEl(page: Page) {
   return page.locator('kai-command');

@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Contributing/How it's built" />
+<Meta title="Getting Started/How it's built" />
 
 # How it's built
 
@@ -27,7 +27,7 @@ src/components/   →  AI feature components (ChatContainer, Message, PromptInpu
 src/elements/     →  kai-* custom elements (the Shadow-DOM facade)
 ```
 
-The package exposes two of these layers directly. `@kitn.ai/ui` (the `.` export) gives you layers 1–3 as Solid source; `@kitn.ai/ui/elements` gives you layer 4, the registered `kai-*` elements. The **Contributing → Working with the components directly** page covers the first; the rest of the docs cover the second.
+The package exposes two of these layers directly. `@kitn.ai/ui` (the `.` export) gives you layers 1–3 as Solid source; `@kitn.ai/ui/elements` gives you layer 4, the registered `kai-*` elements. The **Getting Started → Working with the primitives** page covers the first; the rest of the docs cover the second.
 
 ## Why Solid behind a custom element
 
@@ -70,6 +70,6 @@ That last point matters: a *bare* boolean attribute parses to `undefined`, not `
 
 ## Where to go next
 
-- **Contributing → Working with the components directly** — import the primitives and feature components into a Solid app.
-- **Contributing → Run the kit locally** — clone, build, and the Storybook dev loop.
-- **Contributing → Create or modify a component** — add a primitive and expose it as a `kai-*` element.
+- **Getting Started → Working with the primitives** — import the primitives and feature components into a Solid app.
+- **Getting Started → Run the kit locally** — clone, build, and the Storybook dev loop.
+- **Getting Started → Create or modify a component** — add a primitive and expose it as a `kai-*` element.

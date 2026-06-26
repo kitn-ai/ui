@@ -4,11 +4,12 @@ import { exampleUsageStoryIdPrefixes } from '../src/stories/examples/usage';
 import './api-tab'; // registers the "Code" tab for Components + Examples/Patterns
 
 // Storybook 10 controls addon-panel visibility here (the old per-story
-// `parameters.options.showPanel` is no longer honored). The Examples, Patterns,
-// and Theming stories are presentational — no args/controls — so the
-// Controls/Actions/Interactions panel is just empty space. Hide it for those
-// groups; component stories (which use controls) keep their panel.
-const NO_PANEL_PREFIXES = ['Examples/', 'Patterns/', 'Theming/'];
+// `parameters.options.showPanel` is no longer honored). Presentational stories —
+// no args/controls — would otherwise show an empty Controls/Actions/Interactions
+// panel. Hide it for those; component stories (which use controls) keep their
+// panel. The auto-generated Token Reference (now under Getting Started) is the
+// live case; the Examples/Patterns prefixes are kept for any composed demos.
+const NO_PANEL_PREFIXES = ['Examples/', 'Patterns/', 'Getting Started/Token Reference'];
 
 // The `Solid (Advanced)/` tier is always present in the sidebar but sits below
 // Components (via the storySort order in preview.ts) and is collapsed by

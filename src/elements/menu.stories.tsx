@@ -19,7 +19,7 @@ interface MenuEl extends HTMLElement {
 }
 
 const meta = {
-  title: 'Labs/Kai Menu',
+  title: 'Labs/Menu',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 export default meta;

@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { TokenTable } from './docs/theme-tokens';
 
-// Renders in the Solid preview (unlike MDX, which is React) and is embedded
-// into the Theming docs page via <Canvas of={...}>.
+// Renders in the Solid preview (unlike MDX, which is React): an auto-generated
+// reference of every overridable theme token, shown under Getting Started.
 const meta = {
-  title: 'Theming/Token Reference',
+  title: 'Getting Started/Token Reference',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 
