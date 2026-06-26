@@ -35,7 +35,7 @@ Notice that \`count\` is called as a function -- this is how SolidJS tracks whic
 ];
 
 const meta = {
-  title: 'Solid (Advanced)/Elements/ChatContainer',
+  title: 'Components/Elements/ChatContainer',
   component: ChatContainerRoot,
   tags: ['autodocs'],
   parameters: {

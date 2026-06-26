@@ -1,0 +1,140 @@
+---
+title: How composition works
+description: The mental model behind kai-* composition — slots for position, ::part and tokens for styling, props for per-item data — and when to reach for each.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The kit owns the **frame** — where things go — and the **primitives**. You own the **content** and the **wiring**. There's no enum of every layout to pick from; you compose the one you need from three mechanisms. Learn which mechanism does what, and the patterns that follow read as obvious.
+
+## The three mechanisms
+
+| Mechanism | What it controls | How you reach it |
+| --- | --- | --- |
+| **Slots** | Position — your markup in a named region | `<div slot="name">…</div>` |
+| **`::part` + tokens** | Styling — the kit's own regions, from outside | `kai-x::part(name) { … }`, CSS custom properties |
+| **Props** | Data — per-item content the kit renders | a JavaScript property (`messages`, `cards`) |
+
+One rule decides between them: a slot moves *your* markup; a `::part` restyles *ours*; a prop hands us the data and lets us render each item. Reach for a prop only for behavior CSS can't express.
+
+## 1. Slots — position
+
+A slot is a named hole inside the element's shadow that you fill with your own markup. Set the `slot` attribute on a direct child:
+
+```html
+<kai-chat>
+  <nav slot="sidebar">…your conversation list…</nav>
+  <footer slot="footer">Responses may be inaccurate.</footer>
+</kai-chat>
+```
+
+Inside a slot, nothing is `kai-*`-bound — it's your `<nav>`, your `<form>`, your CSS. A slot only earns its place where the shadow boundary blocks you. Content above or below the whole element is your own layout (a sibling node), so there's no slot for it.
+
+Slots come in two modes:
+
+- **inject** — additive. The built-in region still renders; your markup is added to it. `header-start`, `composer-actions`, and `footer` are inject slots.
+- **replace** — your markup stands in for the whole region, and **you own that region's data and events**. The `composer` slot is `replace`: project your own input and you drive submit and loading yourself, feeding the thread through `messages`.
+
+<Aside type="caution" title="replace means you own it">
+A `replace` slot hands you the whole region. A custom `composer` won't fire `kai-submit` for you — wire submit, loading, and the `messages` update yourself.
+</Aside>
+
+## 2. `::part` and tokens — styling
+
+To restyle a region the kit renders, target its `::part` from your own stylesheet. No shadow piercing, no `!important` arms race:
+
+```css
+kai-chat::part(header-bar) { height: 3.5rem; padding-inline: 1rem }
+kai-message::part(bubble)  { background: var(--color-primary) }
+```
+
+Parts also cover the "just hide it" case, which is pure CSS and so deliberately *not* a prop — for example, an Enter-only prompt input:
+
+```css
+kai-prompt-input::part(send) { display: none }
+```
+
+For global look-and-feel — color, radius, type — set the design tokens instead of styling every part. See [Theming](/guides/theming/).
+
+## 3. Props — per-item data
+
+Per-item content stays a **property**, never a slot. Messages, generative-UI cards, model lists — you hand the data to the element and it renders each item.
+
+```js
+chat.messages = [
+  { id: '1', role: 'assistant', content: 'How can I help?' },
+];
+```
+
+This is the load-bearing constraint, not an arbitrary choice: a slotted light-DOM node lives outside the shadow and **can't read the component's reactive state**, so it can't re-render per message or per card. That's why custom card UI registers in the card registry (the kit renders it with the item's data) rather than being slotted in. See [Generative UI](/guides/generative-ui/).
+
+## You write → we render
+
+The split, end to end on `<kai-chat>`: your light DOM projects into named slots; the data you set as a property drives what the kit renders inside its shadow.
+
+<svg role="img" aria-label="Light-DOM slots project into the kai-chat shadow root; messages stay a prop the kit renders." viewBox="0 0 1000 470" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:var(--sl-font);background:var(--sl-color-bg);border:1px solid var(--sl-color-gray-5);border-radius:12px">
+  <defs>
+    <marker id="hcw-arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="currentColor"/></marker>
+  </defs>
+  <g fill="var(--sl-color-gray-2)">
+    <text x="32" y="44" font-size="13" font-weight="700" letter-spacing="1" fill="var(--sl-color-gray-3)">YOU WRITE — light DOM</text>
+    <rect x="32" y="58" width="404" height="300" rx="10" fill="var(--sl-color-gray-6)" stroke="var(--sl-color-gray-5)"/>
+    <g font-family="var(--sl-font-mono,monospace)" font-size="14" fill="var(--sl-color-white)">
+      <text x="52" y="92">&lt;kai-chat&gt;</text>
+      <text x="72" y="124"><tspan fill="var(--sl-color-blue)">&lt;nav</tspan>    slot="sidebar"<tspan fill="var(--sl-color-blue)">&gt;</tspan>…</text>
+      <text x="72" y="156"><tspan fill="var(--sl-color-orange)">&lt;header</tspan> slot="header"<tspan fill="var(--sl-color-orange)">&gt;</tspan>…</text>
+      <text x="72" y="188"><tspan fill="var(--sl-color-orange)">&lt;form</tspan>   slot="composer"<tspan fill="var(--sl-color-orange)">&gt;</tspan>…</text>
+      <text x="72" y="220"><tspan fill="var(--sl-color-blue)">&lt;footer</tspan> slot="footer"<tspan fill="var(--sl-color-blue)">&gt;</tspan>…</text>
+      <text x="52" y="252">&lt;/kai-chat&gt;</text>
+      <text x="52" y="296"><tspan fill="var(--sl-color-green)">el.messages</tspan> = [ … ]</text>
+    </g>
+    <text x="52" y="322" font-size="12.5" fill="var(--sl-color-gray-3)">data — a prop, not a slot</text>
+  </g>
+  <g color="var(--sl-color-gray-3)" fill="var(--sl-color-gray-3)">
+    <text x="452" y="200" font-size="12.5" font-weight="600">projects into</text>
+    <line x1="448" y1="218" x2="544" y2="218" stroke="currentColor" stroke-width="2" marker-end="url(#hcw-arrow)"/>
+  </g>
+  <g>
+    <text x="564" y="44" font-size="13" font-weight="700" letter-spacing="1" fill="var(--sl-color-gray-3)">WE RENDER — shadow DOM</text>
+    <rect x="564" y="58" width="404" height="300" rx="12" fill="var(--sl-color-bg)" stroke="var(--sl-color-gray-4)" stroke-dasharray="6 5"/>
+    <rect x="580" y="74" width="104" height="268" rx="8" fill="var(--sl-color-blue-low)" stroke="var(--sl-color-blue)"/>
+    <text x="632" y="212" font-size="13" font-weight="700" fill="var(--sl-color-blue)" text-anchor="middle">sidebar</text>
+    <rect x="696" y="74" width="256" height="40" rx="8" fill="var(--sl-color-orange-low)" stroke="var(--sl-color-orange)"/>
+    <text x="710" y="99" font-size="13" font-weight="700" fill="var(--sl-color-orange)">header · replace</text>
+    <rect x="696" y="124" width="256" height="150" rx="8" fill="var(--sl-color-green-low)" stroke="var(--sl-color-green)"/>
+    <text x="710" y="150" font-size="13" font-weight="700" fill="var(--sl-color-green)">messages → cards</text>
+    <text x="710" y="172" font-size="12" fill="var(--sl-color-green)" font-family="var(--sl-font-mono,monospace)">data · card-registry</text>
+    <rect x="696" y="284" width="256" height="26" rx="7" fill="var(--sl-color-blue-low)" stroke="var(--sl-color-blue)"/>
+    <text x="710" y="302" font-size="12" font-weight="600" fill="var(--sl-color-blue)">composer-actions · inject</text>
+    <rect x="696" y="316" width="256" height="26" rx="7" fill="var(--sl-color-orange-low)" stroke="var(--sl-color-orange)"/>
+    <text x="710" y="334" font-size="12" font-weight="600" fill="var(--sl-color-orange)">composer · replace</text>
+  </g>
+  <line x1="32" y1="386" x2="968" y2="386" stroke="var(--sl-color-gray-5)"/>
+  <g font-size="13">
+    <rect x="32" y="406" width="15" height="15" rx="3" fill="var(--sl-color-blue-low)" stroke="var(--sl-color-blue)"/>
+    <text x="56" y="412" font-weight="700" fill="var(--sl-color-blue)">INJECT</text>
+    <text x="56" y="430" fill="var(--sl-color-gray-2)" font-size="12.5">your markup is added to the region (a slot)</text>
+    <rect x="372" y="406" width="15" height="15" rx="3" fill="var(--sl-color-orange-low)" stroke="var(--sl-color-orange)"/>
+    <text x="396" y="412" font-weight="700" fill="var(--sl-color-orange)">REPLACE</text>
+    <text x="396" y="430" fill="var(--sl-color-gray-2)" font-size="12.5">your markup stands in; you own its events</text>
+    <rect x="720" y="406" width="15" height="15" rx="3" fill="var(--sl-color-green-low)" stroke="var(--sl-color-green)"/>
+    <text x="744" y="412" font-weight="700" fill="var(--sl-color-green)">DATA</text>
+    <text x="744" y="430" fill="var(--sl-color-gray-2)" font-size="12.5">a prop — never a slot</text>
+  </g>
+</svg>
+
+## When to reach for which
+
+- **Move or replace a region** → a slot. Adding chrome (a footer, a toolbar control) is inject; swapping a whole region (your own header or composer) is replace, and you own its wiring.
+- **Restyle a region the kit renders** → `::part` for that one region, design tokens for global look. CSS-only behaviors (hide the send button) are parts, not props.
+- **Change per-item content** → a prop or the card registry — never a slot, because a slotted node can't see the component's reactive state.
+- **Outgrown the slots on `<kai-chat>`** → step down a layer and assemble the shell from the primitives yourself.
+
+Every element's exact holes and styleable regions live in its own page under **Slots** and **Styling** (e.g. [`kai-chat`](/components/chat/), [`kai-message`](/components/message/), [`kai-prompt-input`](/components/prompt-input/)).
+
+## Next
+
+- **[Compose your own shell](/patterns/compose-your-own/)** — assemble the sidebar, message thread, and composer from the primitives when `<kai-chat>` is too fixed.
+- **[Custom chat header](/patterns/custom-chat-header/)** — inject controls and replace the header in practice.
+- **[Generative UI](/guides/generative-ui/)** — the card registry, the data-render path for custom message content.
+- **[Theming](/guides/theming/)** — the design tokens behind the styling layer.

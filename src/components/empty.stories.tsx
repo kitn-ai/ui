@@ -19,7 +19,7 @@ import { componentDescription } from '../stories/docs/element-controls';
  * common composition, and the variation stories are compositional showcases.
  */
 const meta = {
-  title: 'Solid (Advanced)/Elements/Empty',
+  title: 'Components/Elements/Empty',
   component: Empty,
   tags: ['autodocs'],
   parameters: {

@@ -45,6 +45,7 @@ export function Tooltip(props: TooltipProps) {
     <>
       <As
         as="span"
+        class="inline-block"
         ref={setTriggerEl}
         aria-describedby={open() ? id : undefined}
         onPointerEnter={() => { setPointerInside(true); show(local.openDelay ?? 600); }}

@@ -9,6 +9,9 @@ const props = el?.props ?? [];
 
 const th = 'text-left text-xs font-semibold uppercase tracking-wide text-ink-3 bg-surface px-4 py-2.5 border-b border-line';
 ---
+{props.length === 0 ? (
+  <p class="not-content my-4 text-sm text-ink-3">No configurable properties — set content in the default slot and style it via <code>::part</code>.</p>
+) : (
 <div class="not-content my-4 overflow-hidden rounded-xl border border-line">
   <table class="w-full border-collapse text-sm">
     <thead><tr><th class={th}>Property</th><th class={th}>Type</th><th class={th}>Default</th><th class={th}>Notes</th></tr></thead>
@@ -33,3 +36,4 @@ const th = 'text-left text-xs font-semibold uppercase tracking-wide text-ink-3 b
     </tbody>
   </table>
 </div>
+)}

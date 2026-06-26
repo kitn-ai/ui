@@ -11,7 +11,7 @@ describe('Skeleton', () => {
     const els = container.querySelectorAll('.animate-pulse');
     expect(els).toHaveLength(1);
     const el = els[0] as HTMLElement;
-    expect(el).toHaveClass('bg-muted', 'h-4', 'w-64');
+    expect(el).toHaveClass('bg-foreground/10', 'h-4', 'w-64');
     expect(el.style.width).toBe(''); // class drives the size; nothing inlined over it
   });
 

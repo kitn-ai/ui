@@ -3,7 +3,7 @@ import { Avatar } from './avatar';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Solid (Advanced)/Primitives/Avatar',
+  title: 'Components/Primitives/Avatar',
   component: Avatar,
   tags: ['autodocs'],
   parameters: {

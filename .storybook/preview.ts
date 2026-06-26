@@ -107,40 +107,19 @@ const preview: Preview = {
         // intra-group order (e.g. Examples lead with the full-app "wow" demo
         // rather than sorting alphabetically).
         order: [
-          'Docs',
-          [
-            'Introduction',
-            'Installation',
-            'Getting Started',
-            'Choosing Components',
-            'Composition & Child Elements',
-            'Frameworks',
-            ['Overview', 'HTML', 'React', 'Svelte', 'Vue', 'Angular', 'Solid'],
-            'Recipes',
-            ['Streaming (OpenRouter)', 'Text-to-Speech', 'Speech-to-Text'],
-            'Accessibility',
-            'Using with AI',
-          ],
-          'Theming',
-          ['Overview', 'Editor', 'Token Reference', 'Typography'],
-          'Examples',
-          [
-            'Full Chat App',
-            'Streaming Response',
-            'State & Hooks',
-            'Conversation with Reasoning',
-            'Conversation with Sources',
-            'Message Actions',
-            'Prompt Input Variants',
-            'Context & Token Usage',
-            'Checkpoint & Restore',
-          ],
-          'Patterns',
+          // Storybook is the SolidJS-primitive / contributor surface (the consumer
+          // web-component docs live at ui.kitn.ai). Lead with the Contributing
+          // guides, then the SolidJS Components, the Labs composition testing
+          // ground, and the small Test Fixtures set the e2e specs target. The
+          // web-component element stories now live in the docs, not here.
+          'Contributing',
+          ['Overview', "How it's built", 'Working with the primitives', 'Create or modify a component', 'Building in the Labs', 'Run the kit locally'],
           'Components',
-          'Solid (Advanced)',
           ['Overview', 'Elements', 'Primitives'],
-          'Generative UI',
-          ['Overview', 'Cards', ['kai-confirm', '*'], 'SDK'],
+          'Labs',
+          'Test Fixtures',
+          'Theming',
+          ['Token Reference'],
           '*',
         ],
       },

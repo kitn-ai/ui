@@ -43,7 +43,7 @@ Internally this runs `build:css` (compiles Tailwind to `src/elements/compiled.cs
 
 | File | Format | Notes |
 |------|--------|-------|
-| `dist/kitn-chat.es.js` | ES module | Main entry. ~110 KB gzip; lazy chunks for code highlighting load on demand |
+| `dist/kai.es.js` | ES module | Main entry. ~110 KB gzip; lazy chunks for code highlighting load on demand |
 
 The build is **ES-module only** by design. A UMD/IIFE build cannot code-split, so it would have to inline every lazy chunk (all the Shiki syntax-highlighting languages) into one multi-MB file. The ES build keeps those chunks lazy and is loadable directly via `<script type="module">` in every modern browser.
 
@@ -55,12 +55,12 @@ Import the ES module as a side-effect. It registers all **40+ custom elements** 
 import '@kitn.ai/ui/elements';
 ```
 
-The `./elements` export in `package.json` resolves to `dist/kitn-chat.es.js`.
+The `./elements` export in `package.json` resolves to `dist/kai.es.js`.
 
 For plain HTML pages:
 
 ```html
-<script type="module" src="./dist/kitn-chat.es.js"></script>
+<script type="module" src="./dist/kai.es.js"></script>
 ```
 
 ---
@@ -1167,6 +1167,14 @@ The polished building blocks you compose your own chrome from — themed, access
 |-------|-----------|-------------|
 | `kai-click` | — | The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. |
 
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `icon` | replace | A custom leading icon (any inline SVG, inherits `currentColor`). Wins over the `icon` prop. |
+
 #### Styleable parts
 
 Restyle from outside the Shadow DOM via `kai-button::part(name)`.
@@ -1304,6 +1312,14 @@ A text hint shown on hover/focus of a slotted trigger; positioned and portaled i
 | `closeDelay` | `close-delay` | `undefined | number` | — | Delay (ms) before it closes after the pointer leaves. Defaults to 300. |
 | `placement` | `placement` | `undefined | string` | — | Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. |
 
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `card` | inject | The rich content shown in the floating hover card. |
+
 #### Composed from
 
 `UI/HoverCard`
@@ -1333,6 +1349,15 @@ Rich content on hover/focus of a trigger — the markup-carrying sibling of `<ka
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-dismiss` | — | The notice was dismissed via its × (it also hides itself). |
+
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `action` | inject | A trailing action beside the message — a link or button. |
+| `icon` | replace | A custom leading icon (any inline SVG, inherits `currentColor`). Overrides the severity default and the `icon` prop — the same escape hatch as `kai-button`. |
 
 #### Composed from
 
@@ -1384,7 +1409,7 @@ A themed divider between groups of content (toolbar sections, menu groups, heade
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-
+| `orientation` | `orientation` | `undefined | "horizontal" | "vertical" | "both"` | `'vertical'` | Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. |
 
 #### Styleable parts
 
@@ -1419,6 +1444,14 @@ A scroll container with a themed, thin, cross-browser scrollbar and a keyboard-r
 | `height` | `height` | `undefined | string` | — | CSS height. Defaults per variant (a text line height; circle = width). |
 | `lines` | `lines` | `undefined | number` | — | `text` only: number of lines; the last is shorter. Defaults to 1. |
 
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-skeleton::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(skeleton)` | The shimmer block(s). Recolor or change the opacity from outside; the default is a low-contrast foreground tint that reads in both light and dark. <br>`kai-skeleton::part(skeleton) { background: var(--color-primary); opacity: 0.15 }` |
+
 #### Composed from
 
 `UI/Skeleton`
@@ -1451,6 +1484,14 @@ A pulsing loading placeholder that preserves layout while content arrives. Respo
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-select` | `{ id: string; checked?: undefined | false | true }` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
+
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `trigger` | replace | Your own trigger element; replaces the built-in button driven by the `trigger-icon` / `trigger-label` props. |
 
 #### Composed from
 

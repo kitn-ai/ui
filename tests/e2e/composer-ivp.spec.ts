@@ -13,10 +13,10 @@ import { test, expect, type Page } from '@playwright/test';
  * (Storybook must be serving on :6006.)
  */
 
-const SKILLS_STORY = '/iframe.html?id=elements-composer--skills&viewMode=story';
-const PREFILLED_STORY = '/iframe.html?id=elements-composer--prefilled&viewMode=story';
-const DEFAULT_STORY = '/iframe.html?id=elements-composer--default&viewMode=story';
-const HIGHLIGHTED_STORY = '/iframe.html?id=elements-composer--highlighted&viewMode=story';
+const SKILLS_STORY = '/iframe.html?id=test-fixtures-composer--skills&viewMode=story';
+const PREFILLED_STORY = '/iframe.html?id=test-fixtures-composer--prefilled&viewMode=story';
+const DEFAULT_STORY = '/iframe.html?id=test-fixtures-composer--default&viewMode=story';
+const HIGHLIGHTED_STORY = '/iframe.html?id=test-fixtures-composer--highlighted&viewMode=story';
 
 /** Locator for the editable surface inside the element's (open) shadow root.
  *  Playwright pierces open shadow roots automatically. */

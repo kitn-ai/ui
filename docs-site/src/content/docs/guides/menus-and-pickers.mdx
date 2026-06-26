@@ -1,0 +1,135 @@
+---
+title: Menus & command pickers
+description: Wire two JSON-driven pickers — a kai-menu cascading + menu and a kai-command grouped command palette — their item shapes, events, and triggers.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import MenuCommandDemo from '../../../components/MenuCommandDemo.tsx';
+
+<p class="kai-lede">Two interactive pickers cover most of what a chat UI needs. `<kai-menu>` is a cascading dropdown — the `+` attach menu, an effort selector, a row-actions menu. `<kai-command>` is a filterable, grouped picker — an `@`-mention palette or a command bar. Both are JSON-driven: you set an array, listen for an event. Open the menu, hover Skills, then search the palette below.</p>
+
+<MenuCommandDemo client:only="solid" />
+
+Both elements take their data as an `items` array set in JavaScript — arrays can't be HTML attributes — and report selections through non-bubbling `kai-*` events you listen for on the element itself. That's the whole contract.
+
+<Aside type="note" title="Which one to reach for">
+`<kai-menu>` when you have a fixed, shallow tree the user clicks through — actions, toggles, a submenu or two. `<kai-command>` when the list is long enough to search, or naturally falls into groups (people, files, commands). The menu opens from a trigger; the palette is a search box you place wherever you want.
+</Aside>
+
+## The + menu — kai-menu
+
+Register the elements once, then drop the menu in. The built-in trigger is driven by props: `trigger-icon` for an icon button, `trigger-label` for a text button, `trigger-icon-trailing` for a select-style chevron. `label` gives an icon-only trigger an accessible name.
+
+```html
+<script type="module">
+  import '@kitn.ai/ui/elements';
+</script>
+
+<kai-menu trigger-icon="plus" label="Add"></kai-menu>
+```
+
+### The items tree
+
+Set `items` in JavaScript. Each leaf needs an `id` and a `label`; the rest is optional. Nest an `items` array for a submenu, drop in `{ separator: true }` for a rule, `{ heading: true, label }` for a non-interactive group label, `checked` for a toggle, `disabled` to grey one out, `shortcut` for a trailing hint, and `icon` for a leading glyph (a name from the [icon set](/components/icon/), an image URL, or text).
+
+```js
+const menu = document.querySelector('kai-menu');
+menu.items = [
+  { heading: true, label: 'Actions' },
+  { id: 'add-files', label: 'Add files or photos', icon: 'paperclip', shortcut: '⌘U' },
+  { id: 'add-github', label: 'Add from GitHub', icon: 'github' },
+  {
+    label: 'Skills', icon: 'sparkles',
+    items: [
+      { id: 'skill-creator', label: 'skill-creator', icon: 'sparkles' },
+      { id: 'manage-skills', label: 'Manage skills', icon: 'settings' },
+    ],
+  },
+  { separator: true },
+  { id: 'web-search', label: 'Web search', icon: 'globe', checked: true },
+  { id: 'coming-soon', label: 'Coming soon', disabled: true },
+];
+```
+
+### Reading selections
+
+`kai-select` fires when the user picks a leaf. Plain items carry `{ id }`; checkbox items carry `{ id, checked }`, where `checked` is the new state. A submenu's parent doesn't fire — only the leaf you land on does.
+
+```js
+menu.addEventListener('kai-select', (e) => {
+  const { id, checked } = e.detail;
+  if (id === 'web-search') {
+    // checked is the NEW state — write a fresh array back to update the checkmark.
+    menu.items = menu.items.map((item) =>
+      item.id === 'web-search' ? { ...item, checked } : item,
+    );
+  } else {
+    console.log('picked:', id);
+  }
+});
+```
+
+Reassign a new array to update a toggle — mutating an item in place won't re-render. That's the same streaming rule as everywhere else in the kit.
+
+### A custom trigger
+
+The `trigger-icon` / `trigger-label` props cover the common case. When you need your own button, project it into `slot="trigger"` — a slotted trigger replaces the built-in one.
+
+```html
+<kai-menu>
+  <button slot="trigger" aria-label="More">⋯</button>
+</kai-menu>
+```
+
+<Aside type="tip" title="Where the + menu lives in a composer">
+In a real composer the `+` menu sits in `<kai-prompt-input>`'s `toolbar-start` slot, and an effort selector — a `kai-menu` with `trigger-label` + a trailing chevron — sits in `toolbar-end`. See [Build a composer](/guides/build-a-composer/) for the assembled card.
+</Aside>
+
+## The command palette — kai-command
+
+`<kai-command>` renders a search box over a grouped list and handles the filtering and keyboard navigation for you. `placeholder` sets the input text; `empty-label` is shown when nothing matches.
+
+```html
+<kai-command placeholder="Search people, files, commands…" empty-label="Nothing matches"></kai-command>
+```
+
+### The items list
+
+`items` is a flat array — no nesting. Each item needs an `id` and a `label`; `icon` and `description` are optional. Set `group` and the element buckets items under that heading automatically; items without a `group` render ungrouped at the top.
+
+```js
+const palette = document.querySelector('kai-command');
+palette.items = [
+  { id: 'ana', label: 'Ana Ortiz', icon: 'message-circle', description: 'Design', group: 'People' },
+  { id: 'sam', label: 'Sam Lee', icon: 'message-circle', description: 'Engineering', group: 'People' },
+  { id: 'design-spec', label: 'design-spec.md', icon: 'file-text', description: '/docs', group: 'Files' },
+  { id: 'roadmap', label: 'roadmap.md', icon: 'file-text', description: '/docs', group: 'Files' },
+  { id: 'deploy', label: 'Deploy', icon: 'sparkles', description: 'Ship to production', group: 'Commands' },
+];
+```
+
+### Reading selections and the query
+
+`kai-select` fires with `{ id }` on click or Enter. `kai-query-change` fires `{ value }` on every keystroke — use it to fetch results from a server instead of filtering the static list, the standard move for an `@`-mention picker.
+
+```js
+palette.addEventListener('kai-select', (e) => {
+  console.log('inserted:', e.detail.id);
+});
+
+palette.addEventListener('kai-query-change', (e) => {
+  // Filtering the static `items` happens for free. Hook this up only when the
+  // results come from a backend.
+  fetchMentions(e.detail.value).then((results) => { palette.items = results; });
+});
+```
+
+<Aside type="note" title="Events don't bubble">
+Every `kai-*` event is a non-bubbling `CustomEvent` — add the listener to the element itself, not a parent or `document`. Read the payload from `event.detail`. This holds for `kai-select`, `kai-query-change`, and the rest of the kit.
+</Aside>
+
+## Next
+
+- **[How composition works](/guides/how-composition-works/)** — slots for position, `::part` and tokens for styling, props for per-item data, and when to reach for each.
+- **[`kai-menu` reference](/components/menu/)** and **[`kai-command` reference](/components/command/)** — every prop, event, and slot.
+- **[Build a composer](/guides/build-a-composer/)** — the `+` menu and effort selector wired into a full Claude-style composer.

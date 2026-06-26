@@ -34,7 +34,7 @@ export interface CodeHighlightingOptions {
   aliases?: Record<string, string>;
 }
 
-// Runtime values live in the compiled \`default\` (dist/kitn-chat.es.js); we only
+// Runtime values live in the compiled \`default\` (dist/kai.es.js); we only
 // DECLARE their signatures here so the .d.ts pulls no source.
 export declare function configureCodeHighlighting(options: CodeHighlightingOptions): void;
 export declare function isCodeHighlightingEnabled(): boolean;`;

@@ -1,0 +1,112 @@
+---
+title: Button
+description: The kit's button as a drop-in web component — variants, sizes, leading/trailing icons, and a slot for your own SVG.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import SlotTable from '../../../components/SlotTable.astro';
+import PartTable from '../../../components/PartTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-button</p>
+
+<p class="kai-lede">The kit's button as a drop-in web component — five variants, text and icon sizes, leading and trailing icons, and a slot for your own SVG. Compose polished, theme-aware controls instead of hand-rolling a `<button>` plus hover styles.</p>
+
+<Facts items={['Shadow DOM', '5 variants', 'Named + URL icons', 'Emits kai-click']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-button" />
+
+<Aside type="tip" title="When to use">
+Reach for `<kai-button>` for any user-triggered action — submitting input, a toolbar action, confirming or dismissing. Use `default` for the primary action and `subtle`/`ghost`/`outline` for secondary or low-emphasis ones. It's the same button the kit's own controls use, so a custom action row sitting next to a [Prompt input](/components/prompt-input/) or [Suggestions](/components/suggestions/) matches without extra styling.
+</Aside>
+
+## Usage
+
+Put the label as light-DOM text inside the element. Set `variant` and `size` for emphasis and footprint, add `icon` for a leading glyph, and listen for `kai-click`. For an icon-only button, drop the text, set `size="icon"`, and name it with `label`.
+
+```html
+<kai-button variant="subtle" size="icon" icon="mic" label="Voice input"></kai-button>
+<kai-button variant="ghost" icon-trailing="chevron-down">High</kai-button>
+<kai-button>Send</kai-button>
+```
+
+## Examples
+
+### Variants
+
+`variant` sets the emphasis: `default` (filled), `subtle` (muted text, hover tint — the toolbar look), `ghost` (transparent, hover fill), `outline`, and `destructive`.
+
+<Example client:visible tag="kai-button" config={{ variant: 'default' }} data="send" />
+
+<Example client:visible tag="kai-button" config={{ variant: 'subtle' }} data="cancel" />
+
+<Example client:visible tag="kai-button" config={{ variant: 'outline' }} data="cancel" />
+
+<Example client:visible tag="kai-button" config={{ variant: 'destructive' }} data="cancel" />
+
+### Sizes
+
+`sm`, `md` (default), and `lg` size text buttons.
+
+<Example client:visible tag="kai-button" config={{ size: 'sm' }} data="send" />
+
+<Example client:visible tag="kai-button" config={{ size: 'lg' }} data="send" />
+
+### Icon-only
+
+Drop the text, use a square `size` (`icon` / `icon-sm`), and set `label` for the accessible name. `icon` takes a named icon, an image URL, or a data-URI.
+
+<Example client:visible tag="kai-button" config={{ variant: 'subtle', size: 'icon', icon: 'mic', label: 'Voice input' }} data="iconOnly" />
+
+### Trailing icon
+
+`icon-trailing` sits after the label — a `chevron-down` reads as a menu affordance.
+
+<Example client:visible tag="kai-button" config={{ variant: 'ghost', iconTrailing: 'chevron-down' }} data="model" />
+
+### Custom icon via slot
+
+For a glyph the `icon` prop can't name — your own SVG, an icon library — slot it into `slot="icon"`; it wins over the `icon` prop. Keep `label` for the accessible name.
+
+<Example client:visible tag="kai-button" config={{ label: 'Ship' }} data="slottedIcon" />
+
+## Slots
+
+The label is the default slot; `icon` is the one named seam:
+
+<SlotTable tag="kai-button" />
+
+```html
+<kai-button label="Ship">
+  <svg slot="icon" viewBox="0 0 24 24" width="16" height="16"><!-- your glyph --></svg>
+  Ship it
+</kai-button>
+```
+
+## Styling
+
+The whole button is one `::part` — restyle radius, padding, color, or weight from outside while keeping `variant`/`size` as the defaults.
+
+<PartTable tag="kai-button" />
+
+## Props
+
+<PropTable tag="kai-button" />
+
+## Events
+
+<EventTable tag="kai-button" />
+
+## Composed from
+
+<ComposedFrom tag="kai-button" />
+
+<NeedAHand />

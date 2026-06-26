@@ -57,7 +57,7 @@ const sampleAttachments: AttachmentData[] = [
 ];
 
 const meta = {
-  title: 'Solid (Advanced)/Elements/Attachments',
+  title: 'Components/Elements/Attachments',
   component: Attachments,
   tags: ['autodocs'],
   parameters: {

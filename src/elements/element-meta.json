@@ -467,6 +467,13 @@
       }
     ],
     "tokens": [],
+    "slots": [
+      {
+        "name": "icon",
+        "mode": "replace",
+        "doc": "A custom leading icon (any inline SVG, inherits `currentColor`). Wins over the `icon` prop."
+      }
+    ],
     "parts": [
       {
         "name": "button",
@@ -2070,7 +2077,14 @@
         "storyId": "solid-advanced-primitives-hovercard--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "card",
+        "mode": "inject",
+        "doc": "The rich content shown in the floating hover card."
+      }
+    ]
   },
   {
     "tag": "kai-icon",
@@ -2396,7 +2410,14 @@
         "storyId": "solid-advanced-primitives-dropdownsubcontent--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "trigger",
+        "mode": "replace",
+        "doc": "Your own trigger element; replaces the built-in button driven by the `trigger-icon` / `trigger-label` props."
+      }
+    ]
   },
   {
     "tag": "kai-message",
@@ -2658,7 +2679,19 @@
         "storyId": "solid-advanced-primitives-notice--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "action",
+        "mode": "inject",
+        "doc": "A trailing action beside the message — a link or button."
+      },
+      {
+        "name": "icon",
+        "mode": "replace",
+        "doc": "A custom leading icon (any inline SVG, inherits `currentColor`). Overrides the severity default and the `icon` prop — the same escape hatch as `kai-button`."
+      }
+    ]
   },
   {
     "tag": "kai-popover",
@@ -3265,7 +3298,17 @@
     "tag": "kai-scroll-area",
     "className": "KaiScrollAreaElement",
     "displayName": "ScrollArea",
-    "props": [],
+    "props": [
+      {
+        "name": "orientation",
+        "type": "undefined | \"horizontal\" | \"vertical\" | \"both\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it.",
+        "default": "'vertical'",
+        "displayType": "undefined | \"horizontal\" | \"vertical\" | \"both\""
+      }
+    ],
     "events": [],
     "composedFrom": [
       {
@@ -3411,7 +3454,14 @@
         "storyId": "solid-advanced-primitives-skeleton--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "parts": [
+      {
+        "name": "skeleton",
+        "doc": "The shimmer block(s). Recolor or change the opacity from outside; the default is a low-contrast foreground tint that reads in both light and dark.",
+        "recipe": "kai-skeleton::part(skeleton) { background: var(--color-primary); opacity: 0.15 }"
+      }
+    ]
   },
   {
     "tag": "kai-skills",

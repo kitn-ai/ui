@@ -3,7 +3,7 @@ import { Separator } from './separator';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Solid (Advanced)/Primitives/Separator',
+  title: 'Components/Primitives/Separator',
   component: Separator,
   tags: ['autodocs'],
   parameters: {

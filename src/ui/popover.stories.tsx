@@ -7,7 +7,7 @@ import { Button } from './button';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Solid (Advanced)/Primitives/Popover',
+  title: 'Components/Primitives/Popover',
   component: Popover,
   tags: ['autodocs'],
   parameters: {

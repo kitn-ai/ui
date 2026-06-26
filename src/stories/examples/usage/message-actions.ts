@@ -9,7 +9,7 @@ const hover: StoryUsage = {
     'Render an assistant message with an action bar that reveals on hover. Declare each button as a `<kai-action id icon tooltip>` child of `<kai-message>` and set `actions-reveal="hover"` — the element owns the fade (no consumer CSS). React passes the `actions` array instead; the Solid demo uses the primitives with `group`/`group-hover`.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <kai-message id="msg" role="assistant" avatar-fallback="AI" content="${REPLY}" actions-reveal="hover">
@@ -130,7 +130,7 @@ const alwaysVisible: StoryUsage = {
     "Keep the bar always visible (the default). Declare each button as a `<kai-action id icon tooltip>` child — built-in-style (copy/like/…) and custom (share/bookmark) are all just `<kai-action>` elements, and `<kai-message>` fires `messageaction` with the id. (React passes them as the `actions` array.)",
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <kai-message id="msg" role="assistant" avatar-fallback="AI" content="${REPLY}">
@@ -245,7 +245,7 @@ const copyConfirm: StoryUsage = {
     'Listen for `messageaction` with `action: "copy"` and write to the clipboard yourself — `<kai-message>` only emits the event; it does not touch the clipboard. In SolidJS you can also swap the icon to a check for 2 seconds as a visual confirmation (see the Solid tab).',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <kai-message id="msg" role="assistant" avatar-fallback="AI" content="${REPLY}">
@@ -370,7 +370,7 @@ const feedbackBar: StoryUsage = {
     'Ask for feedback under a reply. `<kai-feedback-bar>` owns the whole flow — it asks, optionally collects a category + comment on a not-helpful vote (`collect-detail`), then confirms with a thank-you **in place** (it does not disappear on a vote; only `close` removes it). It fires `feedback` (`{ value }`), `feedbackdetail` (`{ value, category?, comment? }`), and `close`.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <kai-feedback-bar id="fb" bar-title="Was this response helpful?" collect-detail></kai-feedback-bar>
@@ -482,7 +482,7 @@ const fullExample: StoryUsage = {
     'Every feature combined: avatar, markdown content, the action bar (copy/regenerate plus custom **Share**/**Bookmark** with tooltips), a copy→clipboard handler with visual confirmation, and a **Feedback Bar** below. Like/dislike are omitted since the Feedback Bar covers that. Icon-only buttons get tooltips automatically; override the text with a `tooltip` field on custom actions. In SolidJS wrap each button with `<Tooltip>` (see the Solid tab).',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <div style="max-width:42rem; padding:1rem; display:flex; flex-direction:column; gap:0.5rem">

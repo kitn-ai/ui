@@ -1,0 +1,189 @@
+---
+title: Use the chat app
+description: Drive <kai-chat> end to end — seed the thread, stream replies, offer models and starter prompts, and react to every event it fires.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import ChatDemo from '../../../components/ChatDemo.tsx';
+
+`<kai-chat>` is the batteries-included element: a message thread with markdown, reasoning, and tool calls, a composer, optional header chrome, and a streaming-ready render loop. You feed it data and listen for events; it handles the UI. Send a message in the demo below — the reply streams in.
+
+<ChatDemo
+  client:only="solid"
+  chatTitle="Assistant"
+  placeholder="Ask anything…"
+  suggestions={["What makes AI/UI different from rolling my own?", "Show me a streaming reply"]}
+  messages={[]}
+/>
+
+This guide assumes you've installed the package and registered the elements. If not, do the [Getting Started](/guides/getting-started/) quickstart first, then come back here to go deeper.
+
+## Drop it in
+
+`<kai-chat>` works in two motions you'll repeat all over this page: set rich data on a JavaScript property, and listen for `kai-*` events. Render the element, seed the thread, and handle a submit.
+
+```html
+<kai-chat id="chat" style="display:block; height:100dvh;"></kai-chat>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-chat');
+
+  const chat = document.getElementById('chat');
+
+  // Seed the thread. Arrays can't be attributes, so this lives in JavaScript.
+  chat.messages = [
+    { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+  ];
+
+  chat.addEventListener('kai-submit', (e) => {
+    const userMessage = { id: crypto.randomUUID(), role: 'user', content: e.detail.value };
+    chat.messages = [...chat.messages, userMessage];
+    // Call your model here, then append an assistant message.
+  });
+</script>
+```
+
+A few things that pay off everywhere:
+
+- `messages` is an array of `{ id, role, content }`. Every entry needs a stable `id` (it keys the render and message actions); `role` is `'user'` or `'assistant'`. Optional fields — `reasoning`, `tools`, `attachments`, `actions`, `avatar` — light up the matching UI when present.
+- Assign a **new array** to re-render. Pushing into the existing one won't trigger an update.
+- `kai-submit` carries the input on `e.detail.value` and any staged files on `e.detail.attachments`.
+- Give the element an explicit height. It fills its block and owns its own scrolling.
+
+<Aside type="note" title="The one rule that trips people up">
+Arrays and objects — `messages`, `models`, `suggestions`, `context` — are set in JavaScript, never as HTML attributes (an attribute is always a string). Scalars like `placeholder`, `loading`, `chat-title`, and `theme` work fine as attributes. Each framework's property binding handles this for you; the gotcha only bites raw HTML.
+</Aside>
+
+## Stream a reply
+
+`<kai-chat>` is transport-agnostic — it renders whatever you hand it, so it doesn't care whether tokens come from your own backend, a proxy, or a mock. The pattern: append an empty assistant message, then replace it with a fresh object on every chunk.
+
+```js
+chat.addEventListener('kai-submit', async (e) => {
+  const prompt = e.detail.value.trim();
+  if (!prompt) return;
+
+  // 1. Show the user's turn and an empty assistant placeholder.
+  const assistantId = crypto.randomUUID();
+  chat.messages = [
+    ...chat.messages,
+    { id: crypto.randomUUID(), role: 'user', content: prompt },
+    { id: assistantId, role: 'assistant', content: '' },
+  ];
+  chat.loading = true;
+
+  // 2. Stream from your endpoint and grow the assistant message.
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: prompt }),
+  });
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let answer = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    answer += decoder.decode(value, { stream: true });
+
+    // New object per chunk — mutating in place won't re-render.
+    chat.messages = chat.messages.map((m) =>
+      m.id === assistantId ? { ...m, content: answer } : m,
+    );
+  }
+
+  chat.loading = false;
+});
+```
+
+`loading` toggles the streaming indicator and disables submit while the reply is in flight. Set it back to `false` when the stream ends. For a full backend recipe — parsing SSE, error handling, the abort path — see the [streaming recipe](/guides/recipes/streaming/).
+
+## Offer models
+
+Pass a `models` array and `<kai-chat>` shows a switcher in its header. Track the selection with `currentModel` and update it from `kai-model-change`.
+
+```js
+chat.models = [
+  { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI' },
+  { id: 'claude-sonnet', name: 'Claude Sonnet', provider: 'Anthropic' },
+];
+chat.currentModel = 'gpt-4o';
+
+chat.addEventListener('kai-model-change', (e) => {
+  chat.currentModel = e.detail.modelId;
+  // Route your next request to e.detail.modelId.
+});
+```
+
+Each model is `{ id, name, provider? }` — `id` is what you get back on `kai-model-change`, `name` is the label, and `provider` groups the menu. The switcher only appears when there's more than one model.
+
+## Starter suggestions and the empty state
+
+An empty thread reads as a dead end. Hand the user a few `suggestions` and `<kai-chat>` renders them as starter chips in its own empty state, then hides them once the conversation begins.
+
+```js
+chat.messages = [];
+chat.suggestions = [
+  'What can you help me with?',
+  'Show me a streaming example',
+  'Theme the components to match my brand',
+];
+```
+
+Clicking a chip submits it immediately by default, firing `kai-submit` like a typed message — so the streaming loop above just works. To prefill the input instead and let the user edit first, set `suggestionMode = 'fill'` and read the chosen text from `kai-suggestion-click`. For a custom greeting with chips of your own, see the [empty-state pattern](/patterns/empty-state/).
+
+## The events you'll wire
+
+Every interaction surfaces as a non-bubbling `kai-*` CustomEvent. Listen on the element itself and read the payload off `e.detail`.
+
+- **`kai-submit`** — the user sent a message. `detail: { value, attachments }`. This is the one you always handle.
+- **`kai-model-change`** — the header switcher changed. `detail: { modelId }`.
+- **`kai-suggestion-click`** — a starter chip was chosen in `'fill'` mode (in `'submit'` mode you get `kai-submit` instead). `detail: { value }`.
+- **`kai-message-action`** — a message action button was clicked. `detail: { messageId, action, state? }`, where `action` is a built-in (`copy`, `like`, `dislike`, `regenerate`, `edit`) or your custom id; `state` is `'on'`/`'off'` for the like/dislike toggles. Show actions by adding an `actions` array to a message.
+- **`kai-value-change`** — fires on every keystroke; useful for draft persistence or a controlled input.
+- **`kai-search`** / **`kai-voice`** — the toolbar Search and Mic buttons, shown when you set the `search` and `voice` props. Each fires with an empty detail; you own what happens next.
+
+```js
+chat.addEventListener('kai-message-action', (e) => {
+  const { messageId, action } = e.detail;
+  if (action === 'regenerate') regenerate(messageId);
+});
+```
+
+## In React
+
+The element is identical under React; the wrapper just gives you typed props and `on*` handlers.
+
+```tsx
+import { Chat } from '@kitn.ai/ui/react';
+import { useState } from 'react';
+
+export function App() {
+  const [messages, setMessages] = useState([
+    { id: '1', role: 'assistant', content: 'Hello! How can I help?' },
+  ]);
+
+  return (
+    <Chat
+      messages={messages}
+      style={{ display: 'block', height: '100dvh' }}
+      onSubmit={(e) => {
+        const turn = { id: crypto.randomUUID(), role: 'user', content: e.detail.value };
+        setMessages((prev) => [...prev, turn]);
+        // …call your model, then append an assistant message.
+      }}
+    />
+  );
+}
+```
+
+For state that's tedious to thread by hand — the message list, the streaming loop, optimistic turns — the [`useKaiChat` hook](/guides/state-and-hooks/) manages it for you.
+
+## What's next
+
+- **[Compose your own shell](/patterns/compose-your-own/)** — when one element isn't enough control, swap in slots and assemble the thread, header, and composer yourself.
+- **[State & hooks](/guides/state-and-hooks/)** — `useKaiChat` / `createKaiChat` for managing the conversation without wiring `messages` by hand.
+- **[`kai-chat` reference](/components/chat/)** — every prop, event, and slot in one place.

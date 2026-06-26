@@ -28,7 +28,7 @@ const def: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <!-- Composition approach: declarative children, no JS wiring needed for sources -->
@@ -288,7 +288,7 @@ const compositionStory: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <!-- Composition: no JS needed for sources — just declare children -->

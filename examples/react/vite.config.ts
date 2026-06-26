@@ -15,7 +15,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@kitn.ai/ui/react': resolve(repoRoot, 'frameworks/react/index.tsx'),
-      '@kitn.ai/ui/elements': resolve(repoRoot, 'dist/kitn-chat.es.js'),
+      '@kitn.ai/ui/elements': resolve(repoRoot, 'dist/kai.es.js'),
       '@kitn.ai/ui/theme.css': resolve(repoRoot, 'theme.css'),
     },
   },

@@ -1,0 +1,73 @@
+---
+title: Badge
+description: A small pill for labels, statuses, counts, and inline citation markers.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Playground from '../../../components/Playground.tsx';
+import Example from '../../../components/Example.tsx';
+import PropTable from '../../../components/PropTable.astro';
+import PartTable from '../../../components/PartTable.astro';
+import ComposedFrom from '../../../components/ComposedFrom.astro';
+import Facts from '../../../components/Facts.astro';
+import NeedAHand from '../../../components/NeedAHand.astro';
+
+<p class="kai-tag-sub">kai-badge</p>
+
+<p class="kai-lede">A small pill for labels, statuses, counts, and inline citation markers. Put the content as light-DOM text; `variant` picks the look.</p>
+
+<Facts items={['Shadow DOM', '3 variants', 'Light-DOM content', '1 part']} />
+
+## Preview
+
+<Playground client:only="solid" tag="kai-badge" />
+
+<Aside type="tip" title="When to use">
+Tag a feature as `Beta`, mark a model's status, show an unread count on a panel, or drop a numbered marker beside an inline citation. For the citation chips those markers point at, see [Sources](/components/sources/).
+</Aside>
+
+## Usage
+
+Put the label or number as light-DOM text inside the element, then set `variant` to pick the look — a muted pill, a compact count, or a filled citation marker. The badge sizes to its content; place it wherever it belongs in your layout.
+
+```html
+<kai-badge>Beta</kai-badge>
+<kai-badge variant="count">3</kai-badge>
+<kai-badge variant="citation">1</kai-badge>
+```
+
+## Examples
+
+### Default
+
+A muted pill for labels and statuses.
+
+<Example client:visible tag="kai-badge" config={{ variant: 'default' }} data="label" />
+
+### Count
+
+`count` is a compact badge for unread counts and other small numbers.
+
+<Example client:visible tag="kai-badge" config={{ variant: 'count' }} data="count" />
+
+### Citation
+
+`citation` is a filled primary marker for inline citation references.
+
+<Example client:visible tag="kai-badge" config={{ variant: 'citation' }} data="citation" />
+
+## Styling
+
+Restyle the pill through its part — change the background, color, or shape; `variant` only sets the defaults.
+
+<PartTable tag="kai-badge" />
+
+## Props
+
+<PropTable tag="kai-badge" />
+
+## Composed from
+
+<ComposedFrom tag="kai-badge" />
+
+<NeedAHand />

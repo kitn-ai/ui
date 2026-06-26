@@ -1,0 +1,144 @@
+---
+title: Use a workspace
+description: Build a full chat app — conversation sidebar plus a live thread — from a single <kai-workspace> element.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import WorkspaceDemo from '../../../components/WorkspaceDemo.tsx';
+
+`<kai-workspace>` is the whole app in one element: a resizable, collapsible sidebar listing past conversations beside a streaming chat thread. Pick a conversation, start a new one, or send a message — the demo below is live.
+
+<WorkspaceDemo client:only="solid" />
+
+## What it is, and when to reach for it
+
+`<kai-workspace>` composes a conversation list and a chat thread into one ChatGPT-style layout. You hand it the list of conversations and the active thread's messages; it renders the sidebar, the resize handle, the header, and the composer.
+
+Reach for it when your app has **many conversations** and you want the sidebar handled for you. If you only need a single thread, use [`<kai-chat>`](/guides/getting-started/) instead — same `messages` and `kai-submit` contract, no sidebar. When you outgrow the built-in layout, [compose your own shell](/patterns/compose-your-own/) from the same parts.
+
+## Seed the data
+
+Two properties hold the state: `conversations` (the sidebar list) and `messages` (the open thread). Both are arrays, so set them in JavaScript — arrays can't be HTML attributes. `activeId` tells the sidebar which row is open.
+
+```html
+<kai-workspace id="ws" style="display:block; height:100dvh;"></kai-workspace>
+
+<script type="module">
+  import '@kitn.ai/ui/elements';
+
+  await customElements.whenDefined('kai-workspace');
+
+  const ws = document.getElementById('ws');
+
+  // The sidebar list. The component buckets rows by recency using the timestamps.
+  ws.conversations = [
+    {
+      id: 'c1',
+      title: 'Migrating the dashboard to web components',
+      scope: { type: 'collection' },
+      messageCount: 4,
+      lastMessageAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    // … more conversations
+  ];
+
+  // The open thread — same ChatMessage shape as <kai-chat>.
+  ws.messages = [
+    { id: 'u1', role: 'user', content: 'How do I share state across the panels?' },
+    { id: 'a1', role: 'assistant', content: 'Keep one source of truth and reassign it on each change.', actions: ['copy', 'like', 'dislike'] },
+  ];
+
+  // Highlight the open conversation in the sidebar.
+  ws.activeId = 'c1';
+</script>
+```
+
+Each conversation needs `id`, `title`, `scope` (`{ type: 'collection' }` for a general chat, or `{ type: 'document' }` when it's scoped to a document), `messageCount`, `lastMessageAt`, and `updatedAt`. The two timestamps drive the "Today" / "Yesterday" / "Last 7 days" grouping.
+
+`messages` is the same shape `<kai-chat>` uses: `id`, `role`, `content`, plus optional `actions`, `reasoning`, `tools`, and `attachments`.
+
+## Handle the events
+
+Three events drive the interactivity. Like every `kai-*` element, the events are non-bubbling `CustomEvent`s — listen on the element itself.
+
+```js
+// 1. Selecting a conversation in the sidebar.
+ws.addEventListener('kai-conversation-select', (e) => {
+  ws.activeId = e.detail.id;
+  ws.messages = threadFor(e.detail.id); // load this thread from your store
+});
+
+// 2. Starting a new chat.
+ws.addEventListener('kai-new-chat', () => {
+  ws.activeId = undefined;
+  ws.messages = [];
+});
+
+// 3. Submitting a message — identical loop to <kai-chat>.
+ws.addEventListener('kai-submit', async (e) => {
+  const text = e.detail.value.trim();
+  if (!text) return;
+
+  const aId = crypto.randomUUID();
+  ws.messages = [
+    ...ws.messages,
+    { id: crypto.randomUUID(), role: 'user', content: text },
+    { id: aId, role: 'assistant', content: '' },
+  ];
+  ws.loading = true;
+
+  // Stream the reply from your backend (or a proxy to your model provider).
+  for await (const token of streamFromYourModel(text)) {
+    // Reassign a NEW array each token — mutating in place won't re-render.
+    ws.messages = ws.messages.map((m) =>
+      m.id === aId ? { ...m, content: m.content + token } : m,
+    );
+  }
+  ws.loading = false;
+});
+```
+
+- `kai-conversation-select` carries the picked row on `e.detail.id`.
+- `kai-new-chat` has no payload — clear the thread and drop `activeId`.
+- `kai-submit` carries the input on `e.detail.value` and any staged files on `e.detail.attachments`.
+
+<Aside type="note" title="The sidebar resizes and collapses on its own">
+The user can drag the divider or collapse the sidebar with no wiring from you. To persist that state, listen for `kai-sidebar-toggle` and read `e.detail.collapsed`. Tune the defaults with the `sidebarWidth`, `sidebarMinWidth`, and `sidebarMaxWidth` props.
+</Aside>
+
+## Own the data, render with the element
+
+`<kai-workspace>` keeps no database. It renders whatever `conversations` and `messages` you give it and tells you when the user acts — you decide what those events mean against your own backend.
+
+The pattern is a single source of truth you reassign on every change:
+
+```js
+// Your store — could be local state, a query cache, or anything.
+const conversations = await api.listConversations();
+const threads = new Map(); // id -> ChatMessage[]
+
+ws.conversations = conversations;
+
+ws.addEventListener('kai-conversation-select', async (e) => {
+  const id = e.detail.id;
+  // Lazy-load the thread the first time it's opened.
+  if (!threads.has(id)) threads.set(id, await api.loadThread(id));
+  ws.activeId = id;
+  ws.messages = threads.get(id);
+});
+
+ws.addEventListener('kai-new-chat', async () => {
+  const conv = await api.createConversation();
+  ws.conversations = [conv, ...ws.conversations]; // new array → re-render
+  ws.activeId = conv.id;
+  ws.messages = [];
+});
+```
+
+Reassign `conversations` (and `messages`) to a **new array** whenever the data changes — a fresh reference is what re-renders the element. After a turn finishes, persist `ws.messages` back to your store so the thread survives a reload.
+
+## What's next
+
+- **[Compose your own shell](/patterns/compose-your-own/)** — when you outgrow the all-in-one and want to lay out the sidebar and thread yourself, built from the same parts.
+- **[`kai-workspace` reference](/components/workspace/)** — every prop and event, including the model switcher, context meter, search, and entity triggers.

@@ -4,7 +4,7 @@ import { Loader, type LoaderVariant, type LoaderSize } from './loader';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Solid (Advanced)/Elements/Loader',
+  title: 'Components/Elements/Loader',
   component: Loader,
   tags: ['autodocs'],
   parameters: {

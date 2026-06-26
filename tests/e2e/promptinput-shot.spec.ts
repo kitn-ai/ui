@@ -21,12 +21,12 @@ async function shot(page: Page, name: string) {
 }
 
 test('basic — empty (placeholder)', async ({ page }) => {
-  await page.goto(story('examples-prompt-input-variants--basic-input'));
+  await page.goto(story('test-fixtures-prompt-input-variants--basic-input'));
   await shot(page, 'basic-empty');
 });
 
 test('basic — short text', async ({ page }) => {
-  await page.goto(story('examples-prompt-input-variants--basic-input'));
+  await page.goto(story('test-fixtures-prompt-input-variants--basic-input'));
   await expect(host(page)).toBeVisible();
   await host(page).click();
   await page.keyboard.type('Write me a haiku about the sea');
@@ -34,7 +34,7 @@ test('basic — short text', async ({ page }) => {
 });
 
 test('basic — long multiline (scroll at max-height)', async ({ page }) => {
-  await page.goto(story('examples-prompt-input-variants--basic-input'));
+  await page.goto(story('test-fixtures-prompt-input-variants--basic-input'));
   await expect(host(page)).toBeVisible();
   await host(page).click();
   for (let i = 0; i < 12; i++) {
@@ -45,26 +45,26 @@ test('basic — long multiline (scroll at max-height)', async ({ page }) => {
 });
 
 test('with-suggestions', async ({ page }) => {
-  await page.goto(story('examples-prompt-input-variants--with-suggestions'));
+  await page.goto(story('test-fixtures-prompt-input-variants--with-suggestions'));
   await shot(page, 'with-suggestions');
 });
 
 test('with-action-buttons', async ({ page }) => {
-  await page.goto(story('examples-prompt-input-variants--with-action-buttons'));
+  await page.goto(story('test-fixtures-prompt-input-variants--with-action-buttons'));
   await shot(page, 'with-action-buttons');
 });
 
 test('with-file-attachments', async ({ page }) => {
-  await page.goto(story('examples-prompt-input-variants--with-file-attachments'));
+  await page.goto(story('test-fixtures-prompt-input-variants--with-file-attachments'));
   await shot(page, 'with-attachments');
 });
 
 test('stoppable-streaming (loading + stop)', async ({ page }) => {
-  await page.goto(story('examples-prompt-input-variants--stoppable-streaming'));
+  await page.goto(story('test-fixtures-prompt-input-variants--stoppable-streaming'));
   await shot(page, 'stoppable');
 });
 
 test('full-example', async ({ page }) => {
-  await page.goto(story('examples-prompt-input-variants--full-example'));
+  await page.goto(story('test-fixtures-prompt-input-variants--full-example'));
   await shot(page, 'full-example');
 });

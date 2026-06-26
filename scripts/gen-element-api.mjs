@@ -234,7 +234,7 @@ const cem = {
   readme: '',
   modules: [{
     kind: 'javascript-module',
-    path: 'dist/kitn-chat.es.js',
+    path: 'dist/kai.es.js',
     declarations: elements.map((el) => ({
       kind: 'class',
       customElement: true,
@@ -291,6 +291,19 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
   writeFileSync(resolve(root, 'src/elements/element-meta.json'), JSON.stringify(elements, null, 2) + '\n');
   console.log(`✓ src/elements/element-meta.json — ${elements.length} elements`);
+
+  // ---- emit the curated icon-name list (the `name=` values kai-icon/icon props
+  // accept) so the docs can render a no-drift gallery. Source of truth is the
+  // NAMED_ICONS object in src/ui/icon.tsx; extract its keys from the literal. ----
+  {
+    const iconSrc = readFileSync(resolve(root, 'src/ui/icon.tsx'), 'utf8');
+    const block = iconSrc.match(/NAMED_ICONS[^=]*=\s*\{([\s\S]*?)\n\};/);
+    const names = block
+      ? [...block[1].matchAll(/^\s*'?([a-z][a-z0-9-]*)'?\s*:/gm)].map((m) => m[1]).sort()
+      : [];
+    writeFileSync(resolve(root, 'src/elements/icon-names.json'), JSON.stringify(names, null, 2) + '\n');
+    console.log(`✓ src/elements/icon-names.json — ${names.length} curated icons`);
+  }
   for (const mod of ['./gen-element-types.mjs', './gen-element-react.mjs']) {
     try {
       const m = await import(mod);

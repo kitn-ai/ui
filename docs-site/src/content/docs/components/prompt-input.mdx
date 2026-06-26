@@ -8,6 +8,8 @@ import Playground from '../../../components/Playground.tsx';
 import Example from '../../../components/Example.tsx';
 import PropTable from '../../../components/PropTable.astro';
 import EventTable from '../../../components/EventTable.astro';
+import SlotTable from '../../../components/SlotTable.astro';
+import PartTable from '../../../components/PartTable.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
 
@@ -101,6 +103,18 @@ Set `attachments` to pre-populate staged files. The element manages attachment s
 `disabled` makes the composer entirely non-interactive — useful for read-only or locked states.
 
 <Example client:visible tag="kai-prompt-input" config={{ disabled: true }} data="withSuggestions" />
+
+## Slots
+
+Project controls into the input's shadow: a status strip above the textarea, or leading/trailing toolbar clusters — where a `+` menu or a model switcher goes.
+
+<SlotTable tag="kai-prompt-input" />
+
+## Styling
+
+Restyle the send button via `::part(send)`, or hide it for an Enter-only composer.
+
+<PartTable tag="kai-prompt-input" />
 
 ## Props
 

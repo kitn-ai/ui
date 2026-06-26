@@ -23,7 +23,7 @@ import type { ExampleUsage, StoryUsage } from './types';
  */
 const htmlSnippet = (obj: string) => `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <kai-context id="ctx"></kai-context>
@@ -403,7 +403,7 @@ const inHeaderBar: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <header style="display:flex;align-items:center;gap:0.5rem">

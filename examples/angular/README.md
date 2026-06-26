@@ -10,7 +10,7 @@ listens for CustomEvents with `(eventname)="handler($event)"`.  Adding
 
 ## Prerequisites
 
-Build the kit first so the local bundle (`dist/kitn-chat.es.js`) exists:
+Build the kit first so the local bundle (`dist/kai.es.js`) exists:
 
 ```bash
 # From the repo root
@@ -49,7 +49,7 @@ npm run typecheck
 | Allow unknown tags | `schemas: [CUSTOM_ELEMENTS_SCHEMA]` on the standalone component |
 | Theme | `[theme]="theme()"` — passes `'light' \| 'dark' \| 'auto'` |
 
-The Vite config aliases `@kitn.ai/ui/elements` to the local `../../dist/kitn-chat.es.js`
+The Vite config aliases `@kitn.ai/ui/elements` to the local `../../dist/kai.es.js`
 so the example exercises the in-repo build without needing a published package.
 
 ## Key files

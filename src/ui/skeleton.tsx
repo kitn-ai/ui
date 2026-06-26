@@ -48,7 +48,12 @@ function Skeleton(props: SkeletonProps) {
 
   const block = (shortLast = false) => (
     <div
-      class={cn('animate-pulse bg-muted', rounding(local.variant), fills() && 'w-full', local.class)}
+      part="skeleton"
+      // `bg-foreground/10` tints from the theme foreground, so it keeps a visible
+      // ~10% contrast against the background in BOTH light and dark (the old
+      // `bg-muted` was nearly invisible on a light surface). Recolor / restyle
+      // opacity from outside via `::part(skeleton)`.
+      class={cn('animate-pulse bg-foreground/10', rounding(local.variant), fills() && 'w-full', local.class)}
       style={blockStyle(shortLast)}
       {...rest}
     />

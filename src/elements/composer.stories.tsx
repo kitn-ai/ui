@@ -66,7 +66,7 @@ const HTML_SNIPPET = `<!-- Works in any framework or plain HTML -->
 </script>`;
 
 const meta = {
-  title: 'Elements/Composer',
+  title: 'Test Fixtures/Composer',
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',

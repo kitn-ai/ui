@@ -180,11 +180,15 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-button',
       'kai-chat',
       'kai-conversations',
+      'kai-hover-card',
       'kai-icon',
+      'kai-menu',
       'kai-message',
+      'kai-notice',
       'kai-prompt-input',
       'kai-scroll-area',
       'kai-separator',
+      'kai-skeleton',
     ]);
     expect(ELEMENT_COMPOSITION['kai-chat'].slots).toBe(CHAT_SLOTS);
     expect(ELEMENT_COMPOSITION['kai-message'].slots).toBe(MESSAGE_SLOTS);

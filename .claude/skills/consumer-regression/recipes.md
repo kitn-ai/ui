@@ -115,7 +115,7 @@ curl -N -X POST localhost:3000/api/chat -H 'content-type: application/json' \
 The elements bundle must not throw when imported with no DOM:
 ```bash
 REPO="$(git rev-parse --show-toplevel)"
-node --input-type=module -e "await import('$REPO/dist/kitn-chat.es.js'); console.log('SSR-OK')"   # no throw
+node --input-type=module -e "await import('$REPO/dist/kai.es.js'); console.log('SSR-OK')"   # no throw
 ```
 For SSR frameworks (Next, TanStack Start, SvelteKit, Remix, Astro) the scaffold ALSO renders the chat client-only (`dynamic({ssr:false})` / `createFileRoute({ssr:false})`) to avoid hydration mismatch — confirm the server HTML omits `<kai-chat>`.
 

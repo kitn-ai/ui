@@ -10,7 +10,7 @@ const story = (id: string) => `/iframe.html?id=${id}&viewMode=story`;
 const frame = (page: Page) => page.locator('[data-prompt-input]').first();
 
 test('typing enables the send button; Enter submits and clears', async ({ page }) => {
-  await page.goto(story('examples-prompt-input-variants--basic-input'));
+  await page.goto(story('test-fixtures-prompt-input-variants--basic-input'));
   await expect(frame(page)).toBeVisible();
   const send = page.getByRole('button', { name: 'Send message' });
   await expect(send).toBeDisabled(); // empty
@@ -28,7 +28,7 @@ test('typing enables the send button; Enter submits and clears', async ({ page }
 });
 
 test('Shift+Enter inserts a newline without submitting', async ({ page }) => {
-  await page.goto(story('examples-prompt-input-variants--basic-input'));
+  await page.goto(story('test-fixtures-prompt-input-variants--basic-input'));
   await expect(frame(page)).toBeVisible();
   await frame(page).click();
   await page.keyboard.type('line one');
@@ -41,7 +41,7 @@ test('Shift+Enter inserts a newline without submitting', async ({ page }) => {
 });
 
 test('clicking anywhere in the frame focuses the input (cursor-text)', async ({ page }) => {
-  await page.goto(story('examples-prompt-input-variants--basic-input'));
+  await page.goto(story('test-fixtures-prompt-input-variants--basic-input'));
   await expect(frame(page)).toBeVisible();
   // Click the frame (not the editable directly) — should focus the editable.
   await frame(page).click({ position: { x: 300, y: 10 } });

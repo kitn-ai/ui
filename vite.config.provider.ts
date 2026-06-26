@@ -17,15 +17,15 @@ export default defineConfig({
       beforeWriteFile(filePath, content) {
         const providerEntry = resolve('dist/provider.d.ts');
         if (filePath === providerEntry) {
-          return { filePath: resolve('dist/kitn-chat-provider.d.ts'), content };
+          return { filePath: resolve('dist/kai-provider.d.ts'), content };
         }
         return undefined;
       },
     }),
   ],
   build: {
-    emptyOutDir: false, // do NOT clobber dist/kitn-chat.es.js (main build runs first)
-    lib: { entry: 'src/remote/provider.ts', formats: ['es'], fileName: () => 'kitn-chat-provider.es.js' },
+    emptyOutDir: false, // do NOT clobber dist/kai.es.js (main build runs first)
+    lib: { entry: 'src/remote/provider.ts', formats: ['es'], fileName: () => 'kai-provider.es.js' },
     rollupOptions: { external: ['solid-js', 'solid-js/web'] },
   },
 });

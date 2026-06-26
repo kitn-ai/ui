@@ -1,14 +1,25 @@
 import { type JSX, splitProps } from 'solid-js';
 import { cn } from '../utils/cn';
 
-export interface ScrollAreaProps extends JSX.HTMLAttributes<HTMLDivElement> { children: JSX.Element; }
+export type ScrollOrientation = 'vertical' | 'horizontal' | 'both';
+
+export interface ScrollAreaProps extends JSX.HTMLAttributes<HTMLDivElement> {
+  children: JSX.Element;
+  /** Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross
+   *  axis is clamped to `hidden` so content can't overflow it. */
+  orientation?: ScrollOrientation;
+}
 
 export function ScrollArea(props: ScrollAreaProps) {
-  const [local, rest] = splitProps(props, ['children', 'class']);
+  const [local, rest] = splitProps(props, ['children', 'class', 'orientation']);
+  const overflow = () =>
+    local.orientation === 'horizontal' ? 'overflow-x-auto overflow-y-hidden'
+      : local.orientation === 'both' ? 'overflow-auto'
+        : 'overflow-y-auto overflow-x-hidden';
   return (
     // tabindex=0 keeps the scroll region reachable by keyboard when it has no
     // focusable descendants (WCAG 2.1.1 — axe `scrollable-region-focusable`).
-    <div tabindex={0} class={cn('overflow-y-auto scrollbar-thin', local.class)} {...rest}>
+    <div tabindex={0} class={cn(overflow(), 'scrollbar-thin', local.class)} {...rest}>
       {local.children}
     </div>
   );

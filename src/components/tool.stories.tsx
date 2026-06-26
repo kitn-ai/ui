@@ -34,7 +34,7 @@ const errorPart: ToolPart = {
 };
 
 const meta = {
-  title: 'Solid (Advanced)/Elements/Tool',
+  title: 'Components/Elements/Tool',
   component: Tool,
   tags: ['autodocs'],
   parameters: {

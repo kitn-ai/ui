@@ -930,12 +930,13 @@ export const ScopePicker = createWebComponent<ScopePickerProps>(
 );
 
 export interface ScrollAreaProps extends WebComponentProps {
-
+  /** Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. */
+  orientation?: "horizontal" | "vertical" | "both";
 }
 
 export const ScrollArea = createWebComponent<ScrollAreaProps>(
   'kai-scroll-area',
-  ["theme"],
+  ["theme","orientation"],
   {  },
 );
 

@@ -14,7 +14,7 @@ export function getKit(): Promise<Record<string, unknown>> {
   // '/kitn/…' (a missing slash silently 404s the bundle on the deployed site).
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   if (!kitPromise) {
-    kitPromise = import(/* @vite-ignore */ `${base}/kitn/kitn-chat.es.js`).then(
+    kitPromise = import(/* @vite-ignore */ `${base}/kitn/kai.es.js`).then(
       async (mod: Record<string, unknown>) => {
         await customElements.whenDefined('kai-chat');
         return mod;

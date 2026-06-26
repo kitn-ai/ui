@@ -654,6 +654,8 @@ export interface KaiScopePickerElement extends HTMLElement {
 export interface KaiScrollAreaElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
+  /** Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. */
+  orientation?: "horizontal" | "vertical" | "both";
 }
 
 export interface KaiScrollButtonElement extends HTMLElement {

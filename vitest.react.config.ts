@@ -16,7 +16,7 @@ const dirname =
 // The custom elements themselves are SolidJS — we DON'T compile them here.
 // Instead `@kitn.ai/ui/elements` resolves to the prebuilt bundle (already-
 // compiled JS), exactly like a real consumer. Run `npm run build` first so
-// `dist/kitn-chat.es.js` and the generated `frameworks/react/index.tsx` exist.
+// `dist/kai.es.js` and the generated `frameworks/react/index.tsx` exist.
 export default defineConfig({
   plugins: [react()],
   // The root tsconfig sets jsx=preserve / jsxImportSource=solid-js (for the Solid
@@ -26,7 +26,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@kitn.ai/ui/react': path.resolve(dirname, 'frameworks/react/index.tsx'),
-      '@kitn.ai/ui/elements': path.resolve(dirname, 'dist/kitn-chat.es.js'),
+      '@kitn.ai/ui/elements': path.resolve(dirname, 'dist/kai.es.js'),
     },
   },
   test: {

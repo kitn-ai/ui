@@ -112,15 +112,15 @@ const RULES: Rule[] = [
     title: 'Wrong element prefix `kitn-` (should be `kai-`)',
     cause:
       'The custom element prefix is `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`). ' +
-      '`kitn-chat` is only a bundle filename — it is not a registered element name. ' +
-      'Using `<kitn-chat>` results in an unknown element that renders nothing.',
+      '`kitn-` is a legacy name (the register-all bundle is `kai.es.js`) — it is not a ' +
+      'registered element name. Using `<kitn-chat>` results in an unknown element that renders nothing.',
     fix:
       'Replace the `kitn-` prefix with `kai-` everywhere.\n\n' +
       '```html\n' +
       '<!-- ✅ Correct element prefix -->\n' +
       '<kai-chat></kai-chat>\n' +
       '<kai-artifact></kai-artifact>\n\n' +
-      '<!-- ❌ Wrong — kitn-chat is a bundle filename, not an element -->\n' +
+      '<!-- ❌ Wrong — kitn-chat is not an element (the bundle is kai.es.js) -->\n' +
       '<kitn-chat></kitn-chat>\n' +
       '```',
   },

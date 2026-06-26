@@ -32,7 +32,7 @@ function ScrollDemo(props: { variant?: 'outline' | 'ghost' | 'default'; size?: '
 }
 
 const meta = {
-  title: 'Solid (Advanced)/Elements/ScrollButton',
+  title: 'Components/Elements/ScrollButton',
   component: ScrollButton,
   tags: ['autodocs'],
   parameters: {

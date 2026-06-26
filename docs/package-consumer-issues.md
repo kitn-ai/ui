@@ -20,7 +20,7 @@ breaks."* They're the highest-leverage fixes for first-time React consumers.
 
 **Root cause.** `frameworks/react/index.tsx` only imports `./runtime`; nothing in the `/react` import graph
 calls `customElements.define`. Registration lives only in the side-effect bundle `@kitn.ai/ui/elements`
-(`dist/kitn-chat.es.js`). A consumer importing only `/react` gets wrappers that render undefined elements.
+(`dist/kai.es.js`). A consumer importing only `/react` gets wrappers that render undefined elements.
 
 **Why it bites everyone.** The package's own `llms.txt` React example omits `import '@kitn.ai/ui/elements'`,
 so the primary onboarding path produces non-rendering code.

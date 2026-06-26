@@ -10,7 +10,7 @@ import { buttonVariants } from './button';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Solid (Advanced)/Primitives/Dropdown',
+  title: 'Components/Primitives/Dropdown',
   component: Dropdown,
   tags: ['autodocs'],
   parameters: {

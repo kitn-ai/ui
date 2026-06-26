@@ -35,6 +35,16 @@
     "kai-scroll-button": "scroll-button",
     "kai-popover": "popover",
     "kai-switch": "switch",
+    "kai-button": "button",
+    "kai-avatar": "avatar",
+    "kai-badge": "badge",
+    "kai-tooltip": "tooltip",
+    "kai-notice": "notice",
+    "kai-icon": "icon",
+    "kai-separator": "separator",
+    "kai-scroll-area": "scroll-area",
+    "kai-hover-card": "hover-card",
+    "kai-skeleton": "skeleton",
     "kai-toast-region": "toast",
     "kai-card": "card",
     "kai-form": "form",
@@ -45,7 +55,9 @@
     "kai-choice": "choice",
     "kai-cards": "cards",
     "kai-compare": "compare",
-    "kai-composer": "composer"
+    "kai-composer": "composer",
+    "kai-menu": "menu",
+    "kai-command": "command"
   },
   "files": {
     "conversation-list": [
@@ -149,6 +161,36 @@
     "switch": [
       "kai-switch"
     ],
+    "button": [
+      "kai-button"
+    ],
+    "avatar": [
+      "kai-avatar"
+    ],
+    "badge": [
+      "kai-badge"
+    ],
+    "tooltip": [
+      "kai-tooltip"
+    ],
+    "notice": [
+      "kai-notice"
+    ],
+    "icon": [
+      "kai-icon"
+    ],
+    "separator": [
+      "kai-separator"
+    ],
+    "scroll-area": [
+      "kai-scroll-area"
+    ],
+    "hover-card": [
+      "kai-hover-card"
+    ],
+    "skeleton": [
+      "kai-skeleton"
+    ],
     "toast": [
       "kai-toast-region"
     ],
@@ -181,6 +223,12 @@
     ],
     "composer": [
       "kai-composer"
+    ],
+    "menu": [
+      "kai-menu"
+    ],
+    "command": [
+      "kai-command"
     ]
   }
 }

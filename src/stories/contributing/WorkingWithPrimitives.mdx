@@ -1,0 +1,123 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Contributing/Working with the primitives" />
+
+# Working with the components directly
+
+The `kai-*` elements are the fast path. When you want full control over markup and layout — and you're in a Solid app — skip the wrapper and import the underlying pieces from `@kitn.ai/ui`. You compose them in JSX, and your bundler tree-shakes away whatever you don't use.
+
+This page is the catalog, organized by the four layers (see the **Contributing → How it's built** page). For a full streaming chat built this way, see the [Solid framework guide](https://ui.kitn.ai/guides/frameworks/solid/).
+
+```bash
+npm install @kitn.ai/ui solid-js
+```
+
+```ts
+import '@kitn.ai/ui/theme.css'; // design tokens, once near your entry
+```
+
+> **Note — ships as source.** The `.` entry exports raw TSX. Your bundler compiles and tree-shakes it alongside your own Solid code, so you only pay for what you import.
+
+## Headless primitives
+
+Behavior with no markup — the logic you'd otherwise rewrite per app. These are the layer the `kai-*` elements don't expose, so importing them directly is the main reason to drop down here.
+
+```tsx
+import {
+  useTextStream,
+  useStickToBottom,
+  useAutoResize,
+  useVoiceRecorder,
+} from '@kitn.ai/ui';
+```
+
+- `useTextStream` — drive token-by-token streaming into your own UI.
+- `useStickToBottom` — keep a scroll container pinned to the latest message, yielding when the reader scrolls up.
+- `useAutoResize` — grow a textarea with its content.
+- `useVoiceRecorder` — microphone capture state for a voice composer.
+
+`ChatConfig` (and its `useChatConfig` hook) sets shared options like prose size for everything rendered inside it.
+
+### State helpers & hooks
+
+Consumer-owned chat state, made ergonomic. The `@kitn.ai/ui/state` subpath ships immutable helpers and a typed streaming handle; each framework adds a batteries-included store that owns the state for you:
+
+```ts
+import { appendMessage, updateMessage, createAssistantStream } from '@kitn.ai/ui/state';
+import { createKaiChat } from '@kitn.ai/ui';          // SolidJS store
+// React: import { useKaiChat } from '@kitn.ai/ui/react';
+```
+
+- `appendMessage` / `upsertMessage` / `updateMessage` / `removeMessage` / `appendContent` — immutable `ChatMessage[]` updates (a new array reference per change, so the element re-renders).
+- `addSuggestion` / `removeSuggestion` — immutable suggestion-list updates.
+- `createAssistantStream(set)` — a fluent handle that grows one in-flight assistant message: `appendText`, `appendReasoning`, `upsertTool`/`updateTool`, `patch`, `done`, `abort`.
+- `useKaiChat` (React, from `@kitn.ai/ui/react`) and `createKaiChat` (Solid, from `@kitn.ai/ui`) — own the message list, wire submit, and return a spreadable `bind`.
+
+For the setter contract, streaming loop, and multi-chat usage, see the **Examples → State & Hooks** story.
+
+## UI primitives
+
+The kit's own accessible building blocks. Useful on their own, well outside a chat.
+
+```tsx
+import { Button, Avatar, Badge, Separator } from '@kitn.ai/ui';
+import { Tooltip, HoverCard, Dropdown } from '@kitn.ai/ui';
+import { Resizable, ResizablePanel, ScrollArea } from '@kitn.ai/ui';
+
+<Button variant="ghost" size="icon" aria-label="Add"><PlusIcon /></Button> {/* your icon */}
+<Badge>Beta</Badge>
+```
+
+`Resizable` + `ResizablePanel` build a draggable split — handles drop in automatically between visible panels. See the [Solid framework guide](https://ui.kitn.ai/guides/frameworks/solid/) for a full sidebar-plus-chat layout.
+
+Each primitive has a live story under **Components → Primitives**, including [Button](?path=/docs/components-primitives-button--docs), [Avatar](?path=/docs/components-primitives-avatar--docs), [Badge](?path=/docs/components-primitives-badge--docs), [Separator](?path=/docs/components-primitives-separator--docs), [Tooltip](?path=/docs/components-primitives-tooltip--docs), [HoverCard](?path=/docs/components-primitives-hovercard--docs), [Dropdown](?path=/docs/components-primitives-dropdown--docs), [Resizable](?path=/docs/components-primitives-resizable--docs), and [ScrollArea](?path=/docs/components-primitives-scrollarea--docs).
+
+## Feature components
+
+The AI surface. Compose a thread, or drop a single component anywhere.
+
+```tsx
+import {
+  ChatContainer,
+  ChatContainerContent,
+  Message,
+  MessageContent,
+  PromptInput,
+  PromptInputTextarea,
+  PromptInputActions,
+} from '@kitn.ai/ui';
+```
+
+Each one also works standalone — render just the part you need:
+
+```tsx
+import {
+  Markdown, Reasoning, ReasoningTrigger, ReasoningContent, Tool, Artifact,
+} from '@kitn.ai/ui';
+
+<Markdown content={assistantReply} />
+<Reasoning isStreaming={isStreaming}>
+  <ReasoningTrigger>View reasoning</ReasoningTrigger>
+  <ReasoningContent markdown>{thinkingText}</ReasoningContent>
+</Reasoning>
+<Tool toolPart={toolCall} defaultOpen />
+<Artifact files={artifactFiles} />
+```
+
+`Reasoning` is a compound: pair it with `ReasoningTrigger` and `ReasoningContent`. Prose size for `Markdown` comes from the surrounding `ChatConfig`, not a prop.
+
+`ChatContainer` is transport-agnostic: it owns the conversation UI, you own the request. Render messages inside `ChatContainerContent` and stream the reply into your signal from `PromptInput`'s `onSubmit`.
+
+The feature components each have a live story under **Components → Elements**, including [ChatContainer](?path=/docs/components-elements-chatcontainer--docs), [Message](?path=/docs/components-elements-message-narrow-panel--docs), [PromptInput](?path=/docs/components-elements-promptinput--docs), [Markdown](?path=/docs/components-elements-markdown--docs), [Tool](?path=/docs/components-elements-tool--docs), and [Artifact](?path=/docs/components-elements-artifact--docs).
+
+## Mix the two
+
+Native components and `kai-*` elements ship in the same package and coexist. Compose primitives where you want control, and drop a `<kai-chat>` shell where you want batteries included — even on different screens of the same app.
+
+> **Note — in Solid, pass rich data with `prop:`.** When you do use a `kai-*` element inside Solid, bind arrays and objects with `prop:` (`prop:messages={messages()}`) so Solid sets a DOM property instead of stringifying it, and listen with the `on:` namespace (`on:kai-submit`).
+
+## Next
+
+- **Contributing → Run the kit locally** — the build and Storybook dev loop.
+- **Contributing → Create or modify a component** — add your own primitive and element.
+- **Contributing → How it's built** — the four-layer architecture these imports come from.

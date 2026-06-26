@@ -10,7 +10,7 @@ import type { AttachmentData } from '../index';
 import { ArrowUp, Paperclip, Globe, Mic, Square, Sparkles } from 'lucide-solid';
 
 const meta: Meta = {
-  title: 'Examples/Prompt Input Variants',
+  title: 'Test Fixtures/Prompt Input Variants',
   parameters: { layout: 'padded' },
 };
 

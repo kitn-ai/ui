@@ -9,7 +9,7 @@ import {
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Solid (Advanced)/Elements/ChainOfThought',
+  title: 'Components/Elements/ChainOfThought',
   component: ChainOfThought,
   tags: ['autodocs'],
   parameters: {

@@ -8,6 +8,8 @@ import Playground from '../../../components/Playground.tsx';
 import Example from '../../../components/Example.tsx';
 import PropTable from '../../../components/PropTable.astro';
 import EventTable from '../../../components/EventTable.astro';
+import SlotTable from '../../../components/SlotTable.astro';
+import PartTable from '../../../components/PartTable.astro';
 import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
@@ -110,6 +112,18 @@ Add `context` to show a live token-usage gauge — yellow near the warning thres
 Set `triggers` so `/` inserts a skill pill and `@` opens a sectioned menu of agents and plugins. `kai-submit` carries the structured `doc` + `entities` for your backend to expand.
 
 <Example client:visible tag="kai-chat" data="withTriggers" />
+
+## Slots
+
+`<kai-chat>` is a frame: keep the built-in thread and project your own chrome into named slots. An `inject` slot adds to a region; a `replace` slot stands in for it (you own that region's data and events). See [Compose your own shell](/patterns/compose-your-own/) for a worked example.
+
+<SlotTable tag="kai-chat" />
+
+## Styling
+
+Restyle the built-in regions from outside via `::part` — no shadow piercing.
+
+<PartTable tag="kai-chat" />
 
 ## Props
 

@@ -6,7 +6,7 @@ import { Button } from '../ui/button';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Solid (Advanced)/Elements/PromptInput',
+  title: 'Components/Elements/PromptInput',
   component: PromptInput,
   tags: ['autodocs'],
   parameters: {
