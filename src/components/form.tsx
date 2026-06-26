@@ -8,6 +8,7 @@ import {
   createMemo,
   createEffect,
   on,
+  onMount,
   ErrorBoundary,
 } from 'solid-js';
 import { createStore, produce, unwrap } from 'solid-js/store';
@@ -355,6 +356,25 @@ export function buildResult(
 // The <Form> component.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** Imperative handle exposed via `controllerRef` — surfaces the form's latent
+ *  capabilities (focus the first/first-invalid control, validate, programmatic
+ *  send, reset to defaults, dismiss/reopen) so the `<kai-form>` facade can forward
+ *  them as instance methods. */
+export interface FormController {
+  /** Focus the first control, or the first INVALID control after a failed validation. */
+  focus(options?: FocusOptions): void;
+  /** Run full validation + submit: focus the first invalid field on failure, else emit `submit`. */
+  send(): void;
+  /** Run client-side validation now and return per-field errors WITHOUT submitting. */
+  validate(): { valid: boolean; errors?: Record<string, string> };
+  /** Re-seed from each field's `default` and clear errors. */
+  reset(): void;
+  /** Trigger the dismiss path (emit `dismiss` + collapse to the re-openable stub). */
+  dismiss(): void;
+  /** Re-open a dismissed card from its stub (emit `reopen`). */
+  reopen(): void;
+}
+
 export interface FormProps {
   /** The form definition (CardEnvelope.data). */
   data?: FormDefinition;
@@ -370,6 +390,16 @@ export interface FormProps {
   class?: string;
   /** When set, render the chromed read-only view instead of the form inputs. */
   resolution?: CardResolution;
+  /** Controlled field values — when set, this wins over internal/uncontrolled state. */
+  values?: Record<string, unknown>;
+  /** Initial values overlaying the schema defaults (uncontrolled seed). */
+  defaultValues?: Record<string, unknown>;
+  /** Disable all fields + submit. */
+  disabled?: boolean;
+  /** Fires on input with the current coerced values + validity (distinct from submit). */
+  onValuesChange?: (payload: { values: Record<string, unknown>; valid: boolean }) => void;
+  /** Receive the imperative controller once mounted. */
+  controllerRef?: (controller: FormController) => void;
 }
 
 const DEFAULT_FORM: FormDefinition = { type: 'object', properties: {} };
@@ -383,7 +413,10 @@ const DEFAULT_FORM: FormDefinition = { type: 'object', properties: {} };
  */
 export function Form(props: FormProps): JSX.Element {
   const merged = mergeProps({ cardId: 'kai-form' }, props);
-  const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution']);
+  const [local] = splitProps(merged, [
+    'data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution',
+    'values', 'defaultValues', 'disabled', 'onValuesChange', 'controllerRef',
+  ]);
 
   const ctxHost = useCardHost();
 
@@ -414,7 +447,34 @@ export function Form(props: FormProps): JSX.Element {
   const [values, setValues] = createStore<Record<string, unknown>>({});
   const [errors, setErrors] = createStore<Record<string, string>>({});
 
+  // Build the seed value map: schema `default`s, overlaid by `defaultValues`, then
+  // (when controlled) the live `values` prop. The controlled prop always wins.
+  const seedMap = (d: FormDefinition): Record<string, unknown> => {
+    const next: Record<string, unknown> = {};
+    for (const [key, field] of Object.entries(d.properties ?? {})) {
+      if (field.default !== undefined) next[key] = field.default;
+      else if (field.type === 'array') next[key] = [];
+    }
+    if (local.defaultValues) Object.assign(next, local.defaultValues);
+    if (local.values) Object.assign(next, local.values);
+    return next;
+  };
+
   const seed = (d: FormDefinition): void => {
+    const next = seedMap(d);
+    setValues(produce((s) => {
+      for (const k of Object.keys(s)) delete s[k];
+      Object.assign(s, next);
+    }));
+    setErrors(produce((s) => {
+      for (const k of Object.keys(s)) delete s[k];
+    }));
+  };
+
+  // Reset to defaults only (ignore the controlled `values`/`defaultValues` overlay):
+  // re-seed from each field's schema `default` and clear errors. Used by reset().
+  const seedDefaults = (): void => {
+    const d = def();
     const next: Record<string, unknown> = {};
     for (const [key, field] of Object.entries(d.properties ?? {})) {
       if (field.default !== undefined) next[key] = field.default;
@@ -431,6 +491,16 @@ export function Form(props: FormProps): JSX.Element {
 
   // Reseed whenever a NEW valid definition arrives.
   createEffect(on(() => local.data, () => { if (envelopeValid().ok) seed(def()); }));
+
+  // Controlled values: when the consumer drives `values`, mirror it into the store
+  // (the controlled prop wins over local edits). Deferred so mount's seed runs first.
+  createEffect(on(() => local.values, (v) => {
+    if (!v) return;
+    setValues(produce((s) => {
+      for (const k of Object.keys(s)) delete s[k];
+      Object.assign(s, v);
+    }));
+  }, { defer: true }));
 
   // ready + error lifecycle emits.
   createEffect(on(envelopeValid, (state) => {
@@ -450,6 +520,12 @@ export function Form(props: FormProps): JSX.Element {
   const setField = (key: string, raw: unknown): void => {
     setValues(key, raw);
     if (errors[key]) setErrors(key, undefined as unknown as string);
+    // Fire the live change signal: current coerced values + validity (distinct from
+    // the terminal submit). Validation here is read-only — it doesn't surface errors.
+    const snapshot = unwrap(values) as Record<string, unknown>;
+    const out = buildResult(def(), snapshot);
+    const { valid } = validateForm(def(), snapshot);
+    local.onValuesChange?.({ values: out, valid });
   };
 
   const validateField = (key: string): void => {
@@ -462,12 +538,21 @@ export function Form(props: FormProps): JSX.Element {
     setErrors(key, single.fieldErrors[key]);
   };
 
-  const onSubmit = (e: Event): void => {
-    e.preventDefault();
-    if (res.isResolved()) return;
-    // Capture the <form> synchronously — `e.currentTarget` is nulled out once the
-    // event has finished dispatching (so it can't be read in a later microtask).
-    const formEl = e.currentTarget as HTMLElement | null;
+  // Resolve the root to query controls inside (the live <form> when called from the
+  // submit event, else the host element's shadow root for a programmatic call).
+  const queryRoot = (formEl?: HTMLElement | null): ParentNode =>
+    formEl?.closest('form') ?? formEl ?? local.hostElement?.shadowRoot ?? document;
+
+  // Focus the control for a field key (the `[data-control]` inside its `[data-field]`).
+  const focusControl = (key: string, root: ParentNode, options?: FocusOptions): void => {
+    root.querySelector<HTMLElement>(`[data-field="${cssEscape(key)}"] [data-control]`)?.focus(options);
+  };
+
+  // Run full validation; on failure surface the per-field errors + focus the first
+  // invalid control and return false; on success emit `submit` + resolve. Shared by
+  // the form's onSubmit handler and the controller's send().
+  const runSubmit = (formEl?: HTMLElement | null): boolean => {
+    if (res.isResolved()) return false;
     const snapshot = unwrap(values);
     const result = validateForm(def(), snapshot as Record<string, unknown>);
     setErrors(produce((s) => {
@@ -476,18 +561,23 @@ export function Form(props: FormProps): JSX.Element {
     }));
     if (!result.valid) {
       const firstBad = keys().find((k) => result.fieldErrors[k]);
-      if (firstBad && local.hostElement) {
-        // Focus the first invalid control (light-DOM query inside shadow root).
-        queueMicrotask(() => {
-          const root: ParentNode = formEl?.closest('form') ?? formEl ?? document;
-          root.querySelector<HTMLElement>(`[data-field="${cssEscape(firstBad)}"] [data-control]`)?.focus();
-        });
+      if (firstBad) {
+        const root = queryRoot(formEl);
+        queueMicrotask(() => focusControl(firstBad, root));
       }
-      return;
+      return false;
     }
     const out = buildResult(def(), snapshot as Record<string, unknown>);
     emit({ kind: 'submit', cardId: local.cardId, data: out });
     res.setLocal({ kind: 'submit', data: out });
+    return true;
+  };
+
+  const onSubmit = (e: Event): void => {
+    e.preventDefault();
+    // Capture the <form> synchronously — `e.currentTarget` is nulled out once the
+    // event has finished dispatching (so it can't be read in a later microtask).
+    runSubmit(e.currentTarget as HTMLElement | null);
   };
 
   // Dismiss: emit `dismiss` AND optimistically flip to a `dismissed` resolution so
@@ -498,6 +588,39 @@ export function Form(props: FormProps): JSX.Element {
     res.setLocal({ kind: 'dismissed' });
   };
   const onReopen = (): void => emit({ kind: 'reopen', cardId: local.cardId });
+
+  const disabled = (): boolean => local.disabled === true;
+
+  // Imperative controller (Pattern C): hand the facade a handle over the form's
+  // latent capabilities. focus targets the first control (or the first INVALID one
+  // after a failed validation); validate runs the existing validateForm and surfaces
+  // the per-field errors WITHOUT submitting; send runs the same path as the Submit
+  // button; reset re-seeds from schema defaults; dismiss/reopen drive the stub.
+  onMount(() => {
+    local.controllerRef?.({
+      focus: (options) => {
+        const root = queryRoot();
+        const firstBad = keys().find((k) => errors[k]);
+        const target = firstBad ?? keys()[0];
+        if (target) focusControl(target, root, options);
+      },
+      send: () => { runSubmit(); },
+      validate: () => {
+        const snapshot = unwrap(values) as Record<string, unknown>;
+        const result = validateForm(def(), snapshot);
+        setErrors(produce((s) => {
+          for (const k of Object.keys(s)) delete s[k];
+          Object.assign(s, result.fieldErrors);
+        }));
+        return result.valid
+          ? { valid: true }
+          : { valid: false, errors: result.fieldErrors };
+      },
+      reset: () => seedDefaults(),
+      dismiss: () => onDismiss(),
+      reopen: () => onReopen(),
+    });
+  });
 
   const actions = createMemo(() => def()['x-kai-actions'] ?? []);
   const submitLabel = () => def()['x-kai-submitLabel'] ?? 'Submit';
@@ -556,7 +679,7 @@ export function Form(props: FormProps): JSX.Element {
                       </Button>
                     )}
                   </For>
-                  <Button type="submit" form={formId()}>
+                  <Button type="submit" form={formId()} disabled={disabled()}>
                     {submitLabel()}
                   </Button>
                 </div>
@@ -583,7 +706,7 @@ export function Form(props: FormProps): JSX.Element {
                     inlineMax={inlineMax()}
                     value={() => values[key]}
                     error={() => errors[key]}
-                    disabled={false}
+                    disabled={disabled()}
                     onInput={(v) => setField(key, v)}
                     onBlur={() => validateField(key)}
                   />

@@ -16,8 +16,10 @@ export interface KaiArtifactElement extends HTMLElement {
   src?: string;
   /** Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). */
   files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
-  /** Active tab: `preview` (default) or `code`. */
+  /** Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). */
   tab?: "preview" | "code";
+  /** Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`. */
+  defaultTab?: "preview" | "code";
   /** Selected file path — syncs the tree highlight, Code source, and preview. */
   activeFile?: string;
   /** iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`). */
@@ -129,8 +131,14 @@ export interface KaiCardsElement extends HTMLElement {
 export interface KaiChainOfThoughtElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). */
-  steps: { label: string; content?: undefined | string }[];
+  /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). Each `{ label, content?, id? }`. */
+  steps: { label: string; content?: undefined | string; id?: undefined | string }[];
+  /** Open mode: `'multiple'` (default — any number of steps open at once) or `'single'` (at most one open; opening a step closes the others). */
+  type?: "single" | "multiple";
+  /** Controlled open step key(s). When set, it WINS over user interaction (the consumer owns the open set). String in `single` mode, string[] in `multiple` mode. Set as a JS property. */
+  value?: string | string[];
+  /** Uncontrolled INITIAL open step key(s) — seeds which steps render expanded. Ignored once `value` is provided. Set as a JS property. */
+  defaultValue?: string | string[];
 }
 
 export interface KaiChatElement extends HTMLElement {
@@ -218,6 +226,12 @@ export interface KaiChoiceElement extends HTMLElement {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled selection — the selected option id. When set, the consumer owns the current pick (RadioGroup `value`). Attribute: `value`. */
+  value?: string;
+  /** Option id to pre-select on mount (uncontrolled seed). Attribute: `default-value`. */
+  defaultValue?: string;
+  /** Disable the whole radiogroup + Submit (e.g. while the agent is busy). Attribute: `disabled`. */
+  disabled?: boolean;
 }
 
 export interface KaiCodeBlockElement extends HTMLElement {
@@ -397,6 +411,12 @@ export interface KaiFormElement extends HTMLElement {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled field values (JS property). When set, it wins over local edits. */
+  values?: Record<string, unknown>;
+  /** Initial values overlaying the schema defaults (uncontrolled seed; JS property). */
+  defaultValues?: Record<string, unknown>;
+  /** Disable all fields + submit. Attribute: `disabled`. */
+  disabled?: boolean;
 }
 
 export interface KaiHoverCardElement extends HTMLElement {
@@ -797,6 +817,12 @@ export interface KaiTasksElement extends HTMLElement {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{ selected:[…] } }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled selection (task ids; JS property). When set, it wins over local state. */
+  value?: string[];
+  /** Uncontrolled initial selection (task ids; JS property), overlaying per-task `checked`. */
+  defaultValue?: string[];
+  /** Freeze the whole list + Confirm. Attribute: `disabled`. */
+  disabled?: boolean;
 }
 
 export interface KaiTextShimmerElement extends HTMLElement {

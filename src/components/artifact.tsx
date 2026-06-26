@@ -35,13 +35,43 @@ export type ArtifactTab = 'preview' | 'code';
 /** A file the artifact can preview + show source for. */
 export type ArtifactFile = FileTreeFile;
 
+/** Imperative handle exposed via `controllerRef` — surfaces the artifact's latent
+ *  toolbar capabilities (history back/forward/reload/home, programmatic navigate,
+ *  file selection, open-in-new-tab, maximize/restore) so the `<kai-artifact>`
+ *  facade can forward them as instance methods. Each delegates to the SAME internal
+ *  handler the toolbar buttons use, so every existing event still fires. */
+export interface ArtifactController {
+  /** Go back in the artifact's own history stack (no-op when there's no prior entry). */
+  back(): void;
+  /** Go forward in the history stack (no-op when there's no forward entry). */
+  forward(): void;
+  /** Force-reload the current preview url (also re-renders an inline PDF). */
+  reload(): void;
+  /** Navigate to the `src` home url (no-op when there's no `src`). */
+  home(): void;
+  /** Push + load a url in the preview (the path-field submit path). */
+  navigate(url: string): void;
+  /** Select a file by path: highlights the tree, shows its source, navigates the preview. */
+  selectFile(path: string): void;
+  /** Open the current url in a new browser tab (no-op when there's no concrete url). */
+  openExternal(): void;
+  /** Enter the maximized view-state (fires onMaximizeChange/kai-maximize-change). */
+  maximize(): void;
+  /** Exit the maximized view-state. */
+  restore(): void;
+}
+
 export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   /** URL the preview iframe frames. */
   src?: string;
   /** Files for the Code tab's tree (+ each file's preview `url`). */
   files?: ArtifactFile[];
-  /** Active tab. Default `preview`. */
+  /** Controlled active tab — when set, the artifact follows it (re-asserted on
+   *  every change). When undefined the tab is uncontrolled (see `defaultTab`). */
   tab?: ArtifactTab;
+  /** Uncontrolled INITIAL tab (used only when `tab` is undefined). The user can
+   *  then freely switch tabs; defaults to `preview`. */
+  defaultTab?: ArtifactTab;
   /** Selected file path (syncs tree highlight + Code source + preview). */
   activeFile?: string;
   /** iframe `sandbox` override. Default `allow-scripts allow-forms`. */
@@ -80,6 +110,10 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   standalone?: boolean;
   /** Make the path field read-only (visible, nav-tracking, non-editable). */
   readonlyPath?: boolean;
+  /** Receive the imperative controller once mounted. The `<kai-artifact>` facade
+   *  forwards these as element methods (back/forward/reload/home/navigate/
+   *  selectFile/openExternal/maximize/restore). */
+  controllerRef?: (controller: ArtifactController) => void;
 }
 
 const DEFAULT_SANDBOX = 'allow-scripts allow-forms';
@@ -116,7 +150,9 @@ export function Artifact(props: ArtifactProps): JSX.Element {
   const merged = mergeProps(
     {
       files: [] as ArtifactFile[],
-      tab: 'preview' as ArtifactTab,
+      // No `tab` default: a present `tab` means controlled. The uncontrolled
+      // initial tab comes from `defaultTab` (seeded into the internal signal below).
+      defaultTab: 'preview' as ArtifactTab,
       sandbox: DEFAULT_SANDBOX,
       showNav: true,
       showReload: true,
@@ -135,6 +171,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
     'src',
     'files',
     'tab',
+    'defaultTab',
     'activeFile',
     'sandbox',
     'iframeTitle',
@@ -152,6 +189,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
     'openInTab',
     'standalone',
     'readonlyPath',
+    'controllerRef',
     'class',
   ]);
 
@@ -169,7 +207,11 @@ export function Artifact(props: ArtifactProps): JSX.Element {
   const canBack = () => cursor() > 0;
   const canForward = () => cursor() < history().length - 1;
 
-  const [tab, setTab] = createSignal<ArtifactTab>(local.tab);
+  // Seed the internal tab: a present `tab` (controlled) wins; otherwise the
+  // uncontrolled `defaultTab` (which merges to 'preview'). The user can then
+  // switch freely unless `tab` is set (the effect below re-asserts the controlled
+  // value on each change).
+  const [tab, setTab] = createSignal<ArtifactTab>(local.tab ?? local.defaultTab);
   const [activeFile, setActiveFile] = createSignal<string | undefined>(local.activeFile);
   const [reloadKey, setReloadKey] = createSignal(0);
 
@@ -208,8 +250,12 @@ export function Artifact(props: ArtifactProps): JSX.Element {
 
   let iframeEl: HTMLIFrameElement | undefined;
 
-  // Controlled syncing: when the consumer changes the props, follow them.
-  createEffect(() => setTab(local.tab));
+  // Controlled syncing: when the consumer changes the props, follow them. `tab` is
+  // followed ONLY when it's actually set — an undefined `tab` means uncontrolled,
+  // so the internal signal (seeded from defaultTab) is left for the user to drive.
+  createEffect(() => {
+    if (local.tab !== undefined) setTab(local.tab);
+  });
   createEffect(() => setActiveFile(local.activeFile));
   // `src` change → navigate. Use `on(local.src, …)` so the effect tracks ONLY
   // the `src` prop — NOT `currentUrl()` — otherwise navigating away (file click,
@@ -289,6 +335,38 @@ export function Artifact(props: ArtifactProps): JSX.Element {
   const goHome = () => {
     if (local.src) navigate(local.src);
   };
+
+  // Explicitly drive the maximize view-state to a target (the imperative twin of
+  // the toggle button). Fires onMaximizeChange only when the value actually flips,
+  // matching toggleMaximize's "report on change" contract.
+  const setMaximizeState = (next: boolean) => {
+    if (maximized() === next) return;
+    setMaximized(next);
+    local.onMaximizeChange?.(next);
+  };
+
+  // --- Imperative controller (Pattern C): hand the facade a handle over the
+  //     artifact's latent toolbar capabilities. Every method delegates to the
+  //     SAME internal handler the toolbar buttons use, so navigate/tab-change/
+  //     file-select/maximize-change all still fire. ---
+  onMount(() => {
+    local.controllerRef?.({
+      back: () => goBack(),
+      forward: () => goForward(),
+      reload: () => reload(),
+      home: () => goHome(),
+      navigate: (url) => navigate(url),
+      // Resolve the file for the path so highlight + source + preview all sync;
+      // a path with no matching file entry is a no-op (nothing to show).
+      selectFile: (path) => {
+        const file = fileFor(path);
+        if (file) selectFile(path, file);
+      },
+      openExternal: () => openInNewTab(),
+      maximize: () => setMaximizeState(true),
+      restore: () => setMaximizeState(false),
+    });
+  });
 
   // Best-effort: if the consumer opted into `allow-same-origin`, keep the path
   // field truthful as the framed doc navigates itself. Cross-origin (the secure

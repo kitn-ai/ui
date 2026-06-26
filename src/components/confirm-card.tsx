@@ -7,6 +7,7 @@ import {
   createMemo,
   createEffect,
   on,
+  onMount,
   ErrorBoundary,
 } from 'solid-js';
 import { cn } from '../utils/cn';
@@ -121,6 +122,21 @@ export function defaultActionId(actions: ConfirmAction[]): string | undefined {
 // The <ConfirmCard> component.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** Imperative handle exposed via `controllerRef` — surfaces the confirm card's
+ *  latent action/dismiss capabilities so the `<kai-confirm>` facade can forward
+ *  them as instance methods (focus/confirm/dismiss/reopen). */
+export interface ConfirmController {
+  /** Focus the default action button (or the first action if none default). */
+  focus(options?: FocusOptions): void;
+  /** Activate an action by id (or the default action when omitted) — emits the
+   *  `action` verb + resolves single-shot. */
+  confirm(actionId?: string): void;
+  /** Dismiss the card — emits `dismiss` + optimistically collapses to the stub. */
+  dismiss(): void;
+  /** Re-open a dismissed card from its stub — emits `reopen`. */
+  reopen(): void;
+}
+
 export interface ConfirmCardProps {
   /** The confirm definition (CardEnvelope.data). */
   data?: ConfirmCardData;
@@ -138,6 +154,9 @@ export interface ConfirmCardProps {
   class?: string;
   /** When set, render the chromed read-only view instead of the buttons. */
   resolution?: CardResolution;
+  /** Receive the imperative controller once mounted. The `<kai-confirm>` facade
+   *  forwards these as element methods (focus/confirm/dismiss/reopen). */
+  controllerRef?: (controller: ConfirmController) => void;
 }
 
 /**
@@ -159,6 +178,7 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
     'autofocus',
     'class',
     'resolution',
+    'controllerRef',
   ]);
 
   const ctxHost = useCardHost();
@@ -220,6 +240,39 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
   const onReopen = (): void => emit({ kind: 'reopen', cardId: local.cardId });
 
   let bodyRef: HTMLDivElement | undefined;
+  let actionsRef: HTMLDivElement | undefined;
+
+  // The default action button (or the first action button if none is marked
+  // default) — the same target the `autofocus` prop focuses on mount.
+  const focusTarget = (): HTMLButtonElement | null => {
+    if (!actionsRef) return null;
+    return (
+      actionsRef.querySelector<HTMLButtonElement>('button[data-kai-default="true"]') ??
+      actionsRef.querySelector<HTMLButtonElement>('button[data-action-id]')
+    );
+  };
+
+  // ── Imperative controller (Pattern C): hand the facade a handle over the
+  //    card's latent action/dismiss capabilities. Every method drives the SAME
+  //    internal path the buttons drive, so the same kai-card events fire. ──────────
+  onMount(() => {
+    local.controllerRef?.({
+      // Focus the default (or first) action button on demand.
+      focus: (options) => focusTarget()?.focus(options),
+      // Activate an action by id (or the default action with no id) — the button path.
+      confirm: (actionId) => {
+        const list = actions();
+        const id = actionId ?? defaultId();
+        if (id === undefined) return;
+        const action = list.find((a) => a.id === id);
+        if (action) onAction(action);
+      },
+      // Trigger the dismiss path (the X-button path).
+      dismiss: () => onDismiss(),
+      // Re-open a dismissed card (the stub's affordance path).
+      reopen: () => onReopen(),
+    });
+  });
 
   // Surface the resolved action id for host styling.
   createEffect(() => {
@@ -269,7 +322,7 @@ export function ConfirmCard(props: ConfirmCardProps): JSX.Element {
                     <X size={16} aria-hidden="true" />
                   </Button>
                 </Show>
-                <div class="ml-auto flex flex-wrap items-center gap-2">
+                <div ref={actionsRef} class="ml-auto flex flex-wrap items-center gap-2">
                   <For each={actions()}>
                     {(action) => (
                       <Button

@@ -41,6 +41,18 @@ export { normalizeCandidates, buildSelection, isAnyStreaming } from './response-
 
 export type CompareLayout = 'auto' | 'columns' | 'tabs';
 
+/** Imperative handle exposed via `controllerRef` — surfaces the compare's latent
+ *  capabilities (commit a pick by candidate id, focus the roving tab stop) so the
+ *  `<kai-compare>` facade can forward them as instance methods (Pattern C). */
+export interface ResponseCompareController {
+  /** Commit a pick by candidate id — same path as the "Pick this" button: emits
+   *  onSelect + optimistically collapses (single-shot; inert while streaming or
+   *  already resolved). No-op for an unknown id. */
+  select(candidateId: string): void;
+  /** Focus the current roving tab stop (the focused candidate's "Pick this" radio). */
+  focus(options?: FocusOptions): void;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Resolution controller — a sibling of `useCardResolution` for `CompareSelection`,
 // which has no `kind` field (so it can't satisfy `R extends CardResolution`). Same
@@ -88,6 +100,9 @@ export interface ResponseCompareProps {
    *  component is ≥640px wide, tabs when narrower (e.g. on a phone). */
   layout?: CompareLayout;
   class?: string;
+  /** Receive the imperative controller once mounted. The `<kai-compare>` facade
+   *  forwards these as element methods (select/focus). */
+  controllerRef?: (controller: ResponseCompareController) => void;
   /** Fired when the user commits a pick. */
   onSelect?: (sel: CompareSelection) => void;
   /** Fired once both candidates have settled (stopped streaming) and a valid
@@ -119,6 +134,7 @@ export function ResponseCompare(props: ResponseCompareProps): JSX.Element {
     'selection',
     'layout',
     'class',
+    'controllerRef',
     'onSelect',
     'onReady',
     'onError',
@@ -178,10 +194,23 @@ export function ResponseCompare(props: ResponseCompareProps): JSX.Element {
     res.setLocal(sel);
   };
 
-  const focusColumn = (index: number): void => {
+  const focusColumn = (index: number, options?: FocusOptions): void => {
     const cols = groupRef?.querySelectorAll<HTMLElement>('[role="radio"]');
-    cols?.[index]?.focus();
+    cols?.[index]?.focus(options);
   };
+
+  // Imperative controller (Pattern C): hand the facade a handle over the latent
+  // pick + roving-focus capabilities. `pick`/`focusColumn` are already wired
+  // internally — this just surfaces them. `select` looks the candidate up by id
+  // (the public surface is id-based; `pick` is candidate-based internally) and
+  // is a no-op for an unknown id, while streaming, or once resolved (via pick()).
+  local.controllerRef?.({
+    select: (candidateId: string) => {
+      const cand = pair()?.find((c) => c.id === candidateId);
+      if (cand) pick(cand);
+    },
+    focus: (options?: FocusOptions) => focusColumn(focusIndex(), options),
+  });
 
   // Two-item roving tabindex (A↔B). Arrows toggle the focused column; Enter/Space
   // picks it. No-op once resolved.

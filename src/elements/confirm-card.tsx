@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { ConfirmCard, type ConfirmCardData } from '../components/confirm-card';
+import { ConfirmCard, type ConfirmCardData, type ConfirmController } from '../components/confirm-card';
 import type { CardResolution } from '../primitives/card-contract';
 
 interface Props extends Record<string, unknown> {
@@ -28,6 +28,9 @@ interface Props extends Record<string, unknown> {
  * optional close affordance, and `error` for a malformed definition (inline error).
  * Routes through a `CardProvider` when present, else the bubbling `kai-card` event.
  * Isolated in Shadow DOM; theme-aware via the shared kit tokens.
+ *
+ * Exposes instance methods `focus()`/`confirm(actionId?)`/`dismiss()`/`reopen()`
+ * that drive the same internal paths as the buttons.
  */
 defineWebComponent<Props>(
   'kai-confirm',
@@ -38,14 +41,36 @@ defineWebComponent<Props>(
     autofocus: false,
     resolution: undefined,
   },
-  (props, { element, flag }) => (
-    <ConfirmCard
-      data={props.data as ConfirmCardData | undefined}
-      cardId={props.cardId ?? (element.id || 'kai-confirm')}
-      heading={props.heading}
-      autofocus={flag('autofocus')}
-      resolution={props.resolution as CardResolution | undefined}
-      hostElement={element}
-    />
-  ),
+  (props, { element, flag, expose }) => {
+    // Pattern C: the ConfirmCard owns the action/dismiss state and hands up a
+    // controller; the facade captures it and exposes delegating methods. The card's
+    // own paths still fire (confirm → kai-card `action`; dismiss/reopen → kai-card
+    // `dismiss`/`reopen`).
+    let controller: ConfirmController | undefined;
+    expose({
+      /** Focus the default action button (or the first action if none is default) —
+       *  the same target `autofocus` focuses on mount, but on demand. */
+      focus: (options?: FocusOptions) => controller?.focus(options),
+      /** Activate an action by id — emits the `action` verb on kai-card and resolves
+       *  the card (single-shot). With no id, invokes the default action. */
+      confirm: (actionId?: string) => controller?.confirm(actionId),
+      /** Trigger the dismiss path — emits `dismiss` on kai-card and optimistically
+       *  collapses the card to its re-openable stub. */
+      dismiss: () => controller?.dismiss(),
+      /** Re-open a dismissed card from its stub — emits `reopen` on kai-card. */
+      reopen: () => controller?.reopen(),
+    });
+
+    return (
+      <ConfirmCard
+        data={props.data as ConfirmCardData | undefined}
+        cardId={props.cardId ?? (element.id || 'kai-confirm')}
+        heading={props.heading}
+        autofocus={flag('autofocus')}
+        resolution={props.resolution as CardResolution | undefined}
+        controllerRef={(c) => (controller = c)}
+        hostElement={element}
+      />
+    );
+  },
 );

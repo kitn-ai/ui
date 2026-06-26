@@ -82,11 +82,11 @@
     "displayName": "Cards",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-cards></kai-cards>",
-      "react": "import { Cards } from '@kitn.ai/ui/react';\n\n<Cards />",
-      "vue": "<kai-cards />",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-cards></kai-cards>",
-      "angular": "<kai-cards></kai-cards>"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-cards></kai-cards>\n<script type=\"module\">\n  const el = document.querySelector('kai-cards');\n  el.addEventListener('kai-card-resolved', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Cards } from '@kitn.ai/ui/react';\n\n<Cards\n  onCardResolved={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-cards\n  @kai-card-resolved=\"onCardResolved\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-cards\n  on:kai-card-resolved={onCardResolved}\n></kai-cards>",
+      "angular": "<kai-cards\n  (kai-card-resolved)=\"onCardResolved($event)\"\n></kai-cards>"
     }
   },
   {
@@ -94,12 +94,12 @@
     "displayName": "ChainOfThought",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-chain-of-thought></kai-chain-of-thought>\n<script type=\"module\">\n  const el = document.querySelector('kai-chain-of-thought');\n  el.steps = /* … */;\n</script>",
-      "react": "import { ChainOfThought } from '@kitn.ai/ui/react';\n\n<ChainOfThought\n  steps={steps}\n/>",
-      "vue": "<kai-chain-of-thought\n  :steps.prop=\"steps\"\n/>",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-chain-of-thought\n  {steps}\n></kai-chain-of-thought>",
-      "angular": "<kai-chain-of-thought\n  [steps]=\"steps\"\n></kai-chain-of-thought>",
-      "solid": "import { ChainOfThought } from '@kitn.ai/ui';\n\n<ChainOfThought\n  steps={steps}\n/>"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-chain-of-thought></kai-chain-of-thought>\n<script type=\"module\">\n  const el = document.querySelector('kai-chain-of-thought');\n  el.steps = /* … */;\n  el.addEventListener('kai-value-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { ChainOfThought } from '@kitn.ai/ui/react';\n\n<ChainOfThought\n  steps={steps}\n  onValueChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-chain-of-thought\n  :steps.prop=\"steps\"\n  @kai-value-change=\"onValueChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-chain-of-thought\n  {steps}\n  on:kai-value-change={onValueChange}\n></kai-chain-of-thought>",
+      "angular": "<kai-chain-of-thought\n  [steps]=\"steps\"\n  (kai-value-change)=\"onValueChange($event)\"\n></kai-chain-of-thought>",
+      "solid": "import { ChainOfThought } from '@kitn.ai/ui';\n\n<ChainOfThought\n  steps={steps}\n  onValueChange={(e) => console.log(e.detail)}\n/>"
     }
   },
   {
@@ -132,11 +132,11 @@
     "displayName": "Choice",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-choice></kai-choice>",
-      "react": "import { Choice } from '@kitn.ai/ui/react';\n\n<Choice />",
-      "vue": "<kai-choice />",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-choice></kai-choice>",
-      "angular": "<kai-choice></kai-choice>"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-choice></kai-choice>\n<script type=\"module\">\n  const el = document.querySelector('kai-choice');\n  el.addEventListener('kai-value-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Choice } from '@kitn.ai/ui/react';\n\n<Choice\n  onValueChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-choice\n  @kai-value-change=\"onValueChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-choice\n  on:kai-value-change={onValueChange}\n></kai-choice>",
+      "angular": "<kai-choice\n  (kai-value-change)=\"onValueChange($event)\"\n></kai-choice>"
     }
   },
   {
@@ -296,12 +296,12 @@
     "displayName": "Form",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-form></kai-form>",
-      "react": "import { Form } from '@kitn.ai/ui/react';\n\n<Form />",
-      "vue": "<kai-form />",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-form></kai-form>",
-      "angular": "<kai-form></kai-form>",
-      "solid": "import { Form } from '@kitn.ai/ui';\n\n<Form />"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-form></kai-form>\n<script type=\"module\">\n  const el = document.querySelector('kai-form');\n  el.addEventListener('kai-values-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Form } from '@kitn.ai/ui/react';\n\n<Form\n  onValuesChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-form\n  @kai-values-change=\"onValuesChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-form\n  on:kai-values-change={onValuesChange}\n></kai-form>",
+      "angular": "<kai-form\n  (kai-values-change)=\"onValuesChange($event)\"\n></kai-form>",
+      "solid": "import { Form } from '@kitn.ai/ui';\n\n<Form\n  onValuesChange={(e) => console.log(e.detail)}\n/>"
     }
   },
   {
@@ -652,11 +652,11 @@
     "displayName": "Tasks",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-tasks></kai-tasks>",
-      "react": "import { Tasks } from '@kitn.ai/ui/react';\n\n<Tasks />",
-      "vue": "<kai-tasks />",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-tasks></kai-tasks>",
-      "angular": "<kai-tasks></kai-tasks>"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-tasks></kai-tasks>\n<script type=\"module\">\n  const el = document.querySelector('kai-tasks');\n  el.addEventListener('kai-value-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Tasks } from '@kitn.ai/ui/react';\n\n<Tasks\n  onValueChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-tasks\n  @kai-value-change=\"onValueChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-tasks\n  on:kai-value-change={onValueChange}\n></kai-tasks>",
+      "angular": "<kai-tasks\n  (kai-value-change)=\"onValueChange($event)\"\n></kai-tasks>"
     }
   },
   {
@@ -729,12 +729,12 @@
     "displayName": "VoiceInput",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-voice-input></kai-voice-input>\n<script type=\"module\">\n  const el = document.querySelector('kai-voice-input');\n  el.addEventListener('kai-audio-captured', (e) => console.log(e.detail));\n  el.addEventListener('kai-transcription', (e) => console.log(e.detail));\n</script>",
-      "react": "import { VoiceInput } from '@kitn.ai/ui/react';\n\n<VoiceInput\n  onAudioCaptured={(e) => console.log(e.detail)}\n  onTranscription={(e) => console.log(e.detail)}\n/>",
-      "vue": "<kai-voice-input\n  @kai-audio-captured=\"onAudioCaptured\"\n  @kai-transcription=\"onTranscription\"\n/>",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-voice-input\n  on:kai-audio-captured={onAudioCaptured}\n  on:kai-transcription={onTranscription}\n></kai-voice-input>",
-      "angular": "<kai-voice-input\n  (kai-audio-captured)=\"onAudioCaptured($event)\"\n  (kai-transcription)=\"onTranscription($event)\"\n></kai-voice-input>",
-      "solid": "import { VoiceInput } from '@kitn.ai/ui';\n\n<VoiceInput\n  onAudioCaptured={(e) => console.log(e.detail)}\n  onTranscription={(e) => console.log(e.detail)}\n/>"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-voice-input></kai-voice-input>\n<script type=\"module\">\n  const el = document.querySelector('kai-voice-input');\n  el.addEventListener('kai-audio-captured', (e) => console.log(e.detail));\n  el.addEventListener('kai-recording-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-transcription', (e) => console.log(e.detail));\n</script>",
+      "react": "import { VoiceInput } from '@kitn.ai/ui/react';\n\n<VoiceInput\n  onAudioCaptured={(e) => console.log(e.detail)}\n  onRecordingChange={(e) => console.log(e.detail)}\n  onTranscription={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-voice-input\n  @kai-audio-captured=\"onAudioCaptured\"\n  @kai-recording-change=\"onRecordingChange\"\n  @kai-transcription=\"onTranscription\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-voice-input\n  on:kai-audio-captured={onAudioCaptured}\n  on:kai-recording-change={onRecordingChange}\n  on:kai-transcription={onTranscription}\n></kai-voice-input>",
+      "angular": "<kai-voice-input\n  (kai-audio-captured)=\"onAudioCaptured($event)\"\n  (kai-recording-change)=\"onRecordingChange($event)\"\n  (kai-transcription)=\"onTranscription($event)\"\n></kai-voice-input>",
+      "solid": "import { VoiceInput } from '@kitn.ai/ui';\n\n<VoiceInput\n  onAudioCaptured={(e) => console.log(e.detail)}\n  onRecordingChange={(e) => console.log(e.detail)}\n  onTranscription={(e) => console.log(e.detail)}\n/>"
     }
   },
   {

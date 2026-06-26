@@ -1,14 +1,19 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Artifact, type ArtifactFile, type ArtifactTab } from '../components/artifact';
+import { Artifact, type ArtifactController, type ArtifactFile, type ArtifactTab } from '../components/artifact';
 
 interface Props extends Record<string, unknown> {
   /** URL the preview iframe frames. Consumer-controlled. */
   src?: string;
   /** Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). */
   files: ArtifactFile[];
-  /** Active tab: `preview` (default) or `code`. */
+  /** Controlled active tab: `preview` or `code`. When set, the artifact follows it
+   *  (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). */
   tab?: ArtifactTab;
+  /** Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`.
+   *  Seeds the starting tab; the user can then switch freely without the consumer
+   *  re-asserting a controlled `tab`. */
+  defaultTab?: ArtifactTab;
   /** Selected file path — syncs the tree highlight, Code source, and preview. */
   activeFile?: string;
   /** iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`). */
@@ -59,7 +64,8 @@ interface Events extends Record<string, unknown> {
 defineWebComponent<Props, Events>('kai-artifact', {
   src: undefined,
   files: [],
-  tab: 'preview',
+  tab: undefined,
+  defaultTab: undefined,
   activeFile: undefined,
   sandbox: 'allow-scripts allow-forms',
   iframeTitle: undefined,
@@ -73,8 +79,42 @@ defineWebComponent<Props, Events>('kai-artifact', {
   noTabs: false,
   standalone: false,
   readonlyPath: false,
-}, (props, { element, dispatch, flag }) => {
+}, (props, { element, dispatch, flag, expose }) => {
   const [maximized, setMaximized] = createSignal(flag('maximized'));
+
+  // ── Imperative API (instance methods on the host) ──────────────────────────
+  // Pattern C: the Artifact component owns the history stack + tab/file/maximize
+  // state and hands up a controller; the facade captures it and exposes delegating
+  // methods. Every internal handler still fires its event (navigate → kai-navigate;
+  // selectFile → kai-file-select; maximize/restore → kai-maximize-change). Names are
+  // collision-checked against the props: openExternal (not openInTab — a prop),
+  // maximize/restore (not maximized — a prop), navigate/selectFile (not src/activeFile
+  // — props); NO tab-switching method (tab is a prop → switch via `el.tab`).
+  let controller: ArtifactController | undefined;
+  expose({
+    /** Go back in the artifact's own history stack (no-op when there's no prior entry). */
+    back: () => controller?.back(),
+    /** Go forward in the history stack (no-op when there's no forward entry). */
+    forward: () => controller?.forward(),
+    /** Force-reload the current preview url (also re-renders an inline PDF). */
+    reload: () => controller?.reload(),
+    /** Navigate to the `src` home url (no-op when there's no `src`). */
+    home: () => controller?.home(),
+    /** Push + load a url in the preview — the path-field submit path (fires kai-navigate). */
+    navigate: (url: string) => controller?.navigate(url),
+    /** Select a file by path: highlights the tree, shows its source, navigates the
+     *  preview (fires kai-file-select + kai-navigate). Named selectFile to avoid the
+     *  `activeFile` prop. */
+    selectFile: (path: string) => controller?.selectFile(path),
+    /** Open the current url in a new browser tab (no-op when there's no concrete url).
+     *  Named openExternal, NOT openInTab — that's a prop (toolbar button visibility). */
+    openExternal: () => controller?.openExternal(),
+    /** Enter the maximized view-state (fires kai-maximize-change{maximized:true}).
+     *  Named maximize, NOT maximized — that's a prop. */
+    maximize: () => controller?.maximize(),
+    /** Exit the maximized view-state (fires kai-maximize-change{maximized:false}). */
+    restore: () => controller?.restore(),
+  });
 
   const onMaximizeChange = (next: boolean) => {
     setMaximized(next);
@@ -113,6 +153,7 @@ defineWebComponent<Props, Events>('kai-artifact', {
           src={props.src}
           files={props.files}
           tab={props.tab}
+          defaultTab={props.defaultTab}
           activeFile={props.activeFile}
           sandbox={props.sandbox}
           iframeTitle={props.iframeTitle}
@@ -130,6 +171,7 @@ defineWebComponent<Props, Events>('kai-artifact', {
           onNavigate={(url) => dispatch('kai-navigate', { url })}
           onTabChange={(tab) => dispatch('kai-tab-change', { tab })}
           onFileSelect={(path) => dispatch('kai-file-select', { path })}
+          controllerRef={(c) => (controller = c)}
         />
       </div>
     </>

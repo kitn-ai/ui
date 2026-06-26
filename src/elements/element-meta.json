@@ -29,8 +29,15 @@
         "type": "undefined | \"preview\" | \"code\"",
         "optional": true,
         "scalar": true,
-        "description": "Active tab: `preview` (default) or `code`.",
-        "default": "'preview'",
+        "description": "Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`).",
+        "displayType": "undefined | \"preview\" | \"code\""
+      },
+      {
+        "name": "defaultTab",
+        "type": "undefined | \"preview\" | \"code\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`.",
         "displayType": "undefined | \"preview\" | \"code\""
       },
       {
@@ -175,7 +182,62 @@
         "displayDetail": "{ tab: \"preview\" | \"code\" }"
       }
     ],
-    "methods": [],
+    "methods": [
+      {
+        "name": "back",
+        "params": "",
+        "returns": "void",
+        "description": "Go back in the artifact's own history stack (no-op when there's no prior entry)."
+      },
+      {
+        "name": "forward",
+        "params": "",
+        "returns": "void",
+        "description": "Go forward in the history stack (no-op when there's no forward entry)."
+      },
+      {
+        "name": "reload",
+        "params": "",
+        "returns": "void",
+        "description": "Force-reload the current preview url (also re-renders an inline PDF)."
+      },
+      {
+        "name": "home",
+        "params": "",
+        "returns": "void",
+        "description": "Navigate to the `src` home url (no-op when there's no `src`)."
+      },
+      {
+        "name": "navigate",
+        "params": "url: string",
+        "returns": "void",
+        "description": "Push + load a url in the preview — the path-field submit path (fires kai-navigate)."
+      },
+      {
+        "name": "selectFile",
+        "params": "path: string",
+        "returns": "void",
+        "description": "Select a file by path: highlights the tree, shows its source, navigates the preview (fires kai-file-select + kai-navigate). Named selectFile to avoid the `activeFile` prop."
+      },
+      {
+        "name": "openExternal",
+        "params": "",
+        "returns": "void",
+        "description": "Open the current url in a new browser tab (no-op when there's no concrete url). Named openExternal, NOT openInTab — that's a prop (toolbar button visibility)."
+      },
+      {
+        "name": "maximize",
+        "params": "",
+        "returns": "void",
+        "description": "Enter the maximized view-state (fires kai-maximize-change{maximized:true}). Named maximize, NOT maximized — that's a prop."
+      },
+      {
+        "name": "restore",
+        "params": "",
+        "returns": "void",
+        "description": "Exit the maximized view-state (fires kai-maximize-change{maximized:false})."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Artifact",
@@ -593,8 +655,34 @@
         "displayType": "undefined | { onSubmit?: undefined | (cardId: string, data: unknown) => void; onAction?: undefined | (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined | (text: string, opts: { mode: \"compose\" | \"send\"; context?: unknown; }) => void; onOpen?: undefined | (url: string, target: \"tab\" | \"artifact\") => void; onState?: undefined | (cardId: string, patch: unknown) => void; onDismiss?: undefined | (cardId: string) => void; onReopen?: undefined | (cardId: string) => void; onError?: undefined | (cardId: string, message: string) => void; maxSendPromptMode?: undefined | \"compose\" | \"send\" }"
       }
     ],
-    "events": [],
-    "methods": [],
+    "events": [
+      {
+        "name": "kai-card-resolved",
+        "detail": "{ cardId: string; resolution: { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }",
+        "description": "A child card transitioned to a resolved/deferred state (an action was chosen, a form/tasks submission landed, or it was dismissed) — re-emitted off the host as a non-bubbling convenience event so a consumer can observe resolution centrally without diffing the cards array. `detail` = `{ cardId, resolution }`. (A `reopen` un-resolves a card and has no `CardResolution`, so it does NOT fire this — observe reopen via the underlying bubbling `kai-card` event.)",
+        "displayDetail": "{ cardId: string; resolution: { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "resolve",
+        "params": "cardId: string, resolution: CardResolution",
+        "returns": "void",
+        "description": "Programmatically resolve a child card by id: set that envelope's `resolution` so the child re-renders into its read-only/resolved view — the imperative twin of the consumer mutating the cards array. No-op for an unknown id."
+      },
+      {
+        "name": "dismiss",
+        "params": "cardId: string",
+        "returns": "void",
+        "description": "Collapse a card to its re-openable stub from the host side — convenience for `resolve(cardId, { kind: 'dismissed' })`."
+      },
+      {
+        "name": "getCard",
+        "params": "cardId: string",
+        "returns": "HTMLElement | null",
+        "description": "Return the live child element node for a card id (or null) so consumers can call that card's own methods (focus/expand/…) without a shadow-DOM query."
+      }
+    ],
     "composedFrom": [
       {
         "name": "CardFallback",
@@ -611,43 +699,73 @@
     "props": [
       {
         "name": "steps",
-        "type": "{ label: string; content?: undefined | string }[]",
+        "type": "{ label: string; content?: undefined | string; id?: undefined | string }[]",
         "optional": false,
         "scalar": false,
-        "description": "The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1).",
-        "typeName": "Step[]",
-        "typeShape": "{ label: string; content?: undefined | string }[]",
+        "description": "The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). Each `{ label, content?, id? }`.",
+        "typeName": "ChainOfThoughtStepData[]",
+        "typeShape": "{ label: string; content?: undefined | string; id?: undefined | string }[]",
         "default": "[]",
-        "displayType": "{ label: string; content?: undefined | string }[]"
+        "displayType": "{ label: string; content?: undefined | string; id?: undefined | string }[]"
+      },
+      {
+        "name": "type",
+        "type": "undefined | \"single\" | \"multiple\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Open mode: `'multiple'` (default — any number of steps open at once) or `'single'` (at most one open; opening a step closes the others).",
+        "displayType": "undefined | \"single\" | \"multiple\""
+      },
+      {
+        "name": "value",
+        "type": "undefined | string | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Controlled open step key(s). When set, it WINS over user interaction (the consumer owns the open set). String in `single` mode, string[] in `multiple` mode. Set as a JS property.",
+        "displayType": "undefined | string | string[]"
+      },
+      {
+        "name": "defaultValue",
+        "type": "undefined | string | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Uncontrolled INITIAL open step key(s) — seeds which steps render expanded. Ignored once `value` is provided. Set as a JS property.",
+        "displayType": "undefined | string | string[]"
       }
     ],
-    "events": [],
-    "methods": [],
+    "events": [
+      {
+        "name": "kai-value-change",
+        "detail": "{ value: string | string[] }",
+        "description": "The open set changed — by user click OR an expand()/collapse()/toggle() call. `value` is a string in `single` mode, a string[] in `multiple` mode. (Maps Radix Accordion's onValueChange.)",
+        "displayDetail": "{ value: string | string[] }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "expand",
+        "params": "index?: number",
+        "returns": "void",
+        "description": "Open one step's detail by index, or — with no arg — ALL steps. In `single` mode opening one step closes the others (expand-all keeps the last)."
+      },
+      {
+        "name": "collapse",
+        "params": "index?: number",
+        "returns": "void",
+        "description": "Close one step's detail by index, or — with no arg — ALL steps."
+      },
+      {
+        "name": "toggle",
+        "params": "index?: number",
+        "returns": "void",
+        "description": "Flip one step's open state by index."
+      }
+    ],
     "composedFrom": [
       {
-        "name": "ChainOfThought",
+        "name": "ChainOfThoughtAccordion",
         "group": "Components",
-        "storyId": "solid-advanced-elements-chainofthought--docs"
-      },
-      {
-        "name": "ChainOfThoughtStep",
-        "group": "Components",
-        "storyId": "solid-advanced-elements-chainofthoughtstep--docs"
-      },
-      {
-        "name": "ChainOfThoughtTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-elements-chainofthoughttrigger--docs"
-      },
-      {
-        "name": "ChainOfThoughtContent",
-        "group": "Components",
-        "storyId": "solid-advanced-elements-chainofthoughtcontent--docs"
-      },
-      {
-        "name": "ChainOfThoughtItem",
-        "group": "Components",
-        "storyId": "solid-advanced-elements-chainofthoughtitem--docs"
+        "storyId": "solid-advanced-elements-chainofthoughtaccordion--docs"
       }
     ],
     "tokens": []
@@ -1156,10 +1274,72 @@
         "scalar": false,
         "description": "Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`.",
         "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled selection — the selected option id. When set, the consumer owns the current pick (RadioGroup `value`). Attribute: `value`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "defaultValue",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Option id to pre-select on mount (uncontrolled seed). Attribute: `default-value`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the whole radiogroup + Submit (e.g. while the agent is busy). Attribute: `disabled`.",
+        "displayType": "undefined | false | true"
       }
     ],
-    "events": [],
-    "methods": [],
+    "events": [
+      {
+        "name": "kai-value-change",
+        "detail": "{ value: string }",
+        "description": "The selection changed BEFORE submit (a row click or the `select()` method). Distinct from the terminal `action` verb on the `kai-card` contract event.",
+        "displayDetail": "{ value: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the radiogroup roving tab stop (or the Other input when selected)."
+      },
+      {
+        "name": "select",
+        "params": "optionId: string",
+        "returns": "void",
+        "description": "Select an option by id locally — no emit, fires kai-value-change (same as a row click). Lets a consumer pre-highlight or drive selection externally."
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": "Submit the current selection — emits the `action` verb on kai-card and resolves the card (single-shot). Named `send`, not `submit`, per the shared vocabulary."
+      },
+      {
+        "name": "dismiss",
+        "params": "",
+        "returns": "void",
+        "description": "Trigger the dismiss path — emits `dismiss` on kai-card and optimistically collapses the card to its re-openable stub."
+      },
+      {
+        "name": "reopen",
+        "params": "",
+        "returns": "void",
+        "description": "Re-open a dismissed card from its stub — emits `reopen` on kai-card."
+      }
+    ],
     "composedFrom": [
       {
         "name": "ChoiceCard",
@@ -1399,7 +1579,20 @@
         "displayDetail": "{ compareId: string }"
       }
     ],
-    "methods": [],
+    "methods": [
+      {
+        "name": "select",
+        "params": "candidateId: string",
+        "returns": "void",
+        "description": "Programmatically commit a pick by candidate id — same path as the \"Pick this\" button: fires kai-compare-select and optimistically collapses (single-shot; inert while streaming or already resolved). `select` does NOT collide with the `selection` prop (distinct identifier)."
+      },
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the current roving tab stop (the focused candidate's \"Pick this\" radio) so a consumer can move keyboard focus into the radiogroup."
+      }
+    ],
     "composedFrom": [
       {
         "name": "ResponseCompare",
@@ -1630,7 +1823,32 @@
       }
     ],
     "events": [],
-    "methods": [],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the default action button (or the first action if none is default) — the same target `autofocus` focuses on mount, but on demand."
+      },
+      {
+        "name": "confirm",
+        "params": "actionId?: string",
+        "returns": "void",
+        "description": "Activate an action by id — emits the `action` verb on kai-card and resolves the card (single-shot). With no id, invokes the default action."
+      },
+      {
+        "name": "dismiss",
+        "params": "",
+        "returns": "void",
+        "description": "Trigger the dismiss path — emits `dismiss` on kai-card and optimistically collapses the card to its re-openable stub."
+      },
+      {
+        "name": "reopen",
+        "params": "",
+        "returns": "void",
+        "description": "Re-open a dismissed card from its stub — emits `reopen` on kai-card."
+      }
+    ],
     "composedFrom": [
       {
         "name": "ConfirmCard",
@@ -2194,10 +2412,79 @@
         "scalar": false,
         "description": "Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`.",
         "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "values",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "Controlled field values (JS property). When set, it wins over local edits.",
+        "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "defaultValues",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "Initial values overlaying the schema defaults (uncontrolled seed; JS property).",
+        "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable all fields + submit. Attribute: `disabled`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
-    "events": [],
-    "methods": [],
+    "events": [
+      {
+        "name": "kai-values-change",
+        "detail": "{ values: Record<string, unknown>; valid: false | true }",
+        "description": "The form's values changed on input — current coerced values + validity.",
+        "displayDetail": "{ values: Record<string, unknown>; valid: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the first control, or the first INVALID control after a failed validation."
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": "Validate + submit programmatically — focus the first invalid field on failure, else emit the `submit` CardEvent and resolve. Named `send`, not `submit`."
+      },
+      {
+        "name": "validate",
+        "params": "",
+        "returns": "void",
+        "description": "Run client-side validation now and return `{ valid, errors? }` WITHOUT submitting."
+      },
+      {
+        "name": "reset",
+        "params": "",
+        "returns": "void",
+        "description": "Re-seed the form from each field's `default` and clear errors."
+      },
+      {
+        "name": "dismiss",
+        "params": "",
+        "returns": "void",
+        "description": "Trigger the dismiss path (emit `dismiss` + collapse to the re-openable stub)."
+      },
+      {
+        "name": "reopen",
+        "params": "",
+        "returns": "void",
+        "description": "Re-open a dismissed card from its stub (emit `reopen`)."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Form",
@@ -4321,10 +4608,79 @@
         "scalar": false,
         "description": "Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{ selected:[…] } }`.",
         "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Controlled selection (task ids; JS property). When set, it wins over local state.",
+        "displayType": "undefined | string[]"
+      },
+      {
+        "name": "defaultValue",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Uncontrolled initial selection (task ids; JS property), overlaying per-task `checked`.",
+        "displayType": "undefined | string[]"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Freeze the whole list + Confirm. Attribute: `disabled`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
-    "events": [],
-    "methods": [],
+    "events": [
+      {
+        "name": "kai-value-change",
+        "detail": "{ value: string[] }",
+        "description": "The selection changed on a toggle — the selected ids in input order.",
+        "displayDetail": "{ value: string[] }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "select",
+        "params": "taskIds?: string[]",
+        "returns": "void",
+        "description": "Set the checked task ids (local-only, no emit), respecting disabled/max. With no arg, select all toggleable rows."
+      },
+      {
+        "name": "toggle",
+        "params": "taskId: string, checked?: boolean",
+        "returns": "void",
+        "description": "Toggle one task by id, honoring the max gate (no `checked` = flip)."
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": "Confirm the current selection — emits the `submit` CardEvent + resolves (only when the min/max gate passes). Named `send`, not `submit`."
+      },
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the task group (select-all checkbox if shown, else the first row)."
+      },
+      {
+        "name": "dismiss",
+        "params": "",
+        "returns": "void",
+        "description": "Trigger the dismiss path (emit `dismiss` + collapse to the re-openable stub)."
+      },
+      {
+        "name": "reopen",
+        "params": "",
+        "returns": "void",
+        "description": "Re-open a dismissed card from its stub (emit `reopen`)."
+      }
+    ],
     "composedFrom": [
       {
         "name": "TasksCard",
@@ -4726,13 +5082,32 @@
         "displayDetail": "{ blob: Blob }"
       },
       {
+        "name": "kai-recording-change",
+        "detail": "{ recording: false | true }",
+        "description": "Recording started or stopped — lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount.",
+        "displayDetail": "{ recording: false | true }"
+      },
+      {
         "name": "kai-transcription",
         "detail": "{ text: string }",
         "description": "Transcription completed (the `transcribe` property resolved).",
         "displayDetail": "{ text: string }"
       }
     ],
-    "methods": [],
+    "methods": [
+      {
+        "name": "start",
+        "params": "",
+        "returns": "void",
+        "description": "Begin recording programmatically (e.g. push-to-talk bound to a global key). Runs the same getUserMedia path as clicking the mic; no-ops if already recording."
+      },
+      {
+        "name": "stop",
+        "params": "",
+        "returns": "void",
+        "description": "Stop the in-progress recording, producing the blob (→ kai-audio-captured) and running transcription. Pairs with start() for push-to-talk."
+      }
+    ],
     "composedFrom": [
       {
         "name": "VoiceInput",

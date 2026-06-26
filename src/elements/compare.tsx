@@ -1,7 +1,11 @@
 import { defineWebComponent } from './define';
 import { ChatConfig, useChatConfig, type ProseSize } from '../primitives/chat-config';
 import { ResponseCompare, type CompareLayout } from '../components/response-compare';
-import type { ResponseCompareData, CompareSelection } from '../components/response-compare';
+import type {
+  ResponseCompareData,
+  CompareSelection,
+  ResponseCompareController,
+} from '../components/response-compare';
 
 interface Props extends Record<string, unknown> {
   /** The compare definition (prompt + the two candidates). Set as a JS PROPERTY:
@@ -60,12 +64,29 @@ defineWebComponent<Props, Events>(
     codeTheme: undefined,
     codeHighlight: undefined,
   },
-  (props, { element, dispatch }) => {
+  (props, { element, dispatch, expose }) => {
     const compareId = (): string => props.compareId ?? (element.id || 'kai-compare');
     // Inherit the shadow-root portal mount from the outer ChatConfig that
     // defineWebComponent installs, so candidate-body overlays (hover cards,
     // tooltips) stay inside the shadow root.
     const outer = useChatConfig();
+
+    // ── Imperative API (instance methods on the host) ──────────────────────────
+    // Pattern C: ResponseCompare owns the pick + roving-focus state and hands up a
+    // controller; the facade captures it and exposes delegating methods. The
+    // component's own callbacks still fire (select → onSelect → kai-compare-select).
+    let controller: ResponseCompareController | undefined;
+    expose({
+      /** Programmatically commit a pick by candidate id — same path as the "Pick
+       *  this" button: fires kai-compare-select and optimistically collapses
+       *  (single-shot; inert while streaming or already resolved). `select` does
+       *  NOT collide with the `selection` prop (distinct identifier). */
+      select: (candidateId: string) => controller?.select(candidateId),
+      /** Focus the current roving tab stop (the focused candidate's "Pick this"
+       *  radio) so a consumer can move keyboard focus into the radiogroup. */
+      focus: (options?: FocusOptions) => controller?.focus(options),
+    });
+
     return (
       <ChatConfig
         proseSize={props.proseSize}
@@ -78,6 +99,7 @@ defineWebComponent<Props, Events>(
           compareId={compareId()}
           selection={props.selection as CompareSelection | undefined}
           layout={(props.layout as CompareLayout | undefined) ?? 'auto'}
+          controllerRef={(c) => (controller = c)}
           onSelect={(sel) => dispatch('kai-compare-select', sel)}
           onReady={() => dispatch('kai-ready', { compareId: compareId() })}
           onError={(message) => dispatch('kai-error', { compareId: compareId(), message })}

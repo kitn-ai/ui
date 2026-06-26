@@ -16,8 +16,10 @@ export interface ArtifactProps extends WebComponentProps {
   src?: string;
   /** Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). */
   files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
-  /** Active tab: `preview` (default) or `code`. */
+  /** Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). */
   tab?: "preview" | "code";
+  /** Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`. */
+  defaultTab?: "preview" | "code";
   /** Selected file path — syncs the tree highlight, Code source, and preview. */
   activeFile?: string;
   /** iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`). */
@@ -56,7 +58,7 @@ export interface ArtifactProps extends WebComponentProps {
 
 export const Artifact = createWebComponent<ArtifactProps>(
   'kai-artifact',
-  ["theme","src","files","tab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath"],
+  ["theme","src","files","tab","defaultTab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath"],
   { onFileSelect: 'kai-file-select', onMaximizeChange: 'kai-maximize-change', onNavigate: 'kai-navigate', onTabChange: 'kai-tab-change' },
 );
 
@@ -160,23 +162,33 @@ export interface CardsProps extends WebComponentProps {
   types?: Record<string, string>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
   policy?: { onSubmit?: (cardId: string, data: unknown) => void; onAction?: (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: (text: string, opts: { mode: "compose" | "send"; context?: unknown; }) => void; onOpen?: (url: string, target: "tab" | "artifact") => void; onState?: (cardId: string, patch: unknown) => void; onDismiss?: (cardId: string) => void; onReopen?: (cardId: string) => void; onError?: (cardId: string, message: string) => void; maxSendPromptMode?: "compose" | "send" };
+  /** A child card transitioned to a resolved/deferred state (an action was chosen, a form/tasks submission landed, or it was dismissed) — re-emitted off the host as a non-bubbling convenience event so a consumer can observe resolution centrally without diffing the cards array. `detail` = `{ cardId, resolution }`. (A `reopen` un-resolves a card and has no `CardResolution`, so it does NOT fire this — observe reopen via the underlying bubbling `kai-card` event.) */
+  onCardResolved?: (event: CustomEvent<{ cardId: string; resolution: { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }>) => void;
 }
 
 export const Cards = createWebComponent<CardsProps>(
   'kai-cards',
   ["theme","cards","types","policy"],
-  {  },
+  { onCardResolved: 'kai-card-resolved' },
 );
 
 export interface ChainOfThoughtProps extends WebComponentProps {
-  /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). */
-  steps: { label: string; content?: undefined | string }[];
+  /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). Each `{ label, content?, id? }`. */
+  steps: { label: string; content?: undefined | string; id?: undefined | string }[];
+  /** Open mode: `'multiple'` (default — any number of steps open at once) or `'single'` (at most one open; opening a step closes the others). */
+  type?: "single" | "multiple";
+  /** Controlled open step key(s). When set, it WINS over user interaction (the consumer owns the open set). String in `single` mode, string[] in `multiple` mode. Set as a JS property. */
+  value?: string | string[];
+  /** Uncontrolled INITIAL open step key(s) — seeds which steps render expanded. Ignored once `value` is provided. Set as a JS property. */
+  defaultValue?: string | string[];
+  /** The open set changed — by user click OR an expand()/collapse()/toggle() call. `value` is a string in `single` mode, a string[] in `multiple` mode. (Maps Radix Accordion's onValueChange.) */
+  onValueChange?: (event: CustomEvent<{ value: string | string[] }>) => void;
 }
 
 export const ChainOfThought = createWebComponent<ChainOfThoughtProps>(
   'kai-chain-of-thought',
-  ["theme","steps"],
-  {  },
+  ["theme","steps","type","value","defaultValue"],
+  { onValueChange: 'kai-value-change' },
 );
 
 export interface ChatProps extends WebComponentProps {
@@ -288,12 +300,20 @@ export interface ChoiceProps extends WebComponentProps {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled selection — the selected option id. When set, the consumer owns the current pick (RadioGroup `value`). Attribute: `value`. */
+  value?: string;
+  /** Option id to pre-select on mount (uncontrolled seed). Attribute: `default-value`. */
+  defaultValue?: string;
+  /** Disable the whole radiogroup + Submit (e.g. while the agent is busy). Attribute: `disabled`. */
+  disabled?: boolean;
+  /** The selection changed BEFORE submit (a row click or the `select()` method). Distinct from the terminal `action` verb on the `kai-card` contract event. */
+  onValueChange?: (event: CustomEvent<{ value: string }>) => void;
 }
 
 export const Choice = createWebComponent<ChoiceProps>(
   'kai-choice',
-  ["theme","data","cardId","heading","resolution"],
-  {  },
+  ["theme","data","cardId","heading","resolution","value","defaultValue","disabled"],
+  { onValueChange: 'kai-value-change' },
 );
 
 export interface CodeBlockProps extends WebComponentProps {
@@ -567,12 +587,20 @@ export interface FormProps extends WebComponentProps {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled field values (JS property). When set, it wins over local edits. */
+  values?: Record<string, unknown>;
+  /** Initial values overlaying the schema defaults (uncontrolled seed; JS property). */
+  defaultValues?: Record<string, unknown>;
+  /** Disable all fields + submit. Attribute: `disabled`. */
+  disabled?: boolean;
+  /** The form's values changed on input — current coerced values + validity. */
+  onValuesChange?: (event: CustomEvent<{ values: Record<string, unknown>; valid: boolean }>) => void;
 }
 
 export const Form = createWebComponent<FormProps>(
   'kai-form',
-  ["theme","data","cardId","heading","resolution"],
-  {  },
+  ["theme","data","cardId","heading","resolution","values","defaultValues","disabled"],
+  { onValuesChange: 'kai-values-change' },
 );
 
 export interface HoverCardProps extends WebComponentProps {
@@ -1131,12 +1159,20 @@ export interface TasksProps extends WebComponentProps {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{ selected:[…] } }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled selection (task ids; JS property). When set, it wins over local state. */
+  value?: string[];
+  /** Uncontrolled initial selection (task ids; JS property), overlaying per-task `checked`. */
+  defaultValue?: string[];
+  /** Freeze the whole list + Confirm. Attribute: `disabled`. */
+  disabled?: boolean;
+  /** The selection changed on a toggle — the selected ids in input order. */
+  onValueChange?: (event: CustomEvent<{ value: string[] }>) => void;
 }
 
 export const Tasks = createWebComponent<TasksProps>(
   'kai-tasks',
-  ["theme","data","cardId","heading","resolution"],
-  {  },
+  ["theme","data","cardId","heading","resolution","value","defaultValue","disabled"],
+  { onValueChange: 'kai-value-change' },
 );
 
 export interface TextShimmerProps extends WebComponentProps {
@@ -1247,6 +1283,8 @@ export interface VoiceInputProps extends WebComponentProps {
   disabled?: boolean;
   /** Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. */
   onAudioCaptured?: (event: CustomEvent<{ blob: Blob }>) => void;
+  /** Recording started or stopped — lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount. */
+  onRecordingChange?: (event: CustomEvent<{ recording: boolean }>) => void;
   /** Transcription completed (the `transcribe` property resolved). */
   onTranscription?: (event: CustomEvent<{ text: string }>) => void;
 }
@@ -1254,7 +1292,7 @@ export interface VoiceInputProps extends WebComponentProps {
 export const VoiceInput = createWebComponent<VoiceInputProps>(
   'kai-voice-input',
   ["theme","transcribe","disabled"],
-  { onAudioCaptured: 'kai-audio-captured', onTranscription: 'kai-transcription' },
+  { onAudioCaptured: 'kai-audio-captured', onRecordingChange: 'kai-recording-change', onTranscription: 'kai-transcription' },
 );
 
 export interface WorkspaceProps extends WebComponentProps {

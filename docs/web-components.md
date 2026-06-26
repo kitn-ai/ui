@@ -716,11 +716,20 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `steps` | — | `{ label: string; content?: undefined | string }[]` | `[]` | The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). |
+| `steps` | — | `{ label: string; content?: undefined | string; id?: undefined | string }[]` | `[]` | The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). Each `{ label, content?, id? }`. |
+| `type` | `type` | `undefined | "single" | "multiple"` | — | Open mode: `'multiple'` (default — any number of steps open at once) or `'single'` (at most one open; opening a step closes the others). |
+| `value` | — | `undefined | string | string[]` | — | Controlled open step key(s). When set, it WINS over user interaction (the consumer owns the open set). String in `single` mode, string[] in `multiple` mode. Set as a JS property. |
+| `defaultValue` | — | `undefined | string | string[]` | — | Uncontrolled INITIAL open step key(s) — seeds which steps render expanded. Ignored once `value` is provided. Set as a JS property. |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-value-change` | `{ value: string | string[] }` | The open set changed — by user click OR an expand()/collapse()/toggle() call. `value` is a string in `single` mode, a string[] in `multiple` mode. (Maps Radix Accordion's onValueChange.) |
 
 #### Composed from
 
-`Components/ChainOfThought`, `Components/ChainOfThoughtStep`, `Components/ChainOfThoughtTrigger`, `Components/ChainOfThoughtContent`, `Components/ChainOfThoughtItem`
+`Components/ChainOfThoughtAccordion`
 
 #### Theming
 
@@ -901,6 +910,7 @@ A drag-and-drop / click-to-pick file upload dropzone.
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-audio-captured` | `{ blob: Blob }` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. |
+| `kai-recording-change` | `{ recording: false | true }` | Recording started or stopped — lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount. |
 | `kai-transcription` | `{ text: string }` | Transcription completed (the `transcribe` property resolved). |
 
 #### Composed from
