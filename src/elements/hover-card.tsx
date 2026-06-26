@@ -1,7 +1,7 @@
-import { createEffect, untrack } from 'solid-js';
 import { type Placement } from '@floating-ui/dom';
 import { HoverCardRoot, HoverCardTrigger, HoverCardContent, type HoverCardController } from '../ui/hover-card';
 import { defineWebComponent } from './define';
+import { wireDisclosure } from './disclosure';
 
 interface Props extends Record<string, unknown> {
   /** Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it
@@ -52,39 +52,13 @@ defineWebComponent<Props, Events>('kai-hover-card', {
   open: undefined,
   defaultOpen: undefined,
   disabled: undefined,
-}, (props, { element, dispatch, flag, expose }) => {
+}, (props, ctx) => {
+  const { flag } = ctx;
   let api: HoverCardController | undefined;
-  let prev: boolean | undefined;
 
-  // Reflect internal open → the `open` host attribute (for :host([open]) CSS) and
-  // fire kai-open-change on every change.
-  createEffect(() => {
-    if (!api) return;
-    const o = api.open();
-    element.toggleAttribute('open', o);
-    if (prev !== undefined && prev !== o) dispatch('kai-open-change', { open: o });
-    prev = o;
-  });
-
-  // External `open` prop/attr → drive the internal state. Only when the consumer
-  // has EXPLICITLY set it (so a `defaultOpen` seed isn't clobbered on mount); the
-  // equality guard makes the reflect above a no-op rather than a feedback loop.
-  createEffect(() => {
-    if (!api) return;
-    const explicit = props.open !== undefined || element.hasAttribute('open');
-    if (!explicit) return;
-    const desired = flag('open');
-    if (desired !== untrack(api.open)) api.setOpen(desired);
-  });
-
-  expose({
-    /** Open the card programmatically (no-op while disabled). */
-    show: () => { if (!flag('disabled')) api?.setOpen(true); },
-    /** Close the card programmatically. */
-    hide: () => api?.setOpen(false),
-    /** Flip the open state (closes while disabled). */
-    toggle: () => api?.setOpen(flag('disabled') ? false : !api.open()),
-  });
+  // The standard overlay surface: settable+reflecting `open`, kai-open-change,
+  // show/hide/toggle, disabled-gating. See ./disclosure.
+  wireDisclosure(ctx, () => api, () => props.open);
 
   return (
     <>

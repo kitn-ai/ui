@@ -2174,13 +2174,13 @@
         "name": "show",
         "params": "",
         "returns": "void",
-        "description": "Open the card programmatically (no-op while disabled)."
+        "description": "Open it programmatically (no-op while disabled)."
       },
       {
         "name": "hide",
         "params": "",
         "returns": "void",
-        "description": "Close the card programmatically."
+        "description": "Close it programmatically."
       },
       {
         "name": "toggle",

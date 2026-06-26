@@ -124,11 +124,25 @@ const dispatchNames = (sourceFile) => {
   return names;
 };
 
+// Methods contributed by shared helpers that call `expose()` internally (so the
+// literal-`expose({...})` walk below can't see them). Keep in sync with the helper.
+const HELPER_METHODS = {
+  wireDisclosure: [
+    { name: 'show', params: '', returns: 'void', description: 'Open it programmatically (no-op while disabled).' },
+    { name: 'hide', params: '', returns: 'void', description: 'Close it programmatically.' },
+    { name: 'toggle', params: '', returns: 'void', description: 'Flip the open state (closes while disabled).' },
+  ],
+};
+
 // collect expose({ name: fn }) imperative methods per file — the input half of the
 // interaction surface (defineWebComponent's ctx.expose attaches them to the host).
+// Also recognizes method-providing helpers (e.g. wireDisclosure) by their call site.
 const exposeMethods = (sourceFile) => {
   const out = [];
   const visit = (node) => {
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && Array.isArray(HELPER_METHODS[node.expression.text])) {
+      out.push(...HELPER_METHODS[node.expression.text].map((m) => ({ ...m })));
+    }
     if (
       ts.isCallExpression(node) &&
       ts.isIdentifier(node.expression) &&
