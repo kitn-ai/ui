@@ -1,0 +1,15 @@
+---
+// The full curated icon set, from the no-drift icon-names.json (generated from
+// NAMED_ICONS in the kit). Each tile renders the live <kai-icon> + its name; the
+// elements upgrade when the page's kit bundle loads.
+import names from '../data/icon-names.json';
+---
+<div class="not-content my-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+  {names.map((name) => (
+    <div class="flex items-center gap-3 rounded-lg border border-line bg-surface px-3 py-2.5">
+      <kai-icon name={name} style="flex:0 0 auto"></kai-icon>
+      <code class="truncate text-xs text-ink-2">{name}</code>
+    </div>
+  ))}
+</div>
+<p class="text-sm text-ink-3">{names.length} curated icons. Need another glyph? Pass a URL / data-URI to <code>name</code>, or slot any inline SVG via <code>slot="icon"</code> on the elements that take one.</p>

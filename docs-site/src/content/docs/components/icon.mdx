@@ -8,6 +8,7 @@ import Playground from '../../../components/Playground.tsx';
 import Example from '../../../components/Example.tsx';
 import PropTable from '../../../components/PropTable.astro';
 import PartTable from '../../../components/PartTable.astro';
+import IconGallery from '../../../components/IconGallery.astro';
 import ComposedFrom from '../../../components/ComposedFrom.astro';
 import Facts from '../../../components/Facts.astro';
 import NeedAHand from '../../../components/NeedAHand.astro';
@@ -26,9 +27,15 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 Reach for `kai-icon` when you need one of the kit's icons in your *own* markup — a glyph next to a heading, in a stat tile, beside a custom button — and want it to match the kit's look without bundling a separate icon library. It's one of three icon tiers: most elements take an `icon` prop that resolves the same curated names (see [Button](/components/button/)); `kai-icon` exposes that resolver as a standalone element; and for anything outside the curated set, drop your own inline `<svg slot="icon">` into an element. Use this tier when the icon stands alone rather than decorating another component.
 </Aside>
 
+## All icons
+
+The set is deliberately small — these are the glyphs the kit's own elements use, not a general-purpose icon library. Pick any one by `name`:
+
+<IconGallery />
+
 ## Usage
 
-Set `name` to a curated icon and `size` to one of `sm` / `md` / `lg`. The set is deliberately small and curated — these are the glyphs the kit's own elements use, not a general-purpose icon library. Available names include `sparkles`, `globe`, `mic`, `search`, `paperclip`, `settings`, `code`, `book-open`, `file-text`, `folder`, `share`, and `arrow-left`. Pass an unknown name and it renders as literal text (with a dev-time warning), so for any glyph outside the set, drop your own inline SVG into another element's `slot="icon"` rather than forcing it through here.
+Set `name` to one of the curated icons above and `size` to one of `sm` / `md` / `lg`. Pass an unknown name and it renders as literal text (with a dev-time warning), so for any glyph outside the set, drop your own inline SVG into another element's `slot="icon"` rather than forcing it through here.
 
 ```html
 <kai-icon name="globe"></kai-icon>
@@ -36,12 +43,6 @@ Set `name` to a curated icon and `size` to one of `sm` / `md` / `lg`. The set is
 ```
 
 ## Examples
-
-### A curated icon
-
-`name` picks the glyph; it renders inline at the `md` size in the theme's foreground.
-
-<Example client:visible tag="kai-icon" config={{ name: 'globe' }} />
 
 ### Sizing
 
