@@ -4,11 +4,11 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Create or modify a component
 
-Adding a component means working down the layers (see the **Getting Started/How it's built** page): write the Solid component, give it a story, then wrap it as a `kai-*` element. Modifying one is the same path in reverse — find the layer that owns the behavior and change it there. We'll build a toggle the whole way through; it's the shortest component that touches every step.
+Adding a component means working down the layers: write the Solid component, give it a story, wrap it as a `kai-*` element. Modifying one is the same in reverse — change the layer that owns the behavior. A toggle touches every step, so that's the example.
 
 ## 1. Write the component
 
-UI primitives go in `src/ui/`. Keep them accessible and theme-tokened — no hard-coded colors. The real `Switch` is a `role="switch"` button that supports both controlled and uncontrolled state:
+UI primitives go in `src/ui/`. Keep them accessible and token-styled (no hard-coded colors). The real `Switch` is a `role="switch"` button supporting controlled and uncontrolled state:
 
 ```tsx
 // src/ui/switch.tsx
@@ -17,7 +17,7 @@ import { cn } from '../utils/cn';
 
 export interface SwitchProps {
   checked?: boolean;        // controlled — drive from onChange
-  defaultChecked?: boolean; // initial state when uncontrolled
+  defaultChecked?: boolean; // uncontrolled initial state
   disabled?: boolean;
   label?: string;
   onChange?: (checked: boolean) => void;
@@ -51,11 +51,11 @@ export function Switch(props: SwitchProps) {
 }
 ```
 
-Two conventions worth copying: support a controlled `checked` *and* an uncontrolled `defaultChecked`, and style with token-backed Tailwind classes (`bg-primary`, `bg-muted`, `ring-ring`) so theming and dark mode come for free.
+Support both a controlled `checked` and an uncontrolled `defaultChecked`, and use token-backed classes (`bg-primary`, `bg-muted`, `ring-ring`) so theming and dark mode come along.
 
 ## 2. Give it a story
 
-Stories are how you build and review a component in isolation — they're not an afterthought. A primitive's story sits beside it in `src/ui/` and uses `componentDescription` for the docs blurb:
+A primitive's story sits beside it in `src/ui/`:
 
 ```tsx
 // src/ui/switch.stories.tsx
@@ -69,12 +69,7 @@ const meta = {
   component: Switch,
   tags: ['autodocs'],
   parameters: {
-    docs: {
-      description: componentDescription([
-        'A toggle switch (`role="switch"`) for an immediate on/off setting.',
-        '**When to use:** a setting that applies the moment it flips.',
-      ]),
-    },
+    docs: { description: componentDescription(['A toggle switch (`role="switch"`) for an immediate on/off setting.']) },
   },
   argTypes: {
     disabled: { control: 'boolean' },
@@ -92,11 +87,11 @@ export const Playground: Story = {};
 export const On: Story = { args: { defaultChecked: true } };
 ```
 
-Run `npm run storybook` and the story is live. Write a description, a `Playground` driven by `args`, and a showcase story for each notable variation. Element stories — in `src/elements/` — differ slightly: they pull controls from the generated metadata with `argTypesFor(tag)` and write the blurb with `specDescription`. Copy an existing one like `src/elements/switch.stories.tsx`.
+Wire callbacks with `fn()` so they log to the Actions panel, and give each notable variation its own story. Element stories (in `src/elements/`) pull controls from the generated metadata with `argTypesFor(tag)` and write their blurb with `specDescription` — copy `src/elements/switch.stories.tsx`.
 
 ## 3. Expose it as a `kai-*` element
 
-To make the primitive usable outside Solid, wrap it with `defineWebComponent` in `src/elements/`. This is the whole element:
+Wrap the primitive with `defineWebComponent` in `src/elements/`:
 
 ```tsx
 // src/elements/switch.tsx
@@ -127,17 +122,13 @@ defineWebComponent<Props, Events>('kai-switch', {
 ));
 ```
 
-What the facade handles for you:
+- **Boolean props** — `flag('checked')`, not `props.checked` (a bare attribute parses to `undefined`).
+- **Events** — `dispatch('kai-change', { checked })`; the `<Props, Events>` type args keep names and payloads honest.
+- **Slots** — for content rather than data, render `<slot />` (or named slots) in the facade.
 
-- **Boolean props** — use `flag('checked')`, not `props.checked`. A bare attribute (`<kai-switch checked>`) parses to `undefined`, so `flag` is what makes `<kai-switch checked>`, `checked="true"`, and `el.checked = true` all read as on.
-- **Events** — `dispatch('kai-change', { checked })` fires a `kai-*` `CustomEvent` off the host. Typing `defineWebComponent<Props, Events>` keeps `dispatch` honest about names and payloads.
-- **Slots** — for content rather than data, render `<slot />` (or named slots) inside the facade; the kit's composition elements do this for declarative children.
-
-> **Note — reserved prop names.** `title`, `id`, `slot`, and `lang` collide with global HTMLElement attributes and break the element constructor — `defineWebComponent` throws if you use them. Rename (e.g. a source title → `headline`).
+`title`, `id`, `slot`, and `lang` collide with global HTMLElement attributes — `defineWebComponent` throws if you use them. Rename (a source title → `headline`).
 
 ## 4. Register and regenerate
-
-Add the element to the barrel so the bundle defines it, and re-run the API generator so the metadata, types, and docs pick it up.
 
 ```ts
 // src/elements/register.ts
@@ -148,10 +139,6 @@ import './switch';
 npm run build:api   # regenerates element-meta.json, types, React wrappers, llms.txt
 ```
 
-That's the full loop: the component exists, has a story, ships as `<kai-switch>`, and shows up everywhere the generated metadata feeds — the reference tables, the React adapter, and the for-AI-agents output.
-
-> **Keep the layers honest.** Behavior belongs in `src/primitives/`, accessible markup in `src/ui/`, the AI surface in `src/components/`, and only the thin wrapper in `src/elements/`. When you modify a component, change the layer that owns the behavior — the element facade should stay boring.
-
 ## Verify
 
-Before you call it done: `npm run typecheck`, `npm test`, and check the story in `npm run storybook` in both light and dark. For element behavior that needs a real browser, add a Playwright check rather than a jsdom test.
+`npm run typecheck`, `npm test`, and check the story in `npm run storybook` (light and dark). For element behavior that needs a real browser, add a Playwright check rather than a jsdom test.

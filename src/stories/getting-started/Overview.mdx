@@ -4,22 +4,19 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Overview
 
-This Storybook is the **development surface for AI/UI itself** — the SolidJS layer underneath the `kai-*` web components: the headless primitives, the in-house UI primitives, the feature components, and the Solid-to-custom-element facades.
+This Storybook is the dev surface for AI/UI — the SolidJS layer under the `kai-*` web components: the headless primitives, the UI primitives, the feature components, and the custom-element facades, each with live stories and controls.
 
-**Building an app with AI/UI?** You almost certainly want the web components, not this. The consumer documentation — install, the chat app, workspaces, composing your own, every element's API — lives at **[ui.kitn.ai](https://ui.kitn.ai)**. Reach for this Storybook when you're working *on* the kit, not *with* it.
+Consumer docs (install, the chat app, the full element API) live at [ui.kitn.ai](https://ui.kitn.ai). Use this when you're composing the kit directly in Solid, or working on it.
 
-## What's here
+## Sections
 
-- **Getting Started** (these pages) — how the kit is built, how to run it locally, how to add or change a component, and how to work with the primitives directly.
-- **Components** — a story for every SolidJS primitive and feature component, with controls. This is the live reference for the layer the web components are built on.
-- **Labs** — the composition testing ground: prototypes that compose `kai-*` elements (slots, parts, new patterns) before they graduate into the public docs. See **Getting Started → Building in the Labs**.
+- **Getting Started** — how the kit is built, running it locally, adding or changing a component.
+- **Components** — a story for every primitive and feature component.
+- **Labs** — compositions prototyped against real `kai-*` elements before they graduate to the docs.
 
 ## Start here
 
-1. **[How it's built](?path=/docs/getting-started-how-it-s-built--docs)** — the four layers and how a change flows through them.
-2. **[Working with the primitives](?path=/docs/getting-started-working-with-the-primitives--docs)** — import the SolidJS components directly for full compositional control.
-3. **[Create or modify a component](?path=/docs/getting-started-create-or-modify-a-component--docs)** — the full path: primitive → story → `kai-*` facade.
-4. **[Run the kit locally](?path=/docs/getting-started-run-the-kit-locally--docs)** — clone, install, dev, test, build.
-5. **[Building in the Labs](?path=/docs/getting-started-building-in-the-labs--docs)** — prototype a composition and verify it.
-
-> **Note:** the web components are the product; this layer is how they're made. When in doubt about a consumer-facing question, check [ui.kitn.ai](https://ui.kitn.ai) first.
+- [How it's built](?path=/docs/getting-started-how-it-s-built--docs) — the four layers.
+- [Working with the primitives](?path=/docs/getting-started-working-with-the-primitives--docs) — import the Solid components directly.
+- [Create or modify a component](?path=/docs/getting-started-create-or-modify-a-component--docs) — primitive → story → facade.
+- [Run the kit locally](?path=/docs/getting-started-run-the-kit-locally--docs) — clone, dev, test, build.

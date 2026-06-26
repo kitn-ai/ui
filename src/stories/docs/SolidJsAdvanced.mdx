@@ -2,30 +2,19 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 <Meta title="Components/Overview" />
 
-# Components — the SolidJS layer
+# Components
 
-AI/UI is **authored in SolidJS** and shipped as framework-agnostic `kai-*` web components.
-This section is the live reference for that SolidJS layer: the same building blocks the web
-components compose from, each with controls, an Actions panel, and its source.
-
-**Building an app?** You almost certainly want the web components, not these. Install, the full
-element API, and copy-paste examples for React / Vue / Svelte / Angular / HTML live at
-**[ui.kitn.ai](https://ui.kitn.ai)**. Reach for this section when you're assembling a custom UI
-*in SolidJS*, or working on the kit itself.
+The SolidJS layer the `kai-*` web components compose from — every primitive and feature component, with controls and source. The full element API and framework usage are at [ui.kitn.ai](https://ui.kitn.ai).
 
 ## Two tiers
 
-- **Elements** — the feature components (`Message`, `Tool`, `Reasoning`, `Composer`, `Artifact`, …).
-  Each maps to a `kai-*` custom element; use these when you're building your own chat layout in Solid.
-- **Primitives** — the in-house, accessible base components (`Button`, `Tooltip`, `Dropdown`,
-  `Switch`, …) the feature components are built on (no third-party UI deps). You rarely use these directly.
+- **Elements** — feature components (`Message`, `Tool`, `Reasoning`, `Composer`, `Artifact`, …), each mapping to a `kai-*` element.
+- **Primitives** — the accessible base components (`Button`, `Tooltip`, `Dropdown`, `Switch`, …) they're built on. No third-party UI deps.
 
-## What's on each story
+## Each story
 
-- **Demo** — the live component, with **controls** to tweak its props.
-- **Actions** — interact with the story and its events stream into this panel.
-- **Code** — the exact SolidJS source for the story, with realistic values to copy from.
+- **Demo** — the live component, with controls.
+- **Actions** — events stream here as you interact.
+- **Code** — the story's SolidJS source.
 
-For the full per-element API (every prop, event, method, and slot) and framework-specific usage,
-see that element's page on **[ui.kitn.ai](https://ui.kitn.ai)**. Theme it all with the design
-tokens in **Getting Started → Token Reference**.
+Theme everything with the design tokens in [Token Reference](?path=/docs/getting-started-token-reference--token-reference).
