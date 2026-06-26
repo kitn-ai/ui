@@ -1,6 +1,6 @@
 import { splitProps, Show, For } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../ui/dropdown';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, type DropdownController } from '../ui/dropdown';
 import { Button } from '../ui/button';
 import type { SearchFilters } from '../types';
 
@@ -10,12 +10,22 @@ export interface ChatScopePickerProps {
   availableAuthors?: string[];
   availableTags?: string[];
   class?: string;
+  /** Initial open state of the dropdown (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard no longer open the dropdown. */
+  disabled?: boolean;
+  /** Receive the dropdown's open controller (forwarded from the inner Dropdown). */
+  controllerRef?: (api: DropdownController) => void;
 }
 
 export function ChatScopePicker(props: ChatScopePickerProps) {
-  const [local] = splitProps(props, ['currentLabel', 'onScopeChange', 'availableAuthors', 'availableTags', 'class']);
+  const [local] = splitProps(props, ['currentLabel', 'onScopeChange', 'availableAuthors', 'availableTags', 'class', 'defaultOpen', 'disabled', 'controllerRef']);
   return (
-    <Dropdown>
+    <Dropdown
+      defaultOpen={local.defaultOpen}
+      disabled={local.disabled}
+      controllerRef={local.controllerRef}
+    >
       <DropdownTrigger as={(triggerProps: any) => (
         <Button variant="ghost" size="sm" class={cn('gap-1 text-xs', local.class)} {...triggerProps}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>

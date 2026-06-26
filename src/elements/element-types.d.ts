@@ -528,6 +528,12 @@ export interface KaiModelSwitcherElement extends HTMLElement {
   models: { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[];
   /** The currently-selected model id. Defaults to the first model. */
   currentModel?: string;
+  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the dropdown. */
+  disabled?: boolean;
 }
 
 export interface KaiNoticeElement extends HTMLElement {
@@ -596,12 +602,16 @@ export interface KaiReasoningElement extends HTMLElement {
   text: string;
   /** Trigger label. */
   label?: string;
-  /** Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it). */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click + while streaming). Set `el.open = true`; listen for `kai-open-change`. */
   open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
   /** While true, auto-expands (and re-collapses when it flips false). */
   streaming?: boolean;
   /** Render `text` as markdown. */
   markdown?: boolean;
+  /** Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. */
+  disabled?: boolean;
 }
 
 export interface KaiRemoteElement extends HTMLElement {
@@ -665,6 +675,12 @@ export interface KaiScopePickerElement extends HTMLElement {
   availableTags: string[];
   /** The label shown on the trigger for the active scope. */
   currentLabel?: string;
+  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-scope-picker open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the dropdown. */
+  disabled?: boolean;
 }
 
 export interface KaiScrollAreaElement extends HTMLElement {
@@ -827,8 +843,12 @@ export interface KaiToolElement extends HTMLElement {
   theme?: 'light' | 'dark' | 'auto';
   /** The tool-call to display. Set as a JS property. */
   tool?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string };
-  /** Start expanded. */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click). Set `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`. */
   open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. */
+  disabled?: boolean;
 }
 
 export interface KaiTooltipElement extends HTMLElement {

@@ -1,10 +1,21 @@
 import { splitProps, For, Show, createSignal } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../ui/dropdown';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, type DropdownController } from '../ui/dropdown';
 import { Button } from '../ui/button';
 import type { ModelOption } from '../types';
 
-export interface ModelSwitcherProps { models: ModelOption[]; currentModelId: string; onModelChange: (modelId: string) => void; class?: string; }
+export interface ModelSwitcherProps {
+  models: ModelOption[];
+  currentModelId: string;
+  onModelChange: (modelId: string) => void;
+  class?: string;
+  /** Initial open state of the dropdown (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard no longer open the dropdown. */
+  disabled?: boolean;
+  /** Receive the dropdown's open controller (forwarded from the inner Dropdown). */
+  controllerRef?: (api: DropdownController) => void;
+}
 
 const Chevron = (props: { class?: string }) => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class={props.class}>
@@ -25,7 +36,7 @@ function ModelRow(props: { model: ModelOption; currentModelId: string; onModelCh
 }
 
 export function ModelSwitcher(props: ModelSwitcherProps) {
-  const [local] = splitProps(props, ['models', 'currentModelId', 'onModelChange', 'class']);
+  const [local] = splitProps(props, ['models', 'currentModelId', 'onModelChange', 'class', 'defaultOpen', 'disabled', 'controllerRef']);
   const currentModel = () => local.models.find((m) => m.id === local.currentModelId);
 
   // Ungrouped models list first; grouped models collect under their group name,
@@ -44,7 +55,11 @@ export function ModelSwitcher(props: ModelSwitcherProps) {
 
   return (
     <Show when={local.models.length > 1}>
-      <Dropdown>
+      <Dropdown
+        defaultOpen={local.defaultOpen}
+        disabled={local.disabled}
+        controllerRef={local.controllerRef}
+      >
         <DropdownTrigger as={(triggerProps: any) => (
           <Button variant="ghost" size="sm" class={cn('gap-1 text-meta text-muted-foreground', local.class)} {...triggerProps}>
             {currentModel()?.name ?? local.currentModelId}

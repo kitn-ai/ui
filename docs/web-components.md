@@ -545,15 +545,17 @@ No events.
 |----------|-----------|------|---------|-------|
 | `text` | `text` | `string` | `''` | The reasoning text to display. |
 | `label` | `label` | `undefined | string` | `'Reasoning'` | Trigger label. |
-| `open` | `open` | `undefined | false | true` | — | Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it). |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click + while streaming). Set `el.open = true`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `streaming` | `streaming` | `undefined | false | true` | `false` | While true, auto-expands (and re-collapses when it flips false). |
 | `markdown` | `markdown` | `undefined | false | true` | `true` | Render `text` as markdown. |
+| `disabled` | `disabled` | `undefined | false | true` | — | Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-open-change` | `{ open: false | true }` | Open state changed (via the trigger or streaming auto-open). |
+| `kai-open-change` | `{ open: false | true }` | The reasoning block expanded or collapsed (via the trigger, streaming auto-open, or a method). |
 
 #### Composed from
 
@@ -576,7 +578,15 @@ Collapsible reasoning/thinking block with optional streaming auto-expand.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `tool` | — | `ToolPart | undefined` | — | The tool-call to display. Set as a JS property. |
-| `open` | `open` | `undefined | false | true` | `false` | Start expanded. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click). Set `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined | false | true` | — | Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-open-change` | `{ open: false | true }` | The panel expanded or collapsed (by trigger click or a method). |
 
 #### Composed from
 
@@ -643,12 +653,16 @@ Renders a list of file/document attachments in grid, inline, or list layouts.
 |----------|-----------|------|---------|-------|
 | `models` | — | `{ id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | `[]` | The selectable models. Set as a JS property (array). |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently-selected model id. Defaults to the first model. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger — click/keyboard and `show()` no longer open the dropdown. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-model-change` | `{ modelId: string }` | A model was selected. |
+| `kai-open-change` | `{ open: false | true }` | The model dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). |
 
 #### Composed from
 
@@ -1084,11 +1098,15 @@ A small button used to mark or navigate to a conversation checkpoint.
 | `availableAuthors` | — | `string[]` | `[]` | Authors to offer as scope filters. Set as a JS property. |
 | `availableTags` | — | `string[]` | `[]` | Tags to offer as scope filters. Set as a JS property. |
 | `currentLabel` | `current-label` | `undefined | string` | `'All Content'` | The label shown on the trigger for the active scope. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-scope-picker open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger — click/keyboard and `show()` no longer open the dropdown. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `kai-open-change` | `{ open: false | true }` | The scope dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). |
 | `kai-scope-change` | `{ filters: SearchFilters | undefined }` | A scope was chosen (`undefined` filters = "All Content"). |
 
 #### Composed from

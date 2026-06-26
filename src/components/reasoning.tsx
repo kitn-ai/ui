@@ -1,4 +1,4 @@
-import { type JSX, splitProps, createSignal, createContext, useContext, createEffect, onCleanup, Show } from 'solid-js';
+import { type JSX, type Accessor, splitProps, createSignal, createContext, useContext, createEffect, onCleanup, Show } from 'solid-js';
 import { cn } from '../utils/cn';
 import { ChevronDown } from 'lucide-solid';
 import { Markdown } from './markdown';
@@ -7,7 +7,13 @@ import { observeContentHeight } from '../primitives/use-resize-observer';
 interface ReasoningContextValue {
   isOpen: () => boolean;
   onOpenChange: (open: boolean) => void;
+  disabled: () => boolean;
 }
+
+/** Imperative open controller, handed to a parent (the kai-reasoning facade) via
+ *  `controllerRef` so it can drive/observe open state — mirrors
+ *  CollapsibleController/HoverCardController. */
+export interface ReasoningController { open: Accessor<boolean>; setOpen: (v: boolean) => void; }
 
 const ReasoningContext = createContext<ReasoningContextValue>();
 
@@ -25,19 +31,30 @@ export interface ReasoningProps {
   children: JSX.Element;
   class?: string;
   open?: boolean;
+  /** Initial open state (uncontrolled seed). */
+  defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   isStreaming?: boolean;
+  /** Gate the trigger — programmatic control via the controller still works. */
+  disabled?: boolean;
+  /** Receive the open controller (open accessor + setOpen) once mounted. */
+  controllerRef?: (api: ReasoningController) => void;
 }
 
 function Reasoning(props: ReasoningProps) {
-  const [local] = splitProps(props, ['children', 'class', 'open', 'onOpenChange', 'isStreaming']);
-  const [internalOpen, setInternalOpen] = createSignal(false);
+  const [local] = splitProps(props, ['children', 'class', 'open', 'defaultOpen', 'onOpenChange', 'isStreaming', 'disabled', 'controllerRef']);
+  const [internalOpen, setInternalOpen] = createSignal(local.defaultOpen ?? false);
   const [wasAutoOpened, setWasAutoOpened] = createSignal(false);
 
   const isControlled = () => local.open !== undefined;
   const isOpen = () => (isControlled() ? local.open! : internalOpen());
+  const disabled = () => !!local.disabled;
 
+  // The single open-mutate path, shared by the trigger and the imperative
+  // controller. In controlled mode we don't touch internal state; the consumer
+  // reflects via the `open` prop and observes via onOpenChange.
   const handleOpenChange = (newOpen: boolean) => {
+    if (isOpen() === newOpen) return;
     if (!isControlled()) {
       setInternalOpen(newOpen);
     }
@@ -56,8 +73,13 @@ function Reasoning(props: ReasoningProps) {
     }
   });
 
+  // Hand the controller up once. setOpen routes through handleOpenChange so it
+  // notifies onOpenChange and respects controlled/uncontrolled mode. Not gated
+  // by disabled — the facade's wireDisclosure applies disabled-gating itself.
+  local.controllerRef?.({ open: isOpen, setOpen: handleOpenChange });
+
   return (
-    <ReasoningContext.Provider value={{ isOpen, onOpenChange: handleOpenChange }}>
+    <ReasoningContext.Provider value={{ isOpen, onOpenChange: handleOpenChange, disabled }}>
       <div class={local.class}>{local.children}</div>
     </ReasoningContext.Provider>
   );
@@ -71,12 +93,13 @@ export interface ReasoningTriggerProps extends JSX.ButtonHTMLAttributes<HTMLButt
 
 function ReasoningTrigger(props: ReasoningTriggerProps) {
   const [local, rest] = splitProps(props, ['children', 'class']);
-  const { isOpen, onOpenChange } = useReasoningContext();
+  const { isOpen, onOpenChange, disabled } = useReasoningContext();
 
   return (
     <button
       class={cn('flex cursor-pointer items-center gap-2 text-meta', local.class)}
-      onClick={() => onOpenChange(!isOpen())}
+      disabled={disabled() || undefined}
+      onClick={() => { if (!disabled()) onOpenChange(!isOpen()); }}
       {...rest}
     >
       <span class="text-primary">{local.children}</span>

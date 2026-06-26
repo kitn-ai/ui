@@ -22,6 +22,7 @@ interface CollapsibleCtx {
   open: Accessor<boolean>;
   toggle: () => void;
   contentId: string;
+  disabled: Accessor<boolean>;
 }
 
 const Ctx = createContext<CollapsibleCtx>();
@@ -32,25 +33,48 @@ const useCollapsible = () => {
   return c;
 };
 
+/** Imperative open controller, handed to a parent (e.g. the kai-tool facade)
+ *  via `controllerRef` so it can drive/observe open state — mirrors
+ *  HoverCardController. Only available when the Collapsible is UNCONTROLLED
+ *  (no `open` prop); in controlled mode the parent already owns the state. */
+export interface CollapsibleController { open: Accessor<boolean>; setOpen: (v: boolean) => void; }
+
 export function Collapsible(props: {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** When true, the trigger no longer toggles (programmatic show/hide still work
+   *  via the controller; this only gates the user-facing trigger). */
+  disabled?: boolean;
+  /** Receive the open controller (open accessor + setOpen) once mounted.
+   *  Only meaningful in uncontrolled mode (no `open` prop). */
+  controllerRef?: (api: CollapsibleController) => void;
   children: JSX.Element;
   class?: string;
 }) {
-  const [local, rest] = splitProps(props, ['open', 'defaultOpen', 'onOpenChange', 'children', 'class']);
+  const [local, rest] = splitProps(props, ['open', 'defaultOpen', 'onOpenChange', 'disabled', 'controllerRef', 'children', 'class']);
   const [uncontrolled, setUncontrolled] = createSignal(local.defaultOpen ?? false);
   const isControlled = () => local.open !== undefined;
   const open = () => (isControlled() ? !!local.open : uncontrolled());
-  const toggle = () => {
-    const next = !open();
+  const disabled = () => !!local.disabled;
+  // setOpen drives the open state and notifies onOpenChange — the single mutate
+  // path shared by the trigger and the imperative controller.
+  const setOpen = (next: boolean) => {
+    if (open() === next) return;
     if (!isControlled()) setUncontrolled(next);
     local.onOpenChange?.(next);
   };
+  const toggle = () => {
+    if (disabled()) return;
+    setOpen(!open());
+  };
+  // Hand the controller up once. setOpen is NOT gated by disabled — disabled only
+  // suppresses the user trigger; programmatic show/hide remain available (the
+  // facade's wireDisclosure applies its own disabled-gating on show/toggle).
+  local.controllerRef?.({ open, setOpen });
   const contentId = createUniqueId();
   return (
-    <Ctx.Provider value={{ open, toggle, contentId }}>
+    <Ctx.Provider value={{ open, toggle, contentId, disabled }}>
       <div
         class={local.class}
         {...rest}
@@ -78,10 +102,12 @@ export function CollapsibleTrigger(props: {
     type: 'button' as const,
     'aria-expanded': ctx.open(),
     'aria-controls': ctx.contentId,
+    disabled: ctx.disabled() || undefined,
     'data-expanded': ctx.open() ? '' : undefined,
     'data-closed': ctx.open() ? undefined : '',
     'data-state': ctx.open() ? 'open' : 'closed',
     onClick: (e: MouseEvent) => {
+      if (ctx.disabled()) return;
       if (typeof local.onClick === 'function') {
         (local.onClick as (e: MouseEvent) => void)(e);
       }

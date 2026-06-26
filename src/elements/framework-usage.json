@@ -411,12 +411,12 @@
     "displayName": "ModelSwitcher",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-model-switcher></kai-model-switcher>\n<script type=\"module\">\n  const el = document.querySelector('kai-model-switcher');\n  el.models = /* … */;\n  el.addEventListener('kai-model-change', (e) => console.log(e.detail));\n</script>",
-      "react": "import { ModelSwitcher } from '@kitn.ai/ui/react';\n\n<ModelSwitcher\n  models={models}\n  onModelChange={(e) => console.log(e.detail)}\n/>",
-      "vue": "<kai-model-switcher\n  :models.prop=\"models\"\n  @kai-model-change=\"onModelChange\"\n/>",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-model-switcher\n  {models}\n  on:kai-model-change={onModelChange}\n></kai-model-switcher>",
-      "angular": "<kai-model-switcher\n  [models]=\"models\"\n  (kai-model-change)=\"onModelChange($event)\"\n></kai-model-switcher>",
-      "solid": "import { ModelSwitcher } from '@kitn.ai/ui';\n\n<ModelSwitcher\n  models={models}\n  onModelChange={(e) => console.log(e.detail)}\n/>"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-model-switcher></kai-model-switcher>\n<script type=\"module\">\n  const el = document.querySelector('kai-model-switcher');\n  el.models = /* … */;\n  el.addEventListener('kai-model-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-open-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { ModelSwitcher } from '@kitn.ai/ui/react';\n\n<ModelSwitcher\n  models={models}\n  onModelChange={(e) => console.log(e.detail)}\n  onOpenChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-model-switcher\n  :models.prop=\"models\"\n  @kai-model-change=\"onModelChange\"\n  @kai-open-change=\"onOpenChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-model-switcher\n  {models}\n  on:kai-model-change={onModelChange}\n  on:kai-open-change={onOpenChange}\n></kai-model-switcher>",
+      "angular": "<kai-model-switcher\n  [models]=\"models\"\n  (kai-model-change)=\"onModelChange($event)\"\n  (kai-open-change)=\"onOpenChange($event)\"\n></kai-model-switcher>",
+      "solid": "import { ModelSwitcher } from '@kitn.ai/ui';\n\n<ModelSwitcher\n  models={models}\n  onModelChange={(e) => console.log(e.detail)}\n  onOpenChange={(e) => console.log(e.detail)}\n/>"
     }
   },
   {
@@ -524,12 +524,12 @@
     "displayName": "ScopePicker",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-scope-picker></kai-scope-picker>\n<script type=\"module\">\n  const el = document.querySelector('kai-scope-picker');\n  el.availableAuthors = /* … */;\n  el.availableTags = /* … */;\n  el.addEventListener('kai-scope-change', (e) => console.log(e.detail));\n</script>",
-      "react": "import { ScopePicker } from '@kitn.ai/ui/react';\n\n<ScopePicker\n  availableAuthors={availableAuthors}\n  availableTags={availableTags}\n  onScopeChange={(e) => console.log(e.detail)}\n/>",
-      "vue": "<kai-scope-picker\n  :availableAuthors.prop=\"availableAuthors\"\n  :availableTags.prop=\"availableTags\"\n  @kai-scope-change=\"onScopeChange\"\n/>",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-scope-picker\n  {availableAuthors}\n  {availableTags}\n  on:kai-scope-change={onScopeChange}\n></kai-scope-picker>",
-      "angular": "<kai-scope-picker\n  [availableAuthors]=\"availableAuthors\"\n  [availableTags]=\"availableTags\"\n  (kai-scope-change)=\"onScopeChange($event)\"\n></kai-scope-picker>",
-      "solid": "import { ChatScopePicker } from '@kitn.ai/ui';\n\n<ChatScopePicker\n  availableAuthors={availableAuthors}\n  availableTags={availableTags}\n  onScopeChange={(e) => console.log(e.detail)}\n/>"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-scope-picker></kai-scope-picker>\n<script type=\"module\">\n  const el = document.querySelector('kai-scope-picker');\n  el.availableAuthors = /* … */;\n  el.availableTags = /* … */;\n  el.addEventListener('kai-open-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-scope-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { ScopePicker } from '@kitn.ai/ui/react';\n\n<ScopePicker\n  availableAuthors={availableAuthors}\n  availableTags={availableTags}\n  onOpenChange={(e) => console.log(e.detail)}\n  onScopeChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-scope-picker\n  :availableAuthors.prop=\"availableAuthors\"\n  :availableTags.prop=\"availableTags\"\n  @kai-open-change=\"onOpenChange\"\n  @kai-scope-change=\"onScopeChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-scope-picker\n  {availableAuthors}\n  {availableTags}\n  on:kai-open-change={onOpenChange}\n  on:kai-scope-change={onScopeChange}\n></kai-scope-picker>",
+      "angular": "<kai-scope-picker\n  [availableAuthors]=\"availableAuthors\"\n  [availableTags]=\"availableTags\"\n  (kai-open-change)=\"onOpenChange($event)\"\n  (kai-scope-change)=\"onScopeChange($event)\"\n></kai-scope-picker>",
+      "solid": "import { ChatScopePicker } from '@kitn.ai/ui';\n\n<ChatScopePicker\n  availableAuthors={availableAuthors}\n  availableTags={availableTags}\n  onOpenChange={(e) => console.log(e.detail)}\n  onScopeChange={(e) => console.log(e.detail)}\n/>"
     }
   },
   {
@@ -703,12 +703,12 @@
     "displayName": "Tool",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-tool></kai-tool>",
-      "react": "import { Tool } from '@kitn.ai/ui/react';\n\n<Tool />",
-      "vue": "<kai-tool />",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-tool></kai-tool>",
-      "angular": "<kai-tool></kai-tool>",
-      "solid": "import { Tool } from '@kitn.ai/ui';\n\n<Tool />"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-tool></kai-tool>\n<script type=\"module\">\n  const el = document.querySelector('kai-tool');\n  el.addEventListener('kai-open-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Tool } from '@kitn.ai/ui/react';\n\n<Tool\n  onOpenChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-tool\n  @kai-open-change=\"onOpenChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-tool\n  on:kai-open-change={onOpenChange}\n></kai-tool>",
+      "angular": "<kai-tool\n  (kai-open-change)=\"onOpenChange($event)\"\n></kai-tool>",
+      "solid": "import { Tool } from '@kitn.ai/ui';\n\n<Tool\n  onOpenChange={(e) => console.log(e.detail)}\n/>"
     }
   },
   {

@@ -1,6 +1,6 @@
 import { type JSX, splitProps, createSignal, Show, For } from 'solid-js';
 import { cn } from '../utils/cn';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../ui/collapsible';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent, type CollapsibleController } from '../ui/collapsible';
 import { Button } from '../ui/button';
 import { CheckCircle, ChevronDown, Loader2, Settings, XCircle } from 'lucide-solid';
 import type { ToolPart } from './tool-types';
@@ -9,6 +9,11 @@ export type { ToolPart } from './tool-types';
 export interface ToolProps {
   toolPart: ToolPart;
   defaultOpen?: boolean;
+  /** Gate the disclosure trigger (programmatic control still works). */
+  disabled?: boolean;
+  /** Receive the open controller once mounted (forwarded from the Collapsible),
+   *  so a parent (the kai-tool facade) can drive/observe open state. */
+  controllerRef?: (api: CollapsibleController) => void;
   class?: string;
 }
 
@@ -94,8 +99,12 @@ function ToolStateBadge(props: { state: ToolPart['state'] }) {
 }
 
 function Tool(props: ToolProps) {
-  const [local, rest] = splitProps(props, ['toolPart', 'defaultOpen', 'class']);
-  const [isOpen, setIsOpen] = createSignal(local.defaultOpen ?? false);
+  const [local, rest] = splitProps(props, ['toolPart', 'defaultOpen', 'disabled', 'controllerRef', 'class']);
+  // Drive the Collapsible UNCONTROLLED (seed from defaultOpen) and read its open
+  // state via the controller it hands up — that same controller is forwarded to
+  // the facade so wireDisclosure can drive show/hide/toggle.
+  const [api, setApi] = createSignal<CollapsibleController>();
+  const isOpen = () => api()?.open() ?? (local.defaultOpen ?? false);
 
   const state = () => local.toolPart.state;
   const input = () => local.toolPart.input;
@@ -103,7 +112,11 @@ function Tool(props: ToolProps) {
 
   return (
     <div class={cn('mt-3 overflow-hidden rounded-lg bg-surface', local.class)}>
-      <Collapsible open={isOpen()} onOpenChange={setIsOpen}>
+      <Collapsible
+        defaultOpen={local.defaultOpen}
+        disabled={local.disabled}
+        controllerRef={(a) => { setApi(a); local.controllerRef?.(a); }}
+      >
         <CollapsibleTrigger
           as={(triggerProps: JSX.HTMLAttributes<HTMLButtonElement>) => (
             <Button

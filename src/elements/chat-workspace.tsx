@@ -1,7 +1,7 @@
 import { Show } from 'solid-js';
 import { defineWebComponent } from './define';
 import { createControllableSignal } from '../primitives/controllable';
-import { ChatThread, type ChatThreadContextUsage } from '../components/chat-thread';
+import { ChatThread, type ChatThreadContextUsage, type ChatThreadController } from '../components/chat-thread';
 import { ConversationList } from '../components/conversation-list';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resizable';
 import { Button } from '../ui/button';
@@ -89,17 +89,41 @@ defineWebComponent<Props, Events>('kai-workspace', {
   search: false, voice: false, triggers: undefined, kindIcons: undefined,
   sidebarWidth: 22, sidebarMinWidth: 200, sidebarMaxWidth: 420,
   sidebarCollapsed: undefined, defaultSidebarCollapsed: undefined,
-}, (props, { dispatch, flag }) => {
+}, (props, { dispatch, flag, expose }) => {
   // Controlled/uncontrolled collapse: `sidebarCollapsed` (when set) wins;
   // otherwise the element manages its own state, seeded from
-  // `defaultSidebarCollapsed`. `toggle` always writes the internal value (a no-op
-  // visually while controlled) and emits `kai-sidebar-toggle` so a controlling app
-  // can update its own state.
+  // `defaultSidebarCollapsed`. `setCollapsedTo` always writes the internal value (a
+  // no-op visually while controlled) and emits `kai-sidebar-toggle` so a controlling
+  // app can update its own state.
   const [collapsed, setCollapsed] = createControllableSignal(
     () => props.sidebarCollapsed as boolean | undefined,
     flag('defaultSidebarCollapsed'),
   );
-  const toggle = () => { const next = !collapsed(); setCollapsed(next); dispatch('kai-sidebar-toggle', { collapsed: next }); };
+  const setCollapsedTo = (next: boolean) => { setCollapsed(next); dispatch('kai-sidebar-toggle', { collapsed: next }); };
+  const toggle = () => setCollapsedTo(!collapsed());
+
+  // Imperative method API. The sidebar methods drive the same collapse path as the
+  // in-UI toggle (named *Sidebar to avoid the `sidebarCollapsed` prop accessor).
+  // The thread methods delegate to the embedded ChatThread's controller, captured
+  // once below — the thread node is shared across both <Show> branches, so a single
+  // controllerRef is stable across collapse/expand.
+  let controller: ChatThreadController | undefined;
+  expose({
+    /** Collapse/expand the conversation sidebar and fire `kai-sidebar-toggle`. */
+    toggleSidebar: () => toggle(),
+    /** Force the conversation sidebar collapsed (fires `kai-sidebar-toggle`). */
+    collapseSidebar: () => setCollapsedTo(true),
+    /** Force the conversation sidebar expanded (fires `kai-sidebar-toggle`). */
+    expandSidebar: () => setCollapsedTo(false),
+    /** Focus the thread's composer. */
+    focus: (options?: FocusOptions) => controller?.focus(options),
+    /** Clear the thread draft + staged attachments. */
+    clear: () => controller?.clear(),
+    /** Submit the current thread draft programmatically (fires `kai-submit`). */
+    send: () => controller?.send(),
+    /** Scroll the thread to the newest message. */
+    scrollToBottom: (behavior?: ScrollBehavior) => controller?.scrollToBottom(behavior),
+  });
 
   // Create the thread ONCE and reference the same node in both <Show> branches.
   // It's owned by this component root (not by a Show branch), so toggling the
@@ -123,6 +147,7 @@ defineWebComponent<Props, Events>('kai-workspace', {
       onMessageAction={(detail) => dispatch('kai-message-action', detail)}
       onSearch={() => dispatch('kai-search', {})}
       onVoice={() => dispatch('kai-voice', {})}
+      controllerRef={(c) => (controller = c)}
     />
   );
 

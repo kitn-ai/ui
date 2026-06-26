@@ -894,12 +894,16 @@ _No events._
 |---|---|---|---|
 | `models` | — | `{ id: string; name: string; provider?: undefined \| string; description?: undefined \| string; group?: undefined \| string }[]` | The selectable models. Set as a JS property (array). |
 | `currentModel` | `current-model` | `undefined \| string` | The currently-selected model id. Defaults to the first model. |
+| `open` | `open` | `undefined \| false \| true` | Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable the trigger — click/keyboard and `show()` no longer open the dropdown. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-model-change` | `CustomEvent<{ modelId: string }>` | A model was selected. |
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The model dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). |
 
 ---
 
@@ -1006,15 +1010,17 @@ _No events._
 |---|---|---|---|
 | `text` | `text` | `string` | The reasoning text to display. |
 | `label` | `label` | `undefined \| string` | Trigger label. |
-| `open` | `open` | `undefined \| false \| true` | Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it). |
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click + while streaming). Set `el.open = true`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
 | `streaming` | `streaming` | `undefined \| false \| true` | While true, auto-expands (and re-collapses when it flips false). |
 | `markdown` | `markdown` | `undefined \| false \| true` | Render `text` as markdown. |
+| `disabled` | `disabled` | `undefined \| false \| true` | Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | Open state changed (via the trigger or streaming auto-open). |
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The reasoning block expanded or collapsed (via the trigger, streaming auto-open, or a method). |
 
 ---
 
@@ -1101,11 +1107,15 @@ _No events._
 | `availableAuthors` | — | `string[]` | Authors to offer as scope filters. Set as a JS property. |
 | `availableTags` | — | `string[]` | Tags to offer as scope filters. Set as a JS property. |
 | `currentLabel` | `current-label` | `undefined \| string` | The label shown on the trigger for the active scope. |
+| `open` | `open` | `undefined \| false \| true` | Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-scope-picker open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable the trigger — click/keyboard and `show()` no longer open the dropdown. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The scope dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). |
 | `kai-scope-change` | `CustomEvent<{ filters: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }>` | A scope was chosen (`undefined` filters = "All Content"). |
 
 ---
@@ -1344,9 +1354,15 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `tool` | — | `undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }` | The tool-call to display. Set as a JS property. |
-| `open` | `open` | `undefined \| false \| true` | Start expanded. |
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click). Set `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined \| false \| true` | Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. |
 
-_No events._
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The panel expanded or collapsed (by trigger click or a method). |
 
 ---
 

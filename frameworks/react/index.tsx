@@ -742,14 +742,22 @@ export interface ModelSwitcherProps extends WebComponentProps {
   models: { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[];
   /** The currently-selected model id. Defaults to the first model. */
   currentModel?: string;
+  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the dropdown. */
+  disabled?: boolean;
   /** A model was selected. */
   onModelChange?: (event: CustomEvent<{ modelId: string }>) => void;
+  /** The model dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
   'kai-model-switcher',
-  ["theme","models","currentModel"],
-  { onModelChange: 'kai-model-change' },
+  ["theme","models","currentModel","open","defaultOpen","disabled"],
+  { onModelChange: 'kai-model-change', onOpenChange: 'kai-open-change' },
 );
 
 export interface NoticeProps extends WebComponentProps {
@@ -848,19 +856,23 @@ export interface ReasoningProps extends WebComponentProps {
   text: string;
   /** Trigger label. */
   label?: string;
-  /** Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it). */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click + while streaming). Set `el.open = true`; listen for `kai-open-change`. */
   open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
   /** While true, auto-expands (and re-collapses when it flips false). */
   streaming?: boolean;
   /** Render `text` as markdown. */
   markdown?: boolean;
-  /** Open state changed (via the trigger or streaming auto-open). */
+  /** Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. */
+  disabled?: boolean;
+  /** The reasoning block expanded or collapsed (via the trigger, streaming auto-open, or a method). */
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const Reasoning = createWebComponent<ReasoningProps>(
   'kai-reasoning',
-  ["theme","text","label","open","streaming","markdown"],
+  ["theme","text","label","open","defaultOpen","streaming","markdown","disabled"],
   { onOpenChange: 'kai-open-change' },
 );
 
@@ -947,14 +959,22 @@ export interface ScopePickerProps extends WebComponentProps {
   availableTags: string[];
   /** The label shown on the trigger for the active scope. */
   currentLabel?: string;
+  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-scope-picker open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the dropdown. */
+  disabled?: boolean;
+  /** The scope dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
   /** A scope was chosen (`undefined` filters = "All Content"). */
   onScopeChange?: (event: CustomEvent<{ filters: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }>) => void;
 }
 
 export const ScopePicker = createWebComponent<ScopePickerProps>(
   'kai-scope-picker',
-  ["theme","availableAuthors","availableTags","currentLabel"],
-  { onScopeChange: 'kai-scope-change' },
+  ["theme","availableAuthors","availableTags","currentLabel","open","defaultOpen","disabled"],
+  { onOpenChange: 'kai-open-change', onScopeChange: 'kai-scope-change' },
 );
 
 export interface ScrollAreaProps extends WebComponentProps {
@@ -1179,14 +1199,20 @@ export const ToastRegion = createWebComponent<ToastRegionProps>(
 export interface ToolProps extends WebComponentProps {
   /** The tool-call to display. Set as a JS property. */
   tool?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string };
-  /** Start expanded. */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click). Set `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`. */
   open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. */
+  disabled?: boolean;
+  /** The panel expanded or collapsed (by trigger click or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const Tool = createWebComponent<ToolProps>(
   'kai-tool',
-  ["theme","tool","open"],
-  {  },
+  ["theme","tool","open","defaultOpen","disabled"],
+  { onOpenChange: 'kai-open-change' },
 );
 
 export interface TooltipProps extends WebComponentProps {
