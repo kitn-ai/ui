@@ -1,0 +1,122 @@
+---
+title: Compose a message thread
+description: Lay out your own message list from standalone kai-message elements — one per turn — and wire its per-message slots for a header, a footer, and the avatar.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import MessageThreadDemo from '../../../components/MessageThreadDemo.tsx';
+
+<p class="kai-lede">`<kai-chat>` renders the whole thread for you. When you need to own the layout — interleave your own rows, drop a per-message header, attach a citation footer, swap the avatar — step down a layer and render one `<kai-message>` per turn yourself. Each one keeps the kit's rich rendering (markdown, reasoning, tools, the action bar) and exposes three composition seams. Here's a two-turn thread built that way.</p>
+
+<MessageThreadDemo client:only="solid" />
+
+Each `<kai-message>` renders from a single `message` object — the same shape `<kai-chat>` uses per row. On top of that it exposes two inject slots inside the body column, `before-body` and `after-body`, and a replace slot for the `avatar` rail. We build the thread up one seam at a time.
+
+<Aside type="note" title="Slots, parts, and props">
+A **slot** is a named region you fill with your own markup — use it to add or replace a piece. A **`::part`** is an element the kit renders that you restyle from outside. Reach for a **prop** only for behavior CSS can't express — and per-message *content* is always the `message` prop, never a slot. See [How composition works](/guides/how-composition-works/) for the full model.
+</Aside>
+
+## Render one message per turn
+
+Register the elements once, then create a `<kai-message>` for each turn and hand it a `message`. Arrays and objects are JS properties — set `message` in script, never as an HTML attribute. The element renders the content (markdown for assistant, plain for user), any reasoning or tool calls, and the action bar from the actions you list.
+
+```html
+<script type="module">
+  import '@kitn.ai/ui/elements';
+</script>
+
+<div id="thread"></div>
+```
+
+```js
+const thread = document.getElementById('thread');
+
+const turns = [
+  { id: 'm-u', role: 'user', content: 'Which model handled this, and what did it cost?' },
+  {
+    id: 'm-a',
+    role: 'assistant',
+    content: 'Here is the summary you asked for. The citation is below.',
+    actions: ['copy', 'like', 'dislike', 'regenerate'],
+  },
+];
+
+for (const turn of turns) {
+  const el = document.createElement('kai-message');
+  el.message = turn;            // a JS property — the per-message data
+  thread.append(el);
+}
+```
+
+Action clicks come back as `kai-message-action` on the element itself — kit events don't bubble. The detail carries `{ messageId, action }` (plus `state: 'on' | 'off'` for the like/dislike toggles).
+
+```js
+el.addEventListener('kai-message-action', (e) => {
+  console.log(e.detail.action, 'on', e.detail.messageId);
+});
+```
+
+That's already a working thread. Streaming is the same move you'd make in `<kai-chat>`: assign a **new** `message` object as tokens arrive (mutating the old one in place won't re-render).
+
+## Add a per-message header in before-body
+
+`before-body` is an inject slot at the top of the body column, above the reasoning, tools, and content. It's the home for a per-message header — a model-name label, a role + timestamp line. Project a node with `slot="before-body"`; your markup is *added* to the body, the built-in content still renders below it.
+
+```html
+<kai-message id="turn">
+  <div slot="before-body" class="model-label">
+    <span class="dot"></span> gpt-style-2 · just now
+  </div>
+</kai-message>
+```
+
+Inside the slot nothing is `kai-*`-bound — it's your `<div>`, your CSS, your tokens. Style it against the design tokens (`var(--kai-color-muted-foreground)`, `var(--kai-color-surface-strong)`) so it tracks the theme.
+
+## Add a citation/cost row in after-body
+
+`after-body` is the mirror seam: an inject slot at the bottom of the body column, *below* the action bar. Use it for the things that trail a turn — a citation row, a token-cost or latency line. Here we drop in a `<kai-source>` citation and a usage line.
+
+```html
+<kai-message id="turn">
+  <div slot="after-body">
+    <kai-source href="https://ui.kitn.ai" label="ui.kitn.ai" show-favicon></kai-source>
+    <span class="usage">gpt-style-2 · 1,284 tokens · $0.012 · 1.9s</span>
+  </div>
+</kai-message>
+```
+
+`before-body` and `after-body` are both **inject** — additive. The kit's content and action bar keep rendering; your markup brackets them. That's the difference from a replace slot, which would stand in for a whole region.
+
+## Replace — or drop — the avatar
+
+The `avatar` slot is **replace**: your node stands in for the built-in avatar rail. Project `slot="avatar"` and that element *is* the rail — the kit wraps it in `::part(avatar)` so it stays styleable and consistent with the built-in part name.
+
+```html
+<kai-message id="assistant-turn">
+  <div slot="avatar" class="ai-avatar">AI</div>
+</kai-message>
+```
+
+For a turn that should have no rail at all — a user message that reads full-width — set the `avatar="none"` attribute instead. It omits the rail entirely so the body spans the row, which keeps the layout predictable when you never show an avatar on that side.
+
+```js
+userEl.setAttribute('avatar', 'none');   // no rail; body spans the full row
+```
+
+So the three avatar states are: leave it alone for the built-in (when `message.avatar` resolves), project `slot="avatar"` to replace it, or set `avatar="none"` to drop it.
+
+<Aside type="tip" title="Restyle the rows from outside with ::part">
+You don't have to slot to restyle. `<kai-message>` exposes `::part(row)`, `::part(bubble)`, `::part(content)`, `::part(actions)`, and `::part(avatar)` — target them from your own stylesheet to tune the row gap, the bubble background, the body typography, or the action-bar spacing without touching the shadow.
+
+```css
+kai-message::part(row)    { gap: 0.75rem }
+kai-message::part(bubble) { background: var(--kai-color-primary); color: var(--kai-color-primary-foreground) }
+kai-message::part(content) { font-size: 0.9375rem }
+```
+</Aside>
+
+## Next
+
+- **[How composition works](/guides/how-composition-works/)** — the slot / `::part` / prop mental model, and inject vs. replace.
+- **[`kai-message` reference](/components/message/)** — every prop, event, slot, and `::part`, plus the full `message` object shape.
+- **[Compose your own shell](/patterns/compose-your-own/)** — wrap a hand-built thread like this in your own sidebar, header, and composer when `<kai-chat>` is too fixed.
