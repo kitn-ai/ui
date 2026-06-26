@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
+import { fn } from 'storybook/test';
 import { Artifact, type ArtifactFile, type ArtifactTab } from './artifact';
 import { componentDescription } from '../stories/docs/element-controls';
 
@@ -52,8 +53,20 @@ const meta = {
     src: { control: 'text' },
     tab: { control: 'select', options: ['preview', 'code'] },
     sandbox: { control: 'text' },
+    onNavigate: { action: 'kai-navigate', description: 'The preview navigated to a new URL.', table: { category: 'Events' } },
+    onTabChange: { action: 'kai-tab-change', description: 'The Preview | Code tab changed.', table: { category: 'Events' } },
+    onFileSelect: { action: 'kai-file-select', description: 'A file was selected in the Code tree.', table: { category: 'Events' } },
+    onMaximizeChange: { action: 'kai-maximize-change', description: 'The artifact entered/left the maximized view.', table: { category: 'Events' } },
   },
-  args: { src: `${BASE}/index.html`, files: FILES, tab: 'preview' as ArtifactTab },
+  args: {
+    src: `${BASE}/index.html`,
+    files: FILES,
+    tab: 'preview' as ArtifactTab,
+    onNavigate: fn(),
+    onTabChange: fn(),
+    onFileSelect: fn(),
+    onMaximizeChange: fn(),
+  },
   render: (args) => (
     <div class="h-[520px] w-full max-w-[900px]">
       <Artifact
@@ -62,6 +75,10 @@ const meta = {
         tab={args.tab}
         sandbox={args.sandbox}
         iframeTitle="Starboard artifact preview"
+        onNavigate={args.onNavigate}
+        onTabChange={args.onTabChange}
+        onFileSelect={args.onFileSelect}
+        onMaximizeChange={args.onMaximizeChange}
       />
     </div>
   ),
@@ -70,13 +87,33 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { Artifact } from '@kitn.ai/ui';`;
+const IMPORT = `import { Artifact, type ArtifactFile } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
 export const Playground: Story = {
-  ...src(`<Artifact src={src} files={files} tab="preview" />`),
+  ...src(`// Your backend hosts the artifact; \`src\` is the live URL it serves,
+// \`files\` feeds the Code tab's tree + source view.
+const src = 'https://your-app.dev/index.html';
+
+const files: ArtifactFile[] = [
+  { path: 'index.html', url: \`\${base}/index.html\`, language: 'html',
+    code: '<!DOCTYPE html>\\n<html>…</html>' },
+  { path: 'css/site.css', url: \`\${base}/css/site.css\`, language: 'css',
+    code: ':root { --accent: #6ea8fe; }' },
+  { path: 'assets/logo.svg', url: \`\${base}/assets/logo.svg\`, type: 'image' },
+  { path: 'assets/report.pdf', url: \`\${base}/assets/report.pdf\`, type: 'pdf' },
+];
+
+<Artifact
+  src={src}
+  files={files}
+  tab="preview"
+  onNavigate={(url) => console.log('navigate', url)}
+  onTabChange={(tab) => console.log('tab', tab)}
+  onFileSelect={(path) => console.log('file', path)}
+/>`),
 };
 
 export const CodeTab: Story = {

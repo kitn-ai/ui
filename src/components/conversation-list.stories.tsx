@@ -69,6 +69,11 @@ const meta = {
       description: 'Fired when the sidebar-toggle (menu) button is clicked.',
       table: { category: 'Events' },
     },
+    onSearchChange: {
+      action: 'searchChange',
+      description: 'Fired with the current query whenever the built-in search box changes.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     groups,
@@ -77,6 +82,7 @@ const meta = {
     onSelect: fn(),
     onNewChat: fn(),
     onToggleSidebar: fn(),
+    onSearchChange: fn(),
   },
   render: (args) => (
     <div class="h-[500px] w-72 border border-border rounded-lg overflow-hidden">
@@ -88,18 +94,40 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { ConversationList } from '@kitn.ai/ui';`;
+const IMPORT = `import { ConversationList } from '@kitn.ai/ui';
+import type { ConversationGroup, ConversationSummary } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-const usage = `<ConversationList
-  groups={groups}
-  conversations={conversations}
-  activeId={activeId()}
-  onSelect={setActiveId}
-  onNewChat={() => {}}
-/>`;
+const usage = `// Groups are the collapsible buckets; conversations land in a group by groupId.
+const groups: ConversationGroup[] = [
+  { id: 'today', name: 'Today', sortOrder: 0, createdAt: '2026-04-10' },
+  { id: 'yesterday', name: 'Yesterday', sortOrder: 1, createdAt: '2026-04-09' },
+];
+
+const conversations: ConversationSummary[] = [
+  { id: '1', title: 'SolidJS signals explained', groupId: 'today',
+    scope: { type: 'document' }, messageCount: 5,
+    lastMessageAt: '2026-04-10T14:00:00Z', updatedAt: '2026-04-10T14:00:00Z' },
+  { id: '2', title: 'CSS Grid vs Flexbox', groupId: 'yesterday',
+    scope: { type: 'document' }, messageCount: 8,
+    lastMessageAt: '2026-04-09T16:00:00Z', updatedAt: '2026-04-09T16:00:00Z' },
+  // …
+];
+
+const [activeId, setActiveId] = createSignal('1');
+
+<div class="h-[500px] w-72 overflow-hidden rounded-lg border">
+  <ConversationList
+    groups={groups}
+    conversations={conversations}
+    activeId={activeId()}
+    onSelect={setActiveId}
+    onNewChat={() => startNewChat()}
+    onSearchChange={(q) => console.log('search', q)}
+  />
+</div>`;
 
 /** Interactive playground — edit the groups/conversations arrays and active id via controls. */
 export const Playground: Story = {

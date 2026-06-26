@@ -45,11 +45,17 @@ const meta = {
       description: 'Called with the final transcribed text (trimmed, non-empty).',
       table: { category: 'Events' },
     },
+    onRecordingChange: {
+      action: 'recordingChange',
+      description: 'Fired with `true` when recording starts and `false` when it stops.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     disabled: false,
     onTranscribe: transcribe,
     onTranscription: fn(),
+    onRecordingChange: fn(),
   },
   render: (args) => <VoiceInput {...args} />,
 } satisfies Meta<typeof VoiceInput>;

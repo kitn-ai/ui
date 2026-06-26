@@ -50,7 +50,15 @@ const src = (code: string) => ({
 /** Hover (or focus) the trigger to reveal a profile preview card. */
 export const Playground: Story = {
   ...src(`<HoverCard trigger={<Button variant="outline">@ada</Button>}>
-  <ProfilePreview name="Ada Lovelace" />
+  <div class="flex gap-3">
+    <div class="flex size-10 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
+      AL
+    </div>
+    <div class="space-y-1">
+      <p class="text-sm font-medium">Ada Lovelace</p>
+      <p class="text-xs text-muted-foreground">Wrote the first algorithm for a machine.</p>
+    </div>
+  </div>
 </HoverCard>`),
 };
 
@@ -71,7 +79,11 @@ export const LinkPreview: Story = {
       for the full custom-elements API.
     </p>
   ),
-  ...src(`<HoverCard trigger={<a href="...">MDN reference</a>}>
-  <LinkPreview title="Custom elements — MDN" host="developer.mozilla.org" />
+  ...src(`<HoverCard trigger={<a href="https://developer.mozilla.org/...">MDN reference</a>}>
+  <div class="space-y-1">
+    <p class="text-sm font-medium">Custom elements — MDN</p>
+    <p class="text-xs text-muted-foreground">developer.mozilla.org</p>
+    <p class="text-xs text-muted-foreground">Define your own HTML elements with the CustomElementRegistry.</p>
+  </div>
 </HoverCard>`),
 };

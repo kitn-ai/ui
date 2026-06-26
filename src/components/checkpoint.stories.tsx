@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { fn } from 'storybook/test';
+import { action } from 'storybook/actions';
 import { Checkpoint, CheckpointIcon, CheckpointTrigger } from './checkpoint';
 import { componentDescription } from '../stories/docs/element-controls';
 
@@ -34,7 +34,7 @@ const meta = {
     <div class="max-w-md">
       <Checkpoint {...args}>
         <CheckpointIcon />
-        <CheckpointTrigger tooltip="Restore to this point" onClick={fn()}>
+        <CheckpointTrigger tooltip="Restore to this point" onClick={() => action('checkpoint-restore')()}>
           Restore
         </CheckpointTrigger>
       </Checkpoint>
@@ -70,7 +70,7 @@ export const WithCustomIcon: Story = {
             <path d="M12 6v6l4 2" />
           </svg>
         </CheckpointIcon>
-        <CheckpointTrigger tooltip="Go back to this checkpoint" onClick={fn()}>
+        <CheckpointTrigger tooltip="Go back to this checkpoint" onClick={() => action('checkpoint-revert')()}>
           Revert to checkpoint
         </CheckpointTrigger>
       </Checkpoint>
@@ -91,7 +91,7 @@ export const NoTooltip: Story = {
     <div class="max-w-md">
       <Checkpoint>
         <CheckpointIcon />
-        <CheckpointTrigger onClick={fn()}>Restore</CheckpointTrigger>
+        <CheckpointTrigger onClick={() => action('checkpoint-restore')()}>Restore</CheckpointTrigger>
       </Checkpoint>
     </div>
   ),

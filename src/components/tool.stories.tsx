@@ -149,5 +149,15 @@ export const Error: Story = {
 
 export const Collapsed: Story = {
   args: { toolPart: completedPart, defaultOpen: false },
-  ...src(`<Tool toolPart={toolPart} />`),
+  ...src(`// Without \`defaultOpen\` the panel starts collapsed — the header still
+// shows the tool name + state badge; click to expand the input/output.
+const toolPart = {
+  type: 'search_documents',
+  state: 'output-available',
+  input: { query: 'SolidJS reactive primitives', limit: 10 },
+  output: { results: [{ title: 'Signals', score: 0.95 }, { title: 'Effects', score: 0.87 }] },
+  toolCallId: 'call_abc123',
+};
+
+<Tool toolPart={toolPart} />`),
 };

@@ -63,7 +63,16 @@ const src = (code: string) => ({
 
 /** Interactive playground — tweak the controls to explore the switcher. */
 export const Playground: Story = {
-  ...src(`<ModelSwitcher
+  ...src(`// Each model: { id, name, optional provider | description | group }.
+const models = [
+  { id: 'claude-sonnet', name: 'Claude Sonnet', provider: 'Anthropic' },
+  { id: 'claude-opus', name: 'Claude Opus', provider: 'Anthropic' },
+  { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI' },
+];
+
+const [modelId, setModelId] = createSignal('claude-sonnet');
+
+<ModelSwitcher
   models={models}
   currentModelId={modelId()}
   onModelChange={setModelId}

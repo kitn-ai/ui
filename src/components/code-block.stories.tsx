@@ -96,29 +96,60 @@ const src = (code: string) => ({
 
 /** Interactive playground — edit the code, language, or theme via controls. */
 export const Playground: Story = {
-  ...src(`<CodeBlock>
-  <CodeBlockCode code={tsCode} language="typescript" />
+  ...src(`const code = \`interface User {
+  id: string;
+  name: string;
+}
+
+function greet(user: User): string {
+  return \\\`Hello, \\\${user.name}!\\\`;
+}\`;
+
+<CodeBlock>
+  <CodeBlockCode code={code} language="typescript" />
 </CodeBlock>`),
 };
 
 export const TypeScript: Story = {
   args: { code: tsCode, language: 'typescript' },
-  ...src(`<CodeBlock>
-  <CodeBlockCode code={tsCode} language="typescript" />
+  ...src(`const code = \`interface User {
+  id: string;
+  name: string;
+}\`;
+
+<CodeBlock>
+  <CodeBlockCode code={code} language="typescript" />
 </CodeBlock>`),
 };
 
 export const Python: Story = {
   args: { code: pythonCode, language: 'python' },
-  ...src(`<CodeBlock>
-  <CodeBlockCode code={pythonCode} language="python" />
+  ...src(`const code = \`def fibonacci(n: int) -> list[int]:
+    if n <= 0:
+        return []
+    seq = [0, 1]
+    while len(seq) < n:
+        seq.append(seq[-1] + seq[-2])
+    return seq[:n]\`;
+
+<CodeBlock>
+  <CodeBlockCode code={code} language="python" />
 </CodeBlock>`),
 };
 
 export const CSS: Story = {
   args: { code: cssCode, language: 'css' },
-  ...src(`<CodeBlock>
-  <CodeBlockCode code={cssCode} language="css" />
+  ...src(`const code = \`:root {
+  --primary: hsl(240 5.9% 10%);
+}
+
+.button {
+  background: var(--primary);
+  border-radius: 0.5rem;
+}\`;
+
+<CodeBlock>
+  <CodeBlockCode code={code} language="css" />
 </CodeBlock>`),
 };
 
@@ -143,8 +174,10 @@ export const WithHeader: Story = {
   ...src(`<CodeBlock>
   <CodeBlockGroup class="border-b border-border px-4 py-2">
     <span class="text-xs text-muted-foreground font-mono">user.ts</span>
-    <Button variant="ghost" size="icon-sm">{/* copy icon */}</Button>
+    <Button variant="ghost" size="icon-sm" onClick={() => navigator.clipboard.writeText(code)}>
+      {/* copy icon */}
+    </Button>
   </CodeBlockGroup>
-  <CodeBlockCode code={tsCode} language="typescript" />
+  <CodeBlockCode code={code} language="typescript" />
 </CodeBlock>`),
 };

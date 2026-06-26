@@ -42,7 +42,20 @@ export const Playground: Story = {
   parameters: {
     docs: {
       source: {
-        code: `${IMPORT}\n\n<ScrollArea class="h-56 w-72 rounded-lg border p-2">\n  <For each={conversations}>{(c) => <Row {...c} />}</For>\n</ScrollArea>`,
+        code: `${IMPORT}
+import { For } from 'solid-js';
+
+const conversations = Array.from({ length: 24 }, (_, i) => \`Conversation \${i + 1}\`);
+
+<ScrollArea class="h-56 w-72 rounded-lg border p-2">
+  <ul class="space-y-1">
+    <For each={conversations}>
+      {(title) => (
+        <li class="rounded-md px-3 py-2 text-sm hover:bg-muted">{title}</li>
+      )}
+    </For>
+  </ul>
+</ScrollArea>`,
         language: 'tsx',
       },
     },

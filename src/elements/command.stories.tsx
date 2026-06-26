@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { onMount } from 'solid-js';
-import { action } from 'storybook/actions';
+import { onMount, onCleanup } from 'solid-js';
 import './register'; // side effect: registers all kai-* custom elements (incl. kai-command)
+import { attachKaiActions } from '../stories/docs/story-actions';
 import type { KaiCommandItem } from './command';
 
 // Declare the custom element tag for SolidJS JSX.
@@ -32,7 +32,8 @@ type Story = StoryObj;
 /**
  * Reproduces a @-mention or slash-command picker backed by `<kai-command>`.
  * Items are grouped under "Mac apps", "Chats", and "Files". Set as a JS property
- * in `onMount`. `kai-select` and `kai-query-change` are both logged to the console.
+ * in `onMount`. Every declared event (`kai-select`, `kai-query-change`,
+ * `kai-active-change`) is logged to the Actions panel.
  */
 function MentionPickerDemo() {
   let el: CommandEl | undefined;
@@ -53,14 +54,8 @@ function MentionPickerDemo() {
   onMount(() => {
     if (!el) return;
     el.items = [...items];
-
-    el.addEventListener('kai-select', (e) => {
-      action('kai-select')((e as CustomEvent<{ id: string }>).detail);
-    });
-
-    el.addEventListener('kai-query-change', (e) => {
-      action('kai-query-change')((e as CustomEvent<{ value: string }>).detail);
-    });
+    // Auto-wire every CustomEvent the element declares to the Actions panel.
+    onCleanup(attachKaiActions(el));
   });
 
   return (
@@ -82,7 +77,7 @@ export const MentionPicker: Story = {
     docs: {
       description: {
         story:
-          'Type to filter across all groups. Arrow keys move the selection; Enter picks; Escape clears. Watch the console for `kai-select` and `kai-query-change`.',
+          'Type to filter across all groups. Arrow keys move the selection; Enter picks; Escape clears. Watch the Actions panel for `kai-select`, `kai-query-change`, and `kai-active-change`.',
       },
       source: {
         language: 'html',

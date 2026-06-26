@@ -26,6 +26,16 @@ const meta = {
       description: 'Axis the panels are laid out along.',
       table: { defaultValue: { summary: 'horizontal' } },
     },
+    onPanelResize: {
+      action: 'panelResize',
+      description: 'On `ResizableHandle` — fires the clamped pixel delta while dragging (and `0` on a double-click reset).',
+      table: { category: 'Events' },
+    },
+    onChange: {
+      action: 'change',
+      description: 'On the `Resizable` convenience — fires the current panel sizes (percent) on drag-end / keyboard resize / visibility change.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     orientation: 'horizontal',
@@ -179,7 +189,7 @@ export const ConvenienceGroup: Story = {
   name: 'Resizable (convenience)',
   render: () => (
     <div class="h-48 w-full max-w-2xl rounded-lg border border-border overflow-hidden">
-      <Resizable orientation="horizontal" withHandle onChange={(sizes) => console.log('sizes', sizes)}>
+      <Resizable orientation="horizontal" withHandle onChange={fn()}>
         <ResizablePanel defaultSize="240px" locked>
           <div class="flex h-full items-center justify-center bg-muted/30 p-4">
             <span class="text-sm text-muted-foreground">Locked sidebar (240px)</span>

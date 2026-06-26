@@ -95,7 +95,15 @@ const src = (code: string) => ({
 
 /** Interactive playground — a full transcript inside the stick-to-bottom container. */
 export const Playground: Story = {
-  ...src(`<div class="h-[500px]">
+  ...src(`// Your transcript — each turn is a { role, content } record.
+const messages = [
+  { role: 'user', content: 'What is SolidJS?' },
+  { role: 'assistant', content: '**SolidJS** is a reactive UI library…' },
+  // …
+];
+
+// Give the root a fixed height so it can scroll + stick to the bottom.
+<div class="h-[500px]">
   <ChatContainerRoot class="h-full flex-col p-4">
     <ChatContainerContent class="space-y-4">
       <For each={messages}>

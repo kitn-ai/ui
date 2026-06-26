@@ -176,5 +176,24 @@ pnpm dev
 
 For more info, visit [solidjs.com](https://solidjs.com).`,
   },
-  ...src(`<Markdown class="max-w-2xl" content={richMarkdown} />`),
+  ...src(`const richMarkdown = \`# Project Overview
+
+This is a **comprehensive** guide to building modern web apps.
+
+## Key Technologies
+- **SolidJS** -- Reactive UI framework
+- **TypeScript** -- Type-safe JavaScript
+
+\\\`\\\`\\\`bash
+pnpm create solid
+\\\`\\\`\\\`
+
+> **Note:** Make sure you have Node.js 18+ installed.
+
+| Layer | Technology |
+|-------|-----------|
+| UI    | SolidJS   |
+…\`;
+
+<Markdown class="max-w-2xl" content={richMarkdown} />`),
 };

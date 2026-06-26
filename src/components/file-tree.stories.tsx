@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
+import { fn } from 'storybook/test';
 import { FileTree, type FileTreeFile } from './file-tree';
 import { componentDescription } from '../stories/docs/element-controls';
 
@@ -32,11 +33,16 @@ const meta = {
   argTypes: {
     files: { control: false },
     activeFile: { control: 'text' },
+    onSelect: {
+      action: 'select',
+      description: 'A file was selected — called with `(path, file)`.',
+      table: { category: 'Events' },
+    },
   },
-  args: { files: FILES, activeFile: 'src/app.ts' },
+  args: { files: FILES, activeFile: 'src/app.ts', onSelect: fn() },
   render: (args) => (
     <div class="w-64 h-80 overflow-auto rounded-lg border border-border scrollbar-thin">
-      <FileTree files={args.files} activeFile={args.activeFile} />
+      <FileTree files={args.files} activeFile={args.activeFile} onSelect={args.onSelect} />
     </div>
   ),
 } satisfies Meta<typeof FileTree>;
@@ -44,13 +50,27 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { FileTree } from '@kitn.ai/ui';`;
+const IMPORT = `import { FileTree, type FileTreeFile } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
 export const Playground: Story = {
-  ...src(`<FileTree files={files} activeFile="src/app.ts" onSelect={(p) => set(p)} />`),
+  ...src(`// Flat list of \`/\`-delimited paths — folders are derived automatically.
+const files: FileTreeFile[] = [
+  { path: 'index.html', type: 'html' },
+  { path: 'css/site.css', type: 'other', language: 'css' },
+  { path: 'src/app.ts', type: 'other', language: 'ts' },
+  { path: 'src/lib/format.ts', type: 'other', language: 'ts' },
+  { path: 'assets/logo.svg', type: 'image' },
+  // …
+];
+
+<FileTree
+  files={files}
+  activeFile="src/app.ts"
+  onSelect={(path, file) => console.log('select', path, file)}
+/>`),
 };
 
 /** Drives selection from `onSelect` — the controlled pattern. */

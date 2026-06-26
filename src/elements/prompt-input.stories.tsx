@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { onMount } from 'solid-js';
+import { onMount, onCleanup } from 'solid-js';
 import './register'; // side effect: registers <kai-chat>, <kai-conversations>, <kai-prompt-input>
+import { attachKaiActions } from '../stories/docs/story-actions';
 import type { AttachmentData } from '../components/attachments';
 import type { TriggerDef } from '../components/composer';
 import type { ComposerDoc } from '../primitives/composer-model';
@@ -67,8 +68,9 @@ function PromptInputElement(props: { search?: boolean; voice?: boolean; attachme
         if (name in args) (el as unknown as Record<string, unknown>)[name] = args[name];
       }
     }
-    el.addEventListener('kai-search', () => console.log('search clicked'));
-    el.addEventListener('kai-voice', () => console.log('voice clicked'));
+    // Log every declared CustomEvent (kai-submit, kai-value-change, kai-search,
+    // kai-voice, kai-suggestion-click, …) to the Actions panel.
+    onCleanup(attachKaiActions(el));
   });
   return (
     <kai-prompt-input
@@ -238,9 +240,8 @@ export const WithCustomToolbarActions: Story = {
     onMount(() => {
       if (!el) return;
       el.setAttribute('placeholder', 'Ask anything...');
-      el.addEventListener('kai-toolbar-action', (e: Event) => {
-        console.log('toolbar action:', (e as CustomEvent<{ action: string }>).detail.action);
-      });
+      // Log every declared event, incl. kai-toolbar-action from the <kai-action> children.
+      onCleanup(attachKaiActions(el));
     });
     return (
       <div style={{ padding: '16px', width: '100%' }}>
@@ -256,7 +257,7 @@ export const WithCustomToolbarActions: Story = {
           <kai-action id="bookmark" icon="bookmark" tooltip="Bookmark" />
         </kai-prompt-input>
         <p style={{ 'margin-top': '8px', 'font-size': '12px', color: 'var(--color-muted-foreground)' }}>
-          Open the browser console to see <code>kai-action</code> events when you click the extra toolbar buttons.
+          Watch the Actions panel for <code>kai-toolbar-action</code> events when you click the extra toolbar buttons.
         </p>
       </div>
     );
@@ -327,16 +328,15 @@ export const WithEntityPills: Story = {
       if (!el) return;
       el.placeholder = 'Type / for a skill or @ for an agent…';
       el.triggers = ENTITY_TRIGGERS;
-      el.addEventListener('kai-submit', (e) =>
-        console.log('submit:', (e as CustomEvent).detail),
-      );
+      // Log every declared event (kai-submit carries the structured doc + entities).
+      onCleanup(attachKaiActions(el));
     });
     return (
       <div style={{ padding: '16px', width: '100%' }}>
         <kai-prompt-input ref={(e: HTMLElement) => (el = e as PromptInputEl)} style={{ display: 'block', width: '100%' }} />
         <p style={{ 'margin-top': '8px', 'font-size': '12px', color: 'var(--color-muted-foreground)' }}>
           Type <code>/</code> to insert a skill or <code>@</code> to insert an agent. Backspace deletes a
-          whole pill. Open the console to see <code>kai-submit</code> with the structured <code>doc</code> + <code>entities</code>.
+          whole pill. Watch the Actions panel for <code>kai-submit</code> with the structured <code>doc</code> + <code>entities</code>.
         </p>
       </div>
     );
@@ -362,7 +362,8 @@ export const Prefilled: Story = {
         { type: 'entity', entity: { kind: 'plugin', id: 'record-replay', label: 'Record & Replay', icon: recordIcon, data: { plugin: 'record-replay' } } },
         { type: 'text', text: '.' },
       ];
-      el.addEventListener('kai-submit', (e) => console.log('submit:', (e as CustomEvent).detail));
+      // Log every declared event (kai-submit carries the structured doc + entities).
+      onCleanup(attachKaiActions(el));
     });
     return (
       <div style={{ padding: '16px', width: '100%' }}>

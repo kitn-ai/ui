@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { onMount } from 'solid-js';
+import { onMount, onCleanup } from 'solid-js';
 import './register'; // side effect: registers <kai-message>, <kai-source>, …
+import { attachKaiActions } from '../stories/docs/story-actions';
 import type { ChatMessage } from './chat-types';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
@@ -84,8 +85,13 @@ function ComposedThread() {
     if (userEl) {
       userEl.setAttribute('avatar', 'none');
       userEl.message = userMessage;
+      onCleanup(attachKaiActions(userEl)); // log kai-message-action
     }
-    if (assistantEl) assistantEl.message = assistantMessage;
+    if (assistantEl) {
+      assistantEl.message = assistantMessage;
+      // Log kai-message-action (copy / like / dislike / regenerate clicks).
+      onCleanup(attachKaiActions(assistantEl));
+    }
   });
   return (
     <div class="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
@@ -120,11 +126,14 @@ const HTML_SNIPPET = `<!-- Compose your own message list — one <kai-message> p
 
 <script type="module">
   import '@kitn.ai/ui/elements';   // registers the custom elements
-  document.getElementById('turn').message = {
+  const turn = document.getElementById('turn');
+  turn.message = {
     id: 'm-a', role: 'assistant',
     content: 'Here is the summary you asked for.',
     actions: ['copy', 'like', 'regenerate'],
   };
+  // The action bar emits a non-bubbling CustomEvent on the element.
+  turn.addEventListener('kai-message-action', (e) => console.log(e.detail));
 </script>`;
 
 const meta = {

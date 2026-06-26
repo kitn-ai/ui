@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { action } from 'storybook/actions';
+import { onMount, onCleanup } from 'solid-js';
 import './register'; // side effect: registers <kai-prompt-input> et al.
+import { attachKaiActions } from '../stories/docs/story-actions';
 import type { AttachmentData } from '../components/attachments';
+
+// Wire a kai-* element's declared CustomEvents to the Actions panel from a `ref`.
+const withActions = (e: Element) => onMount(() => onCleanup(attachKaiActions(e as HTMLElement)));
 
 // Labs: the <kai-prompt-input> composition slots. Dogfoods real kit components
 // where they fit — a <kai-notice> above the card, a <kai-attachments> row (with
@@ -53,11 +57,11 @@ export const Slots: Story = {
   render: () => (
     <div>
       {/* Above the card = your own layout, not a slot. Dogfood <kai-notice>. */}
-      <kai-notice severity="warning" dismissible style={{ display: 'block', 'margin-bottom': '8px' }}>
+      <kai-notice severity="warning" dismissible style={{ display: 'block', 'margin-bottom': '8px' }} ref={withActions}>
         Model X is unavailable.
         <a slot="action" href="#" style="color:var(--color-foreground);font-weight:600">Learn more</a>
       </kai-notice>
-      <kai-prompt-input style={{ display: 'block' }}>
+      <kai-prompt-input style={{ display: 'block' }} ref={withActions}>
         {/* input-top: attached files above the textarea — dogfood <kai-attachments>
             with hover-card previews. Hover a chip to preview; × removes it. */}
         <kai-attachments
@@ -70,11 +74,12 @@ export const Slots: Story = {
             el.hoverCard = true;
             el.removable = true;
             el.showMediaType = true;
-            el.addEventListener('kai-remove', (ev) => action('kai-remove')((ev as CustomEvent).detail));
+            // Log every declared event (kai-remove) to the Actions panel.
+            withActions(el);
           }}
         />
         {/* toolbar-start: a kit button, before the textarea controls. */}
-        <kai-button slot="toolbar-start" variant="subtle" size="icon" icon="plus" label="Open menu" />
+        <kai-button slot="toolbar-start" variant="subtle" size="icon" icon="plus" label="Open menu" ref={withActions} />
         {/* toolbar-end: trailing controls, before the Send button. */}
         <span
           slot="toolbar-end"
@@ -119,7 +124,7 @@ export const Slots: Story = {
 export const DropIn: Story = {
   name: 'Defaults (no slots)',
   render: () => (
-    <kai-prompt-input style={{ display: 'block' }} />
+    <kai-prompt-input style={{ display: 'block' }} ref={withActions} />
   ),
   parameters: {
     docs: {

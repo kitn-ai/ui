@@ -83,6 +83,9 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// The event callbacks our custom-render stories route to the Actions panel.
+type EventArgs = { onValueChange?: (value: string) => void; onSubmit?: () => void };
+
 const IMPORT = `import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
@@ -100,11 +103,12 @@ export const Playground: Story = {
 
 /** Empty composer with a Send button disabled until there is text. */
 export const Default: Story = {
-  render: () => {
+  render: (args: EventArgs) => {
     const [value, setValue] = createSignal('');
+    const handleChange = (v: string) => { setValue(v); args.onValueChange?.(v); };
     return (
       <div class="max-w-xl">
-        <PromptInput value={value()} onValueChange={setValue}>
+        <PromptInput value={value()} onValueChange={handleChange} onSubmit={args.onSubmit}>
           <PromptInputTextarea placeholder="Ask anything..." />
           <PromptInputActions>
             <Button variant="default" size="sm" disabled={!value()}>
@@ -125,11 +129,12 @@ export const Default: Story = {
 
 /** Pre-filled with a prompt. */
 export const WithContent: Story = {
-  render: () => {
+  render: (args: EventArgs) => {
     const [value, setValue] = createSignal('Tell me about SolidJS reactive primitives');
+    const handleChange = (v: string) => { setValue(v); args.onValueChange?.(v); };
     return (
       <div class="max-w-xl">
-        <PromptInput value={value()} onValueChange={setValue}>
+        <PromptInput value={value()} onValueChange={handleChange} onSubmit={args.onSubmit}>
           <PromptInputTextarea placeholder="Ask anything..." />
           <PromptInputActions>
             <Button variant="default" size="sm">Send</Button>
@@ -148,9 +153,9 @@ export const WithContent: Story = {
 
 /** Read-only composer — `disabled` dims it and blocks input. */
 export const Disabled: Story = {
-  render: () => (
+  render: (args: EventArgs) => (
     <div class="max-w-xl">
-      <PromptInput disabled value="" onValueChange={() => {}}>
+      <PromptInput disabled value="" onValueChange={args.onValueChange} onSubmit={args.onSubmit}>
         <PromptInputTextarea placeholder="Chat is disabled..." />
         <PromptInputActions>
           <Button variant="default" size="sm" disabled>Send</Button>
@@ -168,9 +173,9 @@ export const Disabled: Story = {
 
 /** In-flight — `isLoading` typically pairs with a Stop action. */
 export const Loading: Story = {
-  render: () => (
+  render: (args: EventArgs) => (
     <div class="max-w-xl">
-      <PromptInput isLoading value="" onValueChange={() => {}}>
+      <PromptInput isLoading value="" onValueChange={args.onValueChange} onSubmit={args.onSubmit}>
         <PromptInputTextarea placeholder="Generating response..." />
         <PromptInputActions>
           <Button variant="outline" size="sm">
@@ -190,11 +195,12 @@ export const Loading: Story = {
 
 /** A split actions row — a leading icon control and a trailing Send (showcase). */
 export const WithMultipleActions: Story = {
-  render: () => {
+  render: (args: EventArgs) => {
     const [value, setValue] = createSignal('');
+    const handleChange = (v: string) => { setValue(v); args.onValueChange?.(v); };
     return (
       <div class="max-w-xl">
-        <PromptInput value={value()} onValueChange={setValue}>
+        <PromptInput value={value()} onValueChange={handleChange} onSubmit={args.onSubmit}>
           <PromptInputTextarea placeholder="Ask anything..." />
           <PromptInputActions class="justify-between w-full px-2 pb-1">
             <div class="flex items-center gap-1">

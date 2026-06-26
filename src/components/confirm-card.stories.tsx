@@ -1,15 +1,24 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
+import { action } from 'storybook/actions';
 import { ConfirmCard, type ConfirmCardData } from './confirm-card';
 import { componentDescription } from '../stories/docs/element-controls';
 import type { CardEvent, CardHost, CardContext } from '../primitives/card-contract';
 
 const ctx: CardContext = { theme: { mode: 'light' }, locale: 'en' };
 
-/** Renders the Solid <ConfirmCard> with a capturing `host`, logging emitted events. */
+/** Renders the Solid <ConfirmCard> with a capturing `host`. Every emitted
+ *  `CardEvent` is both shown in the inline log AND routed to the Actions panel
+ *  (keyed by the event's `kind`, e.g. `card:action`, `card:dismiss`). */
 function Demo(props: { def: ConfirmCardData; heading?: string; cardId: string }) {
   const [log, setLog] = createSignal<CardEvent[]>([]);
-  const host: CardHost = { context: () => ctx, emit: (e) => setLog((p) => [...p, e]) };
+  const host: CardHost = {
+    context: () => ctx,
+    emit: (e) => {
+      action(`card:${e.kind}`)(e);
+      setLog((p) => [...p, e]);
+    },
+  };
   return (
     <div style={{ 'max-width': '460px', display: 'flex', 'flex-direction': 'column', gap: '12px' }}>
       <ConfirmCard host={host} data={props.def} heading={props.heading} cardId={props.cardId} />
@@ -65,10 +74,45 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof ConfirmCard>;
 
+const IMPORT = `import { ConfirmCard, type ConfirmCardData } from '@kitn.ai/ui';
+import type { CardHost } from '@kitn.ai/ui';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
 export const ApproveReject: Story = {
   render: () => <Demo def={APPROVE} heading="Run database migration?" cardId="card-approve" />,
+  ...src(`const data: ConfirmCardData = {
+  body: 'This will apply 3 pending migrations to production. This cannot be undone.',
+  tone: 'warning',
+  actions: [
+    { id: 'approve', label: 'Run migration', style: 'primary', default: true },
+    { id: 'reject', label: 'Cancel' },
+  ],
+};
+
+// A CardHost receives the emitted CardEvents directly (the native-host path).
+const host: CardHost = {
+  context: () => ({ theme: { mode: 'light' }, locale: 'en' }),
+  emit: (e) => {
+    // { kind: 'action', cardId, action: 'approve' | 'reject', payload? }
+    if (e.kind === 'action') console.log('chose', e.action);
+  },
+};
+
+<ConfirmCard host={host} data={data} heading="Run database migration?" cardId="card-approve" />`),
 };
 
 export const Destructive: Story = {
   render: () => <Demo def={DESTRUCTIVE} heading="Delete files?" cardId="card-delete" />,
+  ...src(`const data: ConfirmCardData = {
+  body: 'Permanently delete 12 files? This cannot be undone.',
+  tone: 'danger',
+  actions: [
+    { id: 'delete', label: 'Delete files', style: 'destructive', default: true },
+    { id: 'cancel', label: 'Keep them' },
+  ],
+};
+
+<ConfirmCard host={host} data={data} heading="Delete files?" cardId="card-delete" />`),
 };

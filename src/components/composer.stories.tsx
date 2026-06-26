@@ -63,6 +63,36 @@ const meta = {
       description: 'Fired with `{ doc, text, entities }` on every input event.',
       table: { category: 'Events' },
     },
+    onTrigger: {
+      action: 'trigger',
+      description: 'A trigger char (`/`, `@`) opened the menu — `{ char, query, rect }`.',
+      table: { category: 'Events' },
+    },
+    onTriggerClose: {
+      action: 'trigger-close',
+      description: 'The trigger menu closed (selection, Escape, or no longer matching).',
+      table: { category: 'Events' },
+    },
+    onEntityAdd: {
+      action: 'entity-add',
+      description: 'An entity pill (skill/mention) was inserted into the doc.',
+      table: { category: 'Events' },
+    },
+    onEntityRemove: {
+      action: 'entity-remove',
+      description: 'An entity pill was removed from the doc.',
+      table: { category: 'Events' },
+    },
+    onFocus: {
+      action: 'focus',
+      description: 'The editable surface gained focus.',
+      table: { category: 'Events' },
+    },
+    onBlur: {
+      action: 'blur',
+      description: 'The editable surface lost focus.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     placeholder: 'Ask anything…',
@@ -72,6 +102,12 @@ const meta = {
     submitOnEnter: true,
     onSubmit: fn(),
     onChange: fn(),
+    onTrigger: fn(),
+    onTriggerClose: fn(),
+    onEntityAdd: fn(),
+    onEntityRemove: fn(),
+    onFocus: fn(),
+    onBlur: fn(),
   },
   render: (args: ComposerProps) => (
     <div class="max-w-2xl">
@@ -83,12 +119,23 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
+const IMPORT = `import { Composer, type TriggerDef, type ComposerDoc } from '@kitn.ai/ui';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
 // ---------------------------------------------------------------------------
 // Playground
 // ---------------------------------------------------------------------------
 
 /** Args-driven — toggle disabled/loading and edit the placeholder via Controls. */
 export const Playground: Story = {
+  ...src(`<Composer
+  placeholder="Ask anything…"
+  submitOnEnter
+  onSubmit={({ doc, text, entities }) => send({ text, entities })}
+  onChange={({ text }) => setDraft(text)}
+/>`),
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
     // The editable surface must be present.
@@ -131,6 +178,25 @@ export const WithSkills: Story = {
     onSubmit: fn(),
     onChange: fn(),
   },
+  ...src(`// A trigger char opens a menu of items; picking one inserts an atomic pill.
+const triggers: TriggerDef[] = [
+  {
+    char: '/',
+    kind: 'skill',
+    items: [
+      { id: 'record-replay', label: 'Record & Replay', icon: skillIcon,
+        promptText: 'Use the Record & Replay skill.' },
+      { id: 'summarize', label: 'Summarize' },
+    ],
+  },
+];
+
+<Composer
+  placeholder="Type / to pick a skill…"
+  triggers={triggers}
+  onSubmit={({ text, entities }) => send({ text, entities })}
+  onEntityAdd={(e) => console.log('added', e)}
+/>`),
   render: (args: ComposerProps) => (
     <div class="max-w-2xl">
       <Composer {...args} />
@@ -175,6 +241,22 @@ export const WithMentions: Story = {
     onSubmit: fn(),
     onChange: fn(),
   },
+  ...src(`const triggers: TriggerDef[] = [
+  {
+    char: '@',
+    kind: 'mention',
+    items: [
+      { id: 'alice', label: 'Alice Kim', icon: '/avatars/alice.png' },
+      { id: 'bob', label: 'Bob Chen', icon: '/avatars/bob.png' },
+    ],
+  },
+];
+
+<Composer
+  placeholder="Type @ to mention someone…"
+  triggers={triggers}
+  onSubmit={({ text, entities }) => send({ text, entities })}
+/>`),
   render: (args: ComposerProps) => (
     <div class="max-w-2xl">
       <Composer {...args} />
@@ -216,6 +298,14 @@ export const Prefilled: Story = {
     onSubmit: fn(),
     onChange: fn(),
   },
+  ...src(`// Seed the composer with a structured doc: an entity pill + trailing text.
+const value: ComposerDoc = [
+  { type: 'entity', entity: { kind: 'skill', id: 'record-replay',
+    label: 'Record & Replay', icon: skillIcon } },
+  { type: 'text', text: " I'm going to show y" },
+];
+
+<Composer value={value} onSubmit={({ text, entities }) => send({ text, entities })} />`),
   render: (args: ComposerProps) => (
     <div class="max-w-2xl">
       <Composer {...args} />
@@ -251,6 +341,17 @@ export const Highlighted: Story = {
     onSubmit: fn(),
     onChange: fn(),
   },
+  ...src(`// A highlight rule is a literal string or a { pattern, class } regex rule.
+const highlights = [
+  'deploy',
+  { pattern: 'TICKET-\\\\d+', class: 'tok' },
+];
+
+<Composer
+  value="Please deploy this fix for TICKET-123 and also TICKET-456 soon."
+  highlights={highlights}
+  onChange={({ text }) => setDraft(text)}
+/>`),
   render: (args: ComposerProps) => (
     <div class="max-w-2xl">
       <Composer {...args} />

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
+import { action } from 'storybook/actions';
 import { createSignal } from 'solid-js';
 import { Reasoning, ReasoningTrigger, ReasoningContent } from './reasoning';
 import { componentDescription } from '../stories/docs/element-controls';
@@ -91,8 +92,12 @@ export const WithMarkdown: Story = {
 export const Controlled: Story = {
   render: () => {
     const [open, setOpen] = createSignal(true);
+    const onOpenChange = (next: boolean) => {
+      action('openChange')(next);
+      setOpen(next);
+    };
     return (
-      <Reasoning open={open()} onOpenChange={setOpen}>
+      <Reasoning open={open()} onOpenChange={onOpenChange}>
         <ReasoningTrigger>Thinking process</ReasoningTrigger>
         <ReasoningContent>
           <p>This is a controlled reasoning component that starts open.</p>
@@ -122,7 +127,7 @@ export const Streaming: Story = {
         >
           {streaming() ? 'Stop streaming' : 'Start streaming'}
         </button>
-        <Reasoning isStreaming={streaming()}>
+        <Reasoning isStreaming={streaming()} onOpenChange={action('openChange')}>
           <ReasoningTrigger>Thinking...</ReasoningTrigger>
           <ReasoningContent>
             <p>Auto-opens during streaming and auto-closes when streaming ends.</p>

@@ -30,6 +30,11 @@ const meta = {
     },
     gutter: { control: 'number', description: 'Gap in px between trigger and panel.', table: { defaultValue: { summary: '6' } } },
     open: { control: 'boolean', description: 'Controlled open state. Omit for click-to-toggle.' },
+    onOpenChange: {
+      action: 'openChange',
+      description: 'Fires with the next open state whenever the popover opens or closes.',
+      table: { category: 'Events' },
+    },
   },
   args: { placement: 'bottom-start', onOpenChange: fn() },
 } satisfies Meta<typeof Popover>;

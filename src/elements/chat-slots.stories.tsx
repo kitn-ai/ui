@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { onMount } from 'solid-js';
-import { action } from 'storybook/actions';
+import { onMount, onCleanup } from 'solid-js';
 import { LifeBuoy, Sparkles } from 'lucide-solid';
 import './register'; // side effect: registers <kai-chat> et al.
+import { attachKaiActions } from '../stories/docs/story-actions';
 import type { ChatMessage } from './chat-types';
 import type { ConversationSummary, ConversationGroup } from '../types';
 
@@ -69,14 +69,18 @@ function InjectDemo() {
   let el: ChatEl | undefined;
   let convEl: ConversationsEl | undefined;
   onMount(() => {
-    if (el) { el.messages = thread; el.chatTitle = 'Acme Support'; }
+    if (el) {
+      el.messages = thread;
+      el.chatTitle = 'Acme Support';
+      // Log every event the chat shell declares (kai-submit, kai-value-change, …).
+      onCleanup(attachKaiActions(el));
+    }
     if (convEl) {
       convEl.groups = convGroups;
       convEl.conversations = convs;
       convEl.activeId = 'c1';
-      convEl.addEventListener('kai-conversation-select', (e) =>
-        action('kai-conversation-select')((e as CustomEvent<{ id: string }>).detail));
-      convEl.addEventListener('kai-new-chat', () => action('kai-new-chat')());
+      // Log every event the sidebar declares (kai-conversation-select, kai-new-chat, …).
+      onCleanup(attachKaiActions(convEl));
     }
   });
   return (
@@ -84,7 +88,8 @@ function InjectDemo() {
       {/* Inject the real conversation-history sidebar — set its data as JS props. */}
       <kai-conversations slot="sidebar" ref={(e) => (convEl = e as ConversationsEl)} style={{ display: 'block', height: '100%' }} />
       {/* A custom composer action — themed kai-button, works in light + dark. */}
-      <kai-button slot="composer-actions" variant="subtle" icon="sparkles">Improve prompt</kai-button>
+      <kai-button slot="composer-actions" variant="subtle" icon="sparkles"
+        ref={(e) => onMount(() => onCleanup(attachKaiActions(e)))}>Improve prompt</kai-button>
       <footer slot="footer" style="font:12px/1.4 system-ui;color:var(--color-muted-foreground);text-align:center;padding:4px">
         Acme may make mistakes. <a href="#" style="color:var(--color-foreground)">Verify important info</a>.
       </footer>
@@ -126,7 +131,11 @@ export const Inject: Story = {
 //      rather than re-rolling an empty state by hand. ─────────────────────────
 function EmptyDemo() {
   let el: ChatEl | undefined;
-  onMount(() => { if (el) el.messages = []; });
+  onMount(() => {
+    if (!el) return;
+    el.messages = [];
+    onCleanup(attachKaiActions(el)); // log kai-chat's events to the Actions panel
+  });
   return (
     <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }}>
       <kai-empty
@@ -135,7 +144,8 @@ function EmptyDemo() {
         description="Ask about billing, your account, or anything else — a human is one click away."
       >
         <span slot="media"><LifeBuoy size={28} /></span>
-        <kai-button variant="default">Talk to a person</kai-button>
+        <kai-button variant="default"
+          ref={(e) => onMount(() => onCleanup(attachKaiActions(e)))}>Talk to a person</kai-button>
       </kai-empty>
     </kai-chat>
   );
@@ -174,7 +184,11 @@ let nextId = 100;
 function ReplaceDemo() {
   let el: ChatEl | undefined;
   let input: HTMLInputElement | undefined;
-  onMount(() => { if (el) el.messages = thread; });
+  onMount(() => {
+    if (!el) return;
+    el.messages = thread;
+    onCleanup(attachKaiActions(el)); // log kai-chat's events to the Actions panel
+  });
   const send = (e: Event) => {
     e.preventDefault();
     const text = input?.value.trim();
@@ -232,7 +246,11 @@ export const ReplaceComposer: Story = {
 //    did before slots existed (regression guard). ─────────────────────────────
 function DropInDemo() {
   let el: ChatEl | undefined;
-  onMount(() => { if (el) el.messages = thread; });
+  onMount(() => {
+    if (!el) return;
+    el.messages = thread;
+    onCleanup(attachKaiActions(el)); // log kai-chat's events to the Actions panel
+  });
   return <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }} />;
 }
 export const DropIn: Story = {

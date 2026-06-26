@@ -23,6 +23,11 @@ const meta = {
     defaultChecked: { control: 'boolean', description: 'Initial state when uncontrolled.' },
     disabled: { control: 'boolean', description: 'Disable interaction.' },
     label: { control: 'text', description: 'Accessible label.' },
+    onChange: {
+      action: 'change',
+      description: 'Fires with the next checked state on toggle.',
+      table: { category: 'Events' },
+    },
   },
   args: { label: 'Temporary chat', onChange: fn() },
 } satisfies Meta<typeof Switch>;

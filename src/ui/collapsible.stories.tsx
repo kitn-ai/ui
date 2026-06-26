@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './collapsible';
 import { componentDescription } from '../stories/docs/element-controls';
 
@@ -16,7 +17,17 @@ const meta = {
       ]),
     },
   },
-  render: () => <CollapsibleDemo defaultOpen />,
+  argTypes: {
+    onOpenChange: {
+      action: 'openChange',
+      description: 'Fires with the next open state whenever the disclosure expands or collapses.',
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    onOpenChange: fn(),
+  },
+  render: (args) => <CollapsibleDemo defaultOpen onOpenChange={args.onOpenChange} />,
 } satisfies Meta<typeof Collapsible>;
 
 export default meta;
@@ -27,9 +38,9 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-function CollapsibleDemo(props: { defaultOpen?: boolean }) {
+function CollapsibleDemo(props: { defaultOpen?: boolean; onOpenChange?: (open: boolean) => void }) {
   return (
-    <Collapsible defaultOpen={props.defaultOpen} class="w-80 rounded-lg border border-border">
+    <Collapsible defaultOpen={props.defaultOpen} onOpenChange={props.onOpenChange} class="w-80 rounded-lg border border-border">
       <CollapsibleTrigger class="group flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-foreground">
         <span>Reasoning</span>
         <svg
@@ -51,7 +62,7 @@ function CollapsibleDemo(props: { defaultOpen?: boolean }) {
 
 /** Toggle the trigger to expand/collapse. The chevron rotates via the `data-expanded` attribute. */
 export const Playground: Story = {
-  ...src(`<Collapsible defaultOpen>
+  ...src(`<Collapsible defaultOpen onOpenChange={(open) => console.log('expanded:', open)}>
   <CollapsibleTrigger>Reasoning</CollapsibleTrigger>
   <CollapsibleContent>
     <p>First I parsed the request, then checked the available tools…</p>
@@ -61,8 +72,8 @@ export const Playground: Story = {
 
 /** Starts collapsed. */
 export const InitiallyClosed: Story = {
-  render: () => <CollapsibleDemo />,
-  ...src(`<Collapsible>
+  render: (args: { onOpenChange?: (open: boolean) => void }) => <CollapsibleDemo onOpenChange={args.onOpenChange} />,
+  ...src(`<Collapsible onOpenChange={(open) => console.log(open)}>
   <CollapsibleTrigger>Reasoning</CollapsibleTrigger>
   <CollapsibleContent>…</CollapsibleContent>
 </Collapsible>`),

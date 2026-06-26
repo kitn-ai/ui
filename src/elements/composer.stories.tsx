@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { onMount } from 'solid-js';
+import { onMount, onCleanup } from 'solid-js';
 import './register'; // side effect: registers all kai-* custom elements (incl. kai-composer)
+import { attachKaiActions } from '../stories/docs/story-actions';
 import type { TriggerDef } from '../components/composer';
 import type { ComposerDoc } from '../primitives/composer-model';
 import { expect } from 'storybook/test';
@@ -95,12 +96,8 @@ export const Default: Story = {
     onMount(() => {
       if (!el) return;
       el.placeholder = 'Ask anything…';
-      el.addEventListener('kai-submit', (e: Event) => {
-        console.log('kai-submit:', (e as CustomEvent).detail);
-      });
-      el.addEventListener('kai-value-change', (e: Event) => {
-        console.log('kai-value-change:', (e as CustomEvent).detail);
-      });
+      // Log every declared CustomEvent (kai-submit, kai-value-change, kai-trigger, …).
+      onCleanup(attachKaiActions(el));
     });
     return (
       <div style={{ padding: '16px', width: '100%' }}>
@@ -169,9 +166,8 @@ export const Skills: Story = {
           ],
         },
       ];
-      el.addEventListener('kai-submit', (e: Event) => {
-        console.log('kai-submit:', (e as CustomEvent).detail);
-      });
+      // Log every declared CustomEvent (kai-submit, kai-trigger, kai-entity-add, …).
+      onCleanup(attachKaiActions(el));
     });
     return (
       <div style={{ padding: '16px', width: '100%' }}>
@@ -239,9 +235,8 @@ export const Mentions: Story = {
           ],
         },
       ];
-      el.addEventListener('kai-submit', (e: Event) => {
-        console.log('kai-submit:', (e as CustomEvent).detail);
-      });
+      // Log every declared CustomEvent (kai-submit, kai-trigger, kai-entity-add, …).
+      onCleanup(attachKaiActions(el));
     });
     return (
       <div style={{ padding: '16px', width: '100%' }}>
@@ -305,9 +300,8 @@ export const Prefilled: Story = {
         },
         { type: 'text', text: " I'm going to show y" },
       ];
-      el.addEventListener('kai-submit', (e: Event) => {
-        console.log('kai-submit:', (e as CustomEvent).detail);
-      });
+      // Log every declared CustomEvent (kai-submit, kai-value-change, …).
+      onCleanup(attachKaiActions(el));
     });
     return (
       <div style={{ padding: '16px', width: '100%' }}>
@@ -362,6 +356,8 @@ export const PillKinds: Story = {
         { type: 'entity', entity: { kind: 'plugin', id: 'documents', label: 'Documents', icon: imgData('#2563eb', 'D') } },
         { type: 'text', text: ' on this PR.' },
       ];
+      // Log every declared CustomEvent (kai-submit, kai-entity-remove, …).
+      onCleanup(attachKaiActions(el));
     });
     return (
       <div style={{ padding: '16px', width: '100%' }}>
@@ -403,6 +399,8 @@ export const Highlighted: Story = {
         'deploy',
         { pattern: 'TICKET-\\d+', class: 'tok' },
       ];
+      // Log every declared CustomEvent (kai-submit, kai-value-change, …).
+      onCleanup(attachKaiActions(el));
     });
     return (
       <div style={{ padding: '16px', width: '100%' }}>

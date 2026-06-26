@@ -62,14 +62,28 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { ConversationItem } from '@kitn.ai/ui';`;
+const IMPORT = `import { ConversationItem } from '@kitn.ai/ui';
+import type { ConversationSummary } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
 /** Interactive playground — toggle `isActive` and edit the conversation object. */
 export const Playground: Story = {
-  ...src(`<ConversationItem conversation={conversation} isActive={false} onSelect={(id) => {}} />`),
+  ...src(`const conversation: ConversationSummary = {
+  id: '1',
+  title: 'How to use SolidJS signals',
+  messageCount: 8,
+  scope: { type: 'document' },
+  lastMessageAt: '2026-04-10T12:00:00Z',
+  updatedAt: '2026-04-10T12:00:00Z',
+};
+
+<ConversationItem
+  conversation={conversation}
+  isActive={false}
+  onSelect={(id) => setActiveId(id)}
+/>`),
 };
 
 export const Active: Story = {

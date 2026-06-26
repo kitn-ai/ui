@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { createSignal, type JSX } from 'solid-js';
+import { createSignal, onMount, onCleanup, type JSX } from 'solid-js';
 import './register'; // side effect: registers the custom elements
+import { attachKaiActions } from '../stories/docs/story-actions';
 
 // The web components are custom DOM elements, so declare the tags for JSX. This
 // labs story declares its own intrinsic types (including the new `collapsed`
@@ -95,6 +96,11 @@ export const CollapsedAtMount: Story = {
   name: 'Collapsed at mount',
   render: () => {
     const [collapsed, setCollapsed] = createSignal(true);
+    let groupEl: HTMLElement | undefined;
+    // Log the group's declared events (kai-change on drag, kai-maximize-change).
+    onMount(() => {
+      if (groupEl) onCleanup(attachKaiActions(groupEl));
+    });
     return (
       <div style={{ display: 'flex', 'flex-direction': 'column', gap: '8px' }}>
         <button
@@ -115,7 +121,7 @@ export const CollapsedAtMount: Story = {
           {/* `collapsed` is a PLAIN JSX boolean — no imperative setAttribute. The
               facade reflects it to the attribute the parent reads, so the panel
               starts collapsed at the very first render. */}
-          <kai-resizable orientation="horizontal">
+          <kai-resizable orientation="horizontal" ref={(e) => (groupEl = e as HTMLElement)}>
             <kai-resizable-item size="28%" min="140px" collapsed={collapsed()}>
               <Pane label="List" />
             </kai-resizable-item>

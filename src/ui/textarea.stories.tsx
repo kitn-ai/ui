@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import type { JSX } from 'solid-js';
-import { Textarea } from './textarea';
+import { fn } from 'storybook/test';
+import { Textarea, type TextareaProps } from './textarea';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
@@ -22,10 +23,22 @@ const meta = {
     maxHeight: { control: 'number', description: 'Max height (px) before the field scrolls instead of growing.' },
     autoResize: { control: 'boolean', description: 'Grow with content. Default true.' },
     class: { control: 'text', description: 'Extra classes.' },
+    onInput: {
+      action: 'input',
+      description: 'Fires on every keystroke — read `event.currentTarget.value`.',
+      table: { category: 'Events' },
+    },
+    onChange: {
+      action: 'change',
+      description: 'Fires on blur/commit, like a native textarea.',
+      table: { category: 'Events' },
+    },
   },
   args: {
     placeholder: 'Ask anything… (Shift+Enter for a newline)',
     maxHeight: 200,
+    onInput: fn(),
+    onChange: fn(),
   },
   render: (args) => (
     <Frame>
@@ -59,15 +72,27 @@ const src = (code: string) => ({
 export const Playground: Story = {
   ...src(`{/* The frame owns the focus ring; the textarea's own ring is neutralized. */}
 <div class="cursor-text rounded-xl border bg-muted/40 p-3 focus-within:ring-2 focus-within:ring-ring">
-  <Textarea placeholder="Ask anything…" maxHeight={200} class="focus-visible:ring-0" />
+  <Textarea
+    placeholder="Ask anything…"
+    maxHeight={200}
+    class="focus-visible:ring-0"
+    onInput={(e) => setValue(e.currentTarget.value)}
+  />
 </div>`),
 };
 
 /** A fixed-height field (auto-resize disabled). */
 export const FixedHeight: Story = {
-  render: () => (
+  render: (args: TextareaProps) => (
     <Frame>
-      <Textarea autoResize={false} rows={4} placeholder="Fixed at 4 rows…" class="focus-visible:ring-0" />
+      <Textarea
+        autoResize={false}
+        rows={4}
+        placeholder="Fixed at 4 rows…"
+        class="focus-visible:ring-0"
+        onInput={args.onInput}
+        onChange={args.onChange}
+      />
     </Frame>
   ),
   ...src(`<div class="cursor-text rounded-xl border bg-muted/40 p-3 focus-within:ring-2 focus-within:ring-ring">

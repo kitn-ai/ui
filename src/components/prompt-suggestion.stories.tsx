@@ -92,12 +92,12 @@ export const Block: Story = {
 
 /** A row of pill suggestions (showcase — not driven by controls). */
 export const MultipleSuggestions: Story = {
-  render: () => (
+  render: (args: { onClick?: (e: MouseEvent) => void }) => (
     <div class="flex flex-wrap gap-2">
-      <PromptSuggestion>What is SolidJS?</PromptSuggestion>
-      <PromptSuggestion>Explain reactive signals</PromptSuggestion>
-      <PromptSuggestion>Compare SolidJS vs React</PromptSuggestion>
-      <PromptSuggestion>Best practices for state management</PromptSuggestion>
+      <PromptSuggestion onClick={args.onClick}>What is SolidJS?</PromptSuggestion>
+      <PromptSuggestion onClick={args.onClick}>Explain reactive signals</PromptSuggestion>
+      <PromptSuggestion onClick={args.onClick}>Compare SolidJS vs React</PromptSuggestion>
+      <PromptSuggestion onClick={args.onClick}>Best practices for state management</PromptSuggestion>
     </div>
   ),
   ...src(`<div class="flex flex-wrap gap-2">
@@ -110,11 +110,11 @@ export const MultipleSuggestions: Story = {
 
 /** Filtered list with a highlighted match (showcase). */
 export const WithHighlightedSearch: Story = {
-  render: () => (
+  render: (args: { onClick?: (e: MouseEvent) => void }) => (
     <div class="w-72 space-y-1">
-      <PromptSuggestion highlight="solid">How does SolidJS handle reactivity?</PromptSuggestion>
-      <PromptSuggestion highlight="solid">What makes SolidJS fast?</PromptSuggestion>
-      <PromptSuggestion highlight="solid">SolidJS vs Svelte comparison</PromptSuggestion>
+      <PromptSuggestion highlight="solid" onClick={args.onClick}>How does SolidJS handle reactivity?</PromptSuggestion>
+      <PromptSuggestion highlight="solid" onClick={args.onClick}>What makes SolidJS fast?</PromptSuggestion>
+      <PromptSuggestion highlight="solid" onClick={args.onClick}>SolidJS vs Svelte comparison</PromptSuggestion>
     </div>
   ),
   ...src(`<div class="w-72 space-y-1">
@@ -127,11 +127,11 @@ export const WithHighlightedSearch: Story = {
 /** Stacked, full-width list rows (showcase). */
 export const BlockList: Story = {
   name: 'Block list',
-  render: () => (
+  render: (args: { onClick?: (e: MouseEvent) => void }) => (
     <div class="w-72 flex flex-col gap-1">
-      <PromptSuggestion block>What does being a Catalyst mean for how I work with others?</PromptSuggestion>
-      <PromptSuggestion block>How do my Dominance and Influence styles play off each other?</PromptSuggestion>
-      <PromptSuggestion block>Where might my lower Conscientiousness trip me up?</PromptSuggestion>
+      <PromptSuggestion block onClick={args.onClick}>What does being a Catalyst mean for how I work with others?</PromptSuggestion>
+      <PromptSuggestion block onClick={args.onClick}>How do my Dominance and Influence styles play off each other?</PromptSuggestion>
+      <PromptSuggestion block onClick={args.onClick}>Where might my lower Conscientiousness trip me up?</PromptSuggestion>
     </div>
   ),
   ...src(`<div class="w-72 flex flex-col gap-1">

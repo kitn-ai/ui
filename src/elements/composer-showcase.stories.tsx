@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { onMount } from 'solid-js';
+import { onMount, onCleanup } from 'solid-js';
 import { action } from 'storybook/actions';
 import './register'; // side-effect: registers kai-prompt-input, kai-menu, kai-model-switcher, etc.
+import { attachKaiActions } from '../stories/docs/story-actions';
 import type { KaiMenuItem } from './menu';
 import type { ModelOption } from '../types';
 
@@ -72,6 +73,7 @@ function ComposerShowcase() {
   let modelEl: ModelSwitcherEl | undefined;
   let inputEl: PromptInputEl | undefined;
   let suggestionsEl: SuggestionsEl | undefined;
+  let noticeEl: HTMLElement | undefined;
 
   onMount(() => {
     // Wire the + menu items (realistic context-attach actions).
@@ -102,6 +104,10 @@ function ComposerShowcase() {
       ];
       plusMenuEl.items = [...plusItems];
 
+      // Custom labeled logging disambiguates the two menus, the two buttons, and
+      // the suggestion chips (the plain event name alone wouldn't). The shared
+      // helper covers each element's REMAINING declared events (e.g. kai-open-change)
+      // with `only`, so every event still logs exactly once.
       plusMenuEl.addEventListener('kai-select', (e) => {
         const detail = (e as CustomEvent<{ id: string; checked?: boolean }>).detail;
         action('+ menu: kai-select')(detail);
@@ -111,6 +117,7 @@ function ComposerShowcase() {
           );
         }
       });
+      onCleanup(attachKaiActions(plusMenuEl, undefined, ['kai-open-change']));
     }
 
     // Wire the effort selector menu.
@@ -124,6 +131,7 @@ function ComposerShowcase() {
       effortMenuEl.addEventListener('kai-select', (e) => {
         action('effort menu: kai-select')((e as CustomEvent).detail);
       });
+      onCleanup(attachKaiActions(effortMenuEl, undefined, ['kai-open-change']));
     }
 
     // Wire the model switcher.
@@ -133,16 +141,19 @@ function ComposerShowcase() {
         { id: 'sonnet', name: 'Sonnet' },
         { id: 'haiku', name: 'Haiku' },
       ];
-      modelEl.addEventListener('kai-model-change', (e) => {
-        action('kai-model-change')((e as CustomEvent).detail);
-      });
+      // kai-model-change + kai-open-change — both declared; the helper covers both.
+      onCleanup(attachKaiActions(modelEl));
     }
 
-    // Wire the prompt input submit event only (no suggestions — custom chips rendered below).
+    // Wire the prompt input — log all of its declared events (kai-submit,
+    // kai-value-change, …). No suggestions here (custom chips rendered below).
     if (inputEl) {
-      inputEl.addEventListener('kai-submit', (e) => {
-        action('kai-submit')((e as CustomEvent).detail);
-      });
+      onCleanup(attachKaiActions(inputEl));
+    }
+
+    // The self-dismissing notice — log its kai-dismiss event.
+    if (noticeEl) {
+      onCleanup(attachKaiActions(noticeEl));
     }
 
     // Suggestion chips — data is a JS property; each item carries an icon name.
@@ -165,7 +176,7 @@ function ComposerShowcase() {
       <div class="flex w-full max-w-[720px] flex-col gap-3">
         {/* A self-dismissing kit notice, placed above the composer. The dev owns
             the placement; the notice owns its box, icon, a11y role, and dismiss. */}
-        <kai-notice severity="warning" dismissible>
+        <kai-notice severity="warning" dismissible ref={(e) => (noticeEl = e as HTMLElement)}>
           Claude Fable 5 is currently unavailable.
           <a
             slot="action"
