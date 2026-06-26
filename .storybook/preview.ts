@@ -2,6 +2,23 @@ import type { Preview } from 'storybook-solidjs-vite';
 import { themes } from 'storybook/theming';
 import './styles.css';
 
+// ── AI/UI brand for the manager (top-left) ──────────────────────────────────
+// The split-node mark (the favicon glyph: zinc wedge + magenta wedge in a
+// rounded square) + an "AI/UI" wordmark, built as an inline SVG data-URI so
+// there's no static asset to serve. `wordmark` colour is themed per manager mode
+// so it reads on both the light and dark chrome.
+const brandMark = (wordmark: string): string =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="104" height="28" viewBox="0 0 104 28">' +
+      '<defs><clipPath id="m"><rect width="28" height="28" rx="7"/></clipPath></defs>' +
+      '<g clip-path="url(#m)">' +
+      '<polygon points="0,0 17,0 9,28 0,28" fill="#71717a"/>' +
+      '<polygon points="20,0 28,0 28,28 12,28" fill="#EC2295"/></g>' +
+      `<text x="38" y="20" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif" font-size="17" font-weight="700" fill="${wordmark}">AI<tspan fill="#EC2295">/</tspan>UI</text>` +
+      '</svg>',
+  )}`;
+const BRAND = { brandTitle: 'AI/UI', brandUrl: 'https://ui.kitn.ai' };
+
 // Storybook's dark toggle adds `.dark` to the preview <html>, but the `kai-*`
 // custom elements render in SHADOW DOM, which a light-DOM class can't cross — so
 // they'd otherwise fall back to their own `theme="auto"` (the OS preference) and
@@ -129,8 +146,8 @@ const preview: Preview = {
       classTarget: 'html',
       darkClass: 'dark',
       lightClass: 'light',
-      dark: { ...themes.dark, appPreviewBg: 'hsl(50 2% 9%)' },
-      light: { ...themes.light },
+      dark: { ...themes.dark, appPreviewBg: 'hsl(50 2% 9%)', ...BRAND, brandImage: brandMark('#fafafa') },
+      light: { ...themes.light, ...BRAND, brandImage: brandMark('#27272a') },
     },
   },
 };

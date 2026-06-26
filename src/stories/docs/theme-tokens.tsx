@@ -7,6 +7,7 @@ import type { Palette } from './theme-editor/theme-css';
 
 type ColorToken = { name: string; light: string; dark: string };
 type RadiusToken = { name: string; value: string };
+type TextToken = { name: string; size: string; lineHeight: string };
 
 export const PURPOSE: Record<string, string> = {
   '--color-background': 'App / page background',
@@ -30,6 +31,19 @@ export const PURPOSE: Record<string, string> = {
   '--color-ring': 'Focus ring',
   '--color-sidebar': 'Sidebar background',
   '--color-code-foreground': 'Inline code text / accent',
+  '--color-surface': 'Raised surface (panels)',
+  '--color-surface-strong': 'Stronger raised surface',
+  '--color-surface-sunken': 'Recessed / inset surface',
+  '--color-tool-blue': 'Tool-call accent — running / info',
+  '--color-tool-green': 'Tool-call accent — success',
+  '--color-tool-amber': 'Tool-call accent — pending / warning',
+  '--color-tool-red': 'Tool-call accent — error',
+  '--color-scrollbar-thumb': 'Custom scrollbar thumb',
+  '--color-scrollbar-thumb-hover': 'Scrollbar thumb (hover)',
+  '--text-body': 'Body copy',
+  '--text-title': 'Headings / titles',
+  '--text-caption': 'Captions / supporting text',
+  '--text-meta': 'Meta / labels (smallest)',
 };
 
 /** Raw walk of loaded stylesheets → light/dark custom-property maps (colors + radius).
@@ -68,18 +82,36 @@ function collectTokens(): { light: Record<string, string>; dark: Record<string, 
   return { light, dark };
 }
 
-/** Reference data for the token table: a color token is one with a `.dark` override. */
-function discover(): { colors: ColorToken[]; radii: RadiusToken[] } {
-  const { light, dark } = collectTokens();
-  const colors = Object.keys(dark)
+// The kit's radius tokens (Tailwind v4 also emits a default --radius-* scale, so
+// these are listed explicitly rather than discovered).
+const KIT_RADII = ['--radius', '--radius-sm', '--radius-md', '--radius-lg', '--radius-xl'];
+
+/** Reference data for the token table. The kit's complete token set is the
+ *  curated PURPOSE map (colors + typography) + KIT_RADII — reading VALUES live
+ *  via getComputedStyle. This lists every kit token (not just the ones with a
+ *  `.dark` override) and never picks up Tailwind's default-theme tokens. Dark
+ *  values come from a throwaway `.dark` probe; a token with no `.dark` override
+ *  inherits its `:root` value (shown identically in both columns). */
+function discover(): { colors: ColorToken[]; radii: RadiusToken[]; texts: TextToken[] } {
+  const rootCS = getComputedStyle(document.documentElement);
+  const probe = document.createElement('div');
+  probe.className = 'dark';
+  probe.style.display = 'none';
+  document.body.appendChild(probe);
+  const darkCS = getComputedStyle(probe);
+  const get = (cs: CSSStyleDeclaration, n: string) => cs.getPropertyValue(n).trim();
+
+  const names = Object.keys(PURPOSE);
+  const colors = names
     .filter((n) => n.startsWith('--color-'))
-    .sort()
-    .map((name) => ({ name, light: light[name] || dark[name], dark: dark[name] }));
-  const radii = Object.keys(light)
-    .filter((n) => n.startsWith('--radius'))
-    .sort()
-    .map((name) => ({ name, value: light[name] }));
-  return { colors, radii };
+    .map((name) => ({ name, light: get(rootCS, name), dark: get(darkCS, name) || get(rootCS, name) }));
+  const texts = names
+    .filter((n) => n.startsWith('--text-'))
+    .map((name) => ({ name, size: get(rootCS, name), lineHeight: get(rootCS, `${name}--line-height`) || '—' }));
+  const radii = KIT_RADII.map((name) => ({ name, value: get(rootCS, name) })).filter((r) => r.value);
+
+  probe.remove();
+  return { colors, radii, texts };
 }
 
 /** Light/dark palettes for the theme editor: light = colors + --radius, dark = colors.
@@ -129,20 +161,36 @@ function Swatch(props: { color: string }) {
   );
 }
 
+const sectionHead: JSX.CSSProperties = {
+  margin: '1.75rem 0 .6rem', 'font-size': '13px', 'font-weight': '700',
+  'letter-spacing': '.04em', 'text-transform': 'uppercase', color: 'var(--color-muted-foreground)',
+};
+
 /** Auto-generated reference of every overridable token (light + dark values). */
 export function TokenTable() {
-  const [data, setData] = createSignal<{ colors: ColorToken[]; radii: RadiusToken[] }>({ colors: [], radii: [] });
+  const [data, setData] = createSignal<{ colors: ColorToken[]; radii: RadiusToken[]; texts: TextToken[] }>({ colors: [], radii: [], texts: [] });
   onMount(() => setData(discover()));
   return (
-    <div style={{ 'font-size': '13px', color: 'var(--color-foreground)' }}>
+    <div style={{ 'font-size': '13px', color: 'var(--color-foreground)', 'max-width': '900px' }}>
+      <p style={{ margin: '0 0 .5rem', 'line-height': '1.55' }}>
+        Every value the kit renders comes from a CSS custom property — these are the design tokens.
+        Override any of them on <code>:root</code> (or any scoped parent) to rebrand the whole kit;
+        because they're plain CSS variables they cascade through the Shadow DOM into every
+        <code> kai-*</code> element. The table below is generated live from the loaded
+        <code> theme.css</code>, so it always lists the complete, current set.
+      </p>
+      <p style={{ margin: '0 0 .5rem', color: 'var(--color-muted-foreground)' }}>
+        Want to design a palette visually and copy the CSS out? Use the{' '}
+        <a href="https://ui.kitn.ai/theme/editor" target="_blank" rel="noreferrer"
+           style={{ color: 'var(--color-primary)', 'font-weight': '600' }}>
+          theme editor at ui.kitn.ai/theme/editor
+        </a>.
+      </p>
+
+      <h3 style={sectionHead}>Colors</h3>
       <table style={{ width: '100%', 'border-collapse': 'collapse' }}>
         <thead>
-          <tr>
-            <th style={cellHead}>Token</th>
-            <th style={cellHead}>Purpose</th>
-            <th style={cellHead}>Light</th>
-            <th style={cellHead}>Dark</th>
-          </tr>
+          <tr><th style={cellHead}>Token</th><th style={cellHead}>Purpose</th><th style={cellHead}>Light</th><th style={cellHead}>Dark</th></tr>
         </thead>
         <tbody>
           <For each={data().colors}>
@@ -155,19 +203,51 @@ export function TokenTable() {
               </tr>
             )}
           </For>
-          <For each={data().radii}>
+        </tbody>
+      </table>
+
+      <h3 style={sectionHead}>Typography</h3>
+      <table style={{ width: '100%', 'border-collapse': 'collapse' }}>
+        <thead>
+          <tr><th style={cellHead}>Token</th><th style={cellHead}>Purpose</th><th style={cellHead}>Size</th><th style={cellHead}>Line height</th></tr>
+        </thead>
+        <tbody>
+          <For each={data().texts}>
             {(t) => (
               <tr>
                 <td style={cell}><code>{t.name}</code></td>
-                <td style={{ ...cell, color: 'var(--color-muted-foreground)' }}>Corner radius</td>
-                <td style={{ ...cell }} colspan={2}><small>{t.value}</small></td>
+                <td style={{ ...cell, color: 'var(--color-muted-foreground)' }}>{PURPOSE[t.name] || ''}</td>
+                <td style={cell}><span style={{ 'font-size': t.size }}>Aa</span> <small style={{ color: 'var(--color-muted-foreground)' }}>{t.size}</small></td>
+                <td style={cell}><small>{t.lineHeight}</small></td>
               </tr>
             )}
           </For>
         </tbody>
       </table>
-      <p style={{ 'margin-top': '.75rem', color: 'var(--color-muted-foreground)', 'font-size': '12px' }}>
-        This table is generated live from the loaded CSS — it always reflects the current tokens in <code>theme.css</code>.
+
+      <h3 style={sectionHead}>Radius</h3>
+      <table style={{ width: '100%', 'border-collapse': 'collapse' }}>
+        <thead>
+          <tr><th style={cellHead}>Token</th><th style={cellHead}>Purpose</th><th style={cellHead}>Value</th></tr>
+        </thead>
+        <tbody>
+          <For each={data().radii}>
+            {(t) => (
+              <tr>
+                <td style={cell}><code>{t.name}</code></td>
+                <td style={{ ...cell, color: 'var(--color-muted-foreground)' }}>Corner radius</td>
+                <td style={cell}>
+                  <span style={{ display: 'inline-block', width: '1.6rem', height: '1.1rem', background: 'var(--color-muted)', border: '1px solid var(--color-border)', 'border-top-left-radius': t.value, 'border-bottom-left-radius': t.value, 'vertical-align': 'middle', 'margin-right': '.4rem' }} />
+                  <small>{t.value}</small>
+                </td>
+              </tr>
+            )}
+          </For>
+        </tbody>
+      </table>
+
+      <p style={{ 'margin-top': '1rem', color: 'var(--color-muted-foreground)', 'font-size': '12px' }}>
+        Generated live from the loaded CSS — always reflects the current tokens in <code>theme.css</code>.
       </p>
     </div>
   );
