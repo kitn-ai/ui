@@ -7,7 +7,7 @@ const basic: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <kai-prompt-input id="prompt" placeholder="Ask anything..."></kai-prompt-input>
@@ -136,7 +136,7 @@ const suggestions: StoryUsage = {
     'Show starter prompts above the input. Pass a `suggestions` array (as a PROPERTY) and pick `suggestionMode` — `"submit"` (default) sends the prompt immediately, `"fill"` just drops it into the box and fires `kai-suggestion-click`. (The demo groups its chips with the SolidJS `PromptSuggestion` primitive, which the element renders as one flat row.)',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <kai-prompt-input
@@ -299,7 +299,7 @@ const actionButtons: StoryUsage = {
     'Add toolbar buttons beside the input. `<kai-prompt-input>` has built-in Search and Voice buttons — enable `search` and `voice`, then handle the `search` / `voice` events; attaching files is built in (the paperclip, emitted on `submit` as `attachments`). For extra custom buttons, place `<kai-action id icon tooltip>` children inside `<kai-prompt-input>` — the element reads them as invisible data carriers and renders a ghost icon button per entry in the left toolbar; clicking fires a `kai-toolbar-action` CustomEvent with `detail.action` = the action id. This is the same `<kai-action>` descriptor element that `<kai-message>` uses (composition symmetry). The Solid tab shows a custom Sparkles button composed directly with the `PromptInput` primitives (the full-control equivalent).',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <!-- Built-in buttons: search (Globe) and voice (Mic). -->
@@ -439,7 +439,7 @@ const streaming: StoryUsage = {
     'Block input while a reply streams. Set `loading` to show the streaming state and stop accepting submits, and `disabled` to make the box fully non-interactive. Add `stoppable` to get a built-in Stop button that fires `kai-stop` — listen for that event and call `controller.abort()` on your fetch/SSE. (The demo composes the SolidJS `PromptInput` + `Loader` primitives to show the typing/dots indicators and a stop button.)',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <kai-prompt-input id="prompt" placeholder="Generating response..." loading disabled></kai-prompt-input>
@@ -541,7 +541,7 @@ const modelSelector: StoryUsage = {
     'Put a model picker beside the input. `<kai-prompt-input>` doesn\'t expose a model-switcher prop — pair it with the standalone `<kai-model-switcher>` element (bind `models` and `currentModel`, handle `modelchange`) and lay them out side by side. (The demo composes the SolidJS `PromptInput` + `ModelSwitcher` primitives in the actions row.)',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <div style="display:flex; flex-direction:column; gap:0.5rem">
@@ -686,7 +686,7 @@ const withFileAttachments: StoryUsage = {
     'The `kai-prompt-input` element has a built-in paperclip: clicking it opens a file picker, previews appear above the textarea (removable chips), and `kai-submit` always carries `{ value, attachments: AttachmentData[] }` — even when the array is empty. To pre-populate staged files, set `prompt.attachments = [...]` as a JS **property** after mount; the element then manages its own attachment state from there. The Solid demo wires the `Attachments`/`Attachment`/`AttachmentPreview`/`AttachmentInfo`/`AttachmentRemove` primitives manually for full control — use the element if you want the paperclip UX for free.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <!-- The element renders the paperclip, file picker, and removable chips automatically. -->
@@ -939,7 +939,7 @@ const fullExample: StoryUsage = {
     'Everything combined: model switcher, grouped suggestion chips, streaming state (with a Stop button), and a send button that enables once you type. Simulates the idle → streaming → idle loop you\'d wire to a real fetch/SSE call. Key gotchas: `kai-submit` always emits `{ value, attachments }` (attachments may be empty); Enter submits, Shift+Enter newlines; `loading` blocks submit while `disabled` kills focus too — use both while streaming; add `stoppable` to enable the built-in Stop button — it fires `kai-stop` when clicked; call `controller.abort()` in your handler to cancel the stream. When composing Solid primitives (the `PromptInput` + `PromptInputActions` pattern), wire the Square button yourself as shown in the Full Example story.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <div style="max-width:42rem; padding:1rem; display:flex; flex-direction:column; gap:1rem">

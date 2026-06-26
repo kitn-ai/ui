@@ -132,7 +132,7 @@ function htmlCode(meta: ElementMeta, r: Resolved): string {
   const falseBools = r.attrs.filter(falseBool);
   const open = `<${meta.tag}${attrs.length ? ' ' + attrs.join(' ') : ''}></${meta.tag}>`;
   const lines = [
-    `<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js"></script>`,
+    `<script type="module" src="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js"></script>`,
     '',
     open,
   ];

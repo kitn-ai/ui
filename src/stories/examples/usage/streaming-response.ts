@@ -11,7 +11,7 @@ const typewriter: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <kai-response-stream id="stream" mode="typewriter" speed="40"></kai-response-stream>
@@ -134,7 +134,7 @@ const waiting: StoryUsage = {
     'Show a placeholder **before the first token arrives** — `<kai-response-stream>` is not involved yet (there is nothing to stream). Use `<kai-loader variant="dots">` for the thinking spinner and `<kai-text-shimmer>` for the shimmering label. Once the first chunk arrives, swap them out for `<kai-response-stream>`. Use `<kai-loader variant="typing">` in the input bar to signal that tokens are now *flowing* — `dots` means waiting, `typing` means actively generating.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <div style="display:flex;align-items:center;gap:0.75rem">
@@ -206,7 +206,7 @@ const fade: StoryUsage = {
     'Reveal the reply word-by-word with staggered CSS fade-ins instead of a typewriter. Set `mode="fade"` on `<kai-response-stream>` and tune `speed` to control the stagger cadence. **Important:** when `text` is a plain string, `kai-complete` / `onComplete` is **never fired** in fade mode — all segments are delivered immediately and CSS handles the reveal with no detectable endpoint. If you need a completion callback in fade mode, pass an `AsyncIterable<string>` as a property instead (the callback fires after the iterator is exhausted).',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <kai-response-stream id="stream" mode="fade" speed="30"></kai-response-stream>
@@ -305,7 +305,7 @@ const fullLifecycle: StoryUsage = {
     'All three phases in one interactive story: **waiting** (dots loader + shimmer before first token), **streaming** (typewriter reveal with a stop button), and **complete** (action bar appears; input unlocks). This is the pattern to follow in production. **Phase ownership:** `ResponseStream` / `kai-response-stream` knows nothing about waiting or cancellation — your app owns a `phase` signal and drives the UI from it. **No built-in cancel:** to stop mid-stream, call `abortController.abort()` on your own fetch and then reset your phase state; the element will stop receiving characters but does not reset its display.',
   snippets: {
     html: `<script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <!-- Phase 1: Waiting -->

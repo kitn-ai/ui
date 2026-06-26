@@ -21,7 +21,7 @@ const defaultStory: StoryUsage = {
   snippets: {
     html: `<!-- Register the elements once (CDN or bundler) -->
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <!-- Scalar strings bind as plain attributes. -->

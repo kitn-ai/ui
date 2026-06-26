@@ -1,5 +1,5 @@
 // Composable web-components showcase — wiring for the demo page.
-// (The kit itself is registered by ../../dist/kitn-chat.es.js, imported in the HTML.)
+// (The kit itself is registered by ../../dist/kai.es.js, imported in the HTML.)
 
 // ── boot guard: if the bundle didn't register the elements, show how to run it ──
 setTimeout(() => {

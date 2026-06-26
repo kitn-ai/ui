@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildSnippets } from '../../scripts/gen-framework-usage.mjs';
 
-const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 
 const artifact = {
   tag: 'kai-artifact',

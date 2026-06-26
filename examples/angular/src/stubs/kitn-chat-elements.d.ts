@@ -8,7 +8,7 @@
  *
  * At runtime / in the Vite build, the real bundle is used via the alias in
  * vite.config.ts:
- *   `@kitn.ai/ui/elements` → `../../dist/kitn-chat.es.js`
+ *   `@kitn.ai/ui/elements` → `../../dist/kai.es.js`
  *
  * This import is side-effect only (registers custom elements globally) so the
  * opaque declaration is all TypeScript needs.
