@@ -84,7 +84,7 @@ function InjectDemo() {
     }
   });
   return (
-    <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }}>
+    <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '100vh' }}>
       {/* Inject the real conversation-history sidebar, set its data as JS props. */}
       <kai-conversations slot="sidebar" ref={(e) => (convEl = e as ConversationsEl)} style={{ display: 'block', height: '100%' }} />
       {/* A custom composer action (a themed kai-button) works in light + dark. */}
@@ -137,7 +137,7 @@ function EmptyDemo() {
     onCleanup(attachKaiActions(el)); // log kai-chat's events to the Actions panel
   });
   return (
-    <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }}>
+    <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '100vh' }}>
       <kai-empty
         slot="empty"
         empty-title="How can we help?"
@@ -198,7 +198,7 @@ function ReplaceDemo() {
     if (input) input.value = '';
   };
   return (
-    <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }}>
+    <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '100vh' }}>
       <div slot="header" style="display:flex;align-items:center;gap:10px;padding:0 16px;height:56px;background:var(--color-surface);border-bottom:1px solid var(--color-border);color:var(--color-foreground);font:600 15px system-ui">
         <span style="color:var(--color-primary);display:flex;flex-shrink:0"><Sparkles size={20} /></span> Concierge, fully custom header
       </div>
@@ -251,7 +251,7 @@ function DropInDemo() {
     el.messages = thread;
     onCleanup(attachKaiActions(el)); // log kai-chat's events to the Actions panel
   });
-  return <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }} />;
+  return <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '100vh' }} />;
 }
 export const DropIn: Story = {
   name: 'Defaults (no slots)',
