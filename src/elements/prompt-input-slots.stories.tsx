@@ -1,21 +1,41 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { Plus, X } from 'lucide-solid';
+import { action } from 'storybook/actions';
 import './register'; // side effect: registers <kai-prompt-input> et al.
+import type { AttachmentData } from '../components/attachments';
 
-// SPIKE: feasibility demo for the slotted-shell composition model on
-// <kai-prompt-input>. Every slot is filled with PLAIN DOM (no kai-* inside the
-// slots) and inline-styled, to prove: (1) light-DOM content projects through the
-// Solid-rendered shadow slots, and (2) shadow-DOM style encapsulation does NOT
-// reach slotted content — the consumer's own markup and CSS win.
+// Labs: the <kai-prompt-input> composition slots. Dogfoods real kit components
+// where they fit — a <kai-notice> above the card, a <kai-attachments> row (with
+// hover-card previews) in the input-top slot, a <kai-button> in the toolbar — on
+// the kit's theme tokens, so it reads correctly in light and dark and doubles as
+// a copy-paste reference. Content ABOVE the card is your own layout, not a slot:
+// only the holes you can't reach from outside (inside the card / toolbar) are
+// slots. Component events log to the Actions panel.
 
 declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       'kai-prompt-input': JSX.HTMLAttributes<HTMLElement> & { theme?: string; placeholder?: string; loading?: boolean; disabled?: boolean; voice?: boolean; search?: boolean; attach?: boolean; submit?: string; 'suggestion-mode'?: string };
+      'kai-notice': JSX.HTMLAttributes<HTMLElement> & { severity?: string; icon?: string; dismissible?: boolean };
+      'kai-button': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; icon?: string; 'icon-trailing'?: string; label?: string; disabled?: boolean };
+      'kai-attachments': JSX.HTMLAttributes<HTMLElement> & { variant?: string };
     }
   }
 }
+
+type AttachmentsEl = HTMLElement & {
+  items?: AttachmentData[];
+  hoverCard?: boolean;
+  removable?: boolean;
+  showMediaType?: boolean;
+};
+
+// A couple of attached files for the input-top row. The image carries a `url`,
+// so its hover-card shows a real preview; the PDF shows type + name.
+const attachmentItems: AttachmentData[] = [
+  { id: 'a1', type: 'file', filename: 'architecture.png', mediaType: 'image/png', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop' },
+  { id: 'a2', type: 'file', filename: 'q3-report.pdf', mediaType: 'application/pdf' },
+];
 
 const meta = {
   title: 'Labs/Prompt Input Slots',
@@ -29,38 +49,32 @@ type Story = StoryObj;
 //    outer content is light DOM you already control. Only the holes you can't
 //    reach from outside (inside the card / toolbar) are slots. ─────────────────
 export const Slots: Story = {
+  name: 'Add toolbar & input content',
   render: () => (
     <div>
-      {/* Above the card = your own layout, not a slot. */}
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:color-mix(in srgb, var(--color-tool-amber) 14%, var(--color-background));border:1px solid color-mix(in srgb, var(--color-tool-amber) 32%, transparent);border-radius:8px;margin-bottom:8px;font:13px/1.4 system-ui;color:var(--color-foreground)">
-        <span>
-          Model X is unavailable.{' '}
-          <a href="#" style="color:var(--color-tool-amber);font-weight:600">Learn more</a>
-        </span>
-        <button
-          type="button"
-          aria-label="Dismiss"
-          style="border:0;background:transparent;cursor:pointer;color:var(--color-muted-foreground);line-height:1;padding:0 2px;display:flex;align-items:center"
-        >
-          <X size={16} />
-        </button>
-      </div>
+      {/* Above the card = your own layout, not a slot. Dogfood <kai-notice>. */}
+      <kai-notice severity="warning" dismissible style={{ display: 'block', 'margin-bottom': '8px' }}>
+        Model X is unavailable.
+        <a slot="action" href="#" style="color:var(--color-foreground);font-weight:600">Learn more</a>
+      </kai-notice>
       <kai-prompt-input style={{ display: 'block' }}>
-        {/* input-top: inside the card, above the textarea. */}
-        <div
+        {/* input-top: attached files above the textarea — dogfood <kai-attachments>
+            with hover-card previews. Hover a chip to preview; × removes it. */}
+        <kai-attachments
           slot="input-top"
-          style="padding:6px 12px;font:12px/1.4 system-ui;color:var(--color-foreground);background:color-mix(in srgb, var(--color-tool-green) 14%, var(--color-background));border-radius:8px;margin:8px 8px 0"
-        >
-          Projects · Acme redesign
-        </div>
-        <button
-          slot="toolbar-start"
-          type="button"
-          style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid var(--color-border);border-radius:9999px;background:var(--color-surface);color:var(--color-foreground);cursor:pointer;flex-shrink:0"
-          aria-label="Open menu"
-        >
-          <Plus size={16} />
-        </button>
+          variant="inline"
+          style="display:block;margin:8px 8px 0"
+          ref={(e) => {
+            const el = e as AttachmentsEl;
+            el.items = attachmentItems;
+            el.hoverCard = true;
+            el.removable = true;
+            el.showMediaType = true;
+            el.addEventListener('kai-remove', (ev) => action('kai-remove')((ev as CustomEvent).detail));
+          }}
+        />
+        {/* toolbar-start: a kit button, before the textarea controls. */}
+        <kai-button slot="toolbar-start" variant="subtle" size="icon" icon="plus" label="Open menu" />
         {/* toolbar-end: trailing controls, before the Send button. */}
         <span
           slot="toolbar-end"
@@ -71,12 +85,45 @@ export const Slots: Story = {
       </kai-prompt-input>
     </div>
   ),
+  parameters: {
+    docs: {
+      source: {
+        language: 'html',
+        code: `<!-- Content ABOVE the card is your own layout (a sibling), not a slot. -->
+<kai-notice severity="warning" dismissible>
+  Model X is unavailable. <a slot="action" href="#">Learn more</a>
+</kai-notice>
+
+<kai-prompt-input>
+  <!-- attached files, with hover-card previews, above the textarea -->
+  <kai-attachments slot="input-top" variant="inline" hover-card removable show-media-type></kai-attachments>
+  <kai-button slot="toolbar-start" variant="subtle" size="icon" icon="plus" label="Open menu"></kai-button>
+  <span slot="toolbar-end">Opus 4.8</span>
+</kai-prompt-input>
+
+<script type="module">
+  // Array/object props are set as JS properties, never attributes.
+  document.querySelector('kai-attachments').items = [
+    { id: 'a1', type: 'file', filename: 'architecture.png', mediaType: 'image/png', url: '/architecture.png' },
+  ];
+  document.querySelector('kai-attachments')
+    .addEventListener('kai-remove', (e) => console.log('removed', e.detail));
+</script>`,
+      },
+    },
+  },
 };
 
 // ── 2. DROP-IN — no slots projected → regression baseline (toolbar must start
 //    cleanly at the attach button, no phantom gap). ───────────────────────────
 export const DropIn: Story = {
+  name: 'Defaults (no slots)',
   render: () => (
     <kai-prompt-input style={{ display: 'block' }} />
   ),
+  parameters: {
+    docs: {
+      source: { language: 'html', code: `<kai-prompt-input></kai-prompt-input>` },
+    },
+  },
 };

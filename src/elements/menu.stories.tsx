@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
+import { action } from 'storybook/actions';
 import { Plus } from 'lucide-solid';
 import './register'; // side effect: registers all kai-* custom elements (incl. kai-menu)
 import type { KaiMenuItem } from './menu';
@@ -68,7 +69,7 @@ function PlusMenuDemo() {
 
     el.addEventListener('kai-select', (e) => {
       const detail = (e as CustomEvent<{ id: string; checked?: boolean }>).detail;
-      console.log('[kai-menu] kai-select', detail);
+      action('kai-select')(detail);
 
       // For the checkbox item, flip its state and reassign a fresh array ref.
       if (detail.id === 'web-search' && detail.checked !== undefined) {
@@ -80,18 +81,45 @@ function PlusMenuDemo() {
   });
 
   return (
-    <div style={{ padding: '48px', display: 'flex', gap: '16px', 'align-items': 'flex-start' }}>
+    <div style={{ padding: '48px' }}>
       <kai-menu ref={(e) => (el = e as MenuEl)}>
         <span slot="trigger" style={{ display: 'flex', 'align-items': 'center', 'justify-content': 'center' }}>
           <Plus size={18} />
         </span>
       </kai-menu>
-      <p style={{ 'font-size': '13px', color: '#71717a', 'margin-top': '2px' }}>
-        Click the + icon to open the cascading menu. Check the console for <code>kai-select</code> events.
-      </p>
     </div>
   );
 }
 
-export const PlusMenu: Story = { render: () => <PlusMenuDemo /> };
+export const PlusMenu: Story = {
+  name: 'Cascading menu',
+  render: () => <PlusMenuDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Click the + icon to open the cascading menu (submenus on hover, a checkbox item, a disabled item). Check the console for `kai-select` events.',
+      },
+      source: {
+        language: 'html',
+        code: `<kai-menu trigger-icon="plus"></kai-menu>
+
+<script type="module">
+  const menu = document.querySelector('kai-menu');
+  // Items — including submenus, separators, and checkboxes — are a JS property.
+  menu.items = [
+    { heading: true, label: 'Actions' },
+    { id: 'add-files', label: 'Add files or photos', icon: 'paperclip', shortcut: '⌘U' },
+    { label: 'Skills', icon: 'sparkles', items: [
+      { id: 'skill-creator', label: 'skill-creator', icon: 'sparkles' },
+    ] },
+    { separator: true },
+    { id: 'web-search', label: 'Web search', icon: 'globe', checked: true },
+  ];
+  menu.addEventListener('kai-select', (e) => console.log(e.detail));
+</script>`,
+      },
+    },
+  },
+};
 

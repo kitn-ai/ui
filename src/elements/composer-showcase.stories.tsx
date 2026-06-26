@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
+import { action } from 'storybook/actions';
 import './register'; // side-effect: registers kai-prompt-input, kai-menu, kai-model-switcher, etc.
 import type { KaiMenuItem } from './menu';
 import type { ModelOption } from '../types';
@@ -103,7 +104,7 @@ function ComposerShowcase() {
 
       plusMenuEl.addEventListener('kai-select', (e) => {
         const detail = (e as CustomEvent<{ id: string; checked?: boolean }>).detail;
-        console.log('[kai-menu] kai-select', detail);
+        action('+ menu: kai-select')(detail);
         if (detail.id === 'web-search' && detail.checked !== undefined) {
           plusMenuEl!.items = plusMenuEl!.items!.map((item) =>
             item.id === 'web-search' ? { ...item, checked: detail.checked } : item,
@@ -121,7 +122,7 @@ function ComposerShowcase() {
         { id: 'low', label: 'Low' },
       ];
       effortMenuEl.addEventListener('kai-select', (e) => {
-        console.log('[effort-menu] kai-select', (e as CustomEvent).detail);
+        action('effort menu: kai-select')((e as CustomEvent).detail);
       });
     }
 
@@ -133,14 +134,14 @@ function ComposerShowcase() {
         { id: 'haiku', name: 'Haiku' },
       ];
       modelEl.addEventListener('kai-model-change', (e) => {
-        console.log('[model-switcher] kai-model-change', (e as CustomEvent).detail);
+        action('kai-model-change')((e as CustomEvent).detail);
       });
     }
 
     // Wire the prompt input submit event only (no suggestions — custom chips rendered below).
     if (inputEl) {
       inputEl.addEventListener('kai-submit', (e) => {
-        console.log('[kai-prompt-input] kai-submit', (e as CustomEvent).detail);
+        action('kai-submit')((e as CustomEvent).detail);
       });
     }
 
@@ -153,7 +154,7 @@ function ComposerShowcase() {
         { label: 'Life stuff', icon: 'smile' },
       ];
       suggestionsEl.addEventListener('kai-select', (e) => {
-        console.log('[suggestion]', (e as CustomEvent).detail);
+        action('suggestion: kai-select')((e as CustomEvent).detail);
       });
     }
   });
@@ -194,9 +195,12 @@ function ComposerShowcase() {
             {/* Effort selector — built-in label trigger via props. */}
             <kai-menu trigger-label="High" trigger-icon-trailing="chevron-down" ref={(e) => (effortMenuEl = e as MenuEl)} />
 
-            {/* Mic + voice — kit buttons; variant + icon do the styling. */}
-            <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice input" />
-            <kai-button variant="subtle" size="icon-sm" icon="audio-lines" label="Voice mode" />
+            {/* Mic + voice — kit buttons; variant + icon do the styling. Each
+                emits kai-click → logged to the Actions panel. */}
+            <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice input"
+              ref={(e) => e.addEventListener('kai-click', () => action('mic: kai-click')())} />
+            <kai-button variant="subtle" size="icon-sm" icon="audio-lines" label="Voice mode"
+              ref={(e) => e.addEventListener('kai-click', () => action('voice: kai-click')())} />
           </div>
         </kai-prompt-input>
 
@@ -216,4 +220,38 @@ function ComposerShowcase() {
 
 // Named distinctly from the "Composer" group so Storybook does NOT single-story-
 // hoist it — keeps every Lab a consistent topic folder, not a lone leaf.
-export const ProductionComposer: Story = { render: () => <ComposerShowcase /> };
+export const ProductionComposer: Story = {
+  render: () => <ComposerShowcase />,
+  parameters: {
+    docs: {
+      source: {
+        language: 'html',
+        code: `<kai-notice severity="warning" dismissible>Claude Fable 5 is currently unavailable.</kai-notice>
+
+<kai-prompt-input placeholder="How can I help you today?">
+  <!-- left: a "+" cascading menu -->
+  <kai-menu slot="toolbar-start" trigger-icon="plus" label="Add"></kai-menu>
+
+  <!-- right: model switcher · effort menu · mic / voice -->
+  <div slot="toolbar-end" class="flex items-center gap-1">
+    <kai-model-switcher></kai-model-switcher>
+    <kai-menu trigger-label="High" trigger-icon-trailing="chevron-down"></kai-menu>
+    <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice input"></kai-button>
+    <kai-button variant="subtle" size="icon-sm" icon="audio-lines" label="Voice mode"></kai-button>
+  </div>
+</kai-prompt-input>
+
+<kai-suggestions></kai-suggestions>
+
+<script type="module">
+  // Array/object props are set as JS properties, never attributes.
+  document.querySelector('kai-menu[slot="toolbar-start"]').items = [/* … */];
+  document.querySelector('kai-model-switcher').models = [/* … */];
+  document.querySelector('kai-suggestions').suggestions = [/* … */];
+  document.querySelector('kai-prompt-input')
+    .addEventListener('kai-submit', (e) => console.log(e.detail.value));
+</script>`,
+      },
+    },
+  },
+};

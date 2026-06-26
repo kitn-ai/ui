@@ -31,12 +31,6 @@ const assistantMessage: ChatMessage = {
   actions: ['copy', 'like', 'dislike', 'regenerate'],
 };
 
-const KITN_AVATAR =
-  'data:image/svg+xml;utf8,' +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="14" fill="#7c3aed"/><text x="32" y="44" font-size="34" text-anchor="middle" fill="white">K</text></svg>',
-  );
-
 // --- Slotted regions (consumer light-DOM markup) --------------------------
 
 /** A model-name + timestamp header — the `before-body` slot. */
@@ -158,6 +152,6 @@ type Story = StoryObj;
 /** A two-turn thread: a no-avatar user turn, then an assistant turn wiring up
  *  the `avatar`, `before-body`, and `after-body` seams. */
 export const ComposedMessageThread: Story = {
-  name: 'Composed Message Thread (slots)',
+  name: 'Per-message slots (header, sources, avatar)',
   render: () => <ComposedThread />,
 };
