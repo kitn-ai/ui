@@ -578,12 +578,20 @@ export interface HoverCardProps extends WebComponentProps {
   closeDelay?: number;
   /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. */
   placement?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover). Set `el.open = true`, or `<kai-hover-card open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Suppress the hover behavior entirely without unmounting. */
+  disabled?: boolean;
+  /** The card opened or closed (by hover/focus, outside-click, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const HoverCard = createWebComponent<HoverCardProps>(
   'kai-hover-card',
-  ["theme","openDelay","closeDelay","placement"],
-  {  },
+  ["theme","openDelay","closeDelay","placement","open","defaultOpen","disabled"],
+  { onOpenChange: 'kai-open-change' },
 );
 
 export interface IconProps extends WebComponentProps {

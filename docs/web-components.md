@@ -1321,6 +1321,15 @@ A text hint shown on hover/focus of a slotted trigger; positioned and portaled i
 | `openDelay` | `open-delay` | `undefined | number` | — | Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too). |
 | `closeDelay` | `close-delay` | `undefined | number` | — | Delay (ms) before it closes after the pointer leaves. Defaults to 300. |
 | `placement` | `placement` | `undefined | string` | — | Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover). Set `el.open = true`, or `<kai-hover-card open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined | false | true` | — | Suppress the hover behavior entirely without unmounting. |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-open-change` | `{ open: false | true }` | The card opened or closed (by hover/focus, outside-click, or a method). |
 
 #### Slots
 
@@ -1332,7 +1341,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 #### Composed from
 
-`UI/HoverCard`
+`UI/HoverCardRoot`, `UI/HoverCardTrigger`, `UI/HoverCardContent`
 
 #### Theming
 

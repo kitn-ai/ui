@@ -408,6 +408,12 @@ export interface KaiHoverCardElement extends HTMLElement {
   closeDelay?: number;
   /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. */
   placement?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover). Set `el.open = true`, or `<kai-hover-card open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Suppress the hover behavior entirely without unmounting. */
+  disabled?: boolean;
 }
 
 export interface KaiIconElement extends HTMLElement {

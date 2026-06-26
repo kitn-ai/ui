@@ -715,8 +715,15 @@ _No events._
 | `openDelay` | `open-delay` | `undefined \| number` | Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too). |
 | `closeDelay` | `close-delay` | `undefined \| number` | Delay (ms) before it closes after the pointer leaves. Defaults to 300. |
 | `placement` | `placement` | `undefined \| string` | Preferred placement: `'top' \| 'bottom' \| 'left' \| 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. |
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover). Set `el.open = true`, or `<kai-hover-card open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined \| false \| true` | Suppress the hover behavior entirely without unmounting. |
 
-_No events._
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The card opened or closed (by hover/focus, outside-click, or a method). |
 
 **Slots** (project your own markup via `slot="name"` on a light-DOM child):
 

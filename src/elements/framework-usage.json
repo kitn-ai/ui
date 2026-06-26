@@ -309,12 +309,12 @@
     "displayName": "HoverCard",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-hover-card></kai-hover-card>",
-      "react": "import { HoverCard } from '@kitn.ai/ui/react';\n\n<HoverCard />",
-      "vue": "<kai-hover-card />",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-hover-card></kai-hover-card>",
-      "angular": "<kai-hover-card></kai-hover-card>",
-      "solid": "import { HoverCard } from '@kitn.ai/ui';\n\n<HoverCard />"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-hover-card></kai-hover-card>\n<script type=\"module\">\n  const el = document.querySelector('kai-hover-card');\n  el.addEventListener('kai-open-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { HoverCard } from '@kitn.ai/ui/react';\n\n<HoverCard\n  onOpenChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-hover-card\n  @kai-open-change=\"onOpenChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-hover-card\n  on:kai-open-change={onOpenChange}\n></kai-hover-card>",
+      "angular": "<kai-hover-card\n  (kai-open-change)=\"onOpenChange($event)\"\n></kai-hover-card>",
+      "solid": "import { HoverCard } from '@kitn.ai/ui';\n\n<HoverCard\n  onOpenChange={(e) => console.log(e.detail)}\n/>"
     }
   },
   {
