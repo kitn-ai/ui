@@ -1,4 +1,4 @@
-import { createSignal, createEffect, For, Show } from 'solid-js';
+import { createSignal, createEffect, For, Show, onMount } from 'solid-js';
 import { ChatConfig, useChatConfig } from '../primitives/chat-config';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../primitives/composer-model';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
@@ -122,6 +122,18 @@ export interface ChatThreadProps {
   onMessageAction?: (detail: MessageActionDetail) => void;
   onSearch?: () => void;
   onVoice?: () => void;
+  /** Receive the imperative controller once mounted. The kai-chat facade forwards
+   *  these as element methods (focus/clear/send/scrollToBottom). */
+  controllerRef?: (controller: ChatThreadController) => void;
+}
+
+/** Imperative handle exposed via `controllerRef` — the input half of the chat's
+ *  interaction surface, forwarded onto `<kai-chat>` as instance methods. */
+export interface ChatThreadController {
+  focus(options?: FocusOptions): void;
+  clear(): void;
+  send(): void;
+  scrollToBottom(behavior?: ScrollBehavior): void;
 }
 
 export function ChatThread(props: ChatThreadProps) {
@@ -163,6 +175,22 @@ export function ChatThread(props: ChatThreadProps) {
   const visibleSuggestions = () =>
     props.persistSuggestions || props.messages.length === 0 ? props.suggestions : undefined;
   const showScrollButton = () => props.scrollButton !== false;
+
+  // Hand the imperative controller to the facade once mounted (rootEl is set).
+  onMount(() => {
+    props.controllerRef?.({
+      focus: (options) =>
+        rootEl
+          ?.querySelector<HTMLElement>('[contenteditable]:not([contenteditable="false"]), textarea')
+          ?.focus(options),
+      clear: () => { setInternal(''); setAttachments([]); props.onValueChange?.(''); },
+      send: () => handleSubmit(),
+      scrollToBottom: (behavior) => {
+        const vp = rootEl?.querySelector<HTMLElement>('.overflow-y-auto');
+        vp?.scrollTo({ top: vp.scrollHeight, behavior: behavior ?? 'smooth' });
+      },
+    });
+  });
 
   return (
     <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={props.codeHighlight !== false} portalMount={outer.portalMount()}>

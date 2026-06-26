@@ -124,11 +124,47 @@ const dispatchNames = (sourceFile) => {
   return names;
 };
 
+// collect expose({ name: fn }) imperative methods per file — the input half of the
+// interaction surface (defineWebComponent's ctx.expose attaches them to the host).
+const exposeMethods = (sourceFile) => {
+  const out = [];
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'expose' &&
+      node.arguments[0] &&
+      ts.isObjectLiteralExpression(node.arguments[0])
+    ) {
+      for (const prop of node.arguments[0].properties) {
+        let name, fn;
+        if (ts.isPropertyAssignment(prop) && (ts.isIdentifier(prop.name) || ts.isStringLiteralLike(prop.name))) {
+          name = prop.name.text; fn = prop.initializer;
+        } else if (ts.isMethodDeclaration(prop) && ts.isIdentifier(prop.name)) {
+          name = prop.name.text; fn = prop;
+        } else continue;
+        const params = fn.parameters ? fn.parameters.map((pp) => pp.getText(sourceFile)).join(', ') : '';
+        const returns = fn.type ? fn.type.getText(sourceFile) : 'void';
+        let description = '';
+        for (const r of ts.getLeadingCommentRanges(sourceFile.text, prop.getFullStart()) ?? []) {
+          const t = sourceFile.text.slice(r.pos, r.end);
+          if (t.startsWith('/**')) description = t.replace(/^\/\*\*|\*\/$/g, '').replace(/^\s*\*\s?/gm, '').replace(/\s+/g, ' ').trim();
+        }
+        out.push({ name, params, returns, description });
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return out;
+};
+
 const elements = [];
 for (const file of facadeFiles) {
   const sf = program.getSourceFile(file);
   if (!sf) continue;
   const fileDispatch = dispatchNames(sf);
+  const fileMethods = exposeMethods(sf);
   const visit = (node) => {
     if (
       ts.isCallExpression(node) &&
@@ -156,7 +192,7 @@ for (const file of facadeFiles) {
       const composed = composedImports(sf);
       const tokens = COMPONENT_TOKENS[tag] ?? [];
       const className = tagToClass(tag);
-      elements.push({ tag, className, displayName: displayNameFromClass(className), props, events, composedFrom: composed, tokens });
+      elements.push({ tag, className, displayName: displayNameFromClass(className), props, events, methods: fileMethods, composedFrom: composed, tokens });
     }
     ts.forEachChild(node, visit);
   };
@@ -241,13 +277,23 @@ const cem = {
       tagName: el.tag,
       name: el.className,
       description: '',
-      members: el.props.map((p) => ({
-        kind: 'field',
-        name: p.name,
-        type: { text: p.type },
-        description: p.description,
-        privacy: 'public',
-      })),
+      members: [
+        ...el.props.map((p) => ({
+          kind: 'field',
+          name: p.name,
+          type: { text: p.type },
+          description: p.description,
+          privacy: 'public',
+        })),
+        ...el.methods.map((m) => ({
+          kind: 'method',
+          name: m.name,
+          ...(m.params ? { parameters: [{ name: m.params }] } : {}),
+          return: { type: { text: m.returns } },
+          description: m.description,
+          privacy: 'public',
+        })),
+      ],
       attributes: [
         { name: 'theme', type: { text: "'light' | 'dark' | 'auto'" }, description: 'Color mode (auto follows prefers-color-scheme).' },
         ...el.props.filter((p) => p.scalar).map((p) => ({

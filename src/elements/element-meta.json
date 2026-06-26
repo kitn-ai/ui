@@ -175,6 +175,7 @@
         "displayDetail": "{ tab: \"preview\" | \"code\" }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Artifact",
@@ -254,6 +255,7 @@
         "displayDetail": "{ id: string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Attachments",
@@ -351,6 +353,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Avatar",
@@ -376,6 +379,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Badge",
@@ -466,6 +470,7 @@
         "displayDetail": null
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Button",
@@ -529,6 +534,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Card",
@@ -569,6 +575,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "CardFallback",
@@ -596,6 +603,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ChainOfThought",
@@ -920,6 +928,38 @@
         "displayDetail": "Record<string, never>"
       }
     ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": ""
+      },
+      {
+        "name": "blur",
+        "params": "",
+        "returns": "void",
+        "description": ""
+      },
+      {
+        "name": "clear",
+        "params": "",
+        "returns": "void",
+        "description": ""
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": ""
+      },
+      {
+        "name": "scrollToBottom",
+        "params": "behavior?: ScrollBehavior",
+        "returns": "void",
+        "description": ""
+      }
+    ],
     "composedFrom": [
       {
         "name": "ChatThread",
@@ -1041,6 +1081,7 @@
         "displayDetail": null
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Checkpoint",
@@ -1099,6 +1140,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ChoiceCard",
@@ -1159,6 +1201,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "CodeBlock",
@@ -1219,6 +1262,7 @@
         "displayDetail": "{ id: string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "CommandList",
@@ -1311,6 +1355,7 @@
         "displayDetail": "{ compareId: string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ResponseCompare",
@@ -1452,6 +1497,7 @@
         "displayDetail": "{ doc: ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Composer",
@@ -1509,6 +1555,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ConfirmCard",
@@ -1556,6 +1603,7 @@
         "displayDetail": "{ level: \"ok\" | \"warn\" | \"danger\" }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Context",
@@ -1678,6 +1726,7 @@
         "displayDetail": "Record<string, never>"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ConversationList",
@@ -1730,6 +1779,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Embed",
@@ -1764,6 +1814,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Empty",
@@ -1881,6 +1932,7 @@
         "displayDetail": "{ value: \"helpful\" | \"not-helpful\"; category?: undefined | string; comment?: undefined | string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "FeedbackBar",
@@ -1932,6 +1984,7 @@
         "displayDetail": "{ path: string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "FileTree",
@@ -1990,6 +2043,7 @@
         "displayDetail": "{ files: File[] }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "FileUpload",
@@ -2043,6 +2097,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Form",
@@ -2083,6 +2138,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "HoverCard",
@@ -2124,6 +2180,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [],
     "tokens": [],
     "parts": [
@@ -2174,6 +2231,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Image",
@@ -2206,6 +2264,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "LinkPreview",
@@ -2248,6 +2307,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Loader",
@@ -2300,6 +2360,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Markdown",
@@ -2371,6 +2432,7 @@
         "displayDetail": "{ id: string; checked?: undefined | false | true }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Dropdown",
@@ -2539,6 +2601,7 @@
         "displayDetail": "{ messageId: string; action: string; state?: undefined | \"on\" | \"off\" }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Message",
@@ -2636,6 +2699,7 @@
         "displayDetail": "{ modelId: string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ModelSwitcher",
@@ -2685,6 +2749,7 @@
         "displayDetail": null
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Notice",
@@ -2746,6 +2811,7 @@
         "displayDetail": "{ open: false | true }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Popover",
@@ -2932,6 +2998,32 @@
         "displayDetail": "Record<string, never>"
       }
     ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the text editor inside the shadow root (not the hidden file input)."
+      },
+      {
+        "name": "blur",
+        "params": "",
+        "returns": "void",
+        "description": "Blur the focused input control."
+      },
+      {
+        "name": "clear",
+        "params": "",
+        "returns": "void",
+        "description": "Clear the text and any staged attachments (fires kai-value-change / kai-attachments-change so a controlled consumer can react)."
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": "Send the current value programmatically — same path as Enter / the send button (fires kai-submit, then clears staged attachments). Named `send`, not `submit`, to avoid colliding with the `submit` prop."
+      }
+    ],
     "composedFrom": [],
     "tokens": [],
     "slots": [
@@ -3017,6 +3109,7 @@
         "displayDetail": "{ open: false | true }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Reasoning",
@@ -3075,6 +3168,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [],
     "tokens": []
   },
@@ -3116,6 +3210,7 @@
         "displayDetail": "{ maximized: false | true; index: null | number }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ResizableHandle",
@@ -3196,6 +3291,7 @@
         "displayDetail": "unknown"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ResizableHandle",
@@ -3254,6 +3350,7 @@
         "displayDetail": null
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ResponseStream",
@@ -3304,6 +3401,7 @@
         "displayDetail": "{ filters: SearchFilters | undefined }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ChatScopePicker",
@@ -3329,6 +3427,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ScrollArea",
@@ -3385,6 +3484,7 @@
         "displayDetail": null
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Button",
@@ -3410,6 +3510,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Separator",
@@ -3466,6 +3567,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Skeleton",
@@ -3500,6 +3602,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "MessageSkills",
@@ -3560,6 +3663,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Source",
@@ -3620,6 +3724,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Source",
@@ -3701,6 +3806,7 @@
         "displayDetail": "{ value: string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "PromptSuggestion",
@@ -3748,6 +3854,7 @@
         "displayDetail": "{ checked: false | true }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Switch",
@@ -3796,6 +3903,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "TasksCard",
@@ -3848,6 +3956,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "TextShimmer",
@@ -3898,6 +4007,7 @@
         "displayDetail": null
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ThinkingBar",
@@ -3974,6 +4084,7 @@
         "displayDetail": "{ id: string; reason: \"action\" | \"timeout\" | \"close\" }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ToastRegion",
@@ -4007,6 +4118,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Tool",
@@ -4045,6 +4157,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Tooltip",
@@ -4091,6 +4204,7 @@
         "displayDetail": "{ text: string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "VoiceInput",
@@ -4400,6 +4514,7 @@
         "displayDetail": "Record<string, never>"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ChatThread",

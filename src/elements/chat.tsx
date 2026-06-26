@@ -1,7 +1,7 @@
 import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
 import { CHAT_SLOTS, readSlots } from './slots';
-import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage } from '../components/chat-thread';
+import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage, type ChatThreadController } from '../components/chat-thread';
 import type { AttachmentData } from '../components/attachments';
 import type { TriggerDef } from '../components/composer';
 import type { ComposerDoc } from '../primitives/composer-model';
@@ -10,7 +10,7 @@ import type { ModelOption } from '../types';
 
 type Props = Omit<ChatThreadProps,
   'class' | 'onValueChange' | 'onSubmit' | 'onAttachmentsChange' | 'onSuggestionClick' | 'onModelChange'
-  | 'onMessageAction' | 'onSearch' | 'onVoice'> & Record<string, unknown>;
+  | 'onMessageAction' | 'onSearch' | 'onVoice' | 'controllerRef'> & Record<string, unknown>;
 
 interface Events {
   /** User submitted a message. */
@@ -41,7 +41,7 @@ defineWebComponent<Props, Events>('kai-chat', {
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
   search: false, voice: false, triggers: undefined, kindIcons: undefined,
   actionsReveal: 'always',
-}, (props, { dispatch, flag, element }) => {
+}, (props, { dispatch, flag, element, expose }) => {
   // Slot detection is driven by the CHAT_SLOTS registry (single source of truth)
   // so slot names never drift between the view, the facade, and the docs.
   const [slots, setSlots] = createSignal<Record<string, boolean>>({});
@@ -57,6 +57,17 @@ defineWebComponent<Props, Events>('kai-chat', {
   // Reflect streaming state to a host attribute so slotted composer/notice CSS
   // can react without reading internals (e.g. :host([loading]) ::slotted(...)).
   createEffect(() => { element.toggleAttribute('loading', flag('loading')); });
+
+  // Imperative method API — forward the chat-thread controller onto the host
+  // (focus the composer, clear it, send programmatically, scroll the thread).
+  let controller: ChatThreadController | undefined;
+  expose({
+    focus: (options?: FocusOptions) => controller?.focus(options),
+    blur: () => (element.shadowRoot?.activeElement as HTMLElement | null)?.blur(),
+    clear: () => controller?.clear(),
+    send: () => controller?.send(),
+    scrollToBottom: (behavior?: ScrollBehavior) => controller?.scrollToBottom(behavior),
+  });
 
   return (
   <ChatThread
@@ -79,6 +90,7 @@ defineWebComponent<Props, Events>('kai-chat', {
     onMessageAction={(detail) => dispatch('kai-message-action', detail)}
     onSearch={() => dispatch('kai-search', {})}
     onVoice={() => dispatch('kai-voice', {})}
+    controllerRef={(c) => (controller = c)}
     headerStart={slot('header-start')}
     headerEnd={slot('header-end')}
     headerFull={slot('header')}

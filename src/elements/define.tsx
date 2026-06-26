@@ -67,6 +67,17 @@ export interface WebComponentContext<E = Record<string, unknown>> {
    * `name` is the camelCase prop name; the matching kebab attribute is derived.
    */
   flag: (name: string) => boolean;
+  /**
+   * Expose imperative methods on the host element instance — the input half of a
+   * component's interaction surface (`el.focus()`, `el.clear()`, `el.scrollToBottom()`,
+   * …), the counterpart to the events `dispatch` fires. Call once from the facade
+   * with closures over its internal state/refs; each entry is assigned to the host,
+   * so a consumer calls it directly: `document.querySelector('kai-prompt-input').focus()`.
+   * Overriding a native method name (e.g. `focus`) shadows it on the instance so it
+   * can target the right control inside the shadow root (the WebAwesome/Shoelace
+   * convention). Methods are attached when the facade renders (on element upgrade).
+   */
+  expose: (methods: Record<string, (...args: never[]) => unknown>) => void;
 }
 
 /** camelCase prop name → kebab-case attribute (`hoverCard` → `hover-card`). */
@@ -146,6 +157,22 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
     const flag = (name: string) =>
       resolveFlag(element, (props as Record<string, unknown>)[name], toAttr(name));
 
+    // Attach imperative methods onto the host instance. See WebComponentContext.expose.
+    // Uses defineProperty so a method can shadow an inherited getter-only accessor
+    // (e.g. `focus`/`blur`) which a plain assignment would throw on. A method name
+    // must NOT collide with a declared prop (the prop's accessor would be clobbered)
+    // — pick a distinct verb (e.g. `send()` next to a `submit` prop). Failures warn
+    // and skip rather than breaking the element's render.
+    const expose: WebComponentContext<E>['expose'] = (methods) => {
+      for (const [name, fn] of Object.entries(methods)) {
+        try {
+          Object.defineProperty(element, name, { value: fn, writable: true, configurable: true });
+        } catch (err) {
+          console.warn(`defineWebComponent(${tag}): could not expose method "${name}"`, err);
+        }
+      }
+    };
+
     const isDark = createDarkMode(() => props.theme as string | undefined);
 
     // Prefer a single shared stylesheet adopted into this shadow root; only emit
@@ -170,7 +197,7 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
         <div classList={{ dark: isDark() }} style={{ display: 'contents', color: 'var(--color-foreground)' }}>
           <div ref={portalNode} />
           <ChatConfig portalMount={portalNode}>
-            {Facade(props as unknown as P, { element, dispatch, flag })}
+            {Facade(props as unknown as P, { element, dispatch, flag, expose })}
           </ChatConfig>
         </div>
       </>
