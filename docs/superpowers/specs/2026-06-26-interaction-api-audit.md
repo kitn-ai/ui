@@ -509,3 +509,189 @@ Methods to add:
 ## Scope note
 
 This audit covers the **59 kai-* custom elements** (events via `dispatch`, methods via `expose`). The ~123 SolidJS **primitives** use callback-props (a different interaction model) — a separate phase-2 audit if wanted.
+
+---
+
+# Part 2 — Ecosystem-expected API (Radix / Shoelace benchmark)
+
+_A second 7→4-agent pass benchmarked our 16 most-convention-bound interactive elements against Radix Primitives + Shoelace. This layer is about the API consumers **expect by convention** (controlled/uncontrolled, `disabled`, timing) — distinct from Part 1's latent-capability methods. Fold these into the same waves._
+
+**94 missing items — 57 standard (genuinely expected) · 37 nice-to-have.**
+
+## ★ Cross-cutting decisions (resolve these before the waves — they touch many elements)
+
+1. **`disabled` is missing almost everywhere** (10 of the 16 benchmarked, and likely most of the 43 interactive). Consumers expect every interactive element to take `disabled`. **Decision: adopt `disabled` as a near-universal scalar prop** across interactive elements (cheap, high-expectation).
+2. **The controlled/uncontrolled trio.** Radix's headline pattern is `open` + `defaultOpen` + `onOpenChange` (overlays/collapsibles) and `value` + `defaultValue` + `onValueChange` (selections/toggles). Today our elements are **uncontrolled-only** (self-managed, no change event, no seed). The web-component-idiomatic subset is: a **`kai-*-change` event** (so app state can observe) + a **`defaultOpen`/`defaultValue` seed** + **imperative methods** (`show`/`hide`/`toggle`, already in Part 1). Full *controlled* `open`/`value` props (the element reflects consumer state and stops self-managing) are a bigger lift. **Decision needed: how far do we adopt React-style controlled props vs. the lighter event+seed+methods path?** Recommended default: ship the **change event + `defaultOpen`/`defaultValue` seed + imperative methods everywhere** (covers ~90% of real use), and add fully-`open`/`value`-controlled props only where there's clear demand (hover-card, tooltip, switch, menu).
+3. **Selection elements** (choice/tasks/form/switch/model-switcher/scope-picker/command) want a `value`/`defaultValue` + `kai-value-change` channel — they emit only the card-contract `submit` today, so a host can't observe/seed selection without a round-trip.
+
+Recurring standard gaps by frequency: `disabled` ×10 · `defaultOpen` ×6 · `value` ×5 · `kai-open-change` ×4 · `open` ×3 · `kai-value-change` ×3.
+
+## Per-element expected-API gaps (standard tier)
+
+### `kai-hover-card` — aligns with Radix HoverCard.Root (open/defaultOpen/onOpenChange/openDelay/closeDelay) + HoverCard.Content (side/align/sideOffset/collisionPadding); Shoelace sl-popup positioning props
+
+**Standard (expected):**
+- **prop** `open` — open?: boolean (attribute: open). The element today is fully self-managed — there is NO way to control whether the card is shown from the consumer. Radix's headline hover-card API is the controlled/uncontrolled trio. Consumers programmatically open a hover card (e.g. to preview on a different trigger, or pin it open). Without `open` the component can't be driven by app state at all.
+- **prop** `defaultOpen` — defaultOpen?: boolean (attribute: default-open). Uncontrolled initial-open state. Half of the Radix controlled/uncontrolled contract; lets a consumer render the card open on mount without wiring an event handler. Currently the internal signal hardcodes `createSignal(false)` with no way to seed it.
+- **event** `kai-open-change` — kai-open-change → CustomEvent<{ open: boolean }> (non-bubbling). Maps Radix `onOpenChange(open)`. The element has ZERO events today (events: []), so a consumer can't observe open/close at all — no way to sync `open`, lazy-load card content on first open, or fire analytics. This is the single most-expected event for any open/close overlay.
+- **prop** `disabled` — disabled?: boolean (attribute: disabled). No way to suppress the card without unmounting. Consumers need to conditionally disable the hover behavior (e.g. on touch devices, while loading, or when the trigger is itself disabled). Radix achieves this via controlled `open`, but a dedicated `disabled` is the idiomatic web-component scalar and matches Shoelace/WebAwesome overlay conventions.
+
+_Nice-to-have:_ `show` (method), `hide` (method), `sideOffset` (prop), `align` (prop).
+
+### `kai-tooltip` — aligns with Radix Tooltip.Root (open/defaultOpen/onOpenChange/delayDuration/disableHoverableContent) + Tooltip.Content (side/align/sideOffset); Shoelace sl-tooltip (placement/disabled/trigger/show()/hide())
+
+**Standard (expected):**
+- **prop** `open` — open?: boolean (attribute: open). No controlled visibility. The internal `createSignal(false)` is unreachable from the consumer. Radix Tooltip.Root supports controlled `open`; consumers force-show a tooltip (onboarding hint, validation error pointer) or keep it open during a guided flow. Today that's impossible.
+- **prop** `defaultOpen` — defaultOpen?: boolean (attribute: default-open). Uncontrolled initial-open state, completing the Radix trio. Lets a tooltip render open on mount (e.g. a one-time coach mark) without a controlled handler.
+- **event** `kai-open-change` — kai-open-change → CustomEvent<{ open: boolean }> (non-bubbling). Maps Radix `onOpenChange(open)`. The element emits no events (events: []) — a consumer can't react to show/hide, sync controlled `open`, or instrument it. Essential companion to `open`/`defaultOpen`.
+- **prop** `placement` — placement?: string (attribute: placement) — 'top'|'bottom'|'left'|'right' (+ '-start'/'-end'). The tooltip's position is HARDCODED to 'top' in the primitive (usePosition(..., { placement: 'top' })) with no prop to override it. kai-hover-card already exposes `placement`; the tooltip should match. Radix `side` and Shoelace `placement` are standard — consumers routinely place tooltips below/beside a trigger near a viewport edge. This is the most glaring gap for the tooltip.
+- **prop** `closeDelay` — closeDelay?: number (attribute: close-delay). Only `openDelay` is exposed; there is no way to tune the hide delay. The primitive hides immediately on leave (no grace period), so a consumer can't add hover-bridge tolerance the way kai-hover-card's `closeDelay` allows. Radix's Tooltip.Provider has close/skip timing; Shoelace and WebAwesome expose close timing. Pairs naturally with the existing `openDelay`.
+- **prop** `disabled` — disabled?: boolean (attribute: disabled). No way to turn the tooltip off while keeping the trigger mounted (e.g. hide hint once the user is onboarded, or on touch). Shoelace sl-tooltip ships `disabled` as a first-class scalar; this is a very common consumer need and trivial to wire (short-circuit show()).
+
+_Nice-to-have:_ `dismissOnClick` (prop), `show` (method), `hide` (method), `sideOffset` (prop).
+
+### `kai-popover` — aligns with Radix Popover.Root (open/defaultOpen/onOpenChange/modal) + PopoverContent (side/align/sideOffset/collisionPadding/onEscapeKeyDown/onPointerDownOutside) + PopoverAnchor; Shoelace/WebAwesome <wa-popup>/<sl-dropdown> (distance/skidding/show()/hide()).
+
+**Standard (expected):**
+- **prop** `defaultOpen` — defaultOpen?: boolean. The underlying `Popover` primitive already accepts `defaultOpen` (uncontrolled initial state) but the facade never forwards it. Radix's controlled/uncontrolled trio is open + defaultOpen + onOpenChange; consumers expect to render a popover open-on-mount without wiring controlled state. Pure plumbing — the primitive supports it today.
+- **prop** `modal` — modal?: boolean (default false). Radix Popover exposes `modal` to trap focus and make outside content inert/scroll-locked while open. For ChatGPT-style header menus and confirm-popovers consumers reach for this; today the panel is a role=dialog with no focus trap or scroll lock option.
+- **prop** `disabled` — disabled?: boolean. Every open/close overlay in the ecosystem can be disabled so the trigger no longer toggles. There is no way to inertly disable kai-popover today short of removing the trigger.
+- **method** `show / hide / toggle` — show(): void; hide(): void; toggle(): void. Web-component consumers (plain HTML, Vue, Angular) expect imperative open/close methods on the element instance rather than only a controlled `open` property + re-render. The facade already has `expose()` (used by kai-chat/kai-prompt-input for focus/blur/clear), so this is a natural addition. Note: name them show/hide/toggle to avoid colliding with the existing `open` property.
+
+_Nice-to-have:_ `sideOffset / collisionPadding` (prop), `kai-escape-key-down / kai-pointer-down-outside` (event).
+
+### `kai-menu` — aligns with Radix DropdownMenu.Root (open/defaultOpen/onOpenChange/modal/dir) + DropdownMenuContent (side/align/sideOffset/loop) + onSelect per item. Shoelace <sl-dropdown> (open, show()/hide(), placement). Item shape ≈ Radix DropdownMenuRadioGroup/CheckboxItem.
+
+**Standard (expected):**
+- **prop** `open` — open?: boolean. kai-menu is fully uncontrolled — the open state lives inside the internal Dropdown signal with no way to drive or read it. Radix DropdownMenu.Root has the controlled/uncontrolled trio; consumers expect to open a menu programmatically (e.g. via a keyboard shortcut) or coordinate it with other UI. kai-popover already has `open`; kai-menu lacks it entirely.
+- **prop** `defaultOpen` — defaultOpen?: boolean. Uncontrolled initial-open, the second leg of the Radix trio. Pairs with `open`/`kai-open-change`. The internal Dropdown signal would need to accept an initial value.
+- **event** `kai-open-change` — kai-open-change { open: boolean }. There is no way to observe the menu opening/closing today — only `kai-select` on a leaf. Radix fires onOpenChange on every toggle (Escape, outside-click, select). Consumers need this to sync chevron state, analytics, or lazy-load menu contents. This is the most conspicuous gap vs the ecosystem for this archetype.
+- **method** `show / hide / toggle` — show(): void; hide(): void; toggle(): void. Imperative open/close for plain-HTML and non-React consumers, mirroring the proposed kai-popover methods and the existing expose() pattern (kai-chat/kai-prompt-input). Required because there is currently no programmatic way to open the menu at all (no `open` prop either).
+
+_Nice-to-have:_ `modal` (prop), `placement (actually wired)` (prop).
+
+### `kai-model-switcher` — aligns with Radix Select.Root (value/defaultValue/onValueChange/open/defaultOpen/onOpenChange/disabled/name/required) + SelectTrigger; this is a Select archetype. WebAwesome <wa-select>/Shoelace <sl-select> (value, placeholder, disabled, hoist).
+
+**Standard (expected):**
+- **prop** `defaultValue (defaultModel)` — defaultModel?: string. kai-model-switcher has `currentModel` (≈ controlled value) and `kai-model-change` (≈ onValueChange) but no uncontrolled initial value. Without it, consumers must own selection state to set an initial model that isn't the first in the list. Completes the Select trio.
+- **prop** `disabled` — disabled?: boolean. A Select can be disabled (e.g. while a response streams and the model can't change). No way to do that today; the trigger is always interactive.
+
+_Nice-to-have:_ `kai-open-change` (event), `placeholder` (prop), `name` (prop).
+
+### `kai-scope-picker` — aligns with Radix Select.Root / DropdownMenuRadioGroup (value/defaultValue/onValueChange/open/onOpenChange/disabled). It is a single-select scope filter rendered as a dropdown.
+
+**Standard (expected):**
+- **prop** `value` — value?: SearchFilters | undefined. The element only takes `currentLabel` (a display string) and emits `kai-scope-change` — there is no controlled selected-value input. A consumer cannot drive the active scope from state, only label it; the selected row also isn't marked active/checked. Radix selection components expect a controlled `value` paired with the change event.
+- **prop** `disabled` — disabled?: boolean. No way to disable the picker (e.g. when there are no authors/tags or scoping is unavailable). Standard for every selection control in the ecosystem.
+
+_Nice-to-have:_ `defaultValue` (prop), `kai-open-change` (event).
+
+### `kai-command` — aligns with Radix Combobox is community (cmdk): Command (value/onValueChange for highlighted item, filter, loop, shouldFilter, loading) + CommandInput (value/onValueChange). Also Radix-pattern combobox: open/onOpenChange, disabled. Our element is a command/combobox palette.
+
+**Standard (expected):**
+- **prop** `value (controlled query)` — value?: string. The search query is purely internal state — `placeholder` is the only input prop. kai-query-change reports keystrokes, but there is no controlled `value` to set/reset the query programmatically (e.g. clear it after select, or seed it from a trigger character). Standard for a controlled combobox input.
+- **prop** `highlightedId (controlled active item)` — highlightedId?: string. The active/highlighted row (activeId) is internal-only; consumers can't read or set which item is highlighted, nor get notified when arrow-key navigation changes it. cmdk treats the highlighted value as a first-class controlled value with onValueChange. Needed to coordinate the palette with an external input (the @/slash-trigger case in a composer).
+- **event** `kai-highlight-change` — kai-highlight-change { id: string }. Pairs with the controlled highlightedId. Consumers driving the palette from an external textarea (slash/mention triggers) need to know which item ArrowUp/Down landed on without it being selected. Today only kai-select (commit) and kai-query-change (input) fire.
+- **prop** `shouldFilter / filter` — shouldFilter?: boolean (default true). kai-command always client-filters items by label/description. For async/server-side search (the documented kai-query-change → fetch use case) the consumer must disable built-in filtering or the server results get re-filtered locally. cmdk's shouldFilter=false is the standard escape hatch; without it server-driven palettes double-filter.
+- **prop** `loading` — loading?: boolean. With async filtering (the explicit use case in the docs) there's no way to show a pending/loading state — only items or the empty label. A loading flag (with a spinner/skeleton) is expected for server-backed command palettes.
+
+_Nice-to-have:_ `focusInput` (method).
+
+### `kai-tool` — aligns with Radix Collapsible (Root open/defaultOpen/onOpenChange/disabled). Shoelace <sl-details> (open prop + sl-show/sl-hide/sl-after-show events).
+
+**Standard (expected):**
+- **event** `kai-open-change` — kai-open-change CustomEvent<{ open: boolean }>. Every Radix open/close primitive emits onOpenChange. kai-reasoning (the sibling collapsible) already emits kai-open-change; kai-tool is the only collapsible in this archetype that fires NOTHING, so a consumer cannot react to the user expanding/collapsing a tool-call panel (e.g. lazy-load output, log inspection, sync layout).
+- **prop** `defaultOpen` — defaultOpen?: boolean. Radix splits initial-uncontrolled (defaultOpen) from the controlled value (open). kai-tool conflates them: `open` is consumed as defaultOpen internally and never updates. Consumers expect `defaultOpen` to seed uncontrolled state while `open` controls it live. Adding defaultOpen (and freeing `open` to be the controlled live prop) restores the standard trio.
+- **prop** `disabled` — disabled?: boolean (scalar attr). Radix Collapsible.Root exposes `disabled` to prevent the trigger from toggling. A tool-call panel that is still streaming (state 'input-streaming') or that the app wants to pin open/closed has no way to lock the trigger. The Tool trigger is a plain Button with no disabled wiring.
+
+_Nice-to-have:_ `toggle` (method).
+
+> kai-tool is a single collapsible panel. Today the facade maps its `open` prop to the underlying Tool's `defaultOpen` (uncontrolled, read once on mount via flag('open')) — so `open` is really 'start expanded', NOT a controlled/reactive prop, and there is NO way to observe or drive expansion after mount. Against the Radix Collapsible trio it is missing the live controlled value, the change event, disabled, and imperative methods. NOTE: the existing `open` name already exists, so a true controlled prop is the blocker — recommend making the existing `open` reactive+controlled (plumb it through Tool, which currently ignores live `open`) and adding `defaultOpen` for the uncontrolled initial; this requires a small change in src/components/tool.tsx (it hardcodes createSignal(defaultOpen) and never tracks a controlled `open`).
+
+### `kai-chain-of-thought` — aligns with Radix Accordion (Root type single|multiple, value/defaultValue/onValueChange, collapsible) — a list of independently-collapsible steps. Each step is a Radix Collapsible.
+
+**Standard (expected):**
+- **prop** `type` — type?: 'single' | 'multiple'  (default 'multiple'). Radix Accordion's defining prop: single (one open at a time) vs multiple (any number open). A reasoning trace often wants single-expand (auto-collapse the previous step as you read down) but kai-chain-of-thought hardcodes multiple, independent collapsibles with no way to request single-open behavior.
+- **prop** `value` — value?: string | string[]  (controlled open step id(s)). Radix Accordion is controlled via value/onValueChange. kai-chain-of-thought offers NO way to control which step(s) are expanded — a streaming agent UI that wants to auto-expand the active step (and collapse finished ones) has no hook. Standard for the accordion archetype.
+- **prop** `defaultValue` — defaultValue?: string | string[]  (uncontrolled initial open step id(s)). The uncontrolled counterpart to `value`. Currently EVERY step renders closed with no opt-out — a consumer cannot even say 'start with step 1 expanded'. Radix's defaultValue covers exactly this initial-open need.
+- **event** `kai-value-change` — kai-value-change CustomEvent<{ value: string | string[] }>. Maps Radix Accordion onValueChange. The element fires no events whatsoever, so a consumer cannot observe which reasoning step the user expanded/collapsed (analytics, sync, lazy-load detail). The most glaring gap: a multi-collapsible with zero change signal.
+
+_Nice-to-have:_ `collapsible` (prop), `disabled` (prop), `orientation` (prop).
+
+> kai-chain-of-thought renders N independently-collapsible steps, each its own <Collapsible> with internal uncontrolled state and NO defaultOpen wired (every step starts closed, no way to change that). This is exactly the Accordion archetype, yet the facade exposes ONLY `steps` data — no `type`, no value model, no change event, no per-step open control, no methods. It is the least Radix-aligned element of the four. Because per-step ids are needed for a value model, recommend the Step descriptor gain an optional `id` (or use index/label as the key) so value/defaultValue can reference steps. The underlying ChainOfThoughtStep does not accept open/defaultOpen today, so this needs plumbing in src/components/chain-of-thought.tsx.
+
+### `kai-reasoning` — aligns with Radix Collapsible (Root open/defaultOpen/onOpenChange/disabled). Best-aligned of the four — already has controlled open + kai-open-change.
+
+**Standard (expected):**
+- **prop** `defaultOpen` — defaultOpen?: boolean. kai-reasoning has controlled `open` but NO uncontrolled-initial prop — the internal Reasoning signal always starts false, so a consumer who wants the block to render expanded but remain user-toggleable (without going fully controlled) cannot. Radix Collapsible's defaultOpen covers exactly this; the underlying Reasoning's internalOpen signal just needs to seed from a defaultOpen prop.
+- **prop** `disabled` — disabled?: boolean (scalar attr). Radix Collapsible.Root exposes `disabled` to lock the trigger. While reasoning is mid-stream a consumer may want to pin it open and prevent the user collapsing it; today ReasoningTrigger is an always-clickable button with no disabled support.
+
+_Nice-to-have:_ `toggle` (method).
+
+> Strong baseline: `open` is genuinely controlled (the underlying Reasoning treats open!==undefined as controlled) and kai-open-change fires. Missing pieces vs the full Collapsible trio are the uncontrolled-initial prop, disabled, and imperative methods. Note the existing `streaming` auto-open is a nice domain extra, not a substitute for defaultOpen (it FORCES open while true and FORCES closed when it flips false, so it can't express 'start open, stay user-controlled').
+
+### `kai-artifact` — aligns with Radix Tabs (Root value/defaultValue/onValueChange, activationMode, orientation, Tab disabled) for the Preview|Code toggle; the maximize affordance follows the Collapsible open/defaultOpen/onOpenChange trio.
+
+**Standard (expected):**
+- **prop** `defaultTab` — defaultTab?: 'preview' | 'code'. Radix Tabs splits defaultValue (uncontrolled initial) from value (controlled). kai-artifact only has `tab`, which the component treats as controlled-following (createEffect(setTab(local.tab))) — so a consumer can't set an initial tab and then let the user freely switch without re-asserting the prop. defaultTab gives the uncontrolled-initial that the Tabs archetype expects.
+- **method** `reload` — reload(): void  (plus back(): void / forward(): void / home(): void). kai-artifact ALREADY implements goBack/goForward/reload/goHome internally but only as toolbar button handlers — a consumer who hid the toolbar (noNav/noReload/noHome) has NO way to drive navigation. Exposing these via expose() is the web-component standard for imperative control (cf. Shoelace components exposing action methods); reload() in particular is a common 'refresh the artifact' need with no current API.
+
+_Nice-to-have:_ `defaultActiveFile` (prop), `defaultMaximized` (prop), `activationMode` (prop), `orientation` (prop), `navigate` (method).
+
+> kai-artifact's Preview|Code segmented control IS a Radix Tabs surface (role=tablist/tab already present). `tab` is controlled + kai-tab-change fires (good), and maximize has controlled `maximized` + kai-maximize-change (good). Gaps are the uncontrolled-initial counterparts (defaultTab, defaultActiveFile, defaultMaximized) and the Tabs ergonomics (activationMode, orientation, per-tab disabled), plus imperative navigation methods that the component already implements internally (back/forward/reload/home) but doesn't expose. Naming: use `defaultTab` (not defaultValue) to mirror the existing `tab` prop, and `kai-tab-change` already fills the onValueChange slot.
+
+### `kai-switch` — aligns with Radix Switch (Root checked/defaultChecked/onCheckedChange/disabled/required/name/value) · Shoelace sl-switch (checked/disabled/required/name/value + focus()/blur(); sl-change/sl-input/sl-focus/sl-blur)
+
+**Standard (expected):**
+- **prop** `defaultChecked` — defaultChecked?: boolean (attr `default-checked`). Radix splits controlled `checked` from uncontrolled `defaultChecked`. Today `checked` is silently treated as the uncontrolled initial value (facade passes it to the primitive's defaultChecked), so there is no way to express a true controlled switch. Add `defaultChecked` as the uncontrolled seed and make `checked` controlled (below) to match the trio convention.
+- **prop** `checked (controlled)` — checked?: boolean — when set, the element reflects the consumer's value and does not self-advance; drive it from kai-change. The primitive already supports a controlled `checked` distinct from `defaultChecked`, but the facade discards it (maps the prop to defaultChecked). React/Vue/Svelte consumers expect a controlled Switch where they own state. This is a behavior CSS can't supply.
+- **prop** `name` — name?: string (attr `name`). Switch is a form control; Radix and Shoelace both expose `name` so the toggle submits with a surrounding <form>. Without it the switch can't participate in native form submission / FormData.
+- **prop** `value` — value?: string (default 'on'). Paired with `name`, the submitted value when checked (Radix/Shoelace default 'on'). Required for form participation.
+- **method** `focus` — focus(options?: FocusOptions): void. The control lives in shadow DOM, so the host element's native focus() does not reach the inner role=switch button. Shoelace exposes focus()/blur() on every form control for exactly this reason; the kit's own `expose()` is documented for shadowing native focus.
+
+_Nice-to-have:_ `required` (prop), `blur` (method), `kai-input` (event).
+
+> The facade wires the `checked` prop to the primitive's `defaultChecked` (uncontrolled-only). There is no controlled mode, no form-participation, and no imperative focus, all of which the Switch archetype standardly carries. `kai-change { checked }` already covers onCheckedChange.
+
+### `kai-choice` — aligns with Radix RadioGroup (Root value/defaultValue/onValueChange/disabled/required/name) — single-select-of-N. Submit-gated, but the selection layer should still expose the RadioGroup trio.
+
+**Standard (expected):**
+- **prop** `value` — value?: string (the selected option id) — controlled selection. RadioGroup's defining prop. kai-choice tracks selection in a private signal with no controlled override, so a consumer can neither set nor own the current pick before submit. Maps to RadioGroup.Root value.
+- **prop** `defaultValue` — defaultValue?: string (option id to pre-select on mount). Lets the card open with a recommended option already selected (it renders a `recommended` pill today but can't pre-select it). Uncontrolled seed half of the RadioGroup trio.
+- **event** `kai-value-change` — kai-value-change { value: string }. RadioGroup's onValueChange fires when the selection changes, BEFORE any commit. kai-choice only emits at Submit (the kai-card `action` verb), so a consumer can't react to the in-progress pick (e.g. enable/preview). This is the missing selection-change signal distinct from the terminal submit.
+- **prop** `disabled` — disabled?: boolean (attr `disabled`) — disables the whole radiogroup + Submit. Per-option `disabled` exists in the data, but there is no group-level disabled to freeze the entire card (e.g. while the agent is busy). RadioGroup.Root and every Radix selection root expose a top-level `disabled`.
+
+_Nice-to-have:_ `name` (prop), `focus` (method).
+
+> kai-choice is a single-select radiogroup that defers emission until a Submit click (emits the Card `action` verb via the bubbling kai-card event). It currently has NO controlled selection surface and no per-selection change signal — only the terminal submit. Consumers wanting to pre-seed, control, or observe the in-progress selection have no API. The `resolution` prop only rehydrates the terminal read-only view, not live selection.
+
+### `kai-tasks` — aligns with A multi-select checkbox group — Radix Checkbox group semantics + a select-all (no single Radix root for this, so model on Checkbox's checked/defaultChecked/onCheckedChange applied to the set, plus RadioGroup-style value array). Shoelace checkbox group conventions.
+
+**Standard (expected):**
+- **prop** `value` — value?: string[] (selected task ids) — controlled multi-selection. The selection set is private signal state seeded only from per-task `checked`. A consumer can neither control nor read the live selection. A top-level controlled `value` array is the standard handle for a multi-select group.
+- **event** `kai-value-change` — kai-value-change { value: string[] }. onCheckedChange/onValueChange fire on every toggle. kai-tasks emits nothing until Confirm (the kai-card `submit` verb), so a consumer can't observe selection changes mid-flight (e.g. to live-update a count outside the card or enable a sibling control). This is the missing change signal distinct from the terminal submit.
+- **prop** `disabled` — disabled?: boolean (attr `disabled`) — freeze the whole list + Confirm. Per-task `disabled` exists, but there is no group-level disabled to freeze the entire card (e.g. while the plan is executing). Every Radix selection/toggle root exposes a top-level `disabled`.
+
+_Nice-to-have:_ `defaultValue` (prop).
+
+> kai-tasks is a multi-select checkbox list with select-all + min/max gating, committing only on Confirm (emits the Card `submit` verb with `{ selected }` via the bubbling kai-card event). Like kai-choice, it has no controlled selection surface and no per-toggle change signal — only the terminal submit. Initial checked state comes only from per-task `data.checked`; there's no top-level controlled/observed selection.
+
+### `kai-confirm` — aligns with Radix AlertDialog / a controlled action-set surface — the open/close trio (open/defaultOpen/onOpenChange) + dismissal. It already has `autofocus` (≈ AlertDialog default-action focus) and emits dismiss via the kai-card contract.
+
+_Nice-to-have:_ `open` (prop), `kai-open-change` (event), `focusDefaultAction` (method).
+
+> kai-confirm is an approval card with a dismissible affordance and an optimistic dismissed state. It behaves like a presence-controlled surface (AlertDialog) but exposes no open/close API — the host can't programmatically open/close it or be notified of dismissal except via the bubbling kai-card `dismiss`/`reopen` verbs. The `resolution` prop is the only presence handle and it's a rehydration channel, not a controlled open/close.
+
+### `kai-form` — aligns with Radix Form (Root + Field/Control/Submit, client validation) · Shoelace form controls (reportValidity()/checkValidity()/reset(), per-field name/value, disabled). kai-form renders JSON-Schema fields, validates client-side, and emits the Card `submit` verb via the bubbling kai-card event.
+
+**Standard (expected):**
+- **prop** `values` — values?: Record<string, unknown> — controlled field values. The form's value store is entirely private (createStore seeded from schema defaults). A controlled `values` lets a consumer own/observe the form state — the Form-archetype expectation for two-way binding. Behavior CSS can't supply.
+- **prop** `defaultValues` — defaultValues?: Record<string, unknown> — initial values overlaying schema defaults. Today initial values can only come from per-field JSON-Schema `default`. Consumers routinely need to pre-fill a form from existing data (edit flows) without rewriting the schema. Uncontrolled seed half of the convention.
+- **event** `kai-values-change` — kai-values-change { values: Record<string, unknown>; valid: boolean }. kai-form validates on input internally but emits nothing until the terminal kai-card `submit`. A change event with the current (coerced) values + validity is the standard live-binding/observation signal every form library provides, and is distinct from the submit verb.
+- **method** `validate` — validate(): { valid: boolean; errors?: Record<string,string> }. Shoelace exposes checkValidity()/reportValidity() on every form control; Radix Form runs client validation. kai-form has a full validateAgainstSchema pass internally but no way to trigger/read it imperatively (e.g. before a host-driven submit). Surface it.
+- **method** `submit` — submit(): void — programmatically validate + emit the submit verb. Lets a host trigger submission from an external button (a common pattern when the submit control lives outside the card chrome). Mirrors HTMLFormElement.requestSubmit()/Shoelace form submit.
+- **method** `reset` — reset(): void — restore values to defaultValues/schema defaults and clear errors. Standard on every form control (HTMLFormElement.reset, Shoelace reset()). kai-form has no way to clear/restore its private value store. Needed for retry/cancel flows.
+- **prop** `disabled` — disabled?: boolean (attr `disabled`) — disable all fields + submit. Per-field `readOnly` exists in the schema, but there is no group-level disabled to freeze the whole form (e.g. while submitting / while the agent is busy). A top-level `disabled` is standard on form roots/fieldsets.
+
+> kai-form owns a private store of field values and validates against the schema, but exposes none of it: no controlled/observed values, no imperative validate/submit/reset, and no group-level disabled. The `resolution` prop only rehydrates the read-only post-submit view. Consumers wanting two-way binding, pre-fill beyond schema `default`, live-validation feedback, or programmatic submit have no surface.
+
