@@ -3,7 +3,7 @@ import { cn } from '../utils/cn';
 
 export interface SwitchProps {
   /** Controlled checked state. When set, the component defers state to the
-   *  parent — drive it from `onChange`. Omit for uncontrolled (internal) state. */
+   *  parent; drive it from `onChange`. Omit for uncontrolled (internal) state. */
   checked?: boolean;
   /** Initial checked state when uncontrolled. */
   defaultChecked?: boolean;
@@ -75,8 +75,11 @@ export function Switch(props: SwitchProps) {
       >
         <span
           class={cn(
-            'inline-block h-4 w-4 rounded-full bg-white shadow transition-transform',
-            isOn() ? 'translate-x-[1.125rem]' : 'translate-x-0.5',
+            'inline-block h-4 w-4 rounded-full shadow transition-transform',
+            // On the `primary` track use `primary-foreground` so the thumb stays
+            // visible in both themes (in dark mode `primary` is light, where a
+            // hard-coded white thumb vanished). Off-track stays white over `muted`.
+            isOn() ? 'translate-x-[1.125rem] bg-primary-foreground' : 'translate-x-0.5 bg-white',
           )}
         />
       </button>
