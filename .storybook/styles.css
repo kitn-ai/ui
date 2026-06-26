@@ -98,6 +98,10 @@
   background: color-mix(in oklab, var(--color-muted-foreground) 12%, transparent) !important;
   color: var(--color-foreground) !important;
   border: none !important;
+  /* Tighten the chip and drop the side margin so trailing punctuation hugs the
+     chip (e.g. `size`. instead of "size ."). */
+  padding: 0.1em 0.3em !important;
+  margin: 0 !important;
 }
 
 /* Docs code blocks — dark "terminal" style in EVERY mode. Storybook renders
