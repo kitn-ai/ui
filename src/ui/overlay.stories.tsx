@@ -5,15 +5,15 @@ import { createPresence, usePosition, useDismiss } from './overlay';
 import { buttonVariants } from './button';
 
 /**
- * `overlay.tsx` is not a component, it's the small DIY toolkit that every
+ * `overlay.tsx` is not a component; it's the small DIY toolkit that every
  * floating surface in the kit (Tooltip, HoverCard, Dropdown) is built from,
  * replacing the former third-party UI dependency. Three primitives:
  *
- * - `usePosition(ref, floating, opts)`, anchors `floating` to `ref` via
+ * - `usePosition(ref, floating, opts)`: anchors `floating` to `ref` via
  *   @floating-ui/dom with flip/shift, tracking it on scroll/resize.
- * - `createPresence(open)`, keeps a node mounted through its CSS exit
+ * - `createPresence(open)`: keeps a node mounted through its CSS exit
  *   animation, then unmounts on `animationend`.
- * - `useDismiss({ enabled, onDismiss, refs })`, Escape + outside-pointerdown
+ * - `useDismiss({ enabled, onDismiss, refs })`: Escape + outside-pointerdown
  *   dismissal (no scroll lock).
  *
  * Plus an `As` polymorphic helper for trigger elements.
@@ -26,7 +26,7 @@ const meta: Meta = {
     docs: {
       description: {
         component: [
-          'The hooks toolkit (not a renderable component) behind `Tooltip`, `HoverCard`, and `Dropdown`. `usePosition(ref, floating, opts)` anchors a node via `@floating-ui/dom`, `createPresence(open)` keeps it mounted through its CSS exit animation, and `useDismiss({ enabled, onDismiss, refs })` handles Escape + outside-click. An `As` helper renders a polymorphic trigger.',
+          'The hooks toolkit (not a renderable component) behind `Tooltip`, `HoverCard`, and `Dropdown`. `usePosition(ref, floating, opts)` anchors a node via `@floating-ui/dom`; `createPresence(open)` keeps it mounted through its CSS exit animation; and `useDismiss({ enabled, onDismiss, refs })` handles Escape + outside-click. An `As` helper renders a polymorphic trigger.',
           'Reach for `Tooltip` / `HoverCard` / `Dropdown` first; use these only for a floating surface they don\'t cover.',
         ].join('\n\n'),
       },

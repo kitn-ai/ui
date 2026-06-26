@@ -43,7 +43,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, flip the orientation. */
+/** Interactive playground: flip the orientation. */
 export const Playground: Story = {
   ...src(`<Separator orientation="horizontal" />`),
 };

@@ -91,7 +91,7 @@ const meta = {
     variant: 'grid' as const,
   },
   // `onRemove` lives on each child `Attachment`, not the container, so it isn't a
-  // story arg, route it straight to the Actions panel via `action('remove')`.
+  // story arg; route it straight to the Actions panel via `action('remove')`.
   render: (args) => {
     const [items, setItems] = createSignal([...sampleAttachments]);
     const remove = (id: string) => { action('remove')(id); setItems((prev) => prev.filter((a) => a.id !== id)); };
@@ -122,7 +122,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, switch `variant` to compare grid / inline / list. */
+/** Interactive playground: switch `variant` to compare grid / inline / list. */
 export const Playground: Story = {
   ...src(`// Each item is an AttachmentData, a file or a cited source-document.
 const [items, setItems] = createSignal<AttachmentData[]>([

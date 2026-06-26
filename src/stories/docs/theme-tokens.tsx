@@ -67,7 +67,7 @@ function collectTokens(): { light: Record<string, string>; dark: Record<string, 
           }
         }
       }
-      // Grouping rules (@layer/@media/@supports) carry nested rules — recurse.
+      // Grouping rules (@layer/@media/@supports) carry nested rules: recurse.
       const nested = (rule as CSSGroupingRule).cssRules;
       if (nested) visit(nested);
     }
@@ -87,7 +87,7 @@ function collectTokens(): { light: Record<string, string>; dark: Record<string, 
 const KIT_RADII = ['--radius', '--radius-sm', '--radius-md', '--radius-lg', '--radius-xl'];
 
 /** Reference data for the token table. The kit's complete token set is the
- *  curated PURPOSE map (colors + typography) + KIT_RADII — reading VALUES live
+ *  curated PURPOSE map (colors + typography) + KIT_RADII, reading VALUES live
  *  via getComputedStyle. This lists every kit token (not just the ones with a
  *  `.dark` override) and never picks up Tailwind's default-theme tokens. Dark
  *  values come from a throwaway `.dark` probe; a token with no `.dark` override
@@ -115,7 +115,7 @@ function discover(): { colors: ColorToken[]; radii: RadiusToken[]; texts: TextTo
 }
 
 /** Light/dark palettes for the theme editor: light = colors + --radius, dark = colors.
- *  The token set is keyed off the `.dark` overrides — that's what defines a kit token
+ *  The token set is keyed off the `.dark` overrides: that's what defines a kit token
  *  and excludes Tailwind's default palette (which has no `.dark` entry). Light values
  *  come from `:root`, falling back to the dark value if a token only exists in dark. */
 export function discoverPalettes(): { light: Palette; dark: Palette } {
@@ -148,7 +148,7 @@ export function toHex(css: string): string {
 
 const cellHead: JSX.CSSProperties = { 'text-align': 'left', padding: '8px 12px', 'border-bottom': '1px solid var(--color-border)', 'font-weight': '600', 'font-size': '15px' };
 const cell: JSX.CSSProperties = { padding: '8px 12px', 'border-bottom': '1px solid var(--color-border)', 'vertical-align': 'middle', 'font-size': '15px' };
-// Value text (hex / size / line-height) — readable, not the browser's tiny <small>.
+// Value text (hex / size / line-height): readable, not the browser's tiny <small>.
 const valueText: JSX.CSSProperties = { 'font-size': '13px', color: 'var(--color-muted-foreground)' };
 
 function Swatch(props: { color: string }) {

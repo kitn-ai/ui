@@ -8,12 +8,12 @@ import type { AttachmentData } from '../components/attachments';
 const withActions = (e: Element) => onMount(() => onCleanup(attachKaiActions(e as HTMLElement)));
 
 // Labs: the <kai-prompt-input> composition slots. Dogfoods real kit components
-// where they fit, a <kai-notice> above the card, a <kai-attachments> row (with
-// hover-card previews) in the input-top slot, a <kai-button> in the toolbar, on
-// the kit's theme tokens, so it reads correctly in light and dark and doubles as
-// a copy-paste reference. Content ABOVE the card is your own layout, not a slot:
-// only the holes you can't reach from outside (inside the card / toolbar) are
-// slots. Component events log to the Actions panel.
+// where they fit: a <kai-notice> above the card, a <kai-attachments> row (with
+// hover-card previews) in the input-top slot, a <kai-button> in the toolbar. All
+// on the kit's theme tokens, so it reads correctly in light and dark and doubles
+// as a copy-paste reference. Content ABOVE the card is your own layout, not a
+// slot: only the holes you can't reach from outside (inside the card / toolbar)
+// are slots. Component events log to the Actions panel.
 
 declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -48,8 +48,8 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-// ── 1. SLOTS, input-top + toolbar-start + toolbar-end projected in. The notice
-//    above the card is the consumer's OWN layout (a sibling div), NOT a slot
+// ── 1. SLOTS: input-top + toolbar-start + toolbar-end projected in. The notice
+//    above the card is the consumer's OWN layout (a sibling div), NOT a slot:
 //    outer content is light DOM you already control. Only the holes you can't
 //    reach from outside (inside the card / toolbar) are slots. ─────────────────
 export const Slots: Story = {
@@ -62,7 +62,7 @@ export const Slots: Story = {
         <a slot="action" href="#" style="color:var(--color-foreground);font-weight:600">Learn more</a>
       </kai-notice>
       <kai-prompt-input style={{ display: 'block' }} ref={withActions}>
-        {/* input-top: attached files above the textarea, dogfood <kai-attachments>
+        {/* input-top: attached files above the textarea; dogfood <kai-attachments>
             with hover-card previews. Hover a chip to preview; × removes it. */}
         <kai-attachments
           slot="input-top"
@@ -119,7 +119,7 @@ export const Slots: Story = {
   },
 };
 
-// ── 2. DROP-IN, no slots projected → regression baseline (toolbar must start
+// ── 2. DROP-IN: no slots projected → regression baseline (toolbar must start
 //    cleanly at the attach button, no phantom gap). ───────────────────────────
 export const DropIn: Story = {
   name: 'Defaults (no slots)',

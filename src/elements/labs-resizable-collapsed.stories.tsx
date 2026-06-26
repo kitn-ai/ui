@@ -78,7 +78,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Labs: the `collapsed` boolean on `<kai-resizable-item>`. A bare `<kai-resizable-item collapsed>` written in framework JSX (React / Solid / Vue / Svelte) collapses the panel at the **first** render, the panel starts hidden, no imperative `setAttribute` needed. This fixes the bug where `hidden` as a JSX boolean did nothing because it set neither the attribute nor the IDL property on a custom element, so `<kai-resizable>` never saw it and the panel rendered visible.',
+          'Labs: the `collapsed` boolean on `<kai-resizable-item>`. A bare `<kai-resizable-item collapsed>` written in framework JSX (React / Solid / Vue / Svelte) collapses the panel at the **first** render: the panel starts hidden, no imperative `setAttribute` needed. This fixes the bug where `hidden` as a JSX boolean did nothing because it set neither the attribute nor the IDL property on a custom element, so `<kai-resizable>` never saw it and the panel rendered visible.',
       },
     },
   },
@@ -89,7 +89,7 @@ type Story = StoryObj;
 
 /**
  * The bug repro: a plain JSX boolean `collapsed` on the first item. The panel must
- * start COLLAPSED at mount, only the Chat panel is visible until you expand it.
+ * start COLLAPSED at mount; only the Chat panel is visible until you expand it.
  * (Before the fix, `hidden` as a JSX boolean left the panel visible at mount.)
  */
 export const CollapsedAtMount: Story = {

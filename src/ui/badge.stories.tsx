@@ -42,7 +42,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, switch the variant and edit the content. */
+/** Interactive playground: switch the variant and edit the content. */
 export const Playground: Story = {
   ...src(`<Badge variant="default">Default badge</Badge>`),
 };

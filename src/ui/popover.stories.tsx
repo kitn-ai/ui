@@ -43,7 +43,7 @@ type Story = StoryObj<typeof meta>;
 const LEGACY = ['GPT-4o', 'GPT-4.1', 'GPT-4o mini'];
 const row = 'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted';
 
-/** A model menu rebuilt from the primitive, flagship row, an expandable group,
+/** A model menu rebuilt from the primitive: a flagship row, an expandable group,
  *  and a Switch, the kind of card a plain menu can't hold. */
 export const ModelMenu: Story = {
   render: (args: Partial<PopoverProps>) => {
@@ -72,12 +72,12 @@ export const ModelMenu: Story = {
   },
 };
 
-/** Minimal, a trigger and a small card. */
+/** Minimal: a trigger and a small card. */
 export const Basic: Story = {
   render: (args: Partial<PopoverProps>) => (
     <Popover {...args} trigger={<Button size="sm">Open</Button>}>
       <div style={{ width: '12rem', padding: '0.5rem' }} class="text-sm text-foreground">
-        Any content goes here, this is a <code>role="dialog"</code> panel.
+        Any content goes here; this is a <code>role="dialog"</code> panel.
       </div>
     </Popover>
   ),

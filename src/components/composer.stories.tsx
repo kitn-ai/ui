@@ -21,7 +21,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A plain-text prompt input with atomic entity pills (skills, mentions) via `/` and `@` trigger menus, keyword highlighting through the CSS Custom Highlight API, and a structured `{ doc, text, entities }` submit event. Not an RTE: `contenteditable="plaintext-only"`, pills are the only non-text nodes.',
+        'A plain-text prompt input with atomic entity pills (skills, mentions) via `/` and `@` trigger menus, keyword highlighting through the CSS Custom Highlight API, and a structured `{ doc, text, entities }` submit event. Not an RTE: `contenteditable="plaintext-only"`; pills are the only non-text nodes.',
         'On `<kai-composer>`, array/object props (`value`, `triggers`, `highlights`) are set as JS properties; scalars (`placeholder`, `disabled`, `loading`, `maxHeight`, `submitOnEnter`) work as attributes.',
       ]),
     },
@@ -33,7 +33,7 @@ const meta = {
     },
     disabled: {
       control: 'boolean',
-      description: 'Disables the composer, non-interactive.',
+      description: 'Disables the composer (non-interactive).',
       table: { defaultValue: { summary: 'false' } },
     },
     loading: {
@@ -63,7 +63,7 @@ const meta = {
     },
     onTrigger: {
       action: 'trigger',
-      description: 'A trigger char (`/`, `@`) opened the menu, `{ char, query, rect }`.',
+      description: 'A trigger char (`/`, `@`) opened the menu: `{ char, query, rect }`.',
       table: { category: 'Events' },
     },
     onTriggerClose: {
@@ -126,7 +126,7 @@ const src = (code: string) => ({
 // Playground
 // ---------------------------------------------------------------------------
 
-/** Args-driven, toggle disabled/loading and edit the placeholder via Controls. */
+/** Args-driven: toggle disabled/loading and edit the placeholder via Controls. */
 export const Playground: Story = {
   ...src(`<Composer
   placeholder="Ask anything…"
@@ -287,7 +287,7 @@ const PREFILLED_DOC: ComposerDoc = [
   { type: 'text', text: " I'm going to show y" },
 ];
 
-/** A pre-populated doc, an entity pill followed by text.
+/** A pre-populated doc: an entity pill followed by text.
  *  The pill renders as an atomic inline chip and the trailing text is editable. */
 export const Prefilled: Story = {
   args: {

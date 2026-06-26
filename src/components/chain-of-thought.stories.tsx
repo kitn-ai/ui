@@ -66,7 +66,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, expand the steps to reveal each reasoning item. */
+/** Interactive playground: expand the steps to reveal each reasoning item. */
 export const Playground: Story = {
   ...src(`<ChainOfThought>
   <ChainOfThoughtStep>

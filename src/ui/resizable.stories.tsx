@@ -65,7 +65,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, flip the orientation, then drag the handle. */
+/** Interactive playground: flip the orientation, then drag the handle. */
 export const Playground: Story = {
   ...src(`<ResizablePanelGroup orientation="horizontal">
   <ResizablePanel defaultSize={30} data-min-size="100" data-max-size="400">

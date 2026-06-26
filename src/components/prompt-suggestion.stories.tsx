@@ -11,7 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A clickable starter/follow-up prompt. Text goes in children, `onClick` submits it. Renders as a rounded pill by default; `block` makes a full-width list row, and `highlight` emphasizes a matched substring (forcing the list-row layout) for type-ahead filtering.',
+        'A clickable starter/follow-up prompt. Text goes in children; `onClick` submits it. Renders as a rounded pill by default; `block` makes a full-width list row, and `highlight` emphasizes a matched substring (forcing the list-row layout) for type-ahead filtering.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -19,7 +19,7 @@ const meta = {
   argTypes: {
     children: {
       control: 'text',
-      description: 'Suggestion content, the prompt text (or an element).',
+      description: 'Suggestion content: the prompt text (or an element).',
     },
     variant: {
       control: 'select',

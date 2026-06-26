@@ -45,7 +45,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, set the tooltip text and hover the trigger. */
+/** Interactive playground: set the tooltip text and hover the trigger. */
 export const Playground: Story = {
   ...src(`<Tooltip content="This is a tooltip">
   <Button variant="outline">Hover me</Button>

@@ -134,8 +134,8 @@ const meta = {
       description: specDescription('kai-prompt-input', [
           '`<kai-prompt-input>` is the framework-agnostic **web component** version of the chat composer, an auto-resizing textarea with a send button and optional suggestion chips, isolated in **Shadow DOM** so the host page\'s CSS can\'t leak in and the kit\'s styles can\'t leak out. SolidJS is bundled in, so the host needs nothing.',
           '**When to use:** adding a message composer to a non-Solid app (React, Vue, Svelte, plain HTML), or anywhere you want zero style conflicts. If you *are* in SolidJS and want fine-grained control, compose the `PromptInput` primitives instead.',
-          '**How to use:** register once with `import \'@kitn.ai/ui/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`kai-submit`, `kai-value-change`, `kai-suggestion-click`, `kai-search`, `kai-voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files. **Custom toolbar buttons:** place `<kai-action id icon tooltip>` elements as children, they are invisible data carriers (Shadow DOM hides them) that the element reads and renders as extra ghost icon buttons in the left toolbar. Each click fires a `kai-toolbar-action` CustomEvent with `detail.action` equal to the action id (the same `<kai-action>` descriptor element that `<kai-message>` uses, composition symmetry).',
-          '**Entity pills (triggers):** set the `triggers` JS property to a list of `{ char, kind, items }` definitions, typing the trigger char (e.g. `/` for skills, `@` for agents/plugins) opens a menu; selecting an item inserts an atomic pill. `kai-submit` / `kai-value-change` carry the structured `doc` + `entities` alongside the flattened `value` string. See the *Entity Pills* and *Prefilled* stories.',
+          '**How to use:** register once with `import \'@kitn.ai/ui/elements\'`, configure it with JS **properties** (`placeholder`, `value`, `disabled`, `loading`, `suggestions`, `attachments`) and flag attributes (`search`, `voice` to show the Globe/Mic toolbar buttons), and listen for **CustomEvents** (`kai-submit`, `kai-value-change`, `kai-suggestion-click`, `kai-search`, `kai-voice`) directly on the element. Leave `value` unset to let the element manage its own input state; seed `attachments` to pre-populate staged files. **Custom toolbar buttons:** place `<kai-action id icon tooltip>` elements as children; they are invisible data carriers (Shadow DOM hides them) that the element reads and renders as extra ghost icon buttons in the left toolbar. Each click fires a `kai-toolbar-action` CustomEvent with `detail.action` equal to the action id (the same `<kai-action>` descriptor element that `<kai-message>` uses; composition symmetry).',
+          '**Entity pills (triggers):** set the `triggers` JS property to a list of `{ char, kind, items }` definitions. Typing the trigger char (e.g. `/` for skills, `@` for agents/plugins) opens a menu; selecting an item inserts an atomic pill. `kai-submit` / `kai-value-change` carry the structured `doc` + `entities` alongside the flattened `value` string. See the *Entity Pills* and *Prefilled* stories.',
           '**Placement:** pinned to the bottom of a chat surface, full width. Set `loading` while a response streams to show the busy state, and `disabled` to block input entirely.',
           'See the **Code** tab below for the HTML usage; the *SolidJS* story shows the same element inside a Solid component.',
         ]),
@@ -231,7 +231,7 @@ const CUSTOM_TOOLBAR_SNIPPET = `<kai-prompt-input id="input" voice></kai-prompt-
 
 /** Composition: place **`<kai-action>`** children inside `<kai-prompt-input>` to add
  *  custom ghost icon buttons in the toolbar. Each click fires a `kai-toolbar-action` event
- *  with `detail.action` equal to the action id, the same `<kai-action>` descriptor
+ *  with `detail.action` equal to the action id; the same `<kai-action>` descriptor
  *  element that `<kai-message>` uses for its action bar (composition symmetry). */
 export const WithCustomToolbarActions: Story = {
   name: 'Custom Toolbar Actions (kai-action)',
@@ -249,7 +249,7 @@ export const WithCustomToolbarActions: Story = {
           ref={(e: HTMLElement) => (el = e)}
           style={{ display: 'block', width: '100%' }}
         >
-          {/* <kai-action> children are invisible data carriers, Shadow DOM hides them.
+          {/* <kai-action> children are invisible data carriers; Shadow DOM hides them.
               The element reads them via querySelectorAll + MutationObserver and renders
               a ghost icon button per entry in the left toolbar. Clicking fires kai-action. */}
           <kai-action id="attach" icon="paperclip" tooltip="Attach" />
@@ -273,7 +273,7 @@ const recordIcon =
 const tile = (hex: string) =>
   `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><rect width='32' height='32' rx='7' fill='%23${hex}'/></svg>`;
 
-// There is NO cap on items, the menu shows as many as you provide (and scrolls).
+// There is NO cap on items; the menu shows as many as you provide (and scrolls).
 // This set is intentionally large to demonstrate that.
 const ENTITY_TRIGGERS: TriggerDef[] = [
   {
@@ -316,7 +316,7 @@ const ENTITY_TRIGGERS: TriggerDef[] = [
   },
 ];
 
-/** Rich entity pills inside the real prompt input: `/` inserts a **skill**, `@`
+/** Rich entity pills inside the real prompt input: `/` inserts a **skill**; `@`
  *  inserts an **agent** (plugins are the grouping/provenance, carried in `data`).
  *  Each pill is atomic; `kai-submit`/`kai-value-change` carry the structured
  *  `doc` + `entities` alongside the flattened `value`. */
@@ -344,7 +344,7 @@ export const WithEntityPills: Story = {
 };
 
 /** Programmatic pre-population: set `value` to a **ComposerDoc** (not a string) to
- *  seed pills, skills/agents/plugins, that the user can then edit. `kai-submit`
+ *  seed pills (skills/agents/plugins) that the user can then edit. `kai-submit`
  *  still emits the flattened `value` string plus the structured `doc` + `entities`. */
 export const Prefilled: Story = {
   name: 'Prefilled (pills)',

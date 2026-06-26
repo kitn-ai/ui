@@ -149,9 +149,9 @@ This is a **comprehensive** guide to building modern web applications.
 
 ## Key Technologies
 
-- **SolidJS** -- Reactive UI framework
-- **TypeScript** -- Type-safe JavaScript
-- **Tailwind CSS** -- Utility-first styling
+- **SolidJS**: Reactive UI framework
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first styling
 
 ## Getting Started
 
@@ -179,8 +179,8 @@ For more info, visit [solidjs.com](https://solidjs.com).`,
 This is a **comprehensive** guide to building modern web apps.
 
 ## Key Technologies
-- **SolidJS** -- Reactive UI framework
-- **TypeScript** -- Type-safe JavaScript
+- **SolidJS**: Reactive UI framework
+- **TypeScript**: Type-safe JavaScript
 
 \\\`\\\`\\\`bash
 pnpm create solid

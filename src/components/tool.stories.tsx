@@ -49,7 +49,7 @@ const meta = {
   argTypes: {
     toolPart: {
       control: 'object',
-      description: 'The tool call to render, `type`, `state`, and optional `input`/`output`/`errorText`/`toolCallId`.',
+      description: 'The tool call to render: `type`, `state`, and optional `input`/`output`/`errorText`/`toolCallId`.',
     },
     defaultOpen: {
       control: 'boolean',
@@ -146,8 +146,8 @@ export const Error: Story = {
 
 export const Collapsed: Story = {
   args: { toolPart: completedPart, defaultOpen: false },
-  ...src(`// Without \`defaultOpen\` the panel starts collapsed, the header still
-// shows the tool name + state badge; click to expand the input/output.
+  ...src(`// Without \`defaultOpen\` the panel starts collapsed; the header still
+// shows the tool name + state badge. Click to expand the input/output.
 const toolPart = {
   type: 'search_documents',
   state: 'output-available',

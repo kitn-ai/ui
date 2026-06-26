@@ -91,7 +91,7 @@ const src = (code: string) => ({
 });
 
 export const Playground: Story = {
-  ...src(`// Your backend hosts the artifact; \`src\` is the live URL it serves,
+  ...src(`// Your backend hosts the artifact; \`src\` is the live URL it serves.
 // \`files\` feeds the Code tab's tree + source view.
 const src = 'https://your-app.dev/index.html';
 
@@ -125,7 +125,7 @@ export const CodeTab: Story = {
   ...src(`<Artifact src={src} files={files} tab="code" activeFile="index.html" />`),
 };
 
-/** Controlled, observe the emitted nav model. */
+/** Controlled: observe the emitted nav model. */
 export const Controlled: Story = {
   render: () => {
     const [log, setLog] = createSignal<string[]>([]);

@@ -1,6 +1,6 @@
 // Story-only helper: route a kai-* element's CustomEvents to the Storybook
 // Actions panel. The kai-* facade events are NON-bubbling (they don't reach a
-// canvas-root delegate), so each must be listened for ON THE ELEMENT — this
+// canvas-root delegate), so each must be listened for ON THE ELEMENT. This
 // attaches one listener per event the element declares in element-meta and logs
 // the `detail` payload via `action(name)`. Auto-discovered, so a story never has
 // to enumerate (or drift from) the element's event list.
@@ -11,7 +11,7 @@
 //   onMount(() => onCleanup(attachKaiActions(el)));
 //
 // For SolidJS *component* stories (Components/Elements, Components/Primitives)
-// there are no CustomEvents — wire their callback props with `fn()` in `args`
+// there are no CustomEvents; wire their callback props with `fn()` in `args`
 // per the Button exemplar instead.
 import { action } from 'storybook/actions';
 import elementMeta from '../../elements/element-meta.json';

@@ -92,7 +92,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, edit the code, language, or theme via controls. */
+/** Interactive playground: edit the code, language, or theme via controls. */
 export const Playground: Story = {
   ...src(`const code = \`interface User {
   id: string;
@@ -151,7 +151,7 @@ export const CSS: Story = {
 </CodeBlock>`),
 };
 
-/** A header row (`CodeBlockGroup`) with a filename and a copy button, showcase. */
+/** A header row (`CodeBlockGroup`) with a filename and a copy button (showcase). */
 export const WithHeader: Story = {
   render: () => (
     <div class="max-w-lg">

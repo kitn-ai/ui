@@ -44,7 +44,7 @@ const meta = {
     mediaVariant: {
       control: 'select',
       options: ['default', 'icon'],
-      description: '`EmptyMedia` variant: `icon` is a muted rounded tile, `default` is a bare slot.',
+      description: '`EmptyMedia` variant: `icon` is a muted rounded tile; `default` is a bare slot.',
       table: { defaultValue: { summary: 'default' } },
     },
     actionLabel: {

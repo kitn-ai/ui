@@ -91,9 +91,9 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, a full transcript inside the stick-to-bottom container. */
+/** Interactive playground: a full transcript inside the stick-to-bottom container. */
 export const Playground: Story = {
-  ...src(`// Your transcript, each turn is a { role, content } record.
+  ...src(`// Your transcript: each turn is a { role, content } record.
 const messages = [
   { role: 'user', content: 'What is SolidJS?' },
   { role: 'assistant', content: '**SolidJS** is a reactive UI library…' },

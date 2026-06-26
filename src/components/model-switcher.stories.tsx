@@ -93,7 +93,7 @@ export const MultipleModels: Story = {
 /**
  * Rich rows + a collapsible group. `description` renders as the row subtitle
  * (preferred over `provider`), and models sharing a `group` collect under a
- * collapsible section, the ChatGPT-style "Legacy models" pattern.
+ * collapsible section (the ChatGPT-style "Legacy models" pattern).
  */
 export const GroupedAndDescribed: Story = {
   args: {

@@ -35,7 +35,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, edit `class` to resize the placeholder. */
+/** Interactive playground: edit `class` to resize the placeholder. */
 export const Playground: Story = {
   ...src(`<Skeleton class="h-4 w-64" />`),
 };

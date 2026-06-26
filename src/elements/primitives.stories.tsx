@@ -44,7 +44,7 @@ export const Avatars: Story = {
   ),
 };
 
-/** Pills, label, count, and citation marker. */
+/** Pills: label, count, and citation marker. */
 export const Badges: Story = {
   render: () => (
     <div class="flex items-center gap-3">
@@ -55,7 +55,7 @@ export const Badges: Story = {
   ),
 };
 
-/** Tooltip wrapping a kit button, hover or focus the controls. */
+/** Tooltip wrapping a kit button. Hover or focus the controls. */
 export const Tooltips: Story = {
   render: () => (
     <div class="flex items-center gap-4 p-16">
@@ -89,7 +89,7 @@ export const Notices: Story = {
   ),
 };
 
-/** Dividers, horizontal between stacked content, vertical inside a control row. */
+/** Dividers: horizontal between stacked content, vertical inside a control row. */
 export const Separators: Story = {
   render: () => (
     <div class="flex max-w-md flex-col gap-3 text-foreground">
@@ -107,7 +107,7 @@ export const Separators: Story = {
   ),
 };
 
-/** Scroll area, themed thin scrollbar; content scrolls inside a bounded box. */
+/** Scroll area: themed thin scrollbar; content scrolls inside a bounded box. */
 export const ScrollAreaStory: Story = {
   name: 'Scroll Area',
   render: () => (
@@ -121,7 +121,7 @@ export const ScrollAreaStory: Story = {
   ),
 };
 
-/** Hover card, RICH content on hover/focus of a trigger (vs the text-only tooltip). */
+/** Hover card: RICH content on hover/focus of a trigger (vs the text-only tooltip). */
 export const HoverCards: Story = {
   render: () => (
     <div class="flex items-center gap-2 p-16 text-foreground">
@@ -140,7 +140,7 @@ export const HoverCards: Story = {
   ),
 };
 
-/** Loading placeholders, variants, responsive width, and a composed card skeleton. */
+/** Loading placeholders: variants, responsive width, and a composed card skeleton. */
 export const Skeletons: Story = {
   render: () => (
     <div class="flex flex-col gap-6 text-foreground">
@@ -155,7 +155,7 @@ export const Skeletons: Story = {
         <div class="w-full rounded-md border border-border p-3"><kai-skeleton variant="text" lines="2" /></div>
         <div class="w-1/2 rounded-md border border-border p-3"><kai-skeleton variant="text" lines="2" /></div>
       </div>
-      {/* Composed: avatar + lines, how a consumer mirrors a real layout. */}
+      {/* Composed: avatar + lines (how a consumer mirrors a real layout). */}
       <div class="flex w-72 items-center gap-3 rounded-lg border border-border p-3">
         <kai-skeleton variant="circle" width="2.5rem" />
         <div class="flex-1"><kai-skeleton variant="text" lines="2" /></div>
@@ -175,7 +175,7 @@ export const Icons: Story = {
         <kai-icon name="paperclip" />
         <kai-icon name="sparkles" size="lg" />
       </div>
-      {/* Escape hatch: any inline SVG via slot="icon", inherits currentColor. */}
+      {/* Escape hatch: any inline SVG via slot="icon"; inherits currentColor. */}
       <kai-button variant="outline" size="sm" label="Ship it" ref={withActions}>
         <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
         Ship it

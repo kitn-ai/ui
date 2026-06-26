@@ -23,7 +23,7 @@ const meta = {
     class: { control: 'text', description: 'Extra classes.' },
     onInput: {
       action: 'input',
-      description: 'Fires on every keystroke, read `event.currentTarget.value`.',
+      description: 'Fires on every keystroke; read `event.currentTarget.value`.',
       table: { category: 'Events' },
     },
     onChange: {
@@ -66,7 +66,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Type several lines, the field grows until `maxHeight`, then scrolls. Focus the field: the ring is on the frame, not a nested box. */
+/** Type several lines: the field grows until `maxHeight`, then scrolls. Focus the field: the ring is on the frame, not a nested box. */
 export const Playground: Story = {
   ...src(`{/* The frame owns the focus ring; the textarea's own ring is neutralized. */}
 <div class="cursor-text rounded-xl border bg-muted/40 p-3 focus-within:ring-2 focus-within:ring-ring">

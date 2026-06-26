@@ -54,7 +54,7 @@ const src = (code: string) => ({
 });
 
 export const Playground: Story = {
-  ...src(`// Flat list of \`/\`-delimited paths, folders are derived automatically.
+  ...src(`// Flat list of \`/\`-delimited paths: folders are derived automatically.
 const files: FileTreeFile[] = [
   { path: 'index.html', type: 'html' },
   { path: 'css/site.css', type: 'other', language: 'css' },

@@ -76,7 +76,7 @@ const meta = {
         '`<kai-composer>` is a framework-agnostic **web component** for rich prompt input. It types like a plain textarea but supports atomic inline entity pills (skills, mentions) via `/` and `@` trigger menus, keyword highlighting via the CSS Custom Highlight API, and emits a structured `{ doc, text, entities }` payload.',
         '**When to use:** any non-Solid app (React, Vue, Svelte, plain HTML) that needs a prompt input with entity-pill support.',
         '**How to use:** register once with `import \'@kitn.ai/ui/elements\'`. Set **JS properties** for `triggers`, `value`, and `highlights` (arrays/objects). Scalars (`placeholder`, `disabled`, `loading`) work as attributes. Listen for **CustomEvents** (`kai-submit`, `kai-value-change`, `kai-entity-add`, `kai-entity-remove`, `kai-trigger`, `kai-trigger-close`) directly on the element.',
-        '**Not an RTE**, no bold/italic. Entity pills are the only non-text nodes; the content surface is `contenteditable="plaintext-only"`.',
+        '**Not an RTE**: no bold/italic. Entity pills are the only non-text nodes; the content surface is `contenteditable="plaintext-only"`.',
       ]),
     },
   },
@@ -281,7 +281,7 @@ const PREFILLED_SNIPPET = `<kai-composer id="composer" style="display:block; wid
   composer.addEventListener('kai-submit', (e) => console.log('submit:', e.detail));
 </script>`;
 
-/** Pre-populate via the `value` property, a doc containing an entity pill
+/** Pre-populate via the `value` property: a doc containing an entity pill
  *  followed by text. The pill renders as an atomic inline chip. */
 export const Prefilled: Story = {
   render: () => {
@@ -336,7 +336,7 @@ export const Prefilled: Story = {
 // ---------------------------------------------------------------------------
 
 /** All three pill skins in one field, seeded via a doc `value`: skills and
- *  agents render LIGHT, decorated inline text led by their sigil (`/`, `@`)
+ *  agents render LIGHT (decorated inline text led by their sigil: `/`, `@`),
  *  while a plugin renders as a richer chip (it bundles tools/skills/agents, so
  *  it reads differently at a glance). */
 export const PillKinds: Story = {
@@ -347,7 +347,7 @@ export const PillKinds: Story = {
       if (!el) return;
       el.value = [
         { type: 'text', text: 'Review ' },
-        // Capitalized labels on purpose, the pill DISPLAY lowercases them (CSS),
+        // Capitalized labels on purpose: the pill DISPLAY lowercases them (CSS),
         // while the entity label + emitted payload keep the original casing.
         { type: 'entity', entity: { kind: 'skill', id: 'record-replay', label: 'Record-Replay' } },
         { type: 'text', text: ' then ask ' },

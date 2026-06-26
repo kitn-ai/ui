@@ -127,7 +127,7 @@ const usage = `<Context usedTokens={85000} maxTokens={128000} inputTokens={60000
   </ContextContent>
 </Context>`;
 
-/** Interactive playground, tweak token counts to watch the ring, bar color, and breakdown update. */
+/** Interactive playground: tweak token counts to watch the ring, bar color, and breakdown update. */
 export const Playground: Story = {
   ...src(usage),
 };
@@ -207,7 +207,7 @@ const customThresholdUsage = `<Context
 </Context>`;
 
 /**
- * Custom thresholds, `warnThreshold=0.5` / `dangerThreshold=0.75` so the bar
+ * Custom thresholds: `warnThreshold=0.5` / `dangerThreshold=0.75` so the bar
  * turns yellow at 50% and red at 75%. At 55% (110 000 / 200 000) the bar renders
  * yellow even though the defaults would show green at this level.
  */

@@ -65,7 +65,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, toggle `isActive` and edit the conversation object. */
+/** Interactive playground: toggle `isActive` and edit the conversation object. */
 export const Playground: Story = {
   ...src(`const conversation: ConversationSummary = {
   id: '1',
@@ -107,7 +107,7 @@ export const LongTitle: Story = {
 />`),
 };
 
-/** Several items stacked, one active, showcase. */
+/** Several items stacked, one active (showcase). */
 export const MultipleItems: Story = {
   render: (args: { onSelect: (id: string) => void }) => (
     <div class="w-64 space-y-0.5">

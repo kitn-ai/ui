@@ -48,7 +48,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, the default flag icon with a restore trigger. */
+/** Interactive playground: the default flag icon with a restore trigger. */
 export const Playground: Story = {
   ...src(`<Checkpoint>
   <CheckpointIcon />

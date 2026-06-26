@@ -54,7 +54,7 @@ const meta = {
     layout: 'fullscreen',
     // Theme-driven: the whole showcase follows the Storybook light/dark toggle
     // (preview.ts syncs it onto every kai-* element). We default the toggle to
-    // dark so it opens matching the reference, but it's fully theme-aware, flip
+    // dark so it opens matching the reference, but it's fully theme-aware; flip
     // the toggle for light. No per-element theme, no forced palette.
     darkMode: { current: 'dark' },
   },
@@ -151,12 +151,12 @@ function ComposerShowcase() {
       onCleanup(attachKaiActions(inputEl));
     }
 
-    // The self-dismissing notice, log its kai-dismiss event.
+    // The self-dismissing notice: log its kai-dismiss event.
     if (noticeEl) {
       onCleanup(attachKaiActions(noticeEl));
     }
 
-    // Suggestion chips, data is a JS property; each item carries an icon name.
+    // Suggestion chips: data is a JS property; each item carries an icon name.
     if (suggestionsEl) {
       suggestionsEl.suggestions = [
         { label: 'Write', icon: 'pencil' },
@@ -230,7 +230,7 @@ function ComposerShowcase() {
 }
 
 // Named distinctly from the "Composer" group so Storybook does NOT single-story-
-// hoist it, keeps every Lab a consistent topic folder, not a lone leaf.
+// hoist it; keeps every Lab a consistent topic folder, not a lone leaf.
 export const ProductionComposer: Story = {
   render: () => <ComposerShowcase />,
   parameters: {

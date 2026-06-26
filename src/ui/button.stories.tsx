@@ -4,7 +4,7 @@ import { Button } from './button';
 import { componentDescription } from '../stories/docs/element-controls';
 
 /**
- * Convention exemplar, every component story should follow this shape:
+ * Convention exemplar: every component story should follow this shape:
  * `component`, a description, `argTypes` (controls), `args` (defaults incl.
  * `fn()` for events), a `Playground` story rendered from args, plus showcase
  * stories for notable variations.
@@ -68,7 +68,7 @@ type Story = StoryObj<typeof meta>;
  * "Show code" / "Copy code" buttons surface. `language: 'tsx'` labels it as SolidJS.
  *
  * Note: `Button` is a SolidJS *component* (a scoped import), not a global custom
- * element, so the unprefixed name can't conflict with anything, alias on import
+ * element, so the unprefixed name can't conflict with anything; alias on import
  * if a host already has a `Button`. Only the web components (`<kai-chat>`, …)
  * are prefixed, because those claim global custom-element tag names.
  */
@@ -77,7 +77,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, tweak the controls to explore every combination. */
+/** Interactive playground: tweak the controls to explore every combination. */
 export const Playground: Story = {
   ...src(`<Button variant="default" size="md" onClick={() => {}}>Click me</Button>`),
 };

@@ -50,7 +50,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground, tweak the controls to explore image vs. fallback and sizes. */
+/** Interactive playground: tweak the controls to explore image vs. fallback and sizes. */
 export const Playground: Story = {
   ...src(`<Avatar fallback="JD" size="md" />`),
 };
