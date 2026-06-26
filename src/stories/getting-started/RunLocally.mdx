@@ -18,11 +18,11 @@ npm install
 npm run dev   # http://localhost:6006
 ```
 
-`npm run dev` and `npm run storybook` are the same command — build the CSS, launch Storybook on 6006. Stories live next to their source, mirroring the layers:
+`npm run dev` and `npm run storybook` are the same command: build the CSS, launch Storybook on 6006. Stories live next to their source, mirroring the layers:
 
-- `src/ui/*.stories.tsx` — UI primitives.
-- `src/components/*.stories.tsx` — feature components.
-- `src/elements/*.stories.tsx` — the `kai-*` elements.
+- `src/ui/*.stories.tsx`: UI primitives.
+- `src/components/*.stories.tsx`: feature components.
+- `src/elements/*.stories.tsx`: the `kai-*` elements.
 
 Editing a story or its source hot-reloads the open story.
 
@@ -34,7 +34,7 @@ npm run test:watch  # re-run on change
 npm run typecheck   # tsc across the Solid src, React wrappers, React tests, and the MCP
 ```
 
-`npm run test:storybook` runs the stories in a real browser. Test the Solid component (e.g. `Switch`), not the element — the facade isn't testable under jsdom. Browser-only element behavior is covered by Playwright.
+`npm run test:storybook` runs the stories in a real browser. Test the Solid component (e.g. `Switch`), not the element: the facade isn't testable under jsdom. Browser-only element behavior is covered by Playwright.
 
 ## Build
 
@@ -44,4 +44,4 @@ npm run build
 
 Compiles the library bundles, then (in `postbuild`) builds the theme tokens, regenerates the API metadata, and emits the schemas.
 
-`npm run build:api` (run by the build) reads the elements and emits the machine-readable specs — `element-meta.json`, `dist/custom-elements.json`, the React wrappers, and `llms.txt` / `llms-full.txt`. These drive the reference tables, the React adapter, and the for-agents output. They're generated: change the source, then regenerate — don't hand-edit.
+`npm run build:api` (run by the build) reads the elements and emits the machine-readable specs: `element-meta.json`, `dist/custom-elements.json`, the React wrappers, and `llms.txt` / `llms-full.txt`. These drive the reference tables, the React adapter, and the for-agents output. They're generated, so change the source and regenerate; don't hand-edit.

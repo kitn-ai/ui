@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # How it's built
 
-Every `kai-*` element is a thin Shadow-DOM wrapper around a SolidJS component. The behavior — streaming, auto-resize, stick-to-bottom scroll, accessible toggles — lives in the Solid code underneath; the element is the layer that makes it a custom tag any framework can use.
+Every `kai-*` element is a thin Shadow-DOM wrapper around a SolidJS component. The behavior (streaming, auto-resize, stick-to-bottom scroll, accessible toggles) lives in the Solid code underneath. The element is the layer that makes it a custom tag any framework can use.
 
 ## Four layers
 
@@ -17,16 +17,16 @@ src/components/   →  AI feature components (ChatContainer, Message, PromptInpu
 src/elements/     →  kai-* custom elements (the Shadow-DOM facade)
 ```
 
-1. **Headless primitives** (`src/primitives/`) — behavior, no markup. Solid hooks and utilities: `useTextStream`, `useStickToBottom` (yields when the reader scrolls up), `useAutoResize`, `useVoiceRecorder`, and the generative-UI card contract.
-2. **UI primitives** (`src/ui/`) — accessible building blocks styled through the design tokens: `Button`, `Avatar`, `Switch`, `Tooltip`, `HoverCard`, `Dropdown`, `Resizable`, `ScrollArea`, `Separator`. Keyboard-operable, theme-aware, chat-agnostic.
-3. **Feature components** (`src/components/`) — the AI surface: `ChatContainer`, `Message`, `PromptInput`, `Markdown`, `Reasoning`, `Tool`, `Artifact`, `ConversationList`, the cards.
-4. **Element facade** (`src/elements/`) — each feature component wrapped as a `kai-*` element: Shadow DOM, the token stylesheet, prop/attribute handling, `kai-*` events. Most files are a few lines.
+1. **Headless primitives** (`src/primitives/`): behavior, no markup. Solid hooks and utilities like `useTextStream`, `useStickToBottom` (yields when the reader scrolls up), `useAutoResize`, `useVoiceRecorder`, and the generative-UI card contract.
+2. **UI primitives** (`src/ui/`): accessible building blocks styled through the design tokens, like `Button`, `Avatar`, `Switch`, `Tooltip`, `HoverCard`, `Dropdown`, `Resizable`, `ScrollArea`, `Separator`. Keyboard-operable, theme-aware, chat-agnostic.
+3. **Feature components** (`src/components/`): the AI surface, like `ChatContainer`, `Message`, `PromptInput`, `Markdown`, `Reasoning`, `Tool`, `Artifact`, `ConversationList`, the cards.
+4. **Element facade** (`src/elements/`): each feature component wrapped as a `kai-*` element, adding Shadow DOM, the token stylesheet, prop/attribute handling, and `kai-*` events. Most files are a few lines.
 
 The package exports two of these directly: `@kitn.ai/ui` ships layers 1–3 as Solid source; `@kitn.ai/ui/elements` registers layer 4. Inside a Solid app you can skip the wrapper and compose the components directly; anywhere else, the element drops in with no Solid runtime and its styles sealed in Shadow DOM.
 
 ## The facade
 
-`<kai-switch>` is the whole element — a wrapper around the `Switch` primitive:
+`<kai-switch>` is the whole element, a wrapper around the `Switch` primitive:
 
 ```tsx
 import { defineWebComponent } from './define';
@@ -53,6 +53,6 @@ defineWebComponent('kai-switch', {
 - Adds a `theme` prop (`light` / `dark` / `auto`) that toggles the dark token scope.
 - Gives the facade `dispatch(type, detail)` (fires a `kai-*` `CustomEvent`) and `flag(name)`.
 
-Use `flag()` for boolean props, not the raw prop: a bare attribute (`<kai-switch checked>`) parses to `undefined`, so `flag` is what makes `<kai-switch checked>`, `checked="true"`, and `el.checked = true` all read as on.
+Use `flag()` for boolean props, not the raw prop. A bare attribute (`<kai-switch checked>`) parses to `undefined`, so `flag` is what makes `<kai-switch checked>`, `checked="true"`, and `el.checked = true` all read as on.
 
-A primitive and its element are a pair — `Switch` (Solid component) and `<kai-switch>` (element). Only the elements take the `kai-*` prefix, since they claim global tag names.
+A primitive and its element are a pair: `Switch` (Solid component) and `<kai-switch>` (element). Only the elements take the `kai-*` prefix, since they claim global tag names.

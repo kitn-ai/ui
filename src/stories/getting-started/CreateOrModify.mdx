@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Create or modify a component
 
-Adding a component means working down the layers: write the Solid component, give it a story, wrap it as a `kai-*` element. Modifying one is the same in reverse — change the layer that owns the behavior. A toggle touches every step, so that's the example.
+Adding a component means working down the layers: write the Solid component, give it a story, wrap it as a `kai-*` element. Modifying one is the same in reverse: change the layer that owns the behavior. A toggle touches every step, so that's the example.
 
 ## 1. Write the component
 
@@ -16,7 +16,7 @@ import { createSignal } from 'solid-js';
 import { cn } from '../utils/cn';
 
 export interface SwitchProps {
-  checked?: boolean;        // controlled — drive from onChange
+  checked?: boolean;        // controlled, drive from onChange
   defaultChecked?: boolean; // uncontrolled initial state
   disabled?: boolean;
   label?: string;
@@ -87,7 +87,7 @@ export const Playground: Story = {};
 export const On: Story = { args: { defaultChecked: true } };
 ```
 
-Wire callbacks with `fn()` so they log to the Actions panel, and give each notable variation its own story. Element stories (in `src/elements/`) pull controls from the generated metadata with `argTypesFor(tag)` and write their blurb with `specDescription` — copy `src/elements/switch.stories.tsx`.
+Wire callbacks with `fn()` so they log to the Actions panel, and give each notable variation its own story. Element stories (in `src/elements/`) pull controls from the generated metadata with `argTypesFor(tag)` and write their blurb with `specDescription`. Copy `src/elements/switch.stories.tsx`.
 
 ## 3. Expose it as a `kai-*` element
 
@@ -122,11 +122,11 @@ defineWebComponent<Props, Events>('kai-switch', {
 ));
 ```
 
-- **Boolean props** — `flag('checked')`, not `props.checked` (a bare attribute parses to `undefined`).
-- **Events** — `dispatch('kai-change', { checked })`; the `<Props, Events>` type args keep names and payloads honest.
-- **Slots** — for content rather than data, render `<slot />` (or named slots) in the facade.
+- **Boolean props**: `flag('checked')`, not `props.checked` (a bare attribute parses to `undefined`).
+- **Events**: `dispatch('kai-change', { checked })`; the `<Props, Events>` type args keep names and payloads honest.
+- **Slots**: for content rather than data, render `<slot />` (or named slots) in the facade.
 
-`title`, `id`, `slot`, and `lang` collide with global HTMLElement attributes — `defineWebComponent` throws if you use them. Rename (a source title → `headline`).
+`title`, `id`, `slot`, and `lang` collide with global HTMLElement attributes, so `defineWebComponent` throws if you use them. Rename (a source title becomes `headline`).
 
 ## 4. Register and regenerate
 

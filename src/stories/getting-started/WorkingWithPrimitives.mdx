@@ -14,11 +14,11 @@ npm install @kitn.ai/ui solid-js
 import '@kitn.ai/ui/theme.css'; // design tokens, once near your entry
 ```
 
-The `.` entry ships raw TSX — your bundler compiles and tree-shakes it alongside your own code.
+The `.` entry ships raw TSX; your bundler compiles and tree-shakes it alongside your own code.
 
 ## Headless primitives
 
-Behavior, no markup — the layer the `kai-*` elements don't expose, so this is the main reason to import directly.
+Behavior, no markup. This is the layer the `kai-*` elements don't expose, so it's the main reason to import directly.
 
 ```tsx
 import {
@@ -29,10 +29,10 @@ import {
 } from '@kitn.ai/ui';
 ```
 
-- `useTextStream` — token-by-token streaming into your own UI.
-- `useStickToBottom` — pin a scroll container to the latest message, yielding when the reader scrolls up.
-- `useAutoResize` — grow a textarea with its content.
-- `useVoiceRecorder` — microphone capture state.
+- `useTextStream`: token-by-token streaming into your own UI.
+- `useStickToBottom`: pin a scroll container to the latest message, yielding when the reader scrolls up.
+- `useAutoResize`: grow a textarea with its content.
+- `useVoiceRecorder`: microphone capture state.
 
 `ChatConfig` (with `useChatConfig`) sets shared options like prose size for everything inside it.
 
@@ -46,15 +46,15 @@ import { createKaiChat } from '@kitn.ai/ui';          // SolidJS store
 // React: import { useKaiChat } from '@kitn.ai/ui/react';
 ```
 
-- `appendMessage` / `upsertMessage` / `updateMessage` / `removeMessage` / `appendContent` — immutable `ChatMessage[]` updates (new array reference per change, so the element re-renders).
-- `createAssistantStream(set)` — a handle that grows one in-flight assistant message: `appendText`, `appendReasoning`, `upsertTool`, `patch`, `done`, `abort`.
-- `useKaiChat` (React) / `createKaiChat` (Solid) — own the message list, wire submit, return a spreadable `bind`.
+- `appendMessage` / `upsertMessage` / `updateMessage` / `removeMessage` / `appendContent`: immutable `ChatMessage[]` updates (new array reference per change, so the element re-renders).
+- `createAssistantStream(set)`: a handle that grows one in-flight assistant message via `appendText`, `appendReasoning`, `upsertTool`, `patch`, `done`, `abort`.
+- `useKaiChat` (React) / `createKaiChat` (Solid): own the message list, wire submit, return a spreadable `bind`.
 
 See the **Examples → State & Hooks** story for the setter contract and streaming loop.
 
 ## UI primitives
 
-The kit's accessible building blocks — useful well outside a chat.
+The kit's accessible building blocks, useful well outside a chat.
 
 ```tsx
 import { Button, Avatar, Badge, Separator } from '@kitn.ai/ui';
@@ -93,10 +93,10 @@ import {
 <Artifact files={artifactFiles} />
 ```
 
-`ChatContainer` is transport-agnostic: it owns the conversation UI, you own the request — stream the reply into your signal from `PromptInput`'s `onSubmit`. `Markdown` reads its prose size from the surrounding `ChatConfig`, not a prop. Each component has a story under **Components → Elements**.
+`ChatContainer` is transport-agnostic: it owns the conversation UI, you own the request. Stream the reply into your signal from `PromptInput`'s `onSubmit`. `Markdown` reads its prose size from the surrounding `ChatConfig`, not a prop. Each component has a story under **Components → Elements**.
 
 ## Mixing the two
 
-Native components and `kai-*` elements ship in the same package and coexist — compose primitives where you want control, drop a `<kai-chat>` shell where you want defaults.
+Native components and `kai-*` elements ship in the same package and coexist. Compose primitives where you want control, drop a `<kai-chat>` shell where you want defaults.
 
 When you use a `kai-*` element inside Solid, bind arrays/objects with `prop:` (`prop:messages={messages()}`) so Solid sets a DOM property instead of stringifying, and listen with `on:` (`on:kai-submit`).

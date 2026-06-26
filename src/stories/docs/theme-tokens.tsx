@@ -34,10 +34,10 @@ export const PURPOSE: Record<string, string> = {
   '--color-surface': 'Raised surface (panels)',
   '--color-surface-strong': 'Stronger raised surface',
   '--color-surface-sunken': 'Recessed / inset surface',
-  '--color-tool-blue': 'Tool-call accent — running / info',
-  '--color-tool-green': 'Tool-call accent — success',
-  '--color-tool-amber': 'Tool-call accent — pending / warning',
-  '--color-tool-red': 'Tool-call accent — error',
+  '--color-tool-blue': 'Tool-call accent: running / info',
+  '--color-tool-green': 'Tool-call accent: success',
+  '--color-tool-amber': 'Tool-call accent: pending / warning',
+  '--color-tool-red': 'Tool-call accent: error',
   '--color-scrollbar-thumb': 'Custom scrollbar thumb',
   '--color-scrollbar-thumb-hover': 'Scrollbar thumb (hover)',
   '--text-body': 'Body copy',
@@ -107,7 +107,7 @@ function discover(): { colors: ColorToken[]; radii: RadiusToken[]; texts: TextTo
     .map((name) => ({ name, light: get(rootCS, name), dark: get(darkCS, name) || get(rootCS, name) }));
   const texts = names
     .filter((n) => n.startsWith('--text-'))
-    .map((name) => ({ name, size: get(rootCS, name), lineHeight: get(rootCS, `${name}--line-height`) || '—' }));
+    .map((name) => ({ name, size: get(rootCS, name), lineHeight: get(rootCS, `${name}--line-height`) || '-' }));
   const radii = KIT_RADII.map((name) => ({ name, value: get(rootCS, name) })).filter((r) => r.value);
 
   probe.remove();
@@ -173,10 +173,12 @@ export function TokenTable() {
   const [data, setData] = createSignal<{ colors: ColorToken[]; radii: RadiusToken[]; texts: TextToken[] }>({ colors: [], radii: [], texts: [] });
   onMount(() => setData(discover()));
   return (
-    <div style={{ 'font-size': '15px', color: 'var(--color-foreground)', width: '100%', 'max-width': '1280px', margin: '0 auto' }}>
-      <style>{`.kit-token-link{color:#1ea7fd;font-weight:600;text-decoration:none}.kit-token-link:hover{text-decoration:underline}`}</style>
+    <div style={{ padding: '64px 20px', width: '100%' }}>
+      <style>{`.kit-token-link{color:#006DEB;text-decoration:underline}.kit-token-link:hover{text-decoration:none}html.dark .kit-token-link,.dark .kit-token-link{color:#4ea3ff}`}</style>
+      <div style={{ 'font-family': '"Nunito Sans", ui-sans-serif, system-ui, sans-serif', 'font-size': '15px', color: 'var(--color-foreground)', 'max-width': '1000px', margin: '0 auto' }}>
+      <h1 style={{ 'font-size': '32px', 'font-weight': '700', margin: '0 0 12px', color: 'var(--color-foreground)' }}>Token Reference</h1>
       <p style={{ margin: '0 0 .5rem', 'font-size': '16px', 'line-height': '1.6' }}>
-        Every value the kit renders comes from a CSS custom property — these are the design tokens.
+        Every value the kit renders comes from a CSS custom property. These are the design tokens.
         Override any of them on <code>:root</code> (or any scoped parent) to rebrand the whole kit;
         because they're plain CSS variables they cascade through the Shadow DOM into every
         <code> kai-*</code> element. The table below is generated live from the loaded
@@ -249,8 +251,9 @@ export function TokenTable() {
       </table>
 
       <p style={{ 'margin-top': '1rem', color: 'var(--color-muted-foreground)', 'font-size': '13px' }}>
-        Generated live from the loaded CSS — always reflects the current tokens in <code>theme.css</code>.
+        Generated from the loaded CSS, so it always reflects the current tokens in <code>theme.css</code>.
       </p>
+      </div>
     </div>
   );
 }

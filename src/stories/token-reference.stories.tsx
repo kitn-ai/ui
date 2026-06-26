@@ -5,7 +5,7 @@ import { TokenTable } from './docs/theme-tokens';
 // reference of every overridable theme token, shown under Getting Started.
 const meta = {
   title: 'Getting Started/Token Reference',
-  parameters: { layout: 'padded' },
+  parameters: { layout: 'fullscreen' },
 } satisfies Meta;
 
 export default meta;
