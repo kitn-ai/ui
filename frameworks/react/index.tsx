@@ -1172,12 +1172,24 @@ export interface TooltipProps extends WebComponentProps {
   content?: string;
   /** Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless. */
   openDelay?: number;
+  /** Delay (ms) before it hides after the pointer leaves. Defaults to 0 (hides immediately). */
+  closeDelay?: number;
+  /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'top'`; flips to stay in view. */
+  placement?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover/focus). Set `el.open = true`, or `<kai-tooltip open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Turn the tooltip off while keeping the trigger mounted (hover/focus and `show()` no longer open it). */
+  disabled?: boolean;
+  /** The tooltip opened or closed (by hover/focus, outside-click, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const Tooltip = createWebComponent<TooltipProps>(
   'kai-tooltip',
-  ["theme","content","openDelay"],
-  {  },
+  ["theme","content","openDelay","closeDelay","placement","open","defaultOpen","disabled"],
+  { onOpenChange: 'kai-open-change' },
 );
 
 export interface VoiceInputProps extends WebComponentProps {

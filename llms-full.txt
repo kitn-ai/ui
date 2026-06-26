@@ -1347,8 +1347,17 @@ _No events._
 |---|---|---|---|
 | `content` | `content` | `undefined \| string` | The hint text shown on hover/focus of the slotted trigger. |
 | `openDelay` | `open-delay` | `undefined \| number` | Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless. |
+| `closeDelay` | `close-delay` | `undefined \| number` | Delay (ms) before it hides after the pointer leaves. Defaults to 0 (hides immediately). |
+| `placement` | `placement` | `undefined \| string` | Preferred placement: `'top' \| 'bottom' \| 'left' \| 'right'` (+ optional `-start`/`-end`). Defaults to `'top'`; flips to stay in view. |
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover/focus). Set `el.open = true`, or `<kai-tooltip open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined \| false \| true` | Turn the tooltip off while keeping the trigger mounted (hover/focus and `show()` no longer open it). |
 
-_No events._
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The tooltip opened or closed (by hover/focus, outside-click, or a method). |
 
 ---
 

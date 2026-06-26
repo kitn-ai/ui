@@ -716,12 +716,12 @@
     "displayName": "Tooltip",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-tooltip></kai-tooltip>",
-      "react": "import { Tooltip } from '@kitn.ai/ui/react';\n\n<Tooltip />",
-      "vue": "<kai-tooltip />",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-tooltip></kai-tooltip>",
-      "angular": "<kai-tooltip></kai-tooltip>",
-      "solid": "import { Tooltip } from '@kitn.ai/ui';\n\n<Tooltip />"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-tooltip></kai-tooltip>\n<script type=\"module\">\n  const el = document.querySelector('kai-tooltip');\n  el.addEventListener('kai-open-change', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Tooltip } from '@kitn.ai/ui/react';\n\n<Tooltip\n  onOpenChange={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-tooltip\n  @kai-open-change=\"onOpenChange\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-tooltip\n  on:kai-open-change={onOpenChange}\n></kai-tooltip>",
+      "angular": "<kai-tooltip\n  (kai-open-change)=\"onOpenChange($event)\"\n></kai-tooltip>",
+      "solid": "import { Tooltip } from '@kitn.ai/ui';\n\n<Tooltip\n  onOpenChange={(e) => console.log(e.detail)}\n/>"
     }
   },
   {

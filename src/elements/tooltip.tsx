@@ -1,5 +1,7 @@
-import { Tooltip } from '../ui/tooltip';
+import { type Placement } from '@floating-ui/dom';
+import { Tooltip, type TooltipController } from '../ui/tooltip';
 import { defineWebComponent } from './define';
+import { wireDisclosure } from './disclosure';
 
 interface Props extends Record<string, unknown> {
   /** The hint text shown on hover/focus of the slotted trigger. */
@@ -7,6 +9,27 @@ interface Props extends Record<string, unknown> {
   /** Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus
    *  shows it immediately regardless. */
   openDelay?: number;
+  /** Delay (ms) before it hides after the pointer leaves. Defaults to 0 (hides
+   *  immediately). */
+  closeDelay?: number;
+  /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional
+   *  `-start`/`-end`). Defaults to `'top'`; flips to stay in view. */
+  placement?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open`
+   *  attribute, the element still self-manages on hover/focus). Set `el.open = true`,
+   *  or `<kai-tooltip open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Turn the tooltip off while keeping the trigger mounted (hover/focus and
+   *  `show()` no longer open it). */
+  disabled?: boolean;
+}
+
+/** Events fired by `<kai-tooltip>`. */
+interface Events {
+  /** The tooltip opened or closed (by hover/focus, outside-click, or a method). */
+  'kai-open-change': { open: boolean };
 }
 
 /**
@@ -21,14 +44,33 @@ interface Props extends Record<string, unknown> {
  * </kai-tooltip>
  * ```
  */
-defineWebComponent<Props>('kai-tooltip', {
+defineWebComponent<Props, Events>('kai-tooltip', {
   content: '',
   openDelay: undefined,
-}, (props) => (
-  <Tooltip
-    content={props.content ?? ''}
-    openDelay={props.openDelay != null ? Number(props.openDelay) : undefined}
-  >
-    <slot />
-  </Tooltip>
-));
+  closeDelay: undefined,
+  placement: undefined,
+  open: undefined,
+  defaultOpen: undefined,
+  disabled: undefined,
+}, (props, ctx) => {
+  const { flag } = ctx;
+  let api: TooltipController | undefined;
+
+  // The standard overlay surface: settable+reflecting `open`, kai-open-change,
+  // show/hide/toggle, disabled-gating. See ./disclosure.
+  wireDisclosure(ctx, () => api, () => props.open);
+
+  return (
+    <Tooltip
+      content={props.content ?? ''}
+      openDelay={props.openDelay != null ? Number(props.openDelay) : undefined}
+      closeDelay={props.closeDelay != null ? Number(props.closeDelay) : undefined}
+      placement={(props.placement as Placement | undefined) ?? undefined}
+      defaultOpen={flag('defaultOpen')}
+      disabled={flag('disabled')}
+      controllerRef={(a) => (api = a)}
+    >
+      <slot />
+    </Tooltip>
+  );
+});
