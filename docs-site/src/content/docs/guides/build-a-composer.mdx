@@ -1,0 +1,164 @@
+---
+title: Build a composer
+description: Assemble a Claude-style composer — a + menu, model switcher, effort menu, voice buttons, suggestions, and a notice — from kai-prompt-input's slots.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import ComposerDemo from '../../../components/ComposerDemo.tsx';
+
+<p class="kai-lede">`<kai-prompt-input>` ships a textarea and a Send button. Everything else — the `+` menu, a model switcher, an effort selector, voice buttons, suggestion chips — you compose in through its toolbar slots. Here's the full Claude-style composer, built from kit pieces. Open the `+` menu, switch models, pick an effort, or click a starter.</p>
+
+<ComposerDemo client:only="solid" />
+
+The card exposes three slots — `input-top`, `toolbar-start`, and `toolbar-end` — all inside its shadow boundary. Anything you want *above or below the whole card* (the notice, the chips) is your own layout: a sibling element, not a slot. We build it in that order.
+
+<Aside type="note" title="Slots, parts, and props">
+A **slot** is a named region you fill with your own markup — use it to add or replace a piece. A **`::part`** is an element the kit renders that you restyle from outside. Reach for a **prop** only for behavior CSS can't express. See [How composition works](/guides/how-composition-works/) for the full model.
+</Aside>
+
+## Start with the input
+
+Register the elements once, then drop the card in. `submit="auto"` hides the Send button until there's text; `attach={false}` (the `attach` attribute set to `false`) drops the built-in paperclip so you can supply your own attach action from the `+` menu.
+
+```html
+<script type="module">
+  import '@kitn.ai/ui/elements';
+</script>
+
+<kai-prompt-input
+  placeholder="How can I help you today?"
+  attach="false"
+  submit="auto"
+></kai-prompt-input>
+```
+
+Listen for `kai-submit` on the element itself — kit events don't bubble. `event.detail.value` is the flattened text.
+
+```js
+const input = document.querySelector('kai-prompt-input');
+input.addEventListener('kai-submit', (e) => {
+  console.log('send:', e.detail.value);
+});
+```
+
+## Add the + menu in toolbar-start
+
+`toolbar-start` is the leading region of the toolbar — the conventional home for a `+` attach menu. Project a `<kai-menu>` there. Give it `trigger-icon="plus"` for the built-in icon button and a `label` so the icon-only trigger has an accessible name.
+
+```html
+<kai-prompt-input placeholder="How can I help you today?" attach="false" submit="auto">
+  <kai-menu slot="toolbar-start" trigger-icon="plus" label="Add"></kai-menu>
+</kai-prompt-input>
+```
+
+The menu's `items` is an array, so set it in JavaScript (arrays can't be HTML attributes). Nest items for a submenu, add `{ separator: true }` for a rule, and `checked` for a toggle. The `kai-select` event carries `{ id }` (plus `checked` for toggle items).
+
+```js
+const plus = document.querySelector('kai-menu[slot="toolbar-start"]');
+plus.items = [
+  { id: 'add-files', label: 'Add files or photos', icon: 'paperclip', shortcut: '⌘U' },
+  { id: 'add-github', label: 'Add from GitHub', icon: 'github' },
+  {
+    label: 'Skills', icon: 'sparkles',
+    items: [
+      { id: 'skill-creator', label: 'skill-creator', icon: 'sparkles' },
+      { id: 'manage-skills', label: 'Manage skills', icon: 'settings' },
+    ],
+  },
+  { separator: true },
+  { id: 'web-search', label: 'Web search', icon: 'globe', checked: false },
+];
+
+plus.addEventListener('kai-select', (e) => {
+  console.log('menu:', e.detail.id);
+});
+```
+
+## Add the trailing cluster in toolbar-end
+
+`toolbar-end` is the trailing region, just before the Send button. The model switcher, an effort menu, and the two voice buttons live here. Wrap them in a plain `<div slot="toolbar-end">` — one slot holds the whole group, and your wrapper lays them out.
+
+```html
+<kai-prompt-input placeholder="How can I help you today?" attach="false" submit="auto">
+  <kai-menu slot="toolbar-start" trigger-icon="plus" label="Add"></kai-menu>
+
+  <div slot="toolbar-end" style="display:flex; align-items:center; gap:.25rem">
+    <kai-model-switcher></kai-model-switcher>
+    <kai-menu trigger-label="High" trigger-icon-trailing="chevron-down"></kai-menu>
+    <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice input"></kai-button>
+    <kai-button variant="subtle" size="icon-sm" icon="audio-lines" label="Voice mode"></kai-button>
+  </div>
+</kai-prompt-input>
+```
+
+Wire the model switcher and the effort menu the same way — array data in JavaScript, events on the element. The model switcher fires `kai-model-change`; the effort menu reuses `kai-select`.
+
+```js
+const models = document.querySelector('kai-model-switcher');
+models.models = [
+  { id: 'opus-4-8', name: 'Opus 4.8' },
+  { id: 'sonnet', name: 'Sonnet' },
+  { id: 'haiku', name: 'Haiku' },
+];
+models.currentModel = 'opus-4-8';
+models.addEventListener('kai-model-change', (e) => console.log('model:', e.detail));
+
+const effort = document.querySelector('div[slot="toolbar-end"] kai-menu');
+effort.items = [
+  { heading: true, label: 'Effort' },
+  { id: 'high', label: 'High' },
+  { id: 'medium', label: 'Medium' },
+  { id: 'low', label: 'Low' },
+];
+effort.addEventListener('kai-select', (e) => console.log('effort:', e.detail.id));
+```
+
+<Aside type="tip" title="Why a menu, not props, for effort">
+The effort selector is a `<kai-menu>` with `trigger-label` + a trailing chevron — not a prompt-input prop. Composing it from a menu means you own the options and the label, and `kai-prompt-input` stays a composer, not a settings panel. Same reasoning for the model switcher: it's its own element you drop into the slot.
+</Aside>
+
+The mic and voice buttons are plain `<kai-button>`s — `variant` + `icon` do the styling, and `label` is required because they're icon-only. Listen for `kai-click` to wire them up. `<kai-prompt-input>` also has built-in `voice` and `search` props if you'd rather use its own toolbar buttons; here we compose our own so they sit in the trailing cluster.
+
+## Suggestions and the notice — your own layout
+
+The chips below the card and the notice above it aren't slots — there's no region for them inside the card's shadow boundary. They're sibling elements in your layout. Stack them around the input:
+
+```html
+<div style="display:flex; flex-direction:column; gap:.75rem; max-width:640px">
+  <kai-notice severity="warning" dismissible>
+    A scheduled maintenance window starts at 18:00 UTC.
+    <a slot="action" href="/status">Status</a>
+  </kai-notice>
+
+  <kai-prompt-input placeholder="How can I help you today?" attach="false" submit="auto">
+    <!-- toolbar-start + toolbar-end slots, as above -->
+  </kai-prompt-input>
+
+  <kai-suggestions variant="outline" size="sm"></kai-suggestions>
+</div>
+```
+
+`<kai-notice>` takes a `severity`, an optional `action` slot for a link, and `dismissible` for the × (which fires `kai-dismiss`). `<kai-suggestions>` takes its chips in JavaScript; clicking one fires `kai-select`.
+
+```js
+const suggestions = document.querySelector('kai-suggestions');
+suggestions.suggestions = [
+  { label: 'Write', icon: 'pencil' },
+  { label: 'Learn', icon: 'book-open' },
+  { label: 'Code', icon: 'code' },
+  { label: 'Life stuff', icon: 'smile' },
+];
+suggestions.addEventListener('kai-select', (e) => {
+  document.querySelector('kai-prompt-input').value = e.detail.value ?? e.detail.label;
+});
+```
+
+<Aside type="note" title="Above/below the card vs. inside it">
+`input-top`, `toolbar-start`, and `toolbar-end` are the *only* slots on `<kai-prompt-input>` — they reach positions inside the card you can't get to from your own DOM. Content that wraps the card (a notice, chips, a footer) is light DOM you already control, so it's a sibling, not a slot. `input-top` is handy for an inline status strip above the textarea.
+</Aside>
+
+## Next
+
+- **[Compose your own shell](/patterns/compose-your-own/)** — step down from `<kai-chat>` and assemble the sidebar, thread, and composer for full layout control.
+- **[`kai-prompt-input` reference](/components/prompt-input/)** — every prop, event, slot, and `::part` (including hiding Send via `::part(send)`).
+- **[`kai-menu` reference](/components/menu/)** and **[`kai-model-switcher` reference](/components/model-switcher/)** — the menu item tree and the model/group options.

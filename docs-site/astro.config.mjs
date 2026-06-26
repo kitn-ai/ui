@@ -75,12 +75,23 @@ export default defineConfig({
               { label: 'Introduction', slug: 'guides/introduction' },
               { label: 'Installation', slug: 'guides/installation' },
               { label: 'Getting Started', slug: 'guides/getting-started' },
-              { label: 'State helpers & hooks', slug: 'guides/state-and-hooks' },
-              { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
-              { label: 'Loading', slug: 'guides/loading' },
+              // Tier 1 — use what we ship
+              { label: 'Use the chat app', slug: 'guides/use-the-chat-app' },
+              { label: 'Use a workspace', slug: 'guides/use-a-workspace' },
+              // Tier 2 — compose & customize
+              {
+                label: 'Compose & customize',
+                items: [
+                  { label: 'How composition works', slug: 'guides/how-composition-works' },
+                  { label: 'Build a composer', slug: 'guides/build-a-composer' },
+                ],
+              },
               { label: 'Theming', slug: 'guides/theming' },
-              { label: 'Accessibility', slug: 'guides/accessibility' },
+              { label: 'State helpers & hooks', slug: 'guides/state-and-hooks' },
               { label: 'Generative UI', slug: 'guides/generative-ui' },
+              { label: 'Loading', slug: 'guides/loading' },
+              { label: 'Accessibility', slug: 'guides/accessibility' },
+              { label: 'For AI Agents', slug: 'guides/for-ai-agents' },
               {
                 label: 'Working with primitives',
                 items: [
