@@ -333,6 +333,7 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 |-------|-----------|-------------|
 | `kai-conversation-select` | `{ id: string }` | A conversation was selected. |
 | `kai-new-chat` | — | The "New chat" button was clicked. |
+| `kai-search` | `{ query: string }` | The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter. |
 | `kai-toggle-sidebar` | — | The sidebar toggle was clicked. |
 
 #### Slots

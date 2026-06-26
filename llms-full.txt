@@ -593,6 +593,7 @@ _No events._
 |---|---|---|
 | `kai-conversation-select` | `CustomEvent<{ id: string }>` | A conversation was selected. |
 | `kai-new-chat` | `CustomEvent<Record<string, never>>` | The "New chat" button was clicked. |
+| `kai-search` | `CustomEvent<{ query: string }>` | The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter. |
 | `kai-toggle-sidebar` | `CustomEvent<Record<string, never>>` | The sidebar toggle was clicked. |
 
 **Slots** (project your own markup via `slot="name"` on a light-DOM child):
@@ -1252,9 +1253,12 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `checked` | `checked` | `undefined \| false \| true` | Initial checked state. Bare attribute (`<kai-switch checked>`) turns it on. |
+| `checked` | `checked` | `undefined \| false \| true` | Controlled checked state — settable and reflected to the `checked` attribute. `el.checked = true` (or `<kai-switch checked>`) drives it; the toggle UI updates it and fires `kai-change`. Read `el.checked` for live state. |
+| `defaultChecked` | `default-checked` | `undefined \| false \| true` | Initial checked state on mount (uncontrolled seed). Bare attribute (`<kai-switch default-checked>`) turns it on. |
 | `disabled` | `disabled` | `undefined \| false \| true` | Disable interaction. |
 | `label` | `label` | `undefined \| string` | Accessible label. |
+| `name` | `name` | `undefined \| string` | Form-control name (paired with `value`). |
+| `value` | `value` | `undefined \| string` | Submitted value when checked (paired with `name`). Defaults to `'on'`. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 

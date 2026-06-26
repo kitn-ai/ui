@@ -756,12 +756,18 @@ export interface KaiSuggestionsElement extends HTMLElement {
 export interface KaiSwitchElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** Initial checked state. Bare attribute (`<kai-switch checked>`) turns it on. */
+  /** Controlled checked state — settable and reflected to the `checked` attribute. `el.checked = true` (or `<kai-switch checked>`) drives it; the toggle UI updates it and fires `kai-change`. Read `el.checked` for live state. */
   checked?: boolean;
+  /** Initial checked state on mount (uncontrolled seed). Bare attribute (`<kai-switch default-checked>`) turns it on. */
+  defaultChecked?: boolean;
   /** Disable interaction. */
   disabled?: boolean;
   /** Accessible label. */
   label?: string;
+  /** Form-control name (paired with `value`). */
+  name?: string;
+  /** Submitted value when checked (paired with `name`). Defaults to `'on'`. */
+  value?: string;
 }
 
 export interface KaiTasksElement extends HTMLElement {

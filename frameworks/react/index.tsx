@@ -455,6 +455,8 @@ export interface ConversationsProps extends WebComponentProps {
   onConversationSelect?: (event: CustomEvent<{ id: string }>) => void;
   /** The "New chat" button was clicked. */
   onNewChat?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter. */
+  onSearch?: (event: CustomEvent<{ query: string }>) => void;
   /** The sidebar toggle was clicked. */
   onToggleSidebar?: (event: CustomEvent<Record<string, never>>) => void;
 }
@@ -462,7 +464,7 @@ export interface ConversationsProps extends WebComponentProps {
 export const Conversations = createWebComponent<ConversationsProps>(
   'kai-conversations',
   ["theme","groups","conversations","activeId"],
-  { onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onToggleSidebar: 'kai-toggle-sidebar' },
+  { onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onToggleSidebar: 'kai-toggle-sidebar' },
 );
 
 export interface EmbedProps extends WebComponentProps {
@@ -1078,19 +1080,25 @@ export const Suggestions = createWebComponent<SuggestionsProps>(
 );
 
 export interface SwitchProps extends WebComponentProps {
-  /** Initial checked state. Bare attribute (`<kai-switch checked>`) turns it on. */
+  /** Controlled checked state — settable and reflected to the `checked` attribute. `el.checked = true` (or `<kai-switch checked>`) drives it; the toggle UI updates it and fires `kai-change`. Read `el.checked` for live state. */
   checked?: boolean;
+  /** Initial checked state on mount (uncontrolled seed). Bare attribute (`<kai-switch default-checked>`) turns it on. */
+  defaultChecked?: boolean;
   /** Disable interaction. */
   disabled?: boolean;
   /** Accessible label. */
   label?: string;
+  /** Form-control name (paired with `value`). */
+  name?: string;
+  /** Submitted value when checked (paired with `name`). Defaults to `'on'`. */
+  value?: string;
   /** The toggle changed. */
   onChange?: (event: CustomEvent<{ checked: boolean }>) => void;
 }
 
 export const Switch = createWebComponent<SwitchProps>(
   'kai-switch',
-  ["theme","checked","disabled","label"],
+  ["theme","checked","defaultChecked","disabled","label","name","value"],
   { onChange: 'kai-change' },
 );
 

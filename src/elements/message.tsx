@@ -61,7 +61,7 @@ defineWebComponent<Props, Events>('kai-message', {
   avatarSrc: undefined,
   avatarFallback: undefined,
   avatar: undefined,
-}, (props, { dispatch, flag, element }) => {
+}, (props, { dispatch, flag, element, expose }) => {
   const outer = useChatConfig();
   const msg = (): ChatMessage =>
     props.message ?? { id: 'message', role: props.role ?? 'assistant', content: props.content ?? '' };
@@ -74,6 +74,15 @@ defineWebComponent<Props, Events>('kai-message', {
     // list). Let them route to the global region (top of the viewport), which is
     // where a confirmation belongs across a hand-built thread. (Inside <kai-chat>
     // the chat owns feedback and targets ITSELF, so in-chat toasts still stay in-chat.)
+  });
+
+  // Imperative method API — `copy()` runs the exact path of the built-in copy
+  // action (`feedback.handleAction(msg, 'copy')`): writes the content to the
+  // clipboard, shows the transient copied-check on the bar, and emits
+  // `kai-message-action{action:'copy'}`.
+  expose({
+    /** Copy the message content to the clipboard and show the copied check. */
+    copy: () => feedback.handleAction(msg(), 'copy'),
   });
 
   // Read declarative <kai-action> children from light DOM.

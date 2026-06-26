@@ -11,8 +11,15 @@ export interface SwitchProps {
   disabled?: boolean;
   /** Accessible label for the control. */
   label?: string;
+  /** Form-control name. When set (paired with `value`), a hidden checkbox carries
+   *  the on/off value for serialization. */
+  name?: string;
+  /** Submitted value when checked (paired with `name`). Defaults to `'on'`. */
+  value?: string;
   /** Fires with the next checked state on toggle. */
   onChange?: (checked: boolean) => void;
+  /** Receives the inner `role="switch"` button so a parent can focus it. */
+  buttonRef?: (el: HTMLButtonElement) => void;
   class?: string;
 }
 
@@ -33,30 +40,46 @@ export function Switch(props: SwitchProps) {
   };
 
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={isOn()}
-      aria-label={props.label}
-      disabled={props.disabled}
-      onClick={toggle}
-      onKeyDown={(e) => {
-        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); }
-      }}
-      class={cn(
-        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        isOn() ? 'bg-primary' : 'bg-muted',
-        props.class,
+    <>
+      {props.name != null && (
+        <input
+          type="checkbox"
+          name={props.name}
+          value={props.value ?? 'on'}
+          checked={isOn()}
+          disabled={props.disabled}
+          aria-hidden="true"
+          tabindex={-1}
+          style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0 0 0 0)', 'white-space': 'nowrap' }}
+          onChange={() => { /* driven by the button; keep the input in sync only */ }}
+        />
       )}
-    >
-      <span
+      <button
+        type="button"
+        role="switch"
+        ref={props.buttonRef}
+        aria-checked={isOn()}
+        aria-label={props.label}
+        disabled={props.disabled}
+        onClick={toggle}
+        onKeyDown={(e) => {
+          if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); }
+        }}
         class={cn(
-          'inline-block h-4 w-4 rounded-full bg-white shadow transition-transform',
-          isOn() ? 'translate-x-[1.125rem]' : 'translate-x-0.5',
+          'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          'disabled:cursor-not-allowed disabled:opacity-50',
+          isOn() ? 'bg-primary' : 'bg-muted',
+          props.class,
         )}
-      />
-    </button>
+      >
+        <span
+          class={cn(
+            'inline-block h-4 w-4 rounded-full bg-white shadow transition-transform',
+            isOn() ? 'translate-x-[1.125rem]' : 'translate-x-0.5',
+          )}
+        />
+      </button>
+    </>
   );
 }

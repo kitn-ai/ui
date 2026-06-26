@@ -1764,13 +1764,38 @@
         "displayDetail": "Record<string, never>"
       },
       {
+        "name": "kai-search",
+        "detail": "{ query: string }",
+        "description": "The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter.",
+        "displayDetail": "{ query: string }"
+      },
+      {
         "name": "kai-toggle-sidebar",
         "detail": "Record<string, never>",
         "description": "The sidebar toggle was clicked.",
         "displayDetail": "Record<string, never>"
       }
     ],
-    "methods": [],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the built-in search input inside the shadow root."
+      },
+      {
+        "name": "clear",
+        "params": "",
+        "returns": "void",
+        "description": "Clear the internal search query (resets the list filter) and fire kai-search with an empty string."
+      },
+      {
+        "name": "select",
+        "params": "id: string",
+        "returns": "void",
+        "description": "Programmatically select a conversation by id — mirror of the kai-conversation-select event (a convenience over driving `activeId`)."
+      }
+    ],
     "composedFrom": [
       {
         "name": "ConversationList",
@@ -2754,7 +2779,14 @@
         "displayDetail": "{ messageId: string; action: string; state?: undefined | \"on\" | \"off\" }"
       }
     ],
-    "methods": [],
+    "methods": [
+      {
+        "name": "copy",
+        "params": "",
+        "returns": "void",
+        "description": "Copy the message content to the clipboard and show the copied check."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Message",
@@ -4014,7 +4046,15 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Initial checked state. Bare attribute (`<kai-switch checked>`) turns it on.",
+        "description": "Controlled checked state — settable and reflected to the `checked` attribute. `el.checked = true` (or `<kai-switch checked>`) drives it; the toggle UI updates it and fires `kai-change`. Read `el.checked` for live state.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultChecked",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial checked state on mount (uncontrolled seed). Bare attribute (`<kai-switch default-checked>`) turns it on.",
         "displayType": "undefined | false | true"
       },
       {
@@ -4032,6 +4072,22 @@
         "scalar": true,
         "description": "Accessible label.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "name",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Form-control name (paired with `value`).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Submitted value when checked (paired with `name`). Defaults to `'on'`.",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
@@ -4042,7 +4098,20 @@
         "displayDetail": "{ checked: false | true }"
       }
     ],
-    "methods": [],
+    "methods": [
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the switch and fire `kai-change` (no-op while disabled)."
+      },
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the inner `role=\"switch\"` button (the host element can't reach it)."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Switch",

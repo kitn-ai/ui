@@ -1,4 +1,4 @@
-import { splitProps, For, Show, createSignal, createMemo, type JSX } from 'solid-js';
+import { splitProps, For, Show, createSignal, createMemo, onMount, type JSX } from 'solid-js';
 import { cn } from '../utils/cn';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../ui/collapsible';
 import { Button } from '../ui/button';
@@ -20,13 +20,40 @@ export interface ConversationListProps {
   footer?: JSX.Element;
   /** Replaces the built-in "no conversations yet" state. */
   empty?: JSX.Element;
+  /** Fired whenever the built-in search box query changes (typing or a
+   *  programmatic `clear()`). Lets the facade surface a `kai-search` event. */
+  onSearchChange?: (query: string) => void;
+  /** Receive the imperative controller once mounted. The `kai-conversations`
+   *  facade uses it to focus / clear the internal search input. */
+  controllerRef?: (controller: ConversationListController) => void;
   class?: string;
 }
 
+/** Imperative handle exposed via `controllerRef` — surfaces the internal search
+ *  box to the `kai-conversations` facade (the searchQuery signal lives here). */
+export interface ConversationListController {
+  /** Focus the built-in search `<input>`. */
+  focus(options?: FocusOptions): void;
+  /** Clear the internal search query (resets the list filter). */
+  clearSearch(): void;
+}
+
 export function ConversationList(props: ConversationListProps) {
-  const [local] = splitProps(props, ['groups', 'conversations', 'activeId', 'onSelect', 'onNewChat', 'onToggleSidebar', 'header', 'footer', 'empty', 'class']);
+  const [local] = splitProps(props, ['groups', 'conversations', 'activeId', 'onSelect', 'onNewChat', 'onToggleSidebar', 'header', 'footer', 'empty', 'onSearchChange', 'controllerRef', 'class']);
   const [searchQuery, setSearchQuery] = createSignal('');
   const isEmpty = createMemo(() => local.conversations.length === 0);
+  // The search query is owned here; setQuery is the single mutation point so both
+  // typing and the imperative clearSearch() notify the facade (→ kai-search).
+  let searchInput: HTMLInputElement | undefined;
+  const setQuery = (q: string) => { setSearchQuery(q); local.onSearchChange?.(q); };
+
+  // Hand the imperative controller (focus / clear the search box) to the facade.
+  onMount(() => {
+    local.controllerRef?.({
+      focus: (options) => searchInput?.focus(options),
+      clearSearch: () => setQuery(''),
+    });
+  });
 
   const filteredConversations = createMemo(() => {
     const q = searchQuery().toLowerCase();
@@ -71,7 +98,7 @@ export function ConversationList(props: ConversationListProps) {
         <div class="px-3 pb-2">
           <div class="flex items-center gap-2 rounded-md bg-surface px-2.5 py-1.5">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted-foreground"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" value={searchQuery()} onInput={(e) => setSearchQuery(e.currentTarget.value)} placeholder="Search chats..."
+            <input ref={searchInput} type="text" value={searchQuery()} onInput={(e) => setQuery(e.currentTarget.value)} placeholder="Search chats..."
               aria-label="Search chats"
               class="bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-full" />
           </div>
