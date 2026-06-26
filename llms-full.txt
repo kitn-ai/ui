@@ -482,6 +482,7 @@ _No events._
 
 | Event | `detail` type | Description |
 |---|---|---|
+| `kai-active-change` | `CustomEvent<{ id: undefined \| string }>` | Fired when the highlighted/active item changes — via Arrow keys or when filtering re-clamps the active row. `id` is the newly active item's id, or `undefined` when no item is active (e.g. the filtered list is empty). Lets a host preview the active item without committing a selection. |
 | `kai-query-change` | `CustomEvent<{ value: string }>` | Fired on every keystroke in the search input. |
 | `kai-select` | `CustomEvent<{ id: string }>` | Fired when the user selects an item (click or Enter). |
 
@@ -821,11 +822,15 @@ _No events._
 | `triggerLabel` | `trigger-label` | `undefined \| string` | Built-in trigger: a text label (e.g. `"High"`). |
 | `triggerIconTrailing` | `trigger-icon-trailing` | `undefined \| string` | Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). |
 | `label` | `label` | `undefined \| string` | Accessible name for an icon-only trigger (no visible label). |
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-menu open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable the trigger — click/keyboard and `show()` no longer open the menu. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). |
 | `kai-select` | `CustomEvent<{ id: string; checked?: undefined \| false \| true }>` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
 
 **Slots** (project your own markup via `slot="name"` on a light-DOM child):
@@ -930,13 +935,15 @@ _No events._
 |---|---|---|---|
 | `placement` | `placement` | `undefined \| "top" \| "right" \| "bottom" \| "left" \| "top-start" \| "top-end" \| "right-start" \| "right-end" \| "bottom-start" \| "bottom-end" \| "left-start" \| "left-end"` | Floating placement relative to the trigger (floating-ui placement). |
 | `gutter` | `gutter` | `undefined \| number` | Gap in px between the trigger and the panel. |
-| `open` | `open` | `undefined \| false \| true` | Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour. |
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on click). Set `el.open = true`, or `<kai-popover open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined \| false \| true` | Turn the popover off while keeping the trigger mounted (clicks and `show()` no longer open it). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The popover wants to open or close (click, Escape, or outside-click). |
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The popover opened or closed (click, Escape, outside-click, or a method). |
 
 ---
 

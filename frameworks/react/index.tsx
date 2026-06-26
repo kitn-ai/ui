@@ -322,6 +322,8 @@ export interface CommandProps extends WebComponentProps {
   placeholder?: string;
   /** Label shown when no items match the current query. */
   emptyLabel?: string;
+  /** Fired when the highlighted/active item changes — via Arrow keys or when filtering re-clamps the active row. `id` is the newly active item's id, or `undefined` when no item is active (e.g. the filtered list is empty). Lets a host preview the active item without committing a selection. */
+  onActiveChange?: (event: CustomEvent<{ id: undefined | string }>) => void;
   /** Fired on every keystroke in the search input. */
   onQueryChange?: (event: CustomEvent<{ value: string }>) => void;
   /** Fired when the user selects an item (click or Enter). */
@@ -331,7 +333,7 @@ export interface CommandProps extends WebComponentProps {
 export const Command = createWebComponent<CommandProps>(
   'kai-command',
   ["theme","items","placeholder","emptyLabel"],
-  { onQueryChange: 'kai-query-change', onSelect: 'kai-select' },
+  { onActiveChange: 'kai-active-change', onQueryChange: 'kai-query-change', onSelect: 'kai-select' },
 );
 
 export interface CompareProps extends WebComponentProps {
@@ -682,14 +684,22 @@ export interface MenuProps extends WebComponentProps {
   triggerIconTrailing?: string;
   /** Accessible name for an icon-only trigger (no visible label). */
   label?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-menu open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the menu. */
+  disabled?: boolean;
+  /** The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
   /** Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. */
   onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
 }
 
 export const Menu = createWebComponent<MenuProps>(
   'kai-menu',
-  ["theme","items","placement","triggerIcon","triggerLabel","triggerIconTrailing","label"],
-  { onSelect: 'kai-select' },
+  ["theme","items","placement","triggerIcon","triggerLabel","triggerIconTrailing","label","open","defaultOpen","disabled"],
+  { onOpenChange: 'kai-open-change', onSelect: 'kai-select' },
 );
 
 export interface MessageProps extends WebComponentProps {
@@ -762,15 +772,19 @@ export interface PopoverProps extends WebComponentProps {
   placement?: "top" | "right" | "bottom" | "left" | "top-start" | "top-end" | "right-start" | "right-end" | "bottom-start" | "bottom-end" | "left-start" | "left-end";
   /** Gap in px between the trigger and the panel. */
   gutter?: number;
-  /** Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour. */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on click). Set `el.open = true`, or `<kai-popover open>`; listen for `kai-open-change`. */
   open?: boolean;
-  /** The popover wants to open or close (click, Escape, or outside-click). */
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Turn the popover off while keeping the trigger mounted (clicks and `show()` no longer open it). */
+  disabled?: boolean;
+  /** The popover opened or closed (click, Escape, outside-click, or a method). */
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const Popover = createWebComponent<PopoverProps>(
   'kai-popover',
-  ["theme","placement","gutter","open"],
+  ["theme","placement","gutter","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
 );
 

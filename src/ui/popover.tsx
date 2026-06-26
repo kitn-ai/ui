@@ -1,7 +1,11 @@
-import { createSignal, Show, type JSX } from 'solid-js';
+import { createSignal, Show, type JSX, type Accessor } from 'solid-js';
 import type { Placement } from '@floating-ui/dom';
 import { cn } from '../utils/cn';
 import { createPresence, usePosition, useDismiss } from './overlay';
+
+/** Imperative open controller, handed to a parent (e.g. the kai-popover facade)
+ *  via `controllerRef` so it can drive/observe open state. */
+export interface PopoverController { open: Accessor<boolean>; setOpen: (v: boolean) => void; }
 
 export interface PopoverProps {
   /** The trigger content (e.g. a button). Clicking it toggles the popover. */
@@ -17,8 +21,12 @@ export interface PopoverProps {
   open?: boolean;
   /** Initial open state when uncontrolled. */
   defaultOpen?: boolean;
+  /** When true, clicking the trigger never opens the popover. */
+  disabled?: boolean;
   /** Fires whenever the popover wants to open or close. */
   onOpenChange?: (open: boolean) => void;
+  /** Receive the open controller (open accessor + setOpen) once mounted. */
+  controllerRef?: (api: PopoverController) => void;
   /** Extra elements counted as "inside" for outside-click dismissal — e.g. the
    *  custom-element host, so clicks on slotted panel content don't dismiss. */
   boundary?: () => HTMLElement | undefined;
@@ -45,6 +53,10 @@ export function Popover(props: PopoverProps) {
     props.onOpenChange?.(v);
   };
 
+  // Hand the open controller up to a parent (e.g. the kai-popover facade) so it
+  // can drive/observe open state via wireDisclosure.
+  props.controllerRef?.({ open: isOpen, setOpen });
+
   const presence = createPresence(isOpen);
   const position = usePosition(trigger, panel, {
     placement: props.placement ?? 'bottom-start',
@@ -61,7 +73,7 @@ export function Popover(props: PopoverProps) {
       <span
         ref={setTrigger}
         style={{ display: 'inline-flex' }}
-        onClick={() => setOpen(!isOpen())}
+        onClick={() => { if (!props.disabled) setOpen(!isOpen()); }}
       >
         {props.trigger}
       </span>

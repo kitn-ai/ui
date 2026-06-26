@@ -1,5 +1,6 @@
 import { defineWebComponent } from './define';
-import { Popover } from '../ui/popover';
+import { Popover, type PopoverController } from '../ui/popover';
+import { wireDisclosure } from './disclosure';
 import type { Placement } from '@floating-ui/dom';
 
 interface Props extends Record<string, unknown> {
@@ -7,14 +8,20 @@ interface Props extends Record<string, unknown> {
   placement?: Placement;
   /** Gap in px between the trigger and the panel. */
   gutter?: number;
-  /** Controlled open state. Set as a JS property (`el.open = true`) to drive the
-   *  popover from your app; omit for the default click-to-toggle behaviour. */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open`
+   *  attribute, the element still self-manages on click). Set `el.open = true`,
+   *  or `<kai-popover open>`; listen for `kai-open-change`. */
   open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Turn the popover off while keeping the trigger mounted (clicks and `show()`
+   *  no longer open it). */
+  disabled?: boolean;
 }
 
 /** Events fired by `<kai-popover>`. */
 interface Events {
-  /** The popover wants to open or close (click, Escape, or outside-click). */
+  /** The popover opened or closed (click, Escape, outside-click, or a method). */
   'kai-open-change': { open: boolean };
 }
 
@@ -39,21 +46,36 @@ interface Events {
  * The default slot is the panel; the `trigger` slot is the control. Clicking the
  * trigger toggles the panel; Escape or an outside click closes it (clicks inside
  * the panel do not). It fires `kai-open-change` with `{ open }` on every change,
- * and accepts an `open` JS property for controlled use.
+ * accepts an `open`/`defaultOpen` JS property, can be `disabled`, and exposes
+ * `show()`/`hide()`/`toggle()` instance methods.
  */
 defineWebComponent<Props, Events>('kai-popover', {
   placement: 'bottom-start',
   gutter: 6,
   open: undefined,
-}, (props, { dispatch, element }) => (
-  <Popover
-    trigger={<slot name="trigger" />}
-    placement={props.placement as Placement}
-    gutter={props.gutter}
-    open={props.open}
-    boundary={() => element}
-    onOpenChange={(open) => dispatch('kai-open-change', { open })}
-  >
-    <slot />
-  </Popover>
-));
+  defaultOpen: undefined,
+  disabled: undefined,
+}, (props, ctx) => {
+  const { flag, element } = ctx;
+  let api: PopoverController | undefined;
+
+  // The standard overlay surface: settable+reflecting `open`, kai-open-change,
+  // show/hide/toggle, disabled-gating. The sole source of kai-open-change — the
+  // primitive's onOpenChange is intentionally NOT wired here to avoid a double
+  // dispatch. See ./disclosure.
+  wireDisclosure(ctx, () => api, () => props.open);
+
+  return (
+    <Popover
+      trigger={<slot name="trigger" />}
+      placement={props.placement as Placement}
+      gutter={props.gutter}
+      defaultOpen={flag('defaultOpen')}
+      disabled={flag('disabled')}
+      controllerRef={(a) => (api = a)}
+      boundary={() => element}
+    >
+      <slot />
+    </Popover>
+  );
+});

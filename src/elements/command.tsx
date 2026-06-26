@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, createUniqueId } from 'solid-js';
+import { createEffect, createMemo, createSignal, createUniqueId, on } from 'solid-js';
 import { CommandList, type CommandGroup } from '../ui/command';
 import { defineWebComponent } from './define';
 
@@ -34,6 +34,11 @@ interface Events {
   'kai-select': { id: string };
   /** Fired on every keystroke in the search input. */
   'kai-query-change': { value: string };
+  /** Fired when the highlighted/active item changes — via Arrow keys or when
+   *  filtering re-clamps the active row. `id` is the newly active item's id, or
+   *  `undefined` when no item is active (e.g. the filtered list is empty). Lets a
+   *  host preview the active item without committing a selection. */
+  'kai-active-change': { id: string | undefined };
 }
 
 /**
@@ -59,7 +64,7 @@ defineWebComponent<Props, Events>('kai-command', {
   items: undefined,
   placeholder: undefined,
   emptyLabel: undefined,
-}, (props, { dispatch }) => {
+}, (props, { dispatch, element, expose }) => {
   const listboxId = createUniqueId();
   const [query, setQuery] = createSignal('');
   const [activeId, setActiveId] = createSignal<string | undefined>(undefined);
@@ -104,6 +109,13 @@ defineWebComponent<Props, Events>('kai-command', {
     }
   });
 
+  /** Mirror the active/highlighted item out as `kai-active-change` whenever it
+   *  changes (Arrow keys or a filter-driven re-clamp). Skips the initial settle
+   *  by only firing when the value actually differs from the previous one. */
+  createEffect(on(activeId, (id, prev) => {
+    if (id !== prev) dispatch('kai-active-change', { id });
+  }));
+
   function select(id: string) {
     dispatch('kai-select', { id });
   }
@@ -137,6 +149,30 @@ defineWebComponent<Props, Events>('kai-command', {
       dispatch('kai-query-change', { value: '' });
     }
   }
+
+  // ── Imperative API (instance methods on the host) ──────────────────────────
+  // Counterpart to the kai-* events: lets a host make the palette type-ready and
+  // reset its query without reaching into the shadow root.
+  expose({
+    /** Focus the search combobox input inside the shadow root so the palette is
+     *  type-ready on demand (Shadow-DOM autofocus is unreliable, so hosts call
+     *  this after opening the palette). */
+    focus: (options?: FocusOptions) =>
+      element.shadowRoot
+        ?.querySelector<HTMLInputElement>('input[role="combobox"], input')
+        ?.focus(options),
+    /** Blur the focused search input. */
+    blur: () =>
+      element.shadowRoot
+        ?.querySelector<HTMLInputElement>('input[role="combobox"], input')
+        ?.blur(),
+    /** Reset the search query to empty — re-showing all items — and fire
+     *  `kai-query-change` with `''`. Mirrors the Escape-key behavior. */
+    clear: () => {
+      setQuery('');
+      dispatch('kai-query-change', { value: '' });
+    },
+  });
 
   return (
     <div class="flex flex-col overflow-hidden">

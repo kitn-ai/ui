@@ -157,11 +157,11 @@
     "displayName": "Command",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-command></kai-command>\n<script type=\"module\">\n  const el = document.querySelector('kai-command');\n  el.addEventListener('kai-query-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
-      "react": "import { Command } from '@kitn.ai/ui/react';\n\n<Command\n  onQueryChange={(e) => console.log(e.detail)}\n  onSelect={(e) => console.log(e.detail)}\n/>",
-      "vue": "<kai-command\n  @kai-query-change=\"onQueryChange\"\n  @kai-select=\"onSelect\"\n/>",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-command\n  on:kai-query-change={onQueryChange}\n  on:kai-select={onSelect}\n></kai-command>",
-      "angular": "<kai-command\n  (kai-query-change)=\"onQueryChange($event)\"\n  (kai-select)=\"onSelect($event)\"\n></kai-command>"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-command></kai-command>\n<script type=\"module\">\n  const el = document.querySelector('kai-command');\n  el.addEventListener('kai-active-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-query-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Command } from '@kitn.ai/ui/react';\n\n<Command\n  onActiveChange={(e) => console.log(e.detail)}\n  onQueryChange={(e) => console.log(e.detail)}\n  onSelect={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-command\n  @kai-active-change=\"onActiveChange\"\n  @kai-query-change=\"onQueryChange\"\n  @kai-select=\"onSelect\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-command\n  on:kai-active-change={onActiveChange}\n  on:kai-query-change={onQueryChange}\n  on:kai-select={onSelect}\n></kai-command>",
+      "angular": "<kai-command\n  (kai-active-change)=\"onActiveChange($event)\"\n  (kai-query-change)=\"onQueryChange($event)\"\n  (kai-select)=\"onSelect($event)\"\n></kai-command>"
     }
   },
   {
@@ -386,11 +386,11 @@
     "displayName": "Menu",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-menu></kai-menu>\n<script type=\"module\">\n  const el = document.querySelector('kai-menu');\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
-      "react": "import { Menu } from '@kitn.ai/ui/react';\n\n<Menu\n  onSelect={(e) => console.log(e.detail)}\n/>",
-      "vue": "<kai-menu\n  @kai-select=\"onSelect\"\n/>",
-      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-menu\n  on:kai-select={onSelect}\n></kai-menu>",
-      "angular": "<kai-menu\n  (kai-select)=\"onSelect($event)\"\n></kai-menu>"
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-menu></kai-menu>\n<script type=\"module\">\n  const el = document.querySelector('kai-menu');\n  el.addEventListener('kai-open-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
+      "react": "import { Menu } from '@kitn.ai/ui/react';\n\n<Menu\n  onOpenChange={(e) => console.log(e.detail)}\n  onSelect={(e) => console.log(e.detail)}\n/>",
+      "vue": "<kai-menu\n  @kai-open-change=\"onOpenChange\"\n  @kai-select=\"onSelect\"\n/>",
+      "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-menu\n  on:kai-open-change={onOpenChange}\n  on:kai-select={onSelect}\n></kai-menu>",
+      "angular": "<kai-menu\n  (kai-open-change)=\"onOpenChange($event)\"\n  (kai-select)=\"onSelect($event)\"\n></kai-menu>"
     }
   },
   {

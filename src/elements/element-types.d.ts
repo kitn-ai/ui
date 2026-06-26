@@ -486,6 +486,12 @@ export interface KaiMenuElement extends HTMLElement {
   triggerIconTrailing?: string;
   /** Accessible name for an icon-only trigger (no visible label). */
   label?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-menu open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the menu. */
+  disabled?: boolean;
 }
 
 export interface KaiMessageElement extends HTMLElement {
@@ -542,8 +548,12 @@ export interface KaiPopoverElement extends HTMLElement {
   placement?: "top" | "right" | "bottom" | "left" | "top-start" | "top-end" | "right-start" | "right-end" | "bottom-start" | "bottom-end" | "left-start" | "left-end";
   /** Gap in px between the trigger and the panel. */
   gutter?: number;
-  /** Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour. */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on click). Set `el.open = true`, or `<kai-popover open>`; listen for `kai-open-change`. */
   open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Turn the popover off while keeping the trigger mounted (clicks and `show()` no longer open it). */
+  disabled?: boolean;
 }
 
 export interface KaiPromptInputElement extends HTMLElement {

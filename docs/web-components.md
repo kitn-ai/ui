@@ -1508,11 +1508,15 @@ A pulsing loading placeholder that preserves layout while content arrives. Respo
 | `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label (e.g. `"High"`). |
 | `triggerIconTrailing` | `trigger-icon-trailing` | `undefined | string` | — | Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). |
 | `label` | `label` | `undefined | string` | — | Accessible name for an icon-only trigger (no visible label). |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-menu open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger — click/keyboard and `show()` no longer open the menu. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `kai-open-change` | `{ open: false | true }` | The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). |
 | `kai-select` | `{ id: string; checked?: undefined | false | true }` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
 
 #### Slots
@@ -1551,6 +1555,7 @@ A cascading action menu built from a JSON items-tree (submenus, separators, chec
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `kai-active-change` | `{ id: undefined | string }` | Fired when the highlighted/active item changes — via Arrow keys or when filtering re-clamps the active row. `id` is the newly active item's id, or `undefined` when no item is active (e.g. the filtered list is empty). Lets a host preview the active item without committing a selection. |
 | `kai-query-change` | `{ value: string }` | Fired on every keystroke in the search input. |
 | `kai-select` | `{ id: string }` | Fired when the user selects an item (click or Enter). |
 
