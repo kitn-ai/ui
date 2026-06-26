@@ -60,6 +60,15 @@
   font-size: 0.9em !important;
 }
 
+/* Stop trailing punctuation from being orphaned on its own line — a sentence
+   ending in inline `code`/a link could leave a lone "." or ")." wrapped to the
+   next line. `text-wrap: pretty` reflows the block to avoid a too-short last
+   line; applied to docs prose + the args-table Description cells. */
+.sbdocs-content :is(p, li, td),
+.docblock-argstable td {
+  text-wrap: pretty;
+}
+
 /* Dark mode for the Storybook DOCS surface. storybook-dark-mode themes the
    manager + preview but leaves the docs content white; the addon puts `.dark`
    on the docs iframe's <html>, so we re-skin the docs surface with the kit's
