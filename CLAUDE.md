@@ -14,7 +14,7 @@ Guidance for working **in this repo** with Claude Code. Consumer-facing usage li
 
 ## The `kai-` contract — do NOT get this wrong (it's what consumers hit)
 
-- Elements are prefixed **`kai-`** (`<kai-chat>`). NEVER `kitn-` (that's only a bundle filename).
+- Elements are prefixed **`kai-`** (`<kai-chat>`). NEVER `kitn-` (a legacy prefix; the register-all bundle is `dist/kai.es.js`).
 - **Array/object props** (`messages`, `suggestions`, `models`, …) are set as **JS properties**, never HTML attributes; only scalars (`placeholder`, `loading`, `theme`) work as attributes.
 - Events are **non-bubbling `kai-*` CustomEvents** — listen on the element itself. Submit = **`kai-submit`**, read `event.detail.value`.
 - Streaming needs a **new array/object reference per chunk** — mutating in place does not re-render.

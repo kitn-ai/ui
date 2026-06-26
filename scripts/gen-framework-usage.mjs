@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 
 // CDN URL for the self-contained element bundle (registers all kai-* custom elements).
 // Source of truth: Installation.mdx § "Via CDN" and README.md § "Or load from a CDN".
-const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
+const CDN_ELEMENTS = 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
 
 // Some elements have a displayName that doesn't match the Solid export name.
 // Map element displayName → actual Solid export name for those cases.

@@ -1,4 +1,4 @@
-// Coarse register-all build → dist/kitn-chat.es.js (the default `@kitn.ai/ui/elements`).
+// Coarse register-all build → dist/kai.es.js (the default `@kitn.ai/ui/elements`).
 //
 // This is a SINGLE-entry build, so register-impl + all elements land in ONE coarse
 // chunk that loads fast — registration completes quickly. (The per-element / autoloader
@@ -38,8 +38,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/elements/register.ts'),
-      name: 'KitnChat',
-      fileName: (format) => `kitn-chat.${format}.js`,
+      name: 'Kai',
+      fileName: (format) => `kai.${format}.js`,
       formats: ['es'],
     },
     emptyOutDir: true,

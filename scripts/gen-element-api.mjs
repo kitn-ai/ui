@@ -234,7 +234,7 @@ const cem = {
   readme: '',
   modules: [{
     kind: 'javascript-module',
-    path: 'dist/kitn-chat.es.js',
+    path: 'dist/kai.es.js',
     declarations: elements.map((el) => ({
       kind: 'class',
       customElement: true,

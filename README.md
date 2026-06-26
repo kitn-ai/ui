@@ -33,7 +33,7 @@ npm install solid-js
 Build the bundle, then import it as a side-effect (it registers the custom elements):
 
 ```bash
-npm run build   # emits dist/kitn-chat.es.js
+npm run build   # emits dist/kai.es.js
 ```
 
 ```html
@@ -70,14 +70,14 @@ The element bundle is a self-contained ES module — load it directly from [jsDe
 
 ```html
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js';
-  // …or unpkg: import 'https://unpkg.com/@kitn.ai/ui/dist/kitn-chat.es.js';
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
+  // …or unpkg: import 'https://unpkg.com/@kitn.ai/ui/dist/kai.es.js';
 </script>
 
 <kai-chat></kai-chat>
 ```
 
-The URLs above track the **latest** release — handy for trying things out. **For production, pin an exact version** (e.g. `@kitn.ai/ui@0.16.0/dist/kitn-chat.es.js`): pinned URLs are immutable and cached far more aggressively, and — since this package is pre-1.0 — pinning shields you from breaking changes in a future minor release. SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To override design tokens, also include `theme.css`:
+The URLs above track the **latest** release — handy for trying things out. **For production, pin an exact version** (e.g. `@kitn.ai/ui@0.16.0/dist/kai.es.js`): pinned URLs are immutable and cached far more aggressively, and — since this package is pre-1.0 — pinning shields you from breaking changes in a future minor release. SolidJS and the kit's CSS are bundled in, and the lazy code-highlighting chunks load from the same CDN on demand. To override design tokens, also include `theme.css`:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@kitn.ai/ui/theme.css">
@@ -381,7 +381,7 @@ A set of runnable examples and a hosted component playground are included in the
 The composable showcase demonstrates every individual element in one page. Build the package first, then serve from the repo root:
 
 ```bash
-npm run build     # produces dist/kitn-chat.es.js
+npm run build     # produces dist/kai.es.js
 npm run examples  # static server at http://localhost:8000
 ```
 

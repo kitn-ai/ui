@@ -42,7 +42,7 @@ export default defineConfig({
     },
     rollupOptions: {
       // React is a peer dep — the consumer provides it. @kitn.ai/ui/elements (the
-      // pre-built sibling bundle, dist/kitn-chat.es.js) is external too.
+      // pre-built sibling bundle, dist/kai.es.js) is external too.
       external: ['react', 'react-dom', 'react/jsx-runtime', '@kitn.ai/ui/elements'],
       output: {
         // Inject the elements self-registration into the BUILT bundle ONLY. Keeping it

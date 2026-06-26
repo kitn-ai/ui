@@ -4,7 +4,7 @@
     "displayName": "Artifact",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-artifact></kai-artifact>\n<script type=\"module\">\n  const el = document.querySelector('kai-artifact');\n  el.files = /* … */;\n  el.addEventListener('kai-file-select', (e) => console.log(e.detail));\n  el.addEventListener('kai-maximize-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-navigate', (e) => console.log(e.detail));\n  el.addEventListener('kai-tab-change', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-artifact></kai-artifact>\n<script type=\"module\">\n  const el = document.querySelector('kai-artifact');\n  el.files = /* … */;\n  el.addEventListener('kai-file-select', (e) => console.log(e.detail));\n  el.addEventListener('kai-maximize-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-navigate', (e) => console.log(e.detail));\n  el.addEventListener('kai-tab-change', (e) => console.log(e.detail));\n</script>",
       "react": "import { Artifact } from '@kitn.ai/ui/react';\n\n<Artifact\n  files={files}\n  onFileSelect={(e) => console.log(e.detail)}\n  onMaximizeChange={(e) => console.log(e.detail)}\n  onNavigate={(e) => console.log(e.detail)}\n  onTabChange={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-artifact\n  :files.prop=\"files\"\n  @kai-file-select=\"onFileSelect\"\n  @kai-maximize-change=\"onMaximizeChange\"\n  @kai-navigate=\"onNavigate\"\n  @kai-tab-change=\"onTabChange\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-artifact\n  {files}\n  on:kai-file-select={onFileSelect}\n  on:kai-maximize-change={onMaximizeChange}\n  on:kai-navigate={onNavigate}\n  on:kai-tab-change={onTabChange}\n></kai-artifact>",
@@ -17,7 +17,7 @@
     "displayName": "Attachments",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-attachments></kai-attachments>\n<script type=\"module\">\n  const el = document.querySelector('kai-attachments');\n  el.items = /* … */;\n  el.addEventListener('kai-remove', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-attachments></kai-attachments>\n<script type=\"module\">\n  const el = document.querySelector('kai-attachments');\n  el.items = /* … */;\n  el.addEventListener('kai-remove', (e) => console.log(e.detail));\n</script>",
       "react": "import { Attachments } from '@kitn.ai/ui/react';\n\n<Attachments\n  items={items}\n  onRemove={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-attachments\n  :items.prop=\"items\"\n  @kai-remove=\"onRemove\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-attachments\n  {items}\n  on:kai-remove={onRemove}\n></kai-attachments>",
@@ -30,7 +30,7 @@
     "displayName": "Avatar",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-avatar></kai-avatar>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-avatar></kai-avatar>",
       "react": "import { Avatar } from '@kitn.ai/ui/react';\n\n<Avatar />",
       "vue": "<kai-avatar />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-avatar></kai-avatar>",
@@ -43,7 +43,7 @@
     "displayName": "Badge",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-badge></kai-badge>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-badge></kai-badge>",
       "react": "import { Badge } from '@kitn.ai/ui/react';\n\n<Badge />",
       "vue": "<kai-badge />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-badge></kai-badge>",
@@ -56,7 +56,7 @@
     "displayName": "Button",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-button></kai-button>\n<script type=\"module\">\n  const el = document.querySelector('kai-button');\n  el.addEventListener('kai-click', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-button></kai-button>\n<script type=\"module\">\n  const el = document.querySelector('kai-button');\n  el.addEventListener('kai-click', (e) => console.log(e.detail));\n</script>",
       "react": "import { Button } from '@kitn.ai/ui/react';\n\n<Button\n  onClick={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-button\n  @kai-click=\"onClick\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-button\n  on:kai-click={onClick}\n></kai-button>",
@@ -69,7 +69,7 @@
     "displayName": "Card",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-card></kai-card>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-card></kai-card>",
       "react": "import { Card } from '@kitn.ai/ui/react';\n\n<Card />",
       "vue": "<kai-card />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-card></kai-card>",
@@ -82,7 +82,7 @@
     "displayName": "Cards",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-cards></kai-cards>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-cards></kai-cards>",
       "react": "import { Cards } from '@kitn.ai/ui/react';\n\n<Cards />",
       "vue": "<kai-cards />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-cards></kai-cards>",
@@ -94,7 +94,7 @@
     "displayName": "ChainOfThought",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-chain-of-thought></kai-chain-of-thought>\n<script type=\"module\">\n  const el = document.querySelector('kai-chain-of-thought');\n  el.steps = /* … */;\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-chain-of-thought></kai-chain-of-thought>\n<script type=\"module\">\n  const el = document.querySelector('kai-chain-of-thought');\n  el.steps = /* … */;\n</script>",
       "react": "import { ChainOfThought } from '@kitn.ai/ui/react';\n\n<ChainOfThought\n  steps={steps}\n/>",
       "vue": "<kai-chain-of-thought\n  :steps.prop=\"steps\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-chain-of-thought\n  {steps}\n></kai-chain-of-thought>",
@@ -107,7 +107,7 @@
     "displayName": "Chat",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-chat></kai-chat>\n<script type=\"module\">\n  const el = document.querySelector('kai-chat');\n  el.messages = /* … */;\n  el.addEventListener('kai-message-action', (e) => console.log(e.detail));\n  el.addEventListener('kai-model-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-search', (e) => console.log(e.detail));\n  el.addEventListener('kai-submit', (e) => console.log(e.detail));\n  el.addEventListener('kai-suggestion-click', (e) => console.log(e.detail));\n  el.addEventListener('kai-value-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-voice', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-chat></kai-chat>\n<script type=\"module\">\n  const el = document.querySelector('kai-chat');\n  el.messages = /* … */;\n  el.addEventListener('kai-message-action', (e) => console.log(e.detail));\n  el.addEventListener('kai-model-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-search', (e) => console.log(e.detail));\n  el.addEventListener('kai-submit', (e) => console.log(e.detail));\n  el.addEventListener('kai-suggestion-click', (e) => console.log(e.detail));\n  el.addEventListener('kai-value-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-voice', (e) => console.log(e.detail));\n</script>",
       "react": "import { Chat } from '@kitn.ai/ui/react';\n\n<Chat\n  messages={messages}\n  onMessageAction={(e) => console.log(e.detail)}\n  onModelChange={(e) => console.log(e.detail)}\n  onSearch={(e) => console.log(e.detail)}\n  onSubmit={(e) => console.log(e.detail)}\n  onSuggestionClick={(e) => console.log(e.detail)}\n  onValueChange={(e) => console.log(e.detail)}\n  onVoice={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-chat\n  :messages.prop=\"messages\"\n  @kai-message-action=\"onMessageAction\"\n  @kai-model-change=\"onModelChange\"\n  @kai-search=\"onSearch\"\n  @kai-submit=\"onSubmit\"\n  @kai-suggestion-click=\"onSuggestionClick\"\n  @kai-value-change=\"onValueChange\"\n  @kai-voice=\"onVoice\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-chat\n  {messages}\n  on:kai-message-action={onMessageAction}\n  on:kai-model-change={onModelChange}\n  on:kai-search={onSearch}\n  on:kai-submit={onSubmit}\n  on:kai-suggestion-click={onSuggestionClick}\n  on:kai-value-change={onValueChange}\n  on:kai-voice={onVoice}\n></kai-chat>",
@@ -119,7 +119,7 @@
     "displayName": "Checkpoint",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-checkpoint></kai-checkpoint>\n<script type=\"module\">\n  const el = document.querySelector('kai-checkpoint');\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-checkpoint></kai-checkpoint>\n<script type=\"module\">\n  const el = document.querySelector('kai-checkpoint');\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
       "react": "import { Checkpoint } from '@kitn.ai/ui/react';\n\n<Checkpoint\n  onSelect={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-checkpoint\n  @kai-select=\"onSelect\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-checkpoint\n  on:kai-select={onSelect}\n></kai-checkpoint>",
@@ -132,7 +132,7 @@
     "displayName": "Choice",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-choice></kai-choice>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-choice></kai-choice>",
       "react": "import { Choice } from '@kitn.ai/ui/react';\n\n<Choice />",
       "vue": "<kai-choice />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-choice></kai-choice>",
@@ -144,7 +144,7 @@
     "displayName": "CodeBlock",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-code-block code=\"…\"></kai-code-block>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-code-block code=\"…\"></kai-code-block>",
       "react": "import { CodeBlock } from '@kitn.ai/ui/react';\n\n<CodeBlock\n  code={code}\n/>",
       "vue": "<kai-code-block\n  :code=\"code\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-code-block\n  {code}\n></kai-code-block>",
@@ -157,7 +157,7 @@
     "displayName": "Command",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-command></kai-command>\n<script type=\"module\">\n  const el = document.querySelector('kai-command');\n  el.addEventListener('kai-query-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-command></kai-command>\n<script type=\"module\">\n  const el = document.querySelector('kai-command');\n  el.addEventListener('kai-query-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
       "react": "import { Command } from '@kitn.ai/ui/react';\n\n<Command\n  onQueryChange={(e) => console.log(e.detail)}\n  onSelect={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-command\n  @kai-query-change=\"onQueryChange\"\n  @kai-select=\"onSelect\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-command\n  on:kai-query-change={onQueryChange}\n  on:kai-select={onSelect}\n></kai-command>",
@@ -169,7 +169,7 @@
     "displayName": "Compare",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-compare></kai-compare>\n<script type=\"module\">\n  const el = document.querySelector('kai-compare');\n  el.addEventListener('kai-compare-select', (e) => console.log(e.detail));\n  el.addEventListener('kai-error', (e) => console.log(e.detail));\n  el.addEventListener('kai-ready', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-compare></kai-compare>\n<script type=\"module\">\n  const el = document.querySelector('kai-compare');\n  el.addEventListener('kai-compare-select', (e) => console.log(e.detail));\n  el.addEventListener('kai-error', (e) => console.log(e.detail));\n  el.addEventListener('kai-ready', (e) => console.log(e.detail));\n</script>",
       "react": "import { Compare } from '@kitn.ai/ui/react';\n\n<Compare\n  onCompareSelect={(e) => console.log(e.detail)}\n  onError={(e) => console.log(e.detail)}\n  onReady={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-compare\n  @kai-compare-select=\"onCompareSelect\"\n  @kai-error=\"onError\"\n  @kai-ready=\"onReady\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-compare\n  on:kai-compare-select={onCompareSelect}\n  on:kai-error={onError}\n  on:kai-ready={onReady}\n></kai-compare>",
@@ -181,7 +181,7 @@
     "displayName": "Composer",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-composer></kai-composer>\n<script type=\"module\">\n  const el = document.querySelector('kai-composer');\n  el.addEventListener('kai-blur', (e) => console.log(e.detail));\n  el.addEventListener('kai-entity-add', (e) => console.log(e.detail));\n  el.addEventListener('kai-entity-remove', (e) => console.log(e.detail));\n  el.addEventListener('kai-focus', (e) => console.log(e.detail));\n  el.addEventListener('kai-submit', (e) => console.log(e.detail));\n  el.addEventListener('kai-trigger', (e) => console.log(e.detail));\n  el.addEventListener('kai-trigger-close', (e) => console.log(e.detail));\n  el.addEventListener('kai-value-change', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-composer></kai-composer>\n<script type=\"module\">\n  const el = document.querySelector('kai-composer');\n  el.addEventListener('kai-blur', (e) => console.log(e.detail));\n  el.addEventListener('kai-entity-add', (e) => console.log(e.detail));\n  el.addEventListener('kai-entity-remove', (e) => console.log(e.detail));\n  el.addEventListener('kai-focus', (e) => console.log(e.detail));\n  el.addEventListener('kai-submit', (e) => console.log(e.detail));\n  el.addEventListener('kai-trigger', (e) => console.log(e.detail));\n  el.addEventListener('kai-trigger-close', (e) => console.log(e.detail));\n  el.addEventListener('kai-value-change', (e) => console.log(e.detail));\n</script>",
       "react": "import { Composer } from '@kitn.ai/ui/react';\n\n<Composer\n  onBlur={(e) => console.log(e.detail)}\n  onEntityAdd={(e) => console.log(e.detail)}\n  onEntityRemove={(e) => console.log(e.detail)}\n  onFocus={(e) => console.log(e.detail)}\n  onSubmit={(e) => console.log(e.detail)}\n  onTrigger={(e) => console.log(e.detail)}\n  onTriggerClose={(e) => console.log(e.detail)}\n  onValueChange={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-composer\n  @kai-blur=\"onBlur\"\n  @kai-entity-add=\"onEntityAdd\"\n  @kai-entity-remove=\"onEntityRemove\"\n  @kai-focus=\"onFocus\"\n  @kai-submit=\"onSubmit\"\n  @kai-trigger=\"onTrigger\"\n  @kai-trigger-close=\"onTriggerClose\"\n  @kai-value-change=\"onValueChange\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-composer\n  on:kai-blur={onBlur}\n  on:kai-entity-add={onEntityAdd}\n  on:kai-entity-remove={onEntityRemove}\n  on:kai-focus={onFocus}\n  on:kai-submit={onSubmit}\n  on:kai-trigger={onTrigger}\n  on:kai-trigger-close={onTriggerClose}\n  on:kai-value-change={onValueChange}\n></kai-composer>",
@@ -193,7 +193,7 @@
     "displayName": "Confirm",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-confirm></kai-confirm>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-confirm></kai-confirm>",
       "react": "import { Confirm } from '@kitn.ai/ui/react';\n\n<Confirm />",
       "vue": "<kai-confirm />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-confirm></kai-confirm>",
@@ -205,7 +205,7 @@
     "displayName": "Context",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-context></kai-context>\n<script type=\"module\">\n  const el = document.querySelector('kai-context');\n  el.addEventListener('kai-threshold-change', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-context></kai-context>\n<script type=\"module\">\n  const el = document.querySelector('kai-context');\n  el.addEventListener('kai-threshold-change', (e) => console.log(e.detail));\n</script>",
       "react": "import { Context } from '@kitn.ai/ui/react';\n\n<Context\n  onThresholdChange={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-context\n  @kai-threshold-change=\"onThresholdChange\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-context\n  on:kai-threshold-change={onThresholdChange}\n></kai-context>",
@@ -218,7 +218,7 @@
     "displayName": "Conversations",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-conversations></kai-conversations>\n<script type=\"module\">\n  const el = document.querySelector('kai-conversations');\n  el.groups = /* … */;\n  el.conversations = /* … */;\n  el.addEventListener('kai-conversation-select', (e) => console.log(e.detail));\n  el.addEventListener('kai-new-chat', (e) => console.log(e.detail));\n  el.addEventListener('kai-toggle-sidebar', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-conversations></kai-conversations>\n<script type=\"module\">\n  const el = document.querySelector('kai-conversations');\n  el.groups = /* … */;\n  el.conversations = /* … */;\n  el.addEventListener('kai-conversation-select', (e) => console.log(e.detail));\n  el.addEventListener('kai-new-chat', (e) => console.log(e.detail));\n  el.addEventListener('kai-toggle-sidebar', (e) => console.log(e.detail));\n</script>",
       "react": "import { Conversations } from '@kitn.ai/ui/react';\n\n<Conversations\n  groups={groups}\n  conversations={conversations}\n  onConversationSelect={(e) => console.log(e.detail)}\n  onNewChat={(e) => console.log(e.detail)}\n  onToggleSidebar={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-conversations\n  :groups.prop=\"groups\"\n  :conversations.prop=\"conversations\"\n  @kai-conversation-select=\"onConversationSelect\"\n  @kai-new-chat=\"onNewChat\"\n  @kai-toggle-sidebar=\"onToggleSidebar\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-conversations\n  {groups}\n  {conversations}\n  on:kai-conversation-select={onConversationSelect}\n  on:kai-new-chat={onNewChat}\n  on:kai-toggle-sidebar={onToggleSidebar}\n></kai-conversations>",
@@ -231,7 +231,7 @@
     "displayName": "Embed",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-embed></kai-embed>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-embed></kai-embed>",
       "react": "import { Embed } from '@kitn.ai/ui/react';\n\n<Embed />",
       "vue": "<kai-embed />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-embed></kai-embed>",
@@ -244,7 +244,7 @@
     "displayName": "Empty",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-empty></kai-empty>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-empty></kai-empty>",
       "react": "import { Empty } from '@kitn.ai/ui/react';\n\n<Empty />",
       "vue": "<kai-empty />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-empty></kai-empty>",
@@ -257,7 +257,7 @@
     "displayName": "FeedbackBar",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-feedback-bar></kai-feedback-bar>\n<script type=\"module\">\n  const el = document.querySelector('kai-feedback-bar');\n  el.addEventListener('kai-close', (e) => console.log(e.detail));\n  el.addEventListener('kai-feedback', (e) => console.log(e.detail));\n  el.addEventListener('kai-feedback-detail', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-feedback-bar></kai-feedback-bar>\n<script type=\"module\">\n  const el = document.querySelector('kai-feedback-bar');\n  el.addEventListener('kai-close', (e) => console.log(e.detail));\n  el.addEventListener('kai-feedback', (e) => console.log(e.detail));\n  el.addEventListener('kai-feedback-detail', (e) => console.log(e.detail));\n</script>",
       "react": "import { FeedbackBar } from '@kitn.ai/ui/react';\n\n<FeedbackBar\n  onClose={(e) => console.log(e.detail)}\n  onFeedback={(e) => console.log(e.detail)}\n  onFeedbackDetail={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-feedback-bar\n  @kai-close=\"onClose\"\n  @kai-feedback=\"onFeedback\"\n  @kai-feedback-detail=\"onFeedbackDetail\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-feedback-bar\n  on:kai-close={onClose}\n  on:kai-feedback={onFeedback}\n  on:kai-feedback-detail={onFeedbackDetail}\n></kai-feedback-bar>",
@@ -270,7 +270,7 @@
     "displayName": "FileTree",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-file-tree></kai-file-tree>\n<script type=\"module\">\n  const el = document.querySelector('kai-file-tree');\n  el.files = /* … */;\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-file-tree></kai-file-tree>\n<script type=\"module\">\n  const el = document.querySelector('kai-file-tree');\n  el.files = /* … */;\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
       "react": "import { FileTree } from '@kitn.ai/ui/react';\n\n<FileTree\n  files={files}\n  onSelect={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-file-tree\n  :files.prop=\"files\"\n  @kai-select=\"onSelect\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-file-tree\n  {files}\n  on:kai-select={onSelect}\n></kai-file-tree>",
@@ -283,7 +283,7 @@
     "displayName": "FileUpload",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-file-upload></kai-file-upload>\n<script type=\"module\">\n  const el = document.querySelector('kai-file-upload');\n  el.addEventListener('kai-files-added', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-file-upload></kai-file-upload>\n<script type=\"module\">\n  const el = document.querySelector('kai-file-upload');\n  el.addEventListener('kai-files-added', (e) => console.log(e.detail));\n</script>",
       "react": "import { FileUpload } from '@kitn.ai/ui/react';\n\n<FileUpload\n  onFilesAdded={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-file-upload\n  @kai-files-added=\"onFilesAdded\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-file-upload\n  on:kai-files-added={onFilesAdded}\n></kai-file-upload>",
@@ -296,7 +296,7 @@
     "displayName": "Form",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-form></kai-form>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-form></kai-form>",
       "react": "import { Form } from '@kitn.ai/ui/react';\n\n<Form />",
       "vue": "<kai-form />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-form></kai-form>",
@@ -309,7 +309,7 @@
     "displayName": "HoverCard",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-hover-card></kai-hover-card>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-hover-card></kai-hover-card>",
       "react": "import { HoverCard } from '@kitn.ai/ui/react';\n\n<HoverCard />",
       "vue": "<kai-hover-card />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-hover-card></kai-hover-card>",
@@ -322,7 +322,7 @@
     "displayName": "Icon",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-icon></kai-icon>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-icon></kai-icon>",
       "react": "import { Icon } from '@kitn.ai/ui/react';\n\n<Icon />",
       "vue": "<kai-icon />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-icon></kai-icon>",
@@ -334,7 +334,7 @@
     "displayName": "Image",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-image></kai-image>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-image></kai-image>",
       "react": "import { Image } from '@kitn.ai/ui/react';\n\n<Image />",
       "vue": "<kai-image />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-image></kai-image>",
@@ -347,7 +347,7 @@
     "displayName": "LinkPreview",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-link-preview></kai-link-preview>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-link-preview></kai-link-preview>",
       "react": "import { LinkPreview } from '@kitn.ai/ui/react';\n\n<LinkPreview />",
       "vue": "<kai-link-preview />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-link-preview></kai-link-preview>",
@@ -360,7 +360,7 @@
     "displayName": "Loader",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-loader></kai-loader>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-loader></kai-loader>",
       "react": "import { Loader } from '@kitn.ai/ui/react';\n\n<Loader />",
       "vue": "<kai-loader />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-loader></kai-loader>",
@@ -373,7 +373,7 @@
     "displayName": "Markdown",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-markdown content=\"…\"></kai-markdown>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-markdown content=\"…\"></kai-markdown>",
       "react": "import { Markdown } from '@kitn.ai/ui/react';\n\n<Markdown\n  content={content}\n/>",
       "vue": "<kai-markdown\n  :content=\"content\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-markdown\n  {content}\n></kai-markdown>",
@@ -386,7 +386,7 @@
     "displayName": "Menu",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-menu></kai-menu>\n<script type=\"module\">\n  const el = document.querySelector('kai-menu');\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-menu></kai-menu>\n<script type=\"module\">\n  const el = document.querySelector('kai-menu');\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
       "react": "import { Menu } from '@kitn.ai/ui/react';\n\n<Menu\n  onSelect={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-menu\n  @kai-select=\"onSelect\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-menu\n  on:kai-select={onSelect}\n></kai-menu>",
@@ -398,7 +398,7 @@
     "displayName": "Message",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-message></kai-message>\n<script type=\"module\">\n  const el = document.querySelector('kai-message');\n  el.addEventListener('kai-message-action', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-message></kai-message>\n<script type=\"module\">\n  const el = document.querySelector('kai-message');\n  el.addEventListener('kai-message-action', (e) => console.log(e.detail));\n</script>",
       "react": "import { Message } from '@kitn.ai/ui/react';\n\n<Message\n  onMessageAction={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-message\n  @kai-message-action=\"onMessageAction\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-message\n  on:kai-message-action={onMessageAction}\n></kai-message>",
@@ -411,7 +411,7 @@
     "displayName": "ModelSwitcher",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-model-switcher></kai-model-switcher>\n<script type=\"module\">\n  const el = document.querySelector('kai-model-switcher');\n  el.models = /* … */;\n  el.addEventListener('kai-model-change', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-model-switcher></kai-model-switcher>\n<script type=\"module\">\n  const el = document.querySelector('kai-model-switcher');\n  el.models = /* … */;\n  el.addEventListener('kai-model-change', (e) => console.log(e.detail));\n</script>",
       "react": "import { ModelSwitcher } from '@kitn.ai/ui/react';\n\n<ModelSwitcher\n  models={models}\n  onModelChange={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-model-switcher\n  :models.prop=\"models\"\n  @kai-model-change=\"onModelChange\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-model-switcher\n  {models}\n  on:kai-model-change={onModelChange}\n></kai-model-switcher>",
@@ -424,7 +424,7 @@
     "displayName": "Notice",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-notice></kai-notice>\n<script type=\"module\">\n  const el = document.querySelector('kai-notice');\n  el.addEventListener('kai-dismiss', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-notice></kai-notice>\n<script type=\"module\">\n  const el = document.querySelector('kai-notice');\n  el.addEventListener('kai-dismiss', (e) => console.log(e.detail));\n</script>",
       "react": "import { Notice } from '@kitn.ai/ui/react';\n\n<Notice\n  onDismiss={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-notice\n  @kai-dismiss=\"onDismiss\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-notice\n  on:kai-dismiss={onDismiss}\n></kai-notice>",
@@ -436,7 +436,7 @@
     "displayName": "Popover",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-popover></kai-popover>\n<script type=\"module\">\n  const el = document.querySelector('kai-popover');\n  el.addEventListener('kai-open-change', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-popover></kai-popover>\n<script type=\"module\">\n  const el = document.querySelector('kai-popover');\n  el.addEventListener('kai-open-change', (e) => console.log(e.detail));\n</script>",
       "react": "import { Popover } from '@kitn.ai/ui/react';\n\n<Popover\n  onOpenChange={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-popover\n  @kai-open-change=\"onOpenChange\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-popover\n  on:kai-open-change={onOpenChange}\n></kai-popover>",
@@ -448,7 +448,7 @@
     "displayName": "PromptInput",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-prompt-input></kai-prompt-input>\n<script type=\"module\">\n  const el = document.querySelector('kai-prompt-input');\n  el.addEventListener('kai-search', (e) => console.log(e.detail));\n  el.addEventListener('kai-stop', (e) => console.log(e.detail));\n  el.addEventListener('kai-submit', (e) => console.log(e.detail));\n  el.addEventListener('kai-suggestion-click', (e) => console.log(e.detail));\n  el.addEventListener('kai-toolbar-action', (e) => console.log(e.detail));\n  el.addEventListener('kai-value-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-voice', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-prompt-input></kai-prompt-input>\n<script type=\"module\">\n  const el = document.querySelector('kai-prompt-input');\n  el.addEventListener('kai-search', (e) => console.log(e.detail));\n  el.addEventListener('kai-stop', (e) => console.log(e.detail));\n  el.addEventListener('kai-submit', (e) => console.log(e.detail));\n  el.addEventListener('kai-suggestion-click', (e) => console.log(e.detail));\n  el.addEventListener('kai-toolbar-action', (e) => console.log(e.detail));\n  el.addEventListener('kai-value-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-voice', (e) => console.log(e.detail));\n</script>",
       "react": "import { PromptInput } from '@kitn.ai/ui/react';\n\n<PromptInput\n  onSearch={(e) => console.log(e.detail)}\n  onStop={(e) => console.log(e.detail)}\n  onSubmit={(e) => console.log(e.detail)}\n  onSuggestionClick={(e) => console.log(e.detail)}\n  onToolbarAction={(e) => console.log(e.detail)}\n  onValueChange={(e) => console.log(e.detail)}\n  onVoice={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-prompt-input\n  @kai-search=\"onSearch\"\n  @kai-stop=\"onStop\"\n  @kai-submit=\"onSubmit\"\n  @kai-suggestion-click=\"onSuggestionClick\"\n  @kai-toolbar-action=\"onToolbarAction\"\n  @kai-value-change=\"onValueChange\"\n  @kai-voice=\"onVoice\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-prompt-input\n  on:kai-search={onSearch}\n  on:kai-stop={onStop}\n  on:kai-submit={onSubmit}\n  on:kai-suggestion-click={onSuggestionClick}\n  on:kai-toolbar-action={onToolbarAction}\n  on:kai-value-change={onValueChange}\n  on:kai-voice={onVoice}\n></kai-prompt-input>",
@@ -461,7 +461,7 @@
     "displayName": "Reasoning",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-reasoning text=\"…\"></kai-reasoning>\n<script type=\"module\">\n  const el = document.querySelector('kai-reasoning');\n  el.addEventListener('kai-open-change', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-reasoning text=\"…\"></kai-reasoning>\n<script type=\"module\">\n  const el = document.querySelector('kai-reasoning');\n  el.addEventListener('kai-open-change', (e) => console.log(e.detail));\n</script>",
       "react": "import { Reasoning } from '@kitn.ai/ui/react';\n\n<Reasoning\n  text={text}\n  onOpenChange={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-reasoning\n  :text=\"text\"\n  @kai-open-change=\"onOpenChange\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-reasoning\n  {text}\n  on:kai-open-change={onOpenChange}\n></kai-reasoning>",
@@ -474,7 +474,7 @@
     "displayName": "Remote",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-remote></kai-remote>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-remote></kai-remote>",
       "react": "import { Remote } from '@kitn.ai/ui/react';\n\n<Remote />",
       "vue": "<kai-remote />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-remote></kai-remote>",
@@ -486,7 +486,7 @@
     "displayName": "Resizable",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-resizable></kai-resizable>\n<script type=\"module\">\n  const el = document.querySelector('kai-resizable');\n  el.addEventListener('kai-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-maximize-change', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-resizable></kai-resizable>\n<script type=\"module\">\n  const el = document.querySelector('kai-resizable');\n  el.addEventListener('kai-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-maximize-change', (e) => console.log(e.detail));\n</script>",
       "react": "import { Resizable } from '@kitn.ai/ui/react';\n\n<Resizable\n  onChange={(e) => console.log(e.detail)}\n  onMaximizeChange={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-resizable\n  @kai-change=\"onChange\"\n  @kai-maximize-change=\"onMaximizeChange\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-resizable\n  on:kai-change={onChange}\n  on:kai-maximize-change={onMaximizeChange}\n></kai-resizable>",
@@ -499,7 +499,7 @@
     "displayName": "ResizableItem",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-resizable-item></kai-resizable-item>\n<script type=\"module\">\n  const el = document.querySelector('kai-resizable-item');\n  el.addEventListener('kai-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-maximize-change', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-resizable-item></kai-resizable-item>\n<script type=\"module\">\n  const el = document.querySelector('kai-resizable-item');\n  el.addEventListener('kai-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-maximize-change', (e) => console.log(e.detail));\n</script>",
       "react": "import { ResizableItem } from '@kitn.ai/ui/react';\n\n<ResizableItem\n  onChange={(e) => console.log(e.detail)}\n  onMaximizeChange={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-resizable-item\n  @kai-change=\"onChange\"\n  @kai-maximize-change=\"onMaximizeChange\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-resizable-item\n  on:kai-change={onChange}\n  on:kai-maximize-change={onMaximizeChange}\n></kai-resizable-item>",
@@ -511,7 +511,7 @@
     "displayName": "ResponseStream",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-response-stream></kai-response-stream>\n<script type=\"module\">\n  const el = document.querySelector('kai-response-stream');\n  el.addEventListener('kai-complete', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-response-stream></kai-response-stream>\n<script type=\"module\">\n  const el = document.querySelector('kai-response-stream');\n  el.addEventListener('kai-complete', (e) => console.log(e.detail));\n</script>",
       "react": "import { ResponseStream } from '@kitn.ai/ui/react';\n\n<ResponseStream\n  onComplete={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-response-stream\n  @kai-complete=\"onComplete\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-response-stream\n  on:kai-complete={onComplete}\n></kai-response-stream>",
@@ -524,7 +524,7 @@
     "displayName": "ScopePicker",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-scope-picker></kai-scope-picker>\n<script type=\"module\">\n  const el = document.querySelector('kai-scope-picker');\n  el.availableAuthors = /* … */;\n  el.availableTags = /* … */;\n  el.addEventListener('kai-scope-change', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-scope-picker></kai-scope-picker>\n<script type=\"module\">\n  const el = document.querySelector('kai-scope-picker');\n  el.availableAuthors = /* … */;\n  el.availableTags = /* … */;\n  el.addEventListener('kai-scope-change', (e) => console.log(e.detail));\n</script>",
       "react": "import { ScopePicker } from '@kitn.ai/ui/react';\n\n<ScopePicker\n  availableAuthors={availableAuthors}\n  availableTags={availableTags}\n  onScopeChange={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-scope-picker\n  :availableAuthors.prop=\"availableAuthors\"\n  :availableTags.prop=\"availableTags\"\n  @kai-scope-change=\"onScopeChange\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-scope-picker\n  {availableAuthors}\n  {availableTags}\n  on:kai-scope-change={onScopeChange}\n></kai-scope-picker>",
@@ -537,7 +537,7 @@
     "displayName": "ScrollArea",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-scroll-area></kai-scroll-area>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-scroll-area></kai-scroll-area>",
       "react": "import { ScrollArea } from '@kitn.ai/ui/react';\n\n<ScrollArea />",
       "vue": "<kai-scroll-area />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-scroll-area></kai-scroll-area>",
@@ -550,7 +550,7 @@
     "displayName": "ScrollButton",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-scroll-button></kai-scroll-button>\n<script type=\"module\">\n  const el = document.querySelector('kai-scroll-button');\n  el.addEventListener('kai-scroll', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-scroll-button></kai-scroll-button>\n<script type=\"module\">\n  const el = document.querySelector('kai-scroll-button');\n  el.addEventListener('kai-scroll', (e) => console.log(e.detail));\n</script>",
       "react": "import { ScrollButton } from '@kitn.ai/ui/react';\n\n<ScrollButton\n  onScroll={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-scroll-button\n  @kai-scroll=\"onScroll\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-scroll-button\n  on:kai-scroll={onScroll}\n></kai-scroll-button>",
@@ -563,7 +563,7 @@
     "displayName": "Separator",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-separator></kai-separator>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-separator></kai-separator>",
       "react": "import { Separator } from '@kitn.ai/ui/react';\n\n<Separator />",
       "vue": "<kai-separator />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-separator></kai-separator>",
@@ -576,7 +576,7 @@
     "displayName": "Skeleton",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-skeleton></kai-skeleton>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-skeleton></kai-skeleton>",
       "react": "import { Skeleton } from '@kitn.ai/ui/react';\n\n<Skeleton />",
       "vue": "<kai-skeleton />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-skeleton></kai-skeleton>",
@@ -589,7 +589,7 @@
     "displayName": "Skills",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-skills></kai-skills>\n<script type=\"module\">\n  const el = document.querySelector('kai-skills');\n  el.skills = /* … */;\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-skills></kai-skills>\n<script type=\"module\">\n  const el = document.querySelector('kai-skills');\n  el.skills = /* … */;\n</script>",
       "react": "import { Skills } from '@kitn.ai/ui/react';\n\n<Skills\n  skills={skills}\n/>",
       "vue": "<kai-skills\n  :skills.prop=\"skills\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-skills\n  {skills}\n></kai-skills>",
@@ -602,7 +602,7 @@
     "displayName": "Source",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-source></kai-source>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-source></kai-source>",
       "react": "import { Source } from '@kitn.ai/ui/react';\n\n<Source />",
       "vue": "<kai-source />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-source></kai-source>",
@@ -615,7 +615,7 @@
     "displayName": "Sources",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-sources></kai-sources>\n<script type=\"module\">\n  const el = document.querySelector('kai-sources');\n  el.sources = /* … */;\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-sources></kai-sources>\n<script type=\"module\">\n  const el = document.querySelector('kai-sources');\n  el.sources = /* … */;\n</script>",
       "react": "import { Sources } from '@kitn.ai/ui/react';\n\n<Sources\n  sources={sources}\n/>",
       "vue": "<kai-sources\n  :sources.prop=\"sources\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-sources\n  {sources}\n></kai-sources>",
@@ -628,7 +628,7 @@
     "displayName": "Suggestions",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-suggestions></kai-suggestions>\n<script type=\"module\">\n  const el = document.querySelector('kai-suggestions');\n  el.suggestions = /* … */;\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-suggestions></kai-suggestions>\n<script type=\"module\">\n  const el = document.querySelector('kai-suggestions');\n  el.suggestions = /* … */;\n  el.addEventListener('kai-select', (e) => console.log(e.detail));\n</script>",
       "react": "import { Suggestions } from '@kitn.ai/ui/react';\n\n<Suggestions\n  suggestions={suggestions}\n  onSelect={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-suggestions\n  :suggestions.prop=\"suggestions\"\n  @kai-select=\"onSelect\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-suggestions\n  {suggestions}\n  on:kai-select={onSelect}\n></kai-suggestions>",
@@ -640,7 +640,7 @@
     "displayName": "Switch",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-switch></kai-switch>\n<script type=\"module\">\n  const el = document.querySelector('kai-switch');\n  el.addEventListener('kai-change', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-switch></kai-switch>\n<script type=\"module\">\n  const el = document.querySelector('kai-switch');\n  el.addEventListener('kai-change', (e) => console.log(e.detail));\n</script>",
       "react": "import { Switch } from '@kitn.ai/ui/react';\n\n<Switch\n  onChange={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-switch\n  @kai-change=\"onChange\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-switch\n  on:kai-change={onChange}\n></kai-switch>",
@@ -652,7 +652,7 @@
     "displayName": "Tasks",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-tasks></kai-tasks>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-tasks></kai-tasks>",
       "react": "import { Tasks } from '@kitn.ai/ui/react';\n\n<Tasks />",
       "vue": "<kai-tasks />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-tasks></kai-tasks>",
@@ -664,7 +664,7 @@
     "displayName": "TextShimmer",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-text-shimmer></kai-text-shimmer>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-text-shimmer></kai-text-shimmer>",
       "react": "import { TextShimmer } from '@kitn.ai/ui/react';\n\n<TextShimmer />",
       "vue": "<kai-text-shimmer />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-text-shimmer></kai-text-shimmer>",
@@ -677,7 +677,7 @@
     "displayName": "ThinkingBar",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-thinking-bar></kai-thinking-bar>\n<script type=\"module\">\n  const el = document.querySelector('kai-thinking-bar');\n  el.addEventListener('kai-stop', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-thinking-bar></kai-thinking-bar>\n<script type=\"module\">\n  const el = document.querySelector('kai-thinking-bar');\n  el.addEventListener('kai-stop', (e) => console.log(e.detail));\n</script>",
       "react": "import { ThinkingBar } from '@kitn.ai/ui/react';\n\n<ThinkingBar\n  onStop={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-thinking-bar\n  @kai-stop=\"onStop\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-thinking-bar\n  on:kai-stop={onStop}\n></kai-thinking-bar>",
@@ -690,7 +690,7 @@
     "displayName": "ToastRegion",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-toast-region></kai-toast-region>\n<script type=\"module\">\n  const el = document.querySelector('kai-toast-region');\n  el.toasts = /* … */;\n  el.addEventListener('kai-action', (e) => console.log(e.detail));\n  el.addEventListener('kai-dismiss', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-toast-region></kai-toast-region>\n<script type=\"module\">\n  const el = document.querySelector('kai-toast-region');\n  el.toasts = /* … */;\n  el.addEventListener('kai-action', (e) => console.log(e.detail));\n  el.addEventListener('kai-dismiss', (e) => console.log(e.detail));\n</script>",
       "react": "import { ToastRegion } from '@kitn.ai/ui/react';\n\n<ToastRegion\n  toasts={toasts}\n  onAction={(e) => console.log(e.detail)}\n  onDismiss={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-toast-region\n  :toasts.prop=\"toasts\"\n  @kai-action=\"onAction\"\n  @kai-dismiss=\"onDismiss\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-toast-region\n  {toasts}\n  on:kai-action={onAction}\n  on:kai-dismiss={onDismiss}\n></kai-toast-region>",
@@ -703,7 +703,7 @@
     "displayName": "Tool",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-tool></kai-tool>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-tool></kai-tool>",
       "react": "import { Tool } from '@kitn.ai/ui/react';\n\n<Tool />",
       "vue": "<kai-tool />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-tool></kai-tool>",
@@ -716,7 +716,7 @@
     "displayName": "Tooltip",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-tooltip></kai-tooltip>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-tooltip></kai-tooltip>",
       "react": "import { Tooltip } from '@kitn.ai/ui/react';\n\n<Tooltip />",
       "vue": "<kai-tooltip />",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-tooltip></kai-tooltip>",
@@ -729,7 +729,7 @@
     "displayName": "VoiceInput",
     "hasSolid": true,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-voice-input></kai-voice-input>\n<script type=\"module\">\n  const el = document.querySelector('kai-voice-input');\n  el.addEventListener('kai-audio-captured', (e) => console.log(e.detail));\n  el.addEventListener('kai-transcription', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-voice-input></kai-voice-input>\n<script type=\"module\">\n  const el = document.querySelector('kai-voice-input');\n  el.addEventListener('kai-audio-captured', (e) => console.log(e.detail));\n  el.addEventListener('kai-transcription', (e) => console.log(e.detail));\n</script>",
       "react": "import { VoiceInput } from '@kitn.ai/ui/react';\n\n<VoiceInput\n  onAudioCaptured={(e) => console.log(e.detail)}\n  onTranscription={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-voice-input\n  @kai-audio-captured=\"onAudioCaptured\"\n  @kai-transcription=\"onTranscription\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-voice-input\n  on:kai-audio-captured={onAudioCaptured}\n  on:kai-transcription={onTranscription}\n></kai-voice-input>",
@@ -742,7 +742,7 @@
     "displayName": "Workspace",
     "hasSolid": false,
     "snippets": {
-      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kitn-chat.es.js\"></script>\n\n<kai-workspace></kai-workspace>\n<script type=\"module\">\n  const el = document.querySelector('kai-workspace');\n  el.groups = /* … */;\n  el.conversations = /* … */;\n  el.messages = /* … */;\n  el.addEventListener('kai-conversation-select', (e) => console.log(e.detail));\n  el.addEventListener('kai-message-action', (e) => console.log(e.detail));\n  el.addEventListener('kai-model-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-new-chat', (e) => console.log(e.detail));\n  el.addEventListener('kai-search', (e) => console.log(e.detail));\n  el.addEventListener('kai-sidebar-toggle', (e) => console.log(e.detail));\n  el.addEventListener('kai-submit', (e) => console.log(e.detail));\n  el.addEventListener('kai-suggestion-click', (e) => console.log(e.detail));\n  el.addEventListener('kai-value-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-voice', (e) => console.log(e.detail));\n</script>",
+      "html": "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js\"></script>\n\n<kai-workspace></kai-workspace>\n<script type=\"module\">\n  const el = document.querySelector('kai-workspace');\n  el.groups = /* … */;\n  el.conversations = /* … */;\n  el.messages = /* … */;\n  el.addEventListener('kai-conversation-select', (e) => console.log(e.detail));\n  el.addEventListener('kai-message-action', (e) => console.log(e.detail));\n  el.addEventListener('kai-model-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-new-chat', (e) => console.log(e.detail));\n  el.addEventListener('kai-search', (e) => console.log(e.detail));\n  el.addEventListener('kai-sidebar-toggle', (e) => console.log(e.detail));\n  el.addEventListener('kai-submit', (e) => console.log(e.detail));\n  el.addEventListener('kai-suggestion-click', (e) => console.log(e.detail));\n  el.addEventListener('kai-value-change', (e) => console.log(e.detail));\n  el.addEventListener('kai-voice', (e) => console.log(e.detail));\n</script>",
       "react": "import { Workspace } from '@kitn.ai/ui/react';\n\n<Workspace\n  groups={groups}\n  conversations={conversations}\n  messages={messages}\n  onConversationSelect={(e) => console.log(e.detail)}\n  onMessageAction={(e) => console.log(e.detail)}\n  onModelChange={(e) => console.log(e.detail)}\n  onNewChat={(e) => console.log(e.detail)}\n  onSearch={(e) => console.log(e.detail)}\n  onSidebarToggle={(e) => console.log(e.detail)}\n  onSubmit={(e) => console.log(e.detail)}\n  onSuggestionClick={(e) => console.log(e.detail)}\n  onValueChange={(e) => console.log(e.detail)}\n  onVoice={(e) => console.log(e.detail)}\n/>",
       "vue": "<kai-workspace\n  :groups.prop=\"groups\"\n  :conversations.prop=\"conversations\"\n  :messages.prop=\"messages\"\n  @kai-conversation-select=\"onConversationSelect\"\n  @kai-message-action=\"onMessageAction\"\n  @kai-model-change=\"onModelChange\"\n  @kai-new-chat=\"onNewChat\"\n  @kai-search=\"onSearch\"\n  @kai-sidebar-toggle=\"onSidebarToggle\"\n  @kai-submit=\"onSubmit\"\n  @kai-suggestion-click=\"onSuggestionClick\"\n  @kai-value-change=\"onValueChange\"\n  @kai-voice=\"onVoice\"\n/>",
       "svelte": "<script>\n  import '@kitn.ai/ui/elements';\n</script>\n\n<kai-workspace\n  {groups}\n  {conversations}\n  {messages}\n  on:kai-conversation-select={onConversationSelect}\n  on:kai-message-action={onMessageAction}\n  on:kai-model-change={onModelChange}\n  on:kai-new-chat={onNewChat}\n  on:kai-search={onSearch}\n  on:kai-sidebar-toggle={onSidebarToggle}\n  on:kai-submit={onSubmit}\n  on:kai-suggestion-click={onSuggestionClick}\n  on:kai-value-change={onValueChange}\n  on:kai-voice={onVoice}\n></kai-workspace>",
