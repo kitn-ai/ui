@@ -6,7 +6,7 @@ import { Copy, ThumbsUp, ThumbsDown } from "lucide-solid";
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: "Solid (Advanced)/Elements/MessageSkills",
+  title: "Components/Elements/MessageSkills",
   component: MessageSkills,
   tags: ["autodocs"],
   parameters: {
