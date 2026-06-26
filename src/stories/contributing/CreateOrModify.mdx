@@ -1,11 +1,10 @@
----
-title: Create or modify a component
-description: Add a UI primitive, give it a story, and expose it as a kai-* web component — the full path through AI/UI's layers, with the Switch as a worked example.
----
+import { Meta } from '@storybook/addon-docs/blocks';
 
-import { Aside } from '@astrojs/starlight/components';
+<Meta title="Contributing/Create or modify a component" />
 
-Adding a component means working down the [layers](/guides/primitives/architecture/): write the Solid component, give it a story, then wrap it as a `kai-*` element. Modifying one is the same path in reverse — find the layer that owns the behavior and change it there. We'll build a toggle the whole way through; it's the shortest component that touches every step.
+# Create or modify a component
+
+Adding a component means working down the layers (see the **Contributing/How it's built** page): write the Solid component, give it a story, then wrap it as a `kai-*` element. Modifying one is the same path in reverse — find the layer that owns the behavior and change it there. We'll build a toggle the whole way through; it's the shortest component that touches every step.
 
 ## 1. Write the component
 
@@ -93,7 +92,7 @@ export const Playground: Story = {};
 export const On: Story = { args: { defaultChecked: true } };
 ```
 
-Run `npm run storybook` and the story is live. Write a description, a `Playground` driven by `args`, and a showcase story for each notable variation. (Element stories — in `src/elements/` — differ slightly: they pull controls from the generated metadata with `argTypesFor(tag)` and write the blurb with `specDescription`. Copy an existing one like `src/elements/switch.stories.tsx`.)
+Run `npm run storybook` and the story is live. Write a description, a `Playground` driven by `args`, and a showcase story for each notable variation. Element stories — in `src/elements/` — differ slightly: they pull controls from the generated metadata with `argTypesFor(tag)` and write the blurb with `specDescription`. Copy an existing one like `src/elements/switch.stories.tsx`.
 
 ## 3. Expose it as a `kai-*` element
 
@@ -134,9 +133,7 @@ What the facade handles for you:
 - **Events** — `dispatch('kai-change', { checked })` fires a `kai-*` `CustomEvent` off the host. Typing `defineWebComponent<Props, Events>` keeps `dispatch` honest about names and payloads.
 - **Slots** — for content rather than data, render `<slot />` (or named slots) inside the facade; the kit's composition elements do this for declarative children.
 
-<Aside type="caution" title="Reserved prop names">
-`title`, `id`, `slot`, and `lang` collide with global HTMLElement attributes and break the element constructor — `defineWebComponent` throws if you use them. Rename (e.g. a source title → `headline`).
-</Aside>
+> **Note — reserved prop names.** `title`, `id`, `slot`, and `lang` collide with global HTMLElement attributes and break the element constructor — `defineWebComponent` throws if you use them. Rename (e.g. a source title → `headline`).
 
 ## 4. Register and regenerate
 
@@ -153,9 +150,7 @@ npm run build:api   # regenerates element-meta.json, types, React wrappers, llms
 
 That's the full loop: the component exists, has a story, ships as `<kai-switch>`, and shows up everywhere the generated metadata feeds — the reference tables, the React adapter, and the for-AI-agents output.
 
-<Aside type="tip" title="Keep the layers honest">
-Behavior belongs in `src/primitives/`, accessible markup in `src/ui/`, the AI surface in `src/components/`, and only the thin wrapper in `src/elements/`. When you modify a component, change the layer that owns the behavior — the element facade should stay boring.
-</Aside>
+> **Keep the layers honest.** Behavior belongs in `src/primitives/`, accessible markup in `src/ui/`, the AI surface in `src/components/`, and only the thin wrapper in `src/elements/`. When you modify a component, change the layer that owns the behavior — the element facade should stay boring.
 
 ## Verify
 

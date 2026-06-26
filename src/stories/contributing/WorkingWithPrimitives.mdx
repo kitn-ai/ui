@@ -1,13 +1,12 @@
----
-title: Working with the components directly
-description: Import AI/UI's headless primitives, UI primitives, and feature components straight from @kitn.ai/ui for full compositional control in a Solid app.
----
+import { Meta } from '@storybook/addon-docs/blocks';
 
-import { Aside } from '@astrojs/starlight/components';
+<Meta title="Contributing/Working with the primitives" />
+
+# Working with the components directly
 
 The `kai-*` elements are the fast path. When you want full control over markup and layout — and you're in a Solid app — skip the wrapper and import the underlying pieces from `@kitn.ai/ui`. You compose them in JSX, and your bundler tree-shakes away whatever you don't use.
 
-This page is the catalog, organized by the [four layers](/guides/primitives/architecture/). For a full streaming chat built this way, see the [Solid guide](/guides/frameworks/solid/).
+This page is the catalog, organized by the four layers (see the **Contributing → How it's built** page). For a full streaming chat built this way, see the [Solid framework guide](https://ui.kitn.ai/guides/frameworks/solid/).
 
 ```bash
 npm install @kitn.ai/ui solid-js
@@ -17,9 +16,7 @@ npm install @kitn.ai/ui solid-js
 import '@kitn.ai/ui/theme.css'; // design tokens, once near your entry
 ```
 
-<Aside type="tip" title="Ships as source">
-The `.` entry exports raw TSX. Your bundler compiles and tree-shakes it alongside your own Solid code, so you only pay for what you import.
-</Aside>
+> **Note — ships as source.** The `.` entry exports raw TSX. Your bundler compiles and tree-shakes it alongside your own Solid code, so you only pay for what you import.
 
 ## Headless primitives
 
@@ -56,22 +53,24 @@ import { createKaiChat } from '@kitn.ai/ui';          // SolidJS store
 - `createAssistantStream(set)` — a fluent handle that grows one in-flight assistant message: `appendText`, `appendReasoning`, `upsertTool`/`updateTool`, `patch`, `done`, `abort`.
 - `useKaiChat` (React, from `@kitn.ai/ui/react`) and `createKaiChat` (Solid, from `@kitn.ai/ui`) — own the message list, wire submit, and return a spreadable `bind`.
 
-See the full [State helpers & hooks](/guides/state-and-hooks/) guide for the setter contract, streaming loop, and multi-chat usage.
+For the setter contract, streaming loop, and multi-chat usage, see the **Examples → State & Hooks** story.
 
 ## UI primitives
 
 The kit's own accessible building blocks. Useful on their own, well outside a chat.
 
 ```tsx
-import { Button, Switch, Avatar, Badge, Separator } from '@kitn.ai/ui';
+import { Button, Avatar, Badge, Separator } from '@kitn.ai/ui';
 import { Tooltip, HoverCard, Dropdown } from '@kitn.ai/ui';
 import { Resizable, ResizablePanel, ScrollArea } from '@kitn.ai/ui';
 
-<Switch label="Temporary chat" onChange={(on) => setTemporary(on)} />
 <Button variant="ghost" size="icon" aria-label="Add"><PlusIcon /></Button> {/* your icon */}
+<Badge>Beta</Badge>
 ```
 
-`Resizable` + `ResizablePanel` build a draggable split — handles drop in automatically between visible panels. See the [Solid guide](/guides/frameworks/solid/) for a full sidebar-plus-chat layout.
+`Resizable` + `ResizablePanel` build a draggable split — handles drop in automatically between visible panels. See the [Solid framework guide](https://ui.kitn.ai/guides/frameworks/solid/) for a full sidebar-plus-chat layout.
+
+Each primitive has a live story under **Solid (Advanced) → Primitives**, including [Button](?path=/docs/solid-advanced-primitives-button--docs), [Avatar](?path=/docs/solid-advanced-primitives-avatar--docs), [Badge](?path=/docs/solid-advanced-primitives-badge--docs), [Separator](?path=/docs/solid-advanced-primitives-separator--docs), [Tooltip](?path=/docs/solid-advanced-primitives-tooltip--docs), [HoverCard](?path=/docs/solid-advanced-primitives-hovercard--docs), [Dropdown](?path=/docs/solid-advanced-primitives-dropdown--docs), [Resizable](?path=/docs/solid-advanced-primitives-resizable--docs), and [ScrollArea](?path=/docs/solid-advanced-primitives-scrollarea--docs).
 
 ## Feature components
 
@@ -109,15 +108,16 @@ import {
 
 `ChatContainer` is transport-agnostic: it owns the conversation UI, you own the request. Render messages inside `ChatContainerContent` and stream the reply into your signal from `PromptInput`'s `onSubmit`.
 
+The feature components each have a live story under **Solid (Advanced) → Elements**, including [ChatContainer](?path=/docs/solid-advanced-elements-chatcontainer--docs), [Message](?path=/docs/solid-advanced-elements-message-narrow-panel--docs), [PromptInput](?path=/docs/solid-advanced-elements-promptinput--docs), [Markdown](?path=/docs/solid-advanced-elements-markdown--docs), [Tool](?path=/docs/solid-advanced-elements-tool--docs), and [Artifact](?path=/docs/solid-advanced-elements-artifact--docs).
+
 ## Mix the two
 
 Native components and `kai-*` elements ship in the same package and coexist. Compose primitives where you want control, and drop a `<kai-chat>` shell where you want batteries included — even on different screens of the same app.
 
-<Aside type="note" title="In Solid, pass rich data with prop:">
-When you do use a `kai-*` element inside Solid, bind arrays and objects with `prop:` (`prop:messages={messages()}`) so Solid sets a DOM property instead of stringifying it, and listen with the `on:` namespace (`on:kai-submit`).
-</Aside>
+> **Note — in Solid, pass rich data with `prop:`.** When you do use a `kai-*` element inside Solid, bind arrays and objects with `prop:` (`prop:messages={messages()}`) so Solid sets a DOM property instead of stringifying it, and listen with the `on:` namespace (`on:kai-submit`).
 
 ## Next
 
-- [Run the kit locally](/guides/primitives/development/) — the build and Storybook dev loop.
-- [Create or modify a component](/guides/primitives/extending/) — add your own primitive and element.
+- **Contributing → Run the kit locally** — the build and Storybook dev loop.
+- **Contributing → Create or modify a component** — add your own primitive and element.
+- **Contributing → How it's built** — the four-layer architecture these imports come from.

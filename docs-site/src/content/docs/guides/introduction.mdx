@@ -45,7 +45,7 @@ Then it's just HTML:
 Two things carry across every element: rich data (`messages`, `models`, `context`, `items`) goes on a JavaScript property, and the element talks back through `CustomEvent`s named `kai-*`. Scalars like `placeholder`, `loading`, and `theme` work as plain attributes.
 
 <Aside type="note" title="Built with SolidJS — but you don't have to care">
-The elements are authored in SolidJS, which is why they're small and fast. That's an implementation detail: nothing about using `<kai-chat>` requires knowing Solid. If you do write Solid, you can import the underlying components directly for deeper composition — see [Working with primitives](/guides/primitives/architecture/).
+The elements are authored in SolidJS, which is why they're small and fast. That's an implementation detail: nothing about using `<kai-chat>` requires knowing Solid. If you do write Solid, you can import the underlying components directly for deeper composition — see the [Solid guide](/guides/frameworks/solid/). Developing the primitives themselves lives in the kit's Storybook (the contributor surface).
 </Aside>
 
 ## Use it in your framework

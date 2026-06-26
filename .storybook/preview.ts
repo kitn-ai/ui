@@ -107,22 +107,19 @@ const preview: Preview = {
         // intra-group order (e.g. Examples lead with the full-app "wow" demo
         // rather than sorting alphabetically).
         order: [
-          'Docs',
-          [
-            'Introduction',
-            'Installation',
-            'Getting Started',
-            'Choosing Components',
-            'Composition & Child Elements',
-            'Frameworks',
-            ['Overview', 'HTML', 'React', 'Svelte', 'Vue', 'Angular', 'Solid'],
-            'Recipes',
-            ['Streaming (OpenRouter)', 'Text-to-Speech', 'Speech-to-Text'],
-            'Accessibility',
-            'Using with AI',
-          ],
-          'Theming',
-          ['Overview', 'Editor', 'Token Reference', 'Typography'],
+          // Storybook is the SolidJS-primitive / contributor surface (the consumer
+          // web-component docs live at ui.kitn.ai). Lead with the Contributing
+          // guides, then the Solid (Advanced) primitive stories and the Labs
+          // composition testing ground; the kept web-component element stories sit
+          // below as a reference/testing tier.
+          'Contributing',
+          ['Overview', "How it's built", 'Working with the primitives', 'Create or modify a component', 'Building in the Labs', 'Run the kit locally'],
+          'Solid (Advanced)',
+          ['Overview', 'Elements', 'Primitives'],
+          'Labs',
+          'Components',
+          'Generative UI',
+          ['Overview', 'Cards', ['kai-confirm', '*'], 'SDK'],
           'Examples',
           [
             'Full Chat App',
@@ -136,11 +133,10 @@ const preview: Preview = {
             'Checkpoint & Restore',
           ],
           'Patterns',
-          'Components',
-          'Solid (Advanced)',
-          ['Overview', 'Elements', 'Primitives'],
-          'Generative UI',
-          ['Overview', 'Cards', ['kai-confirm', '*'], 'SDK'],
+          'Theming',
+          ['Overview', 'Editor', 'Token Reference', 'Typography'],
+          'Docs',
+          ['Choosing Components'],
           '*',
         ],
       },
