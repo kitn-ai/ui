@@ -6,7 +6,7 @@ import { test, expect, type Page } from '@playwright/test';
  * filtering keeps sections; selecting inserts an atomic pill; kai-submit carries
  * the structured doc + entities (each with its kind + id). `/` inserts skills.
  */
-const STORY = '/iframe.html?id=components-promptinput--with-entity-pills&viewMode=story';
+const STORY = '/iframe.html?id=test-fixtures-prompt-input--with-entity-pills&viewMode=story';
 const SHOTS = 'tests/e2e/__screenshots__/promptinput/after';
 
 const editable = (p: Page) => p.locator('[data-kai-composer-editable]').first();
@@ -142,7 +142,7 @@ test('Backspace deletes a whole pill inside the prompt input', async ({ page }) 
 });
 
 // --- Programmatic pre-population: value as a ComposerDoc seeds pills ---
-const PREFILLED = '/iframe.html?id=components-promptinput--prefilled&viewMode=story';
+const PREFILLED = '/iframe.html?id=test-fixtures-prompt-input--prefilled&viewMode=story';
 const readSubmit = (p: Page) =>
   p.evaluate(() => (window as unknown as { __submit: { value: unknown; entities: { id: string; kind: string }[] } | null }).__submit);
 

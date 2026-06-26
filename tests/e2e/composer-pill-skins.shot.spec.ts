@@ -10,7 +10,7 @@ import { test, type Page } from '@playwright/test';
  * Output: tests/e2e/__screenshots__/pill-skins/{light,dark}.png
  */
 
-const STORY = '/iframe.html?id=elements-composer--pill-kinds&viewMode=story';
+const STORY = '/iframe.html?id=test-fixtures-composer--pill-kinds&viewMode=story';
 
 async function shoot(page: Page, scheme: 'light' | 'dark') {
   await page.emulateMedia({ colorScheme: scheme });

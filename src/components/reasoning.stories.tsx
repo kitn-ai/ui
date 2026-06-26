@@ -5,7 +5,7 @@ import { Reasoning, ReasoningTrigger, ReasoningContent } from './reasoning';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Solid (Advanced)/Elements/Reasoning',
+  title: 'Components/Elements/Reasoning',
   component: Reasoning,
   tags: ['autodocs'],
   parameters: {

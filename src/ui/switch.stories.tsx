@@ -4,7 +4,7 @@ import { Switch, type SwitchProps } from './switch';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Solid (Advanced)/Primitives/Switch',
+  title: 'Components/Primitives/Switch',
   component: Switch,
   tags: ['autodocs'],
   parameters: {

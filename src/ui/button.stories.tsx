@@ -10,7 +10,7 @@ import { componentDescription } from '../stories/docs/element-controls';
  * stories for notable variations.
  */
 const meta = {
-  title: 'Solid (Advanced)/Primitives/Button',
+  title: 'Components/Primitives/Button',
   component: Button,
   tags: ['autodocs'],
   parameters: {

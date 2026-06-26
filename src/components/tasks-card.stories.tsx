@@ -53,7 +53,7 @@ const BOUNDED: TasksCardData = {
 };
 
 const meta = {
-  title: 'Solid (Advanced)/Elements/TasksCard',
+  title: 'Components/Elements/TasksCard',
   component: TasksCard,
   tags: ['autodocs'],
   parameters: {

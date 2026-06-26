@@ -123,7 +123,7 @@ function Composer() {
 }`;
 
 const meta = {
-  title: 'Components/PromptInput',
+  title: 'Test Fixtures/Prompt Input',
   tags: ['autodocs'],
   argTypes: argTypesFor('kai-prompt-input'),
   parameters: {

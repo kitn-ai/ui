@@ -109,30 +109,15 @@ const preview: Preview = {
         order: [
           // Storybook is the SolidJS-primitive / contributor surface (the consumer
           // web-component docs live at ui.kitn.ai). Lead with the Contributing
-          // guides, then the Solid (Advanced) primitive stories and the Labs
-          // composition testing ground; the kept web-component element stories sit
-          // below as a reference/testing tier.
+          // guides, then the SolidJS Components, the Labs composition testing
+          // ground, and the small Test Fixtures set the e2e specs target. The
+          // web-component element stories now live in the docs, not here.
           'Contributing',
           ['Overview', "How it's built", 'Working with the primitives', 'Create or modify a component', 'Building in the Labs', 'Run the kit locally'],
-          'Solid (Advanced)',
+          'Components',
           ['Overview', 'Elements', 'Primitives'],
           'Labs',
-          'Components',
-          'Generative UI',
-          ['Overview', 'Cards', ['kai-confirm', '*'], 'SDK'],
-          'Examples',
-          [
-            'Full Chat App',
-            'Streaming Response',
-            'State & Hooks',
-            'Conversation with Reasoning',
-            'Conversation with Sources',
-            'Message Actions',
-            'Prompt Input Variants',
-            'Context & Token Usage',
-            'Checkpoint & Restore',
-          ],
-          'Patterns',
+          'Test Fixtures',
           'Theming',
           ['Overview', 'Editor', 'Token Reference', 'Typography'],
           'Docs',

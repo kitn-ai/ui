@@ -3,7 +3,7 @@ import { Source, SourceTrigger, SourceContent, SourceList } from './source';
 import { componentDescription } from '../stories/docs/element-controls';
 
 const meta = {
-  title: 'Solid (Advanced)/Elements/Source',
+  title: 'Components/Elements/Source',
   component: Source,
   tags: ['autodocs'],
   parameters: {
