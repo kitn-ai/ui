@@ -11,10 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A small floating label that appears on hover/focus of its trigger element, built with a DIY overlay-core implementation (no third-party dependency, no arrow).',
-        '**When to use:** to clarify the purpose of icon-only buttons or terse controls — short, supplementary hints that are not essential to complete the action.',
-        '**How to use:** wrap a single interactive `children` element and set `content` to the hint text. The child becomes the trigger.',
-        '**Placement:** toolbars, message action rows, and any compact icon control where a label would not otherwise fit.',
+        'A small floating label on hover/focus of its trigger. Wrap a single interactive `children` element (it becomes the trigger) and set `content` to the hint text.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -48,7 +45,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — set the tooltip text and hover the trigger. */
+/** Interactive playground, set the tooltip text and hover the trigger. */
 export const Playground: Story = {
   ...src(`<Tooltip content="This is a tooltip">
   <Button variant="outline">Hover me</Button>

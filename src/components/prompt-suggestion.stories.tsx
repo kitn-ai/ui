@@ -11,10 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A clickable suggestion chip built on `Button` — renders as a rounded pill, a full-width list row (`block`), or a search-style row that highlights a matching substring (`highlight`).',
-        '**When to use:** offer the user ready-made prompts to send — empty-state starter questions, follow-up suggestions, or a filtered list of matching prompts as they type.',
-        '**How to use:** pass the prompt text as children and wire `onClick` to submit it. Use `block` for stacked, left-aligned list rows; pass `highlight` to emphasize a matched substring (forces list-row layout). Override `variant`/`size` to restyle.',
-        '**Placement:** chat empty states, below the prompt input as follow-ups, or in a suggestion dropdown.',
+        'A clickable starter/follow-up prompt. Text goes in children, `onClick` submits it. Renders as a rounded pill by default; `block` makes a full-width list row, and `highlight` emphasizes a matched substring (forcing the list-row layout) for type-ahead filtering.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -22,7 +19,7 @@ const meta = {
   argTypes: {
     children: {
       control: 'text',
-      description: 'Suggestion content — the prompt text (or an element).',
+      description: 'Suggestion content, the prompt text (or an element).',
     },
     variant: {
       control: 'select',
@@ -68,7 +65,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — tweak the controls to explore every mode. */
+/** Interactive playground: tweak the controls to explore every mode. */
 export const Playground: Story = {
   ...src(`<PromptSuggestion onClick={() => send('Tell me about TypeScript')}>
   Tell me about TypeScript
@@ -90,7 +87,7 @@ export const Block: Story = {
 </PromptSuggestion>`),
 };
 
-/** A row of pill suggestions (showcase — not driven by controls). */
+/** A row of pill suggestions (showcase, not driven by controls). */
 export const MultipleSuggestions: Story = {
   render: (args: { onClick?: (e: MouseEvent) => void }) => (
     <div class="flex flex-wrap gap-2">

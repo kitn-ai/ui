@@ -11,10 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A toggle **switch** (`role="switch"`) for an immediate on/off setting, built on a native `<button>`.',
-        '**When to use:** a preference that applies the moment it flips — "Temporary chat", notifications, a feature flag. For a labelled choice submitted with a form, prefer a checkbox.',
-        '**How to use:** uncontrolled via `defaultChecked`, or controlled via `checked` + `onChange`. Operable with Space/Enter. Pass `label` for the accessible name.',
-        '**Placement:** settings rows, preference panels, and popover menus such as a chat header model menu.',
+        'A `role="switch"` toggle for an immediate on/off setting. Uncontrolled via `defaultChecked`, or controlled via `checked` + `onChange`; pass `label` for the accessible name.',
       ]),
     },
   },

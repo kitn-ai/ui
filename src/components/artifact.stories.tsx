@@ -41,10 +41,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A framed, switchable **generated-artifact viewer** — the "canvas / artifacts" pattern. A sandboxed `<iframe>` with a functional nav toolbar (back · forward · reload · home + editable path field) and a **Preview | Code** toggle; the Code tab shows a `FileTree` + the active file source via `CodeBlock`.',
-        '**When to use:** to show an AI-generated artifact your backend hosts (page, doc, image, PDF) beside the conversation. The component frames; your backend serves — so relative links, back/forward and multi-format work natively.',
-        '**How to use:** set `src` to the hosted URL and `files` (`{ path, url?, code?, language?, type? }[]`) for the Code tree. The iframe `sandbox` defaults to `allow-scripts allow-forms` (not `allow-same-origin`). Handle `onNavigate(url)`, `onTabChange(tab)`, `onFileSelect(path)`.',
-        '**Placement:** the preview/canvas panel of a chat shell (e.g. `list | chat | artifact`). It **fills** its container — give the parent a height.',
+        'The "canvas / artifacts" pattern: a framed viewer for an AI-generated artifact your backend hosts (page, doc, image, PDF), shown beside the conversation. A sandboxed `<iframe>` with a nav toolbar and a Preview | Code toggle (the Code tab pairs a `FileTree` with `CodeBlock`).',
+        'Set `src` to the hosted URL and `files` for the Code tree; handle `onNavigate`, `onTabChange`, `onFileSelect`. It fills its container, so give the parent a height.',
       ]),
     },
   },
@@ -127,7 +125,7 @@ export const CodeTab: Story = {
   ...src(`<Artifact src={src} files={files} tab="code" activeFile="index.html" />`),
 };
 
-/** Controlled — observe the emitted nav model. */
+/** Controlled, observe the emitted nav model. */
 export const Controlled: Story = {
   render: () => {
     const [log, setLog] = createSignal<string[]>([]);

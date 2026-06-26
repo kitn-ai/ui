@@ -5,7 +5,7 @@ import { attachKaiActions } from '../stories/docs/story-actions';
 
 // The web components are custom DOM elements, so declare the tags for JSX. This
 // labs story declares its own intrinsic types (including the new `collapsed`
-// boolean) so it can set `collapsed` as a plain JSX boolean — the bug repro.
+// boolean) so it can set `collapsed` as a plain JSX boolean, the bug repro.
 declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
@@ -64,7 +64,7 @@ function Frame(props: { children: JSX.Element }) {
 const COLLAPSED_SNIPPET = `<!-- A bare boolean \`collapsed\` collapses the panel at the FIRST render,
      from React / Solid / Vue / Svelte JSX or plain HTML. \`hidden\` does not,
      because a JSX boolean sets neither the \`hidden\` attribute nor the IDL
-     property on a custom element — so the parent never sees it and the panel
+     property on a custom element, so the parent never sees it and the panel
      renders visible. Use \`collapsed\` for declarative collapse. -->
 <kai-resizable orientation="horizontal" style="display:block;height:256px">
   <kai-resizable-item size="28%" min="140px" collapsed> …list… </kai-resizable-item>
@@ -78,7 +78,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Labs: the `collapsed` boolean on `<kai-resizable-item>`. A bare `<kai-resizable-item collapsed>` written in framework JSX (React / Solid / Vue / Svelte) collapses the panel at the **first** render — the panel starts hidden, no imperative `setAttribute` needed. This fixes the bug where `hidden` as a JSX boolean did nothing because it set neither the attribute nor the IDL property on a custom element, so `<kai-resizable>` never saw it and the panel rendered visible.',
+          'Labs: the `collapsed` boolean on `<kai-resizable-item>`. A bare `<kai-resizable-item collapsed>` written in framework JSX (React / Solid / Vue / Svelte) collapses the panel at the **first** render, the panel starts hidden, no imperative `setAttribute` needed. This fixes the bug where `hidden` as a JSX boolean did nothing because it set neither the attribute nor the IDL property on a custom element, so `<kai-resizable>` never saw it and the panel rendered visible.',
       },
     },
   },
@@ -89,7 +89,7 @@ type Story = StoryObj;
 
 /**
  * The bug repro: a plain JSX boolean `collapsed` on the first item. The panel must
- * start COLLAPSED at mount — only the Chat panel is visible until you expand it.
+ * start COLLAPSED at mount, only the Chat panel is visible until you expand it.
  * (Before the fix, `hidden` as a JSX boolean left the panel visible at mount.)
  */
 export const CollapsedAtMount: Story = {
@@ -118,7 +118,7 @@ export const CollapsedAtMount: Story = {
           {collapsed() ? 'Expand list' : 'Collapse list'}
         </button>
         <Frame>
-          {/* `collapsed` is a PLAIN JSX boolean — no imperative setAttribute. The
+          {/* `collapsed` is a PLAIN JSX boolean, no imperative setAttribute. The
               facade reflects it to the attribute the parent reads, so the panel
               starts collapsed at the very first render. */}
           <kai-resizable orientation="horizontal" ref={(e) => (groupEl = e as HTMLElement)}>

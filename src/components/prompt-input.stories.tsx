@@ -14,10 +14,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A composer shell that hosts an auto-resizing `PromptInputTextarea` and a `PromptInputActions` toolbar, with controlled or uncontrolled value, loading, and disabled states.',
-        '**When to use:** as the message input at the bottom of any chat surface, wherever the user types and submits a prompt.',
-        '**How to use:** control text via `value` + `onValueChange` (or leave uncontrolled), wire `onSubmit` (also fired on Enter without Shift), and place your send/stop controls inside `PromptInputActions`. Toggle `isLoading` / `disabled` for in-flight and read-only states.',
-        '**Placement:** pinned at the bottom of the chat column, below the message transcript.',
+        'The chat composer: an auto-resizing `PromptInputTextarea` plus a `PromptInputActions` toolbar for your send/stop controls. Control text with `value` + `onValueChange` (or leave it uncontrolled); `onSubmit` fires on Enter without Shift. `isLoading` and `disabled` cover the in-flight and read-only states.',
       ]),
     },
   },
@@ -53,7 +50,7 @@ const meta = {
     },
     children: {
       control: false,
-      description: 'Composer contents — usually a textarea plus an actions row.',
+      description: 'Composer contents, usually a textarea plus an actions row.',
     },
     class: {
       control: 'text',
@@ -91,7 +88,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — toggle loading/disabled and edit the value via controls. */
+/** Interactive playground: toggle loading/disabled and edit the value via controls. */
 export const Playground: Story = {
   ...src(`<PromptInput value={value()} onValueChange={setValue} onSubmit={send}>
   <PromptInputTextarea placeholder="Ask anything..." />
@@ -151,7 +148,7 @@ export const WithContent: Story = {
 </PromptInput>`),
 };
 
-/** Read-only composer — `disabled` dims it and blocks input. */
+/** Read-only composer: `disabled` dims it and blocks input. */
 export const Disabled: Story = {
   render: (args: EventArgs) => (
     <div class="max-w-xl">
@@ -171,7 +168,7 @@ export const Disabled: Story = {
 </PromptInput>`),
 };
 
-/** In-flight — `isLoading` typically pairs with a Stop action. */
+/** In-flight: `isLoading` typically pairs with a Stop action. */
 export const Loading: Story = {
   render: (args: EventArgs) => (
     <div class="max-w-xl">
@@ -193,7 +190,7 @@ export const Loading: Story = {
 </PromptInput>`),
 };
 
-/** A split actions row — a leading icon control and a trailing Send (showcase). */
+/** A split actions row: a leading icon control and a trailing Send (showcase). */
 export const WithMultipleActions: Story = {
   render: (args: EventArgs) => {
     const [value, setValue] = createSignal('');

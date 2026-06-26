@@ -8,7 +8,7 @@ import type { ConversationSummary, ConversationGroup } from '../types';
 
 // Labs: the kai-chat composition slots. Each demo dogfoods REAL kai-* components
 // and the kit's own theme tokens (var(--color-*)), so every region reads
-// correctly in light AND dark — i.e. these double as working references you can
+// correctly in light AND dark, i.e. these double as working references you can
 // copy. Slots accept ANY light-DOM markup; bespoke regions (the empty state, the
 // fully-custom header/composer) stay hand-written but still use the kit tokens so
 // they never look out of place.
@@ -61,7 +61,7 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-// ── 1. INJECT — your content added into regions (sidebar + composer-actions +
+// ── 1. INJECT, your content added into regions (sidebar + composer-actions +
 //      footer), alongside the built-in header and the default composer. The
 //      sidebar dogfoods the real <kai-conversations>; the action is a themed
 //      <kai-button>; the footer is your own light-DOM, on kit tokens. ──────────
@@ -85,9 +85,9 @@ function InjectDemo() {
   });
   return (
     <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }}>
-      {/* Inject the real conversation-history sidebar — set its data as JS props. */}
+      {/* Inject the real conversation-history sidebar, set its data as JS props. */}
       <kai-conversations slot="sidebar" ref={(e) => (convEl = e as ConversationsEl)} style={{ display: 'block', height: '100%' }} />
-      {/* A custom composer action — themed kai-button, works in light + dark. */}
+      {/* A custom composer action, themed kai-button, works in light + dark. */}
       <kai-button slot="composer-actions" variant="subtle" icon="sparkles"
         ref={(e) => onMount(() => onCleanup(attachKaiActions(e)))}>Improve prompt</kai-button>
       <footer slot="footer" style="font:12px/1.4 system-ui;color:var(--color-muted-foreground);text-align:center;padding:4px">
@@ -125,7 +125,7 @@ export const Inject: Story = {
   },
 };
 
-// ── 2. REPLACE (empty) — custom zero-state. The component owns WHEN it shows
+// ── 2. REPLACE (empty), custom zero-state. The component owns WHEN it shows
 //      (messages.length === 0); the consumer owns WHAT it is. Dogfoods the kit's
 //      own <kai-empty> block (icon via slot="media", a CTA in the default slot)
 //      rather than re-rolling an empty state by hand. ─────────────────────────
@@ -141,7 +141,7 @@ function EmptyDemo() {
       <kai-empty
         slot="empty"
         empty-title="How can we help?"
-        description="Ask about billing, your account, or anything else — a human is one click away."
+        description="Ask about billing, your account, or anything else, a human is one click away."
       >
         <span slot="media"><LifeBuoy size={28} /></span>
         <kai-button variant="default"
@@ -158,7 +158,7 @@ export const EmptyState: Story = {
       source: {
         language: 'html',
         code: `<kai-chat>
-  <!-- Your zero-state — shown by the component whenever messages is empty.
+  <!-- Your zero-state, shown by the component whenever messages is empty.
        Dogfood <kai-empty> instead of hand-rolling the block. -->
   <kai-empty slot="empty" empty-title="How can we help?"
              description="Ask about billing, your account, or anything else.">
@@ -175,9 +175,9 @@ export const EmptyState: Story = {
   },
 };
 
-// ── 3. REPLACE (header + composer) — full custom header AND a custom composer
+// ── 3. REPLACE (header + composer), full custom header AND a custom composer
 //      form. This is the DATA-FLOW WALL: a slotted <form> can't read the
-//      component's reactive state, so it owns its own submit — and drives the
+//      component's reactive state, so it owns its own submit, and drives the
 //      thread by setting the `messages` property (a fresh array ref). Bespoke
 //      markup, but on kit tokens so it's not stranded in light mode. ──────────
 let nextId = 100;
@@ -200,7 +200,7 @@ function ReplaceDemo() {
   return (
     <kai-chat ref={(e) => (el = e as ChatEl)} style={{ display: 'block', height: '560px' }}>
       <div slot="header" style="display:flex;align-items:center;gap:10px;padding:0 16px;height:56px;background:var(--color-surface);border-bottom:1px solid var(--color-border);color:var(--color-foreground);font:600 15px system-ui">
-        <span style="color:var(--color-primary);display:flex;flex-shrink:0"><Sparkles size={20} /></span> Concierge — fully custom header
+        <span style="color:var(--color-primary);display:flex;flex-shrink:0"><Sparkles size={20} /></span> Concierge, fully custom header
       </div>
       <form slot="composer" onSubmit={send} style="display:flex;gap:8px;padding:10px;border:1px solid var(--color-border);border-radius:14px;background:var(--color-surface)">
         <input ref={(e) => (input = e as HTMLInputElement)} placeholder="Your own <form> owns submit…" style="flex:1;border:0;background:transparent;font:14px system-ui;outline:none;color:var(--color-foreground)" />
@@ -217,7 +217,7 @@ export const ReplaceComposer: Story = {
       source: {
         language: 'html',
         code: `<kai-chat>
-  <div slot="header">Concierge — fully custom header</div>
+  <div slot="header">Concierge, fully custom header</div>
   <form slot="composer">
     <input placeholder="Your own <form> owns submit…" />
     <button type="submit">Send</button>
@@ -228,7 +228,7 @@ export const ReplaceComposer: Story = {
   const chat = document.querySelector('kai-chat');
   chat.messages = [/* ChatMessage[] */];
 
-  // A slotted form can't read the component's reactive state — it owns submit
+  // A slotted form can't read the component's reactive state, it owns submit
   // and drives the thread by assigning a fresh messages array.
   document.querySelector('form[slot="composer"]').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -242,7 +242,7 @@ export const ReplaceComposer: Story = {
   },
 };
 
-// ── Drop-in baseline — NO slots projected. The shell must render exactly as it
+// ── Drop-in baseline, NO slots projected. The shell must render exactly as it
 //    did before slots existed (regression guard). ─────────────────────────────
 function DropInDemo() {
   let el: ChatEl | undefined;
@@ -263,7 +263,7 @@ export const DropIn: Story = {
         code: `<kai-chat></kai-chat>
 
 <script type="module">
-  // No slots projected — the shell renders its built-in header + composer.
+  // No slots projected, the shell renders its built-in header + composer.
   document.querySelector('kai-chat').messages = [/* ChatMessage[] */];
 </script>`,
       },

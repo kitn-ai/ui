@@ -65,10 +65,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A composable container for displaying file and source-document attachments as thumbnails, inline chips, or a vertical list. Built from `Attachments` + per-item `Attachment` with `AttachmentPreview`, `AttachmentInfo`, and `AttachmentRemove` parts.',
-        '**When to use:** to show files a user attached to a prompt, or documents/sources referenced by a message. Choose `grid` for thumbnails, `inline` for compact chips, `list` for a detailed rows view.',
-        '**How to use:** set `variant` on `Attachments`, then map your data to `Attachment` (passing each item via `data` and an `onRemove` handler) and compose the preview/info/remove parts inside.',
-        '**Placement:** prompt input area (pending uploads), message bodies (attached or cited files), and document panels.',
+        'A composable container for files a user attached to a prompt or documents a message cites. Built from `Attachments` plus per-item `Attachment` with `AttachmentPreview`, `AttachmentInfo`, and `AttachmentRemove` parts.',
+        'Set `variant`: `grid` (thumbnails), `inline` (compact chips), or `list` (detailed rows). Pass each item via `data` and an `onRemove` handler.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -93,7 +91,7 @@ const meta = {
     variant: 'grid' as const,
   },
   // `onRemove` lives on each child `Attachment`, not the container, so it isn't a
-  // story arg — route it straight to the Actions panel via `action('remove')`.
+  // story arg, route it straight to the Actions panel via `action('remove')`.
   render: (args) => {
     const [items, setItems] = createSignal([...sampleAttachments]);
     const remove = (id: string) => { action('remove')(id); setItems((prev) => prev.filter((a) => a.id !== id)); };
@@ -124,9 +122,9 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — switch `variant` to compare grid / inline / list. */
+/** Interactive playground, switch `variant` to compare grid / inline / list. */
 export const Playground: Story = {
-  ...src(`// Each item is an AttachmentData — a file or a cited source-document.
+  ...src(`// Each item is an AttachmentData, a file or a cited source-document.
 const [items, setItems] = createSignal<AttachmentData[]>([
   { id: '1', type: 'file', filename: 'mountain.jpg', mediaType: 'image/jpeg',
     url: 'https://…/mountain.jpg' },

@@ -11,9 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A two-state disclosure that expands and collapses a region of content, animating height via a CSS `grid-template-rows` `0fr` → `1fr` transition (no JS measurement, no layout thrash). The trigger carries `aria-expanded`/`aria-controls` and the collapsed content is `inert`, so it is removed from tab order and the accessibility tree. Works controlled (`open` + `onOpenChange`) or uncontrolled (`defaultOpen`).',
-        '**When to use:** to hide secondary detail behind a toggle — a reasoning/"chain of thought" panel, a tool-call payload, an expandable conversation group, an FAQ row.',
-        '**How to use:** wrap `CollapsibleTrigger` and `CollapsibleContent` in a `Collapsible`. The trigger renders a `<button>` by default; pass `as` to render a custom element.',
+        'A disclosure that expands/collapses `CollapsibleContent` from a `CollapsibleTrigger`, with the right `aria-expanded` wiring and `inert` collapsed content. Controlled (`open` + `onOpenChange`) or uncontrolled (`defaultOpen`).',
       ]),
     },
   },

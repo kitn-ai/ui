@@ -110,7 +110,7 @@ export const PlusMenu: Story = {
 
 <script type="module">
   const menu = document.querySelector('kai-menu');
-  // Items — including submenus, separators, and checkboxes — are a JS property.
+  // Items, including submenus, separators, and checkboxes, are a JS property.
   menu.items = [
     { heading: true, label: 'Actions' },
     { id: 'add-files', label: 'Add files or photos', icon: 'paperclip', shortcut: '⌘U' },

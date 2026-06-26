@@ -33,10 +33,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A full chat-history sidebar: header (sidebar toggle + new chat), a built-in search box that filters by title, and conversations bucketed into collapsible, count-badged groups.',
-        '**When to use:** as the left-hand navigation for a chat app — browsing, searching, and switching between past conversations.',
-        '**How to use:** pass `groups` and `conversations` arrays, the `activeId`, and handlers `onSelect(id)` / `onNewChat()` (plus optional `onToggleSidebar()`). Give it a sized, overflow-hidden container.',
-        '**Placement:** the persistent left sidebar of a chat layout.',
+        'The chat-history sidebar: a header (sidebar toggle + new chat), a search box that filters by title, and conversations bucketed into collapsible, count-badged groups.',
+        'Pass `groups` and `conversations`, the `activeId`, and handlers `onSelect(id)` / `onNewChat()` (plus optional `onToggleSidebar()`); give it a sized, overflow-hidden container.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -129,7 +127,7 @@ const [activeId, setActiveId] = createSignal('1');
   />
 </div>`;
 
-/** Interactive playground — edit the groups/conversations arrays and active id via controls. */
+/** Interactive playground, edit the groups/conversations arrays and active id via controls. */
 export const Playground: Story = {
   ...src(usage),
 };
@@ -139,7 +137,7 @@ export const WithGroups: Story = {
   ...src(usage),
 };
 
-/** No conversations — the list renders just its header and search box. */
+/** No conversations, the list renders just its header and search box. */
 export const EmptyState: Story = {
   args: { groups: [], conversations: [], activeId: undefined },
   render: (args: ConversationListProps) => (

@@ -3,7 +3,7 @@ import { fn } from 'storybook/test';
 import { VoiceInput } from './voice-input';
 import { componentDescription } from '../stories/docs/element-controls';
 
-/** Sample transcription handler — resolves the recorded audio to text. */
+/** Sample transcription handler: resolves the recorded audio to text. */
 const transcribe = async (_audio: Blob): Promise<string> => {
   await new Promise((r) => setTimeout(r, 1200));
   return 'Hello from the microphone';
@@ -18,10 +18,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A microphone button that records audio, shows recording (pulse rings) and processing (spinner) states, then hands the audio off for transcription.',
-        '**When to use:** to let users dictate input by voice instead of typing — speech-to-text for the prompt field.',
-        '**How to use:** provide `onTranscribe(audio)` returning a `Promise<string>` (your STT call) and `onTranscription(text)` to receive the result. Click toggles recording; transcription runs automatically on stop. Set `disabled` to block input.',
-        '**Placement:** inside the prompt input action bar, next to send and other input actions.',
+        'A microphone button for dictating into the prompt field: click toggles recording (pulse rings), and on stop it runs your STT call and shows a spinner. Wire `onTranscribe(audio)` returning a `Promise<string>` and `onTranscription(text)` to receive the result.',
       ]),
     },
   },
@@ -68,7 +65,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — click the mic to record (requires mic permission). */
+/** Interactive playground: click the mic to record (requires mic permission). */
 export const Playground: Story = {
   ...src(`<VoiceInput
   onTranscribe={async (audio) => {

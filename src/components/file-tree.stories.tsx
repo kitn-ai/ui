@@ -23,10 +23,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A collapsible, keyboard-navigable file explorer built from a flat list of `/`-delimited paths — nested folders are derived automatically. ARIA `tree`/`treeitem`.',
-        '**When to use:** any file/folder tree — the Code tab of `Artifact` uses it, and it is exported for standalone reuse (project explorers, attachment browsers, doc outlines).',
-        '**How to use:** pass `files` (`{ path, url?, code?, language?, type? }[]`); folders come from `/` in each path and `type` picks the icon. Control highlight via `activeFile`, initial open folders via `defaultExpanded`, and handle `onSelect(path, file)`. Arrow keys navigate; Enter/Space selects or toggles.',
-        '**Placement:** a sidebar/explorer column.',
+        'A collapsible, keyboard-navigable file explorer (ARIA `tree`) built from a flat `files` list of `/`-delimited paths: nested folders are derived automatically and `type` picks each icon.',
+        'Drive the highlight with `activeFile`, open folders with `defaultExpanded`, and handle selection via `onSelect(path, file)`. Used in the Code tab of `Artifact`.',
       ]),
     },
   },
@@ -35,7 +33,7 @@ const meta = {
     activeFile: { control: 'text' },
     onSelect: {
       action: 'select',
-      description: 'A file was selected — called with `(path, file)`.',
+      description: 'A file was selected; called with `(path, file)`.',
       table: { category: 'Events' },
     },
   },
@@ -56,7 +54,7 @@ const src = (code: string) => ({
 });
 
 export const Playground: Story = {
-  ...src(`// Flat list of \`/\`-delimited paths — folders are derived automatically.
+  ...src(`// Flat list of \`/\`-delimited paths, folders are derived automatically.
 const files: FileTreeFile[] = [
   { path: 'index.html', type: 'html' },
   { path: 'css/site.css', type: 'other', language: 'css' },
@@ -73,7 +71,7 @@ const files: FileTreeFile[] = [
 />`),
 };
 
-/** Drives selection from `onSelect` — the controlled pattern. */
+/** Drives selection from `onSelect`: the controlled pattern. */
 export const Interactive: Story = {
   render: () => {
     const [active, setActive] = createSignal('src/lib/format.ts');

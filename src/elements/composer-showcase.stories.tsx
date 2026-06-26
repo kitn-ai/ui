@@ -41,7 +41,7 @@ interface ModelSwitcherEl extends HTMLElement {
 }
 
 interface PromptInputEl extends HTMLElement {
-  // no suggestions — the chips below the card are a separate <kai-suggestions>
+  // no suggestions, the chips below the card are a separate <kai-suggestions>
 }
 
 interface SuggestionsEl extends HTMLElement {
@@ -54,7 +54,7 @@ const meta = {
     layout: 'fullscreen',
     // Theme-driven: the whole showcase follows the Storybook light/dark toggle
     // (preview.ts syncs it onto every kai-* element). We default the toggle to
-    // dark so it opens matching the reference, but it's fully theme-aware — flip
+    // dark so it opens matching the reference, but it's fully theme-aware, flip
     // the toggle for light. No per-element theme, no forced palette.
     darkMode: { current: 'dark' },
   },
@@ -64,7 +64,7 @@ export default meta;
 type Story = StoryObj;
 
 // ---------------------------------------------------------------------------
-// Production-quality composer showcase — theme-driven (light/dark via the toggle)
+// Production-quality composer showcase, theme-driven (light/dark via the toggle)
 // ---------------------------------------------------------------------------
 
 function ComposerShowcase() {
@@ -141,22 +141,22 @@ function ComposerShowcase() {
         { id: 'sonnet', name: 'Sonnet' },
         { id: 'haiku', name: 'Haiku' },
       ];
-      // kai-model-change + kai-open-change — both declared; the helper covers both.
+      // kai-model-change + kai-open-change, both declared; the helper covers both.
       onCleanup(attachKaiActions(modelEl));
     }
 
-    // Wire the prompt input — log all of its declared events (kai-submit,
+    // Wire the prompt input, log all of its declared events (kai-submit,
     // kai-value-change, …). No suggestions here (custom chips rendered below).
     if (inputEl) {
       onCleanup(attachKaiActions(inputEl));
     }
 
-    // The self-dismissing notice — log its kai-dismiss event.
+    // The self-dismissing notice, log its kai-dismiss event.
     if (noticeEl) {
       onCleanup(attachKaiActions(noticeEl));
     }
 
-    // Suggestion chips — data is a JS property; each item carries an icon name.
+    // Suggestion chips, data is a JS property; each item carries an icon name.
     if (suggestionsEl) {
       suggestionsEl.suggestions = [
         { label: 'Write', icon: 'pencil' },
@@ -171,7 +171,7 @@ function ComposerShowcase() {
   });
 
   return (
-    // Theme-following page surface — tracks the kit's tokens via the toggle.
+    // Theme-following page surface, tracks the kit's tokens via the toggle.
     <div class="flex min-h-screen items-center justify-center bg-background px-5 py-10 font-sans">
       <div class="flex w-full max-w-[720px] flex-col gap-3">
         {/* A self-dismissing kit notice, placed above the composer. The dev owns
@@ -195,18 +195,18 @@ function ComposerShowcase() {
           submit="auto"
           class="block w-full"
         >
-          {/* toolbar-start: the + menu — built-in trigger via props. */}
+          {/* toolbar-start: the + menu, built-in trigger via props. */}
           <kai-menu slot="toolbar-start" trigger-icon="plus" label="Add" ref={(e) => (plusMenuEl = e as MenuEl)} />
 
           {/* toolbar-end: model switcher + effort + mic + waveform */}
           <div slot="toolbar-end" class="flex items-center gap-1">
-            {/* Model switcher — follows the theme toggle (no hard-coded theme). */}
+            {/* Model switcher, follows the theme toggle (no hard-coded theme). */}
             <kai-model-switcher ref={(e) => (modelEl = e as ModelSwitcherEl)} class="inline-flex" />
 
-            {/* Effort selector — built-in label trigger via props. */}
+            {/* Effort selector, built-in label trigger via props. */}
             <kai-menu trigger-label="High" trigger-icon-trailing="chevron-down" ref={(e) => (effortMenuEl = e as MenuEl)} />
 
-            {/* Mic + voice — kit buttons; variant + icon do the styling. Each
+            {/* Mic + voice, kit buttons; variant + icon do the styling. Each
                 emits kai-click → logged to the Actions panel. */}
             <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice input"
               ref={(e) => e.addEventListener('kai-click', () => action('mic: kai-click')())} />
@@ -215,7 +215,7 @@ function ComposerShowcase() {
           </div>
         </kai-prompt-input>
 
-        {/* Suggestion chips — centered by the dev's own layout. */}
+        {/* Suggestion chips, centered by the dev's own layout. */}
         <div class="mt-2 flex justify-center">
           <kai-suggestions
             ref={(e) => (suggestionsEl = e as SuggestionsEl)}
@@ -230,7 +230,7 @@ function ComposerShowcase() {
 }
 
 // Named distinctly from the "Composer" group so Storybook does NOT single-story-
-// hoist it — keeps every Lab a consistent topic folder, not a lone leaf.
+// hoist it, keeps every Lab a consistent topic folder, not a lone leaf.
 export const ProductionComposer: Story = {
   render: () => <ComposerShowcase />,
   parameters: {

@@ -42,10 +42,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A scrollable message viewport that automatically sticks to the bottom as new content streams in. Composed of `ChatContainerRoot` (the scroll region), `ChatContainerContent` (the message stack), and `ChatContainerScrollAnchor` (the stick-to-bottom target).',
-        '**When to use:** as the conversation transcript region of a chat UI, where messages append over time and the view should follow the latest output unless the user scrolls up.',
-        '**How to use:** wrap your message list in `ChatContainerRoot`, place messages inside `ChatContainerContent`, and end with `ChatContainerScrollAnchor`. Give the root a fixed height so it can scroll.',
-        '**Placement:** the central pane of a chat layout, between the header and the prompt input.',
+        'The scrollable transcript region that sticks to the bottom as content streams in, unless the user scrolls up. Wrap messages in `ChatContainerRoot` (scroll region), place them in `ChatContainerContent`, and end with `ChatContainerScrollAnchor`.',
+        'Give the root a fixed height so it can scroll.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -53,7 +51,7 @@ const meta = {
   argTypes: {
     children: {
       control: false,
-      description: 'The container content — typically `ChatContainerContent` with messages.',
+      description: 'The container content, typically `ChatContainerContent` with messages.',
     },
     class: {
       control: 'text',
@@ -93,9 +91,9 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — a full transcript inside the stick-to-bottom container. */
+/** Interactive playground, a full transcript inside the stick-to-bottom container. */
 export const Playground: Story = {
-  ...src(`// Your transcript — each turn is a { role, content } record.
+  ...src(`// Your transcript, each turn is a { role, content } record.
 const messages = [
   { role: 'user', content: 'What is SolidJS?' },
   { role: 'assistant', content: '**SolidJS** is a reactive UI library…' },

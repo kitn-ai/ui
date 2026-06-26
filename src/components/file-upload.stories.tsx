@@ -14,10 +14,8 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A headless file-upload root that handles window-wide drag-and-drop plus a hidden file input, composed with `FileUploadTrigger` (opens the picker) and `FileUploadContent` (full-screen drop overlay).',
-        '**When to use:** to let users attach files to a chat — via a button click or by dragging files anywhere onto the page.',
-        '**How to use:** wrap a `FileUploadTrigger` and optional `FileUploadContent` in `FileUpload`, and read selected files from `onFilesAdded`. Set `multiple`, `accept`, or `disabled` as needed.',
-        '**Placement:** in the prompt input area or composer toolbar where attachments are added.',
+        'A headless file-upload root for chat attachments: handles window-wide drag-and-drop plus a hidden file input. Compose `FileUploadTrigger` (opens the picker) and `FileUploadContent` (full-screen drop overlay).',
+        'Read selected files from `onFilesAdded`; constrain with `multiple`, `accept`, and `disabled`.',
       ]),
     },
   },
@@ -71,7 +69,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — toggle multiple/disabled and watch the `filesAdded` action. */
+/** Interactive playground: toggle multiple/disabled and watch the `filesAdded` action. */
 export const Playground: Story = {
   ...src(`<FileUpload onFilesAdded={(files) => console.log(files)}>
   <FileUploadTrigger class="...">

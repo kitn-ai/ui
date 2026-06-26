@@ -50,10 +50,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A bordered code card with optional syntax highlighting. `CodeBlock` is the container, `CodeBlockCode` renders the (Shiki-)highlighted source, and `CodeBlockGroup` is a flex row for a header/footer (filename + copy button).',
-        '**When to use:** to display code snippets in chat messages, documentation, or anywhere fenced code appears — typically emitted by the Markdown renderer for ``` blocks.',
-        '**How to use:** wrap one or more children in `<CodeBlock>`. Pass the source string and a `language` to `<CodeBlockCode>`; optionally override the `theme`. Add a `<CodeBlockGroup>` for a filename row and copy action.',
-        '**Placement:** inside assistant message content, README/docs panes, and tool-output views.',
+        'A bordered code card, typically emitted by the Markdown renderer for fenced blocks. `CodeBlock` is the container, `CodeBlockCode` renders the (Shiki) highlighted source, and `CodeBlockGroup` is a flex row for a filename + copy button.',
+        'Pass the source string and a `language` to `CodeBlockCode`; override `theme` if needed.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -94,7 +92,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — edit the code, language, or theme via controls. */
+/** Interactive playground, edit the code, language, or theme via controls. */
 export const Playground: Story = {
   ...src(`const code = \`interface User {
   id: string;
@@ -153,7 +151,7 @@ export const CSS: Story = {
 </CodeBlock>`),
 };
 
-/** A header row (`CodeBlockGroup`) with a filename and a copy button — showcase. */
+/** A header row (`CodeBlockGroup`) with a filename and a copy button, showcase. */
 export const WithHeader: Story = {
   render: () => (
     <div class="max-w-lg">

@@ -260,7 +260,7 @@ export const WithFileAttachments: Story = {
           </PromptInputActions>
         </PromptInput>
         <p class="mt-2 text-xs text-muted-foreground">
-          Note: the <code>kai-prompt-input</code> element handles the full attach UX automatically — this story shows how to wire the Solid primitives manually if you need full control.
+          Note: the <code>kai-prompt-input</code> element handles the full attach UX automatically, this story shows how to wire the Solid primitives manually if you need full control.
         </p>
       </div>
     );
@@ -301,7 +301,7 @@ export const StoppableStreaming: Story = {
         <p class="text-sm text-muted-foreground">
           The Solid primitive equivalent of <code>stoppable</code> on <code>kai-prompt-input</code>:
           when <code>loading</code> is true, the send button is replaced by a Stop button (square icon).
-          Clicking Stop fires <code>kai-stop</code> — your handler calls <code>controller.abort()</code>
+          Clicking Stop fires <code>kai-stop</code>, your handler calls <code>controller.abort()</code>
           then clears the loading flag. Press Submit to start the simulated 3-second stream.
         </p>
         <PromptInput

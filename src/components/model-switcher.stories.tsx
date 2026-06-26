@@ -19,10 +19,8 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A compact dropdown that shows the active model and lets the user switch between the available **models** (grouped by optional `provider` label).',
-        '**When to use:** when a chat surface offers more than one model. It renders nothing when fewer than two models are provided, so it is safe to mount unconditionally.',
-        '**How to use:** pass the `models` list and the `currentModelId`, then handle `onModelChange` to update your selected-model state.',
-        '**Placement:** the prompt input action bar, a chat header, or a settings/toolbar row near the composer.',
+        'A compact dropdown that shows the active model and switches between the available `models` (each `{ id, name }` with optional `provider`, `description`, or `group`).',
+        'Pass `models` and `currentModelId`, then handle `onModelChange`. Renders nothing with fewer than two models, so it is safe to mount unconditionally.',
       ]),
     },
   },
@@ -61,7 +59,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — tweak the controls to explore the switcher. */
+/** Interactive playground: tweak the controls to explore the switcher. */
 export const Playground: Story = {
   ...src(`// Each model: { id, name, optional provider | description | group }.
 const models = [
@@ -79,7 +77,7 @@ const [modelId, setModelId] = createSignal('claude-sonnet');
 />`),
 };
 
-/** Several models across providers — the dropdown lists them with provider labels. */
+/** Several models across providers: the dropdown lists them with provider labels. */
 export const MultipleModels: Story = {
   args: { models: multipleModels, currentModelId: 'claude-sonnet' },
   ...src(`<ModelSwitcher
@@ -95,7 +93,7 @@ export const MultipleModels: Story = {
 /**
  * Rich rows + a collapsible group. `description` renders as the row subtitle
  * (preferred over `provider`), and models sharing a `group` collect under a
- * collapsible section — the ChatGPT-style "Legacy models" pattern.
+ * collapsible section, the ChatGPT-style "Legacy models" pattern.
  */
 export const GroupedAndDescribed: Story = {
   args: {
@@ -118,7 +116,7 @@ export const GroupedAndDescribed: Story = {
 />`),
 };
 
-/** A single model — the switcher renders nothing (needs 2+ models). */
+/** A single model: the switcher renders nothing (needs 2+ models). */
 export const SingleModel: Story = {
   args: {
     models: [{ id: 'claude-sonnet', name: 'Claude Sonnet' }],

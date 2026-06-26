@@ -42,17 +42,14 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A collapsible panel that visualizes a single tool call — its name, state (processing / ready / completed / error), input, output, error, and call ID.',
-        '**When to use:** to surface assistant tool/function calls in the conversation, so users can inspect what was run and what came back.',
-        '**How to use:** pass a `toolPart` describing the call (`type`, `state`, optional `input`, `output`, `errorText`, `toolCallId`). State drives the icon and badge automatically. Set `defaultOpen` to start expanded.',
-        '**Placement:** inline within an assistant message, typically between text segments where the tool was invoked.',
+        'A collapsible panel for a single tool/function call: its state (processing, ready, completed, error), input, output, and error. Drive it with a `toolPart`; state sets the icon/badge automatically, and `defaultOpen` starts it expanded.',
       ]),
     },
   },
   argTypes: {
     toolPart: {
       control: 'object',
-      description: 'The tool call to render — `type`, `state`, and optional `input`/`output`/`errorText`/`toolCallId`.',
+      description: 'The tool call to render, `type`, `state`, and optional `input`/`output`/`errorText`/`toolCallId`.',
     },
     defaultOpen: {
       control: 'boolean',
@@ -79,7 +76,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — edit the `toolPart` object to explore every state. */
+/** Interactive playground: edit the `toolPart` object to explore every state. */
 export const Playground: Story = {
   ...src(`<Tool
   toolPart={{
@@ -149,7 +146,7 @@ export const Error: Story = {
 
 export const Collapsed: Story = {
   args: { toolPart: completedPart, defaultOpen: false },
-  ...src(`// Without \`defaultOpen\` the panel starts collapsed — the header still
+  ...src(`// Without \`defaultOpen\` the panel starts collapsed, the header still
 // shows the tool name + state badge; click to expand the input/output.
 const toolPart = {
   type: 'search_documents',

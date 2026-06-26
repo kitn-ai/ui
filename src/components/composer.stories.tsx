@@ -5,7 +5,7 @@ import type { TriggerDef, ComposerProps } from './composer';
 import type { ComposerDoc } from '../primitives/composer-model';
 import { componentDescription } from '../stories/docs/element-controls';
 
-// Minimal inline data: URI icon — a plain colored square with a glyph.
+// Minimal inline data: URI icon, a plain colored square with a glyph.
 function imgData(fill: string, glyph: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="4" fill="${fill}"/><text x="16" y="22" font-size="16" text-anchor="middle" fill="white">${glyph}</text></svg>`;
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
@@ -21,10 +21,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A rich plain-text composer that supports atomic entity pills (skills, mentions) via `/` and `@` trigger menus, keyword highlighting via the CSS Custom Highlight API, and a structured `{ doc, text, entities }` submit event.',
-        '**Not an RTE** — no formatting controls. `contenteditable="plaintext-only"`, entity pills are the only non-text nodes.',
-        '**When to use:** as the prompt input in an AI chat surface where the user needs to reference skills or mention collaborators inline.',
-        '**Array/object props** (`value`, `triggers`, `highlights`) are set as JS properties; scalars (`placeholder`, `disabled`, `loading`, `maxHeight`, `submitOnEnter`) work as attributes on the `<kai-composer>` element.',
+        'A plain-text prompt input with atomic entity pills (skills, mentions) via `/` and `@` trigger menus, keyword highlighting through the CSS Custom Highlight API, and a structured `{ doc, text, entities }` submit event. Not an RTE: `contenteditable="plaintext-only"`, pills are the only non-text nodes.',
+        'On `<kai-composer>`, array/object props (`value`, `triggers`, `highlights`) are set as JS properties; scalars (`placeholder`, `disabled`, `loading`, `maxHeight`, `submitOnEnter`) work as attributes.',
       ]),
     },
   },
@@ -35,7 +33,7 @@ const meta = {
     },
     disabled: {
       control: 'boolean',
-      description: 'Disables the composer — non-interactive.',
+      description: 'Disables the composer, non-interactive.',
       table: { defaultValue: { summary: 'false' } },
     },
     loading: {
@@ -65,7 +63,7 @@ const meta = {
     },
     onTrigger: {
       action: 'trigger',
-      description: 'A trigger char (`/`, `@`) opened the menu — `{ char, query, rect }`.',
+      description: 'A trigger char (`/`, `@`) opened the menu, `{ char, query, rect }`.',
       table: { category: 'Events' },
     },
     onTriggerClose: {
@@ -128,7 +126,7 @@ const src = (code: string) => ({
 // Playground
 // ---------------------------------------------------------------------------
 
-/** Args-driven — toggle disabled/loading and edit the placeholder via Controls. */
+/** Args-driven, toggle disabled/loading and edit the placeholder via Controls. */
 export const Playground: Story = {
   ...src(`<Composer
   placeholder="Ask anything…"
@@ -147,7 +145,7 @@ export const Playground: Story = {
 };
 
 // ---------------------------------------------------------------------------
-// WithSkills — a / trigger with skill items
+// WithSkills, a / trigger with skill items
 // ---------------------------------------------------------------------------
 
 const SKILL_TRIGGERS: TriggerDef[] = [
@@ -204,7 +202,7 @@ const triggers: TriggerDef[] = [
   ),
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     // NOTE: full /-menu → select → backspace keyboard flow is verified by the
-    // IVP (tests/e2e/composer-ivp.spec.ts), not here — userEvent can't reliably
+    // IVP (tests/e2e/composer-ivp.spec.ts), not here, userEvent can't reliably
     // drive contenteditable selection in this harness (focus races, synthetic
     // input events don't update the DOM the same way a real key sequence does).
     //
@@ -219,7 +217,7 @@ const triggers: TriggerDef[] = [
 };
 
 // ---------------------------------------------------------------------------
-// WithMentions — a @ trigger with mention items
+// WithMentions, a @ trigger with mention items
 // ---------------------------------------------------------------------------
 
 const MENTION_TRIGGERS: TriggerDef[] = [
@@ -263,7 +261,7 @@ export const WithMentions: Story = {
     </div>
   ),
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-    // NOTE: full @-menu → select keyboard flow is verified by the IVP —
+    // NOTE: full @-menu → select keyboard flow is verified by the IVP
     // userEvent can't reliably drive contenteditable in Storybook browser tests.
     const canvas = within(canvasElement);
     const editable = canvas.getByRole('textbox');
@@ -273,7 +271,7 @@ export const WithMentions: Story = {
 };
 
 // ---------------------------------------------------------------------------
-// Prefilled — a doc with an entity pill + trailing text
+// Prefilled, a doc with an entity pill + trailing text
 // ---------------------------------------------------------------------------
 
 const PREFILLED_DOC: ComposerDoc = [
@@ -289,7 +287,7 @@ const PREFILLED_DOC: ComposerDoc = [
   { type: 'text', text: " I'm going to show y" },
 ];
 
-/** A pre-populated doc — an entity pill followed by text.
+/** A pre-populated doc, an entity pill followed by text.
  *  The pill renders as an atomic inline chip and the trailing text is editable. */
 export const Prefilled: Story = {
   args: {
@@ -325,7 +323,7 @@ const value: ComposerDoc = [
 };
 
 // ---------------------------------------------------------------------------
-// Highlighted — keyword highlight rules
+// Highlighted, keyword highlight rules
 // ---------------------------------------------------------------------------
 
 /** Keywords matching `highlights` rules are decorated via the CSS Custom

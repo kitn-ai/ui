@@ -11,10 +11,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A pulsing **placeholder** block used to indicate loading content. It has no shape of its own — size and rounding come from the `class` you pass.',
-        '**When to use:** while content (messages, lists, cards, tool output) is loading, to preserve layout and signal progress without a spinner.',
-        '**How to use:** compose one or more `Skeleton` elements and set width/height/rounding via utility classes (e.g. `class="h-4 w-3/4"`). Build skeletons that mirror the real layout they replace.',
-        '**Placement:** message bubbles, conversation lists, code blocks, tool calls, input areas, and full-page loading states.',
+        'A pulsing loading placeholder with no shape of its own: size and rounding come from the `class` you pass (e.g. `class="h-4 w-3/4"`). Compose several to mirror the layout they stand in for.',
       ]),
     },
   },
@@ -38,7 +35,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — edit `class` to resize the placeholder. */
+/** Interactive playground, edit `class` to resize the placeholder. */
 export const Playground: Story = {
   ...src(`<Skeleton class="h-4 w-64" />`),
 };

@@ -7,7 +7,7 @@ import type { ComposerDoc } from '../primitives/composer-model';
 import { expect } from 'storybook/test';
 import { specDescription } from '../stories/docs/element-controls';
 
-// The web components are custom DOM elements — declare the tag for SolidJS JSX.
+// The web components are custom DOM elements, declare the tag for SolidJS JSX.
 declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
@@ -34,7 +34,7 @@ interface ComposerEl extends HTMLElement {
   value?: string | ComposerDoc;
 }
 
-// Minimal inline data: URI icon — a plain colored square with a glyph.
+// Minimal inline data: URI icon, a plain colored square with a glyph.
 function imgData(fill: string, glyph: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="4" fill="${fill}"/><text x="16" y="22" font-size="16" text-anchor="middle" fill="white">${glyph}</text></svg>`;
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
@@ -76,7 +76,7 @@ const meta = {
         '`<kai-composer>` is a framework-agnostic **web component** for rich prompt input. It types like a plain textarea but supports atomic inline entity pills (skills, mentions) via `/` and `@` trigger menus, keyword highlighting via the CSS Custom Highlight API, and emits a structured `{ doc, text, entities }` payload.',
         '**When to use:** any non-Solid app (React, Vue, Svelte, plain HTML) that needs a prompt input with entity-pill support.',
         '**How to use:** register once with `import \'@kitn.ai/ui/elements\'`. Set **JS properties** for `triggers`, `value`, and `highlights` (arrays/objects). Scalars (`placeholder`, `disabled`, `loading`) work as attributes. Listen for **CustomEvents** (`kai-submit`, `kai-value-change`, `kai-entity-add`, `kai-entity-remove`, `kai-trigger`, `kai-trigger-close`) directly on the element.',
-        '**Not an RTE** — no bold/italic. Entity pills are the only non-text nodes; the content surface is `contenteditable="plaintext-only"`.',
+        '**Not an RTE**, no bold/italic. Entity pills are the only non-text nodes; the content surface is `contenteditable="plaintext-only"`.',
       ]),
     },
   },
@@ -110,7 +110,7 @@ export const Default: Story = {
   },
   parameters: { docs: { source: { code: HTML_SNIPPET, language: 'html' } } },
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-    // kai-composer renders into a Shadow Root — we must pierce it.
+    // kai-composer renders into a Shadow Root, we must pierce it.
     const host = canvasElement.querySelector('kai-composer') as HTMLElement | null;
     expect(host).toBeTruthy();
     const shadow = (host as HTMLElement).shadowRoot;
@@ -181,7 +181,7 @@ export const Skills: Story = {
   parameters: { docs: { source: { code: SKILL_SNIPPET, language: 'html' } } },
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     // NOTE: full /-menu → select → backspace keyboard flow is verified by the
-    // IVP (tests/e2e/composer-ivp.spec.ts), not here — userEvent can't reliably
+    // IVP (tests/e2e/composer-ivp.spec.ts), not here, userEvent can't reliably
     // drive contenteditable selection in this harness (focus races, synthetic
     // input events don't update the DOM the same way a real key sequence does).
     //
@@ -249,7 +249,7 @@ export const Mentions: Story = {
   },
   parameters: { docs: { source: { code: MENTION_SNIPPET, language: 'html' } } },
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-    // NOTE: @-menu keyboard flow deferred to IVP — userEvent can't reliably
+    // NOTE: @-menu keyboard flow deferred to IVP, userEvent can't reliably
     // drive contenteditable selection in this harness.
     const host = canvasElement.querySelector('kai-composer') as HTMLElement | null;
     expect(host).toBeTruthy();
@@ -281,7 +281,7 @@ const PREFILLED_SNIPPET = `<kai-composer id="composer" style="display:block; wid
   composer.addEventListener('kai-submit', (e) => console.log('submit:', e.detail));
 </script>`;
 
-/** Pre-populate via the `value` property — a doc containing an entity pill
+/** Pre-populate via the `value` property, a doc containing an entity pill
  *  followed by text. The pill renders as an atomic inline chip. */
 export const Prefilled: Story = {
   render: () => {
@@ -314,7 +314,7 @@ export const Prefilled: Story = {
   },
   parameters: { docs: { source: { code: PREFILLED_SNIPPET, language: 'html' } } },
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-    // kai-composer renders into Shadow DOM — pierce the root to assert structure.
+    // kai-composer renders into Shadow DOM, pierce the root to assert structure.
     const host = canvasElement.querySelector('kai-composer') as HTMLElement | null;
     expect(host).toBeTruthy();
     const shadow = (host as HTMLElement).shadowRoot;
@@ -336,7 +336,7 @@ export const Prefilled: Story = {
 // ---------------------------------------------------------------------------
 
 /** All three pill skins in one field, seeded via a doc `value`: skills and
- *  agents render LIGHT — decorated inline text led by their sigil (`/`, `@`) —
+ *  agents render LIGHT, decorated inline text led by their sigil (`/`, `@`)
  *  while a plugin renders as a richer chip (it bundles tools/skills/agents, so
  *  it reads differently at a glance). */
 export const PillKinds: Story = {
@@ -347,7 +347,7 @@ export const PillKinds: Story = {
       if (!el) return;
       el.value = [
         { type: 'text', text: 'Review ' },
-        // Capitalized labels on purpose — the pill DISPLAY lowercases them (CSS),
+        // Capitalized labels on purpose, the pill DISPLAY lowercases them (CSS),
         // while the entity label + emitted payload keep the original casing.
         { type: 'entity', entity: { kind: 'skill', id: 'record-replay', label: 'Record-Replay' } },
         { type: 'text', text: ' then ask ' },

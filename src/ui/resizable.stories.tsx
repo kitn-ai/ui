@@ -12,10 +12,8 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A **resizable split layout**: `ResizablePanelGroup` lays out `ResizablePanel` children along an axis, divided by a draggable `ResizableHandle`.',
-        '**When to use:** to let users adjust the relative size of two or more regions — e.g. a collapsible sidebar next to the main chat, or a chat pane next to an inspector.',
-        '**How to use:** wrap panels in `ResizablePanelGroup` and set `orientation` (`horizontal` row / `vertical` column). Give panels a `defaultSize` (percent) and optional `minSize`/`maxSize`; min/max are read from `data-min-size`/`data-max-size` attributes at drag time. Place a `ResizableHandle` (add `withHandle` for a visible grip) between panels. The group needs a sized container (height/width).',
-        '**Placement:** app shells — sidebar + conversation, conversation + context/inspector panels, or stacked editor/preview regions.',
+        'A draggable split layout: `ResizablePanelGroup` lays out `ResizablePanel` children along `orientation`, divided by a `ResizableHandle` (add `withHandle` for a visible grip).',
+        'Give panels a `defaultSize` (percent) plus optional `minSize`/`maxSize`. The group needs a sized container.',
       ]),
     },
   },
@@ -28,12 +26,12 @@ const meta = {
     },
     onPanelResize: {
       action: 'panelResize',
-      description: 'On `ResizableHandle` — fires the clamped pixel delta while dragging (and `0` on a double-click reset).',
+      description: 'On `ResizableHandle`, fires the clamped pixel delta while dragging (and `0` on a double-click reset).',
       table: { category: 'Events' },
     },
     onChange: {
       action: 'change',
-      description: 'On the `Resizable` convenience — fires the current panel sizes (percent) on drag-end / keyboard resize / visibility change.',
+      description: 'On the `Resizable` convenience, fires the current panel sizes (percent) on drag-end / keyboard resize / visibility change.',
       table: { category: 'Events' },
     },
   },
@@ -67,7 +65,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — flip the orientation, then drag the handle. */
+/** Interactive playground, flip the orientation, then drag the handle. */
 export const Playground: Story = {
   ...src(`<ResizablePanelGroup orientation="horizontal">
   <ResizablePanel defaultSize={30} data-min-size="100" data-max-size="400">

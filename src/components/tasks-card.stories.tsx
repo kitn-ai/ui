@@ -76,7 +76,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'The SolidJS layer behind `<kai-tasks>`. Pass a `host` (a `CardHost`) to receive the emitted `CardEvent`s directly (the native-host path), or wrap in a `CardProvider`. Toggling rows is local; only confirm emits `submit` with `{ selected }` in input order.',
+        'The SolidJS layer behind `<kai-tasks>`: a checklist card the assistant can put up for plan approval or multi-select. Pass a `host` (a `CardHost`) to receive emitted `CardEvent`s directly, or wrap in a `CardProvider`. Toggling rows is local; only confirm emits `submit` with `{ selected }` in input order.',
       ]),
     },
   },

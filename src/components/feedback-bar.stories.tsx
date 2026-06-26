@@ -12,10 +12,8 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'An inline bar that prompts the user to rate a response. It owns its own flow — it asks, optionally collects a category + comment on a not-helpful vote, then confirms with a thank-you, all in place (the way ChatGPT/Claude do it). It does **not** disappear on a vote; only the close (X) button dismisses it.',
-        '**When to use:** after an assistant message, to collect quick helpful / not-helpful feedback (optionally with a reason).',
-        '**How to use:** set a `title`; for the richer flow set `collect-detail` and pass `categories`. The vote fires `onFeedback` immediately; the optional detail fires `onSubmitDetail`; `onClose` dismisses the bar.',
-        '**Placement:** directly beneath a completed assistant message, or in a message action row.',
+        'An inline helpful / not-helpful rating bar for an assistant message. It owns the whole flow: it asks, optionally collects a category and comment on a not-helpful vote, then confirms with a thank-you, all in place. It does not disappear on a vote (only the close button dismisses it).',
+        'The vote fires `onFeedback` immediately; set `collectDetail` plus `categories` for the detail step (fires `onSubmitDetail`).',
       ]),
     },
   },
@@ -77,7 +75,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — tweak the controls to explore the feedback bar. */
+/** Interactive playground: tweak the controls to explore the feedback bar. */
 export const Playground: Story = {
   ...src(`<FeedbackBar
   title="Was this response helpful?"
@@ -129,10 +127,10 @@ export const WithDetail: Story = {
 
 /** A custom confirmation message shown after the vote. */
 export const CustomThanks: Story = {
-  args: { title: 'Rate this answer', thanksMessage: 'Got it — thanks for helping us improve!' },
+  args: { title: 'Rate this answer', thanksMessage: 'Got it, thanks for helping us improve!' },
   ...src(`<FeedbackBar
   title="Rate this answer"
-  thanksMessage="Got it — thanks for helping us improve!"
+  thanksMessage="Got it, thanks for helping us improve!"
   onFeedback={(value) => console.log('feedback:', value)}
 />`),
 };

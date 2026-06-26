@@ -11,9 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A vertically scrollable container with thin, themed scrollbars (`scrollbar-thin` + muted thumb, transparent track). A thin styling layer over native overflow — no custom scroll hijacking, so momentum, keyboard, and accessibility behave exactly like the platform expects. Constrain it with a height (or let a flex parent bound it) and overflow content scrolls.',
-        '**When to use:** any bounded region whose content can exceed its height — the conversation/history sidebar, a long menu, a tall card body.',
-        '**How to use:** set a height via `class` and drop the scrollable content inside. All other div props (e.g. `aria-label`) are forwarded.',
+        'A bounded container with thin, themed scrollbars over native overflow (no scroll hijacking). Set a height via `class`; overflowing content scrolls.',
       ]),
     },
   },

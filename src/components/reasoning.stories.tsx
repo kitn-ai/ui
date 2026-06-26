@@ -13,10 +13,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A collapsible disclosure for a model\'s thinking/reasoning. Compose `Reasoning` (root) with `ReasoningTrigger` (the toggle) and `ReasoningContent` (the body, with optional markdown).',
-        '**When to use:** to surface an assistant\'s chain-of-thought or scratch reasoning that should be available but collapsed by default. It can auto-open while streaming and auto-close when streaming ends.',
-        '**How to use:** wrap a trigger and content in `Reasoning`. Leave it uncontrolled, or drive it with `open` + `onOpenChange`. Set `isStreaming` to auto-open during generation. Pass `markdown` on `ReasoningContent` to render a markdown string.',
-        '**Placement:** inside or above an assistant message, before the final answer.',
+        'A collapsible disclosure for an assistant\'s chain-of-thought. Compose `Reasoning` (root) with `ReasoningTrigger` (the toggle) and `ReasoningContent` (the body; pass `markdown` to render a markdown string). Leave it uncontrolled or drive it with `open` + `onOpenChange`; `isStreaming` auto-opens during generation and closes when it ends.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -60,7 +57,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — toggle `open` / `isStreaming` via the controls. */
+/** Interactive playground: toggle `open` / `isStreaming` via the controls. */
 export const Playground: Story = {
   ...src(`<Reasoning>
   <ReasoningTrigger>View reasoning</ReasoningTrigger>

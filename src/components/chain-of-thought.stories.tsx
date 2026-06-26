@@ -16,10 +16,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A vertical, collapsible timeline that reveals an agent\'s reasoning as a series of connected steps. Composed of `ChainOfThought` (root) wrapping `ChainOfThoughtStep` items, each with a `ChainOfThoughtTrigger`, `ChainOfThoughtContent`, and one or more `ChainOfThoughtItem`s.',
-        '**When to use:** to surface multi-step reasoning, tool calls, or research progress behind an assistant response, letting users expand each step on demand.',
-        '**How to use:** map each reasoning step to a `ChainOfThoughtStep` (mark the final one with `isLast`); put the summary in `ChainOfThoughtTrigger` and the detail inside `ChainOfThoughtContent` / `ChainOfThoughtItem`.',
-        '**Placement:** above or within an assistant message, typically before the final answer.',
+        'A collapsible vertical timeline for an agent\'s reasoning, tool calls, or research progress, expandable step by step. `ChainOfThought` wraps `ChainOfThoughtStep` items, each with a `ChainOfThoughtTrigger` (summary) and `ChainOfThoughtContent` / `ChainOfThoughtItem` (detail).',
+        'Mark the final step with `isLast`.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -68,7 +66,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — expand the steps to reveal each reasoning item. */
+/** Interactive playground, expand the steps to reveal each reasoning item. */
 export const Playground: Story = {
   ...src(`<ChainOfThought>
   <ChainOfThoughtStep>

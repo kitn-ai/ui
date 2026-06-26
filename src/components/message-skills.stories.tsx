@@ -14,10 +14,8 @@ const meta = {
     docs: {
       controls: { exclude: ["use:eventListener"] },
       description: componentDescription([
-        "A row of small badges that label which **skills** were active when a message was generated.",
-        "**When to use:** above an assistant message whose response was shaped by one or more skills (e.g. `Concise`, `ELI5`). Renders nothing when the `skills` array is empty.",
-        "**How to use:** pass a `skills` array of `{ id, name }`; each `name` is shown as a badge. Add `class` (e.g. `mb-1`) to space it from the message body.",
-        "**Placement:** directly above `MessageContent` inside an assistant `Message`.",
+        "A row of small badges labeling which skills were active when an assistant message was generated (e.g. `Concise`, `ELI5`). Sits directly above `MessageContent`.",
+        "Pass a `skills` array of `{ id, name }`; each `name` becomes a badge. Renders nothing when the array is empty.",
       ]),
     },
   },
@@ -48,7 +46,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: "tsx" } } },
 });
 
-/** Interactive playground — edit the `skills` array to see the badges update. */
+/** Interactive playground: edit the `skills` array to see the badges update. */
 export const Playground: Story = {
   ...src(`<MessageSkills skills={[{ id: '1', name: 'Concise' }, { id: '2', name: 'ELI5' }]} />`),
 };
@@ -75,13 +73,13 @@ export const MultipleSkills: Story = {
 />`),
 };
 
-/** Empty array — the component renders nothing. */
+/** Empty array: the component renders nothing. */
 export const NoSkills: Story = {
   args: { skills: [] },
   ...src(`<MessageSkills skills={[]} />`),
 };
 
-/** Composed above an assistant message body (showcase — not driven by controls). */
+/** Composed above an assistant message body (showcase, not driven by controls). */
 export const InAssistantMessage: Story = {
   name: "In Assistant Message",
   render: () => (

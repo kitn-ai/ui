@@ -11,9 +11,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A floating card that opens when its trigger is hovered or focused, built on the kit\'s DIY overlay core (positioning + dismiss + presence — no third-party dependency). Portals into the active shadow root so it never clips, and a transparent "safe bridge" keeps it open while the pointer travels from trigger to card.',
-        '**When to use:** to reveal supplementary, non-essential context on hover — a user/profile preview, a link or citation preview, an attachment summary. For an actionable menu use `Dropdown`; for a one-line label use `Tooltip`.',
-        '**How to use:** pass the trigger element as `trigger` and the card body as `children`. Tune `openDelay` / `closeDelay` (ms) to taste.',
+        'A floating card shown on hover/focus of its `trigger`, with a safe bridge so it stays open as the pointer moves onto it. Use for non-essential previews; reach for `Dropdown` if it needs actions, `Tooltip` for a one-line label.',
+        'Pass the trigger as `trigger` and the body as `children`; tune `openDelay` / `closeDelay` (ms).',
       ]),
     },
   },
@@ -71,7 +70,7 @@ export const LinkPreview: Story = {
         trigger={<a href="#" class="font-medium text-primary underline underline-offset-2">MDN reference</a>}
       >
         <div class="space-y-1">
-          <p class="text-sm font-medium text-foreground">Custom elements — MDN</p>
+          <p class="text-sm font-medium text-foreground">Custom elements, MDN</p>
           <p class="text-xs text-muted-foreground">developer.mozilla.org</p>
           <p class="text-xs text-muted-foreground">Define your own HTML elements with the CustomElementRegistry.</p>
         </div>
@@ -81,7 +80,7 @@ export const LinkPreview: Story = {
   ),
   ...src(`<HoverCard trigger={<a href="https://developer.mozilla.org/...">MDN reference</a>}>
   <div class="space-y-1">
-    <p class="text-sm font-medium">Custom elements — MDN</p>
+    <p class="text-sm font-medium">Custom elements, MDN</p>
     <p class="text-xs text-muted-foreground">developer.mozilla.org</p>
     <p class="text-xs text-muted-foreground">Define your own HTML elements with the CustomElementRegistry.</p>
   </div>

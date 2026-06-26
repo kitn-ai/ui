@@ -24,10 +24,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A single conversation row — shows the title and message count, truncating long titles, with a highlighted active state.',
-        '**When to use:** as the leaf item inside a chat history sidebar. Usually rendered for you by `ConversationList`; use it directly to build a custom list.',
-        '**How to use:** pass a `conversation` summary, an `isActive` flag, and an `onSelect(id)` handler fired when the row is clicked.',
-        '**Placement:** inside a conversation/chat history sidebar list.',
+        'A single conversation row for a history sidebar: title (truncated) and message count, with a highlighted active state. Pass a `conversation` summary, an `isActive` flag, and `onSelect(id)`. Usually rendered for you by `ConversationList`; use it directly for a custom list.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -68,7 +65,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — toggle `isActive` and edit the conversation object. */
+/** Interactive playground, toggle `isActive` and edit the conversation object. */
 export const Playground: Story = {
   ...src(`const conversation: ConversationSummary = {
   id: '1',
@@ -110,7 +107,7 @@ export const LongTitle: Story = {
 />`),
 };
 
-/** Several items stacked, one active — showcase. */
+/** Several items stacked, one active, showcase. */
 export const MultipleItems: Story = {
   render: (args: { onSelect: (id: string) => void }) => (
     <div class="w-64 space-y-0.5">

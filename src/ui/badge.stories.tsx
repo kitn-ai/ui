@@ -11,10 +11,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A compact pill **badge** for short status text, counts, or citation markers, rendered as an inline `<span>`.',
-        '**When to use:** to annotate a count (unread, results), tag a status/label, or mark an inline source citation in assistant output.',
-        '**How to use:** choose a `variant` (`default` label, `count` numeric pill, `citation` clickable source marker) and pass the text or number as children.',
-        '**Placement:** inline with message text (citations), next to titles or list items (labels), and on toolbar/icon buttons (counts).',
+        'A compact pill for status text, counts, or source citations. Set `variant`: `default` (label), `count` (numeric pill), or `citation` (clickable source marker).',
       ]),
     },
   },
@@ -27,7 +24,7 @@ const meta = {
     },
     children: {
       control: 'text',
-      description: 'Badge content — short text or a number.',
+      description: 'Badge content, short text or a number.',
     },
   },
   args: {
@@ -45,7 +42,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — switch the variant and edit the content. */
+/** Interactive playground, switch the variant and edit the content. */
 export const Playground: Story = {
   ...src(`<Badge variant="default">Default badge</Badge>`),
 };
@@ -65,7 +62,7 @@ export const Citation: Story = {
   ...src(`<Badge variant="citation">1</Badge>`),
 };
 
-/** All variants side by side (showcase — not driven by controls). */
+/** All variants side by side (showcase, not driven by controls). */
 export const AllVariants: Story = {
   render: () => (
     <div class="flex items-center gap-3">
