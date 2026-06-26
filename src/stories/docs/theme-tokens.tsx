@@ -146,8 +146,10 @@ export function toHex(css: string): string {
   return '#' + m.slice(0, 3).map((x) => Math.round(+x).toString(16).padStart(2, '0')).join('');
 }
 
-const cellHead: JSX.CSSProperties = { 'text-align': 'left', padding: '6px 10px', 'border-bottom': '1px solid var(--color-border)', 'font-weight': '600' };
-const cell: JSX.CSSProperties = { padding: '6px 10px', 'border-bottom': '1px solid var(--color-border)', 'vertical-align': 'middle' };
+const cellHead: JSX.CSSProperties = { 'text-align': 'left', padding: '8px 12px', 'border-bottom': '1px solid var(--color-border)', 'font-weight': '600', 'font-size': '15px' };
+const cell: JSX.CSSProperties = { padding: '8px 12px', 'border-bottom': '1px solid var(--color-border)', 'vertical-align': 'middle', 'font-size': '15px' };
+// Value text (hex / size / line-height) — readable, not the browser's tiny <small>.
+const valueText: JSX.CSSProperties = { 'font-size': '13px', color: 'var(--color-muted-foreground)' };
 
 function Swatch(props: { color: string }) {
   return (
@@ -171,18 +173,18 @@ export function TokenTable() {
   const [data, setData] = createSignal<{ colors: ColorToken[]; radii: RadiusToken[]; texts: TextToken[] }>({ colors: [], radii: [], texts: [] });
   onMount(() => setData(discover()));
   return (
-    <div style={{ 'font-size': '13px', color: 'var(--color-foreground)', 'max-width': '900px' }}>
-      <p style={{ margin: '0 0 .5rem', 'line-height': '1.55' }}>
+    <div style={{ 'font-size': '15px', color: 'var(--color-foreground)', width: '100%', 'max-width': '1280px', margin: '0 auto' }}>
+      <style>{`.kit-token-link{color:#1ea7fd;font-weight:600;text-decoration:none}.kit-token-link:hover{text-decoration:underline}`}</style>
+      <p style={{ margin: '0 0 .5rem', 'font-size': '16px', 'line-height': '1.6' }}>
         Every value the kit renders comes from a CSS custom property — these are the design tokens.
         Override any of them on <code>:root</code> (or any scoped parent) to rebrand the whole kit;
         because they're plain CSS variables they cascade through the Shadow DOM into every
         <code> kai-*</code> element. The table below is generated live from the loaded
         <code> theme.css</code>, so it always lists the complete, current set.
       </p>
-      <p style={{ margin: '0 0 .5rem', color: 'var(--color-muted-foreground)' }}>
+      <p style={{ margin: '0 0 .5rem', 'font-size': '16px', 'line-height': '1.6', color: 'var(--color-muted-foreground)' }}>
         Want to design a palette visually and copy the CSS out? Use the{' '}
-        <a href="https://ui.kitn.ai/theme/editor" target="_blank" rel="noreferrer"
-           style={{ color: 'var(--color-primary)', 'font-weight': '600' }}>
+        <a href="https://ui.kitn.ai/theme/editor" target="_blank" rel="noreferrer" class="kit-token-link">
           theme editor at ui.kitn.ai/theme/editor
         </a>.
       </p>
@@ -198,8 +200,8 @@ export function TokenTable() {
               <tr>
                 <td style={cell}><code>{t.name}</code></td>
                 <td style={{ ...cell, color: 'var(--color-muted-foreground)' }}>{PURPOSE[t.name] || ''}</td>
-                <td style={cell}><Swatch color={t.light} /><small>{t.light}</small></td>
-                <td style={cell}><Swatch color={t.dark} /><small>{t.dark}</small></td>
+                <td style={cell}><Swatch color={t.light} /><span style={valueText}>{t.light}</span></td>
+                <td style={cell}><Swatch color={t.dark} /><span style={valueText}>{t.dark}</span></td>
               </tr>
             )}
           </For>
@@ -217,8 +219,8 @@ export function TokenTable() {
               <tr>
                 <td style={cell}><code>{t.name}</code></td>
                 <td style={{ ...cell, color: 'var(--color-muted-foreground)' }}>{PURPOSE[t.name] || ''}</td>
-                <td style={cell}><span style={{ 'font-size': t.size }}>Aa</span> <small style={{ color: 'var(--color-muted-foreground)' }}>{t.size}</small></td>
-                <td style={cell}><small>{t.lineHeight}</small></td>
+                <td style={cell}><span style={{ 'font-size': t.size }}>Aa</span> <span style={valueText}>{t.size}</span></td>
+                <td style={cell}><span style={valueText}>{t.lineHeight}</span></td>
               </tr>
             )}
           </For>
@@ -238,7 +240,7 @@ export function TokenTable() {
                 <td style={{ ...cell, color: 'var(--color-muted-foreground)' }}>Corner radius</td>
                 <td style={cell}>
                   <span style={{ display: 'inline-block', width: '1.6rem', height: '1.1rem', background: 'var(--color-muted)', border: '1px solid var(--color-border)', 'border-top-left-radius': t.value, 'border-bottom-left-radius': t.value, 'vertical-align': 'middle', 'margin-right': '.4rem' }} />
-                  <small>{t.value}</small>
+                  <span style={valueText}>{t.value}</span>
                 </td>
               </tr>
             )}
@@ -246,7 +248,7 @@ export function TokenTable() {
         </tbody>
       </table>
 
-      <p style={{ 'margin-top': '1rem', color: 'var(--color-muted-foreground)', 'font-size': '12px' }}>
+      <p style={{ 'margin-top': '1rem', color: 'var(--color-muted-foreground)', 'font-size': '13px' }}>
         Generated live from the loaded CSS — always reflects the current tokens in <code>theme.css</code>.
       </p>
     </div>
