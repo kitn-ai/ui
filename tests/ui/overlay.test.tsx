@@ -112,6 +112,64 @@ describe('usePosition onDisconnect', () => {
     floatEl.remove();
   });
 
+  it('fires once when an ancestor of the reference becomes inert', async () => {
+    // Mirrors the DOM-removal case for the modal/takeover pattern: a kai-screen
+    // inert-s its host's siblings while open, so the anchor stays in the DOM but
+    // gains an `inert` ancestor. The overlay must still close.
+    const wrapper = document.createElement('div');
+    const refEl = document.createElement('div');
+    const floatEl = document.createElement('div');
+    wrapper.append(refEl);
+    document.body.append(wrapper, floatEl);
+    let calls = 0;
+    render(() => {
+      const [r] = createSignal<HTMLElement | undefined>(refEl);
+      const [f] = createSignal<HTMLElement | undefined>(floatEl);
+      usePosition(r, f, { onDisconnect: () => { calls++; } });
+      return null;
+    });
+    wrapper.setAttribute('inert', '');
+    await flush();
+    expect(calls).toBe(1);
+    // A further inert toggle elsewhere must not re-fire (one-shot).
+    const other = document.createElement('div');
+    document.body.append(other);
+    other.setAttribute('inert', '');
+    await flush();
+    expect(calls).toBe(1);
+    wrapper.remove();
+    floatEl.remove();
+    other.remove();
+  });
+
+  it('fires when an inert ancestor sits across a shadow boundary from the anchor', async () => {
+    // The REAL shape that the light-DOM-only test missed: kai-coachmark anchors
+    // usePosition to a span INSIDE its own shadow root, while kai-screen sets
+    // `inert` on a LIGHT-DOM ancestor of the coachmark host. closest() halts at
+    // the shadow root, so the predicate must climb across the boundary via the
+    // host. Here: wrapper > host (shadowRoot > refEl); wrapper gains inert.
+    const wrapper = document.createElement('div');
+    const host = document.createElement('div');
+    const root = host.attachShadow({ mode: 'open' });
+    const refEl = document.createElement('div');
+    root.append(refEl);
+    wrapper.append(host);
+    const floatEl = document.createElement('div');
+    document.body.append(wrapper, floatEl);
+    let calls = 0;
+    render(() => {
+      const [r] = createSignal<HTMLElement | undefined>(refEl);
+      const [f] = createSignal<HTMLElement | undefined>(floatEl);
+      usePosition(r, f, { onDisconnect: () => { calls++; } });
+      return null;
+    });
+    wrapper.setAttribute('inert', '');
+    await flush();
+    expect(calls).toBe(1);
+    wrapper.remove();
+    floatEl.remove();
+  });
+
   it('does not fire while the reference stays connected', async () => {
     const refEl = document.createElement('div');
     const floatEl = document.createElement('div');
