@@ -19,11 +19,16 @@ declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'kai-workspace': JSX.HTMLAttributes<HTMLElement>;
+      'kai-workspace': JSX.HTMLAttributes<HTMLElement> & { 'sidebar-min-width'?: string | number; 'collapse-below'?: string | number };
       'kai-card': JSX.HTMLAttributes<HTMLElement> & {
-        heading?: string;
-        description?: string;
+        appearance?: 'outlined' | 'filled' | 'plain' | 'accent';
+        orientation?: 'vertical' | 'horizontal' | 'responsive';
+        collapse?: string;
         dense?: boolean;
+        dismissible?: boolean;
+        href?: string;
+        target?: string;
+        rel?: string;
         clickable?: boolean;
       };
     }
@@ -91,11 +96,12 @@ function SlotsDemo() {
         slot="sidebar-footer"
         clickable
         dense
-        heading="Upgrade to Pro"
-        description="Unlock Fable 5 and higher limits."
         ref={(e) => (upgrade = e as HTMLElement)}
         style="display:block;margin:10px"
-      />
+      >
+        <strong style="display:block;font-weight:600">Upgrade to Pro</strong>
+        <p style="margin-top:0.25rem;font-size:0.8125rem;color:var(--color-muted-foreground)">Unlock Fable 5 and higher limits.</p>
+      </kai-card>
     </kai-workspace>
   );
 }
@@ -115,8 +121,10 @@ export const Slots: Story = {
   <div slot="main-header">You are on the free plan. <a href="#">Upgrade.</a></div>
 
   <!-- Bottom of the rail: an upgrade card, Design trigger, or user menu. -->
-  <kai-card slot="sidebar-footer" clickable dense
-            heading="Upgrade to Pro" description="Unlock higher limits."></kai-card>
+  <kai-card slot="sidebar-footer" clickable dense>
+    <strong>Upgrade to Pro</strong>
+    <p>Unlock higher limits.</p>
+  </kai-card>
 </kai-workspace>
 
 <script type="module">

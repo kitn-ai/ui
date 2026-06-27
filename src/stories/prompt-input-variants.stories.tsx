@@ -17,6 +17,13 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
+// Hand-written "Show code" snippets so the docs panel shows clean usage
+// instead of the auto-generated render() body.
+const IMPORT = `import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn.ai/ui';`;
+const src = (code: string, imports: string = IMPORT) => ({
+  parameters: { docs: { source: { code: `${imports}\n\n${code}`, language: 'tsx' } } },
+});
+
 export const BasicInput: Story = {
   name: 'Basic Input',
   render: () => {
@@ -34,6 +41,18 @@ export const BasicInput: Story = {
       </div>
     );
   },
+  ...src(
+    `<PromptInput value={value()} onValueChange={setValue} onSubmit={() => setValue('')}>
+  <PromptInputTextarea placeholder="Ask anything..." />
+  <PromptInputActions class="justify-end">
+    <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()} aria-label="Send message">
+      <ArrowUp class="size-4" />
+    </Button>
+  </PromptInputActions>
+</PromptInput>`,
+    `import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn.ai/ui';
+import { ArrowUp } from 'lucide-solid';`,
+  ),
 };
 
 export const WithSuggestions: Story = {
@@ -82,6 +101,39 @@ export const WithSuggestions: Story = {
       </div>
     );
   },
+  ...src(
+    `const suggestionGroups = [
+  { label: 'Get started', items: ['Summarize this document', 'What are the key takeaways?', 'Create an outline'] },
+  { label: 'Go deeper', items: ['Compare with similar approaches', 'What are the tradeoffs?', 'Find contradictions'] },
+];
+
+<div class="space-y-4">
+  <For each={suggestionGroups}>
+    {(group) => (
+      <div class="space-y-2">
+        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">{group.label}</span>
+        <div class="flex flex-wrap gap-2">
+          <For each={group.items}>
+            {(item) => <PromptSuggestion onClick={() => setValue(item)}>{item}</PromptSuggestion>}
+          </For>
+        </div>
+      </div>
+    )}
+  </For>
+
+  <PromptInput value={value()} onValueChange={setValue} onSubmit={() => setValue('')}>
+    <PromptInputTextarea placeholder="Ask about this document..." />
+    <PromptInputActions class="justify-end">
+      <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()} aria-label="Send message">
+        <ArrowUp class="size-4" />
+      </Button>
+    </PromptInputActions>
+  </PromptInput>
+</div>`,
+    `import { PromptInput, PromptInputTextarea, PromptInputActions, PromptSuggestion, Button } from '@kitn.ai/ui';
+import { For } from 'solid-js';
+import { ArrowUp } from 'lucide-solid';`,
+  ),
 };
 
 export const WithActionButtons: Story = {
@@ -108,6 +160,24 @@ export const WithActionButtons: Story = {
       </div>
     );
   },
+  ...src(
+    `<PromptInput value={value()} onValueChange={setValue} onSubmit={() => setValue('')}>
+  <PromptInputTextarea placeholder="Message..." />
+  <PromptInputActions class="justify-between">
+    <div class="flex items-center gap-1">
+      <Button variant="ghost" size="icon-sm" aria-label="Attach file"><Paperclip class="size-4 text-muted-foreground" /></Button>
+      <Button variant="ghost" size="icon-sm" aria-label="Search the web"><Globe class="size-4 text-muted-foreground" /></Button>
+      <Button variant="ghost" size="icon-sm" aria-label="Voice input"><Mic class="size-4 text-muted-foreground" /></Button>
+      <Button variant="ghost" size="icon-sm" aria-label="AI suggestions"><Sparkles class="size-4 text-muted-foreground" /></Button>
+    </div>
+    <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()} aria-label="Send message">
+      <ArrowUp class="size-4" />
+    </Button>
+  </PromptInputActions>
+</PromptInput>`,
+    `import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn.ai/ui';
+import { ArrowUp, Paperclip, Globe, Mic, Sparkles } from 'lucide-solid';`,
+  ),
 };
 
 export const StreamingState: Story = {
@@ -147,6 +217,37 @@ export const StreamingState: Story = {
       </div>
     </div>
   ),
+  ...src(
+    `<div class="space-y-6">
+  <PromptInput disabled isLoading>
+    <PromptInputTextarea placeholder="Generating response..." />
+    <PromptInputActions class="justify-between">
+      <div class="flex items-center gap-2">
+        <Loader variant="typing" size="sm" />
+        <span class="text-xs text-foreground">Generating...</span>
+      </div>
+      <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Stop">
+        <Square class="size-3" />
+      </Button>
+    </PromptInputActions>
+  </PromptInput>
+
+  <PromptInput disabled isLoading>
+    <PromptInputTextarea placeholder="Waiting for response..." />
+    <PromptInputActions class="justify-between">
+      <div class="flex items-center gap-2">
+        <Loader variant="dots" size="sm" />
+        <span class="text-xs text-foreground">Thinking...</span>
+      </div>
+      <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Stop">
+        <Square class="size-3" />
+      </Button>
+    </PromptInputActions>
+  </PromptInput>
+</div>`,
+    `import { PromptInput, PromptInputTextarea, PromptInputActions, Loader, Button } from '@kitn.ai/ui';
+import { Square } from 'lucide-solid';`,
+  ),
 };
 
 export const WithModelSelector: Story = {
@@ -178,6 +279,29 @@ export const WithModelSelector: Story = {
       </div>
     );
   },
+  ...src(
+    `const models: ModelOption[] = [
+  { id: 'claude-4', name: 'Claude 4 Opus', provider: 'Anthropic' },
+  { id: 'claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic' },
+  { id: 'gemini-2', name: 'Gemini 2.5 Pro', provider: 'Google' },
+];
+
+<PromptInput value={value()} onValueChange={setValue} onSubmit={() => setValue('')}>
+  <PromptInputTextarea placeholder="Ask anything..." />
+  <PromptInputActions class="justify-between">
+    <ModelSwitcher models={models} currentModelId={modelId()} onModelChange={setModelId} />
+    <div class="flex items-center gap-1">
+      <Button variant="ghost" size="icon-sm" aria-label="Attach file"><Paperclip class="size-4 text-muted-foreground" /></Button>
+      <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()} aria-label="Send message">
+        <ArrowUp class="size-4" />
+      </Button>
+    </div>
+  </PromptInputActions>
+</PromptInput>`,
+    `import { PromptInput, PromptInputTextarea, PromptInputActions, ModelSwitcher, Button } from '@kitn.ai/ui';
+import type { ModelOption } from '@kitn.ai/ui';
+import { ArrowUp, Paperclip } from 'lucide-solid';`,
+  ),
 };
 
 export const WithFileAttachments: Story = {
@@ -265,6 +389,44 @@ export const WithFileAttachments: Story = {
       </div>
     );
   },
+  ...src(
+    `const [attachments, setAttachments] = createSignal<AttachmentData[]>([
+  { id: 'a1', type: 'file', filename: 'architecture.pdf', mediaType: 'application/pdf' },
+  { id: 'a2', type: 'file', filename: 'screenshot.png', mediaType: 'image/png', url: '/screenshot.png' },
+]);
+
+const removeAttachment = (id: string) =>
+  setAttachments((prev) => prev.filter((a) => a.id !== id));
+
+<PromptInput value={value()} onValueChange={setValue} onSubmit={send}>
+  <Show when={attachments().length > 0}>
+    <div class="px-3 pt-3">
+      <Attachments variant="inline">
+        <For each={attachments()}>
+          {(att) => (
+            <Attachment data={att} onRemove={() => removeAttachment(att.id)}>
+              <AttachmentPreview />
+              <AttachmentInfo />
+              <AttachmentRemove />
+            </Attachment>
+          )}
+        </For>
+      </Attachments>
+    </div>
+  </Show>
+  <PromptInputTextarea placeholder="Describe or ask about the attached files..." class="pt-3 pl-4" />
+  <PromptInputActions class="justify-between">
+    <Button variant="ghost" size="icon-sm" aria-label="Attach file"><Paperclip class="size-4 text-muted-foreground" /></Button>
+    <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value() && attachments().length === 0} aria-label="Send message">
+      <ArrowUp class="size-4" />
+    </Button>
+  </PromptInputActions>
+</PromptInput>`,
+    `import { PromptInput, PromptInputTextarea, PromptInputActions, Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove, Button } from '@kitn.ai/ui';
+import type { AttachmentData } from '@kitn.ai/ui';
+import { createSignal, Show, For } from 'solid-js';
+import { ArrowUp, Paperclip } from 'lucide-solid';`,
+  ),
 };
 
 const SUGGESTION_GROUPS = [
@@ -348,6 +510,42 @@ export const StoppableStreaming: Story = {
       </div>
     );
   },
+  ...src(
+    `const [loading, setLoading] = createSignal(false);
+let timer: ReturnType<typeof setTimeout>;
+
+const handleSubmit = () => {
+  setLoading(true);
+  // Production: keep the AbortController from your fetch() call and abort it on stop.
+  timer = setTimeout(() => setLoading(false), 3000);
+};
+
+const handleStop = () => {
+  clearTimeout(timer);
+  setLoading(false);
+};
+
+<PromptInput isLoading={loading()} disabled={loading()} onSubmit={handleSubmit} value="" onValueChange={() => {}}>
+  <PromptInputTextarea placeholder={loading() ? 'Generating...' : 'Type something and hit Submit...'} />
+  <PromptInputActions class="justify-end">
+    <Show
+      when={loading()}
+      fallback={
+        <Button size="icon-sm" class="rounded-full" aria-label="Send message" onClick={handleSubmit}>
+          <ArrowUp class="size-4" />
+        </Button>
+      }
+    >
+      <Button size="icon-sm" variant="outline" class="rounded-full" aria-label="Stop" onClick={handleStop}>
+        <Square class="size-3" />
+      </Button>
+    </Show>
+  </PromptInputActions>
+</PromptInput>`,
+    `import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn.ai/ui';
+import { createSignal, Show } from 'solid-js';
+import { ArrowUp, Square } from 'lucide-solid';`,
+  ),
 };
 
 export const FullExample: Story = {
@@ -453,4 +651,82 @@ export const FullExample: Story = {
       </div>
     );
   },
+  ...src(
+    `const SUGGESTION_GROUPS = [
+  { label: 'Get started', items: ['Summarize this document', 'What are the key takeaways?', 'Create an outline'] },
+  { label: 'Go deeper', items: ['Compare with similar approaches', 'What are the tradeoffs?', 'Find contradictions'] },
+];
+
+const MODELS: ModelOption[] = [
+  { id: 'claude-4-opus', name: 'Claude 4 Opus', provider: 'Anthropic' },
+  { id: 'claude-4-sonnet', name: 'Claude 4 Sonnet', provider: 'Anthropic' },
+  { id: 'gemini-2', name: 'Gemini 2.5 Pro', provider: 'Google' },
+];
+
+const [value, setValue] = createSignal('');
+const [modelId, setModelId] = createSignal('claude-4-opus');
+const [streaming, setStreaming] = createSignal(false);
+let abortRef: ReturnType<typeof setTimeout>;
+
+const handleSubmit = () => {
+  if (!value().trim()) return;
+  setStreaming(true);
+  setValue('');
+  // Production: keep the AbortController from your fetch() call and abort it on stop.
+  abortRef = setTimeout(() => setStreaming(false), 3000);
+};
+
+const handleStop = () => {
+  clearTimeout(abortRef);
+  setStreaming(false);
+};
+
+<div class="space-y-4">
+  <Show when={!streaming()}>
+    <For each={SUGGESTION_GROUPS}>
+      {(group) => (
+        <div class="space-y-2">
+          <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">{group.label}</span>
+          <div class="flex flex-wrap gap-2">
+            <For each={group.items}>
+              {(item) => <PromptSuggestion onClick={() => setValue(item)}>{item}</PromptSuggestion>}
+            </For>
+          </div>
+        </div>
+      )}
+    </For>
+  </Show>
+
+  <PromptInput value={value()} onValueChange={setValue} onSubmit={handleSubmit} disabled={streaming()} isLoading={streaming()}>
+    <PromptInputTextarea placeholder={streaming() ? 'Generating response...' : 'Ask anything...'} />
+    <PromptInputActions class="justify-between">
+      <Show
+        when={streaming()}
+        fallback={<ModelSwitcher models={MODELS} currentModelId={modelId()} onModelChange={setModelId} />}
+      >
+        <div class="flex items-center gap-2">
+          <Loader variant="typing" size="sm" />
+          <span class="text-xs text-foreground">Generating...</span>
+        </div>
+      </Show>
+      <Show
+        when={streaming()}
+        fallback={
+          <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value()} aria-label="Send message" onClick={handleSubmit}>
+            <ArrowUp class="size-4" />
+          </Button>
+        }
+      >
+        <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Stop generation" onClick={handleStop}>
+          <Square class="size-3" />
+        </Button>
+      </Show>
+    </PromptInputActions>
+  </PromptInput>
+</div>`,
+    `import { PromptInput, PromptInputTextarea, PromptInputActions, PromptSuggestion, ModelSwitcher, Loader, Button } from '@kitn.ai/ui';
+import type { ModelOption } from '@kitn.ai/ui';
+import { createSignal, Show, For } from 'solid-js';
+import { ArrowUp, Square } from 'lucide-solid';`,
+  ),
 };

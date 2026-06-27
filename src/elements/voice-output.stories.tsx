@@ -22,6 +22,9 @@ const meta: Meta = {
 };
 export default meta;
 
+// Hand-written HTML for the "Show code" panel (real consumer markup, not JSX).
+const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
+
 const SAMPLE = 'The quick brown fox jumps over the lazy dog.';
 
 export const Native: StoryObj = {
@@ -33,6 +36,8 @@ export const Native: StoryObj = {
       </span>
     </div>
   ),
+  parameters: src(`<!-- Native: reads text aloud via the browser's speechSynthesis. -->
+<kai-voice-output text="The quick brown fox jumps over the lazy dog."></kai-voice-output>`),
 };
 
 export const Disabled: StoryObj = {
@@ -41,6 +46,7 @@ export const Disabled: StoryObj = {
       <kai-voice-output text={SAMPLE} disabled></kai-voice-output>
     </div>
   ),
+  parameters: src(`<kai-voice-output text="The quick brown fox jumps over the lazy dog." disabled></kai-voice-output>`),
 };
 
 // Model seam: set the `synthesize` JS property (a function, never an attribute).
@@ -70,4 +76,14 @@ export const ModelSeam: StoryObj = {
       </span>
     </div>
   ),
+  parameters: src(`<kai-voice-output text="The quick brown fox jumps over the lazy dog."></kai-voice-output>
+
+<script type="module">
+  // synthesize is a function-valued property, never an attribute. When set, the
+  // native speechSynthesis path is bypassed and audio comes from your TTS model.
+  document.querySelector('kai-voice-output').synthesize = async (text) => {
+    const res = await fetch('/api/tts', { method: 'POST', body: text });
+    return res.blob(); // an audio Blob
+  };
+</script>`),
 };

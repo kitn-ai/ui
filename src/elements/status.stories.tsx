@@ -16,6 +16,8 @@ const meta: Meta = {
 };
 export default meta;
 
+const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
+
 export const States: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: '1.5rem', 'align-items': 'center', padding: '1rem' }}>
@@ -27,4 +29,11 @@ export const States: StoryObj = {
       <kai-status status="online" size="md" label="Online (md)"></kai-status>
     </div>
   ),
+  parameters: src(`<!-- All scalar props: set as plain attributes. -->
+<kai-status status="new" pulse label="New"></kai-status>
+<kai-status status="online" label="Online"></kai-status>
+<kai-status status="busy" label="Busy"></kai-status>
+<kai-status status="away" label="Away"></kai-status>
+<kai-status status="offline" label="Offline"></kai-status>
+<kai-status status="online" size="md" label="Online (md)"></kai-status>`),
 };

@@ -18,6 +18,8 @@ const meta: Meta = {
 };
 export default meta;
 
+const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
+
 const ITEMS: KaiNavItem[] = [
   { id: 'new', label: 'New task', icon: 'plus', trailing: 'pencil' },
   { id: 'projects', label: 'Projects', icon: 'folder' },
@@ -37,4 +39,16 @@ export const Sidebar: StoryObj = {
       </div>
     );
   },
+  parameters: src(`<kai-nav default-value="new"></kai-nav>
+
+<script type="module">
+  const nav = document.querySelector('kai-nav');
+  // items is a JS property (array), never an attribute.
+  nav.items = [
+    { id: 'new', label: 'New task', icon: 'plus', trailing: 'pencil' },
+    { id: 'dispatch', label: 'Dispatch', icon: 'share', badge: 'Beta' },
+    /* { id, label, icon, badge, trailing } ... */
+  ];
+  nav.addEventListener('kai-nav-select', (e) => console.log(e.detail.id));
+</script>`),
 };

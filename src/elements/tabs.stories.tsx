@@ -18,6 +18,8 @@ const meta: Meta = {
 };
 export default meta;
 
+const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
+
 const ITEMS: KaiTabItem[] = [
   { id: 'chat', label: 'Chat', icon: 'message-circle' },
   { id: 'cowork', label: 'Cowork' },
@@ -43,4 +45,18 @@ export const Variants: StoryObj = {
       <Strip variant="underline" defaultValue="code" />
     </div>
   ),
+  parameters: src(`<!-- variant + default-value are scalar attributes; items is a JS property. -->
+<kai-tabs variant="segmented" default-value="chat"></kai-tabs>
+<kai-tabs variant="underline" default-value="code"></kai-tabs>
+
+<script type="module">
+  for (const tabs of document.querySelectorAll('kai-tabs')) {
+    tabs.items = [
+      { id: 'chat', label: 'Chat', icon: 'message-circle' },
+      { id: 'cowork', label: 'Cowork' },
+      { id: 'code', label: 'Code', icon: 'code' },
+    ];
+    tabs.addEventListener('kai-tab-change', (e) => console.log(e.detail.value));
+  }
+</script>`),
 };

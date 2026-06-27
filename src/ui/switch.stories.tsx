@@ -32,6 +32,16 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * SolidJS stories can't auto-serialize a render function, so attach a real,
+ * paste-ready snippet (with its import line). `language: 'tsx'` labels SolidJS.
+ * Args-only stories already show clean source, so they skip this.
+ */
+const IMPORT = `import { Switch } from '@kitn.ai/ui';`;
+const src = (code: string) => ({
+  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+});
+
 /** Off by default; click or press Space to toggle. */
 export const Playground: Story = {};
 
@@ -50,4 +60,8 @@ export const SettingsRow: Story = {
       <Switch {...args} />
     </div>
   ),
+  ...src(`<div style={{ display: 'flex', 'align-items': 'center', 'justify-content': 'space-between', gap: '2rem', width: '18rem' }}>
+  <span style={{ 'font-size': '14px' }}>Temporary chat</span>
+  <Switch label="Temporary chat" />
+</div>`),
 };

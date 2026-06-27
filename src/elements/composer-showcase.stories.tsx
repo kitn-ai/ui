@@ -24,8 +24,8 @@ declare module 'solid-js' {
       };
       'kai-menu': JSX.HTMLAttributes<HTMLElement> & { theme?: string; 'trigger-icon'?: string; 'trigger-label'?: string; 'trigger-icon-trailing'?: string; label?: string };
       'kai-model-switcher': JSX.HTMLAttributes<HTMLElement> & { theme?: string; 'current-model'?: string };
-      'kai-button': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; icon?: string; 'icon-trailing'?: string; label?: string; disabled?: boolean };
-      'kai-suggestions': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; block?: boolean | string; highlight?: string };
+      'kai-button': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; icon?: string; 'icon-trailing'?: string; label?: string; disabled?: boolean; full?: boolean; align?: 'start' | 'center' | 'end' };
+      'kai-suggestions': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: 'md' | 'lg'; block?: boolean | string; highlight?: string };
       'kai-notice': JSX.HTMLAttributes<HTMLElement> & { severity?: string; icon?: string; dismissible?: boolean };
     }
   }
@@ -220,7 +220,7 @@ function ComposerShowcase() {
           <kai-suggestions
             ref={(e) => (suggestionsEl = e as SuggestionsEl)}
             variant="outline"
-            size="sm"
+            size="md"
             class="inline-flex"
           />
         </div>

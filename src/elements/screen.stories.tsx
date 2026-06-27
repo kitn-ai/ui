@@ -22,6 +22,9 @@ const meta: Meta = {
 };
 export default meta;
 
+// Hand-written HTML for the "Show code" panel (real consumer markup, not JSX).
+const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
+
 export const Overlay: StoryObj = {
   render: () => {
     const [open, setOpen] = createSignal(false);
@@ -102,4 +105,23 @@ export const Overlay: StoryObj = {
       </div>
     );
   },
+  parameters: src(`<button id="open">Open Design</button>
+
+<!-- A full-bleed overlay that takes over its mount point under a back-header.
+     Mount at the app root for a full takeover, or in a positioned region for a
+     scoped one. -->
+<kai-screen headline="Design">
+  <div>
+    <h3>Design surface</h3>
+    <p>Your own full-bleed surface lives here. Press Back or Escape to return.</p>
+  </div>
+</kai-screen>
+
+<script type="module">
+  const screen = document.querySelector('kai-screen');
+  // The developer owns the swap: the trigger opens, kai-back (Back / Escape) closes.
+  document.querySelector('#open').addEventListener('click', () => { screen.open = true; });
+  screen.addEventListener('kai-back', () => { screen.open = false; });
+  screen.addEventListener('kai-open-change', (e) => console.log(e.detail.open));
+</script>`),
 };
