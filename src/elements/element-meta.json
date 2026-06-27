@@ -3396,6 +3396,73 @@
     "tokens": []
   },
   {
+    "tag": "kai-nav",
+    "className": "KaiNavElement",
+    "displayName": "Nav",
+    "props": [
+      {
+        "name": "items",
+        "type": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The nav items. Set as a JS property (array, not an attribute).",
+        "displayType": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true }[]"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Active item id (controlled).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "defaultValue",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial active id when uncontrolled.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-nav-select",
+        "detail": "{ id: string }",
+        "description": "A nav item was activated.",
+        "displayDetail": "{ id: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "select",
+        "params": "id: string",
+        "returns": "void",
+        "description": "Activate an item by id (fires kai-nav-select)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Nav",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-nav--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "nav",
+        "doc": "The nav list container. Restyle its gap or padding from outside.",
+        "recipe": "kai-nav::part(nav) { gap: 0.25rem }"
+      },
+      {
+        "name": "item",
+        "doc": "A nav item button. The active item carries aria-current=\"page\"; target `::part(item)[aria-current]` for the selected look.",
+        "recipe": "kai-nav::part(item)[aria-current] { background: var(--color-accent) }"
+      }
+    ]
+  },
+  {
     "tag": "kai-notice",
     "className": "KaiNoticeElement",
     "displayName": "Notice",

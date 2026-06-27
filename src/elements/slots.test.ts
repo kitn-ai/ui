@@ -186,6 +186,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-icon',
       'kai-menu',
       'kai-message',
+      'kai-nav',
       'kai-notice',
       'kai-prompt-input',
       'kai-screen',

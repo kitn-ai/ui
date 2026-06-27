@@ -808,6 +808,23 @@ export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
   { onModelChange: 'kai-model-change', onOpenChange: 'kai-open-change' },
 );
 
+export interface NavProps extends WebComponentProps {
+  /** The nav items. Set as a JS property (array, not an attribute). */
+  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean }[];
+  /** Active item id (controlled). */
+  value?: string;
+  /** Initial active id when uncontrolled. */
+  defaultValue?: string;
+  /** A nav item was activated. */
+  onNavSelect?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export const Nav = createWebComponent<NavProps>(
+  'kai-nav',
+  ["theme","items","value","defaultValue"],
+  { onNavSelect: 'kai-nav-select' },
+);
+
 export interface NoticeProps extends WebComponentProps {
   /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). */
   severity?: "neutral" | "info" | "warning" | "error" | "success";

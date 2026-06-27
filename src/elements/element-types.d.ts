@@ -570,6 +570,17 @@ export interface KaiModelSwitcherElement extends HTMLElement {
   disabled?: boolean;
 }
 
+export interface KaiNavElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The nav items. Set as a JS property (array, not an attribute). */
+  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean }[];
+  /** Active item id (controlled). */
+  value?: string;
+  /** Initial active id when uncontrolled. */
+  defaultValue?: string;
+}
+
 export interface KaiNoticeElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -1056,6 +1067,7 @@ declare global {
     'kai-menu': KaiMenuElement;
     'kai-message': KaiMessageElement;
     'kai-model-switcher': KaiModelSwitcherElement;
+    'kai-nav': KaiNavElement;
     'kai-notice': KaiNoticeElement;
     'kai-popover': KaiPopoverElement;
     'kai-prompt-input': KaiPromptInputElement;

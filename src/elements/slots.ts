@@ -300,6 +300,20 @@ export const WORKSPACE_SLOTS: SlotDef[] = [
   { name: 'main-header', mode: 'inject', doc: 'Top of the main region (a top-placed banner or a corner action).' },
 ];
 
+/** Styleable `::part`s of `<kai-nav>`. */
+export const NAV_PARTS: PartDef[] = [
+  {
+    name: 'nav',
+    doc: 'The nav list container. Restyle its gap or padding from outside.',
+    recipe: 'kai-nav::part(nav) { gap: 0.25rem }',
+  },
+  {
+    name: 'item',
+    doc: 'A nav item button. The active item carries aria-current="page"; target `::part(item)[aria-current]` for the selected look.',
+    recipe: 'kai-nav::part(item)[aria-current] { background: var(--color-accent) }',
+  },
+];
+
 /**
  * Per-element composition surface — the SINGLE registry the build extracts
  * (`scripts/gen-element-api.mjs`) into `element-meta.json`, the Custom Elements
@@ -337,6 +351,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-screen': { slots: SCREEN_SLOTS, parts: SCREEN_PARTS },
   'kai-card': { slots: CARD_SLOTS, parts: CARD_PARTS },
   'kai-workspace': { slots: WORKSPACE_SLOTS },
+  'kai-nav': { parts: NAV_PARTS },
 };
 
 /**

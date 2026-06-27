@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 63 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 64 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/ui'`):
-All 63 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 64 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 63 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 64 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/ui/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (63 elements, generated from custom-elements.json)
+## Element reference (64 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -959,6 +959,31 @@ _No events._
 |---|---|---|
 | `kai-model-change` | `CustomEvent<{ modelId: string }>` | A model was selected. |
 | `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The model dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). |
+
+---
+
+### `kai-nav` / `Nav`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `items` | — | `undefined \| { id: string; label?: undefined \| string; icon?: undefined \| string; badge?: undefined \| string; trailing?: undefined \| string; disabled?: undefined \| false \| true }[]` | The nav items. Set as a JS property (array, not an attribute). |
+| `value` | `value` | `undefined \| string` | Active item id (controlled). |
+| `defaultValue` | `default-value` | `undefined \| string` | Initial active id when uncontrolled. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-nav-select` | `CustomEvent<{ id: string }>` | A nav item was activated. |
+
+**Styleable parts** (restyle from outside via `kai-nav::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(nav)` | The nav list container. Restyle its gap or padding from outside. — `kai-nav::part(nav) { gap: 0.25rem }` |
+| `::part(item)` | A nav item button. The active item carries aria-current="page"; target `::part(item)[aria-current]` for the selected look. — `kai-nav::part(item)[aria-current] { background: var(--color-accent) }` |
 
 ---
 

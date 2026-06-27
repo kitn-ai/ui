@@ -35,6 +35,7 @@ import './source';
 import './response-stream';
 import './empty';
 import './status';
+import './nav';
 import './tabs';
 import './voice-output';
 import './screen';
