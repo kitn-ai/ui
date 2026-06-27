@@ -43,6 +43,16 @@ describe('ProgressBar', () => {
     expect(track(container)).toHaveAttribute('aria-valuenow', '100');
   });
 
+  it('names the progressbar from the visible label', () => {
+    const { container } = render(() => <ProgressBar value={3} max={5} label="Setup" />);
+    expect(track(container)).toHaveAccessibleName('Setup');
+  });
+
+  it('falls back to a default accessible name when unlabeled', () => {
+    const { container } = render(() => <ProgressBar value={30} />);
+    expect(track(container)).toHaveAccessibleName('Progress');
+  });
+
   it('renders an optional label', () => {
     const { getByText } = render(() => <ProgressBar value={3} max={5} label="Setup" />);
     expect(getByText('Setup')).toBeInTheDocument();

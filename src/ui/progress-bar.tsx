@@ -1,4 +1,4 @@
-import { type JSX, Show, splitProps } from 'solid-js';
+import { type JSX, Show, splitProps, createUniqueId } from 'solid-js';
 import { cn } from '../utils/cn';
 
 export type ProgressTone = 'primary' | 'success' | 'warning' | 'error' | 'info';
@@ -32,7 +32,10 @@ export interface ProgressBarProps extends JSX.HTMLAttributes<HTMLDivElement> {
  * `prefers-reduced-motion: no-preference`.
  */
 export function ProgressBar(props: ProgressBarProps) {
-  const [local, rest] = splitProps(props, ['value', 'max', 'label', 'tone', 'class']);
+  const [local, rest] = splitProps(props, [
+    'value', 'max', 'label', 'tone', 'class', 'aria-label', 'aria-labelledby',
+  ]);
+  const labelId = createUniqueId();
   const max = () => local.max ?? 100;
   // Clamp value into [0, max]; drive both the fill width and aria-valuenow off it
   // so the bar and the announced value stay consistent.
@@ -45,10 +48,16 @@ export function ProgressBar(props: ProgressBarProps) {
     const m = max();
     return m > 0 ? (clamped() / m) * 100 : 0;
   };
+  // The progressbar must always carry an accessible name. Prefer the rendered
+  // visible label; else a caller-supplied aria-labelledby/aria-label; else a
+  // generic default so the bar is never nameless (axe `aria-progressbar-name`).
+  const labelledBy = () => (local.label ? labelId : local['aria-labelledby']);
+  const ariaLabel = () =>
+    local.label || local['aria-labelledby'] ? undefined : local['aria-label'] ?? 'Progress';
   return (
     <div class={cn('flex flex-col gap-1', local.class)} {...rest}>
       <Show when={local.label}>
-        <span class="text-xs text-muted-foreground">{local.label}</span>
+        <span id={labelId} class="text-xs text-muted-foreground">{local.label}</span>
       </Show>
       <div
         part="track"
@@ -56,7 +65,8 @@ export function ProgressBar(props: ProgressBarProps) {
         aria-valuenow={clamped()}
         aria-valuemin={0}
         aria-valuemax={max()}
-        aria-label={local.label}
+        aria-labelledby={labelledBy()}
+        aria-label={ariaLabel()}
         class="h-1.5 w-full overflow-hidden rounded-full bg-surface-strong"
       >
         <div

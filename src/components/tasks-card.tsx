@@ -622,8 +622,14 @@ function ProgressChecklist(props: {
         </div>
       </Show>
 
-      {/* Thin progress bar under the heading: filled to done / total. */}
-      <ProgressBar value={props.done} max={props.total} />
+      {/* Thin progress bar under the heading: filled to done / total. Named off the
+          checklist heading (no duplicate caption), or a generic label when headless. */}
+      <ProgressBar
+        value={props.done}
+        max={props.total}
+        aria-labelledby={props.heading ? props.headingId : undefined}
+        aria-label={props.heading ? undefined : 'Task progress'}
+      />
 
       <ul
         aria-labelledby={props.heading ? props.headingId : undefined}
