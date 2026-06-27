@@ -217,6 +217,81 @@ export const STATUS_PARTS: PartDef[] = [
   },
 ];
 
+/** Styleable `::part`s of `<kai-tabs>`. */
+export const TABS_PARTS: PartDef[] = [
+  {
+    name: 'tablist',
+    doc: 'The tab strip container (role="tablist"). Restyle its gap, padding, background, or radius from outside; the `variant` prop sets the segmented/underline defaults.',
+    recipe: 'kai-tabs::part(tablist) { gap: 0.5rem; background: var(--color-card) }',
+  },
+  {
+    name: 'tab',
+    doc: 'A single tab button. Restyle from outside; the active tab carries a `[data-active]` attribute, so target `::part(tab)[data-active]` for the selected look.',
+    recipe: 'kai-tabs::part(tab)[data-active] { color: var(--color-primary); font-weight: 600 }',
+  },
+];
+
+/** Styleable `::part`s of `<kai-voice-output>`. */
+export const VOICE_OUTPUT_PARTS: PartDef[] = [
+  {
+    name: 'button',
+    doc: 'The speaker/play button. Restyle radius, size, padding, or colors from outside; it is a ghost icon button by default.',
+    recipe: 'kai-voice-output::part(button) { border-radius: 9999px; color: var(--color-primary) }',
+  },
+];
+
+/** Slots of `<kai-screen>` (the default slot is the screen body). */
+export const SCREEN_SLOTS: SlotDef[] = [
+  { name: 'title', mode: 'replace', part: true, doc: 'Rich header title; overrides the `headline` prop.' },
+  { name: 'actions', mode: 'inject', doc: 'Header trailing cluster (e.g. an avatar or overflow menu).' },
+];
+
+/** Styleable `::part`s of `<kai-screen>`. */
+export const SCREEN_PARTS: PartDef[] = [
+  {
+    name: 'header',
+    doc: 'The back-header bar (back button + title + actions). Restyle its height, padding, or border from outside.',
+    recipe: 'kai-screen::part(header) { height: 3.25rem; padding-inline: 1rem }',
+  },
+  {
+    name: 'back',
+    doc: 'The back button. Restyle or hide it from outside; `back="false"` removes it entirely.',
+    recipe: 'kai-screen::part(back) { border-radius: 9999px }',
+  },
+  {
+    name: 'body',
+    doc: 'The full-bleed surface that fills the mount point and scrolls its content. Tune padding or background from outside.',
+    recipe: 'kai-screen::part(body) { background: var(--color-card) }',
+  },
+];
+
+/** Slots of `<kai-card>` (media region + footer actions + a trailing chevron for a
+ *  clickable card). The body is the default slot. */
+export const CARD_SLOTS: SlotDef[] = [
+  { name: 'media', mode: 'inject', doc: 'Media region (image/GIF/icon) rendered above the heading.' },
+  { name: 'actions', mode: 'inject', doc: 'Footer action buttons. Do NOT combine with a clickable/href card (nested interactive).' },
+  { name: 'trailing', mode: 'inject', doc: 'A trailing chevron/arrow for a clickable card. Composable, no auto-chevron.' },
+];
+
+/** Styleable `::part`s of `<kai-card>`. */
+export const CARD_PARTS: PartDef[] = [
+  {
+    name: 'card',
+    doc: 'The card root (a div, or an a when href is set). Restyle its radius, border, padding, or background; the dense prop sets the compact defaults.',
+    recipe: 'kai-card::part(card) { border-radius: 1rem; padding: 1.25rem }',
+  },
+  {
+    name: 'dismiss',
+    doc: 'The dismiss (×) button shown when dismissible. Recolor or reposition it from outside.',
+    recipe: 'kai-card::part(dismiss) { color: var(--color-muted-foreground) }',
+  },
+  {
+    name: 'trailing',
+    doc: 'The trailing region wrapping the slot="trailing" chevron on a clickable card. Recolor or resize it from outside.',
+    recipe: 'kai-card::part(trailing) { color: var(--color-primary) }',
+  },
+];
+
 /**
  * Per-element composition surface — the SINGLE registry the build extracts
  * (`scripts/gen-element-api.mjs`) into `element-meta.json`, the Custom Elements
@@ -249,6 +324,10 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-skeleton': { parts: SKELETON_PARTS },
   'kai-attachments': { parts: ATTACHMENTS_PARTS },
   'kai-status': { parts: STATUS_PARTS },
+  'kai-tabs': { parts: TABS_PARTS },
+  'kai-voice-output': { parts: VOICE_OUTPUT_PARTS },
+  'kai-screen': { slots: SCREEN_SLOTS, parts: SCREEN_PARTS },
+  'kai-card': { slots: CARD_SLOTS, parts: CARD_PARTS },
 };
 
 /**

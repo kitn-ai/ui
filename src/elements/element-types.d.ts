@@ -115,6 +115,16 @@ export interface KaiCardElement extends HTMLElement {
   errorMessage?: string;
   /** Compact spacing for dense lists. Attribute: `dense`. */
   dense?: boolean;
+  /** Show a close (×) that hides the card and emits `kai-dismiss`. Attribute: `dismissible`. Off by default. */
+  dismissible?: boolean;
+  /** Render the whole card as a link. Attribute: `href`. Wins over `clickable`. */
+  href?: string;
+  /** `target` for the `href` anchor. Attribute: `target`. */
+  target?: string;
+  /** `rel` for the `href` anchor. Attribute: `rel`. */
+  rel?: string;
+  /** Make the whole card a button (`role="button"`, Enter/Space, hover affordance) that emits `kai-card-click`. Attribute: `clickable`. Ignored when `href` is set. */
+  clickable?: boolean;
 }
 
 export interface KaiCardsElement extends HTMLElement {
@@ -703,6 +713,21 @@ export interface KaiScopePickerElement extends HTMLElement {
   disabled?: boolean;
 }
 
+export interface KaiScreenElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-screen open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Header title text. A projected `title` slot overrides it. (Named `headline` because `title` collides with the global `HTMLElement.title` attribute.) */
+  headline?: string;
+  /** Show the back button (default true). */
+  back?: boolean;
+  /** Opt out of marking sibling elements inert/aria-hidden while open (for unusual layouts). */
+  noInert?: boolean;
+}
+
 export interface KaiScrollAreaElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -819,6 +844,21 @@ export interface KaiSwitchElement extends HTMLElement {
   value?: string;
 }
 
+export interface KaiTabsElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Tabs to render. Set as a JS property, not an HTML attribute. */
+  items?: { id: string; label?: string; icon?: string; disabled?: boolean }[];
+  /** Controlled selected id. Set as a JS property (or the `value` attribute); drive it from your app in response to `kai-tab-change`. Omit for uncontrolled. */
+  value?: string;
+  /** Initial selected id when uncontrolled (use the `default-value` attribute in plain HTML). */
+  defaultValue?: string;
+  /** `segmented` (default, a pill group) or `underline` (an underlined row). */
+  variant?: "segmented" | "underline";
+  /** Disable the whole strip. */
+  disabled?: boolean;
+}
+
 export interface KaiTasksElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -916,6 +956,23 @@ export interface KaiVoiceInputElement extends HTMLElement {
   transcribe?: (audio: Blob) => Promise<string>;
   /** Disable the mic button (non-interactive). */
   disabled?: boolean;
+  /** BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang` (the plain `lang` attribute is reserved by `HTMLElement` and can't be a custom-element property). No effect when `transcribe` is set or the browser lacks SpeechRecognition. */
+  recognitionLang?: string;
+  /** Emit live partial transcripts (`kai-transcript-interim`) during native recognition. Attribute: `interim`. No-op on the transcribe/fallback paths. */
+  interim?: boolean;
+}
+
+export interface KaiVoiceOutputElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The utterance to read aloud. */
+  text?: string;
+  /** Speak automatically when `text` is set/changed. */
+  autoplay?: boolean;
+  /** TTS model seam the host supplies — given text, returns an audio `Blob` to play. This is a **function-valued property** (`el.synthesize = async text => blob`); when set, the native `speechSynthesis` path is bypassed. Mirrors `<kai-voice-input>`'s `transcribe`. A value-returning callback can't be modelled as a fire-and-forget event, hence a property. */
+  synthesize?: (text: string) => Promise<Blob>;
+  /** Disable the button (non-interactive). */
+  disabled?: boolean;
 }
 
 export interface KaiWorkspaceElement extends HTMLElement {
@@ -1004,6 +1061,7 @@ declare global {
     'kai-resizable-item': KaiResizableItemElement;
     'kai-response-stream': KaiResponseStreamElement;
     'kai-scope-picker': KaiScopePickerElement;
+    'kai-screen': KaiScreenElement;
     'kai-scroll-area': KaiScrollAreaElement;
     'kai-scroll-button': KaiScrollButtonElement;
     'kai-separator': KaiSeparatorElement;
@@ -1014,6 +1072,7 @@ declare global {
     'kai-status': KaiStatusElement;
     'kai-suggestions': KaiSuggestionsElement;
     'kai-switch': KaiSwitchElement;
+    'kai-tabs': KaiTabsElement;
     'kai-tasks': KaiTasksElement;
     'kai-text-shimmer': KaiTextShimmerElement;
     'kai-thinking-bar': KaiThinkingBarElement;
@@ -1021,6 +1080,7 @@ declare global {
     'kai-tool': KaiToolElement;
     'kai-tooltip': KaiTooltipElement;
     'kai-voice-input': KaiVoiceInputElement;
+    'kai-voice-output': KaiVoiceOutputElement;
     'kai-workspace': KaiWorkspaceElement;
   }
 }

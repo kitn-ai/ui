@@ -10,15 +10,31 @@ interface Props extends Record<string, unknown> {
   transcribe?: (audio: Blob) => Promise<string>;
   /** Disable the mic button (non-interactive). */
   disabled?: boolean;
+  /**
+   * BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`).
+   * Attribute: `recognition-lang` (the plain `lang` attribute is reserved by
+   * `HTMLElement` and can't be a custom-element property). No effect when
+   * `transcribe` is set or the browser lacks SpeechRecognition.
+   */
+  recognitionLang?: string;
+  /** Emit live partial transcripts (`kai-transcript-interim`) during native
+   *  recognition. Attribute: `interim`. No-op on the transcribe/fallback paths. */
+  interim?: boolean;
 }
 
 /** Events fired by `<kai-voice-input>`. */
 interface Events {
   /** Raw audio captured (before transcription) — for hosts that prefer to
-   *  handle transcription themselves instead of via the `transcribe` property. */
+   *  handle transcription themselves instead of via the `transcribe` property.
+   *  Also the unsupported-fallback signal: no `transcribe`, no SpeechRecognition,
+   *  so only the blob is produced (no text). */
   'kai-audio-captured': { blob: Blob };
-  /** Transcription completed (the `transcribe` property resolved). */
+  /** Final transcript — the `transcribe` property resolved, OR native
+   *  `SpeechRecognition` produced final text (no `transcribe` set). */
   'kai-transcription': { text: string };
+  /** Live partial transcript during native recognition (only when `interim` is
+   *  set). Fires repeatedly before the final `kai-transcription`. */
+  'kai-transcript-interim': { text: string };
   /** Recording started or stopped — lets the host drive its own UI (waveform,
    *  push-to-talk indicator) in sync with the mic. Fires on real transitions
    *  only (manual click and programmatic start()/stop()), never on mount. */
@@ -26,13 +42,19 @@ interface Events {
 }
 
 /**
- * `<kai-voice-input>` — a mic button that records and transcribes. The
- * canonical **function-property** element: set `el.transcribe` to your async
- * transcriber. Also emits `kai-audio-captured` (raw blob) and `kai-transcription` (text).
+ * `<kai-voice-input>` — a mic button that records and transcribes. Works
+ * natively by default: with no `transcribe` callback it uses the browser's
+ * `SpeechRecognition` (Chrome/Safari; no Firefox — and cloud-based in Chrome).
+ * Set `el.transcribe` to route audio through your own async transcriber instead.
+ * Where neither is available it records the blob and emits `kai-audio-captured`
+ * with no text. Also emits `kai-transcription` (final text) and, with `interim`,
+ * `kai-transcript-interim` (live partials).
  */
 defineWebComponent<Props, Events>('kai-voice-input', {
   transcribe: undefined,
   disabled: false,
+  recognitionLang: undefined,
+  interim: false,
 }, (props, { dispatch, flag, expose }) => {
   // Pattern C: the VoiceInput component owns useVoiceRecorder; it hands up a
   // start/stop controller and an onRecordingChange callback. The facade captures
@@ -53,11 +75,15 @@ defineWebComponent<Props, Events>('kai-voice-input', {
   return (
     <VoiceInput
       disabled={flag('disabled')}
+      hasTranscribe={typeof props.transcribe === 'function'}
+      lang={props.recognitionLang}
+      interim={flag('interim')}
       onTranscribe={async (blob) => {
         dispatch('kai-audio-captured', { blob });
         return props.transcribe ? props.transcribe(blob) : '';
       }}
       onTranscription={(text) => dispatch('kai-transcription', { text })}
+      onInterim={(text) => dispatch('kai-transcript-interim', { text })}
       onRecordingChange={(recording) => dispatch('kai-recording-change', { recording })}
       controllerRef={(c) => (controller = c)}
     />

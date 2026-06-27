@@ -147,12 +147,26 @@ export interface CardProps extends WebComponentProps {
   errorMessage?: string;
   /** Compact spacing for dense lists. Attribute: `dense`. */
   dense?: boolean;
+  /** Show a close (×) that hides the card and emits `kai-dismiss`. Attribute: `dismissible`. Off by default. */
+  dismissible?: boolean;
+  /** Render the whole card as a link. Attribute: `href`. Wins over `clickable`. */
+  href?: string;
+  /** `target` for the `href` anchor. Attribute: `target`. */
+  target?: string;
+  /** `rel` for the `href` anchor. Attribute: `rel`. */
+  rel?: string;
+  /** Make the whole card a button (`role="button"`, Enter/Space, hover affordance) that emits `kai-card-click`. Attribute: `clickable`. Ignored when `href` is set. */
+  clickable?: boolean;
+  /** A `clickable`/`href` card was activated (click, or Enter/Space). */
+  onCardClick?: (event: CustomEvent) => void;
+  /** The card was dismissed via its × (it also hides itself). */
+  onDismiss?: (event: CustomEvent) => void;
 }
 
 export const Card = createWebComponent<CardProps>(
   'kai-card',
-  ["theme","heading","description","errorMessage","dense"],
-  {  },
+  ["theme","heading","description","errorMessage","dense","dismissible","href","target","rel","clickable"],
+  { onCardClick: 'kai-card-click', onDismiss: 'kai-dismiss' },
 );
 
 export interface CardsProps extends WebComponentProps {
@@ -1005,6 +1019,29 @@ export const ScopePicker = createWebComponent<ScopePickerProps>(
   { onOpenChange: 'kai-open-change', onScopeChange: 'kai-scope-change' },
 );
 
+export interface ScreenProps extends WebComponentProps {
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-screen open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Header title text. A projected `title` slot overrides it. (Named `headline` because `title` collides with the global `HTMLElement.title` attribute.) */
+  headline?: string;
+  /** Show the back button (default true). */
+  back?: boolean;
+  /** Opt out of marking sibling elements inert/aria-hidden while open (for unusual layouts). */
+  noInert?: boolean;
+  /** Back navigation intent: the back button or Escape. The consumer flips their own routing in response (the screen knows nothing about the trigger). */
+  onBack?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The screen opened or closed (a method, `Escape` close, or driven `open`). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export const Screen = createWebComponent<ScreenProps>(
+  'kai-screen',
+  ["theme","open","defaultOpen","headline","back","noInert"],
+  { onBack: 'kai-back', onOpenChange: 'kai-open-change' },
+);
+
 export interface ScrollAreaProps extends WebComponentProps {
   /** Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. */
   orientation?: "horizontal" | "vertical" | "both";
@@ -1167,6 +1204,27 @@ export const Switch = createWebComponent<SwitchProps>(
   { onChange: 'kai-change' },
 );
 
+export interface TabsProps extends WebComponentProps {
+  /** Tabs to render. Set as a JS property, not an HTML attribute. */
+  items?: { id: string; label?: string; icon?: string; disabled?: boolean }[];
+  /** Controlled selected id. Set as a JS property (or the `value` attribute); drive it from your app in response to `kai-tab-change`. Omit for uncontrolled. */
+  value?: string;
+  /** Initial selected id when uncontrolled (use the `default-value` attribute in plain HTML). */
+  defaultValue?: string;
+  /** `segmented` (default, a pill group) or `underline` (an underlined row). */
+  variant?: "segmented" | "underline";
+  /** Disable the whole strip. */
+  disabled?: boolean;
+  /** A tab was selected (click, Enter/Space, or arrow-key move). `value` is the item's id. */
+  onTabChange?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export const Tabs = createWebComponent<TabsProps>(
+  'kai-tabs',
+  ["theme","items","value","defaultValue","variant","disabled"],
+  { onTabChange: 'kai-tab-change' },
+);
+
 export interface TasksProps extends WebComponentProps {
   /** The tasks definition (the CardEnvelope.data). Set as a JS PROPERTY: `el.data = { tasks:[…], selectAll, confirmLabel, … }`. Import `TasksCardData` from `@kitn.ai/ui` for the full shape. */
   data?: Record<string, unknown>;
@@ -1298,18 +1356,45 @@ export interface VoiceInputProps extends WebComponentProps {
   transcribe?: (audio: Blob) => Promise<string>;
   /** Disable the mic button (non-interactive). */
   disabled?: boolean;
-  /** Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. */
+  /** BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang` (the plain `lang` attribute is reserved by `HTMLElement` and can't be a custom-element property). No effect when `transcribe` is set or the browser lacks SpeechRecognition. */
+  recognitionLang?: string;
+  /** Emit live partial transcripts (`kai-transcript-interim`) during native recognition. Attribute: `interim`. No-op on the transcribe/fallback paths. */
+  interim?: boolean;
+  /** Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. Also the unsupported-fallback signal: no `transcribe`, no SpeechRecognition, so only the blob is produced (no text). */
   onAudioCaptured?: (event: CustomEvent<{ blob: Blob }>) => void;
   /** Recording started or stopped — lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount. */
   onRecordingChange?: (event: CustomEvent<{ recording: boolean }>) => void;
-  /** Transcription completed (the `transcribe` property resolved). */
+  /** Live partial transcript during native recognition (only when `interim` is set). Fires repeatedly before the final `kai-transcription`. */
+  onTranscriptInterim?: (event: CustomEvent<{ text: string }>) => void;
+  /** Final transcript — the `transcribe` property resolved, OR native `SpeechRecognition` produced final text (no `transcribe` set). */
   onTranscription?: (event: CustomEvent<{ text: string }>) => void;
 }
 
 export const VoiceInput = createWebComponent<VoiceInputProps>(
   'kai-voice-input',
-  ["theme","transcribe","disabled"],
-  { onAudioCaptured: 'kai-audio-captured', onRecordingChange: 'kai-recording-change', onTranscription: 'kai-transcription' },
+  ["theme","transcribe","disabled","recognitionLang","interim"],
+  { onAudioCaptured: 'kai-audio-captured', onRecordingChange: 'kai-recording-change', onTranscriptInterim: 'kai-transcript-interim', onTranscription: 'kai-transcription' },
+);
+
+export interface VoiceOutputProps extends WebComponentProps {
+  /** The utterance to read aloud. */
+  text?: string;
+  /** Speak automatically when `text` is set/changed. */
+  autoplay?: boolean;
+  /** TTS model seam the host supplies — given text, returns an audio `Blob` to play. This is a **function-valued property** (`el.synthesize = async text => blob`); when set, the native `speechSynthesis` path is bypassed. Mirrors `<kai-voice-input>`'s `transcribe`. A value-returning callback can't be modelled as a fire-and-forget event, hence a property. */
+  synthesize?: (text: string) => Promise<Blob>;
+  /** Disable the button (non-interactive). */
+  disabled?: boolean;
+  /** Playback started or stopped — drive your own UI in sync. Fires on real transitions only (manual click and programmatic speak()/stop()), never on mount. */
+  onSpeakingChange?: (event: CustomEvent<{ speaking: boolean }>) => void;
+  /** The model path (`synthesize`) resolved audio — the raw `Blob` before playback. */
+  onSynthesized?: (event: CustomEvent<{ blob: Blob }>) => void;
+}
+
+export const VoiceOutput = createWebComponent<VoiceOutputProps>(
+  'kai-voice-output',
+  ["theme","text","autoplay","synthesize","disabled"],
+  { onSpeakingChange: 'kai-speaking-change', onSynthesized: 'kai-synthesized' },
 );
 
 export interface WorkspaceProps extends WebComponentProps {

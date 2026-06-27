@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 60 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 63 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/ui'`):
-All 60 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 63 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 60 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 63 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/ui/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (60 elements, generated from custom-elements.json)
+## Element reference (63 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -316,8 +316,34 @@ _No events._
 | `description` | `description` | `undefined \| string` | Supporting text under the heading. Attribute: `description`. |
 | `errorMessage` | `error-message` | `undefined \| string` | When set, the card renders its inline error state instead of the body. Attribute: `error-message`. |
 | `dense` | `dense` | `undefined \| false \| true` | Compact spacing for dense lists. Attribute: `dense`. |
+| `dismissible` | `dismissible` | `undefined \| false \| true` | Show a close (×) that hides the card and emits `kai-dismiss`. Attribute: `dismissible`. Off by default. |
+| `href` | `href` | `undefined \| string` | Render the whole card as a link. Attribute: `href`. Wins over `clickable`. |
+| `target` | `target` | `undefined \| string` | `target` for the `href` anchor. Attribute: `target`. |
+| `rel` | `rel` | `undefined \| string` | `rel` for the `href` anchor. Attribute: `rel`. |
+| `clickable` | `clickable` | `undefined \| false \| true` | Make the whole card a button (`role="button"`, Enter/Space, hover affordance) that emits `kai-card-click`. Attribute: `clickable`. Ignored when `href` is set. |
 
-_No events._
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-card-click` | `CustomEvent` | A `clickable`/`href` card was activated (click, or Enter/Space). |
+| `kai-dismiss` | `CustomEvent` | The card was dismissed via its × (it also hides itself). |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `media` | inject | Media region (image/GIF/icon) rendered above the heading. |
+| `actions` | inject | Footer action buttons. Do NOT combine with a clickable/href card (nested interactive). |
+| `trailing` | inject | A trailing chevron/arrow for a clickable card. Composable, no auto-chevron. |
+
+**Styleable parts** (restyle from outside via `kai-card::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(card)` | The card root (a div, or an a when href is set). Restyle its radius, border, padding, or background; the dense prop sets the compact defaults. — `kai-card::part(card) { border-radius: 1rem; padding: 1.25rem }` |
+| `::part(dismiss)` | The dismiss (×) button shown when dismissible. Recolor or reposition it from outside. — `kai-card::part(dismiss) { color: var(--color-muted-foreground) }` |
+| `::part(trailing)` | The trailing region wrapping the slot="trailing" chevron on a clickable card. Recolor or resize it from outside. — `kai-card::part(trailing) { color: var(--color-primary) }` |
 
 ---
 
@@ -1146,6 +1172,43 @@ _No events._
 
 ---
 
+### `kai-screen` / `Screen`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-screen open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `headline` | `headline` | `undefined \| string` | Header title text. A projected `title` slot overrides it. (Named `headline` because `title` collides with the global `HTMLElement.title` attribute.) |
+| `back` | `back` | `undefined \| false \| true` | Show the back button (default true). |
+| `noInert` | `no-inert` | `undefined \| false \| true` | Opt out of marking sibling elements inert/aria-hidden while open (for unusual layouts). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-back` | `CustomEvent<Record<string, never>>` | Back navigation intent: the back button or Escape. The consumer flips their own routing in response (the screen knows nothing about the trigger). |
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The screen opened or closed (a method, `Escape` close, or driven `open`). |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `title` | replace | Rich header title; overrides the `headline` prop. |
+| `actions` | inject | Header trailing cluster (e.g. an avatar or overflow menu). |
+
+**Styleable parts** (restyle from outside via `kai-screen::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(header)` | The back-header bar (back button + title + actions). Restyle its height, padding, or border from outside. — `kai-screen::part(header) { height: 3.25rem; padding-inline: 1rem }` |
+| `::part(back)` | The back button. Restyle or hide it from outside; `back="false"` removes it entirely. — `kai-screen::part(back) { border-radius: 9999px }` |
+| `::part(body)` | The full-bleed surface that fills the mount point and scrolls its content. Tune padding or background from outside. — `kai-screen::part(body) { background: var(--color-card) }` |
+| `::part(title)` | Rich header title; overrides the `headline` prop. |
+
+---
+
 ### `kai-scroll-area` / `ScrollArea`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -1325,6 +1388,33 @@ _No events._
 
 ---
 
+### `kai-tabs` / `Tabs`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `items` | — | `undefined \| { id: string; label?: undefined \| string; icon?: undefined \| string; disabled?: undefined \| false \| true }[]` | Tabs to render. Set as a JS property, not an HTML attribute. |
+| `value` | `value` | `undefined \| string` | Controlled selected id. Set as a JS property (or the `value` attribute); drive it from your app in response to `kai-tab-change`. Omit for uncontrolled. |
+| `defaultValue` | `default-value` | `undefined \| string` | Initial selected id when uncontrolled (use the `default-value` attribute in plain HTML). |
+| `variant` | `variant` | `undefined \| "segmented" \| "underline"` | `segmented` (default, a pill group) or `underline` (an underlined row). |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable the whole strip. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-tab-change` | `CustomEvent<{ value: string }>` | A tab was selected (click, Enter/Space, or arrow-key move). `value` is the item's id. |
+
+**Styleable parts** (restyle from outside via `kai-tabs::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(tablist)` | The tab strip container (role="tablist"). Restyle its gap, padding, background, or radius from outside; the `variant` prop sets the segmented/underline defaults. — `kai-tabs::part(tablist) { gap: 0.5rem; background: var(--color-card) }` |
+| `::part(tab)` | A single tab button. Restyle from outside; the active tab carries a `[data-active]` attribute, so target `::part(tab)[data-active]` for the selected look. — `kai-tabs::part(tab)[data-active] { color: var(--color-primary); font-weight: 600 }` |
+
+---
+
 ### `kai-tasks` / `Tasks`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -1450,14 +1540,43 @@ _No events._
 |---|---|---|---|
 | `transcribe` | — | `undefined \| (audio: Blob) => Promise<string>` | Transcriber the host supplies — records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event. |
 | `disabled` | `disabled` | `undefined \| false \| true` | Disable the mic button (non-interactive). |
+| `recognitionLang` | `recognition-lang` | `undefined \| string` | BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang` (the plain `lang` attribute is reserved by `HTMLElement` and can't be a custom-element property). No effect when `transcribe` is set or the browser lacks SpeechRecognition. |
+| `interim` | `interim` | `undefined \| false \| true` | Emit live partial transcripts (`kai-transcript-interim`) during native recognition. Attribute: `interim`. No-op on the transcribe/fallback paths. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `kai-audio-captured` | `CustomEvent<{ blob: Blob }>` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. |
+| `kai-audio-captured` | `CustomEvent<{ blob: Blob }>` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. Also the unsupported-fallback signal: no `transcribe`, no SpeechRecognition, so only the blob is produced (no text). |
 | `kai-recording-change` | `CustomEvent<{ recording: false \| true }>` | Recording started or stopped — lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount. |
-| `kai-transcription` | `CustomEvent<{ text: string }>` | Transcription completed (the `transcribe` property resolved). |
+| `kai-transcript-interim` | `CustomEvent<{ text: string }>` | Live partial transcript during native recognition (only when `interim` is set). Fires repeatedly before the final `kai-transcription`. |
+| `kai-transcription` | `CustomEvent<{ text: string }>` | Final transcript — the `transcribe` property resolved, OR native `SpeechRecognition` produced final text (no `transcribe` set). |
+
+---
+
+### `kai-voice-output` / `VoiceOutput`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `text` | `text` | `undefined \| string` | The utterance to read aloud. |
+| `autoplay` | `autoplay` | `undefined \| false \| true` | Speak automatically when `text` is set/changed. |
+| `synthesize` | — | `undefined \| (text: string) => Promise<Blob>` | TTS model seam the host supplies — given text, returns an audio `Blob` to play. This is a **function-valued property** (`el.synthesize = async text => blob`); when set, the native `speechSynthesis` path is bypassed. Mirrors `<kai-voice-input>`'s `transcribe`. A value-returning callback can't be modelled as a fire-and-forget event, hence a property. |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable the button (non-interactive). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-speaking-change` | `CustomEvent<{ speaking: false \| true }>` | Playback started or stopped — drive your own UI in sync. Fires on real transitions only (manual click and programmatic speak()/stop()), never on mount. |
+| `kai-synthesized` | `CustomEvent<{ blob: Blob }>` | The model path (`synthesize`) resolved audio — the raw `Blob` before playback. |
+
+**Styleable parts** (restyle from outside via `kai-voice-output::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(button)` | The speaker/play button. Restyle radius, size, padding, or colors from outside; it is a ghost icon button by default. — `kai-voice-output::part(button) { border-radius: 9999px; color: var(--color-primary) }` |
 
 ---
 

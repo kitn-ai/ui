@@ -612,9 +612,64 @@
         "description": "Compact spacing for dense lists. Attribute: `dense`.",
         "default": "false",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "dismissible",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a close (×) that hides the card and emits `kai-dismiss`. Attribute: `dismissible`. Off by default.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "href",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Render the whole card as a link. Attribute: `href`. Wins over `clickable`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "target",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "`target` for the `href` anchor. Attribute: `target`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "rel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "`rel` for the `href` anchor. Attribute: `rel`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "clickable",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Make the whole card a button (`role=\"button\"`, Enter/Space, hover affordance) that emits `kai-card-click`. Attribute: `clickable`. Ignored when `href` is set.",
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
-    "events": [],
+    "events": [
+      {
+        "name": "kai-card-click",
+        "detail": null,
+        "description": "A `clickable`/`href` card was activated (click, or Enter/Space).",
+        "displayDetail": null
+      },
+      {
+        "name": "kai-dismiss",
+        "detail": null,
+        "description": "The card was dismissed via its × (it also hides itself).",
+        "displayDetail": null
+      }
+    ],
     "methods": [],
     "composedFrom": [
       {
@@ -623,7 +678,41 @@
         "storyId": "solid-advanced-elements-card--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "media",
+        "mode": "inject",
+        "doc": "Media region (image/GIF/icon) rendered above the heading."
+      },
+      {
+        "name": "actions",
+        "mode": "inject",
+        "doc": "Footer action buttons. Do NOT combine with a clickable/href card (nested interactive)."
+      },
+      {
+        "name": "trailing",
+        "mode": "inject",
+        "doc": "A trailing chevron/arrow for a clickable card. Composable, no auto-chevron."
+      }
+    ],
+    "parts": [
+      {
+        "name": "card",
+        "doc": "The card root (a div, or an a when href is set). Restyle its radius, border, padding, or background; the dense prop sets the compact defaults.",
+        "recipe": "kai-card::part(card) { border-radius: 1rem; padding: 1.25rem }"
+      },
+      {
+        "name": "dismiss",
+        "doc": "The dismiss (×) button shown when dismissible. Recolor or reposition it from outside.",
+        "recipe": "kai-card::part(dismiss) { color: var(--color-muted-foreground) }"
+      },
+      {
+        "name": "trailing",
+        "doc": "The trailing region wrapping the slot=\"trailing\" chevron on a clickable card. Recolor or resize it from outside.",
+        "recipe": "kai-card::part(trailing) { color: var(--color-primary) }"
+      }
+    ]
   },
   {
     "tag": "kai-cards",
@@ -4083,6 +4172,135 @@
     "tokens": []
   },
   {
+    "tag": "kai-screen",
+    "className": "KaiScreenElement",
+    "displayName": "Screen",
+    "props": [
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-screen open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "headline",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Header title text. A projected `title` slot overrides it. (Named `headline` because `title` collides with the global `HTMLElement.title` attribute.)",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "back",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show the back button (default true).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "noInert",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Opt out of marking sibling elements inert/aria-hidden while open (for unusual layouts).",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-back",
+        "detail": "Record<string, never>",
+        "description": "Back navigation intent: the back button or Escape. The consumer flips their own routing in response (the screen knows nothing about the trigger).",
+        "displayDetail": "Record<string, never>"
+      },
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The screen opened or closed (a method, `Escape` close, or driven `open`).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
+      },
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Move focus to the screen surface (no-op while closed)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Screen",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-screen--docs"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "title",
+        "mode": "replace",
+        "part": true,
+        "doc": "Rich header title; overrides the `headline` prop."
+      },
+      {
+        "name": "actions",
+        "mode": "inject",
+        "doc": "Header trailing cluster (e.g. an avatar or overflow menu)."
+      }
+    ],
+    "parts": [
+      {
+        "name": "header",
+        "doc": "The back-header bar (back button + title + actions). Restyle its height, padding, or border from outside.",
+        "recipe": "kai-screen::part(header) { height: 3.25rem; padding-inline: 1rem }"
+      },
+      {
+        "name": "back",
+        "doc": "The back button. Restyle or hide it from outside; `back=\"false\"` removes it entirely.",
+        "recipe": "kai-screen::part(back) { border-radius: 9999px }"
+      },
+      {
+        "name": "body",
+        "doc": "The full-bleed surface that fills the mount point and scrolls its content. Tune padding or background from outside.",
+        "recipe": "kai-screen::part(body) { background: var(--color-card) }"
+      },
+      {
+        "name": "title",
+        "doc": "Rich header title; overrides the `headline` prop."
+      }
+    ]
+  },
+  {
     "tag": "kai-scroll-area",
     "className": "KaiScrollAreaElement",
     "displayName": "ScrollArea",
@@ -4632,6 +4850,96 @@
     "tokens": []
   },
   {
+    "tag": "kai-tabs",
+    "className": "KaiTabsElement",
+    "displayName": "Tabs",
+    "props": [
+      {
+        "name": "items",
+        "type": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; disabled?: undefined | false | true }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Tabs to render. Set as a JS property, not an HTML attribute.",
+        "displayType": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; disabled?: undefined | false | true }[]"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled selected id. Set as a JS property (or the `value` attribute); drive it from your app in response to `kai-tab-change`. Omit for uncontrolled.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "defaultValue",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial selected id when uncontrolled (use the `default-value` attribute in plain HTML).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "variant",
+        "type": "undefined | \"segmented\" | \"underline\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`segmented` (default, a pill group) or `underline` (an underlined row).",
+        "default": "'segmented'",
+        "displayType": "undefined | \"segmented\" | \"underline\""
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the whole strip.",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-tab-change",
+        "detail": "{ value: string }",
+        "description": "A tab was selected (click, Enter/Space, or arrow-key move). `value` is the item's id.",
+        "displayDetail": "{ value: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "select",
+        "params": "id: string",
+        "returns": "void",
+        "description": "Select a tab by id (fires `kai-tab-change`). Ignores unknown/disabled ids."
+      },
+      {
+        "name": "focus",
+        "params": "",
+        "returns": "void",
+        "description": "Focus the active tab (or the first focusable tab)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Tabs",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-tabs--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "tablist",
+        "doc": "The tab strip container (role=\"tablist\"). Restyle its gap, padding, background, or radius from outside; the `variant` prop sets the segmented/underline defaults.",
+        "recipe": "kai-tabs::part(tablist) { gap: 0.5rem; background: var(--color-card) }"
+      },
+      {
+        "name": "tab",
+        "doc": "A single tab button. Restyle from outside; the active tab carries a `[data-active]` attribute, so target `::part(tab)[data-active]` for the selected look.",
+        "recipe": "kai-tabs::part(tab)[data-active] { color: var(--color-primary); font-weight: 600 }"
+      }
+    ]
+  },
+  {
     "tag": "kai-tasks",
     "className": "KaiTasksElement",
     "displayName": "Tasks",
@@ -5131,13 +5439,30 @@
         "description": "Disable the mic button (non-interactive).",
         "default": "false",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "recognitionLang",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang` (the plain `lang` attribute is reserved by `HTMLElement` and can't be a custom-element property). No effect when `transcribe` is set or the browser lacks SpeechRecognition.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "interim",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Emit live partial transcripts (`kai-transcript-interim`) during native recognition. Attribute: `interim`. No-op on the transcribe/fallback paths.",
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
       {
         "name": "kai-audio-captured",
         "detail": "{ blob: Blob }",
-        "description": "Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property.",
+        "description": "Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. Also the unsupported-fallback signal: no `transcribe`, no SpeechRecognition, so only the blob is produced (no text).",
         "displayDetail": "{ blob: Blob }"
       },
       {
@@ -5147,9 +5472,15 @@
         "displayDetail": "{ recording: false | true }"
       },
       {
+        "name": "kai-transcript-interim",
+        "detail": "{ text: string }",
+        "description": "Live partial transcript during native recognition (only when `interim` is set). Fires repeatedly before the final `kai-transcription`.",
+        "displayDetail": "{ text: string }"
+      },
+      {
         "name": "kai-transcription",
         "detail": "{ text: string }",
-        "description": "Transcription completed (the `transcribe` property resolved).",
+        "description": "Final transcript — the `transcribe` property resolved, OR native `SpeechRecognition` produced final text (no `transcribe` set).",
         "displayDetail": "{ text: string }"
       }
     ],
@@ -5175,6 +5506,103 @@
       }
     ],
     "tokens": []
+  },
+  {
+    "tag": "kai-voice-output",
+    "className": "KaiVoiceOutputElement",
+    "displayName": "VoiceOutput",
+    "props": [
+      {
+        "name": "text",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The utterance to read aloud.",
+        "default": "''",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "autoplay",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Speak automatically when `text` is set/changed.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "synthesize",
+        "type": "undefined | (text: string) => Promise<Blob>",
+        "optional": true,
+        "scalar": false,
+        "description": "TTS model seam the host supplies — given text, returns an audio `Blob` to play. This is a **function-valued property** (`el.synthesize = async text => blob`); when set, the native `speechSynthesis` path is bypassed. Mirrors `<kai-voice-input>`'s `transcribe`. A value-returning callback can't be modelled as a fire-and-forget event, hence a property.",
+        "displayType": "undefined | (text: string) => Promise<Blob>"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the button (non-interactive).",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-speaking-change",
+        "detail": "{ speaking: false | true }",
+        "description": "Playback started or stopped — drive your own UI in sync. Fires on real transitions only (manual click and programmatic speak()/stop()), never on mount.",
+        "displayDetail": "{ speaking: false | true }"
+      },
+      {
+        "name": "kai-synthesized",
+        "detail": "{ blob: Blob }",
+        "description": "The model path (`synthesize`) resolved audio — the raw `Blob` before playback.",
+        "displayDetail": "{ blob: Blob }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "speak",
+        "params": "",
+        "returns": "void",
+        "description": "Speak the current `text` (native, or via `synthesize` if set)."
+      },
+      {
+        "name": "pause",
+        "params": "",
+        "returns": "void",
+        "description": "Pause playback (resumable)."
+      },
+      {
+        "name": "resume",
+        "params": "",
+        "returns": "void",
+        "description": "Resume paused playback."
+      },
+      {
+        "name": "stop",
+        "params": "",
+        "returns": "void",
+        "description": "Stop playback and reset."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "VoiceOutput",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-voiceoutput--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "button",
+        "doc": "The speaker/play button. Restyle radius, size, padding, or colors from outside; it is a ghost icon button by default.",
+        "recipe": "kai-voice-output::part(button) { border-radius: 9999px; color: var(--color-primary) }"
+      }
+    ]
   },
   {
     "tag": "kai-workspace",
