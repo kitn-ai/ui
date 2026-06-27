@@ -41,6 +41,8 @@ export interface ConversationListProps {
   footer?: JSX.Element;
   /** Replaces the built-in "no conversations yet" state. */
   empty?: JSX.Element;
+  /** Dense single-line rows (a leading dot + title, no message count). */
+  compact?: boolean;
   /** Fired whenever the built-in search box query changes (typing or a
    *  programmatic `clear()`). Lets the facade surface a `kai-search` event. */
   onSearchChange?: (query: string) => void;
@@ -60,7 +62,7 @@ export interface ConversationListController {
 }
 
 export function ConversationList(props: ConversationListProps) {
-  const [local] = splitProps(props, ['groups', 'conversations', 'activeId', 'onSelect', 'onNewChat', 'onToggleSidebar', 'header', 'footer', 'empty', 'onSearchChange', 'controllerRef', 'class']);
+  const [local] = splitProps(props, ['groups', 'conversations', 'activeId', 'onSelect', 'onNewChat', 'onToggleSidebar', 'header', 'footer', 'empty', 'compact', 'onSearchChange', 'controllerRef', 'class']);
   const [searchQuery, setSearchQuery] = createSignal('');
   const isEmpty = createMemo(() => local.conversations.length === 0);
   // The search query is owned here; setQuery is the single mutation point so both
@@ -147,13 +149,22 @@ export function ConversationList(props: ConversationListProps) {
               const convs = createMemo(() => groupedConversations().get(group.id) ?? []);
               return (
                 <Show when={convs().length > 0}>
-                  <GroupSection name={group.name} count={convs().length} conversations={convs()} activeId={local.activeId} onSelect={local.onSelect} />
+                  <GroupSection name={group.name} count={convs().length} conversations={convs()} activeId={local.activeId} onSelect={local.onSelect} compact={local.compact} />
                 </Show>
               );
             }}
           </For>
           <Show when={ungrouped().length > 0}>
-            <GroupSection name="Ungrouped" count={ungrouped().length} conversations={ungrouped()} activeId={local.activeId} onSelect={local.onSelect} />
+            <Show
+              when={local.compact}
+              fallback={<GroupSection name="Ungrouped" count={ungrouped().length} conversations={ungrouped()} activeId={local.activeId} onSelect={local.onSelect} />}
+            >
+              <div class="space-y-0.5 py-1">
+                <For each={ungrouped()}>
+                  {(conv) => <ConversationItem conversation={conv} isActive={conv.id === local.activeId} onSelect={local.onSelect} compact />}
+                </For>
+              </div>
+            </Show>
           </Show>
         </ScrollArea>
       </Show>
@@ -165,7 +176,7 @@ export function ConversationList(props: ConversationListProps) {
   );
 }
 
-function GroupSection(props: { name: string; count: number; conversations: ConversationSummary[]; activeId?: string; onSelect: (id: string) => void }) {
+function GroupSection(props: { name: string; count: number; conversations: ConversationSummary[]; activeId?: string; onSelect: (id: string) => void; compact?: boolean }) {
   const [open, setOpen] = createSignal(true);
   return (
     <Collapsible open={open()} onOpenChange={setOpen}>
@@ -178,7 +189,7 @@ function GroupSection(props: { name: string; count: number; conversations: Conve
       <CollapsibleContent>
         <div class="pl-2 mt-0.5 space-y-0.5">
           <For each={props.conversations}>
-            {(conv) => <ConversationItem conversation={conv} isActive={conv.id === props.activeId} onSelect={props.onSelect} />}
+            {(conv) => <ConversationItem conversation={conv} isActive={conv.id === props.activeId} onSelect={props.onSelect} compact={props.compact} />}
           </For>
         </div>
       </CollapsibleContent>

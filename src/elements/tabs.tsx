@@ -12,6 +12,8 @@ interface Props extends Record<string, unknown> {
   defaultValue?: string;
   /** `segmented` (default, a pill group) or `underline` (an underlined row). */
   variant?: TabsVariant;
+  /** Stretch the strip to full width, each tab sharing the space equally. */
+  block?: boolean;
   /** Disable the whole strip. */
   disabled?: boolean;
 }
@@ -49,6 +51,7 @@ defineWebComponent<Props, Events>('kai-tabs', {
   value: undefined,
   defaultValue: undefined,
   variant: 'segmented',
+  block: undefined,
   disabled: undefined,
 }, (props, { dispatch, flag, expose }) => {
   // Controlled/uncontrolled selection: `value` (when set) wins; otherwise the
@@ -83,6 +86,7 @@ defineWebComponent<Props, Events>('kai-tabs', {
       items={props.items as KaiTabItem[] | undefined}
       value={value()}
       variant={(props.variant as TabsVariant) ?? 'segmented'}
+      block={flag('block')}
       disabled={flag('disabled')}
       onChange={setValueTo}
       ref={(el) => (listRef = el)}

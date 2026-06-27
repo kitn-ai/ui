@@ -1278,6 +1278,8 @@ export interface TabsProps extends WebComponentProps {
   defaultValue?: string;
   /** `segmented` (default, a pill group) or `underline` (an underlined row). */
   variant?: "segmented" | "underline";
+  /** Stretch the strip to full width, each tab sharing the space equally. */
+  block?: boolean;
   /** Disable the whole strip. */
   disabled?: boolean;
   /** A tab was selected (click, Enter/Space, or arrow-key move). `value` is the item's id. */
@@ -1286,7 +1288,7 @@ export interface TabsProps extends WebComponentProps {
 
 export const Tabs = createWebComponent<TabsProps>(
   'kai-tabs',
-  ["theme","items","value","defaultValue","variant","disabled"],
+  ["theme","items","value","defaultValue","variant","block","disabled"],
   { onTabChange: 'kai-tab-change' },
 );
 
@@ -1500,6 +1502,8 @@ export interface WorkspaceProps extends WebComponentProps {
   sidebarCollapsed?: boolean;
   /** Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
   defaultSidebarCollapsed?: boolean;
+  /** Render Recents as dense single-line rows (a leading dot + title, no count). */
+  compact?: boolean;
   /** A conversation was selected in the sidebar. */
   onConversationSelect?: (event: CustomEvent<{ id: string }>) => void;
   /** An action button on a message was clicked. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
@@ -1524,6 +1528,6 @@ export interface WorkspaceProps extends WebComponentProps {
 
 export const Workspace = createWebComponent<WorkspaceProps>(
   'kai-workspace',
-  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","triggers","kindIcons","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed"],
+  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","triggers","kindIcons","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed","compact"],
   { onConversationSelect: 'kai-conversation-select', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onSidebarToggle: 'kai-sidebar-toggle', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );

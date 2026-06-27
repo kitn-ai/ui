@@ -900,6 +900,8 @@ export interface KaiTabsElement extends HTMLElement {
   defaultValue?: string;
   /** `segmented` (default, a pill group) or `underline` (an underlined row). */
   variant?: "segmented" | "underline";
+  /** Stretch the strip to full width, each tab sharing the space equally. */
+  block?: boolean;
   /** Disable the whole strip. */
   disabled?: boolean;
 }
@@ -1060,6 +1062,8 @@ export interface KaiWorkspaceElement extends HTMLElement {
   sidebarCollapsed?: boolean;
   /** Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
   defaultSidebarCollapsed?: boolean;
+  /** Render Recents as dense single-line rows (a leading dot + title, no count). */
+  compact?: boolean;
 }
 
 declare global {

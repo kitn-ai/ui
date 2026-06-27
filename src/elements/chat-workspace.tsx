@@ -52,6 +52,8 @@ interface Props extends Record<string, unknown> {
   /** Initial collapsed state when uncontrolled (default false). Use the
    *  `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
   defaultSidebarCollapsed?: boolean;
+  /** Render Recents as dense single-line rows (a leading dot + title, no count). */
+  compact?: boolean;
 }
 
 interface Events {
@@ -87,7 +89,7 @@ defineWebComponent<Props, Events>('kai-workspace', {
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
   search: false, voice: false, triggers: undefined, kindIcons: undefined,
   sidebarWidth: 22, sidebarMinWidth: 200, sidebarMaxWidth: 420,
-  sidebarCollapsed: undefined, defaultSidebarCollapsed: undefined,
+  sidebarCollapsed: undefined, defaultSidebarCollapsed: undefined, compact: undefined,
 }, (props, { dispatch, flag, expose, element }) => {
   // Which injection slots the consumer has filled. A bare <slot> is always a
   // truthy JSX node, so we render each region wrapper ONLY when readSlots reports
@@ -199,6 +201,7 @@ defineWebComponent<Props, Events>('kai-workspace', {
               <div class="min-h-0 flex-1">
                 <ConversationList
                   groups={props.groups} conversations={props.conversations} activeId={props.activeId as string | undefined}
+                  compact={flag('compact')}
                   onSelect={(id) => dispatch('kai-conversation-select', { id })}
                   onNewChat={() => dispatch('kai-new-chat', {})}
                   onToggleSidebar={toggle}

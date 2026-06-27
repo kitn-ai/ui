@@ -49,6 +49,8 @@ export interface TabsProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onC
   /** Selected item id. */
   value?: string;
   variant?: TabsVariant;
+  /** Stretch the strip to full width, each tab sharing the space equally. */
+  block?: boolean;
   /** Disable the whole strip. */
   disabled?: boolean;
   /** Fired with the newly-selected item's id. */
@@ -64,7 +66,7 @@ export interface TabsProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onC
  */
 export function Tabs(props: TabsProps) {
   const [local, rest] = splitProps(props, [
-    'items', 'value', 'variant', 'disabled', 'onChange', 'ref', 'class',
+    'items', 'value', 'variant', 'block', 'disabled', 'onChange', 'ref', 'class',
   ]);
   const items = () => local.items ?? [];
   const variant = (): TabsVariant => local.variant ?? 'segmented';
@@ -136,7 +138,7 @@ export function Tabs(props: TabsProps) {
       role="tablist"
       part="tablist"
       aria-disabled={local.disabled ? 'true' : undefined}
-      class={cn(TABLIST_CLASS[variant()], local.class)}
+      class={cn(TABLIST_CLASS[variant()], local.block && 'flex w-full', local.class)}
     >
       <For each={items()}>
         {(item) => {
@@ -151,7 +153,7 @@ export function Tabs(props: TabsProps) {
               aria-selected={active() ? 'true' : 'false'}
               tabindex={item.id === rovingId() ? 0 : -1}
               disabled={local.disabled || item.disabled}
-              class={tabClass(variant(), active())}
+              class={cn(tabClass(variant(), active()), local.block && 'flex-1 justify-center')}
               onClick={() => select(item)}
               onKeyDown={(e) => onKeyDown(e, item)}
             >

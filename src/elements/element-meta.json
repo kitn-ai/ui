@@ -5203,6 +5203,14 @@
         "displayType": "undefined | \"segmented\" | \"underline\""
       },
       {
+        "name": "block",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Stretch the strip to full width, each tab sharing the space equally.",
+        "displayType": "undefined | false | true"
+      },
+      {
         "name": "disabled",
         "type": "undefined | false | true",
         "optional": true,
@@ -6154,6 +6162,14 @@
         "optional": true,
         "scalar": true,
         "description": "Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "compact",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Render Recents as dense single-line rows (a leading dot + title, no count).",
         "displayType": "undefined | false | true"
       }
     ],
