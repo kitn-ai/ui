@@ -1,7 +1,7 @@
 import type { Component, JSX } from 'solid-js';
 import {
   Plus, Paperclip, Github, Globe, Sparkles, Settings,
-  FileText, Folder, Monitor, MessageCircle, Search,
+  FileText, Folder, Monitor, MessageCircle, MessageSquare, Search,
   Mic, AudioLines, X, ChevronDown, ChevronLeft,
   Pencil, BookOpen, Code, Smile,
   Share, ArrowLeft, MoreHorizontal,
@@ -23,6 +23,7 @@ const NAMED_ICONS: Record<string, IconComponent> = {
   folder: Folder,
   monitor: Monitor,
   'message-circle': MessageCircle,
+  'message-square': MessageSquare,
   search: Search,
   mic: Mic,
   'audio-lines': AudioLines,
