@@ -166,18 +166,4 @@ describe('<Card>', () => {
     expect(root.getAttribute('target')).toBe('_blank');
     expect(root.getAttribute('rel')).toBe('noopener noreferrer');
   });
-
-  // --- trailing ------------------------------------------------------------
-  test('trailing region renders a part="trailing" node when provided; absent otherwise', () => {
-    const { getByTestId, container } = render(() => (
-      <Card heading="Go" clickable trailing={<span data-testid="chev">›</span>}>
-        body
-      </Card>
-    ));
-    expect(getByTestId('chev')).toBeTruthy();
-    expect(container.querySelector('[part="trailing"]')).toBeTruthy();
-
-    const { container: bare } = render(() => <Card heading="Go">body</Card>);
-    expect(bare.querySelector('[part="trailing"]')).toBeNull();
-  });
 });

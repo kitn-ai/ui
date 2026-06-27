@@ -1,6 +1,6 @@
 ---
 title: Card
-description: Themed card chrome — heading, description, media, body, actions footer, and a shared inline error state.
+description: A presentational card surface — media, header, body, and footer slots, with appearance and orientation variants.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -13,71 +13,93 @@ import NeedAHand from '../../../components/NeedAHand.astro';
 
 <p class="kai-tag-sub">kai-card</p>
 
-<p class="kai-lede">The shared card chrome all generative-UI cards build on — a themed Shadow DOM surface with heading, description, media, body, and actions slots.</p>
+<p class="kai-lede">A presentational card surface. One element: structural slots for media, header, and footer, with `appearance` and `orientation` variants. Compose the content; the card owns the chrome.</p>
 
-<Facts items={['Shadow DOM', 'Chrome only — no events', '4 scalar attributes', 'Media + actions slots', 'Shared error state']} />
+<Facts items={['Shadow DOM', '5 structural slots', 'appearance + orientation', '6 styleable parts', 'dismissible / clickable']} />
 
 ## Preview
 
 <Playground client:only="solid" tag="kai-card" />
 
 <Aside type="tip" title="When to use">
-Use `<kai-card>` around **passive content** — a summary block, a generated report preview, any output that needs no user interaction. All typed cards (`<kai-confirm>`, `<kai-form>`, `<kai-choice>`, etc.) compose from it.
+Use `<kai-card>` for any boxed surface you compose yourself — a promo, a media tile, a summary block. The title and description are body or `slot="header"` content; the card only owns the regions a slot can position. The generative-UI cards (`<kai-confirm>`, `<kai-form>`, `<kai-choice>`) are separate typed components.
 </Aside>
 
-## Usage
+## Anatomy
 
-All four props are scalar attributes — set them as HTML attributes or DOM properties:
+The body is the default slot. The rest are structural regions, each rendered only when filled:
+
+- `slot="media"` — full-bleed image, video, or illustration. Pinned to the top (vertical) or start (horizontal), clipped to the card corners.
+- `slot="header"` — header content, e.g. a title. `slot="header-actions"` — an actions cluster at the end of the header row.
+- **default slot** — the body.
+- `slot="footer"` — footer content. `slot="footer-actions"` — buttons at the end of the footer row.
 
 ```html
-<kai-card heading="Workspace summary" description="Generated just now.">
-  <p>Your repository has 3 open pull requests and 12 passing checks.</p>
+<kai-card appearance="filled" dismissible>
+  <img slot="media" src="/preview.png" alt="Report preview" />
+  <h3 slot="header">Quarterly report</h3>
+  Your Q2 numbers are ready to review.
+  <button slot="footer-actions">Open</button>
 </kai-card>
 ```
-
-- **Default slot** — card body; any passive content.
-- `slot="media"` — full-width region above the heading; drop in an `<img>` or block element.
-- `slot="actions"` — footer for read-only metadata or status labels (not interactive controls).
-- **`error-message`** — replaces the body and actions with the shared inline error UI; remove the attribute to restore the normal view.
 
 ## Examples
 
-### Content Surface
+### Header and body
 
-<Example client:visible tag="kai-card" config={{ heading: 'Workspace summary', description: 'Generated just now.' }} />
+<Example client:visible tag="kai-card" />
 
-### With Media Slot
+### Media
 
-```html
-<kai-card heading="Quarterly report" description="Generated just now.">
-  <img slot="media" src="/preview.png" alt="Report preview" />
-  <p>Your Q2 numbers are ready to review.</p>
-</kai-card>
-```
+Full-bleed media at the top, body below.
 
-<Example client:visible tag="kai-card" config={{ heading: 'Quarterly report', description: 'Generated just now.' }} data="withMedia" />
+<Example client:visible tag="kai-card" data="media" />
 
-### With Actions Slot
+### Header and footer actions
 
-`slot="actions"` — passive metadata such as timestamps or file sizes in the card footer.
+`slot="header-actions"` and `slot="footer-actions"` pin clusters to the end of each row.
 
-<Example client:visible tag="kai-card" config={{ heading: 'Q2 Financial summary', description: '4 charts generated.' }} data="withActions" />
+<Example client:visible tag="kai-card" data="headerFooter" />
 
-### Heading Only
+`footer-actions` is responsive on its own: a right-aligned row when there is room, and a full-width vertical stack when the card is too narrow (a container query on the card's width). Author the **primary action last** so it sits at the row's right and rises to the top of the stack. `kai-button` fills the width automatically when stacked, so the same markup works at any width.
 
-<Example client:visible tag="kai-card" config={{ heading: 'Quarterly report' }} />
+### Appearance
 
-### Inline Error State
+`outlined` (default), `filled`, `plain`, `accent`.
 
-Set `error-message` to render the shared inline error treatment — body and actions are replaced.
+<Example client:visible tag="kai-card" config={{ appearance: 'filled' }} />
 
-<Example client:visible tag="kai-card" config={{ heading: 'Share your feedback', errorMessage: "This card couldn't be displayed." }} />
+### Horizontal
+
+`orientation="horizontal"` puts the media at the start, content beside it.
+
+<Example client:visible tag="kai-card" config={{ orientation: 'horizontal' }} data="media" />
+
+### Responsive
+
+`orientation="responsive"` is horizontal when the card's container is wide enough and vertical when it is not. It is a container query on the card's **own** width, so a card collapses wherever it is narrow (a sidebar, a grid cell), independent of the viewport. The footer action cluster collapses the same way on its own.
+
+The breakpoint is the **`collapse`** prop (a CSS length, default `28rem`); set `collapse="32rem"` to change it. Container-query breakpoints can't be CSS variables, so this is a prop the card bakes into a per-instance `@container` rule, not a `::part` token.
+
+<Example client:visible tag="kai-card" config={{ orientation: 'responsive' }} data="media" />
+
+### Promo
+
+`appearance="filled"` + `dismissible`, with an illustration, title, description, and CTA in the body. The × fires `kai-dismiss`.
+
+<Example client:visible tag="kai-card" config={{ appearance: 'filled', dismissible: true }} data="promo" />
+
+### Clickable
+
+`clickable` makes the whole card a button (`kai-card-click`, Enter/Space). Do not combine it with action buttons.
+
+<Example client:visible tag="kai-card" config={{ clickable: true }} />
 
 ### Dense
 
-`dense` tightens spacing — useful in a tight list or feed of multiple cards.
+`dense` tightens `--kai-card-spacing` for lists and feeds.
 
-<Example client:visible tag="kai-card" config={{ heading: 'Pull request #142', description: 'Opened 2 hours ago by @alex', dense: true }} />
+<Example client:visible tag="kai-card" config={{ dense: true }} />
 
 ## Props
 

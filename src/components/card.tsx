@@ -39,9 +39,6 @@ export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
   clickable?: boolean;
   /** Called when a `clickable` (or `href`) card is activated (click, or Enter/Space). */
   onCardClick?: (event: MouseEvent | KeyboardEvent) => void;
-  /** A trailing node (chevron/arrow) for a clickable card. No auto-chevron —
-   *  the consumer composes it. */
-  trailing?: JSX.Element;
 }
 
 /**
@@ -77,7 +74,6 @@ export function Card(props: CardProps): JSX.Element {
     'rel',
     'clickable',
     'onCardClick',
-    'trailing',
     'class',
     'children',
   ]);
@@ -114,9 +110,7 @@ export function Card(props: CardProps): JSX.Element {
   const rel = () =>
     local.rel ?? (local.target === '_blank' ? 'noopener noreferrer' : undefined);
 
-  // The card's heading + body + actions column. Identical for every variant —
-  // wrapped in a trailing-aware row only when `trailing` is set, so the contract
-  // cards (no trailing) render the exact original structure.
+  // The card's heading + body + actions column.
   const inner = (
     <>
       <Show when={hasHeader()}>
@@ -203,14 +197,7 @@ export function Card(props: CardProps): JSX.Element {
           <div class="overflow-hidden rounded-lg">{local.media}</div>
         </Show>
 
-        <Show when={local.trailing} fallback={inner}>
-          <div class="flex flex-1 items-center gap-3">
-            <div class="flex min-w-0 flex-1 flex-col gap-4">{inner}</div>
-            <div part="trailing" class="shrink-0 text-muted-foreground" aria-hidden="true">
-              {local.trailing}
-            </div>
-          </div>
-        </Show>
+        {inner}
       </Dynamic>
     </Show>
   );

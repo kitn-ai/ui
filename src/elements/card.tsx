@@ -1,16 +1,19 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Card } from '../components/card';
+import { Card, type CardAppearance, type CardOrientation } from '../ui/card';
 
 interface Props extends Record<string, unknown> {
-  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
-  heading?: string;
-  /** Supporting text under the heading. Attribute: `description`. */
-  description?: string;
-  /** When set, the card renders its inline error state instead of the body.
-   *  Attribute: `error-message`. */
-  errorMessage?: string;
-  /** Compact spacing for dense lists. Attribute: `dense`. */
+  /** Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`.
+   *  Attribute: `appearance`. */
+  appearance?: CardAppearance;
+  /** `vertical` (default, media on top) | `horizontal` (media at the start) |
+   *  `responsive` (horizontal when the card's container is wide enough, else
+   *  vertical — a container query on the card's own width). Attribute: `orientation`. */
+  orientation?: CardOrientation;
+  /** The card width below which a `responsive` card collapses to vertical and the
+   *  footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`. */
+  collapse?: string;
+  /** Tighter spacing for dense lists. Attribute: `dense`. */
   dense?: boolean;
   /** Show a close (×) that hides the card and emits `kai-dismiss`. Attribute:
    *  `dismissible`. Off by default. */
@@ -34,38 +37,39 @@ interface Events {
   'kai-card-click': void;
 }
 
+/** The named slots whose occupancy gates a card region. An empty `<slot>` is
+ *  always a truthy node, so the facade tracks which are actually filled and only
+ *  passes those regions to the primitive. */
+const SLOT_NAMES = ['media', 'header', 'header-actions', 'footer', 'footer-actions'] as const;
+type SlotName = (typeof SLOT_NAMES)[number];
+
 /**
- * `<kai-card>` — the shared, presentational card chrome every native card composes
- * from: an optional media region (`slot="media"`), a heading + description, a body
- * (default slot), an actions footer (`slot="actions"`), and one consistent inline
- * **error** state (`error-message`). Isolated in Shadow DOM; theme-aware via the
- * shared kit tokens.
+ * `<kai-card>` — the kit's presentational card, modeled on the WebAwesome card:
+ * ONE element whose flexibility comes from a few structural slots, `appearance`
+ * and `orientation` variants, themeable `::part`s, and a single
+ * `--kai-card-spacing` knob. The title/description are not slots — they are body
+ * (default slot) or `slot="header"` content you mark up yourself.
  *
- * Presentational by default — the contract cards (`<kai-form>`, …) compose the
- * underlying `Card` directly and never opt into the behaviors below. The optional
- * interactions are all OFF by default:
+ * Slots: `media` (full-bleed image/video/illustration), `header` + `header-actions`,
+ * the default slot (body), `footer` + `footer-actions`.
  *
- * - `dismissible` renders a × that hides the card and fires `kai-dismiss` (mirrors
- *   `kai-notice`).
- * - `href` (+ `target`, `rel`) renders the card as an `<a>`; `clickable` makes the
- *   whole card a `role="button"` with Enter/Space activation. Either fires
- *   `kai-card-click`. `href` wins if both are set.
- * - `slot="trailing"` projects a chevron/arrow for a clickable card (no auto-chevron).
- *
- * a11y: a clickable/`href` card MUST NOT also contain footer action buttons
- * (`slot="actions"`) — that nests interactive controls. Use actions OR make the
- * card clickable, never both.
+ * Behaviors (all OFF by default): `dismissible` (× → `kai-dismiss`), and
+ * `href`/`clickable` (whole card a link/button → `kai-card-click`). A
+ * clickable/href card must NOT also contain action buttons.
  *
  * ```html
- * <kai-card clickable dense heading="Upgrade" description="Unlock Fable 5.">
- *   <svg slot="trailing" ...></svg>
+ * <kai-card appearance="filled" dismissible>
+ *   <div slot="media"><img src="…" alt="…" /></div>
+ *   <h3 slot="header">2× usage</h3>
+ *   Do more with a higher session limit.
+ *   <kai-button slot="footer-actions">Start task</kai-button>
  * </kai-card>
  * ```
  */
 defineWebComponent<Props, Events>('kai-card', {
-  heading: undefined,
-  description: undefined,
-  errorMessage: undefined,
+  appearance: 'outlined',
+  orientation: 'vertical',
+  collapse: '28rem',
   dense: false,
   dismissible: false,
   href: undefined,
@@ -73,23 +77,41 @@ defineWebComponent<Props, Events>('kai-card', {
   rel: undefined,
   clickable: false,
 }, (props, { element, dispatch, flag }) => {
-  // The trailing region rerenders the inner layout, so only mount it when the
-  // consumer actually projected `slot="trailing"` content — an empty slot must
-  // leave the plain card untouched. Tracked off the host's direct children.
-  const [hasTrailing, setHasTrailing] = createSignal(false);
+  // Track which named slots are filled, plus whether the default slot (body) has
+  // any content. Re-read on child mutations so streamed/late content lights up
+  // its region. An unfilled region is never rendered (no stray padding/divider).
+  const [filled, setFilled] = createSignal<Record<SlotName, boolean>>({
+    'media': false, 'header': false, 'header-actions': false, 'footer': false, 'footer-actions': false,
+  });
+  const [hasBody, setHasBody] = createSignal(false);
+
   onMount(() => {
-    const read = () => setHasTrailing(!!element.querySelector(':scope > [slot="trailing"]'));
+    const read = () => {
+      const next = {} as Record<SlotName, boolean>;
+      for (const name of SLOT_NAMES) next[name] = !!element.querySelector(`:scope > [slot="${name}"]`);
+      setFilled(next);
+      // Body = any direct child without a slot attribute (element, or non-blank text).
+      setHasBody(
+        Array.from(element.childNodes).some(
+          (n) =>
+            (n.nodeType === Node.ELEMENT_NODE && !(n as Element).hasAttribute('slot')) ||
+            (n.nodeType === Node.TEXT_NODE && (n.textContent ?? '').trim() !== ''),
+        ),
+      );
+    };
     read();
     const observer = new MutationObserver(read);
-    observer.observe(element, { childList: true });
+    observer.observe(element, { childList: true, characterData: true, subtree: true });
     onCleanup(() => observer.disconnect());
   });
 
+  const region = (name: SlotName) => (filled()[name] ? <slot name={name} /> : undefined);
+
   return (
     <Card
-      heading={props.heading}
-      description={props.description}
-      errorMessage={props.errorMessage}
+      appearance={props.appearance as CardAppearance}
+      orientation={props.orientation as CardOrientation}
+      collapse={props.collapse as string}
       dense={flag('dense')}
       dismissible={flag('dismissible')}
       href={props.href}
@@ -98,9 +120,12 @@ defineWebComponent<Props, Events>('kai-card', {
       clickable={flag('clickable')}
       onDismiss={() => dispatch('kai-dismiss')}
       onCardClick={() => dispatch('kai-card-click')}
-      media={<slot name="media" />}
-      actions={<slot name="actions" />}
-      trailing={hasTrailing() ? <slot name="trailing" /> : undefined}
+      media={region('media')}
+      header={region('header')}
+      headerActions={region('header-actions')}
+      footer={region('footer')}
+      footerActions={region('footer-actions')}
+      hasBody={hasBody()}
     >
       <slot />
     </Card>
