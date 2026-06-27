@@ -1,4 +1,4 @@
-import { createSignal, createUniqueId, Show, type Accessor, type JSX } from 'solid-js';
+import { createSignal, createUniqueId, createEffect, onCleanup, Show, type Accessor, type JSX } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { X } from 'lucide-solid';
 import type { Placement } from '@floating-ui/dom';
@@ -24,8 +24,9 @@ export interface CoachmarkProps {
   badge?: JSX.Element;
   /** Floating placement relative to the anchor. Defaults to `'bottom'`. */
   placement?: Placement;
-  /** Color tone: `primary` (default, the theme accent) or `info` (blue). */
-  tone?: 'primary' | 'info';
+  /** Color tone: `primary` (default, theme accent), `info` (blue), `success`
+   *  (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. */
+  tone?: 'primary' | 'info' | 'success' | 'warning' | 'error';
   /** Controlled open state. When set, the component never changes it itself;
    *  drive it from `onOpenChange`. Omit for uncontrolled (internal) state. */
   open?: boolean;
@@ -35,6 +36,9 @@ export interface CoachmarkProps {
   onOpenChange?: (open: boolean) => void;
   /** Dismiss intent: the × button. */
   onDismiss?: () => void;
+  /** Render the arrow that points at the anchor. Defaults to `true`; set `false`
+   *  for a plain bubble with no pointer. */
+  arrow?: boolean;
   /** Receive the open controller once mounted. */
   controllerRef?: (api: CoachmarkController) => void;
 }
@@ -47,36 +51,42 @@ const STATIC_SIDE: Record<string, 'top' | 'bottom' | 'left' | 'right'> = {
   right: 'left',
 };
 
-/** Color classes per `tone`. `info` is the blue onboarding look (white text). */
-const TONES = {
-  primary: {
-    bubble: 'bg-primary text-primary-foreground',
-    arrow: 'bg-primary',
-    dismiss: 'text-primary-foreground/70 hover:bg-primary-foreground/15 hover:text-primary-foreground',
-    badge: 'bg-primary-foreground/20',
-    content: 'text-primary-foreground/85',
-  },
-  info: {
-    bubble: 'bg-tool-blue text-white',
-    arrow: 'bg-tool-blue',
-    dismiss: 'text-white/70 hover:bg-white/15 hover:text-white',
-    badge: 'bg-white/20',
-    content: 'text-white/85',
-  },
+/** DEFAULT bubble colors per `tone`. `info` is the blue onboarding look (white
+ *  text). These seed the `--kai-coachmark-bg` / `--kai-coachmark-fg` custom
+ *  properties. A consumer can override those in CSS (e.g. `kai-coachmark {
+ *  --kai-coachmark-bg: var(--color-tool-blue) }`) to recolor the bubble, arrow,
+ *  and text in one place, persistently, without touching `tone`. */
+const TONE_DEFAULTS = {
+  primary: { bg: 'var(--color-primary)', fg: 'var(--color-primary-foreground)' },
+  info: { bg: 'var(--color-tool-blue)', fg: '#fff' },
+  success: { bg: 'var(--color-tool-green)', fg: '#fff' },
+  // Amber is light, so it carries a fixed dark foreground for contrast (a theme
+  // var would flip to white in dark mode and fail against the amber).
+  warning: { bg: 'var(--color-tool-amber)', fg: '#1a1a1a' },
+  error: { bg: 'var(--color-tool-red)', fg: '#fff' },
 } as const;
 
+// The dismiss/badge/content sub-elements derive from the bubble's foreground via
+// `currentColor` (which inherits the resolved `--kai-coachmark-fg`), so they
+// follow the tone default OR any CSS override automatically (no per-tone class).
+const DISMISS_CLS = 'text-current/70 hover:bg-current/15 hover:text-current';
+const BADGE_CLS = 'bg-current/20';
+const CONTENT_CLS = 'text-current/85';
+
 /**
- * Coachmark is the presentational onboarding hint: a primary-colored bubble with
- * an arrow, anchored to a trigger. It wraps the anchor (the default slot) and
- * positions the bubble against it with `usePosition` (the shared Floating UI
- * primitive) so the arrow tracks the anchor on scroll/resize, flipping/shifting
- * to stay on screen. The developer owns when it shows (`open`/`default-open`);
- * the × fires `onDismiss`. The arrow is a rotated square that inherits the
- * bubble's `bg-primary`, so it always reads as a continuation of the bubble.
+ * Coachmark is the presentational onboarding hint: a tinted bubble with an arrow,
+ * anchored to a trigger. It wraps the anchor (the default slot) and positions the
+ * bubble against it with `usePosition` (the shared Floating UI primitive) so the
+ * arrow tracks the anchor on scroll/resize AND when a sibling reflows it,
+ * flipping/shifting to stay on screen. The developer owns when it shows
+ * (`open`/`default-open`); the ×, Escape, OR clicking the trigger fires
+ * `onDismiss`. Color comes from `--kai-coachmark-bg` / `--kai-coachmark-fg` (each
+ * defaulting to the `tone` palette), so a consumer can recolor purely in CSS; the
+ * arrow reads the same bg var so it always continues the bubble.
  */
 export function Coachmark(props: CoachmarkProps) {
   const config = useChatConfig();
-  const toneCls = () => TONES[props.tone ?? 'primary'];
+  const tone = () => TONE_DEFAULTS[props.tone ?? 'primary'];
   const titleId = createUniqueId();
   const [internalOpen, setInternalOpen] = createSignal(props.defaultOpen ?? false);
   const [anchor, setAnchor] = createSignal<HTMLElement>();
@@ -97,16 +107,40 @@ export function Coachmark(props: CoachmarkProps) {
     placement: props.placement ?? 'bottom',
     gutter: 10,
     arrowEl,
+    // Anchor removed from the DOM -> close so the bubble portal doesn't orphan.
+    onDisconnect: () => setOpen(false),
   });
+
+  // The bubble edge the arrow sits on, derived from the resolved (post flip/shift)
+  // placement.
+  const arrowSide = () => STATIC_SIDE[position.pos().placement.split('-')[0]] ?? 'top';
 
   const dismiss = () => {
     setOpen(false);
     props.onDismiss?.();
   };
 
+  // Clicking the trigger dismisses the hint (alongside the × and Escape): the
+  // consumer engaged with what the hint points at, so it has done its job. A
+  // native listener (not preventing default or stopping propagation) so the
+  // trigger's own click still fires, and so it works for a slotted trigger in the
+  // web component. Only acts while open so it never re-fires onDismiss when shut.
+  createEffect(() => {
+    const el = anchor();
+    if (!el) return;
+    const onClick = () => { if (isOpen()) dismiss(); };
+    el.addEventListener('click', onClick);
+    onCleanup(() => el.removeEventListener('click', onClick));
+  });
+
   return (
     <>
-      {/* The anchor wrapper. inline-block so it hugs the trigger it positions against. */}
+      {/* The anchor wrapper. inline-block so it hugs the trigger it positions
+          against. The trigger-click dismissal is wired as a NATIVE listener on
+          this element (see the effect below) rather than a Solid-delegated
+          onClick, so it also fires for a trigger projected through the <slot/> in
+          the web component (Solid's delegation walks parentNode, which for slotted
+          content stays in the light DOM and never reaches this shadow ancestor). */}
       <span ref={setAnchor} style={{ display: 'inline-block' }}>
         {props.children}
       </span>
@@ -124,34 +158,53 @@ export function Coachmark(props: CoachmarkProps) {
               left: `${position.pos().x}px`,
               top: `${position.pos().y}px`,
               visibility: position.hidden() ? 'hidden' : 'visible',
+              // Color via CSS vars: defaults to the `tone` palette, overridable in
+              // CSS. The text color is inherited by every child (dismiss/badge/
+              // content read it through currentColor).
+              background: `var(--kai-coachmark-bg, ${tone().bg})`,
+              color: `var(--kai-coachmark-fg, ${tone().fg})`,
             }}
             class={cn(
               'z-50 w-64 rounded-lg p-3 pr-8 text-sm kai-elevation',
-              toneCls().bubble,
               'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
             )}
           >
-            {/* The arrow: a rotated square inheriting bg-primary. usePosition writes
-                its offset-axis position (x for top/bottom placements, y for left/right);
-                the static side is pinned to the bubble edge facing the anchor. */}
-            <div
-              ref={setArrowEl}
-              part="arrow"
-              aria-hidden="true"
-              class={cn('absolute size-2 rotate-45', toneCls().arrow)}
-              style={{
-                left: position.arrowPos().x != null ? `${position.arrowPos().x}px` : '',
-                top: position.arrowPos().y != null ? `${position.arrowPos().y}px` : '',
-                [STATIC_SIDE[position.pos().placement.split('-')[0]] ?? 'top']: '-4px',
-              }}
-            />
+            {/* The arrow: a rotated square inheriting the bubble bg. usePosition
+                writes its offset-axis position (x for top/bottom placements, y for
+                left/right); the static side (`-4px`) pins it to the bubble edge
+                facing the anchor so it pokes out as a pointer.
+
+                Each side is an EXPLICIT, static key. Do NOT collapse this to a
+                computed `[arrowSide()]: '-4px'` key: Solid compiles `style={{…}}`
+                object literals to per-property setStyleProperty calls at build time
+                and silently DROPS dynamic/computed keys, so the offset never
+                reaches the DOM and the arrow sinks into the bubble's padding box
+                (invisible against the matching background). */}
+            <Show when={props.arrow !== false}>
+              <div
+                ref={setArrowEl}
+                part="arrow"
+                aria-hidden="true"
+                class="absolute size-2 rotate-45"
+                style={{
+                  left: arrowSide() === 'left' ? '-4px'
+                    : position.arrowPos().x != null ? `${position.arrowPos().x}px` : '',
+                  top: arrowSide() === 'top' ? '-4px'
+                    : position.arrowPos().y != null ? `${position.arrowPos().y}px` : '',
+                  right: arrowSide() === 'right' ? '-4px' : '',
+                  bottom: arrowSide() === 'bottom' ? '-4px' : '',
+                  // Same bg var as the bubble so the arrow always reads as part of it.
+                  background: `var(--kai-coachmark-bg, ${tone().bg})`,
+                }}
+              />
+            </Show>
 
             <button
               type="button"
               part="dismiss"
               aria-label="Dismiss"
               onClick={dismiss}
-              class={cn('absolute right-2 top-2 inline-flex size-5 items-center justify-center rounded transition-colors', toneCls().dismiss)}
+              class={cn('absolute right-2 top-2 inline-flex size-5 items-center justify-center rounded transition-colors', DISMISS_CLS)}
             >
               <X class="size-3.5" aria-hidden="true" />
             </button>
@@ -164,7 +217,7 @@ export function Coachmark(props: CoachmarkProps) {
                 <Show when={props.badge}>
                   <span
                     part="badge"
-                    class={cn('inline-flex items-center rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium uppercase leading-none tracking-wide', toneCls().badge)}
+                    class={cn('inline-flex items-center rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium uppercase leading-none tracking-wide', BADGE_CLS)}
                   >
                     {props.badge}
                   </span>
@@ -173,7 +226,7 @@ export function Coachmark(props: CoachmarkProps) {
             </Show>
 
             <Show when={props.content}>
-              <div class={cn(toneCls().content, props.headline ? 'mt-1.5' : '')}>
+              <div class={cn(CONTENT_CLS, props.headline ? 'mt-1.5' : '')}>
                 {props.content}
               </div>
             </Show>

@@ -66,6 +66,24 @@ describe('Coachmark', () => {
     expect(doc().queryByRole('dialog')).not.toBeInTheDocument();
   });
 
+  it('renders the arrow by default', () => {
+    render(() => (
+      <Coachmark defaultOpen headline="Cowork has a new home">
+        <button>Cowork</button>
+      </Coachmark>
+    ));
+    expect(document.querySelector('[part="arrow"]')).toBeInTheDocument();
+  });
+
+  it('omits the arrow when arrow={false}', () => {
+    render(() => (
+      <Coachmark defaultOpen arrow={false} headline="Cowork has a new home">
+        <button>Cowork</button>
+      </Coachmark>
+    ));
+    expect(document.querySelector('[part="arrow"]')).not.toBeInTheDocument();
+  });
+
   it('labels the dialog by its headline', () => {
     render(() => (
       <Coachmark defaultOpen headline="Cowork has a new home">

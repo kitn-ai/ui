@@ -27,6 +27,8 @@ const meta: Meta = {
 };
 export default meta;
 
+const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
+
 export const PointingAtAButton: StoryObj = {
   render: () => (
     <div
@@ -74,4 +76,16 @@ export const PointingAtAButton: StoryObj = {
       </kai-coachmark>
     </div>
   ),
+  parameters: src(`<!-- The coachmark wraps the trigger (default slot) and points a bubble at it.
+     headline + badge are scalar attributes; the body is the content slot. -->
+<kai-coachmark default-open headline="Cowork has a new home" badge="New">
+  <button type="button">Cowork</button>
+  <span slot="content">Chat with Claude here, or switch to Cowork to build alongside it.</span>
+</kai-coachmark>
+
+<script type="module">
+  // Record the dismiss so the hint won't show again.
+  document.querySelector('kai-coachmark')
+    .addEventListener('kai-dismiss', () => localStorage.setItem('cowork-hint', 'seen'));
+</script>`),
 };

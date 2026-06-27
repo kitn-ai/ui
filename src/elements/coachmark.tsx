@@ -16,8 +16,12 @@ interface Props extends Record<string, unknown> {
   badge?: string;
   /** Floating placement relative to the anchor (default `bottom`). */
   placement?: string;
-  /** Color tone: `primary` (default, the theme accent) or `info` (blue). */
-  tone?: 'primary' | 'info';
+  /** Color tone: `primary` (default, theme accent), `info` (blue), `success`
+   *  (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. */
+  tone?: 'primary' | 'info' | 'success' | 'warning' | 'error';
+  /** Render the arrow that points at the anchor (default `true`). Set
+   *  `arrow="false"` for a plain bubble with no pointer. */
+  arrow?: boolean;
 }
 
 /** Events fired by `<kai-coachmark>`. */
@@ -56,6 +60,7 @@ defineWebComponent<Props, Events>('kai-coachmark', {
   badge: undefined,
   placement: undefined,
   tone: undefined,
+  arrow: true,
 }, (props, ctx) => {
   const { flag, dispatch } = ctx;
   let api: CoachmarkController | undefined;
@@ -70,8 +75,9 @@ defineWebComponent<Props, Events>('kai-coachmark', {
   return (
     <Coachmark
       defaultOpen={flag('defaultOpen')}
+      arrow={flag('arrow')}
       placement={props.placement as never}
-      tone={props.tone as 'primary' | 'info' | undefined}
+      tone={props.tone as 'primary' | 'info' | 'success' | 'warning' | 'error' | undefined}
       headline={props.headline as string | undefined}
       badge={props.badge as string | undefined}
       content={<slot name="content" />}
