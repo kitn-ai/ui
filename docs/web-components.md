@@ -274,6 +274,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 | `sidebar-header` | inject | Top of the conversation rail (brand, a kai-tabs strip). |
 | `sidebar-footer` | inject | Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster. |
 | `main-header` | inject | Top of the main region (a top-placed banner or a corner action). |
+| `main` | replace | Replace the built-in chat thread with your own main view (a home or dashboard screen). Omit to keep the thread. |
 
 #### Composed from
 

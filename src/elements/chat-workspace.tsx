@@ -169,7 +169,11 @@ defineWebComponent<Props, Events>('kai-workspace', {
       <Show when={slots()['main-header']}>
         <div class="shrink-0 border-b border-border"><slot name="main-header" /></div>
       </Show>
-      <div class="min-h-0 flex-1">{threadEl}</div>
+      <div class="min-h-0 flex-1">
+        <Show when={slots()['main']} fallback={threadEl}>
+          <slot name="main" />
+        </Show>
+      </div>
     </div>
   );
 

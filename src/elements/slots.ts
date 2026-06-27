@@ -298,6 +298,7 @@ export const WORKSPACE_SLOTS: SlotDef[] = [
   { name: 'sidebar-header', mode: 'inject', doc: 'Top of the conversation rail (brand, a kai-tabs strip).' },
   { name: 'sidebar-footer', mode: 'inject', doc: 'Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster.' },
   { name: 'main-header', mode: 'inject', doc: 'Top of the main region (a top-placed banner or a corner action).' },
+  { name: 'main', mode: 'replace', doc: 'Replace the built-in chat thread with your own main view (a home or dashboard screen). Omit to keep the thread.' },
 ];
 
 /** Styleable `::part`s of `<kai-nav>`. */

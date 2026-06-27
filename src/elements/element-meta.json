@@ -6303,6 +6303,11 @@
         "name": "main-header",
         "mode": "inject",
         "doc": "Top of the main region (a top-placed banner or a corner action)."
+      },
+      {
+        "name": "main",
+        "mode": "replace",
+        "doc": "Replace the built-in chat thread with your own main view (a home or dashboard screen). Omit to keep the thread."
       }
     ]
   }

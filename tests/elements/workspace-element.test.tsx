@@ -115,3 +115,22 @@ test('a projected sidebar-footer card is clickable (upgrade usage)', async () =>
 
   el.remove();
 });
+
+test('a projected `main` slot replaces the built-in chat thread', async () => {
+  const el = document.createElement('kai-workspace') as WorkspaceEl;
+  el.conversations = conversations;
+  el.messages = messages;
+  el.appendChild(slotted('main', 'Custom home view'));
+  document.body.appendChild(el);
+  await Promise.resolve();
+  await Promise.resolve();
+
+  const root = el.shadowRoot!;
+  // The main slot renders, and the built-in thread does NOT mount (its seeded
+  // message is gone). The sidebar still renders — only the main region is replaced.
+  expect(root.querySelector('slot[name="main"]')).not.toBeNull();
+  expect(root.textContent).not.toContain('Hi there');
+  expect(root.textContent).toContain('First chat');
+
+  el.remove();
+});
