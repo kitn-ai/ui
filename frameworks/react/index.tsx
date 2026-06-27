@@ -90,7 +90,7 @@ export interface AvatarProps extends WebComponentProps {
   src?: string;
   /** Alt text for the image. Defaults to `fallback`. */
   alt?: string;
-  /** Short text shown when there's no image — usually initials (e.g. "RT", "AI"). */
+  /** Short text shown when there's no image — usually initials (e.g. "JD", "AI"). */
   fallback?: string;
   /** Size token: `sm` | `md` (default) | `lg`. */
   size?: "sm" | "md" | "lg";
@@ -126,6 +126,10 @@ export interface ButtonProps extends WebComponentProps {
   label?: string;
   /** Disable the button (non-interactive, dimmed). */
   disabled?: boolean;
+  /** Stretch the button to the full width of its container (a block button) — e.g. a card CTA or a stacked action. Attribute: `full`. */
+  full?: boolean;
+  /** Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button. */
+  align?: "start" | "center" | "end";
   /** Native button `type`. Defaults to `button` (so it never submits a form). */
   type?: "button" | "submit" | "reset";
   /** The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. */
@@ -134,18 +138,18 @@ export interface ButtonProps extends WebComponentProps {
 
 export const Button = createWebComponent<ButtonProps>(
   'kai-button',
-  ["theme","variant","size","icon","iconTrailing","label","disabled","type"],
+  ["theme","variant","size","icon","iconTrailing","label","disabled","full","align","type"],
   { onClick: 'kai-click' },
 );
 
 export interface CardProps extends WebComponentProps {
-  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
-  heading?: string;
-  /** Supporting text under the heading. Attribute: `description`. */
-  description?: string;
-  /** When set, the card renders its inline error state instead of the body. Attribute: `error-message`. */
-  errorMessage?: string;
-  /** Compact spacing for dense lists. Attribute: `dense`. */
+  /** Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`. Attribute: `appearance`. */
+  appearance?: "outlined" | "filled" | "plain" | "accent";
+  /** `vertical` (default, media on top) | `horizontal` (media at the start) | `responsive` (horizontal when the card's container is wide enough, else vertical — a container query on the card's own width). Attribute: `orientation`. */
+  orientation?: "vertical" | "horizontal" | "responsive";
+  /** The card width below which a `responsive` card collapses to vertical and the footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`. */
+  collapse?: string;
+  /** Tighter spacing for dense lists. Attribute: `dense`. */
   dense?: boolean;
   /** Show a close (×) that hides the card and emits `kai-dismiss`. Attribute: `dismissible`. Off by default. */
   dismissible?: boolean;
@@ -165,7 +169,7 @@ export interface CardProps extends WebComponentProps {
 
 export const Card = createWebComponent<CardProps>(
   'kai-card',
-  ["theme","heading","description","errorMessage","dense","dismissible","href","target","rel","clickable"],
+  ["theme","appearance","orientation","collapse","dense","dismissible","href","target","rel","clickable"],
   { onCardClick: 'kai-card-click', onDismiss: 'kai-dismiss' },
 );
 
@@ -341,8 +345,10 @@ export interface CoachmarkProps extends WebComponentProps {
   badge?: string;
   /** Floating placement relative to the anchor (default `bottom`). */
   placement?: string;
-  /** Color tone: `primary` (default, the theme accent) or `info` (blue). */
-  tone?: "primary" | "info";
+  /** Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. */
+  tone?: "primary" | "info" | "success" | "warning" | "error";
+  /** Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. */
+  arrow?: boolean;
   /** The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again. */
   onDismiss?: (event: CustomEvent<Record<string, never>>) => void;
   /** The coachmark opened or closed (a method, the ×, or a driven `open`). */
@@ -351,7 +357,7 @@ export interface CoachmarkProps extends WebComponentProps {
 
 export const Coachmark = createWebComponent<CoachmarkProps>(
   'kai-coachmark',
-  ["theme","open","defaultOpen","headline","badge","placement","tone"],
+  ["theme","open","defaultOpen","headline","badge","placement","tone","arrow"],
   { onDismiss: 'kai-dismiss', onOpenChange: 'kai-open-change' },
 );
 
@@ -507,7 +513,7 @@ export interface ConversationsProps extends WebComponentProps {
   /** Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. */
   groups: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[];
   /** A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. */
-  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
+  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
   /** Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. */
@@ -852,7 +858,7 @@ export const Nav = createWebComponent<NavProps>(
 
 export interface NoticeProps extends WebComponentProps {
   /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). */
-  severity?: "info" | "neutral" | "warning" | "error" | "success";
+  severity?: "info" | "success" | "warning" | "error" | "neutral";
   /** Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. */
   icon?: string;
   /** Show a dismiss (×) that hides the notice and emits `kai-dismiss`. */
@@ -886,6 +892,23 @@ export const Popover = createWebComponent<PopoverProps>(
   'kai-popover',
   ["theme","placement","gutter","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
+);
+
+export interface ProgressBarProps extends WebComponentProps {
+  /** Current progress value (0..max). Attribute: `value`. */
+  value?: number;
+  /** The value `value` runs to (default 100). Attribute: `max`. */
+  max?: number;
+  /** Optional caption above the track. Attribute: `label`. */
+  label?: string;
+  /** Fill color: `primary` (default), `success`, `warning`, `error`, `info`. Attribute: `tone`. */
+  tone?: string;
+}
+
+export const ProgressBar = createWebComponent<ProgressBarProps>(
+  'kai-progress-bar',
+  ["theme","value","max","label","tone"],
+  {  },
 );
 
 export interface PromptInputProps extends WebComponentProps {
@@ -985,7 +1008,7 @@ export const Remote = createWebComponent<RemoteProps>(
 
 export interface ResizableProps extends WebComponentProps {
   /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
-  orientation?: "horizontal" | "vertical";
+  orientation?: "vertical" | "horizontal";
   /** Which item index is maximized (null = none). Declarative source of truth. */
   maximizedIndex?: null | number;
   /** Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. */
@@ -1092,7 +1115,7 @@ export const Screen = createWebComponent<ScreenProps>(
 
 export interface ScrollAreaProps extends WebComponentProps {
   /** Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. */
-  orientation?: "horizontal" | "vertical" | "both";
+  orientation?: "vertical" | "horizontal" | "both";
 }
 
 export const ScrollArea = createWebComponent<ScrollAreaProps>(
@@ -1120,7 +1143,7 @@ export const ScrollButton = createWebComponent<ScrollButtonProps>(
 
 export interface SeparatorProps extends WebComponentProps {
   /** `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). */
-  orientation?: "horizontal" | "vertical";
+  orientation?: "vertical" | "horizontal";
 }
 
 export const Separator = createWebComponent<SeparatorProps>(
@@ -1191,21 +1214,6 @@ export const Sources = createWebComponent<SourcesProps>(
   {  },
 );
 
-export interface StatProps extends WebComponentProps {
-  /** The small muted label above the value. */
-  label?: string;
-  /** The big value (scalar). A default-slot override wins over this. */
-  value?: string;
-  /** A small caption below the value. */
-  hint?: string;
-}
-
-export const Stat = createWebComponent<StatProps>(
-  'kai-stat',
-  ["theme","label","value","hint"],
-  {  },
-);
-
 export interface StatusProps extends WebComponentProps {
   /** Presence/notification state → color. `new` (default) maps to the blue hue. */
   status?: "new" | "online" | "busy" | "away" | "offline";
@@ -1228,8 +1236,8 @@ export interface SuggestionsProps extends WebComponentProps {
   suggestions: (string | { label: string; value?: undefined | string; icon?: undefined | string })[];
   /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
   variant?: "default" | "ghost" | "outline";
-  /** Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). */
-  size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
+  /** Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. */
+  size?: "md" | "lg";
   /** Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list — each row is left-aligned with a leading `icon`, a label, and a hover background. */
   layout?: "list" | "chips";
   /** Full-width left-aligned rows instead of pills. */
@@ -1353,7 +1361,7 @@ export const ThinkingBar = createWebComponent<ThinkingBarProps>(
 
 export interface ToastRegionProps extends WebComponentProps {
   /** The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. */
-  toasts: { id: string; message: string; variant?: undefined | "neutral" | "success"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
+  toasts: { id: string; message: string; variant?: undefined | "success" | "neutral"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
   /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
@@ -1468,7 +1476,7 @@ export interface WorkspaceProps extends WebComponentProps {
   /** Pre-bucketed conversation groups for the sidebar. Set as a JS property. */
   groups: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[];
   /** Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. */
-  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
+  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[];
   /** Id of the open conversation, highlighted in the sidebar. */
   activeId?: string;
   /** The active conversation's message thread, newest last. Set as a JS property. */
@@ -1492,9 +1500,9 @@ export interface WorkspaceProps extends WebComponentProps {
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image src) forwarded to the input. */
   kindIcons?: Record<string, string>;
-  /** Sidebar default width as a percent of the workspace (default 22). */
+  /** Sidebar default width as a percent of the workspace (default 26). */
   sidebarWidth?: number;
-  /** Sidebar min width in px (default 200). */
+  /** Sidebar min width in px (default 240). */
   sidebarMinWidth?: number;
   /** Sidebar max width in px (default 420). */
   sidebarMaxWidth?: number;
@@ -1502,6 +1510,8 @@ export interface WorkspaceProps extends WebComponentProps {
   sidebarCollapsed?: boolean;
   /** Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
   defaultSidebarCollapsed?: boolean;
+  /** Auto-collapse the rail when the workspace's own width drops below this many px, and re-expand when it grows back above. Uncontrolled only (it never fights an app-driven `sidebarCollapsed`); omit to disable. Fires `kai-sidebar-toggle`. Attribute: `collapse-below`. */
+  collapseBelow?: number;
   /** Render Recents as dense single-line rows (a leading dot + title, no count). */
   compact?: boolean;
   /** A conversation was selected in the sidebar. */
@@ -1528,6 +1538,6 @@ export interface WorkspaceProps extends WebComponentProps {
 
 export const Workspace = createWebComponent<WorkspaceProps>(
   'kai-workspace',
-  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","triggers","kindIcons","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed","compact"],
+  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","triggers","kindIcons","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed","collapseBelow","compact"],
   { onConversationSelect: 'kai-conversation-select', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onSidebarToggle: 'kai-sidebar-toggle', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );

@@ -400,7 +400,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Short text shown when there's no image — usually initials (e.g. \"RT\", \"AI\").",
+        "description": "Short text shown when there's no image — usually initials (e.g. \"JD\", \"AI\").",
         "default": "''",
         "displayType": "undefined | string"
       },
@@ -515,6 +515,24 @@
         "displayType": "undefined | false | true"
       },
       {
+        "name": "full",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Stretch the button to the full width of its container (a block button) — e.g. a card CTA or a stacked action. Attribute: `full`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "align",
+        "type": "undefined | \"start\" | \"center\" | \"end\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button.",
+        "default": "'center'",
+        "displayType": "undefined | \"start\" | \"center\" | \"end\""
+      },
+      {
         "name": "type",
         "type": "undefined | \"button\" | \"submit\" | \"reset\"",
         "optional": true,
@@ -581,27 +599,30 @@
     "displayName": "Card",
     "props": [
       {
-        "name": "heading",
-        "type": "undefined | string",
+        "name": "appearance",
+        "type": "undefined | \"outlined\" | \"filled\" | \"plain\" | \"accent\"",
         "optional": true,
         "scalar": true,
-        "description": "Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`.",
-        "displayType": "undefined | string"
+        "description": "Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`. Attribute: `appearance`.",
+        "default": "'outlined'",
+        "displayType": "undefined | \"outlined\" | \"filled\" | \"plain\" | \"accent\""
       },
       {
-        "name": "description",
-        "type": "undefined | string",
+        "name": "orientation",
+        "type": "undefined | \"vertical\" | \"horizontal\" | \"responsive\"",
         "optional": true,
         "scalar": true,
-        "description": "Supporting text under the heading. Attribute: `description`.",
-        "displayType": "undefined | string"
+        "description": "`vertical` (default, media on top) | `horizontal` (media at the start) | `responsive` (horizontal when the card's container is wide enough, else vertical — a container query on the card's own width). Attribute: `orientation`.",
+        "default": "'vertical'",
+        "displayType": "undefined | \"vertical\" | \"horizontal\" | \"responsive\""
       },
       {
-        "name": "errorMessage",
+        "name": "collapse",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "When set, the card renders its inline error state instead of the body. Attribute: `error-message`.",
+        "description": "The card width below which a `responsive` card collapses to vertical and the footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`.",
+        "default": "'28rem'",
         "displayType": "undefined | string"
       },
       {
@@ -609,7 +630,7 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Compact spacing for dense lists. Attribute: `dense`.",
+        "description": "Tighter spacing for dense lists. Attribute: `dense`.",
         "default": "false",
         "displayType": "undefined | false | true"
       },
@@ -674,8 +695,8 @@
     "composedFrom": [
       {
         "name": "Card",
-        "group": "Components",
-        "storyId": "solid-advanced-elements-card--docs"
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-card--docs"
       }
     ],
     "tokens": [],
@@ -683,34 +704,59 @@
       {
         "name": "media",
         "mode": "inject",
-        "doc": "Media region (image/GIF/icon) rendered above the heading."
+        "doc": "Full-bleed media (image/video/illustration) at the top (vertical) or start (horizontal). Clipped to the card corners."
       },
       {
-        "name": "actions",
+        "name": "header",
         "mode": "inject",
-        "doc": "Footer action buttons. Do NOT combine with a clickable/href card (nested interactive)."
+        "doc": "Header content, e.g. a title. Rendered above the body."
       },
       {
-        "name": "trailing",
+        "name": "header-actions",
         "mode": "inject",
-        "doc": "A trailing chevron/arrow for a clickable card. Composable, no auto-chevron."
+        "doc": "An actions cluster pinned to the end of the header row."
+      },
+      {
+        "name": "footer",
+        "mode": "inject",
+        "doc": "Footer content rendered below the body."
+      },
+      {
+        "name": "footer-actions",
+        "mode": "inject",
+        "doc": "Action buttons pinned to the end of the footer. Do NOT combine with a clickable/href card (nested interactive)."
       }
     ],
     "parts": [
       {
         "name": "card",
-        "doc": "The card root (a div, or an a when href is set). Restyle its radius, border, padding, or background; the dense prop sets the compact defaults.",
-        "recipe": "kai-card::part(card) { border-radius: 1rem; padding: 1.25rem }"
+        "doc": "The card root (a div, or an a when href is set). Restyle its radius, border, or background; set --kai-card-spacing for padding/gaps (the dense prop sets the compact default).",
+        "recipe": "kai-card::part(card) { border-radius: 1rem; --kai-card-spacing: 1.5rem }"
+      },
+      {
+        "name": "media",
+        "doc": "The full-bleed media region. Cap or crop it from outside (e.g. a fixed height with object-fit).",
+        "recipe": "kai-card::part(media) { max-height: 12rem }"
+      },
+      {
+        "name": "header",
+        "doc": "The header row (header content + header-actions). Add a divider or adjust its alignment.",
+        "recipe": "kai-card::part(header) { border-bottom: 1px solid var(--color-border) }"
+      },
+      {
+        "name": "body",
+        "doc": "The default-slot body region.",
+        "recipe": "kai-card::part(body) { font-size: 0.9375rem }"
+      },
+      {
+        "name": "footer",
+        "doc": "The footer row (footer content + footer-actions).",
+        "recipe": "kai-card::part(footer) { border-top: 1px solid var(--color-border) }"
       },
       {
         "name": "dismiss",
         "doc": "The dismiss (×) button shown when dismissible. Recolor or reposition it from outside.",
         "recipe": "kai-card::part(dismiss) { color: var(--color-muted-foreground) }"
-      },
-      {
-        "name": "trailing",
-        "doc": "The trailing region wrapping the slot=\"trailing\" chevron on a clickable card. Recolor or resize it from outside.",
-        "recipe": "kai-card::part(trailing) { color: var(--color-primary) }"
       }
     ]
   },
@@ -1485,11 +1531,20 @@
       },
       {
         "name": "tone",
-        "type": "undefined | \"primary\" | \"info\"",
+        "type": "undefined | \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\"",
         "optional": true,
         "scalar": true,
-        "description": "Color tone: `primary` (default, the theme accent) or `info` (blue).",
-        "displayType": "undefined | \"primary\" | \"info\""
+        "description": "Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues.",
+        "displayType": "undefined | \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\""
+      },
+      {
+        "name": "arrow",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Render the arrow that points at the anchor (default `true`). Set `arrow=\"false\"` for a plain bubble with no pointer.",
+        "default": "true",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
@@ -2200,15 +2255,15 @@
       },
       {
         "name": "conversations",
-        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
+        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]",
         "optional": false,
         "scalar": false,
         "description": "A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property.",
         "typeName": "ConversationSummary[]",
-        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
+        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]",
         "default": "[]",
         "typeImport": "ConversationSummary",
-        "displayType": "ConversationSummary[]"
+        "displayType": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]"
       },
       {
         "name": "activeId",
@@ -2336,6 +2391,13 @@
         "name": "footer",
         "mode": "inject",
         "doc": "A row below the list — account, settings, or usage."
+      }
+    ],
+    "parts": [
+      {
+        "name": "trailing",
+        "doc": "The right-aligned trailing text on each conversation row (a count, status, or relative time). Set it per item via the `trailing` field; otherwise a short auto relative time is derived from `updatedAt`. Recolor or resize it from outside.",
+        "recipe": "kai-conversations::part(trailing) { color: var(--color-primary); font-variant-numeric: tabular-nums }"
       }
     ]
   },
@@ -3605,12 +3667,12 @@
     "props": [
       {
         "name": "severity",
-        "type": "undefined | \"info\" | \"neutral\" | \"warning\" | \"error\" | \"success\"",
+        "type": "undefined | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\"",
         "optional": true,
         "scalar": true,
         "description": "`neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`).",
         "default": "'neutral'",
-        "displayType": "undefined | \"info\" | \"neutral\" | \"warning\" | \"error\" | \"success\""
+        "displayType": "undefined | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\""
       },
       {
         "name": "icon",
@@ -3744,6 +3806,68 @@
       }
     ],
     "tokens": []
+  },
+  {
+    "tag": "kai-progress-bar",
+    "className": "KaiProgressBarElement",
+    "displayName": "ProgressBar",
+    "props": [
+      {
+        "name": "value",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Current progress value (0..max). Attribute: `value`.",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "max",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "The value `value` runs to (default 100). Attribute: `max`.",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Optional caption above the track. Attribute: `label`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "tone",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Fill color: `primary` (default), `success`, `warning`, `error`, `info`. Attribute: `tone`.",
+        "default": "'primary'",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "ProgressBar",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-progressbar--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "track",
+        "doc": "The progress track (the background bar). Restyle its height, radius, or background from outside.",
+        "recipe": "kai-progress-bar::part(track) { height: 0.5rem }"
+      },
+      {
+        "name": "fill",
+        "doc": "The filled portion; its width follows value/max. Recolor it from outside.",
+        "recipe": "kai-progress-bar::part(fill) { background: var(--color-tool-green) }"
+      }
+    ]
   },
   {
     "tag": "kai-prompt-input",
@@ -4138,12 +4262,12 @@
     "props": [
       {
         "name": "orientation",
-        "type": "undefined | \"horizontal\" | \"vertical\"",
+        "type": "undefined | \"vertical\" | \"horizontal\"",
         "optional": true,
         "scalar": true,
         "description": "Layout axis: `horizontal` (row, default) or `vertical` (column).",
         "default": "'horizontal'",
-        "displayType": "undefined | \"horizontal\" | \"vertical\""
+        "displayType": "undefined | \"vertical\" | \"horizontal\""
       },
       {
         "name": "maximizedIndex",
@@ -4555,12 +4679,12 @@
     "props": [
       {
         "name": "orientation",
-        "type": "undefined | \"horizontal\" | \"vertical\" | \"both\"",
+        "type": "undefined | \"vertical\" | \"horizontal\" | \"both\"",
         "optional": true,
         "scalar": true,
         "description": "Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it.",
         "default": "'vertical'",
-        "displayType": "undefined | \"horizontal\" | \"vertical\" | \"both\""
+        "displayType": "undefined | \"vertical\" | \"horizontal\" | \"both\""
       }
     ],
     "events": [],
@@ -4638,12 +4762,12 @@
     "props": [
       {
         "name": "orientation",
-        "type": "undefined | \"horizontal\" | \"vertical\"",
+        "type": "undefined | \"vertical\" | \"horizontal\"",
         "optional": true,
         "scalar": true,
         "description": "`horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height).",
         "default": "'horizontal'",
-        "displayType": "undefined | \"horizontal\" | \"vertical\""
+        "displayType": "undefined | \"vertical\" | \"horizontal\""
       }
     ],
     "events": [],
@@ -4887,64 +5011,6 @@
     "tokens": []
   },
   {
-    "tag": "kai-stat",
-    "className": "KaiStatElement",
-    "displayName": "Stat",
-    "props": [
-      {
-        "name": "label",
-        "type": "undefined | string",
-        "optional": true,
-        "scalar": true,
-        "description": "The small muted label above the value.",
-        "displayType": "undefined | string"
-      },
-      {
-        "name": "value",
-        "type": "undefined | string",
-        "optional": true,
-        "scalar": true,
-        "description": "The big value (scalar). A default-slot override wins over this.",
-        "displayType": "undefined | string"
-      },
-      {
-        "name": "hint",
-        "type": "undefined | string",
-        "optional": true,
-        "scalar": true,
-        "description": "A small caption below the value.",
-        "displayType": "undefined | string"
-      }
-    ],
-    "events": [],
-    "methods": [],
-    "composedFrom": [
-      {
-        "name": "Stat",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-stat--docs"
-      }
-    ],
-    "tokens": [],
-    "parts": [
-      {
-        "name": "stat",
-        "doc": "The tile root. Restyle its background, radius, or padding from outside; the consumer arranges tiles in their own CSS grid.",
-        "recipe": "kai-stat::part(stat) { background: var(--color-card); border-radius: 1rem }"
-      },
-      {
-        "name": "label",
-        "doc": "The small muted caption above the value. Recolor or resize it from outside.",
-        "recipe": "kai-stat::part(label) { text-transform: uppercase; letter-spacing: 0.05em }"
-      },
-      {
-        "name": "value",
-        "doc": "The big metric value. Restyle its size, weight, or color from outside; a default-slot override replaces it with rich content.",
-        "recipe": "kai-stat::part(value) { font-size: 1.875rem; color: var(--color-primary) }"
-      }
-    ]
-  },
-  {
     "tag": "kai-status",
     "className": "KaiStatusElement",
     "displayName": "Status",
@@ -5028,11 +5094,12 @@
       },
       {
         "name": "size",
-        "type": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
+        "type": "undefined | \"md\" | \"lg\"",
         "optional": true,
         "scalar": true,
-        "description": "Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`).",
-        "displayType": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\""
+        "description": "Row height for `layout=\"list\"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected.",
+        "default": "'md'",
+        "displayType": "undefined | \"md\" | \"lg\""
       },
       {
         "name": "layout",
@@ -5491,15 +5558,15 @@
     "props": [
       {
         "name": "toasts",
-        "type": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
+        "type": "{ id: string; message: string; variant?: undefined | \"success\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
         "optional": false,
         "scalar": false,
         "description": "The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update.",
         "typeName": "ToastItem[]",
-        "typeShape": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
+        "typeShape": "{ id: string; message: string; variant?: undefined | \"success\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
         "default": "[]",
         "typeImport": "ToastItem",
-        "displayType": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]"
+        "displayType": "{ id: string; message: string; variant?: undefined | \"success\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]"
       },
       {
         "name": "position",
@@ -5946,15 +6013,15 @@
       },
       {
         "name": "conversations",
-        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
+        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]",
         "optional": false,
         "scalar": false,
         "description": "Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property.",
         "typeName": "ConversationSummary[]",
-        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
+        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]",
         "default": "[]",
         "typeImport": "ConversationSummary",
-        "displayType": "ConversationSummary[]"
+        "displayType": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]"
       },
       {
         "name": "activeId",
@@ -6126,8 +6193,8 @@
         "type": "undefined | number",
         "optional": true,
         "scalar": true,
-        "description": "Sidebar default width as a percent of the workspace (default 22).",
-        "default": "22",
+        "description": "Sidebar default width as a percent of the workspace (default 26).",
+        "default": "26",
         "displayType": "undefined | number"
       },
       {
@@ -6135,8 +6202,8 @@
         "type": "undefined | number",
         "optional": true,
         "scalar": true,
-        "description": "Sidebar min width in px (default 200).",
-        "default": "200",
+        "description": "Sidebar min width in px (default 240).",
+        "default": "240",
         "displayType": "undefined | number"
       },
       {
@@ -6163,6 +6230,14 @@
         "scalar": true,
         "description": "Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML.",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "collapseBelow",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Auto-collapse the rail when the workspace's own width drops below this many px, and re-expand when it grows back above. Uncontrolled only (it never fights an app-driven `sidebarCollapsed`); omit to disable. Fires `kai-sidebar-toggle`. Attribute: `collapse-below`.",
+        "displayType": "undefined | number"
       },
       {
         "name": "compact",
@@ -6332,6 +6407,13 @@
         "name": "main",
         "mode": "replace",
         "doc": "Replace the built-in chat thread with your own main view (a home or dashboard screen). Omit to keep the thread."
+      }
+    ],
+    "parts": [
+      {
+        "name": "sidebar",
+        "doc": "The conversation rail. Carries a subtle, theme-aware default background (bg-surface); override its background, border, or width from outside. `sidebar-min-width` sets its min px width and `collapse-below` auto-collapses it under a width.",
+        "recipe": "kai-workspace::part(sidebar) { background: var(--color-card); border-right: 1px solid var(--color-border) }"
       }
     ]
   }

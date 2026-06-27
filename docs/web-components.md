@@ -224,7 +224,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `groups` | — | `ConversationGroup[]` | `[]` | Pre-bucketed conversation groups for the sidebar. Set as a JS property. |
-| `conversations` | — | `ConversationSummary[]` | `[]` | Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. |
+| `conversations` | — | `{ id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]` | `[]` | Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. |
 | `activeId` | `active-id` | `undefined | string` | — | Id of the open conversation, highlighted in the sidebar. |
 | `messages` | — | `{ id: string; role: "user" | "assistant"; content: string; reasoning?: undefined | { text: string; label?: undefined | string }; tools?: undefined | { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string }[]; attachments?: undefined | { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[]; actions?: undefined | ("copy" | "like" | "dislike" | "regenerate" | "edit" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]` | `[]` | The active conversation's message thread, newest last. Set as a JS property. |
 | `value` | `value` | `undefined | string` | — |  |
@@ -244,11 +244,12 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `voice` | `voice` | `undefined | false | true` | `false` |  |
 | `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers (`/` skills, `@` agents/plugins) forwarded to the input. |
 | `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image src) forwarded to the input. |
-| `sidebarWidth` | `sidebar-width` | `undefined | number` | `22` | Sidebar default width as a percent of the workspace (default 22). |
-| `sidebarMinWidth` | `sidebar-min-width` | `undefined | number` | `200` | Sidebar min width in px (default 200). |
+| `sidebarWidth` | `sidebar-width` | `undefined | number` | `26` | Sidebar default width as a percent of the workspace (default 26). |
+| `sidebarMinWidth` | `sidebar-min-width` | `undefined | number` | `240` | Sidebar min width in px (default 240). |
 | `sidebarMaxWidth` | `sidebar-max-width` | `undefined | number` | `420` | Sidebar max width in px (default 420). |
 | `sidebarCollapsed` | `sidebar-collapsed` | `undefined | false | true` | — | Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kai-sidebar-toggle` event. Omit for uncontrolled (the element manages it). |
 | `defaultSidebarCollapsed` | `default-sidebar-collapsed` | `undefined | false | true` | — | Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. |
+| `collapseBelow` | `collapse-below` | `undefined | number` | — | Auto-collapse the rail when the workspace's own width drops below this many px, and re-expand when it grows back above. Uncontrolled only (it never fights an app-driven `sidebarCollapsed`); omit to disable. Fires `kai-sidebar-toggle`. Attribute: `collapse-below`. |
 | `compact` | `compact` | `undefined | false | true` | — | Render Recents as dense single-line rows (a leading dot + title, no count). |
 
 #### Events
@@ -276,6 +277,14 @@ Project your own markup with `slot="name"` on a light-DOM child.
 | `sidebar-footer` | inject | Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster. |
 | `main-header` | inject | Top of the main region (a top-placed banner or a corner action). |
 | `main` | replace | Replace the built-in chat thread with your own main view (a home or dashboard screen). Omit to keep the thread. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-workspace::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(sidebar)` | The conversation rail. Carries a subtle, theme-aware default background (bg-surface); override its background, border, or width from outside. `sidebar-min-width` sets its min px width and `collapse-below` auto-collapses it under a width. <br>`kai-workspace::part(sidebar) { background: var(--color-card); border-right: 1px solid var(--color-border) }` |
 
 #### Composed from
 
@@ -336,7 +345,7 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `groups` | — | `ConversationGroup[]` | `[]` | Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. |
-| `conversations` | — | `ConversationSummary[]` | `[]` | A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. |
+| `conversations` | — | `{ id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]` | `[]` | A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. |
 | `activeId` | `active-id` | `undefined | string` | — | The id of the currently-open conversation, highlighted in the list. |
 | `collapsed` | `collapsed` | `undefined | false | true` | — | Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. |
 | `defaultCollapsed` | `default-collapsed` | `undefined | false | true` | — | Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. |
@@ -360,6 +369,14 @@ Project your own markup with `slot="name"` on a light-DOM child.
 | `header` | replace | Full custom title bar; replaces the built-in toggle / "Chats" / New-chat row. |
 | `empty` | replace | Custom zero-state shown when there are no conversations; replaces the built-in "No conversations yet". |
 | `footer` | inject | A row below the list — account, settings, or usage. |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-conversations::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(trailing)` | The right-aligned trailing text on each conversation row (a count, status, or relative time). Set it per item via the `trailing` field; otherwise a short auto relative time is derived from `updatedAt`. Recolor or resize it from outside. <br>`kai-conversations::part(trailing) { color: var(--color-primary); font-variant-numeric: tabular-nums }` |
 
 #### Composed from
 
@@ -766,7 +783,7 @@ No events.
 |----------|-----------|------|---------|-------|
 | `suggestions` | — | `(string | { label: string; value?: undefined | string; icon?: undefined | string })[]` | `[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
 | `variant` | `variant` | `undefined | "default" | "ghost" | "outline"` | `'outline'` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
-| `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | — | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
+| `size` | `size` | `undefined | "md" | "lg"` | `'md'` | Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. |
 | `layout` | `layout` | `undefined | "list" | "chips"` | `'chips'` | Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list — each row is left-aligned with a leading `icon`, a label, and a hover background. |
 | `block` | `block` | `undefined | false | true` | `false` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined | string` | — | Substring to highlight within each suggestion. |
@@ -1217,6 +1234,8 @@ The polished building blocks you compose your own chrome from — themed, access
 | `iconTrailing` | `icon-trailing` | `undefined | string` | — | Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). |
 | `label` | `label` | `undefined | string` | — | Accessible name. REQUIRED for icon-only buttons (no visible text); ignored when you slot visible text, which already names the button. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the button (non-interactive, dimmed). |
+| `full` | `full` | `undefined | false | true` | `false` | Stretch the button to the full width of its container (a block button) — e.g. a card CTA or a stacked action. Attribute: `full`. |
+| `align` | `align` | `undefined | "start" | "center" | "end"` | `'center'` | Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button. |
 | `type` | `type` | `undefined | "button" | "submit" | "reset"` | `'button'` | Native button `type`. Defaults to `button` (so it never submits a form). |
 
 #### Events
@@ -1263,7 +1282,7 @@ A themed button — `variant` (incl. `subtle`), `size` (incl. icon-only), leadin
 |----------|-----------|------|---------|-------|
 | `src` | `src` | `undefined | string` | — | Image URL/data-URI. When absent, the `fallback` initials show instead. |
 | `alt` | `alt` | `undefined | string` | — | Alt text for the image. Defaults to `fallback`. |
-| `fallback` | `fallback` | `undefined | string` | `''` | Short text shown when there's no image — usually initials (e.g. "RT", "AI"). |
+| `fallback` | `fallback` | `undefined | string` | `''` | Short text shown when there's no image — usually initials (e.g. "JD", "AI"). |
 | `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token: `sm` | `md` (default) | `lg`. |
 
 #### Composed from
@@ -1418,7 +1437,7 @@ Rich content on hover/focus of a trigger — the markup-carrying sibling of `<ka
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `severity` | `severity` | `undefined | "info" | "neutral" | "warning" | "error" | "success"` | `'neutral'` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `severity` | `severity` | `undefined | "info" | "success" | "warning" | "error" | "neutral"` | `'neutral'` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
 | `icon` | `icon` | `undefined | string` | — | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
 | `dismissible` | `dismissible` | `undefined | false | true` | `false` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
 
@@ -1457,7 +1476,7 @@ An inline notice/alert carrying a severity icon, the right a11y role, an optiona
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). |
+| `orientation` | `orientation` | `undefined | "vertical" | "horizontal"` | `'horizontal'` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). |
 
 #### Styleable parts
 
@@ -1487,7 +1506,7 @@ A themed divider between groups of content (toolbar sections, menu groups, heade
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `orientation` | `orientation` | `undefined | "horizontal" | "vertical" | "both"` | `'vertical'` | Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. |
+| `orientation` | `orientation` | `undefined | "vertical" | "horizontal" | "both"` | `'vertical'` | Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. |
 
 #### Styleable parts
 

@@ -27,6 +27,13 @@
     "kai-sources": "source",
     "kai-response-stream": "response-stream",
     "kai-empty": "empty",
+    "kai-status": "status",
+    "kai-nav": "nav",
+    "kai-stat": "stat",
+    "kai-coachmark": "coachmark",
+    "kai-tabs": "tabs",
+    "kai-voice-output": "voice-output",
+    "kai-screen": "screen",
     "kai-chain-of-thought": "chain-of-thought",
     "kai-resizable": "resizable",
     "kai-resizable-item": "resizable",
@@ -138,6 +145,27 @@
     ],
     "empty": [
       "kai-empty"
+    ],
+    "status": [
+      "kai-status"
+    ],
+    "nav": [
+      "kai-nav"
+    ],
+    "stat": [
+      "kai-stat"
+    ],
+    "coachmark": [
+      "kai-coachmark"
+    ],
+    "tabs": [
+      "kai-tabs"
+    ],
+    "voice-output": [
+      "kai-voice-output"
+    ],
+    "screen": [
+      "kai-screen"
     ],
     "chain-of-thought": [
       "kai-chain-of-thought"

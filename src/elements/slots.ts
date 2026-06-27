@@ -55,6 +55,15 @@ export const CONVERSATIONS_SLOTS: SlotDef[] = [
   { name: 'footer', mode: 'inject',  doc: 'A row below the list — account, settings, or usage.' },
 ];
 
+/** Styleable `::part`s of `<kai-conversations>`. */
+export const CONVERSATIONS_PARTS: PartDef[] = [
+  {
+    name: 'trailing',
+    doc: 'The right-aligned trailing text on each conversation row (a count, status, or relative time). Set it per item via the `trailing` field; otherwise a short auto relative time is derived from `updatedAt`. Recolor or resize it from outside.',
+    recipe: 'kai-conversations::part(trailing) { color: var(--color-primary); font-variant-numeric: tabular-nums }',
+  },
+];
+
 /** Slots of `<kai-message>` — per-message composition seams. `before-body` and
  *  `after-body` are INJECT regions inside the message's body column; `avatar`
  *  REPLACES the built-in avatar rail (pair it with `avatar="none"` to omit the
@@ -265,30 +274,47 @@ export const SCREEN_PARTS: PartDef[] = [
   },
 ];
 
-/** Slots of `<kai-card>` (media region + footer actions + a trailing chevron for a
- *  clickable card). The body is the default slot. */
+/** Slots of `<kai-card>` — structural regions only (the title/description are body
+ *  or `slot="header"` content you mark up). The body is the default slot. */
 export const CARD_SLOTS: SlotDef[] = [
-  { name: 'media', mode: 'inject', doc: 'Media region (image/GIF/icon) rendered above the heading.' },
-  { name: 'actions', mode: 'inject', doc: 'Footer action buttons. Do NOT combine with a clickable/href card (nested interactive).' },
-  { name: 'trailing', mode: 'inject', doc: 'A trailing chevron/arrow for a clickable card. Composable, no auto-chevron.' },
+  { name: 'media', mode: 'inject', doc: 'Full-bleed media (image/video/illustration) at the top (vertical) or start (horizontal). Clipped to the card corners.' },
+  { name: 'header', mode: 'inject', doc: 'Header content, e.g. a title. Rendered above the body.' },
+  { name: 'header-actions', mode: 'inject', doc: 'An actions cluster pinned to the end of the header row.' },
+  { name: 'footer', mode: 'inject', doc: 'Footer content rendered below the body.' },
+  { name: 'footer-actions', mode: 'inject', doc: 'Action buttons pinned to the end of the footer. Do NOT combine with a clickable/href card (nested interactive).' },
 ];
 
 /** Styleable `::part`s of `<kai-card>`. */
 export const CARD_PARTS: PartDef[] = [
   {
     name: 'card',
-    doc: 'The card root (a div, or an a when href is set). Restyle its radius, border, padding, or background; the dense prop sets the compact defaults.',
-    recipe: 'kai-card::part(card) { border-radius: 1rem; padding: 1.25rem }',
+    doc: 'The card root (a div, or an a when href is set). Restyle its radius, border, or background; set --kai-card-spacing for padding/gaps (the dense prop sets the compact default).',
+    recipe: 'kai-card::part(card) { border-radius: 1rem; --kai-card-spacing: 1.5rem }',
+  },
+  {
+    name: 'media',
+    doc: 'The full-bleed media region. Cap or crop it from outside (e.g. a fixed height with object-fit).',
+    recipe: 'kai-card::part(media) { max-height: 12rem }',
+  },
+  {
+    name: 'header',
+    doc: 'The header row (header content + header-actions). Add a divider or adjust its alignment.',
+    recipe: 'kai-card::part(header) { border-bottom: 1px solid var(--color-border) }',
+  },
+  {
+    name: 'body',
+    doc: 'The default-slot body region.',
+    recipe: 'kai-card::part(body) { font-size: 0.9375rem }',
+  },
+  {
+    name: 'footer',
+    doc: 'The footer row (footer content + footer-actions).',
+    recipe: 'kai-card::part(footer) { border-top: 1px solid var(--color-border) }',
   },
   {
     name: 'dismiss',
     doc: 'The dismiss (×) button shown when dismissible. Recolor or reposition it from outside.',
     recipe: 'kai-card::part(dismiss) { color: var(--color-muted-foreground) }',
-  },
-  {
-    name: 'trailing',
-    doc: 'The trailing region wrapping the slot="trailing" chevron on a clickable card. Recolor or resize it from outside.',
-    recipe: 'kai-card::part(trailing) { color: var(--color-primary) }',
   },
 ];
 
@@ -299,6 +325,15 @@ export const WORKSPACE_SLOTS: SlotDef[] = [
   { name: 'sidebar-footer', mode: 'inject', doc: 'Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster.' },
   { name: 'main-header', mode: 'inject', doc: 'Top of the main region (a top-placed banner or a corner action).' },
   { name: 'main', mode: 'replace', doc: 'Replace the built-in chat thread with your own main view (a home or dashboard screen). Omit to keep the thread.' },
+];
+
+/** Styleable `::part`s of `<kai-workspace>`. */
+export const WORKSPACE_PARTS: PartDef[] = [
+  {
+    name: 'sidebar',
+    doc: 'The conversation rail. Carries a subtle, theme-aware default background (bg-surface); override its background, border, or width from outside. `sidebar-min-width` sets its min px width and `collapse-below` auto-collapses it under a width.',
+    recipe: 'kai-workspace::part(sidebar) { background: var(--color-card); border-right: 1px solid var(--color-border) }',
+  },
 ];
 
 /** Styleable `::part`s of `<kai-nav>`. */
@@ -315,25 +350,6 @@ export const NAV_PARTS: PartDef[] = [
   },
 ];
 
-/** Styleable `::part`s of `<kai-stat>`. */
-export const STAT_PARTS: PartDef[] = [
-  {
-    name: 'stat',
-    doc: 'The tile root. Restyle its background, radius, or padding from outside; the consumer arranges tiles in their own CSS grid.',
-    recipe: 'kai-stat::part(stat) { background: var(--color-card); border-radius: 1rem }',
-  },
-  {
-    name: 'label',
-    doc: 'The small muted caption above the value. Recolor or resize it from outside.',
-    recipe: 'kai-stat::part(label) { text-transform: uppercase; letter-spacing: 0.05em }',
-  },
-  {
-    name: 'value',
-    doc: 'The big metric value. Restyle its size, weight, or color from outside; a default-slot override replaces it with rich content.',
-    recipe: 'kai-stat::part(value) { font-size: 1.875rem; color: var(--color-primary) }',
-  },
-];
-
 /** Slots of `<kai-coachmark>` (the anchor/trigger is the default slot). */
 export const COACHMARK_SLOTS: SlotDef[] = [
   { name: 'content', mode: 'replace', doc: 'The bubble body text shown under the headline.' },
@@ -346,6 +362,12 @@ export const COACHMARK_PARTS: PartDef[] = [
   { name: 'badge', doc: 'The small badge pill beside the headline (e.g. "New").', recipe: 'kai-coachmark::part(badge) { text-transform: none }' },
   { name: 'title', doc: 'The bold headline text.', recipe: 'kai-coachmark::part(title) { font-size: 0.9375rem }' },
   { name: 'dismiss', doc: 'The dismiss button. Recolor or reposition it from outside.', recipe: 'kai-coachmark::part(dismiss) { color: var(--color-primary-foreground) }' },
+];
+
+/** Styleable `::part`s of `<kai-progress-bar>`. */
+export const PROGRESS_BAR_PARTS: PartDef[] = [
+  { name: 'track', doc: 'The progress track (the background bar). Restyle its height, radius, or background from outside.', recipe: 'kai-progress-bar::part(track) { height: 0.5rem }' },
+  { name: 'fill', doc: 'The filled portion; its width follows value/max. Recolor it from outside.', recipe: 'kai-progress-bar::part(fill) { background: var(--color-tool-green) }' },
 ];
 
 /**
@@ -366,7 +388,7 @@ export interface ElementComposition {
 
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
-  'kai-conversations': { slots: CONVERSATIONS_SLOTS },
+  'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS },
   'kai-message': { slots: MESSAGE_SLOTS, parts: MESSAGE_PARTS },
   'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },
   'kai-button': { slots: BUTTON_SLOTS, parts: BUTTON_PARTS },
@@ -384,10 +406,10 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-voice-output': { parts: VOICE_OUTPUT_PARTS },
   'kai-screen': { slots: SCREEN_SLOTS, parts: SCREEN_PARTS },
   'kai-card': { slots: CARD_SLOTS, parts: CARD_PARTS },
-  'kai-workspace': { slots: WORKSPACE_SLOTS },
+  'kai-workspace': { slots: WORKSPACE_SLOTS, parts: WORKSPACE_PARTS },
   'kai-nav': { parts: NAV_PARTS },
-  'kai-stat': { parts: STAT_PARTS },
   'kai-coachmark': { slots: COACHMARK_SLOTS, parts: COACHMARK_PARTS },
+  'kai-progress-bar': { parts: PROGRESS_BAR_PARTS },
 };
 
 /**

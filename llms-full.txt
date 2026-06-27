@@ -247,7 +247,7 @@ Every element also accepts the `theme` attribute. Array/object properties are ma
 |---|---|---|---|
 | `src` | `src` | `undefined \| string` | Image URL/data-URI. When absent, the `fallback` initials show instead. |
 | `alt` | `alt` | `undefined \| string` | Alt text for the image. Defaults to `fallback`. |
-| `fallback` | `fallback` | `undefined \| string` | Short text shown when there's no image — usually initials (e.g. "RT", "AI"). |
+| `fallback` | `fallback` | `undefined \| string` | Short text shown when there's no image — usually initials (e.g. "JD", "AI"). |
 | `size` | `size` | `undefined \| "sm" \| "md" \| "lg"` | Size token: `sm` \| `md` (default) \| `lg`. |
 
 _No events._
@@ -284,6 +284,8 @@ _No events._
 | `iconTrailing` | `icon-trailing` | `undefined \| string` | Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). |
 | `label` | `label` | `undefined \| string` | Accessible name. REQUIRED for icon-only buttons (no visible text); ignored when you slot visible text, which already names the button. |
 | `disabled` | `disabled` | `undefined \| false \| true` | Disable the button (non-interactive, dimmed). |
+| `full` | `full` | `undefined \| false \| true` | Stretch the button to the full width of its container (a block button) — e.g. a card CTA or a stacked action. Attribute: `full`. |
+| `align` | `align` | `undefined \| "start" \| "center" \| "end"` | Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button. |
 | `type` | `type` | `undefined \| "button" \| "submit" \| "reset"` | Native button `type`. Defaults to `button` (so it never submits a form). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
@@ -312,10 +314,10 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `heading` | `heading` | `undefined \| string` | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
-| `description` | `description` | `undefined \| string` | Supporting text under the heading. Attribute: `description`. |
-| `errorMessage` | `error-message` | `undefined \| string` | When set, the card renders its inline error state instead of the body. Attribute: `error-message`. |
-| `dense` | `dense` | `undefined \| false \| true` | Compact spacing for dense lists. Attribute: `dense`. |
+| `appearance` | `appearance` | `undefined \| "outlined" \| "filled" \| "plain" \| "accent"` | Surface treatment: `outlined` (default) \| `filled` \| `plain` \| `accent`. Attribute: `appearance`. |
+| `orientation` | `orientation` | `undefined \| "vertical" \| "horizontal" \| "responsive"` | `vertical` (default, media on top) \| `horizontal` (media at the start) \| `responsive` (horizontal when the card's container is wide enough, else vertical — a container query on the card's own width). Attribute: `orientation`. |
+| `collapse` | `collapse` | `undefined \| string` | The card width below which a `responsive` card collapses to vertical and the footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`. |
+| `dense` | `dense` | `undefined \| false \| true` | Tighter spacing for dense lists. Attribute: `dense`. |
 | `dismissible` | `dismissible` | `undefined \| false \| true` | Show a close (×) that hides the card and emits `kai-dismiss`. Attribute: `dismissible`. Off by default. |
 | `href` | `href` | `undefined \| string` | Render the whole card as a link. Attribute: `href`. Wins over `clickable`. |
 | `target` | `target` | `undefined \| string` | `target` for the `href` anchor. Attribute: `target`. |
@@ -333,17 +335,22 @@ _No events._
 
 | Slot | Mode | Description |
 |---|---|---|
-| `media` | inject | Media region (image/GIF/icon) rendered above the heading. |
-| `actions` | inject | Footer action buttons. Do NOT combine with a clickable/href card (nested interactive). |
-| `trailing` | inject | A trailing chevron/arrow for a clickable card. Composable, no auto-chevron. |
+| `media` | inject | Full-bleed media (image/video/illustration) at the top (vertical) or start (horizontal). Clipped to the card corners. |
+| `header` | inject | Header content, e.g. a title. Rendered above the body. |
+| `header-actions` | inject | An actions cluster pinned to the end of the header row. |
+| `footer` | inject | Footer content rendered below the body. |
+| `footer-actions` | inject | Action buttons pinned to the end of the footer. Do NOT combine with a clickable/href card (nested interactive). |
 
 **Styleable parts** (restyle from outside via `kai-card::part(name)`):
 
 | Part | Description |
 |---|---|
-| `::part(card)` | The card root (a div, or an a when href is set). Restyle its radius, border, padding, or background; the dense prop sets the compact defaults. — `kai-card::part(card) { border-radius: 1rem; padding: 1.25rem }` |
+| `::part(card)` | The card root (a div, or an a when href is set). Restyle its radius, border, or background; set --kai-card-spacing for padding/gaps (the dense prop sets the compact default). — `kai-card::part(card) { border-radius: 1rem; --kai-card-spacing: 1.5rem }` |
+| `::part(media)` | The full-bleed media region. Cap or crop it from outside (e.g. a fixed height with object-fit). — `kai-card::part(media) { max-height: 12rem }` |
+| `::part(header)` | The header row (header content + header-actions). Add a divider or adjust its alignment. — `kai-card::part(header) { border-bottom: 1px solid var(--color-border) }` |
+| `::part(body)` | The default-slot body region. — `kai-card::part(body) { font-size: 0.9375rem }` |
+| `::part(footer)` | The footer row (footer content + footer-actions). — `kai-card::part(footer) { border-top: 1px solid var(--color-border) }` |
 | `::part(dismiss)` | The dismiss (×) button shown when dismissible. Recolor or reposition it from outside. — `kai-card::part(dismiss) { color: var(--color-muted-foreground) }` |
-| `::part(trailing)` | The trailing region wrapping the slot="trailing" chevron on a clickable card. Recolor or resize it from outside. — `kai-card::part(trailing) { color: var(--color-primary) }` |
 
 ---
 
@@ -508,7 +515,8 @@ _No events._
 | `headline` | `headline` | `undefined \| string` | The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). |
 | `badge` | `badge` | `undefined \| string` | A small badge pill beside the headline (e.g. "New"). |
 | `placement` | `placement` | `undefined \| string` | Floating placement relative to the anchor (default `bottom`). |
-| `tone` | `tone` | `undefined \| "primary" \| "info"` | Color tone: `primary` (default, the theme accent) or `info` (blue). |
+| `tone` | `tone` | `undefined \| "primary" \| "info" \| "success" \| "warning" \| "error"` | Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. |
+| `arrow` | `arrow` | `undefined \| false \| true` | Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -667,7 +675,7 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `groups` | — | `{ id: string; userId?: undefined \| string; teamId?: undefined \| string; name: string; sortOrder: number; createdAt: string }[]` | Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. |
-| `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]` | A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. |
+| `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined \| string }[]` | A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. |
 | `activeId` | `active-id` | `undefined \| string` | The id of the currently-open conversation, highlighted in the list. |
 | `collapsed` | `collapsed` | `undefined \| false \| true` | Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. |
 | `defaultCollapsed` | `default-collapsed` | `undefined \| false \| true` | Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. |
@@ -689,6 +697,12 @@ _No events._
 | `header` | replace | Full custom title bar; replaces the built-in toggle / "Chats" / New-chat row. |
 | `empty` | replace | Custom zero-state shown when there are no conversations; replaces the built-in "No conversations yet". |
 | `footer` | inject | A row below the list — account, settings, or usage. |
+
+**Styleable parts** (restyle from outside via `kai-conversations::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(trailing)` | The right-aligned trailing text on each conversation row (a count, status, or relative time). Set it per item via the `trailing` field; otherwise a short auto relative time is derived from `updatedAt`. Recolor or resize it from outside. — `kai-conversations::part(trailing) { color: var(--color-primary); font-variant-numeric: tabular-nums }` |
 
 ---
 
@@ -1031,7 +1045,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `severity` | `severity` | `undefined \| "info" \| "neutral" \| "warning" \| "error" \| "success"` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `severity` | `severity` | `undefined \| "info" \| "success" \| "warning" \| "error" \| "neutral"` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
 | `icon` | `icon` | `undefined \| string` | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
 | `dismissible` | `dismissible` | `undefined \| false \| true` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
 
@@ -1067,6 +1081,28 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The popover opened or closed (click, Escape, outside-click, or a method). |
+
+---
+
+### `kai-progress-bar` / `ProgressBar`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `value` | `value` | `undefined \| number` | Current progress value (0..max). Attribute: `value`. |
+| `max` | `max` | `undefined \| number` | The value `value` runs to (default 100). Attribute: `max`. |
+| `label` | `label` | `undefined \| string` | Optional caption above the track. Attribute: `label`. |
+| `tone` | `tone` | `undefined \| string` | Fill color: `primary` (default), `success`, `warning`, `error`, `info`. Attribute: `tone`. |
+
+_No events._
+
+**Styleable parts** (restyle from outside via `kai-progress-bar::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(track)` | The progress track (the background bar). Restyle its height, radius, or background from outside. — `kai-progress-bar::part(track) { height: 0.5rem }` |
+| `::part(fill)` | The filled portion; its width follows value/max. Recolor it from outside. — `kai-progress-bar::part(fill) { background: var(--color-tool-green) }` |
 
 ---
 
@@ -1163,7 +1199,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical"` | Layout axis: `horizontal` (row, default) or `vertical` (column). |
+| `orientation` | `orientation` | `undefined \| "vertical" \| "horizontal"` | Layout axis: `horizontal` (row, default) or `vertical` (column). |
 | `maximizedIndex` | — | `undefined \| null \| number` | Which item index is maximized (null = none). Declarative source of truth. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
@@ -1281,7 +1317,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical" \| "both"` | Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. |
+| `orientation` | `orientation` | `undefined \| "vertical" \| "horizontal" \| "both"` | Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. |
 
 _No events._
 
@@ -1317,7 +1353,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical"` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). |
+| `orientation` | `orientation` | `undefined \| "vertical" \| "horizontal"` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). |
 
 _No events._
 
@@ -1392,28 +1428,6 @@ _No events._
 
 ---
 
-### `kai-stat` / `Stat`
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `label` | `label` | `undefined \| string` | The small muted label above the value. |
-| `value` | `value` | `undefined \| string` | The big value (scalar). A default-slot override wins over this. |
-| `hint` | `hint` | `undefined \| string` | A small caption below the value. |
-
-_No events._
-
-**Styleable parts** (restyle from outside via `kai-stat::part(name)`):
-
-| Part | Description |
-|---|---|
-| `::part(stat)` | The tile root. Restyle its background, radius, or padding from outside; the consumer arranges tiles in their own CSS grid. — `kai-stat::part(stat) { background: var(--color-card); border-radius: 1rem }` |
-| `::part(label)` | The small muted caption above the value. Recolor or resize it from outside. — `kai-stat::part(label) { text-transform: uppercase; letter-spacing: 0.05em }` |
-| `::part(value)` | The big metric value. Restyle its size, weight, or color from outside; a default-slot override replaces it with rich content. — `kai-stat::part(value) { font-size: 1.875rem; color: var(--color-primary) }` |
-
----
-
 ### `kai-status` / `Status`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -1443,7 +1457,7 @@ _No events._
 |---|---|---|---|
 | `suggestions` | — | `(string \| { label: string; value?: undefined \| string; icon?: undefined \| string })[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
 | `variant` | `variant` | `undefined \| "default" \| "ghost" \| "outline"` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
-| `size` | `size` | `undefined \| "sm" \| "md" \| "lg" \| "icon" \| "icon-sm"` | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
+| `size` | `size` | `undefined \| "md" \| "lg"` | Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. |
 | `layout` | `layout` | `undefined \| "list" \| "chips"` | Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list — each row is left-aligned with a leading `icon`, a label, and a hover background. |
 | `block` | `block` | `undefined \| false \| true` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined \| string` | Substring to highlight within each suggestion. |
@@ -1566,7 +1580,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `toasts` | — | `{ id: string; message: string; variant?: undefined \| "neutral" \| "success"; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true; target?: undefined \| HTMLElement }[]` | The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. |
+| `toasts` | — | `{ id: string; message: string; variant?: undefined \| "success" \| "neutral"; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true; target?: undefined \| HTMLElement }[]` | The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. |
 | `position` | `position` | `undefined \| "top-center" \| "top-right" \| "top-left" \| "bottom-center" \| "bottom-right" \| "bottom-left"` | Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … |
 | `max` | `max` | `undefined \| number` | Max simultaneously-visible toasts; the rest queue. Defaults to `3`. |
 | `stack` | `stack` | `undefined \| "expanded" \| "collapsed"` | Stacking: 'expanded' (default, full column) \| 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. |
@@ -1677,7 +1691,7 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `groups` | — | `{ id: string; userId?: undefined \| string; teamId?: undefined \| string; name: string; sortOrder: number; createdAt: string }[]` | Pre-bucketed conversation groups for the sidebar. Set as a JS property. |
-| `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]` | Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. |
+| `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined \| string }[]` | Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. |
 | `activeId` | `active-id` | `undefined \| string` | Id of the open conversation, highlighted in the sidebar. |
 | `messages` | — | `{ id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string; tooltip?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string }; feedback?: undefined \| "like" \| "dislike" }[]` | The active conversation's message thread, newest last. Set as a JS property. |
 | `value` | `value` | `undefined \| string` |  |
@@ -1697,11 +1711,12 @@ _No events._
 | `voice` | `voice` | `undefined \| false \| true` |  |
 | `triggers` | — | `undefined \| { char: string; kind: string; items?: undefined \| { id: string; label: string; icon?: undefined \| string; description?: undefined \| string; group?: undefined \| string; kind?: undefined \| string; promptText?: undefined \| string; data?: undefined \| Record<string, unknown> }[] }[]` | Rich entity triggers (`/` skills, `@` agents/plugins) forwarded to the input. |
 | `kindIcons` | — | `undefined \| Record<string, string>` | Default icon per entity kind (kind → image src) forwarded to the input. |
-| `sidebarWidth` | `sidebar-width` | `undefined \| number` | Sidebar default width as a percent of the workspace (default 22). |
-| `sidebarMinWidth` | `sidebar-min-width` | `undefined \| number` | Sidebar min width in px (default 200). |
+| `sidebarWidth` | `sidebar-width` | `undefined \| number` | Sidebar default width as a percent of the workspace (default 26). |
+| `sidebarMinWidth` | `sidebar-min-width` | `undefined \| number` | Sidebar min width in px (default 240). |
 | `sidebarMaxWidth` | `sidebar-max-width` | `undefined \| number` | Sidebar max width in px (default 420). |
 | `sidebarCollapsed` | `sidebar-collapsed` | `undefined \| false \| true` | Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kai-sidebar-toggle` event. Omit for uncontrolled (the element manages it). |
 | `defaultSidebarCollapsed` | `default-sidebar-collapsed` | `undefined \| false \| true` | Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. |
+| `collapseBelow` | `collapse-below` | `undefined \| number` | Auto-collapse the rail when the workspace's own width drops below this many px, and re-expand when it grows back above. Uncontrolled only (it never fights an app-driven `sidebarCollapsed`); omit to disable. Fires `kai-sidebar-toggle`. Attribute: `collapse-below`. |
 | `compact` | `compact` | `undefined \| false \| true` | Render Recents as dense single-line rows (a leading dot + title, no count). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
@@ -1727,6 +1742,12 @@ _No events._
 | `sidebar-footer` | inject | Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster. |
 | `main-header` | inject | Top of the main region (a top-placed banner or a corner action). |
 | `main` | replace | Replace the built-in chat thread with your own main view (a home or dashboard screen). Omit to keep the thread. |
+
+**Styleable parts** (restyle from outside via `kai-workspace::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(sidebar)` | The conversation rail. Carries a subtle, theme-aware default background (bg-surface); override its background, border, or width from outside. `sidebar-min-width` sets its min px width and `collapse-below` auto-collapses it under a width. — `kai-workspace::part(sidebar) { background: var(--color-card); border-right: 1px solid var(--color-border) }` |
 
 ---
 

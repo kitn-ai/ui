@@ -72,7 +72,7 @@ export interface KaiAvatarElement extends HTMLElement {
   src?: string;
   /** Alt text for the image. Defaults to `fallback`. */
   alt?: string;
-  /** Short text shown when there's no image — usually initials (e.g. "RT", "AI"). */
+  /** Short text shown when there's no image — usually initials (e.g. "JD", "AI"). */
   fallback?: string;
   /** Size token: `sm` | `md` (default) | `lg`. */
   size?: "sm" | "md" | "lg";
@@ -100,6 +100,10 @@ export interface KaiButtonElement extends HTMLElement {
   label?: string;
   /** Disable the button (non-interactive, dimmed). */
   disabled?: boolean;
+  /** Stretch the button to the full width of its container (a block button) — e.g. a card CTA or a stacked action. Attribute: `full`. */
+  full?: boolean;
+  /** Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button. */
+  align?: "start" | "center" | "end";
   /** Native button `type`. Defaults to `button` (so it never submits a form). */
   type?: "button" | "submit" | "reset";
 }
@@ -107,13 +111,13 @@ export interface KaiButtonElement extends HTMLElement {
 export interface KaiCardElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
-  heading?: string;
-  /** Supporting text under the heading. Attribute: `description`. */
-  description?: string;
-  /** When set, the card renders its inline error state instead of the body. Attribute: `error-message`. */
-  errorMessage?: string;
-  /** Compact spacing for dense lists. Attribute: `dense`. */
+  /** Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`. Attribute: `appearance`. */
+  appearance?: "outlined" | "filled" | "plain" | "accent";
+  /** `vertical` (default, media on top) | `horizontal` (media at the start) | `responsive` (horizontal when the card's container is wide enough, else vertical — a container query on the card's own width). Attribute: `orientation`. */
+  orientation?: "vertical" | "horizontal" | "responsive";
+  /** The card width below which a `responsive` card collapses to vertical and the footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`. */
+  collapse?: string;
+  /** Tighter spacing for dense lists. Attribute: `dense`. */
   dense?: boolean;
   /** Show a close (×) that hides the card and emits `kai-dismiss`. Attribute: `dismissible`. Off by default. */
   dismissible?: boolean;
@@ -257,8 +261,10 @@ export interface KaiCoachmarkElement extends HTMLElement {
   badge?: string;
   /** Floating placement relative to the anchor (default `bottom`). */
   placement?: string;
-  /** Color tone: `primary` (default, the theme accent) or `info` (blue). */
-  tone?: "primary" | "info";
+  /** Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. */
+  tone?: "primary" | "info" | "success" | "warning" | "error";
+  /** Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. */
+  arrow?: boolean;
 }
 
 export interface KaiCodeBlockElement extends HTMLElement {
@@ -361,7 +367,7 @@ export interface KaiConversationsElement extends HTMLElement {
   /** Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. */
   groups: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[];
   /** A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. */
-  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
+  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
   /** Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. */
@@ -602,7 +608,7 @@ export interface KaiNoticeElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). */
-  severity?: "info" | "neutral" | "warning" | "error" | "success";
+  severity?: "info" | "success" | "warning" | "error" | "neutral";
   /** Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. */
   icon?: string;
   /** Show a dismiss (×) that hides the notice and emits `kai-dismiss`. */
@@ -622,6 +628,19 @@ export interface KaiPopoverElement extends HTMLElement {
   defaultOpen?: boolean;
   /** Turn the popover off while keeping the trigger mounted (clicks and `show()` no longer open it). */
   disabled?: boolean;
+}
+
+export interface KaiProgressBarElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Current progress value (0..max). Attribute: `value`. */
+  value?: number;
+  /** The value `value` runs to (default 100). Attribute: `max`. */
+  max?: number;
+  /** Optional caption above the track. Attribute: `label`. */
+  label?: string;
+  /** Fill color: `primary` (default), `success`, `warning`, `error`, `info`. Attribute: `tone`. */
+  tone?: string;
 }
 
 export interface KaiPromptInputElement extends HTMLElement {
@@ -693,7 +712,7 @@ export interface KaiResizableElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
-  orientation?: "horizontal" | "vertical";
+  orientation?: "vertical" | "horizontal";
   /** Which item index is maximized (null = none). Declarative source of truth. */
   maximizedIndex?: null | number;
 }
@@ -764,7 +783,7 @@ export interface KaiScrollAreaElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. */
-  orientation?: "horizontal" | "vertical" | "both";
+  orientation?: "vertical" | "horizontal" | "both";
 }
 
 export interface KaiScrollButtonElement extends HTMLElement {
@@ -782,7 +801,7 @@ export interface KaiSeparatorElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). */
-  orientation?: "horizontal" | "vertical";
+  orientation?: "vertical" | "horizontal";
 }
 
 export interface KaiSkeletonElement extends HTMLElement {
@@ -831,17 +850,6 @@ export interface KaiSourcesElement extends HTMLElement {
   numbered?: boolean;
 }
 
-export interface KaiStatElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
-  theme?: 'light' | 'dark' | 'auto';
-  /** The small muted label above the value. */
-  label?: string;
-  /** The big value (scalar). A default-slot override wins over this. */
-  value?: string;
-  /** A small caption below the value. */
-  hint?: string;
-}
-
 export interface KaiStatusElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -862,8 +870,8 @@ export interface KaiSuggestionsElement extends HTMLElement {
   suggestions: (string | { label: string; value?: undefined | string; icon?: undefined | string })[];
   /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
   variant?: "default" | "ghost" | "outline";
-  /** Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). */
-  size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
+  /** Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. */
+  size?: "md" | "lg";
   /** Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list — each row is left-aligned with a leading `icon`, a label, and a hover background. */
   layout?: "list" | "chips";
   /** Full-width left-aligned rows instead of pills. */
@@ -953,7 +961,7 @@ export interface KaiToastRegionElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. */
-  toasts: { id: string; message: string; variant?: undefined | "neutral" | "success"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
+  toasts: { id: string; message: string; variant?: undefined | "success" | "neutral"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
   /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
@@ -1028,7 +1036,7 @@ export interface KaiWorkspaceElement extends HTMLElement {
   /** Pre-bucketed conversation groups for the sidebar. Set as a JS property. */
   groups: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[];
   /** Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. */
-  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
+  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[];
   /** Id of the open conversation, highlighted in the sidebar. */
   activeId?: string;
   /** The active conversation's message thread, newest last. Set as a JS property. */
@@ -1052,9 +1060,9 @@ export interface KaiWorkspaceElement extends HTMLElement {
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image src) forwarded to the input. */
   kindIcons?: Record<string, string>;
-  /** Sidebar default width as a percent of the workspace (default 22). */
+  /** Sidebar default width as a percent of the workspace (default 26). */
   sidebarWidth?: number;
-  /** Sidebar min width in px (default 200). */
+  /** Sidebar min width in px (default 240). */
   sidebarMinWidth?: number;
   /** Sidebar max width in px (default 420). */
   sidebarMaxWidth?: number;
@@ -1062,6 +1070,8 @@ export interface KaiWorkspaceElement extends HTMLElement {
   sidebarCollapsed?: boolean;
   /** Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
   defaultSidebarCollapsed?: boolean;
+  /** Auto-collapse the rail when the workspace's own width drops below this many px, and re-expand when it grows back above. Uncontrolled only (it never fights an app-driven `sidebarCollapsed`); omit to disable. Fires `kai-sidebar-toggle`. Attribute: `collapse-below`. */
+  collapseBelow?: number;
   /** Render Recents as dense single-line rows (a leading dot + title, no count). */
   compact?: boolean;
 }
@@ -1105,6 +1115,7 @@ declare global {
     'kai-nav': KaiNavElement;
     'kai-notice': KaiNoticeElement;
     'kai-popover': KaiPopoverElement;
+    'kai-progress-bar': KaiProgressBarElement;
     'kai-prompt-input': KaiPromptInputElement;
     'kai-reasoning': KaiReasoningElement;
     'kai-remote': KaiRemoteElement;
@@ -1120,7 +1131,6 @@ declare global {
     'kai-skills': KaiSkillsElement;
     'kai-source': KaiSourceElement;
     'kai-sources': KaiSourcesElement;
-    'kai-stat': KaiStatElement;
     'kai-status': KaiStatusElement;
     'kai-suggestions': KaiSuggestionsElement;
     'kai-switch': KaiSwitchElement;

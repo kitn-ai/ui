@@ -150,6 +150,9 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
         }
         if (!entry.name.endsWith('.tsx') && !entry.name.endsWith('.ts')) continue;
         if (/\.(test|stories)\.tsx?$/.test(entry.name)) continue;
+        // `ui/stat.tsx` is an internal-only SolidJS component — there is no
+        // `kai-stat` web component, so its parts are intentionally unregistered.
+        if (p.endsWith(join('ui', 'stat.tsx'))) continue;
         for (const m of readFileSync(p, 'utf8').matchAll(PART_RE)) found.add(m[1]);
       }
     };
@@ -189,12 +192,12 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-message',
       'kai-nav',
       'kai-notice',
+      'kai-progress-bar',
       'kai-prompt-input',
       'kai-screen',
       'kai-scroll-area',
       'kai-separator',
       'kai-skeleton',
-      'kai-stat',
       'kai-status',
       'kai-tabs',
       'kai-voice-output',
