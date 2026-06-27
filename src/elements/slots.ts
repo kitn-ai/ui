@@ -370,6 +370,31 @@ export const PROGRESS_BAR_PARTS: PartDef[] = [
   { name: 'fill', doc: 'The filled portion; its width follows value/max. Recolor it from outside.', recipe: 'kai-progress-bar::part(fill) { background: var(--color-tool-green) }' },
 ];
 
+/** Styleable `::part`s of `<kai-file-tree>` — the changed-files / diff bits, shown
+ *  only when a file carries diff metadata (or the `summary` attribute is set). */
+export const FILE_TREE_PARTS: PartDef[] = [
+  {
+    name: 'summary',
+    doc: 'The changed-files summary header (the file count, the summed +additions/-deletions, and the Collapse-all/Expand-all toggle). Rendered only when the `summary` attribute is set; restyle or hide it from outside.',
+    recipe: 'kai-file-tree::part(summary) { border-bottom: none; padding-block: 0.5rem }',
+  },
+  {
+    name: 'status',
+    doc: 'The per-row change-status letter (A/M/D/R/U), shown when a file carries a `status`. Colored with the conventional VCS tool hues; restyle from outside.',
+    recipe: 'kai-file-tree::part(status) { font-weight: 700 }',
+  },
+  {
+    name: 'stat-additions',
+    doc: 'The trailing `+N` additions stat on a file row (success/green tool hue, tabular-nums). Shown only when a file carries `additions`.',
+    recipe: 'kai-file-tree::part(stat-additions) { color: var(--color-tool-green) }',
+  },
+  {
+    name: 'stat-deletions',
+    doc: 'The trailing `-N` deletions stat on a file row (error/red tool hue, tabular-nums). Shown only when a file carries `deletions`.',
+    recipe: 'kai-file-tree::part(stat-deletions) { color: var(--color-tool-red) }',
+  },
+];
+
 /**
  * Per-element composition surface — the SINGLE registry the build extracts
  * (`scripts/gen-element-api.mjs`) into `element-meta.json`, the Custom Elements
@@ -410,6 +435,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-nav': { parts: NAV_PARTS },
   'kai-coachmark': { slots: COACHMARK_SLOTS, parts: COACHMARK_PARTS },
   'kai-progress-bar': { parts: PROGRESS_BAR_PARTS },
+  'kai-file-tree': { parts: FILE_TREE_PARTS },
 };
 
 /**

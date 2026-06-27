@@ -8,6 +8,7 @@ import {
   PROMPT_INPUT_PARTS,
   MESSAGE_SLOTS,
   MESSAGE_PARTS,
+  FILE_TREE_PARTS,
   ELEMENT_COMPOSITION,
   readSlots,
 } from './slots';
@@ -133,6 +134,22 @@ describe('MESSAGE_PARTS registry', () => {
   });
 });
 
+describe('FILE_TREE_PARTS registry', () => {
+  it('declares the changed-files diff parts, with unique names', () => {
+    const names = FILE_TREE_PARTS.map((p) => p.name);
+    expect(names).toEqual(['summary', 'status', 'stat-additions', 'stat-deletions']);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('every part has a non-empty doc contract', () => {
+    expect(FILE_TREE_PARTS.every((p) => p.doc.trim().length > 0)).toBe(true);
+  });
+
+  it('is wired into ELEMENT_COMPOSITION under kai-file-tree', () => {
+    expect(ELEMENT_COMPOSITION['kai-file-tree'].parts).toBe(FILE_TREE_PARTS);
+  });
+});
+
 describe('ELEMENT_COMPOSITION registry (single source of truth the build extracts)', () => {
   // Every `::part` a consumer can style is declared by writing `part="name"` in a
   // facade/component. The registry must name each one so docs + the kai MCP can
@@ -186,6 +203,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-chat',
       'kai-coachmark',
       'kai-conversations',
+      'kai-file-tree',
       'kai-hover-card',
       'kai-icon',
       'kai-menu',
