@@ -631,11 +631,14 @@ _No events._
 | `groups` | — | `{ id: string; userId?: undefined \| string; teamId?: undefined \| string; name: string; sortOrder: number; createdAt: string }[]` | Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. |
 | `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]` | A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. |
 | `activeId` | `active-id` | `undefined \| string` | The id of the currently-open conversation, highlighted in the list. |
+| `collapsed` | `collapsed` | `undefined \| false \| true` | Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. |
+| `defaultCollapsed` | `default-collapsed` | `undefined \| false \| true` | Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
+| `kai-collapse-toggle` | `CustomEvent<{ collapsed: false \| true }>` | The rail was collapsed or expanded (via the toggle, the reopen button, or a `collapse()`/`expand()`/`toggle()` call). |
 | `kai-conversation-select` | `CustomEvent<{ id: string }>` | A conversation was selected. |
 | `kai-new-chat` | `CustomEvent<Record<string, never>>` | The "New chat" button was clicked. |
 | `kai-search` | `CustomEvent<{ query: string }>` | The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter. |
@@ -1627,6 +1630,14 @@ _No events._
 | `kai-suggestion-click` | `CustomEvent<{ value: string }>` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
 | `kai-value-change` | `CustomEvent<{ value: string }>` | Fired on every input change. |
 | `kai-voice` | `CustomEvent<Record<string, never>>` | The Mic / voice button was clicked. |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `sidebar-header` | inject | Top of the conversation rail (brand, a kai-tabs strip). |
+| `sidebar-footer` | inject | Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster. |
+| `main-header` | inject | Top of the main region (a top-placed banner or a corner action). |
 
 ---
 

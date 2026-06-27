@@ -1,11 +1,10 @@
-import { Show } from 'solid-js';
+import { Show, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { createControllableSignal } from '../primitives/controllable';
+import { readSlots, WORKSPACE_SLOTS } from './slots';
 import { ChatThread, type ChatThreadContextUsage, type ChatThreadController } from '../components/chat-thread';
-import { ConversationList } from '../components/conversation-list';
+import { ConversationList, CollapsedRail } from '../components/conversation-list';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resizable';
-import { Button } from '../ui/button';
-import { PanelLeftOpen } from 'lucide-solid';
 import type { AttachmentData } from '../components/attachments';
 import type { TriggerDef } from '../components/composer';
 import type { ChatMessage } from './chat-types';
@@ -89,7 +88,19 @@ defineWebComponent<Props, Events>('kai-workspace', {
   search: false, voice: false, triggers: undefined, kindIcons: undefined,
   sidebarWidth: 22, sidebarMinWidth: 200, sidebarMaxWidth: 420,
   sidebarCollapsed: undefined, defaultSidebarCollapsed: undefined,
-}, (props, { dispatch, flag, expose }) => {
+}, (props, { dispatch, flag, expose, element }) => {
+  // Which injection slots the consumer has filled. A bare <slot> is always a
+  // truthy JSX node, so we render each region wrapper ONLY when readSlots reports
+  // projected light-DOM content (re-read on childList mutation).
+  const [slots, setSlots] = createSignal<Record<string, boolean>>({});
+  onMount(() => {
+    const read = () => setSlots(readSlots(element, WORKSPACE_SLOTS));
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true });
+    onCleanup(() => observer.disconnect());
+  });
+
   // Controlled/uncontrolled collapse: `sidebarCollapsed` (when set) wins;
   // otherwise the element manages its own state, seeded from
   // `defaultSidebarCollapsed`. `setCollapsedTo` always writes the internal value (a
@@ -151,34 +162,51 @@ defineWebComponent<Props, Events>('kai-workspace', {
     />
   );
 
+  // The main region: an optional top-placed `main-header` band above the thread.
+  // Shared across both collapse branches (the thread node is the same instance).
+  const mainRegion = (
+    <div class="flex h-full flex-col overflow-hidden">
+      <Show when={slots()['main-header']}>
+        <div class="shrink-0 border-b border-border"><slot name="main-header" /></div>
+      </Show>
+      <div class="min-h-0 flex-1">{threadEl}</div>
+    </div>
+  );
+
   return (
     <div class="h-full w-full overflow-hidden bg-background">
       <Show
         when={!collapsed()}
         fallback={
           <div class="relative h-full">
-            <Button
-              variant="ghost" size="icon-sm" aria-label="Open sidebar"
-              class="absolute left-2 top-2 z-10 rounded-full bg-card/80 shadow-sm backdrop-blur"
-              onClick={toggle}
-            >
-              <PanelLeftOpen class="size-4" />
-            </Button>
-            {threadEl}
+            <CollapsedRail onExpand={toggle} class="absolute left-2 top-2 z-10" />
+            {mainRegion}
           </div>
         }
       >
         <ResizablePanelGroup orientation="horizontal">
           <ResizablePanel defaultSize={props.sidebarWidth as number} data-min-size={String(props.sidebarMinWidth)} data-max-size={String(props.sidebarMaxWidth)}>
-            <ConversationList
-              groups={props.groups} conversations={props.conversations} activeId={props.activeId as string | undefined}
-              onSelect={(id) => dispatch('kai-conversation-select', { id })}
-              onNewChat={() => dispatch('kai-new-chat', {})}
-              onToggleSidebar={toggle}
-            />
+            {/* The rail: an optional injected header above the list and footer
+                below it (upgrade card / Design trigger / user menu). */}
+            <div class="flex h-full flex-col overflow-hidden">
+              <Show when={slots()['sidebar-header']}>
+                <div class="shrink-0"><slot name="sidebar-header" /></div>
+              </Show>
+              <div class="min-h-0 flex-1">
+                <ConversationList
+                  groups={props.groups} conversations={props.conversations} activeId={props.activeId as string | undefined}
+                  onSelect={(id) => dispatch('kai-conversation-select', { id })}
+                  onNewChat={() => dispatch('kai-new-chat', {})}
+                  onToggleSidebar={toggle}
+                />
+              </div>
+              <Show when={slots()['sidebar-footer']}>
+                <div class="shrink-0 border-t border-border"><slot name="sidebar-footer" /></div>
+              </Show>
+            </div>
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel>{threadEl}</ResizablePanel>
+          <ResizablePanel>{mainRegion}</ResizablePanel>
         </ResizablePanelGroup>
       </Show>
     </div>

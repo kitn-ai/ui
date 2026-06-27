@@ -195,6 +195,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-status',
       'kai-tabs',
       'kai-voice-output',
+      'kai-workspace',
     ]);
     expect(ELEMENT_COMPOSITION['kai-chat'].slots).toBe(CHAT_SLOTS);
     expect(ELEMENT_COMPOSITION['kai-message'].slots).toBe(MESSAGE_SLOTS);

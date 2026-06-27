@@ -265,9 +265,19 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `kai-value-change` | `{ value: string }` | Fired on every input change. |
 | `kai-voice` | — | The Mic / voice button was clicked. |
 
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `sidebar-header` | inject | Top of the conversation rail (brand, a kai-tabs strip). |
+| `sidebar-footer` | inject | Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster. |
+| `main-header` | inject | Top of the main region (a top-placed banner or a corner action). |
+
 #### Composed from
 
-`Components/ChatThread`, `Components/ConversationList`, `UI/ResizablePanelGroup`, `UI/ResizablePanel`, `UI/ResizableHandle`, `UI/Button`
+`Components/ChatThread`, `Components/ConversationList`, `Components/CollapsedRail`, `UI/ResizablePanelGroup`, `UI/ResizablePanel`, `UI/ResizableHandle`
 
 #### Theming
 
@@ -326,11 +336,14 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 | `groups` | — | `ConversationGroup[]` | `[]` | Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. |
 | `conversations` | — | `ConversationSummary[]` | `[]` | A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. |
 | `activeId` | `active-id` | `undefined | string` | — | The id of the currently-open conversation, highlighted in the list. |
+| `collapsed` | `collapsed` | `undefined | false | true` | — | Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. |
+| `defaultCollapsed` | `default-collapsed` | `undefined | false | true` | — | Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `kai-collapse-toggle` | `{ collapsed: false | true }` | The rail was collapsed or expanded (via the toggle, the reopen button, or a `collapse()`/`expand()`/`toggle()` call). |
 | `kai-conversation-select` | `{ id: string }` | A conversation was selected. |
 | `kai-new-chat` | — | The "New chat" button was clicked. |
 | `kai-search` | `{ query: string }` | The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter. |
@@ -348,7 +361,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 #### Composed from
 
-`Components/ConversationList`
+`Components/ConversationList`, `Components/CollapsedRail`
 
 #### Theming
 

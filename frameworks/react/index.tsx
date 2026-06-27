@@ -485,6 +485,12 @@ export interface ConversationsProps extends WebComponentProps {
   conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
+  /** Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. */
+  collapsed?: boolean;
+  /** Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. */
+  defaultCollapsed?: boolean;
+  /** The rail was collapsed or expanded (via the toggle, the reopen button, or a `collapse()`/`expand()`/`toggle()` call). */
+  onCollapseToggle?: (event: CustomEvent<{ collapsed: boolean }>) => void;
   /** A conversation was selected. */
   onConversationSelect?: (event: CustomEvent<{ id: string }>) => void;
   /** The "New chat" button was clicked. */
@@ -497,8 +503,8 @@ export interface ConversationsProps extends WebComponentProps {
 
 export const Conversations = createWebComponent<ConversationsProps>(
   'kai-conversations',
-  ["theme","groups","conversations","activeId"],
-  { onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onToggleSidebar: 'kai-toggle-sidebar' },
+  ["theme","groups","conversations","activeId","collapsed","defaultCollapsed"],
+  { onCollapseToggle: 'kai-collapse-toggle', onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onToggleSidebar: 'kai-toggle-sidebar' },
 );
 
 export interface EmbedProps extends WebComponentProps {

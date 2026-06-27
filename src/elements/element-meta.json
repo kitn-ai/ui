@@ -2086,9 +2086,31 @@
         "scalar": true,
         "description": "The id of the currently-open conversation, highlighted in the list.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "collapsed",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultCollapsed",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML.",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
+      {
+        "name": "kai-collapse-toggle",
+        "detail": "{ collapsed: false | true }",
+        "description": "The rail was collapsed or expanded (via the toggle, the reopen button, or a `collapse()`/`expand()`/`toggle()` call).",
+        "displayDetail": "{ collapsed: false | true }"
+      },
       {
         "name": "kai-conversation-select",
         "detail": "{ id: string }",
@@ -2132,6 +2154,24 @@
         "params": "id: string",
         "returns": "void",
         "description": "Programmatically select a conversation by id — mirror of the kai-conversation-select event (a convenience over driving `activeId`)."
+      },
+      {
+        "name": "collapse",
+        "params": "",
+        "returns": "void",
+        "description": "Collapse the rail to its floating reopen button (fires `kai-collapse-toggle`)."
+      },
+      {
+        "name": "expand",
+        "params": "",
+        "returns": "void",
+        "description": "Expand the rail back to the full list (fires `kai-collapse-toggle`)."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Toggle the rail collapsed/expanded (fires `kai-collapse-toggle`)."
       }
     ],
     "composedFrom": [
@@ -2139,6 +2179,11 @@
         "name": "ConversationList",
         "group": "Components",
         "storyId": "solid-advanced-elements-conversationlist--docs"
+      },
+      {
+        "name": "CollapsedRail",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-collapsedrail--docs"
       }
     ],
     "tokens": [
@@ -5960,6 +6005,11 @@
         "storyId": "solid-advanced-elements-conversationlist--docs"
       },
       {
+        "name": "CollapsedRail",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-collapsedrail--docs"
+      },
+      {
         "name": "ResizablePanelGroup",
         "group": "UI",
         "storyId": "solid-advanced-primitives-resizablepanelgroup--docs"
@@ -5973,13 +6023,25 @@
         "name": "ResizableHandle",
         "group": "UI",
         "storyId": "solid-advanced-primitives-resizablehandle--docs"
-      },
-      {
-        "name": "Button",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-button--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "sidebar-header",
+        "mode": "inject",
+        "doc": "Top of the conversation rail (brand, a kai-tabs strip)."
+      },
+      {
+        "name": "sidebar-footer",
+        "mode": "inject",
+        "doc": "Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster."
+      },
+      {
+        "name": "main-header",
+        "mode": "inject",
+        "doc": "Top of the main region (a top-placed banner or a corner action)."
+      }
+    ]
   }
 ]

@@ -1,4 +1,5 @@
 import { splitProps, For, Show, createSignal, createMemo, onMount, type JSX } from 'solid-js';
+import { PanelLeftOpen } from 'lucide-solid';
 import { cn } from '../utils/cn';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../ui/collapsible';
 import { Button } from '../ui/button';
@@ -6,6 +7,26 @@ import { Badge } from '../ui/badge';
 import { ScrollArea } from '../ui/scroll-area';
 import { ConversationItem } from './conversation-item';
 import type { ConversationSummary, ConversationGroup } from '../types';
+
+/**
+ * The collapsed-rail fallback: a floating reopen button shown when the
+ * conversation sidebar is collapsed. Shared by `kai-workspace` (its collapsed
+ * branch) and the standalone `kai-conversations` (collapsed mode), so the rail
+ * collapses identically in both. Renders only the button; the host owns the
+ * surrounding region (the workspace puts the thread beside it, the standalone
+ * element stands alone). `onExpand` reopens the rail.
+ */
+export function CollapsedRail(props: { onExpand: () => void; class?: string }) {
+  return (
+    <Button
+      variant="ghost" size="icon-sm" aria-label="Open sidebar"
+      class={cn('rounded-full bg-card/80 shadow-sm backdrop-blur', props.class)}
+      onClick={props.onExpand}
+    >
+      <PanelLeftOpen class="size-4" />
+    </Button>
+  );
+}
 
 export interface ConversationListProps {
   groups: ConversationGroup[];

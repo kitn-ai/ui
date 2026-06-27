@@ -347,6 +347,10 @@ export interface KaiConversationsElement extends HTMLElement {
   conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
+  /** Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. */
+  collapsed?: boolean;
+  /** Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. */
+  defaultCollapsed?: boolean;
 }
 
 export interface KaiEmbedElement extends HTMLElement {

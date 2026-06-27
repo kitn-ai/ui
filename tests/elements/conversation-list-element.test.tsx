@@ -67,3 +67,110 @@ test('icon-only controls have accessible names (a11y A1)', async () => {
 
   el.remove();
 });
+
+// ── §8 rail collapse ────────────────────────────────────────────────────────
+
+type ConvEl = HTMLElement & {
+  groups: ConversationGroup[]; conversations: ConversationSummary[];
+  collapsed?: boolean;
+  collapse(): void; expand(): void; toggle(): void;
+};
+
+function mountConversations(extra?: (el: ConvEl) => void): ConvEl {
+  const el = document.createElement('kai-conversations') as ConvEl;
+  el.groups = groups;
+  el.conversations = conversations;
+  extra?.(el);
+  document.body.appendChild(el);
+  return el;
+}
+
+test('collapse() shrinks the rail to a floating reopen button; expand() restores it', async () => {
+  const el = mountConversations();
+  await Promise.resolve();
+  const root = el.shadowRoot!;
+
+  // Expanded by default: the list (and search) render.
+  expect(root.textContent).toContain('Hello world');
+
+  el.collapse();
+  await Promise.resolve();
+  // Collapsed: the list is gone, only the reopen button remains.
+  expect(root.textContent).not.toContain('Hello world');
+  const reopen = root.querySelector<HTMLButtonElement>('button[aria-label="Open sidebar"]');
+  expect(reopen).not.toBeNull();
+
+  el.expand();
+  await Promise.resolve();
+  expect(root.textContent).toContain('Hello world');
+  expect(root.querySelector('button[aria-label="Open sidebar"]')).toBeNull();
+
+  el.remove();
+});
+
+test('collapse/expand/toggle fire kai-collapse-toggle with the new state', async () => {
+  const el = mountConversations();
+  await Promise.resolve();
+
+  const states: boolean[] = [];
+  el.addEventListener('kai-collapse-toggle', (e) => states.push((e as CustomEvent).detail.collapsed));
+
+  el.collapse();
+  el.expand();
+  el.toggle(); // from expanded → collapsed
+  await Promise.resolve();
+
+  expect(states).toEqual([true, false, true]);
+  el.remove();
+});
+
+test('the floating reopen button expands the rail and fires kai-collapse-toggle', async () => {
+  const el = mountConversations((e) => (e.collapsed = undefined));
+  el.collapsed = undefined;
+  await Promise.resolve();
+  el.collapse();
+  await Promise.resolve();
+
+  let lastCollapsed: boolean | null = null;
+  el.addEventListener('kai-collapse-toggle', (e) => (lastCollapsed = (e as CustomEvent).detail.collapsed));
+
+  const reopen = el.shadowRoot!.querySelector<HTMLButtonElement>('button[aria-label="Open sidebar"]')!;
+  reopen.click();
+  await Promise.resolve();
+
+  expect(lastCollapsed).toBe(false);
+  expect(el.shadowRoot!.textContent).toContain('Hello world');
+  el.remove();
+});
+
+test('default-collapsed seeds the rail collapsed (uncontrolled)', async () => {
+  const el = document.createElement('kai-conversations') as ConvEl;
+  el.setAttribute('default-collapsed', '');
+  el.groups = groups;
+  el.conversations = conversations;
+  document.body.appendChild(el);
+  await Promise.resolve();
+
+  const root = el.shadowRoot!;
+  expect(root.querySelector('button[aria-label="Open sidebar"]')).not.toBeNull();
+  expect(root.textContent).not.toContain('Hello world');
+  el.remove();
+});
+
+test('controlled collapsed prop wins over an internal toggle', async () => {
+  const el = mountConversations((e) => (e.collapsed = true));
+  await Promise.resolve();
+  const root = el.shadowRoot!;
+  // Controlled-collapsed: shows the reopen button.
+  expect(root.querySelector('button[aria-label="Open sidebar"]')).not.toBeNull();
+
+  // expand() writes the internal value (masked while controlled) + still fires the
+  // event, so a controlling app can react — but the view stays collapsed.
+  let fired = false;
+  el.addEventListener('kai-collapse-toggle', () => (fired = true));
+  el.expand();
+  await Promise.resolve();
+  expect(fired).toBe(true);
+  expect(root.querySelector('button[aria-label="Open sidebar"]')).not.toBeNull();
+  el.remove();
+});

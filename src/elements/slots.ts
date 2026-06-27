@@ -292,6 +292,14 @@ export const CARD_PARTS: PartDef[] = [
   },
 ];
 
+/** Injection slots of `<kai-workspace>` (the carrier regions the consumer drops
+ *  content into: brand/tabs, the upgrade/Design/user-menu cluster, a top banner). */
+export const WORKSPACE_SLOTS: SlotDef[] = [
+  { name: 'sidebar-header', mode: 'inject', doc: 'Top of the conversation rail (brand, a kai-tabs strip).' },
+  { name: 'sidebar-footer', mode: 'inject', doc: 'Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster.' },
+  { name: 'main-header', mode: 'inject', doc: 'Top of the main region (a top-placed banner or a corner action).' },
+];
+
 /**
  * Per-element composition surface — the SINGLE registry the build extracts
  * (`scripts/gen-element-api.mjs`) into `element-meta.json`, the Custom Elements
@@ -328,6 +336,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-voice-output': { parts: VOICE_OUTPUT_PARTS },
   'kai-screen': { slots: SCREEN_SLOTS, parts: SCREEN_PARTS },
   'kai-card': { slots: CARD_SLOTS, parts: CARD_PARTS },
+  'kai-workspace': { slots: WORKSPACE_SLOTS },
 };
 
 /**
