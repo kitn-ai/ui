@@ -16,6 +16,10 @@ const meta: Meta = {
 };
 export default meta;
 
+// Hand-written HTML for the "Show code" panel (real consumer markup, not JSX).
+// Consumers reach for the <kai-tasks> element; data is set as a JS property.
+const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
+
 const ONBOARDING: TasksCardData = {
   mode: 'progress',
   heading: 'Get started with Claude',
@@ -52,6 +56,23 @@ export const GetStarted: StoryObj = {
       </div>
     );
   },
+  parameters: src(`<kai-tasks card-id="onboarding"></kai-tasks>
+
+<script type="module">
+  const el = document.querySelector('kai-tasks');
+  // Array/object props are set as JS properties, never attributes.
+  el.data = {
+    mode: 'progress',
+    heading: 'Get started with Claude',
+    tasks: [
+      { id: 'role', label: 'Customize Claude to your role', description: '...' },
+      { id: 'tools', label: 'Add ready-made tools and workflows', description: '...' },
+    ],
+  };
+  // No confirm in progress mode: checking a row IS the action, so the live
+  // kai-value-change is the signal.
+  el.addEventListener('kai-value-change', (e) => console.log(e.detail.value));
+</script>`),
 };
 
 const PARTIAL: TasksCardData = {
@@ -78,4 +99,19 @@ export const PartiallyComplete: StoryObj = {
       <TasksCard data={PARTIAL} cardId="onboarding-partial" onValueChange={action('onValueChange')} />
     </div>
   ),
+  parameters: src(`<kai-tasks card-id="onboarding-partial"></kai-tasks>
+
+<script type="module">
+  const el = document.querySelector('kai-tasks');
+  // Per-task \`checked: true\` seeds a row as already complete.
+  el.data = {
+    mode: 'progress',
+    heading: 'Get started with Claude',
+    tasks: [
+      { id: 'role', label: 'Customize Claude to your role', description: '...', checked: true },
+      { id: 'tools', label: 'Add ready-made tools and workflows', description: '...' },
+    ],
+  };
+  el.addEventListener('kai-value-change', (e) => console.log(e.detail.value));
+</script>`),
 };

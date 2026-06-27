@@ -14,6 +14,7 @@ import {
 } from 'solid-js';
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
+import { ProgressBar } from '../ui/progress-bar';
 import { Card } from './card';
 import { DismissedStub } from './dismissed-stub';
 import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primitives/card-contract';
@@ -608,7 +609,7 @@ function ProgressChecklist(props: {
     <div class={cn('flex flex-col gap-3', props.groupClass)}>
       <Show when={props.heading}>
         <div class="flex items-center justify-between gap-3">
-          <span id={props.headingId} class="text-[1.0625rem] font-semibold leading-snug tracking-tight text-foreground">
+          <span id={props.headingId} class="text-sm font-medium text-foreground">
             {props.heading}
           </span>
           <span
@@ -620,6 +621,9 @@ function ProgressChecklist(props: {
           </span>
         </div>
       </Show>
+
+      {/* Thin progress bar under the heading: filled to done / total. */}
+      <ProgressBar value={props.done} max={props.total} />
 
       <ul
         aria-labelledby={props.heading ? props.headingId : undefined}
@@ -635,10 +639,21 @@ function ProgressChecklist(props: {
               <li>
                 <label
                   class={cn(
-                    'flex items-start gap-3 rounded-lg px-2.5 py-2 text-sm transition-colors',
+                    'group flex items-start gap-3 rounded-lg px-2.5 py-2 text-sm transition-colors',
+                    // Keyboard focus ring (kit standard, inset so it stays within the
+                    // row). focus-visible only, so a mouse click that parks focus on the
+                    // row doesn't leave a noisy persistent outline — and it makes a
+                    // Tab-focused completed row's open description perceivable.
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
                     blocked() ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-muted/50',
                   )}
                   data-task-id={task.id}
+                  // Completed rows hide their description until hover/focus, so make the
+                  // row itself focusable to drive the focus-reveal (group-focus-within).
+                  // Incomplete rows stay unfocusable. Expose the label + description to AT.
+                  tabindex={checked() ? 0 : undefined}
+                  aria-label={checked() ? task.label : undefined}
+                  aria-describedby={checked() && task.description ? descId : undefined}
                 >
                   <input
                     type="checkbox"
@@ -649,7 +664,14 @@ function ProgressChecklist(props: {
                     aria-describedby={task.description ? descId : undefined}
                     onChange={(e) => props.onToggle(task.id, e.currentTarget.checked)}
                   />
-                  <span class="mt-0.5 shrink-0 text-muted-foreground" aria-hidden="true">
+                  <span
+                    class={cn(
+                      'mt-0.5 shrink-0 text-muted-foreground',
+                      // Completed rows: the check gently scales on hover.
+                      checked() && 'motion-safe:transition-transform motion-safe:group-hover:scale-110',
+                    )}
+                    aria-hidden="true"
+                  >
                     <Show
                       when={checked()}
                       fallback={<Circle size={18} />}
@@ -658,13 +680,36 @@ function ProgressChecklist(props: {
                     </Show>
                   </span>
                   <span class="flex min-w-0 flex-col gap-0.5">
-                    <span class={cn('font-medium text-foreground', checked() && 'line-through opacity-70')}>
+                    <span
+                      class={cn(
+                        'font-medium text-foreground',
+                        // Completed: strike through + muted, brightening on hover.
+                        checked() && 'line-through opacity-70 motion-safe:transition-opacity motion-safe:group-hover:opacity-100',
+                      )}
+                    >
                       {task.label}
                     </span>
                     <Show when={task.description}>
-                      <span id={descId} class="text-xs font-normal text-muted-foreground">
-                        {task.description}
-                      </span>
+                      <Show
+                        when={checked()}
+                        fallback={
+                          <span id={descId} class="text-xs font-normal text-muted-foreground">
+                            {task.description}
+                          </span>
+                        }
+                      >
+                        {/* Completed: collapse the description and reveal it on hover or
+                            keyboard focus via the grid-rows height trick. Height-collapse
+                            keeps the text in the DOM + a11y tree (unlike display:none). */}
+                        <div class="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] group-focus-within:grid-rows-[1fr] motion-safe:transition-[grid-template-rows] motion-safe:duration-200">
+                          <span
+                            id={descId}
+                            class="overflow-hidden text-xs font-normal text-muted-foreground opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 motion-safe:transition-opacity"
+                          >
+                            {task.description}
+                          </span>
+                        </div>
+                      </Show>
                     </Show>
                   </span>
                 </label>
