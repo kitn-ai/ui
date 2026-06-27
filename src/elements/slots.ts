@@ -208,6 +208,15 @@ export const ATTACHMENTS_PARTS: PartDef[] = [
   },
 ];
 
+/** Styleable `::part`s of `<kai-status>`. */
+export const STATUS_PARTS: PartDef[] = [
+  {
+    name: 'dot',
+    doc: 'The status dot. Recolor or resize it from outside; the `status` prop sets the default hue.',
+    recipe: 'kai-status::part(dot) { background: var(--color-tool-green) }',
+  },
+];
+
 /**
  * Per-element composition surface — the SINGLE registry the build extracts
  * (`scripts/gen-element-api.mjs`) into `element-meta.json`, the Custom Elements
@@ -239,6 +248,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-menu': { slots: MENU_SLOTS },
   'kai-skeleton': { parts: SKELETON_PARTS },
   'kai-attachments': { parts: ATTACHMENTS_PARTS },
+  'kai-status': { parts: STATUS_PARTS },
 };
 
 /**

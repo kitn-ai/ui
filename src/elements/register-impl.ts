@@ -34,6 +34,7 @@ import './message-skills';
 import './source';
 import './response-stream';
 import './empty';
+import './status';
 import './chain-of-thought';
 import './resizable';
 import './file-tree';

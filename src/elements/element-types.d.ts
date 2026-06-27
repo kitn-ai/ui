@@ -774,6 +774,19 @@ export interface KaiSourcesElement extends HTMLElement {
   numbered?: boolean;
 }
 
+export interface KaiStatusElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Presence/notification state → color. `new` (default) maps to the blue hue. */
+  status?: "new" | "online" | "busy" | "away" | "offline";
+  /** Animated ping ring (off by default; respects prefers-reduced-motion). */
+  pulse?: boolean;
+  /** Accessible name. Without it the dot is decorative. */
+  label?: string;
+  /** `sm` (default) or `md`. */
+  size?: "sm" | "md";
+}
+
 export interface KaiSuggestionsElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -998,6 +1011,7 @@ declare global {
     'kai-skills': KaiSkillsElement;
     'kai-source': KaiSourceElement;
     'kai-sources': KaiSourcesElement;
+    'kai-status': KaiStatusElement;
     'kai-suggestions': KaiSuggestionsElement;
     'kai-switch': KaiSwitchElement;
     'kai-tasks': KaiTasksElement;

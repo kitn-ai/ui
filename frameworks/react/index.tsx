@@ -1106,6 +1106,23 @@ export const Sources = createWebComponent<SourcesProps>(
   {  },
 );
 
+export interface StatusProps extends WebComponentProps {
+  /** Presence/notification state → color. `new` (default) maps to the blue hue. */
+  status?: "new" | "online" | "busy" | "away" | "offline";
+  /** Animated ping ring (off by default; respects prefers-reduced-motion). */
+  pulse?: boolean;
+  /** Accessible name. Without it the dot is decorative. */
+  label?: string;
+  /** `sm` (default) or `md`. */
+  size?: "sm" | "md";
+}
+
+export const Status = createWebComponent<StatusProps>(
+  'kai-status',
+  ["theme","status","pulse","label","size"],
+  {  },
+);
+
 export interface SuggestionsProps extends WebComponentProps {
   /** The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. */
   suggestions: (string | { label: string; value?: undefined | string; icon?: undefined | string })[];

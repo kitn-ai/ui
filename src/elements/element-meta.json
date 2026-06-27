@@ -4421,6 +4421,65 @@
     "tokens": []
   },
   {
+    "tag": "kai-status",
+    "className": "KaiStatusElement",
+    "displayName": "Status",
+    "props": [
+      {
+        "name": "status",
+        "type": "undefined | \"new\" | \"online\" | \"busy\" | \"away\" | \"offline\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Presence/notification state → color. `new` (default) maps to the blue hue.",
+        "default": "'new'",
+        "displayType": "undefined | \"new\" | \"online\" | \"busy\" | \"away\" | \"offline\""
+      },
+      {
+        "name": "pulse",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Animated ping ring (off by default; respects prefers-reduced-motion).",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Accessible name. Without it the dot is decorative.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`sm` (default) or `md`.",
+        "default": "'sm'",
+        "displayType": "undefined | \"sm\" | \"md\""
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "Status",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-status--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "dot",
+        "doc": "The status dot. Recolor or resize it from outside; the `status` prop sets the default hue.",
+        "recipe": "kai-status::part(dot) { background: var(--color-tool-green) }"
+      }
+    ]
+  },
+  {
     "tag": "kai-suggestions",
     "className": "KaiSuggestionsElement",
     "displayName": "Suggestions",
