@@ -1,0 +1,102 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Getting Started/Working with the primitives" />
+
+# Working with the primitives
+
+In a Solid app, skip the `kai-*` wrapper and import the pieces from `@kitn.ai/ui` directly. You compose them in JSX; your bundler tree-shakes what you don't use. For a full streaming chat, see the [Solid framework guide](https://ui.kitn.ai/guides/frameworks/solid/).
+
+```bash
+npm install @kitn.ai/ui solid-js
+```
+
+```ts
+import '@kitn.ai/ui/theme.css'; // design tokens, once near your entry
+```
+
+The `.` entry ships raw TSX; your bundler compiles and tree-shakes it alongside your own code.
+
+## Headless primitives
+
+Behavior, no markup. This is the layer the `kai-*` elements don't expose, so it's the main reason to import directly.
+
+```tsx
+import {
+  useTextStream,
+  useStickToBottom,
+  useAutoResize,
+  useVoiceRecorder,
+} from '@kitn.ai/ui';
+```
+
+- `useTextStream`: token-by-token streaming into your own UI.
+- `useStickToBottom`: pin a scroll container to the latest message, yielding when the reader scrolls up.
+- `useAutoResize`: grow a textarea with its content.
+- `useVoiceRecorder`: microphone capture state.
+
+`ChatConfig` (with `useChatConfig`) sets shared options like prose size for everything inside it.
+
+### State helpers & hooks
+
+`@kitn.ai/ui/state` ships immutable state helpers and a typed streaming handle; each framework adds a store that owns the state for you:
+
+```ts
+import { appendMessage, updateMessage, createAssistantStream } from '@kitn.ai/ui/state';
+import { createKaiChat } from '@kitn.ai/ui';          // SolidJS store
+// React: import { useKaiChat } from '@kitn.ai/ui/react';
+```
+
+- `appendMessage` / `upsertMessage` / `updateMessage` / `removeMessage` / `appendContent`: immutable `ChatMessage[]` updates (new array reference per change, so the element re-renders).
+- `createAssistantStream(set)`: a handle that grows one in-flight assistant message via `appendText`, `appendReasoning`, `upsertTool`, `patch`, `done`, `abort`.
+- `useKaiChat` (React) / `createKaiChat` (Solid): own the message list, wire submit, return a spreadable `bind`.
+
+See the **Examples → State & Hooks** story for the setter contract and streaming loop.
+
+## UI primitives
+
+The kit's accessible building blocks, useful well outside a chat.
+
+```tsx
+import { Button, Avatar, Badge, Separator } from '@kitn.ai/ui';
+import { Tooltip, HoverCard, Dropdown } from '@kitn.ai/ui';
+import { Resizable, ResizablePanel, ScrollArea } from '@kitn.ai/ui';
+
+<Button variant="ghost" size="icon" aria-label="Add"><PlusIcon /></Button>
+<Badge>Beta</Badge>
+```
+
+`Resizable` + `ResizablePanel` build a draggable split; handles drop in between visible panels. Each primitive has a story under **Components → Primitives**.
+
+## Feature components
+
+The AI surface. Compose a thread, or drop a single component anywhere:
+
+```tsx
+import {
+  ChatContainer, ChatContainerContent,
+  Message, MessageContent,
+  PromptInput, PromptInputTextarea, PromptInputActions,
+} from '@kitn.ai/ui';
+```
+
+```tsx
+import {
+  Markdown, Reasoning, ReasoningTrigger, ReasoningContent, Tool, Artifact,
+} from '@kitn.ai/ui';
+
+<Markdown content={assistantReply} />
+<Reasoning isStreaming={isStreaming}>
+  <ReasoningTrigger>View reasoning</ReasoningTrigger>
+  <ReasoningContent markdown>{thinkingText}</ReasoningContent>
+</Reasoning>
+<Tool toolPart={toolCall} defaultOpen />
+<Artifact files={artifactFiles} />
+```
+
+`ChatContainer` is transport-agnostic: it owns the conversation UI, you own the request. Stream the reply into your signal from `PromptInput`'s `onSubmit`. `Markdown` reads its prose size from the surrounding `ChatConfig`, not a prop. Each component has a story under **Components → Elements**.
+
+## Mixing the two
+
+Native components and `kai-*` elements ship in the same package and coexist. Compose primitives where you want control, drop a `<kai-chat>` shell where you want defaults.
+
+When you use a `kai-*` element inside Solid, bind arrays/objects with `prop:` (`prop:messages={messages()}`) so Solid sets a DOM property instead of stringifying, and listen with `on:` (`on:kai-submit`).

@@ -69,6 +69,10 @@ interface Events {
   /** The input changed (fires on every edit). Carries the flattened `value`
    *  plus the structured `doc` + `entities`. */
   'kai-value-change': { value: string; doc: ComposerDoc; entities: EntityRef[] };
+  /** The staged attachments changed — a file was added (via the paperclip) or
+   *  removed (per-chip ×). Carries the full current list so a consumer can react
+   *  in real time (validate, show upload progress, toggle the send button). */
+  'kai-attachments-change': { attachments: AttachmentData[] };
   /** A suggestion was clicked while `suggestion-mode="fill"`. */
   'kai-suggestion-click': { value: string };
   /** The Search (Globe) toolbar button was clicked. */
@@ -97,7 +101,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
   attachments: undefined,
   triggers: undefined,
   kindIcons: undefined,
-}, (props, { dispatch, flag, element }) => {
+}, (props, { dispatch, flag, element, expose }) => {
   const [internal, setInternal] = createSignal<string | ComposerDoc>(props.value ?? '');
   // Seed staged attachments from the `attachments` property; the element manages
   // its own state from there (paperclip adds, per-chip remove deletes).
@@ -174,6 +178,32 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
     }
   };
 
+  // ── Imperative API (instance methods on the host) ──────────────────────────
+  // The input half of the interaction surface; counterpart to the kai-* events.
+  expose({
+    /** Focus the text editor inside the shadow root (not the hidden file input). */
+    focus: (options?: FocusOptions) => {
+      const root = element.shadowRoot;
+      const target =
+        root?.querySelector<HTMLElement>('[contenteditable]:not([contenteditable="false"]), textarea') ??
+        root?.querySelector<HTMLElement>('input:not([type="file"])');
+      target?.focus(options);
+    },
+    /** Blur the focused input control. */
+    blur: () =>
+      (element.shadowRoot?.activeElement as HTMLElement | null)?.blur(),
+    /** Clear the text and any staged attachments (fires kai-value-change /
+     *  kai-attachments-change so a controlled consumer can react). */
+    clear: () => {
+      handleChange('');
+      if (attachments().length) { setAttachments([]); dispatch('kai-attachments-change', { attachments: [] }); }
+    },
+    /** Send the current value programmatically — same path as Enter / the send
+     *  button (fires kai-submit, then clears staged attachments). Named `send`,
+     *  not `submit`, to avoid colliding with the `submit` prop. */
+    send: () => handleSubmit(),
+  });
+
   return (
     <DefaultPromptInput
       value={current()}
@@ -194,7 +224,7 @@ defineWebComponent<Props, Events>('kai-prompt-input', {
       onValueChange={handleChange}
       onSubmit={handleSubmit}
       onSuggestionClick={handleSuggestionClick}
-      onAttachmentsChange={setAttachments}
+      onAttachmentsChange={(a) => { setAttachments(a); dispatch('kai-attachments-change', { attachments: a }); }}
       onSearch={() => dispatch('kai-search')}
       onVoice={() => dispatch('kai-voice')}
       onStop={() => dispatch('kai-stop')}

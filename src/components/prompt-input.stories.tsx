@@ -14,10 +14,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A composer shell that hosts an auto-resizing `PromptInputTextarea` and a `PromptInputActions` toolbar, with controlled or uncontrolled value, loading, and disabled states.',
-        '**When to use:** as the message input at the bottom of any chat surface, wherever the user types and submits a prompt.',
-        '**How to use:** control text via `value` + `onValueChange` (or leave uncontrolled), wire `onSubmit` (also fired on Enter without Shift), and place your send/stop controls inside `PromptInputActions`. Toggle `isLoading` / `disabled` for in-flight and read-only states.',
-        '**Placement:** pinned at the bottom of the chat column, below the message transcript.',
+        'The chat composer: an auto-resizing `PromptInputTextarea` plus a `PromptInputActions` toolbar for your send/stop controls. Control text with `value` + `onValueChange` (or leave it uncontrolled); `onSubmit` fires on Enter without Shift. `isLoading` and `disabled` cover the in-flight and read-only states.',
       ]),
     },
   },
@@ -53,7 +50,7 @@ const meta = {
     },
     children: {
       control: false,
-      description: 'Composer contents — usually a textarea plus an actions row.',
+      description: 'Composer contents, usually a textarea plus an actions row.',
     },
     class: {
       control: 'text',
@@ -83,12 +80,15 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// The event callbacks our custom-render stories route to the Actions panel.
+type EventArgs = { onValueChange?: (value: string) => void; onSubmit?: () => void };
+
 const IMPORT = `import { PromptInput, PromptInputTextarea, PromptInputActions, Button } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — toggle loading/disabled and edit the value via controls. */
+/** Interactive playground: toggle loading/disabled and edit the value via controls. */
 export const Playground: Story = {
   ...src(`<PromptInput value={value()} onValueChange={setValue} onSubmit={send}>
   <PromptInputTextarea placeholder="Ask anything..." />
@@ -100,11 +100,12 @@ export const Playground: Story = {
 
 /** Empty composer with a Send button disabled until there is text. */
 export const Default: Story = {
-  render: () => {
+  render: (args: EventArgs) => {
     const [value, setValue] = createSignal('');
+    const handleChange = (v: string) => { setValue(v); args.onValueChange?.(v); };
     return (
       <div class="max-w-xl">
-        <PromptInput value={value()} onValueChange={setValue}>
+        <PromptInput value={value()} onValueChange={handleChange} onSubmit={args.onSubmit}>
           <PromptInputTextarea placeholder="Ask anything..." />
           <PromptInputActions>
             <Button variant="default" size="sm" disabled={!value()}>
@@ -125,11 +126,12 @@ export const Default: Story = {
 
 /** Pre-filled with a prompt. */
 export const WithContent: Story = {
-  render: () => {
+  render: (args: EventArgs) => {
     const [value, setValue] = createSignal('Tell me about SolidJS reactive primitives');
+    const handleChange = (v: string) => { setValue(v); args.onValueChange?.(v); };
     return (
       <div class="max-w-xl">
-        <PromptInput value={value()} onValueChange={setValue}>
+        <PromptInput value={value()} onValueChange={handleChange} onSubmit={args.onSubmit}>
           <PromptInputTextarea placeholder="Ask anything..." />
           <PromptInputActions>
             <Button variant="default" size="sm">Send</Button>
@@ -146,11 +148,11 @@ export const WithContent: Story = {
 </PromptInput>`),
 };
 
-/** Read-only composer — `disabled` dims it and blocks input. */
+/** Read-only composer: `disabled` dims it and blocks input. */
 export const Disabled: Story = {
-  render: () => (
+  render: (args: EventArgs) => (
     <div class="max-w-xl">
-      <PromptInput disabled value="" onValueChange={() => {}}>
+      <PromptInput disabled value="" onValueChange={args.onValueChange} onSubmit={args.onSubmit}>
         <PromptInputTextarea placeholder="Chat is disabled..." />
         <PromptInputActions>
           <Button variant="default" size="sm" disabled>Send</Button>
@@ -166,11 +168,11 @@ export const Disabled: Story = {
 </PromptInput>`),
 };
 
-/** In-flight — `isLoading` typically pairs with a Stop action. */
+/** In-flight: `isLoading` typically pairs with a Stop action. */
 export const Loading: Story = {
-  render: () => (
+  render: (args: EventArgs) => (
     <div class="max-w-xl">
-      <PromptInput isLoading value="" onValueChange={() => {}}>
+      <PromptInput isLoading value="" onValueChange={args.onValueChange} onSubmit={args.onSubmit}>
         <PromptInputTextarea placeholder="Generating response..." />
         <PromptInputActions>
           <Button variant="outline" size="sm">
@@ -188,13 +190,14 @@ export const Loading: Story = {
 </PromptInput>`),
 };
 
-/** A split actions row — a leading icon control and a trailing Send (showcase). */
+/** A split actions row: a leading icon control and a trailing Send (showcase). */
 export const WithMultipleActions: Story = {
-  render: () => {
+  render: (args: EventArgs) => {
     const [value, setValue] = createSignal('');
+    const handleChange = (v: string) => { setValue(v); args.onValueChange?.(v); };
     return (
       <div class="max-w-xl">
-        <PromptInput value={value()} onValueChange={setValue}>
+        <PromptInput value={value()} onValueChange={handleChange} onSubmit={args.onSubmit}>
           <PromptInputTextarea placeholder="Ask anything..." />
           <PromptInputActions class="justify-between w-full px-2 pb-1">
             <div class="flex items-center gap-1">

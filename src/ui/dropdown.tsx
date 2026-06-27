@@ -37,8 +37,20 @@ const useDropdown = () => {
 // a parent's querySelectorAll scoped to its own menu never reaches sub items.
 const ITEM_SELECTOR = '[role="menuitem"]:not([aria-disabled="true"]), [role="menuitemcheckbox"]:not([aria-disabled="true"])';
 
-export function Dropdown(props: { children: JSX.Element }) {
-  const [open, setOpenSig] = createSignal(false);
+/** Imperative open controller, handed to a parent (e.g. the kai-menu facade) via
+ *  `controllerRef` so it can drive/observe the Dropdown's open state. */
+export interface DropdownController { open: Accessor<boolean>; setOpen: (v: boolean) => void; }
+
+export function Dropdown(props: {
+  children: JSX.Element;
+  /** Initial open state (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** When true, the trigger never opens the menu. */
+  disabled?: boolean;
+  /** Receive the open controller (open accessor + setOpen) once mounted. */
+  controllerRef?: (api: DropdownController) => void;
+}) {
+  const [open, setOpenSig] = createSignal(props.defaultOpen ?? false);
   const [viaKb, setViaKb] = createSignal(false);
   const [trigger, setTrigger] = createSignal<HTMLElement>();
   const [menu, setMenu] = createSignal<HTMLElement>();
@@ -48,6 +60,8 @@ export function Dropdown(props: { children: JSX.Element }) {
     return () => setSubMenus((prev) => prev.filter((m) => m !== el));
   };
   const setOpen = (v: boolean, opts?: { viaKeyboard?: boolean; returnFocus?: boolean }) => {
+    // Gate opening while disabled; closing always works.
+    if (v && props.disabled) return;
     setViaKb(!!opts?.viaKeyboard);
     setOpenSig(v);
     if (v) {
@@ -67,6 +81,9 @@ export function Dropdown(props: { children: JSX.Element }) {
       queueMicrotask(() => el?.focus());
     }
   };
+  // Hand the open controller up to a facade (e.g. kai-menu) so it can drive +
+  // observe open state via wireDisclosure. Mirrors HoverCardRoot.controllerRef.
+  props.controllerRef?.({ open, setOpen: (v: boolean) => setOpen(v) });
   return (
     <Ctx.Provider value={{
       open, setOpen, triggerId: createUniqueId(), menuId: createUniqueId(),

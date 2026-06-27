@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { onMount, onCleanup } from 'solid-js';
 import './register'; // side-effect: registers kai-avatar, kai-badge, kai-tooltip, kai-button, …
+import { attachKaiActions } from '../stories/docs/story-actions';
+
+// Small helper for stories below: wire a kai-* element's declared CustomEvents to
+// the Actions panel from a `ref`, cleaned up on unmount.
+const withActions = (e: Element) => onMount(() => onCleanup(attachKaiActions(e as HTMLElement)));
 
 // A purple square as a tiny offline-safe avatar image (proves the <img> path).
 const AVATAR_SRC =
@@ -23,11 +29,11 @@ declare module 'solid-js' {
   }
 }
 
-const meta = { title: 'Labs/New Primitives', parameters: { layout: 'padded' } } satisfies Meta;
+const meta = { title: 'Labs/Foundations', parameters: { layout: 'padded' } } satisfies Meta;
 export default meta;
 type Story = StoryObj;
 
-/** Identity avatars — initials fallback, plus an image. */
+/** Identity avatars, initials fallback, plus an image. */
 export const Avatars: Story = {
   render: () => (
     <div class="flex items-center gap-3">
@@ -38,7 +44,7 @@ export const Avatars: Story = {
   ),
 };
 
-/** Pills — label, count, and citation marker. */
+/** Pills: label, count, and citation marker. */
 export const Badges: Story = {
   render: () => (
     <div class="flex items-center gap-3">
@@ -49,33 +55,33 @@ export const Badges: Story = {
   ),
 };
 
-/** Tooltip wrapping a kit button — hover or focus the controls. */
+/** Tooltip wrapping a kit button. Hover or focus the controls. */
 export const Tooltips: Story = {
   render: () => (
     <div class="flex items-center gap-4 p-16">
-      <kai-tooltip content="Voice input">
-        <kai-button variant="subtle" size="icon" icon="mic" label="Voice input" />
+      <kai-tooltip content="Voice input" ref={withActions}>
+        <kai-button variant="subtle" size="icon" icon="mic" label="Voice input" ref={withActions} />
       </kai-tooltip>
-      <kai-tooltip content="Add files or photos">
-        <kai-button variant="ghost" size="sm" icon="plus">Add</kai-button>
+      <kai-tooltip content="Add files or photos" ref={withActions}>
+        <kai-button variant="ghost" size="sm" icon="plus" ref={withActions}>Add</kai-button>
       </kai-tooltip>
     </div>
   ),
 };
 
-/** Inline notices — one per severity, some dismissible, with an optional action. */
+/** Inline notices, one per severity, some dismissible, with an optional action. */
 export const Notices: Story = {
   render: () => (
     <div class="flex max-w-md flex-col gap-2">
-      <kai-notice severity="info" dismissible>
+      <kai-notice severity="info" dismissible ref={withActions}>
         A new model is available.
         <a slot="action" href="#" class="font-medium text-foreground underline underline-offset-2">See it</a>
       </kai-notice>
-      <kai-notice severity="warning">Claude Fable 5 is currently unavailable.</kai-notice>
-      <kai-notice severity="error" dismissible>Your last message failed to send.</kai-notice>
-      <kai-notice severity="success">Settings saved.</kai-notice>
+      <kai-notice severity="warning" ref={withActions}>Claude Fable 5 is currently unavailable.</kai-notice>
+      <kai-notice severity="error" dismissible ref={withActions}>Your last message failed to send.</kai-notice>
+      <kai-notice severity="success" ref={withActions}>Settings saved.</kai-notice>
       {/* slot="icon" escape hatch: a custom inline SVG overrides the severity glyph. */}
-      <kai-notice severity="info">
+      <kai-notice severity="info" ref={withActions}>
         New notifications are on.
         <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 text-tool-blue"><path d="M10.268 21a2 2 0 0 0 3.464 0" /><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg>
       </kai-notice>
@@ -83,7 +89,7 @@ export const Notices: Story = {
   ),
 };
 
-/** Dividers — horizontal between stacked content, vertical inside a control row. */
+/** Dividers: horizontal between stacked content, vertical inside a control row. */
 export const Separators: Story = {
   render: () => (
     <div class="flex max-w-md flex-col gap-3 text-foreground">
@@ -101,7 +107,7 @@ export const Separators: Story = {
   ),
 };
 
-/** Scroll area — themed thin scrollbar; content scrolls inside a bounded box. */
+/** Scroll area: themed thin scrollbar; content scrolls inside a bounded box. */
 export const ScrollAreaStory: Story = {
   name: 'Scroll Area',
   render: () => (
@@ -115,12 +121,12 @@ export const ScrollAreaStory: Story = {
   ),
 };
 
-/** Hover card — RICH content on hover/focus of a trigger (vs the text-only tooltip). */
+/** Hover card: RICH content on hover/focus of a trigger (vs the text-only tooltip). */
 export const HoverCards: Story = {
   render: () => (
     <div class="flex items-center gap-2 p-16 text-foreground">
       <span>Mentioned by</span>
-      <kai-hover-card open-delay="120">
+      <kai-hover-card open-delay="120" ref={withActions}>
         <a href="#" class="font-medium text-foreground underline underline-offset-2">@acme</a>
         <div slot="card" class="flex w-56 flex-col gap-2">
           <div class="flex items-center gap-2">
@@ -134,7 +140,7 @@ export const HoverCards: Story = {
   ),
 };
 
-/** Loading placeholders — variants, responsive width, and a composed card skeleton. */
+/** Loading placeholders: variants, responsive width, and a composed card skeleton. */
 export const Skeletons: Story = {
   render: () => (
     <div class="flex flex-col gap-6 text-foreground">
@@ -149,7 +155,7 @@ export const Skeletons: Story = {
         <div class="w-full rounded-md border border-border p-3"><kai-skeleton variant="text" lines="2" /></div>
         <div class="w-1/2 rounded-md border border-border p-3"><kai-skeleton variant="text" lines="2" /></div>
       </div>
-      {/* Composed: avatar + lines — how a consumer mirrors a real layout. */}
+      {/* Composed: avatar + lines (how a consumer mirrors a real layout). */}
       <div class="flex w-72 items-center gap-3 rounded-lg border border-border p-3">
         <kai-skeleton variant="circle" width="2.5rem" />
         <div class="flex-1"><kai-skeleton variant="text" lines="2" /></div>
@@ -169,8 +175,8 @@ export const Icons: Story = {
         <kai-icon name="paperclip" />
         <kai-icon name="sparkles" size="lg" />
       </div>
-      {/* Escape hatch: any inline SVG via slot="icon" — inherits currentColor. */}
-      <kai-button variant="outline" size="sm" label="Ship it">
+      {/* Escape hatch: any inline SVG via slot="icon"; inherits currentColor. */}
+      <kai-button variant="outline" size="sm" label="Ship it" ref={withActions}>
         <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
         Ship it
       </kai-button>

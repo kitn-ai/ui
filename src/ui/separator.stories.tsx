@@ -11,10 +11,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A thin **divider** line (a `role="separator"` element) that visually splits content either horizontally or vertically.',
-        '**When to use:** to separate stacked sections, group items in a menu/list, or divide inline controls in a toolbar.',
-        '**How to use:** set `orientation` to `horizontal` (full-width line) or `vertical` (full-height line). For a vertical separator, give the parent a height so the line has something to fill.',
-        '**Placement:** between message groups, in dropdown/menu sections, header toolbars, and between sidebar regions.',
+        'A `role="separator"` divider line. Set `orientation`: `horizontal` (full-width) or `vertical` (full-height; the parent needs a height).',
       ]),
     },
   },
@@ -46,7 +43,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — flip the orientation. */
+/** Interactive playground: flip the orientation. */
 export const Playground: Story = {
   ...src(`<Separator orientation="horizontal" />`),
 };
@@ -60,7 +57,7 @@ export const Horizontal: Story = {
 </div>`),
 };
 
-/** Vertical divider — needs a parent with a fixed height (showcase). */
+/** Vertical divider, needs a parent with a fixed height (showcase). */
 export const Vertical: Story = {
   render: () => (
     <div class="flex items-center gap-3 p-4">

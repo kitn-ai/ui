@@ -124,11 +124,61 @@ const dispatchNames = (sourceFile) => {
   return names;
 };
 
+// Methods contributed by shared helpers that call `expose()` internally (so the
+// literal-`expose({...})` walk below can't see them). Keep in sync with the helper.
+const HELPER_METHODS = {
+  wireDisclosure: [
+    { name: 'show', params: '', returns: 'void', description: 'Open it programmatically (no-op while disabled).' },
+    { name: 'hide', params: '', returns: 'void', description: 'Close it programmatically.' },
+    { name: 'toggle', params: '', returns: 'void', description: 'Flip the open state (closes while disabled).' },
+  ],
+};
+
+// collect expose({ name: fn }) imperative methods per file — the input half of the
+// interaction surface (defineWebComponent's ctx.expose attaches them to the host).
+// Also recognizes method-providing helpers (e.g. wireDisclosure) by their call site.
+const exposeMethods = (sourceFile) => {
+  const out = [];
+  const visit = (node) => {
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && Array.isArray(HELPER_METHODS[node.expression.text])) {
+      out.push(...HELPER_METHODS[node.expression.text].map((m) => ({ ...m })));
+    }
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'expose' &&
+      node.arguments[0] &&
+      ts.isObjectLiteralExpression(node.arguments[0])
+    ) {
+      for (const prop of node.arguments[0].properties) {
+        let name, fn;
+        if (ts.isPropertyAssignment(prop) && (ts.isIdentifier(prop.name) || ts.isStringLiteralLike(prop.name))) {
+          name = prop.name.text; fn = prop.initializer;
+        } else if (ts.isMethodDeclaration(prop) && ts.isIdentifier(prop.name)) {
+          name = prop.name.text; fn = prop;
+        } else continue;
+        const params = fn.parameters ? fn.parameters.map((pp) => pp.getText(sourceFile)).join(', ') : '';
+        const returns = fn.type ? fn.type.getText(sourceFile) : 'void';
+        let description = '';
+        for (const r of ts.getLeadingCommentRanges(sourceFile.text, prop.getFullStart()) ?? []) {
+          const t = sourceFile.text.slice(r.pos, r.end);
+          if (t.startsWith('/**')) description = t.replace(/^\/\*\*|\*\/$/g, '').replace(/^\s*\*\s?/gm, '').replace(/\s+/g, ' ').trim();
+        }
+        out.push({ name, params, returns, description });
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return out;
+};
+
 const elements = [];
 for (const file of facadeFiles) {
   const sf = program.getSourceFile(file);
   if (!sf) continue;
   const fileDispatch = dispatchNames(sf);
+  const fileMethods = exposeMethods(sf);
   const visit = (node) => {
     if (
       ts.isCallExpression(node) &&
@@ -156,7 +206,7 @@ for (const file of facadeFiles) {
       const composed = composedImports(sf);
       const tokens = COMPONENT_TOKENS[tag] ?? [];
       const className = tagToClass(tag);
-      elements.push({ tag, className, displayName: displayNameFromClass(className), props, events, composedFrom: composed, tokens });
+      elements.push({ tag, className, displayName: displayNameFromClass(className), props, events, methods: fileMethods, composedFrom: composed, tokens });
     }
     ts.forEachChild(node, visit);
   };
@@ -241,13 +291,23 @@ const cem = {
       tagName: el.tag,
       name: el.className,
       description: '',
-      members: el.props.map((p) => ({
-        kind: 'field',
-        name: p.name,
-        type: { text: p.type },
-        description: p.description,
-        privacy: 'public',
-      })),
+      members: [
+        ...el.props.map((p) => ({
+          kind: 'field',
+          name: p.name,
+          type: { text: p.type },
+          description: p.description,
+          privacy: 'public',
+        })),
+        ...el.methods.map((m) => ({
+          kind: 'method',
+          name: m.name,
+          ...(m.params ? { parameters: [{ name: m.params }] } : {}),
+          return: { type: { text: m.returns } },
+          description: m.description,
+          privacy: 'public',
+        })),
+      ],
       attributes: [
         { name: 'theme', type: { text: "'light' | 'dark' | 'auto'" }, description: 'Color mode (auto follows prefers-color-scheme).' },
         ...el.props.filter((p) => p.scalar).map((p) => ({
@@ -322,7 +382,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Phase 2: regenerate the SolidJS/UI component spec in the same build pass.
   const { generate: generateComponents } = await import('./gen-component-api.mjs');
   generateComponents();
-  // Phase 3: emit per-element, per-framework copy-paste snippets for the API tab.
-  const { writeFrameworkUsage } = await import('./gen-framework-usage.mjs');
-  writeFrameworkUsage(root, elements);
 }

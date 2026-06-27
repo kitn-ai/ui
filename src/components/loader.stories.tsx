@@ -12,10 +12,8 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A loading indicator with twelve animated **variants** (spinners, dots, bars, terminal, and text-based) in three **sizes**.',
-        '**When to use:** while waiting on an async operation — a streaming response, a tool call, or any pending state.',
-        '**How to use:** pick a `variant` and `size`. Text variants (`text-blink`, `text-shimmer`, `loading-dots`) display the `text` prop (defaults to "Thinking").',
-        '**Placement:** inside assistant message bubbles, send-button states, empty states, or anywhere an in-progress signal is needed.',
+        'A loading indicator with twelve animated `variant`s (spinners, dots, bars, terminal, text-based) in three `size`s, for streaming responses, tool calls, and pending states.',
+        'The text variants (`text-blink`, `text-shimmer`, `loading-dots`) display the `text` prop (defaults to "Thinking").',
       ]),
     },
   },
@@ -61,7 +59,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — switch variant, size, and text to explore every loader. */
+/** Interactive playground: switch variant, size, and text to explore every loader. */
 export const Playground: Story = {
   ...src(`<Loader variant="circular" size="md" />`),
 };
@@ -128,7 +126,7 @@ const allVariants: LoaderVariant[] = [
 
 const allSizes: LoaderSize[] = ['sm', 'md', 'lg'];
 
-/** Every variant across every size (showcase — not driven by controls). */
+/** Every variant across every size (showcase, not driven by controls). */
 export const AllVariantsGrid: Story = {
   render: () => (
     <div class="space-y-6">

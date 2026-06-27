@@ -199,6 +199,15 @@ export const MESSAGE_PARTS: PartDef[] = [
   },
 ];
 
+/** Styleable `::part`s of `<kai-attachments>`. */
+export const ATTACHMENTS_PARTS: PartDef[] = [
+  {
+    name: 'preview',
+    doc: 'The image shown in an attachment’s hover-card preview. Bounded by default (max ~320×256, aspect preserved) so a large image never blows up the card — raise or lower the cap from outside.',
+    recipe: 'kai-attachments::part(preview) { max-width: 32rem; max-height: 24rem }',
+  },
+];
+
 /**
  * Per-element composition surface — the SINGLE registry the build extracts
  * (`scripts/gen-element-api.mjs`) into `element-meta.json`, the Custom Elements
@@ -229,6 +238,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-hover-card': { slots: HOVER_CARD_SLOTS },
   'kai-menu': { slots: MENU_SLOTS },
   'kai-skeleton': { parts: SKELETON_PARTS },
+  'kai-attachments': { parts: ATTACHMENTS_PARTS },
 };
 
 /**

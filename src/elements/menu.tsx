@@ -4,10 +4,12 @@ import {
   Dropdown, DropdownTrigger, DropdownContent, DropdownItem,
   DropdownSeparator, DropdownLabel, DropdownCheckboxItem,
   DropdownSub, DropdownSubTrigger, DropdownSubContent,
+  type DropdownController,
 } from '../ui/dropdown';
 import { renderIcon } from '../ui/icon';
 import { cn } from '../utils/cn';
 import { defineWebComponent } from './define';
+import { wireDisclosure } from './disclosure';
 
 export interface KaiMenuItem {
   /** Emitted in `kai-select` for actionable items. */
@@ -44,6 +46,14 @@ interface Props extends Record<string, unknown> {
   triggerIconTrailing?: string;
   /** Accessible name for an icon-only trigger (no visible label). */
   label?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open`
+   *  attribute, the menu still self-manages on click/keyboard). Set `el.open = true`,
+   *  or `<kai-menu open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the menu. */
+  disabled?: boolean;
 }
 
 interface Events {
@@ -53,6 +63,8 @@ interface Events {
    * - Checkbox items: `{ id, checked }` where `checked` is the NEW state.
    */
   'kai-select': { id: string; checked?: boolean };
+  /** The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  'kai-open-change': { open: boolean };
 }
 
 /**
@@ -83,7 +95,17 @@ defineWebComponent<Props, Events>('kai-menu', {
   triggerLabel: undefined,
   triggerIconTrailing: undefined,
   label: undefined,
-}, (props, { dispatch }) => {
+  open: undefined,
+  defaultOpen: undefined,
+  disabled: undefined,
+}, (props, ctx) => {
+  const { dispatch, flag } = ctx;
+  let api: DropdownController | undefined;
+
+  // The standard overlay surface: settable+reflecting `open`, kai-open-change,
+  // show/hide/toggle, disabled-gating. See ./disclosure.
+  wireDisclosure(ctx, () => api, () => props.open);
+
   function renderItems(items: KaiMenuItem[]) {
     return (
       <For each={items}>
@@ -141,7 +163,11 @@ defineWebComponent<Props, Events>('kai-menu', {
   }
 
   return (
-    <Dropdown>
+    <Dropdown
+      defaultOpen={flag('defaultOpen')}
+      disabled={flag('disabled')}
+      controllerRef={(a) => (api = a)}
+    >
       <DropdownTrigger
         class={cn(
           'inline-flex items-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',

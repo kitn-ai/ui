@@ -61,6 +61,16 @@ export interface ComposerChange {
   text: string;
   entities: EntityRef[];
 }
+/** Imperative handle exposed via `controllerRef` — surfaces the composer's latent
+ *  capabilities (focus/blur the editable, clear the doc, submit, insert a pill) so
+ *  the `<kai-composer>` facade can forward them as instance methods. */
+export interface ComposerController {
+  focus(options?: FocusOptions): void;
+  blur(): void;
+  clear(): void;
+  send(): void;
+  insertEntity(entity: EntityRef): void;
+}
 export interface ComposerProps {
   value?: string | ComposerDoc;
   placeholder?: string;
@@ -85,6 +95,9 @@ export interface ComposerProps {
   ariaLabel?: string;
   /** Receive the editable element (e.g. to register it for click-to-focus). */
   editableRef?: (el: HTMLDivElement) => void;
+  /** Receive the imperative controller once mounted. The `<kai-composer>` facade
+   *  forwards these as element methods (focus/blur/clear/send/insertEntity). */
+  controllerRef?: (controller: ComposerController) => void;
   onChange?: (change: ComposerChange) => void;
   onSubmit?: (change: ComposerChange) => void;
   onTrigger?: (info: { char: string; query: string; rect: DOMRect }) => void;
@@ -461,6 +474,31 @@ export function Composer(props: ComposerProps): JSX.Element {
     };
     document.addEventListener('selectionchange', onSelectionChange);
     onCleanup(() => document.removeEventListener('selectionchange', onSelectionChange));
+  });
+
+  // --- Imperative controller (Pattern C): hand the facade a handle over the
+  //     composer's latent capabilities. `editable`/`snapshot`/`insertEntity` are
+  //     already wired internally — this just surfaces them without changing any
+  //     existing behavior. ---
+  onMount(() => {
+    props.controllerRef?.({
+      focus: (options) => editable.focus(options),
+      blur: () => editable.blur(),
+      // Empty the composer to a blank doc + reset the history baseline. Mirrors
+      // the external-value clear path so derived state syncs and onChange fires
+      // (which the facade turns into kai-value-change).
+      clear: () => {
+        clearPillSelection();
+        renderDoc(editable, [], editable.ownerDocument, props.kindIcons);
+        syncState(snapshot());
+        history.reset({ doc: parseDom(editable), caret: 0 });
+        lastEditAt = 0;
+      },
+      // Submit the current content programmatically — same path as Enter.
+      send: () => props.onSubmit?.(snapshot()),
+      // Insert an atomic pill at the caret (no trigger token to delete).
+      insertEntity: (entity) => insertEntity(entity),
+    });
   });
 
   /**

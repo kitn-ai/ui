@@ -14,10 +14,8 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Layout stress-tests for `Message` inside narrow chat panels (300–380px) and resizable side panels, verifying text wraps and the 32px avatar stays fixed.',
-        '**When to use:** as a reference when embedding the chat in a constrained column — a browser-extension side panel, a docked drawer, or a resizable split view.',
-        '**How to use:** wrap messages in a fixed/min-width container (and usually `ChatConfig proseSize="sm"`), keeping `min-w-0` on flex children so long text wraps instead of overflowing.',
-        '**Placement:** these are full-composition showcases, not control-driven; use them to copy the surrounding panel structure.',
+        'Layout stress-tests for `Message` inside narrow chat panels (300–380px) and resizable side panels: a reference for embedding the chat in a constrained column like a browser-extension side panel or a docked drawer.',
+        'The pattern: wrap messages in a min-width container with `ChatConfig proseSize="sm"`, keeping `min-w-0` on flex children so long text wraps instead of overflowing. These stories are full-composition showcases, not control-driven.',
       ]),
     },
   },
@@ -53,7 +51,7 @@ const src = (code: string) => ({
 const longText =
   'The document is a transcript of a YouTube video where Andre Karpathy discusses building AI agents using large language models. He explains how he structures his personal knowledge base and shares techniques for prompt engineering that maximize output quality.';
 
-/** Default render — a single message inside a 380px card; tweak `class` via controls. */
+/** Default render: a single message inside a 380px card; tweak `class` via controls. */
 export const Playground: Story = {
   ...src(`<ChatConfig proseSize="sm">
   <div style={{ width: '380px' }} class="p-3 rounded-lg">
@@ -65,7 +63,7 @@ export const Playground: Story = {
 </ChatConfig>`),
 };
 
-/** Simulates the chat panel at 380px — the default width in the detail page. */
+/** Simulates the chat panel at 380px: the default width in the detail page. */
 export const NarrowPanel380: Story = {
   render: () => (
     <ChatConfig proseSize="sm">
@@ -99,7 +97,7 @@ export const NarrowPanel380: Story = {
 </ChatConfig>`),
 };
 
-/** Even narrower — 300px minimum width with two messages. */
+/** Even narrower: 300px minimum width with two messages. */
 export const NarrowPanel300: Story = {
   render: () => (
     <ChatConfig proseSize="sm">
@@ -138,7 +136,7 @@ export const NarrowPanel300: Story = {
 </ChatConfig>`),
 };
 
-/** Without ChatContainer — isolates the Message component's own wrapping. */
+/** Without ChatContainer: isolates the Message component's own wrapping. */
 export const NarrowDivOnly: Story = {
   render: () => (
     <ChatConfig proseSize="sm">
@@ -163,7 +161,7 @@ export const NarrowDivOnly: Story = {
 </ChatConfig>`),
 };
 
-/** The avatar in isolation — verifies it stays a fixed 32px. */
+/** The avatar in isolation: verifies it stays a fixed 32px. */
 export const AvatarIsolation: Story = {
   render: () => (
     <div
@@ -184,7 +182,7 @@ export const AvatarIsolation: Story = {
 </div>`),
 };
 
-/** Reproduces the full extension layout — left nav, content column, resizable chat. */
+/** Reproduces the full extension layout: left nav, content column, resizable chat. */
 export const FullExtensionLayout: Story = {
   render: () => (
     <ChatConfig proseSize="sm">
@@ -264,7 +262,7 @@ export const FullExtensionLayout: Story = {
 </ResizablePanelGroup>`),
 };
 
-/** A simpler resizable split — main content beside a chat panel. */
+/** A simpler resizable split: main content beside a chat panel. */
 export const InsideResizablePanel: Story = {
   render: () => (
     <ChatConfig proseSize="sm">
@@ -272,7 +270,7 @@ export const InsideResizablePanel: Story = {
         <ResizablePanelGroup orientation="horizontal" class="flex-1 min-w-0 overflow-hidden">
           <ResizablePanel class="min-w-0 overflow-hidden">
             <div class="h-full p-4 bg-background overflow-y-auto">
-              <p class="text-foreground text-sm">Main content area — this simulates the article/transcript view</p>
+              <p class="text-foreground text-sm">Main content area, this simulates the article/transcript view</p>
             </div>
           </ResizablePanel>
           <ResizableHandle withHandle />

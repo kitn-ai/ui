@@ -26,10 +26,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A composable empty-state block (modeled on shadcn/ui `Empty`): a centered media tile, title, description, and a content slot for actions or suggestions. Token-driven styling; no border by default.',
-        '**When to use:** when a region has nothing to show yet — an empty list/inbox, no search results, a blank chat, or a drop zone — and you want to guide the user toward a next action.',
-        '**How to use:** compose `Empty > EmptyHeader (EmptyMedia + EmptyTitle + EmptyDescription)` and an optional `EmptyContent` for buttons or prompt suggestions. Set `EmptyMedia` `variant` to `icon` for a muted tile or `default` for a bare slot (avatar/illustration). Add `border border-dashed` via `class` for a card.',
-        '**Placement:** empty lists/sidebars, search-result panes, blank chat launch states, and file drop zones.',
+        'A composable empty-state block (modeled on shadcn/ui `Empty`): compose `EmptyHeader` (with `EmptyMedia`, `EmptyTitle`, `EmptyDescription`) and an optional `EmptyContent` for actions or prompt suggestions.',
+        'Set `EmptyMedia` `variant` to `icon` for a muted tile or `default` for a bare slot (avatar/illustration). Drop it into blank chats, empty lists, no-results panes, or file drop zones.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -46,7 +44,7 @@ const meta = {
     mediaVariant: {
       control: 'select',
       options: ['default', 'icon'],
-      description: '`EmptyMedia` variant — `icon` is a muted rounded tile, `default` is a bare slot.',
+      description: '`EmptyMedia` variant: `icon` is a muted rounded tile; `default` is a bare slot.',
       table: { defaultValue: { summary: 'default' } },
     },
     actionLabel: {
@@ -85,7 +83,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — edit the title, description, media variant, and action label. */
+/** Interactive playground: edit the title, description, media variant, and action label. */
 export const Playground: Story = {
   args: {
     title: 'No projects yet',
@@ -105,7 +103,7 @@ export const Playground: Story = {
 </Empty>`),
 };
 
-/** A single primary action — the canonical empty state. */
+/** A single primary action: the canonical empty state. */
 export const Default: Story = {
   render: () => (
     <div class="w-[420px]">
@@ -133,7 +131,7 @@ export const Default: Story = {
 </Empty>`),
 };
 
-/** Two actions — a primary plus a secondary (outline). */
+/** Two actions: a primary plus a secondary (outline). */
 export const WithActions: Story = {
   name: 'With Multiple Actions',
   render: () => (
@@ -209,10 +207,10 @@ export const MediaVariants: Story = {
 </Empty>`),
 };
 
-/** Suggestions as pills (PromptSuggestion default) in a centered wrap —
+/** Suggestions as pills (PromptSuggestion default) in a centered wrap,
  *  best for a handful of short prompts. */
 export const SuggestionPills: Story = {
-  name: 'Suggestions — Pills',
+  name: 'Suggestions: Pills',
   render: () => (
     <div class="w-[460px]">
       <Empty>
@@ -245,10 +243,10 @@ export const SuggestionPills: Story = {
 </Empty>`),
 };
 
-/** Suggestions as a full-width list (PromptSuggestion `block`) — best for
+/** Suggestions as a full-width list (PromptSuggestion `block`), best for
  *  longer, sentence-length prompts. This is the report chat dock's pattern. */
 export const SuggestionList: Story = {
-  name: 'Suggestions — List (block)',
+  name: 'Suggestions: List (block)',
   render: () => (
     <div class="w-[360px]">
       <Empty>
@@ -284,7 +282,7 @@ export const SuggestionList: Story = {
 /** Suggestions organized into labeled groups (mirrors the Prompt Input
  *  Variants → WithSuggestions pattern), inside an empty block. */
 export const GroupedSuggestions: Story = {
-  name: 'Suggestions — Grouped',
+  name: 'Suggestions: Grouped',
   render: () => {
     const groups = [
       { label: 'Get started', items: ['Summarize this document', 'What are the key takeaways?'] },
@@ -328,7 +326,7 @@ export const GroupedSuggestions: Story = {
 </Empty>`),
 };
 
-/** An empty block whose content is an input — the "blank chat" launch state. */
+/** An empty block whose content is an input: the "blank chat" launch state. */
 export const WithInput: Story = {
   name: 'With Prompt Input',
   render: () => {
@@ -405,7 +403,7 @@ export const WithLink: Story = {
 </Empty>`),
 };
 
-/** A bordered (dashed) card treatment — add `border border-dashed` via class. */
+/** A bordered (dashed) card treatment: add `border border-dashed` via class. */
 export const Bordered: Story = {
   render: () => (
     <div class="w-[420px]">

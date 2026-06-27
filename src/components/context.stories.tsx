@@ -27,10 +27,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A model context-window usage indicator: a hover-card trigger showing the used-percent ring, with a popover breaking down token usage (input / output / reasoning / cache) and estimated cost.',
-        '**When to use:** to surface how much of a model\'s context window a conversation has consumed and roughly what it costs — near the prompt input or in a chat header.',
-        '**How to use:** wrap the composition in `<Context>` and pass `usedTokens` / `maxTokens` (plus optional `inputTokens`, `outputTokens`, `reasoningTokens`, `cacheTokens`, `estimatedCost`). Compose `ContextTrigger`, `ContextContent` (with `Header`/`Body`/`Footer`), and the usage rows.',
-        '**Placement:** chat toolbars, prompt-input action bars, and conversation headers.',
+        'A context-window usage indicator: a hover-card trigger with a used-percent ring, and a popover breaking down token usage (input, output, reasoning, cache) plus estimated cost.',
+        'Wrap the composition in `Context` and pass `usedTokens` / `maxTokens` (plus optional per-category counts and `estimatedCost`); compose `ContextTrigger`, `ContextContent` (Header/Body/Footer), and the usage rows.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -129,7 +127,7 @@ const usage = `<Context usedTokens={85000} maxTokens={128000} inputTokens={60000
   </ContextContent>
 </Context>`;
 
-/** Interactive playground — tweak token counts to watch the ring, bar color, and breakdown update. */
+/** Interactive playground: tweak token counts to watch the ring, bar color, and breakdown update. */
 export const Playground: Story = {
   ...src(usage),
 };
@@ -209,7 +207,7 @@ const customThresholdUsage = `<Context
 </Context>`;
 
 /**
- * Custom thresholds — `warnThreshold=0.5` / `dangerThreshold=0.75` so the bar
+ * Custom thresholds: `warnThreshold=0.5` / `dangerThreshold=0.75` so the bar
  * turns yellow at 50% and red at 75%. At 55% (110 000 / 200 000) the bar renders
  * yellow even though the defaults would show green at this level.
  */

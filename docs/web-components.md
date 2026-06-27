@@ -168,6 +168,7 @@ Every element also accepts a `theme` attribute (`'light' | 'dark' | 'auto'`, def
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `kai-attachments-change` | `{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. |
 | `kai-message-action` | `{ messageId: string; action: string; state?: undefined | "on" | "off" }` | An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. |
 | `kai-model-change` | `{ modelId: string }` | The header model switcher changed. |
 | `kai-search` | — | The Search button was clicked. |
@@ -332,6 +333,7 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 |-------|-----------|-------------|
 | `kai-conversation-select` | `{ id: string }` | A conversation was selected. |
 | `kai-new-chat` | — | The "New chat" button was clicked. |
+| `kai-search` | `{ query: string }` | The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter. |
 | `kai-toggle-sidebar` | — | The sidebar toggle was clicked. |
 
 #### Slots
@@ -383,6 +385,7 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `kai-attachments-change` | `{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The staged attachments changed — a file was added (via the paperclip) or removed (per-chip ×). Carries the full current list so a consumer can react in real time (validate, show upload progress, toggle the send button). |
 | `kai-search` | — | The Search (Globe) toolbar button was clicked. |
 | `kai-stop` | — | The Stop button was clicked while `stoppable` and `loading` are both true. |
 | `kai-submit` | `{ value: string; doc: ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[]; attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }` | The user submitted the prompt (Enter or send button). `value` is the flattened text (back-compat); `doc` is the structured document and `entities` the inserted pills (skills/agents) for downstream expansion. |
@@ -542,15 +545,17 @@ No events.
 |----------|-----------|------|---------|-------|
 | `text` | `text` | `string` | `''` | The reasoning text to display. |
 | `label` | `label` | `undefined | string` | `'Reasoning'` | Trigger label. |
-| `open` | `open` | `undefined | false | true` | — | Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it). |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click + while streaming). Set `el.open = true`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `streaming` | `streaming` | `undefined | false | true` | `false` | While true, auto-expands (and re-collapses when it flips false). |
 | `markdown` | `markdown` | `undefined | false | true` | `true` | Render `text` as markdown. |
+| `disabled` | `disabled` | `undefined | false | true` | — | Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
-| `kai-open-change` | `{ open: false | true }` | Open state changed (via the trigger or streaming auto-open). |
+| `kai-open-change` | `{ open: false | true }` | The reasoning block expanded or collapsed (via the trigger, streaming auto-open, or a method). |
 
 #### Composed from
 
@@ -573,7 +578,15 @@ Collapsible reasoning/thinking block with optional streaming auto-expand.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `tool` | — | `ToolPart | undefined` | — | The tool-call to display. Set as a JS property. |
-| `open` | `open` | `undefined | false | true` | `false` | Start expanded. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click). Set `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined | false | true` | — | Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-open-change` | `{ open: false | true }` | The panel expanded or collapsed (by trigger click or a method). |
 
 #### Composed from
 
@@ -610,6 +623,14 @@ No events.
 |-------|-----------|-------------|
 | `kai-remove` | `{ id: string }` | A remove button was clicked. |
 
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-attachments::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(preview)` | The image shown in an attachment’s hover-card preview. Bounded by default (max ~320×256, aspect preserved) so a large image never blows up the card — raise or lower the cap from outside. <br>`kai-attachments::part(preview) { max-width: 32rem; max-height: 24rem }` |
+
 #### Composed from
 
 `Components/Attachments`, `Components/Attachment`, `Components/AttachmentPreview`, `Components/AttachmentInfo`, `Components/AttachmentRemove`, `Components/AttachmentHoverCard`, `Components/AttachmentHoverCardTrigger`, `Components/AttachmentHoverCardContent`, `Components/AttachmentEmpty`
@@ -632,12 +653,16 @@ Renders a list of file/document attachments in grid, inline, or list layouts.
 |----------|-----------|------|---------|-------|
 | `models` | — | `{ id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | `[]` | The selectable models. Set as a JS property (array). |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently-selected model id. Defaults to the first model. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger — click/keyboard and `show()` no longer open the dropdown. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-model-change` | `{ modelId: string }` | A model was selected. |
+| `kai-open-change` | `{ open: false | true }` | The model dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). |
 
 #### Composed from
 
@@ -691,11 +716,20 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `steps` | — | `{ label: string; content?: undefined | string }[]` | `[]` | The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). |
+| `steps` | — | `{ label: string; content?: undefined | string; id?: undefined | string }[]` | `[]` | The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). Each `{ label, content?, id? }`. |
+| `type` | `type` | `undefined | "single" | "multiple"` | — | Open mode: `'multiple'` (default — any number of steps open at once) or `'single'` (at most one open; opening a step closes the others). |
+| `value` | — | `undefined | string | string[]` | — | Controlled open step key(s). When set, it WINS over user interaction (the consumer owns the open set). String in `single` mode, string[] in `multiple` mode. Set as a JS property. |
+| `defaultValue` | — | `undefined | string | string[]` | — | Uncontrolled INITIAL open step key(s) — seeds which steps render expanded. Ignored once `value` is provided. Set as a JS property. |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-value-change` | `{ value: string | string[] }` | The open set changed — by user click OR an expand()/collapse()/toggle() call. `value` is a string in `single` mode, a string[] in `multiple` mode. (Maps Radix Accordion's onValueChange.) |
 
 #### Composed from
 
-`Components/ChainOfThought`, `Components/ChainOfThoughtStep`, `Components/ChainOfThoughtTrigger`, `Components/ChainOfThoughtContent`, `Components/ChainOfThoughtItem`
+`Components/ChainOfThoughtAccordion`
 
 #### Theming
 
@@ -876,6 +910,7 @@ A drag-and-drop / click-to-pick file upload dropzone.
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-audio-captured` | `{ blob: Blob }` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. |
+| `kai-recording-change` | `{ recording: false | true }` | Recording started or stopped — lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount. |
 | `kai-transcription` | `{ text: string }` | Transcription completed (the `transcribe` property resolved). |
 
 #### Composed from
@@ -1073,11 +1108,15 @@ A small button used to mark or navigate to a conversation checkpoint.
 | `availableAuthors` | — | `string[]` | `[]` | Authors to offer as scope filters. Set as a JS property. |
 | `availableTags` | — | `string[]` | `[]` | Tags to offer as scope filters. Set as a JS property. |
 | `currentLabel` | `current-label` | `undefined | string` | `'All Content'` | The label shown on the trigger for the active scope. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-scope-picker open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger — click/keyboard and `show()` no longer open the dropdown. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `kai-open-change` | `{ open: false | true }` | The scope dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). |
 | `kai-scope-change` | `{ filters: SearchFilters | undefined }` | A scope was chosen (`undefined` filters = "All Content"). |
 
 #### Composed from
@@ -1287,6 +1326,17 @@ A curated, theme-aware icon used standalone. Recolor via `::part(icon)` or `curr
 |----------|-----------|------|---------|-------|
 | `content` | `content` | `undefined | string` | `''` | The hint text shown on hover/focus of the slotted trigger. |
 | `openDelay` | `open-delay` | `undefined | number` | — | Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless. |
+| `closeDelay` | `close-delay` | `undefined | number` | — | Delay (ms) before it hides after the pointer leaves. Defaults to 0 (hides immediately). |
+| `placement` | `placement` | `undefined | string` | — | Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'top'`; flips to stay in view. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover/focus). Set `el.open = true`, or `<kai-tooltip open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined | false | true` | — | Turn the tooltip off while keeping the trigger mounted (hover/focus and `show()` no longer open it). |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-open-change` | `{ open: false | true }` | The tooltip opened or closed (by hover/focus, outside-click, or a method). |
 
 #### Composed from
 
@@ -1311,6 +1361,15 @@ A text hint shown on hover/focus of a slotted trigger; positioned and portaled i
 | `openDelay` | `open-delay` | `undefined | number` | — | Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too). |
 | `closeDelay` | `close-delay` | `undefined | number` | — | Delay (ms) before it closes after the pointer leaves. Defaults to 300. |
 | `placement` | `placement` | `undefined | string` | — | Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover). Set `el.open = true`, or `<kai-hover-card open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined | false | true` | — | Suppress the hover behavior entirely without unmounting. |
+
+#### Events
+
+| Event | `detail` | Description |
+|-------|-----------|-------------|
+| `kai-open-change` | `{ open: false | true }` | The card opened or closed (by hover/focus, outside-click, or a method). |
 
 #### Slots
 
@@ -1322,7 +1381,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 #### Composed from
 
-`UI/HoverCard`
+`UI/HoverCardRoot`, `UI/HoverCardTrigger`, `UI/HoverCardContent`
 
 #### Theming
 
@@ -1478,11 +1537,15 @@ A pulsing loading placeholder that preserves layout while content arrives. Respo
 | `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label (e.g. `"High"`). |
 | `triggerIconTrailing` | `trigger-icon-trailing` | `undefined | string` | — | Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). |
 | `label` | `label` | `undefined | string` | — | Accessible name for an icon-only trigger (no visible label). |
+| `open` | `open` | `undefined | false | true` | — | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-menu open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
+| `disabled` | `disabled` | `undefined | false | true` | — | Disable the trigger — click/keyboard and `show()` no longer open the menu. |
 
 #### Events
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `kai-open-change` | `{ open: false | true }` | The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). |
 | `kai-select` | `{ id: string; checked?: undefined | false | true }` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
 
 #### Slots
@@ -1521,6 +1584,7 @@ A cascading action menu built from a JSON items-tree (submenus, separators, chec
 
 | Event | `detail` | Description |
 |-------|-----------|-------------|
+| `kai-active-change` | `{ id: undefined | string }` | Fired when the highlighted/active item changes — via Arrow keys or when filtering re-clamps the active row. `id` is the newly active item's id, or `undefined` when no item is active (e.g. the filtered list is empty). Lets a host preview the active item without committing a selection. |
 | `kai-query-change` | `{ value: string }` | Fired on every keystroke in the search input. |
 | `kai-select` | `{ id: string }` | Fired when the user selects an item (click or Enter). |
 

@@ -11,10 +11,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A small, rounded **avatar** that renders an image when `src` is provided and falls back to short initials otherwise.',
-        '**When to use:** to identify the author of a message, a conversation participant, or the current user in a header or list.',
-        '**How to use:** always pass a `fallback` (1–2 initials) and a `size`. Provide `src`/`alt` when you have an image; if the image is missing or fails, the `fallback` text shows instead.',
-        '**Placement:** message rows (next to assistant/user content), conversation list items, account menus, and headers.',
+        'A rounded avatar that shows the `src` image, or the `fallback` initials (1–2 chars) when no image is set or it fails to load. Sized via `size`.',
       ]),
     },
   },
@@ -53,7 +50,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — tweak the controls to explore image vs. fallback and sizes. */
+/** Interactive playground: tweak the controls to explore image vs. fallback and sizes. */
 export const Playground: Story = {
   ...src(`<Avatar fallback="JD" size="md" />`),
 };
@@ -86,7 +83,7 @@ export const Large: Story = {
   ...src(`<Avatar size="lg" fallback="LG" />`),
 };
 
-/** Every size side by side (showcase — not driven by controls). */
+/** Every size side by side (showcase, not driven by controls). */
 export const AllSizes: Story = {
   render: () => (
     <div class="flex items-center gap-3">

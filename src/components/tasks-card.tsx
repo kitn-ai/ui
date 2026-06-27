@@ -8,6 +8,7 @@ import {
   createMemo,
   createEffect,
   on,
+  onMount,
   ErrorBoundary,
   createUniqueId,
 } from 'solid-js';
@@ -149,6 +150,24 @@ export function confirmReason(data: TasksCardData, count: number): string | unde
 // The <TasksCard> component.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** Imperative handle exposed via `controllerRef` — surfaces the tasks card's latent
+ *  selection model (set the checked ids, toggle one, confirm, focus the group,
+ *  dismiss/reopen) so the `<kai-tasks>` facade can forward them as instance methods. */
+export interface TasksCardController {
+  /** Set the checked ids (local-only, no emit), respecting disabled/max. No arg = select all toggleable rows. */
+  select(taskIds?: string[]): void;
+  /** Toggle one task by id, honoring the max gate. */
+  toggle(taskId: string, checked?: boolean): void;
+  /** Confirm the current selection (only when allowed) — emits `submit` + resolves. */
+  send(): void;
+  /** Focus the task group (select-all checkbox if shown, else the first row). */
+  focus(options?: FocusOptions): void;
+  /** Trigger the dismiss path (emit `dismiss` + collapse to the re-openable stub). */
+  dismiss(): void;
+  /** Re-open a dismissed card from its stub (emit `reopen`). */
+  reopen(): void;
+}
+
 export interface TasksCardProps {
   /** The tasks definition (CardEnvelope.data). */
   data?: TasksCardData;
@@ -164,6 +183,16 @@ export interface TasksCardProps {
   class?: string;
   /** When set, render the chromed read-only summary instead of the interactive controls. */
   resolution?: CardResolution;
+  /** Controlled selection (task ids) — when set, this wins over internal state. */
+  value?: string[];
+  /** Uncontrolled initial selection (task ids), overlaying per-task `checked`. */
+  defaultValue?: string[];
+  /** Freeze the whole list + Confirm. */
+  disabled?: boolean;
+  /** Fires on every selection change with the selected ids (distinct from submit). */
+  onValueChange?: (payload: { value: string[] }) => void;
+  /** Receive the imperative controller once mounted. */
+  controllerRef?: (controller: TasksCardController) => void;
 }
 
 const DEFAULT_DATA: TasksCardData = { tasks: [] };
@@ -177,7 +206,10 @@ const DEFAULT_DATA: TasksCardData = { tasks: [] };
  */
 export function TasksCard(props: TasksCardProps): JSX.Element {
   const merged = mergeProps({ cardId: 'kai-tasks' }, props);
-  const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution']);
+  const [local] = splitProps(merged, [
+    'data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution',
+    'value', 'defaultValue', 'disabled', 'onValueChange', 'controllerRef',
+  ]);
 
   const ctxHost = useCardHost();
   const uid = createUniqueId();
@@ -198,15 +230,36 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
 
   const res = useCardResolution({ prop: () => local.resolution, data: () => local.data });
 
-  // Seed selection from the tasks' initial checked state when a NEW definition arrives.
+  // Only ids that exist in the current task list (drop unknown ids defensively).
+  const validIds = (ids: string[]): string[] => {
+    const known = new Set(tasks().map((t) => t.id));
+    return ids.filter((id) => known.has(id));
+  };
+
+  // Seed selection from `value` (controlled) > `defaultValue` > per-task `checked`,
+  // when a NEW definition arrives.
   createEffect(
     on(
       () => local.data,
       () => {
-        setSelected(new Set(initialSelected(tasks())));
+        const seedIds = local.value ?? local.defaultValue ?? initialSelected(tasks());
+        setSelected(new Set(validIds(seedIds)));
       },
     ),
   );
+
+  // Controlled selection: when the consumer drives `value`, mirror it into the set
+  // (the controlled prop wins). Deferred so mount's seed runs first.
+  createEffect(on(() => local.value, (v) => {
+    if (!v) return;
+    setSelected(new Set(validIds(v)));
+  }, { defer: true }));
+
+  // Fire the live change signal whenever the selection set changes (distinct from
+  // the terminal submit). Deferred so the initial seed doesn't emit.
+  createEffect(on(selected, (s) => {
+    local.onValueChange?.({ value: selectedInOrder(tasks(), s) });
+  }, { defer: true }));
 
   // ready / error lifecycle emits.
   createEffect(
@@ -216,28 +269,34 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
     }),
   );
 
+  const groupDisabled = (): boolean => local.disabled === true;
+
   const count = createMemo(() => selected().size);
   const confirmLabel = () => data().confirmLabel ?? 'Confirm';
   const masterState = createMemo(() => selectAllState(tasks(), selected()));
   const showMaster = createMemo(() => showSelectAll(data(), tasks()));
   const reason = createMemo(() => confirmReason(data(), count()));
-  const confirmEnabled = createMemo(() => canConfirm(data(), count()) && !res.isResolved());
+  const confirmEnabled = createMemo(() => canConfirm(data(), count()) && !res.isResolved() && !groupDisabled());
 
-  const toggle = (id: string, on: boolean): void => {
-    if (res.isResolved()) return;
-    const next = new Set(selected());
+  // Apply one id to a selection set, honoring the max gate (mutates+returns `next`).
+  const applyToggle = (next: Set<string>, id: string, on: boolean): Set<string> => {
     if (on) {
       // Respect max: block adding past max.
-      if (isMaxReached(data(), next.size) && !next.has(id)) return;
+      if (isMaxReached(data(), next.size) && !next.has(id)) return next;
       next.add(id);
     } else {
       next.delete(id);
     }
-    setSelected(next);
+    return next;
+  };
+
+  const toggle = (id: string, on: boolean): void => {
+    if (res.isResolved() || groupDisabled()) return;
+    setSelected(applyToggle(new Set(selected()), id, on));
   };
 
   const toggleAll = (on: boolean): void => {
-    if (res.isResolved()) return;
+    if (res.isResolved() || groupDisabled()) return;
     const next = new Set(selected());
     for (const id of toggleableIds(tasks())) {
       if (on) next.add(id);
@@ -261,6 +320,43 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
     res.setLocal({ kind: 'dismissed' });
   };
   const onReopen = (): void => emit({ kind: 'reopen', cardId: local.cardId });
+
+  // Imperative controller (Pattern C): hand the facade a handle over the tasks
+  // card's latent selection model. select sets the checked ids local-only (no
+  // submit); toggle drives one row; send confirms (same path as Confirm); focus
+  // targets the group; dismiss/reopen drive the stub.
+  onMount(() => {
+    local.controllerRef?.({
+      select: (taskIds) => {
+        if (res.isResolved() || groupDisabled()) return;
+        if (taskIds === undefined) { toggleAll(true); return; }
+        // Build the set fresh, honoring max + disabled per id (skip disabled rows).
+        const next = new Set<string>();
+        const toggleable = new Set(toggleableIds(tasks()));
+        for (const id of validIds(taskIds)) {
+          if (!toggleable.has(id)) continue; // skip per-task-disabled rows
+          applyToggle(next, id, true);
+        }
+        setSelected(next);
+      },
+      toggle: (taskId, checked) => {
+        // No explicit `checked` → flip the current state.
+        const on = checked ?? !selected().has(taskId);
+        toggle(taskId, on);
+      },
+      send: () => onConfirm(),
+      focus: (options) => {
+        const root = local.hostElement?.shadowRoot ?? document;
+        const group = root.querySelector<HTMLElement>('[role="group"]');
+        // Prefer the select-all checkbox (it's the first labelled input), else the
+        // first row's checkbox; fall back to the group container itself.
+        const firstInput = group?.querySelector<HTMLElement>('input[type="checkbox"]');
+        (firstInput ?? group)?.focus(options);
+      },
+      dismiss: () => onDismiss(),
+      reopen: () => onReopen(),
+    });
+  });
 
   // Surface the resolved state for host styling. Only a `submit` resolution is the
   // "submitted" state; a deferred `dismissed` (or `expired`) is not.
@@ -369,6 +465,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                           type="checkbox"
                           class="kai-checkbox"
                           checked={masterState() === 'checked'}
+                          disabled={groupDisabled()}
                           aria-checked={indeterminate() ? 'mixed' : masterState() === 'checked'}
                           ref={(el) => {
                             createEffect(() => {
@@ -387,7 +484,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                   {(task) => {
                     const checked = () => selected().has(task.id);
                     const blocked = () =>
-                      task.disabled || (!checked() && isMaxReached(data(), count()));
+                      groupDisabled() || task.disabled || (!checked() && isMaxReached(data(), count()));
                     const descId = `kai-tl-desc-${uid}-${task.id}`;
                     return (
                       <label

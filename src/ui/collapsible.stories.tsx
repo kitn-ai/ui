@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './collapsible';
 import { componentDescription } from '../stories/docs/element-controls';
 
@@ -10,13 +11,21 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A two-state disclosure that expands and collapses a region of content, animating height via a CSS `grid-template-rows` `0fr` → `1fr` transition (no JS measurement, no layout thrash). The trigger carries `aria-expanded`/`aria-controls` and the collapsed content is `inert`, so it is removed from tab order and the accessibility tree. Works controlled (`open` + `onOpenChange`) or uncontrolled (`defaultOpen`).',
-        '**When to use:** to hide secondary detail behind a toggle — a reasoning/"chain of thought" panel, a tool-call payload, an expandable conversation group, an FAQ row.',
-        '**How to use:** wrap `CollapsibleTrigger` and `CollapsibleContent` in a `Collapsible`. The trigger renders a `<button>` by default; pass `as` to render a custom element.',
+        'A disclosure that expands/collapses `CollapsibleContent` from a `CollapsibleTrigger`, with the right `aria-expanded` wiring and `inert` collapsed content. Controlled (`open` + `onOpenChange`) or uncontrolled (`defaultOpen`).',
       ]),
     },
   },
-  render: () => <CollapsibleDemo defaultOpen />,
+  argTypes: {
+    onOpenChange: {
+      action: 'openChange',
+      description: 'Fires with the next open state whenever the disclosure expands or collapses.',
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    onOpenChange: fn(),
+  },
+  render: (args) => <CollapsibleDemo defaultOpen onOpenChange={args.onOpenChange} />,
 } satisfies Meta<typeof Collapsible>;
 
 export default meta;
@@ -27,9 +36,9 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-function CollapsibleDemo(props: { defaultOpen?: boolean }) {
+function CollapsibleDemo(props: { defaultOpen?: boolean; onOpenChange?: (open: boolean) => void }) {
   return (
-    <Collapsible defaultOpen={props.defaultOpen} class="w-80 rounded-lg border border-border">
+    <Collapsible defaultOpen={props.defaultOpen} onOpenChange={props.onOpenChange} class="w-80 rounded-lg border border-border">
       <CollapsibleTrigger class="group flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-foreground">
         <span>Reasoning</span>
         <svg
@@ -51,7 +60,7 @@ function CollapsibleDemo(props: { defaultOpen?: boolean }) {
 
 /** Toggle the trigger to expand/collapse. The chevron rotates via the `data-expanded` attribute. */
 export const Playground: Story = {
-  ...src(`<Collapsible defaultOpen>
+  ...src(`<Collapsible defaultOpen onOpenChange={(open) => console.log('expanded:', open)}>
   <CollapsibleTrigger>Reasoning</CollapsibleTrigger>
   <CollapsibleContent>
     <p>First I parsed the request, then checked the available tools…</p>
@@ -61,8 +70,8 @@ export const Playground: Story = {
 
 /** Starts collapsed. */
 export const InitiallyClosed: Story = {
-  render: () => <CollapsibleDemo />,
-  ...src(`<Collapsible>
+  render: (args: { onOpenChange?: (open: boolean) => void }) => <CollapsibleDemo onOpenChange={args.onOpenChange} />,
+  ...src(`<Collapsible onOpenChange={(open) => console.log(open)}>
   <CollapsibleTrigger>Reasoning</CollapsibleTrigger>
   <CollapsibleContent>…</CollapsibleContent>
 </Collapsible>`),

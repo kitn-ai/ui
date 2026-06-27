@@ -10,10 +10,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'An inline citation chip with a hover-card preview. Compose `Source` (root, holds the `href`) with `SourceTrigger` (the clickable pill) and `SourceContent` (the hover preview). `SourceList` lays out several side by side.',
-        '**When to use:** to cite a referenced web source inline in an assistant message — show a compact domain/number pill that previews the title and description on hover.',
-        '**How to use:** wrap `SourceTrigger` and `SourceContent` in `Source` with the target `href`. Use `label` for custom text or a citation number, `showFavicon` for the site icon, and pass `title`/`description` to `SourceContent`.',
-        '**Placement:** within message body text as citations, or grouped under a message in a `SourceList`.',
+        'An inline citation chip with a hover-card preview. Compose `Source` (root, holds the `href`) with `SourceTrigger` (the pill: `label` for custom text or a citation number, `showFavicon` for the site icon) and `SourceContent` (the `title`/`description` preview). `SourceList` lays several out side by side.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -47,13 +44,13 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — set the `href` and hover the chip to preview. */
+/** Interactive playground: set the `href` and hover the chip to preview. */
 export const Playground: Story = {
   ...src(`<Source href="https://solidjs.com/docs/basic-reactivity/signals">
   <SourceTrigger label="solidjs.com" />
   <SourceContent
     title="Signals - SolidJS"
-    description="The most basic reactive primitive — a single value that changes over time."
+    description="The most basic reactive primitive, a single value that changes over time."
   />
 </Source>`),
 };

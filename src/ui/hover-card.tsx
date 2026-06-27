@@ -25,13 +25,28 @@ const useHoverCard = () => {
   return c;
 };
 
-export interface HoverCardRootProps { children: JSX.Element; openDelay?: number; closeDelay?: number; }
+/** Imperative open controller, handed to a parent (e.g. the kai-hover-card facade)
+ *  via `controllerRef` so it can drive/observe open state. */
+export interface HoverCardController { open: Accessor<boolean>; setOpen: (v: boolean) => void; }
+
+export interface HoverCardRootProps {
+  children: JSX.Element;
+  openDelay?: number;
+  closeDelay?: number;
+  /** Initial open state (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** When true, hover/focus never opens the card. */
+  disabled?: boolean;
+  /** Receive the open controller (open accessor + setOpen) once mounted. */
+  controllerRef?: (api: HoverCardController) => void;
+}
 
 export function HoverCardRoot(props: HoverCardRootProps) {
-  const [open, setOpen] = createSignal(false);
+  const [open, setOpen] = createSignal(props.defaultOpen ?? false);
   const [trigger, setTrigger] = createSignal<HTMLElement>();
   const [content, setContent] = createSignal<HTMLElement>();
   let timer: number | undefined;
+  props.controllerRef?.({ open, setOpen });
 
   // ONE shared timer drives both trigger and content. Entering either cancels
   // any pending close and schedules an open; leaving either cancels any pending
@@ -40,6 +55,7 @@ export function HoverCardRoot(props: HoverCardRootProps) {
   // before it can run, so the card never flickers and there are no stale-timer
   // sporadics (the HC-1 fix).
   const enter = () => {
+    if (props.disabled) return;
     clearTimeout(timer);
     timer = window.setTimeout(() => setOpen(true), props.openDelay ?? 0);
   };

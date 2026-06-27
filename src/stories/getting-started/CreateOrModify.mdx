@@ -1,0 +1,144 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Getting Started/Create or modify a component" />
+
+# Create or modify a component
+
+Adding a component means working down the layers: write the Solid component, give it a story, wrap it as a `kai-*` element. Modifying one is the same in reverse: change the layer that owns the behavior. A toggle touches every step, so that's the example.
+
+## 1. Write the component
+
+UI primitives go in `src/ui/`. Keep them accessible and token-styled (no hard-coded colors). The real `Switch` is a `role="switch"` button supporting controlled and uncontrolled state:
+
+```tsx
+// src/ui/switch.tsx
+import { createSignal } from 'solid-js';
+import { cn } from '../utils/cn';
+
+export interface SwitchProps {
+  checked?: boolean;        // controlled, drive from onChange
+  defaultChecked?: boolean; // uncontrolled initial state
+  disabled?: boolean;
+  label?: string;
+  onChange?: (checked: boolean) => void;
+}
+
+export function Switch(props: SwitchProps) {
+  const [internal, setInternal] = createSignal(props.defaultChecked ?? false);
+  const isControlled = () => props.checked !== undefined;
+  const isOn = () => (isControlled() ? !!props.checked : internal());
+
+  const toggle = () => {
+    if (props.disabled) return;
+    const next = !isOn();
+    if (!isControlled()) setInternal(next);
+    props.onChange?.(next);
+  };
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={isOn()}
+      aria-label={props.label}
+      disabled={props.disabled}
+      onClick={toggle}
+      class={cn('inline-flex …', isOn() ? 'bg-primary' : 'bg-muted')}
+    >
+      {/* thumb */}
+    </button>
+  );
+}
+```
+
+Support both a controlled `checked` and an uncontrolled `defaultChecked`, and use token-backed classes (`bg-primary`, `bg-muted`, `ring-ring`) so theming and dark mode come along.
+
+## 2. Give it a story
+
+A primitive's story sits beside it in `src/ui/`:
+
+```tsx
+// src/ui/switch.stories.tsx
+import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
+import { Switch } from './switch';
+import { componentDescription } from '../stories/docs/element-controls';
+
+const meta = {
+  title: 'Components/Primitives/Switch',
+  component: Switch,
+  tags: ['autodocs'],
+  parameters: {
+    docs: { description: componentDescription(['A toggle switch (`role="switch"`) for an immediate on/off setting.']) },
+  },
+  argTypes: {
+    disabled: { control: 'boolean' },
+    label: { control: 'text' },
+    onChange: { action: 'change', table: { category: 'Events' } },
+  },
+  args: { disabled: false, label: 'Temporary chat', onChange: fn() },
+  render: (args) => <Switch {...args} />,
+} satisfies Meta<typeof Switch>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Playground: Story = {};
+export const On: Story = { args: { defaultChecked: true } };
+```
+
+Wire callbacks with `fn()` so they log to the Actions panel, and give each notable variation its own story. Element stories (in `src/elements/`) pull controls from the generated metadata with `argTypesFor(tag)` and write their blurb with `specDescription`. Copy `src/elements/switch.stories.tsx`.
+
+## 3. Expose it as a `kai-*` element
+
+Wrap the primitive with `defineWebComponent` in `src/elements/`:
+
+```tsx
+// src/elements/switch.tsx
+import { defineWebComponent } from './define';
+import { Switch } from '../ui/switch';
+
+interface Props extends Record<string, unknown> {
+  checked?: boolean;
+  disabled?: boolean;
+  label?: string;
+}
+
+interface Events {
+  'kai-change': { checked: boolean };
+}
+
+defineWebComponent<Props, Events>('kai-switch', {
+  checked: undefined,
+  disabled: undefined,
+  label: undefined,
+}, (props, { dispatch, flag }) => (
+  <Switch
+    defaultChecked={flag('checked')}
+    disabled={flag('disabled')}
+    label={props.label}
+    onChange={(checked) => dispatch('kai-change', { checked })}
+  />
+));
+```
+
+- **Boolean props**: `flag('checked')`, not `props.checked` (a bare attribute parses to `undefined`).
+- **Events**: `dispatch('kai-change', { checked })`; the `<Props, Events>` type args keep names and payloads honest.
+- **Slots**: for content rather than data, render `<slot />` (or named slots) in the facade.
+
+`title`, `id`, `slot`, and `lang` collide with global HTMLElement attributes, so `defineWebComponent` throws if you use them. Rename (a source title becomes `headline`).
+
+## 4. Register and regenerate
+
+```ts
+// src/elements/register.ts
+import './switch';
+```
+
+```bash
+npm run build:api   # regenerates element-meta.json, types, React wrappers, llms.txt
+```
+
+## Verify
+
+`npm run typecheck`, `npm test`, and check the story in `npm run storybook` (light and dark). For element behavior that needs a real browser, add a Playwright check rather than a jsdom test.

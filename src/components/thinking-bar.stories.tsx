@@ -12,10 +12,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A status row that shows a shimmering "thinking" label, optionally clickable to expand reasoning, with an optional stop/cancel action.',
-        '**When to use:** while the assistant is generating or reasoning, to show live activity and give the user a way to interrupt or to open the reasoning trace.',
-        '**How to use:** set `text` for the label. Pass `onClick` to make the label a button (adds a chevron) — typically to toggle a reasoning panel. Pass `onStop` (with optional `stopLabel`) to render the interrupt action.',
-        '**Placement:** above or in place of a streaming message, or at the top of a reasoning/chain-of-thought block.',
+        'A live-activity status row with a shimmering `text` label, shown while the assistant generates. `onClick` makes the label a button (adds a chevron) for toggling a reasoning panel; `onStop` (with optional `stopLabel`) renders an interrupt action.',
       ]),
     },
   },
@@ -61,7 +58,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — tweak the controls to explore the thinking bar. */
+/** Interactive playground: tweak the controls to explore the thinking bar. */
 export const Playground: Story = {
   ...src(`<ThinkingBar text="Thinking" onStop={() => stop()} />`),
 };

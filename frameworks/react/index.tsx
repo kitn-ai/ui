@@ -16,8 +16,10 @@ export interface ArtifactProps extends WebComponentProps {
   src?: string;
   /** Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). */
   files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
-  /** Active tab: `preview` (default) or `code`. */
+  /** Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). */
   tab?: "preview" | "code";
+  /** Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`. */
+  defaultTab?: "preview" | "code";
   /** Selected file path — syncs the tree highlight, Code source, and preview. */
   activeFile?: string;
   /** iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`). */
@@ -56,7 +58,7 @@ export interface ArtifactProps extends WebComponentProps {
 
 export const Artifact = createWebComponent<ArtifactProps>(
   'kai-artifact',
-  ["theme","src","files","tab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath"],
+  ["theme","src","files","tab","defaultTab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath"],
   { onFileSelect: 'kai-file-select', onMaximizeChange: 'kai-maximize-change', onNavigate: 'kai-navigate', onTabChange: 'kai-tab-change' },
 );
 
@@ -160,23 +162,33 @@ export interface CardsProps extends WebComponentProps {
   types?: Record<string, string>;
   /** Optional CardPolicy handling child events. Property: `el.policy`. */
   policy?: { onSubmit?: (cardId: string, data: unknown) => void; onAction?: (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: (text: string, opts: { mode: "compose" | "send"; context?: unknown; }) => void; onOpen?: (url: string, target: "tab" | "artifact") => void; onState?: (cardId: string, patch: unknown) => void; onDismiss?: (cardId: string) => void; onReopen?: (cardId: string) => void; onError?: (cardId: string, message: string) => void; maxSendPromptMode?: "compose" | "send" };
+  /** A child card transitioned to a resolved/deferred state (an action was chosen, a form/tasks submission landed, or it was dismissed) — re-emitted off the host as a non-bubbling convenience event so a consumer can observe resolution centrally without diffing the cards array. `detail` = `{ cardId, resolution }`. (A `reopen` un-resolves a card and has no `CardResolution`, so it does NOT fire this — observe reopen via the underlying bubbling `kai-card` event.) */
+  onCardResolved?: (event: CustomEvent<{ cardId: string; resolution: { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }>) => void;
 }
 
 export const Cards = createWebComponent<CardsProps>(
   'kai-cards',
   ["theme","cards","types","policy"],
-  {  },
+  { onCardResolved: 'kai-card-resolved' },
 );
 
 export interface ChainOfThoughtProps extends WebComponentProps {
-  /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). */
-  steps: { label: string; content?: undefined | string }[];
+  /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). Each `{ label, content?, id? }`. */
+  steps: { label: string; content?: undefined | string; id?: undefined | string }[];
+  /** Open mode: `'multiple'` (default — any number of steps open at once) or `'single'` (at most one open; opening a step closes the others). */
+  type?: "single" | "multiple";
+  /** Controlled open step key(s). When set, it WINS over user interaction (the consumer owns the open set). String in `single` mode, string[] in `multiple` mode. Set as a JS property. */
+  value?: string | string[];
+  /** Uncontrolled INITIAL open step key(s) — seeds which steps render expanded. Ignored once `value` is provided. Set as a JS property. */
+  defaultValue?: string | string[];
+  /** The open set changed — by user click OR an expand()/collapse()/toggle() call. `value` is a string in `single` mode, a string[] in `multiple` mode. (Maps Radix Accordion's onValueChange.) */
+  onValueChange?: (event: CustomEvent<{ value: string | string[] }>) => void;
 }
 
 export const ChainOfThought = createWebComponent<ChainOfThoughtProps>(
   'kai-chain-of-thought',
-  ["theme","steps"],
-  {  },
+  ["theme","steps","type","value","defaultValue"],
+  { onValueChange: 'kai-value-change' },
 );
 
 export interface ChatProps extends WebComponentProps {
@@ -236,6 +248,8 @@ export interface ChatProps extends WebComponentProps {
   kindIcons?: Record<string, string>;
   /** Whether each message's action bar is always visible (`'always'`, default) or only revealed on hover of that message row (`'hover'`). */
   actionsReveal?: "always" | "hover";
+  /** The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time. */
+  onAttachmentsChange?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
   onMessageAction?: (event: CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>) => void;
   /** The header model switcher changed. */
@@ -255,7 +269,7 @@ export interface ChatProps extends WebComponentProps {
 export const Chat = createWebComponent<ChatProps>(
   'kai-chat',
   ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","sidebar","empty","composer","composerActions","footer","search","voice","triggers","kindIcons","actionsReveal"],
-  { onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSearch: 'kai-search', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
+  { onAttachmentsChange: 'kai-attachments-change', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSearch: 'kai-search', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );
 
 export interface CheckpointProps extends WebComponentProps {
@@ -286,12 +300,20 @@ export interface ChoiceProps extends WebComponentProps {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled selection — the selected option id. When set, the consumer owns the current pick (RadioGroup `value`). Attribute: `value`. */
+  value?: string;
+  /** Option id to pre-select on mount (uncontrolled seed). Attribute: `default-value`. */
+  defaultValue?: string;
+  /** Disable the whole radiogroup + Submit (e.g. while the agent is busy). Attribute: `disabled`. */
+  disabled?: boolean;
+  /** The selection changed BEFORE submit (a row click or the `select()` method). Distinct from the terminal `action` verb on the `kai-card` contract event. */
+  onValueChange?: (event: CustomEvent<{ value: string }>) => void;
 }
 
 export const Choice = createWebComponent<ChoiceProps>(
   'kai-choice',
-  ["theme","data","cardId","heading","resolution"],
-  {  },
+  ["theme","data","cardId","heading","resolution","value","defaultValue","disabled"],
+  { onValueChange: 'kai-value-change' },
 );
 
 export interface CodeBlockProps extends WebComponentProps {
@@ -320,6 +342,8 @@ export interface CommandProps extends WebComponentProps {
   placeholder?: string;
   /** Label shown when no items match the current query. */
   emptyLabel?: string;
+  /** Fired when the highlighted/active item changes — via Arrow keys or when filtering re-clamps the active row. `id` is the newly active item's id, or `undefined` when no item is active (e.g. the filtered list is empty). Lets a host preview the active item without committing a selection. */
+  onActiveChange?: (event: CustomEvent<{ id: undefined | string }>) => void;
   /** Fired on every keystroke in the search input. */
   onQueryChange?: (event: CustomEvent<{ value: string }>) => void;
   /** Fired when the user selects an item (click or Enter). */
@@ -329,7 +353,7 @@ export interface CommandProps extends WebComponentProps {
 export const Command = createWebComponent<CommandProps>(
   'kai-command',
   ["theme","items","placeholder","emptyLabel"],
-  { onQueryChange: 'kai-query-change', onSelect: 'kai-select' },
+  { onActiveChange: 'kai-active-change', onQueryChange: 'kai-query-change', onSelect: 'kai-select' },
 );
 
 export interface CompareProps extends WebComponentProps {
@@ -451,6 +475,8 @@ export interface ConversationsProps extends WebComponentProps {
   onConversationSelect?: (event: CustomEvent<{ id: string }>) => void;
   /** The "New chat" button was clicked. */
   onNewChat?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter. */
+  onSearch?: (event: CustomEvent<{ query: string }>) => void;
   /** The sidebar toggle was clicked. */
   onToggleSidebar?: (event: CustomEvent<Record<string, never>>) => void;
 }
@@ -458,7 +484,7 @@ export interface ConversationsProps extends WebComponentProps {
 export const Conversations = createWebComponent<ConversationsProps>(
   'kai-conversations',
   ["theme","groups","conversations","activeId"],
-  { onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onToggleSidebar: 'kai-toggle-sidebar' },
+  { onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onToggleSidebar: 'kai-toggle-sidebar' },
 );
 
 export interface EmbedProps extends WebComponentProps {
@@ -561,12 +587,20 @@ export interface FormProps extends WebComponentProps {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled field values (JS property). When set, it wins over local edits. */
+  values?: Record<string, unknown>;
+  /** Initial values overlaying the schema defaults (uncontrolled seed; JS property). */
+  defaultValues?: Record<string, unknown>;
+  /** Disable all fields + submit. Attribute: `disabled`. */
+  disabled?: boolean;
+  /** The form's values changed on input — current coerced values + validity. */
+  onValuesChange?: (event: CustomEvent<{ values: Record<string, unknown>; valid: boolean }>) => void;
 }
 
 export const Form = createWebComponent<FormProps>(
   'kai-form',
-  ["theme","data","cardId","heading","resolution"],
-  {  },
+  ["theme","data","cardId","heading","resolution","values","defaultValues","disabled"],
+  { onValuesChange: 'kai-values-change' },
 );
 
 export interface HoverCardProps extends WebComponentProps {
@@ -576,12 +610,20 @@ export interface HoverCardProps extends WebComponentProps {
   closeDelay?: number;
   /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. */
   placement?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover). Set `el.open = true`, or `<kai-hover-card open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Suppress the hover behavior entirely without unmounting. */
+  disabled?: boolean;
+  /** The card opened or closed (by hover/focus, outside-click, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const HoverCard = createWebComponent<HoverCardProps>(
   'kai-hover-card',
-  ["theme","openDelay","closeDelay","placement"],
-  {  },
+  ["theme","openDelay","closeDelay","placement","open","defaultOpen","disabled"],
+  { onOpenChange: 'kai-open-change' },
 );
 
 export interface IconProps extends WebComponentProps {
@@ -672,14 +714,22 @@ export interface MenuProps extends WebComponentProps {
   triggerIconTrailing?: string;
   /** Accessible name for an icon-only trigger (no visible label). */
   label?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-menu open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the menu. */
+  disabled?: boolean;
+  /** The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
   /** Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. */
   onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
 }
 
 export const Menu = createWebComponent<MenuProps>(
   'kai-menu',
-  ["theme","items","placement","triggerIcon","triggerLabel","triggerIconTrailing","label"],
-  { onSelect: 'kai-select' },
+  ["theme","items","placement","triggerIcon","triggerLabel","triggerIconTrailing","label","open","defaultOpen","disabled"],
+  { onOpenChange: 'kai-open-change', onSelect: 'kai-select' },
 );
 
 export interface MessageProps extends WebComponentProps {
@@ -720,14 +770,22 @@ export interface ModelSwitcherProps extends WebComponentProps {
   models: { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[];
   /** The currently-selected model id. Defaults to the first model. */
   currentModel?: string;
+  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the dropdown. */
+  disabled?: boolean;
   /** A model was selected. */
   onModelChange?: (event: CustomEvent<{ modelId: string }>) => void;
+  /** The model dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
   'kai-model-switcher',
-  ["theme","models","currentModel"],
-  { onModelChange: 'kai-model-change' },
+  ["theme","models","currentModel","open","defaultOpen","disabled"],
+  { onModelChange: 'kai-model-change', onOpenChange: 'kai-open-change' },
 );
 
 export interface NoticeProps extends WebComponentProps {
@@ -752,15 +810,19 @@ export interface PopoverProps extends WebComponentProps {
   placement?: "top" | "right" | "bottom" | "left" | "top-start" | "top-end" | "right-start" | "right-end" | "bottom-start" | "bottom-end" | "left-start" | "left-end";
   /** Gap in px between the trigger and the panel. */
   gutter?: number;
-  /** Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour. */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on click). Set `el.open = true`, or `<kai-popover open>`; listen for `kai-open-change`. */
   open?: boolean;
-  /** The popover wants to open or close (click, Escape, or outside-click). */
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Turn the popover off while keeping the trigger mounted (clicks and `show()` no longer open it). */
+  disabled?: boolean;
+  /** The popover opened or closed (click, Escape, outside-click, or a method). */
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const Popover = createWebComponent<PopoverProps>(
   'kai-popover',
-  ["theme","placement","gutter","open"],
+  ["theme","placement","gutter","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
 );
 
@@ -793,6 +855,8 @@ export interface PromptInputProps extends WebComponentProps {
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
   kindIcons?: Record<string, string>;
+  /** The staged attachments changed — a file was added (via the paperclip) or removed (per-chip ×). Carries the full current list so a consumer can react in real time (validate, show upload progress, toggle the send button). */
+  onAttachmentsChange?: (event: CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>) => void;
   /** The Search (Globe) toolbar button was clicked. */
   onSearch?: (event: CustomEvent<Record<string, never>>) => void;
   /** The Stop button was clicked while `stoppable` and `loading` are both true. */
@@ -812,7 +876,7 @@ export interface PromptInputProps extends WebComponentProps {
 export const PromptInput = createWebComponent<PromptInputProps>(
   'kai-prompt-input',
   ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","search","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
-  { onSearch: 'kai-search', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
+  { onAttachmentsChange: 'kai-attachments-change', onSearch: 'kai-search', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );
 
 export interface ReasoningProps extends WebComponentProps {
@@ -820,19 +884,23 @@ export interface ReasoningProps extends WebComponentProps {
   text: string;
   /** Trigger label. */
   label?: string;
-  /** Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it). */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click + while streaming). Set `el.open = true`; listen for `kai-open-change`. */
   open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
   /** While true, auto-expands (and re-collapses when it flips false). */
   streaming?: boolean;
   /** Render `text` as markdown. */
   markdown?: boolean;
-  /** Open state changed (via the trigger or streaming auto-open). */
+  /** Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. */
+  disabled?: boolean;
+  /** The reasoning block expanded or collapsed (via the trigger, streaming auto-open, or a method). */
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const Reasoning = createWebComponent<ReasoningProps>(
   'kai-reasoning',
-  ["theme","text","label","open","streaming","markdown"],
+  ["theme","text","label","open","defaultOpen","streaming","markdown","disabled"],
   { onOpenChange: 'kai-open-change' },
 );
 
@@ -919,14 +987,22 @@ export interface ScopePickerProps extends WebComponentProps {
   availableTags: string[];
   /** The label shown on the trigger for the active scope. */
   currentLabel?: string;
+  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-scope-picker open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the dropdown. */
+  disabled?: boolean;
+  /** The scope dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
   /** A scope was chosen (`undefined` filters = "All Content"). */
   onScopeChange?: (event: CustomEvent<{ filters: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }>) => void;
 }
 
 export const ScopePicker = createWebComponent<ScopePickerProps>(
   'kai-scope-picker',
-  ["theme","availableAuthors","availableTags","currentLabel"],
-  { onScopeChange: 'kai-scope-change' },
+  ["theme","availableAuthors","availableTags","currentLabel","open","defaultOpen","disabled"],
+  { onOpenChange: 'kai-open-change', onScopeChange: 'kai-scope-change' },
 );
 
 export interface ScrollAreaProps extends WebComponentProps {
@@ -1052,19 +1128,25 @@ export const Suggestions = createWebComponent<SuggestionsProps>(
 );
 
 export interface SwitchProps extends WebComponentProps {
-  /** Initial checked state. Bare attribute (`<kai-switch checked>`) turns it on. */
+  /** Controlled checked state — settable and reflected to the `checked` attribute. `el.checked = true` (or `<kai-switch checked>`) drives it; the toggle UI updates it and fires `kai-change`. Read `el.checked` for live state. */
   checked?: boolean;
+  /** Initial checked state on mount (uncontrolled seed). Bare attribute (`<kai-switch default-checked>`) turns it on. */
+  defaultChecked?: boolean;
   /** Disable interaction. */
   disabled?: boolean;
   /** Accessible label. */
   label?: string;
+  /** Form-control name (paired with `value`). */
+  name?: string;
+  /** Submitted value when checked (paired with `name`). Defaults to `'on'`. */
+  value?: string;
   /** The toggle changed. */
   onChange?: (event: CustomEvent<{ checked: boolean }>) => void;
 }
 
 export const Switch = createWebComponent<SwitchProps>(
   'kai-switch',
-  ["theme","checked","disabled","label"],
+  ["theme","checked","defaultChecked","disabled","label","name","value"],
   { onChange: 'kai-change' },
 );
 
@@ -1077,12 +1159,20 @@ export interface TasksProps extends WebComponentProps {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{ selected:[…] } }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled selection (task ids; JS property). When set, it wins over local state. */
+  value?: string[];
+  /** Uncontrolled initial selection (task ids; JS property), overlaying per-task `checked`. */
+  defaultValue?: string[];
+  /** Freeze the whole list + Confirm. Attribute: `disabled`. */
+  disabled?: boolean;
+  /** The selection changed on a toggle — the selected ids in input order. */
+  onValueChange?: (event: CustomEvent<{ value: string[] }>) => void;
 }
 
 export const Tasks = createWebComponent<TasksProps>(
   'kai-tasks',
-  ["theme","data","cardId","heading","resolution"],
-  {  },
+  ["theme","data","cardId","heading","resolution","value","defaultValue","disabled"],
+  { onValueChange: 'kai-value-change' },
 );
 
 export interface TextShimmerProps extends WebComponentProps {
@@ -1145,14 +1235,20 @@ export const ToastRegion = createWebComponent<ToastRegionProps>(
 export interface ToolProps extends WebComponentProps {
   /** The tool-call to display. Set as a JS property. */
   tool?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string };
-  /** Start expanded. */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click). Set `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`. */
   open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. */
+  disabled?: boolean;
+  /** The panel expanded or collapsed (by trigger click or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const Tool = createWebComponent<ToolProps>(
   'kai-tool',
-  ["theme","tool","open"],
-  {  },
+  ["theme","tool","open","defaultOpen","disabled"],
+  { onOpenChange: 'kai-open-change' },
 );
 
 export interface TooltipProps extends WebComponentProps {
@@ -1160,12 +1256,24 @@ export interface TooltipProps extends WebComponentProps {
   content?: string;
   /** Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless. */
   openDelay?: number;
+  /** Delay (ms) before it hides after the pointer leaves. Defaults to 0 (hides immediately). */
+  closeDelay?: number;
+  /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'top'`; flips to stay in view. */
+  placement?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover/focus). Set `el.open = true`, or `<kai-tooltip open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Turn the tooltip off while keeping the trigger mounted (hover/focus and `show()` no longer open it). */
+  disabled?: boolean;
+  /** The tooltip opened or closed (by hover/focus, outside-click, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
 }
 
 export const Tooltip = createWebComponent<TooltipProps>(
   'kai-tooltip',
-  ["theme","content","openDelay"],
-  {  },
+  ["theme","content","openDelay","closeDelay","placement","open","defaultOpen","disabled"],
+  { onOpenChange: 'kai-open-change' },
 );
 
 export interface VoiceInputProps extends WebComponentProps {
@@ -1175,6 +1283,8 @@ export interface VoiceInputProps extends WebComponentProps {
   disabled?: boolean;
   /** Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. */
   onAudioCaptured?: (event: CustomEvent<{ blob: Blob }>) => void;
+  /** Recording started or stopped — lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount. */
+  onRecordingChange?: (event: CustomEvent<{ recording: boolean }>) => void;
   /** Transcription completed (the `transcribe` property resolved). */
   onTranscription?: (event: CustomEvent<{ text: string }>) => void;
 }
@@ -1182,7 +1292,7 @@ export interface VoiceInputProps extends WebComponentProps {
 export const VoiceInput = createWebComponent<VoiceInputProps>(
   'kai-voice-input',
   ["theme","transcribe","disabled"],
-  { onAudioCaptured: 'kai-audio-captured', onTranscription: 'kai-transcription' },
+  { onAudioCaptured: 'kai-audio-captured', onRecordingChange: 'kai-recording-change', onTranscription: 'kai-transcription' },
 );
 
 export interface WorkspaceProps extends WebComponentProps {

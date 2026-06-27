@@ -176,6 +176,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
 
   it('maps each composable element to its slots/parts arrays', () => {
     expect(Object.keys(ELEMENT_COMPOSITION).sort()).toEqual([
+      'kai-attachments',
       'kai-badge',
       'kai-button',
       'kai-chat',

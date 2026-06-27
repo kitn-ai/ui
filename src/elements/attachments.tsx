@@ -118,6 +118,7 @@ defineWebComponent<Props, Events>('kai-attachments', {
                       }
                     >
                       <img
+                        part="preview"
                         src={item.url}
                         alt={getAttachmentLabel(item)}
                         class="block max-h-64 max-w-xs rounded object-contain"

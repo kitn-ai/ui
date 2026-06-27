@@ -8,6 +8,7 @@ import {
   createMemo,
   createEffect,
   on,
+  onMount,
   ErrorBoundary,
   createUniqueId,
 } from 'solid-js';
@@ -151,6 +152,22 @@ export function firstEnabledIndex(options: ChoiceOption[]): number {
 // The <ChoiceCard> component.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** Imperative handle exposed via `controllerRef` — surfaces the choice card's
+ *  latent selection/submit/dismiss capabilities so the `<kai-choice>` facade can
+ *  forward them as instance methods (focus/select/send/dismiss/reopen). */
+export interface ChoiceController {
+  /** Focus the radiogroup roving tab stop (or the Other input when selected). */
+  focus(options?: FocusOptions): void;
+  /** Select an option by id locally (no emit) — same as a row click. */
+  select(optionId: string): void;
+  /** Submit the current selection — emits the `action` verb + resolves single-shot. */
+  send(): void;
+  /** Dismiss the card — emits `dismiss` + optimistically collapses to the stub. */
+  dismiss(): void;
+  /** Re-open a dismissed card from its stub — emits `reopen`. */
+  reopen(): void;
+}
+
 export interface ChoiceCardProps {
   /** The choice definition (CardEnvelope.data). */
   data?: ChoiceCardData;
@@ -166,6 +183,17 @@ export interface ChoiceCardProps {
   class?: string;
   /** When set, render the chromed read-only view instead of the interactive radiogroup. */
   resolution?: CardResolution;
+  /** Controlled selection (option id). When set, the consumer owns the current pick. */
+  value?: string;
+  /** Option id to pre-select on mount (uncontrolled seed). */
+  defaultValue?: string;
+  /** Disable the whole radiogroup + Submit (e.g. while the agent is busy). */
+  disabled?: boolean;
+  /** Fires when the selection changes BEFORE submit (row click or select()). */
+  onValueChange?: (value: string) => void;
+  /** Receive the imperative controller once mounted. The `<kai-choice>` facade
+   *  forwards these as element methods (focus/select/send/dismiss/reopen). */
+  controllerRef?: (controller: ChoiceController) => void;
 }
 
 /**
@@ -182,7 +210,20 @@ export interface ChoiceCardProps {
  */
 export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
   const merged = mergeProps({ cardId: 'kai-choice' }, props);
-  const [local] = splitProps(merged, ['data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution']);
+  const [local] = splitProps(merged, [
+    'data',
+    'cardId',
+    'heading',
+    'host',
+    'hostElement',
+    'class',
+    'resolution',
+    'value',
+    'defaultValue',
+    'disabled',
+    'onValueChange',
+    'controllerRef',
+  ]);
 
   const ctxHost = useCardHost();
   const uid = createUniqueId();
@@ -214,20 +255,33 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
   });
 
   const [focusIndex, setFocusIndex] = createSignal(0);
-  const [selectedId, setSelectedId] = createSignal<string | undefined>(undefined);
+  // Uncontrolled selection store, seeded from `defaultValue`. When the consumer
+  // sets the `value` prop the controlled path wins (same pattern as the composer):
+  // `selectedId()` reads value ?? internal, and `setSelection()` writes the
+  // internal store + fires onValueChange so a controlled host can mirror it.
+  const [internalId, setInternalId] = createSignal<string | undefined>(props.defaultValue);
+  const selectedId = createMemo<string | undefined>(() => local.value ?? internalId());
+  const setSelection = (id: string): void => {
+    if (selectedId() === id) return;
+    setInternalId(id);
+    local.onValueChange?.(id);
+  };
   const [otherText, setOtherText] = createSignal('');
+
+  const isDisabled = (): boolean => local.disabled === true;
 
   let groupRef: HTMLDivElement | undefined;
   let otherInputRef: HTMLInputElement | undefined;
 
   const otherSelected = createMemo(() => selectedId() === OTHER_ACTION);
 
-  // Reset all transient state whenever a NEW definition arrives.
+  // Reset all transient state whenever a NEW definition arrives (re-seed the
+  // uncontrolled selection from `defaultValue`).
   createEffect(
     on(
       () => local.data,
       () => {
-        setSelectedId(undefined);
+        setInternalId(local.defaultValue);
         setOtherText('');
         setFocusIndex(Math.max(0, firstEnabledIndex(options())));
       },
@@ -264,11 +318,12 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
 
   const isOther = (opt: ChoiceOption): boolean => opt.id === OTHER_ACTION;
 
-  // Select (do NOT emit) the given option locally.
+  // Select (do NOT emit) the given option locally; fires onValueChange.
   const select = (opt: ChoiceOption): void => {
     if (res.isResolved()) return; // single-shot
+    if (isDisabled()) return; // group-level freeze
     if (opt.disabled) return;
-    setSelectedId(opt.id);
+    setSelection(opt.id);
     if (isOther(opt)) {
       queueMicrotask(() => otherInputRef?.focus());
     }
@@ -277,6 +332,7 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
   // Whether the current selection is submittable.
   const canSubmit = createMemo(() => {
     if (res.isResolved()) return false;
+    if (isDisabled()) return false; // group-level freeze
     const id = selectedId();
     if (id === undefined) return false;
     if (id === OTHER_ACTION) return otherText().trim().length > 0;
@@ -288,6 +344,7 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
   // Submit the current selection: emit `action` then resolve (single-shot).
   const submit = (): void => {
     if (res.isResolved()) return;
+    if (isDisabled()) return; // group-level freeze
     const id = selectedId();
     if (id === undefined) return;
     if (id === OTHER_ACTION) {
@@ -321,13 +378,43 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
   };
   const onReopen = (): void => emit({ kind: 'reopen', cardId: local.cardId });
 
-  const focusRadio = (index: number): void => {
+  const focusRadio = (index: number, options?: FocusOptions): void => {
     const radios = groupRef?.querySelectorAll<HTMLElement>('[role="radio"]');
-    radios?.[index]?.focus();
+    radios?.[index]?.focus(options);
   };
+
+  // ── Imperative controller (Pattern C): hand the facade a handle over the
+  //    card's latent selection/submit/dismiss capabilities. Every method drives
+  //    the SAME internal path the buttons/keyboard drive, so the same kai-card
+  //    events fire (and onValueChange for select()). ─────────────────────────────
+  onMount(() => {
+    local.controllerRef?.({
+      // Focus the roving radiogroup tab stop, or the Other input when it's selected.
+      focus: (options) => {
+        if (otherSelected() && otherInputRef) otherInputRef.focus(options);
+        else focusRadio(focusIndex(), options);
+      },
+      // Select an option by id locally (no emit) — same as a row click; respects
+      // disabled/resolved gating and moves the roving focus to the picked row.
+      select: (optionId) => {
+        const opts = options();
+        const idx = opts.findIndex((o) => o.id === optionId);
+        if (idx === -1) return;
+        setFocusIndex(idx);
+        select(opts[idx]);
+      },
+      // Submit the current selection (the Submit-button path).
+      send: () => submit(),
+      // Trigger the dismiss path (the X-button path).
+      dismiss: () => onDismiss(),
+      // Re-open a dismissed card (the stub's affordance path).
+      reopen: () => onReopen(),
+    });
+  });
 
   const onGroupKeyDown = (e: KeyboardEvent): void => {
     if (res.isResolved()) return;
+    if (isDisabled()) return; // group-level freeze
     const opts = options();
     const i = focusIndex();
     if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
@@ -385,14 +472,18 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
                 role="radiogroup"
                 aria-label={groupLabel()}
                 aria-describedby={local.data?.prompt ? promptId : undefined}
-                class="divide-y divide-border overflow-hidden rounded-lg border border-input"
+                aria-disabled={isDisabled() ? 'true' : undefined}
+                class={cn(
+                  'divide-y divide-border overflow-hidden rounded-lg border border-input',
+                  isDisabled() && 'cursor-not-allowed opacity-60',
+                )}
                 onKeyDown={onGroupKeyDown}
               >
                 <For each={options()}>
                   {(opt, index) => {
                     const checked = () => selectedId() === opt.id;
                     const tabStop = () =>
-                      !opt.disabled && index() === focusIndex() && !res.isResolved();
+                      !opt.disabled && !isDisabled() && index() === focusIndex() && !res.isResolved();
                     const descId = `kai-choice-desc-${uid}-${opt.id}`;
                     const hasDesc = () => Boolean(opt.description);
                     return (
@@ -422,7 +513,8 @@ export function ChoiceCard(props: ChoiceCardProps): JSX.Element {
                     id={otherInputId}
                     ref={otherInputRef}
                     type="text"
-                    class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    disabled={isDisabled()}
+                    class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
                     placeholder={otherCfg()?.placeholder}
                     value={otherText()}
                     onInput={(e) => setOtherText(e.currentTarget.value)}

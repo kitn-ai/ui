@@ -1,14 +1,32 @@
-import { splitProps, Show, For, createSignal } from 'solid-js';
+import { splitProps, Show, For, createSignal, createEffect, on } from 'solid-js';
 import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
 import { Tooltip } from '../ui/tooltip';
 import { useVoiceRecorder } from '../primitives/use-voice-recorder';
+
+/** Imperative handle exposed via `controllerRef` — surfaces the recorder's latent
+ *  start/stop so the `<kai-voice-input>` facade can forward them as instance
+ *  methods (push-to-talk). Both run the SAME getUserMedia → blob → transcription
+ *  path as clicking the mic, so manual + programmatic emit identically. */
+export interface VoiceInputController {
+  /** Begin recording programmatically (same path as clicking the mic). */
+  start(): void;
+  /** Stop the in-progress recording (produces the blob → onTranscribe). */
+  stop(): void;
+}
 
 export interface VoiceInputProps {
   onTranscribe: (audio: Blob) => Promise<string>;
   onTranscription: (text: string) => void;
   disabled?: boolean;
   class?: string;
+  /** Fires whenever recording starts or stops. Guarded against the spurious
+   *  initial `false` — only true transitions emit (the facade maps this to
+   *  kai-recording-change). */
+  onRecordingChange?: (recording: boolean) => void;
+  /** Receive the imperative controller once mounted. The `<kai-voice-input>`
+   *  facade forwards these as element methods (start/stop). */
+  controllerRef?: (controller: VoiceInputController) => void;
 }
 
 export function VoiceInput(props: VoiceInputProps) {
@@ -19,24 +37,48 @@ export function VoiceInput(props: VoiceInputProps) {
   const label = () =>
     isProcessing() ? 'Transcribing...' : isRecording() ? 'Stop recording' : 'Voice input';
 
+  // Begin recording, then run transcription once the blob resolves. Shared by the
+  // mic click and the imperative start() so both flows emit identically. start()
+  // resolves its Blob when the recorder stops (click again or controller.stop()).
+  async function beginRecording() {
+    try {
+      const blob = await start();
+      setIsProcessing(true);
+      try {
+        const text = await local.onTranscribe(blob);
+        if (text.trim()) local.onTranscription(text.trim());
+      } finally {
+        setIsProcessing(false);
+      }
+    } catch {
+      setIsProcessing(false);
+    }
+  }
+
   async function handleClick() {
     if (isRecording()) {
       stop();
     } else {
-      try {
-        const blob = await start();
-        setIsProcessing(true);
-        try {
-          const text = await local.onTranscribe(blob);
-          if (text.trim()) local.onTranscription(text.trim());
-        } finally {
-          setIsProcessing(false);
-        }
-      } catch {
-        setIsProcessing(false);
-      }
+      await beginRecording();
     }
   }
+
+  // Emit recording transitions to the host. `on(..., { defer: true })` skips the
+  // initial mount value (a spurious {recording:false}) — only real start/stop
+  // transitions fire. Drives BOTH manual (click) and programmatic (start/stop)
+  // since they all flip the same isRecording signal.
+  createEffect(on(isRecording, (recording) => {
+    props.onRecordingChange?.(recording);
+  }, { defer: true }));
+
+  // Imperative controller (Pattern C): hand the facade a start/stop handle.
+  // start() runs the full record→transcribe path; stop() ends the in-progress
+  // recording (resolving start()'s blob → onTranscribe). Guard start() so a
+  // double-start while already recording is a no-op (matches the click toggle).
+  props.controllerRef?.({
+    start: () => { if (!isRecording()) void beginRecording(); },
+    stop: () => stop(),
+  });
 
   // Mic icon (not recording)
   const MicIcon = () => (

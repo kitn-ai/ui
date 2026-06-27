@@ -4,36 +4,18 @@ type Prop = { name: string; type: string; default?: string; scalar: boolean };
 type ElementMeta = { tag: string; props: Prop[] };
 const all = meta as unknown as ElementMeta[];
 
-// A small, consistent pointer at the top of every Web Component's Docs tab,
-// directing readers to the dedicated API tab (which holds the full generated
-// spec). Keeps the Docs tab focused on examples while keeping the spec one click
-// away — and discoverable, since everyone reads the description first.
-const API_POINTER =
-  '> **Full API reference** — every property, event, default and token is on the **API** tab above.';
-
 /**
- * Build a Storybook `docs.description` from an element's intro paragraphs, with
- * the API-tab pointer prepended. The generated spec itself lives in the **API**
- * tab (see `.storybook/api-tab.tsx`), not inline here.
- * (`tag` is kept in the signature so callers don't churn if we re-inline later.)
+ * Build a Storybook `docs.description` from an element's intro paragraphs.
+ * (`tag` is kept in the signature so callers don't churn.) The full per-element
+ * API for the web components lives on the consumer docs at ui.kitn.ai.
  */
 export function specDescription(_tag: string, paragraphs: string[]): { component: string } {
-  return { component: [API_POINTER, ...paragraphs].join('\n\n') };
+  return { component: paragraphs.join('\n\n') };
 }
 
-// The Components/UI sibling of API_POINTER — same idea, component vocabulary
-// (props/callbacks/slots rather than properties/events/attributes).
-const COMPONENT_POINTER =
-  '> **Full API reference** — every prop, callback, slot and token is on the **API** tab above.';
-
-/**
- * Build a Storybook `docs.description` for a SolidJS/UI component story, with the
- * API-tab pointer prepended. The generated spec (props/callbacks/slots/tokens)
- * lives on the **API** tab (see `.storybook/api-tab.tsx`), from
- * `src/components/component-meta.json`.
- */
+/** Build a Storybook `docs.description` for a SolidJS/UI component story. */
 export function componentDescription(paragraphs: string[]): { component: string } {
-  return { component: [COMPONENT_POINTER, ...paragraphs].join('\n\n') };
+  return { component: paragraphs.join('\n\n') };
 }
 
 /**

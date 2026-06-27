@@ -15,10 +15,8 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Renders an image from a `base64` string or a `uint8Array`, building a data URL or object URL automatically; shows a pulsing placeholder until a source is available.',
-        '**When to use:** to display model-generated or attached images supplied as raw bytes / base64 (the `GeneratedImageLike` shape) rather than a remote URL.',
-        '**How to use:** pass `base64` + `mediaType` (or `uint8Array` + `mediaType`) and an `alt` description; size and style via `class`.',
-        '**Placement:** inside assistant messages, attachment previews, or anywhere a generated image needs to be shown.',
+        'Renders a model-generated or attached image from raw bytes rather than a URL: pass `base64` or `uint8Array` plus `mediaType`, and it builds the data/object URL for you.',
+        'Shows a pulsing placeholder until a source is available. Always set `alt`.',
       ]),
     },
   },
@@ -62,7 +60,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — swap the base64 data, media type, and sizing classes. */
+/** Interactive playground: swap the base64 data, media type, and sizing classes. */
 export const Playground: Story = {
   ...src(`<Image
   base64={chatIconBase64}

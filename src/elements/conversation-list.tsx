@@ -1,7 +1,7 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { readSlots, CONVERSATIONS_SLOTS } from './slots';
-import { ConversationList } from '../components/conversation-list';
+import { ConversationList, type ConversationListController } from '../components/conversation-list';
 import type { ConversationGroup, ConversationSummary, ConversationScope } from '../types';
 
 interface Props extends Record<string, unknown> {
@@ -23,6 +23,9 @@ interface Events {
   'kai-new-chat': Record<string, never>;
   /** The sidebar toggle was clicked. */
   'kai-toggle-sidebar': Record<string, never>;
+  /** The built-in search box query changed (typing, or a programmatic `clear()`
+   *  which fires it with `''`). Lets a consumer mirror or server-side the filter. */
+  'kai-search': { query: string };
 }
 
 /** Parse a single light-DOM `<kai-conversation>` element into a `ConversationSummary`.
@@ -50,7 +53,7 @@ defineWebComponent<Props, Events>('kai-conversations', {
   groups: [],
   conversations: [],
   activeId: undefined,
-}, (props, { dispatch, element }) => {
+}, (props, { dispatch, element, expose }) => {
   // Read declarative <kai-conversation> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
   const [slottedConversations, setSlottedConversations] = createSignal<ConversationSummary[]>([]);
@@ -71,6 +74,26 @@ defineWebComponent<Props, Events>('kai-conversations', {
   // Prop conversations take precedence; slotted children are appended after.
   const allConversations = () => [...(props.conversations ?? []), ...slottedConversations()];
 
+  // ── Imperative API (instance methods on the host) ──────────────────────────
+  // The search box's query lives inside ConversationList; we capture its
+  // controller (Pattern C) to focus / clear it from the facade.
+  let controller: ConversationListController | undefined;
+  expose({
+    /** Focus the built-in search input inside the shadow root. */
+    focus: (options?: FocusOptions) => {
+      // Prefer the captured controller; fall back to a shadow query (the search
+      // box only renders when there are conversations).
+      if (controller) controller.focus(options);
+      else element.shadowRoot?.querySelector<HTMLInputElement>('input')?.focus(options);
+    },
+    /** Clear the internal search query (resets the list filter) and fire
+     *  kai-search with an empty string. */
+    clear: () => controller?.clearSearch(),
+    /** Programmatically select a conversation by id — mirror of the
+     *  kai-conversation-select event (a convenience over driving `activeId`). */
+    select: (id: string) => dispatch('kai-conversation-select', { id }),
+  });
+
   return (
     <ConversationList
       groups={props.groups}
@@ -79,6 +102,8 @@ defineWebComponent<Props, Events>('kai-conversations', {
       onSelect={(id) => dispatch('kai-conversation-select', { id })}
       onNewChat={() => dispatch('kai-new-chat')}
       onToggleSidebar={() => dispatch('kai-toggle-sidebar')}
+      onSearchChange={(query) => dispatch('kai-search', { query })}
+      controllerRef={(c) => (controller = c)}
       header={slots().header ? <slot name="header" /> : undefined}
       footer={slots().footer ? <slot name="footer" /> : undefined}
       empty={slots().empty ? <slot name="empty" /> : undefined}

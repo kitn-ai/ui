@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
 import { Paperclip, Github, Sparkles, Globe, Settings, Plus, FileText } from 'lucide-solid';
 import {
@@ -17,33 +18,47 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'An accessible menu that opens from a trigger, built on the kit\'s DIY overlay core (no third-party dependency). Implements the WAI-ARIA menu-button pattern: `aria-haspopup`/`aria-expanded` wiring, roving focus with Arrow/Home/End, type-ahead, Escape/outside-click dismissal, and focus return to the trigger. Portals into the active shadow root and resolves focus through `getRootNode()` so roving focus works inside web components.',
-        '**When to use:** for a list of *actions* or single-choice options triggered by a button — overflow menus (MoreHorizontal), model pickers, scope selectors. For hover-only context use `HoverCard`; for a label use `Tooltip`.',
-        '**How to use:** compose `Dropdown` › `DropdownTrigger` (the button) + `DropdownContent` › one `DropdownItem` per action. Give each item an `onSelect` handler — selecting also closes the menu.',
+        'A `role="menu"` for a list of actions, with roving arrow-key focus, type-ahead, and Escape/outside-click dismissal.',
+        'Compose `Dropdown` › `DropdownTrigger` + `DropdownContent` › `DropdownItem`. Also exports `DropdownCheckboxItem`, `DropdownSeparator`, `DropdownLabel`, and `DropdownSub*` for nested submenus.',
       ]),
     },
   },
-  render: () => <DropdownDemo />,
+  argTypes: {
+    onSelect: {
+      action: 'select',
+      description: 'Per-item handler (`DropdownItem` / `DropdownCheckboxItem`). Fires the item label when chosen.',
+      table: { category: 'Events' },
+    },
+  },
+  args: {
+    onSelect: fn(),
+  },
+  render: (args) => <DropdownDemo onSelect={args.onSelect} />,
 } satisfies Meta<typeof Dropdown>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+/** Per-item select handler, surfaced to the Actions panel. Each demo also keeps a
+ *  local signal so the UI shows the last selection inline. */
+type SelectHandler = (label: string) => void;
 
 const IMPORT = `import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '@kitn.ai/ui';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-function DropdownDemo() {
+function DropdownDemo(props: { onSelect?: SelectHandler }) {
   const [last, setLast] = createSignal<string>();
+  const select = (label: string) => { setLast(label); props.onSelect?.(label); };
   return (
     <div class="space-y-3">
       <Dropdown>
         <DropdownTrigger class={buttonVariants({ variant: 'outline' })}>Actions ▾</DropdownTrigger>
         <DropdownContent>
-          <DropdownItem onSelect={() => setLast('Rename')}>Rename</DropdownItem>
-          <DropdownItem onSelect={() => setLast('Duplicate')}>Duplicate</DropdownItem>
-          <DropdownItem onSelect={() => setLast('Archive')}>Archive</DropdownItem>
+          <DropdownItem onSelect={() => select('Rename')}>Rename</DropdownItem>
+          <DropdownItem onSelect={() => select('Duplicate')}>Duplicate</DropdownItem>
+          <DropdownItem onSelect={() => select('Archive')}>Archive</DropdownItem>
         </DropdownContent>
       </Dropdown>
       <p class="text-xs text-muted-foreground">Last selected: {last() ?? '—'}</p>
@@ -69,9 +84,11 @@ const CASCADE_IMPORT = `import {
   DropdownSub, DropdownSubTrigger, DropdownSubContent,
 } from '@kitn.ai/ui';`;
 
-function CascadingMenuDemo() {
+function CascadingMenuDemo(props: { onSelect?: SelectHandler }) {
   const [webSearch, setWebSearch] = createSignal(true);
   const [last, setLast] = createSignal<string>();
+  const select = (label: string) => { setLast(label); props.onSelect?.(label); };
+  const toggleWebSearch = () => { setWebSearch((v) => !v); props.onSelect?.(`Web search: ${webSearch() ? 'on' : 'off'}`); };
   return (
     <div class="space-y-3">
       <Dropdown>
@@ -83,12 +100,12 @@ function CascadingMenuDemo() {
         </DropdownTrigger>
         <DropdownContent class="min-w-[15rem]">
           <DropdownLabel>Actions</DropdownLabel>
-          <DropdownItem onSelect={() => setLast('Add files or photos')}>
+          <DropdownItem onSelect={() => select('Add files or photos')}>
             <Paperclip class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
             Add files or photos
             <span class="ml-auto pl-4 text-xs tracking-widest text-muted-foreground">⌘U</span>
           </DropdownItem>
-          <DropdownItem onSelect={() => setLast('Add from GitHub')}>
+          <DropdownItem onSelect={() => select('Add from GitHub')}>
             <Github class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
             Add from GitHub
           </DropdownItem>
@@ -98,22 +115,22 @@ function CascadingMenuDemo() {
               Skills
             </DropdownSubTrigger>
             <DropdownSubContent class="min-w-[12rem]">
-              <DropdownItem onSelect={() => setLast('skill-creator')}>
+              <DropdownItem onSelect={() => select('skill-creator')}>
                 <Sparkles class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
                 skill-creator
               </DropdownItem>
-              <DropdownItem onSelect={() => setLast('Manage skills')}>
+              <DropdownItem onSelect={() => select('Manage skills')}>
                 <Settings class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
                 Manage skills
               </DropdownItem>
-              <DropdownItem onSelect={() => setLast('Add skill')}>
+              <DropdownItem onSelect={() => select('Add skill')}>
                 <FileText class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
                 Add skill
               </DropdownItem>
             </DropdownSubContent>
           </DropdownSub>
           <DropdownSeparator />
-          <DropdownCheckboxItem checked={webSearch()} onSelect={() => setWebSearch((v) => !v)}>
+          <DropdownCheckboxItem checked={webSearch()} onSelect={toggleWebSearch}>
             <Globe class="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
             Web search
           </DropdownCheckboxItem>
@@ -133,7 +150,7 @@ function CascadingMenuDemo() {
  * `DropdownCheckboxItem` ("Web search") that toggles in place without closing.
  */
 export const CascadingMenu: Story = {
-  render: () => <CascadingMenuDemo />,
+  render: (args: { onSelect?: SelectHandler }) => <CascadingMenuDemo onSelect={args.onSelect} />,
   parameters: {
     docs: {
       source: {

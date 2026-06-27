@@ -4,7 +4,7 @@ import { Button } from './button';
 import { componentDescription } from '../stories/docs/element-controls';
 
 /**
- * Convention exemplar — every component story should follow this shape:
+ * Convention exemplar: every component story should follow this shape:
  * `component`, a description, `argTypes` (controls), `args` (defaults incl.
  * `fn()` for events), a `Playground` story rendered from args, plus showcase
  * stories for notable variations.
@@ -17,10 +17,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A clickable button with style **variants** and **sizes**, built on a native `<button>` (all standard button attributes pass through).',
-        '**When to use:** any user-triggered action — submitting input, toolbar/icon actions, confirming or dismissing. Use `default` for the primary action, `ghost`/`outline` for secondary or low-emphasis actions.',
-        '**How to use:** set `variant` and `size`, pass label or an icon as children, and wire `onClick`. For icon-only buttons use `size="icon"` / `"icon-sm"` and include an `aria-label`.',
-        '**Placement:** prompt action bars, message action rows, dialogs, toolbars, and empty-state CTAs.',
+        'A native `<button>` with style `variant` (`default`, `ghost`, `outline`) and `size` presets. Use `size="icon"` / `"icon-sm"` for square icon-only buttons (give them an `aria-label`).',
       ]),
     },
   },
@@ -43,7 +40,7 @@ const meta = {
     },
     children: {
       control: 'text',
-      description: 'Button content — text or an icon element.',
+      description: 'Button content, text or an icon element.',
     },
     onClick: {
       action: 'click',
@@ -71,7 +68,7 @@ type Story = StoryObj<typeof meta>;
  * "Show code" / "Copy code" buttons surface. `language: 'tsx'` labels it as SolidJS.
  *
  * Note: `Button` is a SolidJS *component* (a scoped import), not a global custom
- * element, so the unprefixed name can't conflict with anything — alias on import
+ * element, so the unprefixed name can't conflict with anything; alias on import
  * if a host already has a `Button`. Only the web components (`<kai-chat>`, …)
  * are prefixed, because those claim global custom-element tag names.
  */
@@ -80,7 +77,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — tweak the controls to explore every combination. */
+/** Interactive playground: tweak the controls to explore every combination. */
 export const Playground: Story = {
   ...src(`<Button variant="default" size="md" onClick={() => {}}>Click me</Button>`),
 };
@@ -122,7 +119,7 @@ export const Icon: Story = {
   ...src(`<Button size="icon" aria-label="Add">\n  <PlusIcon />\n</Button>`),
 };
 
-/** All variants and sizes side by side (showcase — not driven by controls). */
+/** All variants and sizes side by side (showcase, not driven by controls). */
 export const AllVariants: Story = {
   render: () => (
     <div class="flex flex-wrap items-center gap-3">

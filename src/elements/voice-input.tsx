@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { VoiceInput } from '../components/voice-input';
+import { VoiceInput, type VoiceInputController } from '../components/voice-input';
 
 interface Props extends Record<string, unknown> {
   /**
@@ -19,6 +19,10 @@ interface Events {
   'kai-audio-captured': { blob: Blob };
   /** Transcription completed (the `transcribe` property resolved). */
   'kai-transcription': { text: string };
+  /** Recording started or stopped — lets the host drive its own UI (waveform,
+   *  push-to-talk indicator) in sync with the mic. Fires on real transitions
+   *  only (manual click and programmatic start()/stop()), never on mount. */
+  'kai-recording-change': { recording: boolean };
 }
 
 /**
@@ -29,13 +33,33 @@ interface Events {
 defineWebComponent<Props, Events>('kai-voice-input', {
   transcribe: undefined,
   disabled: false,
-}, (props, { dispatch, flag }) => (
-  <VoiceInput
-    disabled={flag('disabled')}
-    onTranscribe={async (blob) => {
-      dispatch('kai-audio-captured', { blob });
-      return props.transcribe ? props.transcribe(blob) : '';
-    }}
-    onTranscription={(text) => dispatch('kai-transcription', { text })}
-  />
-));
+}, (props, { dispatch, flag, expose }) => {
+  // Pattern C: the VoiceInput component owns useVoiceRecorder; it hands up a
+  // start/stop controller and an onRecordingChange callback. The facade captures
+  // the controller and exposes delegating methods (start/stop both run the same
+  // record→transcribe path as the mic click, so manual + programmatic emit the
+  // same kai-audio-captured/kai-transcription/kai-recording-change events).
+  let controller: VoiceInputController | undefined;
+  expose({
+    /** Begin recording programmatically (e.g. push-to-talk bound to a global
+     *  key). Runs the same getUserMedia path as clicking the mic; no-ops if
+     *  already recording. */
+    start: () => controller?.start(),
+    /** Stop the in-progress recording, producing the blob (→ kai-audio-captured)
+     *  and running transcription. Pairs with start() for push-to-talk. */
+    stop: () => controller?.stop(),
+  });
+
+  return (
+    <VoiceInput
+      disabled={flag('disabled')}
+      onTranscribe={async (blob) => {
+        dispatch('kai-audio-captured', { blob });
+        return props.transcribe ? props.transcribe(blob) : '';
+      }}
+      onTranscription={(text) => dispatch('kai-transcription', { text })}
+      onRecordingChange={(recording) => dispatch('kai-recording-change', { recording })}
+      controllerRef={(c) => (controller = c)}
+    />
+  );
+});

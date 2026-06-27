@@ -13,10 +13,8 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'A horizontal message row that composes an optional `MessageAvatar`, a `MessageContent` body (plain or markdown), and an optional `MessageActions` toolbar.',
-        '**When to use:** rendering any chat turn — user or assistant. Use a bubble + right alignment for user turns, and an avatar + transparent content for assistant turns.',
-        '**How to use:** wrap the parts in `<Message>`. Add `MessageAvatar` for the speaker, `MessageContent` for the text (set `markdown` to render markdown), and `MessageActions` for hover actions. Layout (alignment, bubble) is controlled via `class`.',
-        '**Placement:** inside a `ChatContainer`/scroll region, stacked vertically as the conversation transcript.',
+        'A message row for any chat turn, composing an optional `MessageAvatar`, a `MessageContent` body (set `markdown` to render markdown), and an optional `MessageActions` toolbar.',
+        'Layout is driven by `class`: a bubble plus right alignment for user turns; an avatar plus transparent content for assistant turns.',
       ]),
     },
   },
@@ -27,7 +25,7 @@ const meta = {
     },
     class: {
       control: 'text',
-      description: 'Layout classes — e.g. `flex flex-col items-end` for right-aligned user turns.',
+      description: 'Layout classes, e.g. `flex flex-col items-end` for right-aligned user turns.',
     },
   },
   args: {
@@ -55,7 +53,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — an assistant turn; tweak `class` to change layout. */
+/** Interactive playground: an assistant turn; tweak `class` to change layout. */
 export const Playground: Story = {
   ...src(`<Message>
   <MessageAvatar src="" fallback="AI" alt="Assistant" />
@@ -63,7 +61,7 @@ export const Playground: Story = {
 </Message>`),
 };
 
-/** A user turn — right-aligned bubble, no avatar. */
+/** A user turn: right-aligned bubble, no avatar. */
 export const UserMessage: Story = {
   render: () => (
     <div class="max-w-2xl">
@@ -81,7 +79,7 @@ export const UserMessage: Story = {
 </Message>`),
 };
 
-/** An assistant turn — avatar plus a secondary-background content block. */
+/** An assistant turn: avatar plus a secondary-background content block. */
 export const AssistantMessage: Story = {
   render: () => (
     <div class="max-w-2xl">
@@ -155,7 +153,7 @@ export const UserAlignedRight: Story = {
 </Message>`),
 };
 
-/** Markdown body — set `markdown` on `MessageContent` and pass a markdown string. */
+/** Markdown body: set `markdown` on `MessageContent` and pass a markdown string. */
 export const MarkdownMessage: Story = {
   render: () => (
     <div class="max-w-2xl">

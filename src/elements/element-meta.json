@@ -29,8 +29,15 @@
         "type": "undefined | \"preview\" | \"code\"",
         "optional": true,
         "scalar": true,
-        "description": "Active tab: `preview` (default) or `code`.",
-        "default": "'preview'",
+        "description": "Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`).",
+        "displayType": "undefined | \"preview\" | \"code\""
+      },
+      {
+        "name": "defaultTab",
+        "type": "undefined | \"preview\" | \"code\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`.",
         "displayType": "undefined | \"preview\" | \"code\""
       },
       {
@@ -175,6 +182,62 @@
         "displayDetail": "{ tab: \"preview\" | \"code\" }"
       }
     ],
+    "methods": [
+      {
+        "name": "back",
+        "params": "",
+        "returns": "void",
+        "description": "Go back in the artifact's own history stack (no-op when there's no prior entry)."
+      },
+      {
+        "name": "forward",
+        "params": "",
+        "returns": "void",
+        "description": "Go forward in the history stack (no-op when there's no forward entry)."
+      },
+      {
+        "name": "reload",
+        "params": "",
+        "returns": "void",
+        "description": "Force-reload the current preview url (also re-renders an inline PDF)."
+      },
+      {
+        "name": "home",
+        "params": "",
+        "returns": "void",
+        "description": "Navigate to the `src` home url (no-op when there's no `src`)."
+      },
+      {
+        "name": "navigate",
+        "params": "url: string",
+        "returns": "void",
+        "description": "Push + load a url in the preview — the path-field submit path (fires kai-navigate)."
+      },
+      {
+        "name": "selectFile",
+        "params": "path: string",
+        "returns": "void",
+        "description": "Select a file by path: highlights the tree, shows its source, navigates the preview (fires kai-file-select + kai-navigate). Named selectFile to avoid the `activeFile` prop."
+      },
+      {
+        "name": "openExternal",
+        "params": "",
+        "returns": "void",
+        "description": "Open the current url in a new browser tab (no-op when there's no concrete url). Named openExternal, NOT openInTab — that's a prop (toolbar button visibility)."
+      },
+      {
+        "name": "maximize",
+        "params": "",
+        "returns": "void",
+        "description": "Enter the maximized view-state (fires kai-maximize-change{maximized:true}). Named maximize, NOT maximized — that's a prop."
+      },
+      {
+        "name": "restore",
+        "params": "",
+        "returns": "void",
+        "description": "Exit the maximized view-state (fires kai-maximize-change{maximized:false})."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Artifact",
@@ -254,6 +317,7 @@
         "displayDetail": "{ id: string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Attachments",
@@ -301,7 +365,14 @@
         "storyId": "solid-advanced-elements-attachmentempty--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "parts": [
+      {
+        "name": "preview",
+        "doc": "The image shown in an attachment’s hover-card preview. Bounded by default (max ~320×256, aspect preserved) so a large image never blows up the card — raise or lower the cap from outside.",
+        "recipe": "kai-attachments::part(preview) { max-width: 32rem; max-height: 24rem }"
+      }
+    ]
   },
   {
     "tag": "kai-avatar",
@@ -344,6 +415,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Avatar",
@@ -369,6 +441,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Badge",
@@ -459,6 +532,26 @@
         "displayDetail": null
       }
     ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the inner `<button>` (host.focus() would focus the wrapper)."
+      },
+      {
+        "name": "blur",
+        "params": "",
+        "returns": "void",
+        "description": "Blur the inner `<button>`."
+      },
+      {
+        "name": "click",
+        "params": "",
+        "returns": "void",
+        "description": "Programmatically activate the button — runs the same path as a user click and fires kai-click. Forwarding to the inner button means `disabled` is respected automatically."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Button",
@@ -522,6 +615,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Card",
@@ -561,7 +655,34 @@
         "displayType": "undefined | { onSubmit?: undefined | (cardId: string, data: unknown) => void; onAction?: undefined | (cardId: string, action: string, payload?: unknown) => void; onSendPrompt?: undefined | (text: string, opts: { mode: \"compose\" | \"send\"; context?: unknown; }) => void; onOpen?: undefined | (url: string, target: \"tab\" | \"artifact\") => void; onState?: undefined | (cardId: string, patch: unknown) => void; onDismiss?: undefined | (cardId: string) => void; onReopen?: undefined | (cardId: string) => void; onError?: undefined | (cardId: string, message: string) => void; maxSendPromptMode?: undefined | \"compose\" | \"send\" }"
       }
     ],
-    "events": [],
+    "events": [
+      {
+        "name": "kai-card-resolved",
+        "detail": "{ cardId: string; resolution: { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }",
+        "description": "A child card transitioned to a resolved/deferred state (an action was chosen, a form/tasks submission landed, or it was dismissed) — re-emitted off the host as a non-bubbling convenience event so a consumer can observe resolution centrally without diffing the cards array. `detail` = `{ cardId, resolution }`. (A `reopen` un-resolves a card and has no `CardResolution`, so it does NOT fire this — observe reopen via the underlying bubbling `kai-card` event.)",
+        "displayDetail": "{ cardId: string; resolution: { kind: \"action\"; action: string; payload?: unknown; at?: undefined | string } | { kind: \"submit\"; data: unknown; at?: undefined | string } | { kind: \"dismissed\"; at?: undefined | string } | { kind: \"expired\"; reason?: undefined | string; at?: undefined | string } }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "resolve",
+        "params": "cardId: string, resolution: CardResolution",
+        "returns": "void",
+        "description": "Programmatically resolve a child card by id: set that envelope's `resolution` so the child re-renders into its read-only/resolved view — the imperative twin of the consumer mutating the cards array. No-op for an unknown id."
+      },
+      {
+        "name": "dismiss",
+        "params": "cardId: string",
+        "returns": "void",
+        "description": "Collapse a card to its re-openable stub from the host side — convenience for `resolve(cardId, { kind: 'dismissed' })`."
+      },
+      {
+        "name": "getCard",
+        "params": "cardId: string",
+        "returns": "HTMLElement | null",
+        "description": "Return the live child element node for a card id (or null) so consumers can call that card's own methods (focus/expand/…) without a shadow-DOM query."
+      }
+    ],
     "composedFrom": [
       {
         "name": "CardFallback",
@@ -578,42 +699,73 @@
     "props": [
       {
         "name": "steps",
-        "type": "{ label: string; content?: undefined | string }[]",
+        "type": "{ label: string; content?: undefined | string; id?: undefined | string }[]",
         "optional": false,
         "scalar": false,
-        "description": "The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1).",
-        "typeName": "Step[]",
-        "typeShape": "{ label: string; content?: undefined | string }[]",
+        "description": "The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). Each `{ label, content?, id? }`.",
+        "typeName": "ChainOfThoughtStepData[]",
+        "typeShape": "{ label: string; content?: undefined | string; id?: undefined | string }[]",
         "default": "[]",
-        "displayType": "{ label: string; content?: undefined | string }[]"
+        "displayType": "{ label: string; content?: undefined | string; id?: undefined | string }[]"
+      },
+      {
+        "name": "type",
+        "type": "undefined | \"single\" | \"multiple\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Open mode: `'multiple'` (default — any number of steps open at once) or `'single'` (at most one open; opening a step closes the others).",
+        "displayType": "undefined | \"single\" | \"multiple\""
+      },
+      {
+        "name": "value",
+        "type": "undefined | string | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Controlled open step key(s). When set, it WINS over user interaction (the consumer owns the open set). String in `single` mode, string[] in `multiple` mode. Set as a JS property.",
+        "displayType": "undefined | string | string[]"
+      },
+      {
+        "name": "defaultValue",
+        "type": "undefined | string | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Uncontrolled INITIAL open step key(s) — seeds which steps render expanded. Ignored once `value` is provided. Set as a JS property.",
+        "displayType": "undefined | string | string[]"
       }
     ],
-    "events": [],
+    "events": [
+      {
+        "name": "kai-value-change",
+        "detail": "{ value: string | string[] }",
+        "description": "The open set changed — by user click OR an expand()/collapse()/toggle() call. `value` is a string in `single` mode, a string[] in `multiple` mode. (Maps Radix Accordion's onValueChange.)",
+        "displayDetail": "{ value: string | string[] }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "expand",
+        "params": "index?: number",
+        "returns": "void",
+        "description": "Open one step's detail by index, or — with no arg — ALL steps. In `single` mode opening one step closes the others (expand-all keeps the last)."
+      },
+      {
+        "name": "collapse",
+        "params": "index?: number",
+        "returns": "void",
+        "description": "Close one step's detail by index, or — with no arg — ALL steps."
+      },
+      {
+        "name": "toggle",
+        "params": "index?: number",
+        "returns": "void",
+        "description": "Flip one step's open state by index."
+      }
+    ],
     "composedFrom": [
       {
-        "name": "ChainOfThought",
+        "name": "ChainOfThoughtAccordion",
         "group": "Components",
-        "storyId": "solid-advanced-elements-chainofthought--docs"
-      },
-      {
-        "name": "ChainOfThoughtStep",
-        "group": "Components",
-        "storyId": "solid-advanced-elements-chainofthoughtstep--docs"
-      },
-      {
-        "name": "ChainOfThoughtTrigger",
-        "group": "Components",
-        "storyId": "solid-advanced-elements-chainofthoughttrigger--docs"
-      },
-      {
-        "name": "ChainOfThoughtContent",
-        "group": "Components",
-        "storyId": "solid-advanced-elements-chainofthoughtcontent--docs"
-      },
-      {
-        "name": "ChainOfThoughtItem",
-        "group": "Components",
-        "storyId": "solid-advanced-elements-chainofthoughtitem--docs"
+        "storyId": "solid-advanced-elements-chainofthoughtaccordion--docs"
       }
     ],
     "tokens": []
@@ -865,6 +1017,12 @@
     ],
     "events": [
       {
+        "name": "kai-attachments-change",
+        "detail": "{ attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
+        "description": "The staged attachments changed (file added or removed). Carries the full current list so a consumer can react in real time.",
+        "displayDetail": "{ attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }"
+      },
+      {
         "name": "kai-message-action",
         "detail": "{ messageId: string; action: string; state?: undefined | \"on\" | \"off\" }",
         "description": "An action button on a message was clicked. `action` is the built-in name or custom id. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear.",
@@ -905,6 +1063,38 @@
         "detail": "Record<string, never>",
         "description": "The Mic / voice button was clicked.",
         "displayDetail": "Record<string, never>"
+      }
+    ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": ""
+      },
+      {
+        "name": "blur",
+        "params": "",
+        "returns": "void",
+        "description": ""
+      },
+      {
+        "name": "clear",
+        "params": "",
+        "returns": "void",
+        "description": ""
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": ""
+      },
+      {
+        "name": "scrollToBottom",
+        "params": "behavior?: ScrollBehavior",
+        "returns": "void",
+        "description": ""
       }
     ],
     "composedFrom": [
@@ -1028,6 +1218,7 @@
         "displayDetail": null
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Checkpoint",
@@ -1083,9 +1274,72 @@
         "scalar": false,
         "description": "Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`.",
         "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled selection — the selected option id. When set, the consumer owns the current pick (RadioGroup `value`). Attribute: `value`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "defaultValue",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Option id to pre-select on mount (uncontrolled seed). Attribute: `default-value`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the whole radiogroup + Submit (e.g. while the agent is busy). Attribute: `disabled`.",
+        "displayType": "undefined | false | true"
       }
     ],
-    "events": [],
+    "events": [
+      {
+        "name": "kai-value-change",
+        "detail": "{ value: string }",
+        "description": "The selection changed BEFORE submit (a row click or the `select()` method). Distinct from the terminal `action` verb on the `kai-card` contract event.",
+        "displayDetail": "{ value: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the radiogroup roving tab stop (or the Other input when selected)."
+      },
+      {
+        "name": "select",
+        "params": "optionId: string",
+        "returns": "void",
+        "description": "Select an option by id locally — no emit, fires kai-value-change (same as a row click). Lets a consumer pre-highlight or drive selection externally."
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": "Submit the current selection — emits the `action` verb on kai-card and resolves the card (single-shot). Named `send`, not `submit`, per the shared vocabulary."
+      },
+      {
+        "name": "dismiss",
+        "params": "",
+        "returns": "void",
+        "description": "Trigger the dismiss path — emits `dismiss` on kai-card and optimistically collapses the card to its re-openable stub."
+      },
+      {
+        "name": "reopen",
+        "params": "",
+        "returns": "void",
+        "description": "Re-open a dismissed card from its stub — emits `reopen` on kai-card."
+      }
+    ],
     "composedFrom": [
       {
         "name": "ChoiceCard",
@@ -1146,6 +1400,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "CodeBlock",
@@ -1194,6 +1449,12 @@
     ],
     "events": [
       {
+        "name": "kai-active-change",
+        "detail": "{ id: undefined | string }",
+        "description": "Fired when the highlighted/active item changes — via Arrow keys or when filtering re-clamps the active row. `id` is the newly active item's id, or `undefined` when no item is active (e.g. the filtered list is empty). Lets a host preview the active item without committing a selection.",
+        "displayDetail": "{ id: undefined | string }"
+      },
+      {
         "name": "kai-query-change",
         "detail": "{ value: string }",
         "description": "Fired on every keystroke in the search input.",
@@ -1204,6 +1465,26 @@
         "detail": "{ id: string }",
         "description": "Fired when the user selects an item (click or Enter).",
         "displayDetail": "{ id: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the search combobox input inside the shadow root so the palette is type-ready on demand (Shadow-DOM autofocus is unreliable, so hosts call this after opening the palette)."
+      },
+      {
+        "name": "blur",
+        "params": "",
+        "returns": "void",
+        "description": "Blur the focused search input."
+      },
+      {
+        "name": "clear",
+        "params": "",
+        "returns": "void",
+        "description": "Reset the search query to empty — re-showing all items — and fire `kai-query-change` with `''`. Mirrors the Escape-key behavior."
       }
     ],
     "composedFrom": [
@@ -1296,6 +1577,20 @@
         "detail": "{ compareId: string }",
         "description": "Both candidates have settled and the pick is live.",
         "displayDetail": "{ compareId: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "select",
+        "params": "candidateId: string",
+        "returns": "void",
+        "description": "Programmatically commit a pick by candidate id — same path as the \"Pick this\" button: fires kai-compare-select and optimistically collapses (single-shot; inert while streaming or already resolved). `select` does NOT collide with the `selection` prop (distinct identifier)."
+      },
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the current roving tab stop (the focused candidate's \"Pick this\" radio) so a consumer can move keyboard focus into the radiogroup."
       }
     ],
     "composedFrom": [
@@ -1439,6 +1734,38 @@
         "displayDetail": "{ doc: ({ type: \"text\"; text: string } | { type: \"entity\"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]; text: string; entities: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }"
       }
     ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the editable element. `focus`/`blur` are NOT composed natively, so a host-level focus() can't reach the editable inside the shadow root — this is the only way to focus the composer programmatically."
+      },
+      {
+        "name": "blur",
+        "params": "",
+        "returns": "void",
+        "description": "Blur the editable element."
+      },
+      {
+        "name": "clear",
+        "params": "",
+        "returns": "void",
+        "description": "Empty the composer to a blank doc (resets the internal value + history baseline; fires kai-value-change)."
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": "Submit the current content programmatically — same path as Enter (fires kai-submit). Named `send`, not `submit`, to match the shared vocabulary and avoid any submit collision."
+      },
+      {
+        "name": "insertEntity",
+        "params": "entity: EntityRef",
+        "returns": "void",
+        "description": "Insert an atomic entity pill (skill/agent/plugin) at the caret without typing a trigger (fires kai-entity-add)."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Composer",
@@ -1496,6 +1823,32 @@
       }
     ],
     "events": [],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the default action button (or the first action if none is default) — the same target `autofocus` focuses on mount, but on demand."
+      },
+      {
+        "name": "confirm",
+        "params": "actionId?: string",
+        "returns": "void",
+        "description": "Activate an action by id — emits the `action` verb on kai-card and resolves the card (single-shot). With no id, invokes the default action."
+      },
+      {
+        "name": "dismiss",
+        "params": "",
+        "returns": "void",
+        "description": "Trigger the dismiss path — emits `dismiss` on kai-card and optimistically collapses the card to its re-openable stub."
+      },
+      {
+        "name": "reopen",
+        "params": "",
+        "returns": "void",
+        "description": "Re-open a dismissed card from its stub — emits `reopen` on kai-card."
+      }
+    ],
     "composedFrom": [
       {
         "name": "ConfirmCard",
@@ -1543,6 +1896,7 @@
         "displayDetail": "{ level: \"ok\" | \"warn\" | \"danger\" }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Context",
@@ -1659,10 +2013,36 @@
         "displayDetail": "Record<string, never>"
       },
       {
+        "name": "kai-search",
+        "detail": "{ query: string }",
+        "description": "The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter.",
+        "displayDetail": "{ query: string }"
+      },
+      {
         "name": "kai-toggle-sidebar",
         "detail": "Record<string, never>",
         "description": "The sidebar toggle was clicked.",
         "displayDetail": "Record<string, never>"
+      }
+    ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the built-in search input inside the shadow root."
+      },
+      {
+        "name": "clear",
+        "params": "",
+        "returns": "void",
+        "description": "Clear the internal search query (resets the list filter) and fire kai-search with an empty string."
+      },
+      {
+        "name": "select",
+        "params": "id: string",
+        "returns": "void",
+        "description": "Programmatically select a conversation by id — mirror of the kai-conversation-select event (a convenience over driving `activeId`)."
       }
     ],
     "composedFrom": [
@@ -1717,6 +2097,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Embed",
@@ -1751,6 +2132,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Empty",
@@ -1868,6 +2250,7 @@
         "displayDetail": "{ value: \"helpful\" | \"not-helpful\"; category?: undefined | string; comment?: undefined | string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "FeedbackBar",
@@ -1919,6 +2302,7 @@
         "displayDetail": "{ path: string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "FileTree",
@@ -1977,6 +2361,7 @@
         "displayDetail": "{ files: File[] }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "FileUpload",
@@ -2027,9 +2412,79 @@
         "scalar": false,
         "description": "Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`.",
         "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "values",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "Controlled field values (JS property). When set, it wins over local edits.",
+        "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "defaultValues",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "Initial values overlaying the schema defaults (uncontrolled seed; JS property).",
+        "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable all fields + submit. Attribute: `disabled`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
-    "events": [],
+    "events": [
+      {
+        "name": "kai-values-change",
+        "detail": "{ values: Record<string, unknown>; valid: false | true }",
+        "description": "The form's values changed on input — current coerced values + validity.",
+        "displayDetail": "{ values: Record<string, unknown>; valid: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the first control, or the first INVALID control after a failed validation."
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": "Validate + submit programmatically — focus the first invalid field on failure, else emit the `submit` CardEvent and resolve. Named `send`, not `submit`."
+      },
+      {
+        "name": "validate",
+        "params": "",
+        "returns": "void",
+        "description": "Run client-side validation now and return `{ valid, errors? }` WITHOUT submitting."
+      },
+      {
+        "name": "reset",
+        "params": "",
+        "returns": "void",
+        "description": "Re-seed the form from each field's `default` and clear errors."
+      },
+      {
+        "name": "dismiss",
+        "params": "",
+        "returns": "void",
+        "description": "Trigger the dismiss path (emit `dismiss` + collapse to the re-openable stub)."
+      },
+      {
+        "name": "reopen",
+        "params": "",
+        "returns": "void",
+        "description": "Re-open a dismissed card from its stub (emit `reopen`)."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Form",
@@ -2067,14 +2522,75 @@
         "scalar": true,
         "description": "Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover). Set `el.open = true`, or `<kai-hover-card open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Suppress the hover behavior entirely without unmounting.",
+        "displayType": "undefined | false | true"
       }
     ],
-    "events": [],
+    "events": [
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The card opened or closed (by hover/focus, outside-click, or a method).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
+      }
+    ],
     "composedFrom": [
       {
-        "name": "HoverCard",
+        "name": "HoverCardRoot",
         "group": "UI",
-        "storyId": "solid-advanced-primitives-hovercard--docs"
+        "storyId": "solid-advanced-primitives-hovercardroot--docs"
+      },
+      {
+        "name": "HoverCardTrigger",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-hovercardtrigger--docs"
+      },
+      {
+        "name": "HoverCardContent",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-hovercardcontent--docs"
       }
     ],
     "tokens": [],
@@ -2111,6 +2627,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [],
     "tokens": [],
     "parts": [
@@ -2161,6 +2678,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Image",
@@ -2193,6 +2711,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "LinkPreview",
@@ -2235,6 +2754,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Loader",
@@ -2287,6 +2807,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Markdown",
@@ -2348,14 +2869,64 @@
         "scalar": true,
         "description": "Accessible name for an icon-only trigger (no visible label).",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-menu open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the trigger — click/keyboard and `show()` no longer open the menu.",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The menu opened or closed (by click, keyboard, Escape, outside-click, or a method).",
+        "displayDetail": "{ open: false | true }"
+      },
       {
         "name": "kai-select",
         "detail": "{ id: string; checked?: undefined | false | true }",
         "description": "Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state.",
         "displayDetail": "{ id: string; checked?: undefined | false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
       }
     ],
     "composedFrom": [
@@ -2526,6 +3097,14 @@
         "displayDetail": "{ messageId: string; action: string; state?: undefined | \"on\" | \"off\" }"
       }
     ],
+    "methods": [
+      {
+        "name": "copy",
+        "params": "",
+        "returns": "void",
+        "description": "Copy the message content to the clipboard and show the copied check."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Message",
@@ -2613,6 +3192,30 @@
         "scalar": true,
         "description": "The currently-selected model id. Defaults to the first model.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the trigger — click/keyboard and `show()` no longer open the dropdown.",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
@@ -2621,6 +3224,32 @@
         "detail": "{ modelId: string }",
         "description": "A model was selected.",
         "displayDetail": "{ modelId: string }"
+      },
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The model dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
       }
     ],
     "composedFrom": [
@@ -2672,6 +3301,7 @@
         "displayDetail": null
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Notice",
@@ -2721,7 +3351,23 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour.",
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on click). Set `el.open = true`, or `<kai-popover open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Turn the popover off while keeping the trigger mounted (clicks and `show()` no longer open it).",
         "displayType": "undefined | false | true"
       }
     ],
@@ -2729,8 +3375,28 @@
       {
         "name": "kai-open-change",
         "detail": "{ open: false | true }",
-        "description": "The popover wants to open or close (click, Escape, or outside-click).",
+        "description": "The popover opened or closed (click, Escape, outside-click, or a method).",
         "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
       }
     ],
     "composedFrom": [
@@ -2871,6 +3537,12 @@
     ],
     "events": [
       {
+        "name": "kai-attachments-change",
+        "detail": "{ attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }",
+        "description": "The staged attachments changed — a file was added (via the paperclip) or removed (per-chip ×). Carries the full current list so a consumer can react in real time (validate, show upload progress, toggle the send button).",
+        "displayDetail": "{ attachments: { id: string; type: \"file\" | \"source-document\"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }"
+      },
+      {
         "name": "kai-search",
         "detail": "Record<string, never>",
         "description": "The Search (Globe) toolbar button was clicked.",
@@ -2911,6 +3583,32 @@
         "detail": "Record<string, never>",
         "description": "The Voice (Mic) toolbar button was clicked.",
         "displayDetail": "Record<string, never>"
+      }
+    ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the text editor inside the shadow root (not the hidden file input)."
+      },
+      {
+        "name": "blur",
+        "params": "",
+        "returns": "void",
+        "description": "Blur the focused input control."
+      },
+      {
+        "name": "clear",
+        "params": "",
+        "returns": "void",
+        "description": "Clear the text and any staged attachments (fires kai-value-change / kai-attachments-change so a controlled consumer can react)."
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": "Send the current value programmatically — same path as Enter / the send button (fires kai-submit, then clears staged attachments). Named `send`, not `submit`, to avoid colliding with the `submit` prop."
       }
     ],
     "composedFrom": [],
@@ -2968,7 +3666,15 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it).",
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click + while streaming). Set `el.open = true`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
         "displayType": "undefined | false | true"
       },
       {
@@ -2988,14 +3694,42 @@
         "description": "Render `text` as markdown.",
         "default": "true",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles.",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
       {
         "name": "kai-open-change",
         "detail": "{ open: false | true }",
-        "description": "Open state changed (via the trigger or streaming auto-open).",
+        "description": "The reasoning block expanded or collapsed (via the trigger, streaming auto-open, or a method).",
         "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
       }
     ],
     "composedFrom": [
@@ -3056,6 +3790,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [],
     "tokens": []
   },
@@ -3097,6 +3832,7 @@
         "displayDetail": "{ maximized: false | true; index: null | number }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ResizableHandle",
@@ -3177,6 +3913,7 @@
         "displayDetail": "unknown"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ResizableHandle",
@@ -3235,6 +3972,7 @@
         "displayDetail": null
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ResponseStream",
@@ -3275,14 +4013,64 @@
         "description": "The label shown on the trigger for the active scope.",
         "default": "'All Content'",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-scope-picker open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the trigger — click/keyboard and `show()` no longer open the dropdown.",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The scope dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method).",
+        "displayDetail": "{ open: false | true }"
+      },
       {
         "name": "kai-scope-change",
         "detail": "{ filters: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }",
         "description": "A scope was chosen (`undefined` filters = \"All Content\").",
         "displayDetail": "{ filters: SearchFilters | undefined }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
       }
     ],
     "composedFrom": [
@@ -3310,6 +4098,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ScrollArea",
@@ -3366,6 +4155,7 @@
         "displayDetail": null
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Button",
@@ -3391,6 +4181,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Separator",
@@ -3447,6 +4238,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Skeleton",
@@ -3481,6 +4273,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "MessageSkills",
@@ -3541,6 +4334,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Source",
@@ -3601,6 +4395,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "Source",
@@ -3682,6 +4477,7 @@
         "displayDetail": "{ value: string }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "PromptSuggestion",
@@ -3701,7 +4497,15 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Initial checked state. Bare attribute (`<kai-switch checked>`) turns it on.",
+        "description": "Controlled checked state — settable and reflected to the `checked` attribute. `el.checked = true` (or `<kai-switch checked>`) drives it; the toggle UI updates it and fires `kai-change`. Read `el.checked` for live state.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultChecked",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial checked state on mount (uncontrolled seed). Bare attribute (`<kai-switch default-checked>`) turns it on.",
         "displayType": "undefined | false | true"
       },
       {
@@ -3719,6 +4523,22 @@
         "scalar": true,
         "description": "Accessible label.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "name",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Form-control name (paired with `value`).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Submitted value when checked (paired with `name`). Defaults to `'on'`.",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
@@ -3727,6 +4547,20 @@
         "detail": "{ checked: false | true }",
         "description": "The toggle changed.",
         "displayDetail": "{ checked: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the switch and fire `kai-change` (no-op while disabled)."
+      },
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the inner `role=\"switch\"` button (the host element can't reach it)."
       }
     ],
     "composedFrom": [
@@ -3774,9 +4608,79 @@
         "scalar": false,
         "description": "Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{ selected:[…] } }`.",
         "displayType": "undefined | Record<string, unknown>"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Controlled selection (task ids; JS property). When set, it wins over local state.",
+        "displayType": "undefined | string[]"
+      },
+      {
+        "name": "defaultValue",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Uncontrolled initial selection (task ids; JS property), overlaying per-task `checked`.",
+        "displayType": "undefined | string[]"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Freeze the whole list + Confirm. Attribute: `disabled`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
-    "events": [],
+    "events": [
+      {
+        "name": "kai-value-change",
+        "detail": "{ value: string[] }",
+        "description": "The selection changed on a toggle — the selected ids in input order.",
+        "displayDetail": "{ value: string[] }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "select",
+        "params": "taskIds?: string[]",
+        "returns": "void",
+        "description": "Set the checked task ids (local-only, no emit), respecting disabled/max. With no arg, select all toggleable rows."
+      },
+      {
+        "name": "toggle",
+        "params": "taskId: string, checked?: boolean",
+        "returns": "void",
+        "description": "Toggle one task by id, honoring the max gate (no `checked` = flip)."
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": "Confirm the current selection — emits the `submit` CardEvent + resolves (only when the min/max gate passes). Named `send`, not `submit`."
+      },
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the task group (select-all checkbox if shown, else the first row)."
+      },
+      {
+        "name": "dismiss",
+        "params": "",
+        "returns": "void",
+        "description": "Trigger the dismiss path (emit `dismiss` + collapse to the re-openable stub)."
+      },
+      {
+        "name": "reopen",
+        "params": "",
+        "returns": "void",
+        "description": "Re-open a dismissed card from its stub (emit `reopen`)."
+      }
+    ],
     "composedFrom": [
       {
         "name": "TasksCard",
@@ -3829,6 +4733,7 @@
       }
     ],
     "events": [],
+    "methods": [],
     "composedFrom": [
       {
         "name": "TextShimmer",
@@ -3879,6 +4784,7 @@
         "displayDetail": null
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ThinkingBar",
@@ -3955,6 +4861,7 @@
         "displayDetail": "{ id: string; reason: \"action\" | \"timeout\" | \"close\" }"
       }
     ],
+    "methods": [],
     "composedFrom": [
       {
         "name": "ToastRegion",
@@ -3982,12 +4889,54 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Start expanded.",
-        "default": "false",
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click). Set `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles.",
         "displayType": "undefined | false | true"
       }
     ],
-    "events": [],
+    "events": [
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The panel expanded or collapsed (by trigger click or a method).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Tool",
@@ -4023,9 +4972,76 @@
         "scalar": true,
         "description": "Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless.",
         "displayType": "undefined | number"
+      },
+      {
+        "name": "closeDelay",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Delay (ms) before it hides after the pointer leaves. Defaults to 0 (hides immediately).",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "placement",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'top'`; flips to stay in view.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover/focus). Set `el.open = true`, or `<kai-tooltip open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Turn the tooltip off while keeping the trigger mounted (hover/focus and `show()` no longer open it).",
+        "displayType": "undefined | false | true"
       }
     ],
-    "events": [],
+    "events": [
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The tooltip opened or closed (by hover/focus, outside-click, or a method).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Tooltip",
@@ -4066,10 +5082,30 @@
         "displayDetail": "{ blob: Blob }"
       },
       {
+        "name": "kai-recording-change",
+        "detail": "{ recording: false | true }",
+        "description": "Recording started or stopped — lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount.",
+        "displayDetail": "{ recording: false | true }"
+      },
+      {
         "name": "kai-transcription",
         "detail": "{ text: string }",
         "description": "Transcription completed (the `transcribe` property resolved).",
         "displayDetail": "{ text: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "start",
+        "params": "",
+        "returns": "void",
+        "description": "Begin recording programmatically (e.g. push-to-talk bound to a global key). Runs the same getUserMedia path as clicking the mic; no-ops if already recording."
+      },
+      {
+        "name": "stop",
+        "params": "",
+        "returns": "void",
+        "description": "Stop the in-progress recording, producing the blob (→ kai-audio-captured) and running transcription. Pairs with start() for push-to-talk."
       }
     ],
     "composedFrom": [
@@ -4379,6 +5415,50 @@
         "detail": "Record<string, never>",
         "description": "The Mic / voice button was clicked.",
         "displayDetail": "Record<string, never>"
+      }
+    ],
+    "methods": [
+      {
+        "name": "toggleSidebar",
+        "params": "",
+        "returns": "void",
+        "description": "Collapse/expand the conversation sidebar and fire `kai-sidebar-toggle`."
+      },
+      {
+        "name": "collapseSidebar",
+        "params": "",
+        "returns": "void",
+        "description": "Force the conversation sidebar collapsed (fires `kai-sidebar-toggle`)."
+      },
+      {
+        "name": "expandSidebar",
+        "params": "",
+        "returns": "void",
+        "description": "Force the conversation sidebar expanded (fires `kai-sidebar-toggle`)."
+      },
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the thread's composer."
+      },
+      {
+        "name": "clear",
+        "params": "",
+        "returns": "void",
+        "description": "Clear the thread draft + staged attachments."
+      },
+      {
+        "name": "send",
+        "params": "",
+        "returns": "void",
+        "description": "Submit the current thread draft programmatically (fires `kai-submit`)."
+      },
+      {
+        "name": "scrollToBottom",
+        "params": "behavior?: ScrollBehavior",
+        "returns": "void",
+        "description": "Scroll the thread to the newest message."
       }
     ],
     "composedFrom": [

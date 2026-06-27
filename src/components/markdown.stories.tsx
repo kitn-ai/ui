@@ -11,10 +11,8 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'Renders a Markdown string to styled HTML (GFM enabled — tables, lists, blockquotes), splitting fenced code into highlighted `CodeBlock`s.',
-        '**When to use:** to display assistant message content, documentation, or any rich text authored in Markdown.',
-        '**How to use:** pass the Markdown string as `content`; optionally set `codeTheme` for code fences and `class` for the prose container. Prose sizing follows the surrounding `ChatConfig`.',
-        '**Placement:** inside `MessageContent`, response panels, or anywhere formatted text is shown.',
+        'Renders a Markdown string to styled HTML (GFM: tables, lists, blockquotes) and splits fenced code into highlighted `CodeBlock`s. This is what powers assistant message content.',
+        'Pass the source as `content`; set `codeTheme` for fences. Prose sizing follows the surrounding `ChatConfig`.',
       ]),
     },
   },
@@ -50,7 +48,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — edit the `content` control to render any Markdown. */
+/** Interactive playground: edit the `content` control to render any Markdown. */
 export const Playground: Story = {
   ...src(`<Markdown content="This is a simple paragraph of **Markdown** text." />`),
 };
@@ -151,9 +149,9 @@ This is a **comprehensive** guide to building modern web applications.
 
 ## Key Technologies
 
-- **SolidJS** -- Reactive UI framework
-- **TypeScript** -- Type-safe JavaScript
-- **Tailwind CSS** -- Utility-first styling
+- **SolidJS**: Reactive UI framework
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first styling
 
 ## Getting Started
 
@@ -176,5 +174,24 @@ pnpm dev
 
 For more info, visit [solidjs.com](https://solidjs.com).`,
   },
-  ...src(`<Markdown class="max-w-2xl" content={richMarkdown} />`),
+  ...src(`const richMarkdown = \`# Project Overview
+
+This is a **comprehensive** guide to building modern web apps.
+
+## Key Technologies
+- **SolidJS**: Reactive UI framework
+- **TypeScript**: Type-safe JavaScript
+
+\\\`\\\`\\\`bash
+pnpm create solid
+\\\`\\\`\\\`
+
+> **Note:** Make sure you have Node.js 18+ installed.
+
+| Layer | Technology |
+|-------|-----------|
+| UI    | SolidJS   |
+…\`;
+
+<Markdown class="max-w-2xl" content={richMarkdown} />`),
 };

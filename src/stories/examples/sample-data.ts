@@ -1,6 +1,6 @@
 // Shared sample data for the Examples/* web-component stories. Mirrors the data
 // in examples/composable/main.js so the Storybook catalog matches the external
-// showcase. Plain data only — no DOM wiring here.
+// showcase. Plain data only, no DOM wiring here.
 
 export const models = [
   { id: 'opus', name: 'Claude Opus', provider: 'Anthropic' },
@@ -16,7 +16,7 @@ export const context = {
   estimatedCost: 0.42,
 };
 
-/** An inline SVG data-URL — handy for attachment thumbnails without a server. */
+/** An inline SVG data-URL, handy for attachment thumbnails without a server. */
 export function imgData(fill: string, glyph: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="12" fill="${fill}"/><text x="48" y="60" font-size="42" text-anchor="middle" fill="white">${glyph}</text></svg>`;
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
@@ -58,11 +58,11 @@ export const entityTriggers = [
 ];
 
 export const sources = [
-  { href: 'https://kitn.dev', title: 'kitn — the kit', description: 'Composable SolidJS + web-component chat UI.', showFavicon: true },
+  { href: 'https://kitn.dev', title: 'kitn: the kit', description: 'Composable SolidJS + web-component chat UI.', showFavicon: true },
   { href: 'https://solidjs.com', title: 'SolidJS', description: 'A reactive UI library.', showFavicon: true },
 ];
 
-/** A rich assistant turn — reasoning + a tool call + an attachment + actions. */
+/** A rich assistant turn: reasoning + a tool call + an attachment + actions. */
 export const assistantMessage = {
   id: 'm-a',
   role: 'assistant',

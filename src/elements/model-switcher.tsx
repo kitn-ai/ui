@@ -1,6 +1,8 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from './define';
 import { ModelSwitcher } from '../components/model-switcher';
+import { wireDisclosure } from './disclosure';
+import type { DropdownController } from '../ui/dropdown';
 import type { ModelOption } from '../types';
 
 interface Props extends Record<string, unknown> {
@@ -8,12 +10,22 @@ interface Props extends Record<string, unknown> {
   models: ModelOption[];
   /** The currently-selected model id. Defaults to the first model. */
   currentModel?: string;
+  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected
+   *  to the `open` attribute, the dropdown still self-manages on click/keyboard).
+   *  Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the dropdown. */
+  disabled?: boolean;
 }
 
 /** Events fired by `<kai-model-switcher>`. */
 interface Events {
   /** A model was selected. */
   'kai-model-change': { modelId: string };
+  /** The model dropdown opened or closed (by click, keyboard, Escape, outside-click, or a method). */
+  'kai-open-change': { open: boolean };
 }
 
 /**
@@ -65,7 +77,18 @@ export function parseKaiModelElement(n: Element): ModelOption {
 defineWebComponent<Props, Events>('kai-model-switcher', {
   models: [],
   currentModel: undefined,
-}, (props, { dispatch, element }) => {
+  open: undefined,
+  defaultOpen: undefined,
+  disabled: undefined,
+}, (props, ctx) => {
+  const { dispatch, element, flag } = ctx;
+  let api: DropdownController | undefined;
+
+  // The standard overlay surface: settable+reflecting `open`, kai-open-change,
+  // show/hide/toggle, disabled-gating. See ./disclosure. When <=1 model the inner
+  // Dropdown never mounts, so `api` stays undefined and these methods no-op.
+  wireDisclosure(ctx, () => api, () => props.open);
+
   // Read declarative <kai-model> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
   const [slottedModels, setSlottedModels] = createSignal<ModelOption[]>([]);
@@ -88,6 +111,9 @@ defineWebComponent<Props, Events>('kai-model-switcher', {
       models={allModels()}
       currentModelId={props.currentModel ?? allModels()[0]?.id ?? ''}
       onModelChange={(modelId) => dispatch('kai-model-change', { modelId })}
+      defaultOpen={flag('defaultOpen')}
+      disabled={flag('disabled')}
+      controllerRef={(a) => (api = a)}
     />
   );
 });

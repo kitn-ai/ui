@@ -5,15 +5,15 @@ import { createPresence, usePosition, useDismiss } from './overlay';
 import { buttonVariants } from './button';
 
 /**
- * `overlay.tsx` is not a component — it's the small DIY toolkit that every
+ * `overlay.tsx` is not a component; it's the small DIY toolkit that every
  * floating surface in the kit (Tooltip, HoverCard, Dropdown) is built from,
  * replacing the former third-party UI dependency. Three primitives:
  *
- * - `usePosition(ref, floating, opts)` — anchors `floating` to `ref` via
+ * - `usePosition(ref, floating, opts)`: anchors `floating` to `ref` via
  *   @floating-ui/dom with flip/shift, tracking it on scroll/resize.
- * - `createPresence(open)` — keeps a node mounted through its CSS exit
+ * - `createPresence(open)`: keeps a node mounted through its CSS exit
  *   animation, then unmounts on `animationend`.
- * - `useDismiss({ enabled, onDismiss, refs })` — Escape + outside-pointerdown
+ * - `useDismiss({ enabled, onDismiss, refs })`: Escape + outside-pointerdown
  *   dismissal (no scroll lock).
  *
  * Plus an `As` polymorphic helper for trigger elements.
@@ -26,10 +26,8 @@ const meta: Meta = {
     docs: {
       description: {
         component: [
-          "The shared, dependency-free foundation behind every floating surface in the kit — `Tooltip`, `HoverCard`, and `Dropdown` are all assembled from these primitives. It's a toolkit of hooks, not a renderable component.",
-          '**`usePosition(ref, floating, opts)`** anchors a floating node to a trigger via `@floating-ui/dom` (flip/shift, fixed strategy, tracks on scroll/resize). **`createPresence(open)`** keeps the node mounted through its CSS exit animation. **`useDismiss({ enabled, onDismiss, refs })`** handles Escape + outside-click. An **`As`** helper renders a polymorphic trigger.',
-          '**When to use:** only when you need a floating surface the prebuilt components don\'t cover. Reach for `Tooltip` / `HoverCard` / `Dropdown` first — they already wire these together with the correct ARIA and focus behavior.',
-          'The demo below composes all three into a minimal popover; everything portals into the active shadow root via `ChatConfig`.',
+          'The hooks toolkit (not a renderable component) behind `Tooltip`, `HoverCard`, and `Dropdown`. `usePosition(ref, floating, opts)` anchors a node via `@floating-ui/dom`; `createPresence(open)` keeps it mounted through its CSS exit animation; and `useDismiss({ enabled, onDismiss, refs })` handles Escape + outside-click. An `As` helper renders a polymorphic trigger.',
+          'Reach for `Tooltip` / `HoverCard` / `Dropdown` first; use these only for a floating surface they don\'t cover.',
         ].join('\n\n'),
       },
     },

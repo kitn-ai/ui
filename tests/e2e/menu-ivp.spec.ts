@@ -105,7 +105,7 @@ test.describe('cascading-menu IVP', () => {
 
 // ── kai-menu web component IVP ───────────────────────────────────────────────
 
-const KAI_MENU_STORY = '/iframe.html?id=labs-kai-menu--plus-menu&viewMode=story';
+const KAI_MENU_STORY = '/iframe.html?id=labs-menu--plus-menu&viewMode=story';
 
 /** Install a capture for kai-select events on the <kai-menu> host element.
  *  Mirrors the captureSubmit helper in composer-ivp.spec.ts. */

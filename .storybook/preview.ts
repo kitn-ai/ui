@@ -2,6 +2,23 @@ import type { Preview } from 'storybook-solidjs-vite';
 import { themes } from 'storybook/theming';
 import './styles.css';
 
+// ── AI/UI brand for the manager (top-left) ──────────────────────────────────
+// The split-node mark (the favicon glyph: zinc wedge + magenta wedge in a
+// rounded square) + an "AI/UI" wordmark, built as an inline SVG data-URI so
+// there's no static asset to serve. `wordmark` colour is themed per manager mode
+// so it reads on both the light and dark chrome.
+const brandMark = (wordmark: string): string =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="104" height="28" viewBox="0 0 104 28">' +
+      '<defs><clipPath id="m"><rect width="28" height="28" rx="7"/></clipPath></defs>' +
+      '<g clip-path="url(#m)">' +
+      '<polygon points="0,0 17,0 9,28 0,28" fill="#71717a"/>' +
+      '<polygon points="20,0 28,0 28,28 12,28" fill="#EC2295"/></g>' +
+      `<text x="38" y="20" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif" font-size="17" font-weight="700" fill="${wordmark}">AI<tspan fill="#EC2295">/</tspan>UI</text>` +
+      '</svg>',
+  )}`;
+const BRAND = { brandTitle: 'AI/UI', brandUrl: 'https://ui.kitn.ai' };
+
 // Storybook's dark toggle adds `.dark` to the preview <html>, but the `kai-*`
 // custom elements render in SHADOW DOM, which a light-DOM class can't cross — so
 // they'd otherwise fall back to their own `theme="auto"` (the OS preference) and
@@ -92,34 +109,29 @@ const preview: Preview = {
     },
     options: {
       storySort: {
-        // Sidebar order, top to bottom: the docs, the interactive Theming tools
-        // (next to the Theming doc), composed Examples/Patterns, then the
-        // framework-agnostic **Components** (the primary, copy-into-any-app
-        // API) ABOVE the **Solid (Advanced)** tier — so a reader reaches the
-        // portable elements before the Solid-only building blocks (which stay
-        // present but collapsed below).
+        // Sidebar order, top to bottom: the Getting Started guides, the SolidJS
+        // Components, the Labs composition testing ground, then the small set of
+        // Test Fixtures the e2e specs target.
         //
         // NOTE: every top-level group MUST be named explicitly here. The
         // trailing `*` is a catch-all that sorts unlisted groups to the very
-        // bottom — that's why the `Theming` stories group used to strand itself
-        // below "Components" (it was only referenced inside the nested Docs
-        // sub-order, never as a top-level entry). The nested arrays set the
-        // intra-group order (e.g. Examples lead with the full-app "wow" demo
-        // rather than sorting alphabetically).
+        // bottom — so a group only referenced inside a nested sub-order (never as
+        // a top-level entry) would strand itself below the named ones. The nested
+        // arrays set the intra-group order rather than sorting alphabetically.
         order: [
           // Storybook is the SolidJS-primitive / contributor surface (the consumer
-          // web-component docs live at ui.kitn.ai). Lead with the Contributing
-          // guides, then the SolidJS Components, the Labs composition testing
-          // ground, and the small Test Fixtures set the e2e specs target. The
-          // web-component element stories now live in the docs, not here.
-          'Contributing',
-          ['Overview', "How it's built", 'Working with the primitives', 'Create or modify a component', 'Building in the Labs', 'Run the kit locally'],
+          // web-component docs live at ui.kitn.ai). Lead with the Getting Started
+          // guides (the auto-generated Token Reference rides at the end of that
+          // group — one token doc doesn't warrant its own section), then the
+          // SolidJS Components, the Labs composition testing ground, and the small
+          // Test Fixtures set the e2e specs target. The web-component element
+          // stories now live in the docs, not here.
+          'Getting Started',
+          ['Overview', "How it's built", 'Working with the primitives', 'Create or modify a component', 'Building in the Labs', 'Run the kit locally', 'Token Reference'],
           'Components',
           ['Overview', 'Elements', 'Primitives'],
           'Labs',
           'Test Fixtures',
-          'Theming',
-          ['Token Reference'],
           '*',
         ],
       },
@@ -134,8 +146,8 @@ const preview: Preview = {
       classTarget: 'html',
       darkClass: 'dark',
       lightClass: 'light',
-      dark: { ...themes.dark, appPreviewBg: 'hsl(50 2% 9%)' },
-      light: { ...themes.light },
+      dark: { ...themes.dark, appPreviewBg: 'hsl(50 2% 9%)', ...BRAND, brandImage: brandMark('#fafafa') },
+      light: { ...themes.light, ...BRAND, brandImage: brandMark('#27272a') },
     },
   },
 };

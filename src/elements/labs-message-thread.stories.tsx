@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { onMount } from 'solid-js';
+import { onMount, onCleanup } from 'solid-js';
 import './register'; // side effect: registers <kai-message>, <kai-source>, …
+import { attachKaiActions } from '../stories/docs/story-actions';
 import type { ChatMessage } from './chat-types';
 
 // The web components are custom DOM elements, so declare the tags for JSX.
@@ -31,15 +32,9 @@ const assistantMessage: ChatMessage = {
   actions: ['copy', 'like', 'dislike', 'regenerate'],
 };
 
-const KITN_AVATAR =
-  'data:image/svg+xml;utf8,' +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="14" fill="#7c3aed"/><text x="32" y="44" font-size="34" text-anchor="middle" fill="white">K</text></svg>',
-  );
-
 // --- Slotted regions (consumer light-DOM markup) --------------------------
 
-/** A model-name + timestamp header — the `before-body` slot. */
+/** A model-name + timestamp header, the `before-body` slot. */
 function ModelHeader(props: { model: string; at: string }) {
   return (
     <div slot="before-body" class="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
@@ -52,14 +47,14 @@ function ModelHeader(props: { model: string; at: string }) {
   );
 }
 
-/** A citation/sources row + a token-cost line — the `after-body` slot. */
+/** A citation/sources row + a token-cost line, the `after-body` slot. */
 function SourcesFooter() {
   return (
     <div slot="after-body" class="mt-2 flex flex-col gap-1.5">
       <kai-source
         href="https://kitn.ai"
         label="kitn.ai"
-        headline="kitn.ai — composable chat UI"
+        headline="kitn.ai, composable chat UI"
         description="Framework-agnostic web components for AI chat."
         show-favicon
       />
@@ -68,7 +63,7 @@ function SourcesFooter() {
   );
 }
 
-/** A custom avatar that REPLACES the built-in rail — the `avatar` slot. */
+/** A custom avatar that REPLACES the built-in rail, the `avatar` slot. */
 function CustomAvatar() {
   return (
     <div
@@ -90,8 +85,13 @@ function ComposedThread() {
     if (userEl) {
       userEl.setAttribute('avatar', 'none');
       userEl.message = userMessage;
+      onCleanup(attachKaiActions(userEl)); // log kai-message-action
     }
-    if (assistantEl) assistantEl.message = assistantMessage;
+    if (assistantEl) {
+      assistantEl.message = assistantMessage;
+      // Log kai-message-action (copy / like / dislike / regenerate clicks).
+      onCleanup(attachKaiActions(assistantEl));
+    }
   });
   return (
     <div class="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
@@ -110,7 +110,7 @@ function ComposedThread() {
   );
 }
 
-const HTML_SNIPPET = `<!-- Compose your own message list — one <kai-message> per turn -->
+const HTML_SNIPPET = `<!-- Compose your own message list: one <kai-message> per turn -->
 <kai-message id="turn" style="display:block;">
   <!-- avatar (replace): your node stands in for the built-in rail -->
   <div slot="avatar" class="avatar">AI</div>
@@ -126,11 +126,14 @@ const HTML_SNIPPET = `<!-- Compose your own message list — one <kai-message> p
 
 <script type="module">
   import '@kitn.ai/ui/elements';   // registers the custom elements
-  document.getElementById('turn').message = {
+  const turn = document.getElementById('turn');
+  turn.message = {
     id: 'm-a', role: 'assistant',
     content: 'Here is the summary you asked for.',
     actions: ['copy', 'like', 'regenerate'],
   };
+  // The action bar emits a non-bubbling CustomEvent on the element.
+  turn.addEventListener('kai-message-action', (e) => console.log(e.detail));
 </script>`;
 
 const meta = {
@@ -141,9 +144,9 @@ const meta = {
       description: {
         component:
           [
-            'A **compose-your-own message list** built from standalone `<kai-message>` elements — the keystone of laying out a thread yourself while keeping the kit\'s rich message rendering. This Labs story exercises the three per-message composition seams.',
-            '**Slots** — `before-body` (INJECT, a per-message header above the content: a model-name label, a role/timestamp line), `after-body` (INJECT, a row below the action bar: a citation/sources row, a token-cost line), and `avatar` (REPLACE, your node stands in for the built-in avatar rail; pair with `avatar="none"` to omit the rail entirely).',
-            '**Parts** — `::part(row)`, `::part(bubble)`, `::part(content)`, `::part(actions)`, and `::part(avatar)` are exposed for outside-the-shadow styling.',
+            'A **compose-your-own message list** built from standalone `<kai-message>` elements: the keystone of laying out a thread yourself while keeping the kit\'s rich message rendering. This Labs story exercises the three per-message composition seams.',
+            '**Slots:** `before-body` (INJECT, a per-message header above the content: a model-name label, a role/timestamp line), `after-body` (INJECT, a row below the action bar: a citation/sources row, a token-cost line), and `avatar` (REPLACE, your node stands in for the built-in avatar rail; pair with `avatar="none"` to omit the rail entirely).',
+            '**Parts:** `::part(row)`, `::part(bubble)`, `::part(content)`, `::part(actions)`, and `::part(avatar)` are exposed for outside-the-shadow styling.',
             'See the **Code** tab for the HTML.',
           ].join('\n\n'),
       },
@@ -158,6 +161,6 @@ type Story = StoryObj;
 /** A two-turn thread: a no-avatar user turn, then an assistant turn wiring up
  *  the `avatar`, `before-body`, and `after-body` seams. */
 export const ComposedMessageThread: Story = {
-  name: 'Composed Message Thread (slots)',
+  name: 'Per-message slots (header, sources, avatar)',
   render: () => <ComposedThread />,
 };

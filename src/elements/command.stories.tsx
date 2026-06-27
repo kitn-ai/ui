@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { onMount } from 'solid-js';
+import { onMount, onCleanup } from 'solid-js';
 import './register'; // side effect: registers all kai-* custom elements (incl. kai-command)
+import { attachKaiActions } from '../stories/docs/story-actions';
 import type { KaiCommandItem } from './command';
 
 // Declare the custom element tag for SolidJS JSX.
@@ -22,7 +23,7 @@ interface CommandEl extends HTMLElement {
 }
 
 const meta = {
-  title: 'Labs/Kai Command',
+  title: 'Labs/Command',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 export default meta;
@@ -31,7 +32,8 @@ type Story = StoryObj;
 /**
  * Reproduces a @-mention or slash-command picker backed by `<kai-command>`.
  * Items are grouped under "Mac apps", "Chats", and "Files". Set as a JS property
- * in `onMount`. `kai-select` and `kai-query-change` are both logged to the console.
+ * in `onMount`. Every declared event (`kai-select`, `kai-query-change`,
+ * `kai-active-change`) is logged to the Actions panel.
  */
 function MentionPickerDemo() {
   let el: CommandEl | undefined;
@@ -52,31 +54,48 @@ function MentionPickerDemo() {
   onMount(() => {
     if (!el) return;
     el.items = [...items];
-
-    el.addEventListener('kai-select', (e) => {
-      console.log('[kai-command] kai-select', (e as CustomEvent<{ id: string }>).detail);
-    });
-
-    el.addEventListener('kai-query-change', (e) => {
-      console.log('[kai-command] kai-query-change', (e as CustomEvent<{ value: string }>).detail);
-    });
+    // Auto-wire every CustomEvent the element declares to the Actions panel.
+    onCleanup(attachKaiActions(el));
   });
 
   return (
-    <div style={{ padding: '48px', display: 'flex', gap: '24px', 'align-items': 'flex-start' }}>
-      <div style={{ width: '320px', border: '1px solid var(--color-border, #e4e4e7)', 'border-radius': '12px', overflow: 'hidden' }}>
+    <div style={{ padding: '48px', display: 'flex', 'justify-content': 'center' }}>
+      <div style={{ width: '320px', border: '1px solid var(--color-border)', 'border-radius': '12px', overflow: 'hidden' }}>
         <kai-command
           ref={(e) => (el = e as CommandEl)}
           placeholder="Search…"
         />
       </div>
-      <p style={{ 'font-size': '13px', color: '#71717a', 'margin-top': '4px', 'max-width': '240px' }}>
-        Type to filter across all groups. Arrow keys move the selection; Enter picks;
-        Escape clears. Watch the console for <code>kai-select</code> and <code>kai-query-change</code>.
-      </p>
     </div>
   );
 }
 
-export const MentionPicker: Story = { render: () => <MentionPickerDemo /> };
+export const MentionPicker: Story = {
+  name: 'Mention & command picker',
+  render: () => <MentionPickerDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Type to filter across all groups. Arrow keys move the selection; Enter picks; Escape clears. Watch the Actions panel for `kai-select`, `kai-query-change`, and `kai-active-change`.',
+      },
+      source: {
+        language: 'html',
+        code: `<kai-command placeholder="Search…"></kai-command>
+
+<script type="module">
+  const cmd = document.querySelector('kai-command');
+  // Grouped items are set as a JS property (array ref), never an attribute.
+  cmd.items = [
+    { id: 'ss', label: 'Screen Studio', icon: 'monitor', description: 'Computer use', group: 'Mac apps' },
+    { id: 'rs', label: 'Record screen', icon: 'message-circle', group: 'Chats' },
+    { id: 'screen9', label: 'screen9.py', icon: 'file-text', group: 'Files' },
+  ];
+  cmd.addEventListener('kai-select', (e) => console.log(e.detail));
+  cmd.addEventListener('kai-query-change', (e) => console.log(e.detail));
+</script>`,
+      },
+    },
+  },
+};
 

@@ -11,10 +11,7 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'A clickable suggestion chip built on `Button` — renders as a rounded pill, a full-width list row (`block`), or a search-style row that highlights a matching substring (`highlight`).',
-        '**When to use:** offer the user ready-made prompts to send — empty-state starter questions, follow-up suggestions, or a filtered list of matching prompts as they type.',
-        '**How to use:** pass the prompt text as children and wire `onClick` to submit it. Use `block` for stacked, left-aligned list rows; pass `highlight` to emphasize a matched substring (forces list-row layout). Override `variant`/`size` to restyle.',
-        '**Placement:** chat empty states, below the prompt input as follow-ups, or in a suggestion dropdown.',
+        'A clickable starter/follow-up prompt. Text goes in children; `onClick` submits it. Renders as a rounded pill by default; `block` makes a full-width list row, and `highlight` emphasizes a matched substring (forcing the list-row layout) for type-ahead filtering.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -22,7 +19,7 @@ const meta = {
   argTypes: {
     children: {
       control: 'text',
-      description: 'Suggestion content — the prompt text (or an element).',
+      description: 'Suggestion content: the prompt text (or an element).',
     },
     variant: {
       control: 'select',
@@ -68,7 +65,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — tweak the controls to explore every mode. */
+/** Interactive playground: tweak the controls to explore every mode. */
 export const Playground: Story = {
   ...src(`<PromptSuggestion onClick={() => send('Tell me about TypeScript')}>
   Tell me about TypeScript
@@ -90,14 +87,14 @@ export const Block: Story = {
 </PromptSuggestion>`),
 };
 
-/** A row of pill suggestions (showcase — not driven by controls). */
+/** A row of pill suggestions (showcase, not driven by controls). */
 export const MultipleSuggestions: Story = {
-  render: () => (
+  render: (args: { onClick?: (e: MouseEvent) => void }) => (
     <div class="flex flex-wrap gap-2">
-      <PromptSuggestion>What is SolidJS?</PromptSuggestion>
-      <PromptSuggestion>Explain reactive signals</PromptSuggestion>
-      <PromptSuggestion>Compare SolidJS vs React</PromptSuggestion>
-      <PromptSuggestion>Best practices for state management</PromptSuggestion>
+      <PromptSuggestion onClick={args.onClick}>What is SolidJS?</PromptSuggestion>
+      <PromptSuggestion onClick={args.onClick}>Explain reactive signals</PromptSuggestion>
+      <PromptSuggestion onClick={args.onClick}>Compare SolidJS vs React</PromptSuggestion>
+      <PromptSuggestion onClick={args.onClick}>Best practices for state management</PromptSuggestion>
     </div>
   ),
   ...src(`<div class="flex flex-wrap gap-2">
@@ -110,11 +107,11 @@ export const MultipleSuggestions: Story = {
 
 /** Filtered list with a highlighted match (showcase). */
 export const WithHighlightedSearch: Story = {
-  render: () => (
+  render: (args: { onClick?: (e: MouseEvent) => void }) => (
     <div class="w-72 space-y-1">
-      <PromptSuggestion highlight="solid">How does SolidJS handle reactivity?</PromptSuggestion>
-      <PromptSuggestion highlight="solid">What makes SolidJS fast?</PromptSuggestion>
-      <PromptSuggestion highlight="solid">SolidJS vs Svelte comparison</PromptSuggestion>
+      <PromptSuggestion highlight="solid" onClick={args.onClick}>How does SolidJS handle reactivity?</PromptSuggestion>
+      <PromptSuggestion highlight="solid" onClick={args.onClick}>What makes SolidJS fast?</PromptSuggestion>
+      <PromptSuggestion highlight="solid" onClick={args.onClick}>SolidJS vs Svelte comparison</PromptSuggestion>
     </div>
   ),
   ...src(`<div class="w-72 space-y-1">
@@ -127,11 +124,11 @@ export const WithHighlightedSearch: Story = {
 /** Stacked, full-width list rows (showcase). */
 export const BlockList: Story = {
   name: 'Block list',
-  render: () => (
+  render: (args: { onClick?: (e: MouseEvent) => void }) => (
     <div class="w-72 flex flex-col gap-1">
-      <PromptSuggestion block>What does being a Catalyst mean for how I work with others?</PromptSuggestion>
-      <PromptSuggestion block>How do my Dominance and Influence styles play off each other?</PromptSuggestion>
-      <PromptSuggestion block>Where might my lower Conscientiousness trip me up?</PromptSuggestion>
+      <PromptSuggestion block onClick={args.onClick}>What does being a Catalyst mean for how I work with others?</PromptSuggestion>
+      <PromptSuggestion block onClick={args.onClick}>How do my Dominance and Influence styles play off each other?</PromptSuggestion>
+      <PromptSuggestion block onClick={args.onClick}>Where might my lower Conscientiousness trip me up?</PromptSuggestion>
     </div>
   ),
   ...src(`<div class="w-72 flex flex-col gap-1">

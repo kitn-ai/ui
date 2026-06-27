@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { fn } from 'storybook/test';
+import { action } from 'storybook/actions';
 import { Checkpoint, CheckpointIcon, CheckpointTrigger } from './checkpoint';
 import { componentDescription } from '../stories/docs/element-controls';
 
@@ -11,10 +11,8 @@ const meta = {
     layout: 'padded',
     docs: {
       description: componentDescription([
-        'An inline marker that lets a user restore the conversation to a saved point. Composed of `Checkpoint` (row + separator) wrapping a `CheckpointIcon` and a `CheckpointTrigger` button.',
-        '**When to use:** to mark a restorable state in a transcript — e.g. before an edit or a branching action — so the user can revert to it.',
-        '**How to use:** place a `CheckpointIcon` and a `CheckpointTrigger` inside `Checkpoint`. Give the trigger an `onClick` handler and an optional `tooltip`; pass custom SVG children to `CheckpointIcon` to override the default flag.',
-        '**Placement:** between messages in a chat transcript, as a thin separator-style row.',
+        'A thin separator-style row, placed between messages, that lets a user revert the conversation to a saved point (before an edit or a branch). `Checkpoint` wraps a `CheckpointIcon` and a `CheckpointTrigger` button.',
+        'Give the trigger an `onClick` and optional `tooltip`; pass SVG children to `CheckpointIcon` to override the default flag.',
       ]),
       controls: { exclude: ['use:eventListener'] },
     },
@@ -34,7 +32,7 @@ const meta = {
     <div class="max-w-md">
       <Checkpoint {...args}>
         <CheckpointIcon />
-        <CheckpointTrigger tooltip="Restore to this point" onClick={fn()}>
+        <CheckpointTrigger tooltip="Restore to this point" onClick={() => action('checkpoint-restore')()}>
           Restore
         </CheckpointTrigger>
       </Checkpoint>
@@ -50,7 +48,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — the default flag icon with a restore trigger. */
+/** Interactive playground: the default flag icon with a restore trigger. */
 export const Playground: Story = {
   ...src(`<Checkpoint>
   <CheckpointIcon />
@@ -70,7 +68,7 @@ export const WithCustomIcon: Story = {
             <path d="M12 6v6l4 2" />
           </svg>
         </CheckpointIcon>
-        <CheckpointTrigger tooltip="Go back to this checkpoint" onClick={fn()}>
+        <CheckpointTrigger tooltip="Go back to this checkpoint" onClick={() => action('checkpoint-revert')()}>
           Revert to checkpoint
         </CheckpointTrigger>
       </Checkpoint>
@@ -91,7 +89,7 @@ export const NoTooltip: Story = {
     <div class="max-w-md">
       <Checkpoint>
         <CheckpointIcon />
-        <CheckpointTrigger onClick={fn()}>Restore</CheckpointTrigger>
+        <CheckpointTrigger onClick={() => action('checkpoint-restore')()}>Restore</CheckpointTrigger>
       </Checkpoint>
     </div>
   ),

@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
 import { defineWebComponent } from './define';
 import type { ComposerDoc, EntityRef } from '../primitives/composer-model';
-import type { TriggerDef, TriggerItem, HighlightRule, ComposerChange } from '../components/composer';
+import type { TriggerDef, TriggerItem, HighlightRule, ComposerChange, ComposerController } from '../components/composer';
 import { Composer } from '../components/composer';
 
 /**
@@ -85,12 +85,37 @@ defineWebComponent<Props, Events>('kai-composer', {
   triggers: undefined,
   highlights: undefined,
   kindIcons: undefined,
-}, (props, { dispatch, flag }) => {
+}, (props, { dispatch, flag, expose }) => {
   // Internal signal for uncontrolled value; when the consumer sets `value` as a
   // JS property the controlled path takes precedence (same pattern as prompt-input).
   const [internal, setInternal] = createSignal<string | ComposerDoc | undefined>(props.value);
 
   const current = () => props.value ?? internal();
+
+  // ── Imperative API (instance methods on the host) ──────────────────────────
+  // Pattern C: the Composer component owns the editable + doc state and hands up
+  // a controller; the facade captures it and exposes delegating methods. The
+  // composer's own callbacks still fire (clear → onChange → kai-value-change;
+  // send → onSubmit → kai-submit; insertEntity → onEntityAdd → kai-entity-add).
+  let controller: ComposerController | undefined;
+  expose({
+    /** Focus the editable element. `focus`/`blur` are NOT composed natively, so a
+     *  host-level focus() can't reach the editable inside the shadow root — this is
+     *  the only way to focus the composer programmatically. */
+    focus: (options?: FocusOptions) => controller?.focus(options),
+    /** Blur the editable element. */
+    blur: () => controller?.blur(),
+    /** Empty the composer to a blank doc (resets the internal value + history
+     *  baseline; fires kai-value-change). */
+    clear: () => controller?.clear(),
+    /** Submit the current content programmatically — same path as Enter (fires
+     *  kai-submit). Named `send`, not `submit`, to match the shared vocabulary and
+     *  avoid any submit collision. */
+    send: () => controller?.send(),
+    /** Insert an atomic entity pill (skill/agent/plugin) at the caret without
+     *  typing a trigger (fires kai-entity-add). */
+    insertEntity: (entity: EntityRef) => controller?.insertEntity(entity),
+  });
 
   const handleChange = (change: ComposerChange) => {
     setInternal(change.doc);
@@ -120,6 +145,7 @@ defineWebComponent<Props, Events>('kai-composer', {
       onTriggerClose={() => dispatch('kai-trigger-close', {})}
       onFocus={(e) => dispatch('kai-focus', { originalEvent: e })}
       onBlur={(e) => dispatch('kai-blur', { originalEvent: e })}
+      controllerRef={(c) => (controller = c)}
     />
   );
 });

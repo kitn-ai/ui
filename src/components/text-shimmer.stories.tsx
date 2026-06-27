@@ -11,10 +11,7 @@ const meta = {
     docs: {
       controls: { exclude: ['use:eventListener'] },
       description: componentDescription([
-        'An animated text effect that sweeps a light gradient across its content, rendered into any element tag via `as`.',
-        '**When to use:** to signal an in-progress / loading state with a label — e.g. "Thinking", "Generating", "Searching" — or to draw subtle attention to a transient status line.',
-        '**How to use:** wrap text in `<TextShimmer>`; tune `duration` (seconds per sweep) and `spread` (gradient width, clamped 5–45). Use `as` to change the wrapping tag (e.g. `"h2"`) and pass any standard HTML attributes.',
-        '**Placement:** loading indicators, streaming status lines, thinking bars, and placeholder labels.',
+        'Sweeps a light gradient across text to signal a live "Thinking" / "Generating" status. Tune `duration` (seconds per sweep) and `spread` (gradient width, clamped 5–45); `as` sets the wrapping tag.',
       ]),
     },
   },
@@ -56,7 +53,7 @@ const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
 
-/** Interactive playground — tweak the controls to explore the shimmer effect. */
+/** Interactive playground: tweak the controls to explore the shimmer effect. */
 export const Playground: Story = {
   ...src(`<TextShimmer duration={4} spread={20}>Shimmering text effect</TextShimmer>`),
 };

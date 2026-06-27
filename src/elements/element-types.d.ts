@@ -16,8 +16,10 @@ export interface KaiArtifactElement extends HTMLElement {
   src?: string;
   /** Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). */
   files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
-  /** Active tab: `preview` (default) or `code`. */
+  /** Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). */
   tab?: "preview" | "code";
+  /** Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`. */
+  defaultTab?: "preview" | "code";
   /** Selected file path — syncs the tree highlight, Code source, and preview. */
   activeFile?: string;
   /** iframe `sandbox` override. Secure default `allow-scripts allow-forms` (NOT `allow-same-origin`). */
@@ -129,8 +131,14 @@ export interface KaiCardsElement extends HTMLElement {
 export interface KaiChainOfThoughtElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). */
-  steps: { label: string; content?: undefined | string }[];
+  /** The reasoning steps. Set as a JS property. Compound sub-parts collapse to this one data model (Route 1). Each `{ label, content?, id? }`. */
+  steps: { label: string; content?: undefined | string; id?: undefined | string }[];
+  /** Open mode: `'multiple'` (default — any number of steps open at once) or `'single'` (at most one open; opening a step closes the others). */
+  type?: "single" | "multiple";
+  /** Controlled open step key(s). When set, it WINS over user interaction (the consumer owns the open set). String in `single` mode, string[] in `multiple` mode. Set as a JS property. */
+  value?: string | string[];
+  /** Uncontrolled INITIAL open step key(s) — seeds which steps render expanded. Ignored once `value` is provided. Set as a JS property. */
+  defaultValue?: string | string[];
 }
 
 export interface KaiChatElement extends HTMLElement {
@@ -218,6 +226,12 @@ export interface KaiChoiceElement extends HTMLElement {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'action', action:'…' }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled selection — the selected option id. When set, the consumer owns the current pick (RadioGroup `value`). Attribute: `value`. */
+  value?: string;
+  /** Option id to pre-select on mount (uncontrolled seed). Attribute: `default-value`. */
+  defaultValue?: string;
+  /** Disable the whole radiogroup + Submit (e.g. while the agent is busy). Attribute: `disabled`. */
+  disabled?: boolean;
 }
 
 export interface KaiCodeBlockElement extends HTMLElement {
@@ -397,6 +411,12 @@ export interface KaiFormElement extends HTMLElement {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{…} }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled field values (JS property). When set, it wins over local edits. */
+  values?: Record<string, unknown>;
+  /** Initial values overlaying the schema defaults (uncontrolled seed; JS property). */
+  defaultValues?: Record<string, unknown>;
+  /** Disable all fields + submit. Attribute: `disabled`. */
+  disabled?: boolean;
 }
 
 export interface KaiHoverCardElement extends HTMLElement {
@@ -408,6 +428,12 @@ export interface KaiHoverCardElement extends HTMLElement {
   closeDelay?: number;
   /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. */
   placement?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover). Set `el.open = true`, or `<kai-hover-card open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Suppress the hover behavior entirely without unmounting. */
+  disabled?: boolean;
 }
 
 export interface KaiIconElement extends HTMLElement {
@@ -480,6 +506,12 @@ export interface KaiMenuElement extends HTMLElement {
   triggerIconTrailing?: string;
   /** Accessible name for an icon-only trigger (no visible label). */
   label?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the menu still self-manages on click/keyboard). Set `el.open = true`, or `<kai-menu open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the menu. */
+  disabled?: boolean;
 }
 
 export interface KaiMessageElement extends HTMLElement {
@@ -516,6 +548,12 @@ export interface KaiModelSwitcherElement extends HTMLElement {
   models: { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[];
   /** The currently-selected model id. Defaults to the first model. */
   currentModel?: string;
+  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-model-switcher open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the dropdown. */
+  disabled?: boolean;
 }
 
 export interface KaiNoticeElement extends HTMLElement {
@@ -536,8 +574,12 @@ export interface KaiPopoverElement extends HTMLElement {
   placement?: "top" | "right" | "bottom" | "left" | "top-start" | "top-end" | "right-start" | "right-end" | "bottom-start" | "bottom-end" | "left-start" | "left-end";
   /** Gap in px between the trigger and the panel. */
   gutter?: number;
-  /** Controlled open state. Set as a JS property (`el.open = true`) to drive the popover from your app; omit for the default click-to-toggle behaviour. */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on click). Set `el.open = true`, or `<kai-popover open>`; listen for `kai-open-change`. */
   open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Turn the popover off while keeping the trigger mounted (clicks and `show()` no longer open it). */
+  disabled?: boolean;
 }
 
 export interface KaiPromptInputElement extends HTMLElement {
@@ -580,12 +622,16 @@ export interface KaiReasoningElement extends HTMLElement {
   text: string;
   /** Trigger label. */
   label?: string;
-  /** Controlled open state — set as a property (`el.open = true`). Omit for uncontrolled (the trigger toggles it). */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click + while streaming). Set `el.open = true`; listen for `kai-open-change`. */
   open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
   /** While true, auto-expands (and re-collapses when it flips false). */
   streaming?: boolean;
   /** Render `text` as markdown. */
   markdown?: boolean;
+  /** Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. */
+  disabled?: boolean;
 }
 
 export interface KaiRemoteElement extends HTMLElement {
@@ -649,6 +695,12 @@ export interface KaiScopePickerElement extends HTMLElement {
   availableTags: string[];
   /** The label shown on the trigger for the active scope. */
   currentLabel?: string;
+  /** Drive/observe the dropdown's open state (Shoelace-style: settable + reflected to the `open` attribute, the dropdown still self-manages on click/keyboard). Set `el.open = true`, or `<kai-scope-picker open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Disable the trigger — click/keyboard and `show()` no longer open the dropdown. */
+  disabled?: boolean;
 }
 
 export interface KaiScrollAreaElement extends HTMLElement {
@@ -740,12 +792,18 @@ export interface KaiSuggestionsElement extends HTMLElement {
 export interface KaiSwitchElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** Initial checked state. Bare attribute (`<kai-switch checked>`) turns it on. */
+  /** Controlled checked state — settable and reflected to the `checked` attribute. `el.checked = true` (or `<kai-switch checked>`) drives it; the toggle UI updates it and fires `kai-change`. Read `el.checked` for live state. */
   checked?: boolean;
+  /** Initial checked state on mount (uncontrolled seed). Bare attribute (`<kai-switch default-checked>`) turns it on. */
+  defaultChecked?: boolean;
   /** Disable interaction. */
   disabled?: boolean;
   /** Accessible label. */
   label?: string;
+  /** Form-control name (paired with `value`). */
+  name?: string;
+  /** Submitted value when checked (paired with `name`). Defaults to `'on'`. */
+  value?: string;
 }
 
 export interface KaiTasksElement extends HTMLElement {
@@ -759,6 +817,12 @@ export interface KaiTasksElement extends HTMLElement {
   heading?: string;
   /** Set when the user resolved this card; renders the read-only view. Property: `el.resolution = { kind:'submit', data:{ selected:[…] } }`. */
   resolution?: Record<string, unknown>;
+  /** Controlled selection (task ids; JS property). When set, it wins over local state. */
+  value?: string[];
+  /** Uncontrolled initial selection (task ids; JS property), overlaying per-task `checked`. */
+  defaultValue?: string[];
+  /** Freeze the whole list + Confirm. Attribute: `disabled`. */
+  disabled?: boolean;
 }
 
 export interface KaiTextShimmerElement extends HTMLElement {
@@ -805,8 +869,12 @@ export interface KaiToolElement extends HTMLElement {
   theme?: 'light' | 'dark' | 'auto';
   /** The tool-call to display. Set as a JS property. */
   tool?: { type: string; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId?: string; errorText?: string };
-  /** Start expanded. */
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on trigger click). Set `el.open = true`, or `<kai-tool open>`; listen for `kai-open-change`. */
   open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Gate the disclosure trigger — programmatic `show()/hide()/toggle()` still work, but the trigger click no longer toggles. */
+  disabled?: boolean;
 }
 
 export interface KaiTooltipElement extends HTMLElement {
@@ -816,6 +884,16 @@ export interface KaiTooltipElement extends HTMLElement {
   content?: string;
   /** Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless. */
   openDelay?: number;
+  /** Delay (ms) before it hides after the pointer leaves. Defaults to 0 (hides immediately). */
+  closeDelay?: number;
+  /** Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'top'`; flips to stay in view. */
+  placement?: string;
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute, the element still self-manages on hover/focus). Set `el.open = true`, or `<kai-tooltip open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Turn the tooltip off while keeping the trigger mounted (hover/focus and `show()` no longer open it). */
+  disabled?: boolean;
 }
 
 export interface KaiVoiceInputElement extends HTMLElement {

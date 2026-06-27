@@ -1,4 +1,4 @@
-import { createSignal, createEffect, For, Show } from 'solid-js';
+import { createSignal, createEffect, For, Show, onMount } from 'solid-js';
 import { ChatConfig, useChatConfig } from '../primitives/chat-config';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../primitives/composer-model';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
@@ -116,11 +116,24 @@ export interface ChatThreadProps {
   // callbacks (the facade maps these to dispatch())
   onValueChange?: (value: string) => void;
   onSubmit?: (detail: { value: string; attachments: AttachmentData[] }) => void;
+  onAttachmentsChange?: (attachments: AttachmentData[]) => void;
   onSuggestionClick?: (value: string) => void;
   onModelChange?: (modelId: string) => void;
   onMessageAction?: (detail: MessageActionDetail) => void;
   onSearch?: () => void;
   onVoice?: () => void;
+  /** Receive the imperative controller once mounted. The kai-chat facade forwards
+   *  these as element methods (focus/clear/send/scrollToBottom). */
+  controllerRef?: (controller: ChatThreadController) => void;
+}
+
+/** Imperative handle exposed via `controllerRef` — the input half of the chat's
+ *  interaction surface, forwarded onto `<kai-chat>` as instance methods. */
+export interface ChatThreadController {
+  focus(options?: FocusOptions): void;
+  clear(): void;
+  send(): void;
+  scrollToBottom(behavior?: ScrollBehavior): void;
 }
 
 export function ChatThread(props: ChatThreadProps) {
@@ -162,6 +175,22 @@ export function ChatThread(props: ChatThreadProps) {
   const visibleSuggestions = () =>
     props.persistSuggestions || props.messages.length === 0 ? props.suggestions : undefined;
   const showScrollButton = () => props.scrollButton !== false;
+
+  // Hand the imperative controller to the facade once mounted (rootEl is set).
+  onMount(() => {
+    props.controllerRef?.({
+      focus: (options) =>
+        rootEl
+          ?.querySelector<HTMLElement>('[contenteditable]:not([contenteditable="false"]), textarea')
+          ?.focus(options),
+      clear: () => { setInternal(''); setAttachments([]); props.onValueChange?.(''); },
+      send: () => handleSubmit(),
+      scrollToBottom: (behavior) => {
+        const vp = rootEl?.querySelector<HTMLElement>('.overflow-y-auto');
+        vp?.scrollTo({ top: vp.scrollHeight, behavior: behavior ?? 'smooth' });
+      },
+    });
+  });
 
   return (
     <ChatConfig proseSize={props.proseSize} codeTheme={props.codeTheme} codeHighlight={props.codeHighlight !== false} portalMount={outer.portalMount()}>
@@ -299,7 +328,7 @@ export function ChatThread(props: ChatThreadProps) {
                     search={props.search === true} voice={props.voice === true}
                     triggers={props.triggers} kindIcons={props.kindIcons}
                     onValueChange={handleChange} onSubmit={handleSubmit} onSuggestionClick={handleSuggestionClick}
-                    onAttachmentsChange={setAttachments}
+                    onAttachmentsChange={(a) => { setAttachments(a); props.onAttachmentsChange?.(a); }}
                     onSearch={() => props.onSearch?.()} onVoice={() => props.onVoice?.()}
                   />
                 }

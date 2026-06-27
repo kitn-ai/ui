@@ -57,11 +57,28 @@ defineWebComponent<Props, Events>('kai-button', {
   label: undefined,
   disabled: false,
   type: 'button',
-}, (props, { dispatch, flag }) => {
+}, (props, { dispatch, flag, element, expose }) => {
   // `icon` / `icon-sm` are square, icon-ONLY sizes: suppress the text label and
   // trailing icon so a stray label doesn't get cramped into the square (the
   // `label` prop still names it for assistive tech).
   const iconOnly = () => props.size === 'icon' || props.size === 'icon-sm';
+
+  // ── Imperative API (instance methods on the host) ──────────────────────────
+  // The real <button> lives in the shadow root, so native focus()/blur()/click()
+  // on the host hit the wrapper, not the control. Forward to the inner button.
+  // These shadow the inherited HTMLElement methods — intended; expose() uses
+  // defineProperty so the override sticks. No collision with the props above.
+  expose({
+    /** Focus the inner `<button>` (host.focus() would focus the wrapper). */
+    focus: (options?: FocusOptions) =>
+      element.shadowRoot?.querySelector('button')?.focus(options),
+    /** Blur the inner `<button>`. */
+    blur: () => element.shadowRoot?.querySelector('button')?.blur(),
+    /** Programmatically activate the button — runs the same path as a user
+     *  click and fires kai-click. Forwarding to the inner button means
+     *  `disabled` is respected automatically. */
+    click: () => element.shadowRoot?.querySelector('button')?.click(),
+  });
   return (
     <Button
       part="button"

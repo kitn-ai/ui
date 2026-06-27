@@ -2,16 +2,19 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 <Meta title="Components/Overview" />
 
-# Solid (Advanced)
+# Components
 
-**Most people want the [Components](?path=/docs/components-chat--docs).** This tier is
-only for building a **custom chat UI in SolidJS** — the kit is authored in SolidJS, and these
-are the same building blocks the web components compose from.
+The SolidJS layer the `kai-*` web components compose from. Every primitive and feature component, with controls and source. The full element API and framework usage are at [ui.kitn.ai](https://ui.kitn.ai).
 
-- **Elements** — the composed SolidJS pieces (message, tool, reasoning, …). Each maps to a
-  `kai-*` element; reach for these only if you're assembling your own layout in Solid.
-- **Primitives** — the low-level base components (button, tooltip, dropdown, …) the components
-  are built on. You rarely use these directly.
+## Two tiers
 
-Using a web component instead? Every element's **API** tab has copy-paste examples for
-HTML, React, Svelte, Vue, Angular, and Solid.
+- **Elements**: feature components (`Message`, `Tool`, `Reasoning`, `Composer`, `Artifact`, …), each mapping to a `kai-*` element.
+- **Primitives**: the accessible base components (`Button`, `Tooltip`, `Dropdown`, `Switch`, …) they're built on. No third-party UI deps.
+
+## Each story
+
+- **Demo**: the live component, with controls.
+- **Actions**: events stream here as you interact.
+- **Code**: the story's SolidJS source.
+
+Theme everything with the design tokens in [Token Reference](?path=/docs/getting-started-token-reference--token-reference).

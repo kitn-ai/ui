@@ -1,0 +1,55 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Getting Started/Building in the Labs" />
+
+# Building in the Labs
+
+Labs is where compositions get prototyped and stress-tested before they become public docs. A lab wires real `kai-*` elements together the way a consumer would, to prove a slot, a part, or a new pattern composes. The composer showcase, the custom message thread, and the chat-slot demos all started here.
+
+## Build a lab
+
+A lab is a Storybook story titled under `Labs/…`. Add a `*.stories.tsx` in `src/elements/`:
+
+```tsx
+const meta = { title: 'Labs/My Composition' } satisfies Meta;
+export default meta;
+
+export const Demo = {
+  render: () => {
+    let el: HTMLElement | undefined;
+    onMount(() => {
+      if (!el) return;
+      (el as any).items = [/* … */];                         // array/object data = JS property
+      el.addEventListener('kai-select', (e) =>               // kai-* events are non-bubbling
+        console.log((e as CustomEvent).detail));
+    });
+    return (
+      <kai-prompt-input ref={(e) => (el = e as HTMLElement)}>
+        <kai-menu slot="toolbar-start" trigger-icon="plus" />
+      </kai-prompt-input>
+    );
+  },
+};
+```
+
+The shadow boundary forces three rules, the same ones consumers hit:
+
+- **Array/object data is a property**, set in `onMount`, not an attribute. Reassign a new reference to re-render; don't mutate in place.
+- **Events are non-bubbling `kai-*` CustomEvents**: `addEventListener` on the element itself; Solid's `onClick`/`on:` don't cross the shadow root.
+- **Slots take light-DOM children**: `<x slot="toolbar-start">` projects into the named region.
+
+See `src/elements/composer-showcase.stories.tsx` or `labs-message-thread.stories.tsx` for fuller examples.
+
+## Run and verify
+
+```bash
+npm run storybook   # http://localhost:6006
+```
+
+The `kai-*` elements inject `compiled.css`, built once at startup. A new element, a changed component class, or a new `@theme` token won't hot-reload, so restart Storybook (`lsof -ti:6006 | xargs kill; npm run storybook`). Preview CSS *does* hot-reload, which is misleading. Story files hot-reload fine.
+
+Check it both ways: toggle light/dark and confirm it holds at narrow widths; for anything interaction-driven, add a Playwright IVP rather than trusting the eye. The `tests/e2e/*-ivp.spec.ts` suites target stories by id (e.g. `labs-menu--plus-menu`) and assert real shadow-DOM behavior; run them with the matching `npm run test:*-ivp` script.
+
+## Graduating a lab
+
+When a composition is proven it gets promoted into the public docs at [ui.kitn.ai](https://ui.kitn.ai); the lab story stays here as the testing ground. Keep labs lean: they prove composition, they're not the consumer API reference.
