@@ -15,7 +15,7 @@ export interface ArtifactProps extends WebComponentProps {
   /** URL the preview iframe frames. Consumer-controlled. */
   src?: string;
   /** Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). */
-  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
+  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | "added" | "modified" | "deleted" | "renamed" | "untracked" }[];
   /** Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). */
   tab?: "preview" | "code";
   /** Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`. */
@@ -594,19 +594,21 @@ export const FeedbackBar = createWebComponent<FeedbackBarProps>(
 );
 
 export interface FileTreeProps extends WebComponentProps {
-  /** The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`). */
-  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
+  /** The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type?, additions?, deletions?, status? }`). */
+  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | "added" | "modified" | "deleted" | "renamed" | "untracked" }[];
   /** Selected file path — highlighted in the tree. */
   activeFile?: string;
   /** Folder paths expanded initially. Omit to start with all folders open. */
   defaultExpanded?: string[];
+  /** Show a changed-files summary header (file count + summed `+/-` + Collapse-all). Attribute: `summary`. Off by default. */
+  summary?: boolean;
   /** Fired when a file is selected. `detail.path` = the file's path. */
   onSelect?: (event: CustomEvent<{ path: string }>) => void;
 }
 
 export const FileTree = createWebComponent<FileTreeProps>(
   'kai-file-tree',
-  ["theme","files","activeFile","defaultExpanded"],
+  ["theme","files","activeFile","defaultExpanded","summary"],
   { onSelect: 'kai-select' },
 );
 

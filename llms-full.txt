@@ -184,7 +184,7 @@ Every element also accepts the `theme` attribute. Array/object properties are ma
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `src` | `src` | `undefined \| string` | URL the preview iframe frames. Consumer-controlled. |
-| `files` | — | `{ path: string; url?: undefined \| string; code?: undefined \| string; language?: undefined \| string; type?: undefined \| "html" \| "pdf" \| "image" \| "other" }[]` | Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). |
+| `files` | — | `{ path: string; url?: undefined \| string; code?: undefined \| string; language?: undefined \| string; type?: undefined \| "html" \| "pdf" \| "image" \| "other"; additions?: undefined \| number; deletions?: undefined \| number; status?: undefined \| "added" \| "modified" \| "deleted" \| "renamed" \| "untracked" }[]` | Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). |
 | `tab` | `tab` | `undefined \| "preview" \| "code"` | Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). |
 | `defaultTab` | `default-tab` | `undefined \| "preview" \| "code"` | Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`. |
 | `activeFile` | `active-file` | `undefined \| string` | Selected file path — syncs the tree highlight, Code source, and preview. |
@@ -762,15 +762,25 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `files` | — | `{ path: string; url?: undefined \| string; code?: undefined \| string; language?: undefined \| string; type?: undefined \| "html" \| "pdf" \| "image" \| "other" }[]` | The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`). |
+| `files` | — | `{ path: string; url?: undefined \| string; code?: undefined \| string; language?: undefined \| string; type?: undefined \| "html" \| "pdf" \| "image" \| "other"; additions?: undefined \| number; deletions?: undefined \| number; status?: undefined \| "added" \| "modified" \| "deleted" \| "renamed" \| "untracked" }[]` | The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type?, additions?, deletions?, status? }`). |
 | `activeFile` | `active-file` | `undefined \| string` | Selected file path — highlighted in the tree. |
 | `defaultExpanded` | — | `undefined \| string[]` | Folder paths expanded initially. Omit to start with all folders open. |
+| `summary` | `summary` | `undefined \| false \| true` | Show a changed-files summary header (file count + summed `+/-` + Collapse-all). Attribute: `summary`. Off by default. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-select` | `CustomEvent<{ path: string }>` | Fired when a file is selected. `detail.path` = the file's path. |
+
+**Styleable parts** (restyle from outside via `kai-file-tree::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(summary)` | The changed-files summary header (the file count, the summed +additions/-deletions, and the Collapse-all/Expand-all toggle). Rendered only when the `summary` attribute is set; restyle or hide it from outside. — `kai-file-tree::part(summary) { border-bottom: none; padding-block: 0.5rem }` |
+| `::part(status)` | The per-row change-status letter (A/M/D/R/U), shown when a file carries a `status`. Colored with the conventional VCS tool hues; restyle from outside. — `kai-file-tree::part(status) { font-weight: 700 }` |
+| `::part(stat-additions)` | The trailing `+N` additions stat on a file row (success/green tool hue, tabular-nums). Shown only when a file carries `additions`. — `kai-file-tree::part(stat-additions) { color: var(--color-tool-green) }` |
+| `::part(stat-deletions)` | The trailing `-N` deletions stat on a file row (error/red tool hue, tabular-nums). Shown only when a file carries `deletions`. — `kai-file-tree::part(stat-deletions) { color: var(--color-tool-red) }` |
 
 ---
 

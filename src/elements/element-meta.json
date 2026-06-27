@@ -14,15 +14,15 @@
       },
       {
         "name": "files",
-        "type": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
+        "type": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]",
         "optional": false,
         "scalar": false,
         "description": "Files for the Code tab tree + each file's preview `url`. Set as a JS property (array).",
         "typeName": "FileTreeFile[]",
-        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
+        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]",
         "default": "[]",
         "typeImport": "FileTreeFile",
-        "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
+        "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]"
       },
       {
         "name": "tab",
@@ -2594,15 +2594,15 @@
     "props": [
       {
         "name": "files",
-        "type": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
+        "type": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]",
         "optional": false,
         "scalar": false,
-        "description": "The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`).",
+        "description": "The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type?, additions?, deletions?, status? }`).",
         "typeName": "FileTreeFile[]",
-        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
+        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]",
         "default": "[]",
         "typeImport": "FileTreeFile",
-        "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
+        "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]"
       },
       {
         "name": "activeFile",
@@ -2619,6 +2619,15 @@
         "scalar": false,
         "description": "Folder paths expanded initially. Omit to start with all folders open.",
         "displayType": "undefined | string[]"
+      },
+      {
+        "name": "summary",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a changed-files summary header (file count + summed `+/-` + Collapse-all). Attribute: `summary`. Off by default.",
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
@@ -2637,7 +2646,29 @@
         "storyId": "solid-advanced-elements-filetree--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "parts": [
+      {
+        "name": "summary",
+        "doc": "The changed-files summary header (the file count, the summed +additions/-deletions, and the Collapse-all/Expand-all toggle). Rendered only when the `summary` attribute is set; restyle or hide it from outside.",
+        "recipe": "kai-file-tree::part(summary) { border-bottom: none; padding-block: 0.5rem }"
+      },
+      {
+        "name": "status",
+        "doc": "The per-row change-status letter (A/M/D/R/U), shown when a file carries a `status`. Colored with the conventional VCS tool hues; restyle from outside.",
+        "recipe": "kai-file-tree::part(status) { font-weight: 700 }"
+      },
+      {
+        "name": "stat-additions",
+        "doc": "The trailing `+N` additions stat on a file row (success/green tool hue, tabular-nums). Shown only when a file carries `additions`.",
+        "recipe": "kai-file-tree::part(stat-additions) { color: var(--color-tool-green) }"
+      },
+      {
+        "name": "stat-deletions",
+        "doc": "The trailing `-N` deletions stat on a file row (error/red tool hue, tabular-nums). Shown only when a file carries `deletions`.",
+        "recipe": "kai-file-tree::part(stat-deletions) { color: var(--color-tool-red) }"
+      }
+    ]
   },
   {
     "tag": "kai-file-upload",
