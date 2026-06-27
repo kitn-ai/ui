@@ -10,9 +10,9 @@ interface Props extends Record<string, unknown> {
   suggestions: Item[];
   /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
   variant?: 'outline' | 'ghost' | 'default';
-  /** Size preset for each chip. Defaults to the pill default (`'lg'`); pass
-   *  `'sm'` for smaller pills (or `'md'`). */
-  size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
+  /** Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows.
+   *  Chips are unaffected. */
+  size?: 'md' | 'lg';
   /** Layout: `'chips'` (default) renders a wrapping row of rounded pills;
    *  `'list'` renders a vertical, full-width "Ideas for you" list — each row
    *  is left-aligned with a leading `icon`, a label, and a hover background. */
@@ -59,7 +59,7 @@ export function parseSuggestionNode(n: Element): Item {
 defineWebComponent<Props, Events>('kai-suggestions', {
   suggestions: [],
   variant: 'outline',
-  size: undefined,
+  size: 'md',
   layout: 'chips',
   block: false,
   highlight: undefined,

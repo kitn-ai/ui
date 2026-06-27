@@ -6,7 +6,9 @@ import { renderIcon } from '../ui/icon';
 export interface PromptSuggestionProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   children: JSX.Element | string;
   variant?: 'outline' | 'ghost' | 'default';
-  size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
+  /** Row height for the `list` layout: `'md'` (default) or `'lg'` for taller
+   *  rows (more vertical padding). Chips/block/highlight are unaffected. */
+  size?: 'md' | 'lg';
   /** Optional leading icon (named icon, image URL/data-URI, or text). */
   icon?: string;
   highlight?: string;
@@ -39,7 +41,7 @@ function PromptSuggestion(props: PromptSuggestionProps) {
               fallback={
                 <Button
                   variant={local.variant ?? 'outline'}
-                  size={local.size ?? 'lg'}
+                  size="lg"
                   class={cn('rounded-full', local.class)}
                   {...rest}
                 >
@@ -50,7 +52,7 @@ function PromptSuggestion(props: PromptSuggestionProps) {
             >
               <Button
                 variant={local.variant ?? 'outline'}
-                size={local.size ?? 'md'}
+                size="md"
                 class={cn(
                   'h-auto w-full cursor-pointer justify-start rounded-xl px-4 py-2.5',
                   'text-left text-sm leading-snug whitespace-normal text-pretty',
@@ -65,9 +67,10 @@ function PromptSuggestion(props: PromptSuggestionProps) {
         >
           <Button
             variant={local.variant ?? 'ghost'}
-            size={local.size ?? 'md'}
+            size="md"
             class={cn(
-              'group h-auto w-full cursor-pointer items-center justify-start gap-2.5 rounded-xl px-3 py-2.5',
+              'group h-auto w-full cursor-pointer items-center justify-start gap-2.5 rounded-xl px-3',
+              local.size === 'lg' ? 'py-3.5' : 'py-2.5',
               'text-left text-sm leading-snug whitespace-normal text-pretty',
               'hover:bg-accent',
               local.class,
@@ -85,7 +88,7 @@ function PromptSuggestion(props: PromptSuggestionProps) {
         fallback={
           <Button
             variant={local.variant ?? 'ghost'}
-            size={local.size ?? 'sm'}
+            size="sm"
             class={cn(
               'w-full cursor-pointer justify-start rounded-xl py-2',
               'hover:bg-accent',
@@ -99,7 +102,7 @@ function PromptSuggestion(props: PromptSuggestionProps) {
       >
         <Button
           variant={local.variant ?? 'ghost'}
-          size={local.size ?? 'sm'}
+          size="sm"
           class={cn(
             'w-full cursor-pointer justify-start gap-0 rounded-xl py-2',
             'hover:bg-accent',
