@@ -5,6 +5,7 @@ import {
   Mic, AudioLines, X, ChevronDown, ChevronLeft,
   Pencil, BookOpen, Code, Smile,
   Share, ArrowLeft, MoreHorizontal,
+  House, Clock, Lock, Box, Briefcase, PanelLeft, Circle, SlidersHorizontal, Workflow, SquarePen,
 } from 'lucide-solid';
 
 type IconComponent = Component<{ class?: string }>;
@@ -36,6 +37,17 @@ const NAMED_ICONS: Record<string, IconComponent> = {
   'arrow-left': ArrowLeft,
   'more-horizontal': MoreHorizontal,
   'chevron-left': ChevronLeft,
+  // App-shell glyphs (sidebar nav, recents, filters).
+  home: House,
+  clock: Clock,
+  lock: Lock,
+  box: Box,
+  briefcase: Briefcase,
+  'panel-left': PanelLeft,
+  circle: Circle,
+  'sliders-horizontal': SlidersHorizontal,
+  workflow: Workflow,
+  'square-pen': SquarePen,
 };
 
 /** Render an item icon.
