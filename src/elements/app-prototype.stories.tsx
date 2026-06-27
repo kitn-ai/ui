@@ -13,14 +13,15 @@ import type { ConversationSummary } from '../types';
 // Recents filter are real kai-menus. The purpose is to find gaps. Styling is
 // Tailwind utilities (the storybook preview scans src/, so they generate).
 
-// kai-tasks and kai-command are used as JSX elements here without their stories'
-// own facades, so declare their tags locally.
+// kai-tasks, kai-command, and kai-icon are used as JSX elements here without their
+// stories' own facades, so declare their tags locally.
 declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       'kai-tasks': JSX.HTMLAttributes<HTMLElement>;
       'kai-command': JSX.HTMLAttributes<HTMLElement> & { placeholder?: string; 'empty-label'?: string; theme?: string };
+      'kai-icon': JSX.HTMLAttributes<HTMLElement> & { name?: string; size?: string };
     }
   }
 }
@@ -42,12 +43,23 @@ const NAV: KaiNavItem[] = [
   { id: 'dispatch', label: 'Dispatch', icon: 'lock', badge: 'Beta' },
   { id: 'customize', label: 'Customize', icon: 'briefcase' },
 ];
-const RECENTS: ConversationSummary[] = [
-  'Platinum Eagle Coin Sale Value', 'Precious Metals Data Conversion', 'Markdown file conversion',
-  'Fiddl app logo design concepts', 'Cloudflare Email Service pricing', 'TypeScript email provider emulator',
-  'Restoring focus after dialog closure', 'Creating sandbox environments', 'Remote computer control request',
-  'Claude desktop update not installing', 'Checking Claude version', 'How compound interest works',
-].map((t, i) => ({ id: `r${i}`, title: t, scope: { type: 'document' }, messageCount: 3, lastMessageAt: '2026-06-26T10:00:00Z', updatedAt: '2026-06-26T10:00:00Z' }));
+// [title, updatedAt]. Times are spread so the kai-conversations trailing
+// auto-derives varied relative labels (a few hours ago through ~four weeks),
+// instead of every row reading "1d ago" off one shared timestamp.
+const RECENTS: ConversationSummary[] = ([
+  ['Postgres index tuning', '2026-06-27T07:30:00Z'],
+  ['Dark-mode token audit', '2026-06-27T01:15:00Z'],
+  ['Markdown file conversion', '2026-06-26T16:00:00Z'],
+  ['Webhook retry backoff', '2026-06-25T09:00:00Z'],
+  ['Cloudflare Email Service pricing', '2026-06-24T14:00:00Z'],
+  ['TypeScript email provider emulator', '2026-06-22T11:00:00Z'],
+  ['Restoring focus after dialog closure', '2026-06-20T10:00:00Z'],
+  ['Creating sandbox environments', '2026-06-18T10:00:00Z'],
+  ['Remote computer control request', '2026-06-15T10:00:00Z'],
+  ['Claude desktop update not installing', '2026-06-12T10:00:00Z'],
+  ['Checking Claude version', '2026-06-06T10:00:00Z'],
+  ['How compound interest works', '2026-05-30T10:00:00Z'],
+] as const).map(([title, ts], i) => ({ id: `r${i}`, title, scope: { type: 'document' }, messageCount: 3, lastMessageAt: ts, updatedAt: ts }));
 const IDEAS = [
   { label: 'Send me a daily briefing', icon: 'sparkles', value: 'brief' },
   { label: 'Organize my inbox', icon: 'folder', value: 'inbox' },
@@ -60,8 +72,8 @@ const COMMANDS: KaiCommandItem[] = [
   { id: 'new-chat', label: 'New chat', icon: 'square-pen', group: 'Quick actions' },
   { id: 'new-project', label: 'New project', icon: 'box', group: 'Quick actions' },
   { id: 'upload', label: 'Upload files', icon: 'paperclip', group: 'Quick actions' },
-  { id: 'rc-coin', label: 'Platinum Eagle Coin Sale Value', icon: 'message-square', group: 'Recents' },
-  { id: 'rc-metals', label: 'Precious Metals Data Conversion', icon: 'message-square', group: 'Recents' },
+  { id: 'rc-postgres', label: 'Postgres index tuning', icon: 'message-square', group: 'Recents' },
+  { id: 'rc-tokens', label: 'Dark-mode token audit', icon: 'message-square', group: 'Recents' },
   { id: 'rc-markdown', label: 'Markdown file conversion', icon: 'message-square', group: 'Recents' },
   { id: 'go-projects', label: 'Projects', icon: 'box', group: 'Go to' },
   { id: 'go-artifacts', label: 'Artifacts', icon: 'workflow', group: 'Go to' },
@@ -96,10 +108,14 @@ const mainView = 'flex h-full flex-col items-center gap-6';
 const footerRow = 'border-t border-border';
 
 // A labeled placeholder for a region the consumer owns. It names the slot it
-// fills so the prototype documents the shell instead of faking app content.
-function SlotPlaceholder(props: { label: string; hint: string }) {
+// fills so the prototype documents the shell instead of faking app content. An
+// optional `icon` paints a large muted glyph above the label.
+function SlotPlaceholder(props: { label: string; hint: string; icon?: string }) {
   return (
     <div class="flex h-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border p-10 text-center">
+      <Show when={props.icon}>
+        <kai-icon name={props.icon} class="slot-placeholder-icon text-muted-foreground"></kai-icon>
+      </Show>
       <div class="text-sm font-medium text-foreground">{props.label}</div>
       <div class="max-w-sm text-[0.8125rem] leading-relaxed text-muted-foreground">{props.hint}</div>
     </div>
@@ -122,6 +138,9 @@ export const ClaudeCodeDesktop: Story = {
     // remounted elements keep their data + styling. onMount would run only once.
     return (
       <div class="relative h-screen w-full">
+        {/* Size the placeholder glyphs large: a class-qualified ::part selector
+            outranks kai-icon's own fixed-size class on the part. */}
+        <style>{`.slot-placeholder-icon::part(icon) { width: 2.25rem; height: 2.25rem }`}</style>
         <kai-workspace ref={(el) => { ws = el as El; ws.conversations = RECENTS; ws.compact = true; }} class="block h-full" sidebar-min-width="240" collapse-below="720">
           {/* sidebar-header: chrome + full-width tabs + nav */}
           <div slot="sidebar-header" class="px-2.5 pt-2">
@@ -166,7 +185,9 @@ export const ClaudeCodeDesktop: Story = {
               >Design</kai-button>
             </div>
             <div class={`${footerRow} flex items-center px-2 py-1.5`}>
-              <kai-menu ref={(el) => { (el as El).items = MENU_ITEMS; }}>
+              <kai-menu ref={(el) => { (el as El).items = MENU_ITEMS; }} label="Account menu">
+                {/* The trigger content is NON-interactive: kai-menu wraps it in its
+                    own <button>, so a button/kai-button here would double-nest. */}
                 <div slot="trigger" class="flex items-center gap-2 text-left">
                   <kai-avatar fallback="JD" size="sm"></kai-avatar>
                   <span class="text-sm font-medium">John</span>
@@ -198,7 +219,7 @@ export const ClaudeCodeDesktop: Story = {
                         badge="New"
                         style={{ '--kai-coachmark-bg': 'var(--color-tool-blue)', '--kai-coachmark-fg': 'var(--color-background)' }}
                       >
-                        <kai-button variant="subtle" icon="workflow">Cowork</kai-button>
+                        <kai-button variant="subtle" size="sm" icon="workflow">Cowork</kai-button>
                         <span slot="content">Chat with Claude here, or switch to Cowork to build alongside it.</span>
                       </kai-coachmark>
                     </div>
@@ -229,6 +250,7 @@ export const ClaudeCodeDesktop: Story = {
             <Show when={view() === 'code'}>
               <div class="h-full p-6">
                 <SlotPlaceholder
+                  icon="code"
                   label="Code view"
                   hint="Rendered into the kai-workspace main slot. The consumer owns this view and swaps it per tab. Drop your own screen here."
                 />
@@ -248,6 +270,7 @@ export const ClaudeCodeDesktop: Story = {
         >
           <div class="h-full p-6">
             <SlotPlaceholder
+              icon="workflow"
               label="Design takeover"
               hint="The kai-screen content slot, a full-bleed overlay you mount your own app into. Press Back to return."
             />
@@ -301,8 +324,11 @@ export const ClaudeCodeDesktop: Story = {
   <div slot="sidebar-footer">
     <kai-tasks></kai-tasks>
     <kai-button variant="ghost" icon="workflow">Design</kai-button>
-    <kai-menu>
-      <button slot="trigger"><kai-avatar fallback="JD"></kai-avatar> John</button>
+    <kai-menu label="Account menu">
+      <!-- Trigger content is NON-interactive: kai-menu supplies the button. -->
+      <div slot="trigger" class="flex items-center gap-2">
+        <kai-avatar fallback="JD"></kai-avatar> John
+      </div>
     </kai-menu>
   </div>
 
@@ -316,7 +342,7 @@ export const ClaudeCodeDesktop: Story = {
         <!-- Color the coachmark with CSS tokens, so it survives remounts (no JS) -->
         <kai-coachmark default-open headline="Cowork has a new home" badge="New"
           style="--kai-coachmark-bg: var(--color-tool-blue); --kai-coachmark-fg: var(--color-background)">
-          <kai-button variant="subtle" icon="workflow">Cowork</kai-button>
+          <kai-button variant="subtle" size="sm" icon="workflow">Cowork</kai-button>
           <span slot="content">Chat here, or switch to Cowork to build alongside it.</span>
         </kai-coachmark>
       </div>

@@ -27,8 +27,8 @@ const NAV: KaiNavItem[] = [
   { id: 'customize', label: 'Customize', icon: 'briefcase' },
 ];
 const RECENT_TITLES = [
-  'Platinum Eagle Coin Sale Value', 'Precious Metals Data Conversion', 'Markdown file conversion',
-  'Fiddl app logo design concepts', 'Cloudflare Email Service pricing', 'TypeScript email provider emulator',
+  'Postgres index tuning', 'Dark-mode token audit', 'Markdown file conversion',
+  'Webhook retry backoff', 'Cloudflare Email Service pricing', 'TypeScript email provider emulator',
   'Restoring focus after dialog closure', 'Creating sandbox environments', 'Remote computer control request',
   'Claude desktop update not installing', 'Checking Claude version', 'How compound interest works', 'Untitled',
 ];

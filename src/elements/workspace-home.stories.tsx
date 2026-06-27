@@ -22,7 +22,7 @@ const NAV: KaiNavItem[] = [
   { id: 'customize', label: 'Customize', icon: 'settings' },
 ];
 const RECENTS: ConversationSummary[] = [
-  { id: 'c1', title: 'Precious metals data', scope: { type: 'document' }, messageCount: 4, lastMessageAt: '2026-06-26T10:00:00Z', updatedAt: '2026-06-26T10:00:00Z' },
+  { id: 'c1', title: 'Dark-mode token audit', scope: { type: 'document' }, messageCount: 4, lastMessageAt: '2026-06-26T10:00:00Z', updatedAt: '2026-06-26T10:00:00Z' },
   { id: 'c2', title: 'Markdown file conversion', scope: { type: 'document' }, messageCount: 2, lastMessageAt: '2026-06-25T10:00:00Z', updatedAt: '2026-06-25T10:00:00Z' },
   { id: 'c3', title: 'How compound interest works', scope: { type: 'document' }, messageCount: 6, lastMessageAt: '2026-06-24T10:00:00Z', updatedAt: '2026-06-24T10:00:00Z' },
 ];
