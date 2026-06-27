@@ -1439,6 +1439,129 @@
     "tokens": []
   },
   {
+    "tag": "kai-coachmark",
+    "className": "KaiCoachmarkElement",
+    "displayName": "Coachmark",
+    "props": [
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-coachmark open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "headline",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "badge",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "A small badge pill beside the headline (e.g. \"New\").",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "placement",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Floating placement relative to the anchor (default `bottom`).",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-dismiss",
+        "detail": "Record<string, never>",
+        "description": "The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again.",
+        "displayDetail": "Record<string, never>"
+      },
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The coachmark opened or closed (a method, the ×, or a driven `open`).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Coachmark",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-coachmark--docs"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "content",
+        "mode": "replace",
+        "doc": "The bubble body text shown under the headline."
+      }
+    ],
+    "parts": [
+      {
+        "name": "bubble",
+        "doc": "The hint bubble panel. Restyle its background, radius, or padding from outside; the default is bg-primary.",
+        "recipe": "kai-coachmark::part(bubble) { border-radius: 1rem }"
+      },
+      {
+        "name": "arrow",
+        "doc": "The arrow pointing at the anchor. Inherits the bubble color; recolor it alongside the bubble.",
+        "recipe": "kai-coachmark::part(arrow) { background: var(--color-accent) }"
+      },
+      {
+        "name": "badge",
+        "doc": "The small badge pill beside the headline (e.g. \"New\").",
+        "recipe": "kai-coachmark::part(badge) { text-transform: none }"
+      },
+      {
+        "name": "title",
+        "doc": "The bold headline text.",
+        "recipe": "kai-coachmark::part(title) { font-size: 0.9375rem }"
+      },
+      {
+        "name": "dismiss",
+        "doc": "The dismiss button. Recolor or reposition it from outside.",
+        "recipe": "kai-coachmark::part(dismiss) { color: var(--color-primary-foreground) }"
+      }
+    ]
+  },
+  {
     "tag": "kai-code-block",
     "className": "KaiCodeBlockElement",
     "displayName": "CodeBlock",
@@ -2958,11 +3081,11 @@
     "props": [
       {
         "name": "items",
-        "type": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]",
+        "type": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]",
         "optional": true,
         "scalar": false,
         "description": "Tree of menu items. Set as a JS property — not an HTML attribute.",
-        "displayType": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]"
+        "displayType": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]"
       },
       {
         "name": "placement",
@@ -3038,9 +3161,9 @@
       },
       {
         "name": "kai-select",
-        "detail": "{ id: string; checked?: undefined | false | true }",
-        "description": "Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state.",
-        "displayDetail": "{ id: string; checked?: undefined | false | true }"
+        "detail": "{ id: string; checked?: undefined | false | true; radioGroup?: undefined | string }",
+        "description": "Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. - Radio items: `{ id, radioGroup }` — the consumer marks `id` as the selected one in `radioGroup` and clears the others.",
+        "displayDetail": "{ id: string; checked?: undefined | false | true; radioGroup?: undefined | string }"
       }
     ],
     "methods": [
@@ -3098,6 +3221,11 @@
         "name": "DropdownCheckboxItem",
         "group": "UI",
         "storyId": "solid-advanced-primitives-dropdowncheckboxitem--docs"
+      },
+      {
+        "name": "DropdownRadioItem",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdownradioitem--docs"
       },
       {
         "name": "DropdownSub",
@@ -4751,6 +4879,64 @@
     "tokens": []
   },
   {
+    "tag": "kai-stat",
+    "className": "KaiStatElement",
+    "displayName": "Stat",
+    "props": [
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The small muted label above the value.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The big value (scalar). A default-slot override wins over this.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "hint",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "A small caption below the value.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "Stat",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-stat--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "stat",
+        "doc": "The tile root. Restyle its background, radius, or padding from outside; the consumer arranges tiles in their own CSS grid.",
+        "recipe": "kai-stat::part(stat) { background: var(--color-card); border-radius: 1rem }"
+      },
+      {
+        "name": "label",
+        "doc": "The small muted caption above the value. Recolor or resize it from outside.",
+        "recipe": "kai-stat::part(label) { text-transform: uppercase; letter-spacing: 0.05em }"
+      },
+      {
+        "name": "value",
+        "doc": "The big metric value. Restyle its size, weight, or color from outside; a default-slot override replaces it with rich content.",
+        "recipe": "kai-stat::part(value) { font-size: 1.875rem; color: var(--color-primary) }"
+      }
+    ]
+  },
+  {
     "tag": "kai-status",
     "className": "KaiStatusElement",
     "displayName": "Status",
@@ -4839,6 +5025,15 @@
         "scalar": true,
         "description": "Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`).",
         "displayType": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\""
+      },
+      {
+        "name": "layout",
+        "type": "undefined | \"list\" | \"chips\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width \"Ideas for you\" list — each row is left-aligned with a leading `icon`, a label, and a hover background.",
+        "default": "'chips'",
+        "displayType": "undefined | \"list\" | \"chips\""
       },
       {
         "name": "block",

@@ -314,6 +314,39 @@ export const NAV_PARTS: PartDef[] = [
   },
 ];
 
+/** Styleable `::part`s of `<kai-stat>`. */
+export const STAT_PARTS: PartDef[] = [
+  {
+    name: 'stat',
+    doc: 'The tile root. Restyle its background, radius, or padding from outside; the consumer arranges tiles in their own CSS grid.',
+    recipe: 'kai-stat::part(stat) { background: var(--color-card); border-radius: 1rem }',
+  },
+  {
+    name: 'label',
+    doc: 'The small muted caption above the value. Recolor or resize it from outside.',
+    recipe: 'kai-stat::part(label) { text-transform: uppercase; letter-spacing: 0.05em }',
+  },
+  {
+    name: 'value',
+    doc: 'The big metric value. Restyle its size, weight, or color from outside; a default-slot override replaces it with rich content.',
+    recipe: 'kai-stat::part(value) { font-size: 1.875rem; color: var(--color-primary) }',
+  },
+];
+
+/** Slots of `<kai-coachmark>` (the anchor/trigger is the default slot). */
+export const COACHMARK_SLOTS: SlotDef[] = [
+  { name: 'content', mode: 'replace', doc: 'The bubble body text shown under the headline.' },
+];
+
+/** Styleable `::part`s of `<kai-coachmark>`. */
+export const COACHMARK_PARTS: PartDef[] = [
+  { name: 'bubble', doc: 'The hint bubble panel. Restyle its background, radius, or padding from outside; the default is bg-primary.', recipe: 'kai-coachmark::part(bubble) { border-radius: 1rem }' },
+  { name: 'arrow', doc: 'The arrow pointing at the anchor. Inherits the bubble color; recolor it alongside the bubble.', recipe: 'kai-coachmark::part(arrow) { background: var(--color-accent) }' },
+  { name: 'badge', doc: 'The small badge pill beside the headline (e.g. "New").', recipe: 'kai-coachmark::part(badge) { text-transform: none }' },
+  { name: 'title', doc: 'The bold headline text.', recipe: 'kai-coachmark::part(title) { font-size: 0.9375rem }' },
+  { name: 'dismiss', doc: 'The dismiss button. Recolor or reposition it from outside.', recipe: 'kai-coachmark::part(dismiss) { color: var(--color-primary-foreground) }' },
+];
+
 /**
  * Per-element composition surface — the SINGLE registry the build extracts
  * (`scripts/gen-element-api.mjs`) into `element-meta.json`, the Custom Elements
@@ -352,6 +385,8 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-card': { slots: CARD_SLOTS, parts: CARD_PARTS },
   'kai-workspace': { slots: WORKSPACE_SLOTS },
   'kai-nav': { parts: NAV_PARTS },
+  'kai-stat': { parts: STAT_PARTS },
+  'kai-coachmark': { slots: COACHMARK_SLOTS, parts: COACHMARK_PARTS },
 };
 
 /**

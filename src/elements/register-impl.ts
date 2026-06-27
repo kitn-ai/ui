@@ -36,6 +36,8 @@ import './response-stream';
 import './empty';
 import './status';
 import './nav';
+import './stat';
+import './coachmark';
 import './tabs';
 import './voice-output';
 import './screen';

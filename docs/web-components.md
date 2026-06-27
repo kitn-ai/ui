@@ -765,6 +765,7 @@ No events.
 | `suggestions` | — | `(string | { label: string; value?: undefined | string; icon?: undefined | string })[]` | `[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
 | `variant` | `variant` | `undefined | "default" | "ghost" | "outline"` | `'outline'` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
 | `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | — | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
+| `layout` | `layout` | `undefined | "list" | "chips"` | `'chips'` | Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list — each row is left-aligned with a leading `icon`, a label, and a hover background. |
 | `block` | `block` | `undefined | false | true` | `false` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined | string` | — | Substring to highlight within each suggestion. |
 
@@ -1547,7 +1548,7 @@ A pulsing loading placeholder that preserves layout while content arrives. Respo
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `items` | — | `undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]` | — | Tree of menu items. Set as a JS property — not an HTML attribute. |
+| `items` | — | `undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]` | — | Tree of menu items. Set as a JS property — not an HTML attribute. |
 | `placement` | `placement` | `undefined | string` | — | Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). |
 | `triggerIcon` | `trigger-icon` | `undefined | string` | — | Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case — a slotted trigger overrides it. |
 | `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label (e.g. `"High"`). |
@@ -1562,7 +1563,7 @@ A pulsing loading placeholder that preserves layout while content arrives. Respo
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-open-change` | `{ open: false | true }` | The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). |
-| `kai-select` | `{ id: string; checked?: undefined | false | true }` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
+| `kai-select` | `{ id: string; checked?: undefined | false | true; radioGroup?: undefined | string }` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. - Radio items: `{ id, radioGroup }` — the consumer marks `id` as the selected one in `radioGroup` and clears the others. |
 
 #### Slots
 
@@ -1574,7 +1575,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 #### Composed from
 
-`UI/Dropdown`, `UI/DropdownTrigger`, `UI/DropdownContent`, `UI/DropdownItem`, `UI/DropdownSeparator`, `UI/DropdownLabel`, `UI/DropdownCheckboxItem`, `UI/DropdownSub`, `UI/DropdownSubTrigger`, `UI/DropdownSubContent`
+`UI/Dropdown`, `UI/DropdownTrigger`, `UI/DropdownContent`, `UI/DropdownItem`, `UI/DropdownSeparator`, `UI/DropdownLabel`, `UI/DropdownCheckboxItem`, `UI/DropdownRadioItem`, `UI/DropdownSub`, `UI/DropdownSubTrigger`, `UI/DropdownSubContent`
 
 #### Theming
 

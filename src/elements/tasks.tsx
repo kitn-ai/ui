@@ -36,9 +36,16 @@ interface Events {
  * UI state; only the final confirm emits the Card contract's **`submit`** verb
  * up a bubbling **`kai-card`** CustomEvent (`{ kind:'submit', cardId,
  * data:{ selected } }`) with the checked ids in input order. Also emits `ready` on
- * mount and `error` for a malformed definition (inline error). v1 = select/approve
- * mode only. Routes through a `CardProvider` when present, else the bubbling
- * `kai-card` event. Isolated in Shadow DOM; theme-aware via the shared kit tokens.
+ * mount and `error` for a malformed definition (inline error). Routes through a
+ * `CardProvider` when present, else the bubbling `kai-card` event. Isolated in
+ * Shadow DOM; theme-aware via the shared kit tokens.
+ *
+ * Two looks, one selection model. Default `mode:'select'` = the approval list above.
+ * `mode:'progress'` = the onboarding-checklist look (e.g. "Get started 0 / 2"): a
+ * header `done / total` count + circular indicators + per-item title/description,
+ * and NO confirm button (checking a row IS the action, so the live
+ * `kai-value-change` is the signal). The `max` gate, `toggle`/`select` methods, and
+ * events all still apply.
  */
 defineWebComponent<Props, Events>(
   'kai-tasks',

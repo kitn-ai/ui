@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 64 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 66 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/ui'`):
-All 64 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 66 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 64 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 66 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/ui/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (64 elements, generated from custom-elements.json)
+## Element reference (66 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -494,6 +494,43 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-value-change` | `CustomEvent<{ value: string }>` | The selection changed BEFORE submit (a row click or the `select()` method). Distinct from the terminal `action` verb on the `kai-card` contract event. |
+
+---
+
+### `kai-coachmark` / `Coachmark`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-coachmark open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `headline` | `headline` | `undefined \| string` | The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). |
+| `badge` | `badge` | `undefined \| string` | A small badge pill beside the headline (e.g. "New"). |
+| `placement` | `placement` | `undefined \| string` | Floating placement relative to the anchor (default `bottom`). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-dismiss` | `CustomEvent<Record<string, never>>` | The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again. |
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The coachmark opened or closed (a method, the ×, or a driven `open`). |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `content` | replace | The bubble body text shown under the headline. |
+
+**Styleable parts** (restyle from outside via `kai-coachmark::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(bubble)` | The hint bubble panel. Restyle its background, radius, or padding from outside; the default is bg-primary. — `kai-coachmark::part(bubble) { border-radius: 1rem }` |
+| `::part(arrow)` | The arrow pointing at the anchor. Inherits the bubble color; recolor it alongside the bubble. — `kai-coachmark::part(arrow) { background: var(--color-accent) }` |
+| `::part(badge)` | The small badge pill beside the headline (e.g. "New"). — `kai-coachmark::part(badge) { text-transform: none }` |
+| `::part(title)` | The bold headline text. — `kai-coachmark::part(title) { font-size: 0.9375rem }` |
+| `::part(dismiss)` | The dismiss button. Recolor or reposition it from outside. — `kai-coachmark::part(dismiss) { color: var(--color-primary-foreground) }` |
 
 ---
 
@@ -872,7 +909,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `items` | — | `undefined \| { id?: undefined \| string; label?: undefined \| string; icon?: undefined \| string; shortcut?: undefined \| string; checked?: undefined \| false \| true; disabled?: undefined \| false \| true; separator?: undefined \| false \| true; heading?: undefined \| false \| true; items?: undefined \| Record<string, unknown>[] }[]` | Tree of menu items. Set as a JS property — not an HTML attribute. |
+| `items` | — | `undefined \| { id?: undefined \| string; label?: undefined \| string; icon?: undefined \| string; shortcut?: undefined \| string; checked?: undefined \| false \| true; radioGroup?: undefined \| string; disabled?: undefined \| false \| true; separator?: undefined \| false \| true; heading?: undefined \| false \| true; items?: undefined \| Record<string, unknown>[] }[]` | Tree of menu items. Set as a JS property — not an HTML attribute. |
 | `placement` | `placement` | `undefined \| string` | Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). |
 | `triggerIcon` | `trigger-icon` | `undefined \| string` | Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case — a slotted trigger overrides it. |
 | `triggerLabel` | `trigger-label` | `undefined \| string` | Built-in trigger: a text label (e.g. `"High"`). |
@@ -887,7 +924,7 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). |
-| `kai-select` | `CustomEvent<{ id: string; checked?: undefined \| false \| true }>` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
+| `kai-select` | `CustomEvent<{ id: string; checked?: undefined \| false \| true; radioGroup?: undefined \| string }>` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. - Radio items: `{ id, radioGroup }` — the consumer marks `id` as the selected one in `radioGroup` and clears the others. |
 
 **Slots** (project your own markup via `slot="name"` on a light-DOM child):
 
@@ -1354,6 +1391,28 @@ _No events._
 
 ---
 
+### `kai-stat` / `Stat`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `label` | `label` | `undefined \| string` | The small muted label above the value. |
+| `value` | `value` | `undefined \| string` | The big value (scalar). A default-slot override wins over this. |
+| `hint` | `hint` | `undefined \| string` | A small caption below the value. |
+
+_No events._
+
+**Styleable parts** (restyle from outside via `kai-stat::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(stat)` | The tile root. Restyle its background, radius, or padding from outside; the consumer arranges tiles in their own CSS grid. — `kai-stat::part(stat) { background: var(--color-card); border-radius: 1rem }` |
+| `::part(label)` | The small muted caption above the value. Recolor or resize it from outside. — `kai-stat::part(label) { text-transform: uppercase; letter-spacing: 0.05em }` |
+| `::part(value)` | The big metric value. Restyle its size, weight, or color from outside; a default-slot override replaces it with rich content. — `kai-stat::part(value) { font-size: 1.875rem; color: var(--color-primary) }` |
+
+---
+
 ### `kai-status` / `Status`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -1384,6 +1443,7 @@ _No events._
 | `suggestions` | — | `(string \| { label: string; value?: undefined \| string; icon?: undefined \| string })[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
 | `variant` | `variant` | `undefined \| "default" \| "ghost" \| "outline"` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
 | `size` | `size` | `undefined \| "sm" \| "md" \| "lg" \| "icon" \| "icon-sm"` | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
+| `layout` | `layout` | `undefined \| "list" \| "chips"` | Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list — each row is left-aligned with a leading `icon`, a label, and a hover background. |
 | `block` | `block` | `undefined \| false \| true` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined \| string` | Substring to highlight within each suggestion. |
 

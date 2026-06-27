@@ -31,11 +31,11 @@ const useDropdown = () => {
   return c;
 };
 
-// The roving-focus set: real menuitems AND checkbox items, minus disabled. A
-// DropdownSubTrigger is a menuitem too, so it participates. Labels/separators
+// The roving-focus set: real menuitems AND checkbox/radio items, minus disabled.
+// A DropdownSubTrigger is a menuitem too, so it participates. Labels/separators
 // are intentionally excluded. Submenu content is portaled to a SIBLING node, so
 // a parent's querySelectorAll scoped to its own menu never reaches sub items.
-const ITEM_SELECTOR = '[role="menuitem"]:not([aria-disabled="true"]), [role="menuitemcheckbox"]:not([aria-disabled="true"])';
+const ITEM_SELECTOR = '[role="menuitem"]:not([aria-disabled="true"]), [role="menuitemcheckbox"]:not([aria-disabled="true"]), [role="menuitemradio"]:not([aria-disabled="true"])';
 
 /** Imperative open controller, handed to a parent (e.g. the kai-menu facade) via
  *  `controllerRef` so it can drive/observe the Dropdown's open state. */
@@ -280,6 +280,43 @@ export function DropdownCheckboxItem(props: { children: JSX.Element; class?: str
   return (
     <div
       role="menuitemcheckbox"
+      aria-checked={props.checked ? 'true' : 'false'}
+      tabindex={-1}
+      aria-disabled={props.disabled ? 'true' : undefined}
+      onClick={activate}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } }}
+      onPointerMove={(e) => { if (!props.disabled) (e.currentTarget as HTMLElement).focus(); }}
+      class={cn(
+        'flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors',
+        'hover:bg-muted focus:bg-muted',
+        props.disabled && 'opacity-50 pointer-events-none',
+        props.class,
+      )}
+    >
+      {props.children}
+      <span class="ml-auto flex size-4 shrink-0 items-center justify-center text-muted-foreground">
+        <Show when={props.checked}><Check class="size-4" aria-hidden="true" /></Show>
+      </span>
+    </div>
+  );
+}
+
+/**
+ * A single-select (radio) menu item.
+ * a11y: `role="menuitemradio"` + `aria-checked`. Behaves like the checkbox item —
+ * activating fires `onSelect` but KEEPS THE MENU OPEN (the consumer moves the
+ * selection within the group). The Check sits at the TRAILING edge so leading
+ * content aligns with plain items. Group membership is the consumer's concern;
+ * this primitive just renders the selected state and reports the click.
+ */
+export function DropdownRadioItem(props: { children: JSX.Element; class?: string; checked?: boolean; onSelect?: () => void; disabled?: boolean }) {
+  const activate = () => {
+    if (props.disabled) return;
+    props.onSelect?.(); /* stay open — consumer owns the group selection */
+  };
+  return (
+    <div
+      role="menuitemradio"
       aria-checked={props.checked ? 'true' : 'false'}
       tabindex={-1}
       aria-disabled={props.disabled ? 'true' : undefined}

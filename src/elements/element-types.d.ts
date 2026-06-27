@@ -244,6 +244,21 @@ export interface KaiChoiceElement extends HTMLElement {
   disabled?: boolean;
 }
 
+export interface KaiCoachmarkElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-coachmark open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). */
+  headline?: string;
+  /** A small badge pill beside the headline (e.g. "New"). */
+  badge?: string;
+  /** Floating placement relative to the anchor (default `bottom`). */
+  placement?: string;
+}
+
 export interface KaiCodeBlockElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -509,7 +524,7 @@ export interface KaiMenuElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** Tree of menu items. Set as a JS property — not an HTML attribute. */
-  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
+  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
   /** Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). */
   placement?: string;
   /** Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case — a slotted trigger overrides it. */
@@ -814,6 +829,17 @@ export interface KaiSourcesElement extends HTMLElement {
   numbered?: boolean;
 }
 
+export interface KaiStatElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The small muted label above the value. */
+  label?: string;
+  /** The big value (scalar). A default-slot override wins over this. */
+  value?: string;
+  /** A small caption below the value. */
+  hint?: string;
+}
+
 export interface KaiStatusElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -836,6 +862,8 @@ export interface KaiSuggestionsElement extends HTMLElement {
   variant?: "default" | "ghost" | "outline";
   /** Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). */
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
+  /** Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list — each row is left-aligned with a leading `icon`, a label, and a hover background. */
+  layout?: "list" | "chips";
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
   /** Substring to highlight within each suggestion. */
@@ -1045,6 +1073,7 @@ declare global {
     'kai-chat': KaiChatElement;
     'kai-checkpoint': KaiCheckpointElement;
     'kai-choice': KaiChoiceElement;
+    'kai-coachmark': KaiCoachmarkElement;
     'kai-code-block': KaiCodeBlockElement;
     'kai-command': KaiCommandElement;
     'kai-compare': KaiCompareElement;
@@ -1085,6 +1114,7 @@ declare global {
     'kai-skills': KaiSkillsElement;
     'kai-source': KaiSourceElement;
     'kai-sources': KaiSourcesElement;
+    'kai-stat': KaiStatElement;
     'kai-status': KaiStatusElement;
     'kai-suggestions': KaiSuggestionsElement;
     'kai-switch': KaiSwitchElement;

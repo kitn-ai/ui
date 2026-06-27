@@ -127,3 +127,91 @@ export const PlusMenu: Story = {
   },
 };
 
+/**
+ * The Recents Filter / Group-by menu from the Home screen: two single-select
+ * (radio) sections in one menu. Items sharing a `radioGroup` are mutually
+ * exclusive — the selected one shows a checkmark. Clicking emits
+ * `{ id, radioGroup }`; the consumer owns state, moving the checkmark within the
+ * group (and clearing the rest) by reassigning a fresh `items` array.
+ */
+function FilterGroupByDemo() {
+  let el: MenuEl | undefined;
+
+  const buildItems = (filter: string, groupBy: string): KaiMenuItem[] => [
+    { heading: true, label: 'Filter' },
+    { id: 'all', label: 'All', radioGroup: 'filter', checked: filter === 'all' },
+    { id: 'chat', label: 'Chat', radioGroup: 'filter', checked: filter === 'chat' },
+    { id: 'task', label: 'Task', radioGroup: 'filter', checked: filter === 'task' },
+    { separator: true },
+    { heading: true, label: 'Group by' },
+    { id: 'none', label: 'None', radioGroup: 'groupBy', checked: groupBy === 'none' },
+    { id: 'date', label: 'Date', radioGroup: 'groupBy', checked: groupBy === 'date' },
+    { id: 'project', label: 'Project', radioGroup: 'groupBy', checked: groupBy === 'project' },
+    { id: 'unread', label: 'Unread', radioGroup: 'groupBy', checked: groupBy === 'unread' },
+    { id: 'status', label: 'Status', radioGroup: 'groupBy', checked: groupBy === 'status' },
+  ];
+
+  let filter = 'all';
+  let groupBy = 'date';
+
+  onMount(() => {
+    if (!el) return;
+    el.items = buildItems(filter, groupBy);
+
+    onCleanup(attachKaiActions(el));
+
+    // Single-select: set the clicked id as the selected one in its group and
+    // reassign a fresh array ref so the checkmark moves reactively.
+    el.addEventListener('kai-select', (e) => {
+      const detail = (e as CustomEvent<{ id: string; radioGroup?: string }>).detail;
+      if (detail.radioGroup === 'filter') filter = detail.id;
+      else if (detail.radioGroup === 'groupBy') groupBy = detail.id;
+      el!.items = buildItems(filter, groupBy);
+    });
+  });
+
+  return (
+    <div style={{ padding: '48px' }}>
+      <kai-menu ref={(e) => (el = e as MenuEl)} trigger-label="Filter" trigger-icon-trailing="chevron-down" />
+    </div>
+  );
+}
+
+export const FilterGroupBy: Story = {
+  name: 'Single-select (radio) groups',
+  render: () => <FilterGroupByDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Two single-select sections in one menu. Items sharing a `radioGroup` are mutually exclusive; the selected one shows a checkmark and the menu stays open. `kai-select` carries `{ id, radioGroup }` — the consumer moves the checkmark within the group.',
+      },
+      source: {
+        language: 'html',
+        code: `<kai-menu trigger-label="Filter" trigger-icon-trailing="chevron-down"></kai-menu>
+
+<script type="module">
+  const menu = document.querySelector('kai-menu');
+  // Items sharing a radioGroup are single-select; checked marks the selected one.
+  menu.items = [
+    { heading: true, label: 'Filter' },
+    { id: 'all', label: 'All', radioGroup: 'filter', checked: true },
+    { id: 'chat', label: 'Chat', radioGroup: 'filter' },
+    { id: 'task', label: 'Task', radioGroup: 'filter' },
+    { separator: true },
+    { heading: true, label: 'Group by' },
+    { id: 'none', label: 'None', radioGroup: 'groupBy' },
+    { id: 'date', label: 'Date', radioGroup: 'groupBy', checked: true },
+    { id: 'project', label: 'Project', radioGroup: 'groupBy' },
+    { id: 'unread', label: 'Unread', radioGroup: 'groupBy' },
+    { id: 'status', label: 'Status', radioGroup: 'groupBy' },
+  ];
+  menu.addEventListener('kai-select', (e) => {
+    const { id, radioGroup } = e.detail; // move the checkmark within radioGroup
+  });
+</script>`,
+      },
+    },
+  },
+};
+

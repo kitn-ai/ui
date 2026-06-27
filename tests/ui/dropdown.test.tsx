@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@solidjs/testing-library';
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from '../../src/ui/dropdown';
+import { createSignal } from 'solid-js';
+import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownRadioItem } from '../../src/ui/dropdown';
 
 // jsdom (v24) does not implement the PointerEvent constructor. useDismiss
 // listens for `pointerdown`; copy the shim from overlay.test.tsx.
@@ -91,5 +92,70 @@ describe('Dropdown', () => {
     await Promise.resolve(); // async unmount
     expect(screen.queryByRole('menu')).toBeNull();
     expect(document.activeElement).not.toBe(trg); // focus NOT yanked back to trigger
+  });
+});
+
+describe('DropdownRadioItem (single-select group)', () => {
+  function setupRadio(onSelect = vi.fn()) {
+    const [selected, setSelected] = createSignal('all');
+    const utils = render(() => (
+      <Dropdown>
+        <DropdownTrigger as={(p: any) => <button {...p} data-testid="trg">Menu</button>} />
+        <DropdownContent>
+          <DropdownRadioItem checked={selected() === 'all'} onSelect={() => { setSelected('all'); onSelect('all'); }}>All</DropdownRadioItem>
+          <DropdownRadioItem checked={selected() === 'chat'} onSelect={() => { setSelected('chat'); onSelect('chat'); }}>Chat</DropdownRadioItem>
+          <DropdownRadioItem checked={selected() === 'task'} onSelect={() => { setSelected('task'); onSelect('task'); }}>Task</DropdownRadioItem>
+        </DropdownContent>
+      </Dropdown>
+    ));
+    return { ...utils, onSelect, selected, trg: screen.getByTestId('trg') };
+  }
+
+  it('renders role=menuitemradio with aria-checked reflecting the selected one', () => {
+    const { trg } = setupRadio();
+    fireEvent.click(trg);
+    const items = screen.getAllByRole('menuitemradio');
+    expect(items).toHaveLength(3);
+    expect(items[0].getAttribute('aria-checked')).toBe('true');
+    expect(items[1].getAttribute('aria-checked')).toBe('false');
+    expect(items[2].getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('radio items participate in roving focus alongside menuitems', () => {
+    const { trg } = setupRadio();
+    fireEvent.keyDown(trg, { key: 'ArrowDown' });
+    const items = screen.getAllByRole('menuitemradio');
+    expect(document.activeElement).toBe(items[0]);
+    fireEvent.keyDown(items[0], { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(items[1]);
+  });
+
+  it('selecting moves the checkmark and KEEPS THE MENU OPEN (consumer owns the group)', () => {
+    const { trg, onSelect } = setupRadio();
+    fireEvent.click(trg);
+    let items = screen.getAllByRole('menuitemradio');
+    fireEvent.click(items[1]);
+    expect(onSelect).toHaveBeenCalledWith('chat');
+    // menu stays open
+    expect(screen.getByRole('menu')).toBeTruthy();
+    // checkmark moved
+    items = screen.getAllByRole('menuitemradio');
+    expect(items[0].getAttribute('aria-checked')).toBe('false');
+    expect(items[1].getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('disabled radio item does not fire onSelect', () => {
+    const onSelect = vi.fn();
+    render(() => (
+      <Dropdown defaultOpen>
+        <DropdownTrigger as={(p: any) => <button {...p}>Menu</button>} />
+        <DropdownContent>
+          <DropdownRadioItem checked disabled onSelect={onSelect}>None</DropdownRadioItem>
+        </DropdownContent>
+      </Dropdown>
+    ));
+    const item = screen.getByRole('menuitemradio');
+    fireEvent.click(item);
+    expect(onSelect).not.toHaveBeenCalled();
   });
 });

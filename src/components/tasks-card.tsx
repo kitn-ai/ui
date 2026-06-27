@@ -20,7 +20,7 @@ import type { CardEnvelope, CardEvent, CardHost, CardResolution } from '../primi
 import { useCardResolution } from './use-card-resolution';
 import { emitCardEvent } from '../primitives/card-routing';
 import { useCardHost } from '../primitives/card-host';
-import { Check, X } from 'lucide-solid';
+import { Check, Circle, CircleCheck, X } from 'lucide-solid';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types (tasks.schema.json) — see src/primitives/card-schemas/tasks.schema.json
@@ -35,7 +35,15 @@ export interface TasksTask {
 }
 
 export interface TasksCardData {
-  mode?: 'select'; // future: 'select' | 'progress'
+  /**
+   * `select` (default) = checkbox rows + a confirm button that emits the contract
+   * `submit`. `progress` = an onboarding/checklist look: a header `done / total`
+   * count, circular indicators, per-item title + muted description, and NO confirm
+   * button (checking a row is itself the terminal action). Both share the same
+   * selection model (toggle by id, the `max` gate, `kai-value-change`); `progress`
+   * is purely a presentational variant.
+   */
+  mode?: 'select' | 'progress';
   heading?: string;
   tasks: TasksTask[]; // >=1
   selectAll?: boolean;
@@ -122,6 +130,16 @@ export function showSelectAll(data: TasksCardData, tasks: TasksTask[]): boolean 
   const count = toggleableIds(tasks).length;
   if (data.max !== undefined && count > data.max) return false;
   return true;
+}
+
+/** Whether the card is in the onboarding-checklist `progress` look (no confirm). */
+export function isProgressMode(data: TasksCardData): boolean {
+  return data.mode === 'progress';
+}
+
+/** The header progress count (`done` checked / `total` rows) for `progress` mode. */
+export function progressCount(tasks: TasksTask[], selected: Set<string>): { done: number; total: number } {
+  return { done: tasks.filter((t) => selected.has(t.id)).length, total: tasks.length };
 }
 
 /** Whether confirm is enabled for the current selection count. */
@@ -272,6 +290,10 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
   const groupDisabled = (): boolean => local.disabled === true;
 
   const count = createMemo(() => selected().size);
+  // `progress` mode = the onboarding-checklist look: a header `done / total`
+  // count, circular indicators, no confirm button. Same selection model.
+  const progress = createMemo(() => isProgressMode(data()));
+  const progressN = createMemo(() => progressCount(tasks(), selected()));
   const confirmLabel = () => data().confirmLabel ?? 'Confirm';
   const masterState = createMemo(() => selectAllState(tasks(), selected()));
   const showMaster = createMemo(() => showSelectAll(data(), tasks()));
@@ -379,6 +401,9 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
 
   const reasonId = `kai-tl-reason-${uid}`;
   const countId = `kai-tl-count-${uid}`;
+  const progressCountId = `kai-tl-progress-${uid}`;
+  const progressHeadingId = `kai-tl-heading-${uid}`;
+  const headingText = () => local.heading ?? local.data?.heading;
 
   return (
     <Show when={valid()} fallback={<Card heading={local.heading} errorMessage={errorMessage()} />}>
@@ -395,9 +420,13 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
           }
         >
         <Card
-          heading={local.heading ?? local.data?.heading}
+          // In `progress` mode the heading + count render as a custom in-body row
+          // (so the count can sit right-aligned beside the heading), so the Card
+          // chrome's own heading is suppressed.
+          heading={progress() ? undefined : headingText()}
           actions={
-            res.isResolved() ? undefined : (
+            // `progress` mode is confirm-less: checking a row IS the action.
+            progress() || res.isResolved() ? undefined : (
               <div class="flex w-full flex-wrap items-center justify-between gap-2">
                 <Show when={local.data?.dismissible === true}>
                   <Button
@@ -436,6 +465,26 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
             when={!res.isResolved()}
             fallback={<TasksResolved summary={resolvedSummary()!} optimistic={res.isOptimistic()} />}
           >
+            <Show when={progress()}>
+              <ProgressChecklist
+                heading={headingText()}
+                headingId={progressHeadingId}
+                countId={progressCountId}
+                done={progressN().done}
+                total={progressN().total}
+                tasks={tasks()}
+                uid={uid}
+                isChecked={(id) => selected().has(id)}
+                isBlocked={(task) =>
+                  groupDisabled() || task.disabled === true ||
+                  (!selected().has(task.id) && isMaxReached(data(), count()))
+                }
+                onToggle={(id, on) => toggle(id, on)}
+                groupClass={local.class}
+                maxNote={data().max !== undefined ? data().max : undefined}
+              />
+            </Show>
+            <Show when={!progress()}>
             <div
               role="group"
               aria-label={local.heading ?? local.data?.heading ?? 'Tasks'}
@@ -526,11 +575,109 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                 <p class="pt-1 text-xs text-muted-foreground">Up to {data().max} selected.</p>
               </Show>
             </div>
+            </Show>
           </Show>
         </Card>
         </Show>
       </ErrorBoundary>
     </Show>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Onboarding-checklist (`mode: 'progress'`) presenter: a header `done / total`
+// count + circular indicators + per-item title/description, no confirm button.
+// Drives the same selection model, where toggling a row IS the action.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ProgressChecklist(props: {
+  heading?: string;
+  headingId: string;
+  countId: string;
+  done: number;
+  total: number;
+  tasks: TasksTask[];
+  uid: string;
+  isChecked: (id: string) => boolean;
+  isBlocked: (task: TasksTask) => boolean;
+  onToggle: (id: string, on: boolean) => void;
+  groupClass?: string;
+  maxNote?: number;
+}): JSX.Element {
+  return (
+    <div class={cn('flex flex-col gap-3', props.groupClass)}>
+      <Show when={props.heading}>
+        <div class="flex items-center justify-between gap-3">
+          <span id={props.headingId} class="text-[1.0625rem] font-semibold leading-snug tracking-tight text-foreground">
+            {props.heading}
+          </span>
+          <span
+            id={props.countId}
+            aria-live="polite"
+            class="shrink-0 text-sm font-medium tabular-nums text-muted-foreground"
+          >
+            {props.done} / {props.total}
+          </span>
+        </div>
+      </Show>
+
+      <ul
+        aria-labelledby={props.heading ? props.headingId : undefined}
+        aria-label={props.heading ? undefined : 'Checklist'}
+        class="flex flex-col gap-1"
+      >
+        <For each={props.tasks}>
+          {(task) => {
+            const checked = () => props.isChecked(task.id);
+            const blocked = () => props.isBlocked(task);
+            const descId = `kai-tl-pdesc-${props.uid}-${task.id}`;
+            return (
+              <li>
+                <label
+                  class={cn(
+                    'flex items-start gap-3 rounded-lg px-2.5 py-2 text-sm transition-colors',
+                    blocked() ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-muted/50',
+                  )}
+                  data-task-id={task.id}
+                >
+                  <input
+                    type="checkbox"
+                    class="sr-only"
+                    checked={checked()}
+                    disabled={blocked()}
+                    aria-disabled={blocked() ? 'true' : undefined}
+                    aria-describedby={task.description ? descId : undefined}
+                    onChange={(e) => props.onToggle(task.id, e.currentTarget.checked)}
+                  />
+                  <span class="mt-0.5 shrink-0 text-muted-foreground" aria-hidden="true">
+                    <Show
+                      when={checked()}
+                      fallback={<Circle size={18} />}
+                    >
+                      <CircleCheck size={18} class="text-foreground" />
+                    </Show>
+                  </span>
+                  <span class="flex min-w-0 flex-col gap-0.5">
+                    <span class={cn('font-medium text-foreground', checked() && 'line-through opacity-70')}>
+                      {task.label}
+                    </span>
+                    <Show when={task.description}>
+                      <span id={descId} class="text-xs font-normal text-muted-foreground">
+                        {task.description}
+                      </span>
+                    </Show>
+                  </span>
+                </label>
+              </li>
+            );
+          }}
+        </For>
+      </ul>
+
+      <Show when={props.maxNote !== undefined}>
+        <p class="text-xs text-muted-foreground">Up to {props.maxNote} selected.</p>
+      </Show>
+    </div>
   );
 }
 

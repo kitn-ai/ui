@@ -330,6 +330,29 @@ export const Choice = createWebComponent<ChoiceProps>(
   { onValueChange: 'kai-value-change' },
 );
 
+export interface CoachmarkProps extends WebComponentProps {
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-coachmark open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). */
+  headline?: string;
+  /** A small badge pill beside the headline (e.g. "New"). */
+  badge?: string;
+  /** Floating placement relative to the anchor (default `bottom`). */
+  placement?: string;
+  /** The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again. */
+  onDismiss?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The coachmark opened or closed (a method, the ×, or a driven `open`). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export const Coachmark = createWebComponent<CoachmarkProps>(
+  'kai-coachmark',
+  ["theme","open","defaultOpen","headline","badge","placement"],
+  { onDismiss: 'kai-dismiss', onOpenChange: 'kai-open-change' },
+);
+
 export interface CodeBlockProps extends WebComponentProps {
   /** The source code to render. */
   code: string;
@@ -723,7 +746,7 @@ export const Markdown = createWebComponent<MarkdownProps>(
 
 export interface MenuProps extends WebComponentProps {
   /** Tree of menu items. Set as a JS property — not an HTML attribute. */
-  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
+  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
   /** Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). */
   placement?: string;
   /** Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case — a slotted trigger overrides it. */
@@ -742,8 +765,8 @@ export interface MenuProps extends WebComponentProps {
   disabled?: boolean;
   /** The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). */
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
-  /** Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. */
-  onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
+  /** Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. - Radio items: `{ id, radioGroup }` — the consumer marks `id` as the selected one in `radioGroup` and clears the others. */
+  onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean; radioGroup?: undefined | string }>) => void;
 }
 
 export const Menu = createWebComponent<MenuProps>(
@@ -1166,6 +1189,21 @@ export const Sources = createWebComponent<SourcesProps>(
   {  },
 );
 
+export interface StatProps extends WebComponentProps {
+  /** The small muted label above the value. */
+  label?: string;
+  /** The big value (scalar). A default-slot override wins over this. */
+  value?: string;
+  /** A small caption below the value. */
+  hint?: string;
+}
+
+export const Stat = createWebComponent<StatProps>(
+  'kai-stat',
+  ["theme","label","value","hint"],
+  {  },
+);
+
 export interface StatusProps extends WebComponentProps {
   /** Presence/notification state → color. `new` (default) maps to the blue hue. */
   status?: "new" | "online" | "busy" | "away" | "offline";
@@ -1190,6 +1228,8 @@ export interface SuggestionsProps extends WebComponentProps {
   variant?: "default" | "ghost" | "outline";
   /** Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). */
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
+  /** Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list — each row is left-aligned with a leading `icon`, a label, and a hover background. */
+  layout?: "list" | "chips";
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
   /** Substring to highlight within each suggestion. */
@@ -1200,7 +1240,7 @@ export interface SuggestionsProps extends WebComponentProps {
 
 export const Suggestions = createWebComponent<SuggestionsProps>(
   'kai-suggestions',
-  ["theme","suggestions","variant","size","block","highlight"],
+  ["theme","suggestions","variant","size","layout","block","highlight"],
   { onSelect: 'kai-select' },
 );
 
