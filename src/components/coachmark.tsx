@@ -135,13 +135,20 @@ export function Coachmark(props: CoachmarkProps) {
 
   return (
     <>
-      {/* The anchor wrapper. inline-block so it hugs the trigger it positions
-          against. The trigger-click dismissal is wired as a NATIVE listener on
-          this element (see the effect below) rather than a Solid-delegated
-          onClick, so it also fires for a trigger projected through the <slot/> in
-          the web component (Solid's delegation walks parentNode, which for slotted
-          content stays in the light DOM and never reaches this shadow ancestor). */}
-      <span ref={setAnchor} style={{ display: 'inline-block' }}>
+      {/* The anchor wrapper. inline-FLEX (not inline-block) so it hugs the trigger
+          it positions against WITHOUT the baseline strut: an inline-block sits on
+          the host line box's baseline, which reserves descender space below it
+          (line-height 24px), making the host ~6px taller than the trigger and
+          anchoring the trigger to the top, so in a flex toolbar (items-center) the
+          trigger renders a few px above the other controls. inline-flex +
+          vertical-align:middle decouples from that baseline so the wrapper hugs the
+          trigger's true height and stays centered. The trigger-click dismissal is
+          wired as a NATIVE listener on this element (see the effect below) rather
+          than a Solid-delegated onClick, so it also fires for a trigger projected
+          through the <slot/> in the web component (Solid's delegation walks
+          parentNode, which for slotted content stays in the light DOM and never
+          reaches this shadow ancestor). */}
+      <span ref={setAnchor} style={{ display: 'inline-flex', 'vertical-align': 'middle' }}>
         {props.children}
       </span>
       <Show when={presence.present()}>
