@@ -66,7 +66,7 @@ export const Home: Story = {
               padding: '1.5rem',
             }}
           >
-            <h1 style={{ 'font-size': '2rem', 'font-weight': '400', color: 'var(--color-foreground)' }}>Good evening, Rob</h1>
+            <h1 style={{ 'font-size': '2rem', 'font-weight': '400', color: 'var(--color-foreground)' }}>Good evening, John</h1>
             <div style={{ width: '100%', 'max-width': '640px', display: 'flex', 'flex-direction': 'column', gap: '1rem' }}>
               <kai-notice ref={notice}>Claude Fable 5 is currently unavailable.</kai-notice>
               <kai-prompt-input ref={input}></kai-prompt-input>
@@ -76,5 +76,46 @@ export const Home: Story = {
         </kai-workspace>
       </div>
     );
+  },
+  parameters: {
+    docs: {
+      source: {
+        language: 'html',
+        code: `<kai-workspace>
+  <!-- sidebar-header: the nav rail -->
+  <div slot="sidebar-header">
+    <kai-nav></kai-nav>
+  </div>
+
+  <!-- sidebar-footer: an upgrade card -->
+  <kai-card slot="sidebar-footer" clickable></kai-card>
+
+  <!-- main: replaces the built-in chat thread with a Home screen -->
+  <div slot="main">
+    <h1>Good evening, John</h1>
+    <kai-notice severity="neutral">Claude Fable 5 is currently unavailable.</kai-notice>
+    <kai-prompt-input placeholder="How can I help you today?"></kai-prompt-input>
+    <kai-suggestions></kai-suggestions>
+  </div>
+</kai-workspace>
+
+<script type="module">
+  // Array/object props are set as JS properties, never attributes.
+  document.querySelector('kai-workspace').conversations = [/* ConversationSummary[] */];
+
+  const nav = document.querySelector('kai-nav');
+  nav.items = [/* KaiNavItem[] */];
+  nav.defaultValue = 'new';
+
+  const sugg = document.querySelector('kai-suggestions');
+  sugg.suggestions = [/* { label, icon, value }[] */];
+  sugg.layout = 'list';
+
+  const card = document.querySelector('kai-card');
+  card.heading = 'Upgrade to Pro';
+  card.description = 'Unlock higher limits and Fable 5.';
+</script>`,
+      },
+    },
   },
 };

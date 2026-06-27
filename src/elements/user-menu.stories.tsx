@@ -18,7 +18,7 @@ export default meta;
 type Story = StoryObj;
 
 const ITEMS: KaiMenuItem[] = [
-  { heading: true, label: 'roboncode@gmail.com' },
+  { heading: true, label: 'john@example.com' },
   { id: 'settings', label: 'Settings', icon: 'settings', shortcut: '⌘,' },
   { id: 'language', label: 'Language', icon: 'globe', items: [
     { id: 'lang-en', label: 'English' },
@@ -64,10 +64,10 @@ function UserMenu(props: { open?: boolean }) {
           }}
         >
           <span style={{ position: 'relative', display: 'inline-flex' }}>
-            <kai-avatar fallback="RT" size="sm"></kai-avatar>
+            <kai-avatar fallback="JD" size="sm"></kai-avatar>
             <kai-status status="new" pulse style={{ position: 'absolute', right: '-2px', bottom: '-2px' }}></kai-status>
           </span>
-          <span style={{ 'font-weight': '500', 'font-size': '0.875rem', color: 'var(--color-foreground)' }}>Rob</span>
+          <span style={{ 'font-weight': '500', 'font-size': '0.875rem', color: 'var(--color-foreground)' }}>John</span>
           <span style={{ 'font-size': '0.8125rem', color: 'var(--color-muted-foreground)' }}>Max</span>
           <ChevronDown size={16} style={{ 'margin-left': 'auto', color: 'var(--color-muted-foreground)' }} />
         </button>
@@ -86,10 +86,10 @@ export const AccountMenu: Story = {
         code: `<kai-menu>
   <button slot="trigger" class="user-menu-trigger">
     <span style="position:relative">
-      <kai-avatar fallback="RT" size="sm"></kai-avatar>
+      <kai-avatar fallback="JD" size="sm"></kai-avatar>
       <kai-status status="new" pulse style="position:absolute;right:-2px;bottom:-2px"></kai-status>
     </span>
-    <span>Rob</span><span class="muted">Max</span>
+    <span>John</span><span class="muted">Max</span>
   </button>
 </kai-menu>
 <script type="module">

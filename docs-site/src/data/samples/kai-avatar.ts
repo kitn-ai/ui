@@ -28,15 +28,15 @@ export default {
   // Default playground values: a photo with an initials fallback behind it.
   sample: {
     src: PORTRAIT_SVG,
-    fallback: 'RT',
+    fallback: 'JD',
   },
 
   named: {
     // A loaded image avatar.
     image: {
       src: PORTRAIT_SVG,
-      alt: 'Rob Taylor',
-      fallback: 'RT',
+      alt: 'John Doe',
+      fallback: 'JD',
     },
     // No src → the initials fallback renders instead.
     initials: {

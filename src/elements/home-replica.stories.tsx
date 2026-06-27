@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { onMount } from 'solid-js';
-import { PanelLeft, Search, SlidersHorizontal, Asterisk, ListChecks } from 'lucide-solid';
+import { PanelLeft, Search, SlidersHorizontal, Asterisk, ListChecks, Sparkles } from 'lucide-solid';
 import './register'; // registers every kai-* element used below
 import { TasksCard, type TasksCardData } from '../components/tasks-card';
 import type { KaiNavItem } from '../ui/nav';
@@ -32,7 +32,7 @@ const RECENT_TITLES = [
   'Restoring focus after dialog closure', 'Creating sandbox environments', 'Remote computer control request',
   'Claude desktop update not installing', 'Checking Claude version', 'How compound interest works', 'Untitled',
 ];
-const RECENTS: KaiNavItem[] = RECENT_TITLES.map((t, i) => ({ id: `r${i}`, label: t, icon: 'circle' }));
+const RECENTS: KaiNavItem[] = RECENT_TITLES.map((t, i) => ({ id: `r${i}`, label: t, icon: 'message-square' }));
 const IDEAS = [
   { label: 'Send me a daily briefing', icon: 'sparkles', value: 'brief' },
   { label: 'Organize my inbox', icon: 'folder', value: 'inbox' },
@@ -52,7 +52,7 @@ const iconBtn = 'inline-flex size-7 items-center justify-center rounded-md text-
 
 export const Home: Story = {
   render: () => {
-    let tabs!: El, nav!: El, recents!: El, sugg!: El, model!: El, effort!: El, plus!: El, promo!: El, notice!: El, coach!: El, input!: El;
+    let tabs!: El, nav!: El, recents!: El, sugg!: El, model!: El, effort!: El, plus!: El, notice!: El, coach!: El, input!: El;
     onMount(() => {
       tabs.items = TABS; tabs.value = 'home';
       nav.items = NAV; nav.defaultValue = 'new';
@@ -64,7 +64,6 @@ export const Home: Story = {
       notice.dismissible = true;
       input.attach = false;
       coach.tone = 'info';
-      promo.heading = '2× usage for Cowork'; promo.description = 'Do more with a higher session limit, now through July 5.'; promo.dismissible = true;
     });
     return (
       <div style={{ display: 'flex', height: '840px', width: '100%', background: 'var(--color-background)', color: 'var(--color-foreground)' }}>
@@ -95,10 +94,10 @@ export const Home: Story = {
           </div>
           <div style={{ 'border-top': '1px solid var(--color-border)', padding: '0.625rem 0.75rem', display: 'flex', 'align-items': 'center', gap: '0.5rem' }}>
             <span style={{ position: 'relative', display: 'inline-flex' }}>
-              <kai-avatar fallback="RT" size="sm"></kai-avatar>
+              <kai-avatar fallback="JD" size="sm"></kai-avatar>
               <kai-status status="new" pulse style={{ position: 'absolute', right: '-2px', bottom: '-2px' }}></kai-status>
             </span>
-            <span style={{ 'font-weight': '500', 'font-size': '0.875rem' }}>Rob</span>
+            <span style={{ 'font-weight': '500', 'font-size': '0.875rem' }}>John</span>
             <span style={{ 'font-size': '0.8125rem', color: 'var(--color-muted-foreground)' }}>Max</span>
           </div>
         </aside>
@@ -106,7 +105,7 @@ export const Home: Story = {
         {/* ── MAIN ─────────────────────────────────────────────────── */}
         <main style={{ flex: '1', position: 'relative', display: 'flex', 'flex-direction': 'column', 'align-items': 'center', 'padding-top': '14vh', gap: '1.5rem' }}>
           <h1 style={{ display: 'flex', 'align-items': 'center', gap: '0.5rem', 'font-family': 'Georgia, "Times New Roman", serif', 'font-size': '2.25rem', 'font-weight': '400', color: 'var(--color-foreground)' }}>
-            <Asterisk class="size-7" style={{ color: '#d97757' }} /> Good evening, Rob
+            <Asterisk class="size-7" style={{ color: '#d97757' }} /> Good evening, John
           </h1>
 
           <div style={{ width: '100%', 'max-width': '660px', display: 'flex', 'flex-direction': 'column', gap: '0.75rem' }}>
@@ -136,12 +135,91 @@ export const Home: Story = {
             <kai-suggestions ref={sugg}></kai-suggestions>
           </div>
 
-          <kai-card ref={promo} style={{ position: 'absolute', bottom: '1.25rem', right: '1.25rem', width: '264px', display: 'block' }}>
-            <div slot="media" style={{ height: '88px', display: 'flex', 'align-items': 'center', 'justify-content': 'center', 'font-size': '2.5rem', background: 'var(--color-muted)', 'border-radius': '0.5rem' }}>🫰</div>
-            <button slot="actions" style={{ width: '100%', padding: '0.5rem', 'border-radius': '0.5rem', border: 'none', cursor: 'pointer', 'font-weight': '500', background: 'var(--color-foreground)', color: 'var(--color-background)' }}>Start task</button>
+          <kai-card appearance="filled" dismissible style={{ position: 'absolute', bottom: '1.25rem', right: '1.25rem', width: '264px', display: 'block' }}>
+            <div style={{ display: 'flex', 'flex-direction': 'column', gap: '0.75rem' }}>
+              <div style={{ height: '88px', display: 'flex', 'align-items': 'center', 'justify-content': 'center', background: 'var(--color-muted)', 'border-radius': '0.5rem' }}><Sparkles class="size-7 text-primary" /></div>
+              <div>
+                <strong style={{ display: 'block', 'font-size': '0.9375rem', 'font-weight': 600 }}>2× usage for Cowork</strong>
+                <p style={{ 'margin-top': '0.25rem', 'font-size': '0.8125rem', color: 'var(--color-muted-foreground)' }}>Do more with a higher session limit, now through July 5.</p>
+              </div>
+              <kai-button full>Start task</kai-button>
+            </div>
           </kai-card>
         </main>
       </div>
     );
+  },
+  parameters: {
+    docs: {
+      source: {
+        language: 'html',
+        code: `<!-- A consumer-authored shell (your own flex layout), composed from kai-* elements.
+     There is no kai-workspace here; the kit just supplies the parts. -->
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside>
+    <kai-tabs variant="segmented"></kai-tabs>
+    <kai-nav></kai-nav>            <!-- primary nav -->
+    <span>Recents</span>
+    <kai-nav></kai-nav>            <!-- recent threads -->
+    <!-- ...onboarding TasksCard... -->
+    <span>
+      <kai-avatar fallback="JD" size="sm"></kai-avatar>
+      <kai-status status="new" pulse></kai-status>
+    </span>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <h1>Good evening, John</h1>
+
+    <kai-notice>
+      Claude Fable 5 is currently unavailable.
+      <a slot="action" href="#">Learn more</a>
+    </kai-notice>
+
+    <kai-prompt-input placeholder="How can I help you today?">
+      <div slot="toolbar-start">
+        <kai-menu trigger-icon="plus" label="Add"></kai-menu>
+        <kai-coachmark default-open headline="Cowork has a new home" badge="New" placement="bottom">
+          <button>Cowork</button>
+          <span slot="content">Chat here, or switch to Cowork to build alongside it.</span>
+        </kai-coachmark>
+      </div>
+      <div slot="toolbar-end">
+        <kai-model-switcher></kai-model-switcher>
+        <kai-menu trigger-label="High" trigger-icon-trailing="chevron-down"></kai-menu>
+        <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice"></kai-button>
+      </div>
+    </kai-prompt-input>
+
+    <kai-suggestions></kai-suggestions>
+
+    <!-- a dismissible promo card, pinned bottom-right -->
+    <kai-card appearance="filled" dismissible>/* illustration + title + CTA */</kai-card>
+  </main>
+</div>
+
+<script type="module">
+  // Array/object props are set as JS properties, never attributes.
+  const tabs = document.querySelector('kai-tabs');
+  tabs.items = [/* KaiNavItem[] */];
+  tabs.value = 'home';
+
+  const [nav, recents] = document.querySelectorAll('kai-nav');
+  nav.items = [/* KaiNavItem[] */];
+  nav.defaultValue = 'new';
+  recents.items = [/* KaiNavItem[] */];
+
+  const sugg = document.querySelector('kai-suggestions');
+  sugg.suggestions = [/* { label, icon, value }[] */];
+  sugg.layout = 'list';
+
+  document.querySelector('kai-model-switcher').models = [/* { id, name }[] */];
+
+  // Each kai-menu owns its list: menu.items = [/* { id, label, icon }[] */]
+</script>`,
+      },
+    },
   },
 };

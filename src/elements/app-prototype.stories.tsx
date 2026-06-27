@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { createSignal, onMount, Show } from 'solid-js';
-import { Asterisk } from 'lucide-solid';
+import { createSignal, Show } from 'solid-js';
+import { Asterisk, Sparkles, Download } from 'lucide-solid';
 import './register'; // every kai-* element used below
 import type { KaiNavItem } from '../ui/nav';
 import type { KaiTabItem } from '../ui/tabs';
+import type { KaiCommandItem } from './command';
 import type { ConversationSummary } from '../types';
 
 // Labs: a working interactive prototype of the Claude desktop app, built on
@@ -12,18 +13,19 @@ import type { ConversationSummary } from '../types';
 // Recents filter are real kai-menus. The purpose is to find gaps. Styling is
 // Tailwind utilities (the storybook preview scans src/, so they generate).
 
-// kai-tasks is only used as a JSX element here (its story uses the TasksCard
-// component), so declare its tag locally.
+// kai-tasks and kai-command are used as JSX elements here without their stories'
+// own facades, so declare their tags locally.
 declare module 'solid-js' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       'kai-tasks': JSX.HTMLAttributes<HTMLElement>;
+      'kai-command': JSX.HTMLAttributes<HTMLElement> & { placeholder?: string; 'empty-label'?: string; theme?: string };
     }
   }
 }
 
-const meta = { title: 'Labs/App Prototype', parameters: { layout: 'fullscreen' } } satisfies Meta;
+const meta = { title: 'Labs/Apps', parameters: { layout: 'fullscreen' } } satisfies Meta;
 export default meta;
 type Story = StoryObj;
 type El = HTMLElement & Record<string, unknown>;
@@ -52,8 +54,24 @@ const IDEAS = [
   { label: 'Customize Cowork for me', icon: 'file-text', value: 'customize' },
 ];
 const MODELS = [{ id: 'opus', name: 'Opus 4.8' }, { id: 'sonnet', name: 'Sonnet 4.6' }];
+// Command center contents. A flat KaiCommandItem[] (the kai-command `items` prop);
+// the element buckets them into sections by `group`.
+const COMMANDS: KaiCommandItem[] = [
+  { id: 'new-chat', label: 'New chat', icon: 'square-pen', group: 'Quick actions' },
+  { id: 'new-project', label: 'New project', icon: 'box', group: 'Quick actions' },
+  { id: 'upload', label: 'Upload files', icon: 'paperclip', group: 'Quick actions' },
+  { id: 'rc-coin', label: 'Platinum Eagle Coin Sale Value', icon: 'message-square', group: 'Recents' },
+  { id: 'rc-metals', label: 'Precious Metals Data Conversion', icon: 'message-square', group: 'Recents' },
+  { id: 'rc-markdown', label: 'Markdown file conversion', icon: 'message-square', group: 'Recents' },
+  { id: 'go-projects', label: 'Projects', icon: 'box', group: 'Go to' },
+  { id: 'go-artifacts', label: 'Artifacts', icon: 'workflow', group: 'Go to' },
+  { id: 'go-scheduled', label: 'Scheduled', icon: 'clock', group: 'Go to' },
+  { id: 'go-customize', label: 'Customize', icon: 'briefcase', group: 'Go to' },
+  { id: 'settings', label: 'Settings', icon: 'settings', group: 'Settings' },
+  { id: 'help', label: 'Get help', icon: 'message-circle', group: 'Settings' },
+];
 const MENU_ITEMS = [
-  { heading: true, label: 'roboncode@gmail.com' },
+  { heading: true, label: 'john@example.com' },
   { id: 'settings', label: 'Settings', icon: 'settings', shortcut: '⌘,' },
   { id: 'language', label: 'Language', icon: 'globe', items: [{ id: 'en', label: 'English' }, { id: 'es', label: 'Espanol' }] },
   { id: 'help', label: 'Get help', icon: 'message-circle' },
@@ -72,135 +90,272 @@ const ONBOARDING = {
     { id: 'sched', label: 'Schedule a recurring task', description: 'Great for reminders, reports, or regular check-ins' },
   ],
 };
-const STATS = [
-  { label: 'Sessions', value: '408' }, { label: 'Messages', value: '363,676' },
-  { label: 'Total tokens', value: '181.5M' }, { label: 'Active days', value: '79' },
-  { label: 'Current streak', value: '17d' }, { label: 'Longest streak', value: '27d' },
-  { label: 'Peak hour', value: '7 AM' }, { label: 'Favorite model', value: 'Opus 4.8' },
-];
-
 // Repeated patterns, named for readability.
 const greeting = 'flex items-center gap-2 font-serif font-normal';
 const mainView = 'flex h-full flex-col items-center gap-6';
 const footerRow = 'border-t border-border';
 
-export const Prototype: Story = {
+// A labeled placeholder for a region the consumer owns. It names the slot it
+// fills so the prototype documents the shell instead of faking app content.
+function SlotPlaceholder(props: { label: string; hint: string }) {
+  return (
+    <div class="flex h-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border p-10 text-center">
+      <div class="text-sm font-medium text-foreground">{props.label}</div>
+      <div class="max-w-sm text-[0.8125rem] leading-relaxed text-muted-foreground">{props.hint}</div>
+    </div>
+  );
+}
+
+export const ClaudeCodeDesktop: Story = {
+  name: 'Claude Code Desktop',
   render: () => {
     const [view, setView] = createSignal<'home' | 'code'>('home');
     const [designOpen, setDesignOpen] = createSignal(false);
+    const [cmdOpen, setCmdOpen] = createSignal(false);
+    // Captured in the workspace ref so the sidebar-header toggle can drive its
+    // exposed imperative API (toggleSidebar) from a sibling element's ref.
+    let ws: El | undefined;
 
-    let ws!: El, tabs!: El, nav!: El, sugg!: El, model!: El, effort!: El, plus!: El, promo!: El, notice!: El, coach!: El, input!: El, menu!: El, designBtn!: El, screen!: El, tasks!: El;
-
-    onMount(() => {
-      ws.conversations = RECENTS; ws.compact = true;
-      nav.items = NAV; nav.defaultValue = 'new';
-      sugg.suggestions = IDEAS; sugg.layout = 'list';
-      model.models = MODELS; model.currentModel = 'opus';
-      effort.items = [{ id: 'high', label: 'High', checked: true }, { id: 'med', label: 'Medium' }];
-      plus.items = [{ id: 'attach', label: 'Add files', icon: 'paperclip' }, { id: 'project', label: 'From a project', icon: 'box' }];
-      notice.dismissible = true;
-      input.attach = false;
-      coach.tone = 'info';
-      promo.heading = '2× usage for Cowork'; promo.description = 'Do more with a higher session limit, now through July 5.'; promo.dismissible = true;
-      menu.items = MENU_ITEMS;
-      tasks.data = ONBOARDING;
-
-      // interactions
-      tabs.items = TABS; tabs.defaultValue = 'home'; tabs.block = true;
-      tabs.addEventListener('kai-tab-change', (e) => setView((e as CustomEvent).detail.value));
-      designBtn.addEventListener('kai-click', () => setDesignOpen(true));
-      screen.addEventListener('kai-back', () => setDesignOpen(false));
-      screen.addEventListener('kai-open-change', (e) => setDesignOpen((e as CustomEvent).detail.open));
-    });
-
+    // Array/object props (and event wiring) are applied in each element's ref
+    // callback, NOT a one-shot onMount. The Home view lives inside <Show>, so it
+    // unmounts/remounts on tab switch; a ref runs on every (re)mount, so the
+    // remounted elements keep their data + styling. onMount would run only once.
     return (
       <div class="relative h-screen w-full">
-        <kai-workspace ref={ws} class="block h-full">
+        <kai-workspace ref={(el) => { ws = el as El; ws.conversations = RECENTS; ws.compact = true; }} class="block h-full" sidebar-min-width="240" collapse-below="720">
           {/* sidebar-header: chrome + full-width tabs + nav */}
           <div slot="sidebar-header" class="px-2.5 pt-2">
-            <div class="flex justify-end gap-1 pb-2">
-              <kai-button variant="ghost" size="icon-sm" icon="panel-left" label="Toggle sidebar"></kai-button>
-              <kai-button variant="ghost" size="icon-sm" icon="search" label="Search"></kai-button>
+            <div class="flex justify-between gap-1 pb-2">
+              <kai-button
+                ref={(el) => { el.addEventListener('kai-click', () => (ws?.toggleSidebar as (() => void) | undefined)?.()); }}
+                variant="ghost"
+                size="icon-sm"
+                icon="panel-left"
+                label="Toggle sidebar"
+              ></kai-button>
+              <kai-button
+                ref={(el) => { el.addEventListener('kai-click', () => setCmdOpen(true)); }}
+                variant="ghost"
+                size="icon-sm"
+                icon="search"
+                label="Search"
+              ></kai-button>
             </div>
-            <kai-tabs ref={tabs} variant="segmented"></kai-tabs>
-            <div class="mt-2"><kai-nav ref={nav}></kai-nav></div>
+            <kai-tabs
+              ref={(el) => {
+                const t = el as El;
+                t.items = TABS; t.defaultValue = 'home'; t.block = true;
+                el.addEventListener('kai-tab-change', (e) => setView((e as CustomEvent).detail.value));
+              }}
+              variant="segmented"
+            ></kai-tabs>
+            <div class="mt-2"><kai-nav ref={(el) => { const n = el as El; n.items = NAV; n.defaultValue = 'new'; }}></kai-nav></div>
           </div>
 
           {/* sidebar-footer: checklist + Design (-> kai-screen) + user menu */}
           <div slot="sidebar-footer">
-            <div class="px-2.5 py-2"><kai-tasks ref={tasks}></kai-tasks></div>
-            <kai-button ref={designBtn} variant="ghost" icon="workflow" class={`flex w-full justify-start rounded-none ${footerRow}`}>Design</kai-button>
-            <div class={`${footerRow} px-2 py-1.5`}>
-              <kai-menu ref={menu}>
-                <button slot="trigger" class="flex w-full cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 py-1.5">
-                  <span class="relative inline-flex">
-                    <kai-avatar fallback="RT" size="sm"></kai-avatar>
-                    <kai-status status="new" pulse class="absolute -right-0.5 -bottom-0.5"></kai-status>
-                  </span>
-                  <span class="text-sm font-medium">Rob</span>
-                  <span class="mr-auto text-[0.8125rem] text-muted-foreground">Max</span>
-                </button>
+            <div class="px-2.5 py-2"><kai-tasks ref={(el) => { (el as El).data = ONBOARDING; }}></kai-tasks></div>
+            <kai-separator></kai-separator>
+            <div class="px-2.5 py-1.5">
+              <kai-button
+                ref={(el) => { el.addEventListener('kai-click', () => setDesignOpen(true)); }}
+                full
+                align="start"
+                variant="ghost"
+                icon="workflow"
+              >Design</kai-button>
+            </div>
+            <div class={`${footerRow} flex items-center px-2 py-1.5`}>
+              <kai-menu ref={(el) => { (el as El).items = MENU_ITEMS; }}>
+                <div slot="trigger" class="flex items-center gap-2 text-left">
+                  <kai-avatar fallback="JD" size="sm"></kai-avatar>
+                  <span class="text-sm font-medium">John</span>
+                  <span class="text-[0.8125rem] text-muted-foreground">Max</span>
+                </div>
               </kai-menu>
+              <span class="relative ml-auto inline-flex">
+                <kai-button variant="ghost" size="icon-sm" label="Sync"><Download slot="icon" class="size-4" /></kai-button>
+                <kai-status status="new" pulse class="pointer-events-none absolute -top-0.5 -right-0.5"></kai-status>
+              </span>
             </div>
           </div>
 
           {/* main: swaps Home <-> Code */}
           <div slot="main" class="relative h-full">
             <Show when={view() === 'home'}>
-              <div class={`${mainView} pt-[12vh]`}>
+              <div class={`${mainView} justify-center`}>
                 <h1 class={`${greeting} text-4xl`}>
-                  <Asterisk class="size-7 text-[#d97757]" /> Good evening, Rob
+                  <Asterisk class="size-7 text-[#d97757]" /> Good day, mate
                 </h1>
                 <div class="flex w-full max-w-[660px] flex-col gap-3">
-                  <kai-notice ref={notice}>Claude Fable 5 is currently unavailable.<a slot="action" href="#" class="text-foreground underline">Learn more</a></kai-notice>
-                  <kai-prompt-input ref={input} placeholder="How can I help you today?">
+                  <kai-notice ref={(el) => { (el as El).dismissible = true; }}>Claude Fable 5 is currently unavailable.<a slot="action" href="#" class="text-foreground underline">Learn more</a></kai-notice>
+                  <kai-prompt-input ref={(el) => { (el as El).attach = false; }} placeholder="How can I help you today?">
                     <div slot="toolbar-start" class="flex items-center gap-2">
-                      <kai-menu ref={plus} trigger-icon="plus" label="Add"></kai-menu>
-                      <kai-coachmark ref={coach} default-open headline="Cowork has a new home" badge="New">
+                      <kai-menu ref={(el) => { (el as El).items = [{ id: 'attach', label: 'Add files', icon: 'paperclip' }, { id: 'project', label: 'From a project', icon: 'box' }]; }} trigger-icon="plus" label="Add"></kai-menu>
+                      <kai-coachmark
+                        default-open
+                        headline="Cowork has a new home"
+                        badge="New"
+                        style={{ '--kai-coachmark-bg': 'var(--color-tool-blue)', '--kai-coachmark-fg': 'var(--color-background)' }}
+                      >
                         <kai-button variant="subtle" icon="workflow">Cowork</kai-button>
                         <span slot="content">Chat with Claude here, or switch to Cowork to build alongside it.</span>
                       </kai-coachmark>
                     </div>
                     <div slot="toolbar-end" class="flex items-center gap-1.5">
-                      <kai-model-switcher ref={model}></kai-model-switcher>
-                      <kai-menu ref={effort} trigger-label="High" trigger-icon-trailing="chevron-down"></kai-menu>
+                      <kai-model-switcher ref={(el) => { const m = el as El; m.models = MODELS; m.currentModel = 'opus'; }}></kai-model-switcher>
+                      <kai-menu ref={(el) => { (el as El).items = [{ id: 'high', label: 'High', checked: true }, { id: 'med', label: 'Medium' }]; }} trigger-label="High" trigger-icon-trailing="chevron-down"></kai-menu>
                       <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice"></kai-button>
                     </div>
                   </kai-prompt-input>
-                  <div class="mt-22 text-[0.8125rem] text-muted-foreground">Ideas for you</div>
-                  <kai-suggestions ref={sugg}></kai-suggestions>
+                  <div class="mt-2 text-[0.8125rem] text-muted-foreground">Ideas for you</div>
+                  <kai-suggestions ref={(el) => { const s = el as El; s.suggestions = IDEAS; s.layout = 'list'; }} variant="ghost" size="lg"></kai-suggestions>
                 </div>
-                <kai-card ref={promo} class="absolute right-5 bottom-5 block w-[264px]">
-                  <div slot="media" class="flex h-20 items-center justify-center rounded-lg bg-muted text-4xl">🤞</div>
-                  <kai-button slot="actions" class="w-full">Start task</kai-button>
+                <kai-card appearance="filled" dismissible class="absolute right-5 bottom-5 block w-[264px]">
+                  <div class="flex flex-col gap-3">
+                    <div class="flex h-20 items-center justify-center rounded-lg bg-muted">
+                      <Sparkles class="size-7 text-primary" />
+                    </div>
+                    <div>
+                      <strong class="block text-[0.9375rem] font-semibold">2× usage for Cowork</strong>
+                      <p class="mt-1 text-[0.8125rem] text-muted-foreground">Do more with a higher session limit, now through July 5.</p>
+                    </div>
+                    <kai-button full>Start task</kai-button>
+                  </div>
                 </kai-card>
               </div>
             </Show>
 
             <Show when={view() === 'code'}>
-              <div class={`${mainView} pt-[8vh]`}>
-                <h1 class={`${greeting} text-3xl`}>
-                  <Asterisk class="size-6 text-[#d97757]" /> What's up next, Rob?
-                </h1>
-                <div class="grid w-full max-w-[680px] grid-cols-4 gap-2">
-                  {STATS.map((s) => (<kai-stat label={s.label} value={s.value}></kai-stat>))}
-                </div>
-                <div class="mt-auto mb-6 w-full max-w-[680px]">
-                  <kai-prompt-input placeholder="Describe a task or ask a question"></kai-prompt-input>
-                </div>
+              <div class="h-full p-6">
+                <SlotPlaceholder
+                  label="Code view"
+                  hint="Rendered into the kai-workspace main slot. The consumer owns this view and swaps it per tab. Drop your own screen here."
+                />
               </div>
             </Show>
           </div>
         </kai-workspace>
 
         {/* Design takeover: a kai-screen peer that fills the app root when open */}
-        <kai-screen ref={screen} open={designOpen()} headline="Design">
-          <div class="h-full p-8">
-            <h2 class="font-serif text-3xl font-normal">Claude Design</h2>
-            <p class="mt-2 text-muted-foreground">A separate full-screen app, mounted into the kai-screen takeover. Press Back to return.</p>
+        <kai-screen
+          ref={(el) => {
+            el.addEventListener('kai-back', () => setDesignOpen(false));
+            el.addEventListener('kai-open-change', (e) => setDesignOpen((e as CustomEvent).detail.open));
+          }}
+          open={designOpen()}
+          headline="Design"
+        >
+          <div class="h-full p-6">
+            <SlotPlaceholder
+              label="Design takeover"
+              hint="The kai-screen content slot, a full-bleed overlay you mount your own app into. Press Back to return."
+            />
           </div>
         </kai-screen>
+
+        {/* Command center: a light-DOM overlay hosting kai-command. Opened by the
+            sidebar-header search button; closes on backdrop click, Escape, or a
+            selection. The inner panel stops click/keydown from reaching the scrim. */}
+        <Show when={cmdOpen()}>
+          <div
+            class="fixed inset-0 z-50 flex items-start justify-center bg-black/50 pt-[14vh]"
+            onClick={() => setCmdOpen(false)}
+            onKeyDown={(e) => { if (e.key === 'Escape') setCmdOpen(false); }}
+          >
+            <div
+              class="w-full max-w-lg overflow-hidden rounded-xl border border-border bg-card shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <kai-command
+                ref={(el) => {
+                  (el as El).items = COMMANDS;
+                  el.addEventListener('kai-select', () => setCmdOpen(false));
+                  queueMicrotask(() => (el as El).focus?.());
+                }}
+                placeholder="Search commands, recents, settings..."
+              ></kai-command>
+            </div>
+          </div>
+        </Show>
       </div>
     );
+  },
+  parameters: {
+    docs: {
+      source: {
+        language: 'html',
+        // A representative skeleton of the composition (not the full interactive
+        // render). Home/Code swap the main view via kai-tabs; Design opens the
+        // kai-screen takeover; the account + filter are kai-menus.
+        code: `<kai-workspace compact>
+  <!-- sidebar chrome: toggle/search, full-width tabs, nav -->
+  <div slot="sidebar-header">
+    <kai-button variant="ghost" size="icon-sm" icon="panel-left" label="Toggle sidebar"></kai-button>
+    <kai-button variant="ghost" size="icon-sm" icon="search" label="Search"></kai-button>
+    <kai-tabs variant="segmented"></kai-tabs>
+    <kai-nav></kai-nav>
+  </div>
+
+  <!-- footer: onboarding checklist, Design trigger, account menu -->
+  <div slot="sidebar-footer">
+    <kai-tasks></kai-tasks>
+    <kai-button variant="ghost" icon="workflow">Design</kai-button>
+    <kai-menu>
+      <button slot="trigger"><kai-avatar fallback="JD"></kai-avatar> John</button>
+    </kai-menu>
+  </div>
+
+  <!-- main: the consumer-owned view, swapped per tab -->
+  <div slot="main">
+    <h1>Good day, mate</h1>
+    <kai-notice>Claude Fable 5 is currently unavailable.</kai-notice>
+    <kai-prompt-input placeholder="How can I help you today?">
+      <div slot="toolbar-start">
+        <kai-menu trigger-icon="plus" label="Add"></kai-menu>
+        <!-- Color the coachmark with CSS tokens, so it survives remounts (no JS) -->
+        <kai-coachmark default-open headline="Cowork has a new home" badge="New"
+          style="--kai-coachmark-bg: var(--color-tool-blue); --kai-coachmark-fg: var(--color-background)">
+          <kai-button variant="subtle" icon="workflow">Cowork</kai-button>
+          <span slot="content">Chat here, or switch to Cowork to build alongside it.</span>
+        </kai-coachmark>
+      </div>
+      <div slot="toolbar-end">
+        <kai-model-switcher></kai-model-switcher>
+        <kai-menu trigger-label="High" trigger-icon-trailing="chevron-down"></kai-menu>
+        <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice"></kai-button>
+      </div>
+    </kai-prompt-input>
+    <kai-suggestions></kai-suggestions>
+  </div>
+</kai-workspace>
+
+<!-- the Design takeover: a full-bleed kai-screen peer, toggled open -->
+<kai-screen headline="Design"><!-- your full-screen app --></kai-screen>
+
+<style>
+  /* Alternative to the CSS vars above: recolor via the exposed parts. */
+  kai-coachmark::part(bubble),
+  kai-coachmark::part(arrow) { background: var(--color-tool-blue); color: var(--color-background) }
+</style>
+
+<script type="module">
+  // Array/object props are JS properties (the kai- contract); scalars are attributes.
+  // Re-apply them on every (re)mount: a view that unmounts (e.g. a hidden tab)
+  // would otherwise lose its data + styling when it comes back.
+  const tabs = document.querySelector('kai-tabs');
+  tabs.items = [{ id: 'home', label: 'Home', icon: 'home' }, { id: 'code', label: 'Code', icon: 'code' }];
+  tabs.defaultValue = 'home'; tabs.block = true;
+  document.querySelector('kai-nav').items = [/* { id, label, icon, badge } ... */];
+  document.querySelector('kai-workspace').conversations = [/* ConversationSummary[] */];
+  document.querySelector('kai-suggestions').suggestions = [/* { label, icon, value } ... */];
+
+  // Interactions: swap the main view per tab; open the Design takeover.
+  tabs.addEventListener('kai-tab-change', (e) => showView(e.detail.value));
+  designButton.addEventListener('kai-click', () => (screen.open = true));
+  screen.addEventListener('kai-back', () => (screen.open = false));
+</script>`,
+      },
+    },
   },
 };
