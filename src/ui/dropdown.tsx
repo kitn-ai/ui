@@ -130,7 +130,13 @@ export function DropdownContent(props: { children: JSX.Element; class?: string }
   const ctx = useDropdown();
   const config = useChatConfig();
   const presence = createPresence(ctx.open);
-  const position = usePosition(ctx.trigger, ctx.menu, { placement: 'bottom-start', gutter: 6 });
+  const position = usePosition(ctx.trigger, ctx.menu, {
+    placement: 'bottom-start',
+    gutter: 6,
+    // Trigger removed from the DOM -> close (no focus return; it's gone) so the
+    // menu portal doesn't orphan.
+    onDisconnect: () => ctx.setOpen(false, { returnFocus: false }),
+  });
   useDismiss({
     enabled: ctx.open,
     onDismiss: (reason) => ctx.setOpen(false, { returnFocus: reason === 'escape' }),
@@ -464,7 +470,12 @@ export function DropdownSubContent(props: { children: JSX.Element; class?: strin
   const parent = useDropdown();
   const config = useChatConfig();
   const presence = createPresence(sub.open);
-  const position = usePosition(sub.trigger, sub.menu, { placement: 'right-start', gutter: 2 });
+  const position = usePosition(sub.trigger, sub.menu, {
+    placement: 'right-start',
+    gutter: 2,
+    // Sub trigger removed from the DOM -> close so the submenu portal doesn't orphan.
+    onDisconnect: () => sub.setOpen(false, { returnFocus: false }),
+  });
   // Escape/ArrowLeft are handled by onKeyDown below (stopPropagation keeps them
   // local to the sub). Outside-pointer dismiss is handled by the PARENT's
   // useDismiss (whose refs include the registered submenu surface). A separate

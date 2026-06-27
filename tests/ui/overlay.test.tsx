@@ -87,6 +87,53 @@ describe('usePosition', () => {
   });
 });
 
+describe('usePosition onDisconnect', () => {
+  // MutationObserver callbacks are scheduled async; flush a macrotask.
+  const flush = () => new Promise((r) => setTimeout(r, 0));
+
+  it('fires once when the reference leaves the document', async () => {
+    const refEl = document.createElement('div');
+    const floatEl = document.createElement('div');
+    document.body.append(refEl, floatEl);
+    let calls = 0;
+    render(() => {
+      const [r] = createSignal<HTMLElement | undefined>(refEl);
+      const [f] = createSignal<HTMLElement | undefined>(floatEl);
+      usePosition(r, f, { onDisconnect: () => { calls++; } });
+      return null;
+    });
+    refEl.remove();
+    await flush();
+    expect(calls).toBe(1);
+    // Re-mutating the document must not re-fire (one-shot).
+    document.body.append(document.createElement('div'));
+    await flush();
+    expect(calls).toBe(1);
+    floatEl.remove();
+  });
+
+  it('does not fire while the reference stays connected', async () => {
+    const refEl = document.createElement('div');
+    const floatEl = document.createElement('div');
+    document.body.append(refEl, floatEl);
+    let calls = 0;
+    render(() => {
+      const [r] = createSignal<HTMLElement | undefined>(refEl);
+      const [f] = createSignal<HTMLElement | undefined>(floatEl);
+      usePosition(r, f, { onDisconnect: () => { calls++; } });
+      return null;
+    });
+    // Unrelated DOM churn with the anchor still attached.
+    const sibling = document.createElement('div');
+    document.body.append(sibling);
+    sibling.remove();
+    await flush();
+    expect(calls).toBe(0);
+    refEl.remove();
+    floatEl.remove();
+  });
+});
+
 describe('As', () => {
   it('renders the string tag with forwarded props', () => {
     render(() => (

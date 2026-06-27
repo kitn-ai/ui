@@ -3,7 +3,8 @@ import {
 } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import {
-  computePosition, autoUpdate, offset, flip, shift, arrow, hide, type Placement,
+  computePosition, autoUpdate, offset, flip, shift, arrow, hide,
+  getOverflowAncestors, type Placement,
 } from '@floating-ui/dom';
 
 /**
@@ -72,6 +73,50 @@ export interface UsePositionOptions {
   placement?: Placement;
   gutter?: number;
   arrowEl?: Accessor<HTMLElement | undefined>;
+  /**
+   * Fired ONCE when the reference (anchor) element leaves the document, so the
+   * caller can close the overlay and unmount its portal instead of leaving it
+   * orphaned (anchored to a node that no longer exists). Anchored overlays portal
+   * OUT of the trigger's subtree, so Solid's onCleanup does not catch an anchor
+   * that is removed independently of the overlay component. Wire this to set the
+   * overlay's open state to false.
+   */
+  onDisconnect?: () => void;
+}
+
+/**
+ * Watch for the reference element leaving the document and fire `onDisconnect`
+ * exactly once. Uses a MutationObserver on BOTH the document and the anchor's
+ * root node: the document catches the anchor's host being removed (and light-DOM
+ * removals), while the anchor's root node — a ShadowRoot for kai-* elements —
+ * catches removals INSIDE the shadow tree, which a document-level observer can't
+ * see through encapsulation. After any childList/subtree mutation we re-check
+ * `reference.isConnected`. Guarded for environments without MutationObserver.
+ * Returns a teardown that disconnects the observer.
+ */
+function watchAnchorDisconnect(ref: HTMLElement, onDisconnect: () => void): () => void {
+  if (typeof MutationObserver !== 'function') return () => {};
+  let fired = false;
+  // Only fire after the anchor has actually been connected, so a one-off setup
+  // while detached can never trigger a false disconnect.
+  let everConnected = ref.isConnected;
+  const check = () => {
+    if (fired) return;
+    if (ref.isConnected) { everConnected = true; return; }
+    if (!everConnected) return;
+    fired = true;
+    obs.disconnect();
+    onDisconnect();
+  };
+  const obs = new MutationObserver(check);
+  const roots = new Set<Node>();
+  if (typeof document !== 'undefined') roots.add(document);
+  const rootNode = ref.getRootNode();
+  if (rootNode) roots.add(rootNode);
+  for (const root of roots) {
+    try { obs.observe(root, { childList: true, subtree: true }); } catch { /* unobservable root */ }
+  }
+  return () => obs.disconnect();
 }
 
 /**
@@ -116,8 +161,34 @@ export function usePosition(
         setHidden(!!middlewareData.hide?.referenceHidden);
       });
     };
+    // autoUpdate tracks scroll, window resize, reference/floating ResizeObserver,
+    // and reference layout-shifts (IntersectionObserver). But its `ancestorResize`
+    // only listens for DOM `resize` events (which ONLY `window` fires), so an
+    // ANCESTOR element resizing (e.g. a sibling resizable sidebar reflowing the
+    // anchor's container without resizing the anchor itself) is caught only by the
+    // threshold-based layoutShift, which lags during a continuous drag. Add a
+    // ResizeObserver across the reference and its overflow ancestors so the
+    // floating node follows the anchor on any layout resize. Both are torn down
+    // on unmount via onCleanup.
     const cleanup = autoUpdate(ref, float, update);
-    onCleanup(cleanup);
+    let ro: ResizeObserver | undefined;
+    if (typeof ResizeObserver === 'function') {
+      ro = new ResizeObserver(update);
+      ro.observe(ref);
+      for (const ancestor of getOverflowAncestors(ref)) {
+        if (ancestor instanceof Element) ro.observe(ancestor);
+      }
+    }
+    // When the anchor leaves the DOM, close the overlay so its portal unmounts
+    // instead of floating orphaned. Independent of autoUpdate/ResizeObserver.
+    const disconnectWatch = options.onDisconnect
+      ? watchAnchorDisconnect(ref, options.onDisconnect)
+      : undefined;
+    onCleanup(() => {
+      cleanup();
+      ro?.disconnect();
+      disconnectWatch?.();
+    });
   });
 
   return { pos, arrowPos, hidden };
