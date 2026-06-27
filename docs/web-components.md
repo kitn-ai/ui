@@ -1417,7 +1417,7 @@ Rich content on hover/focus of a trigger — the markup-carrying sibling of `<ka
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `severity` | `severity` | `undefined | "neutral" | "info" | "warning" | "error" | "success"` | `'neutral'` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `severity` | `severity` | `undefined | "info" | "neutral" | "warning" | "error" | "success"` | `'neutral'` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
 | `icon` | `icon` | `undefined | string` | — | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
 | `dismissible` | `dismissible` | `undefined | false | true` | `false` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
 

@@ -341,6 +341,8 @@ export interface CoachmarkProps extends WebComponentProps {
   badge?: string;
   /** Floating placement relative to the anchor (default `bottom`). */
   placement?: string;
+  /** Color tone: `primary` (default, the theme accent) or `info` (blue). */
+  tone?: "primary" | "info";
   /** The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again. */
   onDismiss?: (event: CustomEvent<Record<string, never>>) => void;
   /** The coachmark opened or closed (a method, the ×, or a driven `open`). */
@@ -349,7 +351,7 @@ export interface CoachmarkProps extends WebComponentProps {
 
 export const Coachmark = createWebComponent<CoachmarkProps>(
   'kai-coachmark',
-  ["theme","open","defaultOpen","headline","badge","placement"],
+  ["theme","open","defaultOpen","headline","badge","placement","tone"],
   { onDismiss: 'kai-dismiss', onOpenChange: 'kai-open-change' },
 );
 
@@ -850,7 +852,7 @@ export const Nav = createWebComponent<NavProps>(
 
 export interface NoticeProps extends WebComponentProps {
   /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). */
-  severity?: "neutral" | "info" | "warning" | "error" | "success";
+  severity?: "info" | "neutral" | "warning" | "error" | "success";
   /** Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. */
   icon?: string;
   /** Show a dismiss (×) that hides the notice and emits `kai-dismiss`. */

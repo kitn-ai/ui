@@ -257,6 +257,8 @@ export interface KaiCoachmarkElement extends HTMLElement {
   badge?: string;
   /** Floating placement relative to the anchor (default `bottom`). */
   placement?: string;
+  /** Color tone: `primary` (default, the theme accent) or `info` (blue). */
+  tone?: "primary" | "info";
 }
 
 export interface KaiCodeBlockElement extends HTMLElement {
@@ -600,7 +602,7 @@ export interface KaiNoticeElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). */
-  severity?: "neutral" | "info" | "warning" | "error" | "success";
+  severity?: "info" | "neutral" | "warning" | "error" | "success";
   /** Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. */
   icon?: string;
   /** Show a dismiss (×) that hides the notice and emits `kai-dismiss`. */

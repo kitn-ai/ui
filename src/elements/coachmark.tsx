@@ -16,6 +16,8 @@ interface Props extends Record<string, unknown> {
   badge?: string;
   /** Floating placement relative to the anchor (default `bottom`). */
   placement?: string;
+  /** Color tone: `primary` (default, the theme accent) or `info` (blue). */
+  tone?: 'primary' | 'info';
 }
 
 /** Events fired by `<kai-coachmark>`. */
@@ -53,6 +55,7 @@ defineWebComponent<Props, Events>('kai-coachmark', {
   headline: undefined,
   badge: undefined,
   placement: undefined,
+  tone: undefined,
 }, (props, ctx) => {
   const { flag, dispatch } = ctx;
   let api: CoachmarkController | undefined;
@@ -68,6 +71,7 @@ defineWebComponent<Props, Events>('kai-coachmark', {
     <Coachmark
       defaultOpen={flag('defaultOpen')}
       placement={props.placement as never}
+      tone={props.tone as 'primary' | 'info' | undefined}
       headline={props.headline as string | undefined}
       badge={props.badge as string | undefined}
       content={<slot name="content" />}

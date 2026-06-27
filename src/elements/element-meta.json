@@ -1482,6 +1482,14 @@
         "scalar": true,
         "description": "Floating placement relative to the anchor (default `bottom`).",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "tone",
+        "type": "undefined | \"primary\" | \"info\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color tone: `primary` (default, the theme accent) or `info` (blue).",
+        "displayType": "undefined | \"primary\" | \"info\""
       }
     ],
     "events": [
@@ -3597,12 +3605,12 @@
     "props": [
       {
         "name": "severity",
-        "type": "undefined | \"neutral\" | \"info\" | \"warning\" | \"error\" | \"success\"",
+        "type": "undefined | \"info\" | \"neutral\" | \"warning\" | \"error\" | \"success\"",
         "optional": true,
         "scalar": true,
         "description": "`neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`).",
         "default": "'neutral'",
-        "displayType": "undefined | \"neutral\" | \"info\" | \"warning\" | \"error\" | \"success\""
+        "displayType": "undefined | \"info\" | \"neutral\" | \"warning\" | \"error\" | \"success\""
       },
       {
         "name": "icon",

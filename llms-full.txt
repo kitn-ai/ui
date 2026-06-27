@@ -508,6 +508,7 @@ _No events._
 | `headline` | `headline` | `undefined \| string` | The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). |
 | `badge` | `badge` | `undefined \| string` | A small badge pill beside the headline (e.g. "New"). |
 | `placement` | `placement` | `undefined \| string` | Floating placement relative to the anchor (default `bottom`). |
+| `tone` | `tone` | `undefined \| "primary" \| "info"` | Color tone: `primary` (default, the theme accent) or `info` (blue). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -1030,7 +1031,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `severity` | `severity` | `undefined \| "neutral" \| "info" \| "warning" \| "error" \| "success"` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `severity` | `severity` | `undefined \| "info" \| "neutral" \| "warning" \| "error" \| "success"` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
 | `icon` | `icon` | `undefined \| string` | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
 | `dismissible` | `dismissible` | `undefined \| false \| true` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
 

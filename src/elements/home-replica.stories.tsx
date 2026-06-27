@@ -52,7 +52,7 @@ const iconBtn = 'inline-flex size-7 items-center justify-center rounded-md text-
 
 export const Home: Story = {
   render: () => {
-    let tabs!: El, nav!: El, recents!: El, sugg!: El, model!: El, effort!: El, plus!: El, promo!: El, notice!: El;
+    let tabs!: El, nav!: El, recents!: El, sugg!: El, model!: El, effort!: El, plus!: El, promo!: El, notice!: El, coach!: El, input!: El;
     onMount(() => {
       tabs.items = TABS; tabs.value = 'home';
       nav.items = NAV; nav.defaultValue = 'new';
@@ -62,13 +62,12 @@ export const Home: Story = {
       effort.items = [{ id: 'high', label: 'High', checked: true }, { id: 'med', label: 'Medium' }];
       plus.items = [{ id: 'attach', label: 'Add files', icon: 'paperclip' }, { id: 'project', label: 'From a project', icon: 'box' }];
       notice.dismissible = true;
-      promo.heading = '2x usage for Cowork'; promo.description = 'Do more with a higher session limit, now through July 5.'; promo.dismissible = true;
+      input.attach = false;
+      coach.tone = 'info';
+      promo.heading = '2× usage for Cowork'; promo.description = 'Do more with a higher session limit, now through July 5.'; promo.dismissible = true;
     });
     return (
       <div style={{ display: 'flex', height: '840px', width: '100%', background: 'var(--color-background)', color: 'var(--color-foreground)' }}>
-        {/* recolor the coachmark bubble blue (the Claude tint) from outside via ::part */}
-        <style>{`kai-coachmark::part(bubble){background:var(--color-tool-blue);color:#fff} kai-coachmark::part(arrow){background:var(--color-tool-blue)} kai-coachmark::part(title){color:#fff} kai-coachmark::part(dismiss){color:#fff}`}</style>
-
         {/* ── SIDEBAR ──────────────────────────────────────────────── */}
         <aside style={{ width: '288px', display: 'flex', 'flex-direction': 'column', 'border-right': '1px solid var(--color-border)' }}>
           <div style={{ display: 'flex', 'justify-content': 'flex-end', gap: '0.25rem', padding: '0.5rem 0.625rem' }}>
@@ -116,10 +115,10 @@ export const Home: Story = {
               <a slot="action" href="#" style={{ color: 'var(--color-foreground)', 'text-decoration': 'underline' }}>Learn more</a>
             </kai-notice>
 
-            <kai-prompt-input placeholder="How can I help you today?">
+            <kai-prompt-input ref={input} placeholder="How can I help you today?">
               <div slot="toolbar-start" style={{ display: 'flex', 'align-items': 'center', gap: '0.5rem' }}>
                 <kai-menu ref={plus} trigger-icon="plus" label="Add"></kai-menu>
-                <kai-coachmark default-open headline="Cowork has a new home" badge="New" placement="bottom">
+                <kai-coachmark ref={coach} default-open headline="Cowork has a new home" badge="New" placement="bottom">
                   <button style={{ display: 'inline-flex', 'align-items': 'center', gap: '0.375rem', padding: '0.25rem 0.625rem', 'border-radius': '0.5rem', border: 'none', cursor: 'pointer', 'font-size': '0.8125rem', 'font-weight': '500', background: 'color-mix(in srgb, var(--color-tool-blue) 22%, transparent)', color: 'var(--color-tool-blue)' }}>
                     <ListChecks class="size-4" /> Cowork
                   </button>
@@ -133,7 +132,7 @@ export const Home: Story = {
               </div>
             </kai-prompt-input>
 
-            <div style={{ 'font-size': '0.8125rem', color: 'var(--color-muted-foreground)', 'margin-top': '0.5rem' }}>Ideas for you</div>
+            <div style={{ 'font-size': '0.8125rem', color: 'var(--color-muted-foreground)', 'margin-top': '5.5rem' }}>Ideas for you</div>
             <kai-suggestions ref={sugg}></kai-suggestions>
           </div>
 

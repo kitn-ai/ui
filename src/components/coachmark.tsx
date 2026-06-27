@@ -24,6 +24,8 @@ export interface CoachmarkProps {
   badge?: JSX.Element;
   /** Floating placement relative to the anchor. Defaults to `'bottom'`. */
   placement?: Placement;
+  /** Color tone: `primary` (default, the theme accent) or `info` (blue). */
+  tone?: 'primary' | 'info';
   /** Controlled open state. When set, the component never changes it itself;
    *  drive it from `onOpenChange`. Omit for uncontrolled (internal) state. */
   open?: boolean;
@@ -45,6 +47,24 @@ const STATIC_SIDE: Record<string, 'top' | 'bottom' | 'left' | 'right'> = {
   right: 'left',
 };
 
+/** Color classes per `tone`. `info` is the blue onboarding look (white text). */
+const TONES = {
+  primary: {
+    bubble: 'bg-primary text-primary-foreground',
+    arrow: 'bg-primary',
+    dismiss: 'text-primary-foreground/70 hover:bg-primary-foreground/15 hover:text-primary-foreground',
+    badge: 'bg-primary-foreground/20',
+    content: 'text-primary-foreground/85',
+  },
+  info: {
+    bubble: 'bg-tool-blue text-white',
+    arrow: 'bg-tool-blue',
+    dismiss: 'text-white/70 hover:bg-white/15 hover:text-white',
+    badge: 'bg-white/20',
+    content: 'text-white/85',
+  },
+} as const;
+
 /**
  * Coachmark is the presentational onboarding hint: a primary-colored bubble with
  * an arrow, anchored to a trigger. It wraps the anchor (the default slot) and
@@ -56,6 +76,7 @@ const STATIC_SIDE: Record<string, 'top' | 'bottom' | 'left' | 'right'> = {
  */
 export function Coachmark(props: CoachmarkProps) {
   const config = useChatConfig();
+  const toneCls = () => TONES[props.tone ?? 'primary'];
   const titleId = createUniqueId();
   const [internalOpen, setInternalOpen] = createSignal(props.defaultOpen ?? false);
   const [anchor, setAnchor] = createSignal<HTMLElement>();
@@ -105,7 +126,8 @@ export function Coachmark(props: CoachmarkProps) {
               visibility: position.hidden() ? 'hidden' : 'visible',
             }}
             class={cn(
-              'z-50 w-64 rounded-lg bg-primary p-3 pr-8 text-sm text-primary-foreground kai-elevation',
+              'z-50 w-64 rounded-lg p-3 pr-8 text-sm kai-elevation',
+              toneCls().bubble,
               'animate-in fade-in-0 zoom-in-95 data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95',
             )}
           >
@@ -116,7 +138,7 @@ export function Coachmark(props: CoachmarkProps) {
               ref={setArrowEl}
               part="arrow"
               aria-hidden="true"
-              class="absolute size-2 rotate-45 bg-primary"
+              class={cn('absolute size-2 rotate-45', toneCls().arrow)}
               style={{
                 left: position.arrowPos().x != null ? `${position.arrowPos().x}px` : '',
                 top: position.arrowPos().y != null ? `${position.arrowPos().y}px` : '',
@@ -129,7 +151,7 @@ export function Coachmark(props: CoachmarkProps) {
               part="dismiss"
               aria-label="Dismiss"
               onClick={dismiss}
-              class="absolute right-2 top-2 inline-flex size-5 items-center justify-center rounded text-primary-foreground/70 transition-colors hover:bg-primary-foreground/15 hover:text-primary-foreground"
+              class={cn('absolute right-2 top-2 inline-flex size-5 items-center justify-center rounded transition-colors', toneCls().dismiss)}
             >
               <X class="size-3.5" aria-hidden="true" />
             </button>
@@ -142,7 +164,7 @@ export function Coachmark(props: CoachmarkProps) {
                 <Show when={props.badge}>
                   <span
                     part="badge"
-                    class="inline-flex items-center rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-[0.625rem] font-medium uppercase leading-none tracking-wide"
+                    class={cn('inline-flex items-center rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium uppercase leading-none tracking-wide', toneCls().badge)}
                   >
                     {props.badge}
                   </span>
@@ -151,7 +173,7 @@ export function Coachmark(props: CoachmarkProps) {
             </Show>
 
             <Show when={props.content}>
-              <div class={cn('text-primary-foreground/85', props.headline ? 'mt-1.5' : '')}>
+              <div class={cn(toneCls().content, props.headline ? 'mt-1.5' : '')}>
                 {props.content}
               </div>
             </Show>
