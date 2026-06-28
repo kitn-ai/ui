@@ -59,6 +59,10 @@ interface Props extends Record<string, unknown> {
   collapseBelow?: number;
   /** Render Recents as dense single-line rows (a leading dot + title, no count). */
   compact?: boolean;
+  /** Suppress the built-in ConversationList so the `sidebar-header` slot owns the
+   *  whole rail flex region (for apps that supply their own rail nav). Default
+   *  false. Attribute: `no-conversations`. */
+  noConversations?: boolean;
 }
 
 interface Events {
@@ -95,6 +99,7 @@ defineWebComponent<Props, Events>('kai-workspace', {
   search: false, voice: false, triggers: undefined, kindIcons: undefined,
   sidebarWidth: 26, sidebarMinWidth: 240, sidebarMaxWidth: 420,
   sidebarCollapsed: undefined, defaultSidebarCollapsed: undefined, collapseBelow: undefined, compact: undefined,
+  noConversations: undefined,
 }, (props, { dispatch, flag, expose, element }) => {
   // Which injection slots the consumer has filled. A bare <slot> is always a
   // truthy JSX node, so we render each region wrapper ONLY when readSlots reports
@@ -215,9 +220,18 @@ defineWebComponent<Props, Events>('kai-workspace', {
       <Show
         when={!collapsed()}
         fallback={
-          <div class="relative h-full">
-            <CollapsedRail onExpand={toggle} class="absolute left-2 top-2 z-10" />
-            {mainRegion}
+          <div class="flex h-full">
+            {/* Collapsed: the reopen control lives in its OWN thin rail column
+                (matching the sidebar's bg-surface) rather than floating over the
+                content. The previous `absolute` overlay sat on top of a
+                `main-header`'s leading title — see the t3code/codex/chatgpt apps,
+                all of which fill that slot — so it both overlapped the header and
+                competed with any in-header toggle. A dedicated column never
+                overlaps and reads as a collapsed sidebar. */}
+            <div class="flex w-11 shrink-0 flex-col items-center border-r border-border bg-surface pt-2.5">
+              <CollapsedRail onExpand={toggle} class="bg-transparent shadow-none backdrop-blur-none" />
+            </div>
+            <div class="min-w-0 flex-1">{mainRegion}</div>
           </div>
         }
       >
@@ -230,18 +244,23 @@ defineWebComponent<Props, Events>('kai-workspace', {
                 made transparent so the part background reads uniformly. */}
             <div part="sidebar" class="flex h-full flex-col overflow-hidden bg-surface">
               <Show when={slots()['sidebar-header']}>
-                <div class="shrink-0"><slot name="sidebar-header" /></div>
+                {/* When `no-conversations` suppresses the built-in list, the
+                    projected header owns the whole rail flex region; otherwise it
+                    sits as a fixed band above the list. */}
+                <div class={flag('noConversations') ? 'min-h-0 flex-1' : 'shrink-0'}><slot name="sidebar-header" /></div>
               </Show>
-              <div class="min-h-0 flex-1">
-                <ConversationList
-                  class="bg-transparent"
-                  groups={props.groups} conversations={props.conversations} activeId={props.activeId as string | undefined}
-                  compact={flag('compact')}
-                  onSelect={(id) => dispatch('kai-conversation-select', { id })}
-                  onNewChat={() => dispatch('kai-new-chat', {})}
-                  onToggleSidebar={toggle}
-                />
-              </div>
+              <Show when={!flag('noConversations')}>
+                <div class="min-h-0 flex-1">
+                  <ConversationList
+                    class="bg-transparent"
+                    groups={props.groups} conversations={props.conversations} activeId={props.activeId as string | undefined}
+                    compact={flag('compact')}
+                    onSelect={(id) => dispatch('kai-conversation-select', { id })}
+                    onNewChat={() => dispatch('kai-new-chat', {})}
+                    onToggleSidebar={toggle}
+                  />
+                </div>
+              </Show>
               <Show when={slots()['sidebar-footer']}>
                 <div class="shrink-0"><slot name="sidebar-footer" /></div>
               </Show>
