@@ -627,6 +627,7 @@ function ProgressChecklist(props: {
       <ProgressBar
         value={props.done}
         max={props.total}
+        tone="success"
         aria-labelledby={props.heading ? props.headingId : undefined}
         aria-label={props.heading ? undefined : 'Task progress'}
       />
