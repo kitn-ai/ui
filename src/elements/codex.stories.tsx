@@ -3,6 +3,7 @@ import { createSignal, Show, For } from 'solid-js';
 import './register'; // every kai-* element used below
 import type { FileTreeFile } from '../components/file-tree';
 import type { ToolPart } from '../components/tool-types';
+import { PromptDock } from '../ui/prompt-dock';
 import openaiLogo from './logos/openai.svg';
 
 // Labs/Apps: a faithful replica of OpenAI's Codex WEB (chatgpt.com/codex) - a
@@ -226,46 +227,64 @@ export const Codex: Story = {
           </div>
         </header>
 
-        {/* BODY: a single centered column that scrolls. */}
-        <main class="flex-1 overflow-y-auto">
-          {/* HOME: the centered composer + the task feed below it. */}
+        {/* BODY: a single centered column that scrolls. This <main> is the bounded
+            scroll container (flex column, overflow-y-auto, min-h-0 so it can shrink
+            below content height and actually scroll). The HOME wrapper below uses
+            `m-auto` (the double-container trick): margin:auto centers the composer
+            vertically when there's spare room and collapses to top-aligned + scrollable
+            when the content is taller than the column - so the top is never clipped
+            (unlike justify/align-center, which would clip + strand the top on overflow). */}
+        <main class="flex flex-1 flex-col overflow-y-auto min-h-0">
+          {/* HOME: the centered composer + the task feed below it. The `m-auto` here
+              is the inner wrapper of the centering trick (py-10 is the comfortable
+              top/bottom padding for the overflow case). */}
           <Show when={!activeTask()}>
-            <div class="mx-auto w-full max-w-3xl px-4 py-10">
+            <div class="m-auto w-full max-w-3xl px-4 py-10">
               <h1 class="mb-5 text-center text-xl font-semibold tracking-tight">What should Codex work on?</h1>
 
-              {/* The focal composer card. */}
-              <div class="rounded-2xl border border-border bg-card shadow-sm">
+              {/* The focal composer, framed by a PromptDock: the prompt-input is the
+                  raised card; the dock's recessed BOTTOM lip owns the project/control
+                  band the real Codex shows just under the input - repo + branch on the
+                  left, the Ask/Code dual-button on the right. No top lip is needed. */}
+              <PromptDock
+                bottom={
+                  <div class="flex items-center justify-between gap-2">
+                    {/* "Work in a project" - repo + branch environment pills (kai-menu). */}
+                    <div class="flex items-center gap-1.5">
+                      <kai-menu
+                        ref={(el) => { (el as El).items = REPOS; }}
+                        trigger-icon="box"
+                        trigger-label="openai/codex"
+                        trigger-icon-trailing="chevron-down"
+                      ></kai-menu>
+                      <kai-menu
+                        ref={(el) => { (el as El).items = BRANCHES; }}
+                        trigger-icon="git-branch"
+                        trigger-label="main"
+                        trigger-icon-trailing="chevron-down"
+                      ></kai-menu>
+                    </div>
+                    {/* The signature Ask / Code dual-button. Code (primary/accent)
+                        dispatches a coding task; Ask (secondary) answers questions with
+                        no edits. Rendered as two kai-buttons. */}
+                    <div class="flex items-center gap-1.5">
+                      <kai-button variant="outline" size="sm" icon="message-circle">Ask</kai-button>
+                      <kai-button variant="default" size="sm" icon="code">Code</kai-button>
+                    </div>
+                  </div>
+                }
+              >
                 <kai-prompt-input
                   ref={(el) => { (el as El).attach = false; }}
                   class="codex-composer block"
                   placeholder="Describe a task. Codex runs it in a parallel cloud sandbox."
                 >
+                  {/* attach/image affordance stays inline in the input toolbar */}
                   <div slot="toolbar-start" class="flex items-center gap-1.5">
-                    {/* attach/image affordance */}
                     <kai-button variant="ghost" size="icon-sm" icon="image" label="Attach an image"></kai-button>
-                    {/* repo + branch environment pills (kai-menu) */}
-                    <kai-menu
-                      ref={(el) => { (el as El).items = REPOS; }}
-                      trigger-icon="box"
-                      trigger-label="openai/codex"
-                      trigger-icon-trailing="chevron-down"
-                    ></kai-menu>
-                    <kai-menu
-                      ref={(el) => { (el as El).items = BRANCHES; }}
-                      trigger-icon="git-branch"
-                      trigger-label="main"
-                      trigger-icon-trailing="chevron-down"
-                    ></kai-menu>
-                  </div>
-                  {/* The signature Ask / Code dual-button. Code (primary/accent)
-                      dispatches a coding task; Ask (secondary) answers questions with
-                      no edits. Rendered as two kai-buttons. */}
-                  <div slot="toolbar-end" class="flex items-center gap-1.5">
-                    <kai-button variant="outline" size="sm" icon="message-circle">Ask</kai-button>
-                    <kai-button variant="default" size="sm" icon="code">Code</kai-button>
                   </div>
                 </kai-prompt-input>
-              </div>
+              </PromptDock>
 
               {/* TASK FEED */}
               <div class="mt-8">
@@ -442,20 +461,28 @@ export const Codex: Story = {
 <main>
   <h1>What should Codex work on?</h1>
 
-  <!-- the focal composer card -->
-  <kai-prompt-input class="codex-composer" placeholder="Describe a task. Codex runs it in a parallel cloud sandbox.">
-    <div slot="toolbar-start">
-      <kai-button variant="ghost" size="icon-sm" icon="image" label="Attach an image"></kai-button>
-      <kai-menu trigger-icon="box" trigger-label="openai/codex" trigger-icon-trailing="chevron-down"></kai-menu>
-      <kai-menu trigger-icon="git-branch" trigger-label="main" trigger-icon-trailing="chevron-down"></kai-menu>
+  <!-- the focal composer, framed by a PromptDock primitive: the input is the raised
+       card; the dock's recessed BOTTOM lip owns the project/control band Codex shows
+       just under the input. (The kai-prompt-dock element is forthcoming.) -->
+  <div class="prompt-dock">
+    <kai-prompt-input class="codex-composer" placeholder="Describe a task. Codex runs it in a parallel cloud sandbox.">
+      <div slot="toolbar-start">
+        <kai-button variant="ghost" size="icon-sm" icon="image" label="Attach an image"></kai-button>
+      </div>
+    </kai-prompt-input>
+    <!-- BOTTOM lip: repo + branch project pills (left) + the Ask / Code dual-button
+         (right). Code (primary) dispatches a coding task; Ask (secondary) answers. -->
+    <div class="prompt-dock-bottom">
+      <div>
+        <kai-menu trigger-icon="box" trigger-label="openai/codex" trigger-icon-trailing="chevron-down"></kai-menu>
+        <kai-menu trigger-icon="git-branch" trigger-label="main" trigger-icon-trailing="chevron-down"></kai-menu>
+      </div>
+      <div>
+        <kai-button variant="outline" size="sm" icon="message-circle">Ask</kai-button>
+        <kai-button variant="default" size="sm" icon="code">Code</kai-button>
+      </div>
     </div>
-    <!-- the Ask / Code dual-button: Code (primary) dispatches a coding task, Ask
-         (secondary) answers questions. Rendered as two kai-buttons. -->
-    <div slot="toolbar-end">
-      <kai-button variant="outline" size="sm" icon="message-circle">Ask</kai-button>
-      <kai-button variant="default" size="sm" icon="code">Code</kai-button>
-    </div>
-  </kai-prompt-input>
+  </div>
 
   <!-- TASK FEED: each row = a coding task. Custom consumer layout; the pieces are
        kit. Line 1: title + diff stat + PR chip + status chip. Line 2: repo/branch + time. -->
