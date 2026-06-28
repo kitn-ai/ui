@@ -3,7 +3,7 @@ import { createSignal, Show, For, Switch, Match, onMount, onCleanup, type JSX } 
 import {
   Bot, Terminal, FlaskConical, BookText, Boxes, Sparkles, ShieldCheck, Database,
   Megaphone, Bell, Columns3, Focus, List, PanelRight, CheckCircle2, Command,
-  MoreHorizontal, X, type LucideProps,
+  MoreHorizontal, X, Plus, type LucideProps,
 } from 'lucide-solid';
 import './register'; // every kai-* element used below
 import { Pane } from '../ui/pane';
@@ -27,9 +27,11 @@ import { toast, configureToasts } from '../primitives/toast-store';
 // from the keyboard and the command palette.
 //
 // The center is driven by a `Segmented` view switcher over a `view` signal:
-//   • WORKSPACE — an editor-group split (Zed/VSCode/tmux style): a row of
-//                 resizable COLUMNS, each a TAB STRIP + the active agent's `Pane`.
-//                 The default tier; it subsumes the old plain grid.
+//   • WORKSPACE — a 2-level editor-group split (Zed/VSCode/tmux WINDOW TILING): a
+//                 row of resizable COLUMNS; each column is a vertical stack of one
+//                 or more resizable GROUPS (rows); each group = a TAB STRIP + the
+//                 active agent's `Pane`. Columns/groups are LAYOUT regions, never
+//                 status lanes. The default tier.
 //   • FOCUS     — one large `Pane` (the focused agent) beside a vertical RAIL of
 //                 `AgentCard`s; clicking a card promotes it to focus.
 //   • LIST      — a full-width column of `AgentCard`s for scanning many agents.
@@ -50,8 +52,10 @@ import { toast, configureToasts } from '../primitives/toast-store';
 // the first waiting agent, an amber edge on the agents awaiting input, and a
 // "Needs you first" sort toggle. A broadcast composer ("Message all agents") opens
 // from the header. The top-level rail | center | utility split is a real
-// kai-resizable (it fits the ≤ 3-item cap); the N-column editor-group is a
-// hand-rolled flex row with draggable dividers (kai-resizable can't express N).
+// kai-resizable (it fits the ≤ 3-item cap); the 2-level editor-group is a
+// hand-rolled flex layout with draggable dividers on BOTH axes — between columns
+// (horizontal) and between stacked groups within a column (vertical) — since
+// kai-resizable can't express the nested N×M tiling.
 
 // kai-resizable / kai-resizable-item / kai-artifact are used here as JSX elements;
 // the other kai-* tags are declared (identically) by sibling story files.
@@ -181,25 +185,43 @@ const AGENTS: Agent[] = [
   },
 ];
 
-// ── Editor-group model ──────────────────────────────────────────────────────
-// A `column` is one editor group: an ordered set of agent tabs plus the active
-// one. The workspace view renders `columns()` left → right; tab "…" actions and
-// the palette mutate this model (move / split / close), dropping empty columns
-// and keeping `activeId` valid.
+// ── Editor-group model (2-level: columns × rows) ─────────────────────────────
+// WINDOW TILING, not a kanban. A `Column` is a LAYOUT region: a vertical stack of
+// one or more `Group`s (rows). A `Group` is one editor group — an ordered set of
+// agent tabs plus the active one. The workspace renders `columns()` left → right
+// and, inside each column, its groups top → bottom. Tab "…" actions, the
+// "+ New column" affordance, the column close, and the palette mutate this model
+// (split right / split down · move · close), dropping empty GROUPS and empty
+// COLUMNS and keeping every `activeId` + the focus valid. Columns/groups are
+// never organized BY status.
 interface Group {
   id: string;
   agentIds: string[];
   activeId: string;
 }
+interface Column {
+  id: string;
+  groups: Group[];
+}
+
 let colSeq = 0;
+let groupSeq = 0;
 const newColId = () => `col-${colSeq++}`;
-// Distribute the 8 agents across ~3 columns (chunks of 3/3/2). Cleo lands in the
-// middle group, Nova in the last, so attention is spread across the split.
-const initialColumns = (): Group[] => {
+const newGroupId = () => `grp-${groupSeq++}`;
+const makeGroup = (ids: string[]): Group => ({ id: newGroupId(), agentIds: [...ids], activeId: ids[0] ?? '' });
+
+// Distribute the 8 agents across 3 HETEROGENEOUS columns so the 2-level model is
+// visible by default: columns 1 and 3 are single full-height panes (one group
+// each), while the MIDDLE column starts as TWO stacked groups (a row split). Cleo
+// lands in the middle column's top row and Nova in the last column, so attention
+// is spread across the layout. Nothing assumes columns are uniform.
+const initialColumns = (): Column[] => {
   const ids = AGENTS.map((a) => a.id);
-  return [ids.slice(0, 3), ids.slice(3, 6), ids.slice(6)]
-    .filter((c) => c.length > 0)
-    .map((c) => ({ id: newColId(), agentIds: [...c], activeId: c[0] }));
+  return [
+    { id: newColId(), groups: [makeGroup(ids.slice(0, 3))] },
+    { id: newColId(), groups: [makeGroup(ids.slice(3, 5)), makeGroup(ids.slice(5, 6))] },
+    { id: newColId(), groups: [makeGroup(ids.slice(6))] },
+  ];
 };
 
 // The keyboard NUMBER for each agent (Alt/Option+N), shown inside the tab badge.
@@ -273,11 +295,16 @@ export const SplitWorkspace: Story = {
     const [view, setView] = createSignal<ViewMode>('workspace');
     // focusedId drives the Focus + List tiers (one agent at a time).
     const [focusedId, setFocusedId] = createSignal<string>(AGENTS[0].id);
-    // The editor-group model + per-column flex weights (driven by the dividers).
-    const [columns, setColumns] = createSignal<Group[]>(initialColumns());
+    // The 2-level editor-group model. `colSizes` holds the per-COLUMN horizontal
+    // flex weights (the column dividers drive these); `rowSizes` maps a column id →
+    // its per-GROUP vertical flex weights (the in-column row dividers drive those).
+    const [columns, setColumns] = createSignal<Column[]>(initialColumns());
     const [colSizes, setColSizes] = createSignal<number[]>(columns().map(() => 1));
+    const [rowSizes, setRowSizes] = createSignal<Record<string, number[]>>(
+      Object.fromEntries(columns().map((c) => [c.id, c.groups.map(() => 1)])),
+    );
     // Which group/pane is focused (the ⌥-jump + zoom target; paints Pane `focused`).
-    const [focusedGroupId, setFocusedGroupId] = createSignal<string>(columns()[0]?.id ?? '');
+    const [focusedGroupId, setFocusedGroupId] = createSignal<string>(columns()[0]?.groups[0]?.id ?? '');
     // The zoomed (maximized) agent id, or null. Esc / ⌥Z restore.
     const [zoomedId, setZoomedId] = createSignal<string | null>(null);
     // The agent id whose tab "…" menu is open, or null.
@@ -296,7 +323,10 @@ export const SplitWorkspace: Story = {
     // columns row (so the dividers can measure it for drag math).
     const promptRefs = new Map<string, El>();
     let navEl: El | undefined;
+    // The columns row (measured by the column dividers for horizontal drag) + each
+    // column's group stack (measured by its row dividers for vertical drag).
     let rowEl: HTMLDivElement | undefined;
+    const colRefs = new Map<string, HTMLElement>();
 
     const live = () => AGENTS.filter((a) => !closed().has(a.id));
     const agentById = (id: string) => AGENTS.find((a) => a.id === id);
@@ -308,31 +338,62 @@ export const SplitWorkspace: Story = {
     const attentionCount = () => live().filter((a) => a.needsAttention).length;
     const focusedAgent = () => live().find((a) => a.id === focusedId()) ?? live()[0];
 
-    // ── Editor-group helpers ────────────────────────────────────────────────
-    // A column's live agents, in display (attention) order.
-    const colAgents = (col: Group) =>
+    // ── Editor-group helpers (2-level) ───────────────────────────────────────
+    // A group's live agents, in display (attention) order.
+    const colAgents = (group: Group) =>
       ordered(
-        col.agentIds
+        group.agentIds
           .map((id) => agentById(id))
           .filter((a): a is Agent => !!a && !closed().has(a.id)),
       );
-    const focusedColumn = () => columns().find((c) => c.id === focusedGroupId()) ?? columns()[0];
-    const focusedPaneId = () => focusedColumn()?.activeId;
+    // Locate a group (and its column) by group id / by the agent it holds.
+    const findGroup = (groupId: string) => {
+      for (const col of columns()) for (const group of col.groups) if (group.id === groupId) return { col, group };
+      return undefined;
+    };
+    const findGroupOfAgent = (agentId: string) => {
+      for (const col of columns()) for (const group of col.groups) if (group.agentIds.includes(agentId)) return { col, group };
+      return undefined;
+    };
+    const focusedGroup = () => findGroup(focusedGroupId())?.group ?? columns()[0]?.groups[0];
+    const focusedPaneId = () => focusedGroup()?.activeId;
 
-    // Commit a new column layout: drop empties, reset divider weights to equal, and
-    // keep focusedGroupId pointing at a column that still exists.
-    const commitColumns = (next: Group[]) => {
-      const cleaned = next.filter((c) => c.agentIds.length > 0);
+    // Strip an agent out of whatever group holds it, keeping that group's activeId
+    // valid. Leaves empty groups/columns in place — commitColumns drops them.
+    const withoutAgent = (cols: Column[], agentId: string): Column[] =>
+      cols.map((col) => ({
+        ...col,
+        groups: col.groups.map((g) => {
+          if (!g.agentIds.includes(agentId)) return g;
+          const remaining = g.agentIds.filter((id) => id !== agentId);
+          return { ...g, agentIds: remaining, activeId: g.activeId === agentId ? (remaining[0] ?? '') : g.activeId };
+        }),
+      }));
+
+    // Commit a new layout: drop empty GROUPS then empty COLUMNS, reset BOTH axes'
+    // divider weights to equal (survivors REFLOW to fill the freed space), and keep
+    // focusedGroupId pointing at a group that still exists.
+    const commitColumns = (next: Column[]) => {
+      const cleaned = next
+        .map((col) => ({ ...col, groups: col.groups.filter((g) => g.agentIds.length > 0) }))
+        .filter((col) => col.groups.length > 0);
       setColumns(cleaned);
       setColSizes(cleaned.map(() => 1));
-      if (!cleaned.some((c) => c.id === focusedGroupId())) {
-        setFocusedGroupId(cleaned[0]?.id ?? '');
+      setRowSizes(Object.fromEntries(cleaned.map((col) => [col.id, col.groups.map(() => 1)])));
+      const groupIds = cleaned.flatMap((col) => col.groups.map((g) => g.id));
+      if (!groupIds.includes(focusedGroupId())) {
+        setFocusedGroupId(groupIds[0] ?? '');
       }
     };
 
-    const selectTab = (colId: string, agentId: string) => {
-      setColumns((cs) => cs.map((c) => (c.id === colId ? { ...c, activeId: agentId } : c)));
-      setFocusedGroupId(colId);
+    const selectTab = (groupId: string, agentId: string) => {
+      setColumns((cols) =>
+        cols.map((col) => ({
+          ...col,
+          groups: col.groups.map((g) => (g.id === groupId ? { ...g, activeId: agentId } : g)),
+        })),
+      );
+      setFocusedGroupId(groupId);
       setFocusedId(agentId);
     };
 
@@ -340,17 +401,32 @@ export const SplitWorkspace: Story = {
       setClosed((s) => { const n = new Set<string>(s); n.add(agentId); return n; });
       if (zoomedId() === agentId) setZoomedId(null);
       setMenuFor(null);
-      const next = columns().map((c) => {
-        if (!c.agentIds.includes(agentId)) return c;
-        const idx = c.agentIds.indexOf(agentId);
-        const remaining = c.agentIds.filter((id) => id !== agentId);
-        const activeId =
-          c.activeId === agentId
-            ? remaining[Math.min(idx, remaining.length - 1)] ?? ''
-            : c.activeId;
-        return { ...c, agentIds: remaining, activeId };
-      });
+      const next = columns().map((col) => ({
+        ...col,
+        groups: col.groups.map((g) => {
+          if (!g.agentIds.includes(agentId)) return g;
+          const idx = g.agentIds.indexOf(agentId);
+          const remaining = g.agentIds.filter((id) => id !== agentId);
+          const activeId =
+            g.activeId === agentId
+              ? remaining[Math.min(idx, remaining.length - 1)] ?? ''
+              : g.activeId;
+          return { ...g, agentIds: remaining, activeId };
+        }),
+      }));
       commitColumns(next);
+    };
+
+    // Close an ENTIRE column (its panes go with it). The survivors REFLOW to fill
+    // the freed width — commitColumns resets the column weights to equal.
+    const closeColumn = (colId: string) => {
+      setMenuFor(null);
+      const col = columns().find((c) => c.id === colId);
+      if (!col) return;
+      const ids = col.groups.flatMap((g) => g.agentIds);
+      setClosed((s) => { const n = new Set<string>(s); ids.forEach((id) => n.add(id)); return n; });
+      if (zoomedId() && ids.includes(zoomedId() as string)) setZoomedId(null);
+      commitColumns(columns().filter((c) => c.id !== colId));
     };
 
     const resetAll = () => {
@@ -358,52 +434,111 @@ export const SplitWorkspace: Story = {
       const cols = initialColumns();
       setColumns(cols);
       setColSizes(cols.map(() => 1));
-      setFocusedGroupId(cols[0]?.id ?? '');
+      setRowSizes(Object.fromEntries(cols.map((col) => [col.id, col.groups.map(() => 1)])));
+      setFocusedGroupId(cols[0]?.groups[0]?.id ?? '');
       setZoomedId(null);
     };
 
-    // Pull an agent out of its column into a brand-new column right after it.
-    const moveToNewColumn = (agentId: string) => {
+    // SPLIT RIGHT: pull an agent into a brand-new COLUMN inserted right after its
+    // current column (a single-group column to the right).
+    const splitRight = (agentId: string) => {
       setMenuFor(null);
-      const nc: Group = { id: newColId(), agentIds: [agentId], activeId: agentId };
-      const next: Group[] = [];
-      for (const c of columns()) {
-        if (c.agentIds.includes(agentId)) {
-          const remaining = c.agentIds.filter((id) => id !== agentId);
-          if (remaining.length) {
-            next.push({ ...c, agentIds: remaining, activeId: c.activeId === agentId ? remaining[0] : c.activeId });
-          }
-          next.push(nc);
-        } else {
-          next.push(c);
-        }
+      const loc = findGroupOfAgent(agentId);
+      if (!loc) return;
+      const ng = makeGroup([agentId]);
+      const nc: Column = { id: newColId(), groups: [ng] };
+      const next: Column[] = [];
+      for (const col of withoutAgent(columns(), agentId)) {
+        next.push(col);
+        if (col.id === loc.col.id) next.push(nc);
       }
       commitColumns(next);
-      setFocusedGroupId(nc.id);
+      setFocusedGroupId(ng.id);
       setFocusedId(agentId);
     };
 
-    // Move an agent to the adjacent column (dir −1 / +1). No-op past the ends.
+    // SPLIT DOWN: pull an agent into a NEW GROUP (row) inserted just below its
+    // current group, within the SAME column.
+    const splitDown = (agentId: string) => {
+      setMenuFor(null);
+      const loc = findGroupOfAgent(agentId);
+      if (!loc) return;
+      const ng = makeGroup([agentId]);
+      const next = withoutAgent(columns(), agentId).map((col) => {
+        if (col.id !== loc.col.id) return col;
+        const at = col.groups.findIndex((g) => g.id === loc.group.id);
+        const groups = [...col.groups];
+        groups.splice(at + 1, 0, ng);
+        return { ...col, groups };
+      });
+      commitColumns(next);
+      setFocusedGroupId(ng.id);
+      setFocusedId(agentId);
+    };
+
+    // Add a NEW trailing column from the focused pane (the explicit "+ New column"
+    // affordance at the row's trailing edge). Survivors reflow via commitColumns.
+    const addColumn = () => {
+      const agentId = focusedPaneId();
+      if (!agentId) return;
+      setMenuFor(null);
+      const ng = makeGroup([agentId]);
+      const nc: Column = { id: newColId(), groups: [ng] };
+      commitColumns([...withoutAgent(columns(), agentId), nc]);
+      setFocusedGroupId(ng.id);
+      setFocusedId(agentId);
+    };
+
+    // Move an agent to the adjacent COLUMN (dir −1 / +1) — appends to that column's
+    // first group + makes it active. No-op past the ends.
     const moveToColumn = (agentId: string, dir: -1 | 1) => {
       setMenuFor(null);
       const cs = columns();
-      const srcIdx = cs.findIndex((c) => c.agentIds.includes(agentId));
+      const srcIdx = cs.findIndex((c) => c.groups.some((g) => g.agentIds.includes(agentId)));
       if (srcIdx < 0) return;
       const tgtIdx = srcIdx + dir;
       if (tgtIdx < 0 || tgtIdx >= cs.length) return;
-      const targetId = cs[tgtIdx].id;
-      const next = cs.map((c, i) => {
-        if (i === srcIdx) {
-          const remaining = c.agentIds.filter((id) => id !== agentId);
-          return { ...c, agentIds: remaining, activeId: c.activeId === agentId ? (remaining[0] ?? '') : c.activeId };
-        }
-        if (i === tgtIdx) {
-          return { ...c, agentIds: [...c.agentIds, agentId], activeId: agentId };
-        }
-        return c;
-      });
+      const target = cs[tgtIdx];
+      const targetGroup = target.groups[0];
+      if (!targetGroup) return;
+      const next = withoutAgent(cs, agentId).map((col) =>
+        col.id === target.id
+          ? {
+              ...col,
+              groups: col.groups.map((g) =>
+                g.id === targetGroup.id ? { ...g, agentIds: [...g.agentIds, agentId], activeId: agentId } : g,
+              ),
+            }
+          : col,
+      );
       commitColumns(next);
-      setFocusedGroupId(targetId);
+      setFocusedGroupId(targetGroup.id);
+      setFocusedId(agentId);
+    };
+
+    // Move an agent to the adjacent GROUP within its column (dir −1 / +1 — the row
+    // above / below). No-op if there's no such row.
+    const moveToGroup = (agentId: string, dir: -1 | 1) => {
+      setMenuFor(null);
+      const loc = findGroupOfAgent(agentId);
+      if (!loc) return;
+      const groups = loc.col.groups;
+      const srcIdx = groups.findIndex((g) => g.id === loc.group.id);
+      const tgtIdx = srcIdx + dir;
+      if (tgtIdx < 0 || tgtIdx >= groups.length) return;
+      const targetGroup = groups[tgtIdx];
+      const next = withoutAgent(columns(), agentId).map((col) =>
+        col.id === loc.col.id
+          ? {
+              ...col,
+              groups: col.groups.map((g) =>
+                g.id === targetGroup.id ? { ...g, agentIds: [...g.agentIds, agentId], activeId: agentId } : g,
+              ),
+            }
+          : col,
+      );
+      commitColumns(next);
+      setFocusedGroupId(targetGroup.id);
       setFocusedId(agentId);
     };
 
@@ -420,12 +555,12 @@ export const SplitWorkspace: Story = {
       if (!live().some((a) => a.id === agentId)) return;
       setView('workspace');
       setZoomedId(null);
-      const col = columns().find((c) => c.agentIds.includes(agentId));
-      if (col) {
-        setColumns((cs) => cs.map((c) => (c.id === col.id ? { ...c, activeId: agentId } : c)));
-        setFocusedGroupId(col.id);
+      const loc = findGroupOfAgent(agentId);
+      if (loc) {
+        selectTab(loc.group.id, agentId);
+      } else {
+        setFocusedId(agentId);
       }
-      setFocusedId(agentId);
       queueMicrotask(() => promptRefs.get(agentId)?.focus?.());
     };
     const jumpToNumber = (n: number) => {
@@ -528,9 +663,11 @@ export const SplitWorkspace: Story = {
       }
       const fa = focusedPaneId();
       const faName = (fa && agentById(fa)?.name) || 'pane';
-      items.push({ id: 'pane-new', label: 'Move pane to new column', description: faName, group: 'Pane' });
-      items.push({ id: 'pane-right', label: 'Move pane to next column', group: 'Pane' });
-      items.push({ id: 'pane-left', label: 'Move pane to previous column', group: 'Pane' });
+      items.push({ id: 'pane-split-right', label: 'Split pane right (new column)', description: faName, group: 'Pane' });
+      items.push({ id: 'pane-split-down', label: 'Split pane down (new row)', description: faName, group: 'Pane' });
+      items.push({ id: 'pane-next-col', label: 'Move pane to next column', group: 'Pane' });
+      items.push({ id: 'pane-prev-col', label: 'Move pane to previous column', group: 'Pane' });
+      items.push({ id: 'pane-add-col', label: 'New column from pane', group: 'Pane' });
       items.push({ id: 'pane-zoom', label: 'Zoom pane', description: faName, group: 'Pane' });
       items.push({ id: 'broadcast', label: 'Message all agents', group: 'Broadcast' });
       return items;
@@ -547,9 +684,11 @@ export const SplitWorkspace: Story = {
       }
       const fa = focusedPaneId();
       switch (id) {
-        case 'pane-new': if (fa) moveToNewColumn(fa); break;
-        case 'pane-right': if (fa) moveToColumn(fa, 1); break;
-        case 'pane-left': if (fa) moveToColumn(fa, -1); break;
+        case 'pane-split-right': if (fa) splitRight(fa); break;
+        case 'pane-split-down': if (fa) splitDown(fa); break;
+        case 'pane-next-col': if (fa) moveToColumn(fa, 1); break;
+        case 'pane-prev-col': if (fa) moveToColumn(fa, -1); break;
+        case 'pane-add-col': addColumn(); break;
         case 'pane-zoom': toggleZoom(); break;
         case 'broadcast': setBroadcastOpen(true); break;
       }
@@ -620,18 +759,21 @@ export const SplitWorkspace: Story = {
     // A NUMBERED-STATUS-BADGE tab: [tone badge + ⌥number] name [status word] … ×.
     // The badge color encodes status, the digit is the jump key. The status word
     // shows on the active tab, on hover, and always for needs-you / error.
-    const Tab = (props: { col: Group; agent: Agent }) => {
-      const isActive = () => props.col.activeId === props.agent.id;
+    const Tab = (props: { group: Group; colId: string; agent: Agent }) => {
+      const isActive = () => props.group.activeId === props.agent.id;
       const num = AGENT_NUMBER.get(props.agent.id);
       const alwaysWord = () =>
         isActive() || !!props.agent.needsAttention || props.agent.status.tone === 'error';
-      const idx = () => columns().findIndex((c) => c.id === props.col.id);
+      const colIdx = () => columns().findIndex((c) => c.id === props.colId);
+      const col = () => columns().find((c) => c.id === props.colId);
+      const grpIdx = () => col()?.groups.findIndex((g) => g.id === props.group.id) ?? -1;
+      const groupCount = () => col()?.groups.length ?? 0;
       const menuOpen = () => menuFor() === props.agent.id;
       return (
         <div
           role="tab"
           aria-selected={isActive()}
-          onClick={() => selectTab(props.col.id, props.agent.id)}
+          onClick={() => selectTab(props.group.id, props.agent.id)}
           class={cn(
             'group/tab relative flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md py-1 pl-1.5 pr-1 text-xs transition-colors',
             isActive()
@@ -693,9 +835,13 @@ export const SplitWorkspace: Story = {
               class="absolute right-0 top-full z-30 mt-1 w-56 overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-lg"
               onClick={(e) => e.stopPropagation()}
             >
-              <TabMenuItem onClick={() => moveToNewColumn(props.agent.id)}>Move to new column (split right)</TabMenuItem>
-              <TabMenuItem disabled={idx() >= columns().length - 1} onClick={() => moveToColumn(props.agent.id, 1)}>Move to next column</TabMenuItem>
-              <TabMenuItem disabled={idx() <= 0} onClick={() => moveToColumn(props.agent.id, -1)}>Move to previous column</TabMenuItem>
+              <TabMenuItem onClick={() => splitRight(props.agent.id)}>Split right</TabMenuItem>
+              <TabMenuItem onClick={() => splitDown(props.agent.id)}>Split down</TabMenuItem>
+              <div class="my-1 h-px bg-border"></div>
+              <TabMenuItem disabled={colIdx() >= columns().length - 1} onClick={() => moveToColumn(props.agent.id, 1)}>Move to next column</TabMenuItem>
+              <TabMenuItem disabled={colIdx() <= 0} onClick={() => moveToColumn(props.agent.id, -1)}>Move to previous column</TabMenuItem>
+              <TabMenuItem disabled={grpIdx() >= groupCount() - 1} onClick={() => moveToGroup(props.agent.id, 1)}>Move to group below</TabMenuItem>
+              <TabMenuItem disabled={grpIdx() <= 0} onClick={() => moveToGroup(props.agent.id, -1)}>Move to group above</TabMenuItem>
               <div class="my-1 h-px bg-border"></div>
               <TabMenuItem onClick={() => closeTab(props.agent.id)}>Close</TabMenuItem>
             </div>
@@ -704,26 +850,27 @@ export const SplitWorkspace: Story = {
       );
     };
 
-    // One editor group: a tab strip + the active agent's Pane below, filling the
-    // column. Pointer-down anywhere focuses the group (paints Pane `focused`).
-    const ColumnView = (props: { col: Group; index: number }) => {
-      const isFocusedCol = () => props.col.id === focusedGroupId();
-      const activeAgent = () => agentById(props.col.activeId);
+    // One editor GROUP (a row): a tab strip + the active agent's Pane below. Its
+    // vertical flex weight comes from its column's rowSizes. Pointer-down anywhere
+    // focuses the group (paints Pane `focused`).
+    const GroupView = (props: { group: Group; colId: string; weight: number }) => {
+      const isFocused = () => props.group.id === focusedGroupId();
+      const activeAgent = () => agentById(props.group.activeId);
       return (
         <div
-          class="flex h-full min-h-0 min-w-[260px] flex-col gap-1.5"
-          style={{ flex: String(colSizes()[props.index] ?? 1) }}
-          onPointerDown={() => setFocusedGroupId(props.col.id)}
+          class="flex min-h-0 min-w-0 flex-col gap-1.5"
+          style={{ flex: String(props.weight) }}
+          onPointerDown={() => setFocusedGroupId(props.group.id)}
         >
           <div
             role="tablist"
             class={cn(
               'flex shrink-0 items-center gap-1 overflow-x-auto rounded-lg border bg-surface px-1.5 py-1',
-              isFocusedCol() ? 'border-ring' : 'border-border',
+              isFocused() ? 'border-ring' : 'border-border',
             )}
           >
-            <For each={colAgents(props.col)}>
-              {(agent) => <Tab col={props.col} agent={agent} />}
+            <For each={colAgents(props.group)}>
+              {(agent) => <Tab group={props.group} colId={props.colId} agent={agent} />}
             </For>
           </div>
           <div class="min-h-0 flex-1">
@@ -738,7 +885,7 @@ export const SplitWorkspace: Story = {
             >
               {(a) => (
                 <Pane
-                  focused={isFocusedCol()}
+                  focused={isFocused()}
                   leading={<a.glyph class="size-4" />}
                   title={a.name}
                   subtitle={a.role}
@@ -759,9 +906,57 @@ export const SplitWorkspace: Story = {
       );
     };
 
-    // A draggable divider between two columns: shifts flex weight between the pair
-    // as the operator drags. Weight is a fraction of the row width, clamped so
-    // neither side collapses past ~12%.
+    // One COLUMN: a slim header (pane count + a CLOSE-COLUMN control) over a
+    // VERTICAL stack of its groups, with draggable row dividers between stacked
+    // groups. The column's horizontal flex weight comes from colSizes; the inner
+    // stack element is captured in colRefs so the row dividers can measure it.
+    const ColumnView = (props: { col: Column; index: number }) => {
+      const weights = () => rowSizes()[props.col.id] ?? props.col.groups.map(() => 1);
+      return (
+        <div
+          class="flex h-full min-h-0 min-w-[260px] flex-col gap-1"
+          style={{ flex: String(colSizes()[props.index] ?? 1) }}
+        >
+          <div class="flex h-5 shrink-0 items-center justify-between gap-1 px-0.5">
+            <span class="truncate text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
+              {props.col.groups.length} {props.col.groups.length === 1 ? 'pane' : 'panes'}
+            </span>
+            <button
+              type="button"
+              title="Close column"
+              aria-label="Close column"
+              onClick={() => closeColumn(props.col.id)}
+              class="flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-tool-red/10 hover:text-tool-red"
+            >
+              <X class="size-3.5" aria-hidden="true" />
+            </button>
+          </div>
+          <div ref={(el) => colRefs.set(props.col.id, el)} class="flex min-h-0 flex-1 flex-col">
+            <For each={props.col.groups}>
+              {(group, gi) => (
+                <>
+                  <Show when={gi() > 0}>
+                    <div
+                      role="separator"
+                      aria-orientation="horizontal"
+                      onPointerDown={startRowDrag(props.col.id, gi() - 1)}
+                      class="group/rdiv relative my-0.5 h-1 shrink-0 cursor-row-resize"
+                    >
+                      <div class="absolute inset-x-2 top-1/2 h-px -translate-y-1/2 rounded-full bg-border transition-colors group-hover/rdiv:bg-ring"></div>
+                    </div>
+                  </Show>
+                  <GroupView group={group} colId={props.col.id} weight={weights()[gi()] ?? 1} />
+                </>
+              )}
+            </For>
+          </div>
+        </div>
+      );
+    };
+
+    // A draggable divider between two COLUMNS: shifts horizontal flex weight
+    // between the pair as the operator drags. Weight is a fraction of the row
+    // width, clamped so neither side collapses past ~12%.
     const startDrag = (pair: number) => (e: PointerEvent) => {
       e.preventDefault();
       const row = rowEl;
@@ -796,7 +991,45 @@ export const SplitWorkspace: Story = {
       window.addEventListener('pointerup', onUp);
     };
 
-    // The editor-group row: resizable columns with draggable dividers.
+    // A draggable divider between two STACKED GROUPS in a column: shifts vertical
+    // flex weight between the pair as the operator drags, clamped so neither row
+    // collapses past ~12%. Measures the column's group-stack element (colRefs).
+    const startRowDrag = (colId: string, pair: number) => (e: PointerEvent) => {
+      e.preventDefault();
+      const stack = colRefs.get(colId);
+      if (!stack) return;
+      const rect = stack.getBoundingClientRect();
+      const sizes = [...(rowSizes()[colId] ?? [])];
+      const total = sizes.reduce((s, n) => s + n, 0) || 1;
+      const startY = e.clientY;
+      const a0 = sizes[pair] ?? 1;
+      const b0 = sizes[pair + 1] ?? 1;
+      const min = total * 0.12;
+      const onMove = (ev: PointerEvent) => {
+        const delta = ((ev.clientY - startY) / rect.height) * total;
+        let a = a0 + delta;
+        let b = b0 - delta;
+        if (a < min) { b -= min - a; a = min; }
+        if (b < min) { a -= min - b; b = min; }
+        const nextSizes = [...(rowSizes()[colId] ?? [])];
+        nextSizes[pair] = a;
+        nextSizes[pair + 1] = b;
+        setRowSizes({ ...rowSizes(), [colId]: nextSizes });
+      };
+      const onUp = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      };
+      document.body.style.cursor = 'row-resize';
+      document.body.style.userSelect = 'none';
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    };
+
+    // The editor-group row: resizable columns with draggable dividers + a trailing
+    // "+ New column" affordance.
     const ColumnsRow = () => (
       <div ref={rowEl} class="flex h-full min-h-0 gap-0 overflow-x-auto p-2">
         <For each={columns()}>
@@ -816,6 +1049,19 @@ export const SplitWorkspace: Story = {
             </>
           )}
         </For>
+        {/* explicit, discoverable affordance to CREATE a column at the trailing
+            edge — moves the focused pane into a new trailing column (alongside the
+            per-tab "Split right"). */}
+        <button
+          type="button"
+          onClick={addColumn}
+          title="New column from the focused pane"
+          aria-label="New column"
+          class="group/newcol ml-1 flex w-10 shrink-0 flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border text-muted-foreground transition-colors hover:border-ring hover:bg-hover hover:text-foreground"
+        >
+          <Plus class="size-4" aria-hidden="true" />
+          <span class="text-[10px] font-medium uppercase tracking-wider [writing-mode:vertical-rl]">New column</span>
+        </button>
       </div>
     );
 
@@ -1204,17 +1450,22 @@ export const SplitWorkspace: Story = {
         language: 'tsx',
         // A representative skeleton (not the full interactive render). The shell is a
         // three-region kai-resizable (rail | center | utility). The CENTER is a
-        // `Segmented` view switcher; the default WORKSPACE tier is an editor-group of
-        // resizable `columns`, each a numbered-status-badge tab strip + the active
-        // agent's `Pane`. A kai-command palette + ⌥-number keys are the keyboard
-        // backbone across both nav levels; agent notifications use toast().
+        // `Segmented` view switcher; the default WORKSPACE tier is a 2-level
+        // editor-group (window tiling) — a row of resizable COLUMNS, each a vertical
+        // stack of resizable GROUPS (rows); every group = a numbered-status-badge tab
+        // strip + the active agent's `Pane`. A kai-command palette + ⌥-number keys
+        // are the keyboard backbone across both nav levels; notifications use toast().
         code: `// status vocabulary shared by Pane + AgentCard
 const AGENTS = [ /* atlas, otto, ivy, cleo (needsAttention), … nova */ ];
 
-// EDITOR-GROUP model: a row of columns, each an ordered set of agent tabs.
+// 2-LEVEL EDITOR-GROUP model (window tiling, not a kanban):
+//   Column = a vertical stack of Groups (rows); Group = an ordered set of agent tabs.
 type Group = { id: string; agentIds: string[]; activeId: string };
-const [columns, setColumns] = createSignal<Group[]>(distribute(AGENTS)); // ~3 cols
-const [focusedGroupId, setFocusedGroupId] = createSignal(columns()[0].id);
+type Column = { id: string; groups: Group[] };
+const [columns, setColumns] = createSignal<Column[]>(distribute(AGENTS)); // mixed cols
+const [colSizes, setColSizes] = createSignal(columns().map(() => 1));        // column widths
+const [rowSizes, setRowSizes] = createSignal(rowWeights(columns()));         // row heights
+const [focusedGroupId, setFocusedGroupId] = createSignal(columns()[0].groups[0].id);
 const [zoomedId, setZoomedId] = createSignal<string | null>(null);
 const [view, setView] = createSignal<'workspace' | 'focus' | 'list'>('workspace');
 
@@ -1231,29 +1482,36 @@ document.addEventListener('keydown', (e) => {
            value={view()} onChange={setView} />
 
 <Switch>
-  {/* WORKSPACE — resizable columns; each = a tab strip + the active Pane */}
+  {/* WORKSPACE — resizable COLUMNS; inside each, resizable GROUPS (rows) */}
   <Match when={view() === 'workspace'}>
     <For each={columns()}>{(col, i) => <>
-      {i() > 0 && <Divider onPointerDown={startDrag(i() - 1)} />}
-      <Column>
-        {/* NUMBERED-STATUS-BADGE tabs: [tone badge + ⌥number] name [status] … × */}
-        <For each={colAgents(col)}>{(a) => <Tab col={col} agent={a} />}</For>
-        <Pane focused={col.id === focusedGroupId()} status={a.status}
-              maximized={zoomedId() === a.id} onMaximize={() => toggleZoom(a.id)}
-              onClose={() => closeTab(a.id)} footer={<Composer agent={a} />}>
-          <AgentBody agent={a} />
-        </Pane>
+      {i() > 0 && <ColDivider onPointerDown={startDrag(i() - 1)} />}          {/* resize cols */}
+      <Column>                                                                {/* + close-column "x" */}
+        <For each={col.groups}>{(g, gi) => <>
+          {gi() > 0 && <RowDivider onPointerDown={startRowDrag(col.id, gi() - 1)} />} {/* resize rows */}
+          <Group>
+            {/* NUMBERED-STATUS-BADGE tabs: [tone badge + ⌥number] name [status] … × */}
+            <For each={colAgents(g)}>{(a) => <Tab group={g} colId={col.id} agent={a} />}</For>
+            <Pane focused={g.id === focusedGroupId()} maximized={zoomedId() === active(g).id}
+                  onClose={() => closeTab(active(g).id)} footer={<Composer agent={active(g)} />}>
+              <AgentBody agent={active(g)} />
+            </Pane>
+          </Group>
+        </>}</For>
       </Column>
     </>}</For>
+    <NewColumnButton onClick={addColumn} />   {/* trailing "+ New column" affordance */}
   </Match>
   {/* FOCUS — one big Pane + a rail of AgentCards; LIST — a scannable column */}
 </Switch>
 
 // COMMAND PALETTE (kai-command) — both nav levels + pane ops:
-//   Go to <agent> · Switch to <workspace> · Move pane new/left/right · Zoom · Message all
+//   Go to <agent> · Switch <workspace> · split right/down · move next/prev column · new column · zoom
 <kai-command items={commandItems()} onkai-select={(e) => onCommandSelect(e.detail.id)} />
 
-// MOVE/SPLIT via the tab "…" menu (not drag): new column / next / previous / close.
+// SPLIT / MOVE via the tab "…" menu (no drag yet): split right (new column) ·
+// split down (new row) · move next/prev column · move group above/below · close.
+// A column "×" closes the WHOLE column; survivors REFLOW to fill the freed width.
 // NOTIFICATIONS: dogfood the kit's imperative toast() store (needs-you + finished).`,
       },
     },
