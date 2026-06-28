@@ -917,6 +917,19 @@ export const ProgressBar = createWebComponent<ProgressBarProps>(
   {  },
 );
 
+export interface PromptDockProps extends WebComponentProps {
+  /** How the tray frames the input — the SPATIAL inset axis: `inset` (default, the classic recessed frame on every side) | `edge` (top/bottom inset only; the input sits flush left/right so the lips span the full width) | `none` (no inset; the lips attach directly as a plain stack). Attribute: `frame`. */
+  frame?: "none" | "inset" | "edge";
+  /** How the tray surface looks — the VISUAL axis, orthogonal to `frame`: `soft` (default, sunken surface + border + radius) | `outlined` (transparent + border + radius) | `filled` (sunken, no border, + radius) | `plain` (bare). Attribute: `appearance`. */
+  appearance?: "outlined" | "filled" | "plain" | "soft";
+}
+
+export const PromptDock = createWebComponent<PromptDockProps>(
+  'kai-prompt-dock',
+  ["theme","frame","appearance"],
+  {  },
+);
+
 export interface PromptInputProps extends WebComponentProps {
   /** Value of the input, as a JS property. A **string** is the controlled text mirror (the host owns it and updates on `kai-value-change`). A **ComposerDoc** (array of text/entity segments) is a one-time **seed** that pre-populates pills (skills/agents/plugins); the user then edits freely. Leave unset for uncontrolled behavior. `kai-submit`/`kai-value-change` always emit `value` as the flattened string (back-compat) plus the structured `doc` + `entities`. */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
@@ -1147,6 +1160,23 @@ export const ScrollButton = createWebComponent<ScrollButtonProps>(
   { onScroll: 'kai-scroll' },
 );
 
+export interface SegmentedProps extends WebComponentProps {
+  /** The selectable segments, left to right. Set as a JS property (array). */
+  options: { value: string; label: string; icon?: undefined | string }[];
+  /** Controlled selected `value` — settable and reflected to the `value` attribute. `el.value = 'preview'` drives it; choosing a segment updates it and fires `kai-change`. Read `el.value` for live state. */
+  value?: string;
+  /** Control density: `sm` or `md`. Defaults to `md`. */
+  size?: "sm" | "md";
+  /** A segment was chosen. */
+  onChange?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export const Segmented = createWebComponent<SegmentedProps>(
+  'kai-segmented',
+  ["theme","options","value","size"],
+  { onChange: 'kai-change' },
+);
+
 export interface SeparatorProps extends WebComponentProps {
   /** `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). */
   orientation?: "vertical" | "horizontal";
@@ -1155,6 +1185,32 @@ export interface SeparatorProps extends WebComponentProps {
 export const Separator = createWebComponent<SeparatorProps>(
   'kai-separator',
   ["theme","orientation"],
+  {  },
+);
+
+export interface SettingItemProps extends WebComponentProps {
+  /** Row label (primary text). Attribute: `label`. */
+  label?: string;
+  /** Optional secondary description under the label. Attribute: `description`. */
+  description?: string;
+}
+
+export const SettingItem = createWebComponent<SettingItemProps>(
+  'kai-setting-item',
+  ["theme","label","description"],
+  {  },
+);
+
+export interface SettingsGroupProps extends WebComponentProps {
+  /** Small section heading shown above the card. Attribute: `heading`. */
+  heading?: string;
+  /** Optional muted description under the heading. Attribute: `description`. */
+  description?: string;
+}
+
+export const SettingsGroup = createWebComponent<SettingsGroupProps>(
+  'kai-settings-group',
+  ["theme","heading","description"],
   {  },
 );
 
@@ -1321,13 +1377,15 @@ export interface TasksProps extends WebComponentProps {
   defaultValue?: string[];
   /** Freeze the whole list + Confirm. Attribute: `disabled`. */
   disabled?: boolean;
+  /** Display-only: rows can't be toggled and show the default cursor (no pointer, hover, or focus affordances). Keeps the look as-is. Attribute: `readonly`. */
+  readonly?: boolean;
   /** The selection changed on a toggle — the selected ids in input order. */
   onValueChange?: (event: CustomEvent<{ value: string[] }>) => void;
 }
 
 export const Tasks = createWebComponent<TasksProps>(
   'kai-tasks',
-  ["theme","data","cardId","heading","resolution","value","defaultValue","disabled"],
+  ["theme","data","cardId","heading","resolution","value","defaultValue","disabled","readonly"],
   { onValueChange: 'kai-value-change' },
 );
 

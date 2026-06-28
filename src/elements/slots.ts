@@ -431,6 +431,39 @@ export interface ElementComposition {
   parts?: PartDef[];
 }
 
+/** Slots + styleable `::part`s of `<kai-prompt-dock>`. */
+export const PROMPT_DOCK_SLOTS: SlotDef[] = [
+  { name: 'top',    mode: 'inject', part: true, doc: 'The top lip: a notice or banner above the input. Rendered only when filled.' },
+  { name: 'bottom', mode: 'inject', part: true, doc: 'The bottom lip: a mode or controls row below the input. Rendered only when filled.' },
+];
+export const PROMPT_DOCK_PARTS: PartDef[] = [
+  {
+    name: 'tray',
+    doc: 'The recessed tray that frames the input. The `appearance`/`frame` props set the defaults; the --kai-prompt-dock-* tokens fine-tune surface/border/radius/inset.',
+    recipe: 'kai-prompt-dock::part(tray) { --kai-prompt-dock-radius: 1rem }',
+  },
+];
+
+/** Styleable `::part`s of `<kai-segmented>`. */
+export const SEGMENTED_PARTS: PartDef[] = [
+  { name: 'track', doc: 'The segmented track (the pill container holding the segments). Restyle its background, radius, or padding.', recipe: 'kai-segmented::part(track) { border-radius: 9999px }' },
+  { name: 'segment', doc: 'Each segment button. Restyle padding, font weight, or the selected look.', recipe: 'kai-segmented::part(segment) { font-weight: 600 }' },
+];
+
+/** Styleable `::part`s of `<kai-settings-group>`. */
+export const SETTINGS_GROUP_PARTS: PartDef[] = [
+  { name: 'header', doc: 'The group heading + description block. Restyle its spacing or typography.', recipe: 'kai-settings-group::part(header) { margin-bottom: 0.75rem }' },
+  { name: 'body', doc: 'The bordered card holding the setting rows. Restyle its surface, border, or radius.', recipe: 'kai-settings-group::part(body) { border-radius: 1rem }' },
+];
+
+/** Slots + styleable `::part`s of `<kai-setting-item>`. */
+export const SETTING_ITEM_SLOTS: SlotDef[] = [
+  { name: 'control', mode: 'inject', part: true, doc: 'The row control (a switch, segmented, select, etc.), right-aligned. Omit it for a label-only row.' },
+];
+export const SETTING_ITEM_PARTS: PartDef[] = [
+  { name: 'label', doc: 'The label + description block on the left of the row. Restyle its typography or spacing.', recipe: 'kai-setting-item::part(label) { gap: 0.125rem }' },
+];
+
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS },
@@ -456,6 +489,10 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-coachmark': { slots: COACHMARK_SLOTS, parts: COACHMARK_PARTS },
   'kai-progress-bar': { parts: PROGRESS_BAR_PARTS },
   'kai-file-tree': { parts: FILE_TREE_PARTS },
+  'kai-prompt-dock': { slots: PROMPT_DOCK_SLOTS, parts: PROMPT_DOCK_PARTS },
+  'kai-segmented': { parts: SEGMENTED_PARTS },
+  'kai-settings-group': { parts: SETTINGS_GROUP_PARTS },
+  'kai-setting-item': { slots: SETTING_ITEM_SLOTS, parts: SETTING_ITEM_PARTS },
 };
 
 /**

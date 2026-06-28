@@ -649,6 +649,15 @@ export interface KaiProgressBarElement extends HTMLElement {
   tone?: string;
 }
 
+export interface KaiPromptDockElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** How the tray frames the input — the SPATIAL inset axis: `inset` (default, the classic recessed frame on every side) | `edge` (top/bottom inset only; the input sits flush left/right so the lips span the full width) | `none` (no inset; the lips attach directly as a plain stack). Attribute: `frame`. */
+  frame?: "none" | "inset" | "edge";
+  /** How the tray surface looks — the VISUAL axis, orthogonal to `frame`: `soft` (default, sunken surface + border + radius) | `outlined` (transparent + border + radius) | `filled` (sunken, no border, + radius) | `plain` (bare). Attribute: `appearance`. */
+  appearance?: "outlined" | "filled" | "plain" | "soft";
+}
+
 export interface KaiPromptInputElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -803,11 +812,40 @@ export interface KaiScrollButtonElement extends HTMLElement {
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
 }
 
+export interface KaiSegmentedElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The selectable segments, left to right. Set as a JS property (array). */
+  options: { value: string; label: string; icon?: undefined | string }[];
+  /** Controlled selected `value` — settable and reflected to the `value` attribute. `el.value = 'preview'` drives it; choosing a segment updates it and fires `kai-change`. Read `el.value` for live state. */
+  value?: string;
+  /** Control density: `sm` or `md`. Defaults to `md`. */
+  size?: "sm" | "md";
+}
+
 export interface KaiSeparatorElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). */
   orientation?: "vertical" | "horizontal";
+}
+
+export interface KaiSettingItemElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Row label (primary text). Attribute: `label`. */
+  label?: string;
+  /** Optional secondary description under the label. Attribute: `description`. */
+  description?: string;
+}
+
+export interface KaiSettingsGroupElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Small section heading shown above the card. Attribute: `heading`. */
+  heading?: string;
+  /** Optional muted description under the heading. Attribute: `description`. */
+  description?: string;
 }
 
 export interface KaiSkeletonElement extends HTMLElement {
@@ -937,6 +975,8 @@ export interface KaiTasksElement extends HTMLElement {
   defaultValue?: string[];
   /** Freeze the whole list + Confirm. Attribute: `disabled`. */
   disabled?: boolean;
+  /** Display-only: rows can't be toggled and show the default cursor (no pointer, hover, or focus affordances). Keeps the look as-is. Attribute: `readonly`. */
+  readonly?: boolean;
 }
 
 export interface KaiTextShimmerElement extends HTMLElement {
@@ -1124,6 +1164,7 @@ declare global {
     'kai-notice': KaiNoticeElement;
     'kai-popover': KaiPopoverElement;
     'kai-progress-bar': KaiProgressBarElement;
+    'kai-prompt-dock': KaiPromptDockElement;
     'kai-prompt-input': KaiPromptInputElement;
     'kai-reasoning': KaiReasoningElement;
     'kai-remote': KaiRemoteElement;
@@ -1134,7 +1175,10 @@ declare global {
     'kai-screen': KaiScreenElement;
     'kai-scroll-area': KaiScrollAreaElement;
     'kai-scroll-button': KaiScrollButtonElement;
+    'kai-segmented': KaiSegmentedElement;
     'kai-separator': KaiSeparatorElement;
+    'kai-setting-item': KaiSettingItemElement;
+    'kai-settings-group': KaiSettingsGroupElement;
     'kai-skeleton': KaiSkeletonElement;
     'kai-skills': KaiSkillsElement;
     'kai-source': KaiSourceElement;
