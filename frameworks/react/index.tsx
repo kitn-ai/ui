@@ -46,6 +46,8 @@ export interface ArtifactProps extends WebComponentProps {
   standalone?: boolean;
   /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
   readonlyPath?: boolean;
+  /** Friendly address shown in the path field instead of the real current url (read-only, non-navigable). Use when the framed url is not consumer-facing (e.g. a `data:` blob) so a clean address shows instead of leaking it. Scalar string: set as the `display-url` attribute or the `displayUrl` property. */
+  displayUrl?: string;
   /** Fired when a file is selected. `detail.path`. */
   onFileSelect?: (event: CustomEvent<{ path: string }>) => void;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
@@ -58,7 +60,7 @@ export interface ArtifactProps extends WebComponentProps {
 
 export const Artifact = createWebComponent<ArtifactProps>(
   'kai-artifact',
-  ["theme","src","files","tab","defaultTab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath"],
+  ["theme","src","files","tab","defaultTab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath","displayUrl"],
   { onFileSelect: 'kai-file-select', onMaximizeChange: 'kai-maximize-change', onNavigate: 'kai-navigate', onTabChange: 'kai-tab-change' },
 );
 
@@ -842,19 +844,21 @@ export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
 );
 
 export interface NavProps extends WebComponentProps {
-  /** The nav items. Set as a JS property (array, not an attribute). */
-  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean }[];
+  /** The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. */
+  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "primary" | "info" | "success" | "warning" | "error" | "neutral"; label?: string; pulse?: boolean }; meta?: string }[];
   /** Active item id (controlled). */
   value?: string;
   /** Initial active id when uncontrolled. */
   defaultValue?: string;
+  /** Ids of group items collapsed on first render (groups default to expanded). Set as a JS property (array). */
+  defaultCollapsed?: string[];
   /** A nav item was activated. */
   onNavSelect?: (event: CustomEvent<{ id: string }>) => void;
 }
 
 export const Nav = createWebComponent<NavProps>(
   'kai-nav',
-  ["theme","items","value","defaultValue"],
+  ["theme","items","value","defaultValue","defaultCollapsed"],
   { onNavSelect: 'kai-nav-select' },
 );
 
@@ -1516,6 +1520,8 @@ export interface WorkspaceProps extends WebComponentProps {
   collapseBelow?: number;
   /** Render Recents as dense single-line rows (a leading dot + title, no count). */
   compact?: boolean;
+  /** Suppress the built-in ConversationList so the `sidebar-header` slot owns the whole rail flex region (for apps that supply their own rail nav). Default false. Attribute: `no-conversations`. */
+  noConversations?: boolean;
   /** A conversation was selected in the sidebar. */
   onConversationSelect?: (event: CustomEvent<{ id: string }>) => void;
   /** An action button on a message was clicked. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
@@ -1540,6 +1546,6 @@ export interface WorkspaceProps extends WebComponentProps {
 
 export const Workspace = createWebComponent<WorkspaceProps>(
   'kai-workspace',
-  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","triggers","kindIcons","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed","collapseBelow","compact"],
+  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","triggers","kindIcons","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed","collapseBelow","compact","noConversations"],
   { onConversationSelect: 'kai-conversation-select', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onSidebarToggle: 'kai-sidebar-toggle', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );

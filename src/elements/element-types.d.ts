@@ -46,6 +46,8 @@ export interface KaiArtifactElement extends HTMLElement {
   standalone?: boolean;
   /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
   readonlyPath?: boolean;
+  /** Friendly address shown in the path field instead of the real current url (read-only, non-navigable). Use when the framed url is not consumer-facing (e.g. a `data:` blob) so a clean address shows instead of leaking it. Scalar string: set as the `display-url` attribute or the `displayUrl` property. */
+  displayUrl?: string;
 }
 
 export interface KaiAttachmentsElement extends HTMLElement {
@@ -598,12 +600,14 @@ export interface KaiModelSwitcherElement extends HTMLElement {
 export interface KaiNavElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
-  /** The nav items. Set as a JS property (array, not an attribute). */
-  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean }[];
+  /** The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. */
+  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "primary" | "info" | "success" | "warning" | "error" | "neutral"; label?: string; pulse?: boolean }; meta?: string }[];
   /** Active item id (controlled). */
   value?: string;
   /** Initial active id when uncontrolled. */
   defaultValue?: string;
+  /** Ids of group items collapsed on first render (groups default to expanded). Set as a JS property (array). */
+  defaultCollapsed?: string[];
 }
 
 export interface KaiNoticeElement extends HTMLElement {
@@ -1076,6 +1080,8 @@ export interface KaiWorkspaceElement extends HTMLElement {
   collapseBelow?: number;
   /** Render Recents as dense single-line rows (a leading dot + title, no count). */
   compact?: boolean;
+  /** Suppress the built-in ConversationList so the `sidebar-header` slot owns the whole rail flex region (for apps that supply their own rail nav). Default false. Attribute: `no-conversations`. */
+  noConversations?: boolean;
 }
 
 declare global {

@@ -251,6 +251,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 | `defaultSidebarCollapsed` | `default-sidebar-collapsed` | `undefined | false | true` | — | Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. |
 | `collapseBelow` | `collapse-below` | `undefined | number` | — | Auto-collapse the rail when the workspace's own width drops below this many px, and re-expand when it grows back above. Uncontrolled only (it never fights an app-driven `sidebarCollapsed`); omit to disable. Fires `kai-sidebar-toggle`. Attribute: `collapse-below`. |
 | `compact` | `compact` | `undefined | false | true` | — | Render Recents as dense single-line rows (a leading dot + title, no count). |
+| `noConversations` | `no-conversations` | `undefined | false | true` | — | Suppress the built-in ConversationList so the `sidebar-header` slot owns the whole rail flex region (for apps that supply their own rail nav). Default false. Attribute: `no-conversations`. |
 
 #### Events
 

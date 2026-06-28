@@ -154,6 +154,14 @@
         "description": "Show the address but make it read-only (visible, nav-tracking, non-editable).",
         "default": "false",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "displayUrl",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Friendly address shown in the path field instead of the real current url (read-only, non-navigable). Use when the framed url is not consumer-facing (e.g. a `data:` blob) so a clean address shows instead of leaking it. Scalar string: set as the `display-url` attribute or the `displayUrl` property.",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
@@ -3631,11 +3639,11 @@
     "props": [
       {
         "name": "items",
-        "type": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true }[]",
+        "type": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string }[]",
         "optional": true,
         "scalar": false,
-        "description": "The nav items. Set as a JS property (array, not an attribute).",
-        "displayType": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true }[]"
+        "description": "The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text.",
+        "displayType": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string }[]"
       },
       {
         "name": "value",
@@ -3652,6 +3660,14 @@
         "scalar": true,
         "description": "Initial active id when uncontrolled.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "defaultCollapsed",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Ids of group items collapsed on first render (groups default to expanded). Set as a JS property (array).",
+        "displayType": "undefined | string[]"
       }
     ],
     "events": [
@@ -3686,8 +3702,28 @@
       },
       {
         "name": "item",
-        "doc": "A nav item button. The active item carries aria-current=\"page\"; target `::part(item)[aria-current]` for the selected look.",
+        "doc": "A nav item button (leaf or group parent). The active leaf carries aria-current=\"page\" and a group parent carries aria-expanded; target `::part(item)[aria-current]` for the selected look or `::part(item)[aria-expanded]` for a group row.",
         "recipe": "kai-nav::part(item)[aria-current] { background: var(--color-accent) }"
+      },
+      {
+        "name": "group",
+        "doc": "The nested child list rendered under an expanded group item. Add a left guide line or tune its indent from outside.",
+        "recipe": "kai-nav::part(group) { border-left: 1px solid var(--color-border); margin-left: 1.1rem }"
+      },
+      {
+        "name": "chevron",
+        "doc": "The disclosure chevron on a group row (rotates when expanded). Recolor or resize it from outside.",
+        "recipe": "kai-nav::part(chevron) { opacity: 1; color: var(--color-primary) }"
+      },
+      {
+        "name": "status",
+        "doc": "The per-item status cluster (a colored dot in the tone hue + an optional label). Shown only when an item carries a `status`; the `pulse` flag animates the dot. Restyle from outside.",
+        "recipe": "kai-nav::part(status) { gap: 0.5rem }"
+      },
+      {
+        "name": "meta",
+        "doc": "The right-aligned muted trailing text on a row (e.g. a relative time). Shown only when an item carries `meta`; restyle from outside.",
+        "recipe": "kai-nav::part(meta) { color: var(--color-foreground); font-variant-numeric: tabular-nums }"
       }
     ]
   },
@@ -6276,6 +6312,14 @@
         "optional": true,
         "scalar": true,
         "description": "Render Recents as dense single-line rows (a leading dot + title, no count).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "noConversations",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Suppress the built-in ConversationList so the `sidebar-header` slot owns the whole rail flex region (for apps that supply their own rail nav). Default false. Attribute: `no-conversations`.",
         "displayType": "undefined | false | true"
       }
     ],
