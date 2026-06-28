@@ -10,8 +10,9 @@ import type { ConversationSummary } from '../types';
 // Labs: a working interactive prototype of the Claude desktop app, built on
 // kai-workspace + the kai-* elements. Home/Code swap the main view via kai-tabs;
 // Design opens the kai-screen takeover; the rail collapses; the user menu and
-// Recents filter are real kai-menus. The purpose is to find gaps. Styling is
-// Tailwind utilities (the storybook preview scans src/, so they generate).
+// Recents filter are real kai-menus. It showcases the kit composing a full
+// desktop shell. Styling is Tailwind utilities (the storybook preview scans
+// src/, so they generate).
 
 // kai-tasks, kai-command, and kai-icon are used as JSX elements here without their
 // stories' own facades, so declare their tags locally.
@@ -22,6 +23,7 @@ declare module 'solid-js' {
       'kai-tasks': JSX.HTMLAttributes<HTMLElement>;
       'kai-command': JSX.HTMLAttributes<HTMLElement> & { placeholder?: string; 'empty-label'?: string; theme?: string };
       'kai-icon': JSX.HTMLAttributes<HTMLElement> & { name?: string; size?: string };
+      'kai-tooltip': JSX.HTMLAttributes<HTMLElement> & { content?: string; 'open-delay'?: number | string };
     }
   }
 }
@@ -122,8 +124,8 @@ function SlotPlaceholder(props: { label: string; hint: string; icon?: string }) 
   );
 }
 
-export const ClaudeCodeDesktop: Story = {
-  name: 'Claude Code Desktop',
+export const ClaudeCode: Story = {
+  name: 'Claude Code',
   render: () => {
     const [view, setView] = createSignal<'home' | 'code'>('home');
     const [designOpen, setDesignOpen] = createSignal(false);
@@ -145,20 +147,24 @@ export const ClaudeCodeDesktop: Story = {
           {/* sidebar-header: chrome + full-width tabs + nav */}
           <div slot="sidebar-header" class="px-2.5 pt-2">
             <div class="flex justify-between gap-1 pb-2">
-              <kai-button
-                ref={(el) => { el.addEventListener('kai-click', () => (ws?.toggleSidebar as (() => void) | undefined)?.()); }}
-                variant="ghost"
-                size="icon-sm"
-                icon="panel-left"
-                label="Toggle sidebar"
-              ></kai-button>
-              <kai-button
-                ref={(el) => { el.addEventListener('kai-click', () => setCmdOpen(true)); }}
-                variant="ghost"
-                size="icon-sm"
-                icon="search"
-                label="Search"
-              ></kai-button>
+              <kai-tooltip content="Toggle sidebar">
+                <kai-button
+                  ref={(el) => { el.addEventListener('kai-click', () => (ws?.toggleSidebar as (() => void) | undefined)?.()); }}
+                  variant="ghost"
+                  size="icon-sm"
+                  icon="panel-left"
+                  label="Toggle sidebar"
+                ></kai-button>
+              </kai-tooltip>
+              <kai-tooltip content="Search">
+                <kai-button
+                  ref={(el) => { el.addEventListener('kai-click', () => setCmdOpen(true)); }}
+                  variant="ghost"
+                  size="icon-sm"
+                  icon="search"
+                  label="Search"
+                ></kai-button>
+              </kai-tooltip>
             </div>
             <kai-tabs
               ref={(el) => {
@@ -195,7 +201,9 @@ export const ClaudeCodeDesktop: Story = {
                 </div>
               </kai-menu>
               <span class="relative ml-auto inline-flex">
-                <kai-button variant="ghost" size="icon-sm" label="Sync"><Download slot="icon" class="size-4" /></kai-button>
+                <kai-tooltip content="Sync">
+                  <kai-button variant="ghost" size="icon-sm" label="Sync"><Download slot="icon" class="size-4" /></kai-button>
+                </kai-tooltip>
                 <kai-status status="new" pulse class="pointer-events-none absolute -top-0.5 -right-0.5"></kai-status>
               </span>
             </div>
@@ -226,7 +234,9 @@ export const ClaudeCodeDesktop: Story = {
                     <div slot="toolbar-end" class="flex items-center gap-1.5">
                       <kai-model-switcher ref={(el) => { const m = el as El; m.models = MODELS; m.currentModel = 'opus'; }}></kai-model-switcher>
                       <kai-menu ref={(el) => { (el as El).items = [{ id: 'high', label: 'High', checked: true }, { id: 'med', label: 'Medium' }]; }} trigger-label="High" trigger-icon-trailing="chevron-down"></kai-menu>
-                      <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice"></kai-button>
+                      <kai-tooltip content="Voice">
+                        <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice"></kai-button>
+                      </kai-tooltip>
                     </div>
                   </kai-prompt-input>
                   <div class="mt-2 text-[0.8125rem] text-muted-foreground">Ideas for you</div>
@@ -314,8 +324,12 @@ export const ClaudeCodeDesktop: Story = {
         code: `<kai-workspace compact>
   <!-- sidebar chrome: toggle/search, full-width tabs, nav -->
   <div slot="sidebar-header">
-    <kai-button variant="ghost" size="icon-sm" icon="panel-left" label="Toggle sidebar"></kai-button>
-    <kai-button variant="ghost" size="icon-sm" icon="search" label="Search"></kai-button>
+    <kai-tooltip content="Toggle sidebar">
+      <kai-button variant="ghost" size="icon-sm" icon="panel-left" label="Toggle sidebar"></kai-button>
+    </kai-tooltip>
+    <kai-tooltip content="Search">
+      <kai-button variant="ghost" size="icon-sm" icon="search" label="Search"></kai-button>
+    </kai-tooltip>
     <kai-tabs variant="segmented"></kai-tabs>
     <kai-nav></kai-nav>
   </div>
@@ -349,7 +363,9 @@ export const ClaudeCodeDesktop: Story = {
       <div slot="toolbar-end">
         <kai-model-switcher></kai-model-switcher>
         <kai-menu trigger-label="High" trigger-icon-trailing="chevron-down"></kai-menu>
-        <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice"></kai-button>
+        <kai-tooltip content="Voice">
+          <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice"></kai-button>
+        </kai-tooltip>
       </div>
     </kai-prompt-input>
     <kai-suggestions></kai-suggestions>
