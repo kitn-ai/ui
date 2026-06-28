@@ -662,6 +662,17 @@ export interface KaiPaneElement extends HTMLElement {
   status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
 }
 
+export interface KaiPaneGroupElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute). */
+  tabs?: { id: string; name: string; status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean }; needsAttention?: boolean; number?: number }[];
+  /** The active tab id (controlled, and reflected to the `active` ATTRIBUTE so `::part`/`[active]` selectors and the per-tab named slot follow it). Set it as the `active` attribute or drive it from `kai-tab-change`; omit for uncontrolled (the first tab). */
+  active?: string;
+  /** Highlight the frame as the ACTIVE group in a multi-group layout. Attribute: `focused`. */
+  focused?: boolean;
+}
+
 export interface KaiPopoverElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -1206,6 +1217,7 @@ declare global {
     'kai-nav': KaiNavElement;
     'kai-notice': KaiNoticeElement;
     'kai-pane': KaiPaneElement;
+    'kai-pane-group': KaiPaneGroupElement;
     'kai-popover': KaiPopoverElement;
     'kai-progress-bar': KaiProgressBarElement;
     'kai-prompt-dock': KaiPromptDockElement;

@@ -946,6 +946,27 @@ export const Pane = createWebComponent<PaneProps>(
   { onClose: 'kai-close', onDock: 'kai-dock', onMaximize: 'kai-maximize', onSplit: 'kai-split' },
 );
 
+export interface PaneGroupProps extends WebComponentProps {
+  /** The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute). */
+  tabs?: { id: string; name: string; status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean }; needsAttention?: boolean; number?: number }[];
+  /** The active tab id (controlled, and reflected to the `active` ATTRIBUTE so `::part`/`[active]` selectors and the per-tab named slot follow it). Set it as the `active` attribute or drive it from `kai-tab-change`; omit for uncontrolled (the first tab). */
+  active?: string;
+  /** Highlight the frame as the ACTIVE group in a multi-group layout. Attribute: `focused`. */
+  focused?: boolean;
+  /** A tab was selected (click, Enter/Space, or arrow-key move). `detail.id` is the tab's id. */
+  onTabChange?: (event: CustomEvent<{ id: string }>) => void;
+  /** A tab's close (×) was clicked. Drop the tab from `tabs` yourself. */
+  onTabClose?: (event: CustomEvent<{ id: string }>) => void;
+  /** A tab's "…" overflow was clicked. Open your own menu from `detail.id`. */
+  onTabMenu?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export const PaneGroup = createWebComponent<PaneGroupProps>(
+  'kai-pane-group',
+  ["theme","tabs","active","focused"],
+  { onTabChange: 'kai-tab-change', onTabClose: 'kai-tab-close', onTabMenu: 'kai-tab-menu' },
+);
+
 export interface PopoverProps extends WebComponentProps {
   /** Floating placement relative to the trigger (floating-ui placement). */
   placement?: "top" | "right" | "bottom" | "left" | "top-start" | "top-end" | "right-start" | "right-end" | "bottom-start" | "bottom-end" | "left-start" | "left-end";

@@ -4110,6 +4110,107 @@
     ]
   },
   {
+    "tag": "kai-pane-group",
+    "className": "KaiPaneGroupElement",
+    "displayName": "PaneGroup",
+    "props": [
+      {
+        "name": "tabs",
+        "type": "undefined | { id: string; name: string; status?: undefined | { tone: \"working\" | \"idle\" | \"done\" | \"error\" | \"blocked\"; label?: undefined | string; pulse?: undefined | false | true }; needsAttention?: undefined | false | true; number?: undefined | number }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute).",
+        "displayType": "undefined | { id: string; name: string; status?: undefined | { tone: \"working\" | \"idle\" | \"done\" | \"error\" | \"blocked\"; label?: undefined | string; pulse?: undefined | false | true }; needsAttention?: undefined | false | true; number?: undefined | number }[]"
+      },
+      {
+        "name": "active",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The active tab id (controlled, and reflected to the `active` ATTRIBUTE so `::part`/`[active]` selectors and the per-tab named slot follow it). Set it as the `active` attribute or drive it from `kai-tab-change`; omit for uncontrolled (the first tab).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "focused",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Highlight the frame as the ACTIVE group in a multi-group layout. Attribute: `focused`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-tab-change",
+        "detail": "{ id: string }",
+        "description": "A tab was selected (click, Enter/Space, or arrow-key move). `detail.id` is the tab's id.",
+        "displayDetail": "{ id: string }"
+      },
+      {
+        "name": "kai-tab-close",
+        "detail": "{ id: string }",
+        "description": "A tab's close (×) was clicked. Drop the tab from `tabs` yourself.",
+        "displayDetail": "{ id: string }"
+      },
+      {
+        "name": "kai-tab-menu",
+        "detail": "{ id: string }",
+        "description": "A tab's \"…\" overflow was clicked. Open your own menu from `detail.id`.",
+        "displayDetail": "{ id: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "select",
+        "params": "id: string",
+        "returns": "void",
+        "description": "Select a tab by id (fires `kai-tab-change`). Ignores unknown ids."
+      },
+      {
+        "name": "focus",
+        "params": "",
+        "returns": "void",
+        "description": "Focus the active tab in the strip."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "PaneGroup",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-panegroup--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "tabs",
+        "doc": "The tab strip (role=\"tablist\"). Restyle its background, height, padding, or gap from outside.",
+        "recipe": "kai-pane-group::part(tabs) { background: var(--color-card); gap: 0.25rem }"
+      },
+      {
+        "name": "tab",
+        "doc": "A single tab button. The active tab carries `[aria-selected=\"true\"]`; target `::part(tab)[aria-selected=\"true\"]` for the selected look.",
+        "recipe": "kai-pane-group::part(tab)[aria-selected=\"true\"] { background: var(--color-accent) }"
+      },
+      {
+        "name": "body",
+        "doc": "The active tab's content region (the named/default slot host).",
+        "recipe": "kai-pane-group::part(body) { padding: 0.75rem }"
+      },
+      {
+        "name": "menu",
+        "doc": "The per-tab \"…\" overflow button. Reveal it on hover or pin it visible from outside.",
+        "recipe": "kai-pane-group::part(menu) { opacity: 1 }"
+      },
+      {
+        "name": "close",
+        "doc": "The per-tab close (\"×\") button. Recolor, resize, or hide it from outside.",
+        "recipe": "kai-pane-group::part(close) { color: var(--color-muted-foreground) }"
+      }
+    ]
+  },
+  {
     "tag": "kai-popover",
     "className": "KaiPopoverElement",
     "displayName": "Popover",
