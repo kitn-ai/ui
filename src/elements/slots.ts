@@ -493,6 +493,18 @@ export const DIALOG_PARTS: PartDef[] = [
   { name: 'body', doc: 'The scrolling content region (the default slot).', recipe: 'kai-dialog::part(body) { padding: 1.25rem }' },
 ];
 
+/** Styleable `::part`s of `<kai-pane-group>` (the editor group: a tab strip over
+ *  the active tab's pane). The per-tab content slots are NAMED DYNAMICALLY by tab
+ *  id (`slot="<tab id>"`) plus a default slot, so they are not enumerable here —
+ *  only the styleable parts are registered. */
+export const PANE_GROUP_PARTS: PartDef[] = [
+  { name: 'tabs', doc: 'The tab strip (role="tablist"). Restyle its background, height, padding, or gap from outside.', recipe: 'kai-pane-group::part(tabs) { background: var(--color-card); gap: 0.25rem }' },
+  { name: 'tab', doc: 'A single tab button. The active tab carries `[aria-selected="true"]`; target `::part(tab)[aria-selected="true"]` for the selected look.', recipe: 'kai-pane-group::part(tab)[aria-selected="true"] { background: var(--color-accent) }' },
+  { name: 'body', doc: 'The active tab\'s content region (the named/default slot host).', recipe: 'kai-pane-group::part(body) { padding: 0.75rem }' },
+  { name: 'menu', doc: 'The per-tab "…" overflow button. Reveal it on hover or pin it visible from outside.', recipe: 'kai-pane-group::part(menu) { opacity: 1 }' },
+  { name: 'close', doc: 'The per-tab close ("×") button. Recolor, resize, or hide it from outside.', recipe: 'kai-pane-group::part(close) { color: var(--color-muted-foreground) }' },
+];
+
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS },
@@ -523,6 +535,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-settings-group': { parts: SETTINGS_GROUP_PARTS },
   'kai-setting-item': { slots: SETTING_ITEM_SLOTS, parts: SETTING_ITEM_PARTS },
   'kai-pane': { slots: PANE_SLOTS, parts: PANE_PARTS },
+  'kai-pane-group': { parts: PANE_GROUP_PARTS },
   'kai-agent-card': { parts: AGENT_CARD_PARTS },
   'kai-dialog': { slots: DIALOG_SLOTS, parts: DIALOG_PARTS },
 };

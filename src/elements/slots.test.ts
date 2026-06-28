@@ -230,6 +230,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-nav',
       'kai-notice',
       'kai-pane',
+      'kai-pane-group',
       'kai-progress-bar',
       'kai-prompt-dock',
       'kai-prompt-input',
