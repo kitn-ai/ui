@@ -208,6 +208,10 @@ export interface TasksCardProps {
   defaultValue?: string[];
   /** Freeze the whole list + Confirm. */
   disabled?: boolean;
+  /** Display-only: rows can't be toggled and show the default cursor (no pointer,
+   *  no hover background, no focus ring). Keeps the visual content as-is — this only
+   *  drops the interactive affordances + a11y exposure. */
+  readonly?: boolean;
   /** Fires on every selection change with the selected ids (distinct from submit). */
   onValueChange?: (payload: { value: string[] }) => void;
   /** Receive the imperative controller once mounted. */
@@ -227,7 +231,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
   const merged = mergeProps({ cardId: 'kai-tasks' }, props);
   const [local] = splitProps(merged, [
     'data', 'cardId', 'heading', 'host', 'hostElement', 'class', 'resolution',
-    'value', 'defaultValue', 'disabled', 'onValueChange', 'controllerRef',
+    'value', 'defaultValue', 'disabled', 'readonly', 'onValueChange', 'controllerRef',
   ]);
 
   const ctxHost = useCardHost();
@@ -289,6 +293,9 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
   );
 
   const groupDisabled = (): boolean => local.disabled === true;
+  // Display-only: block all toggling/confirm and drop the interactive affordances,
+  // without the dimmed/`disabled` look.
+  const readOnly = (): boolean => local.readonly === true;
 
   const count = createMemo(() => selected().size);
   // `progress` mode = the onboarding-checklist look: a header `done / total`
@@ -299,7 +306,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
   const masterState = createMemo(() => selectAllState(tasks(), selected()));
   const showMaster = createMemo(() => showSelectAll(data(), tasks()));
   const reason = createMemo(() => confirmReason(data(), count()));
-  const confirmEnabled = createMemo(() => canConfirm(data(), count()) && !res.isResolved() && !groupDisabled());
+  const confirmEnabled = createMemo(() => canConfirm(data(), count()) && !res.isResolved() && !groupDisabled() && !readOnly());
 
   // Apply one id to a selection set, honoring the max gate (mutates+returns `next`).
   const applyToggle = (next: Set<string>, id: string, on: boolean): Set<string> => {
@@ -314,12 +321,12 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
   };
 
   const toggle = (id: string, on: boolean): void => {
-    if (res.isResolved() || groupDisabled()) return;
+    if (res.isResolved() || groupDisabled() || readOnly()) return;
     setSelected(applyToggle(new Set(selected()), id, on));
   };
 
   const toggleAll = (on: boolean): void => {
-    if (res.isResolved() || groupDisabled()) return;
+    if (res.isResolved() || groupDisabled() || readOnly()) return;
     const next = new Set(selected());
     for (const id of toggleableIds(tasks())) {
       if (on) next.add(id);
@@ -351,7 +358,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
   onMount(() => {
     local.controllerRef?.({
       select: (taskIds) => {
-        if (res.isResolved() || groupDisabled()) return;
+        if (res.isResolved() || groupDisabled() || readOnly()) return;
         if (taskIds === undefined) { toggleAll(true); return; }
         // Build the set fresh, honoring max + disabled per id (skip disabled rows).
         const next = new Set<string>();
@@ -427,7 +434,8 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
           heading={progress() ? undefined : headingText()}
           actions={
             // `progress` mode is confirm-less: checking a row IS the action.
-            progress() || res.isResolved() ? undefined : (
+            // `readonly` is display-only, so there's no confirm/dismiss row either.
+            progress() || res.isResolved() || readOnly() ? undefined : (
               <div class="flex w-full flex-wrap items-center justify-between gap-2">
                 <Show when={local.data?.dismissible === true}>
                   <Button
@@ -483,12 +491,14 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                 onToggle={(id, on) => toggle(id, on)}
                 groupClass={local.class}
                 maxNote={data().max !== undefined ? data().max : undefined}
+                readonly={readOnly()}
               />
             </Show>
             <Show when={!progress()}>
             <div
               role="group"
               aria-label={local.heading ?? local.data?.heading ?? 'Tasks'}
+              aria-readonly={readOnly() ? 'true' : undefined}
               class={cn('flex flex-col', local.class)}
               onKeyDown={(e) => {
                 // Enter anywhere in the card (off a checkbox) confirms when enabled.
@@ -505,17 +515,20 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                     return (
                       <label
                         class={cn(
-                          'flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors',
+                          'flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors',
+                          readOnly() ? 'cursor-default' : 'cursor-pointer',
                           masterState() === 'checked'
                             ? 'bg-accent text-accent-foreground'
-                            : 'text-foreground hover:bg-muted/50',
+                            : readOnly()
+                              ? 'text-foreground'
+                              : 'text-foreground hover:bg-muted/50',
                         )}
                       >
                         <input
                           type="checkbox"
                           class="kai-checkbox"
                           checked={masterState() === 'checked'}
-                          disabled={groupDisabled()}
+                          disabled={groupDisabled() || readOnly()}
                           aria-checked={indeterminate() ? 'mixed' : masterState() === 'checked'}
                           ref={(el) => {
                             createEffect(() => {
@@ -540,9 +553,11 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                       <label
                         class={cn(
                           'flex items-start gap-3 px-3 py-2.5 text-sm transition-colors',
-                          blocked()
-                            ? 'cursor-not-allowed opacity-60'
-                            : 'cursor-pointer hover:bg-muted/50',
+                          readOnly()
+                            ? 'cursor-default'
+                            : blocked()
+                              ? 'cursor-not-allowed opacity-60'
+                              : 'cursor-pointer hover:bg-muted/50',
                           checked() && !blocked()
                             ? 'bg-accent font-medium text-accent-foreground'
                             : 'text-foreground',
@@ -553,7 +568,7 @@ export function TasksCard(props: TasksCardProps): JSX.Element {
                           type="checkbox"
                           class="kai-checkbox mt-0.5"
                           checked={checked()}
-                          disabled={blocked()}
+                          disabled={blocked() || readOnly()}
                           aria-disabled={blocked() ? 'true' : undefined}
                           aria-describedby={task.description ? descId : undefined}
                           onChange={(e) => toggle(task.id, e.currentTarget.checked)}
@@ -604,6 +619,8 @@ function ProgressChecklist(props: {
   onToggle: (id: string, on: boolean) => void;
   groupClass?: string;
   maxNote?: number;
+  /** Display-only: rows aren't focusable/toggleable and show the default cursor. */
+  readonly?: boolean;
 }): JSX.Element {
   return (
     <div class={cn('flex flex-col gap-3', props.groupClass)}>
@@ -635,6 +652,7 @@ function ProgressChecklist(props: {
       <ul
         aria-labelledby={props.heading ? props.headingId : undefined}
         aria-label={props.heading ? undefined : 'Checklist'}
+        aria-readonly={props.readonly ? 'true' : undefined}
         class="flex flex-col gap-1"
       >
         <For each={props.tasks}>
@@ -650,15 +668,22 @@ function ProgressChecklist(props: {
                     // Keyboard focus ring (kit standard, inset so it stays within the
                     // row). focus-visible only, so a mouse click that parks focus on the
                     // row doesn't leave a noisy persistent outline — and it makes a
-                    // Tab-focused completed row's open description perceivable.
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
-                    blocked() ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-muted/50',
+                    // Tab-focused completed row's open description perceivable. Dropped
+                    // entirely when readonly (the row isn't focusable then).
+                    !props.readonly &&
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+                    props.readonly
+                      ? 'cursor-default'
+                      : blocked()
+                        ? 'cursor-not-allowed opacity-60'
+                        : 'cursor-pointer hover:bg-muted/50',
                   )}
                   data-task-id={task.id}
                   // Completed rows hide their description until hover/focus, so make the
                   // row itself focusable to drive the focus-reveal (group-focus-within).
-                  // Incomplete rows stay unfocusable. Expose the label + description to AT.
-                  tabindex={checked() ? 0 : undefined}
+                  // Incomplete rows — and every row when readonly — stay unfocusable.
+                  // Expose the label + description to AT.
+                  tabindex={!props.readonly && checked() ? 0 : undefined}
                   aria-label={checked() ? task.label : undefined}
                   aria-describedby={checked() && task.description ? descId : undefined}
                 >
@@ -666,7 +691,7 @@ function ProgressChecklist(props: {
                     type="checkbox"
                     class="sr-only"
                     checked={checked()}
-                    disabled={blocked()}
+                    disabled={blocked() || props.readonly}
                     aria-disabled={blocked() ? 'true' : undefined}
                     aria-describedby={task.description ? descId : undefined}
                     onChange={(e) => props.onToggle(task.id, e.currentTarget.checked)}
