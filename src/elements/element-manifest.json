@@ -29,7 +29,7 @@
     "kai-empty": "empty",
     "kai-status": "status",
     "kai-nav": "nav",
-    "kai-stat": "stat",
+    "kai-progress-bar": "progress-bar",
     "kai-coachmark": "coachmark",
     "kai-tabs": "tabs",
     "kai-voice-output": "voice-output",
@@ -64,7 +64,15 @@
     "kai-compare": "compare",
     "kai-composer": "composer",
     "kai-menu": "menu",
-    "kai-command": "command"
+    "kai-command": "command",
+    "kai-prompt-dock": "prompt-dock",
+    "kai-segmented": "segmented",
+    "kai-settings-group": "settings-group",
+    "kai-setting-item": "setting-item",
+    "kai-pane": "pane",
+    "kai-pane-group": "pane-group",
+    "kai-agent-card": "agent-card",
+    "kai-dialog": "dialog"
   },
   "files": {
     "conversation-list": [
@@ -152,8 +160,8 @@
     "nav": [
       "kai-nav"
     ],
-    "stat": [
-      "kai-stat"
+    "progress-bar": [
+      "kai-progress-bar"
     ],
     "coachmark": [
       "kai-coachmark"
@@ -257,6 +265,30 @@
     ],
     "command": [
       "kai-command"
+    ],
+    "prompt-dock": [
+      "kai-prompt-dock"
+    ],
+    "segmented": [
+      "kai-segmented"
+    ],
+    "settings-group": [
+      "kai-settings-group"
+    ],
+    "setting-item": [
+      "kai-setting-item"
+    ],
+    "pane": [
+      "kai-pane"
+    ],
+    "pane-group": [
+      "kai-pane-group"
+    ],
+    "agent-card": [
+      "kai-agent-card"
+    ],
+    "dialog": [
+      "kai-dialog"
     ]
   }
 }
