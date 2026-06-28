@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, beforeAll } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resizable';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle, clampBasis } from '../ui/resizable';
 
 // NOTE on file location: the task brief names `src/components/resizable.tsx`, but
 // in this tree the resizable UI primitives live in `src/ui/resizable.tsx` and the
@@ -45,6 +45,65 @@ describe('ResizablePanel default-size reflection', () => {
     ));
     const first = container.querySelector('[data-default-size]') as HTMLElement;
     expect(first?.dataset.defaultSize).toBe('280');
+  });
+});
+
+describe('clampBasis — initial-size clamp helper', () => {
+  it('wraps a default in clamp() when both min and max are present', () => {
+    expect(clampBasis('40%', '360px', '480px')).toBe('clamp(360px, 40%, 480px)');
+  });
+  it('caps with min() when only a max is present (the v0 snap-to-max case)', () => {
+    expect(clampBasis('40%', undefined, '480px')).toBe('min(40%, 480px)');
+  });
+  it('floors with max() when only a min is present', () => {
+    expect(clampBasis('40%', '360px', undefined)).toBe('max(360px, 40%)');
+  });
+  it('passes the basis through untouched when there are no bounds', () => {
+    expect(clampBasis('40%', undefined, undefined)).toBe('40%');
+  });
+  it('stays undefined (flexible) when there is no default', () => {
+    expect(clampBasis(undefined, '360px', '480px')).toBeUndefined();
+  });
+});
+
+describe('ResizablePanel clamps its INITIAL flex-basis into [min, max]', () => {
+  it('caps a percent default against a px max so it cannot paint past max (v0 chat pane)', () => {
+    const { container } = render(() => (
+      <ResizablePanelGroup orientation="horizontal">
+        <ResizablePanel defaultSize="40%" minSize="360px" maxSize="480px">a</ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel>b</ResizablePanel>
+      </ResizablePanelGroup>
+    ));
+    const first = container.querySelector('[style*="flex-basis"]') as HTMLElement;
+    // The basis is a CSS clamp() so the live container width can never push it past max.
+    expect(first.style.flexBasis).toBe('clamp(360px, 40%, 480px)');
+  });
+
+  it('reads min/max from data-* attributes too (the kai-workspace rail path)', () => {
+    const { container } = render(() => (
+      <ResizablePanelGroup orientation="horizontal">
+        <ResizablePanel defaultSize={26} data-min-size="240" data-max-size="420">a</ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel>b</ResizablePanel>
+      </ResizablePanelGroup>
+    ));
+    const first = container.querySelector('[style*="flex-basis"]') as HTMLElement;
+    expect(first.style.flexBasis).toBe('clamp(240px, 26%, 420px)');
+  });
+
+  it('leaves a bounded panel with no default flexible (no spurious basis)', () => {
+    const { container } = render(() => (
+      <ResizablePanelGroup orientation="horizontal">
+        <ResizablePanel minSize="360px" maxSize="480px">a</ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel>b</ResizablePanel>
+      </ResizablePanelGroup>
+    ));
+    // No defaultSize → flexible (`flex: 1 1 0%`), never a clamp()/min()/max() basis.
+    const first = container.firstChild?.firstChild as HTMLElement;
+    expect(first.style.flexBasis).not.toMatch(/clamp|min|max/);
+    expect(first.style.flexGrow).toBe('1');
   });
 });
 
@@ -277,6 +336,23 @@ describe('<kai-resizable> size preservation across content-only re-renders', () 
     // The `hidden` attribute still collapses; the facade owns only `collapsed`.
     expect(el.shadowRoot.querySelectorAll('[data-panel]').length).toBe(1);
     expect(item.hasAttribute('collapsed')).toBe(false);
+  });
+
+  it('clamps a percent item size against a px max on its panel basis (v0 snap-to-max fix)', async () => {
+    const host = mount(`
+      <kai-resizable orientation="horizontal" style="height:300px;width:1600px">
+        <kai-resizable-item size="40%" min="360px" max="480px"><p>chat</p></kai-resizable-item>
+        <kai-resizable-item><p>preview</p></kai-resizable-item>
+      </kai-resizable>
+    `);
+    const el = host.querySelector('kai-resizable') as HTMLElement & { shadowRoot: ShadowRoot };
+    await Promise.resolve();
+    await new Promise((r) => setTimeout(r, 0));
+
+    const panel = el.shadowRoot.querySelector('[data-panel]') as HTMLElement;
+    // Initial basis is clamped — at a wide container, 40% resolves past 480px,
+    // so the CSS clamp caps it; without the fix it painted 40% then snapped.
+    expect(panel.style.flexBasis).toBe('clamp(360px, 40%, 480px)');
   });
 
   it('still re-initializes when an item is actually added', async () => {
