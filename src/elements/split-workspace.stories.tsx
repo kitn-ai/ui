@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { createSignal, Show, For, Switch, Match, onMount, onCleanup, type JSX } from 'solid-js';
+import { createSignal, createEffect, Show, For, Switch, Match, onMount, onCleanup, type JSX } from 'solid-js';
 import {
   Bot, Terminal, FlaskConical, BookText, Boxes, Sparkles, ShieldCheck, Database,
   Megaphone, Bell, Columns3, Focus, List, Globe, CheckCircle2, Command,
@@ -88,6 +88,7 @@ declare module 'solid-js' {
       'kai-tooltip': JSX.HTMLAttributes<HTMLElement> & { content?: string; 'open-delay'?: number | string };
       'kai-separator': JSX.HTMLAttributes<HTMLElement> & { orientation?: string };
       'kai-command': JSX.HTMLAttributes<HTMLElement> & { placeholder?: string; 'empty-label'?: string; theme?: string };
+      'kai-dialog': JSX.HTMLAttributes<HTMLElement> & { open?: boolean };
     }
   }
 }
@@ -1436,55 +1437,6 @@ export const SplitWorkspace: Story = {
       );
     };
 
-    // The header broadcast button opens this MOCK modal. There's no kai-dialog yet;
-    // a real one would own the backdrop, focus-trap, and Escape — here we hand-roll
-    // a fixed backdrop + centered panel, closing on Escape or a backdrop click.
-    const BroadcastModal = () => {
-      const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setBroadcastOpen(false); };
-      onMount(() => document.addEventListener('keydown', onKey));
-      onCleanup(() => document.removeEventListener('keydown', onKey));
-      return (
-        <div
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setBroadcastOpen(false)}
-        >
-          <div
-            class="w-full max-w-lg rounded-2xl border border-border bg-background shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div class="flex items-center justify-between border-b border-border px-4 py-3">
-              <span class="inline-flex items-center gap-2 text-sm font-semibold">
-                <Megaphone class="size-4 text-primary" /> Message all agents
-              </span>
-              <kai-button
-                ref={(el) => { el.addEventListener('kai-click', () => setBroadcastOpen(false)); }}
-                variant="ghost"
-                size="icon-sm"
-                icon="x"
-                label="Close"
-              ></kai-button>
-            </div>
-            <div class="flex flex-col gap-3 p-4">
-              <kai-prompt-input
-                ref={(el) => { (el as El).attach = false; }}
-                class="block"
-                placeholder={`Message all ${live().length} agents...`}
-              ></kai-prompt-input>
-              <div class="flex justify-end">
-                <kai-button
-                  ref={(el) => { el.addEventListener('kai-click', () => setBroadcastOpen(false)); }}
-                  variant="default"
-                  size="sm"
-                >
-                  Send to all {live().length} agents
-                </kai-button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
     // The shell follows the Storybook light/dark toggle — every token flips, and
     // the kai-* shadow roots track the toggle via the preview decorator. The only
     // pinned-dark surfaces are the Browser view's previews (dark apps being
@@ -1841,10 +1793,33 @@ export const SplitWorkspace: Story = {
           </div>
         </Show>
 
-        {/* broadcast composer (mock modal) — opened from the header megaphone */}
-        <Show when={broadcastOpen()}>
-          <BroadcastModal />
-        </Show>
+        {/* broadcast composer — dogfoods kai-dialog (it owns the backdrop, focus-trap, and Escape) */}
+        <kai-dialog
+          ref={(el: HTMLElement & { open?: boolean }) => {
+            createEffect(() => { el.open = broadcastOpen(); });
+            el.addEventListener('kai-open-change', (e) =>
+              setBroadcastOpen((e as CustomEvent<{ open: boolean }>).detail.open),
+            );
+          }}
+        >
+          <span slot="header" class="inline-flex items-center gap-2 text-sm font-semibold">
+            <Megaphone class="size-4 text-primary" /> Message all agents
+          </span>
+          <kai-prompt-input
+            ref={(el) => { (el as El).attach = false; }}
+            class="block"
+            placeholder={`Message all ${live().length} agents...`}
+          ></kai-prompt-input>
+          <div slot="footer" class="flex justify-end">
+            <kai-button
+              ref={(el) => { el.addEventListener('kai-click', () => setBroadcastOpen(false)); }}
+              variant="default"
+              size="sm"
+            >
+              Send to all {live().length} agents
+            </kai-button>
+          </div>
+        </kai-dialog>
 
         {/* drag ghost: a floating mini-tab that trails the pointer during a tab drag */}
         <Show when={drag()}>
