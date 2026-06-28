@@ -61,16 +61,25 @@ defineWebComponent<Props, Events>('kai-tooltip', {
   wireDisclosure(ctx, () => api, () => props.open);
 
   return (
-    <Tooltip
-      content={props.content ?? ''}
-      openDelay={props.openDelay != null ? Number(props.openDelay) : undefined}
-      closeDelay={props.closeDelay != null ? Number(props.closeDelay) : undefined}
-      placement={(props.placement as Placement | undefined) ?? undefined}
-      defaultOpen={flag('defaultOpen')}
-      disabled={flag('disabled')}
-      controllerRef={(a) => (api = a)}
-    >
-      <slot />
-    </Tooltip>
+    <>
+      {/* The shared element base sets `:host{display:block}` (styles.css). A block
+          host wraps the inline-flex trigger in a line box, so the font-descender
+          strut makes the host taller than the control and pins the control to the
+          top, so it reads off-center beside non-tooltipped siblings in a
+          flex-items-center row. inline-flex (like kai-button) drops the line box so
+          the host hugs the trigger and their centers line up. */}
+      <style>{':host{display:inline-flex}'}</style>
+      <Tooltip
+        content={props.content ?? ''}
+        openDelay={props.openDelay != null ? Number(props.openDelay) : undefined}
+        closeDelay={props.closeDelay != null ? Number(props.closeDelay) : undefined}
+        placement={(props.placement as Placement | undefined) ?? undefined}
+        defaultOpen={flag('defaultOpen')}
+        disabled={flag('disabled')}
+        controllerRef={(a) => (api = a)}
+      >
+        <slot />
+      </Tooltip>
+    </>
   );
 });

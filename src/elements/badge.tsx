@@ -21,7 +21,12 @@ interface Props extends Record<string, unknown> {
 defineWebComponent<Props>('kai-badge', {
   variant: 'default',
 }, (props) => (
-  <Badge variant={props.variant ?? 'default'} part="badge">
-    <slot />
-  </Badge>
+  <>
+    {/* Base sets `:host{display:block}`; a badge/pill flows inline with text and
+        beside sibling badges, so inline-flex like kai-button. */}
+    <style>{':host{display:inline-flex}'}</style>
+    <Badge variant={props.variant ?? 'default'} part="badge">
+      <slot />
+    </Badge>
+  </>
 ));

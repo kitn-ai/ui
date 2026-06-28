@@ -27,11 +27,16 @@ defineWebComponent<Props>('kai-status', {
   label: undefined,
   size: 'sm',
 }, (props, { flag }) => (
-  <Status
-    status={(props.status as StatusKind) ?? 'new'}
-    size={(props.size as 'sm' | 'md') ?? 'sm'}
-    pulse={flag('pulse')}
-    label={props.label as string | undefined}
-    part="dot"
-  />
+  <>
+    {/* Base sets `:host{display:block}`; a presence dot sits inline beside an
+        avatar/label, so inline-flex like kai-button. */}
+    <style>{':host{display:inline-flex}'}</style>
+    <Status
+      status={(props.status as StatusKind) ?? 'new'}
+      size={(props.size as 'sm' | 'md') ?? 'sm'}
+      pulse={flag('pulse')}
+      label={props.label as string | undefined}
+      part="dot"
+    />
+  </>
 ));

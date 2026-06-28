@@ -30,7 +30,12 @@ defineWebComponent<Props>('kai-icon', {
   name: '',
   size: 'md',
 }, (props) => (
-  <span part="icon" class={cn('inline-flex shrink-0', SIZE[props.size ?? 'md'] ?? SIZE.md)}>
-    {renderIcon(props.name, { class: 'size-full', imgClass: 'size-full', spanClass: 'size-full' })}
-  </span>
+  <>
+    {/* Base sets `:host{display:block}`; an inline icon must flow with surrounding
+        text (and not force a line break), so inline-flex like kai-button. */}
+    <style>{':host{display:inline-flex}'}</style>
+    <span part="icon" class={cn('inline-flex shrink-0', SIZE[props.size ?? 'md'] ?? SIZE.md)}>
+      {renderIcon(props.name, { class: 'size-full', imgClass: 'size-full', spanClass: 'size-full' })}
+    </span>
+  </>
 ));
