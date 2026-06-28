@@ -110,6 +110,11 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   standalone?: boolean;
   /** Make the path field read-only (visible, nav-tracking, non-editable). */
   readonlyPath?: boolean;
+  /** Friendly address shown in the path field INSTEAD of the real current url
+   *  (read-only, non-navigable). Use when the framed url is not consumer-facing
+   *  (e.g. a `data:` blob) so a clean address is shown instead of leaking it.
+   *  Unset = show the real url (editable per `readonlyPath`). */
+  displayUrl?: string;
   /** Receive the imperative controller once mounted. The `<kai-artifact>` facade
    *  forwards these as element methods (back/forward/reload/home/navigate/
    *  selectFile/openExternal/maximize/restore). */
@@ -189,6 +194,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
     'openInTab',
     'standalone',
     'readonlyPath',
+    'displayUrl',
     'controllerRef',
     'class',
   ]);
@@ -389,9 +395,10 @@ export function Artifact(props: ArtifactProps): JSX.Element {
     const input = (e.currentTarget as HTMLFormElement).elements.namedItem(
       'kai-artifact-path',
     ) as HTMLInputElement | null;
-    if (local.readonlyPath) {
-      // Submit is a no-op while read-only; keep the field reflecting currentUrl.
-      if (input) input.value = currentUrl();
+    if (local.readonlyPath || local.displayUrl != null) {
+      // Submit is a no-op while read-only or showing a friendly displayUrl; keep
+      // the field reflecting the shown value (never push the real, possibly data:, url).
+      if (input) input.value = local.displayUrl ?? currentUrl();
       return;
     }
     if (input && input.value) navigate(input.value);
@@ -408,7 +415,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
     >
       <Show when={showAnyToolbar()}>
         <ArtifactToolbar
-          url={currentUrl}
+          url={() => local.displayUrl ?? currentUrl()}
           tab={tab}
           canBack={canBack}
           canForward={canForward}
@@ -430,7 +437,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
           onToggleMaximize={toggleMaximize}
           canOpenInTab={canOpenInTab}
           onOpenInTab={openInNewTab}
-          readonlyPath={() => local.readonlyPath}
+          readonlyPath={() => local.readonlyPath || local.displayUrl != null}
         />
       </Show>
       <div class="relative min-h-0 flex-1">
