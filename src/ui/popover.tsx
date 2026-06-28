@@ -61,6 +61,8 @@ export function Popover(props: PopoverProps) {
   const position = usePosition(trigger, panel, {
     placement: props.placement ?? 'bottom-start',
     gutter: props.gutter ?? 6,
+    // Trigger removed from the DOM -> close so the panel portal doesn't orphan.
+    onDisconnect: () => setOpen(false),
   });
   useDismiss({
     enabled: isOpen,

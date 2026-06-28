@@ -40,6 +40,11 @@ interface Props extends Record<string, unknown> {
   standalone?: boolean;
   /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
   readonlyPath?: boolean;
+  /** Friendly address shown in the path field instead of the real current url
+   *  (read-only, non-navigable). Use when the framed url is not consumer-facing
+   *  (e.g. a `data:` blob) so a clean address shows instead of leaking it. Scalar
+   *  string: set as the `display-url` attribute or the `displayUrl` property. */
+  displayUrl?: string;
 }
 
 interface Events extends Record<string, unknown> {
@@ -79,6 +84,7 @@ defineWebComponent<Props, Events>('kai-artifact', {
   noTabs: false,
   standalone: false,
   readonlyPath: false,
+  displayUrl: undefined,
 }, (props, { element, dispatch, flag, expose }) => {
   const [maximized, setMaximized] = createSignal(flag('maximized'));
 
@@ -167,6 +173,7 @@ defineWebComponent<Props, Events>('kai-artifact', {
           showTabs={!flag('noTabs')}
           standalone={flag('standalone')}
           readonlyPath={flag('readonlyPath')}
+          displayUrl={props.displayUrl}
           onMaximizeChange={onMaximizeChange}
           onNavigate={(url) => dispatch('kai-navigate', { url })}
           onTabChange={(tab) => dispatch('kai-tab-change', { tab })}

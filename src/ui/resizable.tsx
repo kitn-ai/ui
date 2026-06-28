@@ -53,6 +53,51 @@ export function resolveToPx(value: SizeValue | undefined, containerPx: number): 
   return Number.isFinite(n) ? (n / 100) * containerPx : undefined;
 }
 
+/** Parse a CSS length we can statically clamp (`px` or `%` only). */
+function parseStaticLen(v: string): { n: number; unit: 'px' | '%' } | null {
+  const m = /^\s*(-?\d*\.?\d+)(px|%)\s*$/.exec(v);
+  return m ? { n: parseFloat(m[1]), unit: m[2] as 'px' | '%' } : null;
+}
+
+/**
+ * Build a panel's INITIAL `flex-basis`, clamped into its `[min, max]` bounds so
+ * it never PAINTS past its max (or below its min). The drag handler already
+ * clamps, but only once a drag begins — without this, a percentage default on a
+ * wide container (e.g. `40%` against a `480px` max) renders wider than max and
+ * then SNAPS to max on the first resize. Uses CSS `clamp()`/`min()`/`max()` so
+ * the bound is enforced at layout time against the live container size, with
+ * MIXED units (a `%` default vs a `px` max) resolving correctly — no JS measure.
+ * `basis`/`min`/`max` are already-normalized CSS lengths (see `normalizeSize`);
+ * an undefined `basis` stays undefined → the caller falls back to flexible.
+ */
+export function clampBasis(
+  basis: string | undefined,
+  min: string | undefined,
+  max: string | undefined,
+): string | undefined {
+  if (basis === undefined) return undefined;
+  // Static fast-path: when the basis and every present bound share ONE unit
+  // (all px or all %), the clamp is computable at author time, so emit a bare
+  // value. This avoids a needless clamp()/min()/max() wrapper (and keeps jsdom
+  // from reducing an all-px clamp() to calc()). MIXED units (e.g. a `%` basis
+  // against a `px` max) can only resolve against the live container, so they
+  // keep the CSS function and clamp at layout time.
+  const b = parseStaticLen(basis);
+  const lo = min === undefined ? undefined : parseStaticLen(min);
+  const hi = max === undefined ? undefined : parseStaticLen(max);
+  if (b && (min === undefined || lo?.unit === b.unit) && (max === undefined || hi?.unit === b.unit)) {
+    // CSS clamp(MIN, VAL, MAX) === max(MIN, min(VAL, MAX)).
+    let n = b.n;
+    if (hi) n = Math.min(n, hi.n);
+    if (lo) n = Math.max(n, lo.n);
+    return `${n}${b.unit}`;
+  }
+  if (min !== undefined && max !== undefined) return `clamp(${min}, ${basis}, ${max})`;
+  if (max !== undefined) return `min(${basis}, ${max})`;
+  if (min !== undefined) return `max(${min}, ${basis})`;
+  return basis;
+}
+
 // --- ResizablePanelGroup ---
 
 export interface ResizablePanelGroupProps extends JSX.HTMLAttributes<HTMLDivElement> {
@@ -112,8 +157,31 @@ function ResizablePanel(props: ResizablePanelProps) {
   // main axis to content size — the bug this replaces.) Mirrors the
   // `<kai-resizable>` web-component panel and the Shoelace/Web Awesome grid layout.
   // min:0 on BOTH axes enables shrink-to-scroll; overflow hidden.
+  // Effective min/max as CSS lengths, sourced from the typed `minSize`/`maxSize`
+  // props OR — when absent — from the `data-min-size`/`-pct` (and `-max-`)
+  // attributes a consumer may pass directly. The `kai-workspace` rail does the
+  // latter (`<ResizablePanel data-min-size="240" data-max-size="420">`). A bare
+  // `data-*-size` is pixels, `data-*-size-pct` is percent — the same convention
+  // the handle reads at drag time, so the initial clamp matches the drag clamp.
+  const effectiveBound = (
+    localVal: SizeValue | undefined,
+    pxAttr: unknown,
+    pctAttr: unknown,
+  ): string | undefined => {
+    const fromProp = normalizeSize(localVal);
+    if (fromProp !== undefined) return fromProp;
+    const px = pxAttr == null ? '' : String(pxAttr).trim();
+    if (px !== '') { const n = parseFloat(px); if (Number.isFinite(n)) return `${n}px`; }
+    const pct = pctAttr == null ? '' : String(pctAttr).trim();
+    if (pct !== '') { const n = parseFloat(pct); if (Number.isFinite(n)) return `${n}%`; }
+    return undefined;
+  };
+
   const sizeStyle = (): Record<string, string> => {
-    const basis = normalizeSize(local.defaultSize);
+    const r = rest as Record<string, unknown>;
+    const minB = effectiveBound(local.minSize, r['data-min-size'], r['data-min-size-pct']);
+    const maxB = effectiveBound(local.maxSize, r['data-max-size'], r['data-max-size-pct']);
+    const basis = clampBasis(normalizeSize(local.defaultSize), minB, maxB);
     const base: Record<string, string> = basis !== undefined
       ? { 'flex-basis': basis, 'flex-grow': '0', 'flex-shrink': '0' }
       : { flex: '1 1 0%' };

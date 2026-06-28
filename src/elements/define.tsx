@@ -1,7 +1,7 @@
 import { customElement } from 'solid-element';
 import { ChatConfig } from '../primitives/chat-config';
 import { ELEMENT_CSS } from './css';
-import { createSignal, onCleanup, onMount, Show, type JSX } from 'solid-js';
+import { createSignal, onCleanup, Show, type JSX } from 'solid-js';
 
 /**
  * Shared constructable stylesheet, built once and adopted by every element's
@@ -177,13 +177,25 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
 
     // Prefer a single shared stylesheet adopted into this shadow root; only emit
     // an inline <style> when Constructable Stylesheets aren't supported.
+    //
+    // Adopt SYNCHRONOUSLY, before solid-element inserts the rendered content into
+    // the shadow root. component-register attaches the shadow root lazily on first
+    // `renderRoot` access — which happens during that insert, AFTER this facade
+    // function returns. So we pre-attach the shadow root here (with the same
+    // `mode: 'open'` the renderRoot getter would use, making it a no-op for
+    // solid-element) and adopt the sheet now. If we deferred to onMount instead,
+    // the content would paint UNSTYLED and then animate from that bare state to
+    // its resting style once the sheet landed — every `transition-colors` button
+    // and menu/dropdown trigger flashing as if hovered-then-un-hovered on first
+    // render. Adopting first means the very first computed style of every node is
+    // already the resting style, so no transition can fire on load.
     const sheet = getSharedSheet();
-    onMount(() => {
-      const root = element.shadowRoot;
-      if (sheet && root && 'adoptedStyleSheets' in root) {
+    if (sheet) {
+      const root = element.shadowRoot ?? element.attachShadow({ mode: 'open' });
+      if ('adoptedStyleSheets' in root && !root.adoptedStyleSheets.includes(sheet)) {
         root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet];
       }
-    });
+    }
 
     return (
       <>

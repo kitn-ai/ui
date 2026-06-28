@@ -3,7 +3,8 @@ import {
 } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import {
-  computePosition, autoUpdate, offset, flip, shift, arrow, hide, type Placement,
+  computePosition, autoUpdate, offset, flip, shift, arrow, hide,
+  getOverflowAncestors, type Placement,
 } from '@floating-ui/dom';
 
 /**
@@ -72,6 +73,84 @@ export interface UsePositionOptions {
   placement?: Placement;
   gutter?: number;
   arrowEl?: Accessor<HTMLElement | undefined>;
+  /**
+   * Fired ONCE when the reference (anchor) "goes away" — either removed from the
+   * document OR hidden behind an `inert` ancestor (e.g. a modal/takeover that
+   * inert-s the background while open). In both cases the anchor is no longer a
+   * valid, interactive target, so the caller should close the overlay and unmount
+   * its portal instead of leaving it orphaned (floating over an inert background or
+   * anchored to a node that no longer exists). Anchored overlays portal OUT of the
+   * trigger's subtree, so Solid's onCleanup does not catch an anchor that is
+   * removed/inerted independently of the overlay component. Wire this to set the
+   * overlay's open state to false.
+   */
+  onDisconnect?: () => void;
+}
+
+/**
+ * True if `node` sits inside an `inert` subtree. Climbs ACROSS shadow boundaries:
+ * an anchor often lives inside a web component's shadow root (kai-coachmark renders
+ * its anchor span in its own shadow) while `inert` lands on a LIGHT-DOM ancestor of
+ * the host (kai-screen inert-s its siblings, e.g. kai-workspace). `closest('[inert]')`
+ * alone cannot see that because it halts at the shadow root, so after each tree we
+ * hop to the host of the containing ShadowRoot and keep climbing.
+ */
+function inInertSubtree(node: Node | null): boolean {
+  let n: Node | null = node;
+  while (n) {
+    if (n instanceof Element && n.closest('[inert]')) return true;
+    const root = n.getRootNode();
+    n = root instanceof ShadowRoot ? root.host : null;
+  }
+  return false;
+}
+
+/**
+ * Watch for the reference element "going away" and fire `onDisconnect` exactly
+ * once. The anchor is gone when it is either removed from the document OR hidden
+ * behind an `inert` ancestor (`inInertSubtree(reference)`, which crosses shadow
+ * boundaries) — the latter is how a modal/takeover (e.g. kai-screen) makes the
+ * background non-interactive while leaving it in the DOM. Either way the anchor is
+ * no longer a valid target and the overlay must close.
+ *
+ * Uses a MutationObserver on BOTH the document and the anchor's root node: the
+ * document catches the anchor's host being removed and any ancestor gaining
+ * `inert` (and light-DOM removals), while the anchor's root node — a ShadowRoot
+ * for kai-* elements — catches removals INSIDE the shadow tree, which a
+ * document-level observer can't see through encapsulation. We observe childList
+ * (DOM removals) AND the `inert` attribute, then re-check the anchor after any
+ * mutation. Guarded for environments without MutationObserver. Returns a teardown
+ * that disconnects the observer.
+ */
+function watchAnchorGone(ref: HTMLElement, onDisconnect: () => void): () => void {
+  if (typeof MutationObserver !== 'function') return () => {};
+  let fired = false;
+  // "Live" = connected AND not buried under an inert ancestor (across shadow roots).
+  const isLive = () => ref.isConnected && !inInertSubtree(ref);
+  // Only fire after the anchor has actually been live, so a one-off setup while
+  // detached/inert can never trigger a false disconnect.
+  let everLive = isLive();
+  const check = () => {
+    if (fired) return;
+    if (isLive()) { everLive = true; return; }
+    if (!everLive) return;
+    fired = true;
+    obs.disconnect();
+    onDisconnect();
+  };
+  const obs = new MutationObserver(check);
+  const roots = new Set<Node>();
+  if (typeof document !== 'undefined') roots.add(document);
+  const rootNode = ref.getRootNode();
+  if (rootNode) roots.add(rootNode);
+  for (const root of roots) {
+    try {
+      obs.observe(root, {
+        childList: true, subtree: true, attributes: true, attributeFilter: ['inert'],
+      });
+    } catch { /* unobservable root */ }
+  }
+  return () => obs.disconnect();
 }
 
 /**
@@ -116,8 +195,35 @@ export function usePosition(
         setHidden(!!middlewareData.hide?.referenceHidden);
       });
     };
+    // autoUpdate tracks scroll, window resize, reference/floating ResizeObserver,
+    // and reference layout-shifts (IntersectionObserver). But its `ancestorResize`
+    // only listens for DOM `resize` events (which ONLY `window` fires), so an
+    // ANCESTOR element resizing (e.g. a sibling resizable sidebar reflowing the
+    // anchor's container without resizing the anchor itself) is caught only by the
+    // threshold-based layoutShift, which lags during a continuous drag. Add a
+    // ResizeObserver across the reference and its overflow ancestors so the
+    // floating node follows the anchor on any layout resize. Both are torn down
+    // on unmount via onCleanup.
     const cleanup = autoUpdate(ref, float, update);
-    onCleanup(cleanup);
+    let ro: ResizeObserver | undefined;
+    if (typeof ResizeObserver === 'function') {
+      ro = new ResizeObserver(update);
+      ro.observe(ref);
+      for (const ancestor of getOverflowAncestors(ref)) {
+        if (ancestor instanceof Element) ro.observe(ancestor);
+      }
+    }
+    // When the anchor goes away (removed from the DOM or buried under an inert
+    // ancestor), close the overlay so its portal unmounts instead of floating
+    // orphaned. Independent of autoUpdate/ResizeObserver.
+    const disconnectWatch = options.onDisconnect
+      ? watchAnchorGone(ref, options.onDisconnect)
+      : undefined;
+    onCleanup(() => {
+      cleanup();
+      ro?.disconnect();
+      disconnectWatch?.();
+    });
   });
 
   return { pos, arrowPos, hidden };

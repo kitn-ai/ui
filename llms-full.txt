@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 59 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 66 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/ui'`):
-All 59 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 66 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 59 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 66 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/ui/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (59 elements, generated from custom-elements.json)
+## Element reference (66 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -184,7 +184,7 @@ Every element also accepts the `theme` attribute. Array/object properties are ma
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `src` | `src` | `undefined \| string` | URL the preview iframe frames. Consumer-controlled. |
-| `files` | — | `{ path: string; url?: undefined \| string; code?: undefined \| string; language?: undefined \| string; type?: undefined \| "html" \| "pdf" \| "image" \| "other" }[]` | Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). |
+| `files` | — | `{ path: string; url?: undefined \| string; code?: undefined \| string; language?: undefined \| string; type?: undefined \| "html" \| "pdf" \| "image" \| "other"; additions?: undefined \| number; deletions?: undefined \| number; status?: undefined \| "added" \| "modified" \| "deleted" \| "renamed" \| "untracked" }[]` | Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). |
 | `tab` | `tab` | `undefined \| "preview" \| "code"` | Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). |
 | `defaultTab` | `default-tab` | `undefined \| "preview" \| "code"` | Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`. |
 | `activeFile` | `active-file` | `undefined \| string` | Selected file path — syncs the tree highlight, Code source, and preview. |
@@ -200,6 +200,7 @@ Every element also accepts the `theme` attribute. Array/object properties are ma
 | `noTabs` | `no-tabs` | `undefined \| false \| true` | Hide the Preview\|Code toggle. |
 | `standalone` | `standalone` | `undefined \| false \| true` | Standalone chrome: rounded corners + border (else square, borderless in-panel). |
 | `readonlyPath` | `readonly-path` | `undefined \| false \| true` | Show the address but make it read-only (visible, nav-tracking, non-editable). |
+| `displayUrl` | `display-url` | `undefined \| string` | Friendly address shown in the path field instead of the real current url (read-only, non-navigable). Use when the framed url is not consumer-facing (e.g. a `data:` blob) so a clean address shows instead of leaking it. Scalar string: set as the `display-url` attribute or the `displayUrl` property. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -247,7 +248,7 @@ Every element also accepts the `theme` attribute. Array/object properties are ma
 |---|---|---|---|
 | `src` | `src` | `undefined \| string` | Image URL/data-URI. When absent, the `fallback` initials show instead. |
 | `alt` | `alt` | `undefined \| string` | Alt text for the image. Defaults to `fallback`. |
-| `fallback` | `fallback` | `undefined \| string` | Short text shown when there's no image — usually initials (e.g. "RT", "AI"). |
+| `fallback` | `fallback` | `undefined \| string` | Short text shown when there's no image — usually initials (e.g. "JD", "AI"). |
 | `size` | `size` | `undefined \| "sm" \| "md" \| "lg"` | Size token: `sm` \| `md` (default) \| `lg`. |
 
 _No events._
@@ -284,6 +285,8 @@ _No events._
 | `iconTrailing` | `icon-trailing` | `undefined \| string` | Trailing icon, after the label (e.g. `"chevron-down"` for a menu affordance). |
 | `label` | `label` | `undefined \| string` | Accessible name. REQUIRED for icon-only buttons (no visible text); ignored when you slot visible text, which already names the button. |
 | `disabled` | `disabled` | `undefined \| false \| true` | Disable the button (non-interactive, dimmed). |
+| `full` | `full` | `undefined \| false \| true` | Stretch the button to the full width of its container (a block button) — e.g. a card CTA or a stacked action. Attribute: `full`. |
+| `align` | `align` | `undefined \| "start" \| "center" \| "end"` | Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button. |
 | `type` | `type` | `undefined \| "button" \| "submit" \| "reset"` | Native button `type`. Defaults to `button` (so it never submits a form). |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
@@ -312,12 +315,43 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `heading` | `heading` | `undefined \| string` | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
-| `description` | `description` | `undefined \| string` | Supporting text under the heading. Attribute: `description`. |
-| `errorMessage` | `error-message` | `undefined \| string` | When set, the card renders its inline error state instead of the body. Attribute: `error-message`. |
-| `dense` | `dense` | `undefined \| false \| true` | Compact spacing for dense lists. Attribute: `dense`. |
+| `appearance` | `appearance` | `undefined \| "outlined" \| "filled" \| "plain" \| "accent"` | Surface treatment: `outlined` (default) \| `filled` \| `plain` \| `accent`. Attribute: `appearance`. |
+| `orientation` | `orientation` | `undefined \| "vertical" \| "horizontal" \| "responsive"` | `vertical` (default, media on top) \| `horizontal` (media at the start) \| `responsive` (horizontal when the card's container is wide enough, else vertical — a container query on the card's own width). Attribute: `orientation`. |
+| `collapse` | `collapse` | `undefined \| string` | The card width below which a `responsive` card collapses to vertical and the footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`. |
+| `dense` | `dense` | `undefined \| false \| true` | Tighter spacing for dense lists. Attribute: `dense`. |
+| `dismissible` | `dismissible` | `undefined \| false \| true` | Show a close (×) that hides the card and emits `kai-dismiss`. Attribute: `dismissible`. Off by default. |
+| `href` | `href` | `undefined \| string` | Render the whole card as a link. Attribute: `href`. Wins over `clickable`. |
+| `target` | `target` | `undefined \| string` | `target` for the `href` anchor. Attribute: `target`. |
+| `rel` | `rel` | `undefined \| string` | `rel` for the `href` anchor. Attribute: `rel`. |
+| `clickable` | `clickable` | `undefined \| false \| true` | Make the whole card a button (`role="button"`, Enter/Space, hover affordance) that emits `kai-card-click`. Attribute: `clickable`. Ignored when `href` is set. |
 
-_No events._
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-card-click` | `CustomEvent` | A `clickable`/`href` card was activated (click, or Enter/Space). |
+| `kai-dismiss` | `CustomEvent` | The card was dismissed via its × (it also hides itself). |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `media` | inject | Full-bleed media (image/video/illustration) at the top (vertical) or start (horizontal). Clipped to the card corners. |
+| `header` | inject | Header content, e.g. a title. Rendered above the body. |
+| `header-actions` | inject | An actions cluster pinned to the end of the header row. |
+| `footer` | inject | Footer content rendered below the body. |
+| `footer-actions` | inject | Action buttons pinned to the end of the footer. Do NOT combine with a clickable/href card (nested interactive). |
+
+**Styleable parts** (restyle from outside via `kai-card::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(card)` | The card root (a div, or an a when href is set). Restyle its radius, border, or background; set --kai-card-spacing for padding/gaps (the dense prop sets the compact default). — `kai-card::part(card) { border-radius: 1rem; --kai-card-spacing: 1.5rem }` |
+| `::part(media)` | The full-bleed media region. Cap or crop it from outside (e.g. a fixed height with object-fit). — `kai-card::part(media) { max-height: 12rem }` |
+| `::part(header)` | The header row (header content + header-actions). Add a divider or adjust its alignment. — `kai-card::part(header) { border-bottom: 1px solid var(--color-border) }` |
+| `::part(body)` | The default-slot body region. — `kai-card::part(body) { font-size: 0.9375rem }` |
+| `::part(footer)` | The footer row (footer content + footer-actions). — `kai-card::part(footer) { border-top: 1px solid var(--color-border) }` |
+| `::part(dismiss)` | The dismiss (×) button shown when dismissible. Recolor or reposition it from outside. — `kai-card::part(dismiss) { color: var(--color-muted-foreground) }` |
 
 ---
 
@@ -471,6 +505,45 @@ _No events._
 
 ---
 
+### `kai-coachmark` / `Coachmark`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-coachmark open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `headline` | `headline` | `undefined \| string` | The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). |
+| `badge` | `badge` | `undefined \| string` | A small badge pill beside the headline (e.g. "New"). |
+| `placement` | `placement` | `undefined \| string` | Floating placement relative to the anchor (default `bottom`). |
+| `tone` | `tone` | `undefined \| "primary" \| "info" \| "success" \| "warning" \| "error"` | Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. |
+| `arrow` | `arrow` | `undefined \| false \| true` | Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-dismiss` | `CustomEvent<Record<string, never>>` | The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again. |
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The coachmark opened or closed (a method, the ×, or a driven `open`). |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `content` | replace | The bubble body text shown under the headline. |
+
+**Styleable parts** (restyle from outside via `kai-coachmark::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(bubble)` | The hint bubble panel. Restyle its background, radius, or padding from outside; the default is bg-primary. — `kai-coachmark::part(bubble) { border-radius: 1rem }` |
+| `::part(arrow)` | The arrow pointing at the anchor. Inherits the bubble color; recolor it alongside the bubble. — `kai-coachmark::part(arrow) { background: var(--color-accent) }` |
+| `::part(badge)` | The small badge pill beside the headline (e.g. "New"). — `kai-coachmark::part(badge) { text-transform: none }` |
+| `::part(title)` | The bold headline text. — `kai-coachmark::part(title) { font-size: 0.9375rem }` |
+| `::part(dismiss)` | The dismiss button. Recolor or reposition it from outside. — `kai-coachmark::part(dismiss) { color: var(--color-primary-foreground) }` |
+
+---
+
 ### `kai-code-block` / `CodeBlock`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -603,13 +676,16 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `groups` | — | `{ id: string; userId?: undefined \| string; teamId?: undefined \| string; name: string; sortOrder: number; createdAt: string }[]` | Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. |
-| `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]` | A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. |
+| `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined \| string }[]` | A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. |
 | `activeId` | `active-id` | `undefined \| string` | The id of the currently-open conversation, highlighted in the list. |
+| `collapsed` | `collapsed` | `undefined \| false \| true` | Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. |
+| `defaultCollapsed` | `default-collapsed` | `undefined \| false \| true` | Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
+| `kai-collapse-toggle` | `CustomEvent<{ collapsed: false \| true }>` | The rail was collapsed or expanded (via the toggle, the reopen button, or a `collapse()`/`expand()`/`toggle()` call). |
 | `kai-conversation-select` | `CustomEvent<{ id: string }>` | A conversation was selected. |
 | `kai-new-chat` | `CustomEvent<Record<string, never>>` | The "New chat" button was clicked. |
 | `kai-search` | `CustomEvent<{ query: string }>` | The built-in search box query changed (typing, or a programmatic `clear()` which fires it with `''`). Lets a consumer mirror or server-side the filter. |
@@ -622,6 +698,12 @@ _No events._
 | `header` | replace | Full custom title bar; replaces the built-in toggle / "Chats" / New-chat row. |
 | `empty` | replace | Custom zero-state shown when there are no conversations; replaces the built-in "No conversations yet". |
 | `footer` | inject | A row below the list — account, settings, or usage. |
+
+**Styleable parts** (restyle from outside via `kai-conversations::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(trailing)` | The right-aligned trailing text on each conversation row (a count, status, or relative time). Set it per item via the `trailing` field; otherwise a short auto relative time is derived from `updatedAt`. Recolor or resize it from outside. — `kai-conversations::part(trailing) { color: var(--color-primary); font-variant-numeric: tabular-nums }` |
 
 ---
 
@@ -681,15 +763,25 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `files` | — | `{ path: string; url?: undefined \| string; code?: undefined \| string; language?: undefined \| string; type?: undefined \| "html" \| "pdf" \| "image" \| "other" }[]` | The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`). |
+| `files` | — | `{ path: string; url?: undefined \| string; code?: undefined \| string; language?: undefined \| string; type?: undefined \| "html" \| "pdf" \| "image" \| "other"; additions?: undefined \| number; deletions?: undefined \| number; status?: undefined \| "added" \| "modified" \| "deleted" \| "renamed" \| "untracked" }[]` | The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type?, additions?, deletions?, status? }`). |
 | `activeFile` | `active-file` | `undefined \| string` | Selected file path — highlighted in the tree. |
 | `defaultExpanded` | — | `undefined \| string[]` | Folder paths expanded initially. Omit to start with all folders open. |
+| `summary` | `summary` | `undefined \| false \| true` | Show a changed-files summary header (file count + summed `+/-` + Collapse-all). Attribute: `summary`. Off by default. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-select` | `CustomEvent<{ path: string }>` | Fired when a file is selected. `detail.path` = the file's path. |
+
+**Styleable parts** (restyle from outside via `kai-file-tree::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(summary)` | The changed-files summary header (the file count, the summed +additions/-deletions, and the Collapse-all/Expand-all toggle). Rendered only when the `summary` attribute is set; restyle or hide it from outside. — `kai-file-tree::part(summary) { border-bottom: none; padding-block: 0.5rem }` |
+| `::part(status)` | The per-row change-status letter (A/M/D/R/U), shown when a file carries a `status`. Colored with the conventional VCS tool hues; restyle from outside. — `kai-file-tree::part(status) { font-weight: 700 }` |
+| `::part(stat-additions)` | The trailing `+N` additions stat on a file row (success/green tool hue, tabular-nums). Shown only when a file carries `additions`. — `kai-file-tree::part(stat-additions) { color: var(--color-tool-green) }` |
+| `::part(stat-deletions)` | The trailing `-N` deletions stat on a file row (error/red tool hue, tabular-nums). Shown only when a file carries `deletions`. — `kai-file-tree::part(stat-deletions) { color: var(--color-tool-red) }` |
 
 ---
 
@@ -843,7 +935,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `items` | — | `undefined \| { id?: undefined \| string; label?: undefined \| string; icon?: undefined \| string; shortcut?: undefined \| string; checked?: undefined \| false \| true; disabled?: undefined \| false \| true; separator?: undefined \| false \| true; heading?: undefined \| false \| true; items?: undefined \| Record<string, unknown>[] }[]` | Tree of menu items. Set as a JS property — not an HTML attribute. |
+| `items` | — | `undefined \| { id?: undefined \| string; label?: undefined \| string; icon?: undefined \| string; shortcut?: undefined \| string; checked?: undefined \| false \| true; radioGroup?: undefined \| string; disabled?: undefined \| false \| true; separator?: undefined \| false \| true; heading?: undefined \| false \| true; items?: undefined \| Record<string, unknown>[] }[]` | Tree of menu items. Set as a JS property — not an HTML attribute. |
 | `placement` | `placement` | `undefined \| string` | Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). |
 | `triggerIcon` | `trigger-icon` | `undefined \| string` | Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case — a slotted trigger overrides it. |
 | `triggerLabel` | `trigger-label` | `undefined \| string` | Built-in trigger: a text label (e.g. `"High"`). |
@@ -858,7 +950,7 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). |
-| `kai-select` | `CustomEvent<{ id: string; checked?: undefined \| false \| true }>` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. |
+| `kai-select` | `CustomEvent<{ id: string; checked?: undefined \| false \| true; radioGroup?: undefined \| string }>` | Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. - Radio items: `{ id, radioGroup }` — the consumer marks `id` as the selected one in `radioGroup` and clears the others. |
 
 **Slots** (project your own markup via `slot="name"` on a light-DOM child):
 
@@ -933,13 +1025,43 @@ _No events._
 
 ---
 
+### `kai-nav` / `Nav`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `items` | — | `undefined \| { id: string; label?: undefined \| string; icon?: undefined \| string; badge?: undefined \| string; trailing?: undefined \| string; disabled?: undefined \| false \| true; children?: undefined \| Record<string, unknown>[]; status?: undefined \| { tone: "primary" \| "info" \| "success" \| "warning" \| "error" \| "neutral"; label?: undefined \| string; pulse?: undefined \| false \| true }; meta?: undefined \| string }[]` | The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. |
+| `value` | `value` | `undefined \| string` | Active item id (controlled). |
+| `defaultValue` | `default-value` | `undefined \| string` | Initial active id when uncontrolled. |
+| `defaultCollapsed` | — | `undefined \| string[]` | Ids of group items collapsed on first render (groups default to expanded). Set as a JS property (array). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-nav-select` | `CustomEvent<{ id: string }>` | A nav item was activated. |
+
+**Styleable parts** (restyle from outside via `kai-nav::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(nav)` | The nav list container. Restyle its gap or padding from outside. — `kai-nav::part(nav) { gap: 0.25rem }` |
+| `::part(item)` | A nav item button (leaf or group parent). The active leaf carries aria-current="page" and a group parent carries aria-expanded; target `::part(item)[aria-current]` for the selected look or `::part(item)[aria-expanded]` for a group row. — `kai-nav::part(item)[aria-current] { background: var(--color-accent) }` |
+| `::part(group)` | The nested child list rendered under an expanded group item. Add a left guide line or tune its indent from outside. — `kai-nav::part(group) { border-left: 1px solid var(--color-border); margin-left: 1.1rem }` |
+| `::part(chevron)` | The disclosure chevron on a group row (rotates when expanded). Recolor or resize it from outside. — `kai-nav::part(chevron) { opacity: 1; color: var(--color-primary) }` |
+| `::part(status)` | The per-item status cluster (a colored dot in the tone hue + an optional label). Shown only when an item carries a `status`; the `pulse` flag animates the dot. Restyle from outside. — `kai-nav::part(status) { gap: 0.5rem }` |
+| `::part(meta)` | The right-aligned muted trailing text on a row (e.g. a relative time). Shown only when an item carries `meta`; restyle from outside. — `kai-nav::part(meta) { color: var(--color-foreground); font-variant-numeric: tabular-nums }` |
+
+---
+
 ### `kai-notice` / `Notice`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `severity` | `severity` | `undefined \| "neutral" \| "info" \| "warning" \| "error" \| "success"` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `severity` | `severity` | `undefined \| "info" \| "success" \| "warning" \| "error" \| "neutral"` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
 | `icon` | `icon` | `undefined \| string` | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
 | `dismissible` | `dismissible` | `undefined \| false \| true` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
 
@@ -975,6 +1097,28 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The popover opened or closed (click, Escape, outside-click, or a method). |
+
+---
+
+### `kai-progress-bar` / `ProgressBar`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `value` | `value` | `undefined \| number` | Current progress value (0..max). Attribute: `value`. |
+| `max` | `max` | `undefined \| number` | The value `value` runs to (default 100). Attribute: `max`. |
+| `label` | `label` | `undefined \| string` | Optional caption above the track. Attribute: `label`. |
+| `tone` | `tone` | `undefined \| string` | Fill color: `primary` (default), `success`, `warning`, `error`, `info`. Attribute: `tone`. |
+
+_No events._
+
+**Styleable parts** (restyle from outside via `kai-progress-bar::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(track)` | The progress track (the background bar). Restyle its height, radius, or background from outside. — `kai-progress-bar::part(track) { height: 0.5rem }` |
+| `::part(fill)` | The filled portion; its width follows value/max. Recolor it from outside. — `kai-progress-bar::part(fill) { background: var(--color-tool-green) }` |
 
 ---
 
@@ -1071,7 +1215,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical"` | Layout axis: `horizontal` (row, default) or `vertical` (column). |
+| `orientation` | `orientation` | `undefined \| "vertical" \| "horizontal"` | Layout axis: `horizontal` (row, default) or `vertical` (column). |
 | `maximizedIndex` | — | `undefined \| null \| number` | Which item index is maximized (null = none). Declarative source of truth. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
@@ -1146,13 +1290,50 @@ _No events._
 
 ---
 
+### `kai-screen` / `Screen`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-screen open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+| `headline` | `headline` | `undefined \| string` | Header title text. A projected `title` slot overrides it. (Named `headline` because `title` collides with the global `HTMLElement.title` attribute.) |
+| `back` | `back` | `undefined \| false \| true` | Show the back button (default true). |
+| `noInert` | `no-inert` | `undefined \| false \| true` | Opt out of marking sibling elements inert/aria-hidden while open (for unusual layouts). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-back` | `CustomEvent<Record<string, never>>` | Back navigation intent: the back button or Escape. The consumer flips their own routing in response (the screen knows nothing about the trigger). |
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The screen opened or closed (a method, `Escape` close, or driven `open`). |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `title` | replace | Rich header title; overrides the `headline` prop. |
+| `actions` | inject | Header trailing cluster (e.g. an avatar or overflow menu). |
+
+**Styleable parts** (restyle from outside via `kai-screen::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(header)` | The back-header bar (back button + title + actions). Restyle its height, padding, or border from outside. — `kai-screen::part(header) { height: 3.25rem; padding-inline: 1rem }` |
+| `::part(back)` | The back button. Restyle or hide it from outside; `back="false"` removes it entirely. — `kai-screen::part(back) { border-radius: 9999px }` |
+| `::part(body)` | The full-bleed surface that fills the mount point and scrolls its content. Tune padding or background from outside. — `kai-screen::part(body) { background: var(--color-card) }` |
+| `::part(title)` | Rich header title; overrides the `headline` prop. |
+
+---
+
 ### `kai-scroll-area` / `ScrollArea`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical" \| "both"` | Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. |
+| `orientation` | `orientation` | `undefined \| "vertical" \| "horizontal" \| "both"` | Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. |
 
 _No events._
 
@@ -1188,7 +1369,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `orientation` | `orientation` | `undefined \| "horizontal" \| "vertical"` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). |
+| `orientation` | `orientation` | `undefined \| "vertical" \| "horizontal"` | `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). |
 
 _No events._
 
@@ -1263,6 +1444,27 @@ _No events._
 
 ---
 
+### `kai-status` / `Status`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `status` | `status` | `undefined \| "new" \| "online" \| "busy" \| "away" \| "offline"` | Presence/notification state → color. `new` (default) maps to the blue hue. |
+| `pulse` | `pulse` | `undefined \| false \| true` | Animated ping ring (off by default; respects prefers-reduced-motion). |
+| `label` | `label` | `undefined \| string` | Accessible name. Without it the dot is decorative. |
+| `size` | `size` | `undefined \| "sm" \| "md"` | `sm` (default) or `md`. |
+
+_No events._
+
+**Styleable parts** (restyle from outside via `kai-status::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(dot)` | The status dot. Recolor or resize it from outside; the `status` prop sets the default hue. — `kai-status::part(dot) { background: var(--color-tool-green) }` |
+
+---
+
 ### `kai-suggestions` / `Suggestions`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -1271,7 +1473,8 @@ _No events._
 |---|---|---|---|
 | `suggestions` | — | `(string \| { label: string; value?: undefined \| string; icon?: undefined \| string })[]` | The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. |
 | `variant` | `variant` | `undefined \| "default" \| "ghost" \| "outline"` | Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). |
-| `size` | `size` | `undefined \| "sm" \| "md" \| "lg" \| "icon" \| "icon-sm"` | Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). |
+| `size` | `size` | `undefined \| "md" \| "lg"` | Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. |
+| `layout` | `layout` | `undefined \| "list" \| "chips"` | Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list — each row is left-aligned with a leading `icon`, a label, and a hover background. |
 | `block` | `block` | `undefined \| false \| true` | Full-width left-aligned rows instead of pills. |
 | `highlight` | `highlight` | `undefined \| string` | Substring to highlight within each suggestion. |
 
@@ -1301,6 +1504,34 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-change` | `CustomEvent<{ checked: false \| true }>` | The toggle changed. |
+
+---
+
+### `kai-tabs` / `Tabs`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `items` | — | `undefined \| { id: string; label?: undefined \| string; icon?: undefined \| string; disabled?: undefined \| false \| true }[]` | Tabs to render. Set as a JS property, not an HTML attribute. |
+| `value` | `value` | `undefined \| string` | Controlled selected id. Set as a JS property (or the `value` attribute); drive it from your app in response to `kai-tab-change`. Omit for uncontrolled. |
+| `defaultValue` | `default-value` | `undefined \| string` | Initial selected id when uncontrolled (use the `default-value` attribute in plain HTML). |
+| `variant` | `variant` | `undefined \| "segmented" \| "underline"` | `segmented` (default, a pill group) or `underline` (an underlined row). |
+| `block` | `block` | `undefined \| false \| true` | Stretch the strip to full width, each tab sharing the space equally. |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable the whole strip. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-tab-change` | `CustomEvent<{ value: string }>` | A tab was selected (click, Enter/Space, or arrow-key move). `value` is the item's id. |
+
+**Styleable parts** (restyle from outside via `kai-tabs::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(tablist)` | The tab strip container (role="tablist"). Restyle its gap, padding, background, or radius from outside; the `variant` prop sets the segmented/underline defaults. — `kai-tabs::part(tablist) { gap: 0.5rem; background: var(--color-card) }` |
+| `::part(tab)` | A single tab button. Restyle from outside; the active tab carries a `[data-active]` attribute, so target `::part(tab)[data-active]` for the selected look. — `kai-tabs::part(tab)[data-active] { color: var(--color-primary); font-weight: 600 }` |
 
 ---
 
@@ -1365,7 +1596,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `toasts` | — | `{ id: string; message: string; variant?: undefined \| "neutral" \| "success"; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true; target?: undefined \| HTMLElement }[]` | The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. |
+| `toasts` | — | `{ id: string; message: string; variant?: undefined \| "success" \| "neutral"; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true; target?: undefined \| HTMLElement }[]` | The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. |
 | `position` | `position` | `undefined \| "top-center" \| "top-right" \| "top-left" \| "bottom-center" \| "bottom-right" \| "bottom-left"` | Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … |
 | `max` | `max` | `undefined \| number` | Max simultaneously-visible toasts; the rest queue. Defaults to `3`. |
 | `stack` | `stack` | `undefined \| "expanded" \| "collapsed"` | Stacking: 'expanded' (default, full column) \| 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. |
@@ -1429,14 +1660,43 @@ _No events._
 |---|---|---|---|
 | `transcribe` | — | `undefined \| (audio: Blob) => Promise<string>` | Transcriber the host supplies — records audio, returns the text. This is a **function-valued property** (`el.transcribe = async blob => '...'`) because a value-returning callback can't be modelled as a fire-and-forget event. |
 | `disabled` | `disabled` | `undefined \| false \| true` | Disable the mic button (non-interactive). |
+| `recognitionLang` | `recognition-lang` | `undefined \| string` | BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang` (the plain `lang` attribute is reserved by `HTMLElement` and can't be a custom-element property). No effect when `transcribe` is set or the browser lacks SpeechRecognition. |
+| `interim` | `interim` | `undefined \| false \| true` | Emit live partial transcripts (`kai-transcript-interim`) during native recognition. Attribute: `interim`. No-op on the transcribe/fallback paths. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
 | Event | `detail` type | Description |
 |---|---|---|
-| `kai-audio-captured` | `CustomEvent<{ blob: Blob }>` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. |
+| `kai-audio-captured` | `CustomEvent<{ blob: Blob }>` | Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. Also the unsupported-fallback signal: no `transcribe`, no SpeechRecognition, so only the blob is produced (no text). |
 | `kai-recording-change` | `CustomEvent<{ recording: false \| true }>` | Recording started or stopped — lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount. |
-| `kai-transcription` | `CustomEvent<{ text: string }>` | Transcription completed (the `transcribe` property resolved). |
+| `kai-transcript-interim` | `CustomEvent<{ text: string }>` | Live partial transcript during native recognition (only when `interim` is set). Fires repeatedly before the final `kai-transcription`. |
+| `kai-transcription` | `CustomEvent<{ text: string }>` | Final transcript — the `transcribe` property resolved, OR native `SpeechRecognition` produced final text (no `transcribe` set). |
+
+---
+
+### `kai-voice-output` / `VoiceOutput`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `text` | `text` | `undefined \| string` | The utterance to read aloud. |
+| `autoplay` | `autoplay` | `undefined \| false \| true` | Speak automatically when `text` is set/changed. |
+| `synthesize` | — | `undefined \| (text: string) => Promise<Blob>` | TTS model seam the host supplies — given text, returns an audio `Blob` to play. This is a **function-valued property** (`el.synthesize = async text => blob`); when set, the native `speechSynthesis` path is bypassed. Mirrors `<kai-voice-input>`'s `transcribe`. A value-returning callback can't be modelled as a fire-and-forget event, hence a property. |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable the button (non-interactive). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-speaking-change` | `CustomEvent<{ speaking: false \| true }>` | Playback started or stopped — drive your own UI in sync. Fires on real transitions only (manual click and programmatic speak()/stop()), never on mount. |
+| `kai-synthesized` | `CustomEvent<{ blob: Blob }>` | The model path (`synthesize`) resolved audio — the raw `Blob` before playback. |
+
+**Styleable parts** (restyle from outside via `kai-voice-output::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(button)` | The speaker/play button. Restyle radius, size, padding, or colors from outside; it is a ghost icon button by default. — `kai-voice-output::part(button) { border-radius: 9999px; color: var(--color-primary) }` |
 
 ---
 
@@ -1447,7 +1707,7 @@ _No events._
 | Property | Attribute | Type | Description |
 |---|---|---|---|
 | `groups` | — | `{ id: string; userId?: undefined \| string; teamId?: undefined \| string; name: string; sortOrder: number; createdAt: string }[]` | Pre-bucketed conversation groups for the sidebar. Set as a JS property. |
-| `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]` | Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. |
+| `conversations` | — | `{ id: string; title: string; groupId?: undefined \| string; scope: { type: "document" \| "collection"; documentId?: undefined \| string; filters?: undefined \| { tags?: undefined \| string[]; authors?: undefined \| string[]; contentType?: undefined \| "transcript" \| "markdown"; dateRange?: undefined \| { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined \| string }[]` | Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. |
 | `activeId` | `active-id` | `undefined \| string` | Id of the open conversation, highlighted in the sidebar. |
 | `messages` | — | `{ id: string; role: "user" \| "assistant"; content: string; reasoning?: undefined \| { text: string; label?: undefined \| string }; tools?: undefined \| { type: string; state: "input-streaming" \| "input-available" \| "output-available" \| "output-error"; input?: undefined \| Record<string, unknown>; output?: undefined \| Record<string, unknown>; toolCallId?: undefined \| string; errorText?: undefined \| string }[]; attachments?: undefined \| { id: string; type: "file" \| "source-document"; filename?: undefined \| string; mediaType?: undefined \| string; url?: undefined \| string; title?: undefined \| string }[]; actions?: undefined \| ("copy" \| "like" \| "dislike" \| "regenerate" \| "edit" \| { id: string; label: string; icon?: undefined \| string; tooltip?: undefined \| string })[]; avatar?: undefined \| { src?: undefined \| string; fallback?: undefined \| string; alt?: undefined \| string }; feedback?: undefined \| "like" \| "dislike" }[]` | The active conversation's message thread, newest last. Set as a JS property. |
 | `value` | `value` | `undefined \| string` |  |
@@ -1467,11 +1727,14 @@ _No events._
 | `voice` | `voice` | `undefined \| false \| true` |  |
 | `triggers` | — | `undefined \| { char: string; kind: string; items?: undefined \| { id: string; label: string; icon?: undefined \| string; description?: undefined \| string; group?: undefined \| string; kind?: undefined \| string; promptText?: undefined \| string; data?: undefined \| Record<string, unknown> }[] }[]` | Rich entity triggers (`/` skills, `@` agents/plugins) forwarded to the input. |
 | `kindIcons` | — | `undefined \| Record<string, string>` | Default icon per entity kind (kind → image src) forwarded to the input. |
-| `sidebarWidth` | `sidebar-width` | `undefined \| number` | Sidebar default width as a percent of the workspace (default 22). |
-| `sidebarMinWidth` | `sidebar-min-width` | `undefined \| number` | Sidebar min width in px (default 200). |
+| `sidebarWidth` | `sidebar-width` | `undefined \| number` | Sidebar default width as a percent of the workspace (default 26). |
+| `sidebarMinWidth` | `sidebar-min-width` | `undefined \| number` | Sidebar min width in px (default 240). |
 | `sidebarMaxWidth` | `sidebar-max-width` | `undefined \| number` | Sidebar max width in px (default 420). |
 | `sidebarCollapsed` | `sidebar-collapsed` | `undefined \| false \| true` | Controlled collapsed state. Set this as a JS property (`el.sidebarCollapsed = true`) to drive the sidebar from your app, updating it in response to the `kai-sidebar-toggle` event. Omit for uncontrolled (the element manages it). |
 | `defaultSidebarCollapsed` | `default-sidebar-collapsed` | `undefined \| false \| true` | Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. |
+| `collapseBelow` | `collapse-below` | `undefined \| number` | Auto-collapse the rail when the workspace's own width drops below this many px, and re-expand when it grows back above. Uncontrolled only (it never fights an app-driven `sidebarCollapsed`); omit to disable. Fires `kai-sidebar-toggle`. Attribute: `collapse-below`. |
+| `compact` | `compact` | `undefined \| false \| true` | Render Recents as dense single-line rows (a leading dot + title, no count). |
+| `noConversations` | `no-conversations` | `undefined \| false \| true` | Suppress the built-in ConversationList so the `sidebar-header` slot owns the whole rail flex region (for apps that supply their own rail nav). Default false. Attribute: `no-conversations`. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -1487,6 +1750,21 @@ _No events._
 | `kai-suggestion-click` | `CustomEvent<{ value: string }>` | A suggestion chip was clicked (only in `suggestion-mode="fill"`). |
 | `kai-value-change` | `CustomEvent<{ value: string }>` | Fired on every input change. |
 | `kai-voice` | `CustomEvent<Record<string, never>>` | The Mic / voice button was clicked. |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `sidebar-header` | inject | Top of the conversation rail (brand, a kai-tabs strip). |
+| `sidebar-footer` | inject | Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster. |
+| `main-header` | inject | Top of the main region (a top-placed banner or a corner action). |
+| `main` | replace | Replace the built-in chat thread with your own main view (a home or dashboard screen). Omit to keep the thread. |
+
+**Styleable parts** (restyle from outside via `kai-workspace::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(sidebar)` | The conversation rail. Carries a subtle, theme-aware default background (bg-surface); override its background, border, or width from outside. `sidebar-min-width` sets its min px width and `collapse-below` auto-collapses it under a width. — `kai-workspace::part(sidebar) { background: var(--color-card); border-right: 1px solid var(--color-border) }` |
 
 ---
 

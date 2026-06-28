@@ -70,14 +70,19 @@ export function Tooltip(props: TooltipProps) {
   onCleanup(() => clearTimeout(timer));
 
   const presence = createPresence(open);
-  const position = usePosition(triggerEl, contentEl, { placement: local.placement ?? 'top', gutter: 6 });
+  const position = usePosition(triggerEl, contentEl, {
+    placement: local.placement ?? 'top',
+    gutter: 6,
+    // Trigger removed from the DOM -> close so the tooltip portal doesn't orphan.
+    onDisconnect: () => setOpen(false),
+  });
   useDismiss({ enabled: open, onDismiss: hide, refs: () => [triggerEl(), contentEl()] });
 
   return (
     <>
       <As
         as="span"
-        class="inline-block"
+        class="inline-flex"
         ref={setTriggerEl}
         aria-describedby={open() ? id : undefined}
         onPointerEnter={() => { setPointerInside(true); show(local.openDelay ?? 600); }}

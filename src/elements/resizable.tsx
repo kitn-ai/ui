@@ -1,6 +1,6 @@
 import { createSignal, createEffect, on, onMount, onCleanup, For, Show, type JSX } from 'solid-js';
 import { defineWebComponent } from './define';
-import { ResizableHandle, normalizeSize } from '../ui/resizable';
+import { ResizableHandle, normalizeSize, clampBasis } from '../ui/resizable';
 
 type Orientation = 'horizontal' | 'vertical';
 
@@ -443,7 +443,9 @@ defineWebComponent<GroupProps, GroupEvents>('kai-resizable', {
           const min = boundAttrs(info.min);
           const max = boundAttrs(info.max);
           const def = boundAttrs(info.defaultSize);
-          const basis = normalizeSize(info.size);
+          // Clamp the INITIAL basis into [min, max] so a % size on a wide
+          // container never paints past a px max and then snaps on first drag.
+          const basis = clampBasis(normalizeSize(info.size), normalizeSize(info.min), normalizeSize(info.max));
           const prev = () => visible()[i() - 1];
           const isStatic = () => !!(info.locked || prev()?.locked);
           return (

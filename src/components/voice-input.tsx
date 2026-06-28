@@ -3,6 +3,7 @@ import { cn } from '../utils/cn';
 import { Button } from '../ui/button';
 import { Tooltip } from '../ui/tooltip';
 import { useVoiceRecorder } from '../primitives/use-voice-recorder';
+import { useSpeechRecognition } from '../primitives/use-speech-recognition';
 
 /** Imperative handle exposed via `controllerRef` — surfaces the recorder's latent
  *  start/stop so the `<kai-voice-input>` facade can forward them as instance
@@ -20,6 +21,16 @@ export interface VoiceInputProps {
   onTranscription: (text: string) => void;
   disabled?: boolean;
   class?: string;
+  /** Host supplied a `transcribe` callback. When true the MediaRecorder →
+   *  onTranscribe path runs. When false the component prefers native
+   *  SpeechRecognition (capable browsers), falling back to record-only. */
+  hasTranscribe?: boolean;
+  /** BCP-47 language tag for native recognition (e.g. `en-US`). */
+  lang?: string;
+  /** Emit live partial transcripts via `onInterim` (native path only). */
+  interim?: boolean;
+  /** Live partial transcript from native recognition (when `interim`). */
+  onInterim?: (text: string) => void;
   /** Fires whenever recording starts or stops. Guarded against the spurious
    *  initial `false` — only true transitions emit (the facade maps this to
    *  kai-recording-change). */
@@ -32,10 +43,33 @@ export interface VoiceInputProps {
 export function VoiceInput(props: VoiceInputProps) {
   const [local] = splitProps(props, ['onTranscribe', 'onTranscription', 'disabled', 'class']);
   const { isRecording, start, stop } = useVoiceRecorder();
+  const speech = useSpeechRecognition({ interim: props.interim });
   const [isProcessing, setIsProcessing] = createSignal(false);
 
+  // Path selection (§6): a `transcribe` callback always wins (MediaRecorder →
+  // host transcriber). Otherwise prefer native SpeechRecognition when the browser
+  // supports it. The unsupported-no-callback case falls through to recording the
+  // blob (→ onTranscribe → kai-audio-captured) with no text.
+  const useNative = () => !props.hasTranscribe && speech.isSupported;
+
   const label = () =>
-    isProcessing() ? 'Transcribing...' : isRecording() ? 'Stop recording' : 'Voice input';
+    isProcessing() ? 'Transcribing...' : isActive() ? 'Stop recording' : 'Voice input';
+
+  const isActive = () => (useNative() ? speech.isListening() : isRecording());
+
+  // Native path: SpeechRecognition resolves with the final transcript when it
+  // ends (click again or controller.stop()). Final text → onTranscription.
+  async function beginRecognition() {
+    try {
+      const text = await speech.start({
+        lang: props.lang,
+        onInterim: props.interim ? (t) => props.onInterim?.(t) : undefined,
+      });
+      if (text.trim()) local.onTranscription(text.trim());
+    } catch {
+      /* surfaced via speech.error; the mic returns to idle */
+    }
+  }
 
   // Begin recording, then run transcription once the blob resolves. Shared by the
   // mic click and the imperative start() so both flows emit identically. start()
@@ -55,29 +89,36 @@ export function VoiceInput(props: VoiceInputProps) {
     }
   }
 
+  // Drive whichever path is active (§6: start/stop must follow the live path).
+  function begin() {
+    if (useNative()) void beginRecognition();
+    else void beginRecording();
+  }
+  function end() {
+    if (useNative()) speech.stop();
+    else stop();
+  }
+
   async function handleClick() {
-    if (isRecording()) {
-      stop();
-    } else {
-      await beginRecording();
-    }
+    if (isActive()) end();
+    else begin();
   }
 
   // Emit recording transitions to the host. `on(..., { defer: true })` skips the
   // initial mount value (a spurious {recording:false}) — only real start/stop
   // transitions fire. Drives BOTH manual (click) and programmatic (start/stop)
-  // since they all flip the same isRecording signal.
-  createEffect(on(isRecording, (recording) => {
+  // since they all flip the active path's signal (MediaRecorder or recognition).
+  createEffect(on(isActive, (recording) => {
     props.onRecordingChange?.(recording);
   }, { defer: true }));
 
   // Imperative controller (Pattern C): hand the facade a start/stop handle.
-  // start() runs the full record→transcribe path; stop() ends the in-progress
-  // recording (resolving start()'s blob → onTranscribe). Guard start() so a
-  // double-start while already recording is a no-op (matches the click toggle).
+  // start() runs the active path; stop() ends the in-progress session (resolving
+  // the active path's promise). Guard start() so a double-start while already
+  // active is a no-op (matches the click toggle).
   props.controllerRef?.({
-    start: () => { if (!isRecording()) void beginRecording(); },
-    stop: () => stop(),
+    start: () => { if (!isActive()) begin(); },
+    stop: () => end(),
   });
 
   // Mic icon (not recording)
@@ -107,7 +148,7 @@ export function VoiceInput(props: VoiceInputProps) {
   return (
     <div class={cn('relative inline-flex items-center justify-center', local.class)}>
       {/* Animated pulse rings when recording */}
-      <Show when={isRecording()}>
+      <Show when={isActive()}>
         <For each={[0, 1, 2]}>
           {(index) => (
             <div
@@ -130,16 +171,16 @@ export function VoiceInput(props: VoiceInputProps) {
           disabled={local.disabled || isProcessing()}
           class={cn(
             'relative z-10 rounded-full transition-all duration-300',
-            isRecording() && 'bg-destructive text-white hover:bg-destructive/80',
+            isActive() && 'bg-destructive text-white hover:bg-destructive/80',
           )}
         >
           <Show when={isProcessing()}>
             <Spinner />
           </Show>
-          <Show when={!isProcessing() && isRecording()}>
+          <Show when={!isProcessing() && isActive()}>
             <StopIcon />
           </Show>
-          <Show when={!isProcessing() && !isRecording()}>
+          <Show when={!isProcessing() && !isActive()}>
             <MicIcon />
           </Show>
         </Button>

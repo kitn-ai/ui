@@ -18,9 +18,9 @@ declare module 'solid-js' {
   namespace JSX {
     interface IntrinsicElements {
       'kai-chat': JSX.HTMLAttributes<HTMLElement>;
-      'kai-conversations': JSX.HTMLAttributes<HTMLElement>;
+      'kai-conversations': JSX.HTMLAttributes<HTMLElement> & { collapsed?: boolean; 'default-collapsed'?: boolean };
       'kai-empty': JSX.HTMLAttributes<HTMLElement> & { 'empty-title'?: string; description?: string };
-      'kai-button': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; icon?: string; 'icon-trailing'?: string; label?: string; disabled?: boolean };
+      'kai-button': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; icon?: string; 'icon-trailing'?: string; label?: string; disabled?: boolean; full?: boolean; align?: 'start' | 'center' | 'end' };
     }
   }
 }

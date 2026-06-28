@@ -18,7 +18,7 @@ declare module 'solid-js' {
       'kai-avatar': JSX.HTMLAttributes<HTMLElement> & { src?: string; alt?: string; fallback?: string; size?: string };
       'kai-badge': JSX.HTMLAttributes<HTMLElement> & { variant?: string };
       'kai-tooltip': JSX.HTMLAttributes<HTMLElement> & { content?: string; 'open-delay'?: number | string };
-      'kai-button': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; icon?: string; 'icon-trailing'?: string; label?: string; disabled?: boolean };
+      'kai-button': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; icon?: string; 'icon-trailing'?: string; label?: string; disabled?: boolean; full?: boolean; align?: 'start' | 'center' | 'end' };
       'kai-notice': JSX.HTMLAttributes<HTMLElement> & { severity?: string; icon?: string; dismissible?: boolean };
       'kai-icon': JSX.HTMLAttributes<HTMLElement> & { name?: string; size?: string };
       'kai-separator': JSX.HTMLAttributes<HTMLElement> & { orientation?: string };
@@ -33,15 +33,22 @@ const meta = { title: 'Labs/Foundations', parameters: { layout: 'padded' } } sat
 export default meta;
 type Story = StoryObj;
 
+// Hand-written HTML for the "Show code" panel, so consumers see real kai-* markup
+// (scalar props as attributes) instead of generated Solid JSX.
+const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
+
 /** Identity avatars, initials fallback, plus an image. */
 export const Avatars: Story = {
   render: () => (
     <div class="flex items-center gap-3">
-      <kai-avatar fallback="RT" size="sm" />
+      <kai-avatar fallback="JD" size="sm" />
       <kai-avatar fallback="AI" />
-      <kai-avatar src={AVATAR_SRC} fallback="RT" size="lg" />
+      <kai-avatar src={AVATAR_SRC} fallback="JD" size="lg" />
     </div>
   ),
+  parameters: src(`<kai-avatar fallback="JD" size="sm"></kai-avatar>
+<kai-avatar fallback="AI"></kai-avatar>
+<kai-avatar src="/avatar.jpg" fallback="JD" size="lg"></kai-avatar>`),
 };
 
 /** Pills: label, count, and citation marker. */
@@ -53,6 +60,9 @@ export const Badges: Story = {
       <kai-badge variant="citation">1</kai-badge>
     </div>
   ),
+  parameters: src(`<kai-badge>Beta</kai-badge>
+<kai-badge variant="count">3</kai-badge>
+<kai-badge variant="citation">1</kai-badge>`),
 };
 
 /** Tooltip wrapping a kit button. Hover or focus the controls. */
@@ -67,6 +77,13 @@ export const Tooltips: Story = {
       </kai-tooltip>
     </div>
   ),
+  parameters: src(`<kai-tooltip content="Voice input">
+  <kai-button variant="subtle" size="icon" icon="mic" label="Voice input"></kai-button>
+</kai-tooltip>
+
+<kai-tooltip content="Add files or photos">
+  <kai-button variant="ghost" size="sm" icon="plus">Add</kai-button>
+</kai-tooltip>`),
 };
 
 /** Inline notices, one per severity, some dismissible, with an optional action. */
@@ -87,6 +104,19 @@ export const Notices: Story = {
       </kai-notice>
     </div>
   ),
+  parameters: src(`<kai-notice severity="info" dismissible>
+  A new model is available.
+  <a slot="action" href="#">See it</a>
+</kai-notice>
+<kai-notice severity="warning">Claude Fable 5 is currently unavailable.</kai-notice>
+<kai-notice severity="error" dismissible>Your last message failed to send.</kai-notice>
+<kai-notice severity="success">Settings saved.</kai-notice>
+
+<!-- slot="icon": a custom inline SVG overrides the severity glyph -->
+<kai-notice severity="info">
+  New notifications are on.
+  <svg slot="icon" viewBox="0 0 24 24"><!-- ... --></svg>
+</kai-notice>`),
 };
 
 /** Dividers: horizontal between stacked content, vertical inside a control row. */
@@ -105,6 +135,15 @@ export const Separators: Story = {
       </div>
     </div>
   ),
+  parameters: src(`<span>Section one</span>
+<kai-separator></kai-separator>
+<span>Section two</span>
+
+<div style="display:flex;align-items:center;gap:0.75rem">
+  <span>Model</span>
+  <kai-separator orientation="vertical"></kai-separator>
+  <span>Effort</span>
+</div>`),
 };
 
 /** Scroll area: themed thin scrollbar; content scrolls inside a bounded box. */
@@ -119,6 +158,12 @@ export const ScrollAreaStory: Story = {
       </div>
     </kai-scroll-area>
   ),
+  parameters: src(`<kai-scroll-area style="display:block;height:12rem;width:18rem">
+  <!-- content taller than the box scrolls inside it -->
+  <div>Row 1</div>
+  <div>Row 2</div>
+  <!-- ... -->
+</kai-scroll-area>`),
 };
 
 /** Hover card: RICH content on hover/focus of a trigger (vs the text-only tooltip). */
@@ -138,6 +183,14 @@ export const HoverCards: Story = {
       </kai-hover-card>
     </div>
   ),
+  parameters: src(`<kai-hover-card open-delay="120">
+  <a href="#">@acme</a>
+  <div slot="card">
+    <kai-avatar fallback="AC" size="sm"></kai-avatar>
+    <strong>Acme Corp</strong>
+    <p>Workspace · 24 members · 8 projects</p>
+  </div>
+</kai-hover-card>`),
 };
 
 /** Loading placeholders: variants, responsive width, and a composed card skeleton. */
@@ -162,6 +215,16 @@ export const Skeletons: Story = {
       </div>
     </div>
   ),
+  parameters: src(`<!-- variants: circle, rect, multi-line text -->
+<kai-skeleton variant="circle" width="2.5rem"></kai-skeleton>
+<kai-skeleton variant="rect" width="8rem" height="5rem"></kai-skeleton>
+<kai-skeleton variant="text" lines="3"></kai-skeleton>
+
+<!-- composed: avatar + lines, mirroring a real layout -->
+<div style="display:flex;align-items:center;gap:0.75rem">
+  <kai-skeleton variant="circle" width="2.5rem"></kai-skeleton>
+  <kai-skeleton variant="text" lines="2"></kai-skeleton>
+</div>`),
 };
 
 /** Curated icons standalone (kai-icon), plus the slot escape hatch on kai-button. */
@@ -182,4 +245,14 @@ export const Icons: Story = {
       </kai-button>
     </div>
   ),
+  parameters: src(`<kai-icon name="globe"></kai-icon>
+<kai-icon name="mic"></kai-icon>
+<kai-icon name="code"></kai-icon>
+<kai-icon name="sparkles" size="lg"></kai-icon>
+
+<!-- slot="icon" escape hatch: any inline SVG inherits currentColor -->
+<kai-button variant="outline" size="sm" label="Ship it">
+  <svg slot="icon" viewBox="0 0 24 24"><!-- ... --></svg>
+  Ship it
+</kai-button>`),
 };

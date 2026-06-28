@@ -15,7 +15,7 @@ export interface ArtifactProps extends WebComponentProps {
   /** URL the preview iframe frames. Consumer-controlled. */
   src?: string;
   /** Files for the Code tab tree + each file's preview `url`. Set as a JS property (array). */
-  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
+  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | "added" | "modified" | "deleted" | "renamed" | "untracked" }[];
   /** Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). */
   tab?: "preview" | "code";
   /** Uncontrolled INITIAL tab (used only when `tab` is unset). Default `preview`. Seeds the starting tab; the user can then switch freely without the consumer re-asserting a controlled `tab`. */
@@ -46,6 +46,8 @@ export interface ArtifactProps extends WebComponentProps {
   standalone?: boolean;
   /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
   readonlyPath?: boolean;
+  /** Friendly address shown in the path field instead of the real current url (read-only, non-navigable). Use when the framed url is not consumer-facing (e.g. a `data:` blob) so a clean address shows instead of leaking it. Scalar string: set as the `display-url` attribute or the `displayUrl` property. */
+  displayUrl?: string;
   /** Fired when a file is selected. `detail.path`. */
   onFileSelect?: (event: CustomEvent<{ path: string }>) => void;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
@@ -58,7 +60,7 @@ export interface ArtifactProps extends WebComponentProps {
 
 export const Artifact = createWebComponent<ArtifactProps>(
   'kai-artifact',
-  ["theme","src","files","tab","defaultTab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath"],
+  ["theme","src","files","tab","defaultTab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath","displayUrl"],
   { onFileSelect: 'kai-file-select', onMaximizeChange: 'kai-maximize-change', onNavigate: 'kai-navigate', onTabChange: 'kai-tab-change' },
 );
 
@@ -90,7 +92,7 @@ export interface AvatarProps extends WebComponentProps {
   src?: string;
   /** Alt text for the image. Defaults to `fallback`. */
   alt?: string;
-  /** Short text shown when there's no image — usually initials (e.g. "RT", "AI"). */
+  /** Short text shown when there's no image — usually initials (e.g. "JD", "AI"). */
   fallback?: string;
   /** Size token: `sm` | `md` (default) | `lg`. */
   size?: "sm" | "md" | "lg";
@@ -126,6 +128,10 @@ export interface ButtonProps extends WebComponentProps {
   label?: string;
   /** Disable the button (non-interactive, dimmed). */
   disabled?: boolean;
+  /** Stretch the button to the full width of its container (a block button) — e.g. a card CTA or a stacked action. Attribute: `full`. */
+  full?: boolean;
+  /** Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button. */
+  align?: "start" | "center" | "end";
   /** Native button `type`. Defaults to `button` (so it never submits a form). */
   type?: "button" | "submit" | "reset";
   /** The button was activated (pointer or keyboard). Carries no detail. The native `click` also bubbles (composed) for consumers who prefer it. */
@@ -134,25 +140,39 @@ export interface ButtonProps extends WebComponentProps {
 
 export const Button = createWebComponent<ButtonProps>(
   'kai-button',
-  ["theme","variant","size","icon","iconTrailing","label","disabled","type"],
+  ["theme","variant","size","icon","iconTrailing","label","disabled","full","align","type"],
   { onClick: 'kai-click' },
 );
 
 export interface CardProps extends WebComponentProps {
-  /** Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. */
-  heading?: string;
-  /** Supporting text under the heading. Attribute: `description`. */
-  description?: string;
-  /** When set, the card renders its inline error state instead of the body. Attribute: `error-message`. */
-  errorMessage?: string;
-  /** Compact spacing for dense lists. Attribute: `dense`. */
+  /** Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`. Attribute: `appearance`. */
+  appearance?: "outlined" | "filled" | "plain" | "accent";
+  /** `vertical` (default, media on top) | `horizontal` (media at the start) | `responsive` (horizontal when the card's container is wide enough, else vertical — a container query on the card's own width). Attribute: `orientation`. */
+  orientation?: "vertical" | "horizontal" | "responsive";
+  /** The card width below which a `responsive` card collapses to vertical and the footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`. */
+  collapse?: string;
+  /** Tighter spacing for dense lists. Attribute: `dense`. */
   dense?: boolean;
+  /** Show a close (×) that hides the card and emits `kai-dismiss`. Attribute: `dismissible`. Off by default. */
+  dismissible?: boolean;
+  /** Render the whole card as a link. Attribute: `href`. Wins over `clickable`. */
+  href?: string;
+  /** `target` for the `href` anchor. Attribute: `target`. */
+  target?: string;
+  /** `rel` for the `href` anchor. Attribute: `rel`. */
+  rel?: string;
+  /** Make the whole card a button (`role="button"`, Enter/Space, hover affordance) that emits `kai-card-click`. Attribute: `clickable`. Ignored when `href` is set. */
+  clickable?: boolean;
+  /** A `clickable`/`href` card was activated (click, or Enter/Space). */
+  onCardClick?: (event: CustomEvent) => void;
+  /** The card was dismissed via its × (it also hides itself). */
+  onDismiss?: (event: CustomEvent) => void;
 }
 
 export const Card = createWebComponent<CardProps>(
   'kai-card',
-  ["theme","heading","description","errorMessage","dense"],
-  {  },
+  ["theme","appearance","orientation","collapse","dense","dismissible","href","target","rel","clickable"],
+  { onCardClick: 'kai-card-click', onDismiss: 'kai-dismiss' },
 );
 
 export interface CardsProps extends WebComponentProps {
@@ -316,6 +336,33 @@ export const Choice = createWebComponent<ChoiceProps>(
   { onValueChange: 'kai-value-change' },
 );
 
+export interface CoachmarkProps extends WebComponentProps {
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-coachmark open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). */
+  headline?: string;
+  /** A small badge pill beside the headline (e.g. "New"). */
+  badge?: string;
+  /** Floating placement relative to the anchor (default `bottom`). */
+  placement?: string;
+  /** Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. */
+  tone?: "primary" | "info" | "success" | "warning" | "error";
+  /** Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. */
+  arrow?: boolean;
+  /** The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again. */
+  onDismiss?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The coachmark opened or closed (a method, the ×, or a driven `open`). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export const Coachmark = createWebComponent<CoachmarkProps>(
+  'kai-coachmark',
+  ["theme","open","defaultOpen","headline","badge","placement","tone","arrow"],
+  { onDismiss: 'kai-dismiss', onOpenChange: 'kai-open-change' },
+);
+
 export interface CodeBlockProps extends WebComponentProps {
   /** The source code to render. */
   code: string;
@@ -468,9 +515,15 @@ export interface ConversationsProps extends WebComponentProps {
   /** Pre-bucketed conversation groups (e.g. "Today", "Yesterday"), each with its own conversations. Use this when you want to control the grouping/headers yourself; otherwise pass a flat `conversations` array. Set as a JS property. */
   groups: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[];
   /** A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property. */
-  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
+  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
+  /** Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button. */
+  collapsed?: boolean;
+  /** Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. */
+  defaultCollapsed?: boolean;
+  /** The rail was collapsed or expanded (via the toggle, the reopen button, or a `collapse()`/`expand()`/`toggle()` call). */
+  onCollapseToggle?: (event: CustomEvent<{ collapsed: boolean }>) => void;
   /** A conversation was selected. */
   onConversationSelect?: (event: CustomEvent<{ id: string }>) => void;
   /** The "New chat" button was clicked. */
@@ -483,8 +536,8 @@ export interface ConversationsProps extends WebComponentProps {
 
 export const Conversations = createWebComponent<ConversationsProps>(
   'kai-conversations',
-  ["theme","groups","conversations","activeId"],
-  { onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onToggleSidebar: 'kai-toggle-sidebar' },
+  ["theme","groups","conversations","activeId","collapsed","defaultCollapsed"],
+  { onCollapseToggle: 'kai-collapse-toggle', onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onToggleSidebar: 'kai-toggle-sidebar' },
 );
 
 export interface EmbedProps extends WebComponentProps {
@@ -543,19 +596,21 @@ export const FeedbackBar = createWebComponent<FeedbackBarProps>(
 );
 
 export interface FileTreeProps extends WebComponentProps {
-  /** The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`). */
-  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other" }[];
+  /** The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type?, additions?, deletions?, status? }`). */
+  files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | "added" | "modified" | "deleted" | "renamed" | "untracked" }[];
   /** Selected file path — highlighted in the tree. */
   activeFile?: string;
   /** Folder paths expanded initially. Omit to start with all folders open. */
   defaultExpanded?: string[];
+  /** Show a changed-files summary header (file count + summed `+/-` + Collapse-all). Attribute: `summary`. Off by default. */
+  summary?: boolean;
   /** Fired when a file is selected. `detail.path` = the file's path. */
   onSelect?: (event: CustomEvent<{ path: string }>) => void;
 }
 
 export const FileTree = createWebComponent<FileTreeProps>(
   'kai-file-tree',
-  ["theme","files","activeFile","defaultExpanded"],
+  ["theme","files","activeFile","defaultExpanded","summary"],
   { onSelect: 'kai-select' },
 );
 
@@ -703,7 +758,7 @@ export const Markdown = createWebComponent<MarkdownProps>(
 
 export interface MenuProps extends WebComponentProps {
   /** Tree of menu items. Set as a JS property — not an HTML attribute. */
-  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
+  items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
   /** Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). */
   placement?: string;
   /** Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). Use this instead of slotting `slot="trigger"` for the common case — a slotted trigger overrides it. */
@@ -722,8 +777,8 @@ export interface MenuProps extends WebComponentProps {
   disabled?: boolean;
   /** The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). */
   onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
-  /** Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. */
-  onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean }>) => void;
+  /** Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. - Radio items: `{ id, radioGroup }` — the consumer marks `id` as the selected one in `radioGroup` and clears the others. */
+  onSelect?: (event: CustomEvent<{ id: string; checked?: undefined | boolean; radioGroup?: undefined | string }>) => void;
 }
 
 export const Menu = createWebComponent<MenuProps>(
@@ -788,9 +843,28 @@ export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
   { onModelChange: 'kai-model-change', onOpenChange: 'kai-open-change' },
 );
 
+export interface NavProps extends WebComponentProps {
+  /** The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. */
+  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "primary" | "info" | "success" | "warning" | "error" | "neutral"; label?: string; pulse?: boolean }; meta?: string }[];
+  /** Active item id (controlled). */
+  value?: string;
+  /** Initial active id when uncontrolled. */
+  defaultValue?: string;
+  /** Ids of group items collapsed on first render (groups default to expanded). Set as a JS property (array). */
+  defaultCollapsed?: string[];
+  /** A nav item was activated. */
+  onNavSelect?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export const Nav = createWebComponent<NavProps>(
+  'kai-nav',
+  ["theme","items","value","defaultValue","defaultCollapsed"],
+  { onNavSelect: 'kai-nav-select' },
+);
+
 export interface NoticeProps extends WebComponentProps {
   /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). */
-  severity?: "neutral" | "info" | "warning" | "error" | "success";
+  severity?: "info" | "success" | "warning" | "error" | "neutral";
   /** Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. */
   icon?: string;
   /** Show a dismiss (×) that hides the notice and emits `kai-dismiss`. */
@@ -824,6 +898,23 @@ export const Popover = createWebComponent<PopoverProps>(
   'kai-popover',
   ["theme","placement","gutter","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
+);
+
+export interface ProgressBarProps extends WebComponentProps {
+  /** Current progress value (0..max). Attribute: `value`. */
+  value?: number;
+  /** The value `value` runs to (default 100). Attribute: `max`. */
+  max?: number;
+  /** Optional caption above the track. Attribute: `label`. */
+  label?: string;
+  /** Fill color: `primary` (default), `success`, `warning`, `error`, `info`. Attribute: `tone`. */
+  tone?: string;
+}
+
+export const ProgressBar = createWebComponent<ProgressBarProps>(
+  'kai-progress-bar',
+  ["theme","value","max","label","tone"],
+  {  },
 );
 
 export interface PromptInputProps extends WebComponentProps {
@@ -923,7 +1014,7 @@ export const Remote = createWebComponent<RemoteProps>(
 
 export interface ResizableProps extends WebComponentProps {
   /** Layout axis: `horizontal` (row, default) or `vertical` (column). */
-  orientation?: "horizontal" | "vertical";
+  orientation?: "vertical" | "horizontal";
   /** Which item index is maximized (null = none). Declarative source of truth. */
   maximizedIndex?: null | number;
   /** Fired on drag-end / keyboard resize / visibility change. `detail.sizes` = panel sizes in percent. */
@@ -1005,9 +1096,32 @@ export const ScopePicker = createWebComponent<ScopePickerProps>(
   { onOpenChange: 'kai-open-change', onScopeChange: 'kai-scope-change' },
 );
 
+export interface ScreenProps extends WebComponentProps {
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-screen open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** Header title text. A projected `title` slot overrides it. (Named `headline` because `title` collides with the global `HTMLElement.title` attribute.) */
+  headline?: string;
+  /** Show the back button (default true). */
+  back?: boolean;
+  /** Opt out of marking sibling elements inert/aria-hidden while open (for unusual layouts). */
+  noInert?: boolean;
+  /** Back navigation intent: the back button or Escape. The consumer flips their own routing in response (the screen knows nothing about the trigger). */
+  onBack?: (event: CustomEvent<Record<string, never>>) => void;
+  /** The screen opened or closed (a method, `Escape` close, or driven `open`). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export const Screen = createWebComponent<ScreenProps>(
+  'kai-screen',
+  ["theme","open","defaultOpen","headline","back","noInert"],
+  { onBack: 'kai-back', onOpenChange: 'kai-open-change' },
+);
+
 export interface ScrollAreaProps extends WebComponentProps {
   /** Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. */
-  orientation?: "horizontal" | "vertical" | "both";
+  orientation?: "vertical" | "horizontal" | "both";
 }
 
 export const ScrollArea = createWebComponent<ScrollAreaProps>(
@@ -1035,7 +1149,7 @@ export const ScrollButton = createWebComponent<ScrollButtonProps>(
 
 export interface SeparatorProps extends WebComponentProps {
   /** `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). */
-  orientation?: "horizontal" | "vertical";
+  orientation?: "vertical" | "horizontal";
 }
 
 export const Separator = createWebComponent<SeparatorProps>(
@@ -1106,13 +1220,32 @@ export const Sources = createWebComponent<SourcesProps>(
   {  },
 );
 
+export interface StatusProps extends WebComponentProps {
+  /** Presence/notification state → color. `new` (default) maps to the blue hue. */
+  status?: "new" | "online" | "busy" | "away" | "offline";
+  /** Animated ping ring (off by default; respects prefers-reduced-motion). */
+  pulse?: boolean;
+  /** Accessible name. Without it the dot is decorative. */
+  label?: string;
+  /** `sm` (default) or `md`. */
+  size?: "sm" | "md";
+}
+
+export const Status = createWebComponent<StatusProps>(
+  'kai-status',
+  ["theme","status","pulse","label","size"],
+  {  },
+);
+
 export interface SuggestionsProps extends WebComponentProps {
   /** The suggestions. Strings, or `{ label, value }` when the displayed text and the emitted value differ. Set as a JS property. */
   suggestions: (string | { label: string; value?: undefined | string; icon?: undefined | string })[];
   /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
   variant?: "default" | "ghost" | "outline";
-  /** Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`). */
-  size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
+  /** Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected. */
+  size?: "md" | "lg";
+  /** Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width "Ideas for you" list — each row is left-aligned with a leading `icon`, a label, and a hover background. */
+  layout?: "list" | "chips";
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
   /** Substring to highlight within each suggestion. */
@@ -1123,7 +1256,7 @@ export interface SuggestionsProps extends WebComponentProps {
 
 export const Suggestions = createWebComponent<SuggestionsProps>(
   'kai-suggestions',
-  ["theme","suggestions","variant","size","block","highlight"],
+  ["theme","suggestions","variant","size","layout","block","highlight"],
   { onSelect: 'kai-select' },
 );
 
@@ -1148,6 +1281,29 @@ export const Switch = createWebComponent<SwitchProps>(
   'kai-switch',
   ["theme","checked","defaultChecked","disabled","label","name","value"],
   { onChange: 'kai-change' },
+);
+
+export interface TabsProps extends WebComponentProps {
+  /** Tabs to render. Set as a JS property, not an HTML attribute. */
+  items?: { id: string; label?: string; icon?: string; disabled?: boolean }[];
+  /** Controlled selected id. Set as a JS property (or the `value` attribute); drive it from your app in response to `kai-tab-change`. Omit for uncontrolled. */
+  value?: string;
+  /** Initial selected id when uncontrolled (use the `default-value` attribute in plain HTML). */
+  defaultValue?: string;
+  /** `segmented` (default, a pill group) or `underline` (an underlined row). */
+  variant?: "segmented" | "underline";
+  /** Stretch the strip to full width, each tab sharing the space equally. */
+  block?: boolean;
+  /** Disable the whole strip. */
+  disabled?: boolean;
+  /** A tab was selected (click, Enter/Space, or arrow-key move). `value` is the item's id. */
+  onTabChange?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export const Tabs = createWebComponent<TabsProps>(
+  'kai-tabs',
+  ["theme","items","value","defaultValue","variant","block","disabled"],
+  { onTabChange: 'kai-tab-change' },
 );
 
 export interface TasksProps extends WebComponentProps {
@@ -1211,7 +1367,7 @@ export const ThinkingBar = createWebComponent<ThinkingBarProps>(
 
 export interface ToastRegionProps extends WebComponentProps {
   /** The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. */
-  toasts: { id: string; message: string; variant?: undefined | "neutral" | "success"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
+  toasts: { id: string; message: string; variant?: undefined | "success" | "neutral"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
   /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
@@ -1281,25 +1437,52 @@ export interface VoiceInputProps extends WebComponentProps {
   transcribe?: (audio: Blob) => Promise<string>;
   /** Disable the mic button (non-interactive). */
   disabled?: boolean;
-  /** Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. */
+  /** BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang` (the plain `lang` attribute is reserved by `HTMLElement` and can't be a custom-element property). No effect when `transcribe` is set or the browser lacks SpeechRecognition. */
+  recognitionLang?: string;
+  /** Emit live partial transcripts (`kai-transcript-interim`) during native recognition. Attribute: `interim`. No-op on the transcribe/fallback paths. */
+  interim?: boolean;
+  /** Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. Also the unsupported-fallback signal: no `transcribe`, no SpeechRecognition, so only the blob is produced (no text). */
   onAudioCaptured?: (event: CustomEvent<{ blob: Blob }>) => void;
   /** Recording started or stopped — lets the host drive its own UI (waveform, push-to-talk indicator) in sync with the mic. Fires on real transitions only (manual click and programmatic start()/stop()), never on mount. */
   onRecordingChange?: (event: CustomEvent<{ recording: boolean }>) => void;
-  /** Transcription completed (the `transcribe` property resolved). */
+  /** Live partial transcript during native recognition (only when `interim` is set). Fires repeatedly before the final `kai-transcription`. */
+  onTranscriptInterim?: (event: CustomEvent<{ text: string }>) => void;
+  /** Final transcript — the `transcribe` property resolved, OR native `SpeechRecognition` produced final text (no `transcribe` set). */
   onTranscription?: (event: CustomEvent<{ text: string }>) => void;
 }
 
 export const VoiceInput = createWebComponent<VoiceInputProps>(
   'kai-voice-input',
-  ["theme","transcribe","disabled"],
-  { onAudioCaptured: 'kai-audio-captured', onRecordingChange: 'kai-recording-change', onTranscription: 'kai-transcription' },
+  ["theme","transcribe","disabled","recognitionLang","interim"],
+  { onAudioCaptured: 'kai-audio-captured', onRecordingChange: 'kai-recording-change', onTranscriptInterim: 'kai-transcript-interim', onTranscription: 'kai-transcription' },
+);
+
+export interface VoiceOutputProps extends WebComponentProps {
+  /** The utterance to read aloud. */
+  text?: string;
+  /** Speak automatically when `text` is set/changed. */
+  autoplay?: boolean;
+  /** TTS model seam the host supplies — given text, returns an audio `Blob` to play. This is a **function-valued property** (`el.synthesize = async text => blob`); when set, the native `speechSynthesis` path is bypassed. Mirrors `<kai-voice-input>`'s `transcribe`. A value-returning callback can't be modelled as a fire-and-forget event, hence a property. */
+  synthesize?: (text: string) => Promise<Blob>;
+  /** Disable the button (non-interactive). */
+  disabled?: boolean;
+  /** Playback started or stopped — drive your own UI in sync. Fires on real transitions only (manual click and programmatic speak()/stop()), never on mount. */
+  onSpeakingChange?: (event: CustomEvent<{ speaking: boolean }>) => void;
+  /** The model path (`synthesize`) resolved audio — the raw `Blob` before playback. */
+  onSynthesized?: (event: CustomEvent<{ blob: Blob }>) => void;
+}
+
+export const VoiceOutput = createWebComponent<VoiceOutputProps>(
+  'kai-voice-output',
+  ["theme","text","autoplay","synthesize","disabled"],
+  { onSpeakingChange: 'kai-speaking-change', onSynthesized: 'kai-synthesized' },
 );
 
 export interface WorkspaceProps extends WebComponentProps {
   /** Pre-bucketed conversation groups for the sidebar. Set as a JS property. */
   groups: { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[];
   /** Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property. */
-  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[];
+  conversations: { id: string; title: string; groupId?: undefined | string; scope: { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[];
   /** Id of the open conversation, highlighted in the sidebar. */
   activeId?: string;
   /** The active conversation's message thread, newest last. Set as a JS property. */
@@ -1323,9 +1506,9 @@ export interface WorkspaceProps extends WebComponentProps {
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image src) forwarded to the input. */
   kindIcons?: Record<string, string>;
-  /** Sidebar default width as a percent of the workspace (default 22). */
+  /** Sidebar default width as a percent of the workspace (default 26). */
   sidebarWidth?: number;
-  /** Sidebar min width in px (default 200). */
+  /** Sidebar min width in px (default 240). */
   sidebarMinWidth?: number;
   /** Sidebar max width in px (default 420). */
   sidebarMaxWidth?: number;
@@ -1333,6 +1516,12 @@ export interface WorkspaceProps extends WebComponentProps {
   sidebarCollapsed?: boolean;
   /** Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
   defaultSidebarCollapsed?: boolean;
+  /** Auto-collapse the rail when the workspace's own width drops below this many px, and re-expand when it grows back above. Uncontrolled only (it never fights an app-driven `sidebarCollapsed`); omit to disable. Fires `kai-sidebar-toggle`. Attribute: `collapse-below`. */
+  collapseBelow?: number;
+  /** Render Recents as dense single-line rows (a leading dot + title, no count). */
+  compact?: boolean;
+  /** Suppress the built-in ConversationList so the `sidebar-header` slot owns the whole rail flex region (for apps that supply their own rail nav). Default false. Attribute: `no-conversations`. */
+  noConversations?: boolean;
   /** A conversation was selected in the sidebar. */
   onConversationSelect?: (event: CustomEvent<{ id: string }>) => void;
   /** An action button on a message was clicked. `state` is present only for the toggleable feedback votes: `'on'` when a like/dislike is set, `'off'` when re-tapped to clear. */
@@ -1357,6 +1546,6 @@ export interface WorkspaceProps extends WebComponentProps {
 
 export const Workspace = createWebComponent<WorkspaceProps>(
   'kai-workspace',
-  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","triggers","kindIcons","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed"],
+  ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","triggers","kindIcons","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed","collapseBelow","compact","noConversations"],
   { onConversationSelect: 'kai-conversation-select', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onSidebarToggle: 'kai-sidebar-toggle', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
 );

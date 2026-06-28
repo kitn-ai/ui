@@ -1,11 +1,10 @@
-import { Show } from 'solid-js';
+import { Show, createSignal, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from './define';
 import { createControllableSignal } from '../primitives/controllable';
+import { readSlots, WORKSPACE_SLOTS } from './slots';
 import { ChatThread, type ChatThreadContextUsage, type ChatThreadController } from '../components/chat-thread';
-import { ConversationList } from '../components/conversation-list';
+import { ConversationList, CollapsedRail } from '../components/conversation-list';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../ui/resizable';
-import { Button } from '../ui/button';
-import { PanelLeftOpen } from 'lucide-solid';
 import type { AttachmentData } from '../components/attachments';
 import type { TriggerDef } from '../components/composer';
 import type { ChatMessage } from './chat-types';
@@ -40,9 +39,9 @@ interface Props extends Record<string, unknown> {
   triggers?: TriggerDef[];
   /** Default icon per entity kind (kind → image src) forwarded to the input. */
   kindIcons?: Record<string, string>;
-  /** Sidebar default width as a percent of the workspace (default 22). */
+  /** Sidebar default width as a percent of the workspace (default 26). */
   sidebarWidth?: number;
-  /** Sidebar min width in px (default 200). */
+  /** Sidebar min width in px (default 240). */
   sidebarMinWidth?: number;
   /** Sidebar max width in px (default 420). */
   sidebarMaxWidth?: number;
@@ -53,6 +52,17 @@ interface Props extends Record<string, unknown> {
   /** Initial collapsed state when uncontrolled (default false). Use the
    *  `default-sidebar-collapsed` attribute to start collapsed in plain HTML. */
   defaultSidebarCollapsed?: boolean;
+  /** Auto-collapse the rail when the workspace's own width drops below this many
+   *  px, and re-expand when it grows back above. Uncontrolled only (it never
+   *  fights an app-driven `sidebarCollapsed`); omit to disable. Fires
+   *  `kai-sidebar-toggle`. Attribute: `collapse-below`. */
+  collapseBelow?: number;
+  /** Render Recents as dense single-line rows (a leading dot + title, no count). */
+  compact?: boolean;
+  /** Suppress the built-in ConversationList so the `sidebar-header` slot owns the
+   *  whole rail flex region (for apps that supply their own rail nav). Default
+   *  false. Attribute: `no-conversations`. */
+  noConversations?: boolean;
 }
 
 interface Events {
@@ -87,9 +97,22 @@ defineWebComponent<Props, Events>('kai-workspace', {
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
   search: false, voice: false, triggers: undefined, kindIcons: undefined,
-  sidebarWidth: 22, sidebarMinWidth: 200, sidebarMaxWidth: 420,
-  sidebarCollapsed: undefined, defaultSidebarCollapsed: undefined,
-}, (props, { dispatch, flag, expose }) => {
+  sidebarWidth: 26, sidebarMinWidth: 240, sidebarMaxWidth: 420,
+  sidebarCollapsed: undefined, defaultSidebarCollapsed: undefined, collapseBelow: undefined, compact: undefined,
+  noConversations: undefined,
+}, (props, { dispatch, flag, expose, element }) => {
+  // Which injection slots the consumer has filled. A bare <slot> is always a
+  // truthy JSX node, so we render each region wrapper ONLY when readSlots reports
+  // projected light-DOM content (re-read on childList mutation).
+  const [slots, setSlots] = createSignal<Record<string, boolean>>({});
+  onMount(() => {
+    const read = () => setSlots(readSlots(element, WORKSPACE_SLOTS));
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true });
+    onCleanup(() => observer.disconnect());
+  });
+
   // Controlled/uncontrolled collapse: `sidebarCollapsed` (when set) wins;
   // otherwise the element manages its own state, seeded from
   // `defaultSidebarCollapsed`. `setCollapsedTo` always writes the internal value (a
@@ -101,6 +124,32 @@ defineWebComponent<Props, Events>('kai-workspace', {
   );
   const setCollapsedTo = (next: boolean) => { setCollapsed(next); dispatch('kai-sidebar-toggle', { collapsed: next }); };
   const toggle = () => setCollapsedTo(!collapsed());
+
+  // Responsive auto-collapse. When `collapseBelow` is set, a ResizeObserver on the
+  // workspace root collapses the rail once the workspace's own width drops below
+  // it and re-expands above it. Uncontrolled only — bail while `sidebarCollapsed`
+  // is set so we never fight an app-driven collapse. `autoCollapsed` tracks whether
+  // WE collapsed it, so a user's manual expand isn't auto-undone on the next tick.
+  let rootEl!: HTMLDivElement;
+  let autoCollapsed = false;
+  onMount(() => {
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver((entries) => {
+      const below = props.collapseBelow as number | undefined;
+      if (below == null || props.sidebarCollapsed !== undefined) return;
+      const width = entries[0]?.contentRect.width ?? rootEl.clientWidth;
+      const isBelow = width < below;
+      if (isBelow && !collapsed()) {
+        autoCollapsed = true;
+        setCollapsedTo(true);
+      } else if (!isBelow && collapsed() && autoCollapsed) {
+        autoCollapsed = false;
+        setCollapsedTo(false);
+      }
+    });
+    ro.observe(rootEl);
+    onCleanup(() => ro.disconnect());
+  });
 
   // Imperative method API. The sidebar methods drive the same collapse path as the
   // in-UI toggle (named *Sidebar to avoid the `sidebarCollapsed` prop accessor).
@@ -151,34 +200,74 @@ defineWebComponent<Props, Events>('kai-workspace', {
     />
   );
 
+  // The main region: an optional top-placed `main-header` band above the thread.
+  // Shared across both collapse branches (the thread node is the same instance).
+  const mainRegion = (
+    <div class="flex h-full flex-col overflow-hidden">
+      <Show when={slots()['main-header']}>
+        <div class="shrink-0 border-b border-border"><slot name="main-header" /></div>
+      </Show>
+      <div class="min-h-0 flex-1">
+        <Show when={slots()['main']} fallback={threadEl}>
+          <slot name="main" />
+        </Show>
+      </div>
+    </div>
+  );
+
   return (
-    <div class="h-full w-full overflow-hidden bg-background">
+    <div ref={rootEl} class="h-full w-full overflow-hidden bg-background">
       <Show
         when={!collapsed()}
         fallback={
-          <div class="relative h-full">
-            <Button
-              variant="ghost" size="icon-sm" aria-label="Open sidebar"
-              class="absolute left-2 top-2 z-10 rounded-full bg-card/80 shadow-sm backdrop-blur"
-              onClick={toggle}
-            >
-              <PanelLeftOpen class="size-4" />
-            </Button>
-            {threadEl}
+          <div class="flex h-full">
+            {/* Collapsed: the reopen control lives in its OWN thin rail column
+                (matching the sidebar's bg-surface) rather than floating over the
+                content. The previous `absolute` overlay sat on top of a
+                `main-header`'s leading title — see the t3code/codex/chatgpt apps,
+                all of which fill that slot — so it both overlapped the header and
+                competed with any in-header toggle. A dedicated column never
+                overlaps and reads as a collapsed sidebar. */}
+            <div class="flex w-11 shrink-0 flex-col items-center border-r border-border bg-surface pt-2.5">
+              <CollapsedRail onExpand={toggle} class="bg-transparent shadow-none backdrop-blur-none" />
+            </div>
+            <div class="min-w-0 flex-1">{mainRegion}</div>
           </div>
         }
       >
         <ResizablePanelGroup orientation="horizontal">
           <ResizablePanel defaultSize={props.sidebarWidth as number} data-min-size={String(props.sidebarMinWidth)} data-max-size={String(props.sidebarMaxWidth)}>
-            <ConversationList
-              groups={props.groups} conversations={props.conversations} activeId={props.activeId as string | undefined}
-              onSelect={(id) => dispatch('kai-conversation-select', { id })}
-              onNewChat={() => dispatch('kai-new-chat', {})}
-              onToggleSidebar={toggle}
-            />
+            {/* The rail: an optional injected header above the list and footer
+                below it (upgrade card / Design trigger / user menu). Carries a
+                subtle, theme-aware default background (bg-surface), exposed as
+                ::part(sidebar) so a consumer can override it. The inner list is
+                made transparent so the part background reads uniformly. */}
+            <div part="sidebar" class="flex h-full flex-col overflow-hidden bg-surface">
+              <Show when={slots()['sidebar-header']}>
+                {/* When `no-conversations` suppresses the built-in list, the
+                    projected header owns the whole rail flex region; otherwise it
+                    sits as a fixed band above the list. */}
+                <div class={flag('noConversations') ? 'min-h-0 flex-1' : 'shrink-0'}><slot name="sidebar-header" /></div>
+              </Show>
+              <Show when={!flag('noConversations')}>
+                <div class="min-h-0 flex-1">
+                  <ConversationList
+                    class="bg-transparent"
+                    groups={props.groups} conversations={props.conversations} activeId={props.activeId as string | undefined}
+                    compact={flag('compact')}
+                    onSelect={(id) => dispatch('kai-conversation-select', { id })}
+                    onNewChat={() => dispatch('kai-new-chat', {})}
+                    onToggleSidebar={toggle}
+                  />
+                </div>
+              </Show>
+              <Show when={slots()['sidebar-footer']}>
+                <div class="shrink-0"><slot name="sidebar-footer" /></div>
+              </Show>
+            </div>
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel>{threadEl}</ResizablePanel>
+          <ResizablePanel>{mainRegion}</ResizablePanel>
         </ResizablePanelGroup>
       </Show>
     </div>

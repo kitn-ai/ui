@@ -2,7 +2,7 @@ import { For, Show } from 'solid-js';
 import { MoreHorizontal } from 'lucide-solid';
 import {
   Dropdown, DropdownTrigger, DropdownContent, DropdownItem,
-  DropdownSeparator, DropdownLabel, DropdownCheckboxItem,
+  DropdownSeparator, DropdownLabel, DropdownCheckboxItem, DropdownRadioItem,
   DropdownSub, DropdownSubTrigger, DropdownSubContent,
   type DropdownController,
 } from '../ui/dropdown';
@@ -19,8 +19,14 @@ export interface KaiMenuItem {
   icon?: string;
   /** e.g. '⌘U' — shown right-aligned, muted. */
   shortcut?: string;
-  /** Presence ⇒ a checkbox item (role=menuitemcheckbox). */
+  /** Presence ⇒ a checkbox item (role=menuitemcheckbox). With `radioGroup` set,
+   *  marks the SELECTED radio item in that group instead. */
   checked?: boolean;
+  /** Membership in a single-select group (role=menuitemradio). Items sharing a
+   *  `radioGroup` are mutually exclusive — the one with `checked: true` shows the
+   *  checkmark; selecting one emits `{ id, radioGroup }` so the consumer moves
+   *  the checkmark (the consumer owns state, like checkbox items). */
+  radioGroup?: string;
   disabled?: boolean;
   /** A divider (ignores other fields). */
   separator?: boolean;
@@ -61,8 +67,10 @@ interface Events {
    * Fired when the user selects a leaf item.
    * - Plain items: `{ id }`.
    * - Checkbox items: `{ id, checked }` where `checked` is the NEW state.
+   * - Radio items: `{ id, radioGroup }` — the consumer marks `id` as the selected
+   *   one in `radioGroup` and clears the others.
    */
-  'kai-select': { id: string; checked?: boolean };
+  'kai-select': { id: string; checked?: boolean; radioGroup?: string };
   /** The menu opened or closed (by click, keyboard, Escape, outside-click, or a method). */
   'kai-open-change': { open: boolean };
 }
@@ -127,6 +135,20 @@ defineWebComponent<Props, Events>('kai-menu', {
                   {renderItems(item.items)}
                 </DropdownSubContent>
               </DropdownSub>
+            );
+          }
+          if (item.radioGroup !== undefined) {
+            return (
+              <DropdownRadioItem
+                checked={item.checked}
+                disabled={item.disabled}
+                onSelect={() => {
+                  if (item.id) dispatch('kai-select', { id: item.id, radioGroup: item.radioGroup });
+                }}
+              >
+                <Show when={item.icon}>{renderIcon(item.icon, { imgClass: 'mr-2 size-4 shrink-0', spanClass: 'mr-2 flex h-4 w-4 shrink-0 items-center justify-center text-sm' })}</Show>
+                {item.label}
+              </DropdownRadioItem>
             );
           }
           if (item.checked !== undefined) {

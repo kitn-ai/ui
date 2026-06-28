@@ -55,6 +55,15 @@ export const CONVERSATIONS_SLOTS: SlotDef[] = [
   { name: 'footer', mode: 'inject',  doc: 'A row below the list — account, settings, or usage.' },
 ];
 
+/** Styleable `::part`s of `<kai-conversations>`. */
+export const CONVERSATIONS_PARTS: PartDef[] = [
+  {
+    name: 'trailing',
+    doc: 'The right-aligned trailing text on each conversation row (a count, status, or relative time). Set it per item via the `trailing` field; otherwise a short auto relative time is derived from `updatedAt`. Recolor or resize it from outside.',
+    recipe: 'kai-conversations::part(trailing) { color: var(--color-primary); font-variant-numeric: tabular-nums }',
+  },
+];
+
 /** Slots of `<kai-message>` — per-message composition seams. `before-body` and
  *  `after-body` are INJECT regions inside the message's body column; `avatar`
  *  REPLACES the built-in avatar rail (pair it with `avatar="none"` to omit the
@@ -208,6 +217,204 @@ export const ATTACHMENTS_PARTS: PartDef[] = [
   },
 ];
 
+/** Styleable `::part`s of `<kai-status>`. */
+export const STATUS_PARTS: PartDef[] = [
+  {
+    name: 'dot',
+    doc: 'The status dot. Recolor or resize it from outside; the `status` prop sets the default hue.',
+    recipe: 'kai-status::part(dot) { background: var(--color-tool-green) }',
+  },
+];
+
+/** Styleable `::part`s of `<kai-tabs>`. */
+export const TABS_PARTS: PartDef[] = [
+  {
+    name: 'tablist',
+    doc: 'The tab strip container (role="tablist"). Restyle its gap, padding, background, or radius from outside; the `variant` prop sets the segmented/underline defaults.',
+    recipe: 'kai-tabs::part(tablist) { gap: 0.5rem; background: var(--color-card) }',
+  },
+  {
+    name: 'tab',
+    doc: 'A single tab button. Restyle from outside; the active tab carries a `[data-active]` attribute, so target `::part(tab)[data-active]` for the selected look.',
+    recipe: 'kai-tabs::part(tab)[data-active] { color: var(--color-primary); font-weight: 600 }',
+  },
+];
+
+/** Styleable `::part`s of `<kai-voice-output>`. */
+export const VOICE_OUTPUT_PARTS: PartDef[] = [
+  {
+    name: 'button',
+    doc: 'The speaker/play button. Restyle radius, size, padding, or colors from outside; it is a ghost icon button by default.',
+    recipe: 'kai-voice-output::part(button) { border-radius: 9999px; color: var(--color-primary) }',
+  },
+];
+
+/** Slots of `<kai-screen>` (the default slot is the screen body). */
+export const SCREEN_SLOTS: SlotDef[] = [
+  { name: 'title', mode: 'replace', part: true, doc: 'Rich header title; overrides the `headline` prop.' },
+  { name: 'actions', mode: 'inject', doc: 'Header trailing cluster (e.g. an avatar or overflow menu).' },
+];
+
+/** Styleable `::part`s of `<kai-screen>`. */
+export const SCREEN_PARTS: PartDef[] = [
+  {
+    name: 'header',
+    doc: 'The back-header bar (back button + title + actions). Restyle its height, padding, or border from outside.',
+    recipe: 'kai-screen::part(header) { height: 3.25rem; padding-inline: 1rem }',
+  },
+  {
+    name: 'back',
+    doc: 'The back button. Restyle or hide it from outside; `back="false"` removes it entirely.',
+    recipe: 'kai-screen::part(back) { border-radius: 9999px }',
+  },
+  {
+    name: 'body',
+    doc: 'The full-bleed surface that fills the mount point and scrolls its content. Tune padding or background from outside.',
+    recipe: 'kai-screen::part(body) { background: var(--color-card) }',
+  },
+];
+
+/** Slots of `<kai-card>` — structural regions only (the title/description are body
+ *  or `slot="header"` content you mark up). The body is the default slot. */
+export const CARD_SLOTS: SlotDef[] = [
+  { name: 'media', mode: 'inject', doc: 'Full-bleed media (image/video/illustration) at the top (vertical) or start (horizontal). Clipped to the card corners.' },
+  { name: 'header', mode: 'inject', doc: 'Header content, e.g. a title. Rendered above the body.' },
+  { name: 'header-actions', mode: 'inject', doc: 'An actions cluster pinned to the end of the header row.' },
+  { name: 'footer', mode: 'inject', doc: 'Footer content rendered below the body.' },
+  { name: 'footer-actions', mode: 'inject', doc: 'Action buttons pinned to the end of the footer. Do NOT combine with a clickable/href card (nested interactive).' },
+];
+
+/** Styleable `::part`s of `<kai-card>`. */
+export const CARD_PARTS: PartDef[] = [
+  {
+    name: 'card',
+    doc: 'The card root (a div, or an a when href is set). Restyle its radius, border, or background; set --kai-card-spacing for padding/gaps (the dense prop sets the compact default).',
+    recipe: 'kai-card::part(card) { border-radius: 1rem; --kai-card-spacing: 1.5rem }',
+  },
+  {
+    name: 'media',
+    doc: 'The full-bleed media region. Cap or crop it from outside (e.g. a fixed height with object-fit).',
+    recipe: 'kai-card::part(media) { max-height: 12rem }',
+  },
+  {
+    name: 'header',
+    doc: 'The header row (header content + header-actions). Add a divider or adjust its alignment.',
+    recipe: 'kai-card::part(header) { border-bottom: 1px solid var(--color-border) }',
+  },
+  {
+    name: 'body',
+    doc: 'The default-slot body region.',
+    recipe: 'kai-card::part(body) { font-size: 0.9375rem }',
+  },
+  {
+    name: 'footer',
+    doc: 'The footer row (footer content + footer-actions).',
+    recipe: 'kai-card::part(footer) { border-top: 1px solid var(--color-border) }',
+  },
+  {
+    name: 'dismiss',
+    doc: 'The dismiss (×) button shown when dismissible. Recolor or reposition it from outside.',
+    recipe: 'kai-card::part(dismiss) { color: var(--color-muted-foreground) }',
+  },
+];
+
+/** Injection slots of `<kai-workspace>` (the carrier regions the consumer drops
+ *  content into: brand/tabs, the upgrade/Design/user-menu cluster, a top banner). */
+export const WORKSPACE_SLOTS: SlotDef[] = [
+  { name: 'sidebar-header', mode: 'inject', doc: 'Top of the conversation rail (brand, a kai-tabs strip).' },
+  { name: 'sidebar-footer', mode: 'inject', doc: 'Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster.' },
+  { name: 'main-header', mode: 'inject', doc: 'Top of the main region (a top-placed banner or a corner action).' },
+  { name: 'main', mode: 'replace', doc: 'Replace the built-in chat thread with your own main view (a home or dashboard screen). Omit to keep the thread.' },
+];
+
+/** Styleable `::part`s of `<kai-workspace>`. */
+export const WORKSPACE_PARTS: PartDef[] = [
+  {
+    name: 'sidebar',
+    doc: 'The conversation rail. Carries a subtle, theme-aware default background (bg-surface); override its background, border, or width from outside. `sidebar-min-width` sets its min px width and `collapse-below` auto-collapses it under a width.',
+    recipe: 'kai-workspace::part(sidebar) { background: var(--color-card); border-right: 1px solid var(--color-border) }',
+  },
+];
+
+/** Styleable `::part`s of `<kai-nav>`. */
+export const NAV_PARTS: PartDef[] = [
+  {
+    name: 'nav',
+    doc: 'The nav list container. Restyle its gap or padding from outside.',
+    recipe: 'kai-nav::part(nav) { gap: 0.25rem }',
+  },
+  {
+    name: 'item',
+    doc: 'A nav item button (leaf or group parent). The active leaf carries aria-current="page" and a group parent carries aria-expanded; target `::part(item)[aria-current]` for the selected look or `::part(item)[aria-expanded]` for a group row.',
+    recipe: 'kai-nav::part(item)[aria-current] { background: var(--color-accent) }',
+  },
+  {
+    name: 'group',
+    doc: 'The nested child list rendered under an expanded group item. Add a left guide line or tune its indent from outside.',
+    recipe: 'kai-nav::part(group) { border-left: 1px solid var(--color-border); margin-left: 1.1rem }',
+  },
+  {
+    name: 'chevron',
+    doc: 'The disclosure chevron on a group row (rotates when expanded). Recolor or resize it from outside.',
+    recipe: 'kai-nav::part(chevron) { opacity: 1; color: var(--color-primary) }',
+  },
+  {
+    name: 'status',
+    doc: 'The per-item status cluster (a colored dot in the tone hue + an optional label). Shown only when an item carries a `status`; the `pulse` flag animates the dot. Restyle from outside.',
+    recipe: 'kai-nav::part(status) { gap: 0.5rem }',
+  },
+  {
+    name: 'meta',
+    doc: 'The right-aligned muted trailing text on a row (e.g. a relative time). Shown only when an item carries `meta`; restyle from outside.',
+    recipe: 'kai-nav::part(meta) { color: var(--color-foreground); font-variant-numeric: tabular-nums }',
+  },
+];
+
+/** Slots of `<kai-coachmark>` (the anchor/trigger is the default slot). */
+export const COACHMARK_SLOTS: SlotDef[] = [
+  { name: 'content', mode: 'replace', doc: 'The bubble body text shown under the headline.' },
+];
+
+/** Styleable `::part`s of `<kai-coachmark>`. */
+export const COACHMARK_PARTS: PartDef[] = [
+  { name: 'bubble', doc: 'The hint bubble panel. Restyle its background, radius, or padding from outside; the default is bg-primary.', recipe: 'kai-coachmark::part(bubble) { border-radius: 1rem }' },
+  { name: 'arrow', doc: 'The arrow pointing at the anchor. Inherits the bubble color; recolor it alongside the bubble.', recipe: 'kai-coachmark::part(arrow) { background: var(--color-accent) }' },
+  { name: 'badge', doc: 'The small badge pill beside the headline (e.g. "New").', recipe: 'kai-coachmark::part(badge) { text-transform: none }' },
+  { name: 'title', doc: 'The bold headline text.', recipe: 'kai-coachmark::part(title) { font-size: 0.9375rem }' },
+  { name: 'dismiss', doc: 'The dismiss button. Recolor or reposition it from outside.', recipe: 'kai-coachmark::part(dismiss) { color: var(--color-primary-foreground) }' },
+];
+
+/** Styleable `::part`s of `<kai-progress-bar>`. */
+export const PROGRESS_BAR_PARTS: PartDef[] = [
+  { name: 'track', doc: 'The progress track (the background bar). Restyle its height, radius, or background from outside.', recipe: 'kai-progress-bar::part(track) { height: 0.5rem }' },
+  { name: 'fill', doc: 'The filled portion; its width follows value/max. Recolor it from outside.', recipe: 'kai-progress-bar::part(fill) { background: var(--color-tool-green) }' },
+];
+
+/** Styleable `::part`s of `<kai-file-tree>` — the changed-files / diff bits, shown
+ *  only when a file carries diff metadata (or the `summary` attribute is set). */
+export const FILE_TREE_PARTS: PartDef[] = [
+  {
+    name: 'summary',
+    doc: 'The changed-files summary header (the file count, the summed +additions/-deletions, and the Collapse-all/Expand-all toggle). Rendered only when the `summary` attribute is set; restyle or hide it from outside.',
+    recipe: 'kai-file-tree::part(summary) { border-bottom: none; padding-block: 0.5rem }',
+  },
+  {
+    name: 'status',
+    doc: 'The per-row change-status letter (A/M/D/R/U), shown when a file carries a `status`. Colored with the conventional VCS tool hues; restyle from outside.',
+    recipe: 'kai-file-tree::part(status) { font-weight: 700 }',
+  },
+  {
+    name: 'stat-additions',
+    doc: 'The trailing `+N` additions stat on a file row (success/green tool hue, tabular-nums). Shown only when a file carries `additions`.',
+    recipe: 'kai-file-tree::part(stat-additions) { color: var(--color-tool-green) }',
+  },
+  {
+    name: 'stat-deletions',
+    doc: 'The trailing `-N` deletions stat on a file row (error/red tool hue, tabular-nums). Shown only when a file carries `deletions`.',
+    recipe: 'kai-file-tree::part(stat-deletions) { color: var(--color-tool-red) }',
+  },
+];
+
 /**
  * Per-element composition surface — the SINGLE registry the build extracts
  * (`scripts/gen-element-api.mjs`) into `element-meta.json`, the Custom Elements
@@ -226,7 +433,7 @@ export interface ElementComposition {
 
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
-  'kai-conversations': { slots: CONVERSATIONS_SLOTS },
+  'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS },
   'kai-message': { slots: MESSAGE_SLOTS, parts: MESSAGE_PARTS },
   'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },
   'kai-button': { slots: BUTTON_SLOTS, parts: BUTTON_PARTS },
@@ -239,6 +446,16 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-menu': { slots: MENU_SLOTS },
   'kai-skeleton': { parts: SKELETON_PARTS },
   'kai-attachments': { parts: ATTACHMENTS_PARTS },
+  'kai-status': { parts: STATUS_PARTS },
+  'kai-tabs': { parts: TABS_PARTS },
+  'kai-voice-output': { parts: VOICE_OUTPUT_PARTS },
+  'kai-screen': { slots: SCREEN_SLOTS, parts: SCREEN_PARTS },
+  'kai-card': { slots: CARD_SLOTS, parts: CARD_PARTS },
+  'kai-workspace': { slots: WORKSPACE_SLOTS, parts: WORKSPACE_PARTS },
+  'kai-nav': { parts: NAV_PARTS },
+  'kai-coachmark': { slots: COACHMARK_SLOTS, parts: COACHMARK_PARTS },
+  'kai-progress-bar': { parts: PROGRESS_BAR_PARTS },
+  'kai-file-tree': { parts: FILE_TREE_PARTS },
 };
 
 /**

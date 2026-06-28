@@ -6,7 +6,7 @@ interface Props extends Record<string, unknown> {
   src?: string;
   /** Alt text for the image. Defaults to `fallback`. */
   alt?: string;
-  /** Short text shown when there's no image — usually initials (e.g. "RT", "AI"). */
+  /** Short text shown when there's no image — usually initials (e.g. "JD", "AI"). */
   fallback?: string;
   /** Size token: `sm` | `md` (default) | `lg`. */
   size?: 'sm' | 'md' | 'lg';
@@ -19,7 +19,7 @@ interface Props extends Record<string, unknown> {
  * `icon` prop on another element.
  *
  * ```html
- * <kai-avatar src="/me.jpg" fallback="RT"></kai-avatar>
+ * <kai-avatar src="/me.jpg" fallback="JD"></kai-avatar>
  * <kai-avatar fallback="AI" size="sm"></kai-avatar>
  * ```
  */

@@ -60,8 +60,10 @@ test('tasks schema parses + validates a good/bad payload', () => {
   expect(validateAgainstSchema(s, { selectAll: true }).valid).toBe(false);
   // empty tasks violates minItems
   expect(validateAgainstSchema(s, { tasks: [] }).valid).toBe(false);
-  // bad mode enum ('progress' is reserved but not valid in v1)
-  expect(validateAgainstSchema(s, { mode: 'progress', tasks: [{ id: 'a', label: 'A' }] }).valid).toBe(false);
+  // `progress` is now a valid mode (the onboarding-checklist variant)
+  expect(validateAgainstSchema(s, { mode: 'progress', tasks: [{ id: 'a', label: 'A' }] }).valid).toBe(true);
+  // an unknown mode is still rejected by the enum
+  expect(validateAgainstSchema(s, { mode: 'bogus', tasks: [{ id: 'a', label: 'A' }] }).valid).toBe(false);
   // max minimum is 1
   expect(validateAgainstSchema(s, { tasks: [{ id: 'a', label: 'A' }], max: 0 }).valid).toBe(false);
 });

@@ -1,7 +1,8 @@
-import { createSignal, onMount, onCleanup } from 'solid-js';
+import { createSignal, onMount, onCleanup, Show } from 'solid-js';
 import { defineWebComponent } from './define';
+import { createControllableSignal } from '../primitives/controllable';
 import { readSlots, CONVERSATIONS_SLOTS } from './slots';
-import { ConversationList, type ConversationListController } from '../components/conversation-list';
+import { ConversationList, CollapsedRail, type ConversationListController } from '../components/conversation-list';
 import type { ConversationGroup, ConversationSummary, ConversationScope } from '../types';
 
 interface Props extends Record<string, unknown> {
@@ -14,6 +15,14 @@ interface Props extends Record<string, unknown> {
   conversations: ConversationSummary[];
   /** The id of the currently-open conversation, highlighted in the list. */
   activeId?: string;
+  /** Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to
+   *  drive the rail from your app, updating it in response to `kai-collapse-toggle`.
+   *  Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to
+   *  a floating reopen button. */
+  collapsed?: boolean;
+  /** Initial collapsed state when uncontrolled (default false). Use the
+   *  `default-collapsed` attribute to start collapsed in plain HTML. */
+  defaultCollapsed?: boolean;
 }
 
 interface Events {
@@ -23,6 +32,9 @@ interface Events {
   'kai-new-chat': Record<string, never>;
   /** The sidebar toggle was clicked. */
   'kai-toggle-sidebar': Record<string, never>;
+  /** The rail was collapsed or expanded (via the toggle, the reopen button, or a
+   *  `collapse()`/`expand()`/`toggle()` call). */
+  'kai-collapse-toggle': { collapsed: boolean };
   /** The built-in search box query changed (typing, or a programmatic `clear()`
    *  which fires it with `''`). Lets a consumer mirror or server-side the filter. */
   'kai-search': { query: string };
@@ -53,7 +65,9 @@ defineWebComponent<Props, Events>('kai-conversations', {
   groups: [],
   conversations: [],
   activeId: undefined,
-}, (props, { dispatch, element, expose }) => {
+  collapsed: undefined,
+  defaultCollapsed: undefined,
+}, (props, { dispatch, element, expose, flag }) => {
   // Read declarative <kai-conversation> children from light DOM.
   // Shadow DOM with no <slot> suppresses them visually — they're invisible data carriers.
   const [slottedConversations, setSlottedConversations] = createSignal<ConversationSummary[]>([]);
@@ -74,6 +88,18 @@ defineWebComponent<Props, Events>('kai-conversations', {
   // Prop conversations take precedence; slotted children are appended after.
   const allConversations = () => [...(props.conversations ?? []), ...slottedConversations()];
 
+  // ── Rail collapse (controlled/uncontrolled, same pattern as kai-workspace) ──
+  // `collapsed` (when set) wins; otherwise the element manages its own state,
+  // seeded from `defaultCollapsed`. `setCollapsedTo` always writes the internal
+  // value (a no-op visually while controlled) and emits `kai-collapse-toggle` so
+  // a controlling app can update its own state. Collapsed → the shared
+  // CollapsedRail (the same floating reopen button kai-workspace renders).
+  const [collapsed, setCollapsed] = createControllableSignal(
+    () => props.collapsed as boolean | undefined,
+    flag('defaultCollapsed'),
+  );
+  const setCollapsedTo = (next: boolean) => { setCollapsed(next); dispatch('kai-collapse-toggle', { collapsed: next }); };
+
   // ── Imperative API (instance methods on the host) ──────────────────────────
   // The search box's query lives inside ConversationList; we capture its
   // controller (Pattern C) to focus / clear it from the facade.
@@ -92,21 +118,32 @@ defineWebComponent<Props, Events>('kai-conversations', {
     /** Programmatically select a conversation by id — mirror of the
      *  kai-conversation-select event (a convenience over driving `activeId`). */
     select: (id: string) => dispatch('kai-conversation-select', { id }),
+    /** Collapse the rail to its floating reopen button (fires `kai-collapse-toggle`). */
+    collapse: () => setCollapsedTo(true),
+    /** Expand the rail back to the full list (fires `kai-collapse-toggle`). */
+    expand: () => setCollapsedTo(false),
+    /** Toggle the rail collapsed/expanded (fires `kai-collapse-toggle`). */
+    toggle: () => setCollapsedTo(!collapsed()),
   });
 
   return (
-    <ConversationList
-      groups={props.groups}
-      conversations={allConversations()}
-      activeId={props.activeId}
-      onSelect={(id) => dispatch('kai-conversation-select', { id })}
-      onNewChat={() => dispatch('kai-new-chat')}
-      onToggleSidebar={() => dispatch('kai-toggle-sidebar')}
-      onSearchChange={(query) => dispatch('kai-search', { query })}
-      controllerRef={(c) => (controller = c)}
-      header={slots().header ? <slot name="header" /> : undefined}
-      footer={slots().footer ? <slot name="footer" /> : undefined}
-      empty={slots().empty ? <slot name="empty" /> : undefined}
-    />
+    <Show
+      when={!collapsed()}
+      fallback={<CollapsedRail onExpand={() => setCollapsedTo(false)} />}
+    >
+      <ConversationList
+        groups={props.groups}
+        conversations={allConversations()}
+        activeId={props.activeId}
+        onSelect={(id) => dispatch('kai-conversation-select', { id })}
+        onNewChat={() => dispatch('kai-new-chat')}
+        onToggleSidebar={() => { dispatch('kai-toggle-sidebar'); setCollapsedTo(true); }}
+        onSearchChange={(query) => dispatch('kai-search', { query })}
+        controllerRef={(c) => (controller = c)}
+        header={slots().header ? <slot name="header" /> : undefined}
+        footer={slots().footer ? <slot name="footer" /> : undefined}
+        empty={slots().empty ? <slot name="empty" /> : undefined}
+      />
+    </Show>
   );
 });

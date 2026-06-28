@@ -1,6 +1,7 @@
-import { type JSX, Show, splitProps, mergeProps, createUniqueId } from 'solid-js';
+import { type JSX, Show, splitProps, mergeProps, createSignal, createUniqueId } from 'solid-js';
+import { Dynamic } from 'solid-js/web';
 import { cn } from '../utils/cn';
-import { AlertTriangle } from 'lucide-solid';
+import { AlertTriangle, X } from 'lucide-solid';
 
 export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /** Heading rendered in the card chrome (the contract's CardEnvelope.title).
@@ -19,6 +20,25 @@ export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
   /** Stable id for the heading (so composing cards can `aria-labelledby` it).
    *  Auto-generated when omitted. */
   headingId?: string;
+  /** Render a dismiss (×) button that hides the card and calls `onDismiss`.
+   *  Opt-in, OFF by default — the contract cards never set it, so they are
+   *  unaffected. */
+  dismissible?: boolean;
+  /** Called after the card is dismissed via its ×. */
+  onDismiss?: () => void;
+  /** Render the whole card as a link (`<a>`). Wins over `clickable`. */
+  href?: string;
+  /** `target` for the `href` anchor. */
+  target?: string;
+  /** `rel` for the `href` anchor (default `noopener noreferrer` when `target="_blank"`). */
+  rel?: string;
+  /** Make the whole card behave like a button: `role="button"`, a tabindex, and
+   *  Enter/Space activation, firing `onCardClick`. Ignored when `href` is set.
+   *  A clickable/href card must NOT also contain footer action buttons — that
+   *  nests interactive elements. Use `actions` OR clickable, never both. */
+  clickable?: boolean;
+  /** Called when a `clickable` (or `href`) card is activated (click, or Enter/Space). */
+  onCardClick?: (event: MouseEvent | KeyboardEvent) => void;
 }
 
 /**
@@ -28,6 +48,14 @@ export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
  * "never a broken/partial card" rule). It is intentionally chrome-only: it reads
  * no `CardContext` and emits no `CardEvent` — the cards that compose it (e.g.
  * `kai-form`) own the contract interaction.
+ *
+ * The optional `dismissible` / `href` / `clickable` behaviors are all OFF by
+ * default, so the contract cards (which set none of them) keep their original
+ * presentational behavior unchanged.
+ *
+ * a11y: a `clickable` or `href` card MUST NOT also contain footer action buttons
+ * — that nests interactive controls inside a button/link. Use `actions` OR
+ * make the card clickable, never both.
  */
 export function Card(props: CardProps): JSX.Element {
   const merged = mergeProps({ dense: false }, props);
@@ -39,6 +67,13 @@ export function Card(props: CardProps): JSX.Element {
     'errorMessage',
     'dense',
     'headingId',
+    'dismissible',
+    'onDismiss',
+    'href',
+    'target',
+    'rel',
+    'clickable',
+    'onCardClick',
     'class',
     'children',
   ]);
@@ -48,19 +83,36 @@ export function Card(props: CardProps): JSX.Element {
   const hasError = () => local.errorMessage !== undefined && local.errorMessage !== '';
   const hasHeader = () => Boolean(local.heading) || Boolean(local.description);
 
-  return (
-    <div
-      class={cn(
-        'flex flex-col rounded-xl border border-border bg-card text-card-foreground kai-elevation-sm',
-        local.dense ? 'gap-2.5 p-3.5' : 'gap-4 p-5',
-        local.class,
-      )}
-      {...rest}
-    >
-      <Show when={local.media}>
-        <div class="overflow-hidden rounded-lg">{local.media}</div>
-      </Show>
+  const [open, setOpen] = createSignal(true);
+  const dismiss = (event: MouseEvent) => {
+    // Don't let the × activate a clickable/href card underneath it.
+    event.stopPropagation();
+    setOpen(false);
+    local.onDismiss?.();
+  };
 
+  const isLink = () => Boolean(local.href);
+  const isButton = () => !isLink() && Boolean(local.clickable);
+  const isInteractive = () => isLink() || isButton();
+
+  const activate = (event: MouseEvent | KeyboardEvent) => local.onCardClick?.(event);
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (!isButton()) return;
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+      event.preventDefault();
+      activate(event);
+    }
+  };
+
+  // The interactive elements (`<a>` / role="button") get keyboard + hover/focus
+  // affordances; the plain card is a `<div>`. Anchors carry a safe default `rel`
+  // when opening a new tab.
+  const rel = () =>
+    local.rel ?? (local.target === '_blank' ? 'noopener noreferrer' : undefined);
+
+  // The card's heading + body + actions column.
+  const inner = (
+    <>
       <Show when={hasHeader()}>
         <div
           class={cn(
@@ -105,6 +157,48 @@ export function Card(props: CardProps): JSX.Element {
           <span>{local.errorMessage}</span>
         </div>
       </Show>
-    </div>
+    </>
+  );
+
+  return (
+    <Show when={open()}>
+      <Dynamic
+        component={isLink() ? 'a' : 'div'}
+        part="card"
+        href={isLink() ? local.href : undefined}
+        target={isLink() ? local.target : undefined}
+        rel={isLink() ? rel() : undefined}
+        role={isButton() ? 'button' : undefined}
+        tabindex={isButton() ? 0 : undefined}
+        onClick={isInteractive() ? activate : undefined}
+        onKeyDown={isButton() ? onKeyDown : undefined}
+        class={cn(
+          'relative flex flex-col rounded-xl border border-border bg-card text-card-foreground kai-elevation-sm',
+          local.dense ? 'gap-2.5 p-3.5' : 'gap-4 p-5',
+          isInteractive() &&
+            'cursor-pointer no-underline transition-colors hover:border-ring hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          local.class,
+        )}
+        {...rest}
+      >
+        <Show when={local.dismissible}>
+          <button
+            type="button"
+            part="dismiss"
+            aria-label="Dismiss"
+            onClick={dismiss}
+            class="absolute right-2.5 top-2.5 z-10 shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <X class="size-3.5" aria-hidden="true" />
+          </button>
+        </Show>
+
+        <Show when={local.media}>
+          <div class="overflow-hidden rounded-lg">{local.media}</div>
+        </Show>
+
+        {inner}
+      </Dynamic>
+    </Show>
   );
 }

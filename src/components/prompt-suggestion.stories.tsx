@@ -42,6 +42,15 @@ const meta = {
       description: 'Render as a full-width, left-aligned list row that wraps long text instead of a pill. Ignored in highlight mode.',
       table: { defaultValue: { summary: 'false' } },
     },
+    list: {
+      control: 'boolean',
+      description: 'Render as a full-width "Ideas for you" row: a leading icon, a left-aligned label, and a hover background. Like `block`, but keeps the leading icon. Ignored in highlight mode.',
+      table: { defaultValue: { summary: 'false' } },
+    },
+    icon: {
+      control: 'text',
+      description: 'Leading icon: a named icon (e.g. `sparkles`), an image URL/data-URI, or text/emoji. Shown in pill and list layouts.',
+    },
     onClick: {
       action: 'click',
       description: 'Fired when the suggestion is clicked.',
@@ -118,6 +127,24 @@ export const WithHighlightedSearch: Story = {
   <PromptSuggestion highlight="solid">How does SolidJS handle reactivity?</PromptSuggestion>
   <PromptSuggestion highlight="solid">What makes SolidJS fast?</PromptSuggestion>
   <PromptSuggestion highlight="solid">SolidJS vs Svelte comparison</PromptSuggestion>
+</div>`),
+};
+
+/** The "Ideas for you" idiom: a vertical list of icon + label rows with a
+ *  hover background. Used by `<kai-suggestions layout="list">`. */
+export const List: Story = {
+  name: 'List (Ideas for you)',
+  render: (args: { onClick?: (e: MouseEvent) => void }) => (
+    <div class="w-72 flex flex-col gap-0.5">
+      <PromptSuggestion list icon="sparkles" onClick={args.onClick}>Send me a daily briefing</PromptSuggestion>
+      <PromptSuggestion list icon="folder" onClick={args.onClick}>Organize my inbox</PromptSuggestion>
+      <PromptSuggestion list icon="settings" onClick={args.onClick}>Customize Cowork for me</PromptSuggestion>
+    </div>
+  ),
+  ...src(`<div class="flex flex-col gap-0.5">
+  <PromptSuggestion list icon="sparkles">Send me a daily briefing</PromptSuggestion>
+  <PromptSuggestion list icon="folder">Organize my inbox</PromptSuggestion>
+  <PromptSuggestion list icon="settings">Customize Cowork for me</PromptSuggestion>
 </div>`),
 };
 

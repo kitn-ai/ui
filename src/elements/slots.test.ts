@@ -8,6 +8,8 @@ import {
   PROMPT_INPUT_PARTS,
   MESSAGE_SLOTS,
   MESSAGE_PARTS,
+  FILE_TREE_PARTS,
+  NAV_PARTS,
   ELEMENT_COMPOSITION,
   readSlots,
 } from './slots';
@@ -133,6 +135,38 @@ describe('MESSAGE_PARTS registry', () => {
   });
 });
 
+describe('FILE_TREE_PARTS registry', () => {
+  it('declares the changed-files diff parts, with unique names', () => {
+    const names = FILE_TREE_PARTS.map((p) => p.name);
+    expect(names).toEqual(['summary', 'status', 'stat-additions', 'stat-deletions']);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('every part has a non-empty doc contract', () => {
+    expect(FILE_TREE_PARTS.every((p) => p.doc.trim().length > 0)).toBe(true);
+  });
+
+  it('is wired into ELEMENT_COMPOSITION under kai-file-tree', () => {
+    expect(ELEMENT_COMPOSITION['kai-file-tree'].parts).toBe(FILE_TREE_PARTS);
+  });
+});
+
+describe('NAV_PARTS registry', () => {
+  it('declares nav / item plus the nested-group + status parts, with unique names', () => {
+    const names = NAV_PARTS.map((p) => p.name);
+    expect(names).toEqual(['nav', 'item', 'group', 'chevron', 'status', 'meta']);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('every part has a non-empty doc contract', () => {
+    expect(NAV_PARTS.every((p) => p.doc.trim().length > 0)).toBe(true);
+  });
+
+  it('is wired into ELEMENT_COMPOSITION under kai-nav', () => {
+    expect(ELEMENT_COMPOSITION['kai-nav'].parts).toBe(NAV_PARTS);
+  });
+});
+
 describe('ELEMENT_COMPOSITION registry (single source of truth the build extracts)', () => {
   // Every `::part` a consumer can style is declared by writing `part="name"` in a
   // facade/component. The registry must name each one so docs + the kai MCP can
@@ -150,6 +184,9 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
         }
         if (!entry.name.endsWith('.tsx') && !entry.name.endsWith('.ts')) continue;
         if (/\.(test|stories)\.tsx?$/.test(entry.name)) continue;
+        // `ui/stat.tsx` is an internal-only SolidJS component — there is no
+        // `kai-stat` web component, so its parts are intentionally unregistered.
+        if (p.endsWith(join('ui', 'stat.tsx'))) continue;
         for (const m of readFileSync(p, 'utf8').matchAll(PART_RE)) found.add(m[1]);
       }
     };
@@ -179,17 +216,27 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-attachments',
       'kai-badge',
       'kai-button',
+      'kai-card',
       'kai-chat',
+      'kai-coachmark',
       'kai-conversations',
+      'kai-file-tree',
       'kai-hover-card',
       'kai-icon',
       'kai-menu',
       'kai-message',
+      'kai-nav',
       'kai-notice',
+      'kai-progress-bar',
       'kai-prompt-input',
+      'kai-screen',
       'kai-scroll-area',
       'kai-separator',
       'kai-skeleton',
+      'kai-status',
+      'kai-tabs',
+      'kai-voice-output',
+      'kai-workspace',
     ]);
     expect(ELEMENT_COMPOSITION['kai-chat'].slots).toBe(CHAT_SLOTS);
     expect(ELEMENT_COMPOSITION['kai-message'].slots).toBe(MESSAGE_SLOTS);

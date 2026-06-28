@@ -21,6 +21,12 @@ interface Props extends Record<string, unknown> {
   label?: string;
   /** Disable the button (non-interactive, dimmed). */
   disabled?: boolean;
+  /** Stretch the button to the full width of its container (a block button) —
+   *  e.g. a card CTA or a stacked action. Attribute: `full`. */
+  full?: boolean;
+  /** Justify the button's content: `start`, `center` (default), or `end`.
+   *  Combine with `full` for a full-width, left-aligned button. */
+  align?: 'start' | 'center' | 'end';
   /** Native button `type`. Defaults to `button` (so it never submits a form). */
   type?: 'button' | 'submit' | 'reset';
 }
@@ -56,6 +62,8 @@ defineWebComponent<Props, Events>('kai-button', {
   iconTrailing: undefined,
   label: undefined,
   disabled: false,
+  full: false,
+  align: 'center',
   type: 'button',
 }, (props, { dispatch, flag, element, expose }) => {
   // `icon` / `icon-sm` are square, icon-ONLY sizes: suppress the text label and
@@ -80,10 +88,20 @@ defineWebComponent<Props, Events>('kai-button', {
     click: () => element.shadowRoot?.querySelector('button')?.click(),
   });
   return (
+    <>
+      {/* The host shrinks to the label by default (inline-flex), so a text button
+          is only as wide as its content — until a parent stretches it. A text
+          button's inner control is w-full, so when the host IS stretched (a flex
+          column with items-stretch, e.g. a card's collapsed footer, or an explicit
+          `full`) the button fills it. `full` forces that standalone (a block CTA).
+          Icon buttons stay square (no w-full). */}
+      <style>{':host{display:inline-flex}:host([full]){display:block}'}</style>
     <Button
       part="button"
       variant={props.variant ?? 'default'}
       size={props.size ?? 'md'}
+      align={props.align ?? 'center'}
+      full={flag('full') || !iconOnly()}
       type={props.type ?? 'button'}
       disabled={flag('disabled')}
       aria-label={props.label}
@@ -103,5 +121,6 @@ defineWebComponent<Props, Events>('kai-button', {
         {renderIcon(props.iconTrailing, { class: 'size-4 shrink-0 opacity-60', imgClass: 'size-4 shrink-0', spanClass: 'inline-flex size-4 shrink-0 items-center justify-center', ariaHidden: true })}
       </Show>
     </Button>
+    </>
   );
 });

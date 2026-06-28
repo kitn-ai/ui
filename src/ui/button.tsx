@@ -3,7 +3,9 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../utils/cn';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50',
+  // No justify-* here — the `align` variant owns content justification so it can
+  // be overridden (e.g. a full-width, left-aligned block button).
+  'inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -20,17 +22,25 @@ const buttonVariants = cva(
         icon: 'h-9 w-9',
         'icon-sm': 'h-7 w-7',
       },
+      align: {
+        start: 'justify-start',
+        center: 'justify-center',
+        end: 'justify-end',
+      },
     },
-    defaultVariants: { variant: 'default', size: 'md' },
+    defaultVariants: { variant: 'default', size: 'md', align: 'center' },
   }
 );
 
-export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {}
+export interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  /** Stretch to the full width of the container (a block button). */
+  full?: boolean;
+}
 
 export function Button(props: ButtonProps) {
-  const [local, rest] = splitProps(props, ['variant', 'size', 'class', 'children']);
+  const [local, rest] = splitProps(props, ['variant', 'size', 'align', 'full', 'class', 'children']);
   return (
-    <button class={cn(buttonVariants({ variant: local.variant, size: local.size }), local.class)} {...rest}>
+    <button class={cn(buttonVariants({ variant: local.variant, size: local.size, align: local.align }), local.full && 'w-full', local.class)} {...rest}>
       {local.children}
     </button>
   );

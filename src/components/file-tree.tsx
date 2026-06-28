@@ -30,7 +30,29 @@ export interface FileTreeFile {
   language?: string;
   /** Kind — drives the icon + whether Code applies. */
   type?: 'html' | 'pdf' | 'image' | 'other';
+  /** Lines added vs the base. Rendered as a trailing `+N` stat (success hue,
+   *  tabular-nums). Only shown when present; omit for a plain file row. */
+  additions?: number;
+  /** Lines removed vs the base. Rendered as a trailing `-N` stat (error hue). */
+  deletions?: number;
+  /** Change status vs the base. Drives a small trailing status letter in the
+   *  conventional VCS hue (added=green, modified=amber, deleted=red,
+   *  renamed=blue, untracked=muted). Only shown when present. */
+  status?: 'added' | 'modified' | 'deleted' | 'renamed' | 'untracked';
 }
+
+/** A change status a file can carry. */
+export type FileStatus = NonNullable<FileTreeFile['status']>;
+
+/** Per-status letter, accessible word, and tool-hue text class. Conventional VCS
+ *  colors so a changed-files view reads at a glance. */
+const STATUS_META: Record<FileStatus, { letter: string; label: string; class: string }> = {
+  added: { letter: 'A', label: 'added', class: 'text-tool-green' },
+  modified: { letter: 'M', label: 'modified', class: 'text-tool-amber' },
+  deleted: { letter: 'D', label: 'deleted', class: 'text-tool-red' },
+  renamed: { letter: 'R', label: 'renamed', class: 'text-tool-blue' },
+  untracked: { letter: 'U', label: 'untracked', class: 'text-muted-foreground' },
+};
 
 /** A folder node in the built tree. */
 export interface FileTreeFolderNode {
@@ -134,6 +156,48 @@ function iconFor(type: FileTreeFile['type']) {
   }
 }
 
+/** Every folder path in the tree (render order) — drives collapse-all/expand-all. */
+function collectFolderPaths(nodes: FileTreeNode[], out: string[] = []): string[] {
+  for (const n of nodes) {
+    if (n.kind === 'folder') {
+      out.push(n.path);
+      collectFolderPaths(n.children, out);
+    }
+  }
+  return out;
+}
+
+/** Every leaf file in the tree — drives the summary header totals. */
+function collectFiles(nodes: FileTreeNode[], out: FileTreeFile[] = []): FileTreeFile[] {
+  for (const n of nodes) {
+    if (n.kind === 'folder') collectFiles(n.children, out);
+    else out.push(n.file);
+  }
+  return out;
+}
+
+/** Whether a file carries any diff metadata (status / additions / deletions). */
+function hasDiffMeta(file: FileTreeFile): boolean {
+  return file.status !== undefined || file.additions !== undefined || file.deletions !== undefined;
+}
+
+/**
+ * Accessible name for a changed-file row: the file name plus its status and diff
+ * stats, e.g. `App.tsx, modified, 3 additions, 1 deletion`. Returns `undefined`
+ * when the file has no diff metadata, so a plain row keeps its text content as
+ * the accessible name (unchanged behavior).
+ */
+function fileAccessibleName(name: string, file: FileTreeFile): string | undefined {
+  if (!hasDiffMeta(file)) return undefined;
+  const parts: string[] = [];
+  if (file.status) parts.push(STATUS_META[file.status].label);
+  if (file.additions !== undefined)
+    parts.push(`${file.additions} addition${file.additions === 1 ? '' : 's'}`);
+  if (file.deletions !== undefined)
+    parts.push(`${file.deletions} deletion${file.deletions === 1 ? '' : 's'}`);
+  return [name, ...parts].join(', ');
+}
+
 export interface FileTreeProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   /** Flat file list; folders are derived from `/`-delimited paths. */
   files: FileTreeFile[];
@@ -143,6 +207,10 @@ export interface FileTreeProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   onSelect?: (path: string, file: FileTreeFile) => void;
   /** Folder paths expanded by default. When omitted, all folders start open. */
   defaultExpanded?: string[];
+  /** Show a summary header above the tree: the changed-file count, the summed
+   *  `+additions / -deletions`, and a Collapse-all/Expand-all toggle wired to the
+   *  folder-expand state. Off by default (no header — unchanged behavior). */
+  summary?: boolean;
 }
 
 /**
@@ -157,6 +225,7 @@ export function FileTree(props: FileTreeProps): JSX.Element {
     'activeFile',
     'onSelect',
     'defaultExpanded',
+    'summary',
     'class',
   ]);
 
@@ -195,6 +264,23 @@ export function FileTree(props: FileTreeProps): JSX.Element {
       });
     }
   };
+
+  // Summary header derivations (only read when `summary` is set).
+  const folderPaths = createMemo(() => collectFolderPaths(tree()));
+  const leafFiles = createMemo(() => collectFiles(tree()));
+  const fileCount = () => leafFiles().length;
+  const totalAdds = () => leafFiles().reduce((sum, f) => sum + (f.additions ?? 0), 0);
+  const totalDels = () => leafFiles().reduce((sum, f) => sum + (f.deletions ?? 0), 0);
+  const anyOpen = () => folderPaths().some((p) => isOpen(p));
+  const collapseAll = () => {
+    if (defaultAllOpen()) setClosedSet(new Set<string>(folderPaths()));
+    else setOpenSet(new Set<string>());
+  };
+  const expandAll = () => {
+    if (defaultAllOpen()) setClosedSet(new Set<string>());
+    else setOpenSet(new Set<string>(folderPaths()));
+  };
+  const toggleAll = () => (anyOpen() ? collapseAll() : expandAll());
 
   const [focusedPath, setFocusedPath] = createSignal<string | undefined>();
 
@@ -247,27 +333,59 @@ export function FileTree(props: FileTreeProps): JSX.Element {
   };
 
   return (
-    <div
-      role="tree"
-      aria-label="Files"
-      class={cn('text-sm select-none', local.class)}
-      {...rest}
-    >
-      <For each={tree()}>
-        {(node) => (
-          <TreeNode
-            node={node}
-            depth={0}
-            isOpen={isOpen}
-            toggle={toggle}
-            activeFile={() => local.activeFile}
-            focusedPath={focusedPath}
-            onSelectFile={selectFile}
-            onKeyDown={onKeyDown}
-          />
-        )}
-      </For>
-    </div>
+    <>
+      <Show when={local.summary}>
+        <div
+          part="summary"
+          class="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground border-b border-border"
+        >
+          <span class="font-medium text-foreground">
+            {fileCount()} {fileCount() === 1 ? 'file' : 'files'} changed
+          </span>
+          <Show when={totalAdds() > 0}>
+            <span class="text-tool-green tabular-nums">+{totalAdds()}</span>
+          </Show>
+          <Show when={totalDels() > 0}>
+            <span class="text-tool-red tabular-nums">-{totalDels()}</span>
+          </Show>
+          <Show when={folderPaths().length > 0}>
+            <button
+              type="button"
+              class={cn(
+                'ml-auto rounded-md px-1.5 py-0.5 font-medium text-muted-foreground outline-none',
+                'hover:bg-muted hover:text-foreground',
+                'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
+              )}
+              aria-label={anyOpen() ? 'Collapse all folders' : 'Expand all folders'}
+              onClick={toggleAll}
+            >
+              {anyOpen() ? 'Collapse all' : 'Expand all'}
+            </button>
+          </Show>
+        </div>
+      </Show>
+      <div
+        role="tree"
+        aria-label="Files"
+        class={cn('text-sm select-none', local.class)}
+        {...rest}
+      >
+        <For each={tree()}>
+          {(node) => (
+            <TreeNode
+              node={node}
+              depth={0}
+              isOpen={isOpen}
+              toggle={toggle}
+              activeFile={() => local.activeFile}
+              focusedPath={focusedPath}
+              onSelectFile={selectFile}
+              onKeyDown={onKeyDown}
+            />
+          )}
+        </For>
+      </div>
+    </>
   );
 }
 
@@ -300,32 +418,64 @@ function TreeNode(props: TreeNodeProps): JSX.Element {
   return (
     <Show
       when={props.node.kind === 'folder'}
-      fallback={
-        <div
-          role="treeitem"
-          aria-selected={isActive()}
-          data-tree-path={props.node.path}
-          data-tree-kind="file"
-          tabindex={tabIndex()}
-          class={cn(
-            'flex items-center gap-1.5 rounded-md py-1 pr-2 cursor-pointer outline-none',
-            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
-            isActive()
-              ? 'bg-primary/10 text-foreground font-medium'
-              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-          )}
-          style={indent()}
-          onClick={() => props.onSelectFile(props.node as FileTreeFileNode)}
-          onKeyDown={(e) => props.onKeyDown(e, props.node)}
-        >
-          <span class="w-3.5 shrink-0" />
-          {(() => {
-            const Icon = iconFor((props.node as FileTreeFileNode).file.type);
-            return <Icon size={14} class="shrink-0 opacity-70" aria-hidden="true" />;
-          })()}
-          <span class="truncate">{node().name}</span>
-        </div>
-      }
+      fallback={(() => {
+        const file = (props.node as FileTreeFileNode).file;
+        const ariaName = fileAccessibleName(node().name, file);
+        const hasMeta = ariaName !== undefined;
+        const status = file.status ? STATUS_META[file.status] : undefined;
+        return (
+          <div
+            role="treeitem"
+            aria-selected={isActive()}
+            aria-label={ariaName}
+            data-tree-path={props.node.path}
+            data-tree-kind="file"
+            tabindex={tabIndex()}
+            class={cn(
+              'flex items-center gap-1.5 rounded-md py-1 pr-2 cursor-pointer outline-none',
+              'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
+              isActive()
+                ? 'bg-primary/10 text-foreground font-medium'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            )}
+            style={indent()}
+            onClick={() => props.onSelectFile(props.node as FileTreeFileNode)}
+            onKeyDown={(e) => props.onKeyDown(e, props.node)}
+          >
+            <span class="w-3.5 shrink-0" />
+            {(() => {
+              const Icon = iconFor(file.type);
+              return <Icon size={14} class="shrink-0 opacity-70" aria-hidden="true" />;
+            })()}
+            <span class={cn('truncate', hasMeta && 'min-w-0 flex-1')}>{node().name}</span>
+            <Show when={hasMeta}>
+              <span
+                class="ml-auto flex items-center gap-1.5 shrink-0 pl-2 text-xs"
+                aria-hidden="true"
+              >
+                <Show when={file.additions !== undefined}>
+                  <span part="stat-additions" class="text-tool-green tabular-nums">
+                    +{file.additions}
+                  </span>
+                </Show>
+                <Show when={file.deletions !== undefined}>
+                  <span part="stat-deletions" class="text-tool-red tabular-nums">
+                    -{file.deletions}
+                  </span>
+                </Show>
+                <Show when={status}>
+                  <span
+                    part="status"
+                    class={cn('w-3 text-center font-mono font-semibold', status!.class)}
+                  >
+                    {status!.letter}
+                  </span>
+                </Show>
+              </span>
+            </Show>
+          </div>
+        );
+      })()}
     >
       <div role="none">
         <div

@@ -40,6 +40,16 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * SolidJS stories can't auto-serialize a render function (the panel shows `{}`),
+ * so attach a real, paste-ready snippet with its imports. `imports` defaults to
+ * the common set; richer stories pass their own. `language: 'tsx'` labels SolidJS.
+ */
+const IMPORT = `import { Popover, Button } from '@kitn.ai/ui';`;
+const src = (code: string, imports = IMPORT) => ({
+  parameters: { docs: { source: { code: `${imports}\n\n${code}`, language: 'tsx' } } },
+});
+
 const LEGACY = ['GPT-4o', 'GPT-4.1', 'GPT-4o mini'];
 const row = 'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted';
 
@@ -70,6 +80,35 @@ export const ModelMenu: Story = {
       </Popover>
     );
   },
+  ...src(
+    `function ModelMenu() {
+  const [legacyOpen, setLegacyOpen] = createSignal(false);
+  const legacy = ['GPT-4o', 'GPT-4.1', 'GPT-4o mini'];
+  const row = 'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted';
+  return (
+    <Popover trigger={<Button variant="ghost" size="sm">GPT-5.5 ▾</Button>}>
+      <div style={{ width: '15rem' }}>
+        <button type="button" class={row}>
+          <span style={{ 'font-weight': 600 }}>GPT-5.5</span>
+          <span class="text-caption text-muted-foreground">Flagship</span>
+        </button>
+        <button type="button" class={row} aria-expanded={legacyOpen()} onClick={() => setLegacyOpen(!legacyOpen())}>
+          Legacy models {legacyOpen() ? '▴' : '▾'}
+        </button>
+        <Show when={legacyOpen()}>
+          <For each={legacy}>{(m) => <button type="button" class={row} style={{ 'padding-left': '1.75rem' }}>{m}</button>}</For>
+        </Show>
+        <div style={{ height: '1px', margin: '4px 0', background: 'var(--color-border)' }} />
+        <div class={row} style={{ 'justify-content': 'space-between' }}>
+          <span>Temporary chat</span>
+          <Switch label="Temporary chat" />
+        </div>
+      </div>
+    </Popover>
+  );
+}`,
+    `import { createSignal, Show, For } from 'solid-js';\nimport { Popover, Switch, Button } from '@kitn.ai/ui';`,
+  ),
 };
 
 /** Minimal: a trigger and a small card. */
@@ -81,4 +120,9 @@ export const Basic: Story = {
       </div>
     </Popover>
   ),
+  ...src(`<Popover trigger={<Button size="sm">Open</Button>}>
+  <div style={{ width: '12rem', padding: '0.5rem' }} class="text-sm text-foreground">
+    Any content goes here; this is a <code>role="dialog"</code> panel.
+  </div>
+</Popover>`),
 };

@@ -35,6 +35,10 @@ export interface ConversationSummary {
   messageCount: number;
   lastMessageAt: string;
   updatedAt: string;
+  /** Right-aligned trailing text on the row — a count, status, or "days ago".
+   *  When omitted, a short relative time is auto-derived from `updatedAt`
+   *  (fallback `lastMessageAt`). */
+  trailing?: string;
 }
 
 export interface ConversationGroup {

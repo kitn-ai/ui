@@ -162,3 +162,68 @@ describe('suggestion chip rendering and click events', () => {
     expect(onSelect).toHaveBeenCalledWith('vue');
   });
 });
+
+// ---------------------------------------------------------------------------
+// layout="list" — the vertical "Ideas for you" rows (icon + label + hover)
+// ---------------------------------------------------------------------------
+
+type ListItem = { label: string; value?: string; icon?: string };
+
+/** Harness mirroring the `layout="list"` render path in `prompt-suggestions.tsx`:
+ *  full-width rows with a leading icon, passed to `PromptSuggestion` via `list`. */
+function SuggestionRows(props: { items: ListItem[]; onSelect: (value: string) => void }) {
+  return (
+    <div class="flex flex-col gap-0.5">
+      <For each={props.items}>
+        {(s) => (
+          <PromptSuggestion
+            list
+            icon={s.icon}
+            onClick={() => props.onSelect(s.value ?? s.label)}
+          >
+            {s.label}
+          </PromptSuggestion>
+        )}
+      </For>
+    </div>
+  );
+}
+
+describe('layout="list" rendering', () => {
+  const ideas: ListItem[] = [
+    { label: 'Send me a daily briefing', value: 'briefing', icon: 'sparkles' },
+    { label: 'Organize my inbox', value: 'inbox', icon: 'folder' },
+    { label: 'Customize Cowork for me', value: 'customize', icon: 'settings' },
+  ];
+
+  it('renders one full-width row per item with its label', () => {
+    const { getByText } = render(() => (
+      <SuggestionRows items={ideas} onSelect={() => {}} />
+    ));
+    for (const idea of ideas) expect(getByText(idea.label)).toBeInTheDocument();
+  });
+
+  it('renders the leading icon for a row', () => {
+    // `icon="sparkles"` resolves to a lucide-solid <svg>; a text icon renders
+    // as a <span>. Either way the row still carries its label.
+    const { getByText, getAllByRole } = render(() => (
+      <SuggestionRows
+        items={[{ label: 'Send me a daily briefing', icon: '✦' }]}
+        onSelect={() => {}}
+      />
+    ));
+    const button = getAllByRole('button')[0];
+    expect(button).toBeInTheDocument();
+    expect(getByText('✦')).toBeInTheDocument();
+    expect(getByText('Send me a daily briefing')).toBeInTheDocument();
+  });
+
+  it('fires onSelect with the row value when a list row is clicked', () => {
+    const onSelect = vi.fn();
+    const { getByText } = render(() => (
+      <SuggestionRows items={ideas} onSelect={onSelect} />
+    ));
+    fireEvent.click(getByText('Organize my inbox'));
+    expect(onSelect).toHaveBeenCalledWith('inbox');
+  });
+});

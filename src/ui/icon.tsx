@@ -1,10 +1,13 @@
 import type { Component, JSX } from 'solid-js';
 import {
   Plus, Paperclip, Github, Globe, Sparkles, Settings,
-  FileText, Folder, Monitor, MessageCircle, Search,
+  FileText, Folder, Image, Monitor, MessageCircle, MessageSquare, Search,
   Mic, AudioLines, X, ChevronDown, ChevronLeft,
   Pencil, BookOpen, Code, Smile,
   Share, ArrowLeft, MoreHorizontal,
+  House, Clock, Lock, Box, Briefcase, PanelLeft, Circle, SlidersHorizontal, Workflow, SquarePen,
+  Archive, ArrowUp, Bookmark, Copy, Ellipsis, ExternalLink, Flag,
+  GitBranch, GitPullRequest, ListFilter, RotateCw,
 } from 'lucide-solid';
 
 type IconComponent = Component<{ class?: string }>;
@@ -20,8 +23,10 @@ const NAMED_ICONS: Record<string, IconComponent> = {
   settings: Settings,
   'file-text': FileText,
   folder: Folder,
+  image: Image,
   monitor: Monitor,
   'message-circle': MessageCircle,
+  'message-square': MessageSquare,
   search: Search,
   mic: Mic,
   'audio-lines': AudioLines,
@@ -36,6 +41,29 @@ const NAMED_ICONS: Record<string, IconComponent> = {
   'arrow-left': ArrowLeft,
   'more-horizontal': MoreHorizontal,
   'chevron-left': ChevronLeft,
+  // App-shell glyphs (sidebar nav, recents, filters).
+  home: House,
+  clock: Clock,
+  lock: Lock,
+  box: Box,
+  briefcase: Briefcase,
+  'panel-left': PanelLeft,
+  circle: Circle,
+  'sliders-horizontal': SlidersHorizontal,
+  workflow: Workflow,
+  'square-pen': SquarePen,
+  // Code-app / dev-tool glyphs (git, filters, list actions).
+  archive: Archive,
+  'arrow-up': ArrowUp,
+  bookmark: Bookmark,
+  copy: Copy,
+  ellipsis: Ellipsis,
+  'external-link': ExternalLink,
+  flag: Flag,
+  'git-branch': GitBranch,
+  'git-pull-request': GitPullRequest,
+  'list-filter': ListFilter,
+  'rotate-cw': RotateCw,
 };
 
 /** Render an item icon.

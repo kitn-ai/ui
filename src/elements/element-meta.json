@@ -14,15 +14,15 @@
       },
       {
         "name": "files",
-        "type": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
+        "type": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]",
         "optional": false,
         "scalar": false,
         "description": "Files for the Code tab tree + each file's preview `url`. Set as a JS property (array).",
         "typeName": "FileTreeFile[]",
-        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
+        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]",
         "default": "[]",
         "typeImport": "FileTreeFile",
-        "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
+        "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]"
       },
       {
         "name": "tab",
@@ -154,6 +154,14 @@
         "description": "Show the address but make it read-only (visible, nav-tracking, non-editable).",
         "default": "false",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "displayUrl",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Friendly address shown in the path field instead of the real current url (read-only, non-navigable). Use when the framed url is not consumer-facing (e.g. a `data:` blob) so a clean address shows instead of leaking it. Scalar string: set as the `display-url` attribute or the `displayUrl` property.",
+        "displayType": "undefined | string"
       }
     ],
     "events": [
@@ -400,7 +408,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Short text shown when there's no image — usually initials (e.g. \"RT\", \"AI\").",
+        "description": "Short text shown when there's no image — usually initials (e.g. \"JD\", \"AI\").",
         "default": "''",
         "displayType": "undefined | string"
       },
@@ -515,6 +523,24 @@
         "displayType": "undefined | false | true"
       },
       {
+        "name": "full",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Stretch the button to the full width of its container (a block button) — e.g. a card CTA or a stacked action. Attribute: `full`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "align",
+        "type": "undefined | \"start\" | \"center\" | \"end\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Justify the button's content: `start`, `center` (default), or `end`. Combine with `full` for a full-width, left-aligned button.",
+        "default": "'center'",
+        "displayType": "undefined | \"start\" | \"center\" | \"end\""
+      },
+      {
         "name": "type",
         "type": "undefined | \"button\" | \"submit\" | \"reset\"",
         "optional": true,
@@ -581,27 +607,30 @@
     "displayName": "Card",
     "props": [
       {
-        "name": "heading",
-        "type": "undefined | string",
+        "name": "appearance",
+        "type": "undefined | \"outlined\" | \"filled\" | \"plain\" | \"accent\"",
         "optional": true,
         "scalar": true,
-        "description": "Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`.",
-        "displayType": "undefined | string"
+        "description": "Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`. Attribute: `appearance`.",
+        "default": "'outlined'",
+        "displayType": "undefined | \"outlined\" | \"filled\" | \"plain\" | \"accent\""
       },
       {
-        "name": "description",
-        "type": "undefined | string",
+        "name": "orientation",
+        "type": "undefined | \"vertical\" | \"horizontal\" | \"responsive\"",
         "optional": true,
         "scalar": true,
-        "description": "Supporting text under the heading. Attribute: `description`.",
-        "displayType": "undefined | string"
+        "description": "`vertical` (default, media on top) | `horizontal` (media at the start) | `responsive` (horizontal when the card's container is wide enough, else vertical — a container query on the card's own width). Attribute: `orientation`.",
+        "default": "'vertical'",
+        "displayType": "undefined | \"vertical\" | \"horizontal\" | \"responsive\""
       },
       {
-        "name": "errorMessage",
+        "name": "collapse",
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "When set, the card renders its inline error state instead of the body. Attribute: `error-message`.",
+        "description": "The card width below which a `responsive` card collapses to vertical and the footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`.",
+        "default": "'28rem'",
         "displayType": "undefined | string"
       },
       {
@@ -609,21 +638,135 @@
         "type": "undefined | false | true",
         "optional": true,
         "scalar": true,
-        "description": "Compact spacing for dense lists. Attribute: `dense`.",
+        "description": "Tighter spacing for dense lists. Attribute: `dense`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "dismissible",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a close (×) that hides the card and emits `kai-dismiss`. Attribute: `dismissible`. Off by default.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "href",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Render the whole card as a link. Attribute: `href`. Wins over `clickable`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "target",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "`target` for the `href` anchor. Attribute: `target`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "rel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "`rel` for the `href` anchor. Attribute: `rel`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "clickable",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Make the whole card a button (`role=\"button\"`, Enter/Space, hover affordance) that emits `kai-card-click`. Attribute: `clickable`. Ignored when `href` is set.",
         "default": "false",
         "displayType": "undefined | false | true"
       }
     ],
-    "events": [],
+    "events": [
+      {
+        "name": "kai-card-click",
+        "detail": null,
+        "description": "A `clickable`/`href` card was activated (click, or Enter/Space).",
+        "displayDetail": null
+      },
+      {
+        "name": "kai-dismiss",
+        "detail": null,
+        "description": "The card was dismissed via its × (it also hides itself).",
+        "displayDetail": null
+      }
+    ],
     "methods": [],
     "composedFrom": [
       {
         "name": "Card",
-        "group": "Components",
-        "storyId": "solid-advanced-elements-card--docs"
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-card--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "media",
+        "mode": "inject",
+        "doc": "Full-bleed media (image/video/illustration) at the top (vertical) or start (horizontal). Clipped to the card corners."
+      },
+      {
+        "name": "header",
+        "mode": "inject",
+        "doc": "Header content, e.g. a title. Rendered above the body."
+      },
+      {
+        "name": "header-actions",
+        "mode": "inject",
+        "doc": "An actions cluster pinned to the end of the header row."
+      },
+      {
+        "name": "footer",
+        "mode": "inject",
+        "doc": "Footer content rendered below the body."
+      },
+      {
+        "name": "footer-actions",
+        "mode": "inject",
+        "doc": "Action buttons pinned to the end of the footer. Do NOT combine with a clickable/href card (nested interactive)."
+      }
+    ],
+    "parts": [
+      {
+        "name": "card",
+        "doc": "The card root (a div, or an a when href is set). Restyle its radius, border, or background; set --kai-card-spacing for padding/gaps (the dense prop sets the compact default).",
+        "recipe": "kai-card::part(card) { border-radius: 1rem; --kai-card-spacing: 1.5rem }"
+      },
+      {
+        "name": "media",
+        "doc": "The full-bleed media region. Cap or crop it from outside (e.g. a fixed height with object-fit).",
+        "recipe": "kai-card::part(media) { max-height: 12rem }"
+      },
+      {
+        "name": "header",
+        "doc": "The header row (header content + header-actions). Add a divider or adjust its alignment.",
+        "recipe": "kai-card::part(header) { border-bottom: 1px solid var(--color-border) }"
+      },
+      {
+        "name": "body",
+        "doc": "The default-slot body region.",
+        "recipe": "kai-card::part(body) { font-size: 0.9375rem }"
+      },
+      {
+        "name": "footer",
+        "doc": "The footer row (footer content + footer-actions).",
+        "recipe": "kai-card::part(footer) { border-top: 1px solid var(--color-border) }"
+      },
+      {
+        "name": "dismiss",
+        "doc": "The dismiss (×) button shown when dismissible. Recolor or reposition it from outside.",
+        "recipe": "kai-card::part(dismiss) { color: var(--color-muted-foreground) }"
+      }
+    ]
   },
   {
     "tag": "kai-cards",
@@ -1350,6 +1493,146 @@
     "tokens": []
   },
   {
+    "tag": "kai-coachmark",
+    "className": "KaiCoachmarkElement",
+    "displayName": "Coachmark",
+    "props": [
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-coachmark open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "headline",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "badge",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "A small badge pill beside the headline (e.g. \"New\").",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "placement",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Floating placement relative to the anchor (default `bottom`).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "tone",
+        "type": "undefined | \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues.",
+        "displayType": "undefined | \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\""
+      },
+      {
+        "name": "arrow",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Render the arrow that points at the anchor (default `true`). Set `arrow=\"false\"` for a plain bubble with no pointer.",
+        "default": "true",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-dismiss",
+        "detail": "Record<string, never>",
+        "description": "The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again.",
+        "displayDetail": "Record<string, never>"
+      },
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The coachmark opened or closed (a method, the ×, or a driven `open`).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Coachmark",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-coachmark--docs"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "content",
+        "mode": "replace",
+        "doc": "The bubble body text shown under the headline."
+      }
+    ],
+    "parts": [
+      {
+        "name": "bubble",
+        "doc": "The hint bubble panel. Restyle its background, radius, or padding from outside; the default is bg-primary.",
+        "recipe": "kai-coachmark::part(bubble) { border-radius: 1rem }"
+      },
+      {
+        "name": "arrow",
+        "doc": "The arrow pointing at the anchor. Inherits the bubble color; recolor it alongside the bubble.",
+        "recipe": "kai-coachmark::part(arrow) { background: var(--color-accent) }"
+      },
+      {
+        "name": "badge",
+        "doc": "The small badge pill beside the headline (e.g. \"New\").",
+        "recipe": "kai-coachmark::part(badge) { text-transform: none }"
+      },
+      {
+        "name": "title",
+        "doc": "The bold headline text.",
+        "recipe": "kai-coachmark::part(title) { font-size: 0.9375rem }"
+      },
+      {
+        "name": "dismiss",
+        "doc": "The dismiss button. Recolor or reposition it from outside.",
+        "recipe": "kai-coachmark::part(dismiss) { color: var(--color-primary-foreground) }"
+      }
+    ]
+  },
+  {
     "tag": "kai-code-block",
     "className": "KaiCodeBlockElement",
     "displayName": "CodeBlock",
@@ -1980,15 +2263,15 @@
       },
       {
         "name": "conversations",
-        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
+        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]",
         "optional": false,
         "scalar": false,
         "description": "A flat list of conversation summaries; the component buckets them by recency for you. Ignored when `groups` is provided. Set as a JS property.",
         "typeName": "ConversationSummary[]",
-        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
+        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]",
         "default": "[]",
         "typeImport": "ConversationSummary",
-        "displayType": "ConversationSummary[]"
+        "displayType": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]"
       },
       {
         "name": "activeId",
@@ -1997,9 +2280,31 @@
         "scalar": true,
         "description": "The id of the currently-open conversation, highlighted in the list.",
         "displayType": "undefined | string"
+      },
+      {
+        "name": "collapsed",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled collapsed state. Set as a JS property (`el.collapsed = true`) to drive the rail from your app, updating it in response to `kai-collapse-toggle`. Omit for uncontrolled (the element manages it). Collapsed shrinks the rail to a floating reopen button.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultCollapsed",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML.",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
+      {
+        "name": "kai-collapse-toggle",
+        "detail": "{ collapsed: false | true }",
+        "description": "The rail was collapsed or expanded (via the toggle, the reopen button, or a `collapse()`/`expand()`/`toggle()` call).",
+        "displayDetail": "{ collapsed: false | true }"
+      },
       {
         "name": "kai-conversation-select",
         "detail": "{ id: string }",
@@ -2043,6 +2348,24 @@
         "params": "id: string",
         "returns": "void",
         "description": "Programmatically select a conversation by id — mirror of the kai-conversation-select event (a convenience over driving `activeId`)."
+      },
+      {
+        "name": "collapse",
+        "params": "",
+        "returns": "void",
+        "description": "Collapse the rail to its floating reopen button (fires `kai-collapse-toggle`)."
+      },
+      {
+        "name": "expand",
+        "params": "",
+        "returns": "void",
+        "description": "Expand the rail back to the full list (fires `kai-collapse-toggle`)."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Toggle the rail collapsed/expanded (fires `kai-collapse-toggle`)."
       }
     ],
     "composedFrom": [
@@ -2050,6 +2373,11 @@
         "name": "ConversationList",
         "group": "Components",
         "storyId": "solid-advanced-elements-conversationlist--docs"
+      },
+      {
+        "name": "CollapsedRail",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-collapsedrail--docs"
       }
     ],
     "tokens": [
@@ -2071,6 +2399,13 @@
         "name": "footer",
         "mode": "inject",
         "doc": "A row below the list — account, settings, or usage."
+      }
+    ],
+    "parts": [
+      {
+        "name": "trailing",
+        "doc": "The right-aligned trailing text on each conversation row (a count, status, or relative time). Set it per item via the `trailing` field; otherwise a short auto relative time is derived from `updatedAt`. Recolor or resize it from outside.",
+        "recipe": "kai-conversations::part(trailing) { color: var(--color-primary); font-variant-numeric: tabular-nums }"
       }
     ]
   },
@@ -2267,15 +2602,15 @@
     "props": [
       {
         "name": "files",
-        "type": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
+        "type": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]",
         "optional": false,
         "scalar": false,
-        "description": "The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type? }`).",
+        "description": "The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type?, additions?, deletions?, status? }`).",
         "typeName": "FileTreeFile[]",
-        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]",
+        "typeShape": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]",
         "default": "[]",
         "typeImport": "FileTreeFile",
-        "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\" }[]"
+        "displayType": "{ path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | \"html\" | \"pdf\" | \"image\" | \"other\"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | \"added\" | \"modified\" | \"deleted\" | \"renamed\" | \"untracked\" }[]"
       },
       {
         "name": "activeFile",
@@ -2292,6 +2627,15 @@
         "scalar": false,
         "description": "Folder paths expanded initially. Omit to start with all folders open.",
         "displayType": "undefined | string[]"
+      },
+      {
+        "name": "summary",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a changed-files summary header (file count + summed `+/-` + Collapse-all). Attribute: `summary`. Off by default.",
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
@@ -2310,7 +2654,29 @@
         "storyId": "solid-advanced-elements-filetree--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "parts": [
+      {
+        "name": "summary",
+        "doc": "The changed-files summary header (the file count, the summed +additions/-deletions, and the Collapse-all/Expand-all toggle). Rendered only when the `summary` attribute is set; restyle or hide it from outside.",
+        "recipe": "kai-file-tree::part(summary) { border-bottom: none; padding-block: 0.5rem }"
+      },
+      {
+        "name": "status",
+        "doc": "The per-row change-status letter (A/M/D/R/U), shown when a file carries a `status`. Colored with the conventional VCS tool hues; restyle from outside.",
+        "recipe": "kai-file-tree::part(status) { font-weight: 700 }"
+      },
+      {
+        "name": "stat-additions",
+        "doc": "The trailing `+N` additions stat on a file row (success/green tool hue, tabular-nums). Shown only when a file carries `additions`.",
+        "recipe": "kai-file-tree::part(stat-additions) { color: var(--color-tool-green) }"
+      },
+      {
+        "name": "stat-deletions",
+        "doc": "The trailing `-N` deletions stat on a file row (error/red tool hue, tabular-nums). Shown only when a file carries `deletions`.",
+        "recipe": "kai-file-tree::part(stat-deletions) { color: var(--color-tool-red) }"
+      }
+    ]
   },
   {
     "tag": "kai-file-upload",
@@ -2824,11 +3190,11 @@
     "props": [
       {
         "name": "items",
-        "type": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]",
+        "type": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]",
         "optional": true,
         "scalar": false,
         "description": "Tree of menu items. Set as a JS property — not an HTML attribute.",
-        "displayType": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]"
+        "displayType": "undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]"
       },
       {
         "name": "placement",
@@ -2904,9 +3270,9 @@
       },
       {
         "name": "kai-select",
-        "detail": "{ id: string; checked?: undefined | false | true }",
-        "description": "Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state.",
-        "displayDetail": "{ id: string; checked?: undefined | false | true }"
+        "detail": "{ id: string; checked?: undefined | false | true; radioGroup?: undefined | string }",
+        "description": "Fired when the user selects a leaf item. - Plain items: `{ id }`. - Checkbox items: `{ id, checked }` where `checked` is the NEW state. - Radio items: `{ id, radioGroup }` — the consumer marks `id` as the selected one in `radioGroup` and clears the others.",
+        "displayDetail": "{ id: string; checked?: undefined | false | true; radioGroup?: undefined | string }"
       }
     ],
     "methods": [
@@ -2964,6 +3330,11 @@
         "name": "DropdownCheckboxItem",
         "group": "UI",
         "storyId": "solid-advanced-primitives-dropdowncheckboxitem--docs"
+      },
+      {
+        "name": "DropdownRadioItem",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dropdownradioitem--docs"
       },
       {
         "name": "DropdownSub",
@@ -3262,18 +3633,113 @@
     "tokens": []
   },
   {
+    "tag": "kai-nav",
+    "className": "KaiNavElement",
+    "displayName": "Nav",
+    "props": [
+      {
+        "name": "items",
+        "type": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text.",
+        "displayType": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string }[]"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Active item id (controlled).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "defaultValue",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial active id when uncontrolled.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "defaultCollapsed",
+        "type": "undefined | string[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Ids of group items collapsed on first render (groups default to expanded). Set as a JS property (array).",
+        "displayType": "undefined | string[]"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-nav-select",
+        "detail": "{ id: string }",
+        "description": "A nav item was activated.",
+        "displayDetail": "{ id: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "select",
+        "params": "id: string",
+        "returns": "void",
+        "description": "Activate an item by id (fires kai-nav-select)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Nav",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-nav--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "nav",
+        "doc": "The nav list container. Restyle its gap or padding from outside.",
+        "recipe": "kai-nav::part(nav) { gap: 0.25rem }"
+      },
+      {
+        "name": "item",
+        "doc": "A nav item button (leaf or group parent). The active leaf carries aria-current=\"page\" and a group parent carries aria-expanded; target `::part(item)[aria-current]` for the selected look or `::part(item)[aria-expanded]` for a group row.",
+        "recipe": "kai-nav::part(item)[aria-current] { background: var(--color-accent) }"
+      },
+      {
+        "name": "group",
+        "doc": "The nested child list rendered under an expanded group item. Add a left guide line or tune its indent from outside.",
+        "recipe": "kai-nav::part(group) { border-left: 1px solid var(--color-border); margin-left: 1.1rem }"
+      },
+      {
+        "name": "chevron",
+        "doc": "The disclosure chevron on a group row (rotates when expanded). Recolor or resize it from outside.",
+        "recipe": "kai-nav::part(chevron) { opacity: 1; color: var(--color-primary) }"
+      },
+      {
+        "name": "status",
+        "doc": "The per-item status cluster (a colored dot in the tone hue + an optional label). Shown only when an item carries a `status`; the `pulse` flag animates the dot. Restyle from outside.",
+        "recipe": "kai-nav::part(status) { gap: 0.5rem }"
+      },
+      {
+        "name": "meta",
+        "doc": "The right-aligned muted trailing text on a row (e.g. a relative time). Shown only when an item carries `meta`; restyle from outside.",
+        "recipe": "kai-nav::part(meta) { color: var(--color-foreground); font-variant-numeric: tabular-nums }"
+      }
+    ]
+  },
+  {
     "tag": "kai-notice",
     "className": "KaiNoticeElement",
     "displayName": "Notice",
     "props": [
       {
         "name": "severity",
-        "type": "undefined | \"neutral\" | \"info\" | \"warning\" | \"error\" | \"success\"",
+        "type": "undefined | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\"",
         "optional": true,
         "scalar": true,
         "description": "`neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`).",
         "default": "'neutral'",
-        "displayType": "undefined | \"neutral\" | \"info\" | \"warning\" | \"error\" | \"success\""
+        "displayType": "undefined | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\""
       },
       {
         "name": "icon",
@@ -3407,6 +3873,68 @@
       }
     ],
     "tokens": []
+  },
+  {
+    "tag": "kai-progress-bar",
+    "className": "KaiProgressBarElement",
+    "displayName": "ProgressBar",
+    "props": [
+      {
+        "name": "value",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Current progress value (0..max). Attribute: `value`.",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "max",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "The value `value` runs to (default 100). Attribute: `max`.",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Optional caption above the track. Attribute: `label`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "tone",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Fill color: `primary` (default), `success`, `warning`, `error`, `info`. Attribute: `tone`.",
+        "default": "'primary'",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "ProgressBar",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-progressbar--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "track",
+        "doc": "The progress track (the background bar). Restyle its height, radius, or background from outside.",
+        "recipe": "kai-progress-bar::part(track) { height: 0.5rem }"
+      },
+      {
+        "name": "fill",
+        "doc": "The filled portion; its width follows value/max. Recolor it from outside.",
+        "recipe": "kai-progress-bar::part(fill) { background: var(--color-tool-green) }"
+      }
+    ]
   },
   {
     "tag": "kai-prompt-input",
@@ -3801,12 +4329,12 @@
     "props": [
       {
         "name": "orientation",
-        "type": "undefined | \"horizontal\" | \"vertical\"",
+        "type": "undefined | \"vertical\" | \"horizontal\"",
         "optional": true,
         "scalar": true,
         "description": "Layout axis: `horizontal` (row, default) or `vertical` (column).",
         "default": "'horizontal'",
-        "displayType": "undefined | \"horizontal\" | \"vertical\""
+        "displayType": "undefined | \"vertical\" | \"horizontal\""
       },
       {
         "name": "maximizedIndex",
@@ -4083,18 +4611,147 @@
     "tokens": []
   },
   {
+    "tag": "kai-screen",
+    "className": "KaiScreenElement",
+    "displayName": "Screen",
+    "props": [
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages). Set `el.open = true`, or `<kai-screen open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "headline",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Header title text. A projected `title` slot overrides it. (Named `headline` because `title` collides with the global `HTMLElement.title` attribute.)",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "back",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show the back button (default true).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "noInert",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Opt out of marking sibling elements inert/aria-hidden while open (for unusual layouts).",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-back",
+        "detail": "Record<string, never>",
+        "description": "Back navigation intent: the back button or Escape. The consumer flips their own routing in response (the screen knows nothing about the trigger).",
+        "displayDetail": "Record<string, never>"
+      },
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The screen opened or closed (a method, `Escape` close, or driven `open`).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
+      },
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Move focus to the screen surface (no-op while closed)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Screen",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-screen--docs"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "title",
+        "mode": "replace",
+        "part": true,
+        "doc": "Rich header title; overrides the `headline` prop."
+      },
+      {
+        "name": "actions",
+        "mode": "inject",
+        "doc": "Header trailing cluster (e.g. an avatar or overflow menu)."
+      }
+    ],
+    "parts": [
+      {
+        "name": "header",
+        "doc": "The back-header bar (back button + title + actions). Restyle its height, padding, or border from outside.",
+        "recipe": "kai-screen::part(header) { height: 3.25rem; padding-inline: 1rem }"
+      },
+      {
+        "name": "back",
+        "doc": "The back button. Restyle or hide it from outside; `back=\"false\"` removes it entirely.",
+        "recipe": "kai-screen::part(back) { border-radius: 9999px }"
+      },
+      {
+        "name": "body",
+        "doc": "The full-bleed surface that fills the mount point and scrolls its content. Tune padding or background from outside.",
+        "recipe": "kai-screen::part(body) { background: var(--color-card) }"
+      },
+      {
+        "name": "title",
+        "doc": "Rich header title; overrides the `headline` prop."
+      }
+    ]
+  },
+  {
     "tag": "kai-scroll-area",
     "className": "KaiScrollAreaElement",
     "displayName": "ScrollArea",
     "props": [
       {
         "name": "orientation",
-        "type": "undefined | \"horizontal\" | \"vertical\" | \"both\"",
+        "type": "undefined | \"vertical\" | \"horizontal\" | \"both\"",
         "optional": true,
         "scalar": true,
         "description": "Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it.",
         "default": "'vertical'",
-        "displayType": "undefined | \"horizontal\" | \"vertical\" | \"both\""
+        "displayType": "undefined | \"vertical\" | \"horizontal\" | \"both\""
       }
     ],
     "events": [],
@@ -4172,12 +4829,12 @@
     "props": [
       {
         "name": "orientation",
-        "type": "undefined | \"horizontal\" | \"vertical\"",
+        "type": "undefined | \"vertical\" | \"horizontal\"",
         "optional": true,
         "scalar": true,
         "description": "`horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height).",
         "default": "'horizontal'",
-        "displayType": "undefined | \"horizontal\" | \"vertical\""
+        "displayType": "undefined | \"vertical\" | \"horizontal\""
       }
     ],
     "events": [],
@@ -4421,6 +5078,65 @@
     "tokens": []
   },
   {
+    "tag": "kai-status",
+    "className": "KaiStatusElement",
+    "displayName": "Status",
+    "props": [
+      {
+        "name": "status",
+        "type": "undefined | \"new\" | \"online\" | \"busy\" | \"away\" | \"offline\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Presence/notification state → color. `new` (default) maps to the blue hue.",
+        "default": "'new'",
+        "displayType": "undefined | \"new\" | \"online\" | \"busy\" | \"away\" | \"offline\""
+      },
+      {
+        "name": "pulse",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Animated ping ring (off by default; respects prefers-reduced-motion).",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Accessible name. Without it the dot is decorative.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`sm` (default) or `md`.",
+        "default": "'sm'",
+        "displayType": "undefined | \"sm\" | \"md\""
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "Status",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-status--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "dot",
+        "doc": "The status dot. Recolor or resize it from outside; the `status` prop sets the default hue.",
+        "recipe": "kai-status::part(dot) { background: var(--color-tool-green) }"
+      }
+    ]
+  },
+  {
     "tag": "kai-suggestions",
     "className": "KaiSuggestionsElement",
     "displayName": "Suggestions",
@@ -4445,11 +5161,21 @@
       },
       {
         "name": "size",
-        "type": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\"",
+        "type": "undefined | \"md\" | \"lg\"",
         "optional": true,
         "scalar": true,
-        "description": "Size preset for each chip. Defaults to the pill default (`'lg'`); pass `'sm'` for smaller pills (or `'md'`).",
-        "displayType": "undefined | \"sm\" | \"md\" | \"lg\" | \"icon\" | \"icon-sm\""
+        "description": "Row height for `layout=\"list\"`: `'md'` (default) or `'lg'` for taller rows. Chips are unaffected.",
+        "default": "'md'",
+        "displayType": "undefined | \"md\" | \"lg\""
+      },
+      {
+        "name": "layout",
+        "type": "undefined | \"list\" | \"chips\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Layout: `'chips'` (default) renders a wrapping row of rounded pills; `'list'` renders a vertical, full-width \"Ideas for you\" list — each row is left-aligned with a leading `icon`, a label, and a hover background.",
+        "default": "'chips'",
+        "displayType": "undefined | \"list\" | \"chips\""
       },
       {
         "name": "block",
@@ -4571,6 +5297,104 @@
       }
     ],
     "tokens": []
+  },
+  {
+    "tag": "kai-tabs",
+    "className": "KaiTabsElement",
+    "displayName": "Tabs",
+    "props": [
+      {
+        "name": "items",
+        "type": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; disabled?: undefined | false | true }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Tabs to render. Set as a JS property, not an HTML attribute.",
+        "displayType": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; disabled?: undefined | false | true }[]"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled selected id. Set as a JS property (or the `value` attribute); drive it from your app in response to `kai-tab-change`. Omit for uncontrolled.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "defaultValue",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial selected id when uncontrolled (use the `default-value` attribute in plain HTML).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "variant",
+        "type": "undefined | \"segmented\" | \"underline\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`segmented` (default, a pill group) or `underline` (an underlined row).",
+        "default": "'segmented'",
+        "displayType": "undefined | \"segmented\" | \"underline\""
+      },
+      {
+        "name": "block",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Stretch the strip to full width, each tab sharing the space equally.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the whole strip.",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-tab-change",
+        "detail": "{ value: string }",
+        "description": "A tab was selected (click, Enter/Space, or arrow-key move). `value` is the item's id.",
+        "displayDetail": "{ value: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "select",
+        "params": "id: string",
+        "returns": "void",
+        "description": "Select a tab by id (fires `kai-tab-change`). Ignores unknown/disabled ids."
+      },
+      {
+        "name": "focus",
+        "params": "",
+        "returns": "void",
+        "description": "Focus the active tab (or the first focusable tab)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Tabs",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-tabs--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "tablist",
+        "doc": "The tab strip container (role=\"tablist\"). Restyle its gap, padding, background, or radius from outside; the `variant` prop sets the segmented/underline defaults.",
+        "recipe": "kai-tabs::part(tablist) { gap: 0.5rem; background: var(--color-card) }"
+      },
+      {
+        "name": "tab",
+        "doc": "A single tab button. Restyle from outside; the active tab carries a `[data-active]` attribute, so target `::part(tab)[data-active]` for the selected look.",
+        "recipe": "kai-tabs::part(tab)[data-active] { color: var(--color-primary); font-weight: 600 }"
+      }
+    ]
   },
   {
     "tag": "kai-tasks",
@@ -4801,15 +5625,15 @@
     "props": [
       {
         "name": "toasts",
-        "type": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
+        "type": "{ id: string; message: string; variant?: undefined | \"success\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
         "optional": false,
         "scalar": false,
         "description": "The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update.",
         "typeName": "ToastItem[]",
-        "typeShape": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
+        "typeShape": "{ id: string; message: string; variant?: undefined | \"success\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
         "default": "[]",
         "typeImport": "ToastItem",
-        "displayType": "{ id: string; message: string; variant?: undefined | \"neutral\" | \"success\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]"
+        "displayType": "{ id: string; message: string; variant?: undefined | \"success\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]"
       },
       {
         "name": "position",
@@ -5072,13 +5896,30 @@
         "description": "Disable the mic button (non-interactive).",
         "default": "false",
         "displayType": "undefined | false | true"
+      },
+      {
+        "name": "recognitionLang",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang` (the plain `lang` attribute is reserved by `HTMLElement` and can't be a custom-element property). No effect when `transcribe` is set or the browser lacks SpeechRecognition.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "interim",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Emit live partial transcripts (`kai-transcript-interim`) during native recognition. Attribute: `interim`. No-op on the transcribe/fallback paths.",
+        "default": "false",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [
       {
         "name": "kai-audio-captured",
         "detail": "{ blob: Blob }",
-        "description": "Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property.",
+        "description": "Raw audio captured (before transcription) — for hosts that prefer to handle transcription themselves instead of via the `transcribe` property. Also the unsupported-fallback signal: no `transcribe`, no SpeechRecognition, so only the blob is produced (no text).",
         "displayDetail": "{ blob: Blob }"
       },
       {
@@ -5088,9 +5929,15 @@
         "displayDetail": "{ recording: false | true }"
       },
       {
+        "name": "kai-transcript-interim",
+        "detail": "{ text: string }",
+        "description": "Live partial transcript during native recognition (only when `interim` is set). Fires repeatedly before the final `kai-transcription`.",
+        "displayDetail": "{ text: string }"
+      },
+      {
         "name": "kai-transcription",
         "detail": "{ text: string }",
-        "description": "Transcription completed (the `transcribe` property resolved).",
+        "description": "Final transcript — the `transcribe` property resolved, OR native `SpeechRecognition` produced final text (no `transcribe` set).",
         "displayDetail": "{ text: string }"
       }
     ],
@@ -5118,6 +5965,103 @@
     "tokens": []
   },
   {
+    "tag": "kai-voice-output",
+    "className": "KaiVoiceOutputElement",
+    "displayName": "VoiceOutput",
+    "props": [
+      {
+        "name": "text",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The utterance to read aloud.",
+        "default": "''",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "autoplay",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Speak automatically when `text` is set/changed.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "synthesize",
+        "type": "undefined | (text: string) => Promise<Blob>",
+        "optional": true,
+        "scalar": false,
+        "description": "TTS model seam the host supplies — given text, returns an audio `Blob` to play. This is a **function-valued property** (`el.synthesize = async text => blob`); when set, the native `speechSynthesis` path is bypassed. Mirrors `<kai-voice-input>`'s `transcribe`. A value-returning callback can't be modelled as a fire-and-forget event, hence a property.",
+        "displayType": "undefined | (text: string) => Promise<Blob>"
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable the button (non-interactive).",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-speaking-change",
+        "detail": "{ speaking: false | true }",
+        "description": "Playback started or stopped — drive your own UI in sync. Fires on real transitions only (manual click and programmatic speak()/stop()), never on mount.",
+        "displayDetail": "{ speaking: false | true }"
+      },
+      {
+        "name": "kai-synthesized",
+        "detail": "{ blob: Blob }",
+        "description": "The model path (`synthesize`) resolved audio — the raw `Blob` before playback.",
+        "displayDetail": "{ blob: Blob }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "speak",
+        "params": "",
+        "returns": "void",
+        "description": "Speak the current `text` (native, or via `synthesize` if set)."
+      },
+      {
+        "name": "pause",
+        "params": "",
+        "returns": "void",
+        "description": "Pause playback (resumable)."
+      },
+      {
+        "name": "resume",
+        "params": "",
+        "returns": "void",
+        "description": "Resume paused playback."
+      },
+      {
+        "name": "stop",
+        "params": "",
+        "returns": "void",
+        "description": "Stop playback and reset."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "VoiceOutput",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-voiceoutput--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "button",
+        "doc": "The speaker/play button. Restyle radius, size, padding, or colors from outside; it is a ghost icon button by default.",
+        "recipe": "kai-voice-output::part(button) { border-radius: 9999px; color: var(--color-primary) }"
+      }
+    ]
+  },
+  {
     "tag": "kai-workspace",
     "className": "KaiWorkspaceElement",
     "displayName": "Workspace",
@@ -5136,15 +6080,15 @@
       },
       {
         "name": "conversations",
-        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
+        "type": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]",
         "optional": false,
         "scalar": false,
         "description": "Flat conversation list (auto-bucketed if `groups` is empty). Set as a JS property.",
         "typeName": "ConversationSummary[]",
-        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string }[]",
+        "typeShape": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]",
         "default": "[]",
         "typeImport": "ConversationSummary",
-        "displayType": "ConversationSummary[]"
+        "displayType": "{ id: string; title: string; groupId?: undefined | string; scope: { type: \"document\" | \"collection\"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | \"transcript\" | \"markdown\"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt: string; updatedAt: string; trailing?: undefined | string }[]"
       },
       {
         "name": "activeId",
@@ -5316,8 +6260,8 @@
         "type": "undefined | number",
         "optional": true,
         "scalar": true,
-        "description": "Sidebar default width as a percent of the workspace (default 22).",
-        "default": "22",
+        "description": "Sidebar default width as a percent of the workspace (default 26).",
+        "default": "26",
         "displayType": "undefined | number"
       },
       {
@@ -5325,8 +6269,8 @@
         "type": "undefined | number",
         "optional": true,
         "scalar": true,
-        "description": "Sidebar min width in px (default 200).",
-        "default": "200",
+        "description": "Sidebar min width in px (default 240).",
+        "default": "240",
         "displayType": "undefined | number"
       },
       {
@@ -5352,6 +6296,30 @@
         "optional": true,
         "scalar": true,
         "description": "Initial collapsed state when uncontrolled (default false). Use the `default-sidebar-collapsed` attribute to start collapsed in plain HTML.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "collapseBelow",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Auto-collapse the rail when the workspace's own width drops below this many px, and re-expand when it grows back above. Uncontrolled only (it never fights an app-driven `sidebarCollapsed`); omit to disable. Fires `kai-sidebar-toggle`. Attribute: `collapse-below`.",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "compact",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Render Recents as dense single-line rows (a leading dot + title, no count).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "noConversations",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Suppress the built-in ConversationList so the `sidebar-header` slot owns the whole rail flex region (for apps that supply their own rail nav). Default false. Attribute: `no-conversations`.",
         "displayType": "undefined | false | true"
       }
     ],
@@ -5473,6 +6441,11 @@
         "storyId": "solid-advanced-elements-conversationlist--docs"
       },
       {
+        "name": "CollapsedRail",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-collapsedrail--docs"
+      },
+      {
         "name": "ResizablePanelGroup",
         "group": "UI",
         "storyId": "solid-advanced-primitives-resizablepanelgroup--docs"
@@ -5486,13 +6459,37 @@
         "name": "ResizableHandle",
         "group": "UI",
         "storyId": "solid-advanced-primitives-resizablehandle--docs"
-      },
-      {
-        "name": "Button",
-        "group": "UI",
-        "storyId": "solid-advanced-primitives-button--docs"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "sidebar-header",
+        "mode": "inject",
+        "doc": "Top of the conversation rail (brand, a kai-tabs strip)."
+      },
+      {
+        "name": "sidebar-footer",
+        "mode": "inject",
+        "doc": "Bottom of the rail: an upgrade card, a Design trigger, a user-menu cluster."
+      },
+      {
+        "name": "main-header",
+        "mode": "inject",
+        "doc": "Top of the main region (a top-placed banner or a corner action)."
+      },
+      {
+        "name": "main",
+        "mode": "replace",
+        "doc": "Replace the built-in chat thread with your own main view (a home or dashboard screen). Omit to keep the thread."
+      }
+    ],
+    "parts": [
+      {
+        "name": "sidebar",
+        "doc": "The conversation rail. Carries a subtle, theme-aware default background (bg-surface); override its background, border, or width from outside. `sidebar-min-width` sets its min px width and `collapse-below` auto-collapses it under a width.",
+        "recipe": "kai-workspace::part(sidebar) { background: var(--color-card); border-right: 1px solid var(--color-border) }"
+      }
+    ]
   }
 ]

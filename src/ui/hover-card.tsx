@@ -133,7 +133,12 @@ export function HoverCardContent(props: HoverCardContentProps) {
   // gutter: 0 places the outer shell flush with the trigger; the visual gap is
   // recreated by transparent padding (gapPaddingStyle) so the hit area bridges
   // it and a straight trigger->content transit never leaves a hot zone.
-  const position = usePosition(ctx.trigger, ctx.content, { placement: props.placement ?? 'bottom', gutter: 0 });
+  const position = usePosition(ctx.trigger, ctx.content, {
+    placement: props.placement ?? 'bottom',
+    gutter: 0,
+    // Trigger removed from the DOM -> close so the card portal doesn't orphan.
+    onDisconnect: () => ctx.close(),
+  });
   // Escape OR an outside click closes immediately — an outside click is a
   // deliberate dismiss, not a hover-out (which uses leave()'s grace delay).
   useDismiss({ enabled: ctx.open, onDismiss: () => ctx.close(), refs: () => [ctx.trigger(), ctx.content()] });

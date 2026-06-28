@@ -10,9 +10,13 @@ interface Props extends Record<string, unknown> {
   suggestions: Item[];
   /** Chip style: `'outline'` (default), `'ghost'`, or `'default'` (filled). */
   variant?: 'outline' | 'ghost' | 'default';
-  /** Size preset for each chip. Defaults to the pill default (`'lg'`); pass
-   *  `'sm'` for smaller pills (or `'md'`). */
-  size?: 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
+  /** Row height for `layout="list"`: `'md'` (default) or `'lg'` for taller rows.
+   *  Chips are unaffected. */
+  size?: 'md' | 'lg';
+  /** Layout: `'chips'` (default) renders a wrapping row of rounded pills;
+   *  `'list'` renders a vertical, full-width "Ideas for you" list — each row
+   *  is left-aligned with a leading `icon`, a label, and a hover background. */
+  layout?: 'chips' | 'list';
   /** Full-width left-aligned rows instead of pills. */
   block?: boolean;
   /** Substring to highlight within each suggestion. */
@@ -38,8 +42,9 @@ export function parseSuggestionNode(n: Element): Item {
 
 /**
  * `<kai-suggestions>` — a row/list of suggestion chips. Data via the
- * `suggestions` property; `variant`/`block`/`highlight` attributes; emits
- * `select`.
+ * `suggestions` property; `variant`/`layout`/`block`/`highlight` attributes;
+ * emits `select`. `layout="list"` renders the vertical "Ideas for you" list
+ * (leading icon + label + hover background) instead of pills.
  *
  * Alternatively, declare chips as `<kai-suggestion>` child elements
  * (light-DOM data carriers — hidden by the Shadow DOM):
@@ -54,7 +59,8 @@ export function parseSuggestionNode(n: Element): Item {
 defineWebComponent<Props, Events>('kai-suggestions', {
   suggestions: [],
   variant: 'outline',
-  size: undefined,
+  size: 'md',
+  layout: 'chips',
   block: false,
   highlight: undefined,
 }, (props, { dispatch, flag, element }) => {
@@ -75,8 +81,15 @@ defineWebComponent<Props, Events>('kai-suggestions', {
   // Merge prop suggestions (first) with declarative children (after).
   const allSuggestions = () => [...(props.suggestions ?? []), ...slottedSuggestions()];
 
+  const isList = () => props.layout === 'list';
+
+  const containerClass = () =>
+    isList() ? 'flex flex-col gap-0.5'
+      : flag('block') ? 'flex flex-col gap-2'
+        : 'flex flex-wrap gap-2';
+
   return (
-    <div class={flag('block') ? 'flex flex-col gap-2' : 'flex flex-wrap gap-2'}>
+    <div class={containerClass()}>
       <For each={allSuggestions()}>
         {(s) => (
           <PromptSuggestion
@@ -84,6 +97,7 @@ defineWebComponent<Props, Events>('kai-suggestions', {
             size={props.size}
             icon={iconOf(s)}
             block={flag('block')}
+            list={isList()}
             highlight={props.highlight}
             onClick={() => dispatch('kai-select', { value: valueOf(s) })}
           >

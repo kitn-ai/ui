@@ -11,43 +11,71 @@ test('kai-card registers', () => {
   expect(customElements.get('kai-card')).toBeTruthy();
 });
 
-test('kai-card renders heading + description from attributes and projects default slot', async () => {
+test('projects default-slot body and applies the appearance surface', async () => {
   const el = document.createElement('kai-card');
-  el.setAttribute('heading', 'Share your feedback');
-  el.setAttribute('description', 'Two quick questions.');
+  el.setAttribute('appearance', 'filled');
   el.innerHTML = '<p data-testid="body">the body</p>';
   document.body.appendChild(el);
   await flush();
   const root = el.shadowRoot!;
-  const h = root.querySelector('h3')!;
-  expect(h).toBeTruthy();
-  expect(h.textContent).toBe('Share your feedback');
-  expect(root.textContent).toContain('Two quick questions.');
-  // The default slot exists so light-DOM body projects.
+  // The default slot exists so light-DOM body projects, and gets a part="body".
   expect(root.querySelector('slot:not([name])')).toBeTruthy();
+  expect(root.querySelector('[part="body"]')).toBeTruthy();
+  expect((root.querySelector('[part="card"]') as HTMLElement).className).toContain('bg-surface-strong');
 });
 
-test('kai-card exposes named media + actions slots', async () => {
+test('renders a structural region slot only when that slot is filled', async () => {
   const el = document.createElement('kai-card');
-  el.setAttribute('heading', 'T');
+  el.innerHTML = '<img slot="media" alt="m" /><h3 slot="header">Title</h3>body';
   document.body.appendChild(el);
   await flush();
   const root = el.shadowRoot!;
+  // media + header are projected; footer was never filled, so no footer slot/region.
   expect(root.querySelector('slot[name="media"]')).toBeTruthy();
-  expect(root.querySelector('slot[name="actions"]')).toBeTruthy();
+  expect(root.querySelector('[part="header"]')).toBeTruthy();
+  expect(root.querySelector('slot[name="header"]')).toBeTruthy();
+  expect(root.querySelector('slot[name="footer"]')).toBeNull();
+  expect(root.querySelector('[part="footer"]')).toBeNull();
 });
 
-test('kai-card error-message renders the inline role="alert" error and no slots', async () => {
+test('an empty card renders no body/media/header regions', async () => {
   const el = document.createElement('kai-card');
-  el.setAttribute('heading', 'T');
-  el.setAttribute('error-message', "This form couldn't be displayed.");
   document.body.appendChild(el);
   await flush();
   const root = el.shadowRoot!;
-  const alert = root.querySelector('[role="alert"]')!;
-  expect(alert).toBeTruthy();
-  expect(alert.textContent).toContain("This form couldn't be displayed.");
-  // body + actions slots are not rendered in the error state.
-  expect(root.querySelector('slot:not([name])')).toBeNull();
-  expect(root.querySelector('slot[name="actions"]')).toBeNull();
+  expect(root.querySelector('[part="body"]')).toBeNull();
+  expect(root.querySelector('[part="media"]')).toBeNull();
+  expect(root.querySelector('[part="header"]')).toBeNull();
+});
+
+test('dismissible renders a dismiss part, hides the card, and fires kai-dismiss', async () => {
+  const el = document.createElement('kai-card');
+  el.setAttribute('dismissible', '');
+  el.innerHTML = 'body';
+  let fired = false;
+  el.addEventListener('kai-dismiss', () => (fired = true));
+  document.body.appendChild(el);
+  await flush();
+  const root = el.shadowRoot!;
+  const x = root.querySelector('[part="dismiss"]') as HTMLElement;
+  expect(x).toBeTruthy();
+  x.click();
+  await flush();
+  expect(fired).toBe(true);
+  expect(root.querySelector('[part="card"]')).toBeNull();
+});
+
+test('clickable makes the card a role=button that fires kai-card-click', async () => {
+  const el = document.createElement('kai-card');
+  el.setAttribute('clickable', '');
+  el.innerHTML = 'body';
+  let fired = false;
+  el.addEventListener('kai-card-click', () => (fired = true));
+  document.body.appendChild(el);
+  await flush();
+  const root = el.shadowRoot!;
+  const card = root.querySelector('[part="card"]') as HTMLElement;
+  expect(card.getAttribute('role')).toBe('button');
+  card.click();
+  expect(fired).toBe(true);
 });
