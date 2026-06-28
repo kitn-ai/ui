@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show, For, Switch, Match, onMount, onCleanup, type JSX } from 'solid-js';
 import {
   Bot, Terminal, FlaskConical, BookText, Boxes, Sparkles, ShieldCheck, Database,
-  Megaphone, Bell, Columns3, Focus, List, PanelRight, CheckCircle2, Command,
+  Megaphone, Bell, Columns3, Focus, List, Globe, CheckCircle2, Command,
   MoreHorizontal, X, Plus, type LucideProps,
 } from 'lucide-solid';
 import './register'; // every kai-* element used below
@@ -11,20 +11,21 @@ import { AgentCard, type AgentStatus, type AgentStatusTone } from '../ui/agent-c
 import { Segmented, type SegmentedOption } from '../ui/segmented';
 import { cn } from '../utils/cn';
 import type { KaiNavItem } from '../ui/nav';
-import type { KaiTabItem } from '../ui/tabs';
 import type { KaiCommandItem } from './command';
-import type { FileTreeFile } from '../components/file-tree';
 import { toast, configureToasts } from '../primitives/toast-store';
 
 // Labs/Apps: the full MULTI-AGENT WORKSPACE. A desktop shell with a LEFT
-// workspace rail (kai-nav), a CENTER view-mode area that the operator switches
-// between three tiers, and a RIGHT dockable utility panel (kai-tabs → kai-artifact
-// Browser / kai-file-tree Editor).
+// workspace rail (kai-nav) and a TOP-LEVEL view toggle — AGENTS or BROWSER — that
+// fills the rest of the screen. AGENTS is the view-mode area the operator switches
+// between three tiers; BROWSER is a FULL-SCREEN kai-artifact (address bar /
+// back-forward / reload / displayUrl) with a hand-rolled preview TAB STRIP above
+// it, one tab per open preview (composition, not a monolith).
 //
 // The problem this models: one human navigating MANY WORKSPACES (projects) ×
 // MANY AGENTS within each, keyboard-first AND mouse-friendly. Two nav levels —
 // WORKSPACE (the left rail) and AGENT (the editor-group) — and both are reachable
-// from the keyboard and the command palette.
+// from the keyboard and the command palette. The browser is full-screen, never
+// tiled: a tiny tiled preview is useless, so previews get the whole canvas.
 //
 // The center is driven by a `Segmented` view switcher over a `view` signal:
 //   • WORKSPACE — a 2-level editor-group split (Zed/VSCode/tmux WINDOW TILING): a
@@ -46,16 +47,16 @@ import { toast, configureToasts } from '../primitives/toast-store';
 //   • Cmd/Ctrl+K        opens the kai-command palette (both nav levels).
 //   • Alt/Option+1..8   jumps to agent N: focuses its pane + its prompt input.
 //   • Alt/Option+Z      zooms / restores the focused pane (Esc also restores).
+//   • Alt/Option+B      toggles the top-level AGENTS / BROWSER view.
 // Number keys read `event.code` (Digit1…Digit8) so macOS Option-glyphs never leak.
 //
 // Attention routing surfaces "who needs you": a header count pill that jumps to
 // the first waiting agent, an amber edge on the agents awaiting input, and a
 // "Needs you first" sort toggle. A broadcast composer ("Message all agents") opens
-// from the header. The top-level rail | center | utility split is a real
-// kai-resizable (it fits the ≤ 3-item cap); the 2-level editor-group is a
-// hand-rolled flex layout with draggable dividers on BOTH axes — between columns
-// (horizontal) and between stacked groups within a column (vertical) — since
-// kai-resizable can't express the nested N×M tiling.
+// from the header. The top-level rail | center split is a real kai-resizable; the
+// 2-level editor-group is a hand-rolled flex layout with draggable dividers on
+// BOTH axes — between columns (horizontal) and between stacked groups within a
+// column (vertical) — since kai-resizable can't express the nested N×M tiling.
 
 // kai-resizable / kai-resizable-item / kai-artifact are used here as JSX elements;
 // the other kai-* tags are declared (identically) by sibling story files.
@@ -245,47 +246,88 @@ const TONE_TEXT: Record<AgentStatusTone, string> = {
   blocked: 'text-tool-amber',
 };
 
-// ── Right utility panel ─────────────────────────────────────────────────────
-const UTIL_TABS: KaiTabItem[] = [
-  { id: 'browser', label: 'Browser', icon: 'globe' },
-  { id: 'editor', label: 'Editor', icon: 'code' },
-];
+// ── Browser previews (the full-screen Browser view) ─────────────────────────
+// The Browser top-level view is a FULL-SCREEN kai-artifact (address bar /
+// back-forward / reload / displayUrl) with a hand-rolled TAB STRIP above it — one
+// tab per open preview. Different agents open their OWN preview tabs, so the model
+// is a flat `browserTabs` array of { id, title, url, agentId, src }. Every
+// previewed app is itself DARK (dark surfaces + light text), carried in an
+// isolated `data:` iframe, so it reads as a real dark product regardless of the
+// IDE theme. The artifact frames the `data:` blob; `displayUrl` shows a clean
+// read-only address instead of leaking the blob.
+const dataUrl = (html: string) => `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
 
-// A small staging page the Browser tab frames. The artifact frames a `data:` blob,
-// so `displayUrl` shows a clean read-only address instead of leaking the blob. The
-// previewed app is itself DARK — dark surfaces + light text — so it reads as a real
-// dark product, not a light page dropped into the dark shell.
-const PREVIEW_HTML = `<!doctype html><html><head><meta charset="utf-8"><style>
+// Shared dark styling for every preview page.
+const PREVIEW_CSS = `
   :root { color-scheme: dark; font-family: ui-sans-serif, system-ui, sans-serif; }
   body { margin: 0; background: #0b0b0e; color: #fafafa; }
   header { display: flex; align-items: center; gap: 8px; padding: 14px 20px; border-bottom: 1px solid #27272a; font-weight: 600; }
   .dot { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e80; }
-  main { padding: 28px 20px; max-width: 520px; }
+  main { padding: 28px 20px; max-width: 560px; }
   h1 { font-size: 22px; margin: 0 0 6px; }
   p { color: #a1a1aa; line-height: 1.55; }
   .card { margin-top: 18px; padding: 16px; border: 1px solid #27272a; border-radius: 12px; background: #18181b; }
   .btn { display: inline-block; margin-top: 12px; padding: 9px 16px; border-radius: 8px; background: #fafafa; color: #18181b; text-decoration: none; font-size: 14px; font-weight: 600; }
-</style></head><body>
-  <header><span class="dot"></span> Acme App — staging</header>
-  <main>
-    <h1>Checkout v2</h1>
-    <p>The refactored flow is live on the staging preview. Atlas is coordinating the rollout while the fleet finishes its tasks.</p>
-    <div class="card"><strong>Cart</strong><p style="margin:6px 0 0">2 items · $84.00</p><a class="btn" href="#">Continue to payment</a></div>
-  </main>
-</body></html>`;
-const dataUrl = (html: string) => `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
-const PREVIEW_URL = dataUrl(PREVIEW_HTML);
+`;
 
-// The Editor tab tree. kai-file-tree builds the folder structure from the paths
-// and decorates each row with its diff status + per-file +/-; `summary` (set in
-// the ref) draws the count + summed totals header.
-const EDITOR_FILES: FileTreeFile[] = [
-  { path: 'src/checkout/index.ts', status: 'modified', additions: 24, deletions: 9 },
-  { path: 'src/checkout/cart.ts', status: 'modified', additions: 12, deletions: 4 },
-  { path: 'src/checkout/payment.ts', status: 'added', additions: 88, deletions: 0 },
-  { path: 'src/checkout/legacy.ts', status: 'deleted', additions: 0, deletions: 61 },
-  { path: 'src/api/orders.ts', status: 'modified', additions: 7, deletions: 2 },
-  { path: 'docs/checkout.md', status: 'modified', additions: 15, deletions: 5 },
+interface PreviewCopy {
+  badge: string;
+  h1: string;
+  lede: string;
+  cardTitle: string;
+  cardMeta: string;
+  cta: string;
+}
+const previewPage = (o: PreviewCopy) =>
+  `<!doctype html><html><head><meta charset="utf-8"><style>${PREVIEW_CSS}</style></head><body>` +
+  `<header><span class="dot"></span> ${o.badge}</header>` +
+  `<main><h1>${o.h1}</h1><p>${o.lede}</p>` +
+  `<div class="card"><strong>${o.cardTitle}</strong><p style="margin:6px 0 0">${o.cardMeta}</p>` +
+  `<a class="btn" href="#">${o.cta}</a></div></main></body></html>`;
+
+// A single browser preview tab. `agentId` is the agent that opened it (so a tab
+// reads as "owned" by an agent and we can dedupe re-opens); `src` is the dark
+// `data:` page the artifact frames.
+interface BrowserTab {
+  id: string;
+  title: string;
+  url: string;
+  agentId: string;
+  src: string;
+}
+let previewSeq = 0;
+
+// Seed previews opened by DIFFERENT agents: the dark "Acme App — staging /
+// Checkout" one (Cy), an admin orders view (Otto), and the rendered docs guide
+// (Cleo). The count of these is what the Browser top-level tab badges.
+const INITIAL_BROWSER_TABS: BrowserTab[] = [
+  {
+    id: 'pv-checkout', title: 'Acme App — Checkout', url: '/staging/acme/checkout', agentId: 'cy',
+    src: dataUrl(previewPage({
+      badge: 'Acme App — staging',
+      h1: 'Checkout v2',
+      lede: 'The refactored flow is live on the staging preview. Atlas is coordinating the rollout while the fleet finishes its tasks.',
+      cardTitle: 'Cart', cardMeta: '2 items · $84.00', cta: 'Continue to payment',
+    })),
+  },
+  {
+    id: 'pv-orders', title: 'Acme Admin — Orders', url: '/staging/acme/admin/orders', agentId: 'otto',
+    src: dataUrl(previewPage({
+      badge: 'Acme Admin — staging',
+      h1: 'Orders',
+      lede: 'The split orders table is live behind the new migrations. Otto is reconciling payment intents against the ledger.',
+      cardTitle: 'Today', cardMeta: '1,284 orders · $48,910 captured', cta: 'Open order #4821',
+    })),
+  },
+  {
+    id: 'pv-docs', title: 'Docs — Checkout guide', url: '/preview/docs/checkout', agentId: 'cleo',
+    src: dataUrl(previewPage({
+      badge: 'Docs Portal — preview',
+      h1: 'Checkout integration',
+      lede: 'Cleo is drafting the provider walkthrough. The auth section is blocked on which gateway the guide should target.',
+      cardTitle: 'On this page', cardMeta: 'Setup · Webhooks · Going live', cta: 'Read the guide',
+    })),
+  },
 ];
 
 export const SplitWorkspace: Story = {
@@ -312,9 +354,12 @@ export const SplitWorkspace: Story = {
     const [closed, setClosed] = createSignal<Set<string>>(new Set());
     const [attentionFirst, setAttentionFirst] = createSignal(false);
     const [cmdOpen, setCmdOpen] = createSignal(false);
-    const [utilTab, setUtilTab] = createSignal('browser');
-    // The right utility dock starts COLLAPSED; the chrome toggle flips it open.
-    const [panelOpen, setPanelOpen] = createSignal(false);
+    // TOP-LEVEL view: AGENTS (the editor-group tiling) or BROWSER (a full-screen
+    // kai-artifact + preview tab strip). Distinct from the within-Agents tier.
+    const [topView, setTopView] = createSignal<'agents' | 'browser'>('agents');
+    // Open browser previews — different agents open their own tabs.
+    const [browserTabs, setBrowserTabs] = createSignal<BrowserTab[]>(INITIAL_BROWSER_TABS);
+    const [activeBrowserTab, setActiveBrowserTab] = createSignal<string>(INITIAL_BROWSER_TABS[0]?.id ?? '');
     // Broadcast composer now lives behind a header button → mock modal.
     const [broadcastOpen, setBroadcastOpen] = createSignal(false);
 
@@ -545,6 +590,7 @@ export const SplitWorkspace: Story = {
     const toggleZoom = (agentId?: string) => {
       const id = agentId ?? focusedPaneId();
       if (!id) return;
+      setTopView('agents');
       setView('workspace');
       setZoomedId((z) => (z === id ? null : id));
     };
@@ -553,6 +599,7 @@ export const SplitWorkspace: Story = {
     // of its column, focus that group + its prompt input, in the Workspace tier.
     const jumpToAgent = (agentId: string) => {
       if (!live().some((a) => a.id === agentId)) return;
+      setTopView('agents');
       setView('workspace');
       setZoomedId(null);
       const loc = findGroupOfAgent(agentId);
@@ -576,6 +623,59 @@ export const SplitWorkspace: Story = {
 
     // Toast actions land here: open that agent in the Workspace tier.
     const focusAgent = (id: string) => jumpToAgent(id);
+
+    // ── Browser previews (full-screen Browser view) ──────────────────────────
+    const activeBrowserTabData = () =>
+      browserTabs().find((t) => t.id === activeBrowserTab()) ?? browserTabs()[0];
+
+    // Build a dark preview tab for an arbitrary agent (the "Open preview" action).
+    const makeAgentTab = (a: Agent): BrowserTab => ({
+      id: `pv-${a.id}-${previewSeq++}`,
+      title: `${a.name} preview`,
+      url: `/preview/${workspace()}/${a.id}`,
+      agentId: a.id,
+      src: dataUrl(
+        previewPage({
+          badge: `${WORKSPACE_LABEL.get(workspace())} — preview`,
+          h1: `${a.name} · ${a.role}`,
+          lede: a.lastLine,
+          cardTitle: 'Status',
+          cardMeta: a.status.label ?? a.status.tone,
+          cta: 'Open in agent',
+        }),
+      ),
+    });
+
+    // Open a preview for an agent (defaults to the focused pane): reuse its tab if
+    // one is already open, else add one, then switch to the full-screen Browser.
+    const openPreview = (agentId?: string) => {
+      const id = agentId ?? focusedPaneId();
+      if (!id) return;
+      const a = agentById(id);
+      if (!a) return;
+      setCmdOpen(false);
+      const existing = browserTabs().find((t) => t.agentId === id);
+      if (existing) {
+        setActiveBrowserTab(existing.id);
+      } else {
+        const tab = makeAgentTab(a);
+        setBrowserTabs((tabs) => [...tabs, tab]);
+        setActiveBrowserTab(tab.id);
+      }
+      setTopView('browser');
+    };
+
+    // Close a preview tab; keep the active tab valid and drop back to Agents when
+    // the last preview closes.
+    const closeBrowserTab = (tabId: string) => {
+      const tabs = browserTabs();
+      const idx = tabs.findIndex((t) => t.id === tabId);
+      if (idx < 0) return;
+      const next = tabs.filter((t) => t.id !== tabId);
+      setBrowserTabs(next);
+      if (activeBrowserTab() === tabId) setActiveBrowserTab(next[Math.min(idx, next.length - 1)]?.id ?? '');
+      if (next.length === 0) setTopView('agents');
+    };
 
     // ── Toasts + keyboard ────────────────────────────────────────────────────
     // The imperative toast() singleton lazily mounts ONE <kai-toast-region>; point
@@ -611,6 +711,11 @@ export const SplitWorkspace: Story = {
         if (e.altKey && !e.metaKey && !e.ctrlKey && e.code === 'KeyZ') {
           e.preventDefault();
           toggleZoom();
+          return;
+        }
+        if (e.altKey && !e.metaKey && !e.ctrlKey && e.code === 'KeyB') {
+          e.preventDefault();
+          setTopView((v) => (v === 'browser' ? 'agents' : 'browser'));
           return;
         }
         if (e.key === 'Escape') {
@@ -670,6 +775,13 @@ export const SplitWorkspace: Story = {
       items.push({ id: 'pane-add-col', label: 'New column from pane', group: 'Pane' });
       items.push({ id: 'pane-zoom', label: 'Zoom pane', description: faName, group: 'Pane' });
       items.push({ id: 'broadcast', label: 'Message all agents', group: 'Broadcast' });
+      items.push({ id: 'view-agents', label: 'View agents', group: 'View' });
+      items.push({
+        id: 'open-browser',
+        label: browserTabs().length ? `Open browser (${browserTabs().length})` : 'Open browser',
+        group: 'View',
+      });
+      items.push({ id: 'open-preview', label: `Open preview of ${faName}`, group: 'View' });
       return items;
     };
 
@@ -691,6 +803,9 @@ export const SplitWorkspace: Story = {
         case 'pane-add-col': addColumn(); break;
         case 'pane-zoom': toggleZoom(); break;
         case 'broadcast': setBroadcastOpen(true); break;
+        case 'view-agents': setTopView('agents'); break;
+        case 'open-browser': setTopView('browser'); break;
+        case 'open-preview': if (fa) openPreview(fa); break;
       }
     };
 
@@ -1144,9 +1259,9 @@ export const SplitWorkspace: Story = {
 
     // The shell follows the Storybook light/dark toggle — every token flips, and
     // the kai-* shadow roots track the toggle via the preview decorator. The only
-    // pinned-dark surface is the Browser tab's "Acme App" preview (a dark app being
-    // previewed, independent of the IDE chrome) — it carries its own dark styles in
-    // an isolated `data:` iframe, so it stays dark in either theme.
+    // pinned-dark surfaces are the Browser view's previews (dark apps being
+    // previewed, independent of the IDE chrome) — each carries its own dark styles
+    // in an isolated `data:` iframe, so it stays dark in either theme.
     return (
       <div class="flex h-screen w-full flex-col bg-background text-foreground">
         {/* desktop chrome */}
@@ -1155,6 +1270,38 @@ export const SplitWorkspace: Story = {
             <Boxes class="size-5 text-primary" />
             <span class="text-sm font-semibold tracking-tight">Multi-Agent Workspace</span>
             <kai-badge variant="outline">{WORKSPACE_LABEL.get(workspace())}</kai-badge>
+            {/* TOP-LEVEL view toggle: AGENTS or the full-screen BROWSER. A prominent
+                header pair, distinct from the within-Agents tier switcher. The
+                Browser side carries a count badge of open preview tabs. */}
+            <div class="ml-2 flex items-center gap-0.5 rounded-lg bg-surface-sunken p-0.5">
+              <button
+                type="button"
+                aria-pressed={topView() === 'agents'}
+                onClick={() => setTopView('agents')}
+                class={cn(
+                  'flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors',
+                  topView() === 'agents' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <Boxes class="size-3.5" aria-hidden="true" /> Agents
+              </button>
+              <button
+                type="button"
+                aria-pressed={topView() === 'browser'}
+                onClick={() => setTopView('browser')}
+                class={cn(
+                  'flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors',
+                  topView() === 'browser' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <Globe class="size-3.5" aria-hidden="true" /> Browser
+                <Show when={browserTabs().length > 0}>
+                  <span class="inline-flex min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground">
+                    {browserTabs().length}
+                  </span>
+                </Show>
+              </button>
+            </div>
           </div>
           <div class="flex items-center gap-2">
             {/* attention routing: a header count that jumps to the first needs-you agent */}
@@ -1188,25 +1335,15 @@ export const SplitWorkspace: Story = {
                 <Megaphone slot="icon" class="size-4" />
               </kai-button>
             </kai-tooltip>
-            {/* toggle the right utility dock open/closed (starts collapsed) */}
-            <kai-tooltip content={panelOpen() ? 'Hide panel' : 'Show panel'}>
-              <kai-button
-                ref={(el) => { el.addEventListener('kai-click', () => setPanelOpen((v) => !v)); }}
-                variant={panelOpen() ? 'outline' : 'ghost'}
-                size="icon-sm"
-                label={panelOpen() ? 'Hide utility panel' : 'Show utility panel'}
-              >
-                <PanelRight slot="icon" class="size-4" />
-              </kai-button>
-            </kai-tooltip>
             <kai-tooltip content="Settings">
               <kai-button variant="ghost" size="icon-sm" icon="settings" label="Settings"></kai-button>
             </kai-tooltip>
           </div>
         </header>
 
-        {/* THE SPLIT: a real three-region kai-resizable (rail | center | utility).
-            This fits the <= 3 cap exactly, so it is a true resizable. */}
+        {/* THE SPLIT: a real two-region kai-resizable (rail | center). The center
+            holds the TOP-LEVEL Agents / Browser views; the browser is full-screen,
+            so there's no third utility region. */}
         <div class="min-h-0 flex-1">
           <kai-resizable orientation="horizontal" class="block h-full">
             {/* LEFT — workspaces rail */}
@@ -1240,21 +1377,33 @@ export const SplitWorkspace: Story = {
               </aside>
             </kai-resizable-item>
 
-            {/* CENTER — the view-mode area. A Segmented switcher over workspace |
-                focus | list; the editor-group columns live in the Workspace tier,
-                the focus + periphery in Pane + AgentCard. */}
+            {/* CENTER — fills everything but the rail. The TOP-LEVEL toggle swaps
+                between AGENTS (the view-mode area: a Segmented switcher over
+                workspace | focus | list) and the full-screen BROWSER. */}
             <kai-resizable-item min="460px">
-              <div class="flex h-full flex-col">
+              <Switch>
+                {/* AGENTS — the editor-group tiering, now full-width. */}
+                <Match when={topView() === 'agents'}>
+                  <div class="flex h-full flex-col">
                 {/* view switcher + ordering toggle */}
                 <div class="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-2">
                   <div class="flex items-center gap-2">
                     <Segmented options={VIEW_OPTIONS} value={view()} onChange={(v) => setView(v as ViewMode)} size="sm" />
-                    <span class="hidden text-[11px] text-muted-foreground lg:inline">⌥1–8 jump · ⌥Z zoom · ⌘K palette</span>
+                    <span class="hidden text-[11px] text-muted-foreground lg:inline">⌥1–8 jump · ⌥Z zoom · ⌥B browser · ⌘K palette</span>
                   </div>
                   <div class="flex items-center gap-2">
                     <span class="hidden text-xs text-muted-foreground sm:inline">
                       {live().length} {live().length === 1 ? 'agent' : 'agents'}
                     </span>
+                    {/* opens a dark preview for the focused agent in the Browser view */}
+                    <kai-button
+                      ref={(el) => { el.addEventListener('kai-click', () => openPreview()); }}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Globe slot="icon" class="size-3.5" />
+                      Open preview
+                    </kai-button>
                     {/* fires a success toast ("<Agent> finished …") whose action opens it */}
                     <kai-button
                       ref={(el) => { el.addEventListener('kai-click', simulateCompletion); }}
@@ -1356,59 +1505,86 @@ export const SplitWorkspace: Story = {
                     </Match>
                   </Switch>
                 </div>
-              </div>
-            </kai-resizable-item>
+                  </div>
+                </Match>
 
-            {/* RIGHT — dockable utility panel: Browser (kai-artifact) | Editor
-                (kai-file-tree), swapped by kai-tabs. Starts collapsed; the chrome
-                PanelRight toggle flips `collapsed` via the panelOpen signal. */}
-            <kai-resizable-item size="380px" min="300px" max="560px" collapsed={!panelOpen()}>
-              <div class="flex h-full flex-col bg-surface">
-                <div class="shrink-0 border-b border-border px-2 py-1.5">
-                  <kai-tabs
-                    ref={(el) => {
-                      const t = el as El;
-                      t.items = UTIL_TABS;
-                      t.defaultValue = 'browser';
-                      t.block = true;
-                      el.addEventListener('kai-tab-change', (e) => setUtilTab((e as CustomEvent).detail.value));
-                    }}
-                    variant="segmented"
-                  ></kai-tabs>
-                </div>
-                {/* Browser: the REAL kai-artifact preview + address bar. Preview-only
-                    (noTabs) since the Editor is a sibling kai-tabs tab; back/forward/
-                    home hidden; displayUrl shows a clean read-only address for the
-                    `data:` blob; expandable maximizes THIS panel via the kai-resizable
-                    maximize protocol (the panel is a direct kai-resizable-item). */}
-                <Show when={utilTab() === 'browser'}>
-                  <div class="min-h-0 flex-1">
-                    <kai-artifact
-                      ref={(el) => {
-                        const art = el as El;
-                        art.src = PREVIEW_URL;
-                        art.displayUrl = '/staging/acme';
-                        art.iframeTitle = 'Acme App staging preview';
-                        art.noNav = true;
-                        art.noHome = true;
-                        art.noTabs = true;
-                        art.openInTab = true;
-                      }}
-                      expandable
-                      style={{ display: 'block', height: '100%' }}
-                    ></kai-artifact>
+                {/* BROWSER — a FULL-SCREEN kai-artifact (address bar / back-forward
+                    / reload / displayUrl) with a hand-rolled preview TAB STRIP above
+                    it: one tab per open preview, owned by whichever agent opened it.
+                    Composition (artifact + strip), not a monolith. The previewed
+                    apps are themselves DARK, carried in isolated `data:` iframes. */}
+                <Match when={topView() === 'browser'}>
+                  <div class="flex h-full min-h-0 flex-col">
+                    <div role="tablist" class="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-border bg-surface px-2 py-1.5">
+                      <For each={browserTabs()}>
+                        {(tab) => (
+                          <div
+                            role="tab"
+                            aria-selected={tab.id === activeBrowserTab()}
+                            onClick={() => setActiveBrowserTab(tab.id)}
+                            class={cn(
+                              'group/btab flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md py-1 pl-2 pr-1 text-xs transition-colors',
+                              tab.id === activeBrowserTab()
+                                ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
+                                : 'text-muted-foreground hover:bg-hover hover:text-foreground',
+                            )}
+                          >
+                            <Globe class="size-3.5 shrink-0 opacity-70" aria-hidden="true" />
+                            <span class="max-w-[12rem] truncate font-medium">{tab.title}</span>
+                            <button
+                              type="button"
+                              aria-label={`Close ${tab.title}`}
+                              onClick={(e) => { e.stopPropagation(); closeBrowserTab(tab.id); }}
+                              class={cn(
+                                'ml-0.5 flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-surface-sunken hover:text-foreground',
+                                tab.id === activeBrowserTab() ? 'opacity-100' : 'opacity-0 group-hover/btab:opacity-100',
+                              )}
+                            >
+                              <X class="size-3.5" aria-hidden="true" />
+                            </button>
+                          </div>
+                        )}
+                      </For>
+                      <kai-tooltip content="Open a preview for the focused agent">
+                        <button
+                          type="button"
+                          aria-label="Open preview"
+                          onClick={() => openPreview()}
+                          class="ml-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border border-dashed border-border text-muted-foreground transition-colors hover:border-ring hover:bg-hover hover:text-foreground"
+                        >
+                          <Plus class="size-4" aria-hidden="true" />
+                        </button>
+                      </kai-tooltip>
+                    </div>
+                    <div class="min-h-0 flex-1">
+                      <Show
+                        when={activeBrowserTabData()}
+                        keyed
+                        fallback={
+                          <div class="flex h-full flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
+                            No previews open.
+                            <kai-button ref={(el) => { el.addEventListener('kai-click', () => openPreview()); }} variant="outline" size="sm" icon="plus">Open preview</kai-button>
+                          </div>
+                        }
+                      >
+                        {(tab) => (
+                          <kai-artifact
+                            ref={(el) => {
+                              const art = el as El;
+                              art.src = tab.src;
+                              art.displayUrl = tab.url;
+                              art.iframeTitle = tab.title;
+                              art.noTabs = true;
+                              art.openInTab = true;
+                            }}
+                            style={{ display: 'block', height: '100%' }}
+                          ></kai-artifact>
+                        )}
+                      </Show>
+                    </div>
                   </div>
-                </Show>
-                {/* Editor: kai-file-tree with diff stats + its own summary header. */}
-                <Show when={utilTab() === 'editor'}>
-                  <div class="min-h-0 flex-1 overflow-hidden">
-                    <kai-file-tree
-                      ref={(el) => { const f = el as El; f.files = EDITOR_FILES; f.summary = true; }}
-                      style={{ display: 'block', height: '100%' }}
-                    ></kai-file-tree>
-                  </div>
-                </Show>
-              </div>
+                </Match>
+              </Switch>
             </kai-resizable-item>
           </kai-resizable>
         </div>
@@ -1449,12 +1625,13 @@ export const SplitWorkspace: Story = {
       source: {
         language: 'tsx',
         // A representative skeleton (not the full interactive render). The shell is a
-        // three-region kai-resizable (rail | center | utility). The CENTER is a
-        // `Segmented` view switcher; the default WORKSPACE tier is a 2-level
-        // editor-group (window tiling) — a row of resizable COLUMNS, each a vertical
-        // stack of resizable GROUPS (rows); every group = a numbered-status-badge tab
-        // strip + the active agent's `Pane`. A kai-command palette + ⌥-number keys
-        // are the keyboard backbone across both nav levels; notifications use toast().
+        // two-region kai-resizable (rail | center) under a TOP-LEVEL Agents / Browser
+        // toggle. AGENTS is a `Segmented` view switcher whose default WORKSPACE tier
+        // is a 2-level editor-group (window tiling) — a row of resizable COLUMNS, each
+        // a vertical stack of resizable GROUPS (rows); every group = a
+        // numbered-status-badge tab strip + the active agent's `Pane`. BROWSER is a
+        // full-screen kai-artifact + a hand-rolled preview tab strip. A kai-command
+        // palette + ⌥-number keys are the keyboard backbone; notifications use toast().
         code: `// status vocabulary shared by Pane + AgentCard
 const AGENTS = [ /* atlas, otto, ivy, cleo (needsAttention), … nova */ ];
 
@@ -1469,15 +1646,29 @@ const [focusedGroupId, setFocusedGroupId] = createSignal(columns()[0].groups[0].
 const [zoomedId, setZoomedId] = createSignal<string | null>(null);
 const [view, setView] = createSignal<'workspace' | 'focus' | 'list'>('workspace');
 
+// TOP-LEVEL view: AGENTS or the FULL-SCREEN BROWSER (never tiled). Different agents
+// open their own preview tabs; the Browser top-level tab badges the open count.
+const [topView, setTopView] = createSignal<'agents' | 'browser'>('agents');
+type BrowserTab = { id: string; title: string; url: string; agentId: string; src: string };
+const [browserTabs, setBrowserTabs] = createSignal<BrowserTab[]>(seedPreviews()); // dark data: pages
+const [activeBrowserTab, setActiveBrowserTab] = createSignal(browserTabs()[0].id);
+
 // BROWSER-SAFE keyboard (no Cmd/Ctrl+number — browsers reserve it):
 document.addEventListener('keydown', (e) => {
   if ((e.metaKey || e.ctrlKey) && e.code === 'KeyK') { open palette }       // ⌘K
   if (e.altKey && /^Digit[1-8]$/.test(e.code)) jumpToAgent(/* code → N */); // ⌥1–8
   if (e.altKey && e.code === 'KeyZ') toggleZoom(focusedPaneId());           // ⌥Z
+  if (e.altKey && e.code === 'KeyB') setTopView(v => v === 'browser' ? 'agents' : 'browser'); // ⌥B
   if (e.key === 'Escape') setZoomedId(null);
 });
 
-// CENTER: the view switcher + the active tier
+// TOP-LEVEL toggle (header): AGENTS | Browser (count badge). The within-Agents
+// Workspace/Focus/List Segmented is a SEPARATE, lower switcher.
+<TopToggle value={topView()} onChange={setTopView} browserCount={browserTabs().length} />
+
+<Switch>
+{/* AGENTS — the view switcher + the active tier (full-width) */}
+<Match when={topView() === 'agents'}>
 <Segmented options={[{ value: 'workspace', label: 'Workspace', icon: <Columns3/> }, /* … */]}
            value={view()} onChange={setView} />
 
@@ -1504,9 +1695,23 @@ document.addEventListener('keydown', (e) => {
   </Match>
   {/* FOCUS — one big Pane + a rail of AgentCards; LIST — a scannable column */}
 </Switch>
+</Match>
 
-// COMMAND PALETTE (kai-command) — both nav levels + pane ops:
+{/* BROWSER — a FULL-SCREEN kai-artifact (address bar / back-forward / reload) with
+    a hand-rolled preview TAB STRIP above it (composition, not a monolith) */}
+<Match when={topView() === 'browser'}>
+  <div role="tablist">
+    <For each={browserTabs()}>{(t) => <PreviewTab tab={t}            // title + close ×
+      active={t.id === activeBrowserTab()} onClose={() => closeBrowserTab(t.id)} />}</For>
+    <button onClick={() => openPreview(focusedPaneId())}>＋</button>   {/* open a preview */}
+  </div>
+  <kai-artifact src={activeTab().src} displayUrl={activeTab().url} noTabs />  {/* dark page */}
+</Match>
+</Switch>
+
+// COMMAND PALETTE (kai-command) — both nav levels + pane + view ops:
 //   Go to <agent> · Switch <workspace> · split right/down · move next/prev column · new column · zoom
+//   · View agents · Open browser · Open preview of <agent>
 <kai-command items={commandItems()} onkai-select={(e) => onCommandSelect(e.detail.id)} />
 
 // SPLIT / MOVE via the tab "…" menu (no drag yet): split right (new column) ·
