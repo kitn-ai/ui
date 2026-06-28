@@ -1,7 +1,7 @@
 import {
   createSignal, createEffect, onCleanup, on, For, Show, createMemo,
 } from 'solid-js';
-import { X, Check } from 'lucide-solid';
+import { X, Check, AlertTriangle, XCircle, Info } from 'lucide-solid';
 import { cn } from '../utils/cn';
 import { createPresence } from '../ui/overlay';
 import {
@@ -145,6 +145,15 @@ export function Toast(props: ToastProps) {
       >
         <Show when={variant() === 'success'}>
           <Check class="size-4 shrink-0 text-emerald-500" />
+        </Show>
+        <Show when={variant() === 'warning'}>
+          <AlertTriangle class="size-4 shrink-0 text-warning" />
+        </Show>
+        <Show when={variant() === 'error'}>
+          <XCircle class="size-4 shrink-0 text-destructive" />
+        </Show>
+        <Show when={variant() === 'info'}>
+          <Info class="size-4 shrink-0 text-info" />
         </Show>
         <span class="min-w-0 flex-1 truncate">{props.item.message}</span>
         <Show when={props.item.action}>

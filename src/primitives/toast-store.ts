@@ -16,7 +16,7 @@ import { createRoot, createSignal } from 'solid-js';
 import { createStore, produce } from 'solid-js/store';
 import type { ToastPosition } from '../components/toast';
 
-export type ToastVariant = 'neutral' | 'success';
+export type ToastVariant = 'neutral' | 'success' | 'warning' | 'error' | 'info';
 
 export interface ToastConfig {
   stack?: 'expanded' | 'collapsed';
@@ -204,8 +204,14 @@ function raise(message: string, opts: ToastOptions | undefined, variant: ToastVa
 
 export interface ToastFn {
   (message: string, opts?: ToastOptions): ToastHandle;
-  /** Raise a success (emerald check) toast. */
+  /** Raise a success (green check) toast. */
   success: (message: string, opts?: ToastOptions) => ToastHandle;
+  /** Raise a warning (amber) toast — e.g. an agent needs your input. */
+  warning: (message: string, opts?: ToastOptions) => ToastHandle;
+  /** Raise an error (destructive/red) toast — e.g. an agent failed. */
+  error: (message: string, opts?: ToastOptions) => ToastHandle;
+  /** Raise an info (blue) toast. */
+  info: (message: string, opts?: ToastOptions) => ToastHandle;
   /** Dismiss a toast by id. */
   dismiss: (id: string) => void;
   /** Dismiss every active toast. */
@@ -226,6 +232,9 @@ export const toast: ToastFn = Object.assign(
   (message: string, opts?: ToastOptions) => raise(message, opts, 'neutral'),
   {
     success: (message: string, opts?: ToastOptions) => raise(message, opts, 'success'),
+    warning: (message: string, opts?: ToastOptions) => raise(message, opts, 'warning'),
+    error: (message: string, opts?: ToastOptions) => raise(message, opts, 'error'),
+    info: (message: string, opts?: ToastOptions) => raise(message, opts, 'info'),
     dismiss,
     clear: () => setToasts([]),
   },
