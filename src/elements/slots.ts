@@ -345,8 +345,28 @@ export const NAV_PARTS: PartDef[] = [
   },
   {
     name: 'item',
-    doc: 'A nav item button. The active item carries aria-current="page"; target `::part(item)[aria-current]` for the selected look.',
+    doc: 'A nav item button (leaf or group parent). The active leaf carries aria-current="page" and a group parent carries aria-expanded; target `::part(item)[aria-current]` for the selected look or `::part(item)[aria-expanded]` for a group row.',
     recipe: 'kai-nav::part(item)[aria-current] { background: var(--color-accent) }',
+  },
+  {
+    name: 'group',
+    doc: 'The nested child list rendered under an expanded group item. Add a left guide line or tune its indent from outside.',
+    recipe: 'kai-nav::part(group) { border-left: 1px solid var(--color-border); margin-left: 1.1rem }',
+  },
+  {
+    name: 'chevron',
+    doc: 'The disclosure chevron on a group row (rotates when expanded). Recolor or resize it from outside.',
+    recipe: 'kai-nav::part(chevron) { opacity: 1; color: var(--color-primary) }',
+  },
+  {
+    name: 'status',
+    doc: 'The per-item status cluster (a colored dot in the tone hue + an optional label). Shown only when an item carries a `status`; the `pulse` flag animates the dot. Restyle from outside.',
+    recipe: 'kai-nav::part(status) { gap: 0.5rem }',
+  },
+  {
+    name: 'meta',
+    doc: 'The right-aligned muted trailing text on a row (e.g. a relative time). Shown only when an item carries `meta`; restyle from outside.',
+    recipe: 'kai-nav::part(meta) { color: var(--color-foreground); font-variant-numeric: tabular-nums }',
   },
 ];
 

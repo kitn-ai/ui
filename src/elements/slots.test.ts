@@ -9,6 +9,7 @@ import {
   MESSAGE_SLOTS,
   MESSAGE_PARTS,
   FILE_TREE_PARTS,
+  NAV_PARTS,
   ELEMENT_COMPOSITION,
   readSlots,
 } from './slots';
@@ -147,6 +148,22 @@ describe('FILE_TREE_PARTS registry', () => {
 
   it('is wired into ELEMENT_COMPOSITION under kai-file-tree', () => {
     expect(ELEMENT_COMPOSITION['kai-file-tree'].parts).toBe(FILE_TREE_PARTS);
+  });
+});
+
+describe('NAV_PARTS registry', () => {
+  it('declares nav / item plus the nested-group + status parts, with unique names', () => {
+    const names = NAV_PARTS.map((p) => p.name);
+    expect(names).toEqual(['nav', 'item', 'group', 'chevron', 'status', 'meta']);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('every part has a non-empty doc contract', () => {
+    expect(NAV_PARTS.every((p) => p.doc.trim().length > 0)).toBe(true);
+  });
+
+  it('is wired into ELEMENT_COMPOSITION under kai-nav', () => {
+    expect(ELEMENT_COMPOSITION['kai-nav'].parts).toBe(NAV_PARTS);
   });
 });
 
