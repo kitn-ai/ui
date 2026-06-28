@@ -99,8 +99,8 @@ function ControlButton(props: { label: string; onClick?: () => void; children: J
  *
  * Colors come entirely from design tokens (surface / border / ring / tool-*),
  * so it reads correctly in light and dark with no hardcoded values. The header,
- * body, and footer are exposed via `::part(header|body|footer)` for the eventual
- * `kai-pane` facade.
+ * body, footer, and window-control cluster are exposed via
+ * `::part(header|body|footer|controls)` for the `kai-pane` facade.
  */
 export function Pane(props: PaneProps) {
   return (
@@ -153,7 +153,7 @@ export function Pane(props: PaneProps) {
             </span>
           )}
         </Show>
-        <div class="ml-auto flex shrink-0 items-center gap-0.5">
+        <div part="controls" class="ml-auto flex shrink-0 items-center gap-0.5">
           {props.actions}
           <Show when={props.onSplit}>
             <ControlButton label="Split pane" onClick={props.onSplit}>

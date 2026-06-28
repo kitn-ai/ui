@@ -163,6 +163,7 @@ export function AgentCard(props: AgentCardProps) {
           </Show>
           <span
             aria-hidden="true"
+            part="status"
             class={cn('relative inline-block size-2 rounded-full', TONE_DOT[tone()])}
           />
         </span>
@@ -188,6 +189,7 @@ export function AgentCard(props: AgentCardProps) {
         <Show when={local.onMenu}>
           <button
             type="button"
+            part="menu"
             aria-label="More"
             onClick={(e) => {
               // Don't let the menu click also activate the card.
