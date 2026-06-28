@@ -26,12 +26,35 @@ export interface WebComponentProps {
   children?: ReactNode;
 }
 
+// Per-element registration fires on the CLIENT, once per tag. The element modules
+// touch `window` at module-eval (Solid's runtime), so the thunk must never run on
+// the server — it is only ever called from a client effect, browser-gated here too.
+const registered = new Set<string>();
+function ensureRegistered(tagName: string, register?: () => Promise<unknown>): void {
+  if (!register || registered.has(tagName)) return;
+  if (typeof window === 'undefined' || typeof customElements === 'undefined') return;
+  registered.add(tagName);
+  if (customElements.get(tagName)) return; // already defined (e.g. via registerAll)
+  void register();
+}
+
+/** Eagerly register ALL kai-* elements (the register-all bundle). Opt-in escape
+ *  hatch for consumers who prefer no first-mount upgrade delay. Browser-only;
+ *  a no-op on the server. */
+export function registerAll(): Promise<unknown> | undefined {
+  if (typeof window === 'undefined' || typeof customElements === 'undefined') return undefined;
+  return import('@kitn.ai/ui/elements');
+}
+
 export function createWebComponent<P extends WebComponentProps>(
   tagName: string,
   /** DOM-property names to assign from props (incl. `theme`). */
   propNames: readonly string[],
-  /** Map of React handler prop → DOM event name, e.g. `{ onMessageAction: 'kai-message-action' }`. */
+  /** Map of React handler prop → DOM event name. */
   eventMap: Record<string, string>,
+  /** Client-only thunk that loads + registers this element (a literal dynamic
+   *  import of its `@kitn.ai/ui/elements/<name>` chunk). */
+  register?: () => Promise<unknown>,
 ): ForwardRefExoticComponent<PropsWithoutRef<P> & RefAttributes<HTMLElement>> {
   const eventEntries = Object.entries(eventMap);
 
@@ -70,6 +93,12 @@ export function createWebComponent<P extends WebComponentProps>(
         customElements.whenDefined(tagName).then(applyProps);
       }
     });
+
+    // Client-only, deduped: load + register THIS element on first mount. The
+    // prop-assign effect's whenDefined guard re-applies props once it upgrades.
+    useLayoutEffect(() => {
+      ensureRegistered(tagName, register);
+    }, []);
 
     // Wire CustomEvent listeners ONCE per element. Each stable listener reads the
     // latest handler from handlersRef, so changing a handler's identity across
