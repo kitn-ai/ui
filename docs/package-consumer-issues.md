@@ -106,6 +106,35 @@ hatches prominently: `codeHighlight={false}` on `<kai-chat>` and `configureCodeH
 
 ---
 
+## P3 — Issue 9: `theme.css` token names + global keyframes can collide in a Tailwind v4 consumer
+
+**Symptom.** A consumer who imports the optional `@kitn.ai/ui/theme.css` into a Tailwind v4 build finds their
+own `bg-primary` / `bg-card` / etc. utilities change color — our generic `--color-*` token names merged into
+their `@theme` and the last `@import` wins.
+
+**Root cause.** `theme.css` defines shadcn-style **unprefixed** `--color-*` tokens (plus a few generic global
+`@keyframes` — `blink` / `wave` / `shimmer` / `pulse-dot` — and a `.scrollbar-thin` utility). Tailwind v4
+treats in-scope `--color-*` custom properties as `@theme` entries, so importing our sheet overrides any
+same-named consumer token. The global keyframes / `.scrollbar-thin` could likewise clash by name.
+
+**Why component usage is safe.** Consumers who only *use* the `kai-*` web components are unaffected — everything
+is shadow-isolated, inherited props are pinned at `:host`, and a consumer's global CSS / Tailwind preflight /
+`* {}` / same-named `--color-*` cannot reach inside a component's Shadow DOM. The collision is **opt-in**: it
+only happens when you import `theme.css` into your own build. The default path (no import; theme via the
+namespaced `--kai-color-*`) avoids all of it.
+
+**Recommended fix.**
+- *Consumer guidance (shipped in docs):* prefer theming via the namespaced `--kai-color-*` tokens (no import);
+  if you do import `theme.css`, import it **before** your own token overrides so yours win. No CSS import is
+  needed for the components themselves.
+- *Upstream (planned):* namespace the global `@keyframes` (`blink` / `wave` / `shimmer` / `pulse-dot`) and the
+  `.scrollbar-thin` utility to a `kai-*` prefix so they can't clash by name. The `--color-*` token names stay
+  generic by design (the shadcn-compat surface) but already alias through `--kai-color-*` for the no-collision path.
+
+**Affected:** `theme.css` (keyframe + `.scrollbar-thin` rename), `docs-site/src/content/docs/guides/theming.mdx`, `docs-site/src/content/docs/guides/installation.mdx`.
+
+---
+
 ## Documentation gaps (from the same field test)
 
 1. **React quickstart is wrong** — `llms.txt` "React" omits `import '@kitn.ai/ui/elements'`, the single most
