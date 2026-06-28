@@ -51,6 +51,7 @@ export function writeReact(root, elements, IMPORTS) {
 
     const name = el.displayName;
     const propsName = `${name}Props`;
+    const moduleName = el.tag.replace(/^kai-/, '');
     return `export interface ${propsName} extends WebComponentProps {
 ${[...propLines, ...eventLines].join('\n')}
 }
@@ -59,6 +60,7 @@ export const ${name} = createWebComponent<${propsName}>(
   '${el.tag}',
   ${propNames},
   ${eventMap},
+  () => import('@kitn.ai/ui/elements/${moduleName}'),
 );`;
   }).join('\n\n');
 
@@ -66,11 +68,12 @@ export const ${name} = createWebComponent<${propsName}>(
 // Typed React wrappers for every kitn custom element. Usage:
 //   import { Message } from '@kitn.ai/ui/react';
 //   <Message message={msg} onMessageAction={(e) => …} />
-// The built bundle self-registers all kai-* custom elements — the elements import is
-// injected at build time (see vite.config.react.ts output.banner), so consumers need
-// only this one import. It is kept OUT of this .tsx source so the React typecheck
-// (tsconfig.react.json) does not walk the Solid element source under react-jsx.
-import { createWebComponent, type WebComponentProps } from './runtime';
+// Each wrapper lazy-registers ITS element on first client mount (a dynamic import
+// of '@kitn.ai/ui/elements/<name>'), so a consumer ships only the elements they use
+// — not the register-all bundle. SSR-safe: registration fires only in a client effect.
+// For eager all-registration call registerAll() or import '@kitn.ai/ui/elements'.
+import { createWebComponent, registerAll, type WebComponentProps } from './runtime';
+export { registerAll };
 export { useKaiChat } from './use-kai-chat';
 export type { UseKaiChatOptions, KaiChatController, ChatMessage } from './use-kai-chat';
 ${importLines}
