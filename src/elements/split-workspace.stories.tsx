@@ -2,36 +2,56 @@ import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show, For, Switch, Match, onMount, onCleanup, type JSX } from 'solid-js';
 import {
   Bot, Terminal, FlaskConical, BookText, Boxes, Sparkles, ShieldCheck, Database,
-  Megaphone, Bell, LayoutGrid, Focus, List, PanelRight, CheckCircle2, type LucideProps,
+  Megaphone, Bell, Columns3, Focus, List, PanelRight, CheckCircle2, Command,
+  MoreHorizontal, X, type LucideProps,
 } from 'lucide-solid';
 import './register'; // every kai-* element used below
 import { Pane } from '../ui/pane';
-import { AgentCard, type AgentStatus } from '../ui/agent-card';
-import { PaneGrid } from '../ui/pane-grid';
+import { AgentCard, type AgentStatus, type AgentStatusTone } from '../ui/agent-card';
 import { Segmented, type SegmentedOption } from '../ui/segmented';
+import { cn } from '../utils/cn';
 import type { KaiNavItem } from '../ui/nav';
 import type { KaiTabItem } from '../ui/tabs';
+import type { KaiCommandItem } from './command';
 import type { FileTreeFile } from '../components/file-tree';
 import { toast, configureToasts } from '../primitives/toast-store';
 
-// Labs/Apps: the full MULTI-AGENT WORKSPACE, composed from the new workspace
-// primitives instead of the old hand-rolled grid. A desktop shell with a LEFT
+// Labs/Apps: the full MULTI-AGENT WORKSPACE. A desktop shell with a LEFT
 // workspace rail (kai-nav), a CENTER view-mode area that the operator switches
 // between three tiers, and a RIGHT dockable utility panel (kai-tabs → kai-artifact
 // Browser / kai-file-tree Editor).
 //
+// The problem this models: one human navigating MANY WORKSPACES (projects) ×
+// MANY AGENTS within each, keyboard-first AND mouse-friendly. Two nav levels —
+// WORKSPACE (the left rail) and AGENT (the editor-group) — and both are reachable
+// from the keyboard and the command palette.
+//
 // The center is driven by a `Segmented` view switcher over a `view` signal:
-//   • GRID  — a `PaneGrid` of `Pane`s (one per agent); per-pane maximize drives
-//             `PaneGrid maximizedIndex`, per-pane close removes the agent.
-//   • FOCUS — one large `Pane` (the focused agent) beside a vertical RAIL of
-//             `AgentCard`s; clicking a card promotes it to focus.
-//   • LIST  — a full-width column of `AgentCard`s for scanning many agents.
-// Attention routing surfaces "who needs you": a header count pill, an amber edge
-// on the agents awaiting input (the `AgentCard`/`Pane` attention treatment), and a
-// "Needs you first" sort toggle. A broadcast composer ("Message all agents") sits
-// in the center footer. The top-level rail | center | utility split is a real
-// kai-resizable (it fits the <= 3-item cap), and the N-pane tiling that
-// kai-resizable couldn't express now lives in `PaneGrid`.
+//   • WORKSPACE — an editor-group split (Zed/VSCode/tmux style): a row of
+//                 resizable COLUMNS, each a TAB STRIP + the active agent's `Pane`.
+//                 The default tier; it subsumes the old plain grid.
+//   • FOCUS     — one large `Pane` (the focused agent) beside a vertical RAIL of
+//                 `AgentCard`s; clicking a card promotes it to focus.
+//   • LIST      — a full-width column of `AgentCard`s for scanning many agents.
+//
+// Editor-group tabs use a SPACE-EFFICIENT design: each tab leads with a small
+// tone-colored badge carrying the agent's keyboard NUMBER — the color encodes
+// status, the digit is the ⌥-jump key, unifying status + hint into one element.
+// The status WORD shows on the active tab + on hover (and always for needs-you /
+// error). A per-tab "…" menu moves/splits the pane; an "×" closes it.
+//
+// Keyboard backbone (browser-safe — no Cmd/Ctrl+number, which browsers reserve):
+//   • Cmd/Ctrl+K        opens the kai-command palette (both nav levels).
+//   • Alt/Option+1..8   jumps to agent N: focuses its pane + its prompt input.
+//   • Alt/Option+Z      zooms / restores the focused pane (Esc also restores).
+// Number keys read `event.code` (Digit1…Digit8) so macOS Option-glyphs never leak.
+//
+// Attention routing surfaces "who needs you": a header count pill that jumps to
+// the first waiting agent, an amber edge on the agents awaiting input, and a
+// "Needs you first" sort toggle. A broadcast composer ("Message all agents") opens
+// from the header. The top-level rail | center | utility split is a real
+// kai-resizable (it fits the ≤ 3-item cap); the N-column editor-group is a
+// hand-rolled flex row with draggable dividers (kai-resizable can't express N).
 
 // kai-resizable / kai-resizable-item / kai-artifact are used here as JSX elements;
 // the other kai-* tags are declared (identically) by sibling story files.
@@ -62,6 +82,7 @@ declare module 'solid-js' {
       'kai-tabs': JSX.HTMLAttributes<HTMLElement> & { variant?: string; value?: string; 'default-value'?: string; disabled?: boolean; theme?: string };
       'kai-tooltip': JSX.HTMLAttributes<HTMLElement> & { content?: string; 'open-delay'?: number | string };
       'kai-separator': JSX.HTMLAttributes<HTMLElement> & { orientation?: string };
+      'kai-command': JSX.HTMLAttributes<HTMLElement> & { placeholder?: string; 'empty-label'?: string; theme?: string };
     }
   }
 }
@@ -93,7 +114,7 @@ const WORKSPACE_LABEL = new Map(WORKSPACES.map((w) => [w.id, w.label ?? w.id]));
 // ── The agent fleet ─────────────────────────────────────────────────────────
 // One model shared by every view: the same status vocabulary the `Pane` and
 // `AgentCard` primitives consume (working | idle | done | error | blocked).
-type ViewMode = 'grid' | 'focus' | 'list';
+type ViewMode = 'workspace' | 'focus' | 'list';
 interface Agent {
   id: string;
   name: string;
@@ -160,6 +181,48 @@ const AGENTS: Agent[] = [
   },
 ];
 
+// ── Editor-group model ──────────────────────────────────────────────────────
+// A `column` is one editor group: an ordered set of agent tabs plus the active
+// one. The workspace view renders `columns()` left → right; tab "…" actions and
+// the palette mutate this model (move / split / close), dropping empty columns
+// and keeping `activeId` valid.
+interface Group {
+  id: string;
+  agentIds: string[];
+  activeId: string;
+}
+let colSeq = 0;
+const newColId = () => `col-${colSeq++}`;
+// Distribute the 8 agents across ~3 columns (chunks of 3/3/2). Cleo lands in the
+// middle group, Nova in the last, so attention is spread across the split.
+const initialColumns = (): Group[] => {
+  const ids = AGENTS.map((a) => a.id);
+  return [ids.slice(0, 3), ids.slice(3, 6), ids.slice(6)]
+    .filter((c) => c.length > 0)
+    .map((c) => ({ id: newColId(), agentIds: [...c], activeId: c[0] }));
+};
+
+// The keyboard NUMBER for each agent (Alt/Option+N), shown inside the tab badge.
+// Stable across the fleet by AGENTS order: Atlas=1 … Nova=8.
+const AGENT_NUMBER = new Map(AGENTS.map((a, i) => [a.id, i + 1]));
+
+// tone → solid badge (the numbered status chip) and tone → label text color. Both
+// token-backed (tool-* / muted), so they read in light AND dark with no hardcodes.
+const TONE_BADGE: Record<AgentStatusTone, string> = {
+  working: 'bg-tool-blue text-white',
+  idle: 'bg-muted-foreground text-background',
+  done: 'bg-tool-green text-white',
+  error: 'bg-tool-red text-white',
+  blocked: 'bg-tool-amber text-white',
+};
+const TONE_TEXT: Record<AgentStatusTone, string> = {
+  working: 'text-tool-blue',
+  idle: 'text-muted-foreground',
+  done: 'text-tool-green',
+  error: 'text-tool-red',
+  blocked: 'text-tool-amber',
+};
+
 // ── Right utility panel ─────────────────────────────────────────────────────
 const UTIL_TABS: KaiTabItem[] = [
   { id: 'browser', label: 'Browser', icon: 'globe' },
@@ -207,20 +270,36 @@ export const SplitWorkspace: Story = {
   name: 'Multi-Agent Workspace',
   render: () => {
     const [workspace, setWorkspace] = createSignal('acme');
-    const [view, setView] = createSignal<ViewMode>('grid');
+    const [view, setView] = createSignal<ViewMode>('workspace');
+    // focusedId drives the Focus + List tiers (one agent at a time).
     const [focusedId, setFocusedId] = createSignal<string>(AGENTS[0].id);
-    // Grid maximize is driven through PaneGrid's `maximizedIndex` (the index of the
-    // maximized agent within the live, ordered list).
-    const [maxPaneId, setMaxPaneId] = createSignal<string | null>(null);
+    // The editor-group model + per-column flex weights (driven by the dividers).
+    const [columns, setColumns] = createSignal<Group[]>(initialColumns());
+    const [colSizes, setColSizes] = createSignal<number[]>(columns().map(() => 1));
+    // Which group/pane is focused (the ⌥-jump + zoom target; paints Pane `focused`).
+    const [focusedGroupId, setFocusedGroupId] = createSignal<string>(columns()[0]?.id ?? '');
+    // The zoomed (maximized) agent id, or null. Esc / ⌥Z restore.
+    const [zoomedId, setZoomedId] = createSignal<string | null>(null);
+    // The agent id whose tab "…" menu is open, or null.
+    const [menuFor, setMenuFor] = createSignal<string | null>(null);
     const [closed, setClosed] = createSignal<Set<string>>(new Set());
     const [attentionFirst, setAttentionFirst] = createSignal(false);
+    const [cmdOpen, setCmdOpen] = createSignal(false);
     const [utilTab, setUtilTab] = createSignal('browser');
     // The right utility dock starts COLLAPSED; the chrome toggle flips it open.
     const [panelOpen, setPanelOpen] = createSignal(false);
     // Broadcast composer now lives behind a header button → mock modal.
     const [broadcastOpen, setBroadcastOpen] = createSignal(false);
 
+    // Refs captured imperatively: the per-agent prompt input (so ⌥N can focus it),
+    // the workspace nav (so the palette can drive its controlled value), and the
+    // columns row (so the dividers can measure it for drag math).
+    const promptRefs = new Map<string, El>();
+    let navEl: El | undefined;
+    let rowEl: HTMLDivElement | undefined;
+
     const live = () => AGENTS.filter((a) => !closed().has(a.id));
+    const agentById = (id: string) => AGENTS.find((a) => a.id === id);
     // Stable sort: agents awaiting input float to the top when the toggle is on.
     const ordered = (list: Agent[]) =>
       attentionFirst()
@@ -229,30 +308,141 @@ export const SplitWorkspace: Story = {
     const attentionCount = () => live().filter((a) => a.needsAttention).length;
     const focusedAgent = () => live().find((a) => a.id === focusedId()) ?? live()[0];
 
-    const gridAgents = () => ordered(live());
-    const maxIndex = () => {
-      const id = maxPaneId();
-      if (!id) return null;
-      const i = gridAgents().findIndex((a) => a.id === id);
-      return i >= 0 ? i : null;
+    // ── Editor-group helpers ────────────────────────────────────────────────
+    // A column's live agents, in display (attention) order.
+    const colAgents = (col: Group) =>
+      ordered(
+        col.agentIds
+          .map((id) => agentById(id))
+          .filter((a): a is Agent => !!a && !closed().has(a.id)),
+      );
+    const focusedColumn = () => columns().find((c) => c.id === focusedGroupId()) ?? columns()[0];
+    const focusedPaneId = () => focusedColumn()?.activeId;
+
+    // Commit a new column layout: drop empties, reset divider weights to equal, and
+    // keep focusedGroupId pointing at a column that still exists.
+    const commitColumns = (next: Group[]) => {
+      const cleaned = next.filter((c) => c.agentIds.length > 0);
+      setColumns(cleaned);
+      setColSizes(cleaned.map(() => 1));
+      if (!cleaned.some((c) => c.id === focusedGroupId())) {
+        setFocusedGroupId(cleaned[0]?.id ?? '');
+      }
     };
 
-    const closeAgent = (id: string) => {
-      setClosed((s) => { const n = new Set<string>(s); n.add(id); return n; });
-      if (maxPaneId() === id) setMaxPaneId(null);
+    const selectTab = (colId: string, agentId: string) => {
+      setColumns((cs) => cs.map((c) => (c.id === colId ? { ...c, activeId: agentId } : c)));
+      setFocusedGroupId(colId);
+      setFocusedId(agentId);
     };
-    const resetAll = () => { setClosed(new Set<string>()); setMaxPaneId(null); };
+
+    const closeTab = (agentId: string) => {
+      setClosed((s) => { const n = new Set<string>(s); n.add(agentId); return n; });
+      if (zoomedId() === agentId) setZoomedId(null);
+      setMenuFor(null);
+      const next = columns().map((c) => {
+        if (!c.agentIds.includes(agentId)) return c;
+        const idx = c.agentIds.indexOf(agentId);
+        const remaining = c.agentIds.filter((id) => id !== agentId);
+        const activeId =
+          c.activeId === agentId
+            ? remaining[Math.min(idx, remaining.length - 1)] ?? ''
+            : c.activeId;
+        return { ...c, agentIds: remaining, activeId };
+      });
+      commitColumns(next);
+    };
+
+    const resetAll = () => {
+      setClosed(new Set<string>());
+      const cols = initialColumns();
+      setColumns(cols);
+      setColSizes(cols.map(() => 1));
+      setFocusedGroupId(cols[0]?.id ?? '');
+      setZoomedId(null);
+    };
+
+    // Pull an agent out of its column into a brand-new column right after it.
+    const moveToNewColumn = (agentId: string) => {
+      setMenuFor(null);
+      const nc: Group = { id: newColId(), agentIds: [agentId], activeId: agentId };
+      const next: Group[] = [];
+      for (const c of columns()) {
+        if (c.agentIds.includes(agentId)) {
+          const remaining = c.agentIds.filter((id) => id !== agentId);
+          if (remaining.length) {
+            next.push({ ...c, agentIds: remaining, activeId: c.activeId === agentId ? remaining[0] : c.activeId });
+          }
+          next.push(nc);
+        } else {
+          next.push(c);
+        }
+      }
+      commitColumns(next);
+      setFocusedGroupId(nc.id);
+      setFocusedId(agentId);
+    };
+
+    // Move an agent to the adjacent column (dir −1 / +1). No-op past the ends.
+    const moveToColumn = (agentId: string, dir: -1 | 1) => {
+      setMenuFor(null);
+      const cs = columns();
+      const srcIdx = cs.findIndex((c) => c.agentIds.includes(agentId));
+      if (srcIdx < 0) return;
+      const tgtIdx = srcIdx + dir;
+      if (tgtIdx < 0 || tgtIdx >= cs.length) return;
+      const targetId = cs[tgtIdx].id;
+      const next = cs.map((c, i) => {
+        if (i === srcIdx) {
+          const remaining = c.agentIds.filter((id) => id !== agentId);
+          return { ...c, agentIds: remaining, activeId: c.activeId === agentId ? (remaining[0] ?? '') : c.activeId };
+        }
+        if (i === tgtIdx) {
+          return { ...c, agentIds: [...c.agentIds, agentId], activeId: agentId };
+        }
+        return c;
+      });
+      commitColumns(next);
+      setFocusedGroupId(targetId);
+      setFocusedId(agentId);
+    };
+
+    const toggleZoom = (agentId?: string) => {
+      const id = agentId ?? focusedPaneId();
+      if (!id) return;
+      setView('workspace');
+      setZoomedId((z) => (z === id ? null : id));
+    };
+
+    // Jump to an agent (palette "Go to …", header pill, ⌥N): make it the active tab
+    // of its column, focus that group + its prompt input, in the Workspace tier.
+    const jumpToAgent = (agentId: string) => {
+      if (!live().some((a) => a.id === agentId)) return;
+      setView('workspace');
+      setZoomedId(null);
+      const col = columns().find((c) => c.agentIds.includes(agentId));
+      if (col) {
+        setColumns((cs) => cs.map((c) => (c.id === col.id ? { ...c, activeId: agentId } : c)));
+        setFocusedGroupId(col.id);
+      }
+      setFocusedId(agentId);
+      queueMicrotask(() => promptRefs.get(agentId)?.focus?.());
+    };
+    const jumpToNumber = (n: number) => {
+      const a = AGENTS[n - 1];
+      if (a) jumpToAgent(a.id);
+    };
 
     // Route the operator to whatever wants them first.
     const jumpToAttention = () => {
       const first = ordered(live()).find((a) => a.needsAttention);
-      if (first) { setFocusedId(first.id); setView('focus'); }
+      if (first) jumpToAgent(first.id);
     };
 
-    // Focus a single agent (the toast actions land here): promote it + Focus view.
-    const focusAgent = (id: string) => { setFocusedId(id); setView('focus'); };
+    // Toast actions land here: open that agent in the Workspace tier.
+    const focusAgent = (id: string) => jumpToAgent(id);
 
-    // ── Toasts: dogfood the kit's toast() store for agent notifications ───────────
+    // ── Toasts + keyboard ────────────────────────────────────────────────────
     // The imperative toast() singleton lazily mounts ONE <kai-toast-region>; point
     // it bottom-right. (No manual region: a second region bound to the same store
     // would double every toast. The Storybook decorator themes the body-mounted
@@ -268,6 +458,40 @@ export const SplitWorkspace: Story = {
           action: { label: 'Respond', onAction: () => focusAgent(a.id) },
         });
       }
+
+      // Browser-safe global shortcuts. Number + zoom keys read `event.code` so
+      // macOS Option-glyphs (⌥1 → "¡", ⌥z → "Ω") never matter; preventDefault
+      // cancels the default even when the event originates in a shadow-DOM input.
+      const onKey = (e: KeyboardEvent) => {
+        if ((e.metaKey || e.ctrlKey) && e.code === 'KeyK') {
+          e.preventDefault();
+          setCmdOpen(true);
+          return;
+        }
+        if (e.altKey && !e.metaKey && !e.ctrlKey && /^Digit[1-8]$/.test(e.code)) {
+          e.preventDefault();
+          jumpToNumber(Number(e.code.slice(5)));
+          return;
+        }
+        if (e.altKey && !e.metaKey && !e.ctrlKey && e.code === 'KeyZ') {
+          e.preventDefault();
+          toggleZoom();
+          return;
+        }
+        if (e.key === 'Escape') {
+          if (menuFor()) setMenuFor(null);
+          if (zoomedId()) setZoomedId(null);
+        }
+      };
+      // Any outside click dismisses an open tab "…" menu (its own clicks stop
+      // propagation, so opening never immediately re-closes it).
+      const onDocClick = () => { if (menuFor()) setMenuFor(null); };
+      document.addEventListener('keydown', onKey);
+      document.addEventListener('click', onDocClick);
+      onCleanup(() => {
+        document.removeEventListener('keydown', onKey);
+        document.removeEventListener('click', onDocClick);
+      });
     });
 
     // "An agent finished": a success toast whose action opens that agent. Wired to
@@ -280,8 +504,59 @@ export const SplitWorkspace: Story = {
       });
     };
 
+    // ── Command palette: covers BOTH nav levels ──────────────────────────────
+    // Computed fresh each open (the overlay re-mounts), so it reflects the live
+    // fleet + the currently focused pane. Icons are only set where a kai icon name
+    // is known, to avoid the text-fallback warning.
+    const commandItems = (): KaiCommandItem[] => {
+      const items: KaiCommandItem[] = [];
+      for (const a of live()) {
+        items.push({
+          id: `goto-${a.id}`,
+          label: `Go to ${a.name}`,
+          description: `${a.role} · ⌥${AGENT_NUMBER.get(a.id)}`,
+          group: 'Agents',
+        });
+      }
+      for (const w of WORKSPACES) {
+        items.push({
+          id: `ws-${w.id}`,
+          label: `Switch to ${w.label}`,
+          icon: typeof w.icon === 'string' ? w.icon : undefined,
+          group: 'Workspaces',
+        });
+      }
+      const fa = focusedPaneId();
+      const faName = (fa && agentById(fa)?.name) || 'pane';
+      items.push({ id: 'pane-new', label: 'Move pane to new column', description: faName, group: 'Pane' });
+      items.push({ id: 'pane-right', label: 'Move pane to next column', group: 'Pane' });
+      items.push({ id: 'pane-left', label: 'Move pane to previous column', group: 'Pane' });
+      items.push({ id: 'pane-zoom', label: 'Zoom pane', description: faName, group: 'Pane' });
+      items.push({ id: 'broadcast', label: 'Message all agents', group: 'Broadcast' });
+      return items;
+    };
+
+    const onCommandSelect = (id: string) => {
+      setCmdOpen(false);
+      if (id.startsWith('goto-')) { jumpToAgent(id.slice('goto-'.length)); return; }
+      if (id.startsWith('ws-')) {
+        const w = id.slice('ws-'.length);
+        setWorkspace(w);
+        if (navEl) navEl.value = w;
+        return;
+      }
+      const fa = focusedPaneId();
+      switch (id) {
+        case 'pane-new': if (fa) moveToNewColumn(fa); break;
+        case 'pane-right': if (fa) moveToColumn(fa, 1); break;
+        case 'pane-left': if (fa) moveToColumn(fa, -1); break;
+        case 'pane-zoom': toggleZoom(); break;
+        case 'broadcast': setBroadcastOpen(true); break;
+      }
+    };
+
     const VIEW_OPTIONS: SegmentedOption[] = [
-      { value: 'grid', label: 'Grid', icon: <LayoutGrid class="size-3.5" /> },
+      { value: 'workspace', label: 'Workspace', icon: <Columns3 class="size-3.5" /> },
       { value: 'focus', label: 'Focus', icon: <Focus class="size-3.5" /> },
       { value: 'list', label: 'List', icon: <List class="size-3.5" /> },
     ];
@@ -303,18 +578,19 @@ export const SplitWorkspace: Story = {
       </div>
     );
 
-    // The compact per-pane composer (footer slot of every Pane).
-    const Composer = (props: { name: string }) => (
+    // The compact per-pane composer (footer slot of every Pane). Registers its
+    // prompt input by agent id so ⌥N can focus it the instant the pane mounts.
+    const Composer = (props: { agent: Agent }) => (
       <div class="p-1.5">
         <kai-prompt-input
-          ref={(el) => { (el as El).attach = false; }}
+          ref={(el) => { const p = el as El; p.attach = false; promptRefs.set(props.agent.id, p); }}
           class="block"
-          placeholder={`Message ${props.name}...`}
+          placeholder={`Message ${props.agent.name}...`}
         ></kai-prompt-input>
       </div>
     );
 
-    // The "needs you" pill shown in the header of an attention pane (grid).
+    // The "needs you" pill shown in the header of an attention pane.
     const NeedsYouBadge = () => (
       <span class="inline-flex items-center gap-1 rounded-full bg-tool-amber/15 px-2 py-0.5 text-[11px] font-medium text-tool-amber">
         <Bell class="size-3" /> Needs you
@@ -327,6 +603,249 @@ export const SplitWorkspace: Story = {
         <kai-button ref={(el) => { el.addEventListener('kai-click', resetAll); }} variant="outline" size="sm" icon="rotate-cw">Restore agents</kai-button>
       </div>
     );
+
+    // ── Editor-group tab + its move/split menu ───────────────────────────────
+    const TabMenuItem = (props: { onClick: () => void; disabled?: boolean; children: JSX.Element }) => (
+      <button
+        type="button"
+        role="menuitem"
+        disabled={props.disabled}
+        onClick={() => { if (!props.disabled) props.onClick(); }}
+        class="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs text-popover-foreground transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-40"
+      >
+        {props.children}
+      </button>
+    );
+
+    // A NUMBERED-STATUS-BADGE tab: [tone badge + ⌥number] name [status word] … ×.
+    // The badge color encodes status, the digit is the jump key. The status word
+    // shows on the active tab, on hover, and always for needs-you / error.
+    const Tab = (props: { col: Group; agent: Agent }) => {
+      const isActive = () => props.col.activeId === props.agent.id;
+      const num = AGENT_NUMBER.get(props.agent.id);
+      const alwaysWord = () =>
+        isActive() || !!props.agent.needsAttention || props.agent.status.tone === 'error';
+      const idx = () => columns().findIndex((c) => c.id === props.col.id);
+      const menuOpen = () => menuFor() === props.agent.id;
+      return (
+        <div
+          role="tab"
+          aria-selected={isActive()}
+          onClick={() => selectTab(props.col.id, props.agent.id)}
+          class={cn(
+            'group/tab relative flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md py-1 pl-1.5 pr-1 text-xs transition-colors',
+            isActive()
+              ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
+              : 'text-muted-foreground hover:bg-hover hover:text-foreground',
+            props.agent.needsAttention && !isActive() && 'ring-1 ring-tool-amber/50',
+          )}
+        >
+          <span
+            class={cn(
+              'flex size-[18px] shrink-0 items-center justify-center rounded text-[11px] font-bold leading-none tabular-nums',
+              TONE_BADGE[props.agent.status.tone],
+            )}
+            aria-hidden="true"
+          >
+            {num}
+          </span>
+          <span class="max-w-[8rem] truncate font-medium">{props.agent.name}</span>
+          <Show when={props.agent.status.label}>
+            <span
+              class={cn(
+                'truncate text-[10px] font-medium',
+                TONE_TEXT[props.agent.status.tone],
+                alwaysWord() ? 'inline' : 'hidden group-hover/tab:inline',
+              )}
+            >
+              {props.agent.status.label}
+            </span>
+          </Show>
+          <span class="ml-0.5 flex shrink-0 items-center">
+            <button
+              type="button"
+              aria-label={`${props.agent.name} tab actions`}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen()}
+              onClick={(e) => { e.stopPropagation(); setMenuFor((m) => (m === props.agent.id ? null : props.agent.id)); }}
+              class={cn(
+                'flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-surface-sunken hover:text-foreground',
+                isActive() || menuOpen() ? 'opacity-100' : 'opacity-0 group-hover/tab:opacity-100',
+              )}
+            >
+              <MoreHorizontal class="size-3.5" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label={`Close ${props.agent.name}`}
+              onClick={(e) => { e.stopPropagation(); closeTab(props.agent.id); }}
+              class={cn(
+                'flex size-5 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-surface-sunken hover:text-foreground',
+                isActive() ? 'opacity-100' : 'opacity-0 group-hover/tab:opacity-100',
+              )}
+            >
+              <X class="size-3.5" aria-hidden="true" />
+            </button>
+          </span>
+          <Show when={menuOpen()}>
+            <div
+              role="menu"
+              class="absolute right-0 top-full z-30 mt-1 w-56 overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <TabMenuItem onClick={() => moveToNewColumn(props.agent.id)}>Move to new column (split right)</TabMenuItem>
+              <TabMenuItem disabled={idx() >= columns().length - 1} onClick={() => moveToColumn(props.agent.id, 1)}>Move to next column</TabMenuItem>
+              <TabMenuItem disabled={idx() <= 0} onClick={() => moveToColumn(props.agent.id, -1)}>Move to previous column</TabMenuItem>
+              <div class="my-1 h-px bg-border"></div>
+              <TabMenuItem onClick={() => closeTab(props.agent.id)}>Close</TabMenuItem>
+            </div>
+          </Show>
+        </div>
+      );
+    };
+
+    // One editor group: a tab strip + the active agent's Pane below, filling the
+    // column. Pointer-down anywhere focuses the group (paints Pane `focused`).
+    const ColumnView = (props: { col: Group; index: number }) => {
+      const isFocusedCol = () => props.col.id === focusedGroupId();
+      const activeAgent = () => agentById(props.col.activeId);
+      return (
+        <div
+          class="flex h-full min-h-0 min-w-[260px] flex-col gap-1.5"
+          style={{ flex: String(colSizes()[props.index] ?? 1) }}
+          onPointerDown={() => setFocusedGroupId(props.col.id)}
+        >
+          <div
+            role="tablist"
+            class={cn(
+              'flex shrink-0 items-center gap-1 overflow-x-auto rounded-lg border bg-surface px-1.5 py-1',
+              isFocusedCol() ? 'border-ring' : 'border-border',
+            )}
+          >
+            <For each={colAgents(props.col)}>
+              {(agent) => <Tab col={props.col} agent={agent} />}
+            </For>
+          </div>
+          <div class="min-h-0 flex-1">
+            <Show
+              when={activeAgent()}
+              keyed
+              fallback={
+                <div class="flex h-full items-center justify-center rounded-xl border border-border text-xs text-muted-foreground">
+                  Empty group
+                </div>
+              }
+            >
+              {(a) => (
+                <Pane
+                  focused={isFocusedCol()}
+                  leading={<a.glyph class="size-4" />}
+                  title={a.name}
+                  subtitle={a.role}
+                  status={a.status}
+                  maximized={zoomedId() === a.id}
+                  onMaximize={() => toggleZoom(a.id)}
+                  onClose={() => closeTab(a.id)}
+                  actions={a.needsAttention ? <NeedsYouBadge /> : undefined}
+                  class={a.needsAttention ? 'border-tool-amber/50 ring-2 ring-inset ring-tool-amber/55' : undefined}
+                  footer={<Composer agent={a} />}
+                >
+                  <AgentBody agent={a} />
+                </Pane>
+              )}
+            </Show>
+          </div>
+        </div>
+      );
+    };
+
+    // A draggable divider between two columns: shifts flex weight between the pair
+    // as the operator drags. Weight is a fraction of the row width, clamped so
+    // neither side collapses past ~12%.
+    const startDrag = (pair: number) => (e: PointerEvent) => {
+      e.preventDefault();
+      const row = rowEl;
+      if (!row) return;
+      const rect = row.getBoundingClientRect();
+      const sizes = [...colSizes()];
+      const total = sizes.reduce((s, n) => s + n, 0) || 1;
+      const startX = e.clientX;
+      const a0 = sizes[pair] ?? 1;
+      const b0 = sizes[pair + 1] ?? 1;
+      const min = total * 0.12;
+      const onMove = (ev: PointerEvent) => {
+        const delta = ((ev.clientX - startX) / rect.width) * total;
+        let a = a0 + delta;
+        let b = b0 - delta;
+        if (a < min) { b -= min - a; a = min; }
+        if (b < min) { a -= min - b; b = min; }
+        const nextSizes = [...colSizes()];
+        nextSizes[pair] = a;
+        nextSizes[pair + 1] = b;
+        setColSizes(nextSizes);
+      };
+      const onUp = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      };
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    };
+
+    // The editor-group row: resizable columns with draggable dividers.
+    const ColumnsRow = () => (
+      <div ref={rowEl} class="flex h-full min-h-0 gap-0 overflow-x-auto p-2">
+        <For each={columns()}>
+          {(col, i) => (
+            <>
+              <Show when={i() > 0}>
+                <div
+                  role="separator"
+                  aria-orientation="vertical"
+                  onPointerDown={startDrag(i() - 1)}
+                  class="group/div relative mx-0.5 w-1 shrink-0 cursor-col-resize"
+                >
+                  <div class="absolute inset-y-2 left-1/2 w-px -translate-x-1/2 rounded-full bg-border transition-colors group-hover/div:bg-ring"></div>
+                </div>
+              </Show>
+              <ColumnView col={col} index={i()} />
+            </>
+          )}
+        </For>
+      </div>
+    );
+
+    // A single maximized pane (⌥Z / the pane maximize control). Esc + the restore
+    // glyph drop back to the columns.
+    const ZoomPane = (props: { id: string }) => {
+      const a = () => agentById(props.id);
+      return (
+        <div class="h-full min-h-0 p-2">
+          <Show when={a()} keyed fallback={<RestoreAll />}>
+            {(ag) => (
+              <Pane
+                focused
+                maximized
+                leading={<ag.glyph class="size-4" />}
+                title={ag.name}
+                subtitle={ag.role}
+                status={ag.status}
+                onMaximize={() => setZoomedId(null)}
+                onClose={() => closeTab(ag.id)}
+                actions={ag.needsAttention ? <NeedsYouBadge /> : undefined}
+                footer={<Composer agent={ag} />}
+              >
+                <AgentBody agent={ag} />
+              </Pane>
+            )}
+          </Show>
+        </div>
+      );
+    };
 
     // The header broadcast button opens this MOCK modal. There's no kai-dialog yet;
     // a real one would own the backdrop, focus-trap, and Escape — here we hand-roll
@@ -403,6 +922,15 @@ export const SplitWorkspace: Story = {
                 {attentionCount()} {attentionCount() === 1 ? 'agent needs you' : 'agents need you'}
               </button>
             </Show>
+            {/* command palette: the browser-safe universal entry (⌘K) */}
+            <kai-button
+              ref={(el) => { el.addEventListener('kai-click', () => setCmdOpen(true)); }}
+              variant="outline"
+              size="sm"
+            >
+              <Command slot="icon" class="size-3.5" />
+              <span class="font-mono text-[11px]">⌘K</span>
+            </kai-button>
             {/* broadcast: opens a mock modal composer that fans out to every agent */}
             <kai-tooltip content="Message all agents">
               <kai-button
@@ -413,9 +941,6 @@ export const SplitWorkspace: Story = {
               >
                 <Megaphone slot="icon" class="size-4" />
               </kai-button>
-            </kai-tooltip>
-            <kai-tooltip content="Layout">
-              <kai-button variant="ghost" size="icon-sm" icon="sliders-horizontal" label="Layout"></kai-button>
             </kai-tooltip>
             {/* toggle the right utility dock open/closed (starts collapsed) */}
             <kai-tooltip content={panelOpen() ? 'Hide panel' : 'Show panel'}>
@@ -451,6 +976,7 @@ export const SplitWorkspace: Story = {
                   <kai-nav
                     ref={(el) => {
                       const n = el as El;
+                      navEl = n;
                       n.items = WORKSPACES;
                       n.value = workspace();
                       el.addEventListener('kai-nav-select', (e) => {
@@ -468,14 +994,17 @@ export const SplitWorkspace: Story = {
               </aside>
             </kai-resizable-item>
 
-            {/* CENTER — the view-mode area. A Segmented switcher over grid | focus |
-                list; the N-pane tiling lives in PaneGrid, the focus + periphery in
-                Pane + AgentCard. */}
+            {/* CENTER — the view-mode area. A Segmented switcher over workspace |
+                focus | list; the editor-group columns live in the Workspace tier,
+                the focus + periphery in Pane + AgentCard. */}
             <kai-resizable-item min="460px">
               <div class="flex h-full flex-col">
                 {/* view switcher + ordering toggle */}
                 <div class="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-2">
-                  <Segmented options={VIEW_OPTIONS} value={view()} onChange={(v) => setView(v as ViewMode)} size="sm" />
+                  <div class="flex items-center gap-2">
+                    <Segmented options={VIEW_OPTIONS} value={view()} onChange={(v) => setView(v as ViewMode)} size="sm" />
+                    <span class="hidden text-[11px] text-muted-foreground lg:inline">⌥1–8 jump · ⌥Z zoom · ⌘K palette</span>
+                  </div>
                   <div class="flex items-center gap-2">
                     <span class="hidden text-xs text-muted-foreground sm:inline">
                       {live().length} {live().length === 1 ? 'agent' : 'agents'}
@@ -503,34 +1032,14 @@ export const SplitWorkspace: Story = {
                 {/* the active view */}
                 <div class="min-h-0 flex-1">
                   <Switch>
-                    {/* GRID — a PaneGrid of Panes; maximize → maximizedIndex, close → remove. */}
-                    <Match when={view() === 'grid'}>
-                      <Show when={live().length > 0} fallback={<RestoreAll />}>
-                        <div class="h-full min-h-0 p-2">
-                          <PaneGrid maximizedIndex={maxIndex()} minPaneWidth={300} minPaneHeight={220}>
-                            <For each={gridAgents()}>
-                              {(agent) => {
-                                const isMax = () => maxPaneId() === agent.id;
-                                return (
-                                  <Pane
-                                    leading={<agent.glyph class="size-4" />}
-                                    title={agent.name}
-                                    subtitle={agent.role}
-                                    status={agent.status}
-                                    maximized={isMax()}
-                                    onMaximize={() => setMaxPaneId(isMax() ? null : agent.id)}
-                                    onClose={() => closeAgent(agent.id)}
-                                    actions={agent.needsAttention ? <NeedsYouBadge /> : undefined}
-                                    class={agent.needsAttention ? 'border-tool-amber/50 ring-2 ring-inset ring-tool-amber/55' : undefined}
-                                    footer={<Composer name={agent.name} />}
-                                  >
-                                    <AgentBody agent={agent} />
-                                  </Pane>
-                                );
-                              }}
-                            </For>
-                          </PaneGrid>
-                        </div>
+                    {/* WORKSPACE — the editor-group: resizable columns, each a tab
+                        strip + the active agent's Pane. Zoom replaces the row with a
+                        single maximized Pane. */}
+                    <Match when={view() === 'workspace'}>
+                      <Show when={columns().length > 0} fallback={<RestoreAll />}>
+                        <Show when={zoomedId()} keyed fallback={<ColumnsRow />}>
+                          {(id) => <ZoomPane id={id} />}
+                        </Show>
                       </Show>
                     </Match>
 
@@ -546,9 +1055,9 @@ export const SplitWorkspace: Story = {
                               title={a.name}
                               subtitle={a.role}
                               status={a.status}
-                              onMaximize={() => { setMaxPaneId(a.id); setView('grid'); }}
+                              onMaximize={() => { setZoomedId(a.id); setView('workspace'); }}
                               onClose={() => setView('list')}
-                              footer={<Composer name={a.name} />}
+                              footer={<Composer agent={a} />}
                             >
                               <AgentBody agent={a} />
                             </Pane>
@@ -658,6 +1167,30 @@ export const SplitWorkspace: Story = {
           </kai-resizable>
         </div>
 
+        {/* command palette: a light-DOM overlay hosting kai-command. Opened by ⌘K or
+            the header button; closes on backdrop click, Escape, or a selection. */}
+        <Show when={cmdOpen()}>
+          <div
+            class="fixed inset-0 z-50 flex items-start justify-center bg-black/50 pt-[14vh]"
+            onClick={() => setCmdOpen(false)}
+            onKeyDown={(e) => { if (e.key === 'Escape') setCmdOpen(false); }}
+          >
+            <div
+              class="w-full max-w-lg overflow-hidden rounded-xl border border-border bg-card shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <kai-command
+                ref={(el) => {
+                  (el as El).items = commandItems();
+                  el.addEventListener('kai-select', (e) => onCommandSelect((e as CustomEvent).detail.id));
+                  queueMicrotask(() => (el as El).focus?.());
+                }}
+                placeholder="Search agents, workspaces, actions..."
+              ></kai-command>
+            </div>
+          </div>
+        </Show>
+
         {/* broadcast composer (mock modal) — opened from the header megaphone */}
         <Show when={broadcastOpen()}>
           <BroadcastModal />
@@ -671,79 +1204,57 @@ export const SplitWorkspace: Story = {
         language: 'tsx',
         // A representative skeleton (not the full interactive render). The shell is a
         // three-region kai-resizable (rail | center | utility). The CENTER is a
-        // `Segmented` view switcher over grid | focus | list, composing the workspace
-        // primitives (Pane / AgentCard / PaneGrid). Attention routing sits in the
-        // chrome; a header button opens a broadcast modal; agent notifications are
-        // raised through the kit's imperative toast() store.
+        // `Segmented` view switcher; the default WORKSPACE tier is an editor-group of
+        // resizable `columns`, each a numbered-status-badge tab strip + the active
+        // agent's `Pane`. A kai-command palette + ⌥-number keys are the keyboard
+        // backbone across both nav levels; agent notifications use toast().
         code: `// status vocabulary shared by Pane + AgentCard
-const AGENTS = [
-  { id: 'cleo', name: 'Cleo', role: 'Docs', glyph: BookText,
-    status: { tone: 'blocked', label: 'Needs input' }, needsAttention: true,
-    lastLine: 'Which provider should the guide target?', body: '...' },
-  // ...working / idle / done / error agents...
-];
+const AGENTS = [ /* atlas, otto, ivy, cleo (needsAttention), … nova */ ];
 
-const [view, setView] = createSignal<'grid' | 'focus' | 'list'>('grid');
-const [focusedId, setFocusedId] = createSignal('atlas');
-const [maxPaneId, setMaxPaneId] = createSignal<string | null>(null);
+// EDITOR-GROUP model: a row of columns, each an ordered set of agent tabs.
+type Group = { id: string; agentIds: string[]; activeId: string };
+const [columns, setColumns] = createSignal<Group[]>(distribute(AGENTS)); // ~3 cols
+const [focusedGroupId, setFocusedGroupId] = createSignal(columns()[0].id);
+const [zoomedId, setZoomedId] = createSignal<string | null>(null);
+const [view, setView] = createSignal<'workspace' | 'focus' | 'list'>('workspace');
+
+// BROWSER-SAFE keyboard (no Cmd/Ctrl+number — browsers reserve it):
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.code === 'KeyK') { open palette }       // ⌘K
+  if (e.altKey && /^Digit[1-8]$/.test(e.code)) jumpToAgent(/* code → N */); // ⌥1–8
+  if (e.altKey && e.code === 'KeyZ') toggleZoom(focusedPaneId());           // ⌥Z
+  if (e.key === 'Escape') setZoomedId(null);
+});
 
 // CENTER: the view switcher + the active tier
-<Segmented options={[{ value: 'grid', label: 'Grid', icon: <LayoutGrid/> }, /* ... */]}
+<Segmented options={[{ value: 'workspace', label: 'Workspace', icon: <Columns3/> }, /* … */]}
            value={view()} onChange={setView} />
 
 <Switch>
-  {/* GRID — N panes; per-pane maximize drives PaneGrid maximizedIndex */}
-  <Match when={view() === 'grid'}>
-    <PaneGrid maximizedIndex={maxIndex()}>
-      <For each={agents()}>{(a) => (
-        <Pane title={a.name} subtitle={a.role} status={a.status}
-              maximized={maxPaneId() === a.id}
-              onMaximize={() => setMaxPaneId(/* toggle */)}
-              onClose={() => closeAgent(a.id)}
-              actions={a.needsAttention ? <NeedsYouBadge/> : undefined}
-              footer={<Composer name={a.name}/>}>
-          <AgentBody agent={a}/>
+  {/* WORKSPACE — resizable columns; each = a tab strip + the active Pane */}
+  <Match when={view() === 'workspace'}>
+    <For each={columns()}>{(col, i) => <>
+      {i() > 0 && <Divider onPointerDown={startDrag(i() - 1)} />}
+      <Column>
+        {/* NUMBERED-STATUS-BADGE tabs: [tone badge + ⌥number] name [status] … × */}
+        <For each={colAgents(col)}>{(a) => <Tab col={col} agent={a} />}</For>
+        <Pane focused={col.id === focusedGroupId()} status={a.status}
+              maximized={zoomedId() === a.id} onMaximize={() => toggleZoom(a.id)}
+              onClose={() => closeTab(a.id)} footer={<Composer agent={a} />}>
+          <AgentBody agent={a} />
         </Pane>
-      )}</For>
-    </PaneGrid>
+      </Column>
+    </>}</For>
   </Match>
-
-  {/* FOCUS — one big Pane + a rail of AgentCards (focus + periphery) */}
-  <Match when={view() === 'focus'}>
-    <Pane title={focused().name} status={focused().status} footer={<Composer/>}>
-      <AgentBody agent={focused()}/>
-    </Pane>
-    <For each={others()}>{(a) => (
-      <AgentCard name={a.name} subtitle={a.role} lastLine={a.lastLine}
-                 status={a.status} needsAttention={a.needsAttention}
-                 onActivate={() => setFocusedId(a.id)} />
-    )}</For>
-  </Match>
-
-  {/* LIST — a scannable column; click promotes to focus */}
-  <Match when={view() === 'list'}>
-    <For each={agents()}>{(a) => (
-      <AgentCard name={a.name} status={a.status} needsAttention={a.needsAttention}
-                 active={a.id === focusedId()}
-                 onActivate={() => { setFocusedId(a.id); setView('focus'); }} />
-    )}</For>
-  </Match>
+  {/* FOCUS — one big Pane + a rail of AgentCards; LIST — a scannable column */}
 </Switch>
 
-{/* ATTENTION: a header count that jumps to the first needs-you agent */}
-<button onClick={jumpToAttention}>{attentionCount()} agents need you</button>
+// COMMAND PALETTE (kai-command) — both nav levels + pane ops:
+//   Go to <agent> · Switch to <workspace> · Move pane new/left/right · Zoom · Message all
+<kai-command items={commandItems()} onkai-select={(e) => onCommandSelect(e.detail.id)} />
 
-{/* NOTIFICATIONS: dogfood the kit's imperative toast() store. */}
-configureToasts({ position: 'bottom-right' });
-// "needs you" → persistent + actionable, raised once on mount
-toast('Cleo needs your input', { duration: 0,
-  action: { label: 'Respond', onAction: () => focusAgent('cleo') } });
-// "finished" → success toast whose action opens that agent
-toast.success('Otto finished its backend task',
-  { action: { label: 'Open', onAction: () => focusAgent('otto') } });
-
-{/* BROADCAST: a header button opens a mock modal (a future kai-dialog) */}
-<button onClick={() => setBroadcastOpen(true)}>Message all agents</button>`,
+// MOVE/SPLIT via the tab "…" menu (not drag): new column / next / previous / close.
+// NOTIFICATIONS: dogfood the kit's imperative toast() store (needs-you + finished).`,
       },
     },
   },
