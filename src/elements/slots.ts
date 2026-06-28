@@ -464,6 +464,35 @@ export const SETTING_ITEM_PARTS: PartDef[] = [
   { name: 'label', doc: 'The label + description block on the left of the row. Restyle its typography or spacing.', recipe: 'kai-setting-item::part(label) { gap: 0.125rem }' },
 ];
 
+/** Slots + styleable `::part`s of `<kai-pane>` (the editor-group pane frame). */
+export const PANE_SLOTS: SlotDef[] = [
+  { name: 'leading', mode: 'inject', doc: 'A glyph or avatar at the start of the pane header.' },
+  { name: 'actions', mode: 'inject', doc: 'Extra header controls, before the built-in window controls.' },
+  { name: 'footer', mode: 'inject', part: true, doc: 'A pinned row below the body (e.g. a composer).' },
+];
+export const PANE_PARTS: PartDef[] = [
+  { name: 'header', doc: 'The pane header bar (leading + title/status + actions + window controls).', recipe: 'kai-pane::part(header) { padding-inline: 0.75rem }' },
+  { name: 'body', doc: 'The scrolling body region (the default slot).', recipe: 'kai-pane::part(body) { padding: 1rem }' },
+  { name: 'controls', doc: 'The window-control cluster (maximize/close, and split/dock when enabled).', recipe: 'kai-pane::part(controls) { gap: 0.25rem }' },
+];
+
+/** Styleable `::part`s of `<kai-agent-card>`. */
+export const AGENT_CARD_PARTS: PartDef[] = [
+  { name: 'status', doc: 'The leading tone-colored status dot.', recipe: 'kai-agent-card::part(status) { width: 0.625rem; height: 0.625rem }' },
+  { name: 'menu', doc: 'The trailing overflow ("...") menu button.', recipe: 'kai-agent-card::part(menu) { opacity: 1 }' },
+];
+
+/** Slots + styleable `::part`s of `<kai-dialog>` (the centered modal). */
+export const DIALOG_SLOTS: SlotDef[] = [
+  { name: 'header', mode: 'inject', part: true, doc: 'Optional title region at the top of the panel.' },
+  { name: 'footer', mode: 'inject', part: true, doc: 'Optional actions region at the bottom of the panel.' },
+];
+export const DIALOG_PARTS: PartDef[] = [
+  { name: 'backdrop', doc: 'The full-area scrim behind the panel. Restyle its color/blur.', recipe: 'kai-dialog::part(backdrop) { background: rgb(0 0 0 / 0.6) }' },
+  { name: 'panel', doc: 'The centered modal panel. Restyle width, radius, padding.', recipe: 'kai-dialog::part(panel) { max-width: 32rem }' },
+  { name: 'body', doc: 'The scrolling content region (the default slot).', recipe: 'kai-dialog::part(body) { padding: 1.25rem }' },
+];
+
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS },
@@ -493,6 +522,9 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-segmented': { parts: SEGMENTED_PARTS },
   'kai-settings-group': { parts: SETTINGS_GROUP_PARTS },
   'kai-setting-item': { slots: SETTING_ITEM_SLOTS, parts: SETTING_ITEM_PARTS },
+  'kai-pane': { slots: PANE_SLOTS, parts: PANE_PARTS },
+  'kai-agent-card': { parts: AGENT_CARD_PARTS },
+  'kai-dialog': { slots: DIALOG_SLOTS, parts: DIALOG_PARTS },
 };
 
 /**

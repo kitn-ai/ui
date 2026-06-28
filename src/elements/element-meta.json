@@ -1,5 +1,79 @@
 [
   {
+    "tag": "kai-agent-card",
+    "className": "KaiAgentCardElement",
+    "displayName": "AgentCard",
+    "props": [
+      {
+        "name": "name",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The agent's name — the primary label. Attribute: `name`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "active",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Selected / focused state: highlighted border + surface. Attribute: `active`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "needsAttention",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Raise a prominent \"Needs you\" pill plus a glowing amber edge — the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "status",
+        "type": "undefined | { tone: \"working\" | \"idle\" | \"done\" | \"error\" | \"blocked\"; label?: undefined | string; pulse?: undefined | false | true }",
+        "optional": true,
+        "scalar": false,
+        "description": "Run status — a JS PROPERTY (object), not an attribute. Shape: `{ tone, label?, pulse? }`, where `tone` is one of `working` | `idle` | `done` | `error` | `blocked` (maps to the kit's tool hues), `label` is an optional short string beside the dot, and `pulse` animates the dot. Set it with `el.status = { tone: 'working', label: 'Working', pulse: true }`.",
+        "displayType": "undefined | { tone: \"working\" | \"idle\" | \"done\" | \"error\" | \"blocked\"; label?: undefined | string; pulse?: undefined | false | true }"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-activate",
+        "detail": null,
+        "description": "The card was activated — clicked, or Enter / Space while focused. Promote this agent back to focus.",
+        "displayDetail": null
+      },
+      {
+        "name": "kai-menu",
+        "detail": null,
+        "description": "The trailing \"...\" kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card).",
+        "displayDetail": null
+      }
+    ],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "AgentCard",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-agentcard--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "status",
+        "doc": "The leading tone-colored status dot.",
+        "recipe": "kai-agent-card::part(status) { width: 0.625rem; height: 0.625rem }"
+      },
+      {
+        "name": "menu",
+        "doc": "The trailing overflow (\"...\") menu button.",
+        "recipe": "kai-agent-card::part(menu) { opacity: 1 }"
+      }
+    ]
+  },
+  {
     "tag": "kai-artifact",
     "className": "KaiArtifactElement",
     "displayName": "Artifact",
@@ -1539,11 +1613,11 @@
       },
       {
         "name": "tone",
-        "type": "undefined | \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\"",
+        "type": "undefined | \"error\" | \"primary\" | \"info\" | \"success\" | \"warning\"",
         "optional": true,
         "scalar": true,
         "description": "Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues.",
-        "displayType": "undefined | \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\""
+        "displayType": "undefined | \"error\" | \"primary\" | \"info\" | \"success\" | \"warning\""
       },
       {
         "name": "arrow",
@@ -2406,6 +2480,110 @@
         "name": "trailing",
         "doc": "The right-aligned trailing text on each conversation row (a count, status, or relative time). Set it per item via the `trailing` field; otherwise a short auto relative time is derived from `updatedAt`. Recolor or resize it from outside.",
         "recipe": "kai-conversations::part(trailing) { color: var(--color-primary); font-variant-numeric: tabular-nums }"
+      }
+    ]
+  },
+  {
+    "tag": "kai-dialog",
+    "className": "KaiDialogElement",
+    "displayName": "Dialog",
+    "props": [
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on Escape/backdrop). Set `el.open = true`, or `<kai-dialog open>`; listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The dialog opened or closed (Escape, backdrop click, a driven `open`, or a method).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
+      },
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Move focus to the dialog panel (no-op while closed)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Dialog",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-dialog--docs"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "header",
+        "mode": "inject",
+        "part": true,
+        "doc": "Optional title region at the top of the panel."
+      },
+      {
+        "name": "footer",
+        "mode": "inject",
+        "part": true,
+        "doc": "Optional actions region at the bottom of the panel."
+      }
+    ],
+    "parts": [
+      {
+        "name": "backdrop",
+        "doc": "The full-area scrim behind the panel. Restyle its color/blur.",
+        "recipe": "kai-dialog::part(backdrop) { background: rgb(0 0 0 / 0.6) }"
+      },
+      {
+        "name": "panel",
+        "doc": "The centered modal panel. Restyle width, radius, padding.",
+        "recipe": "kai-dialog::part(panel) { max-width: 32rem }"
+      },
+      {
+        "name": "body",
+        "doc": "The scrolling content region (the default slot).",
+        "recipe": "kai-dialog::part(body) { padding: 1.25rem }"
+      },
+      {
+        "name": "header",
+        "doc": "Optional title region at the top of the panel."
+      },
+      {
+        "name": "footer",
+        "doc": "Optional actions region at the bottom of the panel."
       }
     ]
   },
@@ -3639,11 +3817,11 @@
     "props": [
       {
         "name": "items",
-        "type": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string }[]",
+        "type": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"error\" | \"primary\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string }[]",
         "optional": true,
         "scalar": false,
         "description": "The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text.",
-        "displayType": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"primary\" | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string }[]"
+        "displayType": "undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: \"error\" | \"primary\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string }[]"
       },
       {
         "name": "value",
@@ -3734,12 +3912,12 @@
     "props": [
       {
         "name": "severity",
-        "type": "undefined | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\"",
+        "type": "undefined | \"error\" | \"info\" | \"success\" | \"warning\" | \"neutral\"",
         "optional": true,
         "scalar": true,
         "description": "`neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`).",
         "default": "'neutral'",
-        "displayType": "undefined | \"info\" | \"success\" | \"warning\" | \"error\" | \"neutral\""
+        "displayType": "undefined | \"error\" | \"info\" | \"success\" | \"warning\" | \"neutral\""
       },
       {
         "name": "icon",
@@ -3786,6 +3964,148 @@
         "name": "icon",
         "mode": "replace",
         "doc": "A custom leading icon (any inline SVG, inherits `currentColor`). Overrides the severity default and the `icon` prop — the same escape hatch as `kai-button`."
+      }
+    ]
+  },
+  {
+    "tag": "kai-pane",
+    "className": "KaiPaneElement",
+    "displayName": "Pane",
+    "props": [
+      {
+        "name": "headline",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). Attribute: `headline`.",
+        "default": "''",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "subtitle",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "A role / label shown under the title (e.g. \"Reviewer\", \"claude-sonnet\"). Attribute: `subtitle`.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "maximized",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show the restore glyph instead of maximize, and signal the maximized view-state. Drive it yourself in response to `kai-maximize`. Attribute: `maximized`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "focused",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Highlight the frame with a ring/border to mark the ACTIVE pane. Attribute: `focused`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "showSplit",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a split-pane window control that fires `kai-split`. Off by default. Attribute: `show-split`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "showDock",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a dock-to-side window control that fires `kai-dock`. Off by default. Attribute: `show-dock`.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "status",
+        "type": "undefined | { tone: \"working\" | \"idle\" | \"done\" | \"error\" | \"blocked\"; label?: undefined | string; pulse?: undefined | false | true }",
+        "optional": true,
+        "scalar": false,
+        "description": "A tone-colored status dot (+ optional label) in the header. An object `{ tone, label?, pulse? }` set as a JS PROPERTY (not an attribute).",
+        "displayType": "undefined | { tone: \"working\" | \"idle\" | \"done\" | \"error\" | \"blocked\"; label?: undefined | string; pulse?: undefined | false | true }"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-close",
+        "detail": null,
+        "description": "The close (×) control was clicked.",
+        "displayDetail": null
+      },
+      {
+        "name": "kai-dock",
+        "detail": null,
+        "description": "The dock control was clicked (only present when `show-dock`).",
+        "displayDetail": null
+      },
+      {
+        "name": "kai-maximize",
+        "detail": "{ maximized: false | true }",
+        "description": "The maximize/restore control was clicked. `detail.maximized` is the intended NEXT state — drive the `maximized` prop yourself from it.",
+        "displayDetail": "{ maximized: false | true }"
+      },
+      {
+        "name": "kai-split",
+        "detail": null,
+        "description": "The split control was clicked (only present when `show-split`).",
+        "displayDetail": null
+      }
+    ],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "Pane",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-pane--docs"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "leading",
+        "mode": "inject",
+        "doc": "A glyph or avatar at the start of the pane header."
+      },
+      {
+        "name": "actions",
+        "mode": "inject",
+        "doc": "Extra header controls, before the built-in window controls."
+      },
+      {
+        "name": "footer",
+        "mode": "inject",
+        "part": true,
+        "doc": "A pinned row below the body (e.g. a composer)."
+      }
+    ],
+    "parts": [
+      {
+        "name": "header",
+        "doc": "The pane header bar (leading + title/status + actions + window controls).",
+        "recipe": "kai-pane::part(header) { padding-inline: 0.75rem }"
+      },
+      {
+        "name": "body",
+        "doc": "The scrolling body region (the default slot).",
+        "recipe": "kai-pane::part(body) { padding: 1rem }"
+      },
+      {
+        "name": "controls",
+        "doc": "The window-control cluster (maximize/close, and split/dock when enabled).",
+        "recipe": "kai-pane::part(controls) { gap: 0.25rem }"
+      },
+      {
+        "name": "footer",
+        "doc": "A pinned row below the body (e.g. a composer)."
       }
     ]
   },
@@ -5861,15 +6181,15 @@
     "props": [
       {
         "name": "toasts",
-        "type": "{ id: string; message: string; variant?: undefined | \"success\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
+        "type": "{ id: string; message: string; variant?: undefined | \"error\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
         "optional": false,
         "scalar": false,
         "description": "The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update.",
         "typeName": "ToastItem[]",
-        "typeShape": "{ id: string; message: string; variant?: undefined | \"success\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
+        "typeShape": "{ id: string; message: string; variant?: undefined | \"error\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]",
         "default": "[]",
         "typeImport": "ToastItem",
-        "displayType": "{ id: string; message: string; variant?: undefined | \"success\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]"
+        "displayType": "{ id: string; message: string; variant?: undefined | \"error\" | \"info\" | \"success\" | \"warning\" | \"neutral\"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | false | true; target?: undefined | HTMLElement }[]"
       },
       {
         "name": "position",

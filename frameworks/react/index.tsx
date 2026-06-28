@@ -11,6 +11,27 @@ export { useKaiChat } from './use-kai-chat';
 export type { UseKaiChatOptions, KaiChatController, ChatMessage } from './use-kai-chat';
 
 
+export interface AgentCardProps extends WebComponentProps {
+  /** The agent's name — the primary label. Attribute: `name`. */
+  name?: string;
+  /** Selected / focused state: highlighted border + surface. Attribute: `active`. */
+  active?: boolean;
+  /** Raise a prominent "Needs you" pill plus a glowing amber edge — the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. */
+  needsAttention?: boolean;
+  /** Run status — a JS PROPERTY (object), not an attribute. Shape: `{ tone, label?, pulse? }`, where `tone` is one of `working` | `idle` | `done` | `error` | `blocked` (maps to the kit's tool hues), `label` is an optional short string beside the dot, and `pulse` animates the dot. Set it with `el.status = { tone: 'working', label: 'Working', pulse: true }`. */
+  status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
+  /** The card was activated — clicked, or Enter / Space while focused. Promote this agent back to focus. */
+  onActivate?: (event: CustomEvent) => void;
+  /** The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). */
+  onMenu?: (event: CustomEvent) => void;
+}
+
+export const AgentCard = createWebComponent<AgentCardProps>(
+  'kai-agent-card',
+  ["theme","name","active","needsAttention","status"],
+  { onActivate: 'kai-activate', onMenu: 'kai-menu' },
+);
+
 export interface ArtifactProps extends WebComponentProps {
   /** URL the preview iframe frames. Consumer-controlled. */
   src?: string;
@@ -348,7 +369,7 @@ export interface CoachmarkProps extends WebComponentProps {
   /** Floating placement relative to the anchor (default `bottom`). */
   placement?: string;
   /** Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. */
-  tone?: "primary" | "info" | "success" | "warning" | "error";
+  tone?: "error" | "primary" | "info" | "success" | "warning";
   /** Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. */
   arrow?: boolean;
   /** The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again. */
@@ -538,6 +559,21 @@ export const Conversations = createWebComponent<ConversationsProps>(
   'kai-conversations',
   ["theme","groups","conversations","activeId","collapsed","defaultCollapsed"],
   { onCollapseToggle: 'kai-collapse-toggle', onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onToggleSidebar: 'kai-toggle-sidebar' },
+);
+
+export interface DialogProps extends WebComponentProps {
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on Escape/backdrop). Set `el.open = true`, or `<kai-dialog open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** The dialog opened or closed (Escape, backdrop click, a driven `open`, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export const Dialog = createWebComponent<DialogProps>(
+  'kai-dialog',
+  ["theme","open","defaultOpen"],
+  { onOpenChange: 'kai-open-change' },
 );
 
 export interface EmbedProps extends WebComponentProps {
@@ -845,7 +881,7 @@ export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
 
 export interface NavProps extends WebComponentProps {
   /** The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. */
-  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "primary" | "info" | "success" | "warning" | "error" | "neutral"; label?: string; pulse?: boolean }; meta?: string }[];
+  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "error" | "primary" | "info" | "success" | "warning" | "neutral"; label?: string; pulse?: boolean }; meta?: string }[];
   /** Active item id (controlled). */
   value?: string;
   /** Initial active id when uncontrolled. */
@@ -864,7 +900,7 @@ export const Nav = createWebComponent<NavProps>(
 
 export interface NoticeProps extends WebComponentProps {
   /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). */
-  severity?: "info" | "success" | "warning" | "error" | "neutral";
+  severity?: "error" | "info" | "success" | "warning" | "neutral";
   /** Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. */
   icon?: string;
   /** Show a dismiss (×) that hides the notice and emits `kai-dismiss`. */
@@ -877,6 +913,37 @@ export const Notice = createWebComponent<NoticeProps>(
   'kai-notice',
   ["theme","severity","icon","dismissible"],
   { onDismiss: 'kai-dismiss' },
+);
+
+export interface PaneProps extends WebComponentProps {
+  /** The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). Attribute: `headline`. */
+  headline?: string;
+  /** A role / label shown under the title (e.g. "Reviewer", "claude-sonnet"). Attribute: `subtitle`. */
+  subtitle?: string;
+  /** Show the restore glyph instead of maximize, and signal the maximized view-state. Drive it yourself in response to `kai-maximize`. Attribute: `maximized`. */
+  maximized?: boolean;
+  /** Highlight the frame with a ring/border to mark the ACTIVE pane. Attribute: `focused`. */
+  focused?: boolean;
+  /** Show a split-pane window control that fires `kai-split`. Off by default. Attribute: `show-split`. */
+  showSplit?: boolean;
+  /** Show a dock-to-side window control that fires `kai-dock`. Off by default. Attribute: `show-dock`. */
+  showDock?: boolean;
+  /** A tone-colored status dot (+ optional label) in the header. An object `{ tone, label?, pulse? }` set as a JS PROPERTY (not an attribute). */
+  status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
+  /** The close (×) control was clicked. */
+  onClose?: (event: CustomEvent) => void;
+  /** The dock control was clicked (only present when `show-dock`). */
+  onDock?: (event: CustomEvent) => void;
+  /** The maximize/restore control was clicked. `detail.maximized` is the intended NEXT state — drive the `maximized` prop yourself from it. */
+  onMaximize?: (event: CustomEvent<{ maximized: boolean }>) => void;
+  /** The split control was clicked (only present when `show-split`). */
+  onSplit?: (event: CustomEvent) => void;
+}
+
+export const Pane = createWebComponent<PaneProps>(
+  'kai-pane',
+  ["theme","headline","subtitle","maximized","focused","showSplit","showDock","status"],
+  { onClose: 'kai-close', onDock: 'kai-dock', onMaximize: 'kai-maximize', onSplit: 'kai-split' },
 );
 
 export interface PopoverProps extends WebComponentProps {
@@ -1425,7 +1492,7 @@ export const ThinkingBar = createWebComponent<ThinkingBarProps>(
 
 export interface ToastRegionProps extends WebComponentProps {
   /** The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. */
-  toasts: { id: string; message: string; variant?: undefined | "success" | "neutral"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
+  toasts: { id: string; message: string; variant?: undefined | "error" | "info" | "success" | "warning" | "neutral"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
   /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */

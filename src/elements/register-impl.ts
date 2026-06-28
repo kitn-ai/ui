@@ -81,3 +81,7 @@ import './prompt-dock';
 import './segmented';
 import './settings-group';
 import './setting-item';
+// Multi-agent workspace primitives (graduated from SolidJS prototypes)
+import './pane';
+import './agent-card';
+import './dialog';
