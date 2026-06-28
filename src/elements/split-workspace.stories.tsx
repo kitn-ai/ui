@@ -205,6 +205,21 @@ interface Column {
   groups: Group[];
 }
 
+// A resolved tab drop target, computed live on pointermove:
+//   tabs   → insert into `groupId` before `beforeId` (null = append) — reorder or cross-group move
+//   center → move into `groupId`
+//   edge   → DRAG-TO-SPLIT off that side of `groupId` (left/right = new column, top/bottom = new row)
+type DropZone =
+  | { kind: 'tabs'; groupId: string; beforeId: string | null }
+  | { kind: 'center'; groupId: string }
+  | { kind: 'edge'; groupId: string; edge: 'left' | 'right' | 'top' | 'bottom' };
+interface DragState {
+  agentId: string;
+  x: number;
+  y: number;
+  target?: DropZone;
+}
+
 let colSeq = 0;
 let groupSeq = 0;
 const newColId = () => `col-${colSeq++}`;
@@ -351,6 +366,9 @@ export const SplitWorkspace: Story = {
     const [zoomedId, setZoomedId] = createSignal<string | null>(null);
     // The agent id whose tab "…" menu is open, or null.
     const [menuFor, setMenuFor] = createSignal<string | null>(null);
+    // Pointer drag-and-drop of a tab: the live gesture (dragged agent + pointer
+    // position + the resolved drop zone), or null when idle.
+    const [drag, setDrag] = createSignal<DragState | null>(null);
     const [closed, setClosed] = createSignal<Set<string>>(new Set());
     const [attentionFirst, setAttentionFirst] = createSignal(false);
     const [cmdOpen, setCmdOpen] = createSignal(false);
@@ -372,6 +390,12 @@ export const SplitWorkspace: Story = {
     // column's group stack (measured by its row dividers for vertical drag).
     let rowEl: HTMLDivElement | undefined;
     const colRefs = new Map<string, HTMLElement>();
+    // Tab-DnD hit-testing: each GROUP root (the drop-target rect), its tab STRIP
+    // (the reorder/insert band), and each TAB element keyed `${groupId}:${agentId}`
+    // (to compute the insertion index). Detached entries are skipped via isConnected.
+    const groupRefs = new Map<string, HTMLElement>();
+    const tabStripRefs = new Map<string, HTMLElement>();
+    const tabRefs = new Map<string, HTMLElement>();
 
     const live = () => AGENTS.filter((a) => !closed().has(a.id));
     const agentById = (id: string) => AGENTS.find((a) => a.id === id);
@@ -585,6 +609,170 @@ export const SplitWorkspace: Story = {
       commitColumns(next);
       setFocusedGroupId(targetGroup.id);
       setFocusedId(agentId);
+    };
+
+    // ── Pointer drag-and-drop for tabs (zed/vscode feel, 2-level) ────────────
+    // A TAB (an agent) drags to REORDER within its strip, MOVE into another group
+    // (its strip or body center), or DRAG-TO-SPLIT off a group's EDGE — left/right
+    // makes a new COLUMN that side, top/bottom a new GROUP/row above/below. All
+    // pointer-based (not HTML5 draggable): setPointerCapture, a floating ghost, a
+    // live drop indicator. The resize dividers keep their own pointerdown handlers
+    // on separate `role="separator"` elements, and a tab drag starts ONLY from a
+    // tab, so the two gestures never both fire.
+    let dragMoved = false; // did this gesture pass the move threshold (→ suppress the click)
+    const EDGE_ZONE = 0.22; // outer fraction of a group on a side that means "split"
+
+    // Which displayed tab the pointer would insert BEFORE (null = append). Skips
+    // the dragged tab so its own slot never counts.
+    const insertBeforeId = (groupId: string, x: number, draggedId: string): string | null => {
+      const loc = findGroup(groupId);
+      if (!loc) return null;
+      for (const a of colAgents(loc.group)) {
+        if (a.id === draggedId) continue;
+        const el = tabRefs.get(`${groupId}:${a.id}`);
+        if (!el || !el.isConnected) continue;
+        const r = el.getBoundingClientRect();
+        if (x < r.left + r.width / 2) return a.id;
+      }
+      return null;
+    };
+
+    // Hit-test the group under the pointer and classify the zone: over the tab
+    // strip → insert-at-index; an outer EDGE band → that edge's split; the inner
+    // region → center/move.
+    const hitTest = (x: number, y: number, draggedId: string): DropZone | undefined => {
+      let found: DropZone | undefined;
+      groupRefs.forEach((el, groupId) => {
+        if (found || !el.isConnected) return;
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return;
+        const strip = tabStripRefs.get(groupId);
+        if (strip?.isConnected) {
+          const sr = strip.getBoundingClientRect();
+          if (x >= sr.left && x <= sr.right && y >= sr.top && y <= sr.bottom) {
+            found = { kind: 'tabs', groupId, beforeId: insertBeforeId(groupId, x, draggedId) };
+            return;
+          }
+        }
+        const fx = (x - rect.left) / rect.width;
+        const fy = (y - rect.top) / rect.height;
+        const left = fx, right = 1 - fx, top = fy, bottom = 1 - fy;
+        const min = Math.min(left, right, top, bottom);
+        if (min >= EDGE_ZONE) { found = { kind: 'center', groupId }; return; }
+        if (min === left) found = { kind: 'edge', groupId, edge: 'left' };
+        else if (min === right) found = { kind: 'edge', groupId, edge: 'right' };
+        else if (min === top) found = { kind: 'edge', groupId, edge: 'top' };
+        else found = { kind: 'edge', groupId, edge: 'bottom' };
+      });
+      return found;
+    };
+
+    // Move an agent INTO a group at a position (before `beforeId`, else append),
+    // make it active, and focus the group. Reuses withoutAgent + commitColumns.
+    const insertIntoGroup = (agentId: string, groupId: string, beforeId: string | null) => {
+      setMenuFor(null);
+      const next = withoutAgent(columns(), agentId).map((col) => ({
+        ...col,
+        groups: col.groups.map((g) => {
+          if (g.id !== groupId) return g;
+          const ids = g.agentIds.filter((id) => id !== agentId);
+          let at = beforeId ? ids.indexOf(beforeId) : -1;
+          if (at < 0) at = ids.length;
+          return { ...g, agentIds: [...ids.slice(0, at), agentId, ...ids.slice(at)], activeId: agentId };
+        }),
+      }));
+      commitColumns(next);
+      setFocusedGroupId(groupId);
+      setFocusedId(agentId);
+    };
+
+    // DRAG-TO-SPLIT off a left/right edge: a new single-group COLUMN that side of
+    // the target's column.
+    const splitToColumn = (agentId: string, targetColId: string, side: 'left' | 'right') => {
+      setMenuFor(null);
+      const ng = makeGroup([agentId]);
+      const nc: Column = { id: newColId(), groups: [ng] };
+      const next: Column[] = [];
+      for (const col of withoutAgent(columns(), agentId)) {
+        if (col.id === targetColId && side === 'left') next.push(nc);
+        next.push(col);
+        if (col.id === targetColId && side === 'right') next.push(nc);
+      }
+      commitColumns(next);
+      setFocusedGroupId(ng.id);
+      setFocusedId(agentId);
+    };
+
+    // DRAG-TO-SPLIT off a top/bottom edge: a new GROUP (row) above/below the
+    // target group within the SAME column.
+    const splitToRow = (agentId: string, targetColId: string, targetGroupId: string, side: 'top' | 'bottom') => {
+      setMenuFor(null);
+      const ng = makeGroup([agentId]);
+      const next = withoutAgent(columns(), agentId).map((col) => {
+        if (col.id !== targetColId) return col;
+        const at = col.groups.findIndex((g) => g.id === targetGroupId);
+        const groups = [...col.groups];
+        groups.splice(at < 0 ? groups.length : side === 'top' ? at : at + 1, 0, ng);
+        return { ...col, groups };
+      });
+      commitColumns(next);
+      setFocusedGroupId(ng.id);
+      setFocusedId(agentId);
+    };
+
+    // Commit whatever zone the pointer was over on release.
+    const commitDrop = (agentId: string, zone: DropZone) => {
+      const loc = findGroup(zone.groupId);
+      if (!loc) return;
+      if (zone.kind === 'edge') {
+        if (zone.edge === 'left' || zone.edge === 'right') splitToColumn(agentId, loc.col.id, zone.edge);
+        else splitToRow(agentId, loc.col.id, loc.group.id, zone.edge);
+        return;
+      }
+      insertIntoGroup(agentId, zone.groupId, zone.kind === 'tabs' ? zone.beforeId : null);
+    };
+
+    // Start a tab drag from a tab's pointerdown: left button only, never from the
+    // tab's …/× buttons. A small move threshold separates a click (selectTab) from
+    // a drag; once crossed we capture the pointer, raise the ghost, and live-hit-
+    // test on pointermove. pointerup commits; Esc / drop-outside cancels.
+    const startTabDrag = (agentId: string) => (e: PointerEvent) => {
+      if (e.button !== 0) return;
+      if ((e.target as HTMLElement | null)?.closest('button')) return;
+      const startX = e.clientX, startY = e.clientY;
+      const tabEl = e.currentTarget as HTMLElement;
+      const pointerId = e.pointerId;
+      let started = false;
+      dragMoved = false;
+      const onMove = (ev: PointerEvent) => {
+        if (!started) {
+          if (Math.abs(ev.clientX - startX) + Math.abs(ev.clientY - startY) < 5) return;
+          started = true;
+          dragMoved = true;
+          try { tabEl.setPointerCapture(pointerId); } catch { /* noop */ }
+          document.body.style.userSelect = 'none';
+          document.body.style.cursor = 'grabbing';
+          setDrag({ agentId, x: ev.clientX, y: ev.clientY });
+        }
+        setDrag({ agentId, x: ev.clientX, y: ev.clientY, target: hitTest(ev.clientX, ev.clientY, agentId) });
+      };
+      const finish = (commit: boolean) => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('keydown', onKey);
+        try { tabEl.releasePointerCapture(pointerId); } catch { /* noop */ }
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        const state = drag();
+        setDrag(null);
+        if (commit && started && state?.target) commitDrop(agentId, state.target);
+      };
+      const onUp = () => finish(true);
+      const onKey = (ev: KeyboardEvent) => { if (ev.key === 'Escape') finish(false); };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('keydown', onKey);
     };
 
     const toggleZoom = (agentId?: string) => {
@@ -886,15 +1074,18 @@ export const SplitWorkspace: Story = {
       const menuOpen = () => menuFor() === props.agent.id;
       return (
         <div
+          ref={(el) => tabRefs.set(`${props.group.id}:${props.agent.id}`, el)}
           role="tab"
           aria-selected={isActive()}
-          onClick={() => selectTab(props.group.id, props.agent.id)}
+          onPointerDown={startTabDrag(props.agent.id)}
+          onClick={() => { if (dragMoved) { dragMoved = false; return; } selectTab(props.group.id, props.agent.id); }}
           class={cn(
             'group/tab relative flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md py-1 pl-1.5 pr-1 text-xs transition-colors',
             isActive()
               ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
               : 'text-muted-foreground hover:bg-hover hover:text-foreground',
             props.agent.needsAttention && !isActive() && 'ring-1 ring-tool-amber/50',
+            drag()?.agentId === props.agent.id && 'opacity-40',
           )}
         >
           <span
@@ -971,13 +1162,23 @@ export const SplitWorkspace: Story = {
     const GroupView = (props: { group: Group; colId: string; weight: number }) => {
       const isFocused = () => props.group.id === focusedGroupId();
       const activeAgent = () => agentById(props.group.activeId);
+      // The live drop zone if a tab drag is hovering THIS group, else undefined.
+      const dropZone = (): DropZone | undefined => {
+        const d = drag();
+        return d?.target && d.target.groupId === props.group.id ? d.target : undefined;
+      };
+      const tabsZone = () => { const z = dropZone(); return z?.kind === 'tabs' ? z : undefined; };
+      const edgeZone = () => { const z = dropZone(); return z?.kind === 'edge' ? z : undefined; };
+      const isCenterZone = () => dropZone()?.kind === 'center';
       return (
         <div
-          class="flex min-h-0 min-w-0 flex-col gap-1.5"
+          ref={(el) => groupRefs.set(props.group.id, el)}
+          class="relative flex min-h-0 min-w-0 flex-col gap-1.5"
           style={{ flex: String(props.weight) }}
           onPointerDown={() => setFocusedGroupId(props.group.id)}
         >
           <div
+            ref={(el) => tabStripRefs.set(props.group.id, el)}
             role="tablist"
             class={cn(
               'flex shrink-0 items-center gap-1 overflow-x-auto rounded-lg border bg-surface px-1.5 py-1',
@@ -985,9 +1186,36 @@ export const SplitWorkspace: Story = {
             )}
           >
             <For each={colAgents(props.group)}>
-              {(agent) => <Tab group={props.group} colId={props.colId} agent={agent} />}
+              {(agent) => (
+                <>
+                  {/* insertion line before this tab when the drop would land here */}
+                  <Show when={tabsZone()?.beforeId === agent.id}>
+                    <div class="h-5 w-0.5 shrink-0 self-center rounded-full bg-primary" aria-hidden="true" />
+                  </Show>
+                  <Tab group={props.group} colId={props.colId} agent={agent} />
+                </>
+              )}
             </For>
+            {/* trailing insertion line (append to the end of the strip) */}
+            <Show when={tabsZone() && tabsZone()!.beforeId === null}>
+              <div class="h-5 w-0.5 shrink-0 self-center rounded-full bg-primary" aria-hidden="true" />
+            </Show>
           </div>
+          {/* DRAG-TO-SPLIT / move overlay: a directional half-highlight for an edge
+              split, or a full highlight for a center move. */}
+          <Show when={dropZone() && dropZone()!.kind !== 'tabs'}>
+            <div
+              class={cn(
+                'pointer-events-none absolute z-20 rounded-lg bg-primary/15 ring-2 ring-inset ring-primary transition-all',
+                isCenterZone() && 'inset-0',
+                edgeZone()?.edge === 'left' && 'inset-y-0 left-0 w-1/2',
+                edgeZone()?.edge === 'right' && 'inset-y-0 right-0 w-1/2',
+                edgeZone()?.edge === 'top' && 'inset-x-0 top-0 h-1/2',
+                edgeZone()?.edge === 'bottom' && 'inset-x-0 bottom-0 h-1/2',
+              )}
+              aria-hidden="true"
+            />
+          </Show>
           <div class="min-h-0 flex-1">
             <Show
               when={activeAgent()}
@@ -1616,6 +1844,31 @@ export const SplitWorkspace: Story = {
         {/* broadcast composer (mock modal) — opened from the header megaphone */}
         <Show when={broadcastOpen()}>
           <BroadcastModal />
+        </Show>
+
+        {/* drag ghost: a floating mini-tab that trails the pointer during a tab drag */}
+        <Show when={drag()}>
+          {(d) => (
+            <Show when={agentById(d().agentId)}>
+              {(agent) => (
+                <div
+                  class="pointer-events-none fixed z-[60] flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 text-xs shadow-lg"
+                  style={{ left: `${d().x + 12}px`, top: `${d().y + 12}px` }}
+                >
+                  <span
+                    class={cn(
+                      'flex size-[18px] shrink-0 items-center justify-center rounded text-[11px] font-bold leading-none tabular-nums',
+                      TONE_BADGE[agent().status.tone],
+                    )}
+                    aria-hidden="true"
+                  >
+                    {AGENT_NUMBER.get(agent().id)}
+                  </span>
+                  <span class="font-medium">{agent().name}</span>
+                </div>
+              )}
+            </Show>
+          )}
         </Show>
       </div>
     );
