@@ -45,7 +45,11 @@ export default defineConfig({
       // per-element chunks the wrappers lazy-import) is external — it resolves to the
       // consumer's installed dist at runtime, and stays a code-splittable dynamic import.
       external: ['react', 'react-dom', 'react/jsx-runtime', /^@kitn\.ai\/ui\/elements(\/.*)?$/],
-      // No banner: registration is per-element + client-only now (see runtime.tsx).
+      // Re-emit the React Server Components `'use client'` directive: the wrappers are
+      // hooks-based client components, required for Next.js App Router (and other RSC
+      // bundlers). Rollup strips module-level directives from the source while bundling,
+      // so inject it as a banner to guarantee dist/react.js opens with it.
+      output: { banner: "'use client';" },
     },
   },
 });

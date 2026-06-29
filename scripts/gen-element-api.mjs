@@ -9,7 +9,7 @@
 
 import ts from 'typescript';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createTsHelpers, displayNameFromClass } from './_ts-helpers.mjs';
 
@@ -206,7 +206,14 @@ for (const file of facadeFiles) {
       const composed = composedImports(sf);
       const tokens = COMPONENT_TOKENS[tag] ?? [];
       const className = tagToClass(tag);
-      elements.push({ tag, className, displayName: displayNameFromClass(className), props, events, methods: fileMethods, composedFrom: composed, tokens });
+      const el = { tag, className, displayName: displayNameFromClass(className), props, events, methods: fileMethods, composedFrom: composed, tokens };
+      // Source-module basename (e.g. confirm-card.tsx → "confirm-card"). The
+      // per-element build (vite.config.elements.ts) names each emitted module after
+      // its SOURCE FILE, not its tag, so the React wrappers must lazy-import
+      // `@kitn.ai/ui/elements/<module>` (not `<tag>`) to resolve a real dist file.
+      // Non-enumerable so it stays out of the serialized element-meta.json.
+      Object.defineProperty(el, 'module', { value: basename(file).replace(/\.(tsx|ts)$/, ''), enumerable: false });
+      elements.push(el);
     }
     ts.forEachChild(node, visit);
   };
