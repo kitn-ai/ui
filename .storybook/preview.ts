@@ -1,5 +1,7 @@
-import type { Preview } from 'storybook-solidjs-vite';
+import type { Preview, Decorator } from 'storybook-solidjs-vite';
+import { createComponent, onCleanup, type JSX } from 'solid-js';
 import { themes } from 'storybook/theming';
+import { toast } from '../src/primitives/toast-store';
 import './styles.css';
 
 // ── AI/UI brand for the manager (top-left) ──────────────────────────────────
@@ -62,6 +64,25 @@ if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined') 
   else start();
 }
 
+// The imperative `toast()` store lives in a module-global `createRoot` and mounts
+// its `<kai-toast-region>` on `document.body` (a portal) — both OUTSIDE any story's
+// reactive tree, so they survive a story unmount. A sticky toast raised by one
+// story (e.g. AMUX's "agent needs you" cards in Labs/Apps) would otherwise leak
+// onto the next story you navigate to. This wraps every story in a Solid component
+// whose `onCleanup` clears the store when the story unmounts, so nothing carries
+// across navigation. `preview.ts` is a plain `.ts` file (no JSX), so the wrapper is
+// built with `createComponent` rather than `<ToastReset>`.
+function ToastReset(props: { children: JSX.Element }): JSX.Element {
+  onCleanup(() => toast.clear());
+  return props.children;
+}
+const clearToastsOnUnmount: Decorator = (Story) =>
+  createComponent(ToastReset, {
+    get children() {
+      return Story();
+    },
+  });
+
 const preview: Preview = {
   // `@kitn.ai/ui/elements` (src/elements/register.ts) is now SSR-import-safe: it
   // registers the kai-* custom elements via a gated dynamic `import()` (browser-
@@ -76,6 +97,10 @@ const preview: Preview = {
     if (typeof window === 'undefined') return;
     await import('../src/elements/register-impl');
   },
+  // Outermost decorator: clear any imperatively-raised toasts when a story
+  // unmounts so sticky toasts don't leak across story navigation (see
+  // `clearToastsOnUnmount` above). Keep this FIRST so its `onCleanup` always runs.
+  decorators: [clearToastsOnUnmount],
   parameters: {
     layout: 'fullscreen',
     // Accessibility (axe) runs per-story in both the Storybook UI panel and the

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { createRoot, onCleanup } from 'solid-js';
 import {
   toast, getToasts, ensureMounted, isToastRegionMounted,
   resolveDuration, DEFAULT_TOAST_DURATION, ACTION_TOAST_FLOOR,
@@ -94,6 +95,28 @@ describe('toast() — appearance / inverse / description', () => {
     expect(find(overridden.id)?.appearance).toBe('pill');
     expect(find(overridden.id)?.inverse).toBe(false);
     configureToasts({ appearance: 'pill', inverse: false }); // reset
+  });
+});
+
+describe('clear-on-cleanup — story-unmount mechanism', () => {
+  // The Storybook decorator (.storybook/preview.ts) wraps every story in a Solid
+  // component whose `onCleanup` calls `toast.clear()`, so sticky toasts raised by
+  // one story don't leak onto the next. The decorator itself is hard to unit-test,
+  // but this proves the underlying mechanism: disposing a reactive root whose
+  // `onCleanup` clears the store empties `getToasts()` even for sticky toasts.
+  it('disposing a root whose onCleanup calls toast.clear() empties the store', () => {
+    const dispose = createRoot((d) => {
+      onCleanup(() => toast.clear());
+      return d;
+    });
+    // Raise a couple of toasts INCLUDING a sticky one (duration 0) — the kind AMUX
+    // raises that would otherwise survive a story unmount.
+    toast.warning('agent needs you', { duration: 0 });
+    toast('heads up');
+    expect(getToasts().length).toBeGreaterThan(0);
+
+    dispose(); // simulate the story unmounting
+    expect(getToasts()).toHaveLength(0);
   });
 });
 
