@@ -177,8 +177,14 @@ export function Toast(props: ToastProps) {
           type="button"
           onClick={act}
           class={cn(
-            'shrink-0 rounded-md text-sm font-medium underline-offset-2 hover:underline',
-            actionClass(),
+            appearance() === 'card'
+              ? cn(
+                  'inline-flex shrink-0 items-center rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
+                  inverse()
+                    ? 'border-background/30 text-background hover:bg-background/10'
+                    : 'border-border text-foreground hover:bg-accent',
+                )
+              : cn('shrink-0 rounded-md text-sm font-medium underline-offset-2 hover:underline', actionClass()),
             p.class,
           )}
         >
@@ -220,7 +226,7 @@ export function Toast(props: ToastProps) {
           'animate-in fade-in-0 slide-in-from-top-4',
           'data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:slide-out-to-top-2',
           appearance() === 'card'
-            ? 'flex min-w-[20rem] items-start gap-3 rounded-xl p-4 shadow-xl'
+            ? 'flex min-w-[24rem] items-start gap-3 rounded-xl p-4 shadow-xl'
             : 'flex items-center gap-3 rounded-full px-4 py-2.5',
         )}
       >
@@ -242,7 +248,7 @@ export function Toast(props: ToastProps) {
                 {props.item.description}
               </div>
             </Show>
-            <ActionButton class="mt-2 inline-block" />
+            <ActionButton class="mt-2" />
           </div>
           <CloseButton />
         </Show>
@@ -411,7 +417,7 @@ export function ToastRegion(props: ToastRegionProps) {
             'pointer-events-none fixed z-[100] flex flex-col gap-2',
             anchor()
               ? ANCHOR_FLEX[position()]
-              : cn('max-w-[min(28rem,calc(100vw-2rem))]', POSITION_CLASSES[position()]),
+              : cn('max-w-[min(30rem,calc(100vw-2rem))]', POSITION_CLASSES[position()]),
           )}
           style={anchor() ? anchorStyle(position(), anchor()!) : undefined}
         >
@@ -448,7 +454,7 @@ export function ToastRegion(props: ToastRegionProps) {
             anchored edge. */}
         <div
           class="pointer-events-auto relative transition-[height] duration-200 ease-out"
-          style={{ 'min-width': '16rem', 'max-width': 'min(28rem, calc(100vw - 2rem))', height: `${stageHeight()}px` }}
+          style={{ 'min-width': '16rem', 'max-width': 'min(30rem, calc(100vw - 2rem))', height: `${stageHeight()}px` }}
         >
           <For each={visible()}>
             {(item, i) => (
