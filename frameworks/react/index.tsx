@@ -778,6 +778,60 @@ export const Image = createWebComponent<ImageProps>(
   () => import('@kitn.ai/ui/elements/image'),
 );
 
+export interface InputProps extends WebComponentProps {
+  /** Native input type: `text` (default) · `email` · `url` · `search` · `tel` · `password` · `number`. Single-line only. */
+  type?: string;
+  /** Controlled value — settable and reflected to the `value` attribute. `el.value = 'hi'` drives it (no event); typing updates it and fires `kai-input`. Read `el.value` for live state. */
+  value?: string;
+  /** Placeholder shown when empty. */
+  placeholder?: string;
+  /** Field label, linked to the input. */
+  label?: string;
+  /** Helper text below the control. */
+  hint?: string;
+  /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
+  error?: string;
+  /** Control density: `sm` or `md`. Defaults to `md`. */
+  size?: "sm" | "md";
+  /** Disable interaction. */
+  disabled?: boolean;
+  /** Make the input read-only. */
+  readonly?: boolean;
+  /** Mark the input required. */
+  required?: boolean;
+  /** Force the invalid state without an `error` string. */
+  invalid?: boolean;
+  /** Form-control name. */
+  name?: string;
+  /** The value was committed (blur). */
+  onChange?: (event: CustomEvent<{ value: string }>) => void;
+  /** The value changed per keystroke. */
+  onInput?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export const Input = createWebComponent<InputProps>(
+  'kai-input',
+  ["theme","type","value","placeholder","label","hint","error","size","disabled","readonly","required","invalid","name"],
+  { onChange: 'kai-change', onInput: 'kai-input' },
+  () => import('@kitn.ai/ui/elements/input'),
+);
+
+export interface KbdProps extends WebComponentProps {
+  /** Shortcut spec — tokens joined by `+` (e.g. `Mod+Shift+K`). Omit it to show default-slot content instead. Display only; the element does not bind keys. */
+  keys?: string;
+  /** `mac` uses ⌘/⌥, `other` uses Ctrl. `auto` (default) sniffs the OS. */
+  platform?: "other" | "auto" | "mac";
+  /** Cap size: `sm` or `md`. Defaults to `md`. */
+  size?: "sm" | "md";
+}
+
+export const Kbd = createWebComponent<KbdProps>(
+  'kai-kbd',
+  ["theme","keys","platform","size"],
+  {  },
+  () => import('@kitn.ai/ui/elements/kbd'),
+);
+
 export interface LinkPreviewProps extends WebComponentProps {
   /** Stable card id correlating every emitted event. Set as an attribute or property. */
   cardId?: string;
@@ -1300,6 +1354,34 @@ export const ScrollButton = createWebComponent<ScrollButtonProps>(
   ["theme","for","variant","size"],
   { onScroll: 'kai-scroll' },
   () => import('@kitn.ai/ui/elements/scroll-button'),
+);
+
+export interface SearchProps extends WebComponentProps {
+  /** Controlled query — settable and reflected to the `value` attribute. Read `el.value` for live state. */
+  value?: string;
+  /** Placeholder. Defaults to `Search…`. */
+  placeholder?: string;
+  /** Leading icon-NAME string (a curated name, URL, or text), resolved to a glyph the same way `kai-button`'s `icon` is. Defaults to `search`. */
+  icon?: string;
+  /** Debounce window for `kai-search`, in ms. Defaults to `200`. */
+  debounce?: number;
+  /** Show a spinner in place of the leading icon while results load. */
+  loading?: boolean;
+  /** Optional shortcut hint shown (as a `kai-kbd`) while the field is empty, e.g. `Mod+K`. Display only; it does not bind the key. */
+  shortcut?: string;
+  /** The field committed (blur). */
+  onChange?: (event: CustomEvent<{ value: string }>) => void;
+  /** The query changed (debounced live, and on clear). */
+  onSearch?: (event: CustomEvent<{ value: string }>) => void;
+  /** Enter was pressed. */
+  onSubmit?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export const Search = createWebComponent<SearchProps>(
+  'kai-search',
+  ["theme","value","placeholder","icon","debounce","loading","shortcut"],
+  { onChange: 'kai-change', onSearch: 'kai-search', onSubmit: 'kai-submit' },
+  () => import('@kitn.ai/ui/elements/search'),
 );
 
 export interface SegmentedProps extends WebComponentProps {

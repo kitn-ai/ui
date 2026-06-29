@@ -521,6 +521,46 @@ export interface KaiImageElement extends HTMLElement {
   mediaType?: string;
 }
 
+export interface KaiInputElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Native input type: `text` (default) · `email` · `url` · `search` · `tel` · `password` · `number`. Single-line only. */
+  type?: string;
+  /** Controlled value — settable and reflected to the `value` attribute. `el.value = 'hi'` drives it (no event); typing updates it and fires `kai-input`. Read `el.value` for live state. */
+  value?: string;
+  /** Placeholder shown when empty. */
+  placeholder?: string;
+  /** Field label, linked to the input. */
+  label?: string;
+  /** Helper text below the control. */
+  hint?: string;
+  /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
+  error?: string;
+  /** Control density: `sm` or `md`. Defaults to `md`. */
+  size?: "sm" | "md";
+  /** Disable interaction. */
+  disabled?: boolean;
+  /** Make the input read-only. */
+  readonly?: boolean;
+  /** Mark the input required. */
+  required?: boolean;
+  /** Force the invalid state without an `error` string. */
+  invalid?: boolean;
+  /** Form-control name. */
+  name?: string;
+}
+
+export interface KaiKbdElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Shortcut spec — tokens joined by `+` (e.g. `Mod+Shift+K`). Omit it to show default-slot content instead. Display only; the element does not bind keys. */
+  keys?: string;
+  /** `mac` uses ⌘/⌥, `other` uses Ctrl. `auto` (default) sniffs the OS. */
+  platform?: "other" | "auto" | "mac";
+  /** Cap size: `sm` or `md`. Defaults to `md`. */
+  size?: "sm" | "md";
+}
+
 export interface KaiLinkPreviewElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -862,6 +902,23 @@ export interface KaiScrollButtonElement extends HTMLElement {
   variant?: "default" | "ghost" | "outline";
   /** Button size token. Defaults to `'icon'` (square). */
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
+}
+
+export interface KaiSearchElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Controlled query — settable and reflected to the `value` attribute. Read `el.value` for live state. */
+  value?: string;
+  /** Placeholder. Defaults to `Search…`. */
+  placeholder?: string;
+  /** Leading icon-NAME string (a curated name, URL, or text), resolved to a glyph the same way `kai-button`'s `icon` is. Defaults to `search`. */
+  icon?: string;
+  /** Debounce window for `kai-search`, in ms. Defaults to `200`. */
+  debounce?: number;
+  /** Show a spinner in place of the leading icon while results load. */
+  loading?: boolean;
+  /** Optional shortcut hint shown (as a `kai-kbd`) while the field is empty, e.g. `Mod+K`. Display only; it does not bind the key. */
+  shortcut?: string;
 }
 
 export interface KaiSegmentedElement extends HTMLElement {
@@ -1212,6 +1269,8 @@ declare global {
     'kai-hover-card': KaiHoverCardElement;
     'kai-icon': KaiIconElement;
     'kai-image': KaiImageElement;
+    'kai-input': KaiInputElement;
+    'kai-kbd': KaiKbdElement;
     'kai-link-preview': KaiLinkPreviewElement;
     'kai-loader': KaiLoaderElement;
     'kai-markdown': KaiMarkdownElement;
@@ -1235,6 +1294,7 @@ declare global {
     'kai-screen': KaiScreenElement;
     'kai-scroll-area': KaiScrollAreaElement;
     'kai-scroll-button': KaiScrollButtonElement;
+    'kai-search': KaiSearchElement;
     'kai-segmented': KaiSegmentedElement;
     'kai-separator': KaiSeparatorElement;
     'kai-setting-item': KaiSettingItemElement;

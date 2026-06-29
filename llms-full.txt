@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 74 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 77 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/ui'`):
-All 74 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 77 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 74 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 77 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/ui/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,7 +173,7 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (74 elements, generated from custom-elements.json)
+## Element reference (77 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -948,6 +948,71 @@ _No events._
 
 ---
 
+### `kai-input` / `Input`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `type` | `type` | `undefined \| string` | Native input type: `text` (default) · `email` · `url` · `search` · `tel` · `password` · `number`. Single-line only. |
+| `value` | `value` | `undefined \| string` | Controlled value — settable and reflected to the `value` attribute. `el.value = 'hi'` drives it (no event); typing updates it and fires `kai-input`. Read `el.value` for live state. |
+| `placeholder` | `placeholder` | `undefined \| string` | Placeholder shown when empty. |
+| `label` | `label` | `undefined \| string` | Field label, linked to the input. |
+| `hint` | `hint` | `undefined \| string` | Helper text below the control. |
+| `error` | `error` | `undefined \| string` | Error text; flips the field invalid (`aria-invalid` + destructive border). |
+| `size` | `size` | `undefined \| "sm" \| "md"` | Control density: `sm` or `md`. Defaults to `md`. |
+| `disabled` | `disabled` | `undefined \| false \| true` | Disable interaction. |
+| `readonly` | `readonly` | `undefined \| false \| true` | Make the input read-only. |
+| `required` | `required` | `undefined \| false \| true` | Mark the input required. |
+| `invalid` | `invalid` | `undefined \| false \| true` | Force the invalid state without an `error` string. |
+| `name` | `name` | `undefined \| string` | Form-control name. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-change` | `CustomEvent<{ value: string }>` | The value was committed (blur). |
+| `kai-input` | `CustomEvent<{ value: string }>` | The value changed per keystroke. |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `leading` | inject | A glyph, prefix, or affix at the start of the field, inside the border. |
+| `trailing` | inject | A button, unit, or affix at the end of the field, inside the border. |
+
+**Styleable parts** (restyle from outside via `kai-input::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(field)` | The bordered control box (the row wrapping any affixes plus the input). Restyle its border, radius, surface, or focus ring. — `kai-input::part(field) { border-radius: 0.75rem }` |
+| `::part(input)` | The inner input element. Restyle its text, padding, or placeholder. — `kai-input::part(input) { font-variant-numeric: tabular-nums }` |
+| `::part(label)` | The field label above the control. Restyle its typography or spacing. — `kai-input::part(label) { font-weight: 600 }` |
+| `::part(hint)` | The hint or error line below the control. Restyle its typography. — `kai-input::part(hint) { font-style: italic }` |
+
+---
+
+### `kai-kbd` / `Kbd`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `keys` | `keys` | `undefined \| string` | Shortcut spec — tokens joined by `+` (e.g. `Mod+Shift+K`). Omit it to show default-slot content instead. Display only; the element does not bind keys. |
+| `platform` | `platform` | `undefined \| "other" \| "auto" \| "mac"` | `mac` uses ⌘/⌥, `other` uses Ctrl. `auto` (default) sniffs the OS. |
+| `size` | `size` | `undefined \| "sm" \| "md"` | Cap size: `sm` or `md`. Defaults to `md`. |
+
+_No events._
+
+**Styleable parts** (restyle from outside via `kai-kbd::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(key)` | Each key cap. Restyle its surface, border, radius, or font. — `kai-kbd::part(key) { border-radius: 0.375rem }` |
+| `::part(separator)` | The gap between key caps. Inject a literal joiner (e.g. a plus sign) from outside. — `kai-kbd::part(separator)::after { content: "+" }` |
+
+---
+
 ### `kai-link-preview` / `LinkPreview`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -1521,6 +1586,37 @@ _No events._
 | Event | `detail` type | Description |
 |---|---|---|
 | `kai-scroll` | `CustomEvent` | Emitted when the user clicks the button and `scrollToBottom()` is called. Carries no detail — consumers use it to know a manual scroll occurred. |
+
+---
+
+### `kai-search` / `Search`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `value` | `value` | `undefined \| string` | Controlled query — settable and reflected to the `value` attribute. Read `el.value` for live state. |
+| `placeholder` | `placeholder` | `undefined \| string` | Placeholder. Defaults to `Search…`. |
+| `icon` | `icon` | `undefined \| string` | Leading icon-NAME string (a curated name, URL, or text), resolved to a glyph the same way `kai-button`'s `icon` is. Defaults to `search`. |
+| `debounce` | `debounce` | `undefined \| number` | Debounce window for `kai-search`, in ms. Defaults to `200`. |
+| `loading` | `loading` | `undefined \| false \| true` | Show a spinner in place of the leading icon while results load. |
+| `shortcut` | `shortcut` | `undefined \| string` | Optional shortcut hint shown (as a `kai-kbd`) while the field is empty, e.g. `Mod+K`. Display only; it does not bind the key. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-change` | `CustomEvent<{ value: string }>` | The field committed (blur). |
+| `kai-search` | `CustomEvent<{ value: string }>` | The query changed (debounced live, and on clear). |
+| `kai-submit` | `CustomEvent<{ value: string }>` | Enter was pressed. |
+
+**Styleable parts** (restyle from outside via `kai-search::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(field)` | The bordered control box (the row wrapping the search icon, input, and clear button). — `kai-search::part(field) { border-radius: 9999px }` |
+| `::part(input)` | The inner search input element. — `kai-search::part(input) { font-size: 0.875rem }` |
+| `::part(clear)` | The trailing clear ("x") button, shown when the field is non-empty. — `kai-search::part(clear) { opacity: 1 }` |
 
 ---
 

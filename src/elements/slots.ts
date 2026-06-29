@@ -505,6 +505,32 @@ export const PANE_GROUP_PARTS: PartDef[] = [
   { name: 'close', doc: 'The per-tab close ("×") button. Recolor, resize, or hide it from outside.', recipe: 'kai-pane-group::part(close) { color: var(--color-muted-foreground) }' },
 ];
 
+/** Affix slots + styleable `::part`s of `<kai-input>` (the field shell). */
+export const INPUT_SLOTS: SlotDef[] = [
+  { name: 'leading', mode: 'inject', doc: 'A glyph, prefix, or affix at the start of the field, inside the border.' },
+  { name: 'trailing', mode: 'inject', doc: 'A button, unit, or affix at the end of the field, inside the border.' },
+];
+export const INPUT_PARTS: PartDef[] = [
+  { name: 'field', doc: 'The bordered control box (the row wrapping any affixes plus the input). Restyle its border, radius, surface, or focus ring.', recipe: 'kai-input::part(field) { border-radius: 0.75rem }' },
+  { name: 'input', doc: 'The inner input element. Restyle its text, padding, or placeholder.', recipe: 'kai-input::part(input) { font-variant-numeric: tabular-nums }' },
+  { name: 'label', doc: 'The field label above the control. Restyle its typography or spacing.', recipe: 'kai-input::part(label) { font-weight: 600 }' },
+  { name: 'hint', doc: 'The hint or error line below the control. Restyle its typography.', recipe: 'kai-input::part(hint) { font-style: italic }' },
+];
+
+/** Styleable `::part`s of `<kai-search>` (the debounced filter field; composes the
+ *  kai-input field plus a clear button). */
+export const SEARCH_PARTS: PartDef[] = [
+  { name: 'field', doc: 'The bordered control box (the row wrapping the search icon, input, and clear button).', recipe: 'kai-search::part(field) { border-radius: 9999px }' },
+  { name: 'input', doc: 'The inner search input element.', recipe: 'kai-search::part(input) { font-size: 0.875rem }' },
+  { name: 'clear', doc: 'The trailing clear ("x") button, shown when the field is non-empty.', recipe: 'kai-search::part(clear) { opacity: 1 }' },
+];
+
+/** Styleable `::part`s of `<kai-kbd>` (the keyboard-shortcut display). */
+export const KBD_PARTS: PartDef[] = [
+  { name: 'key', doc: 'Each key cap. Restyle its surface, border, radius, or font.', recipe: 'kai-kbd::part(key) { border-radius: 0.375rem }' },
+  { name: 'separator', doc: 'The gap between key caps. Inject a literal joiner (e.g. a plus sign) from outside.', recipe: 'kai-kbd::part(separator)::after { content: "+" }' },
+];
+
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS },
@@ -538,6 +564,9 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-pane-group': { parts: PANE_GROUP_PARTS },
   'kai-agent-card': { parts: AGENT_CARD_PARTS },
   'kai-dialog': { slots: DIALOG_SLOTS, parts: DIALOG_PARTS },
+  'kai-input': { slots: INPUT_SLOTS, parts: INPUT_PARTS },
+  'kai-search': { parts: SEARCH_PARTS },
+  'kai-kbd': { parts: KBD_PARTS },
 };
 
 /**

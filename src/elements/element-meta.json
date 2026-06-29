@@ -3233,6 +3233,242 @@
     "tokens": []
   },
   {
+    "tag": "kai-input",
+    "className": "KaiInputElement",
+    "displayName": "Input",
+    "props": [
+      {
+        "name": "type",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Native input type: `text` (default) · `email` · `url` · `search` · `tel` · `password` · `number`. Single-line only.",
+        "default": "'text'",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled value — settable and reflected to the `value` attribute. `el.value = 'hi'` drives it (no event); typing updates it and fires `kai-input`. Read `el.value` for live state.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "placeholder",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Placeholder shown when empty.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Field label, linked to the input.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "hint",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Helper text below the control.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "error",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Error text; flips the field invalid (`aria-invalid` + destructive border).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Control density: `sm` or `md`. Defaults to `md`.",
+        "default": "'md'",
+        "displayType": "undefined | \"sm\" | \"md\""
+      },
+      {
+        "name": "disabled",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Disable interaction.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "readonly",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Make the input read-only.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "required",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Mark the input required.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "invalid",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Force the invalid state without an `error` string.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "name",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Form-control name.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-change",
+        "detail": "{ value: string }",
+        "description": "The value was committed (blur).",
+        "displayDetail": "{ value: string }"
+      },
+      {
+        "name": "kai-input",
+        "detail": "{ value: string }",
+        "description": "The value changed per keystroke.",
+        "displayDetail": "{ value: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "options?: FocusOptions",
+        "returns": "void",
+        "description": "Focus the inner input (the host can't reach into the shadow root)."
+      },
+      {
+        "name": "select",
+        "params": "",
+        "returns": "void",
+        "description": "Select the inner input's text."
+      },
+      {
+        "name": "clear",
+        "params": "",
+        "returns": "void",
+        "description": "Empty the value and fire `kai-change` with `''`."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Input",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-input--docs"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "leading",
+        "mode": "inject",
+        "doc": "A glyph, prefix, or affix at the start of the field, inside the border."
+      },
+      {
+        "name": "trailing",
+        "mode": "inject",
+        "doc": "A button, unit, or affix at the end of the field, inside the border."
+      }
+    ],
+    "parts": [
+      {
+        "name": "field",
+        "doc": "The bordered control box (the row wrapping any affixes plus the input). Restyle its border, radius, surface, or focus ring.",
+        "recipe": "kai-input::part(field) { border-radius: 0.75rem }"
+      },
+      {
+        "name": "input",
+        "doc": "The inner input element. Restyle its text, padding, or placeholder.",
+        "recipe": "kai-input::part(input) { font-variant-numeric: tabular-nums }"
+      },
+      {
+        "name": "label",
+        "doc": "The field label above the control. Restyle its typography or spacing.",
+        "recipe": "kai-input::part(label) { font-weight: 600 }"
+      },
+      {
+        "name": "hint",
+        "doc": "The hint or error line below the control. Restyle its typography.",
+        "recipe": "kai-input::part(hint) { font-style: italic }"
+      }
+    ]
+  },
+  {
+    "tag": "kai-kbd",
+    "className": "KaiKbdElement",
+    "displayName": "Kbd",
+    "props": [
+      {
+        "name": "keys",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Shortcut spec — tokens joined by `+` (e.g. `Mod+Shift+K`). Omit it to show default-slot content instead. Display only; the element does not bind keys.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "platform",
+        "type": "undefined | \"other\" | \"auto\" | \"mac\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`mac` uses ⌘/⌥, `other` uses Ctrl. `auto` (default) sniffs the OS.",
+        "default": "'auto'",
+        "displayType": "undefined | \"other\" | \"auto\" | \"mac\""
+      },
+      {
+        "name": "size",
+        "type": "undefined | \"sm\" | \"md\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Cap size: `sm` or `md`. Defaults to `md`.",
+        "default": "'md'",
+        "displayType": "undefined | \"sm\" | \"md\""
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "Kbd",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-kbd--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "key",
+        "doc": "Each key cap. Restyle its surface, border, radius, or font.",
+        "recipe": "kai-kbd::part(key) { border-radius: 0.375rem }"
+      },
+      {
+        "name": "separator",
+        "doc": "The gap between key caps. Inject a literal joiner (e.g. a plus sign) from outside.",
+        "recipe": "kai-kbd::part(separator)::after { content: \"+\" }"
+      }
+    ]
+  },
+  {
     "tag": "kai-link-preview",
     "className": "KaiLinkPreviewElement",
     "displayName": "LinkPreview",
@@ -5306,6 +5542,128 @@
       }
     ],
     "tokens": []
+  },
+  {
+    "tag": "kai-search",
+    "className": "KaiSearchElement",
+    "displayName": "Search",
+    "props": [
+      {
+        "name": "value",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled query — settable and reflected to the `value` attribute. Read `el.value` for live state.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "placeholder",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Placeholder. Defaults to `Search…`.",
+        "default": "'Search…'",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "icon",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Leading icon-NAME string (a curated name, URL, or text), resolved to a glyph the same way `kai-button`'s `icon` is. Defaults to `search`.",
+        "default": "'search'",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "debounce",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Debounce window for `kai-search`, in ms. Defaults to `200`.",
+        "default": "200",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "loading",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Show a spinner in place of the leading icon while results load.",
+        "default": "false",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "shortcut",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Optional shortcut hint shown (as a `kai-kbd`) while the field is empty, e.g. `Mod+K`. Display only; it does not bind the key.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-change",
+        "detail": "{ value: string }",
+        "description": "The field committed (blur).",
+        "displayDetail": "{ value: string }"
+      },
+      {
+        "name": "kai-search",
+        "detail": "{ value: string }",
+        "description": "The query changed (debounced live, and on clear).",
+        "displayDetail": "{ value: string }"
+      },
+      {
+        "name": "kai-submit",
+        "detail": "{ value: string }",
+        "description": "Enter was pressed.",
+        "displayDetail": "{ value: string }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "focus",
+        "params": "",
+        "returns": "void",
+        "description": ""
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Input",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-input--docs"
+      },
+      {
+        "name": "Kbd",
+        "group": "UI",
+        "storyId": "solid-advanced-primitives-kbd--docs"
+      },
+      {
+        "name": "Loader",
+        "group": "Components",
+        "storyId": "solid-advanced-elements-loader--docs"
+      }
+    ],
+    "tokens": [],
+    "parts": [
+      {
+        "name": "field",
+        "doc": "The bordered control box (the row wrapping the search icon, input, and clear button).",
+        "recipe": "kai-search::part(field) { border-radius: 9999px }"
+      },
+      {
+        "name": "input",
+        "doc": "The inner search input element.",
+        "recipe": "kai-search::part(input) { font-size: 0.875rem }"
+      },
+      {
+        "name": "clear",
+        "doc": "The trailing clear (\"x\") button, shown when the field is non-empty.",
+        "recipe": "kai-search::part(clear) { opacity: 1 }"
+      }
+    ]
   },
   {
     "tag": "kai-segmented",
