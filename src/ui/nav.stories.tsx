@@ -198,7 +198,13 @@ export const TrailingActions: Story = {
           items={items()}
           value={value()}
           onItemSelect={setValue}
-          onItemAction={(id) => setValue(id)}
+          // The action must NOT select the row — it does something else. Here it
+          // toggles a "Pinned" badge on the item; the selection (value) is untouched.
+          onItemAction={(id) =>
+            setItems((prev) =>
+              prev.map((i) => (i.id === id ? { ...i, badge: i.badge ? undefined : 'Pinned' } : i)),
+            )
+          }
           onItemClose={(id) => setItems((prev) => prev.filter((i) => i.id !== id))}
         />
       </div>
@@ -213,7 +219,12 @@ export const TrailingActions: Story = {
   items={items()}
   value={active()}
   onItemSelect={setActive}
-  onItemAction={(id) => rename(id)}
+  // The action does a non-select side effect (here: toggle a pin marker).
+  onItemAction={(id) =>
+    setItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, badge: i.badge ? undefined : 'Pinned' } : i)),
+    )
+  }
   onItemClose={(id) => setItems((prev) => prev.filter((i) => i.id !== id))}
 />`),
 };
