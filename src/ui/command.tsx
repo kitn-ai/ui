@@ -82,7 +82,7 @@ export function CommandList(props: CommandListProps): JSX.Element {
                       <Show when={row.shortcut}>
                         {(sc) => (
                           <span part="shortcut" class="ml-auto shrink-0 pl-3">
-                            <Kbd keys={sc()} size="sm" />
+                            <Kbd keys={sc()} platform="auto" size="sm" />
                           </span>
                         )}
                       </Show>
