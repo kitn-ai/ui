@@ -59,6 +59,15 @@ declare module 'solid-js' {
       };
       'kai-image': JSX.HTMLAttributes<HTMLElement>;
       'kai-reasoning': JSX.HTMLAttributes<HTMLElement> & { label?: string; 'default-open'?: boolean; streaming?: boolean; markdown?: boolean };
+      'kai-search': JSX.HTMLAttributes<HTMLElement> & {
+        value?: string;
+        placeholder?: string;
+        icon?: string;
+        debounce?: number;
+        loading?: boolean;
+        shortcut?: string;
+        theme?: string;
+      };
     }
   }
 }
@@ -200,6 +209,17 @@ export const PerplexityPro: Story = {
     const [view, setView] = createSignal<'home' | 'answer'>('answer');
     const [tab, setTab] = createSignal<'answer' | 'sources' | 'images'>('answer');
 
+    // The Assistant rail's session search is a real kai-search that filters the
+    // recent-sessions kai-nav live (dogfood: the input-field family drives an
+    // existing kai-nav, replacing a raw <input>).
+    const [sessionQuery, setSessionQuery] = createSignal('');
+    const filterRecents = (q: string) => {
+      const needle = q.trim().toLowerCase();
+      return needle ? RECENTS.filter((r) => (r.label ?? '').toLowerCase().includes(needle)) : RECENTS;
+    };
+    let recentsNavEl: El | undefined;
+    createEffect(() => { const items = filterRecents(sessionQuery()); if (recentsNavEl) recentsNavEl.items = items; });
+
     // Keep the answer tab-strip's underline (a controlled kai-tabs) in lock-step
     // with the `tab` signal that drives the panel - including across remounts when
     // the top mode toggles away and back.
@@ -252,13 +272,12 @@ export const PerplexityPro: Story = {
                   icon="square-pen"
                 >New Session</kai-button>
                 <kai-button variant="ghost" full align="start" icon="folder">Projects</kai-button>
-                {/* A bare search field is plain consumer markup - the kit's search
-                    lives inside kai-prompt-input / kai-command. */}
-                <input
-                  type="search"
+                {/* Session search: a real kai-search that filters the recent-sessions
+                    kai-nav below. */}
+                <kai-search
+                  ref={(el) => { el.addEventListener('kai-search', (e) => setSessionQuery((e as CustomEvent).detail.value)); }}
                   placeholder="Search sessions..."
-                  class="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
+                ></kai-search>
                 <div class="px-1 pt-1 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">Recent</div>
                 {/* The recent sessions: a real kai-nav. Selecting a row opens an
                     answer. Bounded height so the rail scrolls instead of overflowing. */}
@@ -266,7 +285,8 @@ export const PerplexityPro: Story = {
                   <kai-nav
                     ref={(el) => {
                       const n = el as El;
-                      n.items = RECENTS; n.defaultValue = 's1';
+                      recentsNavEl = n;
+                      n.items = filterRecents(sessionQuery()); n.defaultValue = 's1';
                       el.addEventListener('kai-nav-select', () => setView('answer'));
                     }}
                   ></kai-nav>
@@ -280,11 +300,7 @@ export const PerplexityPro: Story = {
                 <kai-button variant="outline" full align="start" icon="plus">New Task</kai-button>
                 <kai-nav ref={(el) => { const n = el as El; n.items = COMPUTER_NAV; n.defaultValue = 'projects'; }}></kai-nav>
                 <div class="flex items-center gap-1.5">
-                  <input
-                    type="search"
-                    placeholder="Search tasks..."
-                    class="min-w-0 flex-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
+                  <kai-search placeholder="Search tasks..." class="min-w-0 flex-1"></kai-search>
                   <kai-tooltip content="Sort">
                     <kai-button variant="ghost" size="icon-sm" icon="sliders-horizontal" label="Sort"></kai-button>
                   </kai-tooltip>
@@ -537,11 +553,7 @@ export const PerplexityPro: Story = {
                     <h1 class="text-2xl font-semibold tracking-tight">Projects</h1>
                     <kai-button variant="default" size="sm" icon="plus">New Project</kai-button>
                   </div>
-                  <input
-                    type="search"
-                    placeholder="Search Projects"
-                    class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
+                  <kai-search placeholder="Search Projects"></kai-search>
                   {/* the projects list - a REAL kai-nav: a collapsible "Your Projects"
                       group whose child rows carry a letter avatar (icon), the name
                       (label), the relative time (meta) and a Private/Public pill
@@ -573,7 +585,7 @@ export const PerplexityPro: Story = {
     <!-- ASSISTANT rail -->
     <kai-button variant="outline" icon="square-pen">New Session</kai-button>
     <kai-button variant="ghost" icon="folder">Projects</kai-button>
-    <input type="search" placeholder="Search sessions..." /> <!-- a plain search field -->
+    <kai-search placeholder="Search sessions..."></kai-search> <!-- filters the recent-sessions kai-nav -->
     <div>Recent</div>
     <kai-nav></kai-nav> <!-- ~18 recent sessions; selecting one opens an answer -->
 
