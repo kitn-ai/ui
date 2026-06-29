@@ -5,27 +5,29 @@ SSR + streaming + hydration) consuming `@kitn.ai/ui` through the typed React
 wrappers. It doubles as the compatibility test: *does the kit server-render,
 hydrate, and register cleanly on TanStack Start?*
 
-**Yes — verified end to end** (Playwright/Chromium, dev and production build):
-the `<kai-*>` tags server-render as bare tags, then on the client they register,
-hydrate, populate their shadow DOM, and dispatch events — with **no console
-errors or hydration-mismatch warnings**. One consumer-side workaround was needed
-for a packaging bug in `@kitn.ai/ui@0.17.0` (documented below).
+**Yes — verified end to end** (Playwright/Chromium, dev *and* production build):
+`<kai-button>`, `<kai-chat>` and `<kai-conversations>` server-render as bare
+tags, then on the client they register, hydrate, populate their shadow DOM, and
+dispatch events — with **no console errors and no hydration-mismatch warnings**.
+No consumer-side workarounds are needed; it's the standard TanStack Start setup.
 
 ## What it demonstrates
 
 - **SSR-safe custom elements.** The React wrappers register elements
   *client-only* (in a layout effect) and assign array/object props as live DOM
-  *properties* after hydration. So the server emits bare `<kai-button>` /
-  `<kai-chat>` tags, the client registers + populates them, and there's nothing
-  to mismatch between the two renders.
-- **A data-driven element.** `<Chat messages={…} />` — the `messages` **array**
-  is set as a JS property through the wrapper; the thread appears after
+  *properties* after hydration. So the server emits bare `<kai-*>` tags, the
+  client registers + populates them, and there's nothing to mismatch between the
+  two renders.
+- **Data-driven elements.** `<Chat messages={…} />` and
+  `<Conversations conversations={…} />` — the arrays are set as JS *properties*
+  through the wrappers; the thread and the conversation list appear after
   hydration, proving array round-tripping survives SSR.
 - **Events.** `<Button onClick={…}>` increments a counter (the element's
   `kai-click` CustomEvent wired to a React handler).
-- **Per-element registration / tree-shaking.** Importing `{ Button, Chat }` is
-  enough to register just those two — no `import '@kitn.ai/ui/elements'`
-  side-effect, and the elements you don't render aren't downloaded.
+- **Per-element registration / tree-shaking.** Importing
+  `{ Button, Chat, Conversations }` is enough to register just those — no
+  `import '@kitn.ai/ui/elements'` side-effect, and the elements you don't render
+  aren't downloaded at runtime.
 
 ## Run it
 
@@ -45,56 +47,35 @@ at npm instead, swap the `@kitn.ai/ui` dependency for a version range and
 
 ## Consumer setup notes (the parts specific to SSR)
 
-1. **Standard TanStack Start.** `vite.config.ts` is the documented setup —
-   `tanstackStart()` before `viteReact()`. Routes live in `src/routes/`,
-   `theme.css` is imported once in `__root.tsx`. No `'use client'`-style
-   directives exist or are needed — the wrappers self-guard with `typeof
-   window`.
-2. **Keep `@kitn.ai/ui` external to the SSR bundle** (the Vite default — do
-   *not* add it to `ssr.noExternal`). Its per-element registration uses
-   `import('@kitn.ai/ui/elements/<name>')`, which only runs in the browser; the
-   server just renders the bare tags.
-3. **Exclude it from the dev dependency pre-bundler** (`optimizeDeps.exclude`).
-   esbuild's optimizer doesn't run Vite plugins, so it can't see the workaround
-   in note 4; excluding it routes the package through the normal plugin pipeline.
+1. **Standard TanStack Start config.** `vite.config.ts` is the documented setup
+   — `tanstackStart()` before `viteReact()`, nothing kit-specific. Routes live
+   in `src/routes/`, and `theme.css` is imported once in `__root.tsx`.
+2. **No `'use client'`-style directive** is needed — the wrappers self-guard
+   with `typeof window`, so they're inert during SSR and only touch
+   `customElements` in the browser.
+3. **Leave `@kitn.ai/ui` external to the SSR build** (the Vite default — don't
+   add it to `ssr.noExternal`). The per-element registration uses
+   `import('@kitn.ai/ui/elements/<name>')`, which only runs in the browser, so
+   the server just renders the bare tags. Forcing it into the SSR bundle makes
+   the bundler eagerly resolve those browser-only imports for no benefit.
 
-## ⚠️ Packaging bug worked around here (`@kitn.ai/ui@0.17.0`)
+That's it — no `optimizeDeps` tweaks, no resolver shims, no per-element import
+fixups.
 
-The published `@kitn.ai/ui/react` registers each element with
-`import('@kitn.ai/ui/elements/<element-short-name>')`. For ~11 elements that
-short name **doesn't match the file shipped in `dist/elements/`**:
+## Production serving
 
-| wrapper imports `…/elements/` | actual file in `dist/elements/` |
-| --- | --- |
-| `confirm` | `confirm-card.js` |
-| `context` | `context-meter.js` |
-| `conversations` | `conversation-list.js` |
-| `resizable-item` | `resizable.js` |
-| `scope-picker` | `chat-scope-picker.js` |
-| `skills` | `message-skills.js` |
-| `sources` | `source.js` |
-| `suggestions` | `prompt-suggestions.js` |
-| `toast-region` | `toast.js` |
-| `workspace` | `chat-workspace.js` |
-| `remote` | *(no standalone file)* |
-
-The package's `"./elements/*"` export maps each specifier to a path that doesn't
-exist, so **any bundler that statically resolves dynamic-import specifiers**
-(Vite dev import-analysis, esbuild, Rollup) hard-fails the moment *any* wrapper
-is imported — `Failed to resolve import "@kitn.ai/ui/elements/conversations"`.
-This affects every Vite-based consumer (including `Conversations`, the obvious
-choice for this demo), not just TanStack Start.
-
-`vite.config.ts` includes a small `kitnElementsSubpathFix` plugin that rewrites
-the broken specifiers to the real files. **Delete it once the library ships
-matching `./elements/*` files (or corrects the wrapper subpath names).**
+Current TanStack Start `vite build` emits a portable Web-`fetch` handler at
+`dist/server/server.js` (not a Node http listener) plus the static client assets
+in `dist/client`. A real deploy picks a target (Node, Bun, a CDN/worker, …); for
+this example, [`serve.mjs`](./serve.mjs) bridges Node's http to that fetch
+handler and serves the static assets, so `npm start` runs the SSR build locally.
 
 ## Tree-shaking note
 
 At **runtime** the win holds: loading this page fetches only the chunks for the
-elements actually rendered (button, chat, and chat's transitive deps) — the
-other ~70 elements are never downloaded. But the **build** still *emits* a lazy
-chunk for every element, because the wrapper factory calls in the published
-`dist/react.js` aren't annotated `/*@__PURE__*/`, so Rollup can't prove the
-unused wrappers are side-effect-free and keeps all their `import()` split points.
-Net: good for end users, but the build output carries dead chunks.
+elements actually rendered (button, chat, conversations, and their transitive
+deps) — the other ~70 elements are never downloaded. But the **build** still
+*emits* a lazy chunk for every element, because the wrapper factory calls in the
+published `dist/react.js` aren't annotated `/*@__PURE__*/`, so Rollup can't prove
+the unused wrappers are side-effect-free and keeps all their `import()` split
+points. Net: good for end users, but the build output carries dead chunks.

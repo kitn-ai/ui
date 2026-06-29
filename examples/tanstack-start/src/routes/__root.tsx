@@ -45,7 +45,9 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
           h1 { font-size: 1.5rem; margin: 0 0 0.25rem; }
           .lede { color: var(--kai-muted-foreground, #666); margin: 0 0 1.5rem; }
           .row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; }
-          .rail { height: 26rem; border: 1px solid var(--kai-border, #e5e5e5); border-radius: 0.75rem; overflow: hidden; }
+          .panes { display: grid; grid-template-columns: 16rem 1fr; height: 28rem; border: 1px solid var(--kai-border, #e5e5e5); border-radius: 0.75rem; overflow: hidden; }
+          .panes > * { min-width: 0; min-height: 0; }
+          .pane-rail { border-right: 1px solid var(--kai-border, #e5e5e5); }
         `}</style>
       </head>
       <body>

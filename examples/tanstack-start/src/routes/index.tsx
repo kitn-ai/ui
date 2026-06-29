@@ -5,7 +5,11 @@ import { createFileRoute } from '@tanstack/react-router';
 // enough — it lazily registers its own element on the client (in a layout
 // effect), so there's no separate `import '@kitn.ai/ui/elements'` side effect
 // and the unused elements stay tree-shaken out of the bundle.
-import { Button, Chat } from '@kitn.ai/ui/react';
+//
+// `Conversations` is included on purpose: its element file ships as
+// `conversation-list.js`, and the wrapper imports it under that name. It
+// resolves natively here — no consumer-side specifier shim needed.
+import { Button, Chat, Conversations } from '@kitn.ai/ui/react';
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -39,12 +43,52 @@ const MESSAGES: ChatMessage[] = [
   },
 ];
 
+// A second data-driven element — also set as a JS *property* array.
+type Conversation = {
+  id: string;
+  title: string;
+  scope: { type: 'document' | 'collection' };
+  messageCount: number;
+  lastMessageAt: string;
+  updatedAt: string;
+};
+
+const CONVERSATIONS: Conversation[] = [
+  {
+    id: 'c-1',
+    title: 'React + web components',
+    scope: { type: 'collection' },
+    messageCount: 2,
+    lastMessageAt: '2026-06-10T15:30:00.000Z',
+    updatedAt: '2026-06-10T15:30:00.000Z',
+  },
+  {
+    id: 'c-2',
+    title: 'Centering a div',
+    scope: { type: 'collection' },
+    messageCount: 2,
+    lastMessageAt: '2026-06-09T14:20:00.000Z',
+    updatedAt: '2026-06-09T14:20:00.000Z',
+  },
+  {
+    id: 'c-3',
+    title: 'TypeScript generics',
+    scope: { type: 'collection' },
+    messageCount: 4,
+    lastMessageAt: '2026-06-08T11:05:00.000Z',
+    updatedAt: '2026-06-08T11:05:00.000Z',
+  },
+];
+
 function Home() {
   const [clicks, setClicks] = useState(0);
+  const [activeId, setActiveId] = useState('c-1');
 
   // Client-only probe: confirm the elements registered after hydration. On the
   // server this stays "registering…" (the wrappers never touch `customElements`
-  // during SSR); after hydration the layout effects define the elements.
+  // during SSR); after hydration the layout effects define the elements. We
+  // include `kai-conversations` — the previously-mis-specified one — to prove it
+  // now registers natively.
   const [registered, setRegistered] = useState<string | null>(null);
   useEffect(() => {
     let raf = 0;
@@ -52,7 +96,8 @@ function Home() {
       const ok =
         typeof customElements !== 'undefined' &&
         !!customElements.get('kai-button') &&
-        !!customElements.get('kai-chat');
+        !!customElements.get('kai-chat') &&
+        !!customElements.get('kai-conversations');
       setRegistered(ok ? 'registered' : 'registering…');
       if (!ok) raf = requestAnimationFrame(check);
     };
@@ -83,8 +128,20 @@ function Home() {
         </span>
       </div>
 
-      <div className="rail">
-        <Chat messages={MESSAGES} chatTitle="Demo thread" placeholder="Ask anything…" />
+      <div className="panes">
+        <Conversations
+          className="pane-rail"
+          groups={[]}
+          conversations={CONVERSATIONS}
+          activeId={activeId}
+          onConversationSelect={(e) => setActiveId(e.detail.id)}
+        />
+        <Chat
+          className="pane-chat"
+          messages={MESSAGES}
+          chatTitle="Demo thread"
+          placeholder="Ask anything…"
+        />
       </div>
     </main>
   );
