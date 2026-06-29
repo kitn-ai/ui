@@ -38,6 +38,16 @@ Then open:
   | `angular/` | Angular 19 | Web components via `[prop]`/`(event)` + `CUSTOM_ELEMENTS_SCHEMA` |
   | `vue/` | Vue 3 | Web components via `:prop.prop` modifier + `@event` bindings; `isCustomElement` in vite.config |
 
+- **`nextjs/`** and **`tanstack-start/`** are SSR meta-framework apps that consume
+  the kit the way a real consumer does — installed from the local repo via
+  `file:../..` (not aliased). `cd` in, `npm install`, then `npm run build`. Build
+  the kit at the repo root first.
+
+  | Directory | Framework | Kit API used |
+  |---|---|---|
+  | `nextjs/` | Next.js 15 App Router | Generated React wrappers (`@kitn.ai/ui/react`); SSR + RSC `'use client'` |
+  | `tanstack-start/` | TanStack Start | Generated React wrappers (`@kitn.ai/ui/react`); SSR + hydration |
+
 ## Why a server?
 
 `<script type="module">` is fetched with CORS semantics; a `file://` origin is

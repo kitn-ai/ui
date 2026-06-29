@@ -24,10 +24,14 @@ export default defineConfig({
   // these tests, regardless of the inherited tsconfig.
   esbuild: { jsx: 'automatic', jsxImportSource: 'react' },
   resolve: {
-    alias: {
-      '@kitn.ai/ui/react': path.resolve(dirname, 'frameworks/react/index.tsx'),
-      '@kitn.ai/ui/elements': path.resolve(dirname, 'dist/kai.es.js'),
-    },
+    alias: [
+      { find: '@kitn.ai/ui/react', replacement: path.resolve(dirname, 'frameworks/react/index.tsx') },
+      // The tree-shake wrappers lazy-import per-element subpaths
+      // (`@kitn.ai/ui/elements/<source-module>`), and setup.ts imports the bare
+      // `@kitn.ai/ui/elements`. Every element is already registered from the prebuilt
+      // bundle for the suite, so resolve BOTH forms to that same register-all bundle.
+      { find: /^@kitn\.ai\/ui\/elements(\/.*)?$/, replacement: path.resolve(dirname, 'dist/kai.es.js') },
+    ],
   },
   test: {
     name: 'react',

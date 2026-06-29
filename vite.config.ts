@@ -42,6 +42,19 @@ export default defineConfig({
       fileName: (format) => `kai.${format}.js`,
       formats: ['es'],
     },
+    // This is the register-ALL bundle: by design it must include every element's
+    // registration side effect. Rollup otherwise strips register-impl to an EMPTY
+    // module — the element registration calls carry Solid's `/*#__PURE__*/`
+    // annotations and Vite marks the element modules side-effect-free at resolve
+    // time, which beats any `treeshake.moduleSideEffects` option. Only fully
+    // disabling tree-shaking is reliable for a register-ALL entry. `allow-extension`
+    // lets the entry chunk absorb its own code instead of emitting a re-export
+    // facade, so kai.es.js itself holds the `import("./register-impl-*")` boundary
+    // (register-impl stays a lazy chunk — it must, for SSR-import safety).
+    rollupOptions: {
+      treeshake: false,
+      preserveEntrySignatures: 'allow-extension',
+    },
     emptyOutDir: true,
   },
 });

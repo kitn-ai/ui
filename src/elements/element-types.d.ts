@@ -9,6 +9,9 @@ export type { CodeHighlightingOptions } from '../primitives/highlighter';
 export declare function configureCodeHighlighting(options: CodeHighlightingOptions): void;
 export declare function isCodeHighlightingEnabled(): boolean;
 
+/** Resolves once the kai-* elements are registered (browser); inert on the server. */
+export declare const elementsReady: Promise<unknown>;
+
 export interface KaiAgentCardElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';

@@ -35,6 +35,12 @@ const manifest = JSON.parse(readFileSync(resolve(__dirname, 'src/elements/elemen
 
 const entry: Record<string, string> = {
   autoloader: resolve(__dirname, 'src/elements/autoloader.ts'),
+  // kai-remote is wrapped (React `Remote`) + exported via the `./elements/*` subpath,
+  // but it is intentionally NOT in the register-all bundle (register-impl.ts) — it's an
+  // opt-in sandboxed cross-origin iframe card. It's therefore absent from
+  // element-manifest.json (built from register-impl.ts), so build its per-element module
+  // explicitly here so `@kitn.ai/ui/elements/remote` resolves to a real dist file.
+  remote: resolve(__dirname, 'src/elements/remote.tsx'),
 };
 for (const file of Object.keys(manifest.files)) {
   for (const ext of ['tsx', 'ts']) {
