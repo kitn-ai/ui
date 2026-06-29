@@ -177,3 +177,43 @@ export const TaskRuns: Story = {
   onItemSelect={setActive}
 />`),
 };
+
+const ACTIONS: KaiNavItem[] = [
+  { id: 'auth', label: 'Refactor auth', icon: 'file-text', closable: true },
+  { id: 'land', label: 'Landing page', icon: 'file-text', action: { icon: 'pencil', label: 'Rename' } },
+  { id: 'docs', label: 'API docs', icon: 'file-text', closable: true, action: { icon: 'pencil', label: 'Rename' } },
+];
+
+/** Per-item trailing controls. `action` ({ icon, label }) renders a hover button
+ *  that fires `onItemAction`; `closable` renders a × that fires `onItemClose`.
+ *  Both are separate from the row's select — and rendered as siblings of the
+ *  item button (never nested), so they pass the a11y nested-interactive check. */
+export const TrailingActions: Story = {
+  render: () => {
+    const [value, setValue] = createSignal('auth');
+    const [items, setItems] = createSignal(ACTIONS);
+    return (
+      <div class="w-64 rounded-lg border border-border p-2">
+        <Nav
+          items={items()}
+          value={value()}
+          onItemSelect={setValue}
+          onItemAction={(id) => setValue(id)}
+          onItemClose={(id) => setItems((prev) => prev.filter((i) => i.id !== id))}
+        />
+      </div>
+    );
+  },
+  ...src(`const [items, setItems] = createSignal([
+  { id: 'auth', label: 'Refactor auth', icon: 'file-text', closable: true },
+  { id: 'land', label: 'Landing page', icon: 'file-text', action: { icon: 'pencil', label: 'Rename' } },
+]);
+
+<Nav
+  items={items()}
+  value={active()}
+  onItemSelect={setActive}
+  onItemAction={(id) => rename(id)}
+  onItemClose={(id) => setItems((prev) => prev.filter((i) => i.id !== id))}
+/>`),
+};

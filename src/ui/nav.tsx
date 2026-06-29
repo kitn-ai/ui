@@ -138,19 +138,7 @@ function NavRows(props: NavRowsProps) {
           if (!item.status?.label && !item.meta) return undefined;
           return [item.label, item.status?.label, item.meta].filter(Boolean).join(', ');
         };
-        const onClick = (e: MouseEvent) => {
-          // The trailing action/close buttons live INSIDE this row button. Solid
-          // delegates `click` to `document`, so a `stopPropagation()` on a
-          // trailing button would NOT stop this (the row/select) handler — the
-          // row would still select. Discriminate by the event target instead:
-          // if the click originated in a `[data-nav-action]` button, route it to
-          // the action/close callback and return WITHOUT running the select path.
-          const trigger = (e.target as Element | null)?.closest('[data-nav-action]');
-          if (trigger) {
-            if (trigger.getAttribute('data-nav-action') === 'close') props.onItemClose?.(item.id);
-            else props.onItemAction?.(item.id, item.action);
-            return;
-          }
+        const onClick = () => {
           if (item.disabled) return;
           if (isGroup()) props.toggle(item.id);
           else props.onItemSelect?.(item.id);
@@ -163,73 +151,89 @@ function NavRows(props: NavRowsProps) {
         };
         return (
           <>
-            <button
-              part="item"
-              type="button"
-              disabled={item.disabled}
-              aria-current={active() ? 'page' : undefined}
-              aria-expanded={isGroup() ? expanded() : undefined}
-              aria-label={ariaLabel()}
-              onClick={onClick}
-              onKeyDown={onKeyDown}
-              style={props.depth > 0 ? { 'padding-left': `${10 + props.depth * 16}px` } : undefined}
+            {/* The row is a non-interactive wrapper: the selectable item button
+                and the trailing action/close button are SIBLINGS, never nested
+                (a button inside a button is invalid HTML — browsers hoist it out
+                — and trips axe's nested-interactive). Each control owns its own
+                click, so a trailing-button click never reaches the item button's
+                select handler; no event-delegation discrimination is needed. */}
+            <div
               class={cn(
-                'group flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors',
-                'text-muted-foreground hover:bg-accent hover:text-foreground',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                'disabled:pointer-events-none disabled:opacity-50',
-                active() && 'bg-accent font-medium text-foreground',
+                'group relative flex items-center rounded-md transition-colors',
+                'hover:bg-accent',
+                active() && 'bg-accent',
+                item.disabled && 'pointer-events-none opacity-50',
               )}
             >
-              <Show
-                when={isGroup()}
-                fallback={hasGroups() ? <span class="size-4 shrink-0" aria-hidden="true" /> : null}
+              <button
+                part="item"
+                type="button"
+                disabled={item.disabled}
+                aria-current={active() ? 'page' : undefined}
+                aria-expanded={isGroup() ? expanded() : undefined}
+                aria-label={ariaLabel()}
+                onClick={onClick}
+                onKeyDown={onKeyDown}
+                style={props.depth > 0 ? { 'padding-left': `${10 + props.depth * 16}px` } : undefined}
+                class={cn(
+                  'flex min-w-0 flex-1 items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors',
+                  'text-muted-foreground group-hover:text-foreground',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'disabled:pointer-events-none',
+                  active() && 'font-medium text-foreground',
+                )}
               >
-                <span
-                  part="chevron"
-                  aria-hidden="true"
-                  class={cn('flex shrink-0 items-center opacity-60 transition-transform', expanded() && 'rotate-90')}
+                <Show
+                  when={isGroup()}
+                  fallback={hasGroups() ? <span class="size-4 shrink-0" aria-hidden="true" /> : null}
                 >
-                  <ChevronRight size={16} />
-                </span>
-              </Show>
-              <Show when={item.icon}>{renderIcon(item.icon, { class: 'size-4 shrink-0' })}</Show>
-              <span class="min-w-0 flex-1 truncate">{item.label}</span>
-              <Show when={item.status}>
-                <span part="status" class="flex shrink-0 items-center gap-1.5" aria-hidden="true">
-                  <span class="relative inline-flex">
-                    <Show when={item.status!.pulse}>
-                      <span
-                        class={cn(
-                          'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 motion-reduce:hidden',
-                          STATUS_DOT_BG[tone()],
-                        )}
-                      />
-                    </Show>
-                    <span class={cn('relative inline-block size-2 rounded-full', STATUS_DOT_BG[tone()])} />
+                  <span
+                    part="chevron"
+                    aria-hidden="true"
+                    class={cn('flex shrink-0 items-center opacity-60 transition-transform', expanded() && 'rotate-90')}
+                  >
+                    <ChevronRight size={16} />
                   </span>
-                  <Show when={item.status!.label}>
-                    <span class="text-xs text-muted-foreground">{item.status!.label}</span>
-                  </Show>
-                </span>
-              </Show>
-              <Show when={item.meta}>
-                <span part="meta" class="shrink-0 text-xs tabular-nums text-muted-foreground" aria-hidden="true">
-                  {item.meta}
-                </span>
-              </Show>
-              <Show when={item.badge}>
-                <Badge variant="default" class="px-1.5 py-0 text-[0.625rem] font-medium uppercase tracking-wide">{item.badge}</Badge>
-              </Show>
-              <Show when={item.trailing}>{renderIcon(item.trailing, { class: 'size-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-60' })}</Show>
+                </Show>
+                <Show when={item.icon}>{renderIcon(item.icon, { class: 'size-4 shrink-0' })}</Show>
+                <span class="min-w-0 flex-1 truncate">{item.label}</span>
+                <Show when={item.status}>
+                  <span part="status" class="flex shrink-0 items-center gap-1.5" aria-hidden="true">
+                    <span class="relative inline-flex">
+                      <Show when={item.status!.pulse}>
+                        <span
+                          class={cn(
+                            'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 motion-reduce:hidden',
+                            STATUS_DOT_BG[tone()],
+                          )}
+                        />
+                      </Show>
+                      <span class={cn('relative inline-block size-2 rounded-full', STATUS_DOT_BG[tone()])} />
+                    </span>
+                    <Show when={item.status!.label}>
+                      <span class="text-xs text-muted-foreground">{item.status!.label}</span>
+                    </Show>
+                  </span>
+                </Show>
+                <Show when={item.meta}>
+                  <span part="meta" class="shrink-0 text-xs tabular-nums text-muted-foreground" aria-hidden="true">
+                    {item.meta}
+                  </span>
+                </Show>
+                <Show when={item.badge}>
+                  <Badge variant="default" class="px-1.5 py-0 text-[0.625rem] font-medium uppercase tracking-wide">{item.badge}</Badge>
+                </Show>
+                <Show when={item.trailing}>{renderIcon(item.trailing, { class: 'size-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-60' })}</Show>
+              </button>
               <Show when={item.action}>
                 <button
                   part="item-action"
                   data-nav-action="action"
                   type="button"
                   aria-label={item.action!.label}
+                  onClick={() => props.onItemAction?.(item.id, item.action)}
                   class={cn(
-                    'flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground',
+                    'mr-1 flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground',
                     'opacity-0 transition-opacity hover:bg-background/70 hover:text-foreground',
                     'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     'group-hover:opacity-100',
@@ -244,8 +248,9 @@ function NavRows(props: NavRowsProps) {
                   data-nav-action="close"
                   type="button"
                   aria-label={item.label ? `Remove ${item.label}` : 'Remove'}
+                  onClick={() => props.onItemClose?.(item.id)}
                   class={cn(
-                    'flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground',
+                    'mr-1 flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground',
                     'opacity-0 transition-opacity hover:bg-background/70 hover:text-foreground',
                     'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     'group-hover:opacity-100',
@@ -254,7 +259,7 @@ function NavRows(props: NavRowsProps) {
                   {renderIcon('x', { class: 'size-4' })}
                 </button>
               </Show>
-            </button>
+            </div>
             <Show when={isGroup() && expanded()}>
               <div part="group" role="group">
                 <NavRows
