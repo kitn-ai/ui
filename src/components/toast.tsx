@@ -1,14 +1,14 @@
 import {
   createSignal, createEffect, onCleanup, on, For, Show, createMemo,
 } from 'solid-js';
-import { X, Check } from 'lucide-solid';
+import { X, Check, AlertTriangle, XCircle, Info } from 'lucide-solid';
 import { cn } from '../utils/cn';
 import { createPresence } from '../ui/overlay';
 import {
-  type ToastItem, type ToastVariant, resolveDuration,
+  type ToastItem, type ToastVariant, type ToastAppearance, resolveDuration,
 } from '../primitives/toast-store';
 
-export type { ToastItem, ToastVariant };
+export type { ToastItem, ToastVariant, ToastAppearance };
 
 /** Why a toast went away — surfaced to `onDismiss` (and the facade event). */
 export type ToastDismissReason = 'timeout' | 'close' | 'action';
@@ -27,6 +27,12 @@ export interface ToastRegionProps {
   /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style
    *  pile that expands on hover/focus). Attribute: stack. */
   stack?: 'expanded' | 'collapsed';
+  /** Region-level default appearance for toasts that don't set their own. A
+   *  per-toast `appearance` always wins. Defaults to `'pill'`. */
+  appearance?: ToastAppearance;
+  /** Region-level default inverse treatment for toasts that don't set their own.
+   *  A per-toast `inverse` always wins. Defaults to `false`. */
+  inverse?: boolean;
   /** When set, this region renders only the toasts scoped to that element and
    *  anchors over its bounds (top-center), following it on scroll/resize. Unset =
    *  the global, viewport-anchored region. */
@@ -60,6 +66,10 @@ interface ToastProps {
   /** Hold the auto-dismiss timer (the region sets this true while the whole stack
    *  is hovered/expanded, so peers don't dismiss out from under the cursor). */
   paused?: boolean;
+  /** Region-level default appearance, used when the item doesn't set its own. */
+  appearance?: ToastAppearance;
+  /** Region-level default inverse, used when the item doesn't set its own. */
+  inverse?: boolean;
 }
 
 /**
@@ -73,6 +83,18 @@ export function Toast(props: ToastProps) {
   const presence = createPresence(open);
   const variant = () => props.item.variant ?? 'neutral';
   const dismissible = () => props.item.dismissible !== false;
+  // Item-level value wins, then the region-level default, then the built-in default.
+  const appearance = (): ToastAppearance => props.item.appearance ?? props.appearance ?? 'pill';
+  const inverse = (): boolean => props.item.inverse ?? props.inverse ?? false;
+
+  // Surface + accent colors, swapped for the high-contrast inverse treatment so the
+  // toast pops on EITHER appearance, in light AND dark. The inverse surface is the
+  // foreground color, so action/close/muted text switch to the background color.
+  const surfaceClass = () =>
+    inverse() ? 'bg-foreground text-background border-transparent' : 'bg-popover text-popover-foreground border-border';
+  const mutedClass = () => (inverse() ? 'text-background/70' : 'text-muted-foreground');
+  const actionClass = () => (inverse() ? 'text-background hover:text-background/80' : 'text-primary hover:text-primary/80');
+  const closeClass = () => (inverse() ? 'text-background/70 hover:text-background' : 'text-muted-foreground hover:text-foreground');
 
   let remaining = resolveDuration(props.item);
   let startedAt = 0;
@@ -128,45 +150,107 @@ export function Toast(props: ToastProps) {
     if (!keepOpen) { clear(); reason = 'action'; setOpen(false); }
   };
 
+  // Leading variant icon — shared by both appearances. In the card it sits at the
+  // top, so nudge it down to align with the title's cap height.
+  const iconAlign = () => (appearance() === 'card' ? 'mt-0.5' : undefined);
+  const VariantIcon = () => (
+    <>
+      <Show when={variant() === 'success'}>
+        <Check class={cn('size-4 shrink-0 text-emerald-500', iconAlign())} />
+      </Show>
+      <Show when={variant() === 'warning'}>
+        <AlertTriangle class={cn('size-4 shrink-0 text-warning', iconAlign())} />
+      </Show>
+      <Show when={variant() === 'error'}>
+        <XCircle class={cn('size-4 shrink-0 text-destructive', iconAlign())} />
+      </Show>
+      <Show when={variant() === 'info'}>
+        <Info class={cn('size-4 shrink-0 text-info', iconAlign())} />
+      </Show>
+    </>
+  );
+
+  const ActionButton = (p: { class?: string }) => (
+    <Show when={props.item.action}>
+      {(action) => (
+        <button
+          type="button"
+          onClick={act}
+          class={cn(
+            appearance() === 'card'
+              ? cn(
+                  'inline-flex shrink-0 items-center rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
+                  inverse()
+                    ? 'border-background/30 text-background hover:bg-background/10'
+                    : 'border-border text-foreground hover:bg-accent',
+                )
+              : cn('shrink-0 rounded-md text-sm font-medium underline-offset-2 hover:underline', actionClass()),
+            p.class,
+          )}
+        >
+          {action().label}
+        </button>
+      )}
+    </Show>
+  );
+
+  const CloseButton = () => (
+    <Show when={dismissible()}>
+      <button
+        type="button"
+        onClick={close}
+        aria-label="Dismiss"
+        class={cn(
+          '-mr-1 flex size-5 shrink-0 items-center justify-center rounded-md transition-colors',
+          closeClass(),
+        )}
+      >
+        <X class="size-3.5" />
+      </button>
+    </Show>
+  );
+
   return (
     <Show when={presence.present()}>
       <div
         ref={presence.setRef}
         role="status"
+        data-appearance={appearance()}
+        data-inverse={inverse() ? '' : undefined}
         data-closed={presence.state() === 'closed' ? '' : undefined}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
         class={cn(
-          'pointer-events-auto flex items-center gap-3 rounded-full border px-4 py-2.5 text-sm shadow-lg',
-          'bg-popover text-popover-foreground border-border',
+          'pointer-events-auto border text-sm shadow-lg',
+          surfaceClass(),
           'animate-in fade-in-0 slide-in-from-top-4',
           'data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:slide-out-to-top-2',
+          appearance() === 'card'
+            ? 'flex min-w-[24rem] items-start gap-3 rounded-xl p-4 shadow-xl'
+            : 'flex items-center gap-3 rounded-full px-4 py-2.5',
         )}
       >
-        <Show when={variant() === 'success'}>
-          <Check class="size-4 shrink-0 text-emerald-500" />
-        </Show>
-        <span class="min-w-0 flex-1 truncate">{props.item.message}</span>
-        <Show when={props.item.action}>
-          {(action) => (
-            <button
-              type="button"
-              onClick={act}
-              class="text-primary hover:text-primary/80 shrink-0 rounded-md text-sm font-medium underline-offset-2 hover:underline"
-            >
-              {action().label}
-            </button>
-          )}
-        </Show>
-        <Show when={dismissible()}>
-          <button
-            type="button"
-            onClick={close}
-            aria-label="Dismiss"
-            class="text-muted-foreground hover:text-foreground -mr-1 flex size-5 shrink-0 items-center justify-center rounded-md transition-colors"
-          >
-            <X class="size-3.5" />
-          </button>
+        <VariantIcon />
+        <Show
+          when={appearance() === 'card'}
+          fallback={
+            <>
+              <span class="min-w-0 flex-1 truncate">{props.item.message}</span>
+              <ActionButton />
+              <CloseButton />
+            </>
+          }
+        >
+          <div class="min-w-0 flex-1">
+            <div class="font-medium leading-snug">{props.item.message}</div>
+            <Show when={props.item.description}>
+              <div class={cn('mt-1 line-clamp-2 text-xs leading-snug', mutedClass())}>
+                {props.item.description}
+              </div>
+            </Show>
+            <ActionButton class="mt-2" />
+          </div>
+          <CloseButton />
         </Show>
       </div>
     </Show>
@@ -333,7 +417,7 @@ export function ToastRegion(props: ToastRegionProps) {
             'pointer-events-none fixed z-[100] flex flex-col gap-2',
             anchor()
               ? ANCHOR_FLEX[position()]
-              : cn('max-w-[min(28rem,calc(100vw-2rem))]', POSITION_CLASSES[position()]),
+              : cn('max-w-[min(30rem,calc(100vw-2rem))]', POSITION_CLASSES[position()]),
           )}
           style={anchor() ? anchorStyle(position(), anchor()!) : undefined}
         >
@@ -341,6 +425,8 @@ export function ToastRegion(props: ToastRegionProps) {
             {(item) => (
               <Toast
                 item={item}
+                appearance={props.appearance}
+                inverse={props.inverse}
                 onDismiss={(reason) => props.onDismiss?.(item.id, reason)}
                 onAction={(label) => props.onAction?.(item.id, label)}
               />
@@ -368,7 +454,7 @@ export function ToastRegion(props: ToastRegionProps) {
             anchored edge. */}
         <div
           class="pointer-events-auto relative transition-[height] duration-200 ease-out"
-          style={{ 'min-width': '16rem', 'max-width': 'min(28rem, calc(100vw - 2rem))', height: `${stageHeight()}px` }}
+          style={{ 'min-width': '16rem', 'max-width': 'min(30rem, calc(100vw - 2rem))', height: `${stageHeight()}px` }}
         >
           <For each={visible()}>
             {(item, i) => (
@@ -385,6 +471,8 @@ export function ToastRegion(props: ToastRegionProps) {
                 <Toast
                   item={item}
                   paused={open()}
+                  appearance={props.appearance}
+                  inverse={props.inverse}
                   onDismiss={(reason) => props.onDismiss?.(item.id, reason)}
                   onAction={(label) => props.onAction?.(item.id, label)}
                 />

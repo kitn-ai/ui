@@ -41,6 +41,39 @@
   --color-accent-foreground: var(--kai-color-accent-foreground, hsl(240 5.9% 10%));
   --color-destructive: var(--kai-color-destructive, hsl(0 72% 45%));
   --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
+  /* Semantic status colors - solid fills with a legible foreground, matched to
+     the kit's tool-green / -amber / -blue hues so they read on-brand. Use
+     bg-success / bg-warning / bg-info with the matching -foreground for badges,
+     banners, and buttons; or text-success / -warning / -info on a soft tint
+     (below). destructive (above) is the danger/error member of the same family.
+     Light uses darker hues so the color carries a light foreground AND stays
+     legible as text on a pale tint; dark (see .dark) flips to brighter hues over
+     a near-black foreground. Override via --kai-color-success / -warning / -info
+     (+ -foreground). */
+  --color-success: var(--kai-color-success, hsl(142 71% 30%));
+  --color-success-foreground: var(--kai-color-success-foreground, hsl(0 0% 98%));
+  --color-warning: var(--kai-color-warning, hsl(38 92% 30%));
+  --color-warning-foreground: var(--kai-color-warning-foreground, hsl(0 0% 98%));
+  --color-info: var(--kai-color-info, hsl(217 91% 42%));
+  --color-info-foreground: var(--kai-color-info-foreground, hsl(0 0% 98%));
+  /* Soft tinted status surfaces - OPAQUE, theme-tracking fills derived as ~14% of
+     the status hue blended onto the background. Use these for subtle callouts /
+     banners instead of an eyeballed bg-success/10; pair with text-success /
+     -warning / -info / -destructive. Derived, so declared in BOTH light and dark
+     (a color-mix resolves where it's declared - see the surface tokens above). A
+     bare bg- utility for a color-mix token is added at the bottom (see bg-surface). */
+  --color-success-soft: var(--kai-color-success-soft, color-mix(in oklab, var(--color-success) 14%, var(--color-background)));
+  --color-warning-soft: var(--kai-color-warning-soft, color-mix(in oklab, var(--color-warning) 14%, var(--color-background)));
+  --color-info-soft: var(--kai-color-info-soft, color-mix(in oklab, var(--color-info) 14%, var(--color-background)));
+  --color-destructive-soft: var(--kai-color-destructive-soft, color-mix(in oklab, var(--color-destructive) 14%, var(--color-background)));
+  /* Interaction-state backgrounds - opaque, theme-tracking fills for row/control
+     states so consumers stop eyeballing /10 opacities. --color-hover is a subtle
+     neutral (a little --color-muted on the background); --color-selected is a
+     faint --color-primary tint so a selected row tracks the brand. Use bg-hover /
+     bg-selected. Derived, so declared in BOTH light and dark; bare bg- utilities
+     added at the bottom. */
+  --color-hover: var(--kai-color-hover, color-mix(in oklab, var(--color-muted) 60%, var(--color-background)));
+  --color-selected: var(--kai-color-selected, color-mix(in oklab, var(--color-primary) 8%, var(--color-background)));
   --color-border: var(--kai-color-border, hsl(240 5.9% 90%));
   --color-input: var(--kai-color-input, hsl(240 5.9% 90%));
   /* Focus ring — a deliberate blue (not a neutral) so keyboard focus is always
@@ -128,6 +161,25 @@
   --color-accent-foreground: var(--kai-color-accent-foreground, hsl(0 0% 98%));
   --color-destructive: var(--kai-color-destructive, hsl(0 62.8% 30.6%));
   --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
+  /* Semantic status colors - dark mode flips to the brighter tool-* dark hues
+     (matching the chip values) carried over a near-black foreground, so the color
+     both reads as text on a dark soft tint AND backs a legible foreground. See
+     the light @theme note. */
+  --color-success: var(--kai-color-success, hsl(142 71% 45%));
+  --color-success-foreground: var(--kai-color-success-foreground, hsl(45 4% 11%));
+  --color-warning: var(--kai-color-warning, hsl(38 92% 50%));
+  --color-warning-foreground: var(--kai-color-warning-foreground, hsl(45 4% 11%));
+  --color-info: var(--kai-color-info, hsl(217 91% 70%));
+  --color-info-foreground: var(--kai-color-info-foreground, hsl(45 4% 11%));
+  /* Soft status surfaces + interaction states - re-declared so each color-mix
+     recomputes with the DARK hues/background (a derived token resolves where it's
+     declared; see the light block for the full note). */
+  --color-success-soft: var(--kai-color-success-soft, color-mix(in oklab, var(--color-success) 14%, var(--color-background)));
+  --color-warning-soft: var(--kai-color-warning-soft, color-mix(in oklab, var(--color-warning) 14%, var(--color-background)));
+  --color-info-soft: var(--kai-color-info-soft, color-mix(in oklab, var(--color-info) 14%, var(--color-background)));
+  --color-destructive-soft: var(--kai-color-destructive-soft, color-mix(in oklab, var(--color-destructive) 14%, var(--color-background)));
+  --color-hover: var(--kai-color-hover, color-mix(in oklab, var(--color-muted) 60%, var(--color-background)));
+  --color-selected: var(--kai-color-selected, color-mix(in oklab, var(--color-primary) 8%, var(--color-background)));
   --color-border: var(--kai-color-border, hsl(45 4% 17%));
   --color-input: var(--kai-color-input, hsl(45 4% 17%));
   --color-ring: var(--kai-color-ring, hsl(217 91% 68%));
@@ -222,4 +274,29 @@
 }
 @utility bg-surface-sunken {
   background-color: var(--color-surface-sunken);
+}
+
+/* Soft-status + interaction-state utilities. Same reason as bg-surface above: a
+   color-mix-valued @theme token does NOT emit a bare `bg-` utility on its own, so
+   bg-success-soft / bg-warning-soft / bg-info-soft / bg-destructive-soft and
+   bg-hover / bg-selected are declared here. (The SOLID tokens - success / warning
+   / info + their -foreground - are plain hsl values, so bg-success / text-success
+   etc. ARE auto-generated by @theme and need no explicit utility.) */
+@utility bg-success-soft {
+  background-color: var(--color-success-soft);
+}
+@utility bg-warning-soft {
+  background-color: var(--color-warning-soft);
+}
+@utility bg-info-soft {
+  background-color: var(--color-info-soft);
+}
+@utility bg-destructive-soft {
+  background-color: var(--color-destructive-soft);
+}
+@utility bg-hover {
+  background-color: var(--color-hover);
+}
+@utility bg-selected {
+  background-color: var(--color-selected);
 }

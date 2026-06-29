@@ -213,6 +213,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
 
   it('maps each composable element to its slots/parts arrays', () => {
     expect(Object.keys(ELEMENT_COMPOSITION).sort()).toEqual([
+      'kai-agent-card',
       'kai-attachments',
       'kai-badge',
       'kai-button',
@@ -220,6 +221,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-chat',
       'kai-coachmark',
       'kai-conversations',
+      'kai-dialog',
       'kai-file-tree',
       'kai-hover-card',
       'kai-icon',
@@ -227,11 +229,17 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-message',
       'kai-nav',
       'kai-notice',
+      'kai-pane',
+      'kai-pane-group',
       'kai-progress-bar',
+      'kai-prompt-dock',
       'kai-prompt-input',
       'kai-screen',
       'kai-scroll-area',
+      'kai-segmented',
       'kai-separator',
+      'kai-setting-item',
+      'kai-settings-group',
       'kai-skeleton',
       'kai-status',
       'kai-tabs',

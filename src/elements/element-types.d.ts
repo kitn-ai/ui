@@ -9,6 +9,19 @@ export type { CodeHighlightingOptions } from '../primitives/highlighter';
 export declare function configureCodeHighlighting(options: CodeHighlightingOptions): void;
 export declare function isCodeHighlightingEnabled(): boolean;
 
+export interface KaiAgentCardElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The agent's name — the primary label. Attribute: `name`. */
+  name?: string;
+  /** Selected / focused state: highlighted border + surface. Attribute: `active`. */
+  active?: boolean;
+  /** Raise a prominent "Needs you" pill plus a glowing amber edge — the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. */
+  needsAttention?: boolean;
+  /** Run status — a JS PROPERTY (object), not an attribute. Shape: `{ tone, label?, pulse? }`, where `tone` is one of `working` | `idle` | `done` | `error` | `blocked` (maps to the kit's tool hues), `label` is an optional short string beside the dot, and `pulse` animates the dot. Set it with `el.status = { tone: 'working', label: 'Working', pulse: true }`. */
+  status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
+}
+
 export interface KaiArtifactElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
@@ -264,7 +277,7 @@ export interface KaiCoachmarkElement extends HTMLElement {
   /** Floating placement relative to the anchor (default `bottom`). */
   placement?: string;
   /** Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. */
-  tone?: "primary" | "info" | "success" | "warning" | "error";
+  tone?: "error" | "primary" | "info" | "success" | "warning";
   /** Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. */
   arrow?: boolean;
 }
@@ -376,6 +389,15 @@ export interface KaiConversationsElement extends HTMLElement {
   collapsed?: boolean;
   /** Initial collapsed state when uncontrolled (default false). Use the `default-collapsed` attribute to start collapsed in plain HTML. */
   defaultCollapsed?: boolean;
+}
+
+export interface KaiDialogElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on Escape/backdrop). Set `el.open = true`, or `<kai-dialog open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
 }
 
 export interface KaiEmbedElement extends HTMLElement {
@@ -601,7 +623,7 @@ export interface KaiNavElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. */
-  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "primary" | "info" | "success" | "warning" | "error" | "neutral"; label?: string; pulse?: boolean }; meta?: string }[];
+  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "error" | "primary" | "info" | "success" | "warning" | "neutral"; label?: string; pulse?: boolean }; meta?: string }[];
   /** Active item id (controlled). */
   value?: string;
   /** Initial active id when uncontrolled. */
@@ -614,11 +636,41 @@ export interface KaiNoticeElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). */
-  severity?: "info" | "success" | "warning" | "error" | "neutral";
+  severity?: "error" | "info" | "success" | "warning" | "neutral";
   /** Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. */
   icon?: string;
   /** Show a dismiss (×) that hides the notice and emits `kai-dismiss`. */
   dismissible?: boolean;
+}
+
+export interface KaiPaneElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). Attribute: `headline`. */
+  headline?: string;
+  /** A role / label shown under the title (e.g. "Reviewer", "claude-sonnet"). Attribute: `subtitle`. */
+  subtitle?: string;
+  /** Show the restore glyph instead of maximize, and signal the maximized view-state. Drive it yourself in response to `kai-maximize`. Attribute: `maximized`. */
+  maximized?: boolean;
+  /** Highlight the frame with a ring/border to mark the ACTIVE pane. Attribute: `focused`. */
+  focused?: boolean;
+  /** Show a split-pane window control that fires `kai-split`. Off by default. Attribute: `show-split`. */
+  showSplit?: boolean;
+  /** Show a dock-to-side window control that fires `kai-dock`. Off by default. Attribute: `show-dock`. */
+  showDock?: boolean;
+  /** A tone-colored status dot (+ optional label) in the header. An object `{ tone, label?, pulse? }` set as a JS PROPERTY (not an attribute). */
+  status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
+}
+
+export interface KaiPaneGroupElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute). */
+  tabs?: { id: string; name: string; status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean }; needsAttention?: boolean; number?: number }[];
+  /** The active tab id (controlled, and reflected to the `active` ATTRIBUTE so `::part`/`[active]` selectors and the per-tab named slot follow it). Set it as the `active` attribute or drive it from `kai-tab-change`; omit for uncontrolled (the first tab). */
+  active?: string;
+  /** Highlight the frame as the ACTIVE group in a multi-group layout. Attribute: `focused`. */
+  focused?: boolean;
 }
 
 export interface KaiPopoverElement extends HTMLElement {
@@ -647,6 +699,15 @@ export interface KaiProgressBarElement extends HTMLElement {
   label?: string;
   /** Fill color: `primary` (default), `success`, `warning`, `error`, `info`. Attribute: `tone`. */
   tone?: string;
+}
+
+export interface KaiPromptDockElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** How the tray frames the input — the SPATIAL inset axis: `inset` (default, the classic recessed frame on every side) | `edge` (top/bottom inset only; the input sits flush left/right so the lips span the full width) | `none` (no inset; the lips attach directly as a plain stack). Attribute: `frame`. */
+  frame?: "none" | "inset" | "edge";
+  /** How the tray surface looks — the VISUAL axis, orthogonal to `frame`: `soft` (default, sunken surface + border + radius) | `outlined` (transparent + border + radius) | `filled` (sunken, no border, + radius) | `plain` (bare). Attribute: `appearance`. */
+  appearance?: "outlined" | "filled" | "plain" | "soft";
 }
 
 export interface KaiPromptInputElement extends HTMLElement {
@@ -803,11 +864,40 @@ export interface KaiScrollButtonElement extends HTMLElement {
   size?: "sm" | "md" | "lg" | "icon" | "icon-sm";
 }
 
+export interface KaiSegmentedElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** The selectable segments, left to right. Set as a JS property (array). */
+  options: { value: string; label: string; icon?: undefined | string }[];
+  /** Controlled selected `value` — settable and reflected to the `value` attribute. `el.value = 'preview'` drives it; choosing a segment updates it and fires `kai-change`. Read `el.value` for live state. */
+  value?: string;
+  /** Control density: `sm` or `md`. Defaults to `md`. */
+  size?: "sm" | "md";
+}
+
 export interface KaiSeparatorElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** `horizontal` (default, block + full-width) or `vertical` (a rule inside a flex/grid row — it stretches to the row height). */
   orientation?: "vertical" | "horizontal";
+}
+
+export interface KaiSettingItemElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Row label (primary text). Attribute: `label`. */
+  label?: string;
+  /** Optional secondary description under the label. Attribute: `description`. */
+  description?: string;
+}
+
+export interface KaiSettingsGroupElement extends HTMLElement {
+  /** Color mode (`auto` follows prefers-color-scheme). */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Small section heading shown above the card. Attribute: `heading`. */
+  heading?: string;
+  /** Optional muted description under the heading. Attribute: `description`. */
+  description?: string;
 }
 
 export interface KaiSkeletonElement extends HTMLElement {
@@ -937,6 +1027,8 @@ export interface KaiTasksElement extends HTMLElement {
   defaultValue?: string[];
   /** Freeze the whole list + Confirm. Attribute: `disabled`. */
   disabled?: boolean;
+  /** Display-only: rows can't be toggled and show the default cursor (no pointer, hover, or focus affordances). Keeps the look as-is. Attribute: `readonly`. */
+  readonly?: boolean;
 }
 
 export interface KaiTextShimmerElement extends HTMLElement {
@@ -967,13 +1059,17 @@ export interface KaiToastRegionElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. */
-  toasts: { id: string; message: string; variant?: undefined | "success" | "neutral"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
+  toasts: { id: string; message: string; variant?: undefined | "error" | "info" | "success" | "warning" | "neutral"; appearance?: undefined | "pill" | "card"; inverse?: undefined | boolean; description?: undefined | string; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
   /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
   max?: number;
   /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. */
   stack?: "expanded" | "collapsed";
+  /** Default appearance for this region's toasts: `'pill'` (default, compact) | `'card'` (richer, with a description line). A per-toast `appearance` wins. Attribute: `appearance`. */
+  appearance?: "pill" | "card";
+  /** Default high-contrast inverse treatment for this region's toasts. A per-toast `inverse` wins. Off by default. Attribute: `inverse`. */
+  inverse?: boolean;
   /** Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region. */
   target?: HTMLElement;
 }
@@ -1086,6 +1182,7 @@ export interface KaiWorkspaceElement extends HTMLElement {
 
 declare global {
   interface HTMLElementTagNameMap {
+    'kai-agent-card': KaiAgentCardElement;
     'kai-artifact': KaiArtifactElement;
     'kai-attachments': KaiAttachmentsElement;
     'kai-avatar': KaiAvatarElement;
@@ -1105,6 +1202,7 @@ declare global {
     'kai-confirm': KaiConfirmElement;
     'kai-context': KaiContextElement;
     'kai-conversations': KaiConversationsElement;
+    'kai-dialog': KaiDialogElement;
     'kai-embed': KaiEmbedElement;
     'kai-empty': KaiEmptyElement;
     'kai-feedback-bar': KaiFeedbackBarElement;
@@ -1122,8 +1220,11 @@ declare global {
     'kai-model-switcher': KaiModelSwitcherElement;
     'kai-nav': KaiNavElement;
     'kai-notice': KaiNoticeElement;
+    'kai-pane': KaiPaneElement;
+    'kai-pane-group': KaiPaneGroupElement;
     'kai-popover': KaiPopoverElement;
     'kai-progress-bar': KaiProgressBarElement;
+    'kai-prompt-dock': KaiPromptDockElement;
     'kai-prompt-input': KaiPromptInputElement;
     'kai-reasoning': KaiReasoningElement;
     'kai-remote': KaiRemoteElement;
@@ -1134,7 +1235,10 @@ declare global {
     'kai-screen': KaiScreenElement;
     'kai-scroll-area': KaiScrollAreaElement;
     'kai-scroll-button': KaiScrollButtonElement;
+    'kai-segmented': KaiSegmentedElement;
     'kai-separator': KaiSeparatorElement;
+    'kai-setting-item': KaiSettingItemElement;
+    'kai-settings-group': KaiSettingsGroupElement;
     'kai-skeleton': KaiSkeletonElement;
     'kai-skills': KaiSkillsElement;
     'kai-source': KaiSourceElement;

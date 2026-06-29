@@ -78,6 +78,10 @@ Each element injects its own scoped CSS into its Shadow DOM, so the components l
 
 Inherited custom properties cross the Shadow DOM boundary, so these reach every `kai-*` element automatically. Prefer shadcn-style unprefixed `--color-*` tokens? Import `@kitn.ai/ui/theme.css` and override those instead — see [Theming](/guides/theming/) for the full token list, dark mode, and typography.
 
+<Aside type="caution" title="Tailwind v4: theme.css can override your own tokens">
+The components need no CSS import - they are shadow-isolated. Importing `theme.css` is opt-in. In a Tailwind v4 app its generic `--color-*` names merge into your `@theme` and can override your own `bg-primary`, `bg-card`, and friends (last import wins). Prefer the namespaced `--kai-color-*` tokens above (no import); if you do import `theme.css`, import it before your own token overrides.
+</Aside>
+
 ## Via CDN (no build step)
 
 Load the bundle as a self-contained ES module — no install, no bundler:

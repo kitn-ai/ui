@@ -2,14 +2,37 @@
 // Typed React wrappers for every kitn custom element. Usage:
 //   import { Message } from '@kitn.ai/ui/react';
 //   <Message message={msg} onMessageAction={(e) => …} />
-// The built bundle self-registers all kai-* custom elements — the elements import is
-// injected at build time (see vite.config.react.ts output.banner), so consumers need
-// only this one import. It is kept OUT of this .tsx source so the React typecheck
-// (tsconfig.react.json) does not walk the Solid element source under react-jsx.
-import { createWebComponent, type WebComponentProps } from './runtime';
+// Each wrapper lazy-registers ITS element on first client mount (a dynamic import
+// of '@kitn.ai/ui/elements/<name>'), so a consumer ships only the elements they use
+// — not the register-all bundle. SSR-safe: registration fires only in a client effect.
+// For eager all-registration call registerAll() or import '@kitn.ai/ui/elements'.
+import { createWebComponent, registerAll, type WebComponentProps } from './runtime';
+export { registerAll };
 export { useKaiChat } from './use-kai-chat';
 export type { UseKaiChatOptions, KaiChatController, ChatMessage } from './use-kai-chat';
 
+
+export interface AgentCardProps extends WebComponentProps {
+  /** The agent's name — the primary label. Attribute: `name`. */
+  name?: string;
+  /** Selected / focused state: highlighted border + surface. Attribute: `active`. */
+  active?: boolean;
+  /** Raise a prominent "Needs you" pill plus a glowing amber edge — the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. */
+  needsAttention?: boolean;
+  /** Run status — a JS PROPERTY (object), not an attribute. Shape: `{ tone, label?, pulse? }`, where `tone` is one of `working` | `idle` | `done` | `error` | `blocked` (maps to the kit's tool hues), `label` is an optional short string beside the dot, and `pulse` animates the dot. Set it with `el.status = { tone: 'working', label: 'Working', pulse: true }`. */
+  status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
+  /** The card was activated — clicked, or Enter / Space while focused. Promote this agent back to focus. */
+  onActivate?: (event: CustomEvent) => void;
+  /** The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). */
+  onMenu?: (event: CustomEvent) => void;
+}
+
+export const AgentCard = createWebComponent<AgentCardProps>(
+  'kai-agent-card',
+  ["theme","name","active","needsAttention","status"],
+  { onActivate: 'kai-activate', onMenu: 'kai-menu' },
+  () => import('@kitn.ai/ui/elements/agent-card'),
+);
 
 export interface ArtifactProps extends WebComponentProps {
   /** URL the preview iframe frames. Consumer-controlled. */
@@ -62,6 +85,7 @@ export const Artifact = createWebComponent<ArtifactProps>(
   'kai-artifact',
   ["theme","src","files","tab","defaultTab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath","displayUrl"],
   { onFileSelect: 'kai-file-select', onMaximizeChange: 'kai-maximize-change', onNavigate: 'kai-navigate', onTabChange: 'kai-tab-change' },
+  () => import('@kitn.ai/ui/elements/artifact'),
 );
 
 export interface AttachmentsProps extends WebComponentProps {
@@ -85,6 +109,7 @@ export const Attachments = createWebComponent<AttachmentsProps>(
   'kai-attachments',
   ["theme","items","variant","hoverCard","removable","showMediaType","emptyText"],
   { onRemove: 'kai-remove' },
+  () => import('@kitn.ai/ui/elements/attachments'),
 );
 
 export interface AvatarProps extends WebComponentProps {
@@ -102,6 +127,7 @@ export const Avatar = createWebComponent<AvatarProps>(
   'kai-avatar',
   ["theme","src","alt","fallback","size"],
   {  },
+  () => import('@kitn.ai/ui/elements/avatar'),
 );
 
 export interface BadgeProps extends WebComponentProps {
@@ -113,6 +139,7 @@ export const Badge = createWebComponent<BadgeProps>(
   'kai-badge',
   ["theme","variant"],
   {  },
+  () => import('@kitn.ai/ui/elements/badge'),
 );
 
 export interface ButtonProps extends WebComponentProps {
@@ -142,6 +169,7 @@ export const Button = createWebComponent<ButtonProps>(
   'kai-button',
   ["theme","variant","size","icon","iconTrailing","label","disabled","full","align","type"],
   { onClick: 'kai-click' },
+  () => import('@kitn.ai/ui/elements/button'),
 );
 
 export interface CardProps extends WebComponentProps {
@@ -173,6 +201,7 @@ export const Card = createWebComponent<CardProps>(
   'kai-card',
   ["theme","appearance","orientation","collapse","dense","dismissible","href","target","rel","clickable"],
   { onCardClick: 'kai-card-click', onDismiss: 'kai-dismiss' },
+  () => import('@kitn.ai/ui/elements/card'),
 );
 
 export interface CardsProps extends WebComponentProps {
@@ -190,6 +219,7 @@ export const Cards = createWebComponent<CardsProps>(
   'kai-cards',
   ["theme","cards","types","policy"],
   { onCardResolved: 'kai-card-resolved' },
+  () => import('@kitn.ai/ui/elements/cards'),
 );
 
 export interface ChainOfThoughtProps extends WebComponentProps {
@@ -209,6 +239,7 @@ export const ChainOfThought = createWebComponent<ChainOfThoughtProps>(
   'kai-chain-of-thought',
   ["theme","steps","type","value","defaultValue"],
   { onValueChange: 'kai-value-change' },
+  () => import('@kitn.ai/ui/elements/chain-of-thought'),
 );
 
 export interface ChatProps extends WebComponentProps {
@@ -290,6 +321,7 @@ export const Chat = createWebComponent<ChatProps>(
   'kai-chat',
   ["theme","messages","value","placeholder","loading","suggestions","suggestionMode","persistSuggestions","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","headerStart","headerEnd","headerFull","sidebar","empty","composer","composerActions","footer","search","voice","triggers","kindIcons","actionsReveal"],
   { onAttachmentsChange: 'kai-attachments-change', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onSearch: 'kai-search', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
+  () => import('@kitn.ai/ui/elements/chat'),
 );
 
 export interface CheckpointProps extends WebComponentProps {
@@ -309,6 +341,7 @@ export const Checkpoint = createWebComponent<CheckpointProps>(
   'kai-checkpoint',
   ["theme","label","tooltip","variant","size"],
   { onSelect: 'kai-select' },
+  () => import('@kitn.ai/ui/elements/checkpoint'),
 );
 
 export interface ChoiceProps extends WebComponentProps {
@@ -334,6 +367,7 @@ export const Choice = createWebComponent<ChoiceProps>(
   'kai-choice',
   ["theme","data","cardId","heading","resolution","value","defaultValue","disabled"],
   { onValueChange: 'kai-value-change' },
+  () => import('@kitn.ai/ui/elements/choice'),
 );
 
 export interface CoachmarkProps extends WebComponentProps {
@@ -348,7 +382,7 @@ export interface CoachmarkProps extends WebComponentProps {
   /** Floating placement relative to the anchor (default `bottom`). */
   placement?: string;
   /** Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. */
-  tone?: "primary" | "info" | "success" | "warning" | "error";
+  tone?: "error" | "primary" | "info" | "success" | "warning";
   /** Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. */
   arrow?: boolean;
   /** The × dismiss button was pressed. The consumer records that this hint was seen so it won't show again. */
@@ -361,6 +395,7 @@ export const Coachmark = createWebComponent<CoachmarkProps>(
   'kai-coachmark',
   ["theme","open","defaultOpen","headline","badge","placement","tone","arrow"],
   { onDismiss: 'kai-dismiss', onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/elements/coachmark'),
 );
 
 export interface CodeBlockProps extends WebComponentProps {
@@ -380,6 +415,7 @@ export const CodeBlock = createWebComponent<CodeBlockProps>(
   'kai-code-block',
   ["theme","code","language","codeTheme","codeHighlight","proseSize"],
   {  },
+  () => import('@kitn.ai/ui/elements/code-block'),
 );
 
 export interface CommandProps extends WebComponentProps {
@@ -401,6 +437,7 @@ export const Command = createWebComponent<CommandProps>(
   'kai-command',
   ["theme","items","placeholder","emptyLabel"],
   { onActiveChange: 'kai-active-change', onQueryChange: 'kai-query-change', onSelect: 'kai-select' },
+  () => import('@kitn.ai/ui/elements/command'),
 );
 
 export interface CompareProps extends WebComponentProps {
@@ -430,6 +467,7 @@ export const Compare = createWebComponent<CompareProps>(
   'kai-compare',
   ["theme","data","compareId","selection","layout","proseSize","codeTheme","codeHighlight"],
   { onCompareSelect: 'kai-compare-select', onError: 'kai-error', onReady: 'kai-ready' },
+  () => import('@kitn.ai/ui/elements/compare'),
 );
 
 export interface ComposerProps extends WebComponentProps {
@@ -473,6 +511,7 @@ export const Composer = createWebComponent<ComposerProps>(
   'kai-composer',
   ["theme","value","placeholder","disabled","loading","maxHeight","submitOnEnter","triggers","highlights","kindIcons"],
   { onBlur: 'kai-blur', onEntityAdd: 'kai-entity-add', onEntityRemove: 'kai-entity-remove', onFocus: 'kai-focus', onSubmit: 'kai-submit', onTrigger: 'kai-trigger', onTriggerClose: 'kai-trigger-close', onValueChange: 'kai-value-change' },
+  () => import('@kitn.ai/ui/elements/composer'),
 );
 
 export interface ConfirmProps extends WebComponentProps {
@@ -492,6 +531,7 @@ export const Confirm = createWebComponent<ConfirmProps>(
   'kai-confirm',
   ["theme","data","cardId","heading","autofocus","resolution"],
   {  },
+  () => import('@kitn.ai/ui/elements/confirm'),
 );
 
 export interface ContextProps extends WebComponentProps {
@@ -509,6 +549,7 @@ export const Context = createWebComponent<ContextProps>(
   'kai-context',
   ["theme","context","warnThreshold","dangerThreshold"],
   { onThresholdChange: 'kai-threshold-change' },
+  () => import('@kitn.ai/ui/elements/context'),
 );
 
 export interface ConversationsProps extends WebComponentProps {
@@ -538,6 +579,23 @@ export const Conversations = createWebComponent<ConversationsProps>(
   'kai-conversations',
   ["theme","groups","conversations","activeId","collapsed","defaultCollapsed"],
   { onCollapseToggle: 'kai-collapse-toggle', onConversationSelect: 'kai-conversation-select', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onToggleSidebar: 'kai-toggle-sidebar' },
+  () => import('@kitn.ai/ui/elements/conversations'),
+);
+
+export interface DialogProps extends WebComponentProps {
+  /** Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on Escape/backdrop). Set `el.open = true`, or `<kai-dialog open>`; listen for `kai-open-change`. */
+  open?: boolean;
+  /** Initial open state on mount (uncontrolled seed). */
+  defaultOpen?: boolean;
+  /** The dialog opened or closed (Escape, backdrop click, a driven `open`, or a method). */
+  onOpenChange?: (event: CustomEvent<{ open: boolean }>) => void;
+}
+
+export const Dialog = createWebComponent<DialogProps>(
+  'kai-dialog',
+  ["theme","open","defaultOpen"],
+  { onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/elements/dialog'),
 );
 
 export interface EmbedProps extends WebComponentProps {
@@ -551,6 +609,7 @@ export const Embed = createWebComponent<EmbedProps>(
   'kai-embed',
   ["theme","cardId","data"],
   {  },
+  () => import('@kitn.ai/ui/elements/embed'),
 );
 
 export interface EmptyProps extends WebComponentProps {
@@ -564,6 +623,7 @@ export const Empty = createWebComponent<EmptyProps>(
   'kai-empty',
   ["theme","emptyTitle","description"],
   {  },
+  () => import('@kitn.ai/ui/elements/empty'),
 );
 
 export interface FeedbackBarProps extends WebComponentProps {
@@ -593,6 +653,7 @@ export const FeedbackBar = createWebComponent<FeedbackBarProps>(
   'kai-feedback-bar',
   ["theme","barTitle","collectDetail","categories","detailTitle","detailPlaceholder","submitLabel","thanksMessage"],
   { onClose: 'kai-close', onFeedback: 'kai-feedback', onFeedbackDetail: 'kai-feedback-detail' },
+  () => import('@kitn.ai/ui/elements/feedback-bar'),
 );
 
 export interface FileTreeProps extends WebComponentProps {
@@ -612,6 +673,7 @@ export const FileTree = createWebComponent<FileTreeProps>(
   'kai-file-tree',
   ["theme","files","activeFile","defaultExpanded","summary"],
   { onSelect: 'kai-select' },
+  () => import('@kitn.ai/ui/elements/file-tree'),
 );
 
 export interface FileUploadProps extends WebComponentProps {
@@ -631,6 +693,7 @@ export const FileUpload = createWebComponent<FileUploadProps>(
   'kai-file-upload',
   ["theme","multiple","accept","disabled","label"],
   { onFilesAdded: 'kai-files-added' },
+  () => import('@kitn.ai/ui/elements/file-upload'),
 );
 
 export interface FormProps extends WebComponentProps {
@@ -656,6 +719,7 @@ export const Form = createWebComponent<FormProps>(
   'kai-form',
   ["theme","data","cardId","heading","resolution","values","defaultValues","disabled"],
   { onValuesChange: 'kai-values-change' },
+  () => import('@kitn.ai/ui/elements/form'),
 );
 
 export interface HoverCardProps extends WebComponentProps {
@@ -679,6 +743,7 @@ export const HoverCard = createWebComponent<HoverCardProps>(
   'kai-hover-card',
   ["theme","openDelay","closeDelay","placement","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/elements/hover-card'),
 );
 
 export interface IconProps extends WebComponentProps {
@@ -692,6 +757,7 @@ export const Icon = createWebComponent<IconProps>(
   'kai-icon',
   ["theme","name","size"],
   {  },
+  () => import('@kitn.ai/ui/elements/icon'),
 );
 
 export interface ImageProps extends WebComponentProps {
@@ -709,6 +775,7 @@ export const Image = createWebComponent<ImageProps>(
   'kai-image',
   ["theme","base64","bytes","alt","mediaType"],
   {  },
+  () => import('@kitn.ai/ui/elements/image'),
 );
 
 export interface LinkPreviewProps extends WebComponentProps {
@@ -722,6 +789,7 @@ export const LinkPreview = createWebComponent<LinkPreviewProps>(
   'kai-link-preview',
   ["theme","cardId","data"],
   {  },
+  () => import('@kitn.ai/ui/elements/link-preview'),
 );
 
 export interface LoaderProps extends WebComponentProps {
@@ -737,6 +805,7 @@ export const Loader = createWebComponent<LoaderProps>(
   'kai-loader',
   ["theme","variant","size","text"],
   {  },
+  () => import('@kitn.ai/ui/elements/loader'),
 );
 
 export interface MarkdownProps extends WebComponentProps {
@@ -754,6 +823,7 @@ export const Markdown = createWebComponent<MarkdownProps>(
   'kai-markdown',
   ["theme","content","proseSize","codeTheme","codeHighlight"],
   {  },
+  () => import('@kitn.ai/ui/elements/markdown'),
 );
 
 export interface MenuProps extends WebComponentProps {
@@ -785,6 +855,7 @@ export const Menu = createWebComponent<MenuProps>(
   'kai-menu',
   ["theme","items","placement","triggerIcon","triggerLabel","triggerIconTrailing","label","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change', onSelect: 'kai-select' },
+  () => import('@kitn.ai/ui/elements/menu'),
 );
 
 export interface MessageProps extends WebComponentProps {
@@ -818,6 +889,7 @@ export const Message = createWebComponent<MessageProps>(
   'kai-message',
   ["theme","message","role","content","markdown","proseSize","codeTheme","codeHighlight","actionsReveal","avatarSrc","avatarFallback","avatar"],
   { onMessageAction: 'kai-message-action' },
+  () => import('@kitn.ai/ui/elements/message'),
 );
 
 export interface ModelSwitcherProps extends WebComponentProps {
@@ -841,11 +913,12 @@ export const ModelSwitcher = createWebComponent<ModelSwitcherProps>(
   'kai-model-switcher',
   ["theme","models","currentModel","open","defaultOpen","disabled"],
   { onModelChange: 'kai-model-change', onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/elements/model-switcher'),
 );
 
 export interface NavProps extends WebComponentProps {
   /** The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. */
-  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "primary" | "info" | "success" | "warning" | "error" | "neutral"; label?: string; pulse?: boolean }; meta?: string }[];
+  items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "error" | "primary" | "info" | "success" | "warning" | "neutral"; label?: string; pulse?: boolean }; meta?: string }[];
   /** Active item id (controlled). */
   value?: string;
   /** Initial active id when uncontrolled. */
@@ -860,11 +933,12 @@ export const Nav = createWebComponent<NavProps>(
   'kai-nav',
   ["theme","items","value","defaultValue","defaultCollapsed"],
   { onNavSelect: 'kai-nav-select' },
+  () => import('@kitn.ai/ui/elements/nav'),
 );
 
 export interface NoticeProps extends WebComponentProps {
   /** `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). */
-  severity?: "info" | "success" | "warning" | "error" | "neutral";
+  severity?: "error" | "info" | "success" | "warning" | "neutral";
   /** Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. */
   icon?: string;
   /** Show a dismiss (×) that hides the notice and emits `kai-dismiss`. */
@@ -877,6 +951,61 @@ export const Notice = createWebComponent<NoticeProps>(
   'kai-notice',
   ["theme","severity","icon","dismissible"],
   { onDismiss: 'kai-dismiss' },
+  () => import('@kitn.ai/ui/elements/notice'),
+);
+
+export interface PaneProps extends WebComponentProps {
+  /** The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). Attribute: `headline`. */
+  headline?: string;
+  /** A role / label shown under the title (e.g. "Reviewer", "claude-sonnet"). Attribute: `subtitle`. */
+  subtitle?: string;
+  /** Show the restore glyph instead of maximize, and signal the maximized view-state. Drive it yourself in response to `kai-maximize`. Attribute: `maximized`. */
+  maximized?: boolean;
+  /** Highlight the frame with a ring/border to mark the ACTIVE pane. Attribute: `focused`. */
+  focused?: boolean;
+  /** Show a split-pane window control that fires `kai-split`. Off by default. Attribute: `show-split`. */
+  showSplit?: boolean;
+  /** Show a dock-to-side window control that fires `kai-dock`. Off by default. Attribute: `show-dock`. */
+  showDock?: boolean;
+  /** A tone-colored status dot (+ optional label) in the header. An object `{ tone, label?, pulse? }` set as a JS PROPERTY (not an attribute). */
+  status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
+  /** The close (×) control was clicked. */
+  onClose?: (event: CustomEvent) => void;
+  /** The dock control was clicked (only present when `show-dock`). */
+  onDock?: (event: CustomEvent) => void;
+  /** The maximize/restore control was clicked. `detail.maximized` is the intended NEXT state — drive the `maximized` prop yourself from it. */
+  onMaximize?: (event: CustomEvent<{ maximized: boolean }>) => void;
+  /** The split control was clicked (only present when `show-split`). */
+  onSplit?: (event: CustomEvent) => void;
+}
+
+export const Pane = createWebComponent<PaneProps>(
+  'kai-pane',
+  ["theme","headline","subtitle","maximized","focused","showSplit","showDock","status"],
+  { onClose: 'kai-close', onDock: 'kai-dock', onMaximize: 'kai-maximize', onSplit: 'kai-split' },
+  () => import('@kitn.ai/ui/elements/pane'),
+);
+
+export interface PaneGroupProps extends WebComponentProps {
+  /** The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute). */
+  tabs?: { id: string; name: string; status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean }; needsAttention?: boolean; number?: number }[];
+  /** The active tab id (controlled, and reflected to the `active` ATTRIBUTE so `::part`/`[active]` selectors and the per-tab named slot follow it). Set it as the `active` attribute or drive it from `kai-tab-change`; omit for uncontrolled (the first tab). */
+  active?: string;
+  /** Highlight the frame as the ACTIVE group in a multi-group layout. Attribute: `focused`. */
+  focused?: boolean;
+  /** A tab was selected (click, Enter/Space, or arrow-key move). `detail.id` is the tab's id. */
+  onTabChange?: (event: CustomEvent<{ id: string }>) => void;
+  /** A tab's close (×) was clicked. Drop the tab from `tabs` yourself. */
+  onTabClose?: (event: CustomEvent<{ id: string }>) => void;
+  /** A tab's "…" overflow was clicked. Open your own menu from `detail.id`. */
+  onTabMenu?: (event: CustomEvent<{ id: string }>) => void;
+}
+
+export const PaneGroup = createWebComponent<PaneGroupProps>(
+  'kai-pane-group',
+  ["theme","tabs","active","focused"],
+  { onTabChange: 'kai-tab-change', onTabClose: 'kai-tab-close', onTabMenu: 'kai-tab-menu' },
+  () => import('@kitn.ai/ui/elements/pane-group'),
 );
 
 export interface PopoverProps extends WebComponentProps {
@@ -898,6 +1027,7 @@ export const Popover = createWebComponent<PopoverProps>(
   'kai-popover',
   ["theme","placement","gutter","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/elements/popover'),
 );
 
 export interface ProgressBarProps extends WebComponentProps {
@@ -915,6 +1045,21 @@ export const ProgressBar = createWebComponent<ProgressBarProps>(
   'kai-progress-bar',
   ["theme","value","max","label","tone"],
   {  },
+  () => import('@kitn.ai/ui/elements/progress-bar'),
+);
+
+export interface PromptDockProps extends WebComponentProps {
+  /** How the tray frames the input — the SPATIAL inset axis: `inset` (default, the classic recessed frame on every side) | `edge` (top/bottom inset only; the input sits flush left/right so the lips span the full width) | `none` (no inset; the lips attach directly as a plain stack). Attribute: `frame`. */
+  frame?: "none" | "inset" | "edge";
+  /** How the tray surface looks — the VISUAL axis, orthogonal to `frame`: `soft` (default, sunken surface + border + radius) | `outlined` (transparent + border + radius) | `filled` (sunken, no border, + radius) | `plain` (bare). Attribute: `appearance`. */
+  appearance?: "outlined" | "filled" | "plain" | "soft";
+}
+
+export const PromptDock = createWebComponent<PromptDockProps>(
+  'kai-prompt-dock',
+  ["theme","frame","appearance"],
+  {  },
+  () => import('@kitn.ai/ui/elements/prompt-dock'),
 );
 
 export interface PromptInputProps extends WebComponentProps {
@@ -968,6 +1113,7 @@ export const PromptInput = createWebComponent<PromptInputProps>(
   'kai-prompt-input',
   ["theme","value","placeholder","disabled","loading","suggestions","suggestionMode","search","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
   { onAttachmentsChange: 'kai-attachments-change', onSearch: 'kai-search', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
+  () => import('@kitn.ai/ui/elements/prompt-input'),
 );
 
 export interface ReasoningProps extends WebComponentProps {
@@ -993,6 +1139,7 @@ export const Reasoning = createWebComponent<ReasoningProps>(
   'kai-reasoning',
   ["theme","text","label","open","defaultOpen","streaming","markdown","disabled"],
   { onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/elements/reasoning'),
 );
 
 export interface RemoteProps extends WebComponentProps {
@@ -1010,6 +1157,7 @@ export const Remote = createWebComponent<RemoteProps>(
   'kai-remote',
   ["theme","src","providerOrigin","envelope","policy"],
   {  },
+  () => import('@kitn.ai/ui/elements/remote'),
 );
 
 export interface ResizableProps extends WebComponentProps {
@@ -1027,6 +1175,7 @@ export const Resizable = createWebComponent<ResizableProps>(
   'kai-resizable',
   ["theme","orientation","maximizedIndex"],
   { onChange: 'kai-change', onMaximizeChange: 'kai-maximize-change' },
+  () => import('@kitn.ai/ui/elements/resizable'),
 );
 
 export interface ResizableItemProps extends WebComponentProps {
@@ -1050,6 +1199,7 @@ export const ResizableItem = createWebComponent<ResizableItemProps>(
   'kai-resizable-item',
   ["theme","size","min","max","locked","hidden","collapsed"],
   { onChange: 'kai-change', onMaximizeChange: 'kai-maximize-change' },
+  () => import('@kitn.ai/ui/elements/resizable-item'),
 );
 
 export interface ResponseStreamProps extends WebComponentProps {
@@ -1069,6 +1219,7 @@ export const ResponseStream = createWebComponent<ResponseStreamProps>(
   'kai-response-stream',
   ["theme","text","mode","speed","as"],
   { onComplete: 'kai-complete' },
+  () => import('@kitn.ai/ui/elements/response-stream'),
 );
 
 export interface ScopePickerProps extends WebComponentProps {
@@ -1094,6 +1245,7 @@ export const ScopePicker = createWebComponent<ScopePickerProps>(
   'kai-scope-picker',
   ["theme","availableAuthors","availableTags","currentLabel","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change', onScopeChange: 'kai-scope-change' },
+  () => import('@kitn.ai/ui/elements/scope-picker'),
 );
 
 export interface ScreenProps extends WebComponentProps {
@@ -1117,6 +1269,7 @@ export const Screen = createWebComponent<ScreenProps>(
   'kai-screen',
   ["theme","open","defaultOpen","headline","back","noInert"],
   { onBack: 'kai-back', onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/elements/screen'),
 );
 
 export interface ScrollAreaProps extends WebComponentProps {
@@ -1128,6 +1281,7 @@ export const ScrollArea = createWebComponent<ScrollAreaProps>(
   'kai-scroll-area',
   ["theme","orientation"],
   {  },
+  () => import('@kitn.ai/ui/elements/scroll-area'),
 );
 
 export interface ScrollButtonProps extends WebComponentProps {
@@ -1145,6 +1299,25 @@ export const ScrollButton = createWebComponent<ScrollButtonProps>(
   'kai-scroll-button',
   ["theme","for","variant","size"],
   { onScroll: 'kai-scroll' },
+  () => import('@kitn.ai/ui/elements/scroll-button'),
+);
+
+export interface SegmentedProps extends WebComponentProps {
+  /** The selectable segments, left to right. Set as a JS property (array). */
+  options: { value: string; label: string; icon?: undefined | string }[];
+  /** Controlled selected `value` — settable and reflected to the `value` attribute. `el.value = 'preview'` drives it; choosing a segment updates it and fires `kai-change`. Read `el.value` for live state. */
+  value?: string;
+  /** Control density: `sm` or `md`. Defaults to `md`. */
+  size?: "sm" | "md";
+  /** A segment was chosen. */
+  onChange?: (event: CustomEvent<{ value: string }>) => void;
+}
+
+export const Segmented = createWebComponent<SegmentedProps>(
+  'kai-segmented',
+  ["theme","options","value","size"],
+  { onChange: 'kai-change' },
+  () => import('@kitn.ai/ui/elements/segmented'),
 );
 
 export interface SeparatorProps extends WebComponentProps {
@@ -1156,6 +1329,35 @@ export const Separator = createWebComponent<SeparatorProps>(
   'kai-separator',
   ["theme","orientation"],
   {  },
+  () => import('@kitn.ai/ui/elements/separator'),
+);
+
+export interface SettingItemProps extends WebComponentProps {
+  /** Row label (primary text). Attribute: `label`. */
+  label?: string;
+  /** Optional secondary description under the label. Attribute: `description`. */
+  description?: string;
+}
+
+export const SettingItem = createWebComponent<SettingItemProps>(
+  'kai-setting-item',
+  ["theme","label","description"],
+  {  },
+  () => import('@kitn.ai/ui/elements/setting-item'),
+);
+
+export interface SettingsGroupProps extends WebComponentProps {
+  /** Small section heading shown above the card. Attribute: `heading`. */
+  heading?: string;
+  /** Optional muted description under the heading. Attribute: `description`. */
+  description?: string;
+}
+
+export const SettingsGroup = createWebComponent<SettingsGroupProps>(
+  'kai-settings-group',
+  ["theme","heading","description"],
+  {  },
+  () => import('@kitn.ai/ui/elements/settings-group'),
 );
 
 export interface SkeletonProps extends WebComponentProps {
@@ -1173,6 +1375,7 @@ export const Skeleton = createWebComponent<SkeletonProps>(
   'kai-skeleton',
   ["theme","variant","width","height","lines"],
   {  },
+  () => import('@kitn.ai/ui/elements/skeleton'),
 );
 
 export interface SkillsProps extends WebComponentProps {
@@ -1184,6 +1387,7 @@ export const Skills = createWebComponent<SkillsProps>(
   'kai-skills',
   ["theme","skills"],
   {  },
+  () => import('@kitn.ai/ui/elements/skills'),
 );
 
 export interface SourceProps extends WebComponentProps {
@@ -1203,6 +1407,7 @@ export const Source = createWebComponent<SourceProps>(
   'kai-source',
   ["theme","href","label","headline","description","showFavicon"],
   {  },
+  () => import('@kitn.ai/ui/elements/source'),
 );
 
 export interface SourcesProps extends WebComponentProps {
@@ -1218,6 +1423,7 @@ export const Sources = createWebComponent<SourcesProps>(
   'kai-sources',
   ["theme","sources","showFavicon","numbered"],
   {  },
+  () => import('@kitn.ai/ui/elements/sources'),
 );
 
 export interface StatusProps extends WebComponentProps {
@@ -1235,6 +1441,7 @@ export const Status = createWebComponent<StatusProps>(
   'kai-status',
   ["theme","status","pulse","label","size"],
   {  },
+  () => import('@kitn.ai/ui/elements/status'),
 );
 
 export interface SuggestionsProps extends WebComponentProps {
@@ -1258,6 +1465,7 @@ export const Suggestions = createWebComponent<SuggestionsProps>(
   'kai-suggestions',
   ["theme","suggestions","variant","size","layout","block","highlight"],
   { onSelect: 'kai-select' },
+  () => import('@kitn.ai/ui/elements/suggestions'),
 );
 
 export interface SwitchProps extends WebComponentProps {
@@ -1281,6 +1489,7 @@ export const Switch = createWebComponent<SwitchProps>(
   'kai-switch',
   ["theme","checked","defaultChecked","disabled","label","name","value"],
   { onChange: 'kai-change' },
+  () => import('@kitn.ai/ui/elements/switch'),
 );
 
 export interface TabsProps extends WebComponentProps {
@@ -1304,6 +1513,7 @@ export const Tabs = createWebComponent<TabsProps>(
   'kai-tabs',
   ["theme","items","value","defaultValue","variant","block","disabled"],
   { onTabChange: 'kai-tab-change' },
+  () => import('@kitn.ai/ui/elements/tabs'),
 );
 
 export interface TasksProps extends WebComponentProps {
@@ -1321,14 +1531,17 @@ export interface TasksProps extends WebComponentProps {
   defaultValue?: string[];
   /** Freeze the whole list + Confirm. Attribute: `disabled`. */
   disabled?: boolean;
+  /** Display-only: rows can't be toggled and show the default cursor (no pointer, hover, or focus affordances). Keeps the look as-is. Attribute: `readonly`. */
+  readonly?: boolean;
   /** The selection changed on a toggle — the selected ids in input order. */
   onValueChange?: (event: CustomEvent<{ value: string[] }>) => void;
 }
 
 export const Tasks = createWebComponent<TasksProps>(
   'kai-tasks',
-  ["theme","data","cardId","heading","resolution","value","defaultValue","disabled"],
+  ["theme","data","cardId","heading","resolution","value","defaultValue","disabled","readonly"],
   { onValueChange: 'kai-value-change' },
+  () => import('@kitn.ai/ui/elements/tasks'),
 );
 
 export interface TextShimmerProps extends WebComponentProps {
@@ -1346,6 +1559,7 @@ export const TextShimmer = createWebComponent<TextShimmerProps>(
   'kai-text-shimmer',
   ["theme","text","as","duration","spread"],
   {  },
+  () => import('@kitn.ai/ui/elements/text-shimmer'),
 );
 
 export interface ThinkingBarProps extends WebComponentProps {
@@ -1363,17 +1577,22 @@ export const ThinkingBar = createWebComponent<ThinkingBarProps>(
   'kai-thinking-bar',
   ["theme","text","stoppable","stopLabel"],
   { onStop: 'kai-stop' },
+  () => import('@kitn.ai/ui/elements/thinking-bar'),
 );
 
 export interface ToastRegionProps extends WebComponentProps {
   /** The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. */
-  toasts: { id: string; message: string; variant?: undefined | "success" | "neutral"; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
+  toasts: { id: string; message: string; variant?: undefined | "error" | "info" | "success" | "warning" | "neutral"; appearance?: undefined | "pill" | "card"; inverse?: undefined | boolean; description?: undefined | string; action?: undefined | { label: string; onAction: () => void | false }; duration?: undefined | number; dismissible?: undefined | boolean; target?: undefined | HTMLElement }[];
   /** Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … */
   position?: "top-center" | "top-right" | "top-left" | "bottom-center" | "bottom-right" | "bottom-left";
   /** Max simultaneously-visible toasts; the rest queue. Defaults to `3`. */
   max?: number;
   /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. */
   stack?: "expanded" | "collapsed";
+  /** Default appearance for this region's toasts: `'pill'` (default, compact) | `'card'` (richer, with a description line). A per-toast `appearance` wins. Attribute: `appearance`. */
+  appearance?: "pill" | "card";
+  /** Default high-contrast inverse treatment for this region's toasts. A per-toast `inverse` wins. Off by default. Attribute: `inverse`. */
+  inverse?: boolean;
   /** Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region. */
   target?: HTMLElement;
   /** A toast's action button was pressed. */
@@ -1384,8 +1603,9 @@ export interface ToastRegionProps extends WebComponentProps {
 
 export const ToastRegion = createWebComponent<ToastRegionProps>(
   'kai-toast-region',
-  ["theme","toasts","position","max","stack","target"],
+  ["theme","toasts","position","max","stack","appearance","inverse","target"],
   { onAction: 'kai-action', onDismiss: 'kai-dismiss' },
+  () => import('@kitn.ai/ui/elements/toast-region'),
 );
 
 export interface ToolProps extends WebComponentProps {
@@ -1405,6 +1625,7 @@ export const Tool = createWebComponent<ToolProps>(
   'kai-tool',
   ["theme","tool","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/elements/tool'),
 );
 
 export interface TooltipProps extends WebComponentProps {
@@ -1430,6 +1651,7 @@ export const Tooltip = createWebComponent<TooltipProps>(
   'kai-tooltip',
   ["theme","content","openDelay","closeDelay","placement","open","defaultOpen","disabled"],
   { onOpenChange: 'kai-open-change' },
+  () => import('@kitn.ai/ui/elements/tooltip'),
 );
 
 export interface VoiceInputProps extends WebComponentProps {
@@ -1455,6 +1677,7 @@ export const VoiceInput = createWebComponent<VoiceInputProps>(
   'kai-voice-input',
   ["theme","transcribe","disabled","recognitionLang","interim"],
   { onAudioCaptured: 'kai-audio-captured', onRecordingChange: 'kai-recording-change', onTranscriptInterim: 'kai-transcript-interim', onTranscription: 'kai-transcription' },
+  () => import('@kitn.ai/ui/elements/voice-input'),
 );
 
 export interface VoiceOutputProps extends WebComponentProps {
@@ -1476,6 +1699,7 @@ export const VoiceOutput = createWebComponent<VoiceOutputProps>(
   'kai-voice-output',
   ["theme","text","autoplay","synthesize","disabled"],
   { onSpeakingChange: 'kai-speaking-change', onSynthesized: 'kai-synthesized' },
+  () => import('@kitn.ai/ui/elements/voice-output'),
 );
 
 export interface WorkspaceProps extends WebComponentProps {
@@ -1548,4 +1772,5 @@ export const Workspace = createWebComponent<WorkspaceProps>(
   'kai-workspace',
   ["theme","groups","conversations","activeId","messages","value","placeholder","loading","suggestions","suggestionMode","proseSize","codeTheme","codeHighlight","chatTitle","models","currentModel","context","scrollButton","search","voice","triggers","kindIcons","sidebarWidth","sidebarMinWidth","sidebarMaxWidth","sidebarCollapsed","defaultSidebarCollapsed","collapseBelow","compact","noConversations"],
   { onConversationSelect: 'kai-conversation-select', onMessageAction: 'kai-message-action', onModelChange: 'kai-model-change', onNewChat: 'kai-new-chat', onSearch: 'kai-search', onSidebarToggle: 'kai-sidebar-toggle', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
+  () => import('@kitn.ai/ui/elements/workspace'),
 );

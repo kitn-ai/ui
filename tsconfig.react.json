@@ -9,7 +9,12 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@kitn.ai/ui/elements": ["./tests/react/elements-stub.d.ts"],
+      "@kitn.ai/ui/elements/*": ["./tests/react/elements-stub.d.ts"]
+    }
   },
   "include": ["frameworks/**/*.tsx"]
 }

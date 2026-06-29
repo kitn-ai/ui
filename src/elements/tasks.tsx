@@ -20,6 +20,9 @@ interface Props extends Record<string, unknown> {
   defaultValue?: string[];
   /** Freeze the whole list + Confirm. Attribute: `disabled`. */
   disabled?: boolean;
+  /** Display-only: rows can't be toggled and show the default cursor (no pointer,
+   *  hover, or focus affordances). Keeps the look as-is. Attribute: `readonly`. */
+  readonly?: boolean;
 }
 
 /** Events fired by `<kai-tasks>`. (Resolution still flows up the bubbling `kai-card`
@@ -57,6 +60,7 @@ defineWebComponent<Props, Events>(
     value: undefined,
     defaultValue: undefined,
     disabled: false,
+    readonly: false,
   },
   (props, { element, dispatch, flag, expose }) => {
     // Pattern C: the TasksCard component owns the selection set + confirm gating and
@@ -88,6 +92,7 @@ defineWebComponent<Props, Events>(
         value={props.value as string[] | undefined}
         defaultValue={props.defaultValue as string[] | undefined}
         disabled={flag('disabled')}
+        readonly={flag('readonly')}
         onValueChange={(payload) => dispatch('kai-value-change', payload)}
         controllerRef={(c) => (controller = c)}
         hostElement={element}

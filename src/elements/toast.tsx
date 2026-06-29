@@ -1,5 +1,5 @@
 import { defineWebComponent } from './define';
-import { ToastRegion, type ToastDismissReason, type ToastPosition } from '../components/toast';
+import { ToastRegion, type ToastDismissReason, type ToastPosition, type ToastAppearance } from '../components/toast';
 import { toast as toastStore, type ToastItem } from '../primitives/toast-store';
 
 interface Props extends Record<string, unknown> {
@@ -13,6 +13,13 @@ interface Props extends Record<string, unknown> {
   /** Stacking: 'expanded' (default, full column) | 'collapsed' (Sonner-style
    *  pile that expands on hover/focus). Attribute: stack. */
   stack?: 'expanded' | 'collapsed';
+  /** Default appearance for this region's toasts: `'pill'` (default, compact) |
+   *  `'card'` (richer, with a description line). A per-toast `appearance` wins.
+   *  Attribute: `appearance`. */
+  appearance?: ToastAppearance;
+  /** Default high-contrast inverse treatment for this region's toasts. A per-toast
+   *  `inverse` wins. Off by default. Attribute: `inverse`. */
+  inverse?: boolean;
   /** Container element to anchor this region to (JS property). Set by the store
    *  for a scoped region; unset = the global viewport region. */
   target?: HTMLElement;
@@ -35,14 +42,20 @@ interface Events {
  *
  * Because it is a real `kai-*` element it carries its own shadow root + the
  * shared kit stylesheet, so it is viewport-positioned AND kit-styled.
+ *
+ * Stack-level defaults are also declarative: `<kai-toast-region appearance="card"
+ * inverse>` makes every toast that doesn't set its own `appearance`/`inverse`
+ * render as an inverted card. A per-toast value always wins.
  */
 defineWebComponent<Props, Events>('kai-toast-region', {
   toasts: [],
   position: 'top-center',
   max: 3,
   stack: 'expanded',
+  appearance: 'pill',
+  inverse: false,
   target: undefined,
-}, (props, { dispatch }) => {
+}, (props, { dispatch, flag }) => {
   // `max` may arrive as a string attribute (`<kai-toast-region max="2">`).
   const max = () => {
     const raw = props.max as unknown;
@@ -63,6 +76,8 @@ defineWebComponent<Props, Events>('kai-toast-region', {
       position={props.position}
       max={max()}
       stack={props.stack as 'expanded' | 'collapsed' | undefined}
+      appearance={props.appearance as ToastAppearance | undefined}
+      inverse={flag('inverse')}
       target={props.target as HTMLElement | undefined}
       onDismiss={(id, reason) => {
         remove(id);

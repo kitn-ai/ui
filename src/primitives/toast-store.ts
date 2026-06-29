@@ -16,12 +16,20 @@ import { createRoot, createSignal } from 'solid-js';
 import { createStore, produce } from 'solid-js/store';
 import type { ToastPosition } from '../components/toast';
 
-export type ToastVariant = 'neutral' | 'success';
+export type ToastVariant = 'neutral' | 'success' | 'warning' | 'error' | 'info';
+/** Visual treatment: `'pill'` (default, compact single-line) or `'card'` (richer
+ *  rounded card with an optional description line). */
+export type ToastAppearance = 'pill' | 'card';
 
 export interface ToastConfig {
   stack?: 'expanded' | 'collapsed';
   position?: ToastPosition;
   max?: number;
+  /** Default appearance for imperatively-raised toasts. Defaults to `'pill'`. */
+  appearance?: ToastAppearance;
+  /** Default high-contrast inverse treatment for imperatively-raised toasts.
+   *  Defaults to `false`. */
+  inverse?: boolean;
 }
 
 // Module-level config the imperative singleton regions inherit. Defaults match
@@ -33,6 +41,11 @@ function applyConfig(el: HTMLElement): void {
   if (toastConfig.stack) el.setAttribute('stack', toastConfig.stack);
   if (toastConfig.position) el.setAttribute('position', toastConfig.position);
   if (toastConfig.max !== undefined) el.setAttribute('max', String(toastConfig.max));
+  if (toastConfig.appearance) el.setAttribute('appearance', toastConfig.appearance);
+  if (toastConfig.inverse !== undefined) {
+    if (toastConfig.inverse) el.setAttribute('inverse', '');
+    else el.removeAttribute('inverse');
+  }
 }
 
 /**
@@ -59,6 +72,15 @@ export interface ToastItem {
   id: string;
   message: string;
   variant?: ToastVariant;
+  /** Visual treatment: `'pill'` (default, compact single-line) or `'card'` (richer
+   *  rounded card with an optional description line). */
+  appearance?: ToastAppearance;
+  /** High-contrast inverse surface — works on either appearance, popping in light
+   *  AND dark. Defaults to `false`. */
+  inverse?: boolean;
+  /** Secondary line shown below the message in the `'card'` appearance. The
+   *  `'pill'` appearance ignores it. */
+  description?: string;
   action?: ToastAction;
   /** Auto-dismiss delay in ms. `0` = sticky (never auto-dismisses). When an
    *  `action` is present the effective floor is 4000ms so it stays long enough
@@ -77,6 +99,13 @@ export interface ToastItem {
 export interface ToastOptions {
   id?: string;
   variant?: ToastVariant;
+  /** Visual treatment: `'pill'` (default) or `'card'`. Falls back to the value set
+   *  via `configureToasts`, then `'pill'`. */
+  appearance?: ToastAppearance;
+  /** High-contrast inverse surface. Falls back to `configureToasts`, then `false`. */
+  inverse?: boolean;
+  /** Secondary line shown below the message in the `'card'` appearance. */
+  description?: string;
   action?: ToastAction;
   duration?: number;
   dismissible?: boolean;
@@ -193,6 +222,9 @@ function raise(message: string, opts: ToastOptions | undefined, variant: ToastVa
     id,
     message,
     variant: opts?.variant ?? variant,
+    appearance: opts?.appearance ?? toastConfig.appearance ?? 'pill',
+    inverse: opts?.inverse ?? toastConfig.inverse ?? false,
+    description: opts?.description,
     action: opts?.action,
     duration: opts?.duration,
     dismissible: opts?.dismissible,
@@ -204,8 +236,14 @@ function raise(message: string, opts: ToastOptions | undefined, variant: ToastVa
 
 export interface ToastFn {
   (message: string, opts?: ToastOptions): ToastHandle;
-  /** Raise a success (emerald check) toast. */
+  /** Raise a success (green check) toast. */
   success: (message: string, opts?: ToastOptions) => ToastHandle;
+  /** Raise a warning (amber) toast — e.g. an agent needs your input. */
+  warning: (message: string, opts?: ToastOptions) => ToastHandle;
+  /** Raise an error (destructive/red) toast — e.g. an agent failed. */
+  error: (message: string, opts?: ToastOptions) => ToastHandle;
+  /** Raise an info (blue) toast. */
+  info: (message: string, opts?: ToastOptions) => ToastHandle;
   /** Dismiss a toast by id. */
   dismiss: (id: string) => void;
   /** Dismiss every active toast. */
@@ -226,6 +264,9 @@ export const toast: ToastFn = Object.assign(
   (message: string, opts?: ToastOptions) => raise(message, opts, 'neutral'),
   {
     success: (message: string, opts?: ToastOptions) => raise(message, opts, 'success'),
+    warning: (message: string, opts?: ToastOptions) => raise(message, opts, 'warning'),
+    error: (message: string, opts?: ToastOptions) => raise(message, opts, 'error'),
+    info: (message: string, opts?: ToastOptions) => raise(message, opts, 'info'),
     dismiss,
     clear: () => setToasts([]),
   },

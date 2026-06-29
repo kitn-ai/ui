@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 66 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 74 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable primitives** (`import { … } from '@kitn.ai/ui'`):
-All 66 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 74 elements are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -99,7 +99,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Full element reference (all 66 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Full element reference (all 74 elements, every prop/event): ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Machine-readable Custom Elements Manifest: https://unpkg.com/@kitn.ai/ui/dist/custom-elements.json
 - Working examples: https://github.com/kitn-ai/ui/tree/main/examples
 - Storybook: https://storybook.kitn.dev
@@ -173,9 +173,36 @@ The same rule applies to every array/object property (`models`, `context`, `sugg
 
 ---
 
-## Element reference (66 elements, generated from custom-elements.json)
+## Element reference (74 elements, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
+
+### `kai-agent-card` / `AgentCard`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `name` | `name` | `undefined \| string` | The agent's name — the primary label. Attribute: `name`. |
+| `active` | `active` | `undefined \| false \| true` | Selected / focused state: highlighted border + surface. Attribute: `active`. |
+| `needsAttention` | `needs-attention` | `undefined \| false \| true` | Raise a prominent "Needs you" pill plus a glowing amber edge — the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. |
+| `status` | — | `undefined \| { tone: "working" \| "idle" \| "done" \| "error" \| "blocked"; label?: undefined \| string; pulse?: undefined \| false \| true }` | Run status — a JS PROPERTY (object), not an attribute. Shape: `{ tone, label?, pulse? }`, where `tone` is one of `working` \| `idle` \| `done` \| `error` \| `blocked` (maps to the kit's tool hues), `label` is an optional short string beside the dot, and `pulse` animates the dot. Set it with `el.status = { tone: 'working', label: 'Working', pulse: true }`. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-activate` | `CustomEvent` | The card was activated — clicked, or Enter / Space while focused. Promote this agent back to focus. |
+| `kai-menu` | `CustomEvent` | The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). |
+
+**Styleable parts** (restyle from outside via `kai-agent-card::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(status)` | The leading tone-colored status dot. — `kai-agent-card::part(status) { width: 0.625rem; height: 0.625rem }` |
+| `::part(menu)` | The trailing overflow ("...") menu button. — `kai-agent-card::part(menu) { opacity: 1 }` |
+
+---
 
 ### `kai-artifact` / `Artifact`
 
@@ -516,7 +543,7 @@ _No events._
 | `headline` | `headline` | `undefined \| string` | The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). |
 | `badge` | `badge` | `undefined \| string` | A small badge pill beside the headline (e.g. "New"). |
 | `placement` | `placement` | `undefined \| string` | Floating placement relative to the anchor (default `bottom`). |
-| `tone` | `tone` | `undefined \| "primary" \| "info" \| "success" \| "warning" \| "error"` | Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. |
+| `tone` | `tone` | `undefined \| "error" \| "primary" \| "info" \| "success" \| "warning"` | Color tone: `primary` (default, theme accent), `info` (blue), `success` (green), `warning` (amber), or `error` (red) — reusing the kit's tool hues. |
 | `arrow` | `arrow` | `undefined \| false \| true` | Render the arrow that points at the anchor (default `true`). Set `arrow="false"` for a plain bubble with no pointer. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
@@ -704,6 +731,40 @@ _No events._
 | Part | Description |
 |---|---|
 | `::part(trailing)` | The right-aligned trailing text on each conversation row (a count, status, or relative time). Set it per item via the `trailing` field; otherwise a short auto relative time is derived from `updatedAt`. Recolor or resize it from outside. — `kai-conversations::part(trailing) { color: var(--color-primary); font-variant-numeric: tabular-nums }` |
+
+---
+
+### `kai-dialog` / `Dialog`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `open` | `open` | `undefined \| false \| true` | Drive/observe open state (Shoelace-style: settable + reflected to the `open` attribute; the element still self-manages on Escape/backdrop). Set `el.open = true`, or `<kai-dialog open>`; listen for `kai-open-change`. |
+| `defaultOpen` | `default-open` | `undefined \| false \| true` | Initial open state on mount (uncontrolled seed). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-open-change` | `CustomEvent<{ open: false \| true }>` | The dialog opened or closed (Escape, backdrop click, a driven `open`, or a method). |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `header` | inject | Optional title region at the top of the panel. |
+| `footer` | inject | Optional actions region at the bottom of the panel. |
+
+**Styleable parts** (restyle from outside via `kai-dialog::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(backdrop)` | The full-area scrim behind the panel. Restyle its color/blur. — `kai-dialog::part(backdrop) { background: rgb(0 0 0 / 0.6) }` |
+| `::part(panel)` | The centered modal panel. Restyle width, radius, padding. — `kai-dialog::part(panel) { max-width: 32rem }` |
+| `::part(body)` | The scrolling content region (the default slot). — `kai-dialog::part(body) { padding: 1.25rem }` |
+| `::part(header)` | Optional title region at the top of the panel. |
+| `::part(footer)` | Optional actions region at the bottom of the panel. |
 
 ---
 
@@ -1031,7 +1092,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `items` | — | `undefined \| { id: string; label?: undefined \| string; icon?: undefined \| string; badge?: undefined \| string; trailing?: undefined \| string; disabled?: undefined \| false \| true; children?: undefined \| Record<string, unknown>[]; status?: undefined \| { tone: "primary" \| "info" \| "success" \| "warning" \| "error" \| "neutral"; label?: undefined \| string; pulse?: undefined \| false \| true }; meta?: undefined \| string }[]` | The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. |
+| `items` | — | `undefined \| { id: string; label?: undefined \| string; icon?: undefined \| string; badge?: undefined \| string; trailing?: undefined \| string; disabled?: undefined \| false \| true; children?: undefined \| Record<string, unknown>[]; status?: undefined \| { tone: "error" \| "primary" \| "info" \| "success" \| "warning" \| "neutral"; label?: undefined \| string; pulse?: undefined \| false \| true }; meta?: undefined \| string }[]` | The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. |
 | `value` | `value` | `undefined \| string` | Active item id (controlled). |
 | `defaultValue` | `default-value` | `undefined \| string` | Initial active id when uncontrolled. |
 | `defaultCollapsed` | — | `undefined \| string[]` | Ids of group items collapsed on first render (groups default to expanded). Set as a JS property (array). |
@@ -1061,7 +1122,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `severity` | `severity` | `undefined \| "info" \| "success" \| "warning" \| "error" \| "neutral"` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
+| `severity` | `severity` | `undefined \| "error" \| "info" \| "success" \| "warning" \| "neutral"` | `neutral` (default) · `info` · `warning` · `error` · `success`. Drives the leading icon's color and the a11y role (`alert` for errors, else `status`). |
 | `icon` | `icon` | `undefined \| string` | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
 | `dismissible` | `dismissible` | `undefined \| false \| true` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
 
@@ -1077,6 +1138,78 @@ _No events._
 |---|---|---|
 | `action` | inject | A trailing action beside the message — a link or button. |
 | `icon` | replace | A custom leading icon (any inline SVG, inherits `currentColor`). Overrides the severity default and the `icon` prop — the same escape hatch as `kai-button`. |
+
+---
+
+### `kai-pane` / `Pane`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `headline` | `headline` | `undefined \| string` | The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). Attribute: `headline`. |
+| `subtitle` | `subtitle` | `undefined \| string` | A role / label shown under the title (e.g. "Reviewer", "claude-sonnet"). Attribute: `subtitle`. |
+| `maximized` | `maximized` | `undefined \| false \| true` | Show the restore glyph instead of maximize, and signal the maximized view-state. Drive it yourself in response to `kai-maximize`. Attribute: `maximized`. |
+| `focused` | `focused` | `undefined \| false \| true` | Highlight the frame with a ring/border to mark the ACTIVE pane. Attribute: `focused`. |
+| `showSplit` | `show-split` | `undefined \| false \| true` | Show a split-pane window control that fires `kai-split`. Off by default. Attribute: `show-split`. |
+| `showDock` | `show-dock` | `undefined \| false \| true` | Show a dock-to-side window control that fires `kai-dock`. Off by default. Attribute: `show-dock`. |
+| `status` | — | `undefined \| { tone: "working" \| "idle" \| "done" \| "error" \| "blocked"; label?: undefined \| string; pulse?: undefined \| false \| true }` | A tone-colored status dot (+ optional label) in the header. An object `{ tone, label?, pulse? }` set as a JS PROPERTY (not an attribute). |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-close` | `CustomEvent` | The close (×) control was clicked. |
+| `kai-dock` | `CustomEvent` | The dock control was clicked (only present when `show-dock`). |
+| `kai-maximize` | `CustomEvent<{ maximized: false \| true }>` | The maximize/restore control was clicked. `detail.maximized` is the intended NEXT state — drive the `maximized` prop yourself from it. |
+| `kai-split` | `CustomEvent` | The split control was clicked (only present when `show-split`). |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `leading` | inject | A glyph or avatar at the start of the pane header. |
+| `actions` | inject | Extra header controls, before the built-in window controls. |
+| `footer` | inject | A pinned row below the body (e.g. a composer). |
+
+**Styleable parts** (restyle from outside via `kai-pane::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(header)` | The pane header bar (leading + title/status + actions + window controls). — `kai-pane::part(header) { padding-inline: 0.75rem }` |
+| `::part(body)` | The scrolling body region (the default slot). — `kai-pane::part(body) { padding: 1rem }` |
+| `::part(controls)` | The window-control cluster (maximize/close, and split/dock when enabled). — `kai-pane::part(controls) { gap: 0.25rem }` |
+| `::part(footer)` | A pinned row below the body (e.g. a composer). |
+
+---
+
+### `kai-pane-group` / `PaneGroup`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `tabs` | — | `undefined \| { id: string; name: string; status?: undefined \| { tone: "working" \| "idle" \| "done" \| "error" \| "blocked"; label?: undefined \| string; pulse?: undefined \| false \| true }; needsAttention?: undefined \| false \| true; number?: undefined \| number }[]` | The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute). |
+| `active` | `active` | `undefined \| string` | The active tab id (controlled, and reflected to the `active` ATTRIBUTE so `::part`/`[active]` selectors and the per-tab named slot follow it). Set it as the `active` attribute or drive it from `kai-tab-change`; omit for uncontrolled (the first tab). |
+| `focused` | `focused` | `undefined \| false \| true` | Highlight the frame as the ACTIVE group in a multi-group layout. Attribute: `focused`. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-tab-change` | `CustomEvent<{ id: string }>` | A tab was selected (click, Enter/Space, or arrow-key move). `detail.id` is the tab's id. |
+| `kai-tab-close` | `CustomEvent<{ id: string }>` | A tab's close (×) was clicked. Drop the tab from `tabs` yourself. |
+| `kai-tab-menu` | `CustomEvent<{ id: string }>` | A tab's "…" overflow was clicked. Open your own menu from `detail.id`. |
+
+**Styleable parts** (restyle from outside via `kai-pane-group::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(tabs)` | The tab strip (role="tablist"). Restyle its background, height, padding, or gap from outside. — `kai-pane-group::part(tabs) { background: var(--color-card); gap: 0.25rem }` |
+| `::part(tab)` | A single tab button. The active tab carries `[aria-selected="true"]`; target `::part(tab)[aria-selected="true"]` for the selected look. — `kai-pane-group::part(tab)[aria-selected="true"] { background: var(--color-accent) }` |
+| `::part(body)` | The active tab's content region (the named/default slot host). — `kai-pane-group::part(body) { padding: 0.75rem }` |
+| `::part(menu)` | The per-tab "…" overflow button. Reveal it on hover or pin it visible from outside. — `kai-pane-group::part(menu) { opacity: 1 }` |
+| `::part(close)` | The per-tab close ("×") button. Recolor, resize, or hide it from outside. — `kai-pane-group::part(close) { color: var(--color-muted-foreground) }` |
 
 ---
 
@@ -1119,6 +1252,34 @@ _No events._
 |---|---|
 | `::part(track)` | The progress track (the background bar). Restyle its height, radius, or background from outside. — `kai-progress-bar::part(track) { height: 0.5rem }` |
 | `::part(fill)` | The filled portion; its width follows value/max. Recolor it from outside. — `kai-progress-bar::part(fill) { background: var(--color-tool-green) }` |
+
+---
+
+### `kai-prompt-dock` / `PromptDock`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `frame` | `frame` | `undefined \| "none" \| "inset" \| "edge"` | How the tray frames the input — the SPATIAL inset axis: `inset` (default, the classic recessed frame on every side) \| `edge` (top/bottom inset only; the input sits flush left/right so the lips span the full width) \| `none` (no inset; the lips attach directly as a plain stack). Attribute: `frame`. |
+| `appearance` | `appearance` | `undefined \| "outlined" \| "filled" \| "plain" \| "soft"` | How the tray surface looks — the VISUAL axis, orthogonal to `frame`: `soft` (default, sunken surface + border + radius) \| `outlined` (transparent + border + radius) \| `filled` (sunken, no border, + radius) \| `plain` (bare). Attribute: `appearance`. |
+
+_No events._
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `top` | inject | The top lip: a notice or banner above the input. Rendered only when filled. |
+| `bottom` | inject | The bottom lip: a mode or controls row below the input. Rendered only when filled. |
+
+**Styleable parts** (restyle from outside via `kai-prompt-dock::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(tray)` | The recessed tray that frames the input. The `appearance`/`frame` props set the defaults; the --kai-prompt-dock-* tokens fine-tune surface/border/radius/inset. — `kai-prompt-dock::part(tray) { --kai-prompt-dock-radius: 1rem }` |
+| `::part(top)` | The top lip: a notice or banner above the input. Rendered only when filled. |
+| `::part(bottom)` | The bottom lip: a mode or controls row below the input. Rendered only when filled. |
 
 ---
 
@@ -1363,6 +1524,31 @@ _No events._
 
 ---
 
+### `kai-segmented` / `Segmented`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `options` | — | `{ value: string; label: string; icon?: undefined \| string }[]` | The selectable segments, left to right. Set as a JS property (array). |
+| `value` | `value` | `undefined \| string` | Controlled selected `value` — settable and reflected to the `value` attribute. `el.value = 'preview'` drives it; choosing a segment updates it and fires `kai-change`. Read `el.value` for live state. |
+| `size` | `size` | `undefined \| "sm" \| "md"` | Control density: `sm` or `md`. Defaults to `md`. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-change` | `CustomEvent<{ value: string }>` | A segment was chosen. |
+
+**Styleable parts** (restyle from outside via `kai-segmented::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(track)` | The segmented track (the pill container holding the segments). Restyle its background, radius, or padding. — `kai-segmented::part(track) { border-radius: 9999px }` |
+| `::part(segment)` | Each segment button. Restyle padding, font weight, or the selected look. — `kai-segmented::part(segment) { font-weight: 600 }` |
+
+---
+
 ### `kai-separator` / `Separator`
 
 **Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
@@ -1378,6 +1564,52 @@ _No events._
 | Part | Description |
 |---|---|
 | `::part(separator)` | The divider line. Restyle its color, thickness, or inset from outside. — `kai-separator::part(separator) { background: var(--color-border) }` |
+
+---
+
+### `kai-setting-item` / `SettingItem`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `label` | `label` | `undefined \| string` | Row label (primary text). Attribute: `label`. |
+| `description` | `description` | `undefined \| string` | Optional secondary description under the label. Attribute: `description`. |
+
+_No events._
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| `control` | inject | The row control (a switch, segmented, select, etc.), right-aligned. Omit it for a label-only row. |
+
+**Styleable parts** (restyle from outside via `kai-setting-item::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(label)` | The label + description block on the left of the row. Restyle its typography or spacing. — `kai-setting-item::part(label) { gap: 0.125rem }` |
+| `::part(control)` | The row control (a switch, segmented, select, etc.), right-aligned. Omit it for a label-only row. |
+
+---
+
+### `kai-settings-group` / `SettingsGroup`
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `heading` | `heading` | `undefined \| string` | Small section heading shown above the card. Attribute: `heading`. |
+| `description` | `description` | `undefined \| string` | Optional muted description under the heading. Attribute: `description`. |
+
+_No events._
+
+**Styleable parts** (restyle from outside via `kai-settings-group::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(header)` | The group heading + description block. Restyle its spacing or typography. — `kai-settings-group::part(header) { margin-bottom: 0.75rem }` |
+| `::part(body)` | The bordered card holding the setting rows. Restyle its surface, border, or radius. — `kai-settings-group::part(body) { border-radius: 1rem }` |
 
 ---
 
@@ -1548,6 +1780,7 @@ _No events._
 | `value` | — | `undefined \| string[]` | Controlled selection (task ids; JS property). When set, it wins over local state. |
 | `defaultValue` | — | `undefined \| string[]` | Uncontrolled initial selection (task ids; JS property), overlaying per-task `checked`. |
 | `disabled` | `disabled` | `undefined \| false \| true` | Freeze the whole list + Confirm. Attribute: `disabled`. |
+| `readonly` | `readonly` | `undefined \| false \| true` | Display-only: rows can't be toggled and show the default cursor (no pointer, hover, or focus affordances). Keeps the look as-is. Attribute: `readonly`. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):
 
@@ -1596,10 +1829,12 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `toasts` | — | `{ id: string; message: string; variant?: undefined \| "success" \| "neutral"; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true; target?: undefined \| HTMLElement }[]` | The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. |
+| `toasts` | — | `{ id: string; message: string; variant?: undefined \| "error" \| "info" \| "success" \| "warning" \| "neutral"; appearance?: undefined \| "pill" \| "card"; inverse?: undefined \| false \| true; description?: undefined \| string; action?: undefined \| { label: string; onAction: () => void \| false }; duration?: undefined \| number; dismissible?: undefined \| false \| true; target?: undefined \| HTMLElement }[]` | The toasts to render. Newest is shown on top. Set as a JS property (array); pass a new array reference to update. |
 | `position` | `position` | `undefined \| "top-center" \| "top-right" \| "top-left" \| "bottom-center" \| "bottom-right" \| "bottom-left"` | Stack anchor: `'top-center'` (default), `'top-right'`, `'bottom-center'`, … |
 | `max` | `max` | `undefined \| number` | Max simultaneously-visible toasts; the rest queue. Defaults to `3`. |
 | `stack` | `stack` | `undefined \| "expanded" \| "collapsed"` | Stacking: 'expanded' (default, full column) \| 'collapsed' (Sonner-style pile that expands on hover/focus). Attribute: stack. |
+| `appearance` | `appearance` | `undefined \| "pill" \| "card"` | Default appearance for this region's toasts: `'pill'` (default, compact) \| `'card'` (richer, with a description line). A per-toast `appearance` wins. Attribute: `appearance`. |
+| `inverse` | `inverse` | `undefined \| false \| true` | Default high-contrast inverse treatment for this region's toasts. A per-toast `inverse` wins. Off by default. Attribute: `inverse`. |
 | `target` | — | `undefined \| HTMLElement` | Container element to anchor this region to (JS property). Set by the store for a scoped region; unset = the global viewport region. |
 
 **Events** (non-bubbling `CustomEvent`s — listen directly on the element):

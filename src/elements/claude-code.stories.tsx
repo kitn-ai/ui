@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show } from 'solid-js';
 import { Asterisk, Sparkles, Download } from 'lucide-solid';
+import { PromptDock } from '../ui/prompt-dock';
 import './register'; // every kai-* element used below
 import type { KaiNavItem } from '../ui/nav';
 import type { KaiTabItem } from '../ui/tabs';
@@ -108,6 +109,8 @@ const ONBOARDING = {
 const greeting = 'flex items-center gap-2 font-serif font-normal';
 const mainView = 'flex h-full flex-col items-center gap-6';
 const footerRow = 'border-t border-border';
+// A bordered control pill for the dock's bottom mode row (neutral / muted).
+const dockPill = 'inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground';
 
 // A labeled placeholder for a region the consumer owns. It names the slot it
 // fills so the prototype documents the shell instead of faking app content. An
@@ -130,6 +133,8 @@ export const ClaudeCode: Story = {
     const [view, setView] = createSignal<'home' | 'code'>('home');
     const [designOpen, setDesignOpen] = createSignal(false);
     const [cmdOpen, setCmdOpen] = createSignal(false);
+    // Drives the dock's top notice lip; the lip's dismiss control clears it.
+    const [noticeOpen, setNoticeOpen] = createSignal(true);
     // Captured in the workspace ref so the sidebar-header toggle can drive its
     // exposed imperative API (toggleSidebar) from a sibling element's ref.
     let ws: El | undefined;
@@ -217,28 +222,55 @@ export const ClaudeCode: Story = {
                   <Asterisk class="size-7 text-[#d97757]" /> Good day, mate
                 </h1>
                 <div class="flex w-full max-w-[660px] flex-col gap-3">
-                  <kai-notice ref={(el) => { (el as El).dismissible = true; }}>Claude Fable 5 is currently unavailable.<a slot="action" href="#" class="text-foreground underline">Learn more</a></kai-notice>
-                  <kai-prompt-input ref={(el) => { (el as El).attach = false; }} placeholder="How can I help you today?">
-                    <div slot="toolbar-start" class="flex items-center gap-2">
-                      <kai-menu ref={(el) => { (el as El).items = [{ id: 'attach', label: 'Add files', icon: 'paperclip' }, { id: 'project', label: 'From a project', icon: 'box' }]; }} trigger-icon="plus" label="Add"></kai-menu>
-                      <kai-coachmark
-                        default-open
-                        headline="Cowork has a new home"
-                        badge="New"
-                        style={{ '--kai-coachmark-bg': 'var(--color-tool-blue)', '--kai-coachmark-fg': 'var(--color-background)' }}
-                      >
-                        <kai-button variant="subtle" size="sm" icon="workflow">Cowork</kai-button>
-                        <span slot="content">Chat with Claude here, or switch to Cowork to build alongside it.</span>
-                      </kai-coachmark>
-                    </div>
-                    <div slot="toolbar-end" class="flex items-center gap-1.5">
-                      <kai-model-switcher ref={(el) => { const m = el as El; m.models = MODELS; m.currentModel = 'opus'; }}></kai-model-switcher>
-                      <kai-menu ref={(el) => { (el as El).items = [{ id: 'high', label: 'High', checked: true }, { id: 'med', label: 'Medium' }]; }} trigger-label="High" trigger-icon-trailing="chevron-down"></kai-menu>
-                      <kai-tooltip content="Voice">
-                        <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice"></kai-button>
-                      </kai-tooltip>
-                    </div>
-                  </kai-prompt-input>
+                  <PromptDock
+                    frame="inset"
+                    appearance="filled"
+                    top={noticeOpen() ? (
+                      // Top lip: an attention notice. A subtle amber (warning)
+                      // tint sets it apart from the neutral bottom controls.
+                      <div class="flex items-center gap-2 text-tool-amber">
+                        <span>Claude Fable 5 is currently unavailable.</span>
+                        <a href="#" class="font-medium underline underline-offset-2 hover:opacity-80">Learn more</a>
+                        <button
+                          type="button"
+                          aria-label="Dismiss notice"
+                          onClick={() => setNoticeOpen(false)}
+                          class="ml-auto rounded p-0.5 text-muted-foreground opacity-70 transition-opacity hover:text-foreground hover:opacity-100"
+                        >✕</button>
+                      </div>
+                    ) : undefined}
+                    bottom={
+                      // Bottom lip: a mode row. Neutral / muted controls on the
+                      // left, a muted usage hint trailing right.
+                      <div class="flex items-center gap-2">
+                        <button type="button" class={dockPill}>Project or folder ▾</button>
+                        <button type="button" class={dockPill}>Ask ▾</button>
+                        <span class="ml-auto text-xs text-muted-foreground">⚡ 2× more usage until July 5</span>
+                      </div>
+                    }
+                  >
+                    <kai-prompt-input ref={(el) => { (el as El).attach = false; }} placeholder="How can I help you today?">
+                      <div slot="toolbar-start" class="flex items-center gap-2">
+                        <kai-menu ref={(el) => { (el as El).items = [{ id: 'attach', label: 'Add files', icon: 'paperclip' }, { id: 'project', label: 'From a project', icon: 'box' }]; }} trigger-icon="plus" label="Add"></kai-menu>
+                        <kai-coachmark
+                          default-open
+                          headline="Cowork has a new home"
+                          badge="New"
+                          style={{ '--kai-coachmark-bg': 'var(--color-tool-blue)', '--kai-coachmark-fg': 'var(--color-background)' }}
+                        >
+                          <kai-button variant="subtle" size="sm" icon="workflow">Cowork</kai-button>
+                          <span slot="content">Chat with Claude here, or switch to Cowork to build alongside it.</span>
+                        </kai-coachmark>
+                      </div>
+                      <div slot="toolbar-end" class="flex items-center gap-1.5">
+                        <kai-model-switcher ref={(el) => { const m = el as El; m.models = MODELS; m.currentModel = 'opus'; }}></kai-model-switcher>
+                        <kai-menu ref={(el) => { (el as El).items = [{ id: 'high', label: 'High', checked: true }, { id: 'med', label: 'Medium' }]; }} trigger-label="High" trigger-icon-trailing="chevron-down"></kai-menu>
+                        <kai-tooltip content="Voice">
+                          <kai-button variant="subtle" size="icon-sm" icon="mic" label="Voice"></kai-button>
+                        </kai-tooltip>
+                      </div>
+                    </kai-prompt-input>
+                  </PromptDock>
                   <div class="mt-2 text-[0.8125rem] text-muted-foreground">Ideas for you</div>
                   <kai-suggestions ref={(el) => { const s = el as El; s.suggestions = IDEAS; s.layout = 'list'; }} variant="ghost" size="lg"></kai-suggestions>
                 </div>

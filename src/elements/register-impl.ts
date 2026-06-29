@@ -76,3 +76,13 @@ import './composer';
 import './menu';
 // W4 phase 1: grouped filterable command/mention palette
 import './command';
+// Prompt dock + settings building blocks (graduated from SolidJS prototypes)
+import './prompt-dock';
+import './segmented';
+import './settings-group';
+import './setting-item';
+// Multi-agent workspace primitives (graduated from SolidJS prototypes)
+import './pane';
+import './pane-group';
+import './agent-card';
+import './dialog';

@@ -431,6 +431,80 @@ export interface ElementComposition {
   parts?: PartDef[];
 }
 
+/** Slots + styleable `::part`s of `<kai-prompt-dock>`. */
+export const PROMPT_DOCK_SLOTS: SlotDef[] = [
+  { name: 'top',    mode: 'inject', part: true, doc: 'The top lip: a notice or banner above the input. Rendered only when filled.' },
+  { name: 'bottom', mode: 'inject', part: true, doc: 'The bottom lip: a mode or controls row below the input. Rendered only when filled.' },
+];
+export const PROMPT_DOCK_PARTS: PartDef[] = [
+  {
+    name: 'tray',
+    doc: 'The recessed tray that frames the input. The `appearance`/`frame` props set the defaults; the --kai-prompt-dock-* tokens fine-tune surface/border/radius/inset.',
+    recipe: 'kai-prompt-dock::part(tray) { --kai-prompt-dock-radius: 1rem }',
+  },
+];
+
+/** Styleable `::part`s of `<kai-segmented>`. */
+export const SEGMENTED_PARTS: PartDef[] = [
+  { name: 'track', doc: 'The segmented track (the pill container holding the segments). Restyle its background, radius, or padding.', recipe: 'kai-segmented::part(track) { border-radius: 9999px }' },
+  { name: 'segment', doc: 'Each segment button. Restyle padding, font weight, or the selected look.', recipe: 'kai-segmented::part(segment) { font-weight: 600 }' },
+];
+
+/** Styleable `::part`s of `<kai-settings-group>`. */
+export const SETTINGS_GROUP_PARTS: PartDef[] = [
+  { name: 'header', doc: 'The group heading + description block. Restyle its spacing or typography.', recipe: 'kai-settings-group::part(header) { margin-bottom: 0.75rem }' },
+  { name: 'body', doc: 'The bordered card holding the setting rows. Restyle its surface, border, or radius.', recipe: 'kai-settings-group::part(body) { border-radius: 1rem }' },
+];
+
+/** Slots + styleable `::part`s of `<kai-setting-item>`. */
+export const SETTING_ITEM_SLOTS: SlotDef[] = [
+  { name: 'control', mode: 'inject', part: true, doc: 'The row control (a switch, segmented, select, etc.), right-aligned. Omit it for a label-only row.' },
+];
+export const SETTING_ITEM_PARTS: PartDef[] = [
+  { name: 'label', doc: 'The label + description block on the left of the row. Restyle its typography or spacing.', recipe: 'kai-setting-item::part(label) { gap: 0.125rem }' },
+];
+
+/** Slots + styleable `::part`s of `<kai-pane>` (the editor-group pane frame). */
+export const PANE_SLOTS: SlotDef[] = [
+  { name: 'leading', mode: 'inject', doc: 'A glyph or avatar at the start of the pane header.' },
+  { name: 'actions', mode: 'inject', doc: 'Extra header controls, before the built-in window controls.' },
+  { name: 'footer', mode: 'inject', part: true, doc: 'A pinned row below the body (e.g. a composer).' },
+];
+export const PANE_PARTS: PartDef[] = [
+  { name: 'header', doc: 'The pane header bar (leading + title/status + actions + window controls).', recipe: 'kai-pane::part(header) { padding-inline: 0.75rem }' },
+  { name: 'body', doc: 'The scrolling body region (the default slot).', recipe: 'kai-pane::part(body) { padding: 1rem }' },
+  { name: 'controls', doc: 'The window-control cluster (maximize/close, and split/dock when enabled).', recipe: 'kai-pane::part(controls) { gap: 0.25rem }' },
+];
+
+/** Styleable `::part`s of `<kai-agent-card>`. */
+export const AGENT_CARD_PARTS: PartDef[] = [
+  { name: 'status', doc: 'The leading tone-colored status dot.', recipe: 'kai-agent-card::part(status) { width: 0.625rem; height: 0.625rem }' },
+  { name: 'menu', doc: 'The trailing overflow ("...") menu button.', recipe: 'kai-agent-card::part(menu) { opacity: 1 }' },
+];
+
+/** Slots + styleable `::part`s of `<kai-dialog>` (the centered modal). */
+export const DIALOG_SLOTS: SlotDef[] = [
+  { name: 'header', mode: 'inject', part: true, doc: 'Optional title region at the top of the panel.' },
+  { name: 'footer', mode: 'inject', part: true, doc: 'Optional actions region at the bottom of the panel.' },
+];
+export const DIALOG_PARTS: PartDef[] = [
+  { name: 'backdrop', doc: 'The full-area scrim behind the panel. Restyle its color/blur.', recipe: 'kai-dialog::part(backdrop) { background: rgb(0 0 0 / 0.6) }' },
+  { name: 'panel', doc: 'The centered modal panel. Restyle width, radius, padding.', recipe: 'kai-dialog::part(panel) { max-width: 32rem }' },
+  { name: 'body', doc: 'The scrolling content region (the default slot).', recipe: 'kai-dialog::part(body) { padding: 1.25rem }' },
+];
+
+/** Styleable `::part`s of `<kai-pane-group>` (the editor group: a tab strip over
+ *  the active tab's pane). The per-tab content slots are NAMED DYNAMICALLY by tab
+ *  id (`slot="<tab id>"`) plus a default slot, so they are not enumerable here —
+ *  only the styleable parts are registered. */
+export const PANE_GROUP_PARTS: PartDef[] = [
+  { name: 'tabs', doc: 'The tab strip (role="tablist"). Restyle its background, height, padding, or gap from outside.', recipe: 'kai-pane-group::part(tabs) { background: var(--color-card); gap: 0.25rem }' },
+  { name: 'tab', doc: 'A single tab button. The active tab carries `[aria-selected="true"]`; target `::part(tab)[aria-selected="true"]` for the selected look.', recipe: 'kai-pane-group::part(tab)[aria-selected="true"] { background: var(--color-accent) }' },
+  { name: 'body', doc: 'The active tab\'s content region (the named/default slot host).', recipe: 'kai-pane-group::part(body) { padding: 0.75rem }' },
+  { name: 'menu', doc: 'The per-tab "…" overflow button. Reveal it on hover or pin it visible from outside.', recipe: 'kai-pane-group::part(menu) { opacity: 1 }' },
+  { name: 'close', doc: 'The per-tab close ("×") button. Recolor, resize, or hide it from outside.', recipe: 'kai-pane-group::part(close) { color: var(--color-muted-foreground) }' },
+];
+
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS },
@@ -456,6 +530,14 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-coachmark': { slots: COACHMARK_SLOTS, parts: COACHMARK_PARTS },
   'kai-progress-bar': { parts: PROGRESS_BAR_PARTS },
   'kai-file-tree': { parts: FILE_TREE_PARTS },
+  'kai-prompt-dock': { slots: PROMPT_DOCK_SLOTS, parts: PROMPT_DOCK_PARTS },
+  'kai-segmented': { parts: SEGMENTED_PARTS },
+  'kai-settings-group': { parts: SETTINGS_GROUP_PARTS },
+  'kai-setting-item': { slots: SETTING_ITEM_SLOTS, parts: SETTING_ITEM_PARTS },
+  'kai-pane': { slots: PANE_SLOTS, parts: PANE_PARTS },
+  'kai-pane-group': { parts: PANE_GROUP_PARTS },
+  'kai-agent-card': { parts: AGENT_CARD_PARTS },
+  'kai-dialog': { slots: DIALOG_SLOTS, parts: DIALOG_PARTS },
 };
 
 /**

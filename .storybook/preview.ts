@@ -131,6 +131,7 @@ const preview: Preview = {
           'Components',
           ['Overview', 'Elements', 'Primitives'],
           'Labs',
+          ['Apps', ['*', 'AMUX'], '*'],
           'Test Fixtures',
           '*',
         ],
