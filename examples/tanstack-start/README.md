@@ -32,18 +32,21 @@ No consumer-side workarounds are needed; it's the standard TanStack Start setup.
 ## Run it
 
 ```bash
-npm install        # installs the vendored tarball in ./vendor + TanStack Start
+npm install        # resolves @kitn.ai/ui from the local repo + TanStack Start
 npm run dev        # SSR dev server on http://localhost:3000
 npm run build      # production client + server build → dist/
 npm start          # serve the production build (node serve.mjs) on :3000
 npm run typecheck
 ```
 
-The library is installed from a local tarball pinned in
-[`./vendor`](./vendor) via a relative `file:` dependency, so the example is
-self-contained and reproduces the exact build it was tested against. To point it
-at npm instead, swap the `@kitn.ai/ui` dependency for a version range and
-`npm install`.
+This example consumes the local `@kitn.ai/ui` via `file:../..`. Build the kit
+first from the repo root (`npm run build`), then `npm install` here.
+(Post-monorepo this becomes `workspace:*`; once the register-all fix is
+published you can pin the npm semver instead.)
+
+`.npmrc` sets `install-links=true` so npm **packs** the kit into a real
+`node_modules/@kitn.ai/ui` copy instead of symlinking the repo — the same layout
+a real `npm install` from the registry yields.
 
 ## Consumer setup notes (the parts specific to SSR)
 

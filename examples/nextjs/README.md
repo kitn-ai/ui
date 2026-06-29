@@ -91,11 +91,16 @@ wrapper registers its own element on mount (browser-only) — no separate
   `import '@kitn.ai/ui/elements/button'` and render the `<kai-button>` tag
   yourself.
 
-## Pinned to a local build
+## Consuming the local kit
 
-This example installs `@kitn.ai/ui` from a vendored tarball
-(`vendor/kitn-stable.tgz`, a `0.17.0` build off the `fix/elements-register-treeshake`
-branch) rather than npm, because the wrapper fix (per-element registration
-specifiers + the `'use client'` banner + the `remote` element) is not on npm yet.
-Once it's published, replace the dependency with the published semver
-(`"@kitn.ai/ui": "^0.17.x"`) and delete `vendor/`.
+This example consumes the local `@kitn.ai/ui` via `file:../..`. Build the kit
+first from the repo root (`npm run build`), then `npm install` here.
+(Post-monorepo this becomes `workspace:*`; once the register-all fix is
+published you can pin the npm semver instead.)
+
+`.npmrc` sets `install-links=true` so npm **packs** the kit into a real
+`node_modules/@kitn.ai/ui` copy instead of symlinking the repo. Next.js/webpack
+follows symlinks to their realpath, which would put the kit's prebuilt `dist/`
+*outside* `node_modules` — Next would then try to transpile it and choke on the
+minified Shiki chunk. A packed copy is also what a real `npm install` from the
+registry yields, so the example stays faithful to real consumption.
