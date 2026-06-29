@@ -7,6 +7,7 @@ import {
   type DropdownController,
 } from '../ui/dropdown';
 import { renderIcon } from '../ui/icon';
+import { Kbd } from '../ui/kbd';
 import { cn } from '../utils/cn';
 import { defineWebComponent } from './define';
 import { wireDisclosure } from './disclosure';
@@ -90,7 +91,7 @@ interface Events {
  *   const menu = document.querySelector('kai-menu');
  *   menu.items = [
  *     { heading: true, label: 'Actions' },
- *     { id: 'attach', label: 'Add files', icon: 'paperclip', shortcut: '⌘U' },
+ *     { id: 'attach', label: 'Add files', icon: 'paperclip', shortcut: 'Mod+U' },
  *   ];
  *   menu.addEventListener('kai-select', (e) => console.log(e.detail));
  * </script>
@@ -173,8 +174,8 @@ defineWebComponent<Props, Events>('kai-menu', {
               <Show when={item.icon}>{renderIcon(item.icon, { imgClass: 'mr-2 size-4 shrink-0', spanClass: 'mr-2 flex h-4 w-4 shrink-0 items-center justify-center text-sm' })}</Show>
               {item.label}
               <Show when={item.shortcut}>
-                <span class="ml-auto pl-4 text-xs tracking-widest text-muted-foreground">
-                  {item.shortcut}
+                <span part="shortcut" class="ml-auto pl-4 text-muted-foreground">
+                  <Kbd keys={item.shortcut!} platform="auto" size="sm" />
                 </span>
               </Show>
             </DropdownItem>

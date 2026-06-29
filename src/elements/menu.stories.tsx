@@ -43,7 +43,7 @@ function PlusMenuDemo() {
       id: 'add-files',
       label: 'Add files or photos',
       icon: 'paperclip',
-      shortcut: '⌘U',
+      shortcut: 'Mod+U',
     },
     {
       id: 'add-github',
@@ -113,7 +113,7 @@ export const PlusMenu: Story = {
   // Items, including submenus, separators, and checkboxes, are a JS property.
   menu.items = [
     { heading: true, label: 'Actions' },
-    { id: 'add-files', label: 'Add files or photos', icon: 'paperclip', shortcut: '⌘U' },
+    { id: 'add-files', label: 'Add files or photos', icon: 'paperclip', shortcut: 'Mod+U' },
     { label: 'Skills', icon: 'sparkles', items: [
       { id: 'skill-creator', label: 'skill-creator', icon: 'sparkles' },
     ] },
