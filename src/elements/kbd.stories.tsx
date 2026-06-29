@@ -12,7 +12,7 @@ declare module 'solid-js' {
 }
 
 const meta: Meta = {
-  title: 'Labs/Elements/Kbd',
+  title: 'Labs/Foundations/Kbd',
 };
 export default meta;
 
