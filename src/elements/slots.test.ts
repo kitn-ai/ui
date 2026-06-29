@@ -220,6 +220,7 @@ describe('ELEMENT_COMPOSITION registry (single source of truth the build extract
       'kai-card',
       'kai-chat',
       'kai-coachmark',
+      'kai-command',
       'kai-conversations',
       'kai-dialog',
       'kai-editable-label',

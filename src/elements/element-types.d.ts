@@ -301,7 +301,7 @@ export interface KaiCommandElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: 'light' | 'dark' | 'auto';
   /** Flat list of items. Set as a JS property — not an HTML attribute. */
-  items?: { id: string; label: string; icon?: string; description?: string; group?: string }[];
+  items?: { id: string; label: string; icon?: string; description?: string; shortcut?: string; group?: string }[];
   /** Placeholder text for the search input. */
   placeholder?: string;
   /** Label shown when no items match the current query. */

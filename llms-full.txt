@@ -593,7 +593,7 @@ _No events._
 
 | Property | Attribute | Type | Description |
 |---|---|---|---|
-| `items` | — | `undefined \| { id: string; label: string; icon?: undefined \| string; description?: undefined \| string; group?: undefined \| string }[]` | Flat list of items. Set as a JS property — not an HTML attribute. |
+| `items` | — | `undefined \| { id: string; label: string; icon?: undefined \| string; description?: undefined \| string; shortcut?: undefined \| string; group?: undefined \| string }[]` | Flat list of items. Set as a JS property — not an HTML attribute. |
 | `placeholder` | `placeholder` | `undefined \| string` | Placeholder text for the search input. |
 | `emptyLabel` | `empty-label` | `undefined \| string` | Label shown when no items match the current query. |
 
@@ -604,6 +604,12 @@ _No events._
 | `kai-active-change` | `CustomEvent<{ id: undefined \| string }>` | Fired when the highlighted/active item changes — via Arrow keys or when filtering re-clamps the active row. `id` is the newly active item's id, or `undefined` when no item is active (e.g. the filtered list is empty). Lets a host preview the active item without committing a selection. |
 | `kai-query-change` | `CustomEvent<{ value: string }>` | Fired on every keystroke in the search input. |
 | `kai-select` | `CustomEvent<{ id: string }>` | Fired when the user selects an item (click or Enter). |
+
+**Styleable parts** (restyle from outside via `kai-command::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(shortcut)` | The right-aligned per-row keyboard shortcut, rendered as kai-kbd key caps. Shown only when a row carries a `shortcut`. — `kai-command::part(shortcut) { opacity: 0.8 }` |
 
 ---
 
@@ -1112,6 +1118,12 @@ _No events._
 | Slot | Mode | Description |
 |---|---|---|
 | `trigger` | replace | Your own trigger element; replaces the built-in button driven by the `trigger-icon` / `trigger-label` props. |
+
+**Styleable parts** (restyle from outside via `kai-menu::part(name)`):
+
+| Part | Description |
+|---|---|
+| `::part(shortcut)` | The right-aligned per-item keyboard shortcut, rendered as kai-kbd key caps. Shown only when an item carries a `shortcut`. — `kai-menu::part(shortcut) { opacity: 0.8 }` |
 
 ---
 

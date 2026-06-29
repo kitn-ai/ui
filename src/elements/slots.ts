@@ -542,8 +542,19 @@ export const KBD_PARTS: PartDef[] = [
   { name: 'separator', doc: 'The gap between key caps. Inject a literal joiner (e.g. a plus sign) from outside.', recipe: 'kai-kbd::part(separator)::after { content: "+" }' },
 ];
 
+/** Styleable `::part`s of `<kai-command>` (the command palette). */
+export const COMMAND_PARTS: PartDef[] = [
+  { name: 'shortcut', doc: 'The right-aligned per-row keyboard shortcut, rendered as kai-kbd key caps. Shown only when a row carries a `shortcut`.', recipe: 'kai-command::part(shortcut) { opacity: 0.8 }' },
+];
+
+/** Styleable `::part`s of `<kai-menu>` (the actions dropdown). */
+export const MENU_PARTS: PartDef[] = [
+  { name: 'shortcut', doc: 'The right-aligned per-item keyboard shortcut, rendered as kai-kbd key caps. Shown only when an item carries a `shortcut`.', recipe: 'kai-menu::part(shortcut) { opacity: 0.8 }' },
+];
+
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
+  'kai-command': { parts: COMMAND_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS },
   'kai-message': { slots: MESSAGE_SLOTS, parts: MESSAGE_PARTS },
   'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },
@@ -554,7 +565,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-scroll-area': { parts: SCROLL_AREA_PARTS },
   'kai-notice': { slots: NOTICE_SLOTS },
   'kai-hover-card': { slots: HOVER_CARD_SLOTS },
-  'kai-menu': { slots: MENU_SLOTS },
+  'kai-menu': { slots: MENU_SLOTS, parts: MENU_PARTS },
   'kai-skeleton': { parts: SKELETON_PARTS },
   'kai-attachments': { parts: ATTACHMENTS_PARTS },
   'kai-status': { parts: STATUS_PARTS },
