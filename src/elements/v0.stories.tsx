@@ -588,7 +588,9 @@ export const V0: Story = {
 <kai-resizable orientation="horizontal" style="display:block;height:100vh">
   <!-- LEFT: chat thread + composer. min/max give the chat a width floor + ceiling. -->
   <kai-resizable-item size="40%" min="360px" max="480px">
-    <header>Vesper editorial <kai-button variant="ghost" icon="share">Share</kai-button></header>
+    <header>Vesper editorial
+      <kai-tooltip content="Share this build"><kai-button variant="ghost" icon="share">Share</kai-button></kai-tooltip>
+    </header>
 
     <!-- Each assistant generation is a VERSION. kai-artifact has only URL history,
          not a v2/v3 model, so the chip + Restore are hand-wired to navigate(). -->
