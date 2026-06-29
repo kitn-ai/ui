@@ -1,12 +1,16 @@
 import { For, Show, type JSX } from 'solid-js';
 import { cn } from '../utils/cn';
 import { renderIcon } from './icon';
+import { Kbd } from './kbd';
 
 export interface CommandRow {
   id: string;
   label: string;
   icon?: string;
   description?: string;
+  /** Optional keyboard shortcut shown as right-aligned key caps; uses the
+   *  kai-kbd `keys` syntax (e.g. "Mod+K", "Alt+1"). */
+  shortcut?: string;
 }
 
 export interface CommandGroup {
@@ -74,6 +78,13 @@ export function CommandList(props: CommandListProps): JSX.Element {
                       <span class="font-medium whitespace-nowrap shrink-0">{row.label}</span>
                       <Show when={row.description}>
                         <span class="min-w-0 truncate text-muted-foreground">{row.description}</span>
+                      </Show>
+                      <Show when={row.shortcut}>
+                        {(sc) => (
+                          <span part="shortcut" class="ml-auto shrink-0 pl-3">
+                            <Kbd keys={sc()} size="sm" />
+                          </span>
+                        )}
                       </Show>
                     </button>
                   )}

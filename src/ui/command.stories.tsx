@@ -9,15 +9,15 @@ const SAMPLE_GROUPS: CommandGroup[] = [
   {
     group: 'Suggestions',
     items: [
-      { id: 'summarize', label: 'Summarize', icon: 'sparkles', description: 'Condense the thread' },
-      { id: 'search', label: 'Search the web', icon: 'globe', description: 'Look something up' },
+      { id: 'summarize', label: 'Summarize', icon: 'sparkles', description: 'Condense the thread', shortcut: 'Mod+K' },
+      { id: 'search', label: 'Search the web', icon: 'globe', description: 'Look something up', shortcut: 'Alt+1' },
       { id: 'code', label: 'Write code', icon: 'code' },
     ],
   },
   {
     group: 'Files',
     items: [
-      { id: 'notes', label: 'notes.md', icon: 'file-text', description: '~/notes.md' },
+      { id: 'notes', label: 'notes.md', icon: 'file-text', description: '~/notes.md', shortcut: 'Mod+Shift+O' },
       { id: 'src', label: 'src', icon: 'folder' },
     ],
   },
@@ -32,7 +32,7 @@ const meta = {
     docs: {
       controls: { exclude: ['groups', 'onSelect', 'id', 'use:eventListener'] },
       description: componentDescription([
-        'A presentational grouped listbox for command / mention palettes. Each `groups` entry is an optional section header plus rows (`id`, `label`, optional `icon` and `description`). Rows are `role="option"` buttons; clicking one calls `onSelect(id)`. With no items it renders `emptyLabel`.',
+        'A presentational grouped listbox for command / mention palettes. Each `groups` entry is an optional section header plus rows (`id`, `label`, optional `icon`, `description`, and a `shortcut` shown as right-aligned key caps). Rows are `role="option"` buttons; clicking one calls `onSelect(id)`. With no items it renders `emptyLabel`.',
       ]),
     },
   },
@@ -77,8 +77,8 @@ export const Playground: Story = {
   ...src(`<CommandList
   groups={[
     { group: 'Suggestions', items: [
-      { id: 'summarize', label: 'Summarize', icon: 'sparkles', description: 'Condense the thread' },
-      { id: 'search', label: 'Search the web', icon: 'globe' },
+      { id: 'summarize', label: 'Summarize', icon: 'sparkles', description: 'Condense the thread', shortcut: 'Mod+K' },
+      { id: 'search', label: 'Search the web', icon: 'globe', shortcut: 'Alt+1' },
     ] },
     { group: 'Files', items: [
       { id: 'notes', label: 'notes.md', icon: 'file-text', description: '~/notes.md' },
