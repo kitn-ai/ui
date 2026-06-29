@@ -49,7 +49,7 @@ const Note = (props: { children: JSX.Element }) => (
 const PANES = [1, 2, 3, 4, 5, 6];
 
 const meta = {
-  title: 'Components/Primitives/Pane Grid',
+  title: 'Components/Elements/Pane Grid',
   component: PaneGrid,
   tags: ['autodocs'],
   parameters: {

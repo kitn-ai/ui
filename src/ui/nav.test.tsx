@@ -158,6 +158,60 @@ describe('Nav — status dot', () => {
   });
 });
 
+describe('Nav — trailing action / closable', () => {
+  const withTrailing: KaiNavItem[] = [
+    { id: 'a', label: 'Alpha', action: { icon: 'pencil', label: 'Rename' } },
+    { id: 'b', label: 'Beta', closable: true },
+  ];
+
+  // The headline guard: activating the trailing action must NOT select the row
+  // (the action and the item button are siblings, so the select handler is never
+  // reached). This is the unit-level catch for the demo-story regression where a
+  // story wired onItemAction -> setValue.
+  it('clicking the trailing action fires onItemAction and does NOT fire onItemSelect', () => {
+    const onItemSelect = vi.fn();
+    const onItemAction = vi.fn();
+    const { container } = render(() => (
+      <Nav items={withTrailing} value="a" onItemSelect={onItemSelect} onItemAction={onItemAction} />
+    ));
+    const actionBtn = container.querySelector<HTMLButtonElement>('[data-nav-action="action"]')!;
+    expect(actionBtn).not.toBeNull();
+    fireEvent.click(actionBtn);
+    expect(onItemAction).toHaveBeenCalledWith('a', { icon: 'pencil', label: 'Rename' });
+    expect(onItemSelect).not.toHaveBeenCalled();
+  });
+
+  it('clicking the trailing close fires onItemClose and does NOT fire onItemSelect', () => {
+    const onItemSelect = vi.fn();
+    const onItemClose = vi.fn();
+    const { container } = render(() => (
+      <Nav items={withTrailing} onItemSelect={onItemSelect} onItemClose={onItemClose} />
+    ));
+    const closeBtn = container.querySelector<HTMLButtonElement>('[data-nav-action="close"]')!;
+    fireEvent.click(closeBtn);
+    expect(onItemClose).toHaveBeenCalledWith('b');
+    expect(onItemSelect).not.toHaveBeenCalled();
+  });
+
+  it('clicking the row body still fires onItemSelect (not a trailing handler)', () => {
+    const onItemSelect = vi.fn();
+    const onItemAction = vi.fn();
+    const { getByText } = render(() => (
+      <Nav items={withTrailing} onItemSelect={onItemSelect} onItemAction={onItemAction} />
+    ));
+    fireEvent.click(getByText('Alpha'));
+    expect(onItemSelect).toHaveBeenCalledWith('a');
+    expect(onItemAction).not.toHaveBeenCalled();
+  });
+
+  it('renders the trailing button as a sibling of the item button (never nested)', () => {
+    const { container } = render(() => <Nav items={withTrailing} />);
+    const action = container.querySelector('[data-nav-action]')!;
+    // No interactive ancestor: the action button is not inside the item button.
+    expect(action.closest('[part="item"]')).toBeNull();
+  });
+});
+
 describe('Nav — trailing meta', () => {
   const withMeta: KaiNavItem[] = [{ id: 'm', label: 'Landing page', meta: '24d ago' }];
 

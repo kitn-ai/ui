@@ -10,12 +10,29 @@ import {
   Download,
   Minus,
   MoreHorizontal,
-  Search,
   SlidersHorizontal,
   Trash2,
   UserPlus,
-  X,
 } from 'lucide-solid';
+import './search';
+
+// Declare the custom element tag for SolidJS JSX.
+declare module 'solid-js' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      'kai-search': JSX.HTMLAttributes<HTMLElement> & {
+        value?: string;
+        placeholder?: string;
+        icon?: string;
+        debounce?: number;
+        loading?: boolean;
+        shortcut?: string;
+        theme?: string;
+      };
+    }
+  }
+}
 
 // Labs/Proofs: a TOKEN-DRIVEN proof screen. The kit has no data-table / grid
 // component, so this is a polished list-management view (a "Members" table) built
@@ -244,33 +261,21 @@ export const DataTable: Story = {
                 on the right that swaps to a destructive/export set once rows are
                 selected (the standard data-table pattern). */}
             <div class="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2.5">
-              <div class="relative min-w-0 flex-1">
-                <Search
-                  size={15}
-                  class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <input
-                  type="text"
-                  value={search()}
-                  onInput={(e) => {
-                    setSearch(e.currentTarget.value);
-                    setPage(1);
+              {/* kai-search: the kit's inline filter field. Its leading search
+                  icon and clear (×) button are built in, so the hand-rolled
+                  icon/input/clear are gone. Its debounced kai-search event drives
+                  the same `search` filter signal (controlled via the value prop). */}
+              <div class="min-w-0 max-w-xs flex-1">
+                <kai-search
+                  ref={(el) => {
+                    el.addEventListener('kai-search', (e) => {
+                      setSearch((e as CustomEvent).detail.value);
+                      setPage(1);
+                    });
                   }}
+                  value={search()}
                   placeholder="Search members..."
-                  aria-label="Search members"
-                  class="h-9 w-full max-w-xs rounded-md border border-border bg-background pl-8 pr-8 text-body text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
-                />
-                <Show when={search()}>
-                  <button
-                    type="button"
-                    onClick={() => setSearch('')}
-                    aria-label="Clear search"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    <X size={14} />
-                  </button>
-                </Show>
+                ></kai-search>
               </div>
 
               <button

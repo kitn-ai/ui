@@ -368,6 +368,11 @@ export const NAV_PARTS: PartDef[] = [
     doc: 'The right-aligned muted trailing text on a row (e.g. a relative time). Shown only when an item carries `meta`; restyle from outside.',
     recipe: 'kai-nav::part(meta) { color: var(--color-foreground); font-variant-numeric: tabular-nums }',
   },
+  {
+    name: 'item-action',
+    doc: 'The trailing per-item action / close button, a sibling of the item button. Shown only when an item carries `action` or `closable`; reveal it on hover or pin it visible from outside.',
+    recipe: 'kai-nav::part(item-action) { opacity: 1 }',
+  },
 ];
 
 /** Slots of `<kai-coachmark>` (the anchor/trigger is the default slot). */
@@ -505,8 +510,51 @@ export const PANE_GROUP_PARTS: PartDef[] = [
   { name: 'close', doc: 'The per-tab close ("×") button. Recolor, resize, or hide it from outside.', recipe: 'kai-pane-group::part(close) { color: var(--color-muted-foreground) }' },
 ];
 
+/** Affix slots + styleable `::part`s of `<kai-input>` (the field shell). */
+export const INPUT_SLOTS: SlotDef[] = [
+  { name: 'leading', mode: 'inject', doc: 'A glyph, prefix, or affix at the start of the field, inside the border.' },
+  { name: 'trailing', mode: 'inject', doc: 'A button, unit, or affix at the end of the field, inside the border.' },
+];
+export const INPUT_PARTS: PartDef[] = [
+  { name: 'field', doc: 'The bordered control box (the row wrapping any affixes plus the input). Restyle its border, radius, surface, or focus ring.', recipe: 'kai-input::part(field) { border-radius: 0.75rem }' },
+  { name: 'input', doc: 'The inner input element. Restyle its text, padding, or placeholder.', recipe: 'kai-input::part(input) { font-variant-numeric: tabular-nums }' },
+  { name: 'label', doc: 'The field label above the control. Restyle its typography or spacing.', recipe: 'kai-input::part(label) { font-weight: 600 }' },
+  { name: 'hint', doc: 'The hint or error line below the control. Restyle its typography.', recipe: 'kai-input::part(hint) { font-style: italic }' },
+];
+
+/** Styleable `::part`s of `<kai-search>` (the debounced filter field; composes the
+ *  kai-input field plus a clear button). */
+export const SEARCH_PARTS: PartDef[] = [
+  { name: 'field', doc: 'The bordered control box (the row wrapping the search icon, input, and clear button).', recipe: 'kai-search::part(field) { border-radius: 9999px }' },
+  { name: 'input', doc: 'The inner search input element.', recipe: 'kai-search::part(input) { font-size: 0.875rem }' },
+  { name: 'clear', doc: 'The trailing clear ("x") button, shown when the field is non-empty.', recipe: 'kai-search::part(clear) { opacity: 1 }' },
+];
+
+/** Styleable `::part`s of `<kai-editable-label>` (inline rename; the edit field is the kai-input field). */
+export const EDITABLE_LABEL_PARTS: PartDef[] = [
+  { name: 'text', doc: 'The read-mode label text. Restyle its typography; it swaps to the input on edit.', recipe: 'kai-editable-label::part(text) { font-weight: 600 }' },
+  { name: 'input', doc: 'The edit-mode input (the composed kai-input field).', recipe: 'kai-editable-label::part(input) { font: inherit }' },
+];
+
+/** Styleable `::part`s of `<kai-kbd>` (the keyboard-shortcut display). */
+export const KBD_PARTS: PartDef[] = [
+  { name: 'key', doc: 'Each key cap. Restyle its surface, border, radius, or font.', recipe: 'kai-kbd::part(key) { border-radius: 0.375rem }' },
+  { name: 'separator', doc: 'The gap between key caps. Inject a literal joiner (e.g. a plus sign) from outside.', recipe: 'kai-kbd::part(separator)::after { content: "+" }' },
+];
+
+/** Styleable `::part`s of `<kai-command>` (the command palette). */
+export const COMMAND_PARTS: PartDef[] = [
+  { name: 'shortcut', doc: 'The right-aligned per-row keyboard shortcut, rendered as kai-kbd key caps. Shown only when a row carries a `shortcut`.', recipe: 'kai-command::part(shortcut) { opacity: 0.8 }' },
+];
+
+/** Styleable `::part`s of `<kai-menu>` (the actions dropdown). */
+export const MENU_PARTS: PartDef[] = [
+  { name: 'shortcut', doc: 'The right-aligned per-item keyboard shortcut, rendered as kai-kbd key caps. Shown only when an item carries a `shortcut`.', recipe: 'kai-menu::part(shortcut) { opacity: 0.8 }' },
+];
+
 export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-chat': { slots: CHAT_SLOTS, parts: CHAT_PARTS },
+  'kai-command': { parts: COMMAND_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS },
   'kai-message': { slots: MESSAGE_SLOTS, parts: MESSAGE_PARTS },
   'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },
@@ -517,7 +565,7 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-scroll-area': { parts: SCROLL_AREA_PARTS },
   'kai-notice': { slots: NOTICE_SLOTS },
   'kai-hover-card': { slots: HOVER_CARD_SLOTS },
-  'kai-menu': { slots: MENU_SLOTS },
+  'kai-menu': { slots: MENU_SLOTS, parts: MENU_PARTS },
   'kai-skeleton': { parts: SKELETON_PARTS },
   'kai-attachments': { parts: ATTACHMENTS_PARTS },
   'kai-status': { parts: STATUS_PARTS },
@@ -538,6 +586,10 @@ export const ELEMENT_COMPOSITION: Record<string, ElementComposition> = {
   'kai-pane-group': { parts: PANE_GROUP_PARTS },
   'kai-agent-card': { parts: AGENT_CARD_PARTS },
   'kai-dialog': { slots: DIALOG_SLOTS, parts: DIALOG_PARTS },
+  'kai-input': { slots: INPUT_SLOTS, parts: INPUT_PARTS },
+  'kai-search': { parts: SEARCH_PARTS },
+  'kai-kbd': { parts: KBD_PARTS },
+  'kai-editable-label': { parts: EDITABLE_LABEL_PARTS },
 };
 
 /**

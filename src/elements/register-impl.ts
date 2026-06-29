@@ -86,3 +86,8 @@ import './pane';
 import './pane-group';
 import './agent-card';
 import './dialog';
+// Input & search field family
+import './input';
+import './search';
+import './kbd';
+import './editable-label';

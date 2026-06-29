@@ -16,6 +16,9 @@ export interface KaiCommandItem {
   icon?: string;
   /** Muted supplementary text (e.g. a file path or a short description). */
   description?: string;
+  /** Optional keyboard shortcut shown as right-aligned key caps; uses the
+   *  kai-kbd `keys` syntax (e.g. "Mod+K", "Alt+1"). */
+  shortcut?: string;
   /** Group name that buckets this item under a section header. */
   group?: string;
 }
@@ -54,7 +57,7 @@ interface Events {
  *   import '@kitn.ai/ui/elements';
  *   const el = document.querySelector('kai-command');
  *   el.items = [
- *     { id: 'foo', label: 'Foo', icon: 'search', group: 'Recent' },
+ *     { id: 'foo', label: 'Foo', icon: 'search', shortcut: 'Mod+K', group: 'Recent' },
  *   ];
  *   el.addEventListener('kai-select', (e) => console.log(e.detail.id));
  * </script>
@@ -92,7 +95,7 @@ defineWebComponent<Props, Events>('kai-command', {
         g = { group: item.group, items: [] };
         groups.push(g);
       }
-      g.items.push({ id: item.id, label: item.label, icon: item.icon, description: item.description });
+      g.items.push({ id: item.id, label: item.label, icon: item.icon, description: item.description, shortcut: item.shortcut });
     }
     return groups;
   });

@@ -3,7 +3,7 @@ import { createSignal, createEffect, Show, For, Switch, Match, onMount, onCleanu
 import { Portal } from 'solid-js/web';
 import {
   Bot, Terminal, FlaskConical, BookText, Boxes, Sparkles, ShieldCheck, Database,
-  Megaphone, Bell, Globe, Search, Command, Keyboard,
+  Megaphone, Bell, Globe, Search, Keyboard,
   X, Plus, Maximize2, Minimize2,
   Folder, GitBranch, Cloud, Laptop, Layers,
   type LucideProps,
@@ -90,6 +90,14 @@ declare module 'solid-js' {
       'kai-separator': JSX.HTMLAttributes<HTMLElement> & { orientation?: string };
       'kai-command': JSX.HTMLAttributes<HTMLElement> & { placeholder?: string; 'empty-label'?: string; theme?: string };
       'kai-dialog': JSX.HTMLAttributes<HTMLElement> & { open?: boolean };
+      'kai-kbd': JSX.HTMLAttributes<HTMLElement> & { keys?: string; platform?: string; size?: string; theme?: string };
+      'kai-editable-label': JSX.HTMLAttributes<HTMLElement> & {
+        value?: string;
+        editing?: boolean;
+        placeholder?: string;
+        disabled?: boolean;
+        theme?: string;
+      };
     }
   }
 }
@@ -1026,7 +1034,8 @@ export const SplitWorkspace: Story = {
         items.push({
           id: `goto-${a.id}`,
           label: `Go to ${agentName(a.id)}`,
-          description: `${a.role} · ⌥${agentNumber(a.id)}`,
+          description: a.role,
+          shortcut: `Alt+${agentNumber(a.id)}`,
           group: 'Agents',
         });
       }
@@ -1134,9 +1143,6 @@ export const SplitWorkspace: Story = {
       const col = () => columns().find((c) => c.id === props.colId);
       const grpIdx = () => col()?.groups.findIndex((g) => g.id === props.group.id) ?? -1;
       const groupCount = () => col()?.groups.length ?? 0;
-      // Escape/Enter set this before unmounting the input so its teardown onBlur
-      // doesn't double-commit (Escape must cancel, not commit the dirty value).
-      let suppressBlur = false;
       return (
         <div
           ref={(el) => tabRefs.set(`${props.group.id}:${props.agent.id}`, el)}
@@ -1162,20 +1168,22 @@ export const SplitWorkspace: Story = {
               <span class="max-w-[8rem] truncate font-medium">{agentName(props.agent.id)}</span>
             }
           >
-            <input
-              type="text"
-              autofocus
-              value={agentName(props.agent.id)}
-              ref={(el) => queueMicrotask(() => { el.focus(); el.select(); })}
+            <kai-editable-label
+              ref={(el) => {
+                (el as El).value = agentName(props.agent.id);
+                el.addEventListener('kai-rename', (e) =>
+                  commitRename(props.agent.id, (e as CustomEvent<{ value: string }>).detail.value),
+                );
+                el.addEventListener('kai-cancel', () => setRenamingId(null));
+                // kai-editable-label stays silent on an unchanged commit, so clear
+                // the controlled renaming state whenever the field loses focus too.
+                el.addEventListener('focusout', () => setRenamingId(null));
+                queueMicrotask(() => (el as unknown as { edit?: () => void }).edit?.());
+              }}
               onClick={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') { suppressBlur = true; commitRename(props.agent.id, e.currentTarget.value); }
-                else if (e.key === 'Escape') { suppressBlur = true; setRenamingId(null); }
-              }}
-              onBlur={(e) => { if (!suppressBlur) commitRename(props.agent.id, e.currentTarget.value); suppressBlur = false; }}
-              class="w-28 min-w-0 rounded-sm border border-ring bg-background px-1 py-0 text-xs font-medium text-foreground outline-none"
-            />
+              class="min-w-0 max-w-[10rem] text-xs font-medium"
+            ></kai-editable-label>
           </Show>
           <Show when={props.agent.runtime} keyed>
             {(rt) => (
@@ -1575,10 +1583,7 @@ export const SplitWorkspace: Story = {
             >
               <Search class="size-4 shrink-0" aria-hidden="true" />
               <span>Search…</span>
-              <kbd class="ml-auto flex items-center gap-0.5 rounded border border-border bg-background px-1.5 py-1 font-mono text-[11px] leading-none">
-                <Command class="size-3" aria-hidden="true" />
-                K
-              </kbd>
+              <kai-kbd keys="Mod+K" platform="mac" class="ml-auto"></kai-kbd>
             </button>
             {/* attention routing: a header count that opens a dropdown of needs-you agents */}
             <Show when={attentionCount() > 0}>
@@ -1936,24 +1941,24 @@ export const SplitWorkspace: Story = {
             <Keyboard class="size-4 text-primary" /> Keyboard shortcuts
           </span>
           <div class="flex flex-col gap-4">
-            <For each={[
+            <For each={([
               { title: 'Navigation', items: [
-                { keys: '⌘K', label: 'Search / command palette' },
-                { keys: '⌥1–8', label: 'Jump to agent' },
+                { combo: 'Mod+K', label: 'Search / command palette' },
+                { text: '⌥1–8', label: 'Jump to agent' },
               ] },
               { title: 'Layout', items: [
-                { keys: '⌥⇧←/→', label: 'Move pane to column (new column at the edge)' },
-                { keys: '⌥⇧↑/↓', label: 'Move pane to row (new row at the edge)' },
-                { keys: '⌥Z', label: 'Maximize / restore group' },
+                { text: '⌥⇧←/→', label: 'Move pane to column (new column at the edge)' },
+                { text: '⌥⇧↑/↓', label: 'Move pane to row (new row at the edge)' },
+                { combo: 'Alt+Z', label: 'Maximize / restore group' },
               ] },
               { title: 'View', items: [
-                { keys: '⌥B', label: 'Toggle Browser' },
+                { combo: 'Alt+B', label: 'Toggle Browser' },
               ] },
               { title: 'Tabs', items: [
-                { keys: 'Right-click', label: 'Rename / Split / Move / Close' },
-                { keys: 'Esc', label: 'Close menu / restore' },
+                { text: 'Right-click', label: 'Rename / Split / Move / Close' },
+                { text: 'Esc', label: 'Close menu / restore' },
               ] },
-            ]}>
+            ] as { title: string; items: { combo?: string; text?: string; label: string }[] }[])}>
               {(group) => (
                 <div class="flex flex-col gap-0.5">
                   <h3 class="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{group.title}</h3>
@@ -1961,7 +1966,9 @@ export const SplitWorkspace: Story = {
                     {(item) => (
                       <div class="flex items-center justify-between gap-4 py-1 text-sm">
                         <span>{item.label}</span>
-                        <kbd class="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[11px]">{item.keys}</kbd>
+                        <Show when={item.combo} fallback={<kai-kbd>{item.text}</kai-kbd>}>
+                          {(combo) => <kai-kbd keys={combo()} platform="mac"></kai-kbd>}
+                        </Show>
                       </div>
                     )}
                   </For>

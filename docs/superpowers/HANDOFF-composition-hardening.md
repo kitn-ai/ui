@@ -1,12 +1,28 @@
 # HANDOFF — Composition initiative (composer showcase + new composition primitives)
 
-**Date:** 2026-06-27 (SESSION 2) · **Repo root:** `/Users/home/Projects/kitn-ai/kitn-chat` · **Branch:** `feat/new-components-epic` (14 commits off `main`@7fa2b17 + **83 UNCOMMITTED files** = this session's huge round; **NOTHING committed, NOTHING pushed**). · **Status:** green tree (typecheck 4/4 · unit **1174/1174** · build-storybook ✓ · **66 elements**). Rob reviews/commits; the commit + PR are his call. The earlier interaction-API/Storybook work (#111/#112) is merged to `main`; release-please #105 (0.18.0) still open.
+**Date:** 2026-06-29 (SESSIONS 4–5) · **Repo root:** `/Users/home/Projects/kitn-ai/kitn-chat` · **Branch:** `main` — sessions 4–5 ✅ **MERGED via PR #114** (merge commit `4dbacf1`, 37 commits). `feat/new-components-epic` is now merged/stale → **branch fresh off `main` for new work.** · **Status:** green at merge (typecheck 4/4 · unit **1225** · build clean · **74 elements**). release-please **#105** open (Rob's call to publish).
 
-> ★ Read §0.0 SESSION-2 below FIRST + memory **`new-components-epic`** (both authoritative for THIS branch). §0.01 is session-1 context. §0.05 + memory `composition-seams-direction` cont. 40 cover the earlier (merged) work. §0.5 onward is older history — do not trust its "current state" lines.
+> ★ Read **§0.0 (SESSIONS 4–5)** below FIRST + memory **`labs-apps-dogfood`** (SESSION-5) + **`footprint-reduction-research`**. §0.01 onward is now-MERGED session-1–3 history — do not trust its "UNCOMMITTED / current state" lines.
 
 ---
 
-## 0.0 ★CURRENT — SESSION 3 (2026-06-27 cont.): the Labs/Apps multi-harness dogfood phase (7 apps) + a kit-gap-driven fix round. ALL UNCOMMITTED on `feat/new-components-epic`. ★Read memory `new-components-epic` (session-3 tail) + `supervisor-operating-mode`.
+## 0.0 ★CURRENT — SESSIONS 4–5 (2026-06-28/29): new-components epic continuation + AMUX. ✅ MERGED to main via PR #114. ★Read memory `labs-apps-dogfood` (SESSION-5) + `footprint-reduction-research` + `supervisor-operating-mode`.
+
+**WHERE WE ARE:** sessions 4–5 are DONE and **MERGED to `main`** (PR #114, merge commit `4dbacf1`, 37 commits, merge-method=merge to preserve conventional history for release-please). On `main` now; `feat/new-components-epic` is merged/stale → **branch fresh off `main`** for any new work. Gate at merge: typecheck 4/4 · unit **1225** · build clean · 74 elements.
+
+**SHIPPED (on main):**
+- **Composable graduations:** `kai-pane`, `kai-agent-card`, `kai-dialog` (net-new modal), `kai-pane-group` (editor group); toast `warning`/`error`/`info` variants. All registered + drift-guarded slots/parts (build:api → 74 elements).
+- **`kai-toast` `appearance` ('pill' default | 'card' = Sonner/macOS, 24rem, outline-button action) + `inverse` + `description`** (+11 tests).
+- **React per-element registration:** wrappers lazy-register their OWN element via a client-only dynamic-import thunk instead of the register-all bundle → a `<Button>` consumer ships ~4 KB gz + its chunk, not 162 KB. SSR-safe; `registerAll()` opt-in kept. + **`sideEffects` allowlist** (the prerequisite). Spec/plan under `docs/superpowers/`.
+- **Theme:** semantic + tinted-surface + interaction-state color tokens.
+- **Labs:** `kai-prompt-dock`, `kai-segmented`, `kai-settings-group`/`kai-setting-item`, token-driven Proofs screens, a Lovable app, `kai-tasks` readonly, the kai-dialog broadcast dogfood, v0 snippet fix.
+- **AMUX** (renamed from "Multi-Agent Workspace", `split-workspace.stories.tsx`, story id stays `labs-apps--split-workspace`, sorts LAST in Labs/Apps): an IDE-style multi-agent shell — editor-group tiling (gutter-as-header, group-level maximize, drag-to-split), activity-bar rail (Workspaces + Agents + a kai-file-tree explorer), portaled tab + needs-you context menus, inline rename, ⌥⇧-arrow pane moves, a keyboard-shortcuts kai-dialog, calm "waiting" state on the `ring` token, card toasts. **Full anatomy: memory `labs-apps-dogfood` SESSION-5.**
+
+**★PROCESS that worked (reuse):** RAPID-DEV — Rob drives live in Storybook, IVP DEFERRED (he reviews; resume IVP only when he asks), commit checkpoints to protect work. ONE warm worker reused via SendMessage (~30× this session, serialized on the demo file); PARALLEL workers ONLY for disjoint files. **★Recurring bug class: Solid delegates `click` to `document`, so a trigger's `stopPropagation` can't stop a SEPARATE document click-listener** (a dropdown opened-then-instantly-closed; fix = drop it from the doc-listener + use a portal BACKDROP). Portaled menus escape `overflow-hidden`/`overflow-x-auto` clipping. Prefer kit TOKENS over raw Tailwind colors (theme-editor manageability) — but the theme has ONE blue hue (217°: `ring`/`tool-blue`/`info`), so blue-for-waiting reads like blue-for-working (open question Rob flagged — would need a NEW distinct token).
+
+**NEXT (resume here):** (1) **release-please #105** is open + recomputed with the 37 commits' features → Rob's call to merge/publish the release. (2) **Branch off the updated `main`** for new work. (3) Open gaps: **kai-nav has no per-item close / trailing-action event** (drove hand-rolling the AMUX rail lists — candidate kit feature); the **storybook-chromium advisory a11y suite** carries pre-existing color-contrast failures (a future a11y pass; it is NON-required, not the unit gate); long-deferred **method-doc-rendering**; the AMUX **waiting-blue vs working-blue** distinction (if Rob wants them visibly different → add a distinct token). (4) Optional: dogfood AMUX onto `kai-pane-group`, tokenize remaining AMUX raw colors.
+
+## 0.01 (SESSION 3 — superseded; ✅ MERGED to main via PR #114) the Labs/Apps multi-harness dogfood phase (7 apps) + a kit-gap-driven fix round. ★Read memory `labs-apps-dogfood` instead of the lines below.
 
 **WHERE WE ARE:** session-1/2 work is COMMITTED (16 + 7 commits). On top, this session built the **Labs/Apps showcase phase**, currently **UNCOMMITTED: 28 modified + 12 untracked** (`git status`). Rob reviewed each app live while I orchestrated background sub-agents (supervisor mode).
 

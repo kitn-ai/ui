@@ -1,14 +1,39 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, Show } from 'solid-js';
 import { Mail, Lock, Eye, EyeOff, Github, ArrowRight, Sparkles } from 'lucide-solid';
+import './input';
 
-// Labs/Proofs/Auth: a TOKEN-DRIVEN proof screen. The kit ships no auth/form
-// components, so this Sign-in screen is built ENTIRELY from design tokens +
-// raw markup (the Tailwind utilities that theme.css emits over the --color-*
-// tokens: bg-card, bg-surface-sunken, border-input, text-muted-foreground,
-// ring-ring, ...). The only non-markup pieces are lucide-solid glyphs rendered
-// as inline SVG (NOT kai-icon) - so what you see is purely the token system
-// proving it can dress a polished screen we have no purpose-built component for.
+// Declare the custom element tag for SolidJS JSX.
+declare module 'solid-js' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      'kai-input': JSX.HTMLAttributes<HTMLElement> & {
+        type?: string;
+        value?: string;
+        placeholder?: string;
+        label?: string;
+        hint?: string;
+        error?: string;
+        size?: string;
+        disabled?: boolean;
+        readonly?: boolean;
+        required?: boolean;
+        invalid?: boolean;
+        name?: string;
+        theme?: string;
+      };
+    }
+  }
+}
+
+// Labs/Proofs/Auth: a TOKEN-DRIVEN proof screen. The card, buttons, and divider
+// are built from design tokens + raw markup (the Tailwind utilities that
+// theme.css emits over the --color-* tokens: bg-card, bg-surface-sunken,
+// border-input, text-muted-foreground, ring-ring, ...). The email + password
+// fields now dogfood <kai-input> (the kit's field primitive: token-themed
+// border/ring + leading/trailing slots), so the screen mixes the one purpose-built
+// field we ship with otherwise token-only markup and lucide-solid glyphs.
 //
 // It themes light/dark for free: every color is a token utility, no hardcoded
 // hex. The page sits on bg-surface-sunken so the bg-card card lifts off it with
@@ -32,14 +57,10 @@ function GoogleGlyph(props: { class?: string }) {
   );
 }
 
-// Shared, token-driven control classes (factored out so the email + password
-// fields and the two button kinds stay visually identical). These ARE the gap:
-// in a real app each of these would be a kit primitive, not a class string.
-const inputClass =
-  'w-full rounded-md border border-input bg-background py-2.5 pl-10 text-sm text-foreground ' +
-  'placeholder:text-muted-foreground transition-colors ' +
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-ring';
-
+// The email + password fields are now <kai-input>, so the hand-rolled input class
+// string is gone (kai-input owns the token-driven border/ring + affix layout). The
+// OAuth buttons stay raw markup (no kit button used here) and share this class —
+// in a real app this too would be a kit primitive, not a string.
 const oauthButtonClass =
   'inline-flex w-full items-center justify-center gap-2.5 rounded-md border border-input bg-background ' +
   'px-4 py-2.5 text-sm font-medium text-foreground transition-colors ' +
@@ -59,7 +80,7 @@ export const Auth: Story = {
         {/* INNER = the centering wrapper. m-auto v-centers the card when there's
             spare room and collapses to top-aligned (scrollable) when content is
             taller than the viewport. py-10 is the comfortable overflow padding. */}
-        <div class="m-auto w-full max-w-sm px-4 py-10">
+        <div class="m-auto w-full max-w-md px-4 py-10">
           <div class="rounded-2xl border border-border bg-card p-7 text-card-foreground kai-elevation sm:p-8">
             {/* Brand mark + heading. The mark is a token-tinted rounded square. */}
             <div class="mb-7 flex flex-col items-center text-center">
@@ -72,56 +93,38 @@ export const Auth: Story = {
 
             {/* FORM */}
             <form class="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
-              {/* Email field */}
-              <div class="flex flex-col gap-1.5">
-                <label for="auth-email" class="text-sm font-medium text-foreground">
-                  Email
-                </label>
-                <div class="relative">
-                  <Mail class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    id="auth-email"
-                    type="email"
-                    autocomplete="email"
-                    placeholder="you@example.com"
-                    class={inputClass + ' pr-3'}
-                  />
-                </div>
-              </div>
+              {/* Email field — the kit's <kai-input> with a leading Mail glyph. */}
+              <kai-input type="email" label="Email" placeholder="you@example.com">
+                <Mail slot="leading" class="size-4" />
+              </kai-input>
 
-              {/* Password field, with an inline Forgot link and a show/hide toggle */}
+              {/* Password field — <kai-input> with a leading Lock glyph and a
+                  trailing show/hide toggle; the Forgot link sits right-aligned below. */}
               <div class="flex flex-col gap-1.5">
-                <div class="flex items-center justify-between">
-                  <label for="auth-password" class="text-sm font-medium text-foreground">
-                    Password
-                  </label>
-                  <a
-                    href="#"
-                    class="text-xs font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
-                  >
-                    Forgot password?
-                  </a>
-                </div>
-                <div class="relative">
-                  <Lock class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    id="auth-password"
-                    type={show() ? 'text' : 'password'}
-                    autocomplete="current-password"
-                    placeholder="Enter your password"
-                    class={inputClass + ' pr-10'}
-                  />
+                <kai-input
+                  type={show() ? 'text' : 'password'}
+                  label="Password"
+                  placeholder="Enter your password"
+                >
+                  <Lock slot="leading" class="size-4" />
                   <button
+                    slot="trailing"
                     type="button"
                     onClick={() => setShow((s) => !s)}
                     aria-label={show() ? 'Hide password' : 'Show password'}
-                    class="absolute right-2.5 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    class="-mr-1 flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <Show when={show()} fallback={<Eye class="size-4" />}>
                       <EyeOff class="size-4" />
                     </Show>
                   </button>
-                </div>
+                </kai-input>
+                <a
+                  href="#"
+                  class="self-end text-xs font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+                >
+                  Forgot password?
+                </a>
               </div>
 
               {/* Primary submit, full width */}
@@ -177,7 +180,7 @@ export const Auth: Story = {
         // free because every color is a --color-* token utility.
         code: `<!-- Double-container centering: outer scrolls (no items-center), inner m-auto -->
 <div class="flex h-screen overflow-y-auto min-h-0 bg-surface-sunken text-foreground">
-  <div class="m-auto w-full max-w-sm px-4 py-10">
+  <div class="m-auto w-full max-w-md px-4 py-10">
     <div class="rounded-2xl border border-border bg-card p-8 kai-elevation">
       <!-- brand mark + heading -->
       <div class="rounded-xl bg-primary text-primary-foreground"><!-- glyph --></div>
@@ -185,13 +188,15 @@ export const Auth: Story = {
       <p class="text-sm text-muted-foreground">Welcome back...</p>
 
       <form>
-        <label class="text-sm font-medium">Email</label>
-        <input type="email" placeholder="you@example.com"
-          class="w-full rounded-md border border-input bg-background py-2.5 pl-10 text-sm
-                 placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring" />
+        <!-- The fields are the kit's <kai-input> (token-themed field + affix slots). -->
+        <kai-input type="email" label="Email" placeholder="you@example.com">
+          <svg slot="leading"><!-- mail icon --></svg>
+        </kai-input>
 
-        <label class="text-sm font-medium">Password</label>
-        <input type="password" class="... border-input bg-background focus-visible:ring-ring" />
+        <kai-input type="password" label="Password" placeholder="Enter your password">
+          <svg slot="leading"><!-- lock icon --></svg>
+          <button slot="trailing" type="button" aria-label="Show password"><!-- eye --></button>
+        </kai-input>
 
         <button type="submit"
           class="w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground

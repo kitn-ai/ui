@@ -1,6 +1,7 @@
 import { type JSX, For, Show, createSignal } from 'solid-js';
 import { cn } from '../utils/cn';
 import { Textarea } from '../ui/textarea';
+import { Input, FIELD_BASE as inputBase } from '../ui/input';
 import { Star } from 'lucide-solid';
 import type { FormField } from './form';
 
@@ -18,9 +19,6 @@ export interface WidgetProps {
   onInput: (value: unknown) => void;
   onBlur: () => void;
 }
-
-const inputBase =
-  'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none';
 
 function ariaProps(p: WidgetProps) {
   return {
@@ -52,20 +50,24 @@ export function TextWidget(
         return 'text';
     }
   };
+  // Render the bare `Input` control (no label/hint/error): `kai-form`'s FieldRow
+  // already supplies the label, description, and inline error around the widget.
+  // `Input` owns the field styling (its `FIELD_BASE` is the former `inputBase`),
+  // so the rendered input is byte-identical to the old raw `<input>`.
   return (
-    <input
+    <Input
       id={props.id}
       data-control
       type={inputType()}
-      class={cn(inputBase, props.invalid && 'border-destructive dark:border-red-400/70')}
       value={(props.value as string) ?? ''}
       placeholder={props.placeholder}
+      invalid={props.invalid}
       disabled={props.disabled}
       minLength={props.field.minLength}
       maxLength={props.field.maxLength}
       {...ariaProps(props)}
-      onInput={(e) => props.onInput(e.currentTarget.value)}
-      onBlur={props.onBlur}
+      onValueInput={(value) => props.onInput(value)}
+      onValueChange={() => props.onBlur()}
     />
   );
 }

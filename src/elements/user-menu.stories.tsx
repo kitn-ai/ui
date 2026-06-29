@@ -19,7 +19,7 @@ type Story = StoryObj;
 
 const ITEMS: KaiMenuItem[] = [
   { heading: true, label: 'john@example.com' },
-  { id: 'settings', label: 'Settings', icon: 'settings', shortcut: '⌘,' },
+  { id: 'settings', label: 'Settings', icon: 'settings', shortcut: 'Mod+,' },
   { id: 'language', label: 'Language', icon: 'globe', items: [
     { id: 'lang-en', label: 'English' },
     { id: 'lang-es', label: 'Espanol' },
@@ -96,7 +96,7 @@ export const AccountMenu: Story = {
   const menu = document.querySelector('kai-menu');
   menu.items = [
     { heading: true, label: 'you@example.com' },
-    { id: 'settings', label: 'Settings', icon: 'settings', shortcut: '⌘,' },
+    { id: 'settings', label: 'Settings', icon: 'settings', shortcut: 'Mod+,' },
     { id: 'language', label: 'Language', icon: 'globe', items: [/* submenu */] },
     { separator: true },
     { id: 'logout', label: 'Log out' },

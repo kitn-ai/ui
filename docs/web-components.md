@@ -1595,9 +1595,17 @@ Project your own markup with `slot="name"` on a light-DOM child.
 |------|------|-------------|
 | `trigger` | replace | Your own trigger element; replaces the built-in button driven by the `trigger-icon` / `trigger-label` props. |
 
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-menu::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(shortcut)` | The right-aligned per-item keyboard shortcut, rendered as kai-kbd key caps. Shown only when an item carries a `shortcut`. <br>`kai-menu::part(shortcut) { opacity: 0.8 }` |
+
 #### Composed from
 
-`UI/Dropdown`, `UI/DropdownTrigger`, `UI/DropdownContent`, `UI/DropdownItem`, `UI/DropdownSeparator`, `UI/DropdownLabel`, `UI/DropdownCheckboxItem`, `UI/DropdownRadioItem`, `UI/DropdownSub`, `UI/DropdownSubTrigger`, `UI/DropdownSubContent`
+`UI/Dropdown`, `UI/DropdownTrigger`, `UI/DropdownContent`, `UI/DropdownItem`, `UI/DropdownSeparator`, `UI/DropdownLabel`, `UI/DropdownCheckboxItem`, `UI/DropdownRadioItem`, `UI/DropdownSub`, `UI/DropdownSubTrigger`, `UI/DropdownSubContent`, `UI/Kbd`
 
 #### Theming
 
@@ -1615,7 +1623,7 @@ A cascading action menu built from a JSON items-tree (submenus, separators, chec
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `items` | — | `undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Flat list of items. Set as a JS property — not an HTML attribute. |
+| `items` | — | `undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; shortcut?: undefined | string; group?: undefined | string }[]` | — | Flat list of items. Set as a JS property — not an HTML attribute. |
 | `placeholder` | `placeholder` | `undefined | string` | — | Placeholder text for the search input. |
 | `emptyLabel` | `empty-label` | `undefined | string` | — | Label shown when no items match the current query. |
 
@@ -1626,6 +1634,14 @@ A cascading action menu built from a JSON items-tree (submenus, separators, chec
 | `kai-active-change` | `{ id: undefined | string }` | Fired when the highlighted/active item changes — via Arrow keys or when filtering re-clamps the active row. `id` is the newly active item's id, or `undefined` when no item is active (e.g. the filtered list is empty). Lets a host preview the active item without committing a selection. |
 | `kai-query-change` | `{ value: string }` | Fired on every keystroke in the search input. |
 | `kai-select` | `{ id: string }` | Fired when the user selects an item (click or Enter). |
+
+#### Styleable parts
+
+Restyle from outside the Shadow DOM via `kai-command::part(name)`.
+
+| Part | Description |
+|------|-------------|
+| `::part(shortcut)` | The right-aligned per-row keyboard shortcut, rendered as kai-kbd key caps. Shown only when a row carries a `shortcut`. <br>`kai-command::part(shortcut) { opacity: 0.8 }` |
 
 #### Composed from
 
