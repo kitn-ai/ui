@@ -948,7 +948,6 @@ export const SplitWorkspace: Story = {
           id: `needs-${a.id}`,
           duration: 0,
           appearance: 'card',
-          description: [a.dir, a.branch].filter(Boolean).join(' · ') || undefined,
           action: { label: 'Respond', onAction: () => focusAgent(a.id) },
         });
       }
@@ -1013,7 +1012,6 @@ export const SplitWorkspace: Story = {
       if (!done) return;
       toast.success(`${done.name} finished its ${done.role.toLowerCase()} task`, {
         appearance: 'card',
-        description: [done.dir, done.branch].filter(Boolean).join(' · ') || undefined,
         action: { label: 'Open', onAction: () => focusAgent(done.id) },
       });
     };
