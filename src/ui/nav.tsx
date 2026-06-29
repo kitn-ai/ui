@@ -50,6 +50,13 @@ export interface KaiNavItem {
   /** Right-aligned muted trailing text (e.g. a relative time, "24d ago").
    *  Distinct from `trailing` (a hover icon). */
   meta?: string;
+  /** An interactive trailing action button (`icon` is a named icon; `label` is
+   *  its accessible name). Activating it fires `onItemAction` and does NOT select
+   *  the row. Distinct from `trailing` (a decorative hover icon, not a button). */
+  action?: { icon: string; label: string };
+  /** Render an interactive trailing close (×) button. Activating it fires
+   *  `onItemClose` and does NOT select the row. */
+  closable?: boolean;
 }
 
 export interface NavProps extends JSX.HTMLAttributes<HTMLElement> {
@@ -57,13 +64,17 @@ export interface NavProps extends JSX.HTMLAttributes<HTMLElement> {
   /** Active item id (drives aria-current + the selected look). */
   value?: string;
   onItemSelect?: (id: string) => void;
+  /** A row's trailing `action` button was activated (not a select). */
+  onItemAction?: (id: string, action?: { icon: string; label: string }) => void;
+  /** A `closable` row's trailing close button was activated (not a select). */
+  onItemClose?: (id: string) => void;
   /** Ids of group items collapsed on first render. Groups default to expanded. */
   defaultCollapsed?: string[];
 }
 
 export function Nav(props: NavProps) {
   const [local, rest] = splitProps(props, [
-    'items', 'value', 'onItemSelect', 'defaultCollapsed', 'class',
+    'items', 'value', 'onItemSelect', 'onItemAction', 'onItemClose', 'defaultCollapsed', 'class',
   ]);
 
   // Groups default to expanded; `defaultCollapsed` seeds the closed set. Using a
@@ -89,6 +100,8 @@ export function Nav(props: NavProps) {
         depth={0}
         value={local.value}
         onItemSelect={local.onItemSelect}
+        onItemAction={local.onItemAction}
+        onItemClose={local.onItemClose}
         isExpanded={isExpanded}
         toggle={toggle}
       />
@@ -101,6 +114,8 @@ interface NavRowsProps {
   depth: number;
   value?: string;
   onItemSelect?: (id: string) => void;
+  onItemAction?: (id: string, action?: { icon: string; label: string }) => void;
+  onItemClose?: (id: string) => void;
   isExpanded: (id: string) => boolean;
   toggle: (id: string) => void;
 }
@@ -123,7 +138,19 @@ function NavRows(props: NavRowsProps) {
           if (!item.status?.label && !item.meta) return undefined;
           return [item.label, item.status?.label, item.meta].filter(Boolean).join(', ');
         };
-        const onClick = () => {
+        const onClick = (e: MouseEvent) => {
+          // The trailing action/close buttons live INSIDE this row button. Solid
+          // delegates `click` to `document`, so a `stopPropagation()` on a
+          // trailing button would NOT stop this (the row/select) handler — the
+          // row would still select. Discriminate by the event target instead:
+          // if the click originated in a `[data-nav-action]` button, route it to
+          // the action/close callback and return WITHOUT running the select path.
+          const trigger = (e.target as Element | null)?.closest('[data-nav-action]');
+          if (trigger) {
+            if (trigger.getAttribute('data-nav-action') === 'close') props.onItemClose?.(item.id);
+            else props.onItemAction?.(item.id, item.action);
+            return;
+          }
           if (item.disabled) return;
           if (isGroup()) props.toggle(item.id);
           else props.onItemSelect?.(item.id);
@@ -195,6 +222,38 @@ function NavRows(props: NavRowsProps) {
                 <Badge variant="default" class="px-1.5 py-0 text-[0.625rem] font-medium uppercase tracking-wide">{item.badge}</Badge>
               </Show>
               <Show when={item.trailing}>{renderIcon(item.trailing, { class: 'size-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-60' })}</Show>
+              <Show when={item.action}>
+                <button
+                  part="item-action"
+                  data-nav-action="action"
+                  type="button"
+                  aria-label={item.action!.label}
+                  class={cn(
+                    'flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground',
+                    'opacity-0 transition-opacity hover:bg-background/70 hover:text-foreground',
+                    'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    'group-hover:opacity-100',
+                  )}
+                >
+                  {renderIcon(item.action!.icon, { class: 'size-4' })}
+                </button>
+              </Show>
+              <Show when={item.closable}>
+                <button
+                  part="item-action"
+                  data-nav-action="close"
+                  type="button"
+                  aria-label={item.label ? `Remove ${item.label}` : 'Remove'}
+                  class={cn(
+                    'flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground',
+                    'opacity-0 transition-opacity hover:bg-background/70 hover:text-foreground',
+                    'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    'group-hover:opacity-100',
+                  )}
+                >
+                  {renderIcon('x', { class: 'size-4' })}
+                </button>
+              </Show>
             </button>
             <Show when={isGroup() && expanded()}>
               <div part="group" role="group">
@@ -203,6 +262,8 @@ function NavRows(props: NavRowsProps) {
                   depth={props.depth + 1}
                   value={props.value}
                   onItemSelect={props.onItemSelect}
+                  onItemAction={props.onItemAction}
+                  onItemClose={props.onItemClose}
                   isExpanded={props.isExpanded}
                   toggle={props.toggle}
                 />

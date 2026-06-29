@@ -19,6 +19,12 @@ interface Props extends Record<string, unknown> {
 interface Events {
   /** A nav item was activated. */
   'kai-nav-select': { id: string };
+  /** A row's trailing `action` button was activated (not a select). `value` is
+   *  the item id; `action` echoes the item's `{ icon, label }`. */
+  'kai-nav-item-action': { value: string; action?: { icon: string; label: string } };
+  /** A `closable` row's trailing close button was activated (not a select).
+   *  `value` is the item id. */
+  'kai-nav-item-close': { value: string };
 }
 
 /**
@@ -28,6 +34,11 @@ interface Events {
  * chevron), carry a `status` dot (`{ tone, label?, pulse? }`), and a trailing
  * `meta` string (e.g. a relative time). The active item is `value`; selecting a
  * leaf fires `kai-nav-select` (group rows toggle expand/collapse instead).
+ *
+ * Items may also carry an `action` (`{ icon, label }`) or `closable: true`, which
+ * render a trailing button — firing `kai-nav-item-action` `{ value, action }` or
+ * `kai-nav-item-close` `{ value }` (never `kai-nav-select`). Style it via
+ * `::part(item-action)`.
  *
  * ```html
  * <kai-nav default-value="home"></kai-nav>
@@ -68,6 +79,8 @@ defineWebComponent<Props, Events>('kai-nav', {
       value={value()}
       defaultCollapsed={props.defaultCollapsed as string[] | undefined}
       onItemSelect={select}
+      onItemAction={(id, action) => dispatch('kai-nav-item-action', { value: id, action })}
+      onItemClose={(id) => dispatch('kai-nav-item-close', { value: id })}
       part="nav"
     />
   );
