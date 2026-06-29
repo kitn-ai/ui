@@ -1,0 +1,124 @@
+import { type JSX, Show, splitProps, createUniqueId } from 'solid-js';
+import { cn } from '../utils/cn';
+
+export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'onInput' | 'onChange' | 'size'> {
+  /** Field label rendered above the control and linked via `for`/`id`. */
+  label?: string;
+  /** Helper text rendered below the control. */
+  hint?: string;
+  /** Error text; rendered below the control and flips the field invalid. */
+  error?: string;
+  /** Control density. Defaults to `md`. */
+  size?: 'sm' | 'md';
+  /** Force the invalid (destructive-border) state without an `error` string. */
+  invalid?: boolean;
+  /** Leading affix (icon, unit). Rendered inside the field row, before the input. */
+  leading?: JSX.Element;
+  /** Trailing affix (icon, inline button). Rendered inside the field row, after the input. */
+  trailing?: JSX.Element;
+  /** Fires per keystroke with the current value. */
+  onValueInput?: (value: string) => void;
+  /** Fires on commit (blur) with the current value. */
+  onValueChange?: (value: string) => void;
+}
+
+// The single source of the field shell styling — lifted verbatim from the
+// `inputBase` constant that used to live in `src/components/form-widgets.tsx`.
+// `Input` now owns it; the form widgets render `Input` rather than re-pasting it.
+const FIELD_BASE =
+  'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none';
+
+// When a leading/trailing affix is present the border + padding wrap the whole
+// row and the focus ring is driven off the row (`focus-within`), so the input
+// itself sits borderless and transparent inside it.
+const FIELD_ROW =
+  'flex w-full items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm focus-within:outline-none focus-within:ring-2 focus-within:ring-ring';
+const ROW_INPUT =
+  'min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed';
+
+const SIZE_SM = 'px-2.5 py-1';
+const INVALID = 'border-destructive dark:border-red-400/70';
+
+/**
+ * `Input`: the token-themed single-line text field shell. A label/hint/error
+ * stack around a field row that holds an optional `leading` affix, the
+ * `<input>`, and an optional `trailing` affix. The shared border/background/ring
+ * styling lives here (the single field source the form widgets build on).
+ *
+ * Parts: `field` (the bordered control), `input`, `label`, `hint`.
+ * a11y: a generated id links `<label for>`; `invalid`/`error` set `aria-invalid`;
+ * the hint/error text is linked via `aria-describedby`.
+ */
+export function Input(props: InputProps): JSX.Element {
+  const [local, rest] = splitProps(props, [
+    'class', 'label', 'hint', 'error', 'size', 'invalid',
+    'leading', 'trailing', 'onValueInput', 'onValueChange', 'onBlur', 'id', 'disabled',
+  ]);
+
+  const id = local.id ?? createUniqueId();
+  const hintId = `${id}-hint`;
+  const isInvalid = () => !!local.invalid || !!local.error;
+  const hasHint = () => !!local.error || !!local.hint;
+  const hasAffix = () => local.leading != null || local.trailing != null;
+
+  const inputEl = (cls: string, part: string): JSX.Element => (
+    <input
+      {...rest}
+      id={id}
+      part={part}
+      disabled={local.disabled}
+      aria-invalid={isInvalid() ? 'true' : undefined}
+      aria-describedby={hasHint() ? hintId : undefined}
+      class={cls}
+      onInput={(e) => local.onValueInput?.(e.currentTarget.value)}
+      onBlur={(e) => {
+        const handler = local.onBlur;
+        if (typeof handler === 'function') handler(e);
+        local.onValueChange?.(e.currentTarget.value);
+      }}
+    />
+  );
+
+  return (
+    <div class="flex w-full flex-col gap-1.5">
+      <Show when={local.label}>
+        <label part="label" for={id} class="text-sm font-medium text-foreground">
+          {local.label}
+        </label>
+      </Show>
+
+      <Show
+        when={hasAffix()}
+        fallback={inputEl(
+          cn(FIELD_BASE, local.size === 'sm' && SIZE_SM, isInvalid() && INVALID, local.class),
+          'field input',
+        )}
+      >
+        <div
+          part="field"
+          class={cn(
+            FIELD_ROW,
+            local.size === 'sm' && SIZE_SM,
+            isInvalid() && INVALID,
+            local.disabled && 'opacity-50 pointer-events-none',
+            local.class,
+          )}
+        >
+          <Show when={local.leading}>
+            <span class="flex shrink-0 items-center text-muted-foreground">{local.leading}</span>
+          </Show>
+          {inputEl(ROW_INPUT, 'input')}
+          <Show when={local.trailing}>
+            <span class="flex shrink-0 items-center text-muted-foreground">{local.trailing}</span>
+          </Show>
+        </div>
+      </Show>
+
+      <Show when={hasHint()}>
+        <p part="hint" id={hintId} class={cn('text-xs', local.error ? 'text-destructive' : 'text-muted-foreground')}>
+          {local.error ?? local.hint}
+        </p>
+      </Show>
+    </div>
+  );
+}
