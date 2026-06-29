@@ -93,6 +93,22 @@ test('focus() focuses the inner input', async () => {
   el.remove();
 });
 
+test('forwards autocomplete / inputmode / autocapitalize to the inner input', async () => {
+  const el = document.createElement('kai-input');
+  el.setAttribute('autocomplete', 'email');
+  el.setAttribute('inputmode', 'numeric');
+  el.setAttribute('autocapitalize', 'characters');
+  document.body.appendChild(el);
+  await flush();
+
+  const input = el.shadowRoot!.querySelector('input')!;
+  expect(input.getAttribute('autocomplete')).toBe('email');
+  expect(input.getAttribute('inputmode')).toBe('numeric');
+  expect(input.getAttribute('autocapitalize')).toBe('characters');
+
+  el.remove();
+});
+
 test('the error attribute marks the inner input aria-invalid', async () => {
   const el = document.createElement('kai-input');
   el.setAttribute('error', 'Required field');

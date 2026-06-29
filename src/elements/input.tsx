@@ -1,6 +1,6 @@
 import { createEffect, createSignal, onCleanup, onMount, untrack } from 'solid-js';
 import { defineWebComponent } from './define';
-import { Input } from '../ui/input';
+import { Input, type InputProps } from '../ui/input';
 
 interface Props extends Record<string, unknown> {
   /** Native input type: `text` (default) · `email` · `url` · `search` · `tel` ·
@@ -30,6 +30,13 @@ interface Props extends Record<string, unknown> {
   invalid?: boolean;
   /** Form-control name. */
   name?: string;
+  /** Autofill hint forwarded to the inner input (e.g. `email`, `current-password`). */
+  autocomplete?: string;
+  /** Virtual-keyboard hint forwarded to the inner input (e.g. `numeric`, `email`). */
+  inputmode?: string;
+  // NOTE: `autocapitalize` is forwarded too, but NOT as a declared prop — see the
+  // attribute read in the facade body (it is a global reflected HTMLElement IDL
+  // attribute and would break the element constructor as a component-register prop).
 }
 
 /** Events fired by `<kai-input>`. */
@@ -81,6 +88,8 @@ defineWebComponent<Props, Events>('kai-input', {
   required: undefined,
   invalid: undefined,
   name: undefined,
+  autocomplete: undefined,
+  inputmode: undefined,
 }, (props, ctx) => {
   const { element, dispatch, flag, expose } = ctx;
 
@@ -122,6 +131,15 @@ defineWebComponent<Props, Events>('kai-input', {
     }
   });
 
+  // `autocapitalize` is forwarded by reading the host attribute rather than as a
+  // declared prop: it is a global reflected HTMLElement IDL attribute (lowercase,
+  // like the reserved `lang`/`title`), so component-register's constructor
+  // `this.autocapitalize = undefined` would reflect an attribute and throw
+  // "must not have attributes". Seeded now; kept in sync by the observer in onMount.
+  const [autocapitalize, setAutocapitalize] = createSignal<string | undefined>(
+    element.getAttribute('autocapitalize') ?? undefined,
+  );
+
   // Track which affix slots are filled; re-read on child mutations so late/streamed
   // content lights up its affix. An empty slot is never passed to the primitive.
   const [filled, setFilled] = createSignal<Record<SlotName, boolean>>({ leading: false, trailing: false });
@@ -135,6 +153,13 @@ defineWebComponent<Props, Events>('kai-input', {
     const observer = new MutationObserver(read);
     observer.observe(element, { childList: true, subtree: false });
     onCleanup(() => observer.disconnect());
+
+    // Keep the forwarded `autocapitalize` in sync with the host attribute.
+    const syncAutocapitalize = () => setAutocapitalize(element.getAttribute('autocapitalize') ?? undefined);
+    syncAutocapitalize();
+    const attrObserver = new MutationObserver(syncAutocapitalize);
+    attrObserver.observe(element, { attributes: true, attributeFilter: ['autocapitalize'] });
+    onCleanup(() => attrObserver.disconnect());
   });
   const region = (name: SlotName) => (filled()[name] ? <slot name={name} /> : undefined);
 
@@ -165,6 +190,9 @@ defineWebComponent<Props, Events>('kai-input', {
         readonly={flag('readonly')}
         required={flag('required')}
         name={props.name as string | undefined}
+        autocomplete={props.autocomplete as InputProps['autocomplete']}
+        inputmode={props.inputmode as InputProps['inputmode']}
+        autocapitalize={autocapitalize() as InputProps['autocapitalize']}
         leading={region('leading')}
         trailing={region('trailing')}
         onValueInput={(v) => { setValue(v); dispatch('kai-input', { value: v }); }}
